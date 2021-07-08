@@ -1,4 +1,8 @@
 VERSION := $(shell cat VERSION)
+GIT_HASH=$(shell git rev-parse HEAD)
+DATE=$(shell date -u +'%Y-%m-%dT%H:%M:%SZ')
+
+VERSION_INFO_IMPORT_PATH=github.com/observIQ/observIQ-otel-collector/internal/version
 
 # All source code and documents, used when checking for misspellings
 ALLDOC := $(shell find . \( -name "*.md" -o -name "*.yaml" \) \
@@ -21,7 +25,9 @@ LINT=$(GOPATH)/bin/golangci-lint
 IMPI=$(GOPATH)/bin/impi
 MISSPELL=$(GOPATH)/bin/misspell
 
-LDFLAGS=
+LDFLAGS=-ldflags "-s -w -X $(VERSION_INFO_IMPORT_PATH).Version=$(VERSION) \
+-X $(VERSION_INFO_IMPORT_PATH).GitHash=$(GIT_HASH) \
+-X $(VERSION_INFO_IMPORT_PATH).Date=$(DATE)"
 GOBUILD=go build
 GOINSTALL=go install
 GOTEST=go test
@@ -30,7 +36,7 @@ GOFORMAT=gofmt
 
 .PHONY: observiqcol
 observiqcol:
-	$(GOBUILD) $(LDFLAGS) -o $(OUTDIR)/$(GOOS)/observiqcol_$(GOARCH)$(EXT) ./cmd/observiqcol
+	GO111MODULE=on CGO_ENABLED=0 $(GOBUILD) $(LDFLAGS) -o $(OUTDIR)/$(GOOS)/observiqcol_$(GOARCH)$(EXT) ./cmd/observiqcol
 
 .PHONY: install-tools
 install-tools:
