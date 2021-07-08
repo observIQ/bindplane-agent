@@ -32,7 +32,7 @@ GOBUILD=go build
 GOINSTALL=go install
 GOTEST=go test
 GOTOOL=go tool
-GOFORMAT=gofmt
+GOFORMAT=goimports
 
 .PHONY: observiqcol
 observiqcol:
@@ -40,17 +40,13 @@ observiqcol:
 
 .PHONY: install-tools
 install-tools:
-	$(GOINSTALL) github.com/pavius/impi/cmd/impi
+	$(GOINSTALL) golang.org/x/tools/cmd/goimports
 	$(GOINSTALL) github.com/golangci/golangci-lint/cmd/golangci-lint@v1.40.1
 	$(GOINSTALL) github.com/client9/misspell/cmd/misspell
 
 .PHONY: lint
 lint:
 	$(LINT) run
-
-.PHONY: impi
-impi:
-	$(IMPI) --local $(MODNAME) --scheme stdLocalThirdParty ./...
 
 .PHONY: misspell
 misspell:
@@ -71,7 +67,7 @@ test-with-cover:
 
 .PHONY: check-fmt
 check-fmt:
-	@GOFMTOUT=`$(GOFORMAT) -s -d .`; \
+	@GOFMTOUT=`$(GOFORMAT) -d .`; \
 		if [ "$$GOFMTOUT" ]; then \
 			echo "$(GOFORMAT) SUGGESTED CHANGES:"; \
 			echo "$$GOFMTOUT\n"; \
@@ -82,7 +78,9 @@ check-fmt:
 
 .PHONY: fmt
 fmt:
-	$(GOFORMAT) -w -s .
+	$(GOFORMAT) -w .
+
+.PHONY: tidy
 
 .PHONY: ci-checks
 ci-checks: check-fmt misspell lint impi test

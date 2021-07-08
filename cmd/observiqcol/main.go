@@ -18,7 +18,7 @@ func main() {
 
 	bi := component.BuildInfo{
 		Command:     os.Args[0],
-		Description: "observIQ opentelemetry-collector distribution",
+		Description: "observIQ's opentelemetry-collector distribution",
 		Version:     version.Version,
 	}
 
