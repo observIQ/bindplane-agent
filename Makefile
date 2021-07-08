@@ -70,6 +70,7 @@ build-all:
 	$(MAKE) amd64_windows 
 	$(MAKE) arm_linux
 
+# tool-related commands
 .PHONY: install-tools
 install-tools:
 	$(GOINSTALL) golang.org/x/tools/cmd/goimports
@@ -116,6 +117,7 @@ fmt:
 tidy:
 	$(GOTIDY)
 
+# This target performs all checks that CI will do
 .PHONY: ci-checks
 ci-checks: check-fmt misspell lint test
 
