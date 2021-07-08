@@ -1,6 +1,6 @@
 VERSION := $(shell cat VERSION)
-GIT_HASH=$(shell git rev-parse HEAD)
-DATE=$(shell date -u +'%Y-%m-%dT%H:%M:%SZ')
+GIT_HASH := $(shell git rev-parse HEAD)
+DATE := $(shell date -u +'%Y-%m-%dT%H:%M:%SZ')
 
 VERSION_INFO_IMPORT_PATH=github.com/observIQ/observIQ-otel-collector/internal/version
 
@@ -8,35 +8,67 @@ VERSION_INFO_IMPORT_PATH=github.com/observIQ/observIQ-otel-collector/internal/ve
 ALLDOC := $(shell find . \( -name "*.md" -o -name "*.yaml" \) \
                                 -type f | sort)
 
-GOPATH := $(shell go env GOPATH)
-GOOS := $(shell go env GOOS)
-GOARCH := $(shell go env GOARCH)
+GOPATH ?= $(shell go env GOPATH)
+GOOS ?= $(shell go env GOOS)
+GOARCH ?= $(shell go env GOARCH)
 
 ifeq ($(GOOS), windows)
-EXT=.exe
+EXT?=.exe
 else
-EXT=
+EXT?=
 endif
 
 OUTDIR=./build
 MODNAME=github.com/observIQ/observIQ-otel-collector
 
 LINT=$(GOPATH)/bin/golangci-lint
-IMPI=$(GOPATH)/bin/impi
 MISSPELL=$(GOPATH)/bin/misspell
 
 LDFLAGS=-ldflags "-s -w -X $(VERSION_INFO_IMPORT_PATH).Version=$(VERSION) \
 -X $(VERSION_INFO_IMPORT_PATH).GitHash=$(GIT_HASH) \
 -X $(VERSION_INFO_IMPORT_PATH).Date=$(DATE)"
+GOBUILDEXTRAENV=GO111MODULE=on CGO_ENABLED=0
 GOBUILD=go build
 GOINSTALL=go install
 GOTEST=go test
 GOTOOL=go tool
 GOFORMAT=goimports
+GOTIDY=go mod tidy
 
+# Default build target; making this should build for the current os/arch
 .PHONY: observiqcol
 observiqcol:
-	GO111MODULE=on CGO_ENABLED=0 $(GOBUILD) $(LDFLAGS) -o $(OUTDIR)/$(GOOS)/observiqcol_$(GOARCH)$(EXT) ./cmd/observiqcol
+	GOOS=$(GOOS) GOPATH=$(GOPATH) GOARCH=$(GOARCH) $(GOBUILDEXTRAENV) \
+	$(GOBUILD) $(LDFLAGS) -o $(OUTDIR)/observiqcol_$(GOOS)_$(GOARCH)$(EXT) ./cmd/observiqcol
+
+# Other build targets
+.PHONY: amd64_linux
+amd64_linux: GOARCH=amd64
+amd64_linux: GOOS=linux
+amd64_linux: observiqcol
+
+.PHONY: amd64_darwin
+amd64_darwin: GOARCH=amd64
+amd64_darwin: GOOS=darwin
+amd64_darwin: observiqcol
+
+.PHONY: arm_linux
+arm_linux: GOARCH=arm
+arm_linux: GOOS=linux
+arm_linux: observiqcol
+
+.PHONY: amd64_windows
+amd64_windows: GOARCH=amd64
+amd64_windows: GOOS=windows
+amd64_windows: EXT=.exe
+amd64_windows: observiqcol
+
+.PHONY: build-all
+build-all:
+	$(MAKE) amd64_linux 
+	$(MAKE) amd64_darwin 
+	$(MAKE) amd64_windows 
+	$(MAKE) arm_linux
 
 .PHONY: install-tools
 install-tools:
@@ -81,9 +113,11 @@ fmt:
 	$(GOFORMAT) -w .
 
 .PHONY: tidy
+tidy:
+	$(GOTIDY)
 
 .PHONY: ci-checks
-ci-checks: check-fmt misspell lint impi test
+ci-checks: check-fmt misspell lint test
 
 .PHONY: clean
 clean:
