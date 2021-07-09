@@ -22,6 +22,7 @@ OUTDIR=./build
 MODNAME=github.com/observIQ/observIQ-otel-collector
 
 LINT=$(GOPATH)/bin/golangci-lint
+LINT_TIMEOUT?=5m0s
 MISSPELL=$(GOPATH)/bin/misspell
 
 LDFLAGS=-ldflags "-s -w -X $(VERSION_INFO_IMPORT_PATH).Version=$(VERSION) \
@@ -70,7 +71,7 @@ install-tools:
 
 .PHONY: lint
 lint:
-	$(LINT) run
+	$(LINT) run --timeout $(LINT_TIMEOUT)
 
 .PHONY: misspell
 misspell:
