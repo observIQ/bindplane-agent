@@ -35,6 +35,7 @@ jobs:
       - name: Install Dependencies
         if: steps.go-cache.outputs.hit != 'true'
         run: |
+          ls -la
           go mod download
           go test -i
           make install-tools
