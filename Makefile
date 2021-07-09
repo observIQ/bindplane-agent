@@ -38,37 +38,28 @@ GOTIDY=go mod tidy
 # Default build target; making this should build for the current os/arch
 .PHONY: observiqcol
 observiqcol:
-	GOOS=$(GOOS) GOPATH=$(GOPATH) GOARCH=$(GOARCH) $(GOBUILDEXTRAENV) \
+	GOOS=$(GOOS) GOARCH=$(GOARCH) $(GOBUILDEXTRAENV) \
 	$(GOBUILD) $(LDFLAGS) -o $(OUTDIR)/observiqcol_$(GOOS)_$(GOARCH)$(EXT) ./cmd/observiqcol
 
 # Other build targets
 .PHONY: amd64_linux
-amd64_linux: GOARCH=amd64
-amd64_linux: GOOS=linux
-amd64_linux: observiqcol
+amd64_linux:
+	GOOS=linux GOARCH=amd64 $(MAKE) observiqcol
 
 .PHONY: amd64_darwin
-amd64_darwin: GOARCH=amd64
-amd64_darwin: GOOS=darwin
-amd64_darwin: observiqcol
+amd64_darwin:
+	GOOS=darwin GOARCH=amd64 $(MAKE) observiqcol
 
 .PHONY: arm_linux
-arm_linux: GOARCH=arm
-arm_linux: GOOS=linux
-arm_linux: observiqcol
+arm_linux:
+	GOOS=linux GOARCH=arm $(MAKE) observiqcol
 
 .PHONY: amd64_windows
-amd64_windows: GOARCH=amd64
-amd64_windows: GOOS=windows
-amd64_windows: EXT=.exe
-amd64_windows: observiqcol
+amd64_windows:
+	GOOS=windows GOARCH=amd64 $(MAKE) observiqcol
 
 .PHONY: build-all
-build-all:
-	$(MAKE) amd64_linux 
-	$(MAKE) amd64_darwin 
-	$(MAKE) amd64_windows 
-	$(MAKE) arm_linux
+build-all: amd64_linux amd64_darwin amd64_windows arm_linux
 
 # tool-related commands
 .PHONY: install-tools
