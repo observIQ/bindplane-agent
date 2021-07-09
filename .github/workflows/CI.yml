@@ -1,0 +1,124 @@
+name: CI
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+  workflow_dispatch:
+
+jobs:
+  setup-environment:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v2
+      - name: Set up Go 1.16
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.16
+      - name: Cache Go
+        id: go-cache
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-go-modules
+        with:
+          path: |
+            /home/runner/go/pkg/mod
+            /home/runner/.cache/go-build
+            /home/runner/go/bin
+          key: v1-go-pkg-mod-${{ runner.os }}-${{ hashFiles('./go.mod', './go.sum') }}
+      - name: Install Dependencies
+        if: steps.go-cache.outputs.hit != 'true'
+        run: |
+          go mod download
+          go test -i
+          make install-tools
+  ci-checks:
+    runs-on: ubuntu-latest
+    needs: [setup-environment]
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v2
+      - name: Set up Go 1.16
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.16
+      - name: Cache Go
+        id: go-cache
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-go-modules
+        with:
+          path: |
+            /home/runner/go/pkg/mod
+            /home/runner/.cache/go-build
+            /home/runner/go/bin
+          key: v1-go-pkg-mod-${{ runner.os }}-${{ hashFiles('./go.mod', './go.sum') }}
+      - name: Install Dependencies
+        if: steps.go-cache.outputs.hit != 'true'
+        run: |
+          go mod download
+          go test -i
+          make install-tools
+      - name: CI Checks
+        run: make -j3 check-fmt misspell lint
+  test:
+    runs-on: ubuntu-latest
+    needs: [setup-environment]
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v2
+      - name: Set up Go 1.16
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.16
+      - name: Cache Go
+        id: go-cache
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-go-modules
+        with:
+          path: |
+            /home/runner/go/pkg/mod
+            /home/runner/.cache/go-build
+            /home/runner/go/bin
+          key: v1-go-pkg-mod-${{ runner.os }}-${{ hashFiles('./go.mod', './go.sum') }}
+      - name: Install Dependencies
+        if: steps.go-cache.outputs.hit != 'true'
+        run: |
+          go mod download
+          go test -i
+          make install-tools
+      - name: CI Checks
+        run: make test
+  build:
+    runs-on: ubuntu-latest
+    needs: [setup-environment]
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v2
+      - name: Set up Go 1.16
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.16
+      - name: Cache Go
+        id: go-cache
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-go-modules
+        with:
+          path: |
+            /home/runner/go/pkg/mod
+            /home/runner/.cache/go-build
+            /home/runner/go/bin
+          key: v1-go-pkg-mod-${{ runner.os }}-${{ hashFiles('./go.mod', './go.sum') }}
+      - name: Install Dependencies
+        if: steps.go-cache.outputs.hit != 'true'
+        run: |
+          go mod download
+          go test -i
+          make install-tools
+      - name: Build All Targets
+        run: make -j4 build-all
+      
