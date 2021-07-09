@@ -31,13 +31,11 @@ jobs:
             /home/runner/go/pkg/mod
             /home/runner/.cache/go-build
             /home/runner/go/bin
-          key: v1-go-pkg-mod-${{ runner.os }}-${{ hashFiles('./go.mod', './go.sum') }}
+          key: v1-go-pkg-mod-${{ runner.os }}-${{ hashFiles('**/go.mod', '**/go.sum') }}
       - name: Install Dependencies
         if: steps.go-cache.outputs.hit != 'true'
         run: |
-          ls -la
           go mod download
-          go test -i
           make install-tools
   ci-checks:
     runs-on: ubuntu-latest
@@ -63,12 +61,11 @@ jobs:
             /home/runner/go/pkg/mod
             /home/runner/.cache/go-build
             /home/runner/go/bin
-          key: v1-go-pkg-mod-${{ runner.os }}-${{ hashFiles('./go.mod', './go.sum') }}
+          key: v1-go-pkg-mod-${{ runner.os }}-${{ hashFiles('**/go.mod', '**/go.sum') }}
       - name: Install Dependencies
         if: steps.go-cache.outputs.hit != 'true'
         run: |
           go mod download
-          go test -i
           make install-tools
       - name: CI Checks
         run: make -j3 check-fmt misspell lint
@@ -96,12 +93,11 @@ jobs:
             /home/runner/go/pkg/mod
             /home/runner/.cache/go-build
             /home/runner/go/bin
-          key: v1-go-pkg-mod-${{ runner.os }}-${{ hashFiles('./go.mod', './go.sum') }}
+          key: v1-go-pkg-mod-${{ runner.os }}-${{ hashFiles('**/go.mod', '**/go.sum') }}
       - name: Install Dependencies
         if: steps.go-cache.outputs.hit != 'true'
         run: |
           go mod download
-          go test -i
           make install-tools
       - name: CI Checks
         run: make test
@@ -129,12 +125,11 @@ jobs:
             /home/runner/go/pkg/mod
             /home/runner/.cache/go-build
             /home/runner/go/bin
-          key: v1-go-pkg-mod-${{ runner.os }}-${{ hashFiles('./go.mod', './go.sum') }}
+          key: v1-go-pkg-mod-${{ runner.os }}-${{ hashFiles('**/go.mod', '**/go.sum') }}
       - name: Install Dependencies
         if: steps.go-cache.outputs.hit != 'true'
         run: |
           go mod download
-          go test -i
           make install-tools
       - name: Build All Targets
         run: make -j4 build-all
