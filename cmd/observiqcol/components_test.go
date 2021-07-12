@@ -13,5 +13,6 @@ func TestComponents(t *testing.T) {
 	require.NotNil(t, factories.Exporters["otlp"])
 	require.NotNil(t, factories.Exporters["otlphttp"])
 	require.NotNil(t, factories.Exporters["logging"])
+	require.NotNil(t, factories.Exporters["observiq"])
 
 }
