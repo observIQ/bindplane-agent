@@ -8,18 +8,16 @@ require (
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/golangci/golangci-lint v1.41.1
 	github.com/klauspost/compress v1.13.1 // indirect
-	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/observiqexporter v0.29.0 // indirect
-	github.com/open-telemetry/opentelemetry-collector-contrib/extension/fluentbitextension v0.29.0 // indirect
-	github.com/open-telemetry/opentelemetry-collector-contrib/extension/httpforwarder v0.29.0 // indirect
-	github.com/open-telemetry/opentelemetry-collector-contrib/extension/observer/ecsobserver v0.29.0 // indirect
-	github.com/open-telemetry/opentelemetry-collector-contrib/extension/observer/hostobserver v0.29.0 // indirect
-	github.com/open-telemetry/opentelemetry-collector-contrib/extension/observer/k8sobserver v0.29.0 // indirect
+	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/observiqexporter v0.29.0
+	github.com/open-telemetry/opentelemetry-collector-contrib/extension/httpforwarder v0.29.0
+	github.com/open-telemetry/opentelemetry-collector-contrib/extension/observer/ecsobserver v0.29.0
+	github.com/open-telemetry/opentelemetry-collector-contrib/extension/observer/hostobserver v0.29.0
+	github.com/open-telemetry/opentelemetry-collector-contrib/extension/observer/k8sobserver v0.29.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/extension/storage v0.29.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/processor/groupbyattrsprocessor v0.29.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/processor/k8sprocessor v0.29.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/filelogreceiver v0.29.0
-	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/fluentforwardreceiver v0.29.0 // indirect
-	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/receivercreator v0.29.0 // indirect
+	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/receivercreator v0.29.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/syslogreceiver v0.29.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/tcplogreceiver v0.29.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/udplogreceiver v0.29.0
