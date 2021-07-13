@@ -8,8 +8,10 @@ RELEASE_INFO=$(curl -sS -H "Accept: application/vnd.github.v3+json" -H "Authoriz
 UPLOAD_URL=$(printf '%s' "$RELEASE_INFO" | jq -c -r ".upload_url")
 UPLOAD_URL=$(printf '%s' "$UPLOAD_URL" | sed 's/{?.*}$//')
 ASSETS=$(printf '%s' "$RELEASE_INFO" | jq -c -r ".assets[] | {name, id}")
+RELEASE_ID=$(printf '%s' "$RELEASE_INFO" | jq -c -r ".id")
 
 if [ "$DEBUG" != "" ] && [ "$DEBUG" != "0" ]; then
+    printf 'RELEASE_ID: %s\n' "$RELEASE_ID"
     printf 'UPLOAD URL: %s\n' "$UPLOAD_URL"
     printf 'ASSET NAMES:\n%s\n' "$ASSETS"
 fi
@@ -37,3 +39,10 @@ do
        -H "Content-Type: application/octet-stream" \
        --data-binary "@$f" "$UPLOAD_URL?name=$ENCODED_NAME" | jq || exit 1
 done
+
+# Unmark as pre-release
+curl -sS -X PATCH \
+    -H "Accept: application/vnd.github.v3+json" -H "Authorization: Bearer $4" \
+    -H "Content-Type: application/json" \
+    -d "{\"prerelease\": false}" \
+    "$GITHUB_API_URL/repos/$1/releases/$RELEASE_ID" | jq || exit 1
