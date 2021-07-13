@@ -4,7 +4,7 @@ on:
     types: [ published ]
 
 jobs:
-  # This is the first job run; If any step in this fails OR is skipped (because an if clause fails), the release will not be updated.
+  # This is the first job run; If any step in this fails the release will not be updated.
   # This protects against releases that don't match specific criteria:
   #   1. Tag must be a semantic version ((v)d.d.d)
   #   2. Release must be a pre-release
