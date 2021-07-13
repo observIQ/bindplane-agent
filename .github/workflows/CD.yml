@@ -16,19 +16,20 @@ jobs:
         id: get-tag
         run: printf '::set-output name=tag::%s' "$(printf '%s' "${{ github.ref }}" | sed 's/refs\/tags\///')"
       - name: Check the tag is a semantic version
-        id: sem-ver-calc
-        run: "[[ ${{ steps.get-tag.outputs.tag }} =~ ^[0-9]+\\.[0-9]+\\.[0-9]+ ]] && exit 0 || exit 1"
+        run: "[[ ${{ steps.get-tag.outputs.tag }} =~ ^v?[0-9]+\\.[0-9]+\\.[0-9]+ ]] && exit 0 || exit 1"
       - name: Checkout Repo
         uses: actions/checkout@v2
       - name: Check tag matches VERSION file
-        run: "[ ${{ steps.get-tag.outputs.tag }} = $(<VERSION) ] && exit 0 || exit 1"
+        run: |
+          [ $(printf '%s' "${{ steps.get-tag.outputs.tag }}" | sed 's/^v//') = $(<VERSION) ] \
+          && exit 0 || exit 1
       - name: Fetch Release Info
         uses: ./.github/actions/get-release-info
         id: release-info
         with:
           tag: ${{ steps.get-tag.outputs.tag }}
       - name: Check release is pre-release
-        run: exit [ ${{ steps.get-info.outputs.pre-release }} = "true" ] 
+        run: exit [ ${{ steps.release-info.outputs.pre-release }} = "true" ] 
         
   setup-environment:
     runs-on: ubuntu-latest
@@ -181,7 +182,6 @@ jobs:
           working-directory: ./build/
       - name: Upload Release Binaries
         uses: ./.github/actions/upsert-release-artifacts
-        id: release-info
         with:
           path: ./build/
           tag: ${{ steps.get-tag.outputs.tag }}
