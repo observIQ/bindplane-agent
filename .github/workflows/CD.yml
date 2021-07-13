@@ -29,7 +29,7 @@ jobs:
         with:
           tag: ${{ steps.get-tag.outputs.tag }}
       - name: Check release is pre-release
-        run: exit [ ${{ steps.release-info.outputs.pre-release }} = "true" ] 
+        run: '[ "${{ steps.release-info.outputs.pre-release }}" = "true" ] && exit 0 || exit 1'
         
   setup-environment:
     runs-on: ubuntu-latest
