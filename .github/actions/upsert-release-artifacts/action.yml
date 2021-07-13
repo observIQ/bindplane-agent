@@ -20,7 +20,7 @@ runs:
   using: "composite"
   steps:
     - id: upsert-files
-      run: ${{ github.action_path }}/get-release-info-by-tag.sh ${{ inputs.repo-name }} ${{ inputs.tag }} ${{ inputs.path }} ${{ inputs.token }}
+      run: ${{ github.action_path }}/upsert.sh ${{ inputs.repo-name }} ${{ inputs.tag }} ${{ inputs.path }} ${{ inputs.token }}
       shell: bash
 
       
