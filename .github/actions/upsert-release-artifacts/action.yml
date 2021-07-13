@@ -1,0 +1,26 @@
+# Upserts ( creates OR updates ) release artifacts from a path
+name: "Upsert Release Artifacts"
+description: "Gives info about the release"
+inputs:
+  tag:
+    description: 'tag of the release'
+    required: true
+  path:
+    description: 'Path to upload files from'
+    required: true
+  repo-name:
+    description: 'Repo name (e.g. `owner/repo`)'
+    default: ${{ github.repository }}
+    required: false
+  token:
+    description: 'Token for making requests to github'
+    default: ${{ github.token }}
+    required: false
+runs:
+  using: "composite"
+  steps:
+    - id: upsert-files
+      run: ${{ github.action_path }}/get-release-info-by-tag.sh ${{ inputs.repo-name }} ${{ inputs.tag }} ${{ inputs.path }} ${{ inputs.token }}
+      shell: bash
+
+      
