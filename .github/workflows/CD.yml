@@ -127,7 +127,7 @@ jobs:
         run: make test
   build:
     runs-on: ubuntu-latest
-    needs: setup-environment
+    needs: [ ci-checks, test ]
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v2
@@ -157,29 +157,9 @@ jobs:
           make install-tools
       - name: Build All Targets
         run: make -j4 build-all
-      - name: Upload Artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: collector-binaries-${{ github.sha }}
-          path: ./build/
-          if-no-files-found: error
-          retention-days: 1
-
-  # Updates the release with the created binaries and changes it from a pre-release to a fully-fledged release
-  update-release:
-    runs-on: "ubuntu-latest"
-    needs: [ci-checks, test, build]
-    steps:
       - name: Get Tag From Environment
         id: get-tag
         run: printf '::set-output name=tag::%s' "$(printf '%s' "${{ github.ref }}" | sed 's/refs\/tags\///')"
-      - name: Checkout Repo
-        uses: actions/checkout@v2
-      - name: Download Artifacts
-        uses: actions/download-artifact@v2
-        with:
-          name: collector-binaries-${{ github.sha }}
-          working-directory: ./build/
       - name: Upload Release Binaries
         uses: ./.github/actions/upsert-release-artifacts
         with:
