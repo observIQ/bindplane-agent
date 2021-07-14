@@ -2,7 +2,7 @@ VERSION := $(shell cat VERSION)
 GIT_HASH := $(shell git rev-parse HEAD)
 DATE := $(shell date -u +'%Y-%m-%dT%H:%M:%SZ')
 
-VERSION_INFO_IMPORT_PATH=github.com/observIQ/observIQ-otel-collector/internal/version
+VERSION_INFO_IMPORT_PATH=github.com/observIQ/observiq-collector/internal/version
 
 # All source code and documents, used when checking for misspellings
 ALLDOC := $(shell find . \( -name "*.md" -o -name "*.yaml" \) \
@@ -19,7 +19,7 @@ EXT?=
 endif
 
 OUTDIR=./build
-MODNAME=github.com/observIQ/observIQ-otel-collector
+MODNAME=github.com/observIQ/observiq-collector
 
 LINT=$(GOPATH)/bin/golangci-lint
 LINT_TIMEOUT?=5m0s

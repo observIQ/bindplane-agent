@@ -1,4 +1,4 @@
-module github.com/observIQ/observIQ-otel-collector
+module github.com/observIQ/observiq-collector
 
 go 1.16
 
