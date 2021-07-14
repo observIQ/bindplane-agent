@@ -109,7 +109,7 @@ fmt:
 tidy:
 	$(GOTIDY)
 
-# This target performs all checks that CI will do
+# This target performs all checks that CI will do (excluding the build itself)
 .PHONY: ci-checks
 ci-checks: check-fmt misspell lint test
 
