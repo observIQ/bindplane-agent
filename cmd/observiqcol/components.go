@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/observIQ/observiq-collector/extension/orphandetectorextension"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/observiqexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/extension/httpforwarder"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/extension/storage/filestorage"
@@ -80,6 +81,7 @@ func components() (component.Factories, error) {
 		zpagesextension.NewFactory(),
 		filestorage.NewFactory(),
 		httpforwarder.NewFactory(),
+		orphandetectorextension.NewFactory(),
 	)
 
 	if err != nil {

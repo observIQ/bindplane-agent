@@ -910,7 +910,6 @@ github.com/jmespath/go-jmespath v0.0.0-20180206201540-c2b33e8439af/go.mod h1:Nht
 github.com/jmespath/go-jmespath v0.3.0/go.mod h1:9QtRXoHjLGCJ5IBSaohpXITPlowMeeYCZ7fLUTSywik=
 github.com/jmespath/go-jmespath v0.4.0 h1:BEgLn5cpjn8UN1mAw4NjwDrS35OdebyEtFe+9YPoQUg=
 github.com/jmespath/go-jmespath v0.4.0/go.mod h1:T8mJZnbsbmF+m6zOOFylbeCJqk5+pHWvzYPziyZiYoo=
-github.com/jmespath/go-jmespath/internal/testify v1.5.1 h1:shLQSRRSCCPj3f2gpwzGwWFoC7ycTf1rcQZHOlsJ6N8=
 github.com/jmespath/go-jmespath/internal/testify v1.5.1/go.mod h1:L3OGu8Wl2/fWfCI6z80xFu9LTZmf1ZRjMHUOPmWr69U=
 github.com/jmoiron/sqlx v1.2.0/go.mod h1:1FEQNm3xlJgrMD+FBdI9+xvCksHtbpVBBw5dYhBSsks=
 github.com/joho/godotenv v1.3.0 h1:Zjp+RcGpHhGlrMbJzXTrZZPrWj+1vfm90La1wgB6Bhc=
@@ -1191,14 +1190,6 @@ github.com/open-telemetry/opentelemetry-collector-contrib/exporter/observiqexpor
 github.com/open-telemetry/opentelemetry-collector-contrib/exporter/observiqexporter v0.30.0/go.mod h1:qPb5nlV11AOSavsdJLY0ObyDR7imJc6UVn45/2yI4Sw=
 github.com/open-telemetry/opentelemetry-collector-contrib/extension/httpforwarder v0.30.0 h1:NMdJP93sJ8cK5YGCDODhQ+FTQf6Oga5StJmJiozPrKQ=
 github.com/open-telemetry/opentelemetry-collector-contrib/extension/httpforwarder v0.30.0/go.mod h1:iPcB/ZrxiZ0OsFQWAjAl6Me4h0QR0Bv/5v/kJSaPTgE=
-github.com/open-telemetry/opentelemetry-collector-contrib/extension/observer v0.30.0 h1:/NLk/v9W9FfWOhX51cygPzbz2F/XfdZlp3bsthYZLr8=
-github.com/open-telemetry/opentelemetry-collector-contrib/extension/observer v0.30.0/go.mod h1:MPt8Ufjzlq1RbW2GP713ORw8N/xvdHiZtD9FH50+Q5M=
-github.com/open-telemetry/opentelemetry-collector-contrib/extension/observer/ecsobserver v0.30.0 h1:FzXziZBKLXxv2ZNOiwLb2NjRmCeQdhOMK+8v4Png80M=
-github.com/open-telemetry/opentelemetry-collector-contrib/extension/observer/ecsobserver v0.30.0/go.mod h1:nBXSsBmyA+Ackz0WcTUDiOmVzMZc1aradjsx/QP6MtE=
-github.com/open-telemetry/opentelemetry-collector-contrib/extension/observer/hostobserver v0.30.0 h1:rHrGB20zt8uka6OdvaIcvczjQuCfQJiYIilKZqTWoi8=
-github.com/open-telemetry/opentelemetry-collector-contrib/extension/observer/hostobserver v0.30.0/go.mod h1:eU1rTlUIbrHplkVJbphz4sGtWSs4FpZFTCkK6WYGSCY=
-github.com/open-telemetry/opentelemetry-collector-contrib/extension/observer/k8sobserver v0.30.0 h1:dYTp3FB8PZO9WuuRfi7dnSyPNsvAqmeJdbzKZxQGX4E=
-github.com/open-telemetry/opentelemetry-collector-contrib/extension/observer/k8sobserver v0.30.0/go.mod h1:jgwoU5QqwbR7FASQpcAYiBYljcruBE/TFerbJLgOl+c=
 github.com/open-telemetry/opentelemetry-collector-contrib/extension/storage v0.30.0 h1:N5N6OsLgk1DluKAime8kJhdQBUb9EisIec5qTgshfjE=
 github.com/open-telemetry/opentelemetry-collector-contrib/extension/storage v0.30.0/go.mod h1:e20zBxWwmrR1+hoXqoLviX20BAnuGZYKq6T1/f8tBjY=
 github.com/open-telemetry/opentelemetry-collector-contrib/internal/k8sconfig v0.30.0 h1:/JX/apB3OQpHBtzggld13wemoFdzv6EhJC+vF3Y0n8Q=
@@ -1211,8 +1202,6 @@ github.com/open-telemetry/opentelemetry-collector-contrib/processor/k8sprocessor
 github.com/open-telemetry/opentelemetry-collector-contrib/processor/k8sprocessor v0.30.0/go.mod h1:WXE7cYNhm87VVg3tOU2SGxchgGlgAcEOfLrApLRlsnM=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/filelogreceiver v0.30.0 h1:zsDYU04vavr8HuyAtws5T1j4ilQWYNOGv3DqF8egVo8=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/filelogreceiver v0.30.0/go.mod h1:NagAPpT4qbXxbpG2cMAcKeDZqfMVPEApH0boypmzTsg=
-github.com/open-telemetry/opentelemetry-collector-contrib/receiver/receivercreator v0.30.0 h1:aB07Iu1z/UB/NnBnwWltfCycvi0va044Ptj61XEUFaM=
-github.com/open-telemetry/opentelemetry-collector-contrib/receiver/receivercreator v0.30.0/go.mod h1:/Nx/m/ulsFqwUSyxd39XIXOQWLE3gm/rO00vAtufgEA=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/syslogreceiver v0.30.0 h1:ugezNzeKVN8xD9WJn/5fMRYskqrml8V0qjpleePU62o=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/syslogreceiver v0.30.0/go.mod h1:KXV26cwY0XSlMnOlBPMQsAX6veO0O7L1HaKo2bf0WjQ=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/tcplogreceiver v0.30.0 h1:HSCs2+D1ac4+QXtr+/W18/quyIbPc00Eugqq9d4IeR4=
