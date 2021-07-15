@@ -63,11 +63,12 @@ amd64_windows:
 build-all: amd64_linux amd64_darwin amd64_windows arm_linux
 
 # tool-related commands
+TOOLS_MOD_DIR := ./internal/tools
 .PHONY: install-tools
 install-tools:
-	$(GOINSTALL) golang.org/x/tools/cmd/goimports
-	$(GOINSTALL) github.com/golangci/golangci-lint/cmd/golangci-lint@v1.40.1
-	$(GOINSTALL) github.com/client9/misspell/cmd/misspell
+	cd $(TOOLS_MOD_DIR) && $(GOINSTALL) golang.org/x/tools/cmd/goimports
+	cd $(TOOLS_MOD_DIR) && $(GOINSTALL) github.com/golangci/golangci-lint/cmd/golangci-lint@v1.40.1
+	cd $(TOOLS_MOD_DIR) && $(GOINSTALL) github.com/client9/misspell/cmd/misspell
 
 .PHONY: lint
 lint:
