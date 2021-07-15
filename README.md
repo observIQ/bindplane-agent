@@ -64,9 +64,6 @@ To build all targets, run `make build-all`
 
 Build files will show up in the `./build` directory
 
-### Running
-To see command arguments to use while 
-
 ### Running CI checks locally
 
 The CI runs the `ci-checks` make target, which includes linting, testing, and checking documentation for misspelling.
