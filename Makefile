@@ -90,6 +90,10 @@ test-with-cover:
 	$(GOTEST) -vet off -cover cover.out ./...
 	$(GOTOOL) cover -html=cover.out -o cover.html
 
+.PHONY: bench
+bench:
+	go test -benchmem -run=^$$ -bench ^* ./...
+
 .PHONY: check-fmt
 check-fmt:
 	@GOFMTOUT=`$(GOFORMAT) -d .`; \
