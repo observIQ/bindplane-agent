@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 
@@ -25,7 +26,10 @@ func main() {
 
 	if env.IsFileLoggingEnabled() {
 		if fp, ok := env.GetLoggingPath(); ok {
-			logging.RedirectConsoleOutput(fp)
+			err := logging.RedirectConsoleOutput(fp)
+			if err != nil {
+				panic(fmt.Sprintf("Could not redirect console output to file! %v", err))
+			}
 		} else {
 			panic("Failed to find file path for logs, is OIQ_COLLECTOR_HOME set?")
 		}
