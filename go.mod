@@ -15,6 +15,7 @@ require (
 	go.opentelemetry.io/collector v0.30.1
 	go.uber.org/zap v1.18.1
 	golang.org/x/sys v0.0.0-20210630005230-0f9fa26af87c
+	gopkg.in/natefinch/lumberjack.v2 v2.0.0
 )
 
 replace (
