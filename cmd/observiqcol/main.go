@@ -13,7 +13,7 @@ import (
 )
 
 func main() {
-	factories, err := components()
+	factories, err := defaultFactories()
 	if err != nil {
 		log.Fatalf("Failed to build default components: %v", err)
 	}

@@ -29,59 +29,68 @@ import (
 	"go.opentelemetry.io/collector/receiver/otlpreceiver"
 )
 
-// Get the factories for components we want to use.
-// This includes all the defaults.
-func components() (component.Factories, error) {
+var defaultReceivers = []component.ReceiverFactory{
+	otlpreceiver.NewFactory(),
+	filelogreceiver.NewFactory(),
+	syslogreceiver.NewFactory(),
+	tcplogreceiver.NewFactory(),
+	udplogreceiver.NewFactory(),
+}
+
+var defaultProcessors = []component.ProcessorFactory{
+	groupbyattrsprocessor.NewFactory(),
+	k8sprocessor.NewFactory(),
+	attributesprocessor.NewFactory(),
+	resourceprocessor.NewFactory(),
+	batchprocessor.NewFactory(),
+	memorylimiter.NewFactory(),
+	probabilisticsamplerprocessor.NewFactory(),
+}
+
+var defaultExporters = []component.ExporterFactory{
+	fileexporter.NewFactory(),
+	otlpexporter.NewFactory(),
+	otlphttpexporter.NewFactory(),
+	observiqexporter.NewFactory(),
+	loggingexporter.NewFactory(),
+}
+
+var defaultExtensions = []component.ExtensionFactory{
+	bearertokenauthextension.NewFactory(),
+	healthcheckextension.NewFactory(),
+	oidcauthextension.NewFactory(),
+	pprofextension.NewFactory(),
+	zpagesextension.NewFactory(),
+	filestorage.NewFactory(),
+	orphandetectorextension.NewFactory(),
+}
+
+// defaultFactories returns the default factories used by the observIQ collector
+func defaultFactories() (component.Factories, error) {
+	return combineFactories(defaultReceivers, defaultProcessors, defaultExporters, defaultExtensions)
+}
+
+// combineFactories combines the supplied factories into a single Factories struct.
+// Any errors encountered will also be combined into a single error.
+func combineFactories(receivers []component.ReceiverFactory, processors []component.ProcessorFactory, exporters []component.ExporterFactory, extensions []component.ExtensionFactory) (component.Factories, error) {
 	var errs []error
 
-	receiverMap, err := component.MakeReceiverFactoryMap(
-		otlpreceiver.NewFactory(),
-		filelogreceiver.NewFactory(),
-		syslogreceiver.NewFactory(),
-		tcplogreceiver.NewFactory(),
-		udplogreceiver.NewFactory(),
-	)
-
+	receiverMap, err := component.MakeReceiverFactoryMap(receivers...)
 	if err != nil {
 		errs = append(errs, err)
 	}
 
-	processorMap, err := component.MakeProcessorFactoryMap(
-		groupbyattrsprocessor.NewFactory(),
-		k8sprocessor.NewFactory(),
-		attributesprocessor.NewFactory(),
-		resourceprocessor.NewFactory(),
-		batchprocessor.NewFactory(),
-		memorylimiter.NewFactory(),
-		probabilisticsamplerprocessor.NewFactory(),
-	)
-
+	processorMap, err := component.MakeProcessorFactoryMap(processors...)
 	if err != nil {
 		errs = append(errs, err)
 	}
 
-	exporterMap, err := component.MakeExporterFactoryMap(
-		fileexporter.NewFactory(),
-		otlpexporter.NewFactory(),
-		otlphttpexporter.NewFactory(),
-		observiqexporter.NewFactory(),
-		loggingexporter.NewFactory(),
-	)
-
+	exporterMap, err := component.MakeExporterFactoryMap(exporters...)
 	if err != nil {
 		errs = append(errs, err)
 	}
 
-	extensionMap, err := component.MakeExtensionFactoryMap(
-		bearertokenauthextension.NewFactory(),
-		healthcheckextension.NewFactory(),
-		oidcauthextension.NewFactory(),
-		pprofextension.NewFactory(),
-		zpagesextension.NewFactory(),
-		filestorage.NewFactory(),
-		orphandetectorextension.NewFactory(),
-	)
-
+	extensionMap, err := component.MakeExtensionFactoryMap(extensions...)
 	if err != nil {
 		errs = append(errs, err)
 	}
@@ -92,5 +101,4 @@ func components() (component.Factories, error) {
 		Exporters:  exporterMap,
 		Extensions: extensionMap,
 	}, consumererror.Combine(errs)
-
 }
