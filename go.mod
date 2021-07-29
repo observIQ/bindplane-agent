@@ -9,10 +9,10 @@ require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/processor/k8sprocessor v0.30.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/filelogreceiver v0.30.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/syslogreceiver v0.30.0
-	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/tcplogreceiver v0.30.0
+	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/tcplogreceiver v0.31.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/udplogreceiver v0.30.0
 	github.com/stretchr/testify v1.7.0
-	go.opentelemetry.io/collector v0.30.1
+	go.opentelemetry.io/collector v0.31.0
 	go.uber.org/zap v1.18.1
 	golang.org/x/sys v0.0.0-20210630005230-0f9fa26af87c
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0
