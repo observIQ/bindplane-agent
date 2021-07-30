@@ -69,3 +69,5 @@ Build files will show up in the `./build` directory
 The CI runs the `ci-checks` make target, which includes linting, testing, and checking documentation for misspelling.
 CI also does a build of all targets (`make build-all`)
 
+## Releasing
+To release the collector, see [RELEASING.md](RELEASING.md)
