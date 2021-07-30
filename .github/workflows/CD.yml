@@ -160,7 +160,17 @@ jobs:
       - name: Get Tag From Environment
         id: get-tag
         run: printf '::set-output name=tag::%s' "$(printf '%s' "${{ github.ref }}" | sed 's/refs\/tags\///')"
-      - name: Upload Release Binaries
+      - name: Get Tag (no prefix)
+        id: get-tag-no-prefix
+        run: printf '::set-output name=tag::%s' "$(printf '%s' ${{ steps.get-tag.outputs.tag }} | sed 's/^v//')"
+      - name: Upload Release Binaries (GCS)
+        uses: google-github-actions/upload-cloud-storage@main
+        with:
+          credentials: ${{ secrets.GCS_SA_KEY }}
+          path: ./build
+          destination: observiq-collector/collector/${{ steps.get-tag-no-prefix.outputs.tag }}
+          parent: false
+      - name: Upload Release Binaries (GitHub Releases)
         uses: ./.github/actions/upsert-release-artifacts
         with:
           path: ./build/
