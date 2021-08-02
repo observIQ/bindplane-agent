@@ -8,28 +8,23 @@ Supported pipeline types: logs
 
 ## Configuration
 
-
-
 | Field        | Default | Description                                                                                                        |
 | ---          | ---     | ---                                                                                                                |
 | `plugin_dir` | ""      | TODO |
 | `pipeline`   | []      | An array of [operators](https://github.com/open-telemetry/opentelemetry-log-collection/blob/main/docs/operators/README.md#what-operators-are-available). See below for more details |
 
-Note that _by default_, no logs will be read from a file that is not actively being written to because `start_at` defaults to `end`.
-
 ### Pipeline
 
-A pipeline is made up of `operators`. The last operator in a pipeline will automatically emit logs from this receiver.
-
-
-### Operators
-
-Each operator performs a simple responsibility, such as parsing a timestamp or JSON. Chain together operators to process logs into a desired format.
+A pipeline is made up of `operators`. The last operator in a pipeline will automatically emit logs from this receiver. Each operator performs a simple responsibility, such as parsing a timestamp or JSON. Chain together operators to process logs into a desired format.
 
 - Every operator has a `type`.
 - Every operator can be given a unique `id`. If you use the same type of operator more than once in a pipeline, you must specify an `id`. Otherwise, the `id` defaults to the value of `type`.
 - Operators will output to the next operator in the pipeline. The last operator in the pipeline will emit from the receiver. Optionally, the `output` parameter can be used to specify the `id` of another operator to which logs will be passed directly.
 - Only parsers and general purpose operators should be used.
+
+### Statefulness
+
+Some `operators` are able to persist state across subsequent executions of the collector. To enable this, simply configure a [storage extension](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/extension/storage), such as the [filestorage](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/extension/storage/filestorage) extension.
 
 ## Additional Terminology and Features
 
@@ -45,13 +40,11 @@ Each operator performs a simple responsibility, such as parsing a timestamp or J
 Receiver Configuration
 ```yaml
 receivers:
-  logs:
+  stanza:
     plugin_dir: ./local/plugins
     pipeline:    
       - type: file_input
-        include: 
-          - ./local/test/*.log
-          - ./local/test/*.out
+        include: [ ./local/test/myfile.log ]
       - type: json_parser
         timestamp:
           parse_from: time
