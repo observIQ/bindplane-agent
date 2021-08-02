@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 
@@ -10,6 +9,7 @@ import (
 	"github.com/observIQ/observiq-collector/internal/version"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/service"
+	"go.uber.org/zap"
 )
 
 func main() {
@@ -24,20 +24,19 @@ func main() {
 		Version:     version.Version,
 	}
 
+	var loggingOpts []zap.Option
 	if env.IsFileLoggingEnabled() {
 		if fp, ok := env.GetLoggingPath(); ok {
-			err := logging.RedirectConsoleOutput(fp)
-			if err != nil {
-				panic(fmt.Sprintf("Could not redirect console output to file! %v", err))
-			}
+			loggingOpts = []zap.Option{logging.FileLoggingCoreOption(fp)}
 		} else {
 			panic("Failed to find file path for logs, is OIQ_COLLECTOR_HOME set?")
 		}
 	}
 
 	params := service.CollectorSettings{
-		Factories: factories,
-		BuildInfo: bi,
+		Factories:      factories,
+		BuildInfo:      bi,
+		LoggingOptions: loggingOpts,
 	}
 
 	if err := run(params); err != nil {
