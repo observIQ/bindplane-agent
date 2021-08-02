@@ -3,6 +3,9 @@ module github.com/observIQ/observiq-collector
 go 1.16
 
 require (
+	github.com/gorilla/mux v1.8.0
+	github.com/gorilla/websocket v1.4.2
+	github.com/mitchellh/mapstructure v1.4.1
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/observiqexporter v0.31.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/extension/storage v0.31.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/processor/groupbyattrsprocessor v0.31.0
@@ -14,6 +17,7 @@ require (
 	github.com/stretchr/testify v1.7.0
 	go.opentelemetry.io/collector v0.31.0
 	go.uber.org/zap v1.18.1
+	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	golang.org/x/sys v0.0.0-20210630005230-0f9fa26af87c
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0
 )
