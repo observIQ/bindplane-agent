@@ -3,8 +3,10 @@ module github.com/observiq/observiq-collector
 go 1.16
 
 require (
-	github.com/client9/misspell v0.3.4
-	github.com/golangci/golangci-lint v1.41.1
+	github.com/fatih/color v1.12.0 // indirect
+	github.com/gorilla/mux v1.8.0
+	github.com/gorilla/websocket v1.4.2
+	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/klauspost/compress v1.13.1 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/observiqexporter v0.31.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/extension/httpforwarder v0.31.0
@@ -26,8 +28,10 @@ require (
 	go.opentelemetry.io/collector/model v0.31.0
 	go.uber.org/multierr v1.7.0
 	go.uber.org/zap v1.18.1
+	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	golang.org/x/sys v0.0.0-20210630005230-0f9fa26af87c
-	golang.org/x/tools v0.1.4
+	golang.org/x/tools v0.1.4 // indirect
+	gopkg.in/natefinch/lumberjack.v2 v2.0.0
 	gopkg.in/yaml.v2 v2.4.0
 )
 

@@ -2,7 +2,7 @@ VERSION := $(shell cat VERSION)
 GIT_HASH := $(shell git rev-parse HEAD)
 DATE := $(shell date -u +'%Y-%m-%dT%H:%M:%SZ')
 
-VERSION_INFO_IMPORT_PATH=github.com/observIQ/observiq-collector/internal/version
+VERSION_INFO_IMPORT_PATH=github.com/observiq/observiq-collector/internal/version
 
 # All source code and documents, used when checking for misspellings
 ALLDOC := $(shell find . \( -name "*.md" -o -name "*.yaml" \) \
@@ -19,7 +19,7 @@ EXT?=
 endif
 
 OUTDIR=./build
-MODNAME=github.com/observIQ/observiq-collector
+MODNAME=github.com/observiq/observiq-collector
 
 LINT=$(GOPATH)/bin/golangci-lint
 LINT_TIMEOUT?=5m0s
@@ -63,11 +63,12 @@ amd64_windows:
 build-all: amd64_linux amd64_darwin amd64_windows arm_linux
 
 # tool-related commands
+TOOLS_MOD_DIR := ./internal/tools
 .PHONY: install-tools
 install-tools:
-	$(GOINSTALL) golang.org/x/tools/cmd/goimports
-	$(GOINSTALL) github.com/golangci/golangci-lint/cmd/golangci-lint@v1.40.1
-	$(GOINSTALL) github.com/client9/misspell/cmd/misspell
+	cd $(TOOLS_MOD_DIR) && $(GOINSTALL) golang.org/x/tools/cmd/goimports
+	cd $(TOOLS_MOD_DIR) && $(GOINSTALL) github.com/golangci/golangci-lint/cmd/golangci-lint@v1.40.1
+	cd $(TOOLS_MOD_DIR) && $(GOINSTALL) github.com/client9/misspell/cmd/misspell
 
 .PHONY: lint
 lint:

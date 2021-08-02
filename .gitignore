@@ -3,3 +3,4 @@ cover.out
 cover.html
 local
 .DS_Store
+.vscode
