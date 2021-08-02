@@ -45,6 +45,10 @@ For a list of possible command line arguments to use with the collector, run the
 
 ## Additional Components
 These components are based in this repository:
+
+### Receivers
+* [logsreceiver](./receiver/logsreceiver)
+
 ### Extensions
 * [orphandetectorextension](./extension/orphandetectorextension)
 
