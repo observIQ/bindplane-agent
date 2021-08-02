@@ -18,10 +18,13 @@ import (
 	"context"
 
 	"github.com/open-telemetry/opentelemetry-log-collection/agent"
+	"github.com/open-telemetry/opentelemetry-log-collection/operator"
+	"github.com/open-telemetry/opentelemetry-log-collection/plugin"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/config"
 	"go.opentelemetry.io/collector/consumer"
 	"go.opentelemetry.io/collector/receiver/receiverhelper"
+	"go.uber.org/multierr"
 )
 
 const typeStr = "stanza"
@@ -54,6 +57,16 @@ func createLogsReceiver(
 ) (component.LogsReceiver, error) {
 
 	stanzaCfg := cfg.(*Config)
+
+	// TODO agent.Builder should accept generic []map[string]interface{}
+	// and handle this internally
+	if stanzaCfg.PluginDir != "" {
+		errs := plugin.RegisterPlugins(stanzaCfg.PluginDir, operator.DefaultRegistry)
+		if len(errs) != 0 {
+			return nil, multierr.Combine(errs...)
+		}
+	}
+
 	pipeline, err := stanzaCfg.decodeOperatorConfigs()
 	if err != nil {
 		return nil, err
@@ -67,8 +80,6 @@ func createLogsReceiver(
 	if err != nil {
 		return nil, err
 	}
-
-	// TODO validate PluginDir
 
 	opts := []ConverterOption{
 		WithLogger(params.Logger),

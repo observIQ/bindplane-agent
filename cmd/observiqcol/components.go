@@ -17,6 +17,8 @@ import (
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/consumer/consumererror"
 	"go.opentelemetry.io/collector/service/defaultcomponents"
+
+	"github.com/observiq/observiq-collector/receiver/logsreceiver"
 )
 
 // Get the factories for components we want to use.
@@ -31,6 +33,7 @@ func components() (component.Factories, error) {
 	}
 
 	receivers := []component.ReceiverFactory{
+		logsreceiver.NewFactory(),
 		filelogreceiver.NewFactory(),
 		syslogreceiver.NewFactory(),
 		tcplogreceiver.NewFactory(),

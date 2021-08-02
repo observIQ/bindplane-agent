@@ -16,6 +16,7 @@ package logsreceiver
 
 import (
 	"context"
+	"path/filepath"
 	"testing"
 	"time"
 
@@ -24,8 +25,6 @@ import (
 	"go.opentelemetry.io/collector/consumer/consumertest"
 	"go.uber.org/zap"
 )
-
-// TODO Test Plugins
 
 func TestCreateReceiver(t *testing.T) {
 	params := component.ReceiverCreateSettings{
@@ -45,7 +44,7 @@ func TestCreateReceiver(t *testing.T) {
 		require.NotNil(t, receiver, "receiver creation failed")
 	})
 
-	t.Run("Success with ConverterConfig", func(t *testing.T) {
+	t.Run("SuccessConverterConfig", func(t *testing.T) {
 		factory := NewFactory()
 		cfg := factory.CreateDefaultConfig().(*Config)
 		cfg.Pipeline = []map[string]interface{}{
@@ -60,6 +59,87 @@ func TestCreateReceiver(t *testing.T) {
 		receiver, err := factory.CreateLogsReceiver(context.Background(), params, cfg, consumertest.NewNop())
 		require.NoError(t, err, "receiver creation failed")
 		require.NotNil(t, receiver, "receiver creation failed")
+	})
+
+	t.Run("SuccessPlugins", func(t *testing.T) {
+		factory := NewFactory()
+		cfg := factory.CreateDefaultConfig().(*Config)
+		cfg.Pipeline = []map[string]interface{}{
+			{
+				"type": "hello",
+			},
+		}
+		cfg.PluginDir = filepath.Join("testdata", "plugins")
+		cfg.Converter = ConverterConfig{
+			MaxFlushCount: 1,
+			FlushInterval: 3 * time.Second,
+		}
+		ctx := context.Background()
+		nop := consumertest.NewNop()
+		receiver, err := factory.CreateLogsReceiver(ctx, params, cfg, nop)
+		require.NoError(t, err, "receiver creation failed")
+		require.NotNil(t, receiver, "receiver creation failed")
+	})
+
+	t.Run("SuccessPluginParameters", func(t *testing.T) {
+		factory := NewFactory()
+		cfg := factory.CreateDefaultConfig().(*Config)
+		cfg.Pipeline = []map[string]interface{}{
+			{
+				"type": "requires_parameter",
+				"name": "You",
+			},
+		}
+		cfg.PluginDir = filepath.Join("testdata", "plugins")
+		cfg.Converter = ConverterConfig{
+			MaxFlushCount: 1,
+			FlushInterval: 3 * time.Second,
+		}
+		ctx := context.Background()
+		nop := consumertest.NewNop()
+		receiver, err := factory.CreateLogsReceiver(ctx, params, cfg, nop)
+		require.NoError(t, err, "receiver creation failed")
+		require.NotNil(t, receiver, "receiver creation failed")
+	})
+
+	t.Run("FailMissingPluginDir", func(t *testing.T) {
+		factory := NewFactory()
+		cfg := factory.CreateDefaultConfig().(*Config)
+		cfg.Pipeline = []map[string]interface{}{
+			{
+				"type": "whodis",
+			},
+		}
+		cfg.PluginDir = filepath.Join(".", "testdata", "pluginsssss")
+		cfg.Converter = ConverterConfig{
+			MaxFlushCount: 1,
+			FlushInterval: 3 * time.Second,
+		}
+		ctx := context.Background()
+		nop := consumertest.NewNop()
+		receiver, err := factory.CreateLogsReceiver(ctx, params, cfg, nop)
+		require.Error(t, err, "receiver creation should have failed")
+		require.Nil(t, receiver, "receiver creation should have failed")
+	})
+
+	t.Run("FailMissingPluginParameters", func(t *testing.T) {
+		factory := NewFactory()
+		cfg := factory.CreateDefaultConfig().(*Config)
+		cfg.Pipeline = []map[string]interface{}{
+			{
+				"type": "requires_parameter",
+			},
+		}
+		cfg.PluginDir = filepath.Join(".", "testdata", "plugins")
+		cfg.Converter = ConverterConfig{
+			MaxFlushCount: 1,
+			FlushInterval: 3 * time.Second,
+		}
+		ctx := context.Background()
+		nop := consumertest.NewNop()
+		receiver, err := factory.CreateLogsReceiver(ctx, params, cfg, nop)
+		require.Error(t, err, "receiver creation should have failed")
+		require.Nil(t, receiver, "receiver creation should have failed")
 	})
 
 	t.Run("DecodeOperatorConfigsFailureMissingFields", func(t *testing.T) {

@@ -45,7 +45,7 @@ func TestStart(t *testing.T) {
 	cfg := factory.CreateDefaultConfig().(*Config)
 	cfg.Pipeline = []map[string]interface{}{
 		{
-			"type": "json_parser", // TODO pipeline should require an input operator
+			"type": "json_parser",
 		},
 	}
 	ctx := context.Background()
@@ -62,6 +62,43 @@ func TestStart(t *testing.T) {
 
 	stanzaReceiver := logsReceiver.(*receiver)
 	stanzaReceiver.emitter.logChan <- entry.New()
+
+	// Eventually because of asynchronuous nature of the receiver.
+	require.Eventually(t,
+		func() bool {
+			return mockConsumer.Received() == 1
+		},
+		10*time.Second, 5*time.Millisecond, "one log entry expected",
+	)
+	require.NoError(t, logsReceiver.Shutdown(ctx))
+}
+
+func TestPlugins(t *testing.T) {
+	params := component.ReceiverCreateSettings{
+		Logger: zaptest.NewLogger(t),
+	}
+	mockConsumer := mockLogsConsumer{}
+
+	factory := NewFactory()
+	cfg := factory.CreateDefaultConfig().(*Config)
+	cfg.Pipeline = []map[string]interface{}{
+		{
+			"type": "hello",
+		},
+	}
+	cfg.PluginDir = filepath.Join("testdata", "plugins")
+	ctx := context.Background()
+	logsReceiver, err := factory.CreateLogsReceiver(
+		ctx,
+		params,
+		cfg,
+		&mockConsumer,
+	)
+	require.NoError(t, err, "receiver should successfully build")
+
+	// Plugin should emit one entry
+	err = logsReceiver.Start(ctx, componenttest.NewNopHost())
+	require.NoError(t, err, "receiver start failed")
 
 	// Eventually because of asynchronuous nature of the receiver.
 	require.Eventually(t,

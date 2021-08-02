@@ -4,7 +4,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/observIQ/observiq-collector/internal/version"
+	"github.com/observiq/observiq-collector/internal/version"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/service"
 )

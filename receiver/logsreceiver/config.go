@@ -28,7 +28,7 @@ type Config struct {
 
 	Converter ConverterConfig `mapstructure:"converter"`
 	Pipeline  OperatorConfigs `mapstructure:"pipeline"`
-	PluginDir string          `mapstructure:",plugin_dir"`
+	PluginDir string          `mapstructure:"plugin_dir"`
 }
 
 // OperatorConfigs is an alias that allows for unmarshaling outside of mapstructure
