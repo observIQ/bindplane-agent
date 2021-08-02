@@ -13,28 +13,43 @@ type fileWritingCoreShim struct {
 	wCore zapcore.Core
 }
 
+// Enabled tells if the core is enabled (able to log) an entry with the given level.
+// Part of the zapcore.Core interface
 func (f fileWritingCoreShim) Enabled(l zapcore.Level) bool {
 	return f.bCore.Enabled(l)
 }
 
+// With adds structured fields to the core. The returned core is also a newFileWritingCoreShim,
+// still using wCore as the writing core and bCore as the level enabled core.
+// Part of the zapcore.Core interface
 func (f fileWritingCoreShim) With(fi []zap.Field) zapcore.Core {
 	bc := f.bCore.With(fi)
 	wc := f.wCore.With(fi)
 	return newFileWritingCoreShim(bc, wc)
 }
 
+// Check determines if the supplied Entry should be logged.
+// Part of the zapcore.Core interface
 func (f fileWritingCoreShim) Check(e zapcore.Entry, ce *zapcore.CheckedEntry) *zapcore.CheckedEntry {
-	return f.wCore.Check(e, ce)
+	if f.bCore.Enabled(e.Level) {
+		return ce.AddCore(e, f.wCore)
+	}
+	return ce
 }
 
+// Write writes the entry to wCore with the given fields
+// Part of the zapcore.Core interface
 func (f fileWritingCoreShim) Write(e zapcore.Entry, fi []zap.Field) error {
 	return f.wCore.Write(e, fi)
 }
 
+// Sync flushes buffered logs on wCore
+// Part of the zapcore.Core interface
 func (f fileWritingCoreShim) Sync() error {
 	return f.wCore.Sync()
 }
 
+// newFileWritingCoreShim returns a new fileWritingCoreShim with the given bCore and wCore
 func newFileWritingCoreShim(bCore zapcore.Core, wCore zapcore.Core) *fileWritingCoreShim {
 	return &fileWritingCoreShim{
 		bCore: bCore,
@@ -60,7 +75,7 @@ func FileLoggingCoreOption(filePath string) zap.Option {
 			wc := zapcore.NewCore(
 				zapcore.NewConsoleEncoder(zapCfg),
 				w,
-				zap.DebugLevel,
+				zap.FatalLevel,
 			)
 
 			return newFileWritingCoreShim(c, wc)
