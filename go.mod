@@ -17,6 +17,7 @@ require (
 	github.com/stretchr/testify v1.7.0
 	go.opentelemetry.io/collector v0.31.0
 	go.uber.org/zap v1.18.1
+	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	golang.org/x/sys v0.0.0-20210630005230-0f9fa26af87c
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0
 )
