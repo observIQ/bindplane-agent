@@ -3,21 +3,16 @@ module github.com/observiq/observiq-collector
 go 1.16
 
 require (
+	github.com/aws/aws-sdk-go v1.40.8 // indirect
 	github.com/fatih/color v1.12.0 // indirect
 	github.com/gorilla/mux v1.8.0
 	github.com/gorilla/websocket v1.4.2
-	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/klauspost/compress v1.13.1 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/observiqexporter v0.31.0
-	github.com/open-telemetry/opentelemetry-collector-contrib/extension/httpforwarder v0.31.0
-	github.com/open-telemetry/opentelemetry-collector-contrib/extension/observer/ecsobserver v0.31.0
-	github.com/open-telemetry/opentelemetry-collector-contrib/extension/observer/hostobserver v0.31.0
-	github.com/open-telemetry/opentelemetry-collector-contrib/extension/observer/k8sobserver v0.31.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/extension/storage v0.31.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/processor/groupbyattrsprocessor v0.31.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/processor/k8sprocessor v0.31.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/filelogreceiver v0.31.0
-	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/receivercreator v0.31.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/syslogreceiver v0.31.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/tcplogreceiver v0.31.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/udplogreceiver v0.31.0
