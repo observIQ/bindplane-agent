@@ -7,6 +7,7 @@ import (
 	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/groupbyattrsprocessor"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/k8sprocessor"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/filelogreceiver"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/logsreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/syslogreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/tcplogreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/udplogreceiver"
@@ -30,6 +31,7 @@ import (
 )
 
 var defaultReceivers = []component.ReceiverFactory{
+	logsreceiver.NewFactory(),
 	otlpreceiver.NewFactory(),
 	filelogreceiver.NewFactory(),
 	syslogreceiver.NewFactory(),
