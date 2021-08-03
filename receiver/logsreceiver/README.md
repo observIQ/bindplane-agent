@@ -10,8 +10,8 @@ Supported pipeline types: logs
 
 | Field        | Default | Description                                                                                                        |
 | ---          | ---     | ---                                                                                                                |
-| `plugin_dir` | ""      | TODO |
-| `pipeline`   | []      | An array of [operators](https://github.com/open-telemetry/opentelemetry-log-collection/blob/main/docs/operators/README.md#what-operators-are-available). See below for more details |
+| `pipeline`   | []      | An array of [operators](https://github.com/open-telemetry/opentelemetry-log-collection/blob/main/docs/operators/README.md#what-operators-are-available). See below for more details. |
+| `plugin_dir` | ""      | A path to a directory that contains [plugins](https://github.com/open-telemetry/opentelemetry-log-collection/blob/main/docs/plugins.md#defining-plugins). |
 
 ### Pipeline
 
