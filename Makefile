@@ -2,7 +2,7 @@ VERSION := $(shell cat VERSION)
 GIT_HASH := $(shell git rev-parse HEAD)
 DATE := $(shell date -u +'%Y-%m-%dT%H:%M:%SZ')
 
-VERSION_INFO_IMPORT_PATH=github.com/observIQ/observiq-collector/internal/version
+VERSION_INFO_IMPORT_PATH=github.com/observiq/observiq-collector/internal/version
 
 # All source code and documents, used when checking for misspellings
 ALLDOC := $(shell find . \( -name "*.md" -o -name "*.yaml" \) \
@@ -19,7 +19,7 @@ EXT?=
 endif
 
 OUTDIR=./build
-MODNAME=github.com/observIQ/observiq-collector
+MODNAME=github.com/observiq/observiq-collector
 
 LINT=$(GOPATH)/bin/golangci-lint
 LINT_TIMEOUT?=5m0s
@@ -90,6 +90,10 @@ test:
 test-with-cover:
 	$(GOTEST) -vet off -cover cover.out ./...
 	$(GOTOOL) cover -html=cover.out -o cover.html
+
+.PHONY: bench
+bench:
+	go test -benchmem -run=^$$ -bench ^* ./...
 
 .PHONY: check-fmt
 check-fmt:

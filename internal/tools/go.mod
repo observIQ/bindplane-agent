@@ -1,4 +1,4 @@
-module github.com/observIQ/observiq-collector/internal/tools
+module github.com/observiq/observiq-collector/internal/tools
 
 go 1.16
 

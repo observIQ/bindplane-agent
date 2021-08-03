@@ -1,7 +1,8 @@
 package main
 
 import (
-	"github.com/observIQ/observiq-collector/extension/orphandetectorextension"
+	"github.com/observiq/observiq-collector/extension/orphandetectorextension"
+	"github.com/observiq/observiq-collector/receiver/logsreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/observiqexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/extension/storage/filestorage"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/groupbyattrsprocessor"
@@ -30,6 +31,7 @@ import (
 )
 
 var defaultReceivers = []component.ReceiverFactory{
+	logsreceiver.NewFactory(),
 	otlpreceiver.NewFactory(),
 	filelogreceiver.NewFactory(),
 	syslogreceiver.NewFactory(),
