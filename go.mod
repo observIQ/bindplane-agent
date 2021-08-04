@@ -7,7 +7,9 @@ require (
 	github.com/fatih/color v1.12.0 // indirect
 	github.com/gorilla/mux v1.8.0
 	github.com/gorilla/websocket v1.4.2
+	github.com/jpillora/backoff v1.0.0
 	github.com/klauspost/compress v1.13.1 // indirect
+	github.com/mitchellh/mapstructure v1.4.1
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/observiqexporter v0.31.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/extension/storage v0.31.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/processor/groupbyattrsprocessor v0.31.0

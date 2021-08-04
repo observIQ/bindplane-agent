@@ -1,6 +1,7 @@
 package main
 
 import (
+	observiqextension "github.com/observiq/observiq-collector/extension/observiq"
 	"github.com/observiq/observiq-collector/extension/orphandetectorextension"
 	"github.com/observiq/observiq-collector/receiver/logsreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/observiqexporter"
@@ -65,6 +66,7 @@ var defaultExtensions = []component.ExtensionFactory{
 	zpagesextension.NewFactory(),
 	filestorage.NewFactory(),
 	orphandetectorextension.NewFactory(),
+	observiqextension.NewFactory(),
 }
 
 // defaultFactories returns the default factories used by the observIQ collector
