@@ -29,16 +29,14 @@ func Open(ctx context.Context, url string, headers http.Header) (*Conn, error) {
 }
 
 // Close will attempt to gracefully close a websocket connection.
-func Close(conn *Conn) error {
+func Close(conn *Conn) {
 	deadline := time.Now().Add(time.Second)
 	message := websocket.FormatCloseMessage(websocket.CloseNormalClosure, "")
 
 	err := conn.WriteControl(websocket.CloseMessage, message, deadline)
 	if err != nil {
-		err = conn.Close()
+		conn.Close()
 	}
-
-	return err
 }
 
 // PumpInbound will pump inbound traffic from the connection to the pipeline.
