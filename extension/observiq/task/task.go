@@ -49,7 +49,7 @@ func FromMessage(msg *message.Message) (*Task, error) {
 	var task Task
 	err := mapstructure.Decode(msg.Content, &task)
 	if err != nil {
-		return nil, fmt.Errorf("failed to decode message as task: %w", err)
+		return nil, fmt.Errorf("failed to decode task: %w", err)
 	}
 
 	return &task, nil
