@@ -1,7 +1,7 @@
 package status
 
 import (
-	"github.com/observiq/observiq-collector/extension/observiq/message"
+	"github.com/observiq/observiq-collector/manager/message"
 )
 
 // Status is the status of the collector.

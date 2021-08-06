@@ -1,13 +1,14 @@
-package observiq
+package manager
 
 import (
+	"fmt"
+	"os"
 	"time"
 
-	"go.opentelemetry.io/collector/config"
+	"github.com/spf13/viper"
 )
 
 const (
-	typeStr           = "observiq_manager"
 	endpoint          = "wss://connections.app.observiq.com"
 	statusInterval    = time.Minute
 	reconnectInterval = time.Minute * 30
@@ -26,18 +27,31 @@ type Config struct {
 	MaxConnectBackoff time.Duration `mapstructure:"max_connect_backoff"`
 	BufferSize        int           `mapstructure:"buffer_size"`
 	TemplateID        string        `mapstructure:"template_id"`
-
-	config.ExtensionSettings `mapstructure:",squash"`
 }
 
-// createDefaultConfig returns the default config used to configure the observiq extension
-func createDefaultConfig() config.Extension {
-	return &Config{
-		ExtensionSettings: config.NewExtensionSettings(config.NewID(typeStr)),
-		Endpoint:          endpoint,
-		StatusInterval:    statusInterval,
-		ReconnectInterval: reconnectInterval,
-		MaxConnectBackoff: maxConnectBackoff,
-		BufferSize:        bufferSize,
+// ConfigFromFile creates a config from the supplied file
+func ConfigFromFile(filePath string) (*Config, error) {
+	viper.SetConfigType("yaml")
+	viper.SetDefault("endpoint", endpoint)
+	viper.SetDefault("status_interval", statusInterval)
+	viper.SetDefault("reconnect_interval", reconnectInterval)
+	viper.SetDefault("max_connect_backoff", maxConnectBackoff)
+	viper.SetDefault("buffer_size", bufferSize)
+
+	file, err := os.Open(filePath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to open file: %w", err)
 	}
+	defer file.Close()
+
+	if err := viper.ReadConfig(file); err != nil {
+		return nil, fmt.Errorf("failed to read: %w", err)
+	}
+
+	config := &Config{}
+	if err := viper.Unmarshal(config); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal: %w", err)
+	}
+
+	return config, nil
 }

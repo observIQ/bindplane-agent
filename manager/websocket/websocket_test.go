@@ -12,7 +12,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
-	"github.com/observiq/observiq-collector/extension/observiq/message"
+	"github.com/observiq/observiq-collector/manager/message"
 	"github.com/stretchr/testify/require"
 )
 

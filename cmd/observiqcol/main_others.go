@@ -2,8 +2,8 @@
 
 package main
 
-import "go.opentelemetry.io/collector/service"
+import "github.com/observiq/observiq-collector/manager"
 
-func run(params service.CollectorSettings) error {
-	return runInteractive(params)
+func run(manager *manager.Manager) error {
+	return runInteractive(manager)
 }

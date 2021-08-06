@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/mitchellh/mapstructure"
-	"github.com/observiq/observiq-collector/extension/observiq/message"
+	"github.com/observiq/observiq-collector/manager/message"
 )
 
 // Status is the status of a task.

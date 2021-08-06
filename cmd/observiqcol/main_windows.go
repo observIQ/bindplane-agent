@@ -24,16 +24,16 @@ func interactive() (bool, error) {
 	return !winService, nil
 }
 
-func run(params service.CollectorSettings) error {
+func run(manager *manager.Manager) error {
 	ri, err := interactive()
 	if err != nil {
 		return err
 	}
 
 	if ri {
-		return runInteractive(params)
+		return runInteractive(manager)
 	}
 
 	// This is currently being run as a windows service -- we should run this as a service then.
-	return svc.Run("", service.NewWindowsService(params))
+	return svc.Run("", service.NewWindowsService(manager))
 }
