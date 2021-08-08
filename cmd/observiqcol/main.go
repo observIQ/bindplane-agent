@@ -33,17 +33,10 @@ func main() {
 	}
 	manager := manager.New(config, collector, logger)
 
-	if err := run(manager); err != nil {
-		log.Fatal(err)
-	}
-}
-
-func runInteractive(manager *manager.Manager) error {
+	// TODO: Look into handling interupt signals with context
 	if err := manager.Run(context.Background()); err != nil {
-		return err
+		log.Fatalf("Manager failed: %s", err)
 	}
-
-	return nil
 }
 
 // TODO: Revisit logging to determine appropriate configuration and panic behavior
