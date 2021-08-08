@@ -10,7 +10,9 @@ import (
 	"go.uber.org/zap"
 )
 
-// NewSettings returns new set of settings for the collector.
+const buildDescription = "observIQ's opentelemetry-collector distribution"
+
+// NewSettings returns new settings for the collector.
 func NewSettings(configPath string, loggingOpts []zap.Option) (service.CollectorSettings, error) {
 	factories, err := DefaultFactories()
 	if err != nil {
@@ -19,7 +21,7 @@ func NewSettings(configPath string, loggingOpts []zap.Option) (service.Collector
 
 	buildInfo := component.BuildInfo{
 		Command:     os.Args[0],
-		Description: "observIQ's opentelemetry-collector distribution",
+		Description: buildDescription,
 		Version:     version.Version,
 	}
 

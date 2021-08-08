@@ -39,7 +39,10 @@ func (m *Manager) Run(ctx context.Context) error {
 	cancelCtx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	go m.collector.Run(cancelCtx)
+	err := m.collector.Run()
+	if err != nil {
+		m.logger.Error("failed to start collector: %s", zap.Error(err))
+	}
 
 	group, groupCtx := errgroup.WithContext(cancelCtx)
 	group.Go(func() error { return m.handleConnection(groupCtx, pipeline) })
@@ -88,7 +91,8 @@ func (m *Manager) handleStatus(ctx context.Context, pipeline *message.Pipeline) 
 		case <-ctx.Done():
 			return ctx.Err()
 		case <-ticker.C:
-			m.logger.Info("Collector status", zap.Bool("Running", m.collector.Running()), zap.Error(m.collector.Error()))
+			collectorStatus := m.collector.Status()
+			m.logger.Info("Collector status", zap.Bool("Running", collectorStatus.Running), zap.Error(collectorStatus.Err))
 			report, err := status.Get()
 			if err != nil {
 				m.logger.Error("Failed to report status", zap.Error(err))

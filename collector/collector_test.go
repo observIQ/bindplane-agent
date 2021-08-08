@@ -3,9 +3,8 @@ package collector
 import (
 	"context"
 	"errors"
-	"sync"
+	"fmt"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/component"
@@ -18,45 +17,38 @@ func TestCollectorRunValid(t *testing.T) {
 	require.NoError(t, err)
 
 	collector := New(settings)
-	wg := &sync.WaitGroup{}
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		collector.Run(context.Background())
-	}()
+	err = collector.Run()
+	require.NoError(t, err)
 
-	<-time.After(time.Millisecond * 30)
-	require.True(t, collector.Running())
-	require.NoError(t, collector.Error())
+	status := collector.Status()
+	require.True(t, status.Running)
+	require.NoError(t, status.Err)
 
 	collector.Stop()
-	wg.Wait()
-	require.False(t, collector.running)
-	require.NoError(t, collector.Error())
+	status = collector.Status()
+	require.False(t, status.Running)
 }
 
-func TestCollectorRunContext(t *testing.T) {
+func TestCollectorRunMultiple(t *testing.T) {
 	settings, err := NewSettings("./test/valid.yaml", nil)
 	require.NoError(t, err)
 
-	ctx, cancel := context.WithCancel(context.Background())
-
 	collector := New(settings)
-	wg := &sync.WaitGroup{}
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		collector.Run(ctx)
-	}()
+	for i := 1; i < 5; i++ {
+		attempt := fmt.Sprintf("Attempt %d", i)
+		t.Run(attempt, func(t *testing.T) {
+			err = collector.Run()
+			require.NoError(t, err)
 
-	<-time.After(time.Millisecond * 30)
-	require.True(t, collector.Running())
-	require.NoError(t, collector.Error())
+			status := collector.Status()
+			require.True(t, status.Running)
+			require.NoError(t, status.Err)
 
-	cancel()
-	wg.Wait()
-	require.False(t, collector.running)
-	require.NoError(t, collector.Error())
+			collector.Stop()
+			status = collector.Status()
+			require.False(t, status.Running)
+		})
+	}
 }
 
 func TestCollectorRunInvalidConfig(t *testing.T) {
@@ -64,17 +56,13 @@ func TestCollectorRunInvalidConfig(t *testing.T) {
 	require.NoError(t, err)
 
 	collector := New(settings)
-	wg := &sync.WaitGroup{}
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		collector.Run(context.Background())
-	}()
+	err = collector.Run()
+	require.Error(t, err)
 
-	wg.Wait()
-	require.False(t, collector.Running())
-	require.Error(t, collector.Error())
-	require.Contains(t, collector.Error().Error(), "cannot build pipelines")
+	status := collector.Status()
+	require.False(t, status.Running)
+	require.Error(t, status.Err)
+	require.Contains(t, status.Err.Error(), "cannot build pipelines")
 }
 
 func TestCollectorRunInvalidFactory(t *testing.T) {
@@ -88,17 +76,42 @@ func TestCollectorRunInvalidFactory(t *testing.T) {
 	)
 
 	collector := New(settings)
-	wg := &sync.WaitGroup{}
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		collector.Run(context.Background())
-	}()
+	err = collector.Run()
+	require.Error(t, err)
 
-	wg.Wait()
-	require.False(t, collector.Running())
-	require.Error(t, collector.Error())
-	require.Contains(t, collector.Error().Error(), "invalid config settings")
+	status := collector.Status()
+	require.False(t, status.Running)
+	require.Contains(t, status.Err.Error(), "invalid config settings")
+}
+
+func TestCollectorRunTwice(t *testing.T) {
+	settings, err := NewSettings("./test/valid.yaml", nil)
+	require.NoError(t, err)
+
+	collector := New(settings)
+	err = collector.Run()
+	require.NoError(t, err)
+	defer collector.Stop()
+
+	err = collector.Run()
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "service already running")
+}
+
+func TestCollectorStopTwice(t *testing.T) {
+	settings, err := NewSettings("./test/valid.yaml", nil)
+	require.NoError(t, err)
+
+	collector := New(settings)
+	err = collector.Run()
+	require.NoError(t, err)
+	collector.Stop()
+
+	status := collector.Status()
+	require.False(t, status.Running)
+
+	collector.Stop()
+	require.False(t, status.Running)
 }
 
 // InvalidConfig is a config without a mapstructure tag.

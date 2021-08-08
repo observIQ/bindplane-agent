@@ -3,36 +3,31 @@ package main
 import (
 	"context"
 	"log"
-	"os"
 
 	"github.com/observiq/observiq-collector/collector"
 	"github.com/observiq/observiq-collector/internal/env"
 	"github.com/observiq/observiq-collector/internal/logging"
 	"github.com/observiq/observiq-collector/manager"
+	"github.com/spf13/pflag"
 	"go.uber.org/zap"
 )
 
 func main() {
-	managerConfigPath, ok := os.LookupEnv("OBSERVIQ_MANAGER_CONFIG")
-	if !ok {
-		log.Fatalf("OBSERVIQ_MANAGER_CONFIG environment variable is not set")
-	}
-
-	collectorConfigPath, ok := os.LookupEnv("OBSERVIQ_COLLECTOR_CONFIG")
-	if !ok {
-		log.Fatalf("OBSERVIQ_COLLECTOR_CONFIG environment variable is not set")
-	}
+	// TODO: Revist default values for flags
+	var managerConfigPath = pflag.String("manager-config", "./remote.yaml", "the manager config path")
+	var collectorConfigPath = pflag.String("collector-config", "./config.yaml", "the collector config path")
+	pflag.Parse()
 
 	loggingOpts := getLoggingOpts()
 	logger := getLogger()
 
-	settings, err := collector.NewSettings(collectorConfigPath, loggingOpts)
+	settings, err := collector.NewSettings(*collectorConfigPath, loggingOpts)
 	if err != nil {
 		log.Fatalf("Failed to get collector settings: %s", err)
 	}
 	collector := collector.New(settings)
 
-	config, err := manager.ConfigFromFile(managerConfigPath)
+	config, err := manager.ConfigFromFile(*managerConfigPath)
 	if err != nil {
 		log.Fatalf("Failed to get manager config: %s", err)
 	}

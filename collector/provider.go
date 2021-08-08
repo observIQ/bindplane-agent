@@ -6,7 +6,7 @@ import (
 	"go.opentelemetry.io/collector/config/configparser"
 )
 
-// FileProvider is a parser provider derived from a file.
+// FileProvider is a parser provider that uses a file.
 type FileProvider struct {
 	filePath string
 }
