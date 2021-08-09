@@ -19,17 +19,19 @@ import (
 
 // Manager is the manager for the observiq control plane.
 type Manager struct {
-	config    *Config
-	collector *collector.Collector
-	logger    *zap.Logger
+	config          *Config
+	collector       *collector.Collector
+	collectorConfig string
+	logger          *zap.Logger
 }
 
 // New returns a new manager with the supplied config.
-func New(config *Config, collector *collector.Collector, logger *zap.Logger) *Manager {
+func New(config *Config, collector *collector.Collector, collectorConfig string, logger *zap.Logger) *Manager {
 	return &Manager{
-		config:    config,
-		collector: collector,
-		logger:    logger,
+		config:          config,
+		collector:       collector,
+		collectorConfig: collectorConfig,
+		logger:          logger,
 	}
 }
 
@@ -118,14 +120,20 @@ func (m *Manager) handleTasks(ctx context.Context, pipeline *message.Pipeline) e
 			}
 
 			m.logger.Info("Executing task", zap.Any("task", msg.Content))
-			response, err := task.Execute(t)
-			if err != nil {
-				m.logger.Error("Failed to execute task", zap.Error(err))
-				continue
-			}
-
+			response := m.executeTask(*t)
+			m.logger.Info("Returning task response", zap.Any("response", response))
 			pipeline.Outbound() <- response.ToMessage()
 		}
+	}
+}
+
+// executeTask will execute a task with the manager.
+func (m *Manager) executeTask(t task.Task) task.Response {
+	switch t.Type {
+	case task.Reconfigure:
+		return task.ExecuteReconfigure(t, m.collector, m.collectorConfig)
+	default:
+		return task.ExecuteUnknown(t)
 	}
 }
 

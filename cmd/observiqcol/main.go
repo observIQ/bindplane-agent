@@ -31,7 +31,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to get manager config: %s", err)
 	}
-	manager := manager.New(config, collector, logger)
+	manager := manager.New(config, collector, *collectorConfigPath, logger)
 
 	// TODO: Look into handling interrupt signals with context
 	if err := manager.Run(context.Background()); err != nil {
