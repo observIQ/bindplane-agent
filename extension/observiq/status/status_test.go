@@ -1,6 +1,7 @@
 package status
 
 import (
+	"context"
 	"testing"
 
 	"github.com/observiq/observiq-collector/extension/observiq/message"
@@ -8,13 +9,15 @@ import (
 )
 
 func TestGet(t *testing.T) {
-	report, err := Get()
+	ctx := context.TODO()
+	report, err := Get(ctx)
 	require.NoError(t, err)
 	require.Equal(t, report.ComponentID, "bpagent")
 }
 
 func TestReportToMessage(t *testing.T) {
-	report, err := Get()
+	ctx := context.TODO()
+	report, err := Get(ctx)
 	require.NoError(t, err)
 
 	msg := report.ToMessage()
