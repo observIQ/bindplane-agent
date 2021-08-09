@@ -51,8 +51,8 @@ func AddNetworkMetrics(sr *Report) error {
 		return fmt.Errorf("error getting network interface statistics")
 	}
 	for _, nic := range cleanNetStat(netStat) {
-		sr.withMetric(networkIn(float64(nic.BytesRecv), now))
-		sr.withMetric(networkOut(float64(nic.BytesSent), now))
+		sr.withMetric(networkIn(nic.BytesRecv, now))
+		sr.withMetric(networkOut(nic.BytesSent, now))
 	}
 	return nil
 }
@@ -119,7 +119,7 @@ func memoryAvailable(available float64, t time.Time) Metric {
 	}
 }
 
-func networkIn(bytesR float64, t time.Time) Metric {
+func networkIn(bytesR uint64, t time.Time) Metric {
 	return Metric{
 		Type:      NETWORK_DATA_IN,
 		Value:     bytesR,
@@ -127,7 +127,7 @@ func networkIn(bytesR float64, t time.Time) Metric {
 	}
 }
 
-func networkOut(bytesO float64, t time.Time) Metric {
+func networkOut(bytesO uint64, t time.Time) Metric {
 	return Metric{
 		Type:      NETWORK_DATA_OUT,
 		Value:     bytesO,

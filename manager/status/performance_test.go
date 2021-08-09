@@ -28,12 +28,12 @@ func TestMetricCollection(t *testing.T) {
 	}
 
 	if inVal, hasNetworkIn := sr.Metrics[string(NETWORK_DATA_IN)]; hasNetworkIn {
-		_, isFloat := inVal.Value.(float64)
+		_, isFloat := inVal.Value.(uint64)
 		require.True(t, isFloat)
 	}
 
 	if inVal, hasNetworkOut := sr.Metrics[string(NETWORK_DATA_OUT)]; hasNetworkOut {
-		_, isFloat := inVal.Value.(float64)
+		_, isFloat := inVal.Value.(uint64)
 		require.True(t, isFloat)
 	}
 }

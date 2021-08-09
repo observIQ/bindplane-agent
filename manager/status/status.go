@@ -56,7 +56,7 @@ func Get() (*Report, error) {
 type metricGatherer = func(sr *Report) error
 
 func (sr *Report) addPerformanceMetrics() error {
-	for _, metricGatherer := range []metricGatherer{AddCPUMetrics, AddMemoryMetrics} {
+	for _, metricGatherer := range []metricGatherer{AddCPUMetrics, AddMemoryMetrics, AddNetworkMetrics} {
 		err := metricGatherer(sr)
 		if err != nil {
 			return fmt.Errorf("there was an error gathering performance metrics. %s", err)
