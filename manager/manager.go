@@ -93,7 +93,7 @@ func (m *Manager) handleStatus(ctx context.Context, pipeline *message.Pipeline) 
 		case <-ticker.C:
 			collectorStatus := m.collector.Status()
 			m.logger.Info("Collector status", zap.Bool("Running", collectorStatus.Running), zap.Error(collectorStatus.Err))
-			report, err := status.Get(ctx)
+			report, err := status.Get()
 			if err != nil {
 				m.logger.Error("Failed to report status", zap.Error(err))
 				continue

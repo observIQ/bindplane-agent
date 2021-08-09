@@ -1,8 +1,8 @@
 package status
 
 import (
-	"context"
 	"fmt"
+	"sync"
 
 	"github.com/observiq/observiq-collector/manager/message"
 )
@@ -11,7 +11,7 @@ import (
 type Status int
 
 type Metric struct {
-	Type      string      `json:"type"`
+	Type      MetricKey   `json:"type"`
 	Timestamp int64       `json:"timestamp"`
 	Value     interface{} `json:"value"`
 }
@@ -28,6 +28,8 @@ type Report struct {
 	ComponentID   string             `json:"componentID" mapstructure:"componentID"`
 	Status        Status             `json:"status" mapstructure:"status"`
 	Metrics       map[string]*Metric `json:"metrics"`
+
+	sync.Mutex
 }
 
 // ToMessage converts a report into a message.
@@ -37,25 +39,25 @@ func (r *Report) ToMessage() *message.Message {
 }
 
 // Get returns the status of the collector.
-func Get(ctx context.Context) (*Report, error) {
+func Get() (*Report, error) {
 	report := Report{
 		ComponentType: "bpagent",
 		ComponentID:   "bpagent",
 		Status:        ACTIVE,
 		Metrics:       make(map[string]*Metric),
 	}
-	err := report.addPerformanceMetrics(ctx)
+	err := report.addPerformanceMetrics()
 	if err != nil {
 		return nil, err
 	}
 	return &report, nil
 }
 
-type metricGatherer = func(ctx context.Context, sr *Report) error
+type metricGatherer = func(sr *Report) error
 
-func (sr *Report) addPerformanceMetrics(ctx context.Context) error {
+func (sr *Report) addPerformanceMetrics() error {
 	for _, metricGatherer := range []metricGatherer{AddCPUMetrics, AddMemoryMetrics} {
-		err := metricGatherer(ctx, sr)
+		err := metricGatherer(sr)
 		if err != nil {
 			return fmt.Errorf("there was an error gathering performance metrics. %s", err)
 		}
@@ -64,5 +66,7 @@ func (sr *Report) addPerformanceMetrics(ctx context.Context) error {
 }
 
 func (sr *Report) withMetric(m Metric) {
-	sr.Metrics[m.Type] = &m
+	sr.Lock()
+	defer sr.Unlock()
+	sr.Metrics[string(m.Type)] = &m
 }
