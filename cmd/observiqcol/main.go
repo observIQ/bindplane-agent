@@ -33,7 +33,7 @@ func main() {
 	}
 	manager := manager.New(config, collector, logger)
 
-	// TODO: Look into handling interupt signals with context
+	// TODO: Look into handling interrupt signals with context
 	if err := manager.Run(context.Background()); err != nil {
 		log.Fatalf("Manager failed: %s", err)
 	}
