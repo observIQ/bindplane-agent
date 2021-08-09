@@ -82,12 +82,12 @@ func (c *Collector) runCollector() {
 	c.setErr(nil)
 
 	err := c.svc.Run()
+	c.setRunning(false)
+	c.setErr(err)
+
 	if err != nil {
 		c.errChan <- err
 	}
-
-	c.setRunning(false)
-	c.setErr(err)
 }
 
 // waitForStartup waits for the service to startup before exiting.
