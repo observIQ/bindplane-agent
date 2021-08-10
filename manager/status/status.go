@@ -1,20 +1,11 @@
 package status
 
 import (
-	"fmt"
-	"sync"
-
 	"github.com/observiq/observiq-collector/manager/message"
 )
 
 // Status is the status of the collector.
 type Status int
-
-type Metric struct {
-	Type      MetricKey   `json:"type"`
-	Timestamp int64       `json:"timestamp"`
-	Value     interface{} `json:"value"`
-}
 
 const (
 	DISABLED Status = 0
@@ -24,12 +15,9 @@ const (
 
 // Report is a status report.
 type Report struct {
-	ComponentType string             `json:"componentType" mapstructure:"componentType"`
-	ComponentID   string             `json:"componentID" mapstructure:"componentID"`
-	Status        Status             `json:"status" mapstructure:"status"`
-	Metrics       map[string]*Metric `json:"metrics"`
-
-	sync.Mutex
+	ComponentType string `json:"componentType" mapstructure:"componentType"`
+	ComponentID   string `json:"componentID" mapstructure:"componentID"`
+	Status        Status `json:"status" mapstructure:"status"`
 }
 
 // ToMessage converts a report into a message.
@@ -39,34 +27,10 @@ func (r *Report) ToMessage() *message.Message {
 }
 
 // Get returns the status of the collector.
-func Get() (*Report, error) {
-	report := Report{
+func Get() (Report, error) {
+	return Report{
 		ComponentType: "bpagent",
 		ComponentID:   "bpagent",
 		Status:        ACTIVE,
-		Metrics:       make(map[string]*Metric),
-	}
-	err := report.addPerformanceMetrics()
-	if err != nil {
-		return nil, err
-	}
-	return &report, nil
-}
-
-type metricGatherer = func(sr *Report) error
-
-func (sr *Report) addPerformanceMetrics() error {
-	for _, metricGatherer := range []metricGatherer{AddCPUMetrics, AddMemoryMetrics, AddNetworkMetrics} {
-		err := metricGatherer(sr)
-		if err != nil {
-			return fmt.Errorf("there was an error gathering performance metrics. %s", err)
-		}
-	}
-	return nil
-}
-
-func (sr *Report) withMetric(m Metric) {
-	sr.Lock()
-	defer sr.Unlock()
-	sr.Metrics[string(m.Type)] = &m
+	}, nil
 }
