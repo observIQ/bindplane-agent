@@ -1,0 +1,12 @@
+receivers:
+  filelog:
+    include: 5
+
+exporters:
+  logging:
+
+service:
+  pipelines:
+    logs:
+      receivers: [filelog]
+      exporters: [logging]

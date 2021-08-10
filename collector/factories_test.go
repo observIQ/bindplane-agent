@@ -1,4 +1,4 @@
-package main
+package collector
 
 import (
 	"errors"
@@ -90,7 +90,7 @@ func TestCombineFactories(t *testing.T) {
 }
 
 func TestDefaultFactories(t *testing.T) {
-	factories, err := defaultFactories()
+	factories, err := DefaultFactories()
 	assert.NoError(t, err)
 
 	for _, receiver := range defaultReceivers {

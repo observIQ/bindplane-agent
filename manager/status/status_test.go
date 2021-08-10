@@ -3,7 +3,7 @@ package status
 import (
 	"testing"
 
-	"github.com/observiq/observiq-collector/extension/observiq/message"
+	"github.com/observiq/observiq-collector/manager/message"
 	"github.com/stretchr/testify/require"
 )
 
