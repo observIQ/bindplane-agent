@@ -1,0 +1,12 @@
+collector:
+  level: inof
+  max_backups: 1
+  max_megabytes: 1
+  max_days: 1
+  file: ./local/collector.log
+manager:
+  level: debug
+  max_backups: 5
+  max_megabytes: 5
+  max_days: 5
+  file: ./local/manager.log
