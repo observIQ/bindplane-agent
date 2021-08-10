@@ -27,6 +27,28 @@ type Task struct {
 	Parameters map[string]interface{} `json:"parameters" mapstructure:"parameters"`
 }
 
+// Success returns a new success response from the given task.
+func (t *Task) Success() Response {
+	return Response{
+		ID:     t.ID,
+		Type:   t.Type,
+		Status: Success,
+	}
+}
+
+// Failure returns a new failure response from the given task.
+func (t *Task) Failure(message string, err error) Response {
+	return Response{
+		ID:      t.ID,
+		Type:    t.Type,
+		Status:  Failure,
+		Message: message,
+		Details: map[string]interface{}{
+			"Error": err.Error(),
+		},
+	}
+}
+
 // Response is the response to an executed task.
 type Response struct {
 	Type    Type                   `json:"type" mapstructure:"type"`
