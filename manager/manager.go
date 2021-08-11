@@ -102,7 +102,7 @@ func (m *Manager) handleStatus(ctx context.Context, pipeline *message.Pipeline) 
 			logger.Debug("Running status update")
 
 			collectorStatus := m.collector.Status()
-			report := status.Get()
+			report := status.Get(collectorStatus)
 			err := report.AddPerformanceMetrics()
 			if err != nil {
 				logger.Info("Collector status", zap.Bool("Running", collectorStatus.Running), zap.Error(collectorStatus.Err))

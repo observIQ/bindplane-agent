@@ -19,21 +19,16 @@ func TestMetricCollection(t *testing.T) {
 		v, isFloat := value.Value.(float64)
 		require.True(t, isFloat)
 		require.GreaterOrEqual(t, v, 0.0)
+	} else {
+		require.FailNow(t, "Did not attach CPU percent metric")
 	}
 
 	if val, hv := sr.Metrics[string(MEMORY_USED)]; hv {
 		v, isFloat := val.Value.(float64)
 		require.True(t, isFloat)
 		require.GreaterOrEqual(t, v, 0.0)
+	} else {
+		require.FailNow(t, "Did not attach memory metrics")
 	}
 
-	if inVal, hasNetworkIn := sr.Metrics[string(NETWORK_DATA_IN)]; hasNetworkIn {
-		_, isFloat := inVal.Value.(uint64)
-		require.True(t, isFloat)
-	}
-
-	if inVal, hasNetworkOut := sr.Metrics[string(NETWORK_DATA_OUT)]; hasNetworkOut {
-		_, isFloat := inVal.Value.(uint64)
-		require.True(t, isFloat)
-	}
 }
