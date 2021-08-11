@@ -30,11 +30,16 @@ func main() {
 		log.Fatalf("Failed to read manager config: %s", err)
 	}
 
-	ctx, cancel := context.WithInterrupt()
+	ctx := context.EmptyContext()
+	if ppid := env.GetLauncherPPID(); ppid != 0 {
+		ctx = context.WithParent(ppid)
+	}
+
+	managerCtx, cancel := context.WithInterrupt(ctx)
 	defer cancel()
 
 	manager := manager.New(managerConfig, collector, logger)
-	if err := manager.Run(ctx); err != nil {
+	if err := manager.Run(managerCtx); err != nil {
 		log.Fatalf("Manager exited with error: %s", err)
 	}
 }
