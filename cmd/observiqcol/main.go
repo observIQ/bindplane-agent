@@ -52,8 +52,8 @@ func getLoggingConfig(logConfigPath string) *logging.Config {
 		return nil
 	}
 
-	c, err := logging.LoadConfig(logConfigPath)
-	if err != nil {
+	c, loadErr := logging.LoadConfig(logConfigPath)
+	if loadErr != nil {
 		c = logging.DefaultConfig()
 	}
 
