@@ -1,14 +1,25 @@
 package context
 
 import (
+	"context"
 	"syscall"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 )
 
+func TestEmptyContext(t *testing.T) {
+	ctx := EmptyContext()
+	require.Equal(t, context.Background(), ctx)
+}
+
+func TestWithParent(t *testing.T) {
+	ctx := WithParent(-5)
+	<-ctx.Done()
+}
+
 func TestWithInterruptSignal(t *testing.T) {
-	ctx, cancel := WithInterrupt()
+	ctx, cancel := WithInterrupt(context.Background())
 	defer cancel()
 
 	err := syscall.Kill(syscall.Getpid(), syscall.SIGTERM)
@@ -19,7 +30,7 @@ func TestWithInterruptSignal(t *testing.T) {
 }
 
 func TestWithInterruptCancel(t *testing.T) {
-	ctx, cancel := WithInterrupt()
+	ctx, cancel := WithInterrupt(context.Background())
 	cancel()
 
 	_, ok := <-ctx.Done()
