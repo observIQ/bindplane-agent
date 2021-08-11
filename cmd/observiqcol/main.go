@@ -1,10 +1,10 @@
 package main
 
 import (
-	"context"
 	"log"
 
 	"github.com/observiq/observiq-collector/collector"
+	"github.com/observiq/observiq-collector/internal/context"
 	"github.com/observiq/observiq-collector/internal/env"
 	"github.com/observiq/observiq-collector/internal/logging"
 	"github.com/observiq/observiq-collector/manager"
@@ -30,10 +30,12 @@ func main() {
 		log.Fatalf("Failed to read manager config: %s", err)
 	}
 
-	// TODO: Look into handling interrupt signals with context
+	ctx, cancel := context.WithInterrupt()
+	defer cancel()
+
 	manager := manager.New(managerConfig, collector, logger)
-	if err := manager.Run(context.Background()); err != nil {
-		log.Fatalf("Manager failed to run: %s", err)
+	if err := manager.Run(ctx); err != nil {
+		log.Fatalf("Manager exited with error: %s", err)
 	}
 }
 
