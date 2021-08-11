@@ -33,11 +33,11 @@ type Report struct {
 }
 
 // TODO: figure out the structure of this with the other team
-type ErrorContext struct {
-	Class          string `json:"class"`
-	UserMessage    string `json:"userMessage" mapstructure:"user_message"`
-	Recommendation string `json:"recommendation" mapstructure:"recommendation"`
-}
+// type ErrorContext struct {
+// 	Class          string `json:"class"`
+// 	UserMessage    string `json:"userMessage" mapstructure:"user_message"`
+// 	Recommendation string `json:"recommendation" mapstructure:"recommendation"`
+// }
 
 func (r *Report) ToMessage() *message.Message {
 	msg, _ := message.New(message.StatusReport, r)
@@ -51,14 +51,15 @@ func Get(agentID string, status collector.Status) *Report {
 		Status:        ACTIVE,
 		Metrics:       make(map[string]*Metric),
 	}
-	if status.Err != nil {
-		report.Status = ERROR
-		report.Context = ErrorContext{
-			Class:          "unknown",
-			UserMessage:    "Something went wrong with the agent",
-			Recommendation: "We recommend that you contact support",
-		}
-	}
+	// if status.Err != nil {
+	// 	// TODO: fix service side configuration before we say things are in an error state
+	// 	// report.Status = ERROR
+	// 	report.Context = ErrorContext{
+	// 		Class:          "unknown",
+	// 		UserMessage:    "Something went wrong with the agent",
+	// 		Recommendation: "We recommend that you contact support",
+	// 	}
+	// }
 	return report
 }
 
@@ -83,7 +84,7 @@ func (sr *Report) AddPerformanceMetrics(logger *zap.Logger) {
 	for _, pi := range performanceIndicators {
 		err := pi.collectFunc(sr)
 		if err != nil {
-			logger.Error(fmt.Sprintf("Unable to gather performance data for %s", pi.metricClass), zap.Error(err))
+			logger.Error(fmt.Sprintf("unable to gather performance data for %s", pi.metricClass), zap.Error(err))
 			continue
 		}
 	}
