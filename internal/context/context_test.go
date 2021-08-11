@@ -11,7 +11,7 @@ func TestWithInterruptSignal(t *testing.T) {
 	ctx, cancel := WithInterrupt()
 	defer cancel()
 
-	err := syscall.Kill(syscall.Getpid(), syscall.SIGINT)
+	err := syscall.Kill(syscall.Getpid(), syscall.SIGTERM)
 	require.NoError(t, err)
 
 	_, ok := <-ctx.Done()

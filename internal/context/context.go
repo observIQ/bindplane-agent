@@ -4,13 +4,14 @@ import (
 	"context"
 	"os"
 	"os/signal"
+	"syscall"
 )
 
 // WithInterrupt returns a context that cancels when an interrupt signal is received.
 func WithInterrupt() (context.Context, context.CancelFunc) {
 	ctx, cancel := context.WithCancel(context.Background())
 	signalChan := make(chan os.Signal, 1)
-	signal.Notify(signalChan, os.Interrupt)
+	signal.Notify(signalChan, os.Interrupt, syscall.SIGTERM)
 
 	go func() {
 		select {
