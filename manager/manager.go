@@ -24,7 +24,7 @@ type Manager struct {
 	logger    *zap.Logger
 }
 
-// New returns a new manager with the supplied config.
+// New returns a new manager with the supplied parameters.
 func New(config *Config, collector *collector.Collector, logger *zap.Logger) *Manager {
 	return &Manager{
 		config:    config,
@@ -54,6 +54,10 @@ func (m *Manager) Run(ctx context.Context) error {
 
 // handleConnection will handle the connection to observiq cloud.
 func (m *Manager) handleConnection(ctx context.Context, pipeline *message.Pipeline) error {
+	logger := m.logger.Named("connection-handler")
+	logger.Info("Starting connection handler")
+	defer logger.Info("Exiting connection handler")
+
 	headers := m.headers()
 	backoff := backoff.Backoff{Max: m.config.MaxConnectBackoff}
 
@@ -64,18 +68,18 @@ func (m *Manager) handleConnection(ctx context.Context, pipeline *message.Pipeli
 		case <-time.After(backoff.Duration()):
 			conn, err := websocket.Open(ctx, m.config.Endpoint, headers)
 			if err != nil {
-				m.logger.Error("Failed to open connection", zap.Error(err), zap.Float64("attempt", backoff.Attempt()))
+				logger.Error("Failed to open connection", zap.Error(err), zap.Float64("attempt", backoff.Attempt()))
 				continue
 			}
 
-			m.logger.Info("Connected to observiq cloud")
+			logger.Info("Connected to observiq cloud")
 			backoff.Reset()
 
 			err = websocket.PumpWithTimeout(ctx, conn, pipeline, m.config.ReconnectInterval)
 			switch err {
 			case nil, context.DeadlineExceeded, context.Canceled:
 			default:
-				m.logger.Error("Unexpected connection error", zap.Error(err))
+				logger.Error("Unexpected connection error", zap.Error(err))
 			}
 		}
 	}
@@ -83,6 +87,10 @@ func (m *Manager) handleConnection(ctx context.Context, pipeline *message.Pipeli
 
 // handleStatus will handle reporting status at the specified interval.
 func (m *Manager) handleStatus(ctx context.Context, pipeline *message.Pipeline) error {
+	logger := m.logger.Named("status-handler")
+	logger.Info("Starting status handler")
+	defer logger.Info("Exiting status handler")
+
 	ticker := time.NewTicker(m.config.StatusInterval)
 	defer ticker.Stop()
 
@@ -91,12 +99,13 @@ func (m *Manager) handleStatus(ctx context.Context, pipeline *message.Pipeline) 
 		case <-ctx.Done():
 			return ctx.Err()
 		case <-ticker.C:
+			logger.Debug("Running status update")
+
 			collectorStatus := m.collector.Status()
-			m.logger.Info("Collector status", zap.Bool("Running", collectorStatus.Running), zap.Error(collectorStatus.Err))
 			report := status.Get()
 			err := report.AddPerformanceMetrics()
 			if err != nil {
-				m.logger.Error("Failed to add performance metrics to status report", zap.Error(err))
+				logger.Info("Collector status", zap.Bool("Running", collectorStatus.Running), zap.Error(collectorStatus.Err))
 				continue
 			}
 
@@ -107,26 +116,39 @@ func (m *Manager) handleStatus(ctx context.Context, pipeline *message.Pipeline) 
 
 // handleTasks will handle executing tasks from the pipeline.
 func (m *Manager) handleTasks(ctx context.Context, pipeline *message.Pipeline) error {
+	logger := m.logger.Named("task-handler")
+	logger.Info("Starting task handler")
+	defer logger.Info("Exiting task handler")
+
 	for {
 		select {
 		case <-ctx.Done():
 			return ctx.Err()
 		case msg := <-pipeline.Inbound():
+			logger.Debug("Received message")
+
 			t, err := task.FromMessage(msg)
 			if err != nil {
-				m.logger.Error("Failed to read task", zap.Error(err))
+				logger.Error("Failed to covert message to task", zap.Error(err))
 				continue
 			}
 
-			m.logger.Info("Executing task", zap.Any("task", msg.Content))
-			response, err := task.Execute(t)
-			if err != nil {
-				m.logger.Error("Failed to execute task", zap.Error(err))
-				continue
-			}
+			logger.Info("Executing task", zap.Any("task", msg.Content))
+			response := m.executeTask(t)
 
+			logger.Info("Sending task response", zap.Any("response", response))
 			pipeline.Outbound() <- response.ToMessage()
 		}
+	}
+}
+
+// executeTask will execute a task with the manager.
+func (m *Manager) executeTask(t *task.Task) task.Response {
+	switch t.Type {
+	case task.Reconfigure:
+		return task.ExecuteReconfigure(t, m.collector)
+	default:
+		return task.ExecuteUnknown(t)
 	}
 }
 

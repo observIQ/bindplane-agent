@@ -5,28 +5,32 @@ import (
 	"fmt"
 	"sync"
 
+	"go.opentelemetry.io/collector/config/configtest"
 	"go.opentelemetry.io/collector/service"
+	"go.uber.org/zap"
 )
 
 // Collector wraps the open telemetry collector.
 type Collector struct {
-	settings  service.CollectorSettings
-	svc       *service.Collector
-	svcMux    *sync.Mutex
-	status    Status
-	statusMux *sync.RWMutex
-	wg        *sync.WaitGroup
-	errChan   chan error
+	configPath string
+	settings   service.CollectorSettings
+	svc        *service.Collector
+	svcMux     *sync.Mutex
+	status     Status
+	statusMux  *sync.RWMutex
+	wg         *sync.WaitGroup
+	errChan    chan error
 }
 
 // New returns a new collector.
-func New(settings service.CollectorSettings) *Collector {
+func New(configPath string, loggingOpts []zap.Option) *Collector {
 	return &Collector{
-		settings:  settings,
-		svcMux:    &sync.Mutex{},
-		statusMux: &sync.RWMutex{},
-		wg:        &sync.WaitGroup{},
-		errChan:   make(chan error),
+		configPath: configPath,
+		settings:   NewSettings(configPath, loggingOpts),
+		svcMux:     &sync.Mutex{},
+		statusMux:  &sync.RWMutex{},
+		wg:         &sync.WaitGroup{},
+		errChan:    make(chan error),
 	}
 }
 
@@ -74,6 +78,12 @@ func (c *Collector) Stop() {
 	c.svc = nil
 }
 
+// Restart will restart the collector.
+func (c *Collector) Restart() error {
+	c.Stop()
+	return c.Run()
+}
+
 // runCollector will run the collector. This is a blocking function
 // that should be executed in a separate goroutine.
 func (c *Collector) runCollector() {
@@ -107,6 +117,17 @@ func (c *Collector) waitForStartup() error {
 			return err
 		}
 	}
+}
+
+// ConfigPath will return the config path of the collector.
+func (c *Collector) ConfigPath() string {
+	return c.configPath
+}
+
+// ValidateConfig will validate the collector's config.
+func (c *Collector) ValidateConfig() error {
+	_, err := configtest.LoadConfigAndValidate(c.configPath, c.settings.Factories)
+	return err
 }
 
 // Status will return the status of the collector.
