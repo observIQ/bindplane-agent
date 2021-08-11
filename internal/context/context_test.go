@@ -28,11 +28,3 @@ func TestWithInterruptSignal(t *testing.T) {
 	_, ok := <-ctx.Done()
 	require.False(t, ok)
 }
-
-func TestWithInterruptCancel(t *testing.T) {
-	ctx, cancel := WithInterrupt(context.Background())
-	cancel()
-
-	_, ok := <-ctx.Done()
-	require.False(t, ok)
-}

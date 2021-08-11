@@ -40,22 +40,5 @@ func WithParent(ppid int) context.Context {
 
 // WithInterrupt returns a context that cancels when an interrupt signal is received.
 func WithInterrupt(ctx context.Context) (context.Context, context.CancelFunc) {
-	interruptCtx, cancel := context.WithCancel(ctx)
-	signalChan := make(chan os.Signal, 1)
-	signal.Notify(signalChan, os.Interrupt, syscall.SIGTERM)
-
-	go func() {
-		select {
-		case <-signalChan:
-			cancel()
-		case <-interruptCtx.Done():
-		}
-	}()
-
-	cancelFunc := func() {
-		signal.Stop(signalChan)
-		cancel()
-	}
-
-	return interruptCtx, cancelFunc
+	return signal.NotifyContext(ctx, os.Interrupt, syscall.SIGTERM)
 }
