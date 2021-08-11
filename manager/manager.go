@@ -158,6 +158,8 @@ func (m *Manager) executeTask(t *task.Task) task.Response {
 	switch t.Type {
 	case task.Reconfigure:
 		return task.ExecuteReconfigure(t, m.collector)
+	case task.Restart:
+		return task.ExecuteRestart(t, m.collector)
 	default:
 		return task.ExecuteUnknown(t)
 	}
