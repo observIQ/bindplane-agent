@@ -32,6 +32,7 @@ type Report struct {
 	Context       interface{}        `json:"context,omitempty" mapstrucuture:"context,omitempty"`
 }
 
+// TODO: figure out the structure of this with the other team
 type ErrorContext struct {
 	Class          string `json:"class"`
 	UserMessage    string `json:"userMessage" mapstructure:"user_message"`

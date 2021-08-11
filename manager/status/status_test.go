@@ -12,7 +12,7 @@ import (
 func TestGet(t *testing.T) {
 	status := collector.Status{Err: nil, Running: true}
 	report := Get("41794e4d-9564-4d98-9096-698302577c98", status)
-	require.Equal(t, report.ComponentID, "bpagent")
+	require.Equal(t, report.ComponentID, "41794e4d-9564-4d98-9096-698302577c98")
 }
 
 func TestReportToMessage(t *testing.T) {
