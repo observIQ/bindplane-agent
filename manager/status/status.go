@@ -5,6 +5,7 @@ import (
 
 	"github.com/observiq/observiq-collector/collector"
 	"github.com/observiq/observiq-collector/manager/message"
+	"go.uber.org/zap"
 )
 
 // Status is the status of the collector.
@@ -42,10 +43,10 @@ func (r *Report) ToMessage() *message.Message {
 	return msg
 }
 
-func Get(status collector.Status) *Report {
+func Get(agentID string, status collector.Status) *Report {
 	report := &Report{
-		ComponentType: "bpagent",
-		ComponentID:   "bpagent",
+		ComponentType: "observiq-collector",
+		ComponentID:   agentID,
 		Status:        ACTIVE,
 		Metrics:       make(map[string]*Metric),
 	}
@@ -60,17 +61,31 @@ func Get(status collector.Status) *Report {
 	return report
 }
 
-type metricGatherer = func(sr *Report) error
+type metricGatherer struct {
+	metricClass string
+	collectFunc func(r *Report) error
+}
+
+var performanceIndicators = []metricGatherer{
+	{
+		metricClass: "cpu",
+		collectFunc: AddCPUMetrics,
+	},
+	{
+		metricClass: "memory",
+		collectFunc: AddMemoryMetrics,
+	},
+}
 
 // AddPerformanceMetrics will go through and attach
-func (sr *Report) AddPerformanceMetrics() error {
-	for _, metricGatherer := range []metricGatherer{AddCPUMetrics, AddMemoryMetrics} {
-		err := metricGatherer(sr)
+func (sr *Report) AddPerformanceMetrics(logger *zap.Logger) {
+	for _, pi := range performanceIndicators {
+		err := pi.collectFunc(sr)
 		if err != nil {
-			return fmt.Errorf("there was an error gathering performance metrics. %s", err)
+			logger.Error(fmt.Sprintf("Unable to gather performance data for %s", pi.metricClass), zap.Error(err))
+			continue
 		}
 	}
-	return nil
 }
 
 func (sr *Report) withMetric(m Metric) {

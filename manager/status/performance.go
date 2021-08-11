@@ -23,7 +23,7 @@ const (
 func AddCPUMetrics(sr *Report) error {
 	percentPerCore, err := cpu.Percent(0, true)
 	if err != nil {
-		return fmt.Errorf("there was an error reading CPU metrics")
+		return fmt.Errorf("there was an error reading CPU metrics: %s", err.Error())
 	}
 	now := time.Now()
 	for core, value := range percentPerCore {
