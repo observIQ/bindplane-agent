@@ -8,20 +8,40 @@ import (
 	"github.com/observiq/observiq-collector/internal/context"
 	"github.com/observiq/observiq-collector/internal/env"
 	"github.com/observiq/observiq-collector/internal/logging"
+	"github.com/observiq/observiq-collector/internal/migration"
 	"github.com/observiq/observiq-collector/manager"
 	"github.com/spf13/pflag"
+	"go.uber.org/zap"
 )
 
 func main() {
 	// TODO: Revist default values for flags
-	var managerConfigPath = pflag.String("manager-config", "./remote.yaml", "the manager config path")
+	var managerConfigPath = pflag.String("manager-config", env.DefaultRemoteConfigFile(), "the manager config path")
 	var collectorConfigPath = pflag.String("collector-config", "./config.yaml", "the collector config path")
-	var loggingConfigPath = pflag.String("logging-config", "", "the logging config path")
+	var loggingConfigPath = pflag.String("logging-config", env.DefaultLoggingConfigFile(), "the logging config path")
+	var tryMigration = pflag.BoolP("migrate", "m", false, "try migrating configs from BPAgent on startup")
 	pflag.Parse()
 
 	loggingConfig := getLoggingConfig(*loggingConfigPath)
 	loggingOpts := logging.GetCollectorLoggingOpts(loggingConfig)
 	logger := logging.GetManagerLogger(loggingConfig)
+
+	if *tryMigration {
+		migrationLogger := logger.Named("migration")
+		shouldMigrate, err := migration.ShouldMigrate()
+		switch {
+		case err != nil:
+			migrationLogger.Error("Skipping config migration, encountered error when looking for BPAgent install", zap.Error(err))
+		case shouldMigrate:
+			migrationLogger.Info("Detected BPAgent install, attempting config migration")
+			err := migration.Migrate()
+			if err != nil {
+				migrationLogger.Panic("Failed to migrate!", zap.Error(err))
+			}
+		default:
+			migrationLogger.Info("Skipping config migration, no install of BPAgent detected")
+		}
+	}
 
 	collector := collector.New(*collectorConfigPath, loggingOpts)
 	managerConfig, err := manager.ReadConfig(*managerConfigPath)

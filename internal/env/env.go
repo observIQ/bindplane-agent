@@ -2,6 +2,7 @@ package env
 
 import (
 	"os"
+	"path"
 	"strconv"
 )
 
@@ -26,4 +27,21 @@ func GetLauncherPPID() int {
 	}
 
 	return ppid
+}
+
+func LogDir() string {
+	return path.Join(HomeDir(), "log")
+}
+
+func ConfigDir() string {
+	// TODO: We might want to change from 'config/current' to just 'config' at some point
+	return path.Join(HomeDir(), "config", "current")
+}
+
+func DefaultLoggingConfigFile() string {
+	return path.Join(ConfigDir(), "collector-logging.yaml")
+}
+
+func DefaultRemoteConfigFile() string {
+	return path.Join(ConfigDir(), "collector-remote.yaml")
 }
