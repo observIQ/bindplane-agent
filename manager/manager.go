@@ -36,20 +36,30 @@ func New(config *Config, collector *collector.Collector, logger *zap.Logger) *Ma
 // Start will start the observiq extension.
 func (m *Manager) Run(ctx context.Context) error {
 	pipeline := message.NewPipeline(m.config.BufferSize)
-	cancelCtx, cancel := context.WithCancel(ctx)
-	defer cancel()
 
-	err := m.collector.Run()
-	if err != nil {
-		m.logger.Error("failed to start collector: %s", zap.Error(err))
-	}
-
-	group, groupCtx := errgroup.WithContext(cancelCtx)
+	group, groupCtx := errgroup.WithContext(ctx)
+	group.Go(func() error { return m.handleCollector(groupCtx) })
 	group.Go(func() error { return m.handleConnection(groupCtx, pipeline) })
 	group.Go(func() error { return m.handleStatus(groupCtx, pipeline) })
 	group.Go(func() error { return m.handleTasks(groupCtx, pipeline) })
 
 	return group.Wait()
+}
+
+// handleCollector will handle running the collector.
+func (m *Manager) handleCollector(ctx context.Context) error {
+	logger := m.logger.Named("collector-handler")
+	logger.Info("Starting collector handler")
+	defer logger.Info("Exiting collector handler")
+
+	err := m.collector.Run()
+	if err != nil {
+		logger.Error("failed to start collector: %s", zap.Error(err))
+	}
+
+	<-ctx.Done()
+	m.collector.Stop()
+	return ctx.Err()
 }
 
 // handleConnection will handle the connection to observiq cloud.
