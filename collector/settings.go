@@ -1,7 +1,6 @@
 package collector
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/observiq/observiq-collector/internal/version"
@@ -12,13 +11,9 @@ import (
 
 const buildDescription = "observIQ's opentelemetry-collector distribution"
 
-// NewSettings returns new settings for the collector.
-func NewSettings(configPath string, loggingOpts []zap.Option) (service.CollectorSettings, error) {
-	factories, err := DefaultFactories()
-	if err != nil {
-		return service.CollectorSettings{}, fmt.Errorf("failed to build factories: %w", err)
-	}
-
+// NewSettings returns new settings for the collector with default values.
+func NewSettings(configPath string, loggingOpts []zap.Option) service.CollectorSettings {
+	factories, _ := DefaultFactories()
 	buildInfo := component.BuildInfo{
 		Command:     os.Args[0],
 		Description: buildDescription,
@@ -33,5 +28,5 @@ func NewSettings(configPath string, loggingOpts []zap.Option) (service.Collector
 		LoggingOptions:          loggingOpts,
 		ParserProvider:          provider,
 		DisableGracefulShutdown: true,
-	}, nil
+	}
 }

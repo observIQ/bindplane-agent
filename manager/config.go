@@ -29,8 +29,8 @@ type Config struct {
 	TemplateID        string        `mapstructure:"template_id"`
 }
 
-// ConfigFromFile creates a config from the supplied file
-func ConfigFromFile(filePath string) (*Config, error) {
+// ReadConfig reads a config from the supplied file
+func ReadConfig(filePath string) (*Config, error) {
 	viper.SetConfigType("yaml")
 	viper.SetDefault("endpoint", endpoint)
 	viper.SetDefault("status_interval", statusInterval)

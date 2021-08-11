@@ -1,11 +1,39 @@
 package task
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/observiq/observiq-collector/manager/message"
 	"github.com/stretchr/testify/require"
 )
+
+func TestTaskSuccess(t *testing.T) {
+	task := Task{
+		Type: "unknown",
+		ID:   "test-id",
+	}
+
+	response := task.Success()
+	require.Equal(t, task.Type, response.Type)
+	require.Equal(t, task.ID, response.ID)
+	require.Equal(t, Success, response.Status)
+}
+
+func TestTaskFailure(t *testing.T) {
+	task := Task{
+		Type: "unknown",
+		ID:   "test-id",
+	}
+	err := errors.New("unknown failure")
+
+	response := task.Failure("task failed", err)
+	require.Equal(t, task.Type, response.Type)
+	require.Equal(t, task.ID, response.ID)
+	require.Equal(t, Failure, response.Status)
+	require.Equal(t, "task failed", response.Message)
+	require.Equal(t, err.Error(), response.Details["Error"])
+}
 
 func TestResponseToMessage(t *testing.T) {
 	response := &Response{}

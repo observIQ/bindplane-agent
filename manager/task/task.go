@@ -1,7 +1,6 @@
 package task
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/mitchellh/mapstructure"
@@ -12,22 +11,47 @@ import (
 type Status int
 
 const (
-	RUNNING   Status = 1
-	SUCCESS   Status = 2
-	FAILURE   Status = 3
-	EXCEPTION Status = 4
+	Running   Status = 1
+	Success   Status = 2
+	Failure   Status = 3
+	Exception Status = 4
 )
+
+// Type is the type of a task.
+type Type string
 
 // Task is a request to execute a specific task.
 type Task struct {
-	Type       string                 `json:"type" mapstructure:"type"`
+	Type       Type                   `json:"type" mapstructure:"type"`
 	ID         string                 `json:"id" mapstructure:"id"`
 	Parameters map[string]interface{} `json:"parameters" mapstructure:"parameters"`
 }
 
+// Success returns a new success response from the given task.
+func (t *Task) Success() Response {
+	return Response{
+		ID:     t.ID,
+		Type:   t.Type,
+		Status: Success,
+	}
+}
+
+// Failure returns a new failure response from the given task.
+func (t *Task) Failure(message string, err error) Response {
+	return Response{
+		ID:      t.ID,
+		Type:    t.Type,
+		Status:  Failure,
+		Message: message,
+		Details: map[string]interface{}{
+			"Error": err.Error(),
+		},
+	}
+}
+
 // Response is the response to an executed task.
 type Response struct {
-	Type    string                 `json:"type" mapstructure:"type"`
+	Type    Type                   `json:"type" mapstructure:"type"`
 	ID      string                 `json:"id" mapstructure:"id"`
 	Status  Status                 `json:"status" mapstructure:"status"`
 	Message string                 `json:"message" mapstructure:"message"`
@@ -53,9 +77,4 @@ func FromMessage(msg *message.Message) (*Task, error) {
 	}
 
 	return &task, nil
-}
-
-// Execute will execute the supplied task
-func Execute(task *Task) (*Response, error) {
-	return nil, errors.New("unimplemented task type")
 }

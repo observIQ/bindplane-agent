@@ -19,23 +19,21 @@ func main() {
 	pflag.Parse()
 
 	loggingOpts := getLoggingOpts()
-	logger := getLogger()
-
-	settings, err := collector.NewSettings(*collectorConfigPath, loggingOpts)
+	logger, err := newLogger(loggingOpts)
 	if err != nil {
-		log.Fatalf("Failed to get collector settings: %s", err)
+		log.Fatalf("Failed to create logger: %s", err)
 	}
-	collector := collector.New(settings)
 
-	config, err := manager.ConfigFromFile(*managerConfigPath)
+	collector := collector.New(*collectorConfigPath, loggingOpts)
+	managerConfig, err := manager.ReadConfig(*managerConfigPath)
 	if err != nil {
-		log.Fatalf("Failed to get manager config: %s", err)
+		log.Fatalf("Failed to read manager config: %s", err)
 	}
-	manager := manager.New(config, collector, logger)
 
 	// TODO: Look into handling interrupt signals with context
+	manager := manager.New(managerConfig, collector, logger)
 	if err := manager.Run(context.Background()); err != nil {
-		log.Fatalf("Manager failed: %s", err)
+		log.Fatalf("Manager failed to run: %s", err)
 	}
 }
 
@@ -52,10 +50,9 @@ func getLoggingOpts() []zap.Option {
 	return loggingOpts
 }
 
-// TODO: Determine our logging strategy
-func getLogger() *zap.Logger {
+// newLogger creates a new logger for the manager.
+func newLogger(opts []zap.Option) (*zap.Logger, error) {
 	zapConfig := zap.NewProductionConfig()
 	zapConfig.OutputPaths = []string{"stdout"}
-	zapLogger, _ := zapConfig.Build()
-	return zapLogger
+	return zapConfig.Build(opts...)
 }

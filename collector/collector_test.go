@@ -13,11 +13,8 @@ import (
 )
 
 func TestCollectorRunValid(t *testing.T) {
-	settings, err := NewSettings("./test/valid.yaml", nil)
-	require.NoError(t, err)
-
-	collector := New(settings)
-	err = collector.Run()
+	collector := New("./test/valid.yaml", nil)
+	err := collector.Run()
 	require.NoError(t, err)
 
 	status := collector.Status()
@@ -30,14 +27,11 @@ func TestCollectorRunValid(t *testing.T) {
 }
 
 func TestCollectorRunMultiple(t *testing.T) {
-	settings, err := NewSettings("./test/valid.yaml", nil)
-	require.NoError(t, err)
-
-	collector := New(settings)
+	collector := New("./test/valid.yaml", nil)
 	for i := 1; i < 5; i++ {
 		attempt := fmt.Sprintf("Attempt %d", i)
 		t.Run(attempt, func(t *testing.T) {
-			err = collector.Run()
+			err := collector.Run()
 			require.NoError(t, err)
 
 			status := collector.Status()
@@ -52,11 +46,8 @@ func TestCollectorRunMultiple(t *testing.T) {
 }
 
 func TestCollectorRunInvalidConfig(t *testing.T) {
-	settings, err := NewSettings("./test/invalid.yaml", nil)
-	require.NoError(t, err)
-
-	collector := New(settings)
-	err = collector.Run()
+	collector := New("./test/invalid.yaml", nil)
+	err := collector.Run()
 	require.Error(t, err)
 
 	status := collector.Status()
@@ -66,17 +57,17 @@ func TestCollectorRunInvalidConfig(t *testing.T) {
 }
 
 func TestCollectorRunInvalidFactory(t *testing.T) {
-	settings, err := NewSettings("./test/valid.yaml", nil)
-	require.NoError(t, err)
+	extensions := defaultExtensions
+	defer func() { defaultExtensions = extensions }()
 
-	settings.Factories.Extensions["invalid"] = extensionhelper.NewFactory(
+	defaultExtensions = append(extensions, extensionhelper.NewFactory(
 		"invalid",
 		defaultInvalidConfig,
 		createInvalidExtension,
-	)
+	))
 
-	collector := New(settings)
-	err = collector.Run()
+	collector := New("./test/valid.yaml", nil)
+	err := collector.Run()
 	require.Error(t, err)
 
 	status := collector.Status()
@@ -85,11 +76,8 @@ func TestCollectorRunInvalidFactory(t *testing.T) {
 }
 
 func TestCollectorRunTwice(t *testing.T) {
-	settings, err := NewSettings("./test/valid.yaml", nil)
-	require.NoError(t, err)
-
-	collector := New(settings)
-	err = collector.Run()
+	collector := New("./test/valid.yaml", nil)
+	err := collector.Run()
 	require.NoError(t, err)
 	defer collector.Stop()
 
@@ -99,11 +87,8 @@ func TestCollectorRunTwice(t *testing.T) {
 }
 
 func TestCollectorStopTwice(t *testing.T) {
-	settings, err := NewSettings("./test/valid.yaml", nil)
-	require.NoError(t, err)
-
-	collector := New(settings)
-	err = collector.Run()
+	collector := New("./test/valid.yaml", nil)
+	err := collector.Run()
 	require.NoError(t, err)
 	collector.Stop()
 
@@ -112,6 +97,12 @@ func TestCollectorStopTwice(t *testing.T) {
 
 	collector.Stop()
 	require.False(t, status.Running)
+}
+
+func TestCollectorConfigPath(t *testing.T) {
+	configPath := "./test/valid.yaml"
+	collector := New(configPath, nil)
+	require.Equal(t, configPath, collector.ConfigPath())
 }
 
 // InvalidConfig is a config without a mapstructure tag.
