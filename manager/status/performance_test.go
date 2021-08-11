@@ -13,8 +13,7 @@ func TestMetricCollection(t *testing.T) {
 		Status:        Status(ACTIVE),
 		Metrics:       map[string]*Metric{},
 	}
-	err := sr.AddPerformanceMetrics()
-	require.NoError(t, err)
+	sr.AddPerformanceMetrics(nil)
 	if value, hasValue := sr.Metrics[string(CPU_PERCENT)]; hasValue {
 		v, isFloat := value.Value.(float64)
 		require.True(t, isFloat)

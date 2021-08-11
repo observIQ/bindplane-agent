@@ -11,13 +11,13 @@ import (
 
 func TestGet(t *testing.T) {
 	status := collector.Status{Err: nil, Running: true}
-	report := Get(status)
+	report := Get("41794e4d-9564-4d98-9096-698302577c98", status)
 	require.Equal(t, report.ComponentID, "bpagent")
 }
 
 func TestReportToMessage(t *testing.T) {
 	status := collector.Status{Err: nil}
-	report := Get(status)
+	report := Get("41794e4d-9564-4d98-9096-698302577c98", status)
 
 	msg := report.ToMessage()
 	require.Equal(t, msg.Type, message.StatusReport)
@@ -25,7 +25,7 @@ func TestReportToMessage(t *testing.T) {
 
 func TestErrorToMessage(t *testing.T) {
 	status := collector.Status{Err: errors.New("Error for testing")}
-	report := Get(status)
+	report := Get("41794e4d-9564-4d98-9096-698302577c98", status)
 
 	msg := report.ToMessage()
 	require.Equal(t, msg.Content["status"], ERROR)
