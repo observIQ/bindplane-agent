@@ -25,12 +25,12 @@ type Manager struct {
 }
 
 // New returns a new manager with the supplied parameters.
-func New(config *Config, collector *collector.Collector, logger *zap.Logger) (*Manager, error) {
+func New(config *Config, collector *collector.Collector, logger *zap.Logger) *Manager {
 	return &Manager{
 		config:    config,
 		collector: collector,
 		logger:    logger,
-	}, nil
+	}
 }
 
 // Start will start the observiq extension.

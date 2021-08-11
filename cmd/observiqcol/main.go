@@ -30,12 +30,8 @@ func main() {
 		log.Fatalf("Failed to read manager config: %s", err)
 	}
 
-	manager, err := manager.New(managerConfig, collector, logger)
-	if err != nil {
-		log.Fatalf("Failed to create manager: %s", err)
-	}
-
 	// TODO: Look into handling interrupt signals with context
+	manager := manager.New(managerConfig, collector, logger)
 	if err := manager.Run(context.Background()); err != nil {
 		log.Fatalf("Manager failed to run: %s", err)
 	}
