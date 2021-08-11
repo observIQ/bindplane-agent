@@ -7,13 +7,13 @@ import (
 )
 
 func TestMetricCollection(t *testing.T) {
-	sr := Report{
+	sr := &Report{
 		ComponentType: "observiq-collector",
 		ComponentID:   "id",
 		Status:        Status(ACTIVE),
 		Metrics:       map[string]*Metric{},
 	}
-	err := sr.addPerformanceMetrics()
+	err := sr.AddPerformanceMetrics()
 	require.NoError(t, err)
 	if value, hasValue := sr.Metrics[string(CPU_PERCENT)]; hasValue {
 		v, isFloat := value.Value.(float64)

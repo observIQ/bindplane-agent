@@ -8,14 +8,12 @@ import (
 )
 
 func TestGet(t *testing.T) {
-	report, err := Get()
-	require.NoError(t, err)
+	report := Get()
 	require.Equal(t, report.ComponentID, "bpagent")
 }
 
 func TestReportToMessage(t *testing.T) {
-	report, err := Get()
-	require.NoError(t, err)
+	report := Get()
 
 	msg := report.ToMessage()
 	require.Equal(t, msg.Type, message.StatusReport)

@@ -2,7 +2,6 @@ package status
 
 import (
 	"fmt"
-	"sync"
 
 	"github.com/observiq/observiq-collector/manager/message"
 )
@@ -27,34 +26,57 @@ type Report struct {
 	ComponentType string             `json:"componentType" mapstructure:"componentType"`
 	ComponentID   string             `json:"componentID" mapstructure:"componentID"`
 	Status        Status             `json:"status" mapstructure:"status"`
-	Metrics       map[string]*Metric `json:"metrics"`
-	sync.Mutex
+	Metrics       map[string]*Metric `json:"metrics" mapstructure:"metrics"`
 }
 
-// ToMessage converts a report into a message.
-func (r *Report) ToMessage() *message.Message {
-	msg, _ := message.New(message.StatusReport, r)
-	return msg
+// ErrorReport is a Report with an additional ErrorContext
+type ErrorReport struct {
+	Context ErrorContext `json:"context" mapstrcuture:"context"`
+	*Report
 }
 
-// Get returns the status of the collector.
-func Get() (*Report, error) {
-	report := Report{
+// ErrorContext is an object that gives more user friendly context
+type ErrorContext struct {
+	Class          string      `json:"class,omitempty" mapstructure:"class,omitempty"`
+	UserMessage    string      `json:"userMessage,omitempty" mapstructure:"user_message,omitempty"`
+	Recommendation string      `json:"recommendation,omitempty" mapstructure:"recommendation,omitempty"`
+	Context        interface{} `json:"context,omitempty" mapstructure:"context,omitempty"`
+}
+
+func Get() *Report {
+	return &Report{
 		ComponentType: "bpagent",
 		ComponentID:   "bpagent",
 		Status:        ACTIVE,
 		Metrics:       make(map[string]*Metric),
 	}
-	err := report.addPerformanceMetrics()
-	if err != nil {
-		return nil, err
+}
+
+func (r *Report) ToMessage() *message.Message {
+	msg, _ := message.New(message.StatusReport, r)
+	return msg
+}
+
+func Error(err error) *ErrorReport {
+	report := &ErrorReport{
+		// TODO: classify errors so that we can better present human information
+		Context: ErrorContext{
+			Class:          "unknown",
+			UserMessage:    "Something went wrong with the agent",
+			Recommendation: "We recommend that you contact support",
+			Context:        make(map[string]interface{}),
+		},
 	}
-	return &report, nil
+	report.ComponentType = "bpagent"
+	report.ComponentID = "bpagent"
+	report.Status = ERROR
+	return report
 }
 
 type metricGatherer = func(sr *Report) error
 
-func (sr *Report) addPerformanceMetrics() error {
+// AddPerformanceMetrics will go through and attach
+func (sr *Report) AddPerformanceMetrics() error {
 	for _, metricGatherer := range []metricGatherer{AddCPUMetrics, AddMemoryMetrics, AddNetworkMetrics} {
 		err := metricGatherer(sr)
 		if err != nil {
@@ -65,7 +87,5 @@ func (sr *Report) addPerformanceMetrics() error {
 }
 
 func (sr *Report) withMetric(m Metric) {
-	sr.Lock()
-	defer sr.Unlock()
 	sr.Metrics[string(m.Type)] = &m
 }

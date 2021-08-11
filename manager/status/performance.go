@@ -9,7 +9,7 @@ import (
 	"github.com/shirou/gopsutil/net"
 )
 
-// Metric key is the status of the collector.
+// MetricKey is the status of the collector.
 type MetricKey string
 
 // list of metrics being collected/reported to observiq
