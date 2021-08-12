@@ -4,10 +4,12 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strconv"
 )
 
 const fileLogEnableEnvVar = "OIQ_COLLECTOR_FILE_LOG"
 const collectorHomePathEnvVar = "OIQ_COLLECTOR_HOME"
+const launcherPPIDEnvVar = "COL_PPID"
 
 /*
 	Check if logging to file is enabled (env variable is set and non-zero).
@@ -36,4 +38,19 @@ func GetLoggingPath() (string, bool) {
 	}
 
 	return fp, true
+}
+
+// GetLauncherPPID returns the launcher ppid contained in the `COL_PPID` environment variable.
+func GetLauncherPPID() int {
+	value, ok := os.LookupEnv(launcherPPIDEnvVar)
+	if !ok {
+		return 0
+	}
+
+	ppid, err := strconv.Atoi(value)
+	if err != nil {
+		return 0
+	}
+
+	return ppid
 }

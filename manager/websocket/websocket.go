@@ -39,10 +39,9 @@ func Close(conn *Conn) {
 	}
 }
 
-// PumpInbound will pump inbound traffic from the connection to the pipeline.
-func PumpInbound(ctx context.Context, conn *Conn, pipeline *message.Pipeline) error {
-	defer Close(conn)
-
+// HandleReceive will handle receiving inbound traffic from the connection
+// until the supplied context is cancelled or an error occurs.
+func HandleReceive(ctx context.Context, conn *Conn, in chan *message.Message) error {
 	for {
 		select {
 		case <-ctx.Done():
@@ -57,20 +56,23 @@ func PumpInbound(ctx context.Context, conn *Conn, pipeline *message.Pipeline) er
 				return ErrConnectionClosed
 			}
 
-			pipeline.Inbound() <- message
+			in <- message
 		}
 	}
 }
 
-// PumpOutbound will pump outbound traffic from the pipeline to the connection.
-func PumpOutbound(ctx context.Context, conn *Conn, pipeline *message.Pipeline) error {
-	defer Close(conn)
-
+// HandleSend will handle sending outbound traffic to the connection until
+// the supplied context is cancelled or the outbound channel is closed.
+func HandleSend(ctx context.Context, conn *Conn, out chan *message.Message) error {
 	for {
 		select {
 		case <-ctx.Done():
 			return ctx.Err()
-		case message := <-pipeline.Outbound():
+		case message, ok := <-out:
+			if !ok {
+				return nil
+			}
+
 			if err := write(message, conn); err != nil {
 				return fmt.Errorf("unknown write error: %w", err)
 			}
@@ -78,19 +80,21 @@ func PumpOutbound(ctx context.Context, conn *Conn, pipeline *message.Pipeline) e
 	}
 }
 
-// Pump will handle pumping a connection's traffic.
-func Pump(ctx context.Context, conn *Conn, pipeline *message.Pipeline) error {
-	group, groupCtx := errgroup.WithContext(ctx)
-	group.Go(func() error { return PumpInbound(groupCtx, conn, pipeline) })
-	group.Go(func() error { return PumpOutbound(groupCtx, conn, pipeline) })
-	return group.Wait()
+// HandleClose will handle closing the connection when context is cancelled.
+func HandleClose(ctx context.Context, conn *Conn) error {
+	defer Close(conn)
+	<-ctx.Done()
+	return ctx.Err()
 }
 
-// PumpWithTimeout will pump a connection's traffic until a timeout occurs.
-func PumpWithTimeout(ctx context.Context, conn *websocket.Conn, pipeline *message.Pipeline, timeout time.Duration) error {
-	timedCtx, cancel := context.WithTimeout(ctx, timeout)
-	defer cancel()
-	return Pump(timedCtx, conn, pipeline)
+// HandleTraffic will handle sending and receiving traffic from the supplied connection.
+// If an error occurs or context is cancelled, the connection will be closed.
+func HandleTraffic(ctx context.Context, conn *Conn, in, out chan *message.Message) error {
+	group, groupCtx := errgroup.WithContext(ctx)
+	group.Go(func() error { return HandleReceive(groupCtx, conn, in) })
+	group.Go(func() error { return HandleSend(groupCtx, conn, out) })
+	group.Go(func() error { return HandleClose(groupCtx, conn) })
+	return group.Wait()
 }
 
 // read will read the next message from the supplied connection.
