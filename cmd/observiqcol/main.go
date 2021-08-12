@@ -19,7 +19,7 @@ func main() {
 	var managerConfigPath = pflag.String("manager-config", env.DefaultEnvProvider.DefaultManagerConfigFile(), "the manager config path")
 	var collectorConfigPath = pflag.String("collector-config", "./config.yaml", "the collector config path")
 	var loggingConfigPath = pflag.String("logging-config", env.DefaultEnvProvider.DefaultLoggingConfigFile(), "the logging config path")
-	var skipMigration = pflag.BoolP("no-migrate", "nm", false, "don't try migrating configs from BPAgent on startup")
+	var skipMigration = pflag.Bool("no-migrate", false, "don't try migrating configs from BPAgent on startup")
 	pflag.Parse()
 
 	loggingConfig := getLoggingConfig(*loggingConfigPath)
