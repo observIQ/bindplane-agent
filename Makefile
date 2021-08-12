@@ -40,7 +40,7 @@ GOTIDY=go mod tidy
 .PHONY: agent_manager
 agent_manager:
 	GOOS=$(GOOS) GOARCH=$(GOARCH) $(GOBUILDEXTRAENV) \
-	$(GOBUILD) $(LDFLAGS) -o $(OUTDIR)/agent_manager_$(GOOS)_$(GOARCH)$(EXT) ./cmd/agent_manager
+	$(GOBUILD) $(LDFLAGS) -o $(OUTDIR)/agent_manager_$(GOOS)_$(GOARCH)$(EXT) ./cmd/manager
 
 # Other build targets
 .PHONY: amd64_linux
