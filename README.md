@@ -49,9 +49,6 @@ These components are based in this repository:
 ### Receivers
 * [logsreceiver](./receiver/logsreceiver)
 
-### Extensions
-* [orphandetectorextension](./extension/orphandetectorextension)
-
 ## Development
 
 ### Initial Setup
@@ -60,7 +57,7 @@ Clone this repository, and run `make install-tools`
 
 ### Building
 
-To create a build for your current machine, run `make observiqcol`
+To create a build for your current machine, run `make agent_manager`
 
 To build for a specific architecture, see the [Makefile](./Makefile)
 
