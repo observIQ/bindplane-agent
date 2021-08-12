@@ -88,7 +88,7 @@ test:
 
 .PHONY: test-with-cover
 test-with-cover:
-	$(GOTEST) -vet off -cover cover.out ./...
+	$(GOTEST) -vet off -coverprofile=cover.out ./...
 	$(GOTOOL) cover -html=cover.out -o cover.html
 
 .PHONY: bench

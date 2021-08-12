@@ -10,20 +10,18 @@ import (
 	"github.com/observiq/observiq-collector/internal/logging"
 	"github.com/observiq/observiq-collector/manager"
 	"github.com/spf13/pflag"
-	"go.uber.org/zap"
 )
 
 func main() {
 	// TODO: Revist default values for flags
 	var managerConfigPath = pflag.String("manager-config", "./remote.yaml", "the manager config path")
 	var collectorConfigPath = pflag.String("collector-config", "./config.yaml", "the collector config path")
+	var loggingConfigPath = pflag.String("logging-config", "", "the logging config path")
 	pflag.Parse()
 
-	loggingOpts := getLoggingOpts()
-	logger, err := newLogger(loggingOpts)
-	if err != nil {
-		log.Fatalf("Failed to create logger: %s", err)
-	}
+	loggingConfig := getLoggingConfig(*loggingConfigPath)
+	loggingOpts := logging.GetCollectorLoggingOpts(loggingConfig)
+	logger := logging.GetManagerLogger(loggingConfig)
 
 	collector := collector.New(*collectorConfigPath, loggingOpts)
 	managerConfig, err := manager.ReadConfig(*managerConfigPath)
@@ -45,22 +43,19 @@ func main() {
 	os.Exit(exitCode)
 }
 
-// TODO: Revisit logging to determine appropriate configuration and panic behavior
-func getLoggingOpts() []zap.Option {
-	var loggingOpts []zap.Option
-	if env.IsFileLoggingEnabled() {
-		if fp, ok := env.GetLoggingPath(); ok {
-			loggingOpts = []zap.Option{logging.FileLoggingCoreOption(fp)}
-		} else {
-			panic("Failed to find file path for logs, is OIQ_COLLECTOR_HOME set?")
-		}
+// getLoggingConfig loads the configuration from the file path given.
+//  If the config cannot be loaded, a default config is used instead.
+//  If an empty string is passed as the path (no logging config specified),
+//  then a "nil" config is returned.
+func getLoggingConfig(logConfigPath string) *logging.Config {
+	if logConfigPath == "" {
+		return nil
 	}
-	return loggingOpts
-}
 
-// newLogger creates a new logger for the manager.
-func newLogger(opts []zap.Option) (*zap.Logger, error) {
-	zapConfig := zap.NewProductionConfig()
-	zapConfig.OutputPaths = []string{"stdout"}
-	return zapConfig.Build(opts...)
+	c, err := logging.LoadConfig(logConfigPath)
+	if err != nil {
+		c = logging.DefaultConfig()
+	}
+
+	return c
 }
