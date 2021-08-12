@@ -83,7 +83,9 @@ func migrateRemoteConfig(envProvider env.EnvProvider, bpEnvProvider env.BPEnvPro
 		return err
 	}
 
-	// We do mapstructure, then yaml because the configs are parsed the opposite way (yaml -> mapstructure -> config)
+	// When this config is loaded, viper does something like this: (yaml -> mapstructure -> config)
+	// So here, we do this in reverse: (config -> mapstructure -> yaml)
+	// This ensures consistency between the saved file and loading code (which uses mapstructure tags)
 	configAsMap := make(map[string]interface{})
 	err = mapstructure.Decode(config, &configAsMap)
 	if err != nil {

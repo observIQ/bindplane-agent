@@ -4,10 +4,13 @@ import (
 	"os"
 	"path"
 	"testing"
+	"time"
 
 	"github.com/observiq/observiq-collector/internal/env"
 	"github.com/observiq/observiq-collector/internal/logging"
+	"github.com/observiq/observiq-collector/manager"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/zap"
 )
 
 var testBaseDir = path.Join(".", "tmp")
@@ -114,27 +117,36 @@ func TestMigrateMain(t *testing.T) {
 	logConf, err := logging.LoadConfig(envProvider.loggingConfigPath)
 	require.NoError(t, err)
 
-	// defaultLoggingConf, err := logging.DefaultConfig()
-	// require.NoError(t, err)
+	defaultLoggingConf := logging.DefaultConfig()
+	require.Equal(t, &logging.Config{
+		Collector: logging.LoggerConfig{
+			Level:        zap.InfoLevel,
+			MaxBackups:   5,
+			MaxMegabytes: 1,
+			MaxDays:      7,
+			File:         defaultLoggingConf.Collector.File,
+		},
+		Manager: logging.LoggerConfig{
+			Level:        zap.InfoLevel,
+			MaxBackups:   5,
+			MaxMegabytes: 1,
+			MaxDays:      7,
+			File:         defaultLoggingConf.Manager.File,
+		},
+	}, logConf)
 
-	// require.Equal(t, &logging.Config{
-	// 	Collector: logging.LoggerConfig{
-	// 		Level:        zap.InfoLevel,
-	// 		MaxBackups:   5,
-	// 		MaxMegabytes: 1,
-	// 		MaxDays:      7,
-	// 		File:         defaultLoggingConf.Collector.File,
-	// 	},
-	// 	Manager: logging.LoggerConfig{
-	// 		Level:        zap.InfoLevel,
-	// 		MaxBackups:   5,
-	// 		MaxMegabytes: 1,
-	// 		MaxDays:      7,
-	// 		File:         defaultLoggingConf.Manager.File,
-	// 	},
-	// }, logConf)
+	conf, err := manager.ReadConfig(envProvider.managerConfigPath)
+	require.NoError(t, err)
 
-	require.NotNil(t, logConf)
+	require.Equal(t, &manager.Config{
+		AgentID:           "12414213-1231-9233-b481-63691d1b0c63",
+		SecretKey:         "12414213-b481-4fee-9233-63691d1b0c63",
+		Endpoint:          "wss://connections.app.observiq.com",
+		StatusInterval:    time.Minute,
+		ReconnectInterval: time.Minute * 30,
+		MaxConnectBackoff: time.Minute * 5,
+		BufferSize:        50,
+	}, conf)
 
 	err = tearDownTestDir()
 	require.NoError(t, err)
