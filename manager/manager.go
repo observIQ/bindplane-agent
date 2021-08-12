@@ -139,13 +139,11 @@ func (m *Manager) handleStatus(ctx context.Context, wg *sync.WaitGroup) {
 			logger.Debug("Running status update")
 
 			collectorStatus := m.collector.Status()
-			logger.Info("Collector status", zap.Bool("Running", collectorStatus.Running), zap.Error(collectorStatus.Err))
-
-			report, err := status.Get()
-			if err != nil {
-				logger.Error("Failed to report status", zap.Error(err))
-				continue
+			if collectorStatus.Err != nil {
+				logger.Info("Collector status", zap.Bool("Running", collectorStatus.Running), zap.Error(collectorStatus.Err))
 			}
+			report := status.Get(m.config.AgentID, collectorStatus)
+			report.AddPerformanceMetrics(logger)
 
 			m.out <- report.ToMessage()
 		}

@@ -20,6 +20,7 @@ require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/udplogreceiver v0.31.0
 	github.com/open-telemetry/opentelemetry-log-collection v0.20.0
 	github.com/pierrec/lz4 v2.6.1+incompatible // indirect
+	github.com/shirou/gopsutil v3.21.6+incompatible
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.8.1
 	github.com/stretchr/testify v1.7.0
