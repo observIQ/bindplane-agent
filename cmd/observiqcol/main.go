@@ -50,6 +50,7 @@ func main() {
 	os.Exit(exitCode)
 }
 
+// doMigration performs the migration of configs from BPAgent to the Collector, if needed.
 func doMigration(logger *zap.Logger) {
 	migrationLogger := logger.Named("migration")
 	shouldMigrate, err := migration.ShouldMigrate(env.DefaultBPEnvProvider)
@@ -76,8 +77,8 @@ func getLoggingConfig(logConfigPath string) *logging.Config {
 		return nil
 	}
 
-	c, loadErr := logging.LoadConfig(logConfigPath)
-	if loadErr != nil {
+	c, err := logging.LoadConfig(logConfigPath)
+	if err != nil {
 		c = logging.DefaultConfig()
 	}
 

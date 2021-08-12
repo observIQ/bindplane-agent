@@ -18,11 +18,13 @@ type bpLogConfig struct {
 	MaxDays      *int           `mapstructure:"max_days" yaml:"max_days"`
 }
 
+// BPRemoteConfig returns a manager.Config, parsed from BPAgent's remote.yaml
 func BPRemoteConfig(bpEnvProvider env.BPEnvProvider) (*manager.Config, error) {
 	// bpagents remote.yaml is compatible with manager.Config (manager.Config is a superset of it)
 	return manager.ReadConfig(bpEnvProvider.RemoteConfig())
 }
 
+// LoadBPLogConfig loads BPAgent's logging config into it's struct from disc.
 func LoadBPLogConfig(loggingConfigPath string) (*bpLogConfig, error) {
 	bytes, err := ioutil.ReadFile(loggingConfigPath)
 
@@ -36,6 +38,7 @@ func LoadBPLogConfig(loggingConfigPath string) (*bpLogConfig, error) {
 	return r, err
 }
 
+// BPLogConfigToLogConfig converts the given log config for BPAgent into a collector log config
 func BPLogConfigToLogConfig(c bpLogConfig) (*logging.Config, error) {
 	config := logging.DefaultConfig()
 
@@ -53,7 +56,7 @@ func BPLogConfigToLogConfig(c bpLogConfig) (*logging.Config, error) {
 }
 
 // bpAgentInstalled returns whether a BPAgent install is detected
-//  It accomplishes this by checking if the files needed to migrate exist in certain paths
+//  It accomplishes this by checking if the files needed to migrate exist where they should
 func bpAgentInstalled(bpEnvProvider env.BPEnvProvider) (bool, error) {
 	remoteConfigPath := bpEnvProvider.RemoteConfig()
 	loggingConfigPath := bpEnvProvider.LoggingConfig()

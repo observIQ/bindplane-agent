@@ -1,6 +1,6 @@
 /*
-* The migration package contains code to migrate from bpagent
-* to out opentelemetry collector distro with minimal changes in behaviour
+* The migration package contains code to migrate from BPAgent
+* to our opentelemetry collector distribution with minimal changes in behavior
  */
 package migration
 
@@ -51,7 +51,8 @@ func Migrate(envProvider env.EnvProvider, bpEnvProvider env.BPEnvProvider) error
 	return nil
 }
 
-// migrateLoggingConfig reads and re logging config to collector config
+// migrateLoggingConfig migrates BPAgent's logging config to the collectors logging config
+//  this function will write the new config to the default config location, truncating it if it exists
 func migrateLoggingConfig(envProvider env.EnvProvider, bpEnvProvider env.BPEnvProvider) error {
 	loggingConfigPath := bpEnvProvider.LoggingConfig()
 	bpLogConfig, err := LoadBPLogConfig(loggingConfigPath)
@@ -77,6 +78,8 @@ func migrateLoggingConfig(envProvider env.EnvProvider, bpEnvProvider env.BPEnvPr
 	return nil
 }
 
+// migrateRemoteConfig migrates BPAgent's remote config to the collectors manager config
+//  this function will write the new config to the default config location, truncating it if it exists
 func migrateRemoteConfig(envProvider env.EnvProvider, bpEnvProvider env.BPEnvProvider) error {
 	config, err := BPRemoteConfig(bpEnvProvider)
 	if err != nil {
@@ -119,6 +122,7 @@ func shouldMigrateRemoteConfig(envProvider env.EnvProvider) (bool, error) {
 	return !exists, err
 }
 
+// fileExists checks if the file at the given path exists or not.
 func fileExists(path string) (bool, error) {
 	_, err := os.Stat(path)
 	if errors.Is(err, os.ErrNotExist) {

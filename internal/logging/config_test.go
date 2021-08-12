@@ -10,6 +10,7 @@ import (
 )
 
 func TestLoadConfig(t *testing.T) {
+	defaultConfig := DefaultConfig()
 	testCases := []struct {
 		name   string
 		path   string
@@ -49,7 +50,7 @@ func TestLoadConfig(t *testing.T) {
 		{
 			name:   "empty_config.yaml",
 			path:   path.Join(".", "testdata", "empty_config.yaml"),
-			config: DefaultConfig(),
+			config: defaultConfig,
 		},
 		{
 			name: "partial_config.yaml",
@@ -60,9 +61,9 @@ func TestLoadConfig(t *testing.T) {
 					MaxBackups:   2,
 					MaxMegabytes: 2,
 					MaxDays:      2,
-					File:         DefaultConfig().Collector.File,
+					File:         defaultConfig.Collector.File,
 				},
-				Manager: DefaultConfig().Manager,
+				Manager: defaultConfig.Manager,
 			},
 		},
 		{
