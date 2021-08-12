@@ -13,16 +13,16 @@ import (
 )
 
 type Config struct {
-	Collector LoggerConfig `yaml:"collector"`
-	Manager   LoggerConfig `yaml:"manager"`
+	Collector LoggerConfig `yaml:"collector" mapstructure:"collector"`
+	Manager   LoggerConfig `yaml:"manager" mapstructure:"manager"`
 }
 
 type LoggerConfig struct {
-	Level        zapcore.Level `yaml:"level"`
-	MaxBackups   int           `yaml:"max_backups"`
-	MaxMegabytes int           `yaml:"max_megabytes"`
-	MaxDays      int           `yaml:"max_days"`
-	File         string        `yaml:"file"`
+	Level        zapcore.Level `yaml:"level" mapstructure:"level"`
+	MaxBackups   int           `yaml:"max_backups" mapstructure:"max_backups"`
+	MaxMegabytes int           `yaml:"max_megabytes" mapstructure:"max_megabytes"`
+	MaxDays      int           `yaml:"max_days" mapstructure:"max_days"`
+	File         string        `yaml:"file" mapstructure:"file"`
 }
 
 // DefaultConfig returns the default configuration for logging
@@ -33,14 +33,14 @@ func DefaultConfig() *Config {
 			MaxBackups:   3,
 			MaxMegabytes: 1,
 			MaxDays:      7,
-			File:         path.Join(env.HomeDir(), "log", "collector.log"),
+			File:         path.Join(env.DefaultEnvProvider.LogDir(), "collector.log"),
 		},
 		Manager: LoggerConfig{
 			Level:        zap.InfoLevel,
 			MaxBackups:   3,
 			MaxMegabytes: 1,
 			MaxDays:      7,
-			File:         path.Join(env.HomeDir(), "log", "manager.log"),
+			File:         path.Join(env.DefaultEnvProvider.LogDir(), "manager.log"),
 		},
 	}
 }

@@ -2,7 +2,6 @@ package migration
 
 import (
 	"io/ioutil"
-	"path"
 
 	"github.com/mitchellh/mapstructure"
 	"github.com/observiq/observiq-collector/internal/env"
@@ -19,15 +18,12 @@ type bpLogConfig struct {
 	MaxDays      *int           `mapstructure:"max_days" yaml:"max_days"`
 }
 
-func BPRemoteConfig() (*manager.Config, error) {
+func BPRemoteConfig(bpEnvProvider env.BPEnvProvider) (*manager.Config, error) {
 	// bpagents remote.yaml is compatible with manager.Config (manager.Config is a superset of it)
-	remoteConfigPath := path.Join(env.BPConfigDir(), "remote.yaml")
-	return manager.ReadConfig(remoteConfigPath)
+	return manager.ReadConfig(bpEnvProvider.RemoteConfig())
 }
 
-func LoadBPLogConfig() (*bpLogConfig, error) {
-	loggingConfigPath := path.Join(env.BPConfigDir(), "logging.yaml")
-
+func LoadBPLogConfig(loggingConfigPath string) (*bpLogConfig, error) {
 	bytes, err := ioutil.ReadFile(loggingConfigPath)
 
 	if err != nil {
@@ -41,12 +37,9 @@ func LoadBPLogConfig() (*bpLogConfig, error) {
 }
 
 func BPLogConfigToLogConfig(c bpLogConfig) (*logging.Config, error) {
-	config, err := logging.DefaultConfig()
-	if err != nil {
-		return nil, err
-	}
+	config := logging.DefaultConfig()
 
-	err = mapstructure.Decode(c, &config.Collector)
+	err := mapstructure.Decode(c, &config.Collector)
 	if err != nil {
 		return nil, err
 	}
@@ -61,9 +54,9 @@ func BPLogConfigToLogConfig(c bpLogConfig) (*logging.Config, error) {
 
 // bpAgentInstalled returns whether a BPAgent install is detected
 //  It accomplishes this by checking if the files needed to migrate exist in certain paths
-func bpAgentInstalled() (bool, error) {
-	remoteConfigPath := path.Join(env.BPConfigDir(), "remote.yaml")
-	loggingConfigPath := path.Join(env.BPConfigDir(), "logging.yaml")
+func bpAgentInstalled(bpEnvProvider env.BPEnvProvider) (bool, error) {
+	remoteConfigPath := bpEnvProvider.RemoteConfig()
+	loggingConfigPath := bpEnvProvider.LoggingConfig()
 
 	for _, file := range []string{remoteConfigPath, loggingConfigPath} {
 		exists, err := fileExists(file)

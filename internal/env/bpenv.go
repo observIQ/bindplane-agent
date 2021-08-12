@@ -8,12 +8,22 @@ import (
 
 const bpHomeEnvVar = "BP_AGENT_HOME"
 
-func HasBPHome() bool {
+type BPEnvProvider interface {
+	HasBpHome() bool
+	BPHomeDir() string
+	BPConfigDir() string
+	RemoteConfig() string
+	LoggingConfig() string
+}
+
+type defaultBPEnvProvider struct{}
+
+func (defaultBPEnvProvider) HasBpHome() bool {
 	_, hasEnv := os.LookupEnv(bpHomeEnvVar)
 	return hasEnv
 }
 
-func BPHomeDir() string {
+func (defaultBPEnvProvider) BPHomeDir() string {
 	// This will return BPHome if BPAgent is installed on Windows (environment variable is system-wide)
 	//  This also allows a point to override BP_HOME
 	if home, ok := os.LookupEnv(bpHomeEnvVar); ok {
@@ -31,6 +41,16 @@ func BPHomeDir() string {
 	}
 }
 
-func BPConfigDir() string {
-	return path.Join(BPHomeDir(), "config")
+func (p defaultBPEnvProvider) BPConfigDir() string {
+	return path.Join(p.BPHomeDir(), "config")
 }
+
+func (p defaultBPEnvProvider) RemoteConfig() string {
+	return path.Join(p.BPConfigDir(), "remote.yaml")
+}
+
+func (p defaultBPEnvProvider) LoggingConfig() string {
+	return path.Join(p.BPConfigDir(), "logging.yaml")
+}
+
+var DefaultBPEnvProvider BPEnvProvider = defaultBPEnvProvider{}

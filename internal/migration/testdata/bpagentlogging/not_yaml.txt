@@ -1,0 +1,2 @@
+This is not a yaml file.
+This is an ordinary text file.
