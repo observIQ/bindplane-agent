@@ -2,19 +2,16 @@ package manager
 
 import (
 	"context"
-	"os"
-	"runtime"
+	"sync"
 	"time"
 
 	"github.com/jpillora/backoff"
 	"github.com/observiq/observiq-collector/collector"
-	"github.com/observiq/observiq-collector/internal/version"
 	"github.com/observiq/observiq-collector/manager/message"
 	"github.com/observiq/observiq-collector/manager/status"
 	"github.com/observiq/observiq-collector/manager/task"
 	"github.com/observiq/observiq-collector/manager/websocket"
 	"go.uber.org/zap"
-	"golang.org/x/sync/errgroup"
 )
 
 // Manager is the manager for the observiq control plane.
@@ -22,6 +19,9 @@ type Manager struct {
 	config    *Config
 	collector *collector.Collector
 	logger    *zap.Logger
+	in        chan *message.Message
+	out       chan *message.Message
+	exit      chan int
 }
 
 // New returns a new manager with the supplied parameters.
@@ -30,24 +30,41 @@ func New(config *Config, collector *collector.Collector, logger *zap.Logger) *Ma
 		config:    config,
 		collector: collector,
 		logger:    logger,
+		in:        make(chan *message.Message, config.BufferSize),
+		out:       make(chan *message.Message, config.BufferSize),
+		exit:      make(chan int, 1),
 	}
 }
 
-// Start will start the observiq extension.
-func (m *Manager) Run(ctx context.Context) error {
-	pipeline := message.NewPipeline(m.config.BufferSize)
+// Run will run the manager until the supplied context is cancelled
+// or an exit code is received.
+func (m *Manager) Run(ctx context.Context) (exitCode int) {
+	groupCtx, cancel := context.WithCancel(ctx)
+	wg := &sync.WaitGroup{}
 
-	group, groupCtx := errgroup.WithContext(ctx)
-	group.Go(func() error { return m.handleCollector(groupCtx) })
-	group.Go(func() error { return m.handleConnection(groupCtx, pipeline) })
-	group.Go(func() error { return m.handleStatus(groupCtx, pipeline) })
-	group.Go(func() error { return m.handleTasks(groupCtx, pipeline) })
+	wg.Add(4)
+	go m.handleCollector(groupCtx, wg)
+	go m.handleConnection(groupCtx, wg)
+	go m.handleStatus(groupCtx, wg)
+	go m.handleTasks(groupCtx, wg)
 
-	return group.Wait()
+	select {
+	case <-ctx.Done():
+	case exitCode = <-m.exit:
+	}
+
+	cancel()
+	wg.Wait()
+	m.drainMessages()
+
+	return
 }
 
-// handleCollector will handle running the collector.
-func (m *Manager) handleCollector(ctx context.Context) error {
+// handleCollector will handle starting the collector.
+// When the supplied context is cancelled, the collector handler will stop.
+func (m *Manager) handleCollector(ctx context.Context, wg *sync.WaitGroup) {
+	defer wg.Done()
+
 	logger := m.logger.Named("collector-handler")
 	logger.Info("Starting collector handler")
 	defer logger.Info("Exiting collector handler")
@@ -59,44 +76,54 @@ func (m *Manager) handleCollector(ctx context.Context) error {
 
 	<-ctx.Done()
 	m.collector.Stop()
-	return ctx.Err()
 }
 
-// handleConnection will handle the connection to observiq cloud.
-func (m *Manager) handleConnection(ctx context.Context, pipeline *message.Pipeline) error {
+// handleConnection will handle the connection to the observiq control plane.
+// If an error occurs while connecting, the connection is retried with backoff.
+// This connection is periodically refreshed based on the configured reconnect interval.
+// When the supplied context is cancelled, the connection handler will stop.
+func (m *Manager) handleConnection(ctx context.Context, wg *sync.WaitGroup) {
+	defer wg.Done()
+
 	logger := m.logger.Named("connection-handler")
 	logger.Info("Starting connection handler")
 	defer logger.Info("Exiting connection handler")
 
-	headers := m.headers()
 	backoff := backoff.Backoff{Max: m.config.MaxConnectBackoff}
 
 	for {
 		select {
 		case <-ctx.Done():
-			return ctx.Err()
+			return
 		case <-time.After(backoff.Duration()):
-			conn, err := websocket.Open(ctx, m.config.Endpoint, headers)
+			conn, err := websocket.Open(ctx, m.config.Endpoint, m.config.Headers())
 			if err != nil {
 				logger.Error("Failed to open connection", zap.Error(err), zap.Float64("attempt", backoff.Attempt()))
 				continue
 			}
 
-			logger.Info("Connected to observiq cloud")
+			logger.Info("Connection started")
 			backoff.Reset()
 
-			err = websocket.PumpWithTimeout(ctx, conn, pipeline, m.config.ReconnectInterval)
+			timedCtx, cancel := context.WithTimeout(ctx, m.config.ReconnectInterval)
+			err = websocket.HandleTraffic(timedCtx, conn, m.in, m.out)
+			cancel()
+			logger.Info("Connection stopped")
+
 			switch err {
 			case nil, context.DeadlineExceeded, context.Canceled:
 			default:
-				logger.Error("Unexpected connection error", zap.Error(err))
+				logger.Error("Received connection error", zap.Error(err))
 			}
 		}
 	}
 }
 
-// handleStatus will handle reporting status at the specified interval.
-func (m *Manager) handleStatus(ctx context.Context, pipeline *message.Pipeline) error {
+// handleStatus will handle reporting the agent's status to the outbound channel.
+// When the supplied context is cancelled, the status handler will stop.
+func (m *Manager) handleStatus(ctx context.Context, wg *sync.WaitGroup) {
+	defer wg.Done()
+
 	logger := m.logger.Named("status-handler")
 	logger.Info("Starting status handler")
 	defer logger.Info("Exiting status handler")
@@ -107,7 +134,7 @@ func (m *Manager) handleStatus(ctx context.Context, pipeline *message.Pipeline) 
 	for {
 		select {
 		case <-ctx.Done():
-			return ctx.Err()
+			return
 		case <-ticker.C:
 			logger.Debug("Running status update")
 
@@ -120,13 +147,17 @@ func (m *Manager) handleStatus(ctx context.Context, pipeline *message.Pipeline) 
 				continue
 			}
 
-			pipeline.Outbound() <- report.ToMessage()
+			m.out <- report.ToMessage()
 		}
 	}
 }
 
-// handleTasks will handle executing tasks from the pipeline.
-func (m *Manager) handleTasks(ctx context.Context, pipeline *message.Pipeline) error {
+// handleTasks will handle executing tasks received from the inbound channel
+// and sending a response to the outbound channel. When the supplied context
+// is cancelled, the task handler will stop.
+func (m *Manager) handleTasks(ctx context.Context, wg *sync.WaitGroup) {
+	defer wg.Done()
+
 	logger := m.logger.Named("task-handler")
 	logger.Info("Starting task handler")
 	defer logger.Info("Exiting task handler")
@@ -134,13 +165,13 @@ func (m *Manager) handleTasks(ctx context.Context, pipeline *message.Pipeline) e
 	for {
 		select {
 		case <-ctx.Done():
-			return ctx.Err()
-		case msg := <-pipeline.Inbound():
+			return
+		case msg := <-m.in:
 			logger.Debug("Received message")
 
 			t, err := task.FromMessage(msg)
 			if err != nil {
-				logger.Error("Failed to covert message to task", zap.Error(err))
+				logger.Error("Failed to convert message to task", zap.Error(err))
 				continue
 			}
 
@@ -148,7 +179,7 @@ func (m *Manager) handleTasks(ctx context.Context, pipeline *message.Pipeline) e
 			response := m.executeTask(t)
 
 			logger.Info("Sending task response", zap.Any("response", response))
-			pipeline.Outbound() <- response.ToMessage()
+			m.out <- response.ToMessage()
 		}
 	}
 }
@@ -160,20 +191,38 @@ func (m *Manager) executeTask(t *task.Task) task.Response {
 		return task.ExecuteReconfigure(t, m.collector)
 	case task.Restart:
 		return task.ExecuteRestart(t, m.collector)
+	case task.Shutdown:
+		return task.ExecuteShutdown(t, m.exit)
 	default:
 		return task.ExecuteUnknown(t)
 	}
 }
 
-// headers returns the headers used to connect to observiq cloud.
-func (e *Manager) headers() map[string][]string {
-	hostname, _ := os.Hostname()
-	return map[string][]string{
-		"Secret-Key":       {e.config.SecretKey},
-		"Agent-Id":         {e.config.AgentID},
-		"Hostname":         {hostname},
-		"Version":          {version.Version},
-		"Operating-System": {runtime.GOOS},
-		"Architecture":     {runtime.GOARCH},
+// drainMessages will attempt to drain outbound messages during a shutdown.
+// This operation will timeout after 10 seconds if not completed.
+func (m *Manager) drainMessages() {
+	logger := m.logger.Named("message-drainer")
+	logger.Info("Starting message drainer")
+	defer logger.Info("Exiting message drainer")
+
+	close(m.out)
+	if len(m.out) == 0 {
+		logger.Info("No messages to drain")
+		return
+	}
+
+	timeout := time.Second * 10
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
+
+	conn, err := websocket.Open(ctx, m.config.Endpoint, m.config.Headers())
+	if err != nil {
+		logger.Error("Failed to open connection", zap.Error(err))
+		return
+	}
+	defer websocket.Close(conn)
+
+	if err := websocket.HandleSend(ctx, conn, m.out); err != nil {
+		logger.Error("Received error while draining", zap.Error(err))
 	}
 }

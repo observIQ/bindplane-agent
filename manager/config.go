@@ -3,8 +3,10 @@ package manager
 import (
 	"fmt"
 	"os"
+	"runtime"
 	"time"
 
+	"github.com/observiq/observiq-collector/internal/version"
 	"github.com/spf13/viper"
 )
 
@@ -16,7 +18,7 @@ const (
 	bufferSize        = 50
 )
 
-// Config is the configuration of an observiq extension
+// Config is the configuration of an observiq extension.
 type Config struct {
 	Endpoint          string        `mapstructure:"endpoint"`
 	AgentName         string        `mapstructure:"agent_name"`
@@ -29,7 +31,20 @@ type Config struct {
 	TemplateID        string        `mapstructure:"template_id"`
 }
 
-// ReadConfig reads a config from the supplied file
+// Headers returns the headers used to connect to the control plane.
+func (c *Config) Headers() map[string][]string {
+	hostname, _ := os.Hostname()
+	return map[string][]string{
+		"Secret-Key":       {c.SecretKey},
+		"Agent-Id":         {c.AgentID},
+		"Hostname":         {hostname},
+		"Version":          {version.Version},
+		"Operating-System": {runtime.GOOS},
+		"Architecture":     {runtime.GOARCH},
+	}
+}
+
+// ReadConfig reads a config from the supplied file.
 func ReadConfig(filePath string) (*Config, error) {
 	viper.SetConfigType("yaml")
 	viper.SetDefault("endpoint", endpoint)

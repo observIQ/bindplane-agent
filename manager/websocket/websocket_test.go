@@ -34,7 +34,7 @@ func TestOpenFailure(t *testing.T) {
 	require.Nil(t, conn)
 }
 
-func TestPumpInbound(t *testing.T) {
+func TestHandleReceive(t *testing.T) {
 	server := NewServer(t)
 	server.Start()
 	defer server.Stop()
@@ -47,19 +47,19 @@ func TestPumpInbound(t *testing.T) {
 	defer conn.Close()
 
 	errChan := make(chan error, 1)
-	pipeline := message.NewPipeline(10)
-	go func() { errChan <- PumpInbound(ctx, conn, pipeline) }()
+	in := make(chan *message.Message, 5)
+	go func() { errChan <- HandleReceive(ctx, conn, in) }()
 
 	sentMessage, err := message.New("test", &map[string]interface{}{})
 	require.NoError(t, err)
 
-	server.pipeline.Outbound() <- sentMessage
-	receivedMessage := <-pipeline.Inbound()
+	server.out <- sentMessage
+	receivedMessage := <-in
 	require.Equal(t, sentMessage, receivedMessage)
 	require.Equal(t, 0, len(errChan))
 }
 
-func TestPumpInboundCtx(t *testing.T) {
+func TestHandleReceiveCtx(t *testing.T) {
 	server := NewServer(t)
 	server.Start()
 	defer server.Stop()
@@ -71,13 +71,13 @@ func TestPumpInboundCtx(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
 
-	pipeline := message.NewPipeline(10)
-	err = PumpInbound(ctx, conn, pipeline)
+	in := make(chan *message.Message, 5)
+	err = HandleReceive(ctx, conn, in)
 	require.Error(t, err)
 	require.Contains(t, err.Error(), context.Canceled.Error())
 }
 
-func TestPumpInboundClosed(t *testing.T) {
+func TestHandleReceivedClosedConn(t *testing.T) {
 	server := NewServer(t)
 	server.Start()
 	defer server.Stop()
@@ -90,8 +90,8 @@ func TestPumpInboundClosed(t *testing.T) {
 	defer cancel()
 
 	errChan := make(chan error, 1)
-	pipeline := message.NewPipeline(10)
-	go func() { errChan <- PumpInbound(ctx, conn, pipeline) }()
+	in := make(chan *message.Message, 5)
+	go func() { errChan <- HandleReceive(ctx, conn, in) }()
 	Close(conn)
 
 	err = <-errChan
@@ -99,7 +99,7 @@ func TestPumpInboundClosed(t *testing.T) {
 	require.Contains(t, err.Error(), ErrConnectionClosed.Error())
 }
 
-func TestPumpOutbound(t *testing.T) {
+func TestHandleSend(t *testing.T) {
 	server := NewServer(t)
 	server.Start()
 	defer server.Stop()
@@ -112,19 +112,19 @@ func TestPumpOutbound(t *testing.T) {
 	defer cancel()
 
 	errChan := make(chan error, 1)
-	pipeline := message.NewPipeline(10)
-	go func() { errChan <- PumpOutbound(ctx, conn, pipeline) }()
+	out := make(chan *message.Message, 5)
+	go func() { errChan <- HandleSend(ctx, conn, out) }()
 
 	sentMessage, err := message.New("test", &map[string]interface{}{})
 	require.NoError(t, err)
-	pipeline.Outbound() <- sentMessage
+	out <- sentMessage
 
-	receivedMessage := <-server.pipeline.Inbound()
+	receivedMessage := <-server.in
 	require.Equal(t, sentMessage, receivedMessage)
 	require.Equal(t, 0, len(errChan))
 }
 
-func TestPumpOutboundCtx(t *testing.T) {
+func TestHandleSendCtx(t *testing.T) {
 	server := NewServer(t)
 	server.Start()
 	defer server.Stop()
@@ -136,13 +136,13 @@ func TestPumpOutboundCtx(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
 
-	pipeline := message.NewPipeline(10)
-	err = PumpOutbound(ctx, conn, pipeline)
+	out := make(chan *message.Message, 5)
+	err = HandleSend(ctx, conn, out)
 	require.Error(t, err)
 	require.Contains(t, err.Error(), context.Canceled.Error())
 }
 
-func TestPumpOutboundClosed(t *testing.T) {
+func TestHandleSendClosedConn(t *testing.T) {
 	server := NewServer(t)
 	server.Start()
 	defer server.Stop()
@@ -155,20 +155,39 @@ func TestPumpOutboundClosed(t *testing.T) {
 	defer cancel()
 
 	errChan := make(chan error, 1)
-	pipeline := message.NewPipeline(10)
-	go func() { errChan <- PumpOutbound(ctx, conn, pipeline) }()
+	out := make(chan *message.Message, 5)
+	go func() { errChan <- HandleSend(ctx, conn, out) }()
 	Close(conn)
 
 	sentMessage, err := message.New("test", nil)
 	require.NoError(t, err)
 
-	pipeline.Outbound() <- sentMessage
+	out <- sentMessage
 	err = <-errChan
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "unknown write error")
 }
 
-func TestPump(t *testing.T) {
+func TestHandleSendClosedChan(t *testing.T) {
+	server := NewServer(t)
+	server.Start()
+	defer server.Stop()
+
+	conn, err := Open(context.Background(), server.WebsocketAddress(), nil)
+	require.NoError(t, err)
+	defer conn.Close()
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	out := make(chan *message.Message, 5)
+	close(out)
+
+	err = HandleSend(ctx, conn, out)
+	require.NoError(t, err)
+}
+
+func TestHandleTraffic(t *testing.T) {
 	server := NewServer(t)
 	server.Start()
 	defer server.Stop()
@@ -181,57 +200,25 @@ func TestPump(t *testing.T) {
 	defer cancel()
 
 	errChan := make(chan error, 1)
-	pipeline := message.NewPipeline(10)
-	go func() { errChan <- Pump(ctx, conn, pipeline) }()
+	in := make(chan *message.Message, 5)
+	out := make(chan *message.Message, 5)
+	go func() { errChan <- HandleTraffic(ctx, conn, in, out) }()
 
 	testMessage, err := message.New("test", &map[string]interface{}{})
 	require.NoError(t, err)
 
-	pipeline.Outbound() <- testMessage
-	receivedMessage := <-server.pipeline.Inbound()
+	out <- testMessage
+	receivedMessage := <-server.in
 	require.Equal(t, testMessage, receivedMessage)
 
-	server.pipeline.Outbound() <- testMessage
-	receivedMessage = <-pipeline.Inbound()
+	server.out <- testMessage
+	receivedMessage = <-in
 	require.Equal(t, testMessage, receivedMessage)
 
 	cancel()
 	err = <-errChan
 	require.Error(t, err)
 	require.Contains(t, err.Error(), context.Canceled.Error())
-}
-
-func TestPumpUntilTimeout(t *testing.T) {
-	server := NewServer(t)
-	server.Start()
-	defer server.Stop()
-
-	conn, err := Open(context.Background(), server.WebsocketAddress(), nil)
-	require.NoError(t, err)
-	defer conn.Close()
-
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
-	errChan := make(chan error, 1)
-	pipeline := message.NewPipeline(10)
-	timeout := time.Millisecond * 100
-	go func() { errChan <- PumpWithTimeout(ctx, conn, pipeline, timeout) }()
-
-	testMessage, err := message.New("test", &map[string]interface{}{})
-	require.NoError(t, err)
-
-	pipeline.Outbound() <- testMessage
-	receivedMessage := <-server.pipeline.Inbound()
-	require.Equal(t, testMessage, receivedMessage)
-
-	server.pipeline.Outbound() <- testMessage
-	receivedMessage = <-pipeline.Inbound()
-	require.Equal(t, testMessage, receivedMessage)
-
-	err = <-errChan
-	require.Error(t, err)
-	require.Contains(t, err.Error(), context.DeadlineExceeded.Error())
 }
 
 func TestWriteBadMessage(t *testing.T) {
@@ -260,7 +247,8 @@ type Server struct {
 	address    string
 	port       int
 	httpServer *http.Server
-	pipeline   *message.Pipeline
+	in         chan *message.Message
+	out        chan *message.Message
 }
 
 // HandleRequest converts an http request to a websocket connection and handles incoming traffic.
@@ -271,7 +259,7 @@ func (s *Server) HandleRequest(w http.ResponseWriter, r *http.Request) {
 	}
 	defer conn.Close()
 
-	_ = Pump(context.Background(), conn, s.pipeline)
+	_ = HandleTraffic(context.Background(), conn, s.in, s.out)
 }
 
 // TCPAddress returns the TCP address of the server.
@@ -327,7 +315,8 @@ func NewServer(t *testing.T) *Server {
 		Upgrader: websocket.Upgrader{},
 		address:  "127.0.0.1",
 		port:     port,
-		pipeline: message.NewPipeline(10),
+		in:       make(chan *message.Message, 10),
+		out:      make(chan *message.Message, 10),
 	}
 }
 

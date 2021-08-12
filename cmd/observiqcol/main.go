@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"os"
 
 	"github.com/observiq/observiq-collector/collector"
 	"github.com/observiq/observiq-collector/internal/context"
@@ -39,9 +40,8 @@ func main() {
 	defer cancel()
 
 	manager := manager.New(managerConfig, collector, logger)
-	if err := manager.Run(managerCtx); err != nil {
-		log.Fatalf("Manager exited with error: %s", err)
-	}
+	exitCode := manager.Run(managerCtx)
+	os.Exit(exitCode)
 }
 
 // TODO: Revisit logging to determine appropriate configuration and panic behavior
