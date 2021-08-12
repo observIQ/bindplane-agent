@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"path"
 
 	"github.com/mitchellh/mapstructure"
 	"github.com/observiq/observiq-collector/internal/env"
@@ -54,7 +53,7 @@ func Migrate(envProvider env.EnvProvider, bpEnvProvider env.BPEnvProvider) error
 
 // migrateLoggingConfig reads and re logging config to collector config
 func migrateLoggingConfig(envProvider env.EnvProvider, bpEnvProvider env.BPEnvProvider) error {
-	loggingConfigPath := path.Join(bpEnvProvider.BPConfigDir(), "logging.yaml")
+	loggingConfigPath := bpEnvProvider.LoggingConfig()
 	bpLogConfig, err := LoadBPLogConfig(loggingConfigPath)
 	if err != nil {
 		return err
@@ -96,7 +95,7 @@ func migrateRemoteConfig(envProvider env.EnvProvider, bpEnvProvider env.BPEnvPro
 		return err
 	}
 
-	err = ioutil.WriteFile(envProvider.DefaultRemoteConfigFile(), configBytes, 0666)
+	err = ioutil.WriteFile(envProvider.DefaultManagerConfigFile(), configBytes, 0666)
 	if err != nil {
 		return err
 	}
@@ -114,7 +113,7 @@ func shouldMigrateLoggingConfig(envProvider env.EnvProvider) (bool, error) {
 // shouldMigrateRemoteConfig determines if the logging config should be migrated.
 //  Currently, it will return true if the logging config file does not exist
 func shouldMigrateRemoteConfig(envProvider env.EnvProvider) (bool, error) {
-	exists, err := fileExists(envProvider.DefaultRemoteConfigFile())
+	exists, err := fileExists(envProvider.DefaultManagerConfigFile())
 	return !exists, err
 }
 

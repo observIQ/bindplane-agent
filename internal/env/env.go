@@ -10,35 +10,33 @@ const collectorHomePathEnvVar = "OIQ_COLLECTOR_HOME"
 const launcherPPIDEnvVar = "COL_PPID"
 
 type EnvProvider interface {
-	HomeDir() string
 	LogDir() string
-	ConfigDir() string
 	DefaultLoggingConfigFile() string
-	DefaultRemoteConfigFile() string
+	DefaultManagerConfigFile() string
 }
 
 type defaultEnvProvider struct{}
 
-// HomeDir returns the base directory of the collector.
-func (defaultEnvProvider) HomeDir() string {
+// homeDir returns the base directory of the collector.
+func homeDir() string {
 	return os.Getenv(collectorHomePathEnvVar)
 }
 
-func (p defaultEnvProvider) LogDir() string {
-	return path.Join(p.HomeDir(), "log")
+func configDir() string {
+	// TODO: We might want to change from 'config/current' to just 'config' at some point
+	return path.Join(homeDir(), "config", "current")
 }
 
-func (p defaultEnvProvider) ConfigDir() string {
-	// TODO: We might want to change from 'config/current' to just 'config' at some point
-	return path.Join(p.HomeDir(), "config", "current")
+func (p defaultEnvProvider) LogDir() string {
+	return path.Join(homeDir(), "log")
 }
 
 func (p defaultEnvProvider) DefaultLoggingConfigFile() string {
-	return path.Join(p.ConfigDir(), "collector-logging.yaml")
+	return path.Join(configDir(), "collector-logging.yaml")
 }
 
-func (p defaultEnvProvider) DefaultRemoteConfigFile() string {
-	return path.Join(p.ConfigDir(), "collector-remote.yaml")
+func (p defaultEnvProvider) DefaultManagerConfigFile() string {
+	return path.Join(configDir(), "collector-remote.yaml")
 }
 
 var DefaultEnvProvider EnvProvider = defaultEnvProvider{}

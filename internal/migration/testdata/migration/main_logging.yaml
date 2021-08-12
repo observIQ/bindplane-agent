@@ -1,0 +1,4 @@
+level: INFO
+max_backups: 5
+max_megabytes: 1
+max_days: 7
