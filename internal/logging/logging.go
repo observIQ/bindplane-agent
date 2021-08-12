@@ -32,7 +32,6 @@ func GetManagerLogger(c *Config) *zap.Logger {
 		if err != nil {
 			panic("Failed to create stdout logger")
 		}
-
 	}
 
 	return zapLogger

@@ -67,7 +67,7 @@ func TestLoadConfig(t *testing.T) {
 			},
 		},
 		{
-			name:   "non-existant file",
+			name:   "non-existent file",
 			path:   path.Join(".", "testdata", "does_not_exist.yaml"),
 			errStr: "open testdata/does_not_exist.yaml: no such file or directory",
 		},
