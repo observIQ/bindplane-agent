@@ -1,7 +1,6 @@
 package status
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/shirou/gopsutil/cpu"
@@ -23,7 +22,7 @@ const (
 func AddCPUMetrics(sr *Report) error {
 	percentPerCore, err := cpu.Percent(0, true)
 	if err != nil {
-		return fmt.Errorf("there was an error reading CPU metrics: %s", err.Error())
+		return err
 	}
 	now := time.Now()
 	for core, value := range percentPerCore {
@@ -36,7 +35,7 @@ func AddMemoryMetrics(sr *Report) error {
 	now := time.Now()
 	mStat, err := mem.VirtualMemory()
 	if err != nil {
-		return fmt.Errorf("error getting virtual memory statistics")
+		return err
 	}
 	sr.withMetric(memoryUsed(float64(mStat.Used), now))
 	sr.withMetric(memoryAvailable(float64(mStat.Available), now))
