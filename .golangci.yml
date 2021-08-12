@@ -12,4 +12,3 @@ linters:
     - unparam
     - whitespace
     - ineffassign
-auto-fix: true
