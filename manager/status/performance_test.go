@@ -10,7 +10,7 @@ func TestMetricCollection(t *testing.T) {
 	sr := &Report{
 		ComponentType: "observiq-collector",
 		ComponentID:   "id",
-		Status:        Status(ACTIVE),
+		Status:        ACTIVE,
 		Metrics:       map[string]*Metric{},
 	}
 	sr.AddPerformanceMetrics(nil)
@@ -29,5 +29,4 @@ func TestMetricCollection(t *testing.T) {
 	} else {
 		require.FailNow(t, "Did not attach memory metrics")
 	}
-
 }

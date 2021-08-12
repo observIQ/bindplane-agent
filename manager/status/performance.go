@@ -27,8 +27,8 @@ func AddCPUMetrics(sr *Report) error {
 		return err
 	}
 	now := time.Now()
-	for core, value := range percentPerCore {
-		sr.withMetric(cpuPercent(value, core, now))
+	for _, value := range percentPerCore {
+		sr.withMetric(cpuPercent(value, now))
 	}
 	return nil
 }
@@ -46,7 +46,7 @@ func AddMemoryMetrics(sr *Report) error {
 	return nil
 }
 
-func cpuPercent(percent float64, core int, t time.Time) Metric {
+func cpuPercent(percent float64, t time.Time) Metric {
 	return Metric{
 		Type:      CPU_PERCENT,
 		Value:     percent,
