@@ -17,6 +17,8 @@ const (
 	ERROR    Status = 2
 )
 
+// Metric is an object that reflects a performance metric of the host that
+// the collector is running on
 type Metric struct {
 	Type      MetricKey   `json:"type"`
 	Timestamp int64       `json:"timestamp"`
@@ -39,11 +41,14 @@ type Report struct {
 // 	Recommendation string `json:"recommendation" mapstructure:"recommendation"`
 // }
 
+// ToMessage converts the status report struct to a compatible message that can be sent up the websocket connection
 func (r *Report) ToMessage() *message.Message {
 	msg, _ := message.New(message.StatusReport, r)
 	return msg
 }
 
+// Get creates a status report struct in order to be converted to a message
+// to send up the websocket to reflect current running state of the collector.
 func Get(agentID string, status collector.Status) *Report {
 	report := &Report{
 		ComponentType: "observiq-collector",
@@ -79,7 +84,7 @@ var performanceIndicators = []metricGatherer{
 	},
 }
 
-// AddPerformanceMetrics will go through and attach
+// AddPerformanceMetrics will go through and attach performance metrics to the status report
 func (sr *Report) AddPerformanceMetrics(logger *zap.Logger) {
 	for _, pi := range performanceIndicators {
 		err := pi.collectFunc(sr)

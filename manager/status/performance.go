@@ -7,10 +7,10 @@ import (
 	"github.com/shirou/gopsutil/mem"
 )
 
-// MetricKey is the status of the collector.
+// MetricKey is type of metric that is being reported back up.
 type MetricKey string
 
-// list of metrics being collected/reported to observiq
+// metrics being collected/reported to observiq
 const (
 	CPU_PERCENT      MetricKey = "cpu_percent"
 	MEMORY_USED      MetricKey = "memory_used"
@@ -19,6 +19,8 @@ const (
 	NETWORK_DATA_OUT MetricKey = "network_data_out"
 )
 
+// AddCPUMetrics collects host CPU percent metrics
+// Note: not supported on macos
 func AddCPUMetrics(sr *Report) error {
 	percentPerCore, err := cpu.Percent(0, true)
 	if err != nil {
@@ -31,6 +33,8 @@ func AddCPUMetrics(sr *Report) error {
 	return nil
 }
 
+// AddMemoryMetrics collects host memory metrics and adds them
+// to the status report
 func AddMemoryMetrics(sr *Report) error {
 	now := time.Now()
 	mStat, err := mem.VirtualMemory()
