@@ -21,7 +21,8 @@ var ErrConnectionClosed = errors.New("connection closed")
 
 // Open will open a new websocket connection.
 func Open(ctx context.Context, url string, headers http.Header) (*Conn, error) {
-	conn, _, err := websocket.DefaultDialer.DialContext(ctx, url, headers)
+	conn, res, err := websocket.DefaultDialer.DialContext(ctx, url, headers)
+	defer res.Body.Close()
 	if err != nil {
 		return nil, fmt.Errorf("failed to dial: %w", err)
 	}

@@ -5,7 +5,6 @@ linters:
     - goconst
     - gocritic
     - goimports
-    - maligned
     - misspell
     - nakedret
     - prealloc
@@ -13,3 +12,4 @@ linters:
     - unparam
     - whitespace
     - ineffassign
+auto-fix: true
