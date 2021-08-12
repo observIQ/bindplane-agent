@@ -41,6 +41,7 @@ func main() {
 
 	manager := manager.New(managerConfig, collector, logger)
 	exitCode := manager.Run(managerCtx)
+	// nolint
 	os.Exit(exitCode)
 }
 

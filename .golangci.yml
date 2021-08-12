@@ -1,0 +1,14 @@
+---
+linters:
+  enable:
+    - bodyclose
+    - goconst
+    - gocritic
+    - goimports
+    - misspell
+    - nakedret
+    - prealloc
+    - unconvert
+    - unparam
+    - whitespace
+    - ineffassign

@@ -8,7 +8,7 @@ import (
 
 // Restart is the task type assigned to restarting the collector.
 // Previously, this task was used to restart the entire manager.
-// For the sake of backwards compatability, the key remains the same.
+// For the sake of backwards compatibility, the key remains the same.
 const Restart Type = "restartManager"
 
 // ExecuteRestart executes a restart task.

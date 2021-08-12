@@ -60,7 +60,7 @@ func TestCollectorRunInvalidFactory(t *testing.T) {
 	extensions := defaultExtensions
 	defer func() { defaultExtensions = extensions }()
 
-	defaultExtensions = append(extensions, extensionhelper.NewFactory(
+	defaultExtensions = append(defaultExtensions, extensionhelper.NewFactory(
 		"invalid",
 		defaultInvalidConfig,
 		createInvalidExtension,
