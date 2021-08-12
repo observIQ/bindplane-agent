@@ -10,9 +10,7 @@ import (
 )
 
 func TestLoadConfig(t *testing.T) {
-	defaultConfig, err := DefaultConfig()
-	require.NoError(t, err)
-
+	defaultConfig := DefaultConfig()
 	testCases := []struct {
 		name   string
 		path   string
@@ -42,7 +40,7 @@ func TestLoadConfig(t *testing.T) {
 		{
 			name:   "invalid_log_level.yaml",
 			path:   path.Join(".", "testdata", "invalid_log_level.yaml"),
-			errStr: "1 error(s) decoding:\n\n* error decoding 'collector.level': unrecognized level: \"inof\"",
+			errStr: "unrecognized level: \"inof\"",
 		},
 		{
 			name:   "invalid_collector_mb.yaml",
@@ -76,7 +74,7 @@ func TestLoadConfig(t *testing.T) {
 		{
 			name:   "empty path",
 			path:   "",
-			errStr: "path cannot be empty",
+			errStr: "open : no such file or directory",
 		},
 	}
 
@@ -96,9 +94,6 @@ func TestLoadConfig(t *testing.T) {
 }
 
 func TestValidateConfig(t *testing.T) {
-	defaultConfig, err := DefaultConfig()
-	require.NoError(t, err)
-
 	testCases := []struct {
 		name   string
 		input  *Config
@@ -106,7 +101,7 @@ func TestValidateConfig(t *testing.T) {
 	}{
 		{
 			name:  "Default config is valid",
-			input: defaultConfig,
+			input: DefaultConfig(),
 		},
 		{
 			name: "Config with collector logging max size == 0 is invalid",

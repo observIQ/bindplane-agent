@@ -10,6 +10,8 @@ import (
 	"github.com/observiq/observiq-collector/internal/logging"
 	"github.com/observiq/observiq-collector/manager"
 	"github.com/spf13/pflag"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 func main() {
@@ -20,8 +22,8 @@ func main() {
 	pflag.Parse()
 
 	loggingConfig := getLoggingConfig(*loggingConfigPath)
-	loggingOpts := logging.GetCollectorLoggingOpts(loggingConfig)
-	logger := logging.GetManagerLogger(loggingConfig)
+	loggingOpts := getCollectorLoggingOpts(loggingConfig)
+	logger := getManagerLogger(loggingConfig)
 
 	collector := collector.New(*collectorConfigPath, loggingOpts)
 	managerConfig, err := manager.ReadConfig(*managerConfigPath)
@@ -52,14 +54,45 @@ func getLoggingConfig(logConfigPath string) *logging.Config {
 		return nil
 	}
 
-	c, loadErr := logging.LoadConfig(logConfigPath)
-	if loadErr != nil {
-		var err error
-		c, err = logging.DefaultConfig()
-		if err != nil {
-			log.Fatalf("Failed to load config: %v\nThen failed to load default config: %v", loadErr, err)
-		}
+	c, err := logging.LoadConfig(logConfigPath)
+	if err != nil {
+		// TODO: Should we panic here instead of using defaults?
+		c = logging.DefaultConfig()
 	}
 
 	return c
+}
+
+// getCollectorLoggingOpts gets the logging options passed to the collector
+func getCollectorLoggingOpts(config *logging.Config) []zap.Option {
+	var loggingOpts []zap.Option
+	if config != nil {
+		loggingOpts = append(loggingOpts, zap.WrapCore(func(c zapcore.Core) zapcore.Core {
+			return logging.CreateFileCore(&config.Collector)
+		}))
+	}
+	return loggingOpts
+}
+
+// getManagerLogger creates the logger for the manager.
+//  this may be a file logger, or a console logger, depending of env.FileLoggingEnabled()
+func getManagerLogger(c *logging.Config) *zap.Logger {
+	var zapLogger *zap.Logger
+
+	if c != nil {
+		zapLogger = zap.New(logging.CreateFileCore(&c.Manager))
+	} else {
+		zapConfig := zap.NewProductionConfig()
+		zapConfig.OutputPaths = []string{"stdout"}
+
+		var err error
+		zapLogger, err = zapConfig.Build()
+		if err != nil {
+			// TODO: Evaluate panic-ing here
+			panic("Failed to create stdout logger")
+		}
+
+	}
+
+	return zapLogger
 }
