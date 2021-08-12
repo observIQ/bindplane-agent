@@ -37,27 +37,27 @@ GOFORMAT=goimports
 GOTIDY=go mod tidy
 
 # Default build target; making this should build for the current os/arch
-.PHONY: observiqcol
-observiqcol:
+.PHONY: agent_manager
+agent_manager:
 	GOOS=$(GOOS) GOARCH=$(GOARCH) $(GOBUILDEXTRAENV) \
-	$(GOBUILD) $(LDFLAGS) -o $(OUTDIR)/observiqcol_$(GOOS)_$(GOARCH)$(EXT) ./cmd/observiqcol
+	$(GOBUILD) $(LDFLAGS) -o $(OUTDIR)/agent_manager_$(GOOS)_$(GOARCH)$(EXT) ./cmd/agent_manager
 
 # Other build targets
 .PHONY: amd64_linux
 amd64_linux:
-	GOOS=linux GOARCH=amd64 $(MAKE) observiqcol
+	GOOS=linux GOARCH=amd64 $(MAKE) agent_manager
 
 .PHONY: amd64_darwin
 amd64_darwin:
-	GOOS=darwin GOARCH=amd64 $(MAKE) observiqcol
+	GOOS=darwin GOARCH=amd64 $(MAKE) agent_manager
 
 .PHONY: arm_linux
 arm_linux:
-	GOOS=linux GOARCH=arm $(MAKE) observiqcol
+	GOOS=linux GOARCH=arm $(MAKE) agent_manager
 
 .PHONY: amd64_windows
 amd64_windows:
-	GOOS=windows GOARCH=amd64 $(MAKE) observiqcol
+	GOOS=windows GOARCH=amd64 $(MAKE) agent_manager
 
 .PHONY: build-all
 build-all: amd64_linux amd64_darwin amd64_windows arm_linux
