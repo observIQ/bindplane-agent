@@ -30,7 +30,7 @@ func main() {
 	}
 
 	ctx := context.EmptyContext()
-	if ppid := env.GetLauncherPPID(); ppid != 0 {
+	if ppid := env.GetLauncherID(); ppid != 0 {
 		ctx = context.WithParent(ppid)
 	}
 

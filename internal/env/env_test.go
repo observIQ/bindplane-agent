@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestGetLauncherPPID(t *testing.T) {
+func TestGetLauncherID(t *testing.T) {
 	testCases := []struct {
 		name     string
 		value    string
@@ -31,9 +31,9 @@ func TestGetLauncherPPID(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			err := os.Setenv(launcherPPIDEnvVar, tc.value)
+			err := os.Setenv(launcherIDEnvVar, tc.value)
 			require.NoError(t, err)
-			ppid := GetLauncherPPID()
+			ppid := GetLauncherID()
 			require.Equal(t, tc.expected, ppid)
 		})
 	}
