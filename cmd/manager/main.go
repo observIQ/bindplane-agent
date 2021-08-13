@@ -8,8 +8,10 @@ import (
 	"github.com/observiq/observiq-collector/internal/context"
 	"github.com/observiq/observiq-collector/internal/env"
 	"github.com/observiq/observiq-collector/internal/logging"
+	"github.com/observiq/observiq-collector/internal/version"
 	"github.com/observiq/observiq-collector/manager"
 	"github.com/spf13/pflag"
+	"go.uber.org/zap"
 )
 
 func main() {
@@ -22,6 +24,9 @@ func main() {
 	loggingConfig := getLoggingConfig(*loggingConfigPath)
 	loggingOpts := logging.GetCollectorLoggingOpts(loggingConfig)
 	logger := logging.GetManagerLogger(loggingConfig)
+
+	logger.Info("Starting observIQ Agent", zap.String("version", version.Version),
+		zap.String("git-hash", version.GitHash), zap.String("date-compiled", version.Date))
 
 	collector := collector.New(*collectorConfigPath, loggingOpts)
 	managerConfig, err := manager.ReadConfig(*managerConfigPath)
