@@ -2,6 +2,7 @@ package status
 
 import (
 	"fmt"
+	"runtime"
 
 	"github.com/observiq/observiq-collector/collector"
 	"github.com/observiq/observiq-collector/manager/message"
@@ -71,26 +72,35 @@ func Get(agentID string, status collector.Status) *Report {
 type metricGatherer struct {
 	metricClass string
 	collectFunc func(r *Report) error
+	isSupported func() bool
 }
 
 var performanceIndicators = []metricGatherer{
 	{
 		metricClass: "cpu",
 		collectFunc: AddCPUMetrics,
+		isSupported: func() bool {
+			// cpu metrics are not gatherable on macos
+			return runtime.GOOS != "darwin"
+		},
 	},
 	{
 		metricClass: "memory",
 		collectFunc: AddMemoryMetrics,
+		// supported on all platforms
+		isSupported: func() bool { return true },
 	},
 }
 
 // AddPerformanceMetrics will go through and attach performance metrics to the status report
 func (sr *Report) AddPerformanceMetrics(logger *zap.Logger) {
 	for _, pi := range performanceIndicators {
-		err := pi.collectFunc(sr)
-		if err != nil {
-			logger.Error(fmt.Sprintf("unable to gather performance data for %s", pi.metricClass), zap.Error(err))
-			continue
+		if pi.isSupported() {
+			err := pi.collectFunc(sr)
+			if err != nil {
+				logger.Error(fmt.Sprintf("unable to gather performance data for %s", pi.metricClass), zap.Error(err))
+				continue
+			}
 		}
 	}
 }
