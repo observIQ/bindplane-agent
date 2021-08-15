@@ -86,16 +86,23 @@ func TestCollectorRunTwice(t *testing.T) {
 	require.Contains(t, err.Error(), "service already running")
 }
 
-func TestCollectorStopTwice(t *testing.T) {
+func TestCollectorRestart(t *testing.T) {
 	collector := New("./test/valid.yaml", nil)
 	err := collector.Run()
 	require.NoError(t, err)
-	collector.Stop()
+
+	defer collector.Stop()
+	err = collector.Restart()
+	require.NoError(t, err)
 
 	status := collector.Status()
-	require.False(t, status.Running)
+	require.True(t, status.Running)
+}
 
+func TestCollectorPrematureStop(t *testing.T) {
+	collector := New("./test/valid.yaml", nil)
 	collector.Stop()
+	status := collector.Status()
 	require.False(t, status.Running)
 }
 
@@ -103,6 +110,12 @@ func TestCollectorConfigPath(t *testing.T) {
 	configPath := "./test/valid.yaml"
 	collector := New(configPath, nil)
 	require.Equal(t, configPath, collector.ConfigPath())
+}
+
+func TestValidateConfig(t *testing.T) {
+	collector := New("./test/valid.yaml", nil)
+	err := collector.ValidateConfig()
+	require.NoError(t, err)
 }
 
 // InvalidConfig is a config without a mapstructure tag.

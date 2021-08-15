@@ -1,3 +1,2 @@
 # Changelog
-## 2.0.0
-Test release
+## 0.0.0

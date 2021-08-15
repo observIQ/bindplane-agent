@@ -17,9 +17,8 @@ func NewSettings(configPath string, loggingOpts []zap.Option) service.CollectorS
 	buildInfo := component.BuildInfo{
 		Command:     os.Args[0],
 		Description: buildDescription,
-		Version:     version.Version,
+		Version:     version.Version(),
 	}
-
 	provider := NewFileProvider(configPath)
 
 	return service.CollectorSettings{
