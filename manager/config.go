@@ -68,5 +68,11 @@ func ReadConfig(filePath string) (*Config, error) {
 		return nil, fmt.Errorf("failed to unmarshal: %w", err)
 	}
 
+	// ensure that agent has a non-empty name. If not provided, we default to hostname
+	if config.AgentName == "" {
+		hostname, _ := os.Hostname()
+		config.AgentName = hostname
+	}
+
 	return config, nil
 }

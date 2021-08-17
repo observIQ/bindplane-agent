@@ -5,6 +5,7 @@ go 1.16
 require (
 	github.com/aws/aws-sdk-go v1.40.8 // indirect
 	github.com/fatih/color v1.12.0 // indirect
+	github.com/google/uuid v1.3.0
 	github.com/gorilla/mux v1.8.0
 	github.com/gorilla/websocket v1.4.2
 	github.com/jpillora/backoff v1.0.0
@@ -21,6 +22,7 @@ require (
 	github.com/open-telemetry/opentelemetry-log-collection v0.20.0
 	github.com/pierrec/lz4 v2.6.1+incompatible // indirect
 	github.com/shirou/gopsutil v3.21.7+incompatible
+	github.com/shirou/gopsutil/v3 v3.21.7
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.8.1
 	github.com/stretchr/testify v1.7.0
@@ -29,7 +31,6 @@ require (
 	go.uber.org/multierr v1.7.0
 	go.uber.org/zap v1.19.0
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
-	golang.org/x/sys v0.0.0-20210630005230-0f9fa26af87c // indirect
 	golang.org/x/tools v0.1.4 // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0
 	gopkg.in/yaml.v2 v2.4.0

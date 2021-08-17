@@ -8,6 +8,7 @@ import (
 	"github.com/jpillora/backoff"
 	"github.com/observiq/observiq-collector/collector"
 	"github.com/observiq/observiq-collector/manager/message"
+	"github.com/observiq/observiq-collector/manager/startup"
 	"github.com/observiq/observiq-collector/manager/status"
 	"github.com/observiq/observiq-collector/manager/task"
 	"github.com/observiq/observiq-collector/manager/websocket"
@@ -73,6 +74,9 @@ func (m *Manager) handleCollector(ctx context.Context, wg *sync.WaitGroup) {
 	if err != nil {
 		logger.Error("failed to start collector: %s", zap.Error(err))
 	}
+
+	startupMsg := startup.New(m.config.TemplateID, m.config.AgentName, m.collector).ToMessage()
+	m.out <- startupMsg
 
 	<-ctx.Done()
 	m.collector.Stop()
