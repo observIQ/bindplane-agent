@@ -11,7 +11,7 @@ import (
 // Startup is an object that is reported when the collector gets started up
 type Startup struct {
 	// note that that this needs to be reported back up as bpHome
-	// can probably change server side
+	// can probably change server side at some point to support both
 	OIQHome        string         `json:"bpHome" mapstructure:"bpHome"`
 	TemplateID     string         `json:"configurationID" mapstructure:"configuration_id"`
 	MacAddress     string         `json:"macAddress" mapstructure:"macAddress"`

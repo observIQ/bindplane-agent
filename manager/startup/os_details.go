@@ -8,6 +8,7 @@ import (
 	"github.com/shirou/gopsutil/v3/host"
 )
 
+// GetDetails returns back the user friendly os name for a given os
 func GetDetails() string {
 	info, err := host.Info()
 	if err != nil {
