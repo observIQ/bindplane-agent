@@ -75,8 +75,7 @@ func (m *Manager) handleCollector(ctx context.Context, wg *sync.WaitGroup) {
 		logger.Error("failed to start collector: %s", zap.Error(err))
 	}
 
-	startupMsg := startup.New(m.config.TemplateID, m.config.AgentName, m.collector).ToMessage()
-	m.out <- startupMsg
+	m.sendStartupMessage()
 
 	<-ctx.Done()
 	m.collector.Stop()
@@ -182,6 +181,11 @@ func (m *Manager) handleTasks(ctx context.Context, wg *sync.WaitGroup) {
 
 			logger.Info("Sending task response", zap.Any("response", response))
 			m.out <- response.ToMessage()
+
+			if response.ChangedStartup() {
+				logger.Info("Completed resolving a task that restarts the collector, resending details.")
+				m.sendStartupMessage()
+			}
 		}
 	}
 }
@@ -198,6 +202,12 @@ func (m *Manager) executeTask(t *task.Task) task.Response {
 	default:
 		return task.ExecuteUnknown(t)
 	}
+}
+
+func (m *Manager) sendStartupMessage() {
+	startupMsg := startup.New(m.config.TemplateID, m.config.AgentName, m.collector).ToMessage()
+	m.logger.Debug("Sending startup message", zap.Any("content", startupMsg.Content))
+	m.out <- startupMsg
 }
 
 // drainMessages will attempt to drain outbound messages during a shutdown.

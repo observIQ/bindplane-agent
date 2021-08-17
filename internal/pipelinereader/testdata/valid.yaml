@@ -1,0 +1,13 @@
+exporters:
+  logging: null
+receivers:
+  stanza:
+    pipeline:
+        - type: noop
+service:
+  pipelines:
+    logs:
+        exporters:
+            - logging
+        receivers:
+            - stanza

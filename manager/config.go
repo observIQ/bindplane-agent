@@ -33,11 +33,10 @@ type Config struct {
 
 // Headers returns the headers used to connect to the control plane.
 func (c *Config) Headers() map[string][]string {
-	hostname, _ := os.Hostname()
 	return map[string][]string{
 		"Secret-Key":       {c.SecretKey},
 		"Agent-Id":         {c.AgentID},
-		"Hostname":         {hostname},
+		"Hostname":         {c.AgentName},
 		"Version":          {version.Version},
 		"Operating-System": {runtime.GOOS},
 		"Architecture":     {runtime.GOARCH},
@@ -46,12 +45,14 @@ func (c *Config) Headers() map[string][]string {
 
 // ReadConfig reads a config from the supplied file.
 func ReadConfig(filePath string) (*Config, error) {
+	hostname, _ := os.Hostname()
 	viper.SetConfigType("yaml")
 	viper.SetDefault("endpoint", endpoint)
 	viper.SetDefault("status_interval", statusInterval)
 	viper.SetDefault("reconnect_interval", reconnectInterval)
 	viper.SetDefault("max_connect_backoff", maxConnectBackoff)
 	viper.SetDefault("buffer_size", bufferSize)
+	viper.SetDefault("agent_name", hostname)
 
 	file, err := os.Open(filePath)
 	if err != nil {
@@ -66,12 +67,6 @@ func ReadConfig(filePath string) (*Config, error) {
 	config := &Config{}
 	if err := viper.Unmarshal(config); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal: %w", err)
-	}
-
-	// ensure that agent has a non-empty name. If not provided, we default to hostname
-	if config.AgentName == "" {
-		hostname, _ := os.Hostname()
-		config.AgentName = hostname
 	}
 
 	return config, nil

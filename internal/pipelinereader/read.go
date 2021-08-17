@@ -4,31 +4,31 @@ import (
 	"os"
 
 	"github.com/observiq/observiq-collector/collector"
+	"github.com/observiq/observiq-collector/receiver/logsreceiver"
 	"gopkg.in/yaml.v2"
 )
 
-func Read(c *collector.Collector) (map[string]interface{}, error) {
+type ConfigMap struct {
+	Receivers map[string]baseStanzaReceiver `mapstructure:"receivers"`
+	Exporters map[string]interface{}        `mapstructure:"exporters"`
+}
+
+type baseStanzaReceiver logsreceiver.Config
+
+// Read reads the stanza portion of the collector config, this is so that the manager
+// has visibility into the collector's config
+func Read(c *collector.Collector) (logsreceiver.OperatorConfigs, error) {
 	configBytes, err := os.ReadFile(c.ConfigPath())
 	if err != nil {
 		return nil, err
 	}
 
-	configMap := make(map[string]interface{})
+	configMap := ConfigMap{}
 	err = yaml.Unmarshal(configBytes, &configMap)
 	if err != nil {
 		return nil, err
 	}
 
-	receivers, ok := configMap["receivers"].(map[string]interface{})
-	if !ok {
-		receivers = make(map[string]interface{})
-		configMap["receivers"] = receivers
-	}
-
-	stanza, ok := receivers["stanza"].(map[string]interface{})
-	if !ok {
-		stanza = make(map[string]interface{})
-		receivers["stanza"] = stanza
-	}
-	return stanza, nil
+	stanza := configMap.Receivers["stanza"]
+	return stanza.Pipeline, nil
 }

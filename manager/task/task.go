@@ -78,3 +78,17 @@ func FromMessage(msg *message.Message) (*Task, error) {
 
 	return &task, nil
 }
+
+var startupChangingTasks = []Type{Reconfigure, Restart}
+
+// ResendStartup determines whether the task response should queue up a new onStartup message
+func (r *Response) ChangedStartup() bool {
+	if isSuccess := r.Status == Success; isSuccess {
+		for _, t := range startupChangingTasks {
+			if t == r.Type {
+				return true
+			}
+		}
+	}
+	return false
+}

@@ -1,0 +1,12 @@
+exporters:
+  logging: null
+receivers:
+  stanza:
+    pipeline: yo this ain't valid
+service:
+  pipelines:
+    logs:
+        exporters:
+            - logging
+        receivers:
+            - stanza
