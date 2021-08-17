@@ -5,7 +5,7 @@ import (
 	"net"
 	"strings"
 
-	"github.com/shirou/gopsutil/host"
+	"github.com/shirou/gopsutil/v3/host"
 )
 
 func GetDetails() string {
