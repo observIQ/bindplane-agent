@@ -1,5 +1,0 @@
-collector:
-  level: info
-  max_backups: 2
-  max_megabytes: 2
-  max_days: 2

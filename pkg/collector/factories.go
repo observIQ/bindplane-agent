@@ -1,7 +1,7 @@
 package collector
 
 import (
-	"github.com/observiq/observiq-collector/receiver/logsreceiver"
+	"github.com/observiq/observiq-collector/pkg/receiver/logsreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/observiqexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/extension/storage/filestorage"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/groupbyattrsprocessor"

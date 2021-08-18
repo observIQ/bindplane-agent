@@ -25,9 +25,9 @@ LINT=$(GOPATH)/bin/golangci-lint
 LINT_TIMEOUT?=5m0s
 MISSPELL=$(GOPATH)/bin/misspell
 
-LDFLAGS=-ldflags "-s -w -X $(VERSION_INFO_IMPORT_PATH).Version=$(VERSION) \
--X $(VERSION_INFO_IMPORT_PATH).GitHash=$(GIT_HASH) \
--X $(VERSION_INFO_IMPORT_PATH).Date=$(DATE)"
+LDFLAGS=-ldflags "-s -w -X $(VERSION_INFO_IMPORT_PATH).version=$(VERSION) \
+-X $(VERSION_INFO_IMPORT_PATH).gitHash=$(GIT_HASH) \
+-X $(VERSION_INFO_IMPORT_PATH).date=$(DATE)"
 GOBUILDEXTRAENV=GO111MODULE=on CGO_ENABLED=0
 GOBUILD=go build
 GOINSTALL=go install
@@ -37,27 +37,27 @@ GOFORMAT=goimports
 GOTIDY=go mod tidy
 
 # Default build target; making this should build for the current os/arch
-.PHONY: agent_manager
-agent_manager:
+.PHONY: collector
+collector:
 	GOOS=$(GOOS) GOARCH=$(GOARCH) $(GOBUILDEXTRAENV) \
-	$(GOBUILD) $(LDFLAGS) -o $(OUTDIR)/agent_manager_$(GOOS)_$(GOARCH)$(EXT) ./cmd/manager
+	$(GOBUILD) $(LDFLAGS) -o $(OUTDIR)/collector_$(GOOS)_$(GOARCH)$(EXT) ./cmd/collector
 
 # Other build targets
 .PHONY: amd64_linux
 amd64_linux:
-	GOOS=linux GOARCH=amd64 $(MAKE) agent_manager
+	GOOS=linux GOARCH=amd64 $(MAKE) collector
 
 .PHONY: amd64_darwin
 amd64_darwin:
-	GOOS=darwin GOARCH=amd64 $(MAKE) agent_manager
+	GOOS=darwin GOARCH=amd64 $(MAKE) collector
 
 .PHONY: arm_linux
 arm_linux:
-	GOOS=linux GOARCH=arm $(MAKE) agent_manager
+	GOOS=linux GOARCH=arm $(MAKE) collector
 
 .PHONY: amd64_windows
 amd64_windows:
-	GOOS=windows GOARCH=amd64 $(MAKE) agent_manager
+	GOOS=windows GOARCH=amd64 $(MAKE) collector
 
 .PHONY: build-all
 build-all: amd64_linux amd64_darwin amd64_windows arm_linux

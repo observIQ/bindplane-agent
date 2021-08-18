@@ -5,11 +5,7 @@ go 1.16
 require (
 	github.com/aws/aws-sdk-go v1.40.8 // indirect
 	github.com/fatih/color v1.12.0 // indirect
-	github.com/gorilla/mux v1.8.0
-	github.com/gorilla/websocket v1.4.2
-	github.com/jpillora/backoff v1.0.0
 	github.com/klauspost/compress v1.13.1 // indirect
-	github.com/mitchellh/mapstructure v1.4.1
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/observiqexporter v0.31.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/extension/storage v0.31.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/processor/groupbyattrsprocessor v0.31.0
@@ -20,20 +16,16 @@ require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/udplogreceiver v0.31.0
 	github.com/open-telemetry/opentelemetry-log-collection v0.20.0
 	github.com/pierrec/lz4 v2.6.1+incompatible // indirect
-	github.com/shirou/gopsutil v3.21.7+incompatible
+	github.com/shirou/gopsutil v3.21.7+incompatible // indirect
 	github.com/spf13/pflag v1.0.5
-	github.com/spf13/viper v1.8.1
 	github.com/stretchr/testify v1.7.0
 	go.opentelemetry.io/collector v0.31.0
 	go.opentelemetry.io/collector/model v0.31.0
 	go.uber.org/multierr v1.7.0
 	go.uber.org/zap v1.19.0
-	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	golang.org/x/sys v0.0.0-20210630005230-0f9fa26af87c // indirect
 	golang.org/x/tools v0.1.4 // indirect
-	gopkg.in/natefinch/lumberjack.v2 v2.0.0
 	gopkg.in/yaml.v2 v2.4.0
-	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
 )
 
 replace (

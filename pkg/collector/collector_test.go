@@ -13,7 +13,7 @@ import (
 )
 
 func TestCollectorRunValid(t *testing.T) {
-	collector := New("./test/valid.yaml", nil)
+	collector := New("./test/valid.yaml", "0.0.0", nil)
 	err := collector.Run()
 	require.NoError(t, err)
 
@@ -27,7 +27,7 @@ func TestCollectorRunValid(t *testing.T) {
 }
 
 func TestCollectorRunMultiple(t *testing.T) {
-	collector := New("./test/valid.yaml", nil)
+	collector := New("./test/valid.yaml", "0.0.0", nil)
 	for i := 1; i < 5; i++ {
 		attempt := fmt.Sprintf("Attempt %d", i)
 		t.Run(attempt, func(t *testing.T) {
@@ -46,7 +46,7 @@ func TestCollectorRunMultiple(t *testing.T) {
 }
 
 func TestCollectorRunInvalidConfig(t *testing.T) {
-	collector := New("./test/invalid.yaml", nil)
+	collector := New("./test/invalid.yaml", "0.0.0", nil)
 	err := collector.Run()
 	require.Error(t, err)
 
@@ -66,7 +66,7 @@ func TestCollectorRunInvalidFactory(t *testing.T) {
 		createInvalidExtension,
 	))
 
-	collector := New("./test/valid.yaml", nil)
+	collector := New("./test/valid.yaml", "0.0.0", nil)
 	err := collector.Run()
 	require.Error(t, err)
 
@@ -76,7 +76,7 @@ func TestCollectorRunInvalidFactory(t *testing.T) {
 }
 
 func TestCollectorRunTwice(t *testing.T) {
-	collector := New("./test/valid.yaml", nil)
+	collector := New("./test/valid.yaml", "0.0.0", nil)
 	err := collector.Run()
 	require.NoError(t, err)
 	defer collector.Stop()
@@ -86,23 +86,36 @@ func TestCollectorRunTwice(t *testing.T) {
 	require.Contains(t, err.Error(), "service already running")
 }
 
-func TestCollectorStopTwice(t *testing.T) {
-	collector := New("./test/valid.yaml", nil)
+func TestCollectorRestart(t *testing.T) {
+	collector := New("./test/valid.yaml", "0.0.0", nil)
 	err := collector.Run()
 	require.NoError(t, err)
-	collector.Stop()
+
+	defer collector.Stop()
+	err = collector.Restart()
+	require.NoError(t, err)
 
 	status := collector.Status()
-	require.False(t, status.Running)
+	require.True(t, status.Running)
+}
 
+func TestCollectorPrematureStop(t *testing.T) {
+	collector := New("./test/valid.yaml", "0.0.0", nil)
 	collector.Stop()
+	status := collector.Status()
 	require.False(t, status.Running)
 }
 
 func TestCollectorConfigPath(t *testing.T) {
 	configPath := "./test/valid.yaml"
-	collector := New(configPath, nil)
+	collector := New(configPath, "0.0.0", nil)
 	require.Equal(t, configPath, collector.ConfigPath())
+}
+
+func TestValidateConfig(t *testing.T) {
+	collector := New("./test/valid.yaml", "0.0.0", nil)
+	err := collector.ValidateConfig()
+	require.NoError(t, err)
 }
 
 // InvalidConfig is a config without a mapstructure tag.
