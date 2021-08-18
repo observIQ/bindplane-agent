@@ -6,7 +6,7 @@ receivers:
 service:
   pipelines:
     logs:
-        exporters:
-            - logging
-        receivers:
-            - stanza
+      exporters:
+        - logging
+      receivers:
+        - stanza

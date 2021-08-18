@@ -3,11 +3,23 @@ exporters:
 receivers:
   stanza:
     pipeline:
-        - type: noop
+      - type: noop
+      - name: k8s-2 container logs
+        type: kubernetes_container
+        output:
+          - 9a5b09cb-9853-4d94-82aa-61160c93c458
+        exclude: []
+        version: 0.0.16
+        pod_name: "*"
+        start_at: end
+        cluster_name: minikube
+        container_name: "*"
+      - name: cabin
+        type: cabin_output
 service:
   pipelines:
     logs:
-        exporters:
-            - logging
-        receivers:
-            - stanza
+      exporters:
+        - logging
+      receivers:
+        - stanza
