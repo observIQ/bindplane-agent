@@ -30,7 +30,7 @@ func TestReconfigureParams(t *testing.T) {
 
 	emptyPipeline := emptyParams.getStanzaPipeline()
 	require.Equal(t, 1, len(emptyPipeline))
-	require.Equal(t, noopOperator, emptyPipeline[0])
+	require.Equal(t, cabinOperator, emptyPipeline[0])
 
 	multiplePipeline := multipleParams.getStanzaPipeline()
 	require.Equal(t, 2, len(multiplePipeline))
