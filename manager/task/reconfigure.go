@@ -43,7 +43,7 @@ func (r *ReconfigureParams) getStanzaPipeline() StanzaPipeline {
 	}
 
 	if len(pipeline) == 0 {
-		noop := map[string]interface{}{"type": "noop"}
+		noop := map[string]interface{}{"type": "cabin_output"}
 		pipeline = append(pipeline, noop)
 	}
 
