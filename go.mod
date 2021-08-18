@@ -10,17 +10,16 @@ require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/extension/storage v0.31.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/processor/groupbyattrsprocessor v0.31.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/processor/k8sprocessor v0.31.0
-	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/filelogreceiver v0.31.0
+	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/filelogreceiver v0.33.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/syslogreceiver v0.31.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/tcplogreceiver v0.31.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/udplogreceiver v0.31.0
 	github.com/open-telemetry/opentelemetry-log-collection v0.20.0
 	github.com/pierrec/lz4 v2.6.1+incompatible // indirect
-	github.com/shirou/gopsutil v3.21.7+incompatible // indirect
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.7.0
-	go.opentelemetry.io/collector v0.31.0
-	go.opentelemetry.io/collector/model v0.31.0
+	go.opentelemetry.io/collector v0.33.0
+	go.opentelemetry.io/collector/model v0.33.0
 	go.uber.org/multierr v1.7.0
 	go.uber.org/zap v1.19.0
 	golang.org/x/sys v0.0.0-20210630005230-0f9fa26af87c // indirect
