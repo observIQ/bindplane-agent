@@ -23,10 +23,11 @@ type Collector struct {
 }
 
 // New returns a new collector.
-func New(configPath string, loggingOpts []zap.Option) *Collector {
+func New(configPath string, version string, loggingOpts []zap.Option) *Collector {
+	settings := NewSettings(configPath, version, loggingOpts)
 	return &Collector{
 		configPath: configPath,
-		settings:   NewSettings(configPath, loggingOpts),
+		settings:   settings,
 		svcMux:     &sync.Mutex{},
 		statusMux:  &sync.RWMutex{},
 		wg:         &sync.WaitGroup{},
