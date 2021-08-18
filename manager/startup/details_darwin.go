@@ -15,7 +15,7 @@ func GetOSDetails(info *host.InfoStat) string {
 func getMajorMinor(semantic string) string {
 	parts := strings.Split(semantic, ".")
 	if len(parts) < 2 {
-		return "macOS"
+		return ""
 	}
 	return fmt.Sprintf("%s.%s", parts[0], parts[1])
 }
@@ -28,6 +28,7 @@ func getPrettyVersion(majorMinor string) string {
 		return "macOS 10.14 Mojave"
 	case "10.13":
 		return "macOS 10.13 High Sierra"
+	// Note Go 1.17 will not support these previous versions of macOS
 	case "10.12":
 		return "macOS 10.12 Sierra"
 	case "10.11":
@@ -39,6 +40,9 @@ func getPrettyVersion(majorMinor string) string {
 	case "10.8":
 		return "OS X 10.8 Mountain Lion"
 	default:
+		if majorMinor == "" {
+			return "macOS"
+		}
 		return fmt.Sprintf("macOS %s", majorMinor)
 	}
 }
