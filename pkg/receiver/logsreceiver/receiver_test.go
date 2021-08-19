@@ -204,7 +204,7 @@ func BenchmarkReadLine(b *testing.B) {
 	b.ResetTimer()
 	require.NoError(b, pl.Start(newMockPersister()))
 	for i := 0; i < b.N; i++ {
-		convert(<-emitter.logChan)
+		convert(<-emitter.logChan, nil)
 	}
 }
 
@@ -265,7 +265,7 @@ func BenchmarkParseAndMap(b *testing.B) {
 	b.ResetTimer()
 	require.NoError(b, pl.Start(newMockPersister()))
 	for i := 0; i < b.N; i++ {
-		convert(<-emitter.logChan)
+		convert(<-emitter.logChan, nil)
 	}
 }
 

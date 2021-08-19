@@ -116,6 +116,9 @@ type Converter struct {
 	wg sync.WaitGroup
 
 	logger *zap.Logger
+
+	// idToPipelineConfig is a map of a pipeline segment id to the raw pipeline segment
+	idToPipelineConfig map[string]map[string]interface{}
 }
 
 type ConverterOption interface {
@@ -149,6 +152,12 @@ func WithLogger(logger *zap.Logger) ConverterOption {
 func WithWorkerCount(workerCount int) ConverterOption {
 	return optionFunc(func(c *Converter) {
 		c.workerCount = workerCount
+	})
+}
+
+func WithIdToPipelineConfigMap(idToPipelineConfig map[string]map[string]interface{}) ConverterOption {
+	return optionFunc(func(c *Converter) {
+		c.idToPipelineConfig = idToPipelineConfig
 	})
 }
 
@@ -229,7 +238,7 @@ func (c *Converter) workerLoop() {
 			}
 
 			buff.Reset()
-			lr := convert(e)
+			lr := convert(e, c.idToPipelineConfig)
 
 			if err := encoder.Encode(e.Resource); err != nil {
 				c.logger.Debug("Failed marshaling entry.Resource to JSON",
@@ -362,9 +371,10 @@ func (c *Converter) Batch(e *entry.Entry) error {
 }
 
 // convert converts one entry.Entry into pdata.LogRecord allocating it.
-func convert(ent *entry.Entry) pdata.LogRecord {
+func convert(ent *entry.Entry, idToPipelineConfig map[string]map[string]interface{}) pdata.LogRecord {
 	dest := pdata.NewLogRecord()
 	convertInto(ent, dest)
+	Transform(&dest, idToPipelineConfig)
 	return dest
 }
 
