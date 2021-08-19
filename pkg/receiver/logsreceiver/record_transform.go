@@ -112,10 +112,7 @@ func convertClient(le *pdata.LogRecord) {
 	if clientData, ok := bodyMap.Get("client"); ok {
 		if clientData.Type() == pdata.AttributeValueTypeString {
 			clientDataStr := clientData.StringVal()
-			pdata.NewAttributeValueMap()
-
-			bodyMap.Delete("client")
-			bodyMap.Insert("client", parseIpPort(clientDataStr))
+			bodyMap.Update("client", parseIpPort(clientDataStr))
 		}
 	}
 }

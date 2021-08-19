@@ -40,6 +40,16 @@ func (m mockLogRecord) LogRecord(t *testing.T) pdata.LogRecord {
 	return lr
 }
 
+func sortMapKeys(m pdata.AttributeMap) {
+	m.Sort()
+	m.Range(func(k string, v pdata.AttributeValue) bool {
+		if v.Type() == pdata.AttributeValueTypeMap {
+			sortMapKeys(v.MapVal())
+		}
+		return true
+	})
+}
+
 func TestTransform(t *testing.T) {
 	testDate := time.Date(2021, 6, 16, 13, 32, 0, 0, time.UTC)
 
@@ -329,18 +339,18 @@ func TestTransform(t *testing.T) {
 			Transform(&lrIn, testCase.pluginIdToConfigMap)
 			lrOut := testCase.lrOut.LogRecord(t)
 
-			lrIn.Attributes().Sort()
-			lrOut.Attributes().Sort()
+			sortMapKeys(lrIn.Attributes())
+			sortMapKeys(lrOut.Attributes())
 
 			if lrIn.Body().Type() == pdata.AttributeValueTypeMap {
-				lrIn.Body().MapVal().Sort()
+				sortMapKeys(lrIn.Body().MapVal())
 			}
 
 			if lrOut.Body().Type() == pdata.AttributeValueTypeMap {
-				lrOut.Body().MapVal().Sort()
+				sortMapKeys(lrOut.Body().MapVal())
 			}
 
-			require.EqualValues(t, lrOut, lrIn)
+			require.Equal(t, lrOut, lrIn)
 		})
 	}
 }
