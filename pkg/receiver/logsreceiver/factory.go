@@ -80,8 +80,18 @@ func createLogsReceiver(
 		return nil, err
 	}
 
+	pluginIdToConfig := map[string]map[string]interface{}{}
+	for _, conf := range stanzaCfg.Pipeline {
+		if id, ok := conf["id"]; ok {
+			if idStr, ok := id.(string); ok {
+				pluginIdToConfig[idStr] = conf
+			}
+		}
+	}
+
 	opts := []ConverterOption{
 		WithLogger(params.Logger),
+		WithIdToPipelineConfigMap(pluginIdToConfig),
 	}
 	if stanzaCfg.Converter.MaxFlushCount > 0 {
 		opts = append(opts, WithMaxFlushCount(stanzaCfg.Converter.MaxFlushCount))

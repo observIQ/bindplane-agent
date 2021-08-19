@@ -34,7 +34,7 @@ func BenchmarkConvertSimple(b *testing.B) {
 	b.StartTimer()
 
 	for i := 0; i < b.N; i++ {
-		convert(ent)
+		convert(ent, nil)
 	}
 }
 
@@ -44,7 +44,7 @@ func BenchmarkConvertComplex(b *testing.B) {
 	b.StartTimer()
 
 	for i := 0; i < b.N; i++ {
-		convert(ent)
+		convert(ent, nil)
 	}
 }
 
@@ -403,7 +403,7 @@ func TestConverterCancelledContextCancellsTheFlush(t *testing.T) {
 		pLogs := pdata.NewLogs()
 		ills := pLogs.ResourceLogs().AppendEmpty().InstrumentationLibraryLogs().AppendEmpty()
 
-		lr := convert(complexEntry())
+		lr := convert(complexEntry(), nil)
 		lr.CopyTo(ills.Logs().AppendEmpty())
 
 		assert.Error(t, converter.flush(ctx, pLogs))
@@ -421,7 +421,7 @@ func TestConvertMetadata(t *testing.T) {
 	e.AddAttribute("one", "two")
 	e.Body = true
 
-	result := convert(e)
+	result := convert(e, nil)
 
 	atts := result.Attributes()
 	require.Equal(t, 1, atts.Len(), "expected 1 attribute")
@@ -591,7 +591,7 @@ func anyToBody(body interface{}) pdata.AttributeValue {
 }
 
 func convertAndDrill(entry *entry.Entry) pdata.LogRecord {
-	return convert(entry)
+	return convert(entry, nil)
 }
 
 func TestConvertSeverity(t *testing.T) {
