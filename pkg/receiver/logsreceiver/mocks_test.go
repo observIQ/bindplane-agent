@@ -24,6 +24,7 @@ import (
 	"github.com/open-telemetry/opentelemetry-log-collection/operator"
 	"github.com/open-telemetry/opentelemetry-log-collection/operator/helper"
 	"go.opentelemetry.io/collector/consumer"
+	"go.opentelemetry.io/collector/extension/storage"
 	"go.opentelemetry.io/collector/model/pdata"
 )
 
@@ -144,5 +145,30 @@ func (p *mockClient) Close(_ context.Context) error {
 	p.cacheMux.Lock()
 	defer p.cacheMux.Unlock()
 	p.cache = nil
+	return nil
+}
+
+func (p *mockClient) Batch(ctx context.Context, ops ...storage.Operation) error {
+	for _, op := range ops {
+		switch op.Type {
+		case storage.Get:
+			val, err := p.Get(ctx, op.Key)
+			if err != nil {
+				return err
+			}
+
+			op.Value = val
+		case storage.Set:
+			err := p.Set(ctx, op.Key, op.Value)
+			if err != nil {
+				return err
+			}
+		case storage.Delete:
+			err := p.Delete(ctx, op.Key)
+			if err != nil {
+				return err
+			}
+		}
+	}
 	return nil
 }
