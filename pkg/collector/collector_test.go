@@ -17,12 +17,12 @@ func TestCollectorRunValid(t *testing.T) {
 	err := collector.Run()
 	require.NoError(t, err)
 
-	status := collector.Status()
+	status := <-collector.Status()
 	require.True(t, status.Running)
 	require.NoError(t, status.Err)
 
 	collector.Stop()
-	status = collector.Status()
+	status = <-collector.Status()
 	require.False(t, status.Running)
 }
 
@@ -34,12 +34,12 @@ func TestCollectorRunMultiple(t *testing.T) {
 			err := collector.Run()
 			require.NoError(t, err)
 
-			status := collector.Status()
+			status := <-collector.Status()
 			require.True(t, status.Running)
 			require.NoError(t, status.Err)
 
 			collector.Stop()
-			status = collector.Status()
+			status = <-collector.Status()
 			require.False(t, status.Running)
 		})
 	}
@@ -50,7 +50,7 @@ func TestCollectorRunInvalidConfig(t *testing.T) {
 	err := collector.Run()
 	require.Error(t, err)
 
-	status := collector.Status()
+	status := <-collector.Status()
 	require.False(t, status.Running)
 	require.Error(t, status.Err)
 	require.Contains(t, status.Err.Error(), "cannot build pipelines")
@@ -70,7 +70,7 @@ func TestCollectorRunInvalidFactory(t *testing.T) {
 	err := collector.Run()
 	require.Error(t, err)
 
-	status := collector.Status()
+	status := <-collector.Status()
 	require.False(t, status.Running)
 	require.Contains(t, status.Err.Error(), "invalid config settings")
 }
@@ -95,15 +95,14 @@ func TestCollectorRestart(t *testing.T) {
 	err = collector.Restart()
 	require.NoError(t, err)
 
-	status := collector.Status()
+	status := <-collector.Status()
 	require.True(t, status.Running)
 }
 
 func TestCollectorPrematureStop(t *testing.T) {
 	collector := New("./test/valid.yaml", "0.0.0", nil)
 	collector.Stop()
-	status := collector.Status()
-	require.False(t, status.Running)
+	require.Equal(t, 0, len(collector.statusChan))
 }
 
 func TestCollectorConfigPath(t *testing.T) {

@@ -12,14 +12,13 @@ import (
 
 // Collector wraps the open telemetry collector.
 type Collector struct {
-	configPath string
-	settings   service.CollectorSettings
-	svc        *service.Collector
-	svcMux     *sync.Mutex
-	status     Status
-	statusMux  *sync.RWMutex
-	wg         *sync.WaitGroup
-	errChan    chan error
+	configPath  string
+	settings    service.CollectorSettings
+	svc         *service.Collector
+	svcMux      *sync.Mutex
+	statusChan  chan *Status
+	startupChan chan error
+	wg          *sync.WaitGroup
 }
 
 // New returns a new collector.
@@ -29,13 +28,13 @@ func New(configPath string, version string, loggingOpts []zap.Option) *Collector
 		configPath: configPath,
 		settings:   settings,
 		svcMux:     &sync.Mutex{},
-		statusMux:  &sync.RWMutex{},
+		statusChan: make(chan *Status, 10),
 		wg:         &sync.WaitGroup{},
-		errChan:    make(chan error),
 	}
 }
 
-// Run will run the collector.
+// Run will run the collector. This function will return an error
+// if the collector was unable to startup.
 func (c *Collector) Run() error {
 	c.svcMux.Lock()
 	defer c.svcMux.Unlock()
@@ -48,12 +47,12 @@ func (c *Collector) Run() error {
 	// of a service. We must make a new instance each time we run the collector.
 	svc, err := service.New(c.settings)
 	if err != nil {
-		c.setErr(err)
+		c.sendStatus(false, err)
 		return fmt.Errorf("failed to init service: %w", err)
 	}
 
 	c.svc = svc
-	c.errChan = make(chan error, 1)
+	c.startupChan = make(chan error, 1)
 	c.wg = &sync.WaitGroup{}
 	c.wg.Add(1)
 
@@ -89,15 +88,12 @@ func (c *Collector) Restart() error {
 // that should be executed in a separate goroutine.
 func (c *Collector) runCollector() {
 	defer c.wg.Done()
-	c.setRunning(true)
-	c.setErr(nil)
 
 	err := c.svc.Run()
-	c.setRunning(false)
-	c.setErr(err)
+	c.sendStatus(false, err)
 
 	if err != nil {
-		c.errChan <- err
+		c.startupChan <- err
 	}
 }
 
@@ -109,12 +105,13 @@ func (c *Collector) waitForStartup() error {
 		// that initial service startup was successful.
 		case state := <-c.svc.GetStateChannel():
 			if state == service.Running {
+				c.sendStatus(true, nil)
 				return nil
 			}
 		// A flaw exists in the OT startup function where an early error may occur
 		// without sending any states through the state channel. To handle this,
 		// we use an errChan to exit immediately.
-		case err := <-c.errChan:
+		case err := <-c.startupChan:
 			return err
 		}
 	}
@@ -132,24 +129,19 @@ func (c *Collector) ValidateConfig() error {
 }
 
 // Status will return the status of the collector.
-func (c *Collector) Status() Status {
-	c.statusMux.RLock()
-	defer c.statusMux.RUnlock()
-	return c.status
+func (c *Collector) Status() <-chan *Status {
+	return c.statusChan
 }
 
-// setRunning will set the running state of the collector.
-func (c *Collector) setRunning(running bool) {
-	c.statusMux.Lock()
-	defer c.statusMux.Unlock()
-	c.status.Running = running
-}
+// sendStatus will send a status through the status channel.
+// If the channel is full, the status is discarded.
+func (c *Collector) sendStatus(running bool, err error) {
+	status := &Status{Running: running, Err: err}
 
-// setErr will set the error state of the collector.
-func (c *Collector) setErr(err error) {
-	c.statusMux.Lock()
-	defer c.statusMux.Unlock()
-	c.status.Err = err
+	select {
+	case c.statusChan <- status:
+	default:
+	}
 }
 
 // Status is the status of a collector.

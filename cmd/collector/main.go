@@ -6,7 +6,6 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 
 	"github.com/observiq/observiq-collector/internal/version"
 	"github.com/observiq/observiq-collector/pkg/collector"
@@ -30,8 +29,7 @@ func main() {
 		select {
 		case <-ctx.Done():
 			return
-		case <-time.After(time.Second):
-			status := collector.Status()
+		case status := <-collector.Status():
 			if !status.Running {
 				log.Panicf("Collector stopped running: %s", status.Err)
 			}
