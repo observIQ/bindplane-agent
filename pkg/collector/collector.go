@@ -5,13 +5,20 @@ import (
 	"fmt"
 	"sync"
 
-	"go.opentelemetry.io/collector/config/configtest"
 	"go.opentelemetry.io/collector/service"
 	"go.uber.org/zap"
 )
 
-// Collector wraps the open telemetry collector.
-type Collector struct {
+// Collector is an interface for running the open telemetry collector.
+type Collector interface {
+	Run() error
+	Stop()
+	Restart() error
+	Status() <-chan *Status
+}
+
+// collector is the standard implementation of the Collector interface.
+type collector struct {
 	configPath  string
 	settings    service.CollectorSettings
 	svc         *service.Collector
@@ -22,9 +29,9 @@ type Collector struct {
 }
 
 // New returns a new collector.
-func New(configPath string, version string, loggingOpts []zap.Option) *Collector {
+func New(configPath string, version string, loggingOpts []zap.Option) Collector {
 	settings := NewSettings(configPath, version, loggingOpts)
-	return &Collector{
+	return &collector{
 		configPath: configPath,
 		settings:   settings,
 		svcMux:     &sync.Mutex{},
@@ -35,7 +42,7 @@ func New(configPath string, version string, loggingOpts []zap.Option) *Collector
 
 // Run will run the collector. This function will return an error
 // if the collector was unable to startup.
-func (c *Collector) Run() error {
+func (c *collector) Run() error {
 	c.svcMux.Lock()
 	defer c.svcMux.Unlock()
 
@@ -65,7 +72,7 @@ func (c *Collector) Run() error {
 }
 
 // Stop will stop the collector.
-func (c *Collector) Stop() {
+func (c *collector) Stop() {
 	c.svcMux.Lock()
 	defer c.svcMux.Unlock()
 
@@ -79,14 +86,14 @@ func (c *Collector) Stop() {
 }
 
 // Restart will restart the collector.
-func (c *Collector) Restart() error {
+func (c *collector) Restart() error {
 	c.Stop()
 	return c.Run()
 }
 
 // runCollector will run the collector. This is a blocking function
 // that should be executed in a separate goroutine.
-func (c *Collector) runCollector() {
+func (c *collector) runCollector() {
 	defer c.wg.Done()
 
 	err := c.svc.Run()
@@ -98,7 +105,7 @@ func (c *Collector) runCollector() {
 }
 
 // waitForStartup waits for the service to startup before exiting.
-func (c *Collector) waitForStartup() error {
+func (c *collector) waitForStartup() error {
 	for {
 		select {
 		// If the service is able to transmit a running state, this means
@@ -117,25 +124,14 @@ func (c *Collector) waitForStartup() error {
 	}
 }
 
-// ConfigPath will return the config path of the collector.
-func (c *Collector) ConfigPath() string {
-	return c.configPath
-}
-
-// ValidateConfig will validate the collector's config.
-func (c *Collector) ValidateConfig() error {
-	_, err := configtest.LoadConfigAndValidate(c.configPath, c.settings.Factories)
-	return err
-}
-
 // Status will return the status of the collector.
-func (c *Collector) Status() <-chan *Status {
+func (c *collector) Status() <-chan *Status {
 	return c.statusChan
 }
 
 // sendStatus will send a status through the status channel.
 // If the channel is full, the status is discarded.
-func (c *Collector) sendStatus(running bool, err error) {
+func (c *collector) sendStatus(running bool, err error) {
 	status := &Status{Running: running, Err: err}
 
 	select {
