@@ -102,19 +102,7 @@ func TestCollectorRestart(t *testing.T) {
 func TestCollectorPrematureStop(t *testing.T) {
 	collector := New("./test/valid.yaml", "0.0.0", nil)
 	collector.Stop()
-	require.Equal(t, 0, len(collector.statusChan))
-}
-
-func TestCollectorConfigPath(t *testing.T) {
-	configPath := "./test/valid.yaml"
-	collector := New(configPath, "0.0.0", nil)
-	require.Equal(t, configPath, collector.ConfigPath())
-}
-
-func TestValidateConfig(t *testing.T) {
-	collector := New("./test/valid.yaml", "0.0.0", nil)
-	err := collector.ValidateConfig()
-	require.NoError(t, err)
+	require.Equal(t, 0, len(collector.Status()))
 }
 
 // InvalidConfig is a config without a mapstructure tag.
