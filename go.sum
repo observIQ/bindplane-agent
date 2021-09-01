@@ -962,8 +962,8 @@ github.com/observiq/go-syslog/v3 v3.0.2 h1:vaeINFErM/E3cKE2Ot1FAhhGq5mv7uGBOzjnG
 github.com/observiq/go-syslog/v3 v3.0.2/go.mod h1:9abcumkQwDUY0VgWdH6CaaJ3Ks39A7NvIelMlavPru0=
 github.com/observiq/nanojack v0.0.0-20201106172433-343928847ebc h1:49ewVBwLcy+eYqI4R0ICilCI4dPjddpFXWv3liXzUxM=
 github.com/observiq/nanojack v0.0.0-20201106172433-343928847ebc/go.mod h1:WXIHwGy+c7/IK2PiJ4oxuTHkpnkSut7TNFpKnI5llPU=
-github.com/observiq/opentelemetry-collector-contrib/exporter/observiqexporter v0.0.0-20210820160337-9f1ee738077c h1:N//ByQICmYAubchQlVkWsc3Oo3CWSL17Rb5i26AdX0s=
-github.com/observiq/opentelemetry-collector-contrib/exporter/observiqexporter v0.0.0-20210820160337-9f1ee738077c/go.mod h1:LhTGM6Ad0xCV7u7B/gn6nm6Z1+lFMYcX3R64fOefLaY=
+github.com/observiq/opentelemetry-collector-contrib/exporter/observiqexporter v0.0.0-20210826140239-d3f87afb6835 h1:LxkEVuJpaCErPb2+0dhNGPjqWQ7ugR/FMwQ7ht1FP9w=
+github.com/observiq/opentelemetry-collector-contrib/exporter/observiqexporter v0.0.0-20210826140239-d3f87afb6835/go.mod h1:LhTGM6Ad0xCV7u7B/gn6nm6Z1+lFMYcX3R64fOefLaY=
 github.com/oklog/oklog v0.3.2/go.mod h1:FCV+B7mhrz4o+ueLpx+KqkyXRGMWOYEvfiXtdGtbWGs=
 github.com/oklog/run v1.0.0/go.mod h1:dlhp/R75TPv97u0XWUtDeV/lRKWPKSdTuV0TZvrmrQA=
 github.com/oklog/run v1.1.0/go.mod h1:sVPdnTZT1zYwAJeCMu2Th4T21pA3FPOQRfWjQlk7DVU=

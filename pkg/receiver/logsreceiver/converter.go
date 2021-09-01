@@ -26,6 +26,7 @@ import (
 	"time"
 
 	"github.com/open-telemetry/opentelemetry-log-collection/entry"
+	"github.com/open-telemetry/opentelemetry-log-collection/operator/helper"
 	"go.opentelemetry.io/collector/model/pdata"
 	"go.uber.org/zap"
 )
@@ -115,7 +116,8 @@ type Converter struct {
 	// when Stop() is called.
 	wg sync.WaitGroup
 
-	logger *zap.Logger
+	logger         *zap.Logger
+	hostIdentifier helper.HostIdentifier
 
 	// idToPipelineConfig is a map of a pipeline segment id to the raw pipeline segment
 	idToPipelineConfig map[string]map[string]interface{}
@@ -162,17 +164,19 @@ func WithIdToPipelineConfigMap(idToPipelineConfig map[string]map[string]interfac
 }
 
 func NewConverter(opts ...ConverterOption) *Converter {
+	hi, _ := helper.NewHostIdentifierConfig().Build()
 	c := &Converter{
-		workerChan:    make(chan *entry.Entry),
-		workerCount:   int(math.Max(1, float64(runtime.NumCPU()/4))),
-		batchChan:     make(chan *workerItem),
-		data:          make(map[string]pdata.Logs),
-		pLogsChan:     make(chan pdata.Logs),
-		stopChan:      make(chan struct{}),
-		logger:        zap.NewNop(),
-		flushChan:     make(chan pdata.Logs),
-		flushInterval: DefaultFlushInterval,
-		maxFlushCount: DefaultMaxFlushCount,
+		workerChan:     make(chan *entry.Entry),
+		workerCount:    int(math.Max(1, float64(runtime.NumCPU()/4))),
+		batchChan:      make(chan *workerItem),
+		data:           make(map[string]pdata.Logs),
+		pLogsChan:      make(chan pdata.Logs),
+		stopChan:       make(chan struct{}),
+		logger:         zap.NewNop(),
+		flushChan:      make(chan pdata.Logs),
+		flushInterval:  DefaultFlushInterval,
+		maxFlushCount:  DefaultMaxFlushCount,
+		hostIdentifier: hi,
 	}
 
 	for _, opt := range opts {
@@ -238,6 +242,7 @@ func (c *Converter) workerLoop() {
 			}
 
 			buff.Reset()
+			c.hostIdentifier.Identify(e)
 			lr := convert(e, c.idToPipelineConfig)
 
 			if err := encoder.Encode(e.Resource); err != nil {

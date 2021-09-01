@@ -35,4 +35,4 @@ replace (
 	github.com/open-telemetry/opentelemetry-collector-contrib/internal/stanza v0.24.1-0.20210408210148-736647af91e1 => github.com/open-telemetry/opentelemetry-collector-contrib/internal/stanza v0.33.0
 )
 
-replace github.com/open-telemetry/opentelemetry-collector-contrib/exporter/observiqexporter v0.33.0 => github.com/observiq/opentelemetry-collector-contrib/exporter/observiqexporter v0.0.0-20210820160337-9f1ee738077c
+replace github.com/open-telemetry/opentelemetry-collector-contrib/exporter/observiqexporter v0.33.0 => github.com/observiq/opentelemetry-collector-contrib/exporter/observiqexporter v0.0.0-20210826140239-d3f87afb6835
