@@ -47,4 +47,7 @@ import (
 	_ "github.com/open-telemetry/opentelemetry-log-collection/operator/builtin/output/drop"
 	_ "github.com/open-telemetry/opentelemetry-log-collection/operator/builtin/output/file"
 	_ "github.com/open-telemetry/opentelemetry-log-collection/operator/builtin/output/stdout"
+
+	// register non-opentelemetry operators
+	_ "github.com/observiq/observiq-collector/internal/operators/transformer/k8smetadata"
 )
