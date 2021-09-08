@@ -3,10 +3,7 @@ module github.com/observiq/observiq-collector
 go 1.16
 
 require (
-	github.com/aws/aws-sdk-go v1.40.8 // indirect
-	github.com/containerd/containerd v1.5.0-beta.4 // indirect
-	github.com/fatih/color v1.12.0 // indirect
-	github.com/klauspost/compress v1.13.1 // indirect
+	github.com/matttproud/golang_protobuf_extensions v1.0.2-0.20181231171920-c182affec369 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/observiqexporter v0.33.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/extension/storage v0.33.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/processor/groupbyattrsprocessor v0.33.0
@@ -16,11 +13,10 @@ require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/tcplogreceiver v0.33.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/udplogreceiver v0.33.0
 	github.com/open-telemetry/opentelemetry-log-collection v0.20.0
-	github.com/pierrec/lz4 v2.6.1+incompatible // indirect
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.7.0
-	go.opentelemetry.io/collector v0.33.0
-	go.opentelemetry.io/collector/model v0.33.0
+	go.opentelemetry.io/collector v0.34.0
+	go.opentelemetry.io/collector/model v0.34.0
 	go.uber.org/multierr v1.7.0
 	go.uber.org/zap v1.19.0
 	golang.org/x/sys v0.0.0-20210630005230-0f9fa26af87c // indirect
