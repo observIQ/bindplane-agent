@@ -112,7 +112,7 @@ func (m *MetadataCache) Store(key string, entry MetadataCacheEntry) {
 }
 
 // Start will start the k8s_metadata_decorator operator
-func (k *K8sMetadataDecorator) Start(persister operator.Persister) error {
+func (k *K8sMetadataDecorator) Start(_ operator.Persister) error {
 	config, err := rest.InClusterConfig()
 	if err != nil {
 		return errors.NewError(

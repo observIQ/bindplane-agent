@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/open-telemetry/opentelemetry-log-collection/entry"
-	"github.com/open-telemetry/opentelemetry-log-collection/operator"
 	"github.com/open-telemetry/opentelemetry-log-collection/operator/helper"
 	"github.com/open-telemetry/opentelemetry-log-collection/testutil"
 	"github.com/stretchr/testify/mock"
@@ -71,8 +70,7 @@ func TestK8sMetadataDecoratorCachedMetadata(t *testing.T) {
 	op := ops[0]
 
 	mockOutput := testutil.NewMockOperator("mock")
-	err = op.SetOutputs([]operator.Operator{mockOutput})
-	require.NoError(t, err)
+	mockOutput.On("Outputs").Return("mock")
 
 	// Preload cache so we don't hit the network
 	k8s := op.(*K8sMetadataDecorator)
