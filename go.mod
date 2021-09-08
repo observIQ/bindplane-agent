@@ -4,6 +4,7 @@ go 1.16
 
 require (
 	github.com/aws/aws-sdk-go v1.40.8 // indirect
+	github.com/containerd/containerd v1.5.0-beta.4 // indirect
 	github.com/fatih/color v1.12.0 // indirect
 	github.com/klauspost/compress v1.13.1 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/observiqexporter v0.33.0
@@ -25,6 +26,8 @@ require (
 	golang.org/x/sys v0.0.0-20210630005230-0f9fa26af87c // indirect
 	golang.org/x/tools v0.1.4 // indirect
 	gopkg.in/yaml.v2 v2.4.0
+	k8s.io/apimachinery v0.22.0
+	k8s.io/client-go v0.22.0
 )
 
 replace (
