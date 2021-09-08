@@ -62,18 +62,17 @@ func TestK8sMetadataDecoratorBuildDefault(t *testing.T) {
 	op := ops[0]
 	op.(*K8sMetadataDecorator).SugaredLogger = nil
 	require.Equal(t, expected, op)
-
 }
 
 func TestK8sMetadataDecoratorCachedMetadata(t *testing.T) {
-
 	cfg := basicConfig()
 	ops, err := cfg.Build(testutil.NewBuildContext(t))
 	require.NoError(t, err)
 	op := ops[0]
 
 	mockOutput := testutil.NewMockOperator("mock")
-	op.SetOutputs([]operator.Operator{mockOutput})
+	err = op.SetOutputs([]operator.Operator{mockOutput})
+	require.NoError(t, err)
 
 	// Preload cache so we don't hit the network
 	k8s := op.(*K8sMetadataDecorator)
