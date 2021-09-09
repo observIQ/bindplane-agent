@@ -3,7 +3,7 @@ module github.com/observiq/observiq-collector
 go 1.16
 
 require (
-	github.com/aws/aws-sdk-go v1.40.8 // indirect
+	github.com/aws/aws-sdk-go v1.40.8
 	github.com/fatih/color v1.12.0 // indirect
 	github.com/jpillora/backoff v1.0.0
 	github.com/json-iterator/go v1.1.11
