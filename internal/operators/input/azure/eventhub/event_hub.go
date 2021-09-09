@@ -53,6 +53,7 @@ type EventHubInput struct {
 // Start will start generating log entries.
 func (e *EventHubInput) Start(persister operator.Persister) error {
 	e.Handler = e.handleEvent
+	e.Persist = &azure.Persister{DB: persister}
 	return e.StartConsumers(context.Background())
 }
 

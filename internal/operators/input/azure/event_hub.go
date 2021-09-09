@@ -22,42 +22,22 @@ type EventHub struct {
 
 // StartConsumers starts an Azure Event Hub handler for each partition_id.
 func (e *EventHub) StartConsumers(ctx context.Context) error {
-	connectionContext, cancelFunc := context.WithCancel(ctx)
-	defer cancelFunc()
-	e.WG.Add(1)
-	go e.runConsumers(connectionContext)
-
-	var consumerError error
-	select {
-	case <-ctx.Done():
-		e.Info("Received context complete", zap.Error(ctx.Err()))
-	case consumerError = <-e.errChan:
-		e.Info("Received a terminal error while running the consumer", zap.Error(consumerError))
-	}
-
-	e.Debug("waiting for consumers to stop")
-	e.WG.Wait()
-
-	e.Debug("consumers have stopped")
-	return nil
-}
-
-func (e *EventHub) runConsumers(ctx context.Context) {
 	if err := e.Connect(ctx); err != nil {
-		e.errChan <- err
+		return err
 	}
 
 	runtimeInfo, err := e.hub.GetRuntimeInformation(ctx)
 	if err != nil {
-		e.errChan <- err
+		return err
 	}
 
 	for _, partitionID := range runtimeInfo.PartitionIDs {
 		if err := e.startConsumer(ctx, partitionID, e.hub); err != nil {
-			e.errChan <- err
+			return err
 		}
 		e.Debugw(fmt.Sprintf("Successfully connected to Azure Event Hub '%s' partition_id '%s'", e.Name, partitionID))
 	}
+	return nil
 }
 
 // StopConsumers closes connections to Azure Event Hub.
@@ -99,15 +79,10 @@ func (e *EventHub) startConsumer(ctx context.Context, partitionID string, hub *a
 
 	// start at end and offset exists
 	e.Debugw(fmt.Sprintf("Starting with offset '%s'", offset.Offset))
-	select {
-	case <-ctx.Done():
-		return nil
-	default:
-		_, err = hub.Receive(
-			ctx, partitionID, e.Handler, azhub.ReceiveWithStartingOffset(offset.Offset),
-			azhub.ReceiveWithPrefetchCount(e.PrefetchCount))
-		return err
-	}
+	_, err = hub.Receive(
+		ctx, partitionID, e.Handler, azhub.ReceiveWithStartingOffset(offset.Offset),
+		azhub.ReceiveWithPrefetchCount(e.PrefetchCount))
+	return err
 }
 
 // Connect initializes the connection to Azure Event Hub ensures the input parameters are valid

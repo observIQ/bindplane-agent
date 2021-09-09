@@ -21,17 +21,13 @@ func (p *Persister) Write(namespace, name, consumerGroup, partitionID string, ch
 	if err != nil {
 		return err
 	}
-	// I don't feel good about doing this but trying to figure out how to fit the interface without context
-	ctx := context.Background()
-
-	return p.DB.Set(ctx, key, value)
+	return p.DB.Set(context.TODO(), key, value)
 }
 
 // Read retrieves an Azure Event Hub Checkpoint from the Stanza persistence backend
 func (p *Persister) Read(namespace, name, consumerGroup, partitionID string) (persist.Checkpoint, error) {
 	key := p.persistenceKey(namespace, name, consumerGroup, partitionID)
-	ctx := context.Background()
-	value, err := p.DB.Get(ctx, key)
+	value, err := p.DB.Get(context.TODO(), key)
 	if err != nil {
 		return persist.Checkpoint{}, err
 	}
