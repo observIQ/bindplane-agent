@@ -50,6 +50,8 @@ import (
 
 	// register non-opentelemetry operators
 	_ "github.com/observiq/observiq-collector/internal/operators/input/aws/cloudwatch"
+	_ "github.com/observiq/observiq-collector/internal/operators/input/azure/eventhub"
+	_ "github.com/observiq/observiq-collector/internal/operators/input/azure/loganalytics"
 	_ "github.com/observiq/observiq-collector/internal/operators/input/goflow"
 
 	_ "github.com/observiq/observiq-collector/internal/operators/transformer/k8smetadata"
