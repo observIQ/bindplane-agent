@@ -141,10 +141,6 @@ func (l *LogAnalyticsInput) setTimestamp(e *entry.Entry, records map[string]inte
 	return nil
 }
 
-func (l *LogAnalyticsInput) setResource(e *entry.Entry, key, value string) {
-	e.AddResourceKey(key, value)
-}
-
 func (l *LogAnalyticsInput) setLabel(e *entry.Entry, key string, value interface{}) error {
 	r := entry.NewAttributeField(key)
 	return r.Set(e, value)
