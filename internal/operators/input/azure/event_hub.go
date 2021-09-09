@@ -15,7 +15,6 @@ type EventHub struct {
 	Persist *Persister
 	WG      sync.WaitGroup
 	Handler func(context.Context, *azhub.Event) error
-	errChan chan error
 
 	hub *azhub.Hub
 }

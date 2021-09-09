@@ -54,8 +54,9 @@ type LogAnalyticsInput struct {
 }
 
 // Start will start generating log entries.
-func (l *LogAnalyticsInput) Start(_ operator.Persister) error {
+func (l *LogAnalyticsInput) Start(persister operator.Persister) error {
 	l.Handler = l.handleBatchedEvents
+	l.Persist = &azure.Persister{DB: persister}
 	return l.StartConsumers(context.Background())
 }
 
