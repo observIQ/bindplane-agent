@@ -3,11 +3,13 @@ module github.com/observiq/observiq-collector
 go 1.16
 
 require (
+	github.com/Azure/azure-event-hubs-go/v3 v3.3.13
 	github.com/aws/aws-sdk-go v1.40.8
 	github.com/fatih/color v1.12.0 // indirect
 	github.com/jpillora/backoff v1.0.0
 	github.com/json-iterator/go v1.1.11
 	github.com/klauspost/compress v1.13.1 // indirect
+	github.com/mitchellh/mapstructure v1.4.1
 	github.com/observiq/goflow/v3 v3.4.4
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/observiqexporter v0.33.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/extension/storage v0.33.0
