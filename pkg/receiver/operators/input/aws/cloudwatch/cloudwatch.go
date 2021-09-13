@@ -120,12 +120,9 @@ type CloudwatchInput struct {
 
 // Start will start generating log entries.
 func (c *CloudwatchInput) Start(persister operator.Persister) error {
+	c.persist = Persister{DB: persister}
 	ctx, cancel := context.WithCancel(context.Background())
 	c.cancel = cancel
-
-	if _, err := c.persist.Read(ctx, c.logGroupName); err != nil {
-		return err
-	}
 	c.wg.Add(1)
 	go c.pollEvents(ctx)
 	return nil
@@ -192,7 +189,7 @@ func (c *CloudwatchInput) sessionBuilder() (*cloudwatchlogs.CloudWatchLogs, erro
 // getEvents uses a session to get events from AWS Cloudwatch Logs
 func (c *CloudwatchInput) getEvents(ctx context.Context, svc *cloudwatchlogs.CloudWatchLogs) error {
 	nextToken := ""
-	st, err := c.persist.Read(ctx, c.logGroupName)
+	st, err := c.persist.Read(ctx, c.ID())
 	if err != nil {
 		c.Errorf("failed to get persist: %s", err)
 	}
@@ -299,9 +296,12 @@ func (c *CloudwatchInput) filterLogEventsInputBuilder(nextToken string) cloudwat
 
 // handleEvent is the handler for a AWS Cloudwatch Logs Filtered Event.
 func (c *CloudwatchInput) handleEvent(ctx context.Context, event *cloudwatchlogs.FilteredLogEvent) {
-	e := map[string]interface{}{
-		"message":        event.Message,
-		"ingestion_time": event.IngestionTime,
+	e := map[string]interface{}{}
+	if event.Message != nil {
+		e["message"] = *event.Message
+	}
+	if event.IngestionTime != nil {
+		e["ingestion_time"] = *event.IngestionTime
 	}
 	entry, err := c.NewEntry(e)
 	if err != nil {

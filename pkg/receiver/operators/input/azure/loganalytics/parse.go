@@ -9,7 +9,7 @@ import (
 	"time"
 
 	azhub "github.com/Azure/azure-event-hubs-go/v3"
-	"github.com/observiq/observiq-collector/internal/operators/input/azure"
+	"github.com/observiq/observiq-collector/pkg/receiver/operators/input/azure"
 	"github.com/open-telemetry/opentelemetry-log-collection/entry"
 	"github.com/open-telemetry/opentelemetry-log-collection/errors"
 	"go.uber.org/zap"
