@@ -15,7 +15,6 @@ type Persister struct {
 
 // Helper function to get persisted data
 func (p *Persister) Read(ctx context.Context, key string) (int64, error) {
-	var startTimeBytes []byte
 	startTimeBytes, err := p.DB.Get(ctx, key)
 	if err != nil {
 		return -1, fmt.Errorf("there was an error reading from persistent storage: %w", err)
