@@ -4,12 +4,15 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"sync"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/config"
 	"go.opentelemetry.io/collector/extension/extensionhelper"
+	"go.opentelemetry.io/collector/receiver/receiverhelper"
+	"go.opentelemetry.io/collector/service"
 )
 
 func TestCollectorRunValid(t *testing.T) {
@@ -103,6 +106,47 @@ func TestCollectorPrematureStop(t *testing.T) {
 	collector := New("./test/valid.yaml", "0.0.0", nil)
 	collector.Stop()
 	require.Equal(t, 0, len(collector.Status()))
+}
+
+func TestCollectorCreateServicePanic(t *testing.T) {
+	defaultPanic := func() config.Receiver {
+		panic("expected panic")
+	}
+
+	receiver := receiverhelper.NewFactory("panic", defaultPanic)
+	factories := component.Factories{
+		Receivers: map[config.Type]component.ReceiverFactory{
+			"panic": receiver,
+		},
+	}
+
+	collector := &collector{
+		statusChan: make(chan *Status, 10),
+		settings: service.CollectorSettings{
+			Factories: factories,
+		},
+	}
+
+	svc, err := collector.createService()
+	require.Nil(t, svc)
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "panic during service creation")
+}
+
+func TestCollectorRunServicePanic(t *testing.T) {
+	collector := &collector{
+		statusChan: make(chan *Status, 10),
+		wg:         &sync.WaitGroup{},
+	}
+
+	collector.wg.Add(1)
+	collector.runService()
+	collector.wg.Wait()
+
+	status := <-collector.statusChan
+	require.False(t, status.Running)
+	require.Error(t, status.Err)
+	require.Contains(t, status.Err.Error(), "panic while running service")
 }
 
 // InvalidConfig is a config without a mapstructure tag.
