@@ -52,10 +52,10 @@ func (c *collector) Run() error {
 
 	// The OT collector only supports calling run once during the lifetime
 	// of a service. We must make a new instance each time we run the collector.
-	svc, err := service.New(c.settings)
+	svc, err := c.createService()
 	if err != nil {
 		c.sendStatus(false, err)
-		return fmt.Errorf("failed to init service: %w", err)
+		return err
 	}
 
 	c.svc = svc
@@ -63,7 +63,7 @@ func (c *collector) Run() error {
 	c.wg = &sync.WaitGroup{}
 	c.wg.Add(1)
 
-	go c.runCollector()
+	go c.runService()
 
 	// A race condition exists in the OT collector where the shutdown channel
 	// is not guaranteed to be initialized before the shutdown function is called.
@@ -91,11 +91,33 @@ func (c *collector) Restart() error {
 	return c.Run()
 }
 
-// runCollector will run the collector. This is a blocking function
-// that should be executed in a separate goroutine.
-func (c *collector) runCollector() {
-	defer c.wg.Done()
+// createService creates the collector service.
+func (c *collector) createService() (svc *service.Collector, err error) {
+	defer func() {
+		if panicErr := recover(); panicErr != nil {
+			err = fmt.Errorf("panic during service creation: %v", panicErr)
+		}
+	}()
 
+	svc, err = service.New(c.settings)
+	if err != nil {
+		err = fmt.Errorf("failed to create service: %w", err)
+	}
+
+	return
+}
+
+// runService will run the collector service. This is a blocking function
+// that should be executed in a separate goroutine.
+func (c *collector) runService() {
+	defer func() {
+		if panicErr := recover(); panicErr != nil {
+			err := fmt.Errorf("panic while running service: %v", panicErr)
+			c.sendStatus(false, err)
+		}
+	}()
+
+	defer c.wg.Done()
 	err := c.svc.Run()
 	c.sendStatus(false, err)
 
