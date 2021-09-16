@@ -25,7 +25,7 @@ func (p *Persister) Read(ctx context.Context, key string) (int64, error) {
 	if err != nil && err.Error() != "EOF" {
 		return 0, err
 	}
-	return startTime, err
+	return startTime, nil
 }
 
 // Helper function to set persisted data
