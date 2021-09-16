@@ -360,7 +360,7 @@ func (c *CloudwatchInput) handleEvent(ctx context.Context, event *cloudwatchlogs
 	if *event.IngestionTime > c.startTime {
 		c.startTime = *event.IngestionTime
 		c.Debugf("Writing start time %d to database", *event.IngestionTime)
-		err := c.persist.Write(ctx, logGroupName, c.startTime)
+		err := c.persist.Write(ctx, fmt.Sprintf("%s-%s", c.ID(), logGroupName), c.startTime)
 		if err != nil {
 			c.Errorf("Failed to update persistent storage: %w", err)
 		}
