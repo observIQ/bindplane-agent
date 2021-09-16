@@ -45,6 +45,6 @@ func TestPersistentLoadNoKey(t *testing.T) {
 		DB: persister,
 	}
 	value, err := cwPersister.Read(ctx, "key")
-	require.Error(t, err)
+	require.NoError(t, err)
 	require.Equal(t, int64(0), value)
 }

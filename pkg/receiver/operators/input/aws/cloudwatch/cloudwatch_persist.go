@@ -22,7 +22,10 @@ func (p *Persister) Read(ctx context.Context, key string) (int64, error) {
 	buffer := bytes.NewBuffer(startTimeBytes)
 	var startTime int64
 	err = binary.Read(buffer, binary.BigEndian, &startTime)
-	return startTime, err
+	if err != nil && err.Error() != "EOF" {
+		return 0, err
+	}
+	return startTime, nil
 }
 
 // Helper function to set persisted data
