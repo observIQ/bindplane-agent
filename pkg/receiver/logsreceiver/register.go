@@ -54,5 +54,7 @@ import (
 	_ "github.com/observiq/observiq-collector/pkg/receiver/operators/input/azure/loganalytics"
 	_ "github.com/observiq/observiq-collector/pkg/receiver/operators/input/goflow"
 
+	_ "github.com/observiq/observiq-collector/pkg/receiver/operators/parser/keyvalue"
+
 	_ "github.com/observiq/observiq-collector/pkg/receiver/operators/transformer/k8smetadata"
 )
