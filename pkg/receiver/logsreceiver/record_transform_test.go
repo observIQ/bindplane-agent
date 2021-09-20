@@ -287,6 +287,19 @@ func TestTransform(t *testing.T) {
 			},
 		},
 		{
+			name: "Doesn't panic if expected IP array field is empty",
+			lrIn: mockLogRecord{
+				Body: map[string]interface{}{
+					"remote": "",
+				},
+			},
+			lrOut: mockLogRecord{
+				Body: map[string]interface{}{
+					"remote": "",
+				},
+			},
+		},
+		{
 			name: "Converts known int fields",
 			lrIn: mockLogRecord{
 				Body: map[string]interface{}{

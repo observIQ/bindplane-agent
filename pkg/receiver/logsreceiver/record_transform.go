@@ -141,8 +141,12 @@ func convertStringArrays(le *pdata.LogRecord) {
 			}
 
 			strVal := val.StringVal()
-
 			strVal = strings.TrimSpace(strVal)
+
+			if len(strVal) == 0 {
+				continue
+			}
+
 			if strVal[0] == '[' && strVal[len(strVal)-1] == ']' {
 				strVal = strVal[1 : len(strVal)-1]
 			}
