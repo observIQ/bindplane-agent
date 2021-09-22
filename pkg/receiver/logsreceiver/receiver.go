@@ -16,10 +16,12 @@ package logsreceiver
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"sync"
 
 	"github.com/open-telemetry/opentelemetry-log-collection/agent"
+	"go.etcd.io/bbolt"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/config"
 	"go.opentelemetry.io/collector/consumer"
@@ -52,6 +54,22 @@ func (r *receiver) Start(ctx context.Context, host component.Host) error {
 	r.logger.Info("Starting logs receiver")
 
 	if setErr := r.setStorageClient(ctx, host); setErr != nil {
+		// right now if a collector config is invalid opentelemetry still
+		// starts up components but returns an error early if receivers cannot be started up
+		// and this means that it never calls their respective shutdown.
+		// We have to manually invoke the storageclient Close() in the case that
+		// the collector never invokes shutdown correctly in order to free up the underlying bbolt database
+		// otherwise we get open conflicts while the collector is running inside memory
+		if r.storageClient != nil {
+			r.logger.Warn("closing the storage client for stanza receiver", zap.Error(setErr))
+			if err := r.storageClient.Close(ctx); err != nil {
+				r.logger.Error("there was an error closing the storage client", zap.Error(err))
+			}
+		}
+
+		if errors.Is(setErr, bbolt.ErrTimeout) {
+			return fmt.Errorf("storage client appears to have timed out, another process may be using the storage client. Error: %w", setErr)
+		}
 		return fmt.Errorf("storage client: %s", setErr)
 	}
 
