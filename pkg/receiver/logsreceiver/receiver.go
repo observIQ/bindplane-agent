@@ -54,19 +54,6 @@ func (r *receiver) Start(ctx context.Context, host component.Host) error {
 	r.logger.Info("Starting logs receiver")
 
 	if setErr := r.setStorageClient(ctx, host); setErr != nil {
-		// right now if a collector config is invalid opentelemetry still
-		// starts up components but returns an error early if receivers cannot be started up
-		// and this means that it never calls their respective shutdown.
-		// We have to manually invoke the storageclient Close() in the case that
-		// the collector never invokes shutdown correctly in order to free up the underlying bbolt database
-		// otherwise we get open conflicts while the collector is running inside memory
-		if r.storageClient != nil {
-			r.logger.Warn("closing the storage client for stanza receiver", zap.Error(setErr))
-			if err := r.storageClient.Close(ctx); err != nil {
-				r.logger.Error("there was an error closing the storage client", zap.Error(err))
-			}
-		}
-
 		if errors.Is(setErr, bbolt.ErrTimeout) {
 			return fmt.Errorf("storage client appears to have timed out, another process may be using the storage client. Error: %w", setErr)
 		}
@@ -74,6 +61,15 @@ func (r *receiver) Start(ctx context.Context, host component.Host) error {
 	}
 
 	if obsErr := r.agent.Start(r.getPersister()); obsErr != nil {
+		// with the current version of the open-telemetry collector
+		// if there is an error starting a component then any
+		// extensions already started will not receive a shutdown
+		// because of this we will have to manually close the storage client
+		// in this case
+		closeErr := r.closeStorageClient(ctx)
+		if closeErr != nil {
+			r.logger.Error("There was an erro closing the storage client", zap.Error(closeErr))
+		}
 		return fmt.Errorf("start stanza: %s", obsErr)
 	}
 
@@ -161,6 +157,6 @@ func (r *receiver) Shutdown(ctx context.Context) error {
 	r.cancel()
 	r.wg.Wait()
 
-	clientErr := r.storageClient.Close(ctx)
+	clientErr := r.closeStorageClient(ctx)
 	return multierr.Combine(agentErr, clientErr)
 }

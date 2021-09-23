@@ -49,6 +49,13 @@ func (r *receiver) setStorageClient(ctx context.Context, host component.Host) er
 	return nil
 }
 
+func (r *receiver) closeStorageClient(ctx context.Context) error {
+	if r.storageClient != nil {
+		return r.storageClient.Close(ctx)
+	}
+	return nil
+}
+
 func (r *receiver) getPersister() operator.Persister {
 	return &persister{r.storageClient}
 }
