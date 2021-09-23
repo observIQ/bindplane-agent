@@ -68,7 +68,7 @@ func (r *receiver) Start(ctx context.Context, host component.Host) error {
 		// in this case
 		closeErr := r.closeStorageClient(ctx)
 		if closeErr != nil {
-			r.logger.Error("There was an erro closing the storage client", zap.Error(closeErr))
+			r.logger.Error("There was an error closing the storage client", zap.Error(closeErr))
 		}
 		return fmt.Errorf("start stanza: %s", obsErr)
 	}
