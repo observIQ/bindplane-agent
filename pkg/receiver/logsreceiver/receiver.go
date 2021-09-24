@@ -16,10 +16,12 @@ package logsreceiver
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"sync"
 
 	"github.com/open-telemetry/opentelemetry-log-collection/agent"
+	"go.etcd.io/bbolt"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/config"
 	"go.opentelemetry.io/collector/consumer"
@@ -52,10 +54,22 @@ func (r *receiver) Start(ctx context.Context, host component.Host) error {
 	r.logger.Info("Starting logs receiver")
 
 	if setErr := r.setStorageClient(ctx, host); setErr != nil {
+		if errors.Is(setErr, bbolt.ErrTimeout) {
+			return fmt.Errorf("storage client appears to have timed out, another process may be using the storage client. Error: %w", setErr)
+		}
 		return fmt.Errorf("storage client: %s", setErr)
 	}
 
 	if obsErr := r.agent.Start(r.getPersister()); obsErr != nil {
+		// with the current version of the open-telemetry collector
+		// if there is an error starting a component then any
+		// extensions already started will not receive a shutdown
+		// because of this we will have to manually close the storage client
+		// in this case
+		closeErr := r.closeStorageClient(ctx)
+		if closeErr != nil {
+			r.logger.Error("There was an error closing the storage client", zap.Error(closeErr))
+		}
 		return fmt.Errorf("start stanza: %s", obsErr)
 	}
 
@@ -143,6 +157,6 @@ func (r *receiver) Shutdown(ctx context.Context) error {
 	r.cancel()
 	r.wg.Wait()
 
-	clientErr := r.storageClient.Close(ctx)
+	clientErr := r.closeStorageClient(ctx)
 	return multierr.Combine(agentErr, clientErr)
 }

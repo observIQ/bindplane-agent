@@ -141,7 +141,7 @@ func (c *collector) waitForStartup() error {
 		// without sending any states through the state channel. To handle this,
 		// we use an errChan to exit immediately.
 		case err := <-c.startupChan:
-			return err
+			return fmt.Errorf("failed onstartup: %w", err)
 		}
 	}
 }
