@@ -325,9 +325,7 @@ func TestKVParser(t *testing.T) {
 }
 
 func TestKVParserWithEmbeddedTimeParser(t *testing.T) {
-
 	testTime := time.Unix(1136214245, 0)
-
 	cases := []struct {
 		name          string
 		inputBody     map[string]interface{}
