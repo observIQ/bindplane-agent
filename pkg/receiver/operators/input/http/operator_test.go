@@ -18,9 +18,16 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+const (
+	authHeader        = "x-secret-key"
+	localHost         = "localhost"
+	defaultListenAddr = "localhost:0"
+	devUser           = "dev"
+)
+
 func TestStartStop(t *testing.T) {
-	address := "localhost"
-	port := freePort(address)
+	address := localHost
+	port := freeLocalHostPort()
 	if port == 0 {
 		t.Errorf("failed to find available port for test server")
 		return
@@ -39,14 +46,15 @@ func TestStartStop(t *testing.T) {
 
 	// stopping again should not panic
 	p := func() {
-		op.Stop()
+		err := op.Stop()
+		require.NoError(t, err)
 	}
 	require.NotPanics(t, p)
 }
 
 func TestServer(t *testing.T) {
-	address := "localhost"
-	port := freePort(address)
+	address := localHost
+	port := freeLocalHostPort()
 	if port == 0 {
 		t.Errorf("failed to find available port for test server")
 		return
@@ -143,7 +151,9 @@ func TestServer(t *testing.T) {
 				b, _ := json.Marshal(raw)
 				buf := bytes.NewBuffer(b)
 
-				req, _ := http.NewRequest("POST", u.String(), buf)
+				req, err := http.NewRequest("POST", u.String(), buf)
+				require.NoError(t, err)
+				defer req.Body.Close()
 				return req
 			}(),
 			413,
@@ -156,14 +166,15 @@ func TestServer(t *testing.T) {
 
 			resp, err := client.Do(tc.inputRequest)
 			require.NoError(t, err)
+			defer resp.Body.Close()
 			require.Equal(t, tc.expectStatus, resp.StatusCode)
 		})
 	}
 }
 
 func TestServerBasicAuth(t *testing.T) {
-	address := "localhost"
-	port := freePort(address)
+	address := localHost
+	port := freeLocalHostPort()
 	if port == 0 {
 		t.Errorf("failed to find available port for test server")
 		return
@@ -283,14 +294,15 @@ func TestServerBasicAuth(t *testing.T) {
 
 			resp, err := client.Do(tc.inputRequest)
 			require.NoError(t, err)
+			defer resp.Body.Close()
 			require.Equal(t, tc.expectStatus, resp.StatusCode)
 		})
 	}
 }
 
 func TestServerTokenAuth(t *testing.T) {
-	address := "localhost"
-	port := freePort(address)
+	address := localHost
+	port := freeLocalHostPort()
 	if port == 0 {
 		t.Errorf("failed to find available port for test server")
 		return
@@ -413,6 +425,7 @@ func TestServerTokenAuth(t *testing.T) {
 
 			resp, err := client.Do(tc.inputRequest)
 			require.NoError(t, err)
+			defer resp.Body.Close()
 			require.Equal(t, tc.expectStatus, resp.StatusCode)
 		})
 	}
@@ -657,18 +670,17 @@ func TestAddProtoLabelsError(t *testing.T) {
 	require.Error(t, addProtoLabels("HTTP/t", e))
 }
 
-func freePort(address string) int {
+func freeLocalHostPort() int {
 	port := 0
 	minPort := 40000
 	maxPort := 50000
 	for i := 1; i < 50; i++ {
 		port = minPort + rand.Intn(maxPort-minPort+1)
-		d, err := net.DialTimeout("tcp", net.JoinHostPort(address, strconv.Itoa(port)), time.Second*2)
+		d, err := net.DialTimeout("tcp", net.JoinHostPort(localHost, strconv.Itoa(port)), time.Second*2)
 		if err == nil {
 			d.Close()
 			break
 		}
-
 	}
 	return port
 }
@@ -691,10 +703,11 @@ func testConnection(address string) error {
 
 	attempt := 0
 	for {
-		_, err := client.Do(req)
+		resp, err := client.Do(req)
 		if err == nil {
 			return nil
 		}
+		resp.Body.Close()
 
 		if attempt == 5 {
 			return fmt.Errorf("test connection failed, the http server may not have started correctly: %s", err)

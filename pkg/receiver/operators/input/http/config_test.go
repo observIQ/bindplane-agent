@@ -46,7 +46,7 @@ func TestBuildOperator(t *testing.T) {
 			func() (*HTTPInputConfig, func() error, error) {
 				cfg := NewHTTPInputConfig("test_id")
 				cfg.ListenAddress = ":0"
-				cfg.AuthConfig.Username = "dev"
+				cfg.AuthConfig.Username = devUser
 				cfg.AuthConfig.Password = "dev-password"
 				return cfg, nil, nil
 			},
@@ -58,7 +58,7 @@ func TestBuildOperator(t *testing.T) {
 			func() (*HTTPInputConfig, func() error, error) {
 				cfg := NewHTTPInputConfig("test_id")
 				cfg.ListenAddress = ":0"
-				cfg.AuthConfig.Username = "dev"
+				cfg.AuthConfig.Username = devUser
 				return cfg, nil, nil
 			},
 			true,
@@ -69,7 +69,7 @@ func TestBuildOperator(t *testing.T) {
 			func() (*HTTPInputConfig, func() error, error) {
 				cfg := NewHTTPInputConfig("test_id")
 				cfg.ListenAddress = ":0"
-				cfg.AuthConfig.Password = "dev"
+				cfg.AuthConfig.Password = devUser
 				return cfg, nil, nil
 			},
 			true,
@@ -81,8 +81,8 @@ func TestBuildOperator(t *testing.T) {
 				cfg := NewHTTPInputConfig("test_id")
 				cfg.ListenAddress = ":0"
 				cfg.AuthConfig.Username = "stanza"
-				cfg.AuthConfig.Password = "dev"
-				cfg.AuthConfig.TokenHeader = "x-secret-key"
+				cfg.AuthConfig.Password = devUser
+				cfg.AuthConfig.TokenHeader = authHeader
 				cfg.AuthConfig.Tokens = []string{"token-a", "token-b"}
 				return cfg, nil, nil
 			},
@@ -94,7 +94,7 @@ func TestBuildOperator(t *testing.T) {
 			func() (*HTTPInputConfig, func() error, error) {
 				cfg := NewHTTPInputConfig("test_id")
 				cfg.ListenAddress = ":0"
-				cfg.AuthConfig.TokenHeader = "x-secret-key"
+				cfg.AuthConfig.TokenHeader = authHeader
 				cfg.AuthConfig.Tokens = []string{"token-a", "token-b"}
 				return cfg, nil, nil
 			},
@@ -106,7 +106,7 @@ func TestBuildOperator(t *testing.T) {
 			func() (*HTTPInputConfig, func() error, error) {
 				cfg := NewHTTPInputConfig("test_id")
 				cfg.ListenAddress = ":0"
-				cfg.AuthConfig.TokenHeader = "x-secret-key"
+				cfg.AuthConfig.TokenHeader = authHeader
 				return cfg, nil, nil
 			},
 			true,
@@ -116,7 +116,7 @@ func TestBuildOperator(t *testing.T) {
 			"localhost-address",
 			func() (*HTTPInputConfig, func() error, error) {
 				cfg := NewHTTPInputConfig("test_id")
-				cfg.ListenAddress = "localhost:0"
+				cfg.ListenAddress = defaultListenAddr
 				return cfg, nil, nil
 			},
 			false,
@@ -156,7 +156,7 @@ func TestBuildOperator(t *testing.T) {
 			"no-port",
 			func() (*HTTPInputConfig, func() error, error) {
 				cfg := NewHTTPInputConfig("test_id")
-				cfg.ListenAddress = "localhost"
+				cfg.ListenAddress = localHost
 				return cfg, nil, nil
 			},
 			true,
@@ -171,7 +171,7 @@ func TestBuildOperator(t *testing.T) {
 				}
 
 				cfg := NewHTTPInputConfig("test_id")
-				cfg.ListenAddress = "localhost:0"
+				cfg.ListenAddress = defaultListenAddr
 				cfg.TLS = TLSConfig{
 					Enable:      true,
 					Certificate: crt,
@@ -192,7 +192,7 @@ func TestBuildOperator(t *testing.T) {
 				}
 
 				cfg := NewHTTPInputConfig("test_id")
-				cfg.ListenAddress = "localhost:0"
+				cfg.ListenAddress = defaultListenAddr
 				cfg.TLS = TLSConfig{
 					Enable:      true,
 					Certificate: crt,
@@ -214,7 +214,7 @@ func TestBuildOperator(t *testing.T) {
 				}
 
 				cfg := NewHTTPInputConfig("test_id")
-				cfg.ListenAddress = "localhost:0"
+				cfg.ListenAddress = defaultListenAddr
 				cfg.TLS = TLSConfig{
 					Enable:      true,
 					Certificate: crt,
@@ -236,7 +236,7 @@ func TestBuildOperator(t *testing.T) {
 				}
 
 				cfg := NewHTTPInputConfig("test_id")
-				cfg.ListenAddress = "localhost:0"
+				cfg.ListenAddress = defaultListenAddr
 				cfg.TLS = TLSConfig{
 					Enable:      true,
 					Certificate: crt,
@@ -258,7 +258,7 @@ func TestBuildOperator(t *testing.T) {
 				}
 
 				cfg := NewHTTPInputConfig("test_id")
-				cfg.ListenAddress = "localhost:0"
+				cfg.ListenAddress = defaultListenAddr
 				cfg.TLS = TLSConfig{
 					Enable:      true,
 					Certificate: crt,
@@ -275,7 +275,7 @@ func TestBuildOperator(t *testing.T) {
 			"tls-disabled-with-config",
 			func() (*HTTPInputConfig, func() error, error) {
 				cfg := NewHTTPInputConfig("test_id")
-				cfg.ListenAddress = "localhost:0"
+				cfg.ListenAddress = defaultListenAddr
 				cfg.TLS = TLSConfig{
 					Enable:      false,
 					Certificate: "/tmp/crt",
@@ -297,7 +297,7 @@ func TestBuildOperator(t *testing.T) {
 				}
 
 				cfg := NewHTTPInputConfig("test_id")
-				cfg.ListenAddress = "localhost:0"
+				cfg.ListenAddress = defaultListenAddr
 				cfg.TLS = TLSConfig{
 					Enable:      true,
 					Certificate: crt,
@@ -319,7 +319,7 @@ func TestBuildOperator(t *testing.T) {
 				}
 
 				cfg := NewHTTPInputConfig("test_id")
-				cfg.ListenAddress = "localhost:0"
+				cfg.ListenAddress = defaultListenAddr
 				cfg.TLS = TLSConfig{
 					Enable:      true,
 					Certificate: "",
@@ -341,7 +341,7 @@ func TestBuildOperator(t *testing.T) {
 				}
 
 				cfg := NewHTTPInputConfig("test_id")
-				cfg.ListenAddress = "localhost:0"
+				cfg.ListenAddress = defaultListenAddr
 				cfg.TLS = TLSConfig{
 					Enable:      true,
 					Certificate: crt,
@@ -363,7 +363,7 @@ func TestBuildOperator(t *testing.T) {
 				}
 
 				cfg := NewHTTPInputConfig("test_id")
-				cfg.ListenAddress = "localhost:0"
+				cfg.ListenAddress = defaultListenAddr
 				cfg.TLS = TLSConfig{
 					Enable:      true,
 					Certificate: "/tmp/some-invalid-path",
@@ -385,7 +385,7 @@ func TestBuildOperator(t *testing.T) {
 				}
 
 				cfg := NewHTTPInputConfig("test_id")
-				cfg.ListenAddress = "localhost:0"
+				cfg.ListenAddress = defaultListenAddr
 				cfg.TLS = TLSConfig{
 					Enable:      true,
 					Certificate: crt,
@@ -402,7 +402,7 @@ func TestBuildOperator(t *testing.T) {
 			"read-timeout",
 			func() (*HTTPInputConfig, func() error, error) {
 				cfg := NewHTTPInputConfig("test_id")
-				cfg.ListenAddress = "localhost:0"
+				cfg.ListenAddress = defaultListenAddr
 				cfg.ReadTimeout = helper.NewDuration(10)
 				return cfg, nil, nil
 			},
@@ -413,7 +413,7 @@ func TestBuildOperator(t *testing.T) {
 			"read-timeout-0",
 			func() (*HTTPInputConfig, func() error, error) {
 				cfg := NewHTTPInputConfig("test_id")
-				cfg.ListenAddress = "localhost:0"
+				cfg.ListenAddress = defaultListenAddr
 				cfg.ReadTimeout = helper.NewDuration(0)
 				return cfg, nil, nil
 			},
@@ -424,7 +424,7 @@ func TestBuildOperator(t *testing.T) {
 			"read-timeout-negative",
 			func() (*HTTPInputConfig, func() error, error) {
 				cfg := NewHTTPInputConfig("test_id")
-				cfg.ListenAddress = "localhost:0"
+				cfg.ListenAddress = defaultListenAddr
 				cfg.ReadTimeout = helper.NewDuration(-1)
 				return cfg, nil, nil
 			},
@@ -435,7 +435,7 @@ func TestBuildOperator(t *testing.T) {
 			"idle-timeout",
 			func() (*HTTPInputConfig, func() error, error) {
 				cfg := NewHTTPInputConfig("test_id")
-				cfg.ListenAddress = "localhost:0"
+				cfg.ListenAddress = defaultListenAddr
 				cfg.IdleTimeout = helper.NewDuration(10)
 				return cfg, nil, nil
 			},
@@ -446,7 +446,7 @@ func TestBuildOperator(t *testing.T) {
 			"idle-timeout-0",
 			func() (*HTTPInputConfig, func() error, error) {
 				cfg := NewHTTPInputConfig("test_id")
-				cfg.ListenAddress = "localhost:0"
+				cfg.ListenAddress = defaultListenAddr
 				cfg.IdleTimeout = helper.NewDuration(0)
 				return cfg, nil, nil
 			},
@@ -457,7 +457,7 @@ func TestBuildOperator(t *testing.T) {
 			"idle-timeout-negative",
 			func() (*HTTPInputConfig, func() error, error) {
 				cfg := NewHTTPInputConfig("test_id")
-				cfg.ListenAddress = "localhost:0"
+				cfg.ListenAddress = defaultListenAddr
 				cfg.IdleTimeout = helper.NewDuration(-1)
 				return cfg, nil, nil
 			},
@@ -468,7 +468,7 @@ func TestBuildOperator(t *testing.T) {
 			"write-timeout",
 			func() (*HTTPInputConfig, func() error, error) {
 				cfg := NewHTTPInputConfig("test_id")
-				cfg.ListenAddress = "localhost:0"
+				cfg.ListenAddress = defaultListenAddr
 				cfg.WriteTimeout = helper.NewDuration(10)
 				return cfg, nil, nil
 			},
@@ -479,7 +479,7 @@ func TestBuildOperator(t *testing.T) {
 			"write-timeout-0",
 			func() (*HTTPInputConfig, func() error, error) {
 				cfg := NewHTTPInputConfig("test_id")
-				cfg.ListenAddress = "localhost:0"
+				cfg.ListenAddress = defaultListenAddr
 				cfg.WriteTimeout = helper.NewDuration(0)
 				return cfg, nil, nil
 			},
@@ -490,7 +490,7 @@ func TestBuildOperator(t *testing.T) {
 			"write-timeout-negative",
 			func() (*HTTPInputConfig, func() error, error) {
 				cfg := NewHTTPInputConfig("test_id")
-				cfg.ListenAddress = "localhost:0"
+				cfg.ListenAddress = defaultListenAddr
 				cfg.WriteTimeout = helper.NewDuration(-1)
 				return cfg, nil, nil
 			},
@@ -501,7 +501,7 @@ func TestBuildOperator(t *testing.T) {
 			"max-header-size",
 			func() (*HTTPInputConfig, func() error, error) {
 				cfg := NewHTTPInputConfig("test_id")
-				cfg.ListenAddress = "localhost:0"
+				cfg.ListenAddress = defaultListenAddr
 				cfg.MaxHeaderSize = helper.ByteSize(100)
 				return cfg, nil, nil
 			},
@@ -512,7 +512,7 @@ func TestBuildOperator(t *testing.T) {
 			"max-header-size-0",
 			func() (*HTTPInputConfig, func() error, error) {
 				cfg := NewHTTPInputConfig("test_id")
-				cfg.ListenAddress = "localhost:0"
+				cfg.ListenAddress = defaultListenAddr
 				cfg.MaxHeaderSize = helper.ByteSize(0)
 				return cfg, nil, nil
 			},
@@ -523,7 +523,7 @@ func TestBuildOperator(t *testing.T) {
 			"max-header-negative",
 			func() (*HTTPInputConfig, func() error, error) {
 				cfg := NewHTTPInputConfig("test_id")
-				cfg.ListenAddress = "localhost:0"
+				cfg.ListenAddress = defaultListenAddr
 				cfg.MaxHeaderSize = helper.ByteSize(-1)
 				return cfg, nil, nil
 			},
@@ -534,7 +534,7 @@ func TestBuildOperator(t *testing.T) {
 			"max-body-size",
 			func() (*HTTPInputConfig, func() error, error) {
 				cfg := NewHTTPInputConfig("test_id")
-				cfg.ListenAddress = "localhost:0"
+				cfg.ListenAddress = defaultListenAddr
 				cfg.MaxBodySize = helper.ByteSize(1000)
 				return cfg, nil, nil
 			},
@@ -545,7 +545,7 @@ func TestBuildOperator(t *testing.T) {
 			"max-body-size-0",
 			func() (*HTTPInputConfig, func() error, error) {
 				cfg := NewHTTPInputConfig("test_id")
-				cfg.ListenAddress = "localhost:0"
+				cfg.ListenAddress = defaultListenAddr
 				cfg.MaxBodySize = helper.ByteSize(0)
 				return cfg, nil, nil
 			},
