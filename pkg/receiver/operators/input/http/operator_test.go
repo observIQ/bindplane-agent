@@ -224,6 +224,32 @@ func TestServerBasicAuth(t *testing.T) {
 			403,
 		},
 		{
+			"auth-not-required",
+			func() *http.Request {
+				u := url.URL{
+					Scheme: "http",
+					Host:   cfg.ListenAddress,
+					Path:   "/",
+				}
+				req, _ := http.NewRequest("GET", u.String(), nil)
+				return req
+			}(),
+			200,
+		},
+		{
+			"auth-not-required-health",
+			func() *http.Request {
+				u := url.URL{
+					Scheme: "http",
+					Host:   cfg.ListenAddress,
+					Path:   "/",
+				}
+				req, _ := http.NewRequest("GET", u.String(), nil)
+				return req
+			}(),
+			200,
+		},
+		{
 			"valid",
 			func() *http.Request {
 				u := url.URL{
@@ -353,6 +379,32 @@ func TestServerTokenAuth(t *testing.T) {
 				return req
 			}(),
 			201,
+		},
+		{
+			"auth-not-required",
+			func() *http.Request {
+				u := url.URL{
+					Scheme: "http",
+					Host:   cfg.ListenAddress,
+					Path:   "/",
+				}
+				req, _ := http.NewRequest("GET", u.String(), nil)
+				return req
+			}(),
+			200,
+		},
+		{
+			"auth-not-required-health",
+			func() *http.Request {
+				u := url.URL{
+					Scheme: "http",
+					Host:   cfg.ListenAddress,
+					Path:   "/health",
+				}
+				req, _ := http.NewRequest("GET", u.String(), nil)
+				return req
+			}(),
+			200,
 		},
 		{
 			"test-token2",
