@@ -237,6 +237,39 @@ func TestServerBasicAuth(t *testing.T) {
 			200,
 		},
 		{
+			"auth-required",
+			func() *http.Request {
+				u := url.URL{
+					Scheme: "http",
+					Host:   cfg.ListenAddress,
+					Path:   "/",
+				}
+				req, _ := http.NewRequest("POST", u.String(), nil)
+				return req
+			}(),
+			403,
+		},
+		{
+			"auth-required-get",
+			func() *http.Request {
+				u := url.URL{
+					Scheme: "http",
+					Host:   cfg.ListenAddress,
+					Path:   "/",
+				}
+
+				raw := map[string]interface{}{
+					"message": "this is a basic event",
+				}
+				b, _ := json.Marshal(raw)
+				buf := bytes.NewBuffer(b)
+
+				req, _ := http.NewRequest("GET", u.String(), buf)
+				return req
+			}(),
+			403,
+		},
+		{
 			"auth-not-required-health",
 			func() *http.Request {
 				u := url.URL{
@@ -405,6 +438,39 @@ func TestServerTokenAuth(t *testing.T) {
 				return req
 			}(),
 			200,
+		},
+		{
+			"auth-required",
+			func() *http.Request {
+				u := url.URL{
+					Scheme: "http",
+					Host:   cfg.ListenAddress,
+					Path:   "/",
+				}
+				req, _ := http.NewRequest("POST", u.String(), nil)
+				return req
+			}(),
+			403,
+		},
+		{
+			"auth-required-get",
+			func() *http.Request {
+				u := url.URL{
+					Scheme: "http",
+					Host:   cfg.ListenAddress,
+					Path:   "/",
+				}
+
+				raw := map[string]interface{}{
+					"message": "this is a basic event",
+				}
+				b, _ := json.Marshal(raw)
+				buf := bytes.NewBuffer(b)
+
+				req, _ := http.NewRequest("GET", u.String(), buf)
+				return req
+			}(),
+			403,
 		},
 		{
 			"test-token2",
