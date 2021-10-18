@@ -14,6 +14,11 @@ type authToken struct {
 
 func (a authToken) auth(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// GET requests without a body do not require auth
+		if r.Method == http.MethodGet && r.Body == http.NoBody {
+			return
+		}
+
 		token := r.Header.Get(a.tokenHeader)
 
 		for _, validToken := range a.tokens {
@@ -37,6 +42,11 @@ type authBasic struct {
 
 func (a authBasic) auth(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// GET requests without a body do not require auth
+		if r.Method == http.MethodGet && r.Body == http.NoBody {
+			return
+		}
+
 		u, p, ok := r.BasicAuth()
 		if ok {
 			if u == a.username && p == a.password {

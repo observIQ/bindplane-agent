@@ -53,17 +53,17 @@ func (t *HTTPInput) Stop() error {
 
 // goListenn will listen for http connections.
 func (t *HTTPInput) goListen(ctx context.Context) {
-	entryCreateMethods := []string{"POST", "PUT"}
+	entryCreateMethods := []string{http.MethodPost, http.MethodPut}
 
 	m := mux.NewRouter()
 	m.HandleFunc("/", t.goHandleMessages).Methods(entryCreateMethods...)
+	m.HandleFunc("/", t.health).Methods(http.MethodGet)
+	m.HandleFunc("/health", t.health).Methods(http.MethodGet)
 
 	if t.auth != nil {
 		t.Debugf("using authentication middleware: %s", t.auth.name())
 		m.Use(t.auth.auth)
 	}
-
-	m.HandleFunc("/health", t.health).Methods("GET")
 
 	t.server.Handler = m
 
