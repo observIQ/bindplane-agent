@@ -1,12 +1,13 @@
 package collector
 
 import (
+	"context"
 	"fmt"
 
-	"go.opentelemetry.io/collector/config/configparser"
+	"go.opentelemetry.io/collector/config"
 )
 
-// FileProvider is a parser provider that uses a file.
+// FileProvider is a config provider that uses a file.
 type FileProvider struct {
 	filePath string
 }
@@ -18,12 +19,23 @@ func NewFileProvider(filePath string) *FileProvider {
 	}
 }
 
-// Get returns a config parser from the provider.
-func (f *FileProvider) Get() (*configparser.Parser, error) {
-	cp, err := configparser.NewParserFromFile(f.filePath)
+// Get returns a config map from the provider.
+func (f *FileProvider) Get(ctx context.Context) (*config.Map, error) {
+	select {
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	default:
+	}
+
+	configMap, err := config.NewMapFromFile(f.filePath)
 	if err != nil {
 		return nil, fmt.Errorf("error loading config file: %w", err)
 	}
 
-	return cp, nil
+	return configMap, nil
+}
+
+// Close closes the file provider.
+func (f *FileProvider) Close(ctx context.Context) error {
+	return nil
 }

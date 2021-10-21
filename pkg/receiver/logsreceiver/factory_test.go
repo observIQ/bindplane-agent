@@ -28,7 +28,9 @@ import (
 
 func TestCreateReceiver(t *testing.T) {
 	params := component.ReceiverCreateSettings{
-		Logger: zap.NewNop(),
+		TelemetrySettings: component.TelemetrySettings{
+			Logger: zap.NewNop(),
+		},
 	}
 
 	t.Run("Success", func(t *testing.T) {

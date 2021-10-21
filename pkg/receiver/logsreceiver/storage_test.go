@@ -90,7 +90,9 @@ func TestFailOnMultipleStorageExtensions(t *testing.T) {
 
 func createReceiver(t *testing.T) *receiver {
 	params := component.ReceiverCreateSettings{
-		Logger: zaptest.NewLogger(t),
+		TelemetrySettings: component.TelemetrySettings{
+			Logger: zaptest.NewLogger(t),
+		},
 	}
 	mockConsumer := mockLogsConsumer{}
 
@@ -142,7 +144,11 @@ func TestCheckpoint(t *testing.T) {
 	storageDir := newTempDir(t)
 
 	f := NewFactory()
-	params := component.ReceiverCreateSettings{Logger: zaptest.NewLogger(t)}
+	params := component.ReceiverCreateSettings{
+		TelemetrySettings: component.TelemetrySettings{
+			Logger: zaptest.NewLogger(t),
+		},
+	}
 
 	cfg := testdataRotateTestYamlAsMap(logsDir)
 	cfg.Converter.MaxFlushCount = 1

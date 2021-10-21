@@ -5,11 +5,11 @@ import (
 	"testing"
 
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/observiqexporter"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/extension/bearertokenauthextension"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/attributesprocessor"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/tcplogreceiver"
 	"github.com/stretchr/testify/assert"
 	"go.opentelemetry.io/collector/component"
-	"go.opentelemetry.io/collector/extension/bearertokenauthextension"
-	"go.opentelemetry.io/collector/processor/attributesprocessor"
 )
 
 func TestCombineFactories(t *testing.T) {
@@ -54,7 +54,7 @@ func TestCombineFactories(t *testing.T) {
 				bearertokenauthextension.NewFactory(),
 				bearertokenauthextension.NewFactory(),
 			},
-			expectedError: errors.New(`[duplicate receiver factory "tcplog"; duplicate processor factory "attributes"; duplicate exporter factory "observiq"; duplicate extension factory "bearertokenauth"]`),
+			expectedError: errors.New(`duplicate receiver factory "tcplog"; duplicate processor factory "attributes"; duplicate exporter factory "observiq"; duplicate extension factory "bearertokenauth"`),
 		},
 	}
 

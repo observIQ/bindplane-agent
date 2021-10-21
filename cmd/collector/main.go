@@ -20,7 +20,7 @@ func main() {
 	defer cancel()
 
 	collector := collector.New(*configPath, version.Version(), nil)
-	if err := collector.Run(); err != nil {
+	if err := collector.Run(ctx); err != nil {
 		log.Panicf("Collector failed to start: %s", err)
 	}
 	defer collector.Stop()
