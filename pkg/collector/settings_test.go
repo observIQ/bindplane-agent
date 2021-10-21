@@ -12,7 +12,7 @@ func TestNewSettings(t *testing.T) {
 	require.Equal(t, settings.LoggingOptions, []zap.Option(nil))
 	require.True(t, settings.DisableGracefulShutdown)
 
-	fileProvider, ok := settings.ParserProvider.(*FileProvider)
+	fileProvider, ok := settings.ConfigMapProvider.(*FileProvider)
 	require.True(t, ok)
 	require.Equal(t, "./test/valid.yaml", fileProvider.filePath)
 }

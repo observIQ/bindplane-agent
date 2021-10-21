@@ -20,7 +20,7 @@ func TestUnixTimestampToOtelTimestamp(t *testing.T) {
 
 func TestCoerceValToTimestamp(t *testing.T) {
 	testDate := time.Date(2021, 6, 16, 13, 32, 0, 0, time.UTC)
-	testDateTs := pdata.TimestampFromTime(testDate)
+	testDateTs := pdata.NewTimestampFromTime(testDate)
 	origLocal := time.Local
 
 	testCases := []struct {

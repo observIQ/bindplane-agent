@@ -1,6 +1,7 @@
 package collector
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"sync"
@@ -11,9 +12,9 @@ import (
 
 // Collector is an interface for running the open telemetry collector.
 type Collector interface {
-	Run() error
+	Run(context.Context) error
 	Stop()
-	Restart() error
+	Restart(context.Context) error
 	Status() <-chan *Status
 }
 
@@ -42,7 +43,7 @@ func New(configPath string, version string, loggingOpts []zap.Option) Collector 
 
 // Run will run the collector. This function will return an error
 // if the collector was unable to startup.
-func (c *collector) Run() error {
+func (c *collector) Run(ctx context.Context) error {
 	c.svcMux.Lock()
 	defer c.svcMux.Unlock()
 
@@ -63,7 +64,7 @@ func (c *collector) Run() error {
 	c.wg = &sync.WaitGroup{}
 	c.wg.Add(1)
 
-	go c.runService()
+	go c.runService(ctx)
 
 	// A race condition exists in the OT collector where the shutdown channel
 	// is not guaranteed to be initialized before the shutdown function is called.
@@ -86,9 +87,9 @@ func (c *collector) Stop() {
 }
 
 // Restart will restart the collector.
-func (c *collector) Restart() error {
+func (c *collector) Restart(ctx context.Context) error {
 	c.Stop()
-	return c.Run()
+	return c.Run(ctx)
 }
 
 // createService creates the collector service.
@@ -109,7 +110,7 @@ func (c *collector) createService() (svc *service.Collector, err error) {
 
 // runService will run the collector service. This is a blocking function
 // that should be executed in a separate goroutine.
-func (c *collector) runService() {
+func (c *collector) runService(ctx context.Context) {
 	defer func() {
 		if panicErr := recover(); panicErr != nil {
 			err := fmt.Errorf("panic while running service: %v", panicErr)
@@ -118,7 +119,7 @@ func (c *collector) runService() {
 	}()
 
 	defer c.wg.Done()
-	err := c.svc.Run()
+	err := c.svc.Run(ctx)
 	c.sendStatus(false, err)
 
 	if err != nil {

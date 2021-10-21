@@ -37,7 +37,9 @@ import (
 
 func TestStart(t *testing.T) {
 	params := component.ReceiverCreateSettings{
-		Logger: zaptest.NewLogger(t),
+		TelemetrySettings: component.TelemetrySettings{
+			Logger: zaptest.NewLogger(t),
+		},
 	}
 	mockConsumer := mockLogsConsumer{}
 
@@ -75,7 +77,9 @@ func TestStart(t *testing.T) {
 
 func TestPlugins(t *testing.T) {
 	params := component.ReceiverCreateSettings{
-		Logger: zaptest.NewLogger(t),
+		TelemetrySettings: component.TelemetrySettings{
+			Logger: zaptest.NewLogger(t),
+		},
 	}
 	mockConsumer := mockLogsConsumer{}
 
@@ -112,7 +116,9 @@ func TestPlugins(t *testing.T) {
 
 func TestHandleStartError(t *testing.T) {
 	params := component.ReceiverCreateSettings{
-		Logger: zaptest.NewLogger(t),
+		TelemetrySettings: component.TelemetrySettings{
+			Logger: zaptest.NewLogger(t),
+		},
 	}
 	mockConsumer := mockLogsConsumer{}
 
@@ -133,7 +139,9 @@ func TestHandleStartError(t *testing.T) {
 
 func TestHandleConsumeError(t *testing.T) {
 	params := component.ReceiverCreateSettings{
-		Logger: zaptest.NewLogger(t),
+		TelemetrySettings: component.TelemetrySettings{
+			Logger: zaptest.NewLogger(t),
+		},
 	}
 	mockConsumer := mockLogsRejecter{}
 	factory := NewFactory()
@@ -271,7 +279,7 @@ func BenchmarkParseAndMap(b *testing.B) {
 
 func testdataRotateTestYamlAsMap(tempDir string) *Config {
 	return &Config{
-		ReceiverSettings: config.NewReceiverSettings(config.NewID(typeStr)),
+		ReceiverSettings: config.NewReceiverSettings(config.NewComponentID(typeStr)),
 		Pipeline: OperatorConfigs{
 			map[string]interface{}{
 				"type": "file_input",

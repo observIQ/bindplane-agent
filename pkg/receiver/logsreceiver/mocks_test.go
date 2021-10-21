@@ -24,7 +24,7 @@ import (
 	"github.com/open-telemetry/opentelemetry-log-collection/operator"
 	"github.com/open-telemetry/opentelemetry-log-collection/operator/helper"
 	"go.opentelemetry.io/collector/consumer"
-	"go.opentelemetry.io/collector/extension/storage"
+	"go.opentelemetry.io/collector/extension/experimental/storage"
 	"go.opentelemetry.io/collector/model/pdata"
 )
 

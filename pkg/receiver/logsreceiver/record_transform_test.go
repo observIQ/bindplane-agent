@@ -68,7 +68,7 @@ func TestTransform(t *testing.T) {
 				},
 			},
 			lrOut: mockLogRecord{
-				Timestamp: pdata.TimestampFromTime(testDate),
+				Timestamp: pdata.NewTimestampFromTime(testDate),
 				Body: map[string]interface{}{
 					"anotherValue": "val",
 				},
@@ -83,7 +83,7 @@ func TestTransform(t *testing.T) {
 				},
 			},
 			lrOut: mockLogRecord{
-				Timestamp: pdata.TimestampFromTime(testDate),
+				Timestamp: pdata.NewTimestampFromTime(testDate),
 				Body: map[string]interface{}{
 					"anotherValue": "val",
 				},
@@ -98,7 +98,7 @@ func TestTransform(t *testing.T) {
 				},
 			},
 			lrOut: mockLogRecord{
-				Timestamp: pdata.TimestampFromTime(testDate),
+				Timestamp: pdata.NewTimestampFromTime(testDate),
 				Body: map[string]interface{}{
 					"anotherValue": "val",
 				},

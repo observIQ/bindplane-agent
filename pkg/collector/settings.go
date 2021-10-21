@@ -24,7 +24,7 @@ func NewSettings(configPath string, version string, loggingOpts []zap.Option) se
 		Factories:               factories,
 		BuildInfo:               buildInfo,
 		LoggingOptions:          loggingOpts,
-		ParserProvider:          provider,
+		ConfigMapProvider:       provider,
 		DisableGracefulShutdown: true,
 	}
 }

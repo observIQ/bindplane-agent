@@ -40,7 +40,7 @@ func NewFactory() component.ReceiverFactory {
 
 func createDefaultConfig() config.Receiver {
 	return &Config{
-		ReceiverSettings: config.NewReceiverSettings(config.NewID(typeStr)),
+		ReceiverSettings: config.NewReceiverSettings(config.NewComponentID(typeStr)),
 		Pipeline:         OperatorConfigs{},
 		Converter: ConverterConfig{
 			MaxFlushCount: DefaultMaxFlushCount,

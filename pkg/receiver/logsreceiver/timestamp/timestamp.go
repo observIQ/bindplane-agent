@@ -62,7 +62,7 @@ func CoerceValToTimestamp(val pdata.AttributeValue) (pdata.Timestamp, bool) {
 						continue
 					}
 				}
-				return pdata.TimestampFromTime(date), true
+				return pdata.NewTimestampFromTime(date), true
 			}
 		}
 	case pdata.AttributeValueTypeInt:

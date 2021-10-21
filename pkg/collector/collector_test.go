@@ -16,8 +16,9 @@ import (
 )
 
 func TestCollectorRunValid(t *testing.T) {
+	ctx := context.Background()
 	collector := New("./test/valid.yaml", "0.0.0", nil)
-	err := collector.Run()
+	err := collector.Run(ctx)
 	require.NoError(t, err)
 
 	status := <-collector.Status()
@@ -30,11 +31,12 @@ func TestCollectorRunValid(t *testing.T) {
 }
 
 func TestCollectorRunMultiple(t *testing.T) {
+	ctx := context.Background()
 	collector := New("./test/valid.yaml", "0.0.0", nil)
 	for i := 1; i < 5; i++ {
 		attempt := fmt.Sprintf("Attempt %d", i)
 		t.Run(attempt, func(t *testing.T) {
-			err := collector.Run()
+			err := collector.Run(ctx)
 			require.NoError(t, err)
 
 			status := <-collector.Status()
@@ -49,14 +51,28 @@ func TestCollectorRunMultiple(t *testing.T) {
 }
 
 func TestCollectorRunInvalidConfig(t *testing.T) {
+	ctx := context.Background()
 	collector := New("./test/invalid.yaml", "0.0.0", nil)
-	err := collector.Run()
+	err := collector.Run(ctx)
 	require.Error(t, err)
 
 	status := <-collector.Status()
 	require.False(t, status.Running)
 	require.Error(t, status.Err)
-	require.Contains(t, status.Err.Error(), "cannot build pipelines")
+	require.Contains(t, status.Err.Error(), "cannot build receivers")
+}
+
+func TestCollectorRunCancelledContext(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+
+	collector := New("./test/valid.yaml", "0.0.0", nil)
+	err := collector.Run(ctx)
+	require.Error(t, err)
+
+	status := <-collector.Status()
+	require.False(t, status.Running)
+	require.Contains(t, status.Err.Error(), "context canceled")
 }
 
 func TestCollectorRunInvalidFactory(t *testing.T) {
@@ -69,8 +85,9 @@ func TestCollectorRunInvalidFactory(t *testing.T) {
 		createInvalidExtension,
 	))
 
+	ctx := context.Background()
 	collector := New("./test/valid.yaml", "0.0.0", nil)
-	err := collector.Run()
+	err := collector.Run(ctx)
 	require.Error(t, err)
 
 	status := <-collector.Status()
@@ -79,23 +96,25 @@ func TestCollectorRunInvalidFactory(t *testing.T) {
 }
 
 func TestCollectorRunTwice(t *testing.T) {
+	ctx := context.Background()
 	collector := New("./test/valid.yaml", "0.0.0", nil)
-	err := collector.Run()
+	err := collector.Run(ctx)
 	require.NoError(t, err)
 	defer collector.Stop()
 
-	err = collector.Run()
+	err = collector.Run(ctx)
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "service already running")
 }
 
 func TestCollectorRestart(t *testing.T) {
+	ctx := context.Background()
 	collector := New("./test/valid.yaml", "0.0.0", nil)
-	err := collector.Run()
+	err := collector.Run(ctx)
 	require.NoError(t, err)
 
 	defer collector.Stop()
-	err = collector.Restart()
+	err = collector.Restart(ctx)
 	require.NoError(t, err)
 
 	status := <-collector.Status()
@@ -134,13 +153,14 @@ func TestCollectorCreateServicePanic(t *testing.T) {
 }
 
 func TestCollectorRunServicePanic(t *testing.T) {
+	ctx := context.Background()
 	collector := &collector{
 		statusChan: make(chan *Status, 10),
 		wg:         &sync.WaitGroup{},
 	}
 
 	collector.wg.Add(1)
-	collector.runService()
+	collector.runService(ctx)
 	collector.wg.Wait()
 
 	status := <-collector.statusChan
@@ -158,7 +178,7 @@ type InvalidConfig struct {
 // defaultInvalidConfig creates the default invalid config.
 func defaultInvalidConfig() config.Extension {
 	return &InvalidConfig{
-		ExtensionSettings: config.NewExtensionSettings(config.NewID("invalid")),
+		ExtensionSettings: config.NewExtensionSettings(config.NewComponentID("invalid")),
 	}
 }
 
