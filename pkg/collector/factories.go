@@ -1,6 +1,7 @@
 package collector
 
 import (
+	"github.com/observiq/observiq-collector/pkg/receiver/logsreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/fileexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/observiqexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/extension/bearertokenauthextension"
@@ -29,6 +30,7 @@ import (
 )
 
 var defaultReceivers = []component.ReceiverFactory{
+	logsreceiver.NewFactory(),
 	otlpreceiver.NewFactory(),
 	filelogreceiver.NewFactory(),
 	syslogreceiver.NewFactory(),
