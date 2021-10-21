@@ -16,12 +16,12 @@ require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/extension/healthcheckextension v0.37.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/extension/oidcauthextension v0.37.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/extension/pprofextension v0.37.0
-	github.com/open-telemetry/opentelemetry-collector-contrib/extension/storage v0.37.0
-	github.com/open-telemetry/opentelemetry-collector-contrib/internal/stanza v0.37.0 // indirect
+	github.com/open-telemetry/opentelemetry-collector-contrib/extension/storage v0.37.1
+	github.com/open-telemetry/opentelemetry-collector-contrib/internal/stanza v0.37.1 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/processor/attributesprocessor v0.37.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/processor/groupbyattrsprocessor v0.37.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/processor/k8sattributesprocessor v0.37.0
-	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/filelogreceiver v0.37.0
+	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/filelogreceiver v0.37.1
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/syslogreceiver v0.37.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/tcplogreceiver v0.37.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/udplogreceiver v0.37.0
