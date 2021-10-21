@@ -54,7 +54,7 @@ func TestCombineFactories(t *testing.T) {
 				bearertokenauthextension.NewFactory(),
 				bearertokenauthextension.NewFactory(),
 			},
-			expectedError: errors.New(`[duplicate receiver factory "tcplog"; duplicate processor factory "attributes"; duplicate exporter factory "observiq"; duplicate extension factory "bearertokenauth"]`),
+			expectedError: errors.New(`duplicate receiver factory "tcplog"; duplicate processor factory "attributes"; duplicate exporter factory "observiq"; duplicate extension factory "bearertokenauth"`),
 		},
 	}
 

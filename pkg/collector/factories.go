@@ -19,7 +19,6 @@ import (
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/tcplogreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/udplogreceiver"
 	"go.opentelemetry.io/collector/component"
-	"go.opentelemetry.io/collector/consumer/consumererror"
 	"go.opentelemetry.io/collector/exporter/loggingexporter"
 	"go.opentelemetry.io/collector/exporter/otlpexporter"
 	"go.opentelemetry.io/collector/exporter/otlphttpexporter"
@@ -27,6 +26,7 @@ import (
 	"go.opentelemetry.io/collector/processor/batchprocessor"
 	"go.opentelemetry.io/collector/processor/memorylimiterprocessor"
 	"go.opentelemetry.io/collector/receiver/otlpreceiver"
+	"go.uber.org/multierr"
 )
 
 var defaultReceivers = []component.ReceiverFactory{
@@ -100,5 +100,5 @@ func combineFactories(receivers []component.ReceiverFactory, processors []compon
 		Processors: processorMap,
 		Exporters:  exporterMap,
 		Extensions: extensionMap,
-	}, consumererror.Combine(errs)
+	}, multierr.Combine(errs...)
 }
