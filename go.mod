@@ -16,12 +16,12 @@ require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/extension/healthcheckextension v0.37.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/extension/oidcauthextension v0.37.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/extension/pprofextension v0.37.0
-	github.com/open-telemetry/opentelemetry-collector-contrib/extension/storage v0.37.0
-	github.com/open-telemetry/opentelemetry-collector-contrib/internal/stanza v0.37.0 // indirect
+	github.com/open-telemetry/opentelemetry-collector-contrib/extension/storage v0.38.0
+	github.com/open-telemetry/opentelemetry-collector-contrib/internal/stanza v0.38.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/processor/attributesprocessor v0.37.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/processor/groupbyattrsprocessor v0.37.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/processor/k8sattributesprocessor v0.37.0
-	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/filelogreceiver v0.37.0
+	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/filelogreceiver v0.38.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/syslogreceiver v0.37.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/tcplogreceiver v0.37.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/udplogreceiver v0.37.0
@@ -30,8 +30,8 @@ require (
 	github.com/stretchr/testify v1.7.0
 	github.com/testcontainers/testcontainers-go v0.11.1
 	go.etcd.io/bbolt v1.3.6
-	go.opentelemetry.io/collector v0.37.1-0.20211015233822-bd87fb628058
-	go.opentelemetry.io/collector/model v0.37.1-0.20211015233822-bd87fb628058
+	go.opentelemetry.io/collector v0.38.0
+	go.opentelemetry.io/collector/model v0.38.0
 	go.uber.org/multierr v1.7.0
 	go.uber.org/zap v1.19.1
 	golang.org/x/sys v0.0.0-20210823070655-63515b42dcdf // indirect
@@ -97,7 +97,7 @@ require (
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/jaegertracing/jaeger v1.27.0 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
-	github.com/knadh/koanf v1.2.4 // indirect
+	github.com/knadh/koanf v1.3.0 // indirect
 	github.com/libp2p/go-reuseport v0.0.1 // indirect
 	github.com/magiconair/properties v1.8.5 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.2-0.20181231171920-c182affec369 // indirect
@@ -123,7 +123,7 @@ require (
 	github.com/pquerna/cachecontrol v0.1.0 // indirect
 	github.com/prometheus/client_golang v1.11.0 // indirect
 	github.com/prometheus/client_model v0.2.0 // indirect
-	github.com/prometheus/common v0.31.1 // indirect
+	github.com/prometheus/common v0.32.1 // indirect
 	github.com/prometheus/procfs v0.6.0 // indirect
 	github.com/prometheus/statsd_exporter v0.21.0 // indirect
 	github.com/rs/cors v1.8.0 // indirect
