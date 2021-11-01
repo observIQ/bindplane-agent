@@ -4,7 +4,7 @@ go 1.17
 
 require (
 	github.com/Azure/azure-event-hubs-go/v3 v3.3.13
-	github.com/aws/aws-sdk-go v1.40.8
+	github.com/aws/aws-sdk-go v1.41.15
 	github.com/hashicorp/go-multierror v1.1.0
 	github.com/jpillora/backoff v1.0.0
 	github.com/json-iterator/go v1.1.11
