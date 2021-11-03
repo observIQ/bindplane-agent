@@ -24,6 +24,7 @@ import (
 	"math"
 	"runtime"
 	"sort"
+	"strconv"
 	"sync"
 	"time"
 
@@ -598,9 +599,9 @@ var sevTextMap = map[entry.Severity]string{
 	entry.Fatal4:  "Fatal4",
 }
 
-const key_val_sep = ","
+const key_val_sep = "\u0000"
 
-var pair_sep = []byte("|")
+var pair_sep = []byte{01}
 var fnvHash = fnv.New64a()
 var fnvHashOut = make([]byte, 0, 16)
 var kv_slice = make([]string, 0)
@@ -611,7 +612,10 @@ func writeResourceId(res map[string]string) (uint64, error) {
 	fnvHash.Reset()
 
 	for k, v := range res {
-		kv_slice = append(kv_slice, k+key_val_sep+v)
+		// QuoteToAscii is used here to dispell ambiguity in cases where the seperators may be used in the
+		// key or value.
+		sep_val := strconv.QuoteToASCII(k) + key_val_sep + strconv.QuoteToASCII(v)
+		kv_slice = append(kv_slice, sep_val)
 	}
 
 	// In order for this to be deterministic, we need to sort the map. Using range, like above,
