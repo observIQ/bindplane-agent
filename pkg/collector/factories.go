@@ -19,6 +19,7 @@ import (
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/tcplogreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/udplogreceiver"
 	"go.opentelemetry.io/collector/component"
+	"go.opentelemetry.io/collector/component/componenttest"
 	"go.opentelemetry.io/collector/exporter/loggingexporter"
 	"go.opentelemetry.io/collector/exporter/otlpexporter"
 	"go.opentelemetry.io/collector/exporter/otlphttpexporter"
@@ -36,6 +37,7 @@ var defaultReceivers = []component.ReceiverFactory{
 	syslogreceiver.NewFactory(),
 	tcplogreceiver.NewFactory(),
 	udplogreceiver.NewFactory(),
+	componenttest.NewNopReceiverFactory(),
 }
 
 var defaultProcessors = []component.ProcessorFactory{
@@ -46,6 +48,7 @@ var defaultProcessors = []component.ProcessorFactory{
 	batchprocessor.NewFactory(),
 	memorylimiterprocessor.NewFactory(),
 	probabilisticsamplerprocessor.NewFactory(),
+	componenttest.NewNopProcessorFactory(),
 }
 
 var defaultExporters = []component.ExporterFactory{
@@ -54,6 +57,7 @@ var defaultExporters = []component.ExporterFactory{
 	otlphttpexporter.NewFactory(),
 	observiqexporter.NewFactory(),
 	loggingexporter.NewFactory(),
+	componenttest.NewNopExporterFactory(),
 }
 
 var defaultExtensions = []component.ExtensionFactory{
@@ -63,6 +67,7 @@ var defaultExtensions = []component.ExtensionFactory{
 	pprofextension.NewFactory(),
 	zpagesextension.NewFactory(),
 	filestorage.NewFactory(),
+	componenttest.NewNopExtensionFactory(),
 }
 
 // DefaultFactories returns the default factories used by the observIQ collector

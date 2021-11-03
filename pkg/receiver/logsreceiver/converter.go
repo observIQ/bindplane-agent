@@ -17,11 +17,13 @@ package logsreceiver
 import (
 	"bytes"
 	"context"
-	"encoding/json"
+	"encoding/binary"
 	"errors"
 	"fmt"
+	"hash/fnv"
 	"math"
 	"runtime"
+	"sort"
 	"sync"
 	"time"
 
@@ -107,7 +109,7 @@ type Converter struct {
 	flushChan chan pdata.Logs
 
 	// data holds currently converted and aggregated log entries, grouped by Resource.
-	data map[string]pdata.Logs
+	data map[uint64]pdata.Logs
 	// logRecordCount holds the number of translated and accumulated log Records
 	// and is compared against maxFlushCount to make a decision whether to flush.
 	logRecordCount uint
@@ -169,7 +171,7 @@ func NewConverter(opts ...ConverterOption) *Converter {
 		workerChan:     make(chan *entry.Entry),
 		workerCount:    int(math.Max(1, float64(runtime.NumCPU()/4))),
 		batchChan:      make(chan *workerItem),
-		data:           make(map[string]pdata.Logs),
+		data:           make(map[uint64]pdata.Logs),
 		pLogsChan:      make(chan pdata.Logs),
 		stopChan:       make(chan struct{}),
 		logger:         zap.NewNop(),
@@ -215,9 +217,9 @@ func (c *Converter) OutChannel() <-chan pdata.Logs {
 }
 
 type workerItem struct {
-	Resource       map[string]string
-	LogRecord      pdata.LogRecord
-	ResourceString string
+	Resource   map[string]string
+	LogRecord  pdata.LogRecord
+	ResourceID uint64
 }
 
 // workerLoop is responsible for obtaining log entries from Batch() calls,
@@ -227,8 +229,7 @@ func (c *Converter) workerLoop() {
 	defer c.wg.Done()
 
 	var (
-		buff    = bytes.Buffer{}
-		encoder = json.NewEncoder(&buff)
+		buff = bytes.Buffer{}
 	)
 
 	for {
@@ -244,8 +245,8 @@ func (c *Converter) workerLoop() {
 			buff.Reset()
 			c.hostIdentifier.Identify(e)
 			lr := convert(e, c.idToPipelineConfig)
-
-			if err := encoder.Encode(e.Resource); err != nil {
+			id, err := writeResourceId(e.Resource)
+			if err != nil {
 				c.logger.Debug("Failed marshaling entry.Resource to JSON",
 					zap.Any("resource", e.Resource),
 				)
@@ -254,9 +255,9 @@ func (c *Converter) workerLoop() {
 
 			select {
 			case c.batchChan <- &workerItem{
-				Resource:       e.Resource,
-				ResourceString: buff.String(),
-				LogRecord:      lr,
+				Resource:   e.Resource,
+				ResourceID: id,
+				LogRecord:  lr,
 			}:
 			case <-c.stopChan:
 			}
@@ -280,7 +281,7 @@ func (c *Converter) batchLoop() {
 				return
 			}
 
-			pLogs, ok := c.data[wi.ResourceString]
+			pLogs, ok := c.data[wi.ResourceID]
 			if ok {
 				lr := pLogs.ResourceLogs().
 					At(0).InstrumentationLibraryLogs().
@@ -303,7 +304,7 @@ func (c *Converter) batchLoop() {
 				wi.LogRecord.CopyTo(lr)
 			}
 
-			c.data[wi.ResourceString] = pLogs
+			c.data[wi.ResourceID] = pLogs
 			c.logRecordCount++
 
 			if c.logRecordCount >= c.maxFlushCount {
@@ -595,4 +596,41 @@ var sevTextMap = map[entry.Severity]string{
 	entry.Fatal2:  "Fatal2",
 	entry.Fatal3:  "Fatal3",
 	entry.Fatal4:  "Fatal4",
+}
+
+const key_val_sep = ","
+
+var pair_sep = []byte("|")
+var fnvHash = fnv.New64a()
+var fnvHashOut = make([]byte, 0, 16)
+var kv_slice = make([]string, 0)
+
+func writeResourceId(res map[string]string) (uint64, error) {
+	kv_slice = kv_slice[:0]
+	fnvHashOut = fnvHashOut[:0]
+	fnvHash.Reset()
+
+	for k, v := range res {
+		kv_slice = append(kv_slice, k+key_val_sep+v)
+	}
+
+	// In order for this to be deterministic, we need to sort the map. Using range, like above,
+	// has no guarantee about order.
+	sort.Strings(kv_slice)
+	for _, str := range kv_slice {
+		// TODO: Is hashing even necessary here? Could we just use the long string from above?
+		// There will be a longer hash & comparison time when using it as a map key, but maybe that's OK?
+		_, err := fnvHash.Write([]byte(str))
+		if err != nil {
+			return 0, err
+		}
+
+		_, err = fnvHash.Write(pair_sep)
+		if err != nil {
+			return 0, err
+		}
+	}
+
+	fnvHashOut = fnvHash.Sum(fnvHashOut)
+	return binary.BigEndian.Uint64(fnvHashOut), nil
 }
