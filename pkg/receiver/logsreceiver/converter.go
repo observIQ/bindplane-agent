@@ -24,7 +24,6 @@ import (
 	"math"
 	"runtime"
 	"sort"
-	"strconv"
 	"sync"
 	"time"
 
@@ -246,7 +245,7 @@ func (c *Converter) workerLoop() {
 			buff.Reset()
 			c.hostIdentifier.Identify(e)
 			lr := convert(e, c.idToPipelineConfig)
-			id, err := writeResourceId(e.Resource)
+			id, err := getResourceId(e.Resource)
 			if err != nil {
 				c.logger.Debug("Failed marshaling entry.Resource to JSON",
 					zap.Any("resource", e.Resource),
@@ -599,32 +598,33 @@ var sevTextMap = map[entry.Severity]string{
 	entry.Fatal4:  "Fatal4",
 }
 
-const key_val_sep = "\u0000"
+func getResourceId(resource map[string]string) (uint64, error) {
+	// par_sep and key_value_sep are chosen to be invalid bytes for a utf-8 sequence
+	var pair_sep = []byte{0xc1}
+	var key_val_sep = []byte{0xc0}
+	var fnvHash = fnv.New64a()
+	var fnvHashOut = make([]byte, 0, 16)
+	var key_slice = make([]string, len(resource))
 
-var pair_sep = []byte{01}
-var fnvHash = fnv.New64a()
-var fnvHashOut = make([]byte, 0, 16)
-var kv_slice = make([]string, 0)
-
-func writeResourceId(res map[string]string) (uint64, error) {
-	kv_slice = kv_slice[:0]
-	fnvHashOut = fnvHashOut[:0]
-	fnvHash.Reset()
-
-	for k, v := range res {
-		// QuoteToAscii is used here to dispell ambiguity in cases where the seperators may be used in the
-		// key or value.
-		sep_val := strconv.QuoteToASCII(k) + key_val_sep + strconv.QuoteToASCII(v)
-		kv_slice = append(kv_slice, sep_val)
+	for k := range resource {
+		key_slice = append(key_slice, k)
 	}
 
 	// In order for this to be deterministic, we need to sort the map. Using range, like above,
 	// has no guarantee about order.
-	sort.Strings(kv_slice)
-	for _, str := range kv_slice {
-		// TODO: Is hashing even necessary here? Could we just use the long string from above?
-		// There will be a longer hash & comparison time when using it as a map key, but maybe that's OK?
-		_, err := fnvHash.Write([]byte(str))
+	sort.Strings(key_slice)
+	for _, k := range key_slice {
+		_, err := fnvHash.Write([]byte(k))
+		if err != nil {
+			return 0, err
+		}
+
+		_, err = fnvHash.Write(key_val_sep)
+		if err != nil {
+			return 0, err
+		}
+
+		_, err = fnvHash.Write([]byte(resource[k]))
 		if err != nil {
 			return 0, err
 		}

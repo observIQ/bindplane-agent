@@ -732,3 +732,25 @@ func BenchmarkConverter(b *testing.B) {
 		})
 	}
 }
+
+func BenchmarkGetResourceId(b *testing.B) {
+	b.StopTimer()
+	res := getResource()
+	b.StartTimer()
+	for i := 0; i < b.N; i++ {
+		_, _ = getResourceId(res)
+	}
+}
+
+func getResource() map[string]string {
+	return map[string]string{
+		"file.name":        "filename.log",
+		"file.directory":   "/some_directory",
+		"host.name":        "localhost",
+		"host.ip":          "192.168.1.12",
+		"k8s.pod.name":     "test-pod-123zwe1",
+		"k8s.node.name":    "aws-us-east-1.asfasf.aws.com",
+		"k8s.container.id": "192end1yu8231kd9213erhcncd821y123",
+		"k8s.cluster.name": "my-cluster",
+	}
+}
