@@ -16,9 +16,12 @@ package logsreceiver
 
 import (
 	"context"
+	"math"
 	"sync"
+	"time"
 
 	"github.com/open-telemetry/opentelemetry-log-collection/entry"
+	"github.com/open-telemetry/opentelemetry-log-collection/operator"
 	"github.com/open-telemetry/opentelemetry-log-collection/operator/helper"
 	"go.uber.org/zap"
 )
@@ -26,12 +29,36 @@ import (
 // LogEmitter is a stanza operator that emits log entries to a channel
 type LogEmitter struct {
 	helper.OutputOperator
-	logChan  chan *entry.Entry
-	stopOnce sync.Once
+	logChan               chan []*entry.Entry
+	stopOnce              sync.Once
+	cancel                context.CancelFunc
+	batchMux              sync.Mutex
+	batch                 []*entry.Entry
+	flushChan             chan struct{}
+	wg                    sync.WaitGroup
+	flushTriggerAmount    uint
+	flushInterval         time.Duration
+	entryBatchInitialSize int
 }
 
+var (
+	defaultFlushInterval           = 100 * time.Millisecond
+	defaultFlushTriggerAmount uint = 200
+)
+
 // NewLogEmitter creates a new receiver output
-func NewLogEmitter(logger *zap.SugaredLogger) *LogEmitter {
+// TODO: Convert args here to functional options
+func NewLogEmitter(logger *zap.SugaredLogger, flushInterval time.Duration, flushTriggerAmount uint) *LogEmitter {
+	if flushInterval == 0 {
+		flushInterval = defaultFlushInterval
+	}
+
+	if flushTriggerAmount == 0 {
+		flushTriggerAmount = defaultFlushTriggerAmount
+	}
+
+	entryBatchInitialSize := int(math.Max(float64(flushTriggerAmount), float64(flushTriggerAmount)*1.1))
+
 	return &LogEmitter{
 		OutputOperator: helper.OutputOperator{
 			BasicOperator: helper.BasicOperator{
@@ -40,17 +67,76 @@ func NewLogEmitter(logger *zap.SugaredLogger) *LogEmitter {
 				SugaredLogger: logger,
 			},
 		},
-		logChan: make(chan *entry.Entry),
+		logChan:               make(chan []*entry.Entry),
+		flushChan:             make(chan struct{}, 1),
+		batch:                 make([]*entry.Entry, 0, entryBatchInitialSize),
+		flushInterval:         flushInterval,
+		flushTriggerAmount:    flushTriggerAmount,
+		entryBatchInitialSize: entryBatchInitialSize,
 	}
+}
+
+func (e *LogEmitter) Start(_ operator.Persister) error {
+	ctx, cancel := context.WithCancel(context.Background())
+	e.cancel = cancel
+
+	e.wg.Add(1)
+	go e.flusher(ctx)
+	return nil
 }
 
 // Process will emit an entry to the output channel
 func (e *LogEmitter) Process(ctx context.Context, ent *entry.Entry) error {
+	e.batchMux.Lock()
+	defer e.batchMux.Unlock()
+
+	e.batch = append(e.batch, ent)
+	if uint(len(e.batch)) >= e.flushTriggerAmount {
+		// TODO: Maybe make this block, actually.
+		// We probably want protection against e.batch getting appended to over e.flushTriggerAmount; Should block here in that case
+		select {
+		case e.flushChan <- struct{}{}:
+		default:
+		}
+	}
+
+	return nil
+}
+
+func (e *LogEmitter) flusher(ctx context.Context) {
+	defer e.wg.Done()
+
+	ticker := time.NewTicker(e.flushInterval)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-e.flushChan:
+			e.flush(ctx)
+		case <-ticker.C:
+			e.flush(ctx)
+		case <-ctx.Done():
+			return
+		}
+	}
+}
+
+func (e *LogEmitter) flush(ctx context.Context) {
+	var batch []*entry.Entry
+	e.batchMux.Lock()
+
+	if len(e.batch) == 0 {
+		e.batchMux.Unlock()
+		return
+	}
+	batch = e.batch
+	e.batch = make([]*entry.Entry, 0, e.entryBatchInitialSize)
+
+	e.batchMux.Unlock()
 	select {
-	case e.logChan <- ent:
+	case e.logChan <- batch:
 	case <-ctx.Done():
 	}
-	return nil
 }
 
 // Stop will close the log channel
@@ -58,5 +144,12 @@ func (e *LogEmitter) Stop() error {
 	e.stopOnce.Do(func() {
 		close(e.logChan)
 	})
+
+	if e.cancel != nil {
+		e.cancel()
+		e.cancel = nil
+	}
+
+	e.wg.Wait()
 	return nil
 }

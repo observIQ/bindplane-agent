@@ -218,7 +218,7 @@ func TestCheckpoint(t *testing.T) {
 	// Expect the new 100
 	require.Eventually(t,
 		expectLogs(sink, logger.recall()),
-		time.Second,
+		10*time.Second,
 		10*time.Millisecond,
 		"expected 100 but got %d logs",
 		sink.LogRecordCount(),

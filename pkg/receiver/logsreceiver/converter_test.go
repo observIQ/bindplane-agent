@@ -211,16 +211,13 @@ func TestAllConvertedEntriesAreSentAndReceived(t *testing.T) {
 
 			converter := NewConverter(
 				WithWorkerCount(1),
-				WithMaxFlushCount(tc.maxFlushCount),
-				WithFlushInterval(10*time.Millisecond), // To minimize time spent in test
 			)
 			converter.Start()
 			defer converter.Stop()
 
 			go func() {
-				for _, ent := range complexEntries(tc.entries) {
-					assert.NoError(t, converter.Batch(ent))
-				}
+				entries := complexEntries(tc.entries)
+				assert.NoError(t, converter.Batch(entries))
 			}()
 
 			var (
@@ -252,11 +249,6 @@ func TestAllConvertedEntriesAreSentAndReceived(t *testing.T) {
 					ill := ills.At(0)
 
 					actualCount += ill.Logs().Len()
-
-					assert.LessOrEqual(t, uint(ill.Logs().Len()), tc.maxFlushCount,
-						"Received more log records in one flush than configured by maxFlushCount",
-					)
-
 				case <-timeoutTimer.C:
 					break forLoop
 				}
@@ -318,16 +310,13 @@ func TestAllConvertedEntriesAreSentAndReceivedWithinAnExpectedTimeDuration(t *te
 
 			converter := NewConverter(
 				WithWorkerCount(1),
-				WithMaxFlushCount(tc.maxFlushCount),
-				WithFlushInterval(tc.flushInterval),
 			)
 			converter.Start()
 			defer converter.Stop()
 
 			go func() {
-				for _, ent := range complexEntriesForNDifferentHosts(tc.entries, tc.hostsCount) {
-					assert.NoError(t, converter.Batch(ent))
-				}
+				entries := complexEntriesForNDifferentHosts(tc.entries, tc.hostsCount)
+				assert.NoError(t, converter.Batch(entries))
 			}()
 
 			var (
@@ -369,10 +358,6 @@ func TestAllConvertedEntriesAreSentAndReceivedWithinAnExpectedTimeDuration(t *te
 
 					actualCount += ill.Logs().Len()
 
-					assert.LessOrEqual(t, uint(ill.Logs().Len()), tc.maxFlushCount,
-						"Received more log records in one flush than configured by maxFlushCount",
-					)
-
 				case <-timeoutTimer.C:
 					break forLoop
 				}
@@ -386,10 +371,7 @@ func TestAllConvertedEntriesAreSentAndReceivedWithinAnExpectedTimeDuration(t *te
 }
 
 func TestConverterCancelledContextCancellsTheFlush(t *testing.T) {
-	converter := NewConverter(
-		WithMaxFlushCount(1),
-		WithFlushInterval(time.Millisecond),
-	)
+	converter := NewConverter()
 	converter.Start()
 	defer converter.Stop()
 	var wg sync.WaitGroup
@@ -665,6 +647,7 @@ func BenchmarkConverter(b *testing.B) {
 	const (
 		entryCount = 1_000_000
 		hostsCount = 4
+		batchCount = 200
 	)
 
 	var (
@@ -677,16 +660,18 @@ func BenchmarkConverter(b *testing.B) {
 			for i := 0; i < b.N; i++ {
 				converter := NewConverter(
 					WithWorkerCount(wc),
-					WithMaxFlushCount(1_000),
-					WithFlushInterval(250*time.Millisecond),
 				)
 				converter.Start()
 				defer converter.Stop()
 				b.ResetTimer()
 
 				go func() {
-					for _, ent := range entries {
-						assert.NoError(b, converter.Batch(ent))
+					for i := 0; i < entryCount; i += batchCount {
+						if i+batchCount > entryCount {
+							assert.NoError(b, converter.Batch(entries[i:entryCount]))
+						} else {
+							assert.NoError(b, converter.Batch(entries[i:i+batchCount]))
+						}
 					}
 				}()
 
@@ -738,7 +723,7 @@ func BenchmarkGetResourceId(b *testing.B) {
 	res := getResource()
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		_, _ = getResourceId(res)
+		_, _ = getResourceID(res)
 	}
 }
 

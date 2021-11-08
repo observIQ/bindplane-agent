@@ -15,7 +15,6 @@
 package logsreceiver
 
 import (
-	"bytes"
 	"context"
 	"encoding/binary"
 	"errors"
@@ -61,27 +60,10 @@ const (
 //  └─┼─┼─► workerLoop()                                      │
 //    └─┤ │   consumes sent log entries from workerChan,      │
 //      │ │   translates received entries to pdata.LogRecords,│
-//      └─┤   marshalls them to JSON and send them onto       │
-//        │   batchChan                                       │
-//        └─────────────────────────┬─────────────────────────┘
-//                                  │
-//                                  ▼
-//      ┌─────────────────────────────────────────────────────┐
-//      │ batchLoop()                                         │
-//      │   consumes from batchChan, aggregates log records   │
-//      │   by marshaled Resource and based on flush interval │
-//      │   and maxFlushCount decides whether to send the     │
-//      │   aggregated buffer to flushChan                    │
-//      └───────────────────────────┬─────────────────────────┘
-//                                  │
-//                                  ▼
-//      ┌─────────────────────────────────────────────────────┐
-//      │ flushLoop()                                         │
-//      │   receives log records from flushChan and sends     │
-//      │   them onto pLogsChan which is consumed by          │
-//      │   downstream consumers via OutChannel()             │
-//      └─────────────────────────────────────────────────────┘
-//
+//      └─┤   aggregates them by resource, then sends them    │
+//        │   to pLogschan                                    │
+//        └───────────────────────────────────────────────────┘
+
 type Converter struct {
 	// pLogsChan is a channel on which batched logs will be sent to.
 	pLogsChan chan pdata.Logs
@@ -91,28 +73,12 @@ type Converter struct {
 
 	// workerChan is an internal communication channel that gets the log
 	// entries from Batch() calls and it receives the data in workerLoop().
-	workerChan chan *entry.Entry
+	workerChan chan []*entry.Entry
 	// workerCount configures the amount of workers started.
 	workerCount int
-	// batchChan obtains log entries converted by the pool of workers,
-	// in a form of logRecords grouped by Resource and then after aggregating
-	// them decides based on maxFlushCount if the flush should be triggered.
-	// If also serves the ticker flushes configured by flushInterval.
-	batchChan chan *workerItem
-
-	// flushInterval defines how often we flush the aggregated log entries.
-	flushInterval time.Duration
-	// maxFlushCount defines what's the amount of entries in the buffer that
-	// will trigger a flush of log entries.
-	maxFlushCount uint
-	// flushChan is an internal channel used for transporting batched pdata.Logs.
-	flushChan chan pdata.Logs
 
 	// data holds currently converted and aggregated log entries, grouped by Resource.
 	data map[uint64]pdata.Logs
-	// logRecordCount holds the number of translated and accumulated log Records
-	// and is compared against maxFlushCount to make a decision whether to flush.
-	logRecordCount uint
 
 	// wg is a WaitGroup that makes sure that we wait for spun up goroutines exit
 	// when Stop() is called.
@@ -133,18 +99,6 @@ type optionFunc func(*Converter)
 
 func (f optionFunc) apply(c *Converter) {
 	f(c)
-}
-
-func WithFlushInterval(interval time.Duration) ConverterOption {
-	return optionFunc(func(c *Converter) {
-		c.flushInterval = interval
-	})
-}
-
-func WithMaxFlushCount(count uint) ConverterOption {
-	return optionFunc(func(c *Converter) {
-		c.maxFlushCount = count
-	})
 }
 
 func WithLogger(logger *zap.Logger) ConverterOption {
@@ -168,16 +122,11 @@ func WithIdToPipelineConfigMap(idToPipelineConfig map[string]map[string]interfac
 func NewConverter(opts ...ConverterOption) *Converter {
 	hi, _ := helper.NewHostIdentifierConfig().Build()
 	c := &Converter{
-		workerChan:     make(chan *entry.Entry),
+		workerChan:     make(chan []*entry.Entry),
 		workerCount:    int(math.Max(1, float64(runtime.NumCPU()/4))),
-		batchChan:      make(chan *workerItem),
-		data:           make(map[uint64]pdata.Logs),
 		pLogsChan:      make(chan pdata.Logs),
 		stopChan:       make(chan struct{}),
 		logger:         zap.NewNop(),
-		flushChan:      make(chan pdata.Logs),
-		flushInterval:  DefaultFlushInterval,
-		maxFlushCount:  DefaultMaxFlushCount,
 		hostIdentifier: hi,
 	}
 
@@ -195,12 +144,6 @@ func (c *Converter) Start() {
 		c.wg.Add(1)
 		go c.workerLoop()
 	}
-
-	c.wg.Add(1)
-	go c.batchLoop()
-
-	c.wg.Add(1)
-	go c.flushLoop()
 }
 
 func (c *Converter) Stop() {
@@ -216,133 +159,68 @@ func (c *Converter) OutChannel() <-chan pdata.Logs {
 	return c.pLogsChan
 }
 
-type workerItem struct {
-	Resource   map[string]string
-	LogRecord  pdata.LogRecord
-	ResourceID uint64
-}
-
 // workerLoop is responsible for obtaining log entries from Batch() calls,
 // converting them to pdata.LogRecords and sending them together with the
 // associated Resource through the batchChan for aggregation.
 func (c *Converter) workerLoop() {
 	defer c.wg.Done()
 
-	var (
-		buff = bytes.Buffer{}
-	)
+	// TODO: Base this off of an input parameter, giving the amount allocated per entry
+	// TODO: See performance of re-making this map every iteration of this loop.
+	recordsByResource := make(map[uint64]pdata.Logs, 200)
 
 	for {
 		select {
 		case <-c.stopChan:
 			return
 
-		case e, ok := <-c.workerChan:
+		case eSlice, ok := <-c.workerChan:
 			if !ok {
 				return
 			}
 
-			buff.Reset()
-			c.hostIdentifier.Identify(e)
-			lr := convert(e, c.idToPipelineConfig)
-			id, err := getResourceId(e.Resource)
-			if err != nil {
-				c.logger.Debug("Failed marshaling entry.Resource to JSON",
-					zap.Any("resource", e.Resource),
-				)
-				continue
-			}
-
-			select {
-			case c.batchChan <- &workerItem{
-				Resource:   e.Resource,
-				ResourceID: id,
-				LogRecord:  lr,
-			}:
-			case <-c.stopChan:
-			}
-		}
-	}
-}
-
-// batchLoop is responsible for receiving the converted log entries and aggregating
-// them by Resource.
-// Whenever maxFlushCount is reached or the ticker ticks a flush is triggered.
-func (c *Converter) batchLoop() {
-	defer c.wg.Done()
-
-	ticker := time.NewTicker(c.flushInterval)
-	defer ticker.Stop()
-
-	for {
-		select {
-		case wi, ok := <-c.batchChan:
-			if !ok {
-				return
-			}
-
-			pLogs, ok := c.data[wi.ResourceID]
-			if ok {
-				lr := pLogs.ResourceLogs().
-					At(0).InstrumentationLibraryLogs().
-					At(0).Logs().AppendEmpty()
-				wi.LogRecord.CopyTo(lr)
-			} else {
-				pLogs = pdata.NewLogs()
-				logs := pLogs.ResourceLogs()
-				rls := logs.AppendEmpty()
-
-				resource := rls.Resource()
-				resourceAtts := resource.Attributes()
-				resourceAtts.EnsureCapacity(len(wi.Resource))
-				for k, v := range wi.Resource {
-					resourceAtts.InsertString(k, v)
+			for _, e := range eSlice {
+				// Conversion
+				// c.hostIdentifier.Identify(e)
+				entryLr := convert(e, c.idToPipelineConfig)
+				resourceID, err := getResourceID(e.Resource)
+				if err != nil {
+					c.logger.Debug("Failed getting ID for resource",
+						zap.Any("resource", e.Resource),
+					)
+					continue
 				}
 
-				ills := rls.InstrumentationLibraryLogs()
-				lr := ills.AppendEmpty().Logs().AppendEmpty()
-				wi.LogRecord.CopyTo(lr)
-			}
+				// Resource aggregation
+				pLogs, ok := recordsByResource[resourceID]
+				if ok {
+					lr := pLogs.ResourceLogs().
+						At(0).InstrumentationLibraryLogs().
+						At(0).Logs().AppendEmpty()
+					entryLr.CopyTo(lr)
+				} else {
+					pLogs = pdata.NewLogs()
+					logs := pLogs.ResourceLogs()
+					rls := logs.AppendEmpty()
 
-			c.data[wi.ResourceID] = pLogs
-			c.logRecordCount++
+					resource := rls.Resource()
+					resourceAtts := resource.Attributes()
+					resourceAtts.EnsureCapacity(len(e.Resource))
+					for k, v := range e.Resource {
+						resourceAtts.InsertString(k, v)
+					}
 
-			if c.logRecordCount >= c.maxFlushCount {
-				for r, pLogs := range c.data {
-					c.flushChan <- pLogs
-					delete(c.data, r)
+					ills := rls.InstrumentationLibraryLogs()
+					lr := ills.AppendEmpty().Logs().AppendEmpty()
+					entryLr.CopyTo(lr)
+
+					recordsByResource[resourceID] = pLogs
 				}
-				c.logRecordCount = 0
 			}
-
-		case <-ticker.C:
-			for r, pLogs := range c.data {
-				c.flushChan <- pLogs
-				delete(c.data, r)
-			}
-			c.logRecordCount = 0
-
-		case <-c.stopChan:
-			return
-		}
-	}
-}
-
-func (c *Converter) flushLoop() {
-	defer c.wg.Done()
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
-	for {
-		select {
-		case <-c.stopChan:
-			return
-
-		case pLogs := <-c.flushChan:
-			if err := c.flush(ctx, pLogs); err != nil {
-				c.logger.Debug("Problem sending log entries",
-					zap.Error(err),
-				)
+			// TODO: Target for optimization here; Batch a bunch of pdata.Logs and flush that, not individual pdata.logs
+			for r, pLogs := range recordsByResource {
+				c.flush(context.TODO(), pLogs)
+				delete(recordsByResource, r)
 			}
 		}
 	}
@@ -350,10 +228,8 @@ func (c *Converter) flushLoop() {
 
 // flush flushes provided pdata.Logs entries onto a channel.
 func (c *Converter) flush(ctx context.Context, pLogs pdata.Logs) error {
-	doneChan := ctx.Done()
-
 	select {
-	case <-doneChan:
+	case <-ctx.Done():
 		return fmt.Errorf("flushing log entries interrupted, err: %w", ctx.Err())
 
 	case c.pLogsChan <- pLogs:
@@ -366,8 +242,8 @@ func (c *Converter) flush(ctx context.Context, pLogs pdata.Logs) error {
 	return nil
 }
 
-// Batch takes in an entry.Entry and sends it to an available worker for processing.
-func (c *Converter) Batch(e *entry.Entry) error {
+// Batch takes in a slice of *entry.Entry and sends it to an available worker for processing.
+func (c *Converter) Batch(e []*entry.Entry) error {
 	select {
 	case c.workerChan <- e:
 		return nil
@@ -598,7 +474,7 @@ var sevTextMap = map[entry.Severity]string{
 	entry.Fatal4:  "Fatal4",
 }
 
-func getResourceId(resource map[string]string) (uint64, error) {
+func getResourceID(resource map[string]string) (uint64, error) {
 	// par_sep and key_value_sep are chosen to be invalid bytes for a utf-8 sequence
 	var pair_sep = []byte{0xc1}
 	var key_val_sep = []byte{0xc0}
