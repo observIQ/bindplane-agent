@@ -77,9 +77,6 @@ type Converter struct {
 	// workerCount configures the amount of workers started.
 	workerCount int
 
-	// data holds currently converted and aggregated log entries, grouped by Resource.
-	data map[uint64]pdata.Logs
-
 	// wg is a WaitGroup that makes sure that we wait for spun up goroutines exit
 	// when Stop() is called.
 	wg sync.WaitGroup
@@ -480,7 +477,7 @@ func getResourceID(resource map[string]string) (uint64, error) {
 	var key_val_sep = []byte{0xc0}
 	var fnvHash = fnv.New64a()
 	var fnvHashOut = make([]byte, 0, 16)
-	var key_slice = make([]string, len(resource))
+	var key_slice = make([]string, 0, len(resource))
 
 	for k := range resource {
 		key_slice = append(key_slice, k)
