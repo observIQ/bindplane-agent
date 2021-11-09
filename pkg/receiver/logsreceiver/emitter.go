@@ -88,18 +88,16 @@ func (e *LogEmitter) Start(_ operator.Persister) error {
 // Process will emit an entry to the output channel
 func (e *LogEmitter) Process(ctx context.Context, ent *entry.Entry) error {
 	e.batchMux.Lock()
-	defer e.batchMux.Unlock()
 
 	e.batch = append(e.batch, ent)
 	if uint(len(e.batch)) >= e.flushTriggerAmount {
-		// TODO: Maybe make this block, actually.
-		// We probably want protection against e.batch getting appended to over e.flushTriggerAmount; Should block here in that case
-		select {
-		case e.flushChan <- struct{}{}:
-		default:
-		}
+		// flushTriggerAmount triggers a flush
+		e.batchMux.Unlock()
+		e.flush(ctx)
+		return nil
 	}
 
+	e.batchMux.Unlock()
 	return nil
 }
 
@@ -133,6 +131,7 @@ func (e *LogEmitter) flush(ctx context.Context) {
 	e.batch = make([]*entry.Entry, 0, e.entryBatchInitialSize)
 
 	e.batchMux.Unlock()
+
 	select {
 	case e.logChan <- batch:
 	case <-ctx.Done():
