@@ -155,7 +155,6 @@ func (r *receiver) Shutdown(ctx context.Context) error {
 	agentErr := r.agent.Stop()
 
 	r.converter.Stop()
-	r.emitter.Stop()
 	r.cancel()
 	r.wg.Wait()
 
