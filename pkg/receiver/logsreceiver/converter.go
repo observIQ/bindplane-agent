@@ -178,8 +178,6 @@ func (c *Converter) workerLoop() {
 
 			for _, e := range eSlice {
 				// Conversion
-				c.hostIdentifier.Identify(e)
-				entryLr := convert(e, c.idToPipelineConfig)
 				resourceID, err := getResourceID(e.Resource)
 				if err != nil {
 					c.logger.Debug("Failed getting ID for resource",
@@ -187,6 +185,11 @@ func (c *Converter) workerLoop() {
 					)
 					continue
 				}
+
+				// Add host info after getting resource id; Adds unnecesary work when
+				// getting ID, since the host info is constant across the lifecycle of the whole converter
+				c.hostIdentifier.Identify(e)
+				entryLr := convert(e, c.idToPipelineConfig)
 
 				// Resource aggregation
 				pLogs, ok := recordsByResource[resourceID]
