@@ -38,9 +38,13 @@ type LogEmitter struct {
 	flushInterval time.Duration
 }
 
-type LogEmitterOption func(*LogEmitter)
+type LogEmitterOption interface {
+	Apply(*LogEmitter)
+}
 
-func (leo LogEmitterOption) Apply(le *LogEmitter) {
+type logEmitterOptionFunc func(*LogEmitter)
+
+func (leo logEmitterOptionFunc) Apply(le *LogEmitter) {
 	leo(le)
 }
 
@@ -51,24 +55,24 @@ var (
 
 // LogEmitterWithMaxBatchSize returns an option that makes the LogEmitter use the specified max batch size
 func LogEmitterWithMaxBatchSize(maxBatchSize uint) LogEmitterOption {
-	return func(le *LogEmitter) {
+	return logEmitterOptionFunc(func(le *LogEmitter) {
 		le.maxBatchSize = maxBatchSize
 		le.batch = make([]*entry.Entry, 0, maxBatchSize)
-	}
+	})
 }
 
 // LogEmitterWithFlushInterval returns an option that makes the LogEmitter use the specified flush interval
 func LogEmitterWithFlushInterval(flushInterval time.Duration) LogEmitterOption {
-	return func(le *LogEmitter) {
+	return logEmitterOptionFunc(func(le *LogEmitter) {
 		le.flushInterval = flushInterval
-	}
+	})
 }
 
 // LogEmitterWithLogger returns an option that makes the LogEmitter use the specified logger
 func LogEmitterWithLogger(logger *zap.SugaredLogger) LogEmitterOption {
-	return func(le *LogEmitter) {
+	return logEmitterOptionFunc(func(le *LogEmitter) {
 		le.OutputOperator.BasicOperator.SugaredLogger = logger
-	}
+	})
 }
 
 // NewLogEmitter creates a new receiver output
