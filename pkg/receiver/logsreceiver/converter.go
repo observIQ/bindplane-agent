@@ -178,13 +178,7 @@ func (c *Converter) workerLoop() {
 
 			for _, e := range eSlice {
 				// Conversion
-				resourceID, err := getResourceID(e.Resource)
-				if err != nil {
-					c.logger.Debug("Failed getting ID for resource",
-						zap.Any("resource", e.Resource),
-					)
-					continue
-				}
+				resourceID := getResourceID(e.Resource)
 
 				// Add host info after getting resource id; Adds unnecessary work when
 				// getting ID, since the host info is constant across the lifecycle of the whole converter
@@ -474,13 +468,15 @@ var sevTextMap = map[entry.Severity]string{
 	entry.Fatal4:  "Fatal4",
 }
 
-func getResourceID(resource map[string]string) (uint64, error) {
-	// par_sep and key_value_sep are chosen to be invalid bytes for a utf-8 sequence
-	var pair_sep = []byte{0xc1}
-	var key_val_sep = []byte{0xc0}
+// pair_sep is chosen to be an invalid byte for a utf-8 sequence
+// making it more unlikely to be hit
+var pair_sep = []byte{0xfe}
+
+func getResourceID(resource map[string]string) uint64 {
 	var fnvHash = fnv.New64a()
 	var fnvHashOut = make([]byte, 0, 16)
 	var key_slice = make([]string, 0, len(resource))
+	var escapedSlice = make([]byte, 0, 64)
 
 	for k := range resource {
 		key_slice = append(key_slice, k)
@@ -490,27 +486,39 @@ func getResourceID(resource map[string]string) (uint64, error) {
 	// has no guarantee about order.
 	sort.Strings(key_slice)
 	for _, k := range key_slice {
-		_, err := fnvHash.Write([]byte(k))
-		if err != nil {
-			return 0, err
-		}
+		escapedSlice = appendEscapedSeparator(escapedSlice[:0], k)
+		fnvHash.Write(escapedSlice)
+		fnvHash.Write(pair_sep)
 
-		_, err = fnvHash.Write(key_val_sep)
-		if err != nil {
-			return 0, err
-		}
-
-		_, err = fnvHash.Write([]byte(resource[k]))
-		if err != nil {
-			return 0, err
-		}
-
-		_, err = fnvHash.Write(pair_sep)
-		if err != nil {
-			return 0, err
-		}
+		escapedSlice = appendEscapedSeparator(escapedSlice[:0], resource[k])
+		fnvHash.Write(escapedSlice)
+		fnvHash.Write(pair_sep)
 	}
 
 	fnvHashOut = fnvHash.Sum(fnvHashOut)
-	return binary.BigEndian.Uint64(fnvHashOut), nil
+	return binary.BigEndian.Uint64(fnvHashOut)
+}
+
+// appendEscapedSeparator escapes
+func appendEscapedSeparator(buf []byte, s string) []byte {
+	const escape_char = '\xff'
+
+	if len(s) > cap(buf) {
+		new_buf := make([]byte, len(s))
+		copy(new_buf, buf)
+		buf = new_buf
+	}
+
+	for _, char := range s {
+		switch char {
+		case escape_char:
+			fallthrough
+		case rune(pair_sep[0]):
+			buf = append(buf, byte(escape_char))
+		}
+
+		buf = append(buf, byte(char))
+	}
+
+	return buf
 }

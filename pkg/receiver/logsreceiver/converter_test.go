@@ -15,8 +15,11 @@
 package logsreceiver
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
+	"sort"
 	"strconv"
 	"sync"
 	"testing"
@@ -718,12 +721,26 @@ func BenchmarkConverter(b *testing.B) {
 	}
 }
 
-func BenchmarkGetResourceId(b *testing.B) {
+func BenchmarkGetResourceID(b *testing.B) {
 	b.StopTimer()
 	res := getResource()
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		_, _ = getResourceID(res)
+		getResourceID(res)
+	}
+}
+
+func BenchmarkGetResourceIDJSON(b *testing.B) {
+	b.StopTimer()
+	res := getResource()
+	var underlyingBuffer [256]byte
+	buf := bytes.NewBuffer(underlyingBuffer[:])
+	enc := json.NewEncoder(buf)
+	b.StartTimer()
+	for i := 0; i < b.N; i++ {
+		buf.Reset()
+		err := enc.Encode(res)
+		require.NoError(b, err)
 	}
 }
 
@@ -735,7 +752,113 @@ func getResource() map[string]string {
 		"host.ip":          "192.168.1.12",
 		"k8s.pod.name":     "test-pod-123zwe1",
 		"k8s.node.name":    "aws-us-east-1.asfasf.aws.com",
-		"k8s.container.id": "192end1yu8231kd9213erhcncd821y123",
+		"k8s.container.id": "192end1yu823aocajsiocjnasd",
 		"k8s.cluster.name": "my-cluster",
 	}
+}
+
+type resourceIDOutput struct {
+	name   string
+	output uint64
+}
+
+type resourceIDOutputSlice []resourceIDOutput
+
+func (o resourceIDOutputSlice) Len() int {
+	return len(o)
+}
+
+func (x resourceIDOutputSlice) Less(i, j int) bool {
+	return x[i].output < x[j].output
+}
+
+func (o resourceIDOutputSlice) Swap(i, j int) {
+	o[i], o[j] = o[j], o[i]
+}
+
+func TestGetResourceID(t *testing.T) {
+	testCases := []struct {
+		name  string
+		input map[string]string
+	}{
+		{
+			name:  "Typical Resource",
+			input: getResource(),
+		},
+		{
+			name: "Resource with non-utf bytes",
+			input: map[string]string{
+				"SomeKey":  "Value\xC0\xC1\xD4\xFF\xF0",
+				"\xFF\xF0": "Ooops",
+			},
+		},
+		{
+			name: "Empty value/key",
+			input: map[string]string{
+				"SomeKey": "",
+				"":        "Ooops",
+			},
+		},
+		{
+			name: "Empty value/key (reversed)",
+			input: map[string]string{
+				"":      "SomeKey",
+				"Ooops": "",
+			},
+		},
+		{
+			name: "Ambiguous map 1",
+			input: map[string]string{
+				"AB": "CD",
+				"EF": "G",
+			},
+		},
+		{
+			name: "Ambiguous map 2",
+			input: map[string]string{
+				"ABC": "DE",
+				"F":   "G",
+			},
+		},
+		{
+			name: "Ambiguous map 3",
+			input: map[string]string{
+				"ABC": "DE\xfe",
+				"F":   "G",
+			},
+		},
+		{
+			name: "Ambiguous map 4",
+			input: map[string]string{
+				"ABC":   "DE",
+				"\xfeF": "G",
+			},
+		},
+		{
+			name:  "nil resource",
+			input: nil,
+		},
+	}
+
+	outputs := resourceIDOutputSlice{}
+	for _, testCase := range testCases {
+		outputs = append(outputs, resourceIDOutput{
+			name:   testCase.name,
+			output: getResourceID(testCase.input),
+		})
+	}
+
+	// Ensure every output is unique!
+	sort.Sort(outputs)
+	for i := 1; i < len(outputs); i++ {
+		if outputs[i].output == outputs[i-1].output {
+			t.Errorf("Test case %s and %s had the same output!", outputs[i].name, outputs[i-1].name)
+		}
+	}
+}
+
+func TestGetResourceIDEmptyAndNilAreEqual(t *testing.T) {
+	nilID := getResourceID(nil)
+	emptyID := getResourceID(map[string]string{})
+	require.Equal(t, nilID, emptyID)
 }
