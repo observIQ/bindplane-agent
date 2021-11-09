@@ -34,7 +34,6 @@ type LogEmitter struct {
 	cancel                context.CancelFunc
 	batchMux              sync.Mutex
 	batch                 []*entry.Entry
-	flushChan             chan struct{}
 	wg                    sync.WaitGroup
 	flushTriggerAmount    uint
 	flushInterval         time.Duration
@@ -68,7 +67,6 @@ func NewLogEmitter(logger *zap.SugaredLogger, flushInterval time.Duration, flush
 			},
 		},
 		logChan:               make(chan []*entry.Entry),
-		flushChan:             make(chan struct{}, 1),
 		batch:                 make([]*entry.Entry, 0, entryBatchInitialSize),
 		flushInterval:         flushInterval,
 		flushTriggerAmount:    flushTriggerAmount,
@@ -109,8 +107,6 @@ func (e *LogEmitter) flusher(ctx context.Context) {
 
 	for {
 		select {
-		case <-e.flushChan:
-			e.flush(ctx)
 		case <-ticker.C:
 			e.flush(ctx)
 		case <-ctx.Done():
