@@ -178,7 +178,7 @@ func (c *Converter) workerLoop() {
 
 			for _, e := range eSlice {
 				// Conversion
-				// c.hostIdentifier.Identify(e)
+				c.hostIdentifier.Identify(e)
 				entryLr := convert(e, c.idToPipelineConfig)
 				resourceID, err := getResourceID(e.Resource)
 				if err != nil {
