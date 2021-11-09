@@ -186,7 +186,7 @@ func (c *Converter) workerLoop() {
 					continue
 				}
 
-				// Add host info after getting resource id; Adds unnecesary work when
+				// Add host info after getting resource id; Adds unnecessary work when
 				// getting ID, since the host info is constant across the lifecycle of the whole converter
 				c.hostIdentifier.Identify(e)
 				entryLr := convert(e, c.idToPipelineConfig)
