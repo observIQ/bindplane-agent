@@ -71,7 +71,12 @@ func createLogsReceiver(
 		return nil, err
 	}
 
-	emitter := NewLogEmitter(params.Logger.Sugar(), stanzaCfg.Converter.FlushInterval, stanzaCfg.Converter.MaxFlushCount)
+	emitter := NewLogEmitter(
+		LogEmitterWithLogger(params.Logger.Sugar()),
+		LogEmitterWithFlushInterval(stanzaCfg.Converter.FlushInterval),
+		LogEmitterWithMaxBatchSize(stanzaCfg.Converter.MaxFlushCount),
+	)
+
 	logAgent, err := agent.NewBuilder(params.Logger.Sugar()).
 		WithConfig(&agent.Config{Pipeline: pipeline}).
 		WithDefaultOutput(emitter).

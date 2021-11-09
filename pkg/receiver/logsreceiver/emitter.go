@@ -28,45 +28,70 @@ import (
 // LogEmitter is a stanza operator that emits log entries to a channel
 type LogEmitter struct {
 	helper.OutputOperator
-	logChan            chan []*entry.Entry
-	stopOnce           sync.Once
-	cancel             context.CancelFunc
-	batchMux           sync.Mutex
-	batch              []*entry.Entry
-	wg                 sync.WaitGroup
-	flushTriggerAmount uint
-	flushInterval      time.Duration
+	logChan       chan []*entry.Entry
+	stopOnce      sync.Once
+	cancel        context.CancelFunc
+	batchMux      sync.Mutex
+	batch         []*entry.Entry
+	wg            sync.WaitGroup
+	maxBatchSize  uint
+	flushInterval time.Duration
+}
+
+type LogEmitterOption func(*LogEmitter)
+
+func (leo LogEmitterOption) Apply(le *LogEmitter) {
+	leo(le)
 }
 
 var (
-	defaultFlushInterval           = 100 * time.Millisecond
-	defaultFlushTriggerAmount uint = 200
+	defaultFlushInterval      = 100 * time.Millisecond
+	defaultMaxBatchSize  uint = 200
 )
 
+// LogEmitterWithMaxBatchSize returns an option that makes the LogEmitter use the specified max batch size
+func LogEmitterWithMaxBatchSize(maxBatchSize uint) LogEmitterOption {
+	return func(le *LogEmitter) {
+		le.maxBatchSize = maxBatchSize
+		le.batch = make([]*entry.Entry, 0, maxBatchSize)
+	}
+}
+
+// LogEmitterWithFlushInterval returns an option that makes the LogEmitter use the specified flush interval
+func LogEmitterWithFlushInterval(flushInterval time.Duration) LogEmitterOption {
+	return func(le *LogEmitter) {
+		le.flushInterval = flushInterval
+	}
+}
+
+// LogEmitterWithLogger returns an option that makes the LogEmitter use the specified logger
+func LogEmitterWithLogger(logger *zap.SugaredLogger) LogEmitterOption {
+	return func(le *LogEmitter) {
+		le.OutputOperator.BasicOperator.SugaredLogger = logger
+	}
+}
+
 // NewLogEmitter creates a new receiver output
-// TODO: Convert args here to functional options
-func NewLogEmitter(logger *zap.SugaredLogger, flushInterval time.Duration, flushTriggerAmount uint) *LogEmitter {
-	if flushInterval == 0 {
-		flushInterval = defaultFlushInterval
-	}
-
-	if flushTriggerAmount == 0 {
-		flushTriggerAmount = defaultFlushTriggerAmount
-	}
-
-	return &LogEmitter{
+func NewLogEmitter(opts ...LogEmitterOption) *LogEmitter {
+	le := &LogEmitter{
 		OutputOperator: helper.OutputOperator{
 			BasicOperator: helper.BasicOperator{
 				OperatorID:    "log_emitter",
 				OperatorType:  "log_emitter",
-				SugaredLogger: logger,
+				SugaredLogger: zap.NewNop().Sugar(),
 			},
 		},
-		logChan:            make(chan []*entry.Entry),
-		batch:              make([]*entry.Entry, 0, flushTriggerAmount),
-		flushInterval:      flushInterval,
-		flushTriggerAmount: flushTriggerAmount,
+		logChan:       make(chan []*entry.Entry),
+		maxBatchSize:  defaultMaxBatchSize,
+		batch:         make([]*entry.Entry, 0, defaultMaxBatchSize),
+		flushInterval: defaultFlushInterval,
 	}
+
+	for _, opt := range opts {
+		opt.Apply(le)
+	}
+
+	return le
 }
 
 func (e *LogEmitter) Start(_ operator.Persister) error {
@@ -83,8 +108,8 @@ func (e *LogEmitter) Process(ctx context.Context, ent *entry.Entry) error {
 	e.batchMux.Lock()
 
 	e.batch = append(e.batch, ent)
-	if uint(len(e.batch)) >= e.flushTriggerAmount {
-		// flushTriggerAmount triggers a flush
+	if uint(len(e.batch)) >= e.maxBatchSize {
+		// flushTriggerAmount triggers a blocking flush
 		e.batchMux.Unlock()
 		e.flush(ctx)
 		return nil
@@ -119,7 +144,7 @@ func (e *LogEmitter) flush(ctx context.Context) {
 		return
 	}
 	batch = e.batch
-	e.batch = make([]*entry.Entry, 0, e.flushTriggerAmount)
+	e.batch = make([]*entry.Entry, 0, e.maxBatchSize)
 
 	e.batchMux.Unlock()
 
