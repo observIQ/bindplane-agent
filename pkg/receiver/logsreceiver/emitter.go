@@ -16,7 +16,6 @@ package logsreceiver
 
 import (
 	"context"
-	"math"
 	"sync"
 	"time"
 
@@ -29,15 +28,14 @@ import (
 // LogEmitter is a stanza operator that emits log entries to a channel
 type LogEmitter struct {
 	helper.OutputOperator
-	logChan               chan []*entry.Entry
-	stopOnce              sync.Once
-	cancel                context.CancelFunc
-	batchMux              sync.Mutex
-	batch                 []*entry.Entry
-	wg                    sync.WaitGroup
-	flushTriggerAmount    uint
-	flushInterval         time.Duration
-	entryBatchInitialSize int
+	logChan            chan []*entry.Entry
+	stopOnce           sync.Once
+	cancel             context.CancelFunc
+	batchMux           sync.Mutex
+	batch              []*entry.Entry
+	wg                 sync.WaitGroup
+	flushTriggerAmount uint
+	flushInterval      time.Duration
 }
 
 var (
@@ -56,8 +54,6 @@ func NewLogEmitter(logger *zap.SugaredLogger, flushInterval time.Duration, flush
 		flushTriggerAmount = defaultFlushTriggerAmount
 	}
 
-	entryBatchInitialSize := int(math.Max(float64(flushTriggerAmount), float64(flushTriggerAmount)*1.1))
-
 	return &LogEmitter{
 		OutputOperator: helper.OutputOperator{
 			BasicOperator: helper.BasicOperator{
@@ -66,11 +62,10 @@ func NewLogEmitter(logger *zap.SugaredLogger, flushInterval time.Duration, flush
 				SugaredLogger: logger,
 			},
 		},
-		logChan:               make(chan []*entry.Entry),
-		batch:                 make([]*entry.Entry, 0, entryBatchInitialSize),
-		flushInterval:         flushInterval,
-		flushTriggerAmount:    flushTriggerAmount,
-		entryBatchInitialSize: entryBatchInitialSize,
+		logChan:            make(chan []*entry.Entry),
+		batch:              make([]*entry.Entry, 0, flushTriggerAmount),
+		flushInterval:      flushInterval,
+		flushTriggerAmount: flushTriggerAmount,
 	}
 }
 
@@ -124,7 +119,7 @@ func (e *LogEmitter) flush(ctx context.Context) {
 		return
 	}
 	batch = e.batch
-	e.batch = make([]*entry.Entry, 0, e.entryBatchInitialSize)
+	e.batch = make([]*entry.Entry, 0, e.flushTriggerAmount)
 
 	e.batchMux.Unlock()
 
