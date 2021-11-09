@@ -23,6 +23,7 @@ import (
 	"go.opentelemetry.io/collector/exporter/loggingexporter"
 	"go.opentelemetry.io/collector/exporter/otlpexporter"
 	"go.opentelemetry.io/collector/exporter/otlphttpexporter"
+	"go.opentelemetry.io/collector/extension/ballastextension"
 	"go.opentelemetry.io/collector/extension/zpagesextension"
 	"go.opentelemetry.io/collector/processor/batchprocessor"
 	"go.opentelemetry.io/collector/processor/memorylimiterprocessor"
@@ -67,6 +68,7 @@ var defaultExtensions = []component.ExtensionFactory{
 	pprofextension.NewFactory(),
 	zpagesextension.NewFactory(),
 	filestorage.NewFactory(),
+	ballastextension.NewFactory(),
 	componenttest.NewNopExtensionFactory(),
 }
 
