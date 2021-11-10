@@ -195,9 +195,6 @@ func TestAllConvertedEntriesAreSentAndReceived(t *testing.T) {
 			entries: 10,
 		},
 		{
-			entries: 10,
-		},
-		{
 			entries: 100,
 		},
 	}
