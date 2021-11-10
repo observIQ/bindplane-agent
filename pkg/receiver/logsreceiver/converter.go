@@ -518,7 +518,7 @@ func appendEscapedPairSeparator(buf []byte, s string) []byte {
 		case escape_byte:
 			fallthrough
 		case pair_sep[0]:
-			buf = append(buf, byte(escape_byte))
+			buf = append(buf, escape_byte)
 		}
 
 		buf = append(buf, b)

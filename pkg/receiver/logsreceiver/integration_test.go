@@ -57,7 +57,7 @@ func BenchmarkEmitterToConsumer(b *testing.B) {
 				go func() {
 					ctx := context.Background()
 					for _, e := range entries {
-						logsReceiver.(*receiver).emitter.Process(ctx, e)
+						_ = logsReceiver.(*receiver).emitter.Process(ctx, e)
 					}
 				}()
 
@@ -108,7 +108,7 @@ func TestEmitterToConsumer(t *testing.T) {
 	go func() {
 		ctx := context.Background()
 		for _, e := range entries {
-			logsReceiver.(*receiver).emitter.Process(ctx, e)
+			require.NoError(t, logsReceiver.(*receiver).emitter.Process(ctx, e))
 		}
 	}()
 
