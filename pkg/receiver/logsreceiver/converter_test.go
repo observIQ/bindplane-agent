@@ -189,20 +189,16 @@ func TestAllConvertedEntriesAreSentAndReceived(t *testing.T) {
 	t.Parallel()
 
 	testcases := []struct {
-		entries       int
-		maxFlushCount uint
+		entries int
 	}{
 		{
-			entries:       10,
-			maxFlushCount: 10,
+			entries: 10,
 		},
 		{
-			entries:       10,
-			maxFlushCount: 3,
+			entries: 10,
 		},
 		{
-			entries:       100,
-			maxFlushCount: 20,
+			entries: 100,
 		},
 	}
 
@@ -268,40 +264,28 @@ func TestAllConvertedEntriesAreSentAndReceivedWithinAnExpectedTimeDuration(t *te
 	t.Parallel()
 
 	testcases := []struct {
-		entries       int
-		hostsCount    int
-		maxFlushCount uint
-		flushInterval time.Duration
+		entries    int
+		hostsCount int
 	}{
 		{
-			entries:       10,
-			hostsCount:    1,
-			maxFlushCount: 20,
-			flushInterval: 100 * time.Millisecond,
+			entries:    10,
+			hostsCount: 1,
 		},
 		{
-			entries:       50,
-			hostsCount:    1,
-			maxFlushCount: 51,
-			flushInterval: 100 * time.Millisecond,
+			entries:    50,
+			hostsCount: 1,
 		},
 		{
-			entries:       500,
-			hostsCount:    1,
-			maxFlushCount: 501,
-			flushInterval: 100 * time.Millisecond,
+			entries:    500,
+			hostsCount: 1,
 		},
 		{
-			entries:       500,
-			hostsCount:    1,
-			maxFlushCount: 100,
-			flushInterval: 100 * time.Millisecond,
+			entries:    500,
+			hostsCount: 1,
 		},
 		{
-			entries:       500,
-			hostsCount:    4,
-			maxFlushCount: 501,
-			flushInterval: 100 * time.Millisecond,
+			entries:    500,
+			hostsCount: 4,
 		},
 	}
 
@@ -331,7 +315,7 @@ func TestAllConvertedEntriesAreSentAndReceivedWithinAnExpectedTimeDuration(t *te
 			defer timeoutTimer.Stop()
 
 		forLoop:
-			for start := time.Now(); ; start = time.Now() {
+			for {
 				if tc.entries == actualCount {
 					break
 				}
@@ -341,12 +325,6 @@ func TestAllConvertedEntriesAreSentAndReceivedWithinAnExpectedTimeDuration(t *te
 					if !ok {
 						break forLoop
 					}
-
-					assert.WithinDuration(t,
-						start.Add(tc.flushInterval),
-						time.Now(),
-						tc.flushInterval,
-					)
 
 					actualFlushCount++
 
@@ -788,8 +766,8 @@ func TestGetResourceID(t *testing.T) {
 		{
 			name: "Resource with non-utf bytes",
 			input: map[string]string{
-				"SomeKey":  "Value\xC0\xC1\xD4\xFF\xF0",
-				"\xFF\xF0": "Ooops",
+				"SomeKey":  "Value\xc0\xc1\xd4\xff\xfe",
+				"\xff\xfe": "Ooops",
 			},
 		},
 		{
@@ -838,6 +816,12 @@ func TestGetResourceID(t *testing.T) {
 			name:  "nil resource",
 			input: nil,
 		},
+		{
+			name: "Long resource value",
+			input: map[string]string{
+				"key": "This is a really long resource value; It's so long that the pre-allocated buffer size doesn't hold it.",
+			},
+		},
 	}
 
 	outputs := resourceIDOutputSlice{}
@@ -848,11 +832,11 @@ func TestGetResourceID(t *testing.T) {
 		})
 	}
 
-	// Ensure every output is unique!
+	// Ensure every output is unique
 	sort.Sort(outputs)
 	for i := 1; i < len(outputs); i++ {
 		if outputs[i].output == outputs[i-1].output {
-			t.Errorf("Test case %s and %s had the same output!", outputs[i].name, outputs[i-1].name)
+			t.Errorf("Test case %s and %s had the same output", outputs[i].name, outputs[i-1].name)
 		}
 	}
 }

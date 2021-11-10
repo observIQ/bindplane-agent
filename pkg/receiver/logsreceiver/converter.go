@@ -165,6 +165,8 @@ func (c *Converter) workerLoop() {
 	// TODO: Base this off of an input parameter, giving the amount allocated per entry
 	// TODO: See performance of re-making this map every iteration of this loop.
 	recordsByResource := make(map[uint64]pdata.Logs, 200)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
 	for {
 		select {
@@ -211,9 +213,9 @@ func (c *Converter) workerLoop() {
 					recordsByResource[resourceID] = pLogs
 				}
 			}
-			// TODO: Target for optimization here; Batch a bunch of pdata.Logs and flush that, not individual pdata.logs
+
 			for r, pLogs := range recordsByResource {
-				c.flush(context.TODO(), pLogs)
+				c.flush(ctx, pLogs)
 				delete(recordsByResource, r)
 			}
 		}
@@ -486,11 +488,11 @@ func getResourceID(resource map[string]string) uint64 {
 	// has no guarantee about order.
 	sort.Strings(key_slice)
 	for _, k := range key_slice {
-		escapedSlice = appendEscapedSeparator(escapedSlice[:0], k)
+		escapedSlice = appendEscapedPairSeparator(escapedSlice[:0], k)
 		fnvHash.Write(escapedSlice)
 		fnvHash.Write(pair_sep)
 
-		escapedSlice = appendEscapedSeparator(escapedSlice[:0], resource[k])
+		escapedSlice = appendEscapedPairSeparator(escapedSlice[:0], resource[k])
 		fnvHash.Write(escapedSlice)
 		fnvHash.Write(pair_sep)
 	}
@@ -499,9 +501,10 @@ func getResourceID(resource map[string]string) uint64 {
 	return binary.BigEndian.Uint64(fnvHashOut)
 }
 
-// appendEscapedSeparator escapes
-func appendEscapedSeparator(buf []byte, s string) []byte {
-	const escape_char = '\xff'
+// appendEscapedPairSeparator escapes (prefixes) "pair_sep" with byte 0xff, and appends it to the
+// incoming buffer. It returns the appended buffer.
+func appendEscapedPairSeparator(buf []byte, s string) []byte {
+	const escape_byte byte = '\xff'
 
 	if len(s) > cap(buf) {
 		new_buf := make([]byte, len(s))
@@ -509,15 +512,16 @@ func appendEscapedSeparator(buf []byte, s string) []byte {
 		buf = new_buf
 	}
 
-	for _, char := range s {
-		switch char {
-		case escape_char:
+	sBytes := []byte(s)
+	for _, b := range sBytes {
+		switch b {
+		case escape_byte:
 			fallthrough
-		case rune(pair_sep[0]):
-			buf = append(buf, byte(escape_char))
+		case pair_sep[0]:
+			buf = append(buf, byte(escape_byte))
 		}
 
-		buf = append(buf, byte(char))
+		buf = append(buf, b)
 	}
 
 	return buf
