@@ -71,3 +71,55 @@ func BenchmarkEmitterToConsumer(b *testing.B) {
 		})
 	}
 }
+
+func TestEmitterToConsumer(t *testing.T) {
+	const (
+		entryCount  = 1_000
+		hostsCount  = 4
+		workerCount = 2
+	)
+
+	entries := complexEntriesForNDifferentHosts(entryCount, hostsCount)
+
+	params := component.ReceiverCreateSettings{
+		TelemetrySettings: component.TelemetrySettings{
+			Logger: zap.NewNop(),
+		},
+	}
+
+	factory := NewFactory()
+	cfg := factory.CreateDefaultConfig().(*Config)
+	cfg.Pipeline = []map[string]interface{}{
+		{
+			"type": "noop",
+		},
+	}
+	cfg.Converter.WorkerCount = workerCount
+
+	consumer := &mockLogsConsumer{}
+	logsReceiver, err := factory.CreateLogsReceiver(context.Background(), params, cfg, consumer)
+	require.NoError(t, err)
+
+	err = logsReceiver.Start(context.Background(), componenttest.NewNopHost())
+	require.NoError(t, err)
+
+	consumer.ResetReceivedCount()
+
+	go func() {
+		ctx := context.Background()
+		for _, e := range entries {
+			logsReceiver.(*receiver).emitter.Process(ctx, e)
+		}
+	}()
+
+	require.Eventually(t,
+		func() bool {
+			return consumer.Received() == entryCount
+		},
+		5*time.Second, 5*time.Millisecond, "Did not receive all logs (only received %d)", consumer.Received(),
+	)
+
+	<-time.After(time.Second)
+
+	require.Equal(t, entryCount, consumer.Received())
+}
