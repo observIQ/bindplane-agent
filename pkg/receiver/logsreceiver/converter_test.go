@@ -15,8 +15,11 @@
 package logsreceiver
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
+	"sort"
 	"strconv"
 	"sync"
 	"testing"
@@ -186,20 +189,13 @@ func TestAllConvertedEntriesAreSentAndReceived(t *testing.T) {
 	t.Parallel()
 
 	testcases := []struct {
-		entries       int
-		maxFlushCount uint
+		entries int
 	}{
 		{
-			entries:       10,
-			maxFlushCount: 10,
+			entries: 10,
 		},
 		{
-			entries:       10,
-			maxFlushCount: 3,
-		},
-		{
-			entries:       100,
-			maxFlushCount: 20,
+			entries: 100,
 		},
 	}
 
@@ -211,16 +207,13 @@ func TestAllConvertedEntriesAreSentAndReceived(t *testing.T) {
 
 			converter := NewConverter(
 				WithWorkerCount(1),
-				WithMaxFlushCount(tc.maxFlushCount),
-				WithFlushInterval(10*time.Millisecond), // To minimize time spent in test
 			)
 			converter.Start()
 			defer converter.Stop()
 
 			go func() {
-				for _, ent := range complexEntries(tc.entries) {
-					assert.NoError(t, converter.Batch(ent))
-				}
+				entries := complexEntries(tc.entries)
+				assert.NoError(t, converter.Batch(entries))
 			}()
 
 			var (
@@ -252,11 +245,6 @@ func TestAllConvertedEntriesAreSentAndReceived(t *testing.T) {
 					ill := ills.At(0)
 
 					actualCount += ill.Logs().Len()
-
-					assert.LessOrEqual(t, uint(ill.Logs().Len()), tc.maxFlushCount,
-						"Received more log records in one flush than configured by maxFlushCount",
-					)
-
 				case <-timeoutTimer.C:
 					break forLoop
 				}
@@ -273,40 +261,28 @@ func TestAllConvertedEntriesAreSentAndReceivedWithinAnExpectedTimeDuration(t *te
 	t.Parallel()
 
 	testcases := []struct {
-		entries       int
-		hostsCount    int
-		maxFlushCount uint
-		flushInterval time.Duration
+		entries    int
+		hostsCount int
 	}{
 		{
-			entries:       10,
-			hostsCount:    1,
-			maxFlushCount: 20,
-			flushInterval: 100 * time.Millisecond,
+			entries:    10,
+			hostsCount: 1,
 		},
 		{
-			entries:       50,
-			hostsCount:    1,
-			maxFlushCount: 51,
-			flushInterval: 100 * time.Millisecond,
+			entries:    50,
+			hostsCount: 1,
 		},
 		{
-			entries:       500,
-			hostsCount:    1,
-			maxFlushCount: 501,
-			flushInterval: 100 * time.Millisecond,
+			entries:    500,
+			hostsCount: 1,
 		},
 		{
-			entries:       500,
-			hostsCount:    1,
-			maxFlushCount: 100,
-			flushInterval: 100 * time.Millisecond,
+			entries:    500,
+			hostsCount: 1,
 		},
 		{
-			entries:       500,
-			hostsCount:    4,
-			maxFlushCount: 501,
-			flushInterval: 100 * time.Millisecond,
+			entries:    500,
+			hostsCount: 4,
 		},
 	}
 
@@ -318,16 +294,13 @@ func TestAllConvertedEntriesAreSentAndReceivedWithinAnExpectedTimeDuration(t *te
 
 			converter := NewConverter(
 				WithWorkerCount(1),
-				WithMaxFlushCount(tc.maxFlushCount),
-				WithFlushInterval(tc.flushInterval),
 			)
 			converter.Start()
 			defer converter.Stop()
 
 			go func() {
-				for _, ent := range complexEntriesForNDifferentHosts(tc.entries, tc.hostsCount) {
-					assert.NoError(t, converter.Batch(ent))
-				}
+				entries := complexEntriesForNDifferentHosts(tc.entries, tc.hostsCount)
+				assert.NoError(t, converter.Batch(entries))
 			}()
 
 			var (
@@ -339,7 +312,7 @@ func TestAllConvertedEntriesAreSentAndReceivedWithinAnExpectedTimeDuration(t *te
 			defer timeoutTimer.Stop()
 
 		forLoop:
-			for start := time.Now(); ; start = time.Now() {
+			for {
 				if tc.entries == actualCount {
 					break
 				}
@@ -349,12 +322,6 @@ func TestAllConvertedEntriesAreSentAndReceivedWithinAnExpectedTimeDuration(t *te
 					if !ok {
 						break forLoop
 					}
-
-					assert.WithinDuration(t,
-						start.Add(tc.flushInterval),
-						time.Now(),
-						tc.flushInterval,
-					)
 
 					actualFlushCount++
 
@@ -369,10 +336,6 @@ func TestAllConvertedEntriesAreSentAndReceivedWithinAnExpectedTimeDuration(t *te
 
 					actualCount += ill.Logs().Len()
 
-					assert.LessOrEqual(t, uint(ill.Logs().Len()), tc.maxFlushCount,
-						"Received more log records in one flush than configured by maxFlushCount",
-					)
-
 				case <-timeoutTimer.C:
 					break forLoop
 				}
@@ -386,10 +349,7 @@ func TestAllConvertedEntriesAreSentAndReceivedWithinAnExpectedTimeDuration(t *te
 }
 
 func TestConverterCancelledContextCancellsTheFlush(t *testing.T) {
-	converter := NewConverter(
-		WithMaxFlushCount(1),
-		WithFlushInterval(time.Millisecond),
-	)
+	converter := NewConverter()
 	converter.Start()
 	defer converter.Stop()
 	var wg sync.WaitGroup
@@ -665,6 +625,7 @@ func BenchmarkConverter(b *testing.B) {
 	const (
 		entryCount = 1_000_000
 		hostsCount = 4
+		batchCount = 200
 	)
 
 	var (
@@ -677,16 +638,18 @@ func BenchmarkConverter(b *testing.B) {
 			for i := 0; i < b.N; i++ {
 				converter := NewConverter(
 					WithWorkerCount(wc),
-					WithMaxFlushCount(1_000),
-					WithFlushInterval(250*time.Millisecond),
 				)
 				converter.Start()
 				defer converter.Stop()
 				b.ResetTimer()
 
 				go func() {
-					for _, ent := range entries {
-						assert.NoError(b, converter.Batch(ent))
+					for i := 0; i < entryCount; i += batchCount {
+						if i+batchCount > entryCount {
+							assert.NoError(b, converter.Batch(entries[i:entryCount]))
+						} else {
+							assert.NoError(b, converter.Batch(entries[i:i+batchCount]))
+						}
 					}
 				}()
 
@@ -731,4 +694,152 @@ func BenchmarkConverter(b *testing.B) {
 			}
 		})
 	}
+}
+
+func BenchmarkGetResourceID(b *testing.B) {
+	b.StopTimer()
+	res := getResource()
+	b.StartTimer()
+	for i := 0; i < b.N; i++ {
+		getResourceID(res)
+	}
+}
+
+func BenchmarkGetResourceIDJSON(b *testing.B) {
+	b.StopTimer()
+	res := getResource()
+	var underlyingBuffer [256]byte
+	buf := bytes.NewBuffer(underlyingBuffer[:])
+	enc := json.NewEncoder(buf)
+	b.StartTimer()
+	for i := 0; i < b.N; i++ {
+		buf.Reset()
+		err := enc.Encode(res)
+		require.NoError(b, err)
+	}
+}
+
+func getResource() map[string]string {
+	return map[string]string{
+		"file.name":        "filename.log",
+		"file.directory":   "/some_directory",
+		"host.name":        "localhost",
+		"host.ip":          "192.168.1.12",
+		"k8s.pod.name":     "test-pod-123zwe1",
+		"k8s.node.name":    "aws-us-east-1.asfasf.aws.com",
+		"k8s.container.id": "192end1yu823aocajsiocjnasd",
+		"k8s.cluster.name": "my-cluster",
+	}
+}
+
+type resourceIDOutput struct {
+	name   string
+	output uint64
+}
+
+type resourceIDOutputSlice []resourceIDOutput
+
+func (o resourceIDOutputSlice) Len() int {
+	return len(o)
+}
+
+func (x resourceIDOutputSlice) Less(i, j int) bool {
+	return x[i].output < x[j].output
+}
+
+func (o resourceIDOutputSlice) Swap(i, j int) {
+	o[i], o[j] = o[j], o[i]
+}
+
+func TestGetResourceID(t *testing.T) {
+	testCases := []struct {
+		name  string
+		input map[string]string
+	}{
+		{
+			name:  "Typical Resource",
+			input: getResource(),
+		},
+		{
+			name: "Resource with non-utf bytes",
+			input: map[string]string{
+				"SomeKey":  "Value\xc0\xc1\xd4\xff\xfe",
+				"\xff\xfe": "Ooops",
+			},
+		},
+		{
+			name: "Empty value/key",
+			input: map[string]string{
+				"SomeKey": "",
+				"":        "Ooops",
+			},
+		},
+		{
+			name: "Empty value/key (reversed)",
+			input: map[string]string{
+				"":      "SomeKey",
+				"Ooops": "",
+			},
+		},
+		{
+			name: "Ambiguous map 1",
+			input: map[string]string{
+				"AB": "CD",
+				"EF": "G",
+			},
+		},
+		{
+			name: "Ambiguous map 2",
+			input: map[string]string{
+				"ABC": "DE",
+				"F":   "G",
+			},
+		},
+		{
+			name: "Ambiguous map 3",
+			input: map[string]string{
+				"ABC": "DE\xfe",
+				"F":   "G",
+			},
+		},
+		{
+			name: "Ambiguous map 4",
+			input: map[string]string{
+				"ABC":   "DE",
+				"\xfeF": "G",
+			},
+		},
+		{
+			name:  "nil resource",
+			input: nil,
+		},
+		{
+			name: "Long resource value",
+			input: map[string]string{
+				"key": "This is a really long resource value; It's so long that the pre-allocated buffer size doesn't hold it.",
+			},
+		},
+	}
+
+	outputs := resourceIDOutputSlice{}
+	for _, testCase := range testCases {
+		outputs = append(outputs, resourceIDOutput{
+			name:   testCase.name,
+			output: getResourceID(testCase.input),
+		})
+	}
+
+	// Ensure every output is unique
+	sort.Sort(outputs)
+	for i := 1; i < len(outputs); i++ {
+		if outputs[i].output == outputs[i-1].output {
+			t.Errorf("Test case %s and %s had the same output", outputs[i].name, outputs[i-1].name)
+		}
+	}
+}
+
+func TestGetResourceIDEmptyAndNilAreEqual(t *testing.T) {
+	nilID := getResourceID(nil)
+	emptyID := getResourceID(map[string]string{})
+	require.Equal(t, nilID, emptyID)
 }

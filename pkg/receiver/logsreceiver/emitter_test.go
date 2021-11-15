@@ -25,12 +25,14 @@ import (
 )
 
 func TestLogEmitter(t *testing.T) {
-	emitter := NewLogEmitter(zaptest.NewLogger(t).Sugar())
+	emitter := NewLogEmitter(LogEmitterWithLogger(zaptest.NewLogger(t).Sugar()))
 	defer func() {
 		require.NoError(t, emitter.Stop())
 	}()
 
 	in := entry.New()
+
+	require.NoError(t, emitter.Start(nil))
 
 	go func() {
 		require.NoError(t, emitter.Process(context.Background(), in))
@@ -38,7 +40,7 @@ func TestLogEmitter(t *testing.T) {
 
 	select {
 	case out := <-emitter.logChan:
-		require.Equal(t, in, out)
+		require.Equal(t, in, out[0])
 	case <-time.After(time.Second):
 		require.FailNow(t, "Timed out waiting for output")
 	}

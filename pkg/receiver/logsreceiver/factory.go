@@ -71,7 +71,12 @@ func createLogsReceiver(
 		return nil, err
 	}
 
-	emitter := NewLogEmitter(params.Logger.Sugar())
+	emitter := NewLogEmitter(
+		LogEmitterWithLogger(params.Logger.Sugar()),
+		LogEmitterWithFlushInterval(stanzaCfg.Converter.FlushInterval),
+		LogEmitterWithMaxBatchSize(stanzaCfg.Converter.MaxFlushCount),
+	)
+
 	logAgent, err := agent.NewBuilder(params.Logger.Sugar()).
 		WithConfig(&agent.Config{Pipeline: pipeline}).
 		WithDefaultOutput(emitter).
@@ -92,12 +97,6 @@ func createLogsReceiver(
 	opts := []ConverterOption{
 		WithLogger(params.Logger),
 		WithIdToPipelineConfigMap(pluginIdToConfig),
-	}
-	if stanzaCfg.Converter.MaxFlushCount > 0 {
-		opts = append(opts, WithMaxFlushCount(stanzaCfg.Converter.MaxFlushCount))
-	}
-	if stanzaCfg.Converter.FlushInterval > 0 {
-		opts = append(opts, WithFlushInterval(stanzaCfg.Converter.FlushInterval))
 	}
 	if stanzaCfg.Converter.WorkerCount > 0 {
 		opts = append(opts, WithWorkerCount(stanzaCfg.Converter.WorkerCount))

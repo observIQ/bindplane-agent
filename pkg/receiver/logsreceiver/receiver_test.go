@@ -63,7 +63,7 @@ func TestStart(t *testing.T) {
 	require.NoError(t, err, "receiver start failed")
 
 	stanzaReceiver := logsReceiver.(*receiver)
-	stanzaReceiver.emitter.logChan <- entry.New()
+	stanzaReceiver.emitter.logChan <- []*entry.Entry{entry.New()}
 
 	// Eventually because of asynchronuous nature of the receiver.
 	require.Eventually(t,
@@ -160,7 +160,7 @@ func TestHandleConsumeError(t *testing.T) {
 	require.NoError(t, err, "receiver start failed")
 
 	stanzaReceiver := logsReceiver.(*receiver)
-	stanzaReceiver.emitter.logChan <- entry.New()
+	stanzaReceiver.emitter.logChan <- []*entry.Entry{entry.New()}
 
 	// Eventually because of asynchronuous nature of the receiver.
 	require.Eventually(t,
@@ -191,7 +191,11 @@ func BenchmarkReadLine(b *testing.B) {
 	pipelineCfg := pipeline.Config{}
 	require.NoError(b, yaml.Unmarshal([]byte(pipelineYaml), &pipelineCfg))
 
-	emitter := NewLogEmitter(zap.NewNop().Sugar())
+	emitter := NewLogEmitter(
+		LogEmitterWithLogger(zap.NewNop().Sugar()),
+		LogEmitterWithFlushInterval(1*time.Millisecond),
+	)
+
 	defer func() {
 		require.NoError(b, emitter.Stop())
 	}()
@@ -211,8 +215,12 @@ func BenchmarkReadLine(b *testing.B) {
 	// // Run the actual benchmark
 	b.ResetTimer()
 	require.NoError(b, pl.Start(newMockPersister()))
-	for i := 0; i < b.N; i++ {
-		convert(<-emitter.logChan, nil)
+	for i := 0; i < b.N; {
+		entries := <-emitter.logChan
+		for _, e := range entries {
+			convert(e, nil)
+			i++
+		}
 	}
 }
 
@@ -251,7 +259,11 @@ func BenchmarkParseAndMap(b *testing.B) {
 	pipelineCfg := pipeline.Config{}
 	require.NoError(b, yaml.Unmarshal([]byte(pipelineYaml), &pipelineCfg))
 
-	emitter := NewLogEmitter(zap.NewNop().Sugar())
+	emitter := NewLogEmitter(
+		LogEmitterWithLogger(zap.NewNop().Sugar()),
+		LogEmitterWithFlushInterval(1*time.Millisecond),
+	)
+
 	defer func() {
 		require.NoError(b, emitter.Stop())
 	}()
@@ -269,11 +281,15 @@ func BenchmarkParseAndMap(b *testing.B) {
 		require.NoError(b, err)
 	}
 
-	// // Run the actual benchmark
+	// Run the actual benchmark
 	b.ResetTimer()
 	require.NoError(b, pl.Start(newMockPersister()))
-	for i := 0; i < b.N; i++ {
-		convert(<-emitter.logChan, nil)
+	for i := 0; i < b.N; {
+		entries := <-emitter.logChan
+		for _, e := range entries {
+			convert(e, nil)
+			i++
+		}
 	}
 }
 

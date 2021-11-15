@@ -141,6 +141,7 @@ func (r *receiver) consumerLoop(ctx context.Context) {
 				r.logger.Debug("Converter channel got closed")
 				continue
 			}
+
 			if cErr := r.consumer.ConsumeLogs(ctx, pLogs); cErr != nil {
 				r.logger.Error("ConsumeLogs() failed", zap.Error(cErr))
 			}
@@ -152,6 +153,7 @@ func (r *receiver) consumerLoop(ctx context.Context) {
 func (r *receiver) Shutdown(ctx context.Context) error {
 	r.logger.Info("Stopping stanza receiver")
 	agentErr := r.agent.Stop()
+
 	r.converter.Stop()
 	r.cancel()
 	r.wg.Wait()

@@ -156,7 +156,7 @@ func (c *CloudwatchInput) Start(persister operator.Persister) error {
 func (c *CloudwatchInput) Stop() error {
 	c.cancel()
 	c.wg.Wait()
-	fmt.Printf("Closed all connections to Cloudwatch Logs")
+	c.Info("Closed all connections to Cloudwatch Logs")
 	return nil
 }
 
