@@ -62,6 +62,11 @@ amd64_windows:
 .PHONY: build-all
 build-all: amd64_linux amd64_darwin amd64_windows arm_linux
 
+# Detect GOOS and GOARCH
+.PHONY: build
+build:
+	GOOS=$(GOOS) GOARCH=$(GOARCH) $(MAKE) collector
+
 # tool-related commands
 TOOLS_MOD_DIR := ./internal/tools
 .PHONY: install-tools
