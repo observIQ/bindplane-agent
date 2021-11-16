@@ -11,7 +11,7 @@ on:
 
 jobs:
   setup-environment:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v2
@@ -40,7 +40,7 @@ jobs:
           go mod download
           make install-tools
   ci-checks:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     needs: [setup-environment]
     steps:
       - name: Checkout Repo
@@ -72,7 +72,7 @@ jobs:
       - name: CI Checks
         run: make -j3 check-fmt misspell lint
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     needs: [setup-environment]
     steps:
       - name: Checkout Repo
@@ -104,7 +104,7 @@ jobs:
       - name: Go Test
         run: make test
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     needs: [setup-environment]
     steps:
       - name: Checkout Repo
