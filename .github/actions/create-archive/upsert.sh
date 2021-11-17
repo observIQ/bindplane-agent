@@ -19,7 +19,7 @@ fi
 # For each asset in path, we want to:
 # Delete it's current version if it exists (asset with the same name of the file is already there)
 # Upload the asset using the UPLOAD_URL
-for f in "$3"/**/*
+for f in "$3"/*
 do
     BASENAME_EXT=${f##*/}
  
