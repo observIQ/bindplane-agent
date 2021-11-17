@@ -3,7 +3,7 @@ FROM golang:1.17 as build
 WORKDIR /collector
 COPY . /collector
 ARG JMX_JAR_VERSION=v1.7.0
-RUN make build
+RUN make collector
 RUN curl -L \
     --output /opt/opentelemetry-java-contrib-jmx-metrics.jar \
     "https://github.com/open-telemetry/opentelemetry-java-contrib/releases/download/${JMX_JAR_VERSION}/opentelemetry-jmx-metrics.jar"
