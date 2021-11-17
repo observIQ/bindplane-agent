@@ -1,0 +1,242 @@
+name: CD
+on:
+  release:
+    types: [published]
+
+  workflow_dispatch:
+
+jobs:
+  # This is the first job run; If any step in this fails the release will not be updated.
+  # This protects against releases that don't match specific criteria:
+  #   1. Tag must be a semantic version ((v)d.d.d)
+  #   2. Release must be a pre-release
+  #   3. The tag version must match the version in the VERSION file
+  check-should-edit-release:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Get Tag From Environment
+        id: get-tag
+        run: printf '::set-output name=tag::%s' "$(printf '%s' "${{ github.ref }}" | sed 's/refs\/tags\///')"
+
+      - name: Check the tag is a semantic version
+        run: "[[ ${{ steps.get-tag.outputs.tag }} =~ ^v?[0-9]+\\.[0-9]+\\.[0-9]+ ]] && exit 0 || exit 1"
+
+      - name: Checkout Repo
+        uses: actions/checkout@v2
+
+      - name: Fetch Release Info
+        uses: ./.github/actions/get-release-info
+        id: release-info
+        with:
+          tag: ${{ steps.get-tag.outputs.tag }}
+
+      - name: Check release is pre-release
+        run: '[ "${{ steps.release-info.outputs.pre-release }}" = "true" ] && exit 0 || exit 1'
+  setup-environment:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v2
+      - name: Set up Go 1.17
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.17
+      - name: Setup Go Environment
+        run: |
+          echo "GOPATH=$(go env GOPATH)" >> $GITHUB_ENV
+          echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
+      - name: Cache Go
+        id: go-cache
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-go-modules
+        with:
+          path: |
+            /home/runner/go/pkg/mod
+            /home/runner/.cache/go-build
+            /home/runner/go/bin
+          key: v1-go-pkg-mod-${{ runner.os }}-${{ hashFiles('**/go.mod', '**/go.sum') }}
+      - name: Install Dependencies
+        if: steps.go-cache.outputs.hit != 'true'
+        run: |
+          go mod download
+          make install-tools
+  ci-checks:
+    runs-on: ubuntu-20.04
+    needs: [setup-environment]
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v2
+      - name: Set up Go 1.17
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.17
+      - name: Setup Go Environment
+        run: |
+          echo "GOPATH=$(go env GOPATH)" >> $GITHUB_ENV
+          echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
+      - name: Cache Go
+        id: go-cache
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-go-modules
+        with:
+          path: |
+            /home/runner/go/pkg/mod
+            /home/runner/.cache/go-build
+            /home/runner/go/bin
+          key: v1-go-pkg-mod-${{ runner.os }}-${{ hashFiles('**/go.mod', '**/go.sum') }}
+      - name: Install Dependencies
+        if: steps.go-cache.outputs.hit != 'true'
+        run: |
+          go mod download
+          make install-tools
+      - name: CI Checks
+        run: make -j3 check-fmt misspell lint
+  test:
+    runs-on: ubuntu-20.04
+    needs: [setup-environment]
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v2
+      - name: Set up Go 1.17
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.17
+      - name: Setup Go Environment
+        run: |
+          echo "GOPATH=$(go env GOPATH)" >> $GITHUB_ENV
+          echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
+      - name: Cache Go
+        id: go-cache
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-go-modules
+        with:
+          path: |
+            /home/runner/go/pkg/mod
+            /home/runner/.cache/go-build
+            /home/runner/go/bin
+          key: v1-go-pkg-mod-${{ runner.os }}-${{ hashFiles('**/go.mod', '**/go.sum') }}
+      - name: Install Dependencies
+        if: steps.go-cache.outputs.hit != 'true'
+        run: |
+          go mod download
+          make install-tools
+      - name: Go Test
+        run: make test
+  build-container-image:
+    runs-on: ubuntu-20.04
+    needs: [ci-checks, test]
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v2
+
+      - name: Set up Go 1.17
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.17
+
+      - name: Setup Go Environment
+        run: |
+          echo "GOPATH=$(go env GOPATH)" >> $GITHUB_ENV
+          echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
+      - name: Configure git for private modules
+        env:
+          TOKEN: ${{ secrets.GH_READ_RELEASE_TOKEN }}
+        run: git config --global url."https://${TOKEN}:x-oauth-basic@github.com".insteadOf "https://github.com"
+
+      - name: Cache Go
+        id: go-cache
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-go-modules
+        with:
+          path: |
+            /home/runner/go/pkg/mod
+            /home/runner/.cache/go-build
+            /home/runner/go/bin
+          key: v1-go-pkg-mod-${{ runner.os }}-${{ hashFiles('**/go.mod', '**/go.sum') }}
+
+      - name: Install Dependencies
+        if: steps.go-cache.outputs.hit != 'true'
+        run: |
+          make install-tools
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Inspect builder
+        run: |
+          echo "Name:      ${{ steps.buildx.outputs.name }}"
+          echo "Endpoint:  ${{ steps.buildx.outputs.endpoint }}"
+          echo "Status:    ${{ steps.buildx.outputs.status }}"
+          echo "Flags:     ${{ steps.buildx.outputs.flags }}"
+          echo "Platforms: ${{ steps.buildx.outputs.platforms }}"
+
+      - name: Get Tag From Environment
+        id: get-tag
+        run: printf '::set-output name=tag::%s' "$(printf '%s' "${{ github.ref }}" | sed 's/refs\/tags\///')"
+
+      - name: Build and push
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./Dockerfile
+          # Supporting only linux/amd64 to keep builds fast. arm can
+          # be enabled anytime by updating the `platforms` key.
+          #platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64
+          push: true
+          # uncomment to override jar version: https://github.com/open-telemetry/opentelemetry-java-contrib/releases
+          #build-args: |
+          #  JMX_JAR_VERSION=v1.7.0
+          tags: |
+            observiq/observiq-collector:${{ steps.get-tag.outputs.tag }}
+  build:
+    runs-on: ubuntu-20.04
+    needs: [setup-environment]
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v2
+      - name: Set up Go 1.17
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.17
+      - name: Setup Go Environment
+        run: |
+          echo "GOPATH=$(go env GOPATH)" >> $GITHUB_ENV
+          echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
+      - name: Cache Go
+        id: go-cache
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-go-modules
+        with:
+          path: |
+            /home/runner/go/pkg/mod
+            /home/runner/.cache/go-build
+            /home/runner/go/bin
+          key: v1-go-pkg-mod-${{ runner.os }}-${{ hashFiles('**/go.mod', '**/go.sum') }}
+      - name: Install Dependencies
+        if: steps.go-cache.outputs.hit != 'true'
+        run: |
+          go mod download
+          make install-tools
+      - name: Build All Targets
+        run: make -j4 build-all
+
+      - name: Upload Release Binaries (GitHub Releases)
+        uses: ./.github/actions/upsert-release-artifacts
+        with:
+          path: ./build/
+          tag: ${{ steps.get-tag.outputs.tag }}
