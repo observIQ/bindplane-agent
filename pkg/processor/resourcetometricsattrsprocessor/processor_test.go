@@ -2,7 +2,6 @@ package resourcetometricsattrsprocessor
 
 import (
 	"context"
-	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/mock"
@@ -70,7 +69,8 @@ func TestConsumeMetricsNoop(t *testing.T) {
 		createDefaultConfig().(*Config),
 	)
 
-	p.ConsumeMetrics(ctx, metrics)
+	err := p.ConsumeMetrics(ctx, metrics)
+	require.NoError(t, err)
 
 	require.Empty(t, getMetricAttrsFromMetrics(metricsOut))
 }
@@ -137,7 +137,8 @@ func TestConsumeMetricsMoveExistingAttribs(t *testing.T) {
 	dp := metric.Gauge().DataPoints()
 	dp.AppendEmpty().SetDoubleVal(3.0)
 
-	p.ConsumeMetrics(ctx, metrics)
+	err := p.ConsumeMetrics(ctx, metrics)
+	require.NoError(t, err)
 
 	require.Equal(t, map[string]interface{}{
 		"resourceattrib1": "value",
@@ -183,7 +184,8 @@ func TestConsumeMetricsMixedExistence(t *testing.T) {
 	dp := metric.Gauge().DataPoints()
 	dp.AppendEmpty().SetDoubleVal(3.0)
 
-	p.ConsumeMetrics(ctx, metrics)
+	err := p.ConsumeMetrics(ctx, metrics)
+	require.NoError(t, err)
 
 	require.Equal(t, map[string]interface{}{
 		"resourceattrib1out": "value1",
@@ -223,7 +225,8 @@ func TestConsumeMetricsSum(t *testing.T) {
 	dp := metric.Sum().DataPoints()
 	dp.AppendEmpty().SetDoubleVal(3.0)
 
-	p.ConsumeMetrics(ctx, metrics)
+	err := p.ConsumeMetrics(ctx, metrics)
+	require.NoError(t, err)
 
 	require.Equal(t, map[string]interface{}{
 		"resourceattrib1out": "value1",
@@ -263,7 +266,8 @@ func TestConsumeMetricsHistogram(t *testing.T) {
 	dp := metric.Histogram().DataPoints()
 	dp.AppendEmpty()
 
-	p.ConsumeMetrics(ctx, metrics)
+	err := p.ConsumeMetrics(ctx, metrics)
+	require.NoError(t, err)
 
 	require.Equal(t, map[string]interface{}{
 		"resourceattrib1out": "value1",
@@ -303,7 +307,8 @@ func TestConsumeMetricsSummary(t *testing.T) {
 	dp := metric.Summary().DataPoints()
 	dp.AppendEmpty()
 
-	p.ConsumeMetrics(ctx, metrics)
+	err := p.ConsumeMetrics(ctx, metrics)
+	require.NoError(t, err)
 
 	require.Equal(t, map[string]interface{}{
 		"resourceattrib1out": "value1",
@@ -341,7 +346,8 @@ func TestConsumeMetricsNone(t *testing.T) {
 	metric := getMetric(metrics)
 	metric.SetDataType(pdata.MetricDataTypeNone)
 
-	p.ConsumeMetrics(ctx, metrics)
+	err := p.ConsumeMetrics(ctx, metrics)
+	require.NoError(t, err)
 
 	require.Equal(t, map[string]interface{}(nil), getMetricAttrsFromMetrics(metricsOut))
 }
@@ -384,7 +390,8 @@ func TestConsumeMetricsDoesNotOverwrite(t *testing.T) {
 	dp := metric.Gauge().DataPoints()
 	dp.AppendEmpty().SetDoubleVal(3.0)
 
-	p.ConsumeMetrics(ctx, metrics)
+	err := p.ConsumeMetrics(ctx, metrics)
+	require.NoError(t, err)
 
 	require.Equal(t, map[string]interface{}{
 		"out": "value1",
@@ -431,7 +438,8 @@ func TestConsumeMetricsDoesNotOverwrite2(t *testing.T) {
 	dp.SetDoubleVal(3.0)
 	dp.Attributes().InsertString("out", "originalvalue")
 
-	p.ConsumeMetrics(ctx, metrics)
+	err := p.ConsumeMetrics(ctx, metrics)
+	require.NoError(t, err)
 
 	require.Equal(t, map[string]interface{}{
 		"out": "originalvalue",
@@ -442,56 +450,24 @@ type mockConsumer struct {
 	mock.Mock
 }
 
-func (m mockConsumer) Start(ctx context.Context, host component.Host) error {
+func (m *mockConsumer) Start(ctx context.Context, host component.Host) error {
 	args := m.Called(ctx, host)
 	return args.Error(0)
 }
 
-func (m mockConsumer) Capabilities() consumer.Capabilities {
+func (m *mockConsumer) Capabilities() consumer.Capabilities {
 	args := m.Called()
 	return args.Get(0).(consumer.Capabilities)
 }
 
-func (m mockConsumer) ConsumeMetrics(ctx context.Context, md pdata.Metrics) error {
+func (m *mockConsumer) ConsumeMetrics(ctx context.Context, md pdata.Metrics) error {
 	args := m.Called(ctx, md)
 	return args.Error(0)
 }
 
-func (m mockConsumer) Shutdown(ctx context.Context) error {
+func (m *mockConsumer) Shutdown(ctx context.Context) error {
 	args := m.Called(ctx)
 	return args.Error(0)
-}
-
-func assertAttributeMapIsEqual(t *testing.T, m1, m2 pdata.AttributeMap) {
-	if m1.Len() != m2.Len() {
-		require.Fail(t, "Len of m1 (%d) does not equal Len of m2 (%d)", m1.Len(), m2.Len())
-	}
-
-	m1.Range(func(k string, v pdata.AttributeValue) bool {
-		v2, ok := m2.Get(k)
-		if !ok {
-			require.Fail(t, "m2 does not contain key %s, but m1 does", k)
-			return false
-		}
-
-		err := assertAttributeValueIsEqual(v, v2)
-		if err != nil {
-			require.Fail(t, "Attribute value for %s was not the same between m1 and m2: %v", k, err)
-			return false
-		}
-
-		return true
-	})
-}
-
-func assertAttributeValueIsEqual(a1, a2 pdata.AttributeValue) error {
-	if a1.Type() != a2.Type() {
-		return fmt.Errorf("type of a1 (%d) is not equal to type of a2 (%d)", a1.Type(), a2.Type())
-	}
-	if !a1.Equal(a2) {
-		return fmt.Errorf("a1 (%s) was not equal to a2 (%s)", a1.AsString(), a2.AsString())
-	}
-	return nil
 }
 
 func getMetric(m pdata.Metrics) pdata.Metric {
@@ -502,10 +478,6 @@ func createMetrics() pdata.Metrics {
 	metrics := pdata.NewMetrics()
 	metrics.ResourceMetrics().AppendEmpty().InstrumentationLibraryMetrics().AppendEmpty().Metrics().AppendEmpty()
 	return metrics
-}
-
-func getResourceAttrsFromMetrics(m pdata.Metrics) map[string]interface{} {
-	return m.ResourceMetrics().At(0).Resource().Attributes().AsRaw()
 }
 
 func getMetricAttrsFromMetrics(m pdata.Metrics) map[string]interface{} {
