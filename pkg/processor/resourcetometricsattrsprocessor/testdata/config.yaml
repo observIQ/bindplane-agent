@@ -15,7 +15,7 @@ exporters:
 
 service:
   pipelines:
-    logs:
+    metrics:
       receivers: [nop]
       processors: [resourcetometricsattrs]
       exporters: [nop]
