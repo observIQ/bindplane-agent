@@ -1,4 +1,4 @@
-# Resource to Metrics Attributes Processor
+# Resource Attribute Transposer Processor
 
 This processor copies a resource level attribute to all individual metric data points associated with the resource.
 If they key already exists, no action is taken (the data points' attribute _**IS NOT**_ overwritten)
