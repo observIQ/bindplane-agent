@@ -1,4 +1,4 @@
-package resourcetometricsattrsprocessor
+package resourceattributetransposer
 
 import "go.opentelemetry.io/collector/config"
 

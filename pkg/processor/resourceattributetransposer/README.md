@@ -14,7 +14,7 @@ The following options may be configured:
 
 ```yaml
 processors:
-  resourcetometricsattrs:
+  resourceattributetransposer:
     operations:
       - from: "some.resource.level.attr"
         to: "some.metricdatapoint.level.attr"

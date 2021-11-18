@@ -1,4 +1,4 @@
-package resourcetometricsattrsprocessor
+package resourceattributetransposer
 
 import (
 	"context"

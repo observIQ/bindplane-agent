@@ -1,7 +1,7 @@
 package collector
 
 import (
-	"github.com/observiq/observiq-collector/pkg/processor/resourcetometricsattrsprocessor"
+	"github.com/observiq/observiq-collector/pkg/processor/resourceattributetransposer"
 	"github.com/observiq/observiq-collector/pkg/receiver/logsreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/fileexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/observiqexporter"
@@ -52,7 +52,7 @@ var defaultProcessors = []component.ProcessorFactory{
 	batchprocessor.NewFactory(),
 	memorylimiterprocessor.NewFactory(),
 	probabilisticsamplerprocessor.NewFactory(),
-	resourcetometricsattrsprocessor.NewFactory(),
+	resourceattributetransposer.NewFactory(),
 	componenttest.NewNopProcessorFactory(),
 }
 

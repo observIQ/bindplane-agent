@@ -1,4 +1,4 @@
-package resourcetometricsattrsprocessor
+package resourceattributetransposer
 
 import (
 	"context"
@@ -11,10 +11,10 @@ import (
 )
 
 const (
-	typeStr = "resourcetometricsattrs"
+	typeStr = "resourceattributetransposer"
 )
 
-// NewFactory returns a new factory for the resourcetometricsattrs processor.
+// NewFactory returns a new factory for the resourceattributetransposer processor.
 func NewFactory() component.ProcessorFactory {
 	return processorhelper.NewFactory(
 		typeStr,
@@ -23,19 +23,19 @@ func NewFactory() component.ProcessorFactory {
 	)
 }
 
-// createDefaultConfig returns the default config for the resourcetometricsattrs processor.
+// createDefaultConfig returns the default config for the resourceattributetransposer processor.
 func createDefaultConfig() config.Processor {
 	return &Config{
 		ProcessorSettings: config.NewProcessorSettings(config.NewComponentID(typeStr)),
 	}
 }
 
-// createMetricsProcessor creates the resourcetometricsattrs processor.
+// createMetricsProcessor creates the resourceattributetransposer processor.
 func createMetricsProcessor(ctx context.Context, params component.ProcessorCreateSettings, cfg config.Processor, nextConsumer consumer.Metrics) (component.MetricsProcessor, error) {
 	processorCfg, ok := cfg.(*Config)
 	if !ok {
 		return nil, fmt.Errorf("config was not of correct type for the processor: %+v", cfg)
 	}
 
-	return newResourceToMetricsAttributesProcessor(params.Logger, nextConsumer, processorCfg), nil
+	return newResourceAttributeTransposerProcessor(params.Logger, nextConsumer, processorCfg), nil
 }

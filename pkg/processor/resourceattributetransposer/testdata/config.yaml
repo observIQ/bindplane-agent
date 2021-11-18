@@ -2,8 +2,8 @@ receivers:
   nop:
 
 processors:
-  resourcetometricsattrs:
-  resourcetometricsattrs/customname:
+  resourceattributetransposer:
+  resourceattributetransposer/customname:
     operations:
       - from: "some.resource.level.attr"
         to: "some.metricdatapoint.level.attr"
@@ -17,5 +17,5 @@ service:
   pipelines:
     metrics:
       receivers: [nop]
-      processors: [resourcetometricsattrs]
+      processors: [resourceattributetransposer]
       exporters: [nop]

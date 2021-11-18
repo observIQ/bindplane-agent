@@ -1,4 +1,4 @@
-package resourcetometricsattrsprocessor
+package resourceattributetransposer
 
 import (
 	"context"
@@ -9,15 +9,15 @@ import (
 	"go.uber.org/zap"
 )
 
-type resourceToMetricsAttributesProcessor struct {
+type resourceAttributeTransposerProcessor struct {
 	consumer consumer.Metrics
 	logger   *zap.Logger
 	config   *Config
 }
 
-// newResourceToMetricsAttributesProcessor returns a new resourceToMetricsAttributesProcessor
-func newResourceToMetricsAttributesProcessor(logger *zap.Logger, consumer consumer.Metrics, config *Config) *resourceToMetricsAttributesProcessor {
-	return &resourceToMetricsAttributesProcessor{
+// newResourceAttributeTransposerProcessor returns a new resourceToMetricsAttributesProcessor
+func newResourceAttributeTransposerProcessor(logger *zap.Logger, consumer consumer.Metrics, config *Config) *resourceAttributeTransposerProcessor {
+	return &resourceAttributeTransposerProcessor{
 		consumer: consumer,
 		logger:   logger,
 		config:   config,
@@ -25,17 +25,17 @@ func newResourceToMetricsAttributesProcessor(logger *zap.Logger, consumer consum
 }
 
 // Start starts the processor. It's a noop.
-func (resourceToMetricsAttributesProcessor) Start(ctx context.Context, host component.Host) error {
+func (resourceAttributeTransposerProcessor) Start(ctx context.Context, host component.Host) error {
 	return nil
 }
 
 // Capabilities returns the consumer's capabilities. Indicates that this processor mutates the incoming metrics.
-func (resourceToMetricsAttributesProcessor) Capabilities() consumer.Capabilities {
+func (resourceAttributeTransposerProcessor) Capabilities() consumer.Capabilities {
 	return consumer.Capabilities{MutatesData: true}
 }
 
 // ConsumeMetrics processes the incoming pdata.Metrics.
-func (p resourceToMetricsAttributesProcessor) ConsumeMetrics(ctx context.Context, md pdata.Metrics) error {
+func (p resourceAttributeTransposerProcessor) ConsumeMetrics(ctx context.Context, md pdata.Metrics) error {
 	resMetrics := md.ResourceMetrics()
 	for i := 0; i < resMetrics.Len(); i++ {
 		resMetric := resMetrics.At(i)
@@ -61,7 +61,7 @@ func (p resourceToMetricsAttributesProcessor) ConsumeMetrics(ctx context.Context
 }
 
 // Shutdown stops the processor. It's a noop.
-func (resourceToMetricsAttributesProcessor) Shutdown(ctx context.Context) error {
+func (resourceAttributeTransposerProcessor) Shutdown(ctx context.Context) error {
 	return nil
 }
 
