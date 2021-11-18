@@ -1,4 +1,4 @@
-package resourceattributetransposer
+package resourceattributetransposerprocessor
 
 import (
 	"path"
