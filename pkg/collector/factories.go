@@ -1,6 +1,7 @@
 package collector
 
 import (
+	"github.com/GoogleCloudPlatform/opentelemetry-operations-collector/processor/normalizesumsprocessor"
 	"github.com/observiq/observiq-collector/pkg/processor/resourceattributetransposerprocessor"
 	"github.com/observiq/observiq-collector/pkg/receiver/logsreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/fileexporter"
@@ -63,6 +64,7 @@ var defaultProcessors = []component.ProcessorFactory{
 	resourceattributetransposerprocessor.NewFactory(),
 	componenttest.NewNopProcessorFactory(),
 	metricstransformprocessor.NewFactory(),
+	normalizesumsprocessor.NewFactory(),
 }
 
 var defaultExporters = []component.ExporterFactory{

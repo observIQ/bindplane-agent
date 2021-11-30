@@ -18,7 +18,6 @@ require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/extension/oidcauthextension v0.39.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/extension/pprofextension v0.39.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/extension/storage v0.39.0
-	github.com/open-telemetry/opentelemetry-collector-contrib/internal/stanza v0.39.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/processor/attributesprocessor v0.39.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/processor/groupbyattrsprocessor v0.39.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/processor/k8sattributesprocessor v0.39.0
@@ -46,6 +45,7 @@ require (
 )
 
 require (
+	github.com/GoogleCloudPlatform/opentelemetry-operations-collector v0.0.3-0.20211123195618-f15f911ae5a1
 	github.com/gorilla/mux v1.8.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/processor/probabilisticsamplerprocessor v0.39.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/processor/resourceprocessor v0.39.0
@@ -127,7 +127,7 @@ require (
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect
 	github.com/moby/sys/mount v0.2.0 // indirect
 	github.com/moby/sys/mountinfo v0.4.1 // indirect
-	github.com/moby/term v0.0.0-20210610120745-9d4ed1856297 // indirect
+	github.com/moby/term v0.0.0-20210619224110-3f7ff695adc6 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/morikuni/aec v1.0.0 // indirect
@@ -139,6 +139,7 @@ require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/internal/k8sconfig v0.39.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/internal/kubelet v0.39.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/internal/sharedcomponent v0.39.0 // indirect
+	github.com/open-telemetry/opentelemetry-collector-contrib/internal/stanza v0.39.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/experimentalmetricmetadata v0.39.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/translator/opencensus v0.39.0 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
