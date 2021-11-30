@@ -41,8 +41,8 @@ require (
 	go.uber.org/multierr v1.7.0
 	go.uber.org/zap v1.19.1
 	gopkg.in/yaml.v2 v2.4.0
-	k8s.io/apimachinery v0.22.2
-	k8s.io/client-go v0.22.2
+	k8s.io/apimachinery v0.22.4
+	k8s.io/client-go v0.22.4
 )
 
 require (
@@ -58,12 +58,12 @@ require (
 	contrib.go.opencensus.io/exporter/prometheus v0.4.0 // indirect
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.8 // indirect
 	github.com/Azure/azure-amqp-common-go/v3 v3.0.1 // indirect
-	github.com/Azure/azure-sdk-for-go v55.2.0+incompatible // indirect
+	github.com/Azure/azure-sdk-for-go v51.1.0+incompatible // indirect
 	github.com/Azure/go-amqp v0.13.12 // indirect
 	github.com/Azure/go-ansiterm v0.0.0-20210617225240-d185dfc1b5a1 // indirect
 	github.com/Azure/go-autorest v14.2.0+incompatible // indirect
-	github.com/Azure/go-autorest/autorest v0.11.19 // indirect
-	github.com/Azure/go-autorest/autorest/adal v0.9.14 // indirect
+	github.com/Azure/go-autorest/autorest v0.11.18 // indirect
+	github.com/Azure/go-autorest/autorest/adal v0.9.13 // indirect
 	github.com/Azure/go-autorest/autorest/date v0.3.0 // indirect
 	github.com/Azure/go-autorest/autorest/to v0.4.0 // indirect
 	github.com/Azure/go-autorest/autorest/validation v0.3.1 // indirect
@@ -184,7 +184,7 @@ require (
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/square/go-jose.v2 v2.5.1 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
-	k8s.io/api v0.22.2 // indirect
+	k8s.io/api v0.22.4 // indirect
 	k8s.io/klog/v2 v2.9.0 // indirect
 	k8s.io/kubelet v0.22.2 // indirect
 	k8s.io/utils v0.0.0-20210819203725-bdf08cb9a70a // indirect
@@ -199,5 +199,3 @@ replace (
 	github.com/open-telemetry/opentelemetry-collector-contrib/internal/stanza v0.0.0-00010101000000-000000000000 => github.com/open-telemetry/opentelemetry-collector-contrib/internal/stanza v0.38.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/internal/stanza v0.24.1-0.20210408210148-736647af91e1 => github.com/open-telemetry/opentelemetry-collector-contrib/internal/stanza v0.38.0
 )
-
-replace github.com/open-telemetry/opentelemetry-collector-contrib/exporter/observiqexporter v0.38.0 => github.com/observiq/opentelemetry-collector-contrib/exporter/observiqexporter v0.0.0-20211019185350-5d7036dc7761
