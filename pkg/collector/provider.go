@@ -5,22 +5,40 @@ import (
 	"fmt"
 
 	"go.opentelemetry.io/collector/config"
+	"go.opentelemetry.io/collector/config/configmapprovider"
 )
 
 // FileProvider is a config provider that uses a file.
 type FileProvider struct {
-	filePath string
+	retriever *FileRetriever
 }
 
 // NewFileProvider returns a new file provider.
 func NewFileProvider(filePath string) *FileProvider {
 	return &FileProvider{
-		filePath: filePath,
+		retriever: &FileRetriever{
+			filePath: filePath,
+		},
 	}
 }
 
-// Get returns a config map from the provider.
-func (f *FileProvider) Get(ctx context.Context) (*config.Map, error) {
+// Retrieve returns a FileRetriever
+func (f *FileProvider) Retrieve(ctx context.Context, onChange func(*configmapprovider.ChangeEvent)) (configmapprovider.Retrieved, error) {
+	return f.retriever, nil
+}
+
+// Shutdown stops the file provider.
+func (f *FileProvider) Shutdown(ctx context.Context) error {
+	return nil
+}
+
+// FileRetriever is a retriever that retrieves a configuration from a file
+type FileRetriever struct {
+	filePath string
+}
+
+// Get returns a config map from the file.
+func (f *FileRetriever) Get(ctx context.Context) (*config.Map, error) {
 	select {
 	case <-ctx.Done():
 		return nil, ctx.Err()
@@ -35,7 +53,7 @@ func (f *FileProvider) Get(ctx context.Context) (*config.Map, error) {
 	return configMap, nil
 }
 
-// Close closes the file provider.
-func (f *FileProvider) Close(ctx context.Context) error {
+// Close closes the file retriever.
+func (f *FileRetriever) Close(ctx context.Context) error {
 	return nil
 }

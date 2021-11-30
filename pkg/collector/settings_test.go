@@ -14,5 +14,5 @@ func TestNewSettings(t *testing.T) {
 
 	fileProvider, ok := settings.ConfigMapProvider.(*FileProvider)
 	require.True(t, ok)
-	require.Equal(t, "./test/valid.yaml", fileProvider.filePath)
+	require.Equal(t, "./test/valid.yaml", fileProvider.retriever.filePath)
 }

@@ -153,7 +153,7 @@ func convertStringArrays(le *pdata.LogRecord) {
 
 			strArr := strings.Split(strVal, ",")
 			arrAttrib := pdata.NewAttributeValueArray()
-			arrOut := arrAttrib.ArrayVal()
+			arrOut := arrAttrib.SliceVal()
 			arrOut.EnsureCapacity(len(strArr))
 
 			for _, val := range strArr {
