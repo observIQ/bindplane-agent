@@ -27,6 +27,7 @@ require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/k8sclusterreceiver v0.39.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/kubeletstatsreceiver v0.39.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/mysqlreceiver v0.39.0
+	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/statsdreceiver v0.39.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/syslogreceiver v0.39.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/tcplogreceiver v0.39.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/udplogreceiver v0.39.0

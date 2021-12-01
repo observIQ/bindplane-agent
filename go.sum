@@ -1304,6 +1304,8 @@ github.com/open-telemetry/opentelemetry-collector-contrib/receiver/nginxreceiver
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/prometheusexecreceiver v0.39.0/go.mod h1:nSl737gf3C78bJFsTbFRBkMx5jApqlcPMKy3GDH0jv8=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/prometheusreceiver v0.39.0/go.mod h1:TE5XnzXOfOyy46ptsL2CPJvM+FH69vpjCW/KKdmMcTU=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/redisreceiver v0.39.0/go.mod h1:OUWJodE92tucvR/F0vc7oXHCadlUhw0Hit26/ZE8Z6w=
+github.com/open-telemetry/opentelemetry-collector-contrib/receiver/statsdreceiver v0.39.0 h1:87mwCfu/DltU6d+66Y8YicDLB32T2CEcUQjt28HCiF8=
+github.com/open-telemetry/opentelemetry-collector-contrib/receiver/statsdreceiver v0.39.0/go.mod h1:6OUPlTKNCIUlwB2AgtITEF8oVuG1hQ5fi/h6PCeiLS4=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/syslogreceiver v0.39.0 h1:T9MR4lBG5DM0bKJ7vbgEuHSoiERoKRXjQKDcWOSFQhA=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/syslogreceiver v0.39.0/go.mod h1:doaF5JYnjPS/+1neRJ2nIMNy1eFqQiWdcxwb2rL1Fn4=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/tcplogreceiver v0.39.0 h1:71ZvAAV3uhrihRU652Pf0xardZ5sNsPKxXHxN7GEzY4=
