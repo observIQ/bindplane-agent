@@ -17,6 +17,7 @@ import (
 	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/k8sattributesprocessor"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/metricstransformprocessor"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/probabilisticsamplerprocessor"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/resourcedetectionprocessor"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/resourceprocessor"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/filelogreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/jmxreceiver"
@@ -67,6 +68,7 @@ var defaultProcessors = []component.ProcessorFactory{
 	componenttest.NewNopProcessorFactory(),
 	metricstransformprocessor.NewFactory(),
 	normalizesumsprocessor.NewFactory(),
+	resourcedetectionprocessor.NewFactory(),
 }
 
 var defaultExporters = []component.ExporterFactory{

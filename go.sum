@@ -180,6 +180,7 @@ github.com/Shopify/sarama v1.22.0/go.mod h1:lm3THZ8reqBDBQKQyb5HB3sY1lKp3grEbQ81
 github.com/Shopify/sarama v1.30.0/go.mod h1:zujlQQx1kzHsh4jfV1USnptCQrHAEZ2Hk8fTKCulPVs=
 github.com/Shopify/toxiproxy v2.1.4+incompatible/go.mod h1:OXgGpZ6Cli1/URJOF1DMxUHB2q5Ap20/P/eIdh4G0pI=
 github.com/Shopify/toxiproxy/v2 v2.1.6-0.20210914104332-15ea381dcdae/go.mod h1:/cvHQkZ1fst0EmZnA5dFtiQdWCNCFYzb+uE2vqVgvx0=
+github.com/Showmax/go-fqdn v1.0.0 h1:0rG5IbmVliNT5O19Mfuvna9LL7zlHyRfsSvBPZmF9tM=
 github.com/Showmax/go-fqdn v1.0.0/go.mod h1:SfrFBzmDCtCGrnHhoDjuvFnKsWjEQX/Q9ARZvOrJAko=
 github.com/StackExchange/wmi v1.2.1 h1:VIkavFPXSjcnS+O8yTq7NI32k0R5Aj+v39y29VYDOSA=
 github.com/StackExchange/wmi v1.2.1/go.mod h1:rcmrprowKIVzvc+NUiLncP2uuArMWLCbu9SBzvHz7e8=
@@ -1284,6 +1285,7 @@ github.com/open-telemetry/opentelemetry-collector-contrib/processor/metricstrans
 github.com/open-telemetry/opentelemetry-collector-contrib/processor/metricstransformprocessor v0.39.0/go.mod h1:27wippu0LuU6MKuDqFy2HDVY1SLbPGTwzKjyzJJ00to=
 github.com/open-telemetry/opentelemetry-collector-contrib/processor/probabilisticsamplerprocessor v0.39.0 h1:zDsYn1v5UO7UJdAWgtZGXnJTHLQ8FYzA5eJGcxt61Eg=
 github.com/open-telemetry/opentelemetry-collector-contrib/processor/probabilisticsamplerprocessor v0.39.0/go.mod h1:yVG1qEdt5iDM1o09UZcMRgGTQXiyPo3ycTHzLrb6juw=
+github.com/open-telemetry/opentelemetry-collector-contrib/processor/resourcedetectionprocessor v0.39.0 h1:hlAMBBlL+m7vnPesw4VJP178Q0W/EleaTDIe6HGZGM0=
 github.com/open-telemetry/opentelemetry-collector-contrib/processor/resourcedetectionprocessor v0.39.0/go.mod h1:8CvDnYMiRisb0bhMTNTmQEL4KdsujDUpY2wTv1TIIok=
 github.com/open-telemetry/opentelemetry-collector-contrib/processor/resourceprocessor v0.39.0 h1:0qKcx7wdv6k2tOgF2EhdnDRzcK1nf196573ej6Cflrw=
 github.com/open-telemetry/opentelemetry-collector-contrib/processor/resourceprocessor v0.39.0/go.mod h1:vBQuiaGp9fso5GBMQMHlG910lFQfLQDKmobfzwH7OT0=
