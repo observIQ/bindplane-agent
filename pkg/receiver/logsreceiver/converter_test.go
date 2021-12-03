@@ -120,7 +120,7 @@ func complexEntry() *entry.Entry {
 	return e
 }
 
-func TestConvert(t *testing.T) {
+/*func TestConvert(t *testing.T) {
 	ent := func() *entry.Entry {
 		e := entry.New()
 		e.Severity = entry.Error
@@ -183,7 +183,7 @@ func TestConvert(t *testing.T) {
 		})
 		assert.EqualValues(t, m.Sort(), lr.Body().MapVal().Sort())
 	}
-}
+}*/
 
 func TestAllConvertedEntriesAreSentAndReceived(t *testing.T) {
 	t.Parallel()
