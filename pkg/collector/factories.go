@@ -24,6 +24,7 @@ import (
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/k8sclusterreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/kubeletstatsreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/mysqlreceiver"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/postgresqlreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/statsdreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/syslogreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/tcplogreceiver"
@@ -54,6 +55,7 @@ var defaultReceivers = []component.ReceiverFactory{
 	k8sclusterreceiver.NewFactory(),
 	mysqlreceiver.NewFactory(),
 	statsdreceiver.NewFactory(),
+	postgresqlreceiver.NewFactory(),
 }
 
 var defaultProcessors = []component.ProcessorFactory{
