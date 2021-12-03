@@ -130,18 +130,17 @@ func (c *collector) runService(ctx context.Context) {
 // waitForStartup waits for the service to startup before exiting.
 func (c *collector) waitForStartup() error {
 	for {
-		select {
+		switch c.svc.GetState() {
 		// If the service is able to transmit a running state, this means
 		// that initial service startup was successful.
-		case state := <-c.svc.GetStateChannel():
-			if state == service.Running {
-				c.sendStatus(true, nil)
-				return nil
-			}
+		case service.Running:
+			c.sendStatus(true, nil)
+			return nil
 		// A flaw exists in the OT startup function where an early error may occur
 		// without sending any states through the state channel. To handle this,
 		// we use an errChan to exit immediately.
-		case err := <-c.startupChan:
+		default:
+			err := <-c.startupChan
 			return fmt.Errorf("failed onstartup: %w", err)
 		}
 	}
