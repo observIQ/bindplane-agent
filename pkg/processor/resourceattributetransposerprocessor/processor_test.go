@@ -193,11 +193,11 @@ func TestConsumeMetricsMoveToMultipleMetrics(t *testing.T) {
 
 	require.Equal(t, map[string]interface{}{
 		"resourceattrib1": "value",
-	}, getMetricAttrsFromMetric(pdata.Metric(getMetricSlice(metricsOut).At(0))))
+	}, getMetricAttrsFromMetric(getMetricSlice(metricsOut).At(0)))
 
 	require.Equal(t, map[string]interface{}{
 		"resourceattrib1": "value",
-	}, getMetricAttrsFromMetric(pdata.Metric(getMetricSlice(metricsOut).At(1))))
+	}, getMetricAttrsFromMetric(getMetricSlice(metricsOut).At(1)))
 }
 
 func TestConsumeMetricsMixedExistence(t *testing.T) {
