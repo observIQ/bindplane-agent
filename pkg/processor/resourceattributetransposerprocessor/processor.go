@@ -51,7 +51,7 @@ func (p resourceAttributeTransposerProcessor) ConsumeMetrics(ctx context.Context
 				ilm := ilms.At(j)
 				metrics := ilm.Metrics()
 				for k := 0; k < metrics.Len(); k++ {
-					metric := metrics.At(j)
+					metric := metrics.At(k)
 					setMetricAttr(metric, op.To, resourceValue)
 				}
 			}

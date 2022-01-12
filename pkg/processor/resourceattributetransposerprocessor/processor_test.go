@@ -150,6 +150,56 @@ func TestConsumeMetricsMoveExistingAttribs(t *testing.T) {
 	}, getMetricAttrsFromMetrics(metricsOut))
 }
 
+func TestConsumeMetricsMoveToMultipleMetrics(t *testing.T) {
+	ctx := context.Background()
+	metrics := createMetrics()
+
+	attrs := metrics.ResourceMetrics().At(0).Resource().Attributes()
+	attrs.Insert("resourceattrib1", pdata.NewAttributeValueString("value"))
+
+	var metricsOut pdata.Metrics
+
+	consumer := &mockConsumer{}
+	consumer.On("ConsumeMetrics", ctx, metrics).Run(func(args mock.Arguments) {
+		metricsOut = args[1].(pdata.Metrics)
+	}).Return(nil)
+
+	cfg := createDefaultConfig().(*Config)
+	cfg.Operations = []CopyResourceConfig{
+		{
+			From: "resourceattrib1",
+			To:   "resourceattrib1",
+		},
+	}
+
+	p := newResourceAttributeTransposerProcessor(
+		zap.NewNop(),
+		consumer,
+		cfg,
+	)
+	metricsSlice := getMetricSlice(metrics)
+	metric1 := metricsSlice.At(0)
+	metric1.SetDataType(pdata.MetricDataTypeGauge)
+	dp1 := metric1.Gauge().DataPoints()
+	dp1.AppendEmpty().SetDoubleVal(3.0)
+
+	metric2 := metricsSlice.AppendEmpty()
+	metric2.SetDataType(pdata.MetricDataTypeGauge)
+	dp2 := metric2.Gauge().DataPoints()
+	dp2.AppendEmpty().SetDoubleVal(3.0)
+
+	err := p.ConsumeMetrics(ctx, metrics)
+	require.NoError(t, err)
+
+	require.Equal(t, map[string]interface{}{
+		"resourceattrib1": "value",
+	}, getMetricAttrsFromMetric(getMetricSlice(metricsOut).At(0)))
+
+	require.Equal(t, map[string]interface{}{
+		"resourceattrib1": "value",
+	}, getMetricAttrsFromMetric(getMetricSlice(metricsOut).At(1)))
+}
+
 func TestConsumeMetricsMixedExistence(t *testing.T) {
 	ctx := context.Background()
 	metrics := createMetrics()
@@ -470,8 +520,12 @@ func (m *mockConsumer) Shutdown(ctx context.Context) error {
 	return args.Error(0)
 }
 
+func getMetricSlice(m pdata.Metrics) pdata.MetricSlice {
+	return m.ResourceMetrics().At(0).InstrumentationLibraryMetrics().At(0).Metrics()
+}
+
 func getMetric(m pdata.Metrics) pdata.Metric {
-	return m.ResourceMetrics().At(0).InstrumentationLibraryMetrics().At(0).Metrics().At(0)
+	return getMetricSlice(m).At(0)
 }
 
 func createMetrics() pdata.Metrics {
