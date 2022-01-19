@@ -34,7 +34,7 @@ GOINSTALL=go install
 GOTEST=go test
 GOTOOL=go tool
 GOFORMAT=goimports
-GOTIDY=go mod tidy
+ALL_MODULES := $(shell find . -type f -name "go.mod" -exec dirname {} \; | sort )
 
 # Default build target; making this should build for the current os/arch
 .PHONY: collector
@@ -69,6 +69,7 @@ install-tools:
 	cd $(TOOLS_MOD_DIR) && $(GOINSTALL) golang.org/x/tools/cmd/goimports
 	cd $(TOOLS_MOD_DIR) && $(GOINSTALL) github.com/golangci/golangci-lint/cmd/golangci-lint@v1.40.1
 	cd $(TOOLS_MOD_DIR) && $(GOINSTALL) github.com/client9/misspell/cmd/misspell
+	cd $(TOOLS_MOD_DIR) && $(GOINSTALL) github.com/sigstore/cosign/cmd/cosign
 
 .PHONY: lint
 lint:
@@ -110,9 +111,16 @@ check-fmt:
 fmt:
 	$(GOFORMAT) -w .
 
+.PHONY: for-all
+for-all:
+	@set -e; for dir in $(ALL_MODULES); do \
+	  (cd "$${dir}" && $${CMD} ); \
+	done
+
 .PHONY: tidy
 tidy:
-	$(GOTIDY)
+	$(MAKE) for-all CMD="rm -fr go.sum"
+	$(MAKE) for-all CMD="go mod tidy"
 
 # This target performs all checks that CI will do (excluding the build itself)
 .PHONY: ci-checks
