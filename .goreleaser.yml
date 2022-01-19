@@ -1,0 +1,20 @@
+builds:
+- binary: collector_{{ .Os }}_{{ .Arch }}
+  main: ./cmd/collector
+  env:
+    - CGO_ENABLED=0
+  mod_timestamp: '{{ .CommitTimestamp }}'
+  goos:
+    - windows
+    - linux
+    - darwin
+  goarch:
+    - amd64
+    - arm64
+    - arm
+  ldflags:
+    - -s -w -X github.com/observiq/observiq-collector/internal/version.version=v{{ .Version }}
+  no_unique_dist_dir: true
+  hooks:
+    pre:
+    - make clean
