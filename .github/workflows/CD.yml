@@ -230,17 +230,12 @@ jobs:
       - name: Install Dependencies
         if: steps.go-cache.outputs.hit != 'true'
         run: |
-          go mod download
           make install-tools
-      - name: Build All Targets
-        run: make -j4 build-all
-
     - name: Build cosign key file
       run: echo $COSIGN_PRIVATE_KEY >> cosign.key
       shell: bash
       env:
         COSIGN_PRIVATE_KEY : ${{secrets.ORG_COSIGN_PRIVATE_KEY}}
-
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v2
         with:
