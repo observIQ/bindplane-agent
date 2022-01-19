@@ -1,20 +1,64 @@
+# https://goreleaser.com/customization/build/
 builds:
-- binary: collector_{{ .Os }}_{{ .Arch }}
+- id: collector
+  binary: collector_{{ .Os }}_{{ .Arch }}
   main: ./cmd/collector
   env:
-    - CGO_ENABLED=0
+  - CGO_ENABLED=0
   mod_timestamp: '{{ .CommitTimestamp }}'
   goos:
-    - windows
-    - linux
-    - darwin
+  - windows
+  - linux
+  - darwin
   goarch:
-    - amd64
-    - arm64
-    - arm
+  - amd64
+  - arm64
+  - arm
+  ignore:
+  - goos: windows
+    goarch: arm
+  - goos: windows
+    goarch: arm64
   ldflags:
-    - -s -w -X github.com/observiq/observiq-collector/internal/version.version=v{{ .Version }}
+  - -s -w -X github.com/observiq/observiq-collector/internal/version.version=v{{ .Version }}
   no_unique_dist_dir: true
   hooks:
     pre:
     - make clean
+    - make tidy
+
+# https://goreleaser.com/customization/archive/
+archives:
+- builds:
+  - collector
+  # skip archiving as tar.gz / zip
+  format: binary
+
+# https://goreleaser.com/customization/checksum/
+checksum:
+  name_template: '{{ .ProjectName }}-v{{ .Version }}-SHA256SUMS'
+  algorithm: sha256
+
+# https://goreleaser.com/customization/sign/
+signs:
+- cmd: cosign
+  stdin: '{{ .Env.COSIGN_PWD }}'
+  args: ["sign-blob", "--key=cosign.key", "--output=${signature}", "${artifact}"]
+  artifacts: all
+
+# https://goreleaser.com/customization/release/
+release:
+  draft: false
+
+# GCS
+# https://goreleaser.com/customization/blob/
+blobs:
+- provider: gs
+  bucket: observiq-cloud
+  # v1.0.0 --> observiq-cloud/observiq-collector/1.0.0 (v prefix is removed)
+  folder: "observiq-collector/{{ .Version }}"
+
+# https://goreleaser.com/customization/changelog/
+changelog:
+  skip: false
+  use: github
