@@ -243,4 +243,4 @@ jobs:
           args: release --rm-dist
         env:
           COSIGN_PWD: ${{ secrets.ORG_COSIGN_PWD }}
-          GITHUB_TOKEN: ${{ secrets.GORELEASER_GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
