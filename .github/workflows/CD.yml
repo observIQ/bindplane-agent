@@ -235,8 +235,11 @@ jobs:
       - name: Build All Targets
         run: make -j4 build-all
 
-      - name: Upload Release Binaries (GitHub Releases)
-        uses: ./.github/actions/upsert-release-artifacts
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v2
         with:
-          path: ./build/
-          tag: ${{ steps.get-tag.outputs.tag }}
+          version: v1.1.0
+          args: release --rm-dist
+        env:
+          GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
+          GITHUB_TOKEN: ${{ secrets.GORELEASER_GITHUB_TOKEN }}
