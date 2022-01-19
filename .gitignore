@@ -3,4 +3,6 @@ cover.out
 cover.html
 local
 .DS_Store
-.vscode
+.vscodedist
+dist
+cosign.*
