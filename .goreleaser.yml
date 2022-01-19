@@ -50,14 +50,6 @@ signs:
 release:
   draft: false
 
-# GCS
-# https://goreleaser.com/customization/blob/
-blobs:
-- provider: gs
-  bucket: observiq-cloud
-  # v1.0.0 --> observiq-cloud/observiq-collector/1.0.0 (v prefix is removed)
-  folder: "observiq-collector/{{ .Version }}"
-
 # https://goreleaser.com/customization/changelog/
 changelog:
   skip: false
