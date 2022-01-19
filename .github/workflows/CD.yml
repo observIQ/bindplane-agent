@@ -235,11 +235,17 @@ jobs:
       - name: Build All Targets
         run: make -j4 build-all
 
+    - name: Build cosign key file
+      run: echo $COSIGN_PRIVATE_KEY >> cosign.key
+      shell: bash
+      env:
+        COSIGN_PRIVATE_KEY : ${{secrets.ORG_COSIGN_PRIVATE_KEY}}
+
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v2
         with:
           version: v1.1.0
           args: release --rm-dist
         env:
-          GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
+          COSIGN_PWD: ${{ secrets.ORG_COSIGN_PWD }}
           GITHUB_TOKEN: ${{ secrets.GORELEASER_GITHUB_TOKEN }}
