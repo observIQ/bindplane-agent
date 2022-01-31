@@ -137,7 +137,7 @@ jobs:
           go mod download
           make install-tools
       - name: Build cosign key file
-        run: echo $COSIGN_PRIVATE_KEY >> cosign.key
+        run: 'echo "$COSIGN_PRIVATE_KEY" >> cosign.key'
         shell: bash
         env:
           COSIGN_PRIVATE_KEY : ${{secrets.ORG_COSIGN_PRIVATE_KEY}}
