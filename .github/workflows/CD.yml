@@ -208,6 +208,9 @@ jobs:
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v2
+        with:
+          # For goreleaser
+          fetch-depth: 0
       - name: Set up Go 1.17
         uses: actions/setup-go@v2
         with:
@@ -237,10 +240,8 @@ jobs:
         env:
           COSIGN_PRIVATE_KEY : ${{secrets.ORG_COSIGN_PRIVATE_KEY}}
       - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v2
-        with:
-          version: v1.1.0
-          args: release --rm-dist
+        run: |
+          make release
         env:
           COSIGN_PWD: ${{ secrets.ORG_COSIGN_PWD }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
