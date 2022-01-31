@@ -25,7 +25,7 @@ LINT=$(GOPATH)/bin/golangci-lint
 LINT_TIMEOUT?=5m0s
 MISSPELL=$(GOPATH)/bin/misspell
 
-LDFLAGS=-ldflags "-s -w -X $(VERSION_INFO_IMPORT_PATH).version=$(VERSION) \
+LDFLAGS="-s -w -X $(VERSION_INFO_IMPORT_PATH).version=$(VERSION) \
 -X $(VERSION_INFO_IMPORT_PATH).gitHash=$(GIT_HASH) \
 -X $(VERSION_INFO_IMPORT_PATH).date=$(DATE)"
 GOBUILDEXTRAENV=CGO_ENABLED=0
@@ -40,7 +40,7 @@ ALL_MODULES := $(shell find . -type f -name "go.mod" -exec dirname {} \; | sort 
 .PHONY: collector
 collector:
 	GOOS=$(GOOS) GOARCH=$(GOARCH) $(GOBUILDEXTRAENV) \
-	$(GOBUILD) $(LDFLAGS) -o $(OUTDIR)/collector_$(GOOS)_$(GOARCH)$(EXT) ./cmd/collector
+	$(GOBUILD) -ldflags $(LDFLAGS) -o $(OUTDIR)/collector_$(GOOS)_$(GOARCH)$(EXT) ./cmd/collector
 
 # Other build targets
 .PHONY: amd64_linux
@@ -134,12 +134,9 @@ clean:
 # Build, sign, and release
 .PHONY: release
 release:
-	LDFLAGS=$$LDFLAGS goreleaser release --parallelism 4 --rm-dist
+	LDFLAGS=$(LDFLAGS) goreleaser release --parallelism 4 --rm-dist
 
 # Build and sign, skip release and ignore dirty git tree
 .PHONY: release-test
 release-test:
-	LDFLAGS=$$LDFLAGS goreleaser release --parallelism 4 --skip-validate --skip-publish --rm-dist
-	cosign verify-blob --key cosign.pub --signature dist/collector_linux_arm64.sig dist/collector_linux_arm64
-	cosign verify-blob --key cosign.pub --signature dist/collector_linux_amd64.sig dist/collector_linux_amd64
-	cosign verify-blob --key cosign.pub --signature dist/collector_darwin_arm64.sig dist/collector_darwin_arm64
+	LDFLAGS=$(LDFLAGS) goreleaser release --parallelism 4 --skip-validate --skip-publish --rm-dist
