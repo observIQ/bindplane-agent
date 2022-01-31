@@ -130,3 +130,16 @@ ci-checks: check-fmt misspell lint test
 .PHONY: clean
 clean:
 	rm -rf $(OUTDIR)
+
+# Build, sign, and release
+.PHONY: release
+release:
+	LDFLAGS=$$LDFLAGS goreleaser release --rm-dist
+
+# Build and sign, skip release and ignore dirty git tree
+.PHONY: release-test
+release-test:
+	LDFLAGS=$$LDFLAGS goreleaser release --skip-validate --skip-publish --rm-dist
+	cosign verify-blob --key cosign.pub --signature dist/collector_linux_arm64.sig dist/collector_linux_arm64
+	cosign verify-blob --key cosign.pub --signature dist/collector_linux_amd64.sig dist/collector_linux_amd64
+	cosign verify-blob --key cosign.pub --signature dist/collector_darwin_arm64.sig dist/collector_darwin_arm64
