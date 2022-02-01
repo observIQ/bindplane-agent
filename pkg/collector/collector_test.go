@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/component"
@@ -17,6 +18,9 @@ import (
 
 func TestCollectorRunValid(t *testing.T) {
 	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(ctx, time.Second*5)
+	defer cancel()
+
 	collector := New("./test/valid.yaml", "0.0.0", nil)
 	err := collector.Run(ctx)
 	require.NoError(t, err)
@@ -31,9 +35,12 @@ func TestCollectorRunValid(t *testing.T) {
 }
 
 func TestCollectorRunMultiple(t *testing.T) {
-	ctx := context.Background()
 	collector := New("./test/valid.yaml", "0.0.0", nil)
 	for i := 1; i < 5; i++ {
+		ctx := context.Background()
+		ctx, cancel := context.WithTimeout(ctx, time.Second*5)
+		defer cancel()
+
 		attempt := fmt.Sprintf("Attempt %d", i)
 		t.Run(attempt, func(t *testing.T) {
 			err := collector.Run(ctx)
@@ -52,9 +59,12 @@ func TestCollectorRunMultiple(t *testing.T) {
 
 func TestCollectorRunInvalidConfig(t *testing.T) {
 	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(ctx, time.Second*1)
+	defer cancel()
+
 	collector := New("./test/invalid.yaml", "0.0.0", nil)
 	err := collector.Run(ctx)
-	require.Error(t, err)
+	require.EqualError(t, context.DeadlineExceeded, err.Error())
 
 	status := <-collector.Status()
 	require.False(t, status.Running)
@@ -68,11 +78,7 @@ func TestCollectorRunCancelledContext(t *testing.T) {
 
 	collector := New("./test/valid.yaml", "0.0.0", nil)
 	err := collector.Run(ctx)
-	require.Error(t, err)
-
-	status := <-collector.Status()
-	require.False(t, status.Running)
-	require.Contains(t, status.Err.Error(), "context canceled")
+	require.EqualError(t, context.Canceled, err.Error())
 }
 
 func TestCollectorRunInvalidFactory(t *testing.T) {
@@ -86,17 +92,21 @@ func TestCollectorRunInvalidFactory(t *testing.T) {
 	))
 
 	ctx := context.Background()
+	// collector.Run should return an error well before the generous deadline is exceeded
+	ctx, cancel := context.WithTimeout(ctx, time.Second*60)
+	defer cancel()
+
 	collector := New("./test/valid.yaml", "0.0.0", nil)
 	err := collector.Run(ctx)
-	require.Error(t, err)
-
-	status := <-collector.Status()
-	require.False(t, status.Running)
-	require.Contains(t, status.Err.Error(), "invalid config settings")
+	require.Contains(t, err.Error(), "invalid config settings")
 }
 
 func TestCollectorRunTwice(t *testing.T) {
 	ctx := context.Background()
+	// context must live long enough for the collector to start and attempt to start a second time
+	ctx, cancel := context.WithTimeout(ctx, time.Second*30)
+	defer cancel()
+
 	collector := New("./test/valid.yaml", "0.0.0", nil)
 	err := collector.Run(ctx)
 	require.NoError(t, err)
@@ -109,11 +119,16 @@ func TestCollectorRunTwice(t *testing.T) {
 
 func TestCollectorRestart(t *testing.T) {
 	ctx := context.Background()
+	// context must live long enough for the collector to start and restart
+	ctx, cancel := context.WithTimeout(ctx, time.Second*30)
+	defer cancel()
+
 	collector := New("./test/valid.yaml", "0.0.0", nil)
 	err := collector.Run(ctx)
 	require.NoError(t, err)
 
 	defer collector.Stop()
+
 	err = collector.Restart(ctx)
 	require.NoError(t, err)
 
