@@ -19,7 +19,6 @@ func NewSettings(configPath string, version string, loggingOpts []zap.Option) se
 		Description: buildDescription,
 		Version:     version,
 	}
-	//provider := NewFileProvider(configPath)
 	provider := configmapprovider.NewDefault(configPath, []string{})
 
 	return service.CollectorSettings{
