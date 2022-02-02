@@ -1,7 +1,8 @@
 name: CD
 on:
-  release:
-    types: [published]
+  push:
+    tags:
+      - 'v*'
 
   workflow_dispatch:
 
@@ -208,6 +209,9 @@ jobs:
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v2
+        with:
+          # For goreleaser
+          fetch-depth: 0
       - name: Set up Go 1.17
         uses: actions/setup-go@v2
         with:
@@ -230,13 +234,15 @@ jobs:
       - name: Install Dependencies
         if: steps.go-cache.outputs.hit != 'true'
         run: |
-          go mod download
           make install-tools
-      - name: Build All Targets
-        run: make -j4 build-all
-
-      - name: Upload Release Binaries (GitHub Releases)
-        uses: ./.github/actions/upsert-release-artifacts
-        with:
-          path: ./build/
-          tag: ${{ steps.get-tag.outputs.tag }}
+      - name: Build cosign key file
+        run: 'echo "$COSIGN_PRIVATE_KEY" >> cosign.key'
+        shell: bash
+        env:
+          COSIGN_PRIVATE_KEY : ${{secrets.ORG_COSIGN_PRIVATE_KEY}}
+      - name: Run GoReleaser
+        run: |
+          make release
+        env:
+          COSIGN_PWD: ${{ secrets.ORG_COSIGN_PWD }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

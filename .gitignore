@@ -4,3 +4,6 @@ cover.html
 local
 .DS_Store
 .vscode
+dist
+cosign.*
+gpg.*
