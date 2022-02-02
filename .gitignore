@@ -3,7 +3,7 @@ cover.out
 cover.html
 local
 .DS_Store
-.vscodedist
+.vscode
 dist
 cosign.*
 gpg.*
