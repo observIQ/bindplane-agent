@@ -98,11 +98,11 @@ clean:
 # Default build target; making this should build for the current os/arch
 .PHONY: collector
 collector:
-	goreleaser build --single-target --skip-validate --rm-dist
+	goreleaser build --single-target --skip-validate --snapshot --rm-dist
 
 .PHONY: build-all
 build-all:
-	goreleaser build --skip-validate --rm-dist
+	goreleaser build --skip-validate --snapshot --rm-dist
 
 # Build, sign, and release
 .PHONY: release
