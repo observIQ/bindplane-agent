@@ -84,8 +84,8 @@ for-all:
 
 .PHONY: tidy
 tidy:
-	$(MAKE) for-all CMD="rm -fr go.sum"
-	$(MAKE) for-all CMD="go mod tidy"
+	$(MAKE) for-all CMD="go mod tidy -go=1.16"
+	$(MAKE) for-all CMD="go mod tidy -go=1.17"
 
 # This target performs all checks that CI will do (excluding the build itself)
 .PHONY: ci-checks
@@ -113,3 +113,13 @@ release:
 .PHONY: release-test
 release-test:
 	goreleaser release --parallelism 4 --skip-validate --skip-publish --rm-dist
+
+.PHONY: for-all
+for-all:
+	@echo "running $${CMD} in root"
+	@$${CMD}
+	@set -e; for dir in $(ALL_MODULES); do \
+	  (cd "$${dir}" && \
+	  	echo "running $${CMD} in $${dir}" && \
+	 	$${CMD} ); \
+	done

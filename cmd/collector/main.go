@@ -14,6 +14,7 @@ import (
 
 func main() {
 	var configPath = pflag.String("config", "./config.yaml", "the collector config path")
+	_ = pflag.String("log-level", "", "not implemented") // TEMP(jsirianni): Required for OTEL k8s operator
 	pflag.Parse()
 
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
