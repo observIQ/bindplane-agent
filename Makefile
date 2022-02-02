@@ -1,8 +1,6 @@
-VERSION := $(shell cat VERSION)
-GIT_HASH := $(shell git rev-parse HEAD)
-DATE := $(shell date -u +'%Y-%m-%dT%H:%M:%SZ')
-
-VERSION_INFO_IMPORT_PATH=github.com/observiq/observiq-collector/internal/version
+export GIT_HASH = $(shell git rev-parse HEAD)
+export DATE = $(shell date -u +'%Y-%m-%dT%H:%M:%SZ')
+export VERSION_INFO_IMPORT_PATH = github.com/observiq/observiq-collector/internal/version
 
 # All source code and documents, used when checking for misspellings
 ALLDOC := $(shell find . \( -name "*.md" -o -name "*.yaml" \) \
@@ -18,49 +16,15 @@ else
 EXT?=
 endif
 
-OUTDIR=./build
-MODNAME=github.com/observiq/observiq-collector
-
 LINT=$(GOPATH)/bin/golangci-lint
 LINT_TIMEOUT?=5m0s
 MISSPELL=$(GOPATH)/bin/misspell
 
-LDFLAGS="-s -w -X $(VERSION_INFO_IMPORT_PATH).version=$(VERSION) \
--X $(VERSION_INFO_IMPORT_PATH).gitHash=$(GIT_HASH) \
--X $(VERSION_INFO_IMPORT_PATH).date=$(DATE)"
-GOBUILDEXTRAENV=CGO_ENABLED=0
-GOBUILD=go build
 GOINSTALL=go install
 GOTEST=go test
 GOTOOL=go tool
 GOFORMAT=goimports
 ALL_MODULES := $(shell find . -type f -name "go.mod" -exec dirname {} \; | sort )
-
-# Default build target; making this should build for the current os/arch
-.PHONY: collector
-collector:
-	GOOS=$(GOOS) GOARCH=$(GOARCH) $(GOBUILDEXTRAENV) \
-	$(GOBUILD) -ldflags $(LDFLAGS) -o $(OUTDIR)/collector_$(GOOS)_$(GOARCH)$(EXT) ./cmd/collector
-
-# Other build targets
-.PHONY: amd64_linux
-amd64_linux:
-	GOOS=linux GOARCH=amd64 $(MAKE) collector
-
-.PHONY: amd64_darwin
-amd64_darwin:
-	GOOS=darwin GOARCH=amd64 $(MAKE) collector
-
-.PHONY: arm_linux
-arm_linux:
-	GOOS=linux GOARCH=arm $(MAKE) collector
-
-.PHONY: amd64_windows
-amd64_windows:
-	GOOS=windows GOARCH=amd64 $(MAKE) collector
-
-.PHONY: build-all
-build-all: amd64_linux amd64_darwin amd64_windows arm_linux
 
 # tool-related commands
 TOOLS_MOD_DIR := ./internal/tools
@@ -131,12 +95,21 @@ ci-checks: check-fmt misspell lint test
 clean:
 	rm -rf $(OUTDIR)
 
+# Default build target; making this should build for the current os/arch
+.PHONY: collector
+collector:
+	goreleaser build --single-target --skip-validate --rm-dist
+
+.PHONY: build-all
+build-all:
+	goreleaser build --skip-validate --rm-dist
+
 # Build, sign, and release
 .PHONY: release
 release:
-	LDFLAGS=$(LDFLAGS) goreleaser release --parallelism 4 --rm-dist
+	goreleaser release --parallelism 4 --rm-dist
 
 # Build and sign, skip release and ignore dirty git tree
 .PHONY: release-test
 release-test:
-	LDFLAGS=$(LDFLAGS) goreleaser release --parallelism 4 --skip-validate --skip-publish --rm-dist
+	goreleaser release --parallelism 4 --skip-validate --skip-publish --rm-dist

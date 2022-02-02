@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os"
 	"os/signal"
@@ -13,6 +14,8 @@ import (
 )
 
 func main() {
+	fmt.Println(version.Date(), version.Version(), version.GitHash())
+
 	var configPath = pflag.String("config", "./config.yaml", "the collector config path")
 	pflag.Parse()
 

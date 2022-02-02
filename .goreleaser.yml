@@ -20,7 +20,10 @@ builds:
   - goos: windows
     goarch: arm64
   ldflags:
-  - "{{ .Env.LDFLAGS }}"
+  - -s -w
+  - -X {{ .Env.VERSION_INFO_IMPORT_PATH }}.version=v{{ .Version }}
+  - -X {{ .Env.VERSION_INFO_IMPORT_PATH }}.gitHash={{ .Env.GIT_HASH }}
+  - -X {{ .Env.VERSION_INFO_IMPORT_PATH }}.date={{ .Env.DATE }}
   no_unique_dist_dir: true
   hooks:
     pre:
