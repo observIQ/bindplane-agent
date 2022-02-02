@@ -34,7 +34,6 @@ GOINSTALL=go install
 GOTEST=go test
 GOTOOL=go tool
 GOFORMAT=goimports
-GOTIDY=go mod tidy
 
 # Default build target; making this should build for the current os/arch
 .PHONY: collector
@@ -112,7 +111,9 @@ fmt:
 
 .PHONY: tidy
 tidy:
-	$(GOTIDY)
+	$(MAKE) for-all CMD="rm -fr go.sum"
+	$(MAKE) for-all CMD="go mod tidy -go=1.16"
+	$(MAKE) for-all CMD="go mod tidy -go=1.17"
 
 # This target performs all checks that CI will do (excluding the build itself)
 .PHONY: ci-checks
@@ -121,3 +122,13 @@ ci-checks: check-fmt misspell lint test
 .PHONY: clean
 clean:
 	rm -rf $(OUTDIR)
+
+.PHONY: for-all
+for-all:
+	@echo "running $${CMD} in root"
+	@$${CMD}
+	@set -e; for dir in $(ALL_MODULES); do \
+	  (cd "$${dir}" && \
+	  	echo "running $${CMD} in $${dir}" && \
+	 	$${CMD} ); \
+	done

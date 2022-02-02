@@ -1,9 +1,11 @@
 package collector
 
 import (
+	"github.com/GoogleCloudPlatform/opentelemetry-operations-collector/processor/normalizesumsprocessor"
 	"github.com/observiq/observiq-collector/pkg/processor/resourceattributetransposerprocessor"
 	"github.com/observiq/observiq-collector/pkg/receiver/logsreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/fileexporter"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlecloudexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/observiqexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/extension/bearertokenauthextension"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/extension/healthcheckextension"
@@ -13,10 +15,17 @@ import (
 	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/attributesprocessor"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/groupbyattrsprocessor"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/k8sattributesprocessor"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/metricstransformprocessor"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/probabilisticsamplerprocessor"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/resourcedetectionprocessor"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/resourceprocessor"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/filelogreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/jmxreceiver"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/k8sclusterreceiver"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/kubeletstatsreceiver"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/mysqlreceiver"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/postgresqlreceiver"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/statsdreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/syslogreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/tcplogreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/udplogreceiver"
@@ -42,6 +51,11 @@ var defaultReceivers = []component.ReceiverFactory{
 	tcplogreceiver.NewFactory(),
 	udplogreceiver.NewFactory(),
 	componenttest.NewNopReceiverFactory(),
+	kubeletstatsreceiver.NewFactory(),
+	k8sclusterreceiver.NewFactory(),
+	mysqlreceiver.NewFactory(),
+	statsdreceiver.NewFactory(),
+	postgresqlreceiver.NewFactory(),
 }
 
 var defaultProcessors = []component.ProcessorFactory{
@@ -54,6 +68,9 @@ var defaultProcessors = []component.ProcessorFactory{
 	probabilisticsamplerprocessor.NewFactory(),
 	resourceattributetransposerprocessor.NewFactory(),
 	componenttest.NewNopProcessorFactory(),
+	metricstransformprocessor.NewFactory(),
+	normalizesumsprocessor.NewFactory(),
+	resourcedetectionprocessor.NewFactory(),
 }
 
 var defaultExporters = []component.ExporterFactory{
@@ -63,6 +80,7 @@ var defaultExporters = []component.ExporterFactory{
 	observiqexporter.NewFactory(),
 	loggingexporter.NewFactory(),
 	componenttest.NewNopExporterFactory(),
+	googlecloudexporter.NewFactory(),
 }
 
 var defaultExtensions = []component.ExtensionFactory{

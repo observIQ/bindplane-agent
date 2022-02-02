@@ -5,7 +5,9 @@ import (
 	"errors"
 	"fmt"
 	"sync"
+	"time"
 
+	"github.com/jpillora/backoff"
 	"go.opentelemetry.io/collector/service"
 	"go.uber.org/zap"
 )
@@ -69,7 +71,7 @@ func (c *collector) Run(ctx context.Context) error {
 	// A race condition exists in the OT collector where the shutdown channel
 	// is not guaranteed to be initialized before the shutdown function is called.
 	// We protect against this by waiting for startup to finish before unlocking the mutex.
-	return c.waitForStartup()
+	return c.waitForStartup(ctx)
 }
 
 // Stop will stop the collector.
@@ -128,21 +130,37 @@ func (c *collector) runService(ctx context.Context) {
 }
 
 // waitForStartup waits for the service to startup before exiting.
-func (c *collector) waitForStartup() error {
+func (c *collector) waitForStartup(ctx context.Context) error {
+	backoff := backoff.Backoff{
+		Min:    1 * time.Millisecond,
+		Max:    250 * time.Millisecond,
+		Factor: 2,
+		Jitter: false,
+	}
+
 	for {
-		select {
+		state := c.svc.GetState()
+		switch state {
+		case service.Starting:
+			select {
+			case <-ctx.Done():
+				return ctx.Err()
+			default:
+				time.Sleep(backoff.Duration())
+			}
 		// If the service is able to transmit a running state, this means
 		// that initial service startup was successful.
-		case state := <-c.svc.GetStateChannel():
-			if state == service.Running {
-				c.sendStatus(true, nil)
-				return nil
-			}
+		case service.Running:
+			c.sendStatus(true, nil)
+			return nil
 		// A flaw exists in the OT startup function where an early error may occur
 		// without sending any states through the state channel. To handle this,
 		// we use an errChan to exit immediately.
-		case err := <-c.startupChan:
-			return fmt.Errorf("failed onstartup: %w", err)
+		case service.Closing, service.Closed:
+			return errors.New("failed startup, service is closing or closed")
+		// Unknown state
+		default:
+			return fmt.Errorf("failed onstartup, unknown state: %d", state)
 		}
 	}
 }
