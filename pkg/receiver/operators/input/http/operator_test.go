@@ -825,7 +825,10 @@ func testConnection(address string) error {
 		if err == nil {
 			return nil
 		}
-		resp.Body.Close()
+
+		if resp != nil {
+			resp.Body.Close()
+		}
 
 		if attempt == 5 {
 			return fmt.Errorf("test connection failed, the http server may not have started correctly: %s", err)
