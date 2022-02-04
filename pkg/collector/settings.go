@@ -4,7 +4,6 @@ import (
 	"os"
 
 	"go.opentelemetry.io/collector/component"
-	"go.opentelemetry.io/collector/config/configmapprovider"
 	"go.opentelemetry.io/collector/service"
 	"go.uber.org/zap"
 )
@@ -19,13 +18,13 @@ func NewSettings(configPath string, version string, loggingOpts []zap.Option) se
 		Description: buildDescription,
 		Version:     version,
 	}
-	provider := configmapprovider.NewDefault(configPath, []string{})
+	provider := service.NewDefaultConfigProvider(configPath, []string{})
 
 	return service.CollectorSettings{
 		Factories:               factories,
 		BuildInfo:               buildInfo,
 		LoggingOptions:          loggingOpts,
-		ConfigMapProvider:       provider,
+		ConfigProvider:          provider,
 		DisableGracefulShutdown: true,
 	}
 }
