@@ -7,7 +7,6 @@ require (
 	github.com/golangci/golangci-lint v1.41.1
 	github.com/goreleaser/goreleaser v1.3.1
 	github.com/sigstore/cosign v1.4.1
-	github.com/stretchr/objx v0.3.0 // indirect
 	golang.org/x/tools v0.1.7
 )
 
@@ -324,6 +323,7 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/spf13/viper v1.10.0 // indirect
 	github.com/ssgreg/nlreturn/v2 v2.1.0 // indirect
+	github.com/stretchr/objx v0.3.0 // indirect
 	github.com/stretchr/testify v1.7.0 // indirect
 	github.com/subosito/gotenv v1.2.0 // indirect
 	github.com/syndtr/goleveldb v1.0.0 // indirect
