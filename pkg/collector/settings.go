@@ -3,6 +3,7 @@ package collector
 import (
 	"os"
 
+	"github.com/observiq/observiq-collector/pkg/factories"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/service"
 	"go.uber.org/zap"
@@ -12,7 +13,7 @@ const buildDescription = "observIQ's opentelemetry-collector distribution"
 
 // NewSettings returns new settings for the collector with default values.
 func NewSettings(configPaths []string, version string, loggingOpts []zap.Option) service.CollectorSettings {
-	factories, _ := DefaultFactories()
+	factories, _ := factories.DefaultFactories()
 	buildInfo := component.BuildInfo{
 		Command:     os.Args[0],
 		Description: buildDescription,
