@@ -20,6 +20,7 @@ import (
 	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/resourcedetectionprocessor"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/resourceprocessor"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/filelogreceiver"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/hostmetricsreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/jmxreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/k8sclusterreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/kubeletstatsreceiver"
@@ -58,6 +59,7 @@ var defaultReceivers = []component.ReceiverFactory{
 	statsdreceiver.NewFactory(),
 	postgresqlreceiver.NewFactory(),
 	prometheusreceiver.NewFactory(),
+	hostmetricsreceiver.NewFactory(),
 }
 
 var defaultProcessors = []component.ProcessorFactory{
