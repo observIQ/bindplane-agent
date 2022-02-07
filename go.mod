@@ -24,6 +24,7 @@ require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/processor/metricstransformprocessor v0.40.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/processor/resourcedetectionprocessor v0.40.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/filelogreceiver v0.40.0
+	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/hostmetricsreceiver v0.40.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/jmxreceiver v0.40.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/k8sclusterreceiver v0.40.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/kubeletstatsreceiver v0.40.0
@@ -123,6 +124,7 @@ require (
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/klauspost/compress v1.13.6 // indirect
 	github.com/knadh/koanf v1.3.2 // indirect
+	github.com/leoluk/perflib_exporter v0.1.0 // indirect
 	github.com/libp2p/go-reuseport v0.0.1 // indirect
 	github.com/lufia/plan9stats v0.0.0-20211012122336-39d0f177ccd0 // indirect
 	github.com/magiconair/properties v1.8.5 // indirect
@@ -161,6 +163,7 @@ require (
 	github.com/prometheus/procfs v0.7.3 // indirect
 	github.com/prometheus/statsd_exporter v0.21.0 // indirect
 	github.com/rs/cors v1.8.0 // indirect
+	github.com/shirou/gopsutil v3.21.10+incompatible // indirect
 	github.com/shirou/gopsutil/v3 v3.21.10 // indirect
 	github.com/sirupsen/logrus v1.8.1 // indirect
 	github.com/spf13/cast v1.4.1 // indirect

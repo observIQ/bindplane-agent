@@ -1074,6 +1074,7 @@ github.com/kylelemons/godebug v0.0.0-20160406211939-eadb3ce320cb/go.mod h1:B69LE
 github.com/kylelemons/godebug v1.1.0/go.mod h1:9/0rRGxNHcop5bhtWyNeEfOS8JIWk580+fNqagV/RAw=
 github.com/leodido/go-urn v1.1.0/go.mod h1:+cyI34gQWZcE1eQU7NVgKkkzdXDQHr1dBMtdAPozLkw=
 github.com/leodido/ragel-machinery v0.0.0-20181214104525-299bdde78165/go.mod h1:WZxr2/6a/Ar9bMDc2rN/LJrE/hF6bXE4LPyDSIxwAfg=
+github.com/leoluk/perflib_exporter v0.1.0 h1:fXe/mDaf9jR+Zk8FjFlcCSksACuIj2VNN4GyKHmQqtA=
 github.com/leoluk/perflib_exporter v0.1.0/go.mod h1:rpV0lYj7lemdTm31t7zpCqYqPnw7xs86f+BaaNBVYFM=
 github.com/lib/pq v1.0.0/go.mod h1:5WUZQaWbwv1U+lTReE5YruASi9Al49XbQIvNi/34Woo=
 github.com/libp2p/go-reuseport v0.0.1 h1:7PhkfH73VXfPJYKQ6JwS5I/eVcoyYi9IMNGc6FWpFLw=
@@ -1316,6 +1317,8 @@ github.com/open-telemetry/opentelemetry-collector-contrib/processor/resourceproc
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/filelogreceiver v0.40.0 h1:/6/a6zSeD5jMIXRkZayIDDQPGcTijTpGYT+c7y5fpQs=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/filelogreceiver v0.40.0/go.mod h1:qvc8SCvGCmjKPwb4xAiEglLPfW/VDbe3bcf8hnTxNcQ=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/hostmetricsreceiver v0.39.0/go.mod h1:u92ws0hIomOsHEL32494akt2JC0XbusL2evgIvx3GXs=
+github.com/open-telemetry/opentelemetry-collector-contrib/receiver/hostmetricsreceiver v0.40.0 h1:kxUcVT8yV/PheivBrpqsa3NTAmnX+vJAhWkmNnmc2Pg=
+github.com/open-telemetry/opentelemetry-collector-contrib/receiver/hostmetricsreceiver v0.40.0/go.mod h1:a7owhwOzXe+z0n9GeeKCqeXUelNkv+qHFCZeS8KtCDA=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/httpdreceiver v0.38.0/go.mod h1:tvWshCgICLV8z0jEsmSf7VnWBOGH+sInfk4SsdQ3XwA=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/jmxreceiver v0.39.0/go.mod h1:X/cejCDPYQHeelAFRQzrgJ1dWY2bhDkdI3p7yu6na04=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/jmxreceiver v0.40.0 h1:tJTbCvaIFSRWFeL3z6Efpdq0nn2ZHSK6rNvr0W1xY2E=
