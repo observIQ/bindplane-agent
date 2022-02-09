@@ -26,8 +26,6 @@ type collector struct {
 	loggingOpts []zap.Option
 	mux         sync.Mutex
 	svc         *service.Collector
-	status      Status
-	statusMux   sync.RWMutex
 	statusChan  chan *Status
 	startupChan chan error
 	wg          *sync.WaitGroup
