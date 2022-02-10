@@ -244,7 +244,7 @@ func TestAllConvertedEntriesAreSentAndReceived(t *testing.T) {
 
 					ill := ills.At(0)
 
-					actualCount += ill.Logs().Len()
+					actualCount += ill.LogRecords().Len()
 				case <-timeoutTimer.C:
 					break forLoop
 				}
@@ -334,7 +334,7 @@ func TestAllConvertedEntriesAreSentAndReceivedWithinAnExpectedTimeDuration(t *te
 
 					ill := ills.At(0)
 
-					actualCount += ill.Logs().Len()
+					actualCount += ill.LogRecords().Len()
 
 				case <-timeoutTimer.C:
 					break forLoop
@@ -364,7 +364,7 @@ func TestConverterCancelledContextCancellsTheFlush(t *testing.T) {
 		ills := pLogs.ResourceLogs().AppendEmpty().InstrumentationLibraryLogs().AppendEmpty()
 
 		lr := convert(complexEntry(), nil)
-		lr.CopyTo(ills.Logs().AppendEmpty())
+		lr.CopyTo(ills.LogRecords().AppendEmpty())
 
 		assert.Error(t, converter.flush(ctx, pLogs))
 	}()
@@ -681,7 +681,7 @@ func BenchmarkConverter(b *testing.B) {
 
 						ill := ills.At(0)
 
-						n += ill.Logs().Len()
+						n += ill.LogRecords().Len()
 
 					case <-timeoutTimer.C:
 						break forLoop

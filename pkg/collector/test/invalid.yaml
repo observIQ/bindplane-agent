@@ -3,10 +3,10 @@ receivers:
     include: 5
 
 exporters:
-  logging:
+  nop:
 
 service:
   pipelines:
     logs:
       receivers: [filelog]
-      exporters: [logging]
+      exporters: [nop]

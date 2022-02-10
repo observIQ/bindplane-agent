@@ -7,7 +7,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/jpillora/backoff"
 	"go.opentelemetry.io/collector/service"
 	"go.uber.org/zap"
 )
@@ -23,61 +22,75 @@ type Collector interface {
 // collector is the standard implementation of the Collector interface.
 type collector struct {
 	configPath  string
-	settings    service.CollectorSettings
+	version     string
+	loggingOpts []zap.Option
+	mux         sync.Mutex
 	svc         *service.Collector
-	svcMux      *sync.Mutex
 	statusChan  chan *Status
-	startupChan chan error
 	wg          *sync.WaitGroup
 }
 
 // New returns a new collector.
 func New(configPath string, version string, loggingOpts []zap.Option) Collector {
-	settings := NewSettings(configPath, version, loggingOpts)
 	return &collector{
-		configPath: configPath,
-		settings:   settings,
-		svcMux:     &sync.Mutex{},
-		statusChan: make(chan *Status, 10),
-		wg:         &sync.WaitGroup{},
+		configPath:  configPath,
+		version:     version,
+		loggingOpts: loggingOpts,
+		statusChan:  make(chan *Status, 10),
+		wg:          &sync.WaitGroup{},
 	}
 }
 
 // Run will run the collector. This function will return an error
 // if the collector was unable to startup.
 func (c *collector) Run(ctx context.Context) error {
-	c.svcMux.Lock()
-	defer c.svcMux.Unlock()
+	c.mux.Lock()
+	defer c.mux.Unlock()
 
 	if c.svc != nil {
 		return errors.New("service already running")
 	}
 
+	// The OT collector only supports using settings once during the lifetime
+	// of a single collector insance. We must remake the settings on each startup.
+	settings := NewSettings([]string{c.configPath}, c.version, c.loggingOpts)
+
 	// The OT collector only supports calling run once during the lifetime
 	// of a service. We must make a new instance each time we run the collector.
-	svc, err := c.createService()
+	svc, err := service.New(settings)
 	if err != nil {
+		err := fmt.Errorf("failed to create service: %w", err)
 		c.sendStatus(false, err)
 		return err
 	}
 
-	c.svc = svc
-	c.startupChan = make(chan error, 1)
-	c.wg = &sync.WaitGroup{}
-	c.wg.Add(1)
+	startupErr := make(chan error, 1)
+	wg := sync.WaitGroup{}
+	wg.Add(1)
 
-	go c.runService(ctx)
+	c.svc = svc
+	c.wg = &wg
+
+	go func() {
+		defer wg.Done()
+		err := svc.Run(ctx)
+		c.sendStatus(false, err)
+
+		if err != nil {
+			startupErr <- err
+		}
+	}()
 
 	// A race condition exists in the OT collector where the shutdown channel
 	// is not guaranteed to be initialized before the shutdown function is called.
 	// We protect against this by waiting for startup to finish before unlocking the mutex.
-	return c.waitForStartup(ctx)
+	return c.waitForStartup(ctx, startupErr)
 }
 
 // Stop will stop the collector.
 func (c *collector) Stop() {
-	c.svcMux.Lock()
-	defer c.svcMux.Unlock()
+	c.mux.Lock()
+	defer c.mux.Unlock()
 
 	if c.svc == nil {
 		return
@@ -94,73 +107,24 @@ func (c *collector) Restart(ctx context.Context) error {
 	return c.Run(ctx)
 }
 
-// createService creates the collector service.
-func (c *collector) createService() (svc *service.Collector, err error) {
-	defer func() {
-		if panicErr := recover(); panicErr != nil {
-			err = fmt.Errorf("panic during service creation: %v", panicErr)
-		}
-	}()
-
-	svc, err = service.New(c.settings)
-	if err != nil {
-		err = fmt.Errorf("failed to create service: %w", err)
-	}
-
-	return
-}
-
-// runService will run the collector service. This is a blocking function
-// that should be executed in a separate goroutine.
-func (c *collector) runService(ctx context.Context) {
-	defer func() {
-		if panicErr := recover(); panicErr != nil {
-			err := fmt.Errorf("panic while running service: %v", panicErr)
-			c.sendStatus(false, err)
-		}
-	}()
-
-	defer c.wg.Done()
-	err := c.svc.Run(ctx)
-	c.sendStatus(false, err)
-
-	if err != nil {
-		c.startupChan <- err
-	}
-}
-
 // waitForStartup waits for the service to startup before exiting.
-func (c *collector) waitForStartup(ctx context.Context) error {
-	backoff := backoff.Backoff{
-		Min:    1 * time.Millisecond,
-		Max:    250 * time.Millisecond,
-		Factor: 2,
-		Jitter: false,
-	}
+func (c *collector) waitForStartup(ctx context.Context, startupErr chan error) error {
+	ticker := time.NewTicker(time.Millisecond * 250)
+	defer ticker.Stop()
 
 	for {
-		state := c.svc.GetState()
-		switch state {
-		case service.Starting:
-			select {
-			case <-ctx.Done():
-				return ctx.Err()
-			default:
-				time.Sleep(backoff.Duration())
-			}
-		// If the service is able to transmit a running state, this means
-		// that initial service startup was successful.
-		case service.Running:
+		if c.svc.GetState() == service.Running {
 			c.sendStatus(true, nil)
 			return nil
-		// A flaw exists in the OT startup function where an early error may occur
-		// without sending any states through the state channel. To handle this,
-		// we use an errChan to exit immediately.
-		case service.Closing, service.Closed:
-			return errors.New("failed startup, service is closing or closed")
-		// Unknown state
-		default:
-			return fmt.Errorf("failed onstartup, unknown state: %d", state)
+		}
+
+		select {
+		case <-ticker.C:
+		case <-ctx.Done():
+			c.svc.Shutdown()
+			return ctx.Err()
+		case err := <-startupErr:
+			return err
 		}
 	}
 }
@@ -170,13 +134,10 @@ func (c *collector) Status() <-chan *Status {
 	return c.statusChan
 }
 
-// sendStatus will send a status through the status channel.
-// If the channel is full, the status is discarded.
+// sendStatus will set the status of the collector
 func (c *collector) sendStatus(running bool, err error) {
-	status := &Status{Running: running, Err: err}
-
 	select {
-	case c.statusChan <- status:
+	case c.statusChan <- &Status{running, err}:
 	default:
 	}
 }

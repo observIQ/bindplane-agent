@@ -192,7 +192,7 @@ func (c *Converter) workerLoop() {
 				if ok {
 					lr := pLogs.ResourceLogs().
 						At(0).InstrumentationLibraryLogs().
-						At(0).Logs().AppendEmpty()
+						At(0).LogRecords().AppendEmpty()
 					entryLr.CopyTo(lr)
 				} else {
 					pLogs = pdata.NewLogs()
@@ -207,7 +207,7 @@ func (c *Converter) workerLoop() {
 					}
 
 					ills := rls.InstrumentationLibraryLogs()
-					lr := ills.AppendEmpty().Logs().AppendEmpty()
+					lr := ills.AppendEmpty().LogRecords().AppendEmpty()
 					entryLr.CopyTo(lr)
 
 					recordsByResource[resourceID] = pLogs
@@ -273,7 +273,7 @@ func Convert(ent *entry.Entry) pdata.Logs {
 	}
 
 	ills := rls.InstrumentationLibraryLogs().AppendEmpty()
-	lr := ills.Logs().AppendEmpty()
+	lr := ills.LogRecords().AppendEmpty()
 	convertInto(ent, lr)
 	return pLogs
 }

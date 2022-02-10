@@ -3,10 +3,10 @@ receivers:
     include: ["./var/log/syslog.log"]
 
 exporters:
-  logging:
+  nop:
 
 service:
   pipelines:
     logs:
       receivers: [filelog]
-      exporters: [logging]
+      exporters: [nop]
