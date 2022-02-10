@@ -27,8 +27,7 @@ type collector struct {
 	mux         sync.Mutex
 	svc         *service.Collector
 	statusChan  chan *Status
-	startupChan chan error
-	wg          *sync.WaitGroup
+	wg          sync.WaitGroup
 }
 
 // New returns a new collector.
@@ -38,7 +37,7 @@ func New(configPath string, version string, loggingOpts []zap.Option) Collector 
 		version:     version,
 		loggingOpts: loggingOpts,
 		statusChan:  make(chan *Status, 10),
-		wg:          &sync.WaitGroup{},
+		wg:          sync.WaitGroup{},
 	}
 }
 
@@ -65,17 +64,27 @@ func (c *collector) Run(ctx context.Context) error {
 		return err
 	}
 
-	c.svc = svc
-	c.startupChan = make(chan error, 1)
-	c.wg = &sync.WaitGroup{}
-	c.wg.Add(1)
+	startupErr := make(chan error, 1)
+	wg := sync.WaitGroup{}
+	wg.Add(1)
 
-	go c.runService(ctx)
+	c.svc = svc
+	c.wg = wg
+
+	go func() {
+		defer wg.Done()
+		err := svc.Run(ctx)
+		c.sendStatus(false, err)
+
+		if err != nil {
+			startupErr <- err
+		}
+	}()
 
 	// A race condition exists in the OT collector where the shutdown channel
 	// is not guaranteed to be initialized before the shutdown function is called.
 	// We protect against this by waiting for startup to finish before unlocking the mutex.
-	return c.waitForStartup(ctx)
+	return c.waitForStartup(ctx, startupErr)
 }
 
 // Stop will stop the collector.
@@ -98,20 +107,8 @@ func (c *collector) Restart(ctx context.Context) error {
 	return c.Run(ctx)
 }
 
-// runService will run the collector service. This is a blocking function
-// that should be executed in a separate goroutine.
-func (c *collector) runService(ctx context.Context) {
-	defer c.wg.Done()
-	err := c.svc.Run(ctx)
-	c.sendStatus(false, err)
-
-	if err != nil {
-		c.startupChan <- err
-	}
-}
-
 // waitForStartup waits for the service to startup before exiting.
-func (c *collector) waitForStartup(ctx context.Context) error {
+func (c *collector) waitForStartup(ctx context.Context, startupErr chan error) error {
 	ticker := time.NewTicker(time.Millisecond * 250)
 	defer ticker.Stop()
 
@@ -123,9 +120,7 @@ func (c *collector) waitForStartup(ctx context.Context) error {
 
 		select {
 		case <-ticker.C:
-		case <-ctx.Done():
-			return ctx.Err()
-		case err := <-c.startupChan:
+		case err := <-startupErr:
 			return err
 		}
 	}

@@ -99,7 +99,7 @@ func createReceiver(t *testing.T) *receiver {
 	factory := NewFactory()
 	cfg := factory.CreateDefaultConfig().(*Config)
 	cfg.Pipeline = []map[string]interface{}{
-		map[string]interface{}{
+		{
 			"type": "noop",
 		},
 	}
@@ -154,7 +154,7 @@ func TestCheckpoint(t *testing.T) {
 	cfg.Converter.MaxFlushCount = 1
 	cfg.Converter.FlushInterval = time.Millisecond
 	cfg.Pipeline = []map[string]interface{}{
-		map[string]interface{}{
+		{
 			"type":     "file_input",
 			"include":  []string{fmt.Sprintf("%s/*", logsDir)},
 			"start_at": "beginning",
