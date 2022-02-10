@@ -7,12 +7,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  # This is the first job run; If any step in this fails the release will not be updated.
-  # This protects against releases that don't match specific criteria:
   #   1. Tag must be a semantic version ((v)d.d.d)
-  #   2. Release must be a pre-release
-  #   3. The tag version must match the version in the VERSION file
-  check-should-edit-release:
+  validate-tag:
     runs-on: ubuntu-20.04
     steps:
       - name: Get Tag From Environment
@@ -21,18 +17,6 @@ jobs:
 
       - name: Check the tag is a semantic version
         run: "[[ ${{ steps.get-tag.outputs.tag }} =~ ^v?[0-9]+\\.[0-9]+\\.[0-9]+ ]] && exit 0 || exit 1"
-
-      - name: Checkout Repo
-        uses: actions/checkout@v2
-
-      - name: Fetch Release Info
-        uses: ./.github/actions/get-release-info
-        id: release-info
-        with:
-          tag: ${{ steps.get-tag.outputs.tag }}
-
-      - name: Check release is pre-release
-        run: '[ "${{ steps.release-info.outputs.pre-release }}" = "true" ] && exit 0 || exit 1'
   setup-environment:
     runs-on: ubuntu-20.04
     steps:
