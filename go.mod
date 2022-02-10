@@ -17,13 +17,13 @@ require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/extension/healthcheckextension v0.43.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/extension/oidcauthextension v0.43.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/extension/pprofextension v0.43.0
-	github.com/open-telemetry/opentelemetry-collector-contrib/extension/storage v0.43.0
+	github.com/open-telemetry/opentelemetry-collector-contrib/extension/storage v0.44.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/processor/attributesprocessor v0.43.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/processor/groupbyattrsprocessor v0.43.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/processor/k8sattributesprocessor v0.43.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/processor/metricstransformprocessor v0.43.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/processor/resourcedetectionprocessor v0.43.0
-	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/filelogreceiver v0.43.0
+	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/filelogreceiver v0.44.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/hostmetricsreceiver v0.43.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/jmxreceiver v0.43.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/k8sclusterreceiver v0.43.0
@@ -177,7 +177,7 @@ require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/internal/k8sconfig v0.43.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/internal/kubelet v0.43.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/internal/sharedcomponent v0.43.0 // indirect
-	github.com/open-telemetry/opentelemetry-collector-contrib/internal/stanza v0.43.0 // indirect
+	github.com/open-telemetry/opentelemetry-collector-contrib/internal/stanza v0.44.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/experimentalmetricmetadata v0.43.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/translator/opencensus v0.43.0 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
