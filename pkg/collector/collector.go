@@ -120,6 +120,9 @@ func (c *collector) waitForStartup(ctx context.Context, startupErr chan error) e
 
 		select {
 		case <-ticker.C:
+		case <-ctx.Done():
+			c.svc.Shutdown()
+			return ctx.Err()
 		case err := <-startupErr:
 			return err
 		}
