@@ -18,7 +18,7 @@ require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/extension/oidcauthextension v0.43.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/extension/pprofextension v0.43.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/extension/storage v0.43.0
-	github.com/open-telemetry/opentelemetry-collector-contrib/processor/attributesprocessor v0.43.0
+	github.com/open-telemetry/opentelemetry-collector-contrib/processor/attributesprocessor v0.44.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/processor/groupbyattrsprocessor v0.43.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/processor/k8sattributesprocessor v0.43.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/processor/metricstransformprocessor v0.43.0
@@ -173,7 +173,7 @@ require (
 	github.com/observiq/go-syslog/v3 v3.0.2 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/internal/aws/ecsutil v0.43.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/internal/common v0.43.0 // indirect
-	github.com/open-telemetry/opentelemetry-collector-contrib/internal/coreinternal v0.43.0 // indirect
+	github.com/open-telemetry/opentelemetry-collector-contrib/internal/coreinternal v0.44.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/internal/k8sconfig v0.43.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/internal/kubelet v0.43.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/internal/sharedcomponent v0.43.0 // indirect
