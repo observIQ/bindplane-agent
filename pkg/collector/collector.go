@@ -27,7 +27,7 @@ type collector struct {
 	mux         sync.Mutex
 	svc         *service.Collector
 	statusChan  chan *Status
-	wg          sync.WaitGroup
+	wg          *sync.WaitGroup
 }
 
 // New returns a new collector.
@@ -37,7 +37,7 @@ func New(configPath string, version string, loggingOpts []zap.Option) Collector 
 		version:     version,
 		loggingOpts: loggingOpts,
 		statusChan:  make(chan *Status, 10),
-		wg:          sync.WaitGroup{},
+		wg:          &sync.WaitGroup{},
 	}
 }
 
@@ -69,7 +69,7 @@ func (c *collector) Run(ctx context.Context) error {
 	wg.Add(1)
 
 	c.svc = svc
-	c.wg = wg
+	c.wg = &wg
 
 	go func() {
 		defer wg.Done()
