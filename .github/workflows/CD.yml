@@ -19,6 +19,7 @@ jobs:
         run: "[[ ${{ steps.get-tag.outputs.tag }} =~ ^v?[0-9]+\\.[0-9]+\\.[0-9]+ ]] && exit 0 || exit 1"
   setup-environment:
     runs-on: ubuntu-20.04
+    needs: [validate-tag]
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v2
