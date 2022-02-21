@@ -17,16 +17,16 @@ import (
 )
 
 var defaultProcessors = []component.ProcessorFactory{
+	attributesprocessor.NewFactory(),
+	batchprocessor.NewFactory(),
+	componenttest.NewNopProcessorFactory(),
 	groupbyattrsprocessor.NewFactory(),
 	k8sattributesprocessor.NewFactory(),
-	attributesprocessor.NewFactory(),
-	resourceprocessor.NewFactory(),
-	batchprocessor.NewFactory(),
 	memorylimiterprocessor.NewFactory(),
-	probabilisticsamplerprocessor.NewFactory(),
-	resourceattributetransposerprocessor.NewFactory(),
-	componenttest.NewNopProcessorFactory(),
 	metricstransformprocessor.NewFactory(),
 	normalizesumsprocessor.NewFactory(),
+	probabilisticsamplerprocessor.NewFactory(),
+	resourceattributetransposerprocessor.NewFactory(),
 	resourcedetectionprocessor.NewFactory(),
+	resourceprocessor.NewFactory(),
 }
