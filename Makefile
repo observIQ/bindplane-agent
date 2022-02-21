@@ -76,12 +76,6 @@ check-fmt:
 fmt:
 	$(GOFORMAT) -w .
 
-.PHONY: for-all
-for-all:
-	@set -e; for dir in $(ALL_MODULES); do \
-	  (cd "$${dir}" && $${CMD} ); \
-	done
-
 .PHONY: tidy
 tidy:
 	$(MAKE) for-all CMD="go mod tidy -go=1.16"
