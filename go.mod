@@ -4,7 +4,7 @@ go 1.17
 
 require (
 	github.com/Azure/azure-event-hubs-go/v3 v3.3.13
-	github.com/aws/aws-sdk-go v1.42.40
+	github.com/aws/aws-sdk-go v1.43.2
 	github.com/hashicorp/go-multierror v1.1.0
 	github.com/jpillora/backoff v1.0.0
 	github.com/json-iterator/go v1.1.12
@@ -97,7 +97,7 @@ require (
 	github.com/dennwc/varint v1.0.0 // indirect
 	github.com/devigned/tab v0.1.1 // indirect
 	github.com/digitalocean/godo v1.73.0 // indirect
-	github.com/docker/distribution v2.7.1+incompatible // indirect
+	github.com/docker/distribution v2.8.0+incompatible // indirect
 	github.com/docker/docker v20.10.12+incompatible // indirect
 	github.com/docker/go-connections v0.4.1-0.20210727194412-58542c764a11 // indirect
 	github.com/docker/go-units v0.4.0 // indirect
