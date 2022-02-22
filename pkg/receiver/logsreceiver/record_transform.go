@@ -75,10 +75,10 @@ func addPluginInfo(le *pdata.LogRecord, idToPipelineConfig map[string]map[string
 		return
 	}
 
-	if pluginId, ok := le.Attributes().Get("plugin_id"); ok {
-		if pluginId.Type() == pdata.AttributeValueTypeString {
-			pluginIdStr := pluginId.StringVal()
-			pluginConf := idToPipelineConfig[pluginIdStr]
+	if pluginID, ok := le.Attributes().Get("plugin_id"); ok {
+		if pluginID.Type() == pdata.AttributeValueTypeString {
+			pluginIDStr := pluginID.StringVal()
+			pluginConf := idToPipelineConfig[pluginIDStr]
 
 			if pluginType, ok := pluginConf["type"]; ok {
 				if pluginTypeStr, ok := pluginType.(string); ok {
@@ -112,7 +112,7 @@ func convertClient(le *pdata.LogRecord) {
 	if clientData, ok := bodyMap.Get("client"); ok {
 		if clientData.Type() == pdata.AttributeValueTypeString {
 			clientDataStr := clientData.StringVal()
-			bodyMap.Update("client", parseIpPort(clientDataStr))
+			bodyMap.Update("client", parseIPPort(clientDataStr))
 		}
 	}
 }
@@ -233,7 +233,7 @@ const addressField = "address"
 
 // parseIPPort parses the given string into its ipv4 and port components. If the ip or port cannot be parsed,
 //  the field "address" is filled with the unparsed string.
-func parseIpPort(s string) pdata.AttributeValue {
+func parseIPPort(s string) pdata.AttributeValue {
 	ipPortAttribVal := pdata.NewAttributeValueMap()
 	ipPortMap := ipPortAttribVal.MapVal()
 

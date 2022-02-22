@@ -85,7 +85,7 @@ func (e *EventHub) startConsumer(ctx context.Context, partitionID string, hub *a
 }
 
 // Connect initializes the connection to Azure Event Hub ensures the input parameters are valid
-func (e *EventHub) Connect(ctx context.Context) error {
+func (e *EventHub) Connect(_ context.Context) error {
 	var err error
 	e.hub, err = azhub.NewHubFromConnectionString(e.ConnectionString, azhub.HubWithOffsetPersistence(e.Persist))
 	return err

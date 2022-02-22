@@ -64,7 +64,7 @@ func (o *UnstartableOperator) Start(_ operator.Persister) error {
 }
 
 // Process will return nil
-func (o *UnstartableOperator) Process(ctx context.Context, entry *entry.Entry) error {
+func (o *UnstartableOperator) Process(_ context.Context, _ *entry.Entry) error {
 	return nil
 }
 
@@ -76,7 +76,7 @@ func (m *mockLogsConsumer) Capabilities() consumer.Capabilities {
 	return consumer.Capabilities{MutatesData: false}
 }
 
-func (m *mockLogsConsumer) ConsumeLogs(ctx context.Context, ld pdata.Logs) error {
+func (m *mockLogsConsumer) ConsumeLogs(_ context.Context, ld pdata.Logs) error {
 	atomic.AddInt32(&m.received, int32(ld.LogRecordCount()))
 	return nil
 }
@@ -98,7 +98,7 @@ func (m *mockLogsRejecter) Capabilities() consumer.Capabilities {
 	return consumer.Capabilities{MutatesData: false}
 }
 
-func (m *mockLogsRejecter) ConsumeLogs(ctx context.Context, ld pdata.Logs) error {
+func (m *mockLogsRejecter) ConsumeLogs(_ context.Context, _ pdata.Logs) error {
 	atomic.AddInt32(&m.rejected, 1)
 	return fmt.Errorf("no")
 }
