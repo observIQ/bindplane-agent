@@ -35,6 +35,7 @@ install-tools:
 	cd $(TOOLS_MOD_DIR) && $(GOINSTALL) github.com/client9/misspell/cmd/misspell
 	cd $(TOOLS_MOD_DIR) && $(GOINSTALL) github.com/sigstore/cosign/cmd/cosign
 	cd $(TOOLS_MOD_DIR) && $(GOINSTALL) github.com/goreleaser/goreleaser@v1.3.1
+	cd $(TOOLS_MOD_DIR) && $(GOINSTALL) github.com/uw-labs/lichen
 
 .PHONY: lint
 lint:
