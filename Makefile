@@ -117,3 +117,7 @@ for-all:
 	  	echo "running $${CMD} in $${dir}" && \
 	 	$${CMD} ); \
 	done
+
+.PHONY: scan-licenses
+scan-licenses:
+	lichen --config=./license.yaml $$(find dist/collector_* | xargs)

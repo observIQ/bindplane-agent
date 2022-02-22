@@ -1,0 +1,19 @@
+
+# minimum confidence percentage used during license classification
+threshold: .90
+
+# all permitted licenses - if no list is specified, all licenses are assumed to be allowed
+allow:
+  - "MIT"
+  - "Apache-2.0"
+  - "BSD-3-Clause"
+  - "BSD-2-Clause"
+  - "Zlib"
+  - "ISC"
+  - "MPL-2.0"
+
+exceptions:
+  licenseNotPermitted:
+    # opencontainers/go-digest is Apache 2.0 licensed, the README and CONTRIBUTING docs
+    # are creative commons. https://github.com/opencontainers/go-digest#copyright-and-license
+    - path: "github.com/opencontainers/go-digest"

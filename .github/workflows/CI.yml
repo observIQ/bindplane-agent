@@ -147,3 +147,5 @@ jobs:
         env:
           COSIGN_PWD: ${{ secrets.ORG_COSIGN_PWD }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Scan Dependency Licenses
+        run: make scan-licenses
