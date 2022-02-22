@@ -10,5 +10,6 @@ import (
 	_ "github.com/golangci/golangci-lint/cmd/golangci-lint"
 	_ "github.com/goreleaser/goreleaser/cmd"
 	_ "github.com/sigstore/cosign/cmd/cosign"
+	_ "github.com/uw-labs/lichen"
 	_ "golang.org/x/tools/cmd/goimports"
 )
