@@ -27,3 +27,5 @@ warningCode = 1
 [rule.unused-parameter]
 [rule.unreachable-code]
 [rule.redefines-builtin-id]
+[rule.exported]
+    arguments=["disableStutteringCheck"]

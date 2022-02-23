@@ -223,9 +223,9 @@ func convertIntAndFloatFields(le *pdata.LogRecord) {
 	}
 }
 
-var IPPortRegex = regexp.MustCompile(`^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}):(\d+)$`)
-var IPRegex = regexp.MustCompile(`^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$`)
-var PortRegex = regexp.MustCompile(`(.*):(\d+)$`)
+var ipPortRegex = regexp.MustCompile(`^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}):(\d+)$`)
+var ipRegex = regexp.MustCompile(`^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$`)
+var portRegex = regexp.MustCompile(`(.*):(\d+)$`)
 
 const ipField = "ip"
 const portField = "port"
@@ -237,7 +237,7 @@ func parseIPPort(s string) pdata.AttributeValue {
 	ipPortAttribVal := pdata.NewAttributeValueMap()
 	ipPortMap := ipPortAttribVal.MapVal()
 
-	if match := IPPortRegex.FindStringSubmatch(s); match != nil {
+	if match := ipPortRegex.FindStringSubmatch(s); match != nil {
 		if port, err := strconv.ParseInt(match[2], 10, 64); err == nil {
 			ipPortMap.Insert(ipField, pdata.NewAttributeValueString(match[1]))
 			ipPortMap.Insert(portField, pdata.NewAttributeValueInt(port))
@@ -247,12 +247,12 @@ func parseIPPort(s string) pdata.AttributeValue {
 		return ipPortAttribVal
 	}
 
-	if match := IPRegex.FindStringSubmatch(s); match != nil {
+	if match := ipRegex.FindStringSubmatch(s); match != nil {
 		ipPortMap.Insert(ipField, pdata.NewAttributeValueString(match[1]))
 		return ipPortAttribVal
 	}
 
-	if match := PortRegex.FindStringSubmatch(s); match != nil {
+	if match := portRegex.FindStringSubmatch(s); match != nil {
 		if port, err := strconv.ParseInt(match[2], 10, 64); err == nil {
 			if len(match[1]) > 0 {
 				ipPortMap.Insert(addressField, pdata.NewAttributeValueString(match[1]))

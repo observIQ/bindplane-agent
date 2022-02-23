@@ -127,15 +127,15 @@ type CloudwatchInput struct {
 	profile             string
 	startAtEnd          bool
 	startTime           int64
-	persist             Persister
+	persist             persister
 	wg                  sync.WaitGroup
 
 	session *cloudwatchlogs.CloudWatchLogs
 }
 
 // Start will start generating log entries.
-func (c *CloudwatchInput) Start(persister operator.Persister) error {
-	c.persist = Persister{DB: persister}
+func (c *CloudwatchInput) Start(p operator.Persister) error {
+	c.persist = persister{DB: p}
 	ctx, cancel := context.WithCancel(context.Background())
 	c.cancel = cancel
 

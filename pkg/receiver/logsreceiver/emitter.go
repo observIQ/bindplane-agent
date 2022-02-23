@@ -38,6 +38,7 @@ type LogEmitter struct {
 	flushInterval time.Duration
 }
 
+// LogEmitterOption represents an option that modifies a given LogEmitter
 type LogEmitterOption interface {
 	Apply(*LogEmitter)
 }
@@ -98,6 +99,7 @@ func NewLogEmitter(opts ...LogEmitterOption) *LogEmitter {
 	return le
 }
 
+// Start starts the LogEmitter
 func (e *LogEmitter) Start(_ operator.Persister) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	e.cancel = cancel

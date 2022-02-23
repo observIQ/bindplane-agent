@@ -63,7 +63,6 @@ const (
 //      └─┤   aggregates them by resource, then sends them    │
 //        │   to pLogschan                                    │
 //        └───────────────────────────────────────────────────┘
-
 type Converter struct {
 	// pLogsChan is a channel on which batched logs will be sent to.
 	pLogsChan chan pdata.Logs
@@ -88,6 +87,7 @@ type Converter struct {
 	idToPipelineConfig map[string]map[string]interface{}
 }
 
+// ConverterOption represents some option that modifies a Converter
 type ConverterOption interface {
 	apply(*Converter)
 }
@@ -98,24 +98,28 @@ func (f optionFunc) apply(c *Converter) {
 	f(c)
 }
 
+// WithLogger returns an option to use the given logger
 func WithLogger(logger *zap.Logger) ConverterOption {
 	return optionFunc(func(c *Converter) {
 		c.logger = logger
 	})
 }
 
+// WithWorkerCount returns an option to use the given number of workers
 func WithWorkerCount(workerCount int) ConverterOption {
 	return optionFunc(func(c *Converter) {
 		c.workerCount = workerCount
 	})
 }
 
+// WithIDToPipelineConfigMap returns an option to use the given id to pipeline map
 func WithIDToPipelineConfigMap(idToPipelineConfig map[string]map[string]interface{}) ConverterOption {
 	return optionFunc(func(c *Converter) {
 		c.idToPipelineConfig = idToPipelineConfig
 	})
 }
 
+// NewConverter creates a new converter with the provided options
 func NewConverter(opts ...ConverterOption) *Converter {
 	hi, _ := helper.NewHostIdentifierConfig().Build()
 	c := &Converter{
@@ -134,6 +138,7 @@ func NewConverter(opts ...ConverterOption) *Converter {
 	return c
 }
 
+// Start starts the converter.
 func (c *Converter) Start() {
 	c.logger.Debug("Starting log converter", zap.Int("worker_count", c.workerCount))
 
@@ -143,6 +148,7 @@ func (c *Converter) Start() {
 	}
 }
 
+// Stop stops the converter
 func (c *Converter) Stop() {
 	c.stopOnce.Do(func() {
 		close(c.stopChan)
