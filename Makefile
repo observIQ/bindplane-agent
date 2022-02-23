@@ -121,4 +121,4 @@ for-all:
 
 .PHONY: scan-licenses
 scan-licenses:
-	lichen --config=./license.yaml $$(find dist/collector_* | xargs)
+	lichen --config=./license.yaml $$(find dist/collector_* | grep -v 'sig\|json\|CHANGELOG.md\|yaml\|SHA256' | xargs)
