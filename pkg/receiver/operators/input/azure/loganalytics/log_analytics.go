@@ -16,51 +16,51 @@ func init() {
 }
 
 // NewLogAnalyticsConfig creates a new Azure Log Analytics input config with default values
-func NewLogAnalyticsConfig(operatorID string) *LogAnalyticsInputConfig {
-	return &LogAnalyticsInputConfig{
+func NewLogAnalyticsConfig(operatorID string) *InputConfig {
+	return &InputConfig{
 		InputConfig: helper.NewInputConfig(operatorID, operatorName),
-		AzureConfig: azure.AzureConfig{
+		Config: azure.Config{
 			PrefetchCount: 1000,
 			StartAt:       "end",
 		},
 	}
 }
 
-// LogAnalyticsInputConfig is the configuration of a Azure Log Analytics input operator.
-type LogAnalyticsInputConfig struct {
+// InputConfig is the configuration of a Azure Log Analytics input operator.
+type InputConfig struct {
 	helper.InputConfig `yaml:",inline"`
-	azure.AzureConfig  `yaml:",inline"`
+	azure.Config       `yaml:",inline"`
 }
 
 // Build will build a Azure Log Analytics input operator.
-func (c *LogAnalyticsInputConfig) Build(buildContext operator.BuildContext) ([]operator.Operator, error) {
-	if err := c.AzureConfig.Build(buildContext, c.InputConfig); err != nil {
+func (c *InputConfig) Build(buildContext operator.BuildContext) ([]operator.Operator, error) {
+	if err := c.Config.Build(buildContext, c.InputConfig); err != nil {
 		return nil, err
 	}
 
-	logAnalyticsInput := &LogAnalyticsInput{
+	logAnalyticsInput := &Input{
 		EventHub: azure.EventHub{
-			AzureConfig: c.AzureConfig,
+			Config: c.Config,
 		},
 		json: jsoniter.ConfigFastest,
 	}
 	return []operator.Operator{logAnalyticsInput}, nil
 }
 
-// LogAnalyticsInput is an operator that reads Azure Log Analytics input from Azure Event Hub.
-type LogAnalyticsInput struct {
+// Input is an operator that reads Azure Log Analytics input from Azure Event Hub.
+type Input struct {
 	azure.EventHub
 	json jsoniter.API
 }
 
 // Start will start generating log entries.
-func (l *LogAnalyticsInput) Start(persister operator.Persister) error {
+func (l *Input) Start(persister operator.Persister) error {
 	l.Handler = l.handleBatchedEvents
 	l.Persist = &azure.Persister{DB: persister}
 	return l.StartConsumers(context.Background())
 }
 
 // Stop will stop generating logs.
-func (l *LogAnalyticsInput) Stop() error {
+func (l *Input) Stop() error {
 	return l.StopConsumers()
 }

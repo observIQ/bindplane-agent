@@ -14,6 +14,7 @@
 
 package logsreceiver
 
+//revive:disable:blank-imports These imports are all necessary to register operators for use; They should not be in a main package.
 import (
 	// Register parsers and transformers for stanza-based log receivers
 	_ "github.com/open-telemetry/opentelemetry-log-collection/operator/builtin/input/file"

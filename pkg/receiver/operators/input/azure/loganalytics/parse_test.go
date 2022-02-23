@@ -11,12 +11,12 @@ import (
 
 func TestParse(t *testing.T) {
 	var (
-		operator             LogAnalyticsInput
-		testPartitionKey     string    = "1"
-		testSequenceNum      int64     = 600
-		testTime             time.Time = time.Now()
-		testOffset           int64     = 2000
-		testTimeGeneratedSTR string    = "2021-04-26T17:11:41.3500000Z"
+		operator             Input
+		testPartitionKey           = "1"
+		testSequenceNum      int64 = 600
+		testTime                   = time.Now()
+		testOffset           int64 = 2000
+		testTimeGeneratedSTR       = "2021-04-26T17:11:41.3500000Z"
 	)
 
 	testTimeGenerated, err := time.Parse("2006-01-02T15:04:05.0000000Z07", testTimeGeneratedSTR)

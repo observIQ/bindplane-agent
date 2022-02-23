@@ -70,7 +70,7 @@ jobs:
           go mod download
           make install-tools
       - name: CI Checks
-        run: make -j3 check-fmt misspell lint
+        run: make -j3 check-fmt misspell
   test:
     runs-on: ubuntu-20.04
     needs: [setup-environment]

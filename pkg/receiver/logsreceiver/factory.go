@@ -50,7 +50,7 @@ func createDefaultConfig() config.Receiver {
 }
 
 func createLogsReceiver(
-	ctx context.Context,
+	_ context.Context,
 	params component.ReceiverCreateSettings,
 	cfg config.Receiver,
 	nextConsumer consumer.Logs,
@@ -85,18 +85,18 @@ func createLogsReceiver(
 		return nil, err
 	}
 
-	pluginIdToConfig := map[string]map[string]interface{}{}
+	pluginIDToConfig := map[string]map[string]interface{}{}
 	for _, conf := range stanzaCfg.Pipeline {
 		if id, ok := conf["id"]; ok {
 			if idStr, ok := id.(string); ok {
-				pluginIdToConfig[idStr] = conf
+				pluginIDToConfig[idStr] = conf
 			}
 		}
 	}
 
 	opts := []ConverterOption{
 		WithLogger(params.Logger),
-		WithIdToPipelineConfigMap(pluginIdToConfig),
+		WithIDToPipelineConfigMap(pluginIDToConfig),
 	}
 	if stanzaCfg.Converter.WorkerCount > 0 {
 		opts = append(opts, WithWorkerCount(stanzaCfg.Converter.WorkerCount))
