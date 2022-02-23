@@ -22,8 +22,8 @@ builds:
   ldflags:
   - -s -w
   - -X github.com/observiq/observiq-collector/internal/version.version=v{{ .Version }}
-  - -X github.com/observiq/observiq-collector/internal/version.gitHash={{ .Env.GIT_HASH }}
-  - -X github.com/observiq/observiq-collector/internal/version.date={{ .Env.DATE }}
+  - -X github.com/observiq/observiq-collector/internal/version.gitHash={{ .FullCommit }}
+  - -X github.com/observiq/observiq-collector/internal/version.date={{ .Date }}
   no_unique_dist_dir: true
   hooks:
     pre:
