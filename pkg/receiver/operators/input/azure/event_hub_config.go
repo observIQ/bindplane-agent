@@ -7,8 +7,8 @@ import (
 	"github.com/open-telemetry/opentelemetry-log-collection/operator/helper"
 )
 
-// AzureConfig is the configuration of a Azure Event Hub input operator.
-type AzureConfig struct {
+// Config is the configuration of a Azure Event Hub input operator.
+type Config struct {
 	helper.InputOperator
 
 	// required
@@ -25,7 +25,7 @@ type AzureConfig struct {
 }
 
 // Build builds the event hub input operator
-func (a *AzureConfig) Build(buildContext operator.BuildContext, input helper.InputConfig) error {
+func (a *Config) Build(buildContext operator.BuildContext, input helper.InputConfig) error {
 	inputOperator, err := input.Build(buildContext)
 	if err != nil {
 		return err
@@ -42,7 +42,7 @@ func (a *AzureConfig) Build(buildContext operator.BuildContext, input helper.Inp
 	return a.validate()
 }
 
-func (a AzureConfig) validate() error {
+func (a Config) validate() error {
 	if a.Namespace == "" {
 		return fmt.Errorf("missing required parameter 'namespace'")
 	}

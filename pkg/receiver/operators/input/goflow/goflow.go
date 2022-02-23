@@ -28,14 +28,14 @@ func init() {
 }
 
 // NewGoflowInputConfig creates a new goflow input config with default values
-func NewGoflowInputConfig(operatorID string) *GoflowInputConfig {
-	return &GoflowInputConfig{
+func NewGoflowInputConfig(operatorID string) *InputConfig {
+	return &InputConfig{
 		InputConfig: helper.NewInputConfig(operatorID, operatorName),
 	}
 }
 
-// GoflowInputConfig is the configuration of a goflow input operator.
-type GoflowInputConfig struct {
+// InputConfig is the configuration of a goflow input operator.
+type InputConfig struct {
 	helper.InputConfig `yaml:",inline"`
 
 	Mode          string `json:"mode,omitempty"           yaml:"mode,omitempty"`
@@ -44,7 +44,7 @@ type GoflowInputConfig struct {
 }
 
 // Build will build a goflow input operator.
-func (c *GoflowInputConfig) Build(context operator.BuildContext) ([]operator.Operator, error) {
+func (c *InputConfig) Build(context operator.BuildContext) ([]operator.Operator, error) {
 	inputOperator, err := c.InputConfig.Build(context)
 	if err != nil {
 		return nil, err
@@ -82,7 +82,7 @@ func (c *GoflowInputConfig) Build(context operator.BuildContext) ([]operator.Ope
 		c.Workers = 1
 	}
 
-	goflowInput := &GoflowInput{
+	goflowInput := &Input{
 		InputOperator: inputOperator,
 		mode:          c.Mode,
 		address:       addr.IP.String(),
@@ -92,9 +92,9 @@ func (c *GoflowInputConfig) Build(context operator.BuildContext) ([]operator.Ope
 	return []operator.Operator{goflowInput}, nil
 }
 
-// GoflowInput is an operator that receives network traffic information
+// Input is an operator that receives network traffic information
 // from network devices.
-type GoflowInput struct {
+type Input struct {
 	helper.InputOperator
 	wg     sync.WaitGroup
 	cancel context.CancelFunc
@@ -107,7 +107,7 @@ type GoflowInput struct {
 }
 
 // Start will start generating log entries.
-func (n *GoflowInput) Start(_ operator.Persister) error {
+func (n *Input) Start(_ operator.Persister) error {
 	n.ctx, n.cancel = context.WithCancel(context.Background())
 
 	go func() {
@@ -155,14 +155,14 @@ func (n *GoflowInput) Start(_ operator.Persister) error {
 }
 
 // Stop will stop generating logs.
-func (n *GoflowInput) Stop() error {
+func (n *Input) Stop() error {
 	n.cancel()
 	n.wg.Wait()
 	return nil
 }
 
 // Publish writes entries and satisfies GoFlow's util.Transport interface
-func (n *GoflowInput) Publish(messages []*flowmessage.FlowMessage) {
+func (n *Input) Publish(messages []*flowmessage.FlowMessage) {
 	n.wg.Add(1)
 	defer n.wg.Done()
 
@@ -185,6 +185,6 @@ func (n *GoflowInput) Publish(messages []*flowmessage.FlowMessage) {
 }
 
 // Printf is required by goflows logging interface
-func (n *GoflowInput) Printf(format string, args ...interface{}) {
+func (n *Input) Printf(format string, args ...interface{}) {
 	n.Infof(format, args)
 }

@@ -11,7 +11,7 @@ import (
 
 func TestParse(t *testing.T) {
 	var (
-		operator             LogAnalyticsInput
+		operator             Input
 		testPartitionKey           = "1"
 		testSequenceNum      int64 = 600
 		testTime                   = time.Now()

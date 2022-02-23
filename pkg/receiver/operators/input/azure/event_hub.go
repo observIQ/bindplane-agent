@@ -11,7 +11,7 @@ import (
 
 // EventHub provides methods for reading events from Azure Event Hub.
 type EventHub struct {
-	AzureConfig
+	Config
 	Persist *Persister
 	WG      sync.WaitGroup
 	Handler func(context.Context, *azhub.Event) error

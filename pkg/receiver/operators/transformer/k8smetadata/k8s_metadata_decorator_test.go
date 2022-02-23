@@ -29,7 +29,7 @@ func TestMetadataCache(t *testing.T) {
 	require.Equal(t, entry, loaded)
 }
 
-func basicConfig() *K8sMetadataDecoratorConfig {
+func basicConfig() *DecoratorConfig {
 	cfg := NewK8sMetadataDecoratorConfig("testoperator")
 	cfg.OutputIDs = []string{"mock"}
 	return cfg
@@ -38,7 +38,7 @@ func basicConfig() *K8sMetadataDecoratorConfig {
 func TestK8sMetadataDecoratorBuildDefault(t *testing.T) {
 	cfg := basicConfig()
 
-	expected := &K8sMetadataDecorator{
+	expected := &Decorator{
 		TransformerOperator: helper.TransformerOperator{
 			WriterOperator: helper.WriterOperator{
 				BasicOperator: helper.BasicOperator{
@@ -59,7 +59,7 @@ func TestK8sMetadataDecoratorBuildDefault(t *testing.T) {
 	ops, err := cfg.Build(testutil.NewBuildContext(t))
 	require.NoError(t, err)
 	op := ops[0]
-	op.(*K8sMetadataDecorator).SugaredLogger = nil
+	op.(*Decorator).SugaredLogger = nil
 	require.Equal(t, expected, op)
 }
 
@@ -73,7 +73,7 @@ func TestK8sMetadataDecoratorCachedMetadata(t *testing.T) {
 	mockOutput.On("Outputs").Return("mock")
 
 	// Preload cache so we don't hit the network
-	k8s := op.(*K8sMetadataDecorator)
+	k8s := op.(*Decorator)
 	k8s.namespaceCache.Store("testnamespace", MetadataCacheEntry{
 		ExpirationTime: time.Now().Add(time.Hour),
 		Labels: map[string]string{
