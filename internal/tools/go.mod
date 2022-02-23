@@ -4,6 +4,7 @@ go 1.17
 
 require (
 	github.com/client9/misspell v0.3.4
+	github.com/google/addlicense v1.0.0
 	github.com/goreleaser/goreleaser v1.3.1
 	github.com/sigstore/cosign v1.4.1
 	golang.org/x/tools v0.1.7
@@ -70,6 +71,7 @@ require (
 	github.com/bgentry/speakeasy v0.1.0 // indirect
 	github.com/blakesmith/ar v0.0.0-20190502131153-809d4375e1fb // indirect
 	github.com/blang/semver v3.5.1+incompatible // indirect
+	github.com/bmatcuk/doublestar/v4 v4.0.2 // indirect
 	github.com/caarlos0/ctrlc v1.0.0 // indirect
 	github.com/caarlos0/env/v6 v6.9.1 // indirect
 	github.com/caarlos0/go-reddit/v3 v3.0.1 // indirect
