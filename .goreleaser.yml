@@ -25,10 +25,6 @@ builds:
   - -X github.com/observiq/observiq-collector/internal/version.gitHash={{ .FullCommit }}
   - -X github.com/observiq/observiq-collector/internal/version.date={{ .Date }}
   no_unique_dist_dir: true
-  hooks:
-    pre:
-    - make clean
-    - make tidy
 
 # https://goreleaser.com/customization/archive/
 archives:
