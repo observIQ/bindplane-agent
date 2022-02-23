@@ -9,12 +9,12 @@ import (
 	"github.com/open-telemetry/opentelemetry-log-collection/operator"
 )
 
-type Persister struct {
+type persister struct {
 	DB operator.Persister
 }
 
 // Helper function to get persisted data
-func (p *Persister) Read(ctx context.Context, key string) (int64, error) {
+func (p *persister) Read(ctx context.Context, key string) (int64, error) {
 	startTimeBytes, err := p.DB.Get(ctx, key)
 	if err != nil {
 		return -1, fmt.Errorf("there was an error reading from persistent storage: %w", err)
@@ -29,7 +29,7 @@ func (p *Persister) Read(ctx context.Context, key string) (int64, error) {
 }
 
 // Helper function to set persisted data
-func (p *Persister) Write(ctx context.Context, key string, value int64) error {
+func (p *persister) Write(ctx context.Context, key string, value int64) error {
 	var buf = make([]byte, 8)
 	binary.BigEndian.PutUint64(buf, uint64(value))
 	return p.DB.Set(ctx, key, buf)

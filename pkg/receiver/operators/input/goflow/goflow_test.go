@@ -10,19 +10,19 @@ import (
 func TestBuild(t *testing.T) {
 	cases := []struct {
 		name        string
-		inputRecord GoflowInputConfig
+		inputRecord InputConfig
 		expectErr   bool
 	}{
 		{
 			"minimal-default-mode",
-			GoflowInputConfig{
+			InputConfig{
 				ListenAddress: "0.0.0.0:2056",
 			},
 			false,
 		},
 		{
 			"minimal-netflow-v5",
-			GoflowInputConfig{
+			InputConfig{
 				Mode:          "netflow_v5",
 				ListenAddress: "0.0.0.0:2056",
 			},
@@ -30,7 +30,7 @@ func TestBuild(t *testing.T) {
 		},
 		{
 			"minimal-netflow-ipfix",
-			GoflowInputConfig{
+			InputConfig{
 				Mode:          "netflow_ipfix",
 				ListenAddress: "0.0.0.0:2056",
 			},
@@ -38,7 +38,7 @@ func TestBuild(t *testing.T) {
 		},
 		{
 			"minimal-netflow-sflow",
-			GoflowInputConfig{
+			InputConfig{
 				Mode:          "netflow_v5",
 				ListenAddress: "0.0.0.0:2056",
 			},
@@ -46,7 +46,7 @@ func TestBuild(t *testing.T) {
 		},
 		{
 			"invalid mode",
-			GoflowInputConfig{
+			InputConfig{
 				Mode:          "netflow",
 				ListenAddress: "0.0.0.0:2056",
 			},
@@ -54,7 +54,7 @@ func TestBuild(t *testing.T) {
 		},
 		{
 			"missing-address",
-			GoflowInputConfig{
+			InputConfig{
 				Mode: "sflow",
 			},
 			true,

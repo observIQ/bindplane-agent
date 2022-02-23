@@ -11,13 +11,13 @@ import (
 func TestBuild(t *testing.T) {
 	cases := []struct {
 		name      string
-		input     EventHubInputConfig
+		input     InputConfig
 		expectErr bool
 	}{
 		{
 			"default",
-			EventHubInputConfig{
-				AzureConfig: azure.AzureConfig{
+			InputConfig{
+				Config: azure.Config{
 					Namespace:        "test",
 					Name:             "test",
 					Group:            "test",
@@ -29,8 +29,8 @@ func TestBuild(t *testing.T) {
 		},
 		{
 			"prefetch",
-			EventHubInputConfig{
-				AzureConfig: azure.AzureConfig{
+			InputConfig{
+				Config: azure.Config{
 					Namespace:        "test",
 					Name:             "test",
 					Group:            "test",
@@ -42,8 +42,8 @@ func TestBuild(t *testing.T) {
 		},
 		{
 			"startat-end",
-			EventHubInputConfig{
-				AzureConfig: azure.AzureConfig{
+			InputConfig{
+				Config: azure.Config{
 					Namespace:        "test",
 					Name:             "test",
 					Group:            "test",
@@ -56,8 +56,8 @@ func TestBuild(t *testing.T) {
 		},
 		{
 			"startat-beginning",
-			EventHubInputConfig{
-				AzureConfig: azure.AzureConfig{
+			InputConfig{
+				Config: azure.Config{
 					Namespace:        "test",
 					Name:             "test",
 					Group:            "test",
@@ -70,8 +70,8 @@ func TestBuild(t *testing.T) {
 		},
 		{
 			"prefetch-invalid",
-			EventHubInputConfig{
-				AzureConfig: azure.AzureConfig{
+			InputConfig{
+				Config: azure.Config{
 					Namespace:        "test",
 					Name:             "test",
 					Group:            "test",
@@ -83,8 +83,8 @@ func TestBuild(t *testing.T) {
 		},
 		{
 			"default-required-startat-invalid",
-			EventHubInputConfig{
-				AzureConfig: azure.AzureConfig{
+			InputConfig{
+				Config: azure.Config{
 					Namespace:        "test",
 					Name:             "test",
 					Group:            "test",

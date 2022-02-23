@@ -9,7 +9,7 @@ import (
 )
 
 // handleEvent handles an event received by an Event Hub consumer.
-func (e *EventHubInput) handleEvent(ctx context.Context, event *azhub.Event) error {
+func (e *Input) handleEvent(ctx context.Context, event *azhub.Event) error {
 	e.WG.Add(1)
 	defer e.WG.Done()
 

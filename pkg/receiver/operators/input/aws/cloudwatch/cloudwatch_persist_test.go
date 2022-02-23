@@ -12,27 +12,27 @@ import (
 func TestPersisterCache(t *testing.T) {
 	ctx := context.TODO()
 	stubDatabase := testutil.NewMockPersister("stub")
-	persister := Persister{
+	p := persister{
 		DB: operator.NewScopedPersister("test", stubDatabase),
 	}
-	err := persister.Write(ctx, "key", int64(1620666055012))
+	err := p.Write(ctx, "key", int64(1620666055012))
 	require.NoError(t, err)
 
-	value, readErr := persister.Read(ctx, "key")
+	value, readErr := p.Read(ctx, "key")
 	require.NoError(t, readErr)
 	require.Equal(t, int64(1620666055012), value)
 }
 
 func TestPersisterLoad(t *testing.T) {
 	ctx := context.TODO()
-	persister := testutil.NewMockPersister("mock")
-	cwPersister := Persister{
-		DB: persister,
+	p := testutil.NewMockPersister("mock")
+	cwP := persister{
+		DB: p,
 	}
-	err := cwPersister.Write(ctx, "key", 1620666055012)
+	err := cwP.Write(ctx, "key", 1620666055012)
 	require.NoError(t, err)
 
-	value, syncErr := cwPersister.Read(ctx, "key")
+	value, syncErr := cwP.Read(ctx, "key")
 	require.NoError(t, syncErr)
 	require.Equal(t, int64(1620666055012), value)
 }
@@ -40,11 +40,11 @@ func TestPersisterLoad(t *testing.T) {
 func TestPersistentLoadNoKey(t *testing.T) {
 	ctx := context.TODO()
 
-	persister := testutil.NewMockPersister("mock")
-	cwPersister := Persister{
-		DB: persister,
+	p := testutil.NewMockPersister("mock")
+	cwP := persister{
+		DB: p,
 	}
-	value, err := cwPersister.Read(ctx, "key")
+	value, err := cwP.Read(ctx, "key")
 	require.NoError(t, err)
 	require.Equal(t, int64(0), value)
 }

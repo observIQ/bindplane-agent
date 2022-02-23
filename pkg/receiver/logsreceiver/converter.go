@@ -63,7 +63,6 @@ const (
 //      └─┤   aggregates them by resource, then sends them    │
 //        │   to pLogschan                                    │
 //        └───────────────────────────────────────────────────┘
-
 type Converter struct {
 	// pLogsChan is a channel on which batched logs will be sent to.
 	pLogsChan chan pdata.Logs
@@ -88,6 +87,7 @@ type Converter struct {
 	idToPipelineConfig map[string]map[string]interface{}
 }
 
+// ConverterOption represents some option that modifies a Converter
 type ConverterOption interface {
 	apply(*Converter)
 }
@@ -98,24 +98,28 @@ func (f optionFunc) apply(c *Converter) {
 	f(c)
 }
 
+// WithLogger returns an option to use the given logger
 func WithLogger(logger *zap.Logger) ConverterOption {
 	return optionFunc(func(c *Converter) {
 		c.logger = logger
 	})
 }
 
+// WithWorkerCount returns an option to use the given number of workers
 func WithWorkerCount(workerCount int) ConverterOption {
 	return optionFunc(func(c *Converter) {
 		c.workerCount = workerCount
 	})
 }
 
-func WithIdToPipelineConfigMap(idToPipelineConfig map[string]map[string]interface{}) ConverterOption {
+// WithIDToPipelineConfigMap returns an option to use the given id to pipeline map
+func WithIDToPipelineConfigMap(idToPipelineConfig map[string]map[string]interface{}) ConverterOption {
 	return optionFunc(func(c *Converter) {
 		c.idToPipelineConfig = idToPipelineConfig
 	})
 }
 
+// NewConverter creates a new converter with the provided options
 func NewConverter(opts ...ConverterOption) *Converter {
 	hi, _ := helper.NewHostIdentifierConfig().Build()
 	c := &Converter{
@@ -134,6 +138,7 @@ func NewConverter(opts ...ConverterOption) *Converter {
 	return c
 }
 
+// Start starts the converter.
 func (c *Converter) Start() {
 	c.logger.Debug("Starting log converter", zap.Int("worker_count", c.workerCount))
 
@@ -143,6 +148,7 @@ func (c *Converter) Start() {
 	}
 }
 
+// Stop stops the converter
 func (c *Converter) Stop() {
 	c.stopOnce.Do(func() {
 		close(c.stopChan)
@@ -470,31 +476,31 @@ var sevTextMap = map[entry.Severity]string{
 	entry.Fatal4:  "Fatal4",
 }
 
-// pair_sep is chosen to be an invalid byte for a utf-8 sequence
+// pairSep is chosen to be an invalid byte for a utf-8 sequence
 // making it more unlikely to be hit
-var pair_sep = []byte{0xfe}
+var pairSep = []byte{0xfe}
 
 func getResourceID(resource map[string]string) uint64 {
 	var fnvHash = fnv.New64a()
 	var fnvHashOut = make([]byte, 0, 16)
-	var key_slice = make([]string, 0, len(resource))
+	var keySlice = make([]string, 0, len(resource))
 	var escapedSlice = make([]byte, 0, 64)
 
 	for k := range resource {
-		key_slice = append(key_slice, k)
+		keySlice = append(keySlice, k)
 	}
 
 	// In order for this to be deterministic, we need to sort the map. Using range, like above,
 	// has no guarantee about order.
-	sort.Strings(key_slice)
-	for _, k := range key_slice {
+	sort.Strings(keySlice)
+	for _, k := range keySlice {
 		escapedSlice = appendEscapedPairSeparator(escapedSlice[:0], k)
 		fnvHash.Write(escapedSlice)
-		fnvHash.Write(pair_sep)
+		fnvHash.Write(pairSep)
 
 		escapedSlice = appendEscapedPairSeparator(escapedSlice[:0], resource[k])
 		fnvHash.Write(escapedSlice)
-		fnvHash.Write(pair_sep)
+		fnvHash.Write(pairSep)
 	}
 
 	fnvHashOut = fnvHash.Sum(fnvHashOut)
@@ -504,21 +510,21 @@ func getResourceID(resource map[string]string) uint64 {
 // appendEscapedPairSeparator escapes (prefixes) "pair_sep" with byte 0xff, and appends it to the
 // incoming buffer. It returns the appended buffer.
 func appendEscapedPairSeparator(buf []byte, s string) []byte {
-	const escape_byte byte = '\xff'
+	const escapeByte byte = '\xff'
 
 	if len(s) > cap(buf) {
-		new_buf := make([]byte, len(s))
-		copy(new_buf, buf)
-		buf = new_buf
+		newBuf := make([]byte, len(s))
+		copy(newBuf, buf)
+		buf = newBuf
 	}
 
 	sBytes := []byte(s)
 	for _, b := range sBytes {
 		switch b {
-		case escape_byte:
+		case escapeByte:
 			fallthrough
-		case pair_sep[0]:
-			buf = append(buf, escape_byte)
+		case pairSep[0]:
+			buf = append(buf, escapeByte)
 		}
 
 		buf = append(buf, b)

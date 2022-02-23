@@ -56,7 +56,7 @@ func TestTransform(t *testing.T) {
 	testCases := []struct {
 		name                string
 		lrIn                mockLogRecord
-		pluginIdToConfigMap map[string]map[string]interface{}
+		pluginIDToConfigMap map[string]map[string]interface{}
 		lrOut               mockLogRecord
 	}{
 		{
@@ -141,7 +141,7 @@ func TestTransform(t *testing.T) {
 					"plugin_id": "myid",
 				},
 			},
-			pluginIdToConfigMap: map[string]map[string]interface{}{
+			pluginIDToConfigMap: map[string]map[string]interface{}{
 				"myid": {
 					"id":      "myid",
 					"name":    "my_plugin_1",
@@ -165,7 +165,7 @@ func TestTransform(t *testing.T) {
 					"plugin_id": "myid",
 				},
 			},
-			pluginIdToConfigMap: map[string]map[string]interface{}{},
+			pluginIDToConfigMap: map[string]map[string]interface{}{},
 			lrOut: mockLogRecord{
 				Attributes: map[string]interface{}{
 					"plugin_id": "myid",
@@ -349,7 +349,7 @@ func TestTransform(t *testing.T) {
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
 			lrIn := testCase.lrIn.LogRecord(t)
-			Transform(&lrIn, testCase.pluginIdToConfigMap)
+			Transform(&lrIn, testCase.pluginIDToConfigMap)
 			lrOut := testCase.lrOut.LogRecord(t)
 
 			sortMapKeys(lrIn.Attributes())

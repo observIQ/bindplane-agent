@@ -30,8 +30,8 @@ ALL_MODULES := $(shell find . -type f -name "go.mod" -exec dirname {} \; | sort 
 TOOLS_MOD_DIR := ./internal/tools
 .PHONY: install-tools
 install-tools:
-	cd $(TOOLS_MOD_DIR) && $(GOINSTALL) golang.org/x/tools/cmd/goimports
-	cd $(TOOLS_MOD_DIR) && $(GOINSTALL) github.com/golangci/golangci-lint/cmd/golangci-lint@v1.40.1
+	cd $(TOOLS_MOD_DIR) && go install github.com/mgechev/revive@latest 
+	cd $(TOOLS_MOD_DIR) && $(GOINSTALL) golang.org/x/tools/cmd/goimports	
 	cd $(TOOLS_MOD_DIR) && $(GOINSTALL) github.com/client9/misspell/cmd/misspell
 	cd $(TOOLS_MOD_DIR) && $(GOINSTALL) github.com/sigstore/cosign/cmd/cosign
 	cd $(TOOLS_MOD_DIR) && $(GOINSTALL) github.com/goreleaser/goreleaser@v1.3.1
@@ -39,7 +39,7 @@ install-tools:
 
 .PHONY: lint
 lint:
-	$(LINT) run --timeout $(LINT_TIMEOUT)
+	revive -config revive/config.toml -formatter friendly ./...
 
 .PHONY: misspell
 misspell:

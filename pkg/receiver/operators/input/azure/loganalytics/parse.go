@@ -16,7 +16,7 @@ import (
 )
 
 // handleBatchedEvents handles an event received by an Event Hub consumer.
-func (l *LogAnalyticsInput) handleBatchedEvents(ctx context.Context, event *azhub.Event) error {
+func (l *Input) handleBatchedEvents(ctx context.Context, event *azhub.Event) error {
 	l.WG.Add(1)
 	defer l.WG.Done()
 
@@ -59,7 +59,7 @@ func (l *LogAnalyticsInput) handleBatchedEvents(ctx context.Context, event *azhu
 	return nil
 }
 
-func (l *LogAnalyticsInput) handleEvent(ctx context.Context, event azhub.Event, records map[string]interface{}) {
+func (l *Input) handleEvent(ctx context.Context, event azhub.Event, records map[string]interface{}) {
 	e, err := l.NewEntry(nil)
 	if err != nil {
 		l.Errorw("Failed to parse event as an entry", zap.Error(err))
@@ -74,7 +74,7 @@ func (l *LogAnalyticsInput) handleEvent(ctx context.Context, event azhub.Event, 
 }
 
 // parse returns an entry from an event and set of records
-func (l *LogAnalyticsInput) parse(event azhub.Event, records map[string]interface{}, e *entry.Entry) error {
+func (l *Input) parse(event azhub.Event, records map[string]interface{}, e *entry.Entry) error {
 	// make sure all keys are lower case
 	for k, v := range records {
 		delete(records, k)
@@ -102,7 +102,7 @@ func (l *LogAnalyticsInput) parse(event azhub.Event, records map[string]interfac
 }
 
 // setType sets the label 'azure_log_analytics_table'
-func (l *LogAnalyticsInput) setType(e *entry.Entry, records map[string]interface{}) (map[string]interface{}, error) {
+func (l *Input) setType(e *entry.Entry, records map[string]interface{}) (map[string]interface{}, error) {
 	const typeField = "type"
 
 	for key, value := range records {
@@ -125,7 +125,7 @@ func (l *LogAnalyticsInput) setType(e *entry.Entry, records map[string]interface
 }
 
 // setTimestamp set the entry's timestamp using the timegenerated log analytics field
-func (l *LogAnalyticsInput) setTimestamp(e *entry.Entry, records map[string]interface{}) error {
+func (l *Input) setTimestamp(e *entry.Entry, records map[string]interface{}) error {
 	for key, value := range records {
 		if key == "timegenerated" {
 			if v, ok := value.(string); ok {
@@ -141,12 +141,12 @@ func (l *LogAnalyticsInput) setTimestamp(e *entry.Entry, records map[string]inte
 	return nil
 }
 
-func (l *LogAnalyticsInput) setLabel(e *entry.Entry, key string, value interface{}) error {
+func (l *Input) setLabel(e *entry.Entry, key string, value interface{}) error {
 	r := entry.NewAttributeField(key)
 	return r.Set(e, value)
 }
 
-func (l *LogAnalyticsInput) setField(e *entry.Entry, key string, value interface{}) error {
+func (l *Input) setField(e *entry.Entry, key string, value interface{}) error {
 	r := entry.BodyField{
 		Keys: []string{key},
 	}

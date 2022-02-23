@@ -15,49 +15,49 @@ func init() {
 }
 
 // NewEventHubConfig creates a new Azure Event Hub input config with default values
-func NewEventHubConfig(operatorID string) *EventHubInputConfig {
-	return &EventHubInputConfig{
+func NewEventHubConfig(operatorID string) *InputConfig {
+	return &InputConfig{
 		InputConfig: helper.NewInputConfig(operatorID, operatorName),
-		AzureConfig: azure.AzureConfig{
+		Config: azure.Config{
 			PrefetchCount: 1000,
 			StartAt:       "end",
 		},
 	}
 }
 
-// EventHubInputConfig is the configuration of a Azure Event Hub input operator.
-type EventHubInputConfig struct {
+// InputConfig is the configuration of a Azure Event Hub input operator.
+type InputConfig struct {
 	helper.InputConfig `yaml:",inline"`
-	azure.AzureConfig  `yaml:",inline"`
+	azure.Config       `yaml:",inline"`
 }
 
 // Build will build a Azure Event Hub input operator.
-func (c *EventHubInputConfig) Build(buildContext operator.BuildContext) ([]operator.Operator, error) {
-	if err := c.AzureConfig.Build(buildContext, c.InputConfig); err != nil {
+func (c *InputConfig) Build(buildContext operator.BuildContext) ([]operator.Operator, error) {
+	if err := c.Config.Build(buildContext, c.InputConfig); err != nil {
 		return nil, err
 	}
 
-	eventHubInput := &EventHubInput{
+	eventHubInput := &Input{
 		EventHub: azure.EventHub{
-			AzureConfig: c.AzureConfig,
+			Config: c.Config,
 		},
 	}
 	return []operator.Operator{eventHubInput}, nil
 }
 
-// EventHubInput is an operator that reads input from Azure Event Hub.
-type EventHubInput struct {
+// Input is an operator that reads input from Azure Event Hub.
+type Input struct {
 	azure.EventHub
 }
 
 // Start will start generating log entries.
-func (e *EventHubInput) Start(persister operator.Persister) error {
+func (e *Input) Start(persister operator.Persister) error {
 	e.Handler = e.handleEvent
 	e.Persist = &azure.Persister{DB: persister}
 	return e.StartConsumers(context.Background())
 }
 
 // Stop will stop generating logs.
-func (e *EventHubInput) Stop() error {
+func (e *Input) Stop() error {
 	return e.StopConsumers()
 }

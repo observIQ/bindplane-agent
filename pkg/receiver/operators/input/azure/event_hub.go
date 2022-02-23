@@ -9,9 +9,9 @@ import (
 	"go.uber.org/zap"
 )
 
-// Eventhub provides methods for reading events from Azure Event Hub.
+// EventHub provides methods for reading events from Azure Event Hub.
 type EventHub struct {
-	AzureConfig
+	Config
 	Persist *Persister
 	WG      sync.WaitGroup
 	Handler func(context.Context, *azhub.Event) error
@@ -85,7 +85,7 @@ func (e *EventHub) startConsumer(ctx context.Context, partitionID string, hub *a
 }
 
 // Connect initializes the connection to Azure Event Hub ensures the input parameters are valid
-func (e *EventHub) Connect(ctx context.Context) error {
+func (e *EventHub) Connect(_ context.Context) error {
 	var err error
 	e.hub, err = azhub.NewHubFromConnectionString(e.ConnectionString, azhub.HubWithOffsetPersistence(e.Persist))
 	return err

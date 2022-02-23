@@ -22,8 +22,8 @@ func init() {
 }
 
 // NewCloudwatchConfig creates a new AWS Cloudwatch Logs input config with default values
-func NewCloudwatchConfig(operatorID string) *CloudwatchInputConfig {
-	return &CloudwatchInputConfig{
+func NewCloudwatchConfig(operatorID string) *InputConfig {
+	return &InputConfig{
 		InputConfig: helper.NewInputConfig(operatorID, operatorName),
 
 		EventLimit:   eventLimit,
@@ -32,8 +32,8 @@ func NewCloudwatchConfig(operatorID string) *CloudwatchInputConfig {
 	}
 }
 
-// CloudwatchInputConfig is the configuration of a AWS Cloudwatch Logs input operator.
-type CloudwatchInputConfig struct {
+// InputConfig is the configuration of a AWS Cloudwatch Logs input operator.
+type InputConfig struct {
 	helper.InputConfig `yaml:",inline"`
 
 	// LogGroupName is deprecated but still supported for compatibility with older configurations
@@ -58,7 +58,7 @@ type CloudwatchInputConfig struct {
 }
 
 // Build will build a AWS Cloudwatch Logs input operator.
-func (c *CloudwatchInputConfig) Build(buildContext operator.BuildContext) ([]operator.Operator, error) {
+func (c *InputConfig) Build(buildContext operator.BuildContext) ([]operator.Operator, error) {
 	inputOperator, err := c.InputConfig.Build(buildContext)
 	if err != nil {
 		return nil, err
@@ -95,7 +95,7 @@ func (c *CloudwatchInputConfig) Build(buildContext operator.BuildContext) ([]ope
 		return nil, fmt.Errorf("invalid value '%s' for %s parameter 'start_at'", c.StartAt, operatorName)
 	}
 
-	cloudwatchInput := &CloudwatchInput{
+	cloudwatchInput := &Input{
 		InputOperator:       inputOperator,
 		logGroupName:        c.LogGroupName,
 		logGroups:           c.LogGroups,
@@ -111,8 +111,8 @@ func (c *CloudwatchInputConfig) Build(buildContext operator.BuildContext) ([]ope
 	return []operator.Operator{cloudwatchInput}, nil
 }
 
-// CloudwatchInput is an operator that reads input from AWS Cloudwatch Logs.
-type CloudwatchInput struct {
+// Input is an operator that reads input from AWS Cloudwatch Logs.
+type Input struct {
 	helper.InputOperator
 	cancel       context.CancelFunc
 	pollInterval helper.Duration
@@ -127,15 +127,15 @@ type CloudwatchInput struct {
 	profile             string
 	startAtEnd          bool
 	startTime           int64
-	persist             Persister
+	persist             persister
 	wg                  sync.WaitGroup
 
 	session *cloudwatchlogs.CloudWatchLogs
 }
 
 // Start will start generating log entries.
-func (c *CloudwatchInput) Start(persister operator.Persister) error {
-	c.persist = Persister{DB: persister}
+func (c *Input) Start(p operator.Persister) error {
+	c.persist = persister{DB: p}
 	ctx, cancel := context.WithCancel(context.Background())
 	c.cancel = cancel
 
@@ -153,7 +153,7 @@ func (c *CloudwatchInput) Start(persister operator.Persister) error {
 }
 
 // Stop will stop generating logs.
-func (c *CloudwatchInput) Stop() error {
+func (c *Input) Stop() error {
 	c.cancel()
 	c.wg.Wait()
 	c.Info("Closed all connections to Cloudwatch Logs")
@@ -161,7 +161,7 @@ func (c *CloudwatchInput) Stop() error {
 }
 
 // pollEvents gets events from AWS Cloudwatch Logs every poll interval.
-func (c *CloudwatchInput) pollEvents(ctx context.Context, logGroupName string) {
+func (c *Input) pollEvents(ctx context.Context, logGroupName string) {
 	c.Infof("Started polling AWS Cloudwatch Logs group '%s' using poll interval of '%s'", logGroupName, c.pollInterval)
 	defer c.wg.Done()
 
@@ -186,7 +186,7 @@ func (c *CloudwatchInput) pollEvents(ctx context.Context, logGroupName string) {
 }
 
 // configureSession configures access to AWS
-func (c *CloudwatchInput) configureSession() error {
+func (c *Input) configureSession() error {
 	var lastError error
 
 	sum := 0
@@ -207,7 +207,7 @@ func (c *CloudwatchInput) configureSession() error {
 }
 
 // sessionBuilder builds a session for AWS Cloudwatch Logs
-func (c *CloudwatchInput) sessionBuilder() (*cloudwatchlogs.CloudWatchLogs, error) {
+func (c *Input) sessionBuilder() (*cloudwatchlogs.CloudWatchLogs, error) {
 	region := aws.String(c.region)
 	var sess *session.Session
 	if c.profile == "" {
@@ -226,7 +226,7 @@ func (c *CloudwatchInput) sessionBuilder() (*cloudwatchlogs.CloudWatchLogs, erro
 }
 
 // getEvents uses a session to get events from AWS Cloudwatch Logs
-func (c *CloudwatchInput) getEvents(ctx context.Context, logGroupName string) error {
+func (c *Input) getEvents(ctx context.Context, logGroupName string) error {
 	nextToken := ""
 	st, err := c.persist.Read(ctx, fmt.Sprintf("%s-%s", c.ID(), logGroupName))
 	if err != nil {
@@ -267,7 +267,7 @@ func (c *CloudwatchInput) getEvents(ctx context.Context, logGroupName string) er
 
 // filterLogEventsInputBuilder builds AWS Cloudwatch Logs Filter Log Events Input based on provided values
 // and returns completed input.
-func (c *CloudwatchInput) filterLogEventsInputBuilder(nextToken string, logGroupName string) cloudwatchlogs.FilterLogEventsInput {
+func (c *Input) filterLogEventsInputBuilder(nextToken string, logGroupName string) cloudwatchlogs.FilterLogEventsInput {
 	logGroupNamePtr := aws.String(logGroupName)
 	limit := aws.Int64(c.eventLimit)
 	startTime := aws.Int64(c.startTime)
@@ -334,7 +334,7 @@ func (c *CloudwatchInput) filterLogEventsInputBuilder(nextToken string, logGroup
 }
 
 // handleEvent is the handler for a AWS Cloudwatch Logs Filtered Event.
-func (c *CloudwatchInput) handleEvent(ctx context.Context, event *cloudwatchlogs.FilteredLogEvent, logGroupName string) {
+func (c *Input) handleEvent(ctx context.Context, event *cloudwatchlogs.FilteredLogEvent, logGroupName string) {
 	e := map[string]interface{}{}
 	if event.Message != nil {
 		e["message"] = *event.Message
@@ -367,14 +367,14 @@ func (c *CloudwatchInput) handleEvent(ctx context.Context, event *cloudwatchlogs
 	}
 }
 
-func (c *CloudwatchInput) handleEvents(ctx context.Context, events []*cloudwatchlogs.FilteredLogEvent, logGroupName string) {
+func (c *Input) handleEvents(ctx context.Context, events []*cloudwatchlogs.FilteredLogEvent, logGroupName string) {
 	for _, event := range events {
 		c.handleEvent(ctx, event, logGroupName)
 	}
 }
 
 // buildLogGroupList merges log_group_name and log_group_prefix into log_groups
-func (c *CloudwatchInput) buildLogGroupList() {
+func (c *Input) buildLogGroupList() {
 	if c.logGroupName != "" {
 		found := false
 		for _, group := range c.logGroups {
@@ -394,7 +394,7 @@ func (c *CloudwatchInput) buildLogGroupList() {
 }
 
 // detectLogGroups detects log groups from a prefix
-func (c *CloudwatchInput) detectLogGroups() {
+func (c *Input) detectLogGroups() {
 	limit := int64(50) // Max allowed by aws
 	req := &cloudwatchlogs.DescribeLogGroupsInput{
 		Limit:              &limit,
