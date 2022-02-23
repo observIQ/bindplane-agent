@@ -24,8 +24,8 @@ func init() {
 }
 
 // NewK8sMetadataDecoratorConfig creates a new k8s metadata decorator config with default values
-func NewK8sMetadataDecoratorConfig(operatorID string) *K8sMetadataDecoratorConfig {
-	return &K8sMetadataDecoratorConfig{
+func NewK8sMetadataDecoratorConfig(operatorID string) *DecoratorConfig {
+	return &DecoratorConfig{
 		TransformerConfig: helper.NewTransformerConfig(operatorID, "k8s_metadata_decorator"),
 		PodNameField:      entry.NewResourceField("k8s.pod.name"),
 		NamespaceField:    entry.NewResourceField("k8s.namespace.name"),
@@ -35,8 +35,8 @@ func NewK8sMetadataDecoratorConfig(operatorID string) *K8sMetadataDecoratorConfi
 	}
 }
 
-// K8sMetadataDecoratorConfig is the configuration of k8s_metadata_decorator operator
-type K8sMetadataDecoratorConfig struct {
+// DecoratorConfig is the configuration of k8s_metadata_decorator operator
+type DecoratorConfig struct {
 	helper.TransformerConfig `yaml:",inline"`
 	PodNameField             entry.Field     `json:"pod_name_field,omitempty"  yaml:"pod_name_field,omitempty"`
 	NamespaceField           entry.Field     `json:"namespace_field,omitempty" yaml:"namespace_field,omitempty"`
@@ -46,13 +46,13 @@ type K8sMetadataDecoratorConfig struct {
 }
 
 // Build will build a k8s_metadata_decorator operator from the supplied configuration
-func (c K8sMetadataDecoratorConfig) Build(context operator.BuildContext) ([]operator.Operator, error) {
+func (c DecoratorConfig) Build(context operator.BuildContext) ([]operator.Operator, error) {
 	transformer, err := c.TransformerConfig.Build(context)
 	if err != nil {
 		return nil, errors.Wrap(err, "build transformer")
 	}
 
-	op := &K8sMetadataDecorator{
+	op := &Decorator{
 		TransformerOperator: transformer,
 		podNameField:        c.PodNameField,
 		namespaceField:      c.NamespaceField,
@@ -64,8 +64,8 @@ func (c K8sMetadataDecoratorConfig) Build(context operator.BuildContext) ([]oper
 	return []operator.Operator{op}, nil
 }
 
-// K8sMetadataDecorator is an operator for decorating entries with kubernetes metadata
-type K8sMetadataDecorator struct {
+// Decorator is an operator for decorating entries with kubernetes metadata
+type Decorator struct {
 	helper.TransformerOperator
 	podNameField   entry.Field
 	namespaceField entry.Field
@@ -112,7 +112,7 @@ func (m *MetadataCache) Store(key string, entry MetadataCacheEntry) {
 }
 
 // Start will start the k8s_metadata_decorator operator
-func (k *K8sMetadataDecorator) Start(_ operator.Persister) error {
+func (k *Decorator) Start(_ operator.Persister) error {
 	config, err := rest.InClusterConfig()
 	if err != nil {
 		return errors.NewError(
@@ -159,7 +159,7 @@ func (k *K8sMetadataDecorator) Start(_ operator.Persister) error {
 }
 
 // Process will process an entry received by the k8s_metadata_decorator operator
-func (k *K8sMetadataDecorator) Process(ctx context.Context, entry *entry.Entry) error {
+func (k *Decorator) Process(ctx context.Context, entry *entry.Entry) error {
 	var podName string
 	err := entry.Read(k.podNameField, &podName)
 	if err != nil {
@@ -188,7 +188,7 @@ func (k *K8sMetadataDecorator) Process(ctx context.Context, entry *entry.Entry) 
 	return nil
 }
 
-func (k *K8sMetadataDecorator) getNamespaceMetadata(ctx context.Context, namespace string) (MetadataCacheEntry, error) {
+func (k *Decorator) getNamespaceMetadata(ctx context.Context, namespace string) (MetadataCacheEntry, error) {
 	cacheEntry, ok := k.namespaceCache.Load(namespace)
 
 	var err error
@@ -199,7 +199,7 @@ func (k *K8sMetadataDecorator) getNamespaceMetadata(ctx context.Context, namespa
 	return cacheEntry, err
 }
 
-func (k *K8sMetadataDecorator) getPodMetadata(ctx context.Context, namespace, podName string) (MetadataCacheEntry, error) {
+func (k *Decorator) getPodMetadata(ctx context.Context, namespace, podName string) (MetadataCacheEntry, error) {
 	key := namespace + ":" + podName
 	cacheEntry, ok := k.podCache.Load(key)
 
@@ -211,7 +211,7 @@ func (k *K8sMetadataDecorator) getPodMetadata(ctx context.Context, namespace, po
 	return cacheEntry, err
 }
 
-func (k *K8sMetadataDecorator) refreshNamespaceMetadata(ctx context.Context, namespace string) (MetadataCacheEntry, error) {
+func (k *Decorator) refreshNamespaceMetadata(ctx context.Context, namespace string) (MetadataCacheEntry, error) {
 	ctx, cancel := context.WithTimeout(ctx, k.timeout)
 	defer cancel()
 
@@ -237,7 +237,7 @@ func (k *K8sMetadataDecorator) refreshNamespaceMetadata(ctx context.Context, nam
 	return cacheEntry, nil
 }
 
-func (k *K8sMetadataDecorator) refreshPodMetadata(ctx context.Context, namespace, podName string) (MetadataCacheEntry, error) {
+func (k *Decorator) refreshPodMetadata(ctx context.Context, namespace, podName string) (MetadataCacheEntry, error) {
 	key := namespace + ":" + podName
 
 	subCtx, cancel := context.WithTimeout(ctx, k.timeout)
@@ -305,7 +305,7 @@ func (k *K8sMetadataDecorator) refreshPodMetadata(ctx context.Context, namespace
 	return cacheEntry, nil
 }
 
-func (k *K8sMetadataDecorator) decorateEntryWithNamespaceMetadata(nsMeta MetadataCacheEntry, entry *entry.Entry) {
+func (k *Decorator) decorateEntryWithNamespaceMetadata(nsMeta MetadataCacheEntry, entry *entry.Entry) {
 	if entry.Attributes == nil {
 		entry.Attributes = make(map[string]string)
 	}
@@ -324,7 +324,7 @@ func (k *K8sMetadataDecorator) decorateEntryWithNamespaceMetadata(nsMeta Metadat
 	}
 }
 
-func (k *K8sMetadataDecorator) decorateEntryWithPodMetadata(podMeta MetadataCacheEntry, entry *entry.Entry) {
+func (k *Decorator) decorateEntryWithPodMetadata(podMeta MetadataCacheEntry, entry *entry.Entry) {
 	if entry.Attributes == nil {
 		entry.Attributes = make(map[string]string)
 	}

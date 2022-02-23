@@ -9,12 +9,12 @@ import (
 func TestValidate(t *testing.T) {
 	cases := []struct {
 		name      string
-		input     AzureConfig
+		input     Config
 		expectErr bool
 	}{
 		{
 			"missing-namespace",
-			AzureConfig{
+			Config{
 				Namespace:        "",
 				Name:             "john",
 				Group:            "devel",
@@ -26,7 +26,7 @@ func TestValidate(t *testing.T) {
 		},
 		{
 			"missing-name",
-			AzureConfig{
+			Config{
 				Namespace:        "namespace",
 				Name:             "",
 				Group:            "devel",
@@ -38,7 +38,7 @@ func TestValidate(t *testing.T) {
 		},
 		{
 			"missing-group",
-			AzureConfig{
+			Config{
 				Namespace:        "namespace",
 				Name:             "dev",
 				Group:            "",
@@ -50,7 +50,7 @@ func TestValidate(t *testing.T) {
 		},
 		{
 			"missing-connection-string",
-			AzureConfig{
+			Config{
 				Namespace:        "namespace",
 				Name:             "dev",
 				Group:            "dev",
@@ -62,7 +62,7 @@ func TestValidate(t *testing.T) {
 		},
 		{
 			"invalid-prefetch-count",
-			AzureConfig{
+			Config{
 				Namespace:        "namespace",
 				Name:             "dev",
 				Group:            "dev",
@@ -74,7 +74,7 @@ func TestValidate(t *testing.T) {
 		},
 		{
 			"invalid-start-at",
-			AzureConfig{
+			Config{
 				Namespace:        "namespace",
 				Name:             "dev",
 				Group:            "dev",
@@ -86,7 +86,7 @@ func TestValidate(t *testing.T) {
 		},
 		{
 			"valid-start-at-end",
-			AzureConfig{
+			Config{
 				Namespace:        "namespace",
 				Name:             "dev",
 				Group:            "dev",
@@ -98,7 +98,7 @@ func TestValidate(t *testing.T) {
 		},
 		{
 			"valid-start-at-beginning",
-			AzureConfig{
+			Config{
 				Namespace:        "namespace",
 				Name:             "dev",
 				Group:            "dev",

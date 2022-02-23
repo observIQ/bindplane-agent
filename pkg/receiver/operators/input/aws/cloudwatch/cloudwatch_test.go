@@ -13,7 +13,7 @@ const testName = "test"
 const testAwsPrefix = "/aws"
 
 func TestBuild(t *testing.T) {
-	basicConfig := func() *CloudwatchInputConfig {
+	basicConfig := func() *InputConfig {
 		cfg := NewCloudwatchConfig("test_operator_id")
 		cfg.Region = "test-region"
 		return cfg
@@ -23,12 +23,12 @@ func TestBuild(t *testing.T) {
 	var testStreams = []*string{&stream}
 	cases := []struct {
 		name      string
-		input     *CloudwatchInputConfig
+		input     *InputConfig
 		expectErr bool
 	}{
 		{
 			"default",
-			func() *CloudwatchInputConfig {
+			func() *InputConfig {
 				cfg := basicConfig()
 				cfg.LogGroups = []string{
 					testName,
@@ -40,7 +40,7 @@ func TestBuild(t *testing.T) {
 		},
 		{
 			"log-stream-name-prefix",
-			func() *CloudwatchInputConfig {
+			func() *InputConfig {
 				cfg := basicConfig()
 				cfg.LogGroups = []string{
 					testName,
@@ -53,7 +53,7 @@ func TestBuild(t *testing.T) {
 		},
 		{
 			"event-limit",
-			func() *CloudwatchInputConfig {
+			func() *InputConfig {
 				cfg := basicConfig()
 				cfg.LogGroups = []string{
 					testName,
@@ -66,7 +66,7 @@ func TestBuild(t *testing.T) {
 		},
 		{
 			"poll-interval",
-			func() *CloudwatchInputConfig {
+			func() *InputConfig {
 				cfg := basicConfig()
 				cfg.LogGroups = []string{
 					testName,
@@ -79,7 +79,7 @@ func TestBuild(t *testing.T) {
 		},
 		{
 			"profile",
-			func() *CloudwatchInputConfig {
+			func() *InputConfig {
 				cfg := basicConfig()
 				cfg.LogGroups = []string{
 					testName,
@@ -92,7 +92,7 @@ func TestBuild(t *testing.T) {
 		},
 		{
 			"log-stream-names",
-			func() *CloudwatchInputConfig {
+			func() *InputConfig {
 				cfg := basicConfig()
 				cfg.LogGroups = []string{
 					testName,
@@ -105,7 +105,7 @@ func TestBuild(t *testing.T) {
 		},
 		{
 			"startat-end",
-			func() *CloudwatchInputConfig {
+			func() *InputConfig {
 				cfg := basicConfig()
 				cfg.LogGroups = []string{
 					testName,
@@ -118,7 +118,7 @@ func TestBuild(t *testing.T) {
 		},
 		{
 			"logStreamNames and logStreamNamePrefix both parameters Error",
-			func() *CloudwatchInputConfig {
+			func() *InputConfig {
 				cfg := basicConfig()
 				cfg.LogGroups = []string{
 					testName,
@@ -132,7 +132,7 @@ func TestBuild(t *testing.T) {
 		},
 		{
 			"startat-beginning",
-			func() *CloudwatchInputConfig {
+			func() *InputConfig {
 				cfg := basicConfig()
 				cfg.LogGroups = []string{
 					testName,
@@ -146,7 +146,7 @@ func TestBuild(t *testing.T) {
 		},
 		{
 			"poll-interval-invalid",
-			func() *CloudwatchInputConfig {
+			func() *InputConfig {
 				cfg := basicConfig()
 				cfg.LogGroups = []string{
 					testName,
@@ -159,7 +159,7 @@ func TestBuild(t *testing.T) {
 		},
 		{
 			"event-limit-invalid",
-			func() *CloudwatchInputConfig {
+			func() *InputConfig {
 				cfg := basicConfig()
 				cfg.LogGroups = []string{
 					testName,
@@ -172,7 +172,7 @@ func TestBuild(t *testing.T) {
 		},
 		{
 			"default-required-startat-invalid",
-			func() *CloudwatchInputConfig {
+			func() *InputConfig {
 				cfg := basicConfig()
 				cfg.LogGroups = []string{
 					testName,
@@ -185,7 +185,7 @@ func TestBuild(t *testing.T) {
 		},
 		{
 			"log-group-name",
-			func() *CloudwatchInputConfig {
+			func() *InputConfig {
 				cfg := basicConfig()
 				cfg.LogGroupName = testName
 				return cfg
@@ -194,7 +194,7 @@ func TestBuild(t *testing.T) {
 		},
 		{
 			"log-groups",
-			func() *CloudwatchInputConfig {
+			func() *InputConfig {
 				cfg := basicConfig()
 				cfg.LogGroups = []string{
 					testName,
@@ -206,7 +206,7 @@ func TestBuild(t *testing.T) {
 		},
 		{
 			"log-groups-and-log-group-name",
-			func() *CloudwatchInputConfig {
+			func() *InputConfig {
 				cfg := basicConfig()
 				cfg.LogGroupName = testName
 				cfg.LogGroups = []string{
@@ -219,7 +219,7 @@ func TestBuild(t *testing.T) {
 		},
 		{
 			"log-group-prefix",
-			func() *CloudwatchInputConfig {
+			func() *InputConfig {
 				cfg := basicConfig()
 				cfg.LogGroupPrefix = testAwsPrefix
 				return cfg
@@ -228,7 +228,7 @@ func TestBuild(t *testing.T) {
 		},
 		{
 			"log-group-prefix-and-log-groups",
-			func() *CloudwatchInputConfig {
+			func() *InputConfig {
 				cfg := basicConfig()
 				cfg.LogGroupPrefix = testAwsPrefix
 				cfg.LogGroups = []string{
@@ -241,7 +241,7 @@ func TestBuild(t *testing.T) {
 		},
 		{
 			"log-group-prefix-and-log-group-name",
-			func() *CloudwatchInputConfig {
+			func() *InputConfig {
 				cfg := basicConfig()
 				cfg.LogGroupPrefix = testAwsPrefix
 				cfg.LogGroupName = testName
@@ -251,7 +251,7 @@ func TestBuild(t *testing.T) {
 		},
 		{
 			"log_group_prefix-log_group_name-log_groups",
-			func() *CloudwatchInputConfig {
+			func() *InputConfig {
 				cfg := basicConfig()
 				cfg.LogGroupPrefix = testAwsPrefix
 				cfg.LogGroupName = testName

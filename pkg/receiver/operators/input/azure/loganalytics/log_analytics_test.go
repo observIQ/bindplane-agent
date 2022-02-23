@@ -11,13 +11,13 @@ import (
 func TestBuild(t *testing.T) {
 	cases := []struct {
 		name      string
-		input     LogAnalyticsInputConfig
+		input     InputConfig
 		expectErr bool
 	}{
 		{
 			"default",
-			LogAnalyticsInputConfig{
-				AzureConfig: azure.AzureConfig{
+			InputConfig{
+				Config: azure.Config{
 					Namespace:        "test",
 					Name:             "test",
 					Group:            "test",
@@ -29,8 +29,8 @@ func TestBuild(t *testing.T) {
 		},
 		{
 			"prefetch",
-			LogAnalyticsInputConfig{
-				AzureConfig: azure.AzureConfig{
+			InputConfig{
+				Config: azure.Config{
 					Namespace:        "test",
 					Name:             "test",
 					Group:            "test",
@@ -42,8 +42,8 @@ func TestBuild(t *testing.T) {
 		},
 		{
 			"startat-end",
-			LogAnalyticsInputConfig{
-				AzureConfig: azure.AzureConfig{
+			InputConfig{
+				Config: azure.Config{
 					Namespace:        "test",
 					Name:             "test",
 					Group:            "test",
@@ -56,8 +56,8 @@ func TestBuild(t *testing.T) {
 		},
 		{
 			"startat-beginning",
-			LogAnalyticsInputConfig{
-				AzureConfig: azure.AzureConfig{
+			InputConfig{
+				Config: azure.Config{
 					Namespace:        "test",
 					Name:             "test",
 					Group:            "test",
@@ -70,8 +70,8 @@ func TestBuild(t *testing.T) {
 		},
 		{
 			"prefetch-invalid",
-			LogAnalyticsInputConfig{
-				AzureConfig: azure.AzureConfig{
+			InputConfig{
+				Config: azure.Config{
 					Namespace:        "test",
 					Name:             "test",
 					Group:            "test",
@@ -83,8 +83,8 @@ func TestBuild(t *testing.T) {
 		},
 		{
 			"startat-invalid",
-			LogAnalyticsInputConfig{
-				AzureConfig: azure.AzureConfig{
+			InputConfig{
+				Config: azure.Config{
 					Namespace:        "test",
 					Name:             "test",
 					Group:            "test",

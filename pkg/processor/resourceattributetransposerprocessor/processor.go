@@ -25,7 +25,7 @@ func newResourceAttributeTransposerProcessor(logger *zap.Logger, consumer consum
 }
 
 // Start starts the processor. It's a noop.
-func (resourceAttributeTransposerProcessor) Start(ctx context.Context, host component.Host) error {
+func (resourceAttributeTransposerProcessor) Start(_ context.Context, _ component.Host) error {
 	return nil
 }
 
@@ -61,7 +61,7 @@ func (p resourceAttributeTransposerProcessor) ConsumeMetrics(ctx context.Context
 }
 
 // Shutdown stops the processor. It's a noop.
-func (resourceAttributeTransposerProcessor) Shutdown(ctx context.Context) error {
+func (resourceAttributeTransposerProcessor) Shutdown(_ context.Context) error {
 	return nil
 }
 

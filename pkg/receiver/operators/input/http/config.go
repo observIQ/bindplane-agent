@@ -13,20 +13,20 @@ import (
 )
 
 const (
-	DefaultTimeout     = time.Second * 20
-	DefaultIdleTimeout = time.Second * 60
-	DefaultMaxBodySize = 10000000 // 10 megabyte
+	defaultTimeout     = time.Second * 20
+	defaultIdleTimeout = time.Second * 60
+	defaultMaxBodySize = 10000000 // 10 megabyte
 )
 
 // NewHTTPInputConfig creates a new HTTP input config with default values
 func NewHTTPInputConfig(operatorID string) *HTTPInputConfig {
 	return &HTTPInputConfig{
 		InputConfig:   helper.NewInputConfig(operatorID, "http_input"),
-		IdleTimeout:   helper.NewDuration(DefaultIdleTimeout),
-		ReadTimeout:   helper.NewDuration(DefaultTimeout),
-		WriteTimeout:  helper.NewDuration(DefaultTimeout),
+		IdleTimeout:   helper.NewDuration(defaultIdleTimeout),
+		ReadTimeout:   helper.NewDuration(defaultTimeout),
+		WriteTimeout:  helper.NewDuration(defaultTimeout),
 		MaxHeaderSize: helper.ByteSize(http.DefaultMaxHeaderBytes),
-		MaxBodySize:   helper.ByteSize(DefaultMaxBodySize),
+		MaxBodySize:   helper.ByteSize(defaultMaxBodySize),
 	}
 }
 

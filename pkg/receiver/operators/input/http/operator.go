@@ -195,6 +195,6 @@ func addProtoLabels(proto string, entry *entry.Entry) error {
 	return nil
 }
 
-func (t *HTTPInput) health(w http.ResponseWriter, req *http.Request) {
+func (t *HTTPInput) health(w http.ResponseWriter, _ *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }

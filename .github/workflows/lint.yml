@@ -1,0 +1,14 @@
+name: Lint
+on:
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout Sources
+        uses: actions/checkout@v2
+      - name: Run Revive Action by pulling pre-built image
+        uses: docker://morphy/revive-action:v2
+        with:
+          config: revive/config.toml

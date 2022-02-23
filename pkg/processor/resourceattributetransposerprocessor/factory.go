@@ -31,7 +31,7 @@ func createDefaultConfig() config.Processor {
 }
 
 // createMetricsProcessor creates the resourceattributetransposer processor.
-func createMetricsProcessor(ctx context.Context, params component.ProcessorCreateSettings, cfg config.Processor, nextConsumer consumer.Metrics) (component.MetricsProcessor, error) {
+func createMetricsProcessor(_ context.Context, params component.ProcessorCreateSettings, cfg config.Processor, nextConsumer consumer.Metrics) (component.MetricsProcessor, error) {
 	processorCfg, ok := cfg.(*Config)
 	if !ok {
 		return nil, fmt.Errorf("config was not of correct type for the processor: %+v", cfg)
