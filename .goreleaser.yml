@@ -19,6 +19,8 @@ builds:
     goarch: arm
   - goos: windows
     goarch: arm64
+  - goos: darwin
+    goarch: arm
   ldflags:
   - -s -w
   - -X github.com/observiq/observiq-collector/internal/version.version=v{{ .Version }}
