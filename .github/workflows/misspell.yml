@@ -24,5 +24,5 @@ jobs:
             ${{ runner.os }}-go-
       - name: Install Tools
         run: make install-tools
-      - name: Run misspell
+      - name: Check for Misspelled Words in Doc Files
         run: make misspell
