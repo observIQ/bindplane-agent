@@ -9,7 +9,6 @@ on:
 jobs:
   build-container-image:
     runs-on: ubuntu-20.04
-    needs: [ci-checks, test]
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v2
