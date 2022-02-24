@@ -25,13 +25,13 @@ collector:
 build-all: build-linux build-darwin build-windows
 
 .PHONY: build-linux
-build_linux: build-linux-amd64 build-linux-arm64 build-linux-arm
+build-linux: build-linux-amd64 build-linux-arm64 build-linux-arm
 
 .PHONY: build-darwin
-build-linux: build-darwin-amd64 build-darwin-arm64
+build-darwin: build-darwin-amd64 build-darwin-arm64
 
 .PHONY: build-windows
-build-linux: build-windows-amd64
+build-windows: build-windows-amd64
 
 .PHONY: build-linux-amd64
 build-linux-amd64:
@@ -67,6 +67,7 @@ install-tools:
 	cd $(TOOLS_MOD_DIR) && go install github.com/client9/misspell/cmd/misspell
 	cd $(TOOLS_MOD_DIR) && go install github.com/sigstore/cosign/cmd/cosign
 	cd $(TOOLS_MOD_DIR) && go install github.com/goreleaser/goreleaser@v1.3.1
+	cd $(TOOLS_MOD_DIR) && go install github.com/securego/gosec/v2
 
 .PHONY: lint
 lint:
@@ -105,9 +106,13 @@ fmt:
 tidy:
 	$(MAKE) for-all CMD="go mod tidy -go=1.17"
 
+.PHONY: gosec
+gosec:
+	gosec ./...
+
 # This target performs all checks that CI will do (excluding the build itself)
 .PHONY: ci-checks
-ci-checks: check-fmt misspell lint test
+ci-checks: check-fmt check-license misspell lint gosec test
 
 # This target checks that license copyright header is on every source file
 .PHONY: check-license
