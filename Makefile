@@ -25,13 +25,13 @@ collector:
 build-all: build-linux build-darwin build-windows
 
 .PHONY: build-linux
-build_linux: build-linux-amd64 build-linux-arm64 build-linux-arm
+build-linux: build-linux-amd64 build-linux-arm64 build-linux-arm
 
 .PHONY: build-darwin
-build-linux: build-darwin-amd64 build-darwin-arm64
+build-darwin: build-darwin-amd64 build-darwin-arm64
 
 .PHONY: build-windows
-build-linux: build-windows-amd64
+build-windows: build-windows-amd64
 
 .PHONY: build-linux-amd64
 build-linux-amd64:
