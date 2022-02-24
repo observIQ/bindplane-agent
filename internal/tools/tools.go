@@ -23,7 +23,7 @@ import (
 	_ "github.com/client9/misspell/cmd/misspell"
 	_ "github.com/google/addlicense"
 	_ "github.com/goreleaser/goreleaser/cmd"
+	_ "github.com/securego/gosec/v2"
 	_ "github.com/sigstore/cosign/cmd/cosign"
 	_ "golang.org/x/tools/cmd/goimports"
-	_ "github.com/securego/gosec/v2"
 )
