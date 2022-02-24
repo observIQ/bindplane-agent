@@ -221,7 +221,10 @@ func (c *Converter) workerLoop() {
 			}
 
 			for r, pLogs := range recordsByResource {
-				c.flush(ctx, pLogs)
+				err := c.flush(ctx, pLogs)
+				if err != nil {
+					c.logger.Error("Failed to flush pdata.Logs record, dropping records", zap.Error(err))
+				}
 				delete(recordsByResource, r)
 			}
 		}
@@ -493,6 +496,7 @@ func getResourceID(resource map[string]string) uint64 {
 	// In order for this to be deterministic, we need to sort the map. Using range, like above,
 	// has no guarantee about order.
 	sort.Strings(keySlice)
+	/* #nosec G104 -- fnvHash.Write cannot return an error, it's only to satisfy the hash interface */
 	for _, k := range keySlice {
 		escapedSlice = appendEscapedPairSeparator(escapedSlice[:0], k)
 		fnvHash.Write(escapedSlice)
