@@ -43,7 +43,7 @@ require (
 	github.com/testcontainers/testcontainers-go v0.12.0
 	go.etcd.io/bbolt v1.3.6
 	go.opentelemetry.io/collector v0.44.0
-	go.opentelemetry.io/collector/model v0.44.0
+	go.opentelemetry.io/collector/model v0.45.0
 	go.uber.org/multierr v1.7.0
 	go.uber.org/zap v1.20.0
 	gopkg.in/yaml.v2 v2.4.0
