@@ -1,15 +1,12 @@
-export GIT_HASH = $(shell git rev-parse HEAD)
-export DATE = $(shell date -u +'%Y-%m-%dT%H:%M:%SZ')
-export VERSION_INFO_IMPORT_PATH = github.com/observiq/observiq-collector/internal/version
-
 # All source code and documents, used when checking for misspellings
 ALLDOC := $(shell find . \( -name "*.md" -o -name "*.yaml" \) \
                                 -type f | sort)
+ALL_MODULES := $(shell find . -type f -name "go.mod" -exec dirname {} \; | sort )
 
 # All source code files
 ALL_SRC := $(shell find . -name '*.go' -o -name '*.sh' -o -name 'Dockerfile' -type f | sort)
 
-GOPATH ?= $(shell go env GOPATH)
+OUTDIR=./dist
 GOOS ?= $(shell go env GOOS)
 GOARCH ?= $(shell go env GOARCH)
 
@@ -19,15 +16,46 @@ else
 EXT?=
 endif
 
-LINT=$(GOPATH)/bin/golangci-lint
-LINT_TIMEOUT?=5m0s
-MISSPELL=$(GOPATH)/bin/misspell
+# Default build target; making this should build for the current os/arch
+.PHONY: collector
+collector:
+	go build -o $(OUTDIR)/collector_$(GOOS)_$(GOARCH)$(EXT) ./cmd/collector
 
-GOINSTALL=go install
-GOTEST=go test
-GOTOOL=go tool
-GOFORMAT=goimports
-ALL_MODULES := $(shell find . -type f -name "go.mod" -exec dirname {} \; | sort )
+.PHONY: build-all
+build-all: build-linux build-darwin build-windows
+
+.PHONY: build-linux
+build_linux: build-linux-amd64 build-linux-arm64 build-linux-arm
+
+.PHONY: build-darwin
+build-linux: build-darwin-amd64 build-darwin-arm64
+
+.PHONY: build-windows
+build-linux: build-windows-amd64
+
+.PHONY: build-linux-amd64
+build-linux-amd64:
+	GOOS=linux GOARCH=amd64 $(MAKE) collector
+
+.PHONY: build-linux-arm64
+build-linux-arm64:
+	GOOS=linux GOARCH=arm64 $(MAKE) collector
+
+.PHONY: build-linux-arm
+build-linux-arm:
+	GOOS=linux GOARCH=arm $(MAKE) collector
+
+.PHONY: build-darwin-amd64
+build-darwin-amd64:
+	GOOS=darwin GOARCH=amd64 $(MAKE) collector
+
+.PHONY: build-darwin-arm64
+build-darwin-arm64:
+	GOOS=darwin GOARCH=arm64 $(MAKE) collector
+
+.PHONY: build-windows-amd64
+build-windows-amd64:
+	GOOS=windows GOARCH=amd64 $(MAKE) collector
 
 # tool-related commands
 TOOLS_MOD_DIR := ./internal/tools
@@ -35,10 +63,10 @@ TOOLS_MOD_DIR := ./internal/tools
 install-tools:
 	cd $(TOOLS_MOD_DIR) && go install github.com/mgechev/revive@latest 
 	cd $(TOOLS_MOD_DIR) && go install github.com/google/addlicense
-	cd $(TOOLS_MOD_DIR) && $(GOINSTALL) golang.org/x/tools/cmd/goimports	
-	cd $(TOOLS_MOD_DIR) && $(GOINSTALL) github.com/client9/misspell/cmd/misspell
-	cd $(TOOLS_MOD_DIR) && $(GOINSTALL) github.com/sigstore/cosign/cmd/cosign
-	cd $(TOOLS_MOD_DIR) && $(GOINSTALL) github.com/goreleaser/goreleaser@v1.3.1
+	cd $(TOOLS_MOD_DIR) && go install golang.org/x/tools/cmd/goimports	
+	cd $(TOOLS_MOD_DIR) && go install github.com/client9/misspell/cmd/misspell
+	cd $(TOOLS_MOD_DIR) && go install github.com/sigstore/cosign/cmd/cosign
+	cd $(TOOLS_MOD_DIR) && go install github.com/goreleaser/goreleaser@v1.3.1
 
 .PHONY: lint
 lint:
@@ -46,20 +74,20 @@ lint:
 
 .PHONY: misspell
 misspell:
-	$(MISSPELL) $(ALLDOC)
+	misspell $(ALLDOC)
 
 .PHONY: misspell-fix
 misspell-fix:
-	$(MISSPELL) -w $(ALLDOC)
+	misspell -w $(ALLDOC)
 
 .PHONY: test
 test:
-	$(GOTEST) -vet off -race ./...
+	go test -race ./...
 
 .PHONY: test-with-cover
 test-with-cover:
-	$(GOTEST) -vet off -coverprofile=cover.out ./...
-	$(GOTOOL) cover -html=cover.out -o cover.html
+	go test -coverprofile=cover.out ./...
+	go tool cover -html=cover.out -o cover.html
 
 .PHONY: bench
 bench:
@@ -67,22 +95,14 @@ bench:
 
 .PHONY: check-fmt
 check-fmt:
-	@GOFMTOUT=`$(GOFORMAT) -d .`; \
-		if [ "$$GOFMTOUT" ]; then \
-			echo "$(GOFORMAT) SUGGESTED CHANGES:"; \
-			echo "$$GOFMTOUT\n"; \
-			exit 1; \
-		else \
-			echo "$(GOFORMAT) completed successfully"; \
-		fi
+	goimports -d ./ | diff -u /dev/null -
 
 .PHONY: fmt
 fmt:
-	$(GOFORMAT) -w .
+	goimports -w .
 
 .PHONY: tidy
 tidy:
-	$(MAKE) for-all CMD="go mod tidy -go=1.16"
 	$(MAKE) for-all CMD="go mod tidy -go=1.17"
 
 # This target performs all checks that CI will do (excluding the build itself)
@@ -114,19 +134,6 @@ add-license:
 			echo "Add License finished successfully"; \
 		fi
 
-.PHONY: clean
-clean:
-	rm -rf $(OUTDIR)
-
-# Default build target; making this should build for the current os/arch
-.PHONY: collector
-collector:
-	goreleaser build --single-target --skip-validate --snapshot --rm-dist
-
-.PHONY: build-all
-build-all:
-	goreleaser build --skip-validate --snapshot --rm-dist
-
 # Build, sign, and release
 .PHONY: release
 release:
@@ -146,3 +153,7 @@ for-all:
 	  	echo "running $${CMD} in $${dir}" && \
 	 	$${CMD} ); \
 	done
+
+.PHONY: clean
+clean:
+	rm -rf $(OUTDIR)
