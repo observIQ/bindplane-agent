@@ -112,7 +112,7 @@ gosec:
 
 # This target performs all checks that CI will do (excluding the build itself)
 .PHONY: ci-checks
-ci-checks: check-fmt misspell lint gosec test
+ci-checks: check-fmt check-license misspell lint gosec test
 
 # This target checks that license copyright header is on every source file
 .PHONY: check-license
