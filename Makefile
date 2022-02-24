@@ -67,6 +67,7 @@ install-tools:
 	cd $(TOOLS_MOD_DIR) && go install github.com/client9/misspell/cmd/misspell
 	cd $(TOOLS_MOD_DIR) && go install github.com/sigstore/cosign/cmd/cosign
 	cd $(TOOLS_MOD_DIR) && go install github.com/goreleaser/goreleaser@v1.3.1
+	cd $(TOOLS_MOD_DIR) && go install github.com/securego/gosec/v2
 
 .PHONY: lint
 lint:
@@ -104,6 +105,10 @@ fmt:
 .PHONY: tidy
 tidy:
 	$(MAKE) for-all CMD="go mod tidy -go=1.17"
+
+.PHONY: gosec
+gosec:
+	gosec ./...
 
 # This target performs all checks that CI will do (excluding the build itself)
 .PHONY: ci-checks

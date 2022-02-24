@@ -25,4 +25,5 @@ import (
 	_ "github.com/goreleaser/goreleaser/cmd"
 	_ "github.com/sigstore/cosign/cmd/cosign"
 	_ "golang.org/x/tools/cmd/goimports"
+	_ "github.com/securego/gosec/v2"
 )
