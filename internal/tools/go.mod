@@ -8,6 +8,7 @@ require (
 	github.com/goreleaser/goreleaser v1.3.1
 	github.com/securego/gosec/v2 v2.10.0
 	github.com/sigstore/cosign v1.4.1
+	github.com/uw-labs/lichen v0.1.5
 	golang.org/x/tools v0.1.9
 )
 
@@ -149,6 +150,7 @@ require (
 	github.com/google/go-github/v41 v41.0.0 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/gofuzz v1.2.0 // indirect
+	github.com/google/licenseclassifier v0.0.0-20210325184830-bb04aff29e72 // indirect
 	github.com/google/rpmpack v0.0.0-20211125064518-d0ed9b1b61b9 // indirect
 	github.com/google/trillian v1.4.0 // indirect
 	github.com/google/uuid v1.3.0 // indirect
@@ -196,6 +198,7 @@ require (
 	github.com/kevinburke/ssh_config v1.1.0 // indirect
 	github.com/klauspost/compress v1.13.6 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
+	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
 	github.com/magiconair/properties v1.8.5 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/manifoldco/promptui v0.9.0 // indirect
@@ -213,6 +216,7 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/mpvl/unique v0.0.0-20150818121801-cbe035fff7de // indirect
+	github.com/muesli/termenv v0.11.0 // indirect
 	github.com/oklog/run v1.1.0 // indirect
 	github.com/oklog/ulid v1.3.1 // indirect
 	github.com/olekukonko/tablewriter v0.0.5 // indirect
@@ -259,6 +263,7 @@ require (
 	github.com/tmc/grpc-websocket-proxy v0.0.0-20201229170055-e5319fda7802 // indirect
 	github.com/ulikunitz/xz v0.5.10 // indirect
 	github.com/urfave/cli v1.22.5 // indirect
+	github.com/urfave/cli/v2 v2.3.0 // indirect
 	github.com/vbatts/tar-split v0.11.2 // indirect
 	github.com/vdemeester/k8s-pkg-credentialprovider v1.21.0-1 // indirect
 	github.com/xanzy/go-gitlab v0.52.2 // indirect
