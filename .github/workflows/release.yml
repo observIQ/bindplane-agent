@@ -4,8 +4,6 @@ on:
     tags:
       - 'v*'
 
-  workflow_dispatch:
-
 jobs:
   build-container-image:
     runs-on: ubuntu-20.04
