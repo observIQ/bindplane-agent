@@ -6,6 +6,9 @@ export VERSION_INFO_IMPORT_PATH = github.com/observiq/observiq-collector/interna
 ALLDOC := $(shell find . \( -name "*.md" -o -name "*.yaml" \) \
                                 -type f | sort)
 
+# All source code files
+ALL_SRC := $(shell find . -name '*.go' -o -name '*.sh' -o -name 'Dockerfile' -type f | sort)
+
 GOPATH ?= $(shell go env GOPATH)
 GOOS ?= $(shell go env GOOS)
 GOARCH ?= $(shell go env GOARCH)
@@ -31,6 +34,7 @@ TOOLS_MOD_DIR := ./internal/tools
 .PHONY: install-tools
 install-tools:
 	cd $(TOOLS_MOD_DIR) && go install github.com/mgechev/revive@latest 
+	cd $(TOOLS_MOD_DIR) && go install github.com/google/addlicense
 	cd $(TOOLS_MOD_DIR) && $(GOINSTALL) golang.org/x/tools/cmd/goimports	
 	cd $(TOOLS_MOD_DIR) && $(GOINSTALL) github.com/client9/misspell/cmd/misspell
 	cd $(TOOLS_MOD_DIR) && $(GOINSTALL) github.com/sigstore/cosign/cmd/cosign
@@ -84,6 +88,31 @@ tidy:
 # This target performs all checks that CI will do (excluding the build itself)
 .PHONY: ci-checks
 ci-checks: check-fmt misspell lint test
+
+# This target checks that license copyright header is on every source file
+.PHONY: check-license
+check-license:
+	@ADDLICENSEOUT=`addlicense -check $(ALL_SRC) 2>&1`; \
+		if [ "$$ADDLICENSEOUT" ]; then \
+			echo "addlicense FAILED => add License errors:\n"; \
+			echo "$$ADDLICENSEOUT\n"; \
+			echo "Use 'make add-license' to fix this."; \
+			exit 1; \
+		else \
+			echo "Check License finished successfully"; \
+		fi
+
+# This target adds a license copyright header is on every source file that is missing one
+.PHONY: add-license
+add-license:
+	@ADDLICENSEOUT=`addlicense -y "" -c "observIQ, Inc." $(ALL_SRC) 2>&1`; \
+		if [ "$$ADDLICENSEOUT" ]; then \
+			echo "addlicense FAILED => add License errors:\n"; \
+			echo "$$ADDLICENSEOUT\n"; \
+			exit 1; \
+		else \
+			echo "Add License finished successfully"; \
+		fi
 
 .PHONY: clean
 clean:
