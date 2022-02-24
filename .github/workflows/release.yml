@@ -90,7 +90,6 @@ jobs:
           check-latest: true
         # install tools for cosign
       - name: Install Dependencies
-        if: steps.go-cache.outputs.hit != 'true'
         run: |
           make install-tools
       - name: Build cosign key file
