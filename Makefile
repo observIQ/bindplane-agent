@@ -68,6 +68,7 @@ install-tools:
 	cd $(TOOLS_MOD_DIR) && go install github.com/sigstore/cosign/cmd/cosign
 	cd $(TOOLS_MOD_DIR) && go install github.com/goreleaser/goreleaser@v1.3.1
 	cd $(TOOLS_MOD_DIR) && go install github.com/securego/gosec/v2
+	cd $(TOOLS_MOD_DIR) && go install github.com/uw-labs/lichen
 
 .PHONY: lint
 lint:
@@ -162,3 +163,7 @@ for-all:
 .PHONY: clean
 clean:
 	rm -rf $(OUTDIR)
+
+.PHONY: scan-licenses
+scan-licenses:
+	lichen --config=./license.yaml $$(find dist/collector_* | grep -v 'sig\|json\|CHANGELOG.md\|yaml\|SHA256' | xargs)
