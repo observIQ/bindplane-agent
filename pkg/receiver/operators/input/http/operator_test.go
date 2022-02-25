@@ -821,11 +821,12 @@ func testConnection(address string) error {
 
 	attempt := 0
 	for {
-		resp, err := client.Do(req)
+		_, err := client.Do(req)
+		// return when error is nil, connection
+		// test passed
 		if err == nil {
 			return nil
 		}
-		resp.Body.Close()
 
 		if attempt == 5 {
 			return fmt.Errorf("test connection failed, the http server may not have started correctly: %s", err)
