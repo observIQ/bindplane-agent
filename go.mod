@@ -3,7 +3,7 @@ module github.com/observiq/observiq-collector
 go 1.17
 
 require (
-	github.com/Azure/azure-event-hubs-go/v3 v3.3.13
+	github.com/Azure/azure-event-hubs-go/v3 v3.3.17
 	github.com/aws/aws-sdk-go v1.43.5
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/jpillora/backoff v1.0.0
@@ -64,9 +64,9 @@ require (
 	cloud.google.com/go/trace v1.0.0 // indirect
 	contrib.go.opencensus.io/exporter/prometheus v0.4.0 // indirect
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.10 // indirect
-	github.com/Azure/azure-amqp-common-go/v3 v3.0.1 // indirect
+	github.com/Azure/azure-amqp-common-go/v3 v3.2.3 // indirect
 	github.com/Azure/azure-sdk-for-go v61.1.0+incompatible // indirect
-	github.com/Azure/go-amqp v0.13.12 // indirect
+	github.com/Azure/go-amqp v0.17.0 // indirect
 	github.com/Azure/go-ansiterm v0.0.0-20210617225240-d185dfc1b5a1 // indirect
 	github.com/Azure/go-autorest v14.2.0+incompatible // indirect
 	github.com/Azure/go-autorest/autorest v0.11.23 // indirect
