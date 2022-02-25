@@ -80,4 +80,4 @@ jobs:
       - name: Scan Third Party Dependency Licenses
         run: |
           go install github.com/uw-labs/lichen@v0.1.5
-          lichen --config=./license.yaml $(find dist/collector_*)
+          lichen --config=./license.yaml dist/collector_windows_amd64.exe
