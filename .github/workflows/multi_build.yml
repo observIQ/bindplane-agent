@@ -1,0 +1,83 @@
+# Build is responsible for testing builds on all supported platforms.
+# It is broken up into three separate jobs with targeted builds so that each OS will
+# build in parallel and speed up overall CI time.
+name: Build
+on:
+  pull_request:
+
+jobs:
+  build_linux:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout Sources
+        uses: actions/checkout@v2
+      - name: Setup Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: "1.17"
+          check-latest: true
+      - name: Cache Go Modules
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+      - name: Build
+        run: make build-linux
+      - name: Scan Third Party Dependency Licenses
+        run: |
+          go install github.com/uw-labs/lichen@v0.1.5
+          lichen --config=./license.yaml $(find dist/collector_*)
+  build_darwin:
+    runs-on: macos-11
+    steps:
+      - name: Checkout Sources
+        uses: actions/checkout@v2
+      - name: Setup Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: "1.17"
+          check-latest: true
+      - name: Cache Go Modules
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/Library/Caches/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+      - name: Build
+        run: make build-darwin
+      - name: Scan Third Party Dependency Licenses
+        run: |
+          go install github.com/uw-labs/lichen@v0.1.5
+          lichen --config=./license.yaml $(find dist/collector_*)
+  build_windows:
+    runs-on: windows-2019
+    steps:
+      - name: Checkout Sources
+        uses: actions/checkout@v2
+      - name: Setup Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: "1.17"
+          check-latest: true
+      - name: Cache Go Modules
+        uses: actions/cache@v2
+        with:
+          path: |
+            %LocalAppData%\go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+      - name: Build
+        run: make build-windows
+      - name: Scan Third Party Dependency Licenses
+        run: |
+          go install github.com/uw-labs/lichen@v0.1.5
+          lichen --config=./license.yaml dist/collector_windows_amd64.exe
