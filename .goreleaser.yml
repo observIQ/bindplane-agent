@@ -1,49 +1,50 @@
 # https://goreleaser.com/customization/build/
 builds:
-- id: collector
-  binary: collector_{{ .Os }}_{{ .Arch }}
-  main: ./cmd/collector
-  env:
-  - CGO_ENABLED=0
-  mod_timestamp: '{{ .CommitTimestamp }}'
-  goos:
-  - windows
-  - linux
-  - darwin
-  goarch:
-  - amd64
-  - arm64
-  - arm
-  ignore:
-  - goos: windows
-    goarch: arm
-  - goos: windows
-    goarch: arm64
-  ldflags:
-  - -s -w
-  - -X github.com/observiq/observiq-collector/internal/version.version=v{{ .Version }}
-  - -X github.com/observiq/observiq-collector/internal/version.gitHash={{ .FullCommit }}
-  - -X github.com/observiq/observiq-collector/internal/version.date={{ .Date }}
-  no_unique_dist_dir: true
+  - id: collector
+    binary: collector_{{ .Os }}_{{ .Arch }}
+    main: ./cmd/collector
+    env:
+      - CGO_ENABLED=0
+    mod_timestamp: "{{ .CommitTimestamp }}"
+    goos:
+      - windows
+      - linux
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+      - arm
+    ignore:
+      - goos: windows
+        goarch: arm
+      - goos: windows
+        goarch: arm64
+    ldflags:
+      - -s -w
+      - -X github.com/observiq/observiq-collector/internal/version.version=v{{ .Version }}
+      - -X github.com/observiq/observiq-collector/internal/version.gitHash={{ .FullCommit }}
+      - -X github.com/observiq/observiq-collector/internal/version.date={{ .Date }}
+    no_unique_dist_dir: true
 
 # https://goreleaser.com/customization/archive/
 archives:
-- builds:
-  - collector
-  # skip archiving as tar.gz / zip
-  format: binary
+  - builds:
+      - collector
+    # skip archiving as tar.gz / zip
+    format: binary
 
 # https://goreleaser.com/customization/checksum/
 checksum:
-  name_template: '{{ .ProjectName }}-v{{ .Version }}-SHA256SUMS'
+  name_template: "{{ .ProjectName }}-v{{ .Version }}-SHA256SUMS"
   algorithm: sha256
 
 # https://goreleaser.com/customization/sign/
 signs:
-- cmd: cosign
-  stdin: '{{ .Env.COSIGN_PWD }}'
-  args: ["sign-blob", "--key=cosign.key", "--output=${signature}", "${artifact}"]
-  artifacts: all
+  - cmd: cosign
+    stdin: "{{ .Env.COSIGN_PWD }}"
+    args:
+      ["sign-blob", "--key=cosign.key", "--output=${signature}", "${artifact}"]
+    artifacts: all
 
 # https://goreleaser.com/customization/release/
 release:
@@ -53,3 +54,16 @@ release:
 changelog:
   skip: false
   use: github
+  sort: asc
+  groups:
+    - title: "New Features"
+      regexp: "^.*feat[(\\w)]*:+.*$"
+      order: 0
+    - title: "Bug Fixes"
+      regexp: "^.*fix[(\\w)]*:+.*$"
+      order: 10
+    - title: "Dependencies"
+      regexp: "^.*deps[(\\w)]*:+.*$"
+      order: 30
+    - title: Other
+      order: 999
