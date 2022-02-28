@@ -4,6 +4,7 @@ import (
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-collector/processor/normalizesumsprocessor"
 	"github.com/observiq/observiq-collector/pkg/processor/resourceattributetransposerprocessor"
 	"github.com/observiq/observiq-collector/pkg/receiver/logsreceiver"
+	"github.com/observiq/observiq-collector/pkg/receiver/pluginreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/fileexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlecloudexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/observiqexporter"
@@ -62,6 +63,7 @@ var defaultReceivers = []component.ReceiverFactory{
 	mongodbreceiver.NewFactory(),
 	prometheusreceiver.NewFactory(),
 	hostmetricsreceiver.NewFactory(),
+	pluginreceiver.NewFactory(),
 }
 
 var defaultProcessors = []component.ProcessorFactory{
