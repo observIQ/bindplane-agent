@@ -1,5 +1,5 @@
-# 'receivers' specify configurations for certain receivers.
-# Look at the README for more information on the receivers available for configuration.
+# 'receivers' specify configurations of receivers.
+# Look at the README for more information about the receivers available for configuration.
 receivers:
   # The hostmetrics receiver; This configuration will get cpu load metrics about the machine
   # the collector is running on every minute.
@@ -9,6 +9,15 @@ receivers:
     collection_interval: 1m
     scrapers:
       load:
+
+# 'processors' specify configurations of processors.
+# Look at the README for more information about the processors available for configuration.
+processors:
+  # The batch processor; This processor will aggregate incoming metrics into a batch, releasing them if 
+  # a certain time has passed or if a certain number of entries have been aggregated.
+  # Form more information on configuring the batch processor, refer to the documentation here:
+  # https://github.com/open-telemetry/opentelemetry-collector/tree/main/processor/batchprocessor
+  batch:
 
 # 'exporters' specify configurations for certain exporters.
 # Look at the README for more information on the exporters available for configuration. 
@@ -23,7 +32,9 @@ exporters:
 service:
   pipelines:
     # 'metrics' specifies a metrics pipeline; metrics are scraped using the 'hostmetrics' receiver,
+    # which are aggregated into batches by the 'batch' processor, 
     # and are exported using the 'logging' exporter, printing the metrics to stdout.
     metrics:
       receivers: [hostmetrics]
+      processors: [batch]
       exporters: [logging]
