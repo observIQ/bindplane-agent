@@ -212,6 +212,8 @@ func TestServerBasicAuth(t *testing.T) {
 		}
 	}()
 
+	require.NoError(t, testConnection(cfg.ListenAddress), "expected http server to start and accept requests")
+
 	cases := []struct {
 		name         string
 		inputRequest *http.Request
@@ -836,14 +838,16 @@ func testConnection(address string) error {
 	attempt := 0
 	for {
 		resp, err := client.Do(req)
+		// return when error is nil, connection
+		// test passed
 		if err == nil {
-			return nil
+			return resp.Body.Close()
 		}
-		resp.Body.Close()
 
 		if attempt == 5 {
 			return fmt.Errorf("test connection failed, the http server may not have started correctly: %s", err)
 		}
+		attempt++
 		time.Sleep(time.Millisecond * 500)
 	}
 }
