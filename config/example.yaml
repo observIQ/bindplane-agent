@@ -1,5 +1,5 @@
 # 'receivers' specify configurations of receivers.
-# Look at the README for more information about the receivers available for configuration.
+# See the README for more information about the receivers available for configuration.
 receivers:
   # The hostmetrics receiver; This configuration will get cpu load metrics about the machine
   # the collector is running on every minute.
@@ -11,7 +11,7 @@ receivers:
       load:
 
 # 'processors' specify configurations of processors.
-# Look at the README for more information about the processors available for configuration.
+# See the README for more information about the processors available for configuration.
 processors:
   # The batch processor; This processor will aggregate incoming metrics into a batch, releasing them if 
   # a certain time has passed or if a certain number of entries have been aggregated.
@@ -20,7 +20,7 @@ processors:
   batch:
 
 # 'exporters' specify configurations for certain exporters.
-# Look at the README for more information on the exporters available for configuration. 
+# See the README for more information on the exporters available for configuration. 
 exporters:
   # The logging exporter; This exporter logs to stdout.
   # For more information on configuring the logging exporter, refer to the documentation here:
