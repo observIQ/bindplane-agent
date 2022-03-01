@@ -12,3 +12,4 @@ The following make targets are available for local development:
 * `build-msi`: Builds the MSI. Depends on the `fetch-dependencies` target (`fetch-dependencies` will be run every time this is run).
 * `test-install-msi`: Test installing the MSI. `build-msi` should be run before this is run.
 * `test-uninstall-msi`: Test uninstalling the MSI. `build-msi` should be run before this is run, and the MSI should be installed (e.g. by running `test-install-msi`)
+* `clean`: Cleans this directory of dependencies from `fetch-dependencies`, as well as of build artifacts.
