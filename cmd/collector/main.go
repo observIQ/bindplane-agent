@@ -29,6 +29,10 @@ func main() {
 	_ = pflag.String("log-level", "", "not implemented") // TEMP(jsirianni): Required for OTEL k8s operator
 	pflag.Parse()
 
+	// TODO: Add this back in when https://github.com/open-telemetry/opentelemetry-collector/issues/4842 is resolved
+	// ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	// defer cancel()
+
 	settings := collector.NewSettings(*configPaths, version.Version(), nil)
 	svc, err := service.New(settings)
 	if err != nil {
