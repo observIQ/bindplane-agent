@@ -1,0 +1,40 @@
+# 'receivers' specify configurations of receivers.
+# See the README for more information about the receivers available for configuration.
+receivers:
+  # The hostmetrics receiver; This configuration will get cpu load metrics about the machine
+  # the collector is running on every minute.
+  # For more information on configuring the hostmetrics receiver, refer to the documentation here:
+  # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/hostmetricsreceiver
+  hostmetrics:
+    collection_interval: 1m
+    scrapers:
+      load:
+
+# 'processors' specify configurations of processors.
+# See the README for more information about the processors available for configuration.
+processors:
+  # The batch processor; This processor will aggregate incoming metrics into a batch, releasing them if 
+  # a certain time has passed or if a certain number of entries have been aggregated.
+  # Form more information on configuring the batch processor, refer to the documentation here:
+  # https://github.com/open-telemetry/opentelemetry-collector/tree/main/processor/batchprocessor
+  batch:
+
+# 'exporters' specify configurations for certain exporters.
+# See the README for more information on the exporters available for configuration. 
+exporters:
+  # The logging exporter; This exporter logs to stdout.
+  # For more information on configuring the logging exporter, refer to the documentation here:
+  # https://github.com/open-telemetry/opentelemetry-collector/tree/main/exporter/loggingexporter 
+  logging:
+    loglevel: debug
+
+# 'service' specifies how to construct the data pipelines using the configurations above. 
+service:
+  pipelines:
+    # 'metrics' specifies a metrics pipeline; metrics are scraped using the 'hostmetrics' receiver,
+    # which are aggregated into batches by the 'batch' processor, 
+    # and are exported using the 'logging' exporter, printing the metrics to stdout.
+    metrics:
+      receivers: [hostmetrics]
+      processors: [batch]
+      exporters: [logging]
