@@ -1578,8 +1578,6 @@ github.com/open-telemetry/opentelemetry-collector-contrib/exporter/observiqexpor
 github.com/open-telemetry/opentelemetry-collector-contrib/exporter/observiqexporter v0.45.1/go.mod h1:G48wwN949sd725+yMkp/G2DTJWCJNN0llbN+xxaNzMg=
 github.com/open-telemetry/opentelemetry-collector-contrib/exporter/opencensusexporter v0.45.1 h1:MAEW2nX7ohGDATiC+RonFWqhGQDwSIu91jgC/RYv/iU=
 github.com/open-telemetry/opentelemetry-collector-contrib/exporter/opencensusexporter v0.45.1/go.mod h1:1uwO9/p/tSMIjEmLK/wnHe4weLJ7dXsjZD9kTrIT7Pg=
-github.com/open-telemetry/opentelemetry-collector-contrib/exporter/parquetexporter v0.45.1 h1:NRJkFzAzEYMPYQtejuoacjRUNCbfF6hZp/k7j/K9obc=
-github.com/open-telemetry/opentelemetry-collector-contrib/exporter/parquetexporter v0.45.1/go.mod h1:p/ufIZXzQ0tfr6Tz7DdQPjINswIHVll14jpxXLaPprA=
 github.com/open-telemetry/opentelemetry-collector-contrib/exporter/prometheusexporter v0.45.1 h1:LMUFF9mH/bkQTazhTZw9zBUMJfLPhBVBONo43aUtLXA=
 github.com/open-telemetry/opentelemetry-collector-contrib/exporter/prometheusexporter v0.45.1/go.mod h1:QM/WB30fXqHPGap8qKacprafYxjHq6xwoHVElmEx1CM=
 github.com/open-telemetry/opentelemetry-collector-contrib/exporter/prometheusremotewriteexporter v0.45.1 h1:agvrcaiYlHLcdGWlCvE8HFo7IrPe47htaA0MfJ4k59o=

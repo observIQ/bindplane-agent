@@ -35,7 +35,6 @@ import (
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/lokiexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/observiqexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/opencensusexporter"
-	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/parquetexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/prometheusexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/prometheusremotewriteexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/zipkinexporter"
@@ -71,7 +70,6 @@ var defaultExporters = []component.ExporterFactory{
 	opencensusexporter.NewFactory(),
 	otlpexporter.NewFactory(),
 	otlphttpexporter.NewFactory(),
-	parquetexporter.NewFactory(),
 	prometheusexporter.NewFactory(),
 	prometheusremotewriteexporter.NewFactory(),
 	zipkinexporter.NewFactory(),
