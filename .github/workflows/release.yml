@@ -77,7 +77,7 @@ jobs:
         run: |
           msiexec.exe /qn /x observiq-collector.msi
           sleep 5
-        working-directory: C:/build/windows
+        working-directory: C:/build
       - name: Run CINC (Inspec) Uninstall Tests
         run: C:/cinc-project/cinc-auditor/bin/cinc-auditor.bat exec uninstall.rb
         working-directory: C:/build/test
