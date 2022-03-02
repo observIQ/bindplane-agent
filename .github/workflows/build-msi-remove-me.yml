@@ -40,6 +40,8 @@ jobs:
           path: stanza-plugins
       - name: Copy Plugins to MSI Build Directory
         run: cp -r stanza-plugins/plugins windows/
+      - name: Copy Example Config
+        run: cp config/example.yaml windows/config.yaml
       - name: Download JMX Receiver Jar
         run: curl -f -L -o windows/opentelemetry-java-contrib-jmx-metrics.jar https://github.com/open-telemetry/opentelemetry-java-contrib/releases/download/${{ steps.jmx-jar.outputs.release }}/opentelemetry-jmx-metrics.jar
       # HACK: Copy build directory to C drive to avoid this error, since there must be a relative path from the tempdir that go-msi uses
