@@ -27,7 +27,6 @@ require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/processor/k8sattributesprocessor v0.45.1
 	github.com/open-telemetry/opentelemetry-collector-contrib/processor/metricsgenerationprocessor v0.45.1
 	github.com/open-telemetry/opentelemetry-collector-contrib/processor/metricstransformprocessor v0.45.1
-	github.com/open-telemetry/opentelemetry-collector-contrib/processor/redactionprocessor v0.45.1
 	github.com/open-telemetry/opentelemetry-collector-contrib/processor/resourcedetectionprocessor v0.45.1
 	github.com/open-telemetry/opentelemetry-collector-contrib/processor/routingprocessor v0.45.1
 	github.com/open-telemetry/opentelemetry-collector-contrib/processor/spanmetricsprocessor v0.45.1
