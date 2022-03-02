@@ -57,7 +57,7 @@ jobs:
         working-directory: C:/build
       - name: Get Tag From Environment
         id: get-tag
-        run: printf '::set-output name=tag::%s' "$(printf '%s' "${{ github.ref }}" | sed 's/refs\/tags\///')"
+        run: printf '::set-output name=tag::v0.0.13'
       - name: "Build MSI from Tagged Release"
         run: go-msi.exe make -m observiq-collector.msi --version ${{ steps.get-tag.outputs.tag }} --arch amd64
         working-directory: C:/build

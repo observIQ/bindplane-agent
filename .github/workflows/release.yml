@@ -43,7 +43,7 @@ jobs:
       - name: Copy Plugins to MSI Build Directory
         run: cp -r stanza-plugins/plugins windows/
       - name: Download JMX Receiver Jar
-        run: curl -f -L -o /windows/opentelemetry-java-contrib-jmx-metrics.jar https://github.com/open-telemetry/opentelemetry-java-contrib/releases/download/${{ steps.jmx-jar.outputs.release }}/opentelemetry-jmx-metrics.jar
+        run: curl -f -L -o windows/opentelemetry-java-contrib-jmx-metrics.jar https://github.com/open-telemetry/opentelemetry-java-contrib/releases/download/${{ steps.jmx-jar.outputs.release }}/opentelemetry-jmx-metrics.jar
       # HACK: Copy build directory to C drive to avoid this error, since there must be a relative path from the tempdir that go-msi uses
       # for the MSI to build properly
       - name: Copy Build Dir
@@ -86,7 +86,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: observiq-collector-${{ steps.get-tag.outputs.tag }}.msi
-          path: C:/build/windows/observiq-collector-${{ steps.get-tag.outputs.tag }}.msi
+          path: C:/build/observiq-collector-${{ steps.get-tag.outputs.tag }}.msi
           # Short lived because Go Releaser will upload the msi to a release (github release, gcs, etc)
           retention-days: 1
   build-container-image:
