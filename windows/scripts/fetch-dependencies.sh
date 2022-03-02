@@ -1,6 +1,7 @@
 #!/bin/sh
 set -e
-PROJECT_BASE=".."
+BASEDIR="$(dirname "$(realpath "$0")")"
+PROJECT_BASE="$BASEDIR/../.."
 
 [ -f go-msi.exe ] || curl -f -L -o go-msi.exe https://github.com/observIQ/go-msi/releases/download/v2.0.0/go-msi.exe
 [ -f ./cinc-auditor.msi ] || curl -f -L -o cinc-auditor.msi http://downloads.cinc.sh/files/stable/cinc-auditor/4.17.7/windows/2012r2/cinc-auditor-4.17.7-1-x64.msi
@@ -10,18 +11,6 @@ PROJECT_BASE=".."
 mkdir -p wix
 [ -d wix/sdk ] || unzip -o wix-binaries.zip -d wix
 
-[ -f ./opentelemetry-java-contrib-jmx-metrics.jar ] || curl -f -L -o ./opentelemetry-java-contrib-jmx-metrics.jar \
-    "https://github.com/open-telemetry/opentelemetry-java-contrib/releases/download/$(cat "$PROJECT_BASE/JAVA_CONTRIB_VERSION")/opentelemetry-jmx-metrics.jar"
-
-if [ ! -d "./stanza-plugins" ]; then
-    git clone git@github.com:observIQ/stanza-plugins.git
-fi
-
-cd stanza-plugins
-git fetch --all
-git checkout "$(cat "../$PROJECT_BASE/PLUGINS_VERSION")"
-cd ..
-
-cp -r ./stanza-plugins/plugins .
+$PROJECT_BASE/buildscripts/download-dependencies.sh
 
 cp "$PROJECT_BASE/config/example.yaml" "./config.yaml"
