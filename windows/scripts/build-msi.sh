@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-PROJECT_BASE="../.."
+PROJECT_BASE=".."
 
 
 cp "$PROJECT_BASE/dist/collector_windows_amd64.exe" "observiq-collector.exe"

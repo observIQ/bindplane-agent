@@ -10,9 +10,9 @@ gpg.*
 *.msi
 *.exe
 *.zip
-build/windows/**/wix.dynamic.json
-build/windows/**/wix
+windows/**/wix.dynamic.json
+windows/**/wix
 stanza-plugins
-build/windows/config.yaml
-build/windows/opentelemetry-java-contrib-jmx-metrics.jar
+windows/config.yaml
+windows/opentelemetry-java-contrib-jmx-metrics.jar
 plugins

@@ -8,7 +8,7 @@ fetch-dependencies:
 
 .PHONY: build-msi
 build-msi: fetch-dependencies
-	cd ../..; $(MAKE) build-windows
+	cd ..; $(MAKE) build-windows
 	./scripts/build-msi.sh
 
 .PHONY: test-install-msi
