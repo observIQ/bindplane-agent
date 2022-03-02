@@ -19,10 +19,21 @@ require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/extension/pprofextension v0.45.1
 	github.com/open-telemetry/opentelemetry-collector-contrib/extension/storage v0.45.1
 	github.com/open-telemetry/opentelemetry-collector-contrib/processor/attributesprocessor v0.45.1
+	github.com/open-telemetry/opentelemetry-collector-contrib/processor/cumulativetodeltaprocessor v0.45.1
+	github.com/open-telemetry/opentelemetry-collector-contrib/processor/deltatorateprocessor v0.45.1
+	github.com/open-telemetry/opentelemetry-collector-contrib/processor/filterprocessor v0.45.1
 	github.com/open-telemetry/opentelemetry-collector-contrib/processor/groupbyattrsprocessor v0.45.1
+	github.com/open-telemetry/opentelemetry-collector-contrib/processor/groupbytraceprocessor v0.45.1
 	github.com/open-telemetry/opentelemetry-collector-contrib/processor/k8sattributesprocessor v0.45.1
+	github.com/open-telemetry/opentelemetry-collector-contrib/processor/metricsgenerationprocessor v0.45.1
 	github.com/open-telemetry/opentelemetry-collector-contrib/processor/metricstransformprocessor v0.45.1
+	github.com/open-telemetry/opentelemetry-collector-contrib/processor/redactionprocessor v0.45.1
 	github.com/open-telemetry/opentelemetry-collector-contrib/processor/resourcedetectionprocessor v0.45.1
+	github.com/open-telemetry/opentelemetry-collector-contrib/processor/routingprocessor v0.45.1
+	github.com/open-telemetry/opentelemetry-collector-contrib/processor/spanmetricsprocessor v0.45.1
+	github.com/open-telemetry/opentelemetry-collector-contrib/processor/spanprocessor v0.45.1
+	github.com/open-telemetry/opentelemetry-collector-contrib/processor/tailsamplingprocessor v0.45.1
+	github.com/open-telemetry/opentelemetry-collector-contrib/processor/transformprocessor v0.45.1
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/apachereceiver v0.45.1
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/awscontainerinsightreceiver v0.45.1
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/awsecscontainermetricsreceiver v0.45.1
@@ -99,6 +110,7 @@ require (
 	code.cloudfoundry.org/rfc5424 v0.0.0-20201103192249-000122071b78 // indirect
 	github.com/ReneKroon/ttlcache/v2 v2.11.0 // indirect
 	github.com/Shopify/sarama v1.31.1 // indirect
+	github.com/alecthomas/participle/v2 v2.0.0-alpha7 // indirect
 	github.com/apache/thrift v0.15.0 // indirect
 	github.com/bits-and-blooms/bitset v1.2.0 // indirect
 	github.com/blang/semver v3.5.1+incompatible // indirect
@@ -146,6 +158,7 @@ require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/internal/aws/xray v0.45.1 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/internal/docker v0.45.1 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/internal/splunk v0.45.1 // indirect
+	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/batchpersignal v0.45.1 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/translator/jaeger v0.45.1 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/translator/zipkin v0.45.1 // indirect
 	github.com/opencontainers/runtime-spec v1.0.3-0.20210326190908-1c3f411f0417 // indirect
