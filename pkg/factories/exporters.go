@@ -15,9 +15,29 @@
 package factories
 
 import (
+	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/alibabacloudlogserviceexporter"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/awscloudwatchlogsexporter"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/awsemfexporter"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/awskinesisexporter"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/awsprometheusremotewriteexporter"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/awsxrayexporter"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/azuremonitorexporter"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/carbonexporter"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/elasticsearchexporter"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/f5cloudexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/fileexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlecloudexporter"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlecloudpubsubexporter"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/influxdbexporter"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/jaegerexporter"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/kafkaexporter"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/loadbalancingexporter"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/lokiexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/observiqexporter"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/opencensusexporter"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/prometheusexporter"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/prometheusremotewriteexporter"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/zipkinexporter"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/component/componenttest"
 	"go.opentelemetry.io/collector/exporter/loggingexporter"
@@ -26,11 +46,31 @@ import (
 )
 
 var defaultExporters = []component.ExporterFactory{
+	alibabacloudlogserviceexporter.NewFactory(),
+	awscloudwatchlogsexporter.NewFactory(),
+	awsemfexporter.NewFactory(),
+	awskinesisexporter.NewFactory(),
+	awsprometheusremotewriteexporter.NewFactory(),
+	awsxrayexporter.NewFactory(),
+	azuremonitorexporter.NewFactory(),
+	carbonexporter.NewFactory(),
+	componenttest.NewNopExporterFactory(),
+	elasticsearchexporter.NewFactory(),
+	f5cloudexporter.NewFactory(),
 	fileexporter.NewFactory(),
+	googlecloudexporter.NewFactory(),
+	googlecloudpubsubexporter.NewFactory(),
+	influxdbexporter.NewFactory(),
+	jaegerexporter.NewFactory(),
+	kafkaexporter.NewFactory(),
+	loadbalancingexporter.NewFactory(),
+	loggingexporter.NewFactory(),
+	lokiexporter.NewFactory(),
+	observiqexporter.NewFactory(),
+	opencensusexporter.NewFactory(),
 	otlpexporter.NewFactory(),
 	otlphttpexporter.NewFactory(),
-	observiqexporter.NewFactory(),
-	loggingexporter.NewFactory(),
-	componenttest.NewNopExporterFactory(),
-	googlecloudexporter.NewFactory(),
+	prometheusexporter.NewFactory(),
+	prometheusremotewriteexporter.NewFactory(),
+	zipkinexporter.NewFactory(),
 }
