@@ -30,11 +30,9 @@ For a list of possible command line arguments to use with the collector, run the
 * [probabilisticsamplerprocessor](https://github.com/open-telemetry/opentelemetry-collector/tree/main/processor/probabilisticsamplerprocessor)
 
 ### Exporters
-* [fileexporter](https://github.com/open-telemetry/opentelemetry-collector/tree/main/exporter/fileexporter)
-* [otlpexporter](https://github.com/open-telemetry/opentelemetry-collector/tree/main/exporter/otlpexporter)
-* [otlphttpexporter](https://github.com/open-telemetry/opentelemetry-collector/tree/main/exporter/otlphttpexporter)
-* [observiqexporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/exporter/observiqexporter)
-* [loggingexporter](https://github.com/open-telemetry/opentelemetry-collector/tree/main/exporter/loggingexporter)
+
+For supported exports and their documentation see [exporters](/docs/exporters.md)
+
 ### Extensions
 * [bearertokenauthextension](https://github.com/open-telemetry/opentelemetry-collector/tree/main/extension/bearertokenauthextension)
 * [healthcheckextension](https://github.com/open-telemetry/opentelemetry-collector/tree/main/extension/healthcheckextension)
