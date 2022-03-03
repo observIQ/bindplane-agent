@@ -44,6 +44,16 @@
         ]
       },
       {
+        "path": "HKLM\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\observiq-collector",
+        "values": [
+          {
+            "name": "NoModify",
+            "value": "1",
+            "type": "integer"
+          }
+        ]
+      },
+      {
         "path": "HKLM\\SYSTEM\\CurrentControlSet\\Services\\EventLog\\Application\\observiq-collector",
         "values": [
           {

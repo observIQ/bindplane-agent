@@ -56,9 +56,6 @@
          <Publish Dialog="MaintenanceTypeDlg" Control="RemoveButton" Event="NewDialog" Value="VerifyReadyDlg">1</Publish>
          <Publish Dialog="MaintenanceTypeDlg" Control="Back" Event="NewDialog" Value="MaintenanceWelcomeDlg">1</Publish>
 
-         <!-- disable "change" button in Add/Remove programs-->
-         <!--<SetProperty Id="ARPNOMODIFY" Value="1" After="InstallValidate" Sequence="execute"/>-->
-
          <InstallUISequence>
                <Show Dialog="CustomExitDialog" OnExit="success"/>
          </InstallUISequence>

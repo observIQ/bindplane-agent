@@ -209,8 +209,9 @@ To restart the service, run:
       </UI>
 
       <Property Id="WIXUI_INSTALLDIR" Value="INSTALLDIR" />
-      <!-- disable "change" button in Add/Remove programs-->
-      <!--<SetProperty Id="ARPNOMODIFY" Value="1" After="InstallValidate" Sequence="execute"/>-->
+
+      <!-- disable "change" button when uninstalling the collector-->
+      <Property Id="ARPNOMODIFY" Value="yes" Secure="yes" />
 
       <!-- this should help to propagate env var changes -->
       <CustomActionRef Id="WixBroadcastEnvironmentChange" />
