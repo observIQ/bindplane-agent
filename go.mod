@@ -5,7 +5,7 @@ go 1.17
 require (
 	github.com/Azure/azure-event-hubs-go/v3 v3.3.17
 	github.com/GoogleCloudPlatform/opentelemetry-operations-collector v0.0.3-0.20211123195618-f15f911ae5a1
-	github.com/aws/aws-sdk-go v1.43.7
+	github.com/aws/aws-sdk-go v1.43.9
 	github.com/gorilla/mux v1.8.0
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/jpillora/backoff v1.0.0
@@ -111,7 +111,7 @@ require (
 	go.etcd.io/bbolt v1.3.6
 	go.opentelemetry.io/collector v0.45.0
 	go.opentelemetry.io/collector/model v0.45.0
-	go.uber.org/multierr v1.7.0
+	go.uber.org/multierr v1.8.0
 	go.uber.org/zap v1.21.0
 	gopkg.in/yaml.v2 v2.4.0
 	k8s.io/apimachinery v0.23.4
@@ -252,7 +252,7 @@ require (
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/cncf/xds/go v0.0.0-20211130200136-a8f946100490 // indirect
 	github.com/containerd/cgroups v1.0.1 // indirect
-	github.com/containerd/containerd v1.5.9 // indirect
+	github.com/containerd/containerd v1.5.10 // indirect
 	github.com/coreos/go-oidc v2.2.1+incompatible // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dennwc/varint v1.0.0 // indirect
