@@ -31,15 +31,11 @@ For a list of possible command line arguments to use with the collector, run the
 
 ### Exporters
 
-For supported exports and their documentation see [exporters](/docs/exporters.md)
+For supported exports and their documentation see [exporters](/docs/exporters.md).
 
 ### Extensions
-* [bearertokenauthextension](https://github.com/open-telemetry/opentelemetry-collector/tree/main/extension/bearertokenauthextension)
-* [healthcheckextension](https://github.com/open-telemetry/opentelemetry-collector/tree/main/extension/healthcheckextension)
-* [oidcauthextension](https://github.com/open-telemetry/opentelemetry-collector/tree/main/extension/oidcauthextension)
-* [pprofextension](https://github.com/open-telemetry/opentelemetry-collector/tree/main/extension/pprofextension)
-* [zpagesextension](https://github.com/open-telemetry/opentelemetry-collector/tree/main/extension/zpagesextension)
-* [filestorage](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/extension/storage/filestorage)
+
+For supported extensions and their documentation see [extensions](/docs/extensions.md).
 
 ## Additional Components
 These components are based in this repository:
