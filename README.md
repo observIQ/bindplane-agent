@@ -23,7 +23,7 @@ For supported processors and their documentation see [processors](/docs/processo
 
 ### Exporters
 
-For supported exports and their documentation see [exporters](/docs/exporters.md).
+For supported exporters and their documentation see [exporters](/docs/exporters.md).
 
 ### Extensions
 
