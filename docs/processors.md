@@ -1,0 +1,26 @@
+# Processors
+
+Below is a list of supported processors with links to there documentation pages.
+
+- [normalizesumsprocessor](https://github.com/GoogleCloudPlatform/opentelemetry-operations-collector/blob/master/processor/normalizesumsprocessor/README.md)
+- [resourceattributetransposerprocessor](../pkg/processor/resourceattributetransposerprocessor/README.md)
+- [attributesprocessor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.45.1/processor/attributesprocessor/README.md)
+- [cumulativetodeltaprocessor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.45.1/processor/cumulativetodeltaprocessor/README.md)
+- [deltatorateprocessor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.45.1/processor/deltatorateprocessor/README.md)
+- [filterprocessor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.45.1/processor/filterprocessor/README.md)
+- [groupbyattrsprocessor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.45.1/processor/groupbyattrsprocessor/README.md)
+- [groupbytraceprocessor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.45.1/processor/groupbytraceprocessor/README.md)
+- [k8sattributesprocessor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.45.1/processor/k8sattributesprocessor/README.md)
+- [metricsgenerationprocessor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.45.1/processor/metricsgenerationprocessor/README.md)
+- [metricstransformprocessor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.45.1/processor/metricstransformprocessor/README.md)
+- [probabilisticsamplerprocessor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.45.1/processor/probabilisticsamplerprocessor/README.md)
+- [resourcedetectionprocessor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.45.1/processor/resourcedetectionprocessor/README.md)
+- [resourceprocessor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.45.1/processor/resourceprocessor/README.md)
+- [routingprocessor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.45.1/processor/routingprocessor/README.md)
+- [spanmetricsprocessor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.45.1/processor/spanmetricsprocessor/README.md)
+- [spanprocessor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.45.1/processor/spanprocessor/README.md)
+- [tailsamplingprocessor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.45.1/processor/tailsamplingprocessor/README.md)
+- [transformprocessor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.45.1/processor/transformprocessor/README.md)
+- [componenttest](https://github.com/open-telemetry/opentelemetry-collector/tree/v0.45.0/component/componenttest)
+- [batchprocessor](https://github.com/open-telemetry/opentelemetry-collector/tree/v0.45.0/processor/batchprocessor/README.md)
+- [memorylimiterprocessor](https://github.com/open-telemetry/opentelemetry-collector/tree/v0.45.0/processor/memorylimiterprocessor/README.md)

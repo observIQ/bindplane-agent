@@ -21,13 +21,8 @@ For a list of possible command line arguments to use with the collector, run the
 * [tcplogreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/tcplogreceiver)
 * [udpreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/udplogreceiver)
 ### Processors
-* [groupbyattrsprocessor](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/groupbyattrsprocessor)
-* [k8sprocessor](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/k8sprocessor)
-* [attributesprocessor](https://github.com/open-telemetry/opentelemetry-collector/tree/main/processor/attributesprocessor)
-* [resourceprocessor](https://github.com/open-telemetry/opentelemetry-collector/tree/main/processor/resourceprocessor)
-* [batchprocessor](https://github.com/open-telemetry/opentelemetry-collector/tree/main/processor/batchprocessor)
-* [memorylimiter](https://github.com/open-telemetry/opentelemetry-collector/tree/main/processor/memorylimiter)
-* [probabilisticsamplerprocessor](https://github.com/open-telemetry/opentelemetry-collector/tree/main/processor/probabilisticsamplerprocessor)
+
+For supported processors and their documentation see [processors](/docs/processors.md).
 
 ### Exporters
 
