@@ -148,6 +148,15 @@
 
       </Directory>
 
+      <CustomAction Id="CA_Set_WIXUI_EXITDIALOGOPTIONALTEXT" Property="WIXUI_EXITDIALOGOPTIONALTEXT" Value="The config file can be found here: 
+    [ARPINSTALLLOCATION]config.yaml
+To stop the service, run: 
+    Stop-Service -Name observiq-collector
+To start the service, run: 
+    Start-Service -Name observiq-collector
+To restart the service, run:
+     Restart-Service -Name observiq-collector"/>
+         
       {{range $i, $h := .Hooks}}
       <SetProperty Action="SetCustomExec{{$i}}" {{if eq $h.Execute "immediate"}} Id="WixQuietExecCmdLine" {{else}} Id="CustomExec{{$i}}" {{end}} Value="{{$h.CookedCommand}}" Before="CustomExec{{$i}}" Sequence="execute"/>
       <CustomAction Id="CustomExec{{$i}}" BinaryKey="WixCA" DllEntry="WixQuietExec" Execute="{{$h.Execute}}" Impersonate="{{$h.Impersonate}}" {{if gt ($h.Return | len) 0}} Return="{{$h.Return}}" {{end}}/>
@@ -200,10 +209,11 @@
       </UI>
 
       <Property Id="WIXUI_INSTALLDIR" Value="INSTALLDIR" />
+      <!-- disable "change" button in Add/Remove programs-->
+      <!--<SetProperty Id="ARPNOMODIFY" Value="1" After="InstallValidate" Sequence="execute"/>-->
 
       <!-- this should help to propagate env var changes -->
       <CustomActionRef Id="WixBroadcastEnvironmentChange" />
-
    </Product>
 
 </Wix>
