@@ -2,8 +2,6 @@
 
 Below is a list of supported receivers with links to there documentation pages.
 
-
-- [logsreceiver](../pkg/receiver/logsreceiver/README.md)
 - [apachereceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.45.1/receiver/apachereceiver/README.md)
 - [awscontainerinsightreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.45.1/receiver/awscontainerinsightreceiver/README.md)
 - [awsecscontainermetricsreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.45.1/receiver/awsecscontainermetricsreceiver/README.md)
@@ -12,6 +10,7 @@ Below is a list of supported receivers with links to there documentation pages.
 - [carbonreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.45.1/receiver/carbonreceiver/README.md)
 - [cloudfoundryreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.45.1/receiver/cloudfoundryreceiver/README.md)
 - [collectdreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.45.1/receiver/collectdreceiver/README.md)
+- [componenttest](https://github.com/open-telemetry/opentelemetry-collector/tree/v0.45.0/component/componenttest)
 - [couchdbreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.45.1/receiver/couchdbreceiver/README.md)
 - [dockerstatsreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.45.1/receiver/dockerstatsreceiver/README.md)
 - [dotnetdiagnosticsreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.45.1/receiver/dotnetdiagnosticsreceiver/README.md)
@@ -30,12 +29,14 @@ Below is a list of supported receivers with links to there documentation pages.
 - [kafkametricsreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.45.1/receiver/kafkametricsreceiver/README.md)
 - [kafkareceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.45.1/receiver/kafkareceiver/README.md)
 - [kubeletstatsreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.45.1/receiver/kubeletstatsreceiver/README.md)
+- [logsreceiver](../pkg/receiver/logsreceiver/README.md)
 - [memcachedreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.45.1/receiver/memcachedreceiver/README.md)
 - [mongodbatlasreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.45.1/receiver/mongodbatlasreceiver/README.md)
 - [mongodbreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.45.1/receiver/mongodbreceiver/README.md)
 - [mysqlreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.45.1/receiver/mysqlreceiver/README.md)
 - [nginxreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.45.1/receiver/nginxreceiver/README.md)
 - [opencensusreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.45.1/receiver/opencensusreceiver/README.md)
+- [otlpreceiver](https://github.com/open-telemetry/opentelemetry-collector/tree/v0.45.0/receiver/otlpreceiver/README.md)
 - [podmanreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.45.1/receiver/podmanreceiver/README.md)
 - [postgresqlreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.45.1/receiver/postgresqlreceiver/README.md)
 - [prometheusexecreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.45.1/receiver/prometheusexecreceiver/README.md)
@@ -51,5 +52,3 @@ Below is a list of supported receivers with links to there documentation pages.
 - [windowsperfcountersreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.45.1/receiver/windowsperfcountersreceiver/README.md)
 - [zipkinreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.45.1/receiver/zipkinreceiver/README.md)
 - [zookeeperreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.45.1/receiver/zookeeperreceiver/README.md)
-- [componenttest](https://github.com/open-telemetry/opentelemetry-collector/tree/v0.45.0/component/componenttest)
-- [otlpreceiver](https://github.com/open-telemetry/opentelemetry-collector/tree/v0.45.0/receiver/otlpreceiver/README.md)
