@@ -52,7 +52,7 @@ service:
     # which are then aggregated into batches by the 'batch' processor,
     # and are exported using the 'logging' exporter, printing the logs to stdout.
     # Both the batch configuration and logging configuration may be shared between the logs pipeline and
-    # the metrics pipeline, in this example.
+    # the metrics pipeline, as shown in this example.
     # logs:
     #   receivers: [syslog]
     #   processors: [batch]
