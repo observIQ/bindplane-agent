@@ -12,14 +12,11 @@ For configuration options of a specific component, take a look at the README fou
 
 For a list of possible command line arguments to use with the collector, run the collector with the `--help` argument.
 # Included Components
-## Upstream components
 
 ### Receivers
-* [filelogreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/filelogreceiver)
-* [otlpreceiver](https://github.com/open-telemetry/opentelemetry-collector/tree/main/receiver/otlpreceiver)
-* [syslogreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/syslogreceiver)
-* [tcplogreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/tcplogreceiver)
-* [udpreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/udplogreceiver)
+
+For supported receivers and their documentation see [receivers](/docs/receivers.md).
+
 ### Processors
 
 For supported processors and their documentation see [processors](/docs/processors.md).
@@ -31,12 +28,6 @@ For supported exports and their documentation see [exporters](/docs/exporters.md
 ### Extensions
 
 For supported extensions and their documentation see [extensions](/docs/extensions.md).
-
-## Additional Components
-These components are based in this repository:
-
-### Receivers
-* [logsreceiver](./receiver/logsreceiver)
 
 ## Development
 
