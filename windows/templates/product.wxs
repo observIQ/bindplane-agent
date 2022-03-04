@@ -12,7 +12,7 @@
    <!-- This hardcoded GUID is specifically for the observiq-collector.
         If Id is set to "*", it auto generates an ID, which seems OK, but new MSIs will no longer be able to
         correlate itself with old versions of the installer, and will fail to uninstall old versions properly -->
-   <Product Id="{4995faf9-4f35-4626-930c-4fc0e06e8329}" UpgradeCode="{{.UpgradeCode}}"
+   <Product Id="*" UpgradeCode="{{.UpgradeCode}}"
             Name="{{.Product}}"
             Version="{{.Version.MSI}}"
             Manufacturer="{{.Company}}"
