@@ -18,11 +18,11 @@ To restart collector the service, run:
     Restart-Service -Name observiq-collector" >
                     <Condition Action="show">NOT Installed</Condition>
                 </Control>
-                <Control Id="Description" Hidden="yes" Type="Text" X="135" Y="70" Width="220" Height="40" Transparent="yes" NoPrefix="yes" Text="!(loc.ExitDialogDescription)" >
+                <Control Id="UninstallDescription" Hidden="yes" Type="Text" X="135" Y="70" Width="220" Height="40" Transparent="yes" NoPrefix="yes" Text="!(loc.ExitDialogDescription)" >
                     <Condition Action="show">Installed</Condition>
                 </Control>
                 <Control Id="DocLink" Hidden="yes" Type="Hyperlink" X="135" Y="200" Width="220" Height="20" Transparent="yes">
-                    <Text><![CDATA[<a href="https://github.com/observIQ/observiq-collector/tree/main/docs">Click here for online documentation!</a>]]></Text>
+                    <Text><![CDATA[<a href="https://github.com/observIQ/observiq-collector/blob/windows-docs/docs/installation-windows.md#next-steps">Click here for online documentation on next steps!</a>]]></Text>
                     <Condition Action="show">NOT Installed</Condition>
                 </Control>
                 <Control Id="Title" Type="Text" X="135" Y="20" Width="220" Height="60" Transparent="yes" NoPrefix="yes" Text="!(loc.ExitDialogTitle)" />
