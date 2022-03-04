@@ -22,9 +22,11 @@ By default, the config file for the collector can be found at `C:\Program Files\
 ## Restarting the Collector
 Restarting the collector may be done through the services dialog.
 To access the services dialog, press Win + R, enter `services.msc` into the Run dialog, and press enter.
+
 ![The run dialog](./screenshots/launch-services.png)
 
 Locate the `observiq-collector` service, right click the entry, and click "Restart" to restart the collector.
+
 ![The services dialog](./screenshots/stop-restart-service.png)
 
 Alternatively, you may run the Powershell command below.
@@ -36,9 +38,11 @@ Restart-Service -Name "observiq-collector"
 
 Stopping the collector may be done through the services dialog.
 To access the services dialog, press Win + R, enter `services.msc` into the Run dialog, and press enter.
+
 ![The run dialog](./screenshots/launch-services.png)
 
 Locate the `observiq-collector` service, right click the entry, and click "Stop" to stop the collector.
+
 ![The services dialog](./screenshots/stop-restart-service.png)
 
 Alternatively, you may run the Powershell command below.
@@ -50,9 +54,11 @@ Stop-Service -Name "observiq-collector"
 
 Starting the collector may be done through the services dialog.
 To access the services dialog, press Win + R, enter `services.msc` into the Run dialog, and press enter.
+
 ![The run dialog](./screenshots/launch-services.png)
 
 Locate the `observiq-collector` service, right click the entry, and click "Start" to start the collector.
+
 ![The services dialog](./screenshots/start-service.png)
 
 Alternatively, you may run the Powershell command below.
@@ -63,9 +69,11 @@ Start-Service -Name "observiq-collector"
 ## Uninstalling
 
 To uninstall the collector on Windows, navigate to the control panel, then to the "Uninstall a program" dialog.
+
 ![The control panel](./screenshots/control-panel-uninstall.png)
 
 Locate the `observiq-collector` entry, and select uninstall. 
+
 ![The uninstall or change a program dialog](./screenshots/uninstall-collector.png)
 
 Follow the wizard to complete removal of the collector.
