@@ -12,8 +12,8 @@
         "service": {
           "name": "observiq-collector",
           "start": "delayed",
-          "display-name": "observiq-collector",
-          "description": "ObservIQ's distribution of the OpenTelemetry collector.",
+          "display-name": "observIQ Collector",
+          "description": "observIQ's distribution of the OpenTelemetry collector.",
           "arguments": "--config &quot;[INSTALLDIR]config.yaml&quot;"
         }
       },
