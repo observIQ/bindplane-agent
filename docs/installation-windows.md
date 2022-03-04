@@ -8,7 +8,7 @@ After downloading the MSI, simply double click it to open the installation wizar
 
 Alternatively, you can run the Powershell command below to install the MSI with no UI.
 ```pwsh
-    msiexec /i "<path-to-msi>" /passive
+msiexec /i "<path-to-msi>" /quiet
 ```
 
 ## Next Steps
