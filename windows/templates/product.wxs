@@ -1,0 +1,209 @@
+<?xml version="1.0"?>
+
+<?if $(sys.BUILDARCH)="x86"?>
+    <?define Program_Files="ProgramFilesFolder"?>
+<?elseif $(sys.BUILDARCH)="x64"?>
+    <?define Program_Files="ProgramFiles64Folder"?>
+<?else?>
+    <?error Unsupported value of sys.BUILDARCH=$(sys.BUILDARCH)?>
+<?endif?>
+
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+   <!-- This hardcoded GUID is specifically for the observiq-collector.
+        If Id is set to "*", it auto generates an ID, which seems OK, but new MSIs will no longer be able to
+        correlate itself with old versions of the installer, and will fail to uninstall old versions properly -->
+   <Product Id="*" UpgradeCode="{{.UpgradeCode}}"
+            Name="{{.Product}}"
+            Version="{{.Version.MSI}}"
+            Manufacturer="{{.Company}}"
+            Language="1033">
+
+      <Package InstallerVersion="200" Compressed="yes" Description="{{.Product}} {{.Version.Display}}"
+               Comments="This installs {{.Product}} {{.Version.Display}}" InstallScope="perMachine"/>
+
+      <MediaTemplate EmbedCab="yes" {{if gt (.Compression | len) 0}}CompressionLevel="{{.Compression}}"{{end}}/>
+
+      <MajorUpgrade DowngradeErrorMessage="A newer version of this software is already installed."/>
+
+      {{if gt (.Banner | len) 0 }} <WixVariable Id="WixUIBannerBmp" Value="{{.Banner}}"/> {{end}}
+      {{if gt (.Dialog | len) 0 }} <WixVariable Id="WixUIDialogBmp" Value="{{.Dialog}}"/> {{end}}
+
+      {{if gt (.Icon | len) 0 }}
+      <Icon Id="Installer.Ico" SourceFile="{{.Icon}}"/>
+      <Property Id="ARPPRODUCTICON" Value="Installer.Ico"/>
+      {{end}}
+      <!-- Need to customize the Add/remove program list entry, set the automatically created one to SystemComponent to hide it then create another one. -->
+      <Property Id="ARPSYSTEMCOMPONENT" Value="1"/>
+
+      {{range $i, $p := .Properties}}
+      <Property Id="{{$p.ID}}" {{if $p.Value}}Value="{{$p.Value}}"{{end}} {{if not $p.Registry}}Secure="yes"{{end}}>
+         {{if $p.Registry}}
+         <RegistrySearch Id="{{$p.ID}}Search" Root="{{$p.Registry.Root}}" Key="{{$p.Registry.Key}}"
+            {{if gt ($p.Registry.Name | len) 0}} Name="{{$p.Registry.Name}}" {{end}} Type="raw"/>
+         {{end}}
+      </Property>
+      {{end}}
+      {{range $i, $c := .Conditions}}
+      <Condition Message="{{$c.Message}}"><![CDATA[{{$c.Condition}}]]></Condition>
+      {{end}}
+
+      <Directory Id="TARGETDIR" Name="SourceDir">
+
+        <Directory Id="$(var.Program_Files)">
+            <Directory Id="INSTALLDIR" Name="{{.Product}}">
+                {{define "FILES"}}
+                {{range $f := .}}
+                <Component Id="ApplicationFiles{{$f.ID}}" Guid="*">
+                    <File Id="ApplicationFile{{$f.ID}}" Source="{{$f.Path}}"/>
+                    {{if $f.Service}}
+                    <ServiceInstall Id="ServiceInstall{{$f.ID}}" Type="ownProcess" Name="{{$f.Service.Name}}" Start="{{$f.Service.Start}}" Account="LocalSystem" ErrorControl="normal"
+                    {{if gt ($f.Service.DisplayName | len) 0}} DisplayName="{{$f.Service.DisplayName}}" {{end}}
+                    {{if gt ($f.Service.Description | len) 0}} Description="{{$f.Service.Description}}" {{end}}
+                    {{if gt ($f.Service.Arguments | len) 0}} Arguments="{{$f.Service.Arguments}}" {{end}}>
+                        {{range $d := $f.Service.Dependencies}}
+                        <ServiceDependency Id="{{$d}}"/>
+                        {{end}}
+                        {{if $f.Service.Delayed}}
+                        <ServiceConfig DelayedAutoStart="yes" OnInstall="yes" OnReinstall ="yes"/>
+                        {{end}}
+                    </ServiceInstall>
+                    <ServiceControl Id="ServiceControl{{$f.ID}}" Name="{{$f.Service.Name}}" Start="install" Stop="both" Remove="uninstall"/>
+                    {{end}}
+                 </Component>
+                {{end}}
+                {{end}}
+                {{template "FILES" .Directory.Files}}
+                {{define "DIRECTORIES"}}
+                {{range $d := .}}
+                <Directory Id="ApplicationDirectory{{$d.ID}}" Name="{{$d.Name}}">
+                {{template "FILES" $d.Files}}
+                {{template "DIRECTORIES" $d.Directories}}
+                </Directory>
+                {{end}}
+                {{end}}
+                {{template "DIRECTORIES" .Directory.Directories}}
+            </Directory>
+        </Directory>
+
+        {{range $i, $e := .Environments}}
+        <Component Id="Environments{{$i}}" Guid="*">
+            <Environment Id="Environment{{$i}}" Name="{{$e.Name}}" Value="{{$e.Value}}" Permanent="{{$e.Permanent}}" Part="{{$e.Part}}" Action="{{$e.Action}}" System="{{$e.System}}"/>
+            <RegistryValue Root="HKLM" Key="Software\[Manufacturer]\[ProductName]" Name="envvar{{$i}}" Type="integer" Value="1" KeyPath="yes"/>
+            {{if gt ($e.Condition | len) 0}}<Condition><![CDATA[{{$e.Condition}}]]></Condition>{{end}}
+        </Component>
+        {{end}}
+
+        {{range $i, $r := .Registries}}
+        <Component Id="RegistryEntries{{$i}}" Guid="*">
+            <RegistryKey Root="{{$r.Root}}" Key="{{$r.Key}}">
+                {{range $j, $v := $r.Values}}
+                <RegistryValue Type="{{$v.Type}}" {{if gt ($v.Name | len) 0}} Name="{{$v.Name}}" {{end}} Value="{{$v.Value}}" {{if eq $i 0}}{{if eq $j 0}} KeyPath="yes" {{end}}{{end}}/>
+                {{end}}
+            </RegistryKey>
+            {{if gt ($r.Condition | len) 0}}<Condition><![CDATA[{{$r.Condition}}]]></Condition>{{end}}
+        </Component>
+        {{end}}
+        <Component Id="RegistryEntriesARP" Guid="*">
+            <RegistryKey Root="HKLM" Key="Software\Microsoft\Windows\CurrentVersion\Uninstall\[ProductName]">
+                <RegistryValue Type="string" Name="AuthorizedCDFPrefix" Value=""/>
+                <RegistryValue Type="string" Name="Comments" Value="{{.Info.Comments}}"/>
+                <RegistryValue Type="string" Name="Contact" Value="{{.Info.Contact}}"/>
+                {{if gt (.Icon | len) 0 }}
+                <RegistryValue Type="string" Name="DisplayIcon" Value="%SystemRoot%\Installer\[ProductCode]\Installer.Ico"/>
+                {{end}}
+                <RegistryValue Type="string" Name="DisplayName" Value="[ProductName]" KeyPath="yes"/>
+                <RegistryValue Type="string" Name="DisplayVersion" Value="{{.Version.Display}}"/>
+                <RegistryValue Type="integer" Name="EstimatedSize" Value="{{.Info.Size}}"/>
+                <RegistryValue Type="string" Name="HelpLink" Value="{{.Info.HelpLink}}"/>
+                <RegistryValue Type="string" Name="HelpTelephone" Value="{{.Info.SupportTelephone}}"/>
+                <RegistryValue Type="string" Name="InstallDate" Value="[Date]"/>
+                <RegistryValue Type="string" Name="InstallLocation" Value="[INSTALLDIR]"/>
+                <RegistryValue Type="string" Name="InstallSource" Value="[SourceDir]"/>
+                <RegistryValue Type="integer" Name="Language" Value="[ProductLanguage]"/>
+                <RegistryValue Type="expandable" Name="ModifyPath" Value="MsiExec.exe /I[ProductCode]"/>
+                <RegistryValue Type="string" Name="Publisher" Value="{{.Company}}"/>
+                <RegistryValue Type="string" Name="Readme" Value="{{.Info.Readme}}"/>
+                <RegistryValue Type="expandable" Name="UninstallString" Value="MsiExec.exe /I[ProductCode]"/>
+                <RegistryValue Type="string" Name="URLInfoAbout" Value="{{.Info.SupportLink}}"/>
+                <RegistryValue Type="string" Name="URLUpdateInfo" Value="{{.Info.UpdateInfoLink}}"/>
+                <RegistryValue Type="integer" Name="Version" Value="{{.Version.Hex}}"/>
+            </RegistryKey>
+        </Component>
+
+        <Directory Id="ProgramMenuFolder"/>
+        <Directory Id="DesktopFolder"/>
+
+        {{range $i, $s := .Shortcuts}}
+        <Component Id="ApplicationShortcuts{{$i}}" Guid="*">
+            <Shortcut Id="ApplicationShortcut{{$i}}" Name="{{$s.Name}}" Description="{{$s.Description}}" Target="{{$s.Target}}" WorkingDirectory="{{$s.WDir}}"
+                Directory={{if eq $s.Location "program"}}"ProgramMenuFolder"{{else}}"DesktopFolder"{{end}}
+                {{if gt ($s.Arguments | len) 0}}Arguments="{{$s.Arguments}}"{{end}}>
+                {{if gt ($s.Icon | len) 0}}<Icon Id="Icon{{$i}}" SourceFile="{{$s.Icon}}"/>{{end}}
+                {{range $j, $p := $s.Properties}}<ShortcutProperty Key="{{$p.Key}}" Value="{{$p.Value}}"/>{{end}}
+            </Shortcut>
+            {{if gt ($s.Condition | len) 0}}<Condition><![CDATA[{{$s.Condition}}]]></Condition>{{end}}
+            <RegistryValue Root="HKCU" Key="Software\[Manufacturer]\[ProductName]" Name="shortcut{{$i}}" Type="integer" Value="1" KeyPath="yes"/>
+        </Component>
+        {{end}}
+
+      </Directory>
+
+      {{range $i, $h := .Hooks}}
+      <SetProperty Action="SetCustomExec{{$i}}" {{if eq $h.Execute "immediate"}} Id="WixQuietExecCmdLine" {{else}} Id="CustomExec{{$i}}" {{end}} Value="{{$h.CookedCommand}}" Before="CustomExec{{$i}}" Sequence="execute"/>
+      <CustomAction Id="CustomExec{{$i}}" BinaryKey="WixCA" DllEntry="WixQuietExec" Execute="{{$h.Execute}}" Impersonate="{{$h.Impersonate}}" {{if gt ($h.Return | len) 0}} Return="{{$h.Return}}" {{end}}/>
+      {{end}}
+      <InstallExecuteSequence>
+         {{range $i, $h := .Hooks}}
+         <Custom Action="CustomExec{{$i}}" {{if eq $h.When "install"}} After="InstallFiles" {{else if eq $h.Execute "immediate"}} Before="InstallValidate" {{else}} After="InstallInitialize" {{end}}>
+            {{if eq $h.When "install"}}
+            <![CDATA[NOT Installed AND NOT REMOVE{{if gt ($h.Condition | len) 0}} AND ({{$h.Condition}}){{end}}]]>
+            {{else if eq $h.When "uninstall"}}
+            <![CDATA[REMOVE{{if gt ($h.Condition | len) 0}} AND ({{$h.Condition}}){{end}}]]>
+            {{else if gt ($h.Condition | len) 0 }}
+            <![CDATA[{{$h.Condition}}]]>
+            {{end}}
+         </Custom>
+         {{end}}
+      </InstallExecuteSequence>
+
+      <Feature Id="DefaultFeature" Level="1">
+         {{range $i, $e := .Environments}}
+         <ComponentRef Id="Environments{{$i}}"/>
+         {{end}}
+         {{$id := 0}}
+         {{define "FILESREF"}}
+         {{range $f := .}}
+         <ComponentRef Id="ApplicationFiles{{$f.ID}}"/>
+         {{end}}
+         {{end}}
+         {{template "FILESREF" .Directory.Files}}
+         {{define "DIRECTORIESREF"}}
+         {{range $d := .}}
+         {{template "FILESREF" $d.Files}}
+         {{template "DIRECTORIESREF" $d.Directories}}
+         {{end}}
+         {{end}}
+         {{template "DIRECTORIESREF" .Directory.Directories}}
+         {{range $i, $r := .Registries}}
+         <ComponentRef Id="RegistryEntries{{$i}}"/>
+         {{end}}
+         <ComponentRef Id="RegistryEntriesARP"/>
+         {{range $i, $e := .Shortcuts}}
+         <ComponentRef Id="ApplicationShortcuts{{$i}}"/>
+         {{end}}
+      </Feature>
+
+      <UI>
+         <UIRef Id="WixUI_ErrorProgressText"/>
+         <!-- Define the installer UI -->
+         <UIRef Id="WixUI_HK"/>
+      </UI>
+
+      <Property Id="WIXUI_INSTALLDIR" Value="INSTALLDIR" />
+
+      <!-- this should help to propagate env var changes -->
+      <CustomActionRef Id="WixBroadcastEnvironmentChange" />
+
+   </Product>
+
+</Wix>

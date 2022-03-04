@@ -3,7 +3,7 @@ on:
   pull_request:
 
 jobs:
-  misspell:
+  check-license:
     runs-on: "ubuntu-20.04"
     steps:
       - name: Checkout Sources

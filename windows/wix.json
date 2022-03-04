@@ -1,0 +1,69 @@
+{
+    "product": "observiq-collector",
+    "company": "observIQ, Inc.",
+    "info": {
+      "help-link": "https://observiq.com/contact/",
+      "support-link": "https://observiq.com/contact/"
+    },
+    "upgrade-code": "D67CCA1A-6708-4096-8BDE-5069739FB861",
+    "files": [
+      {
+        "path": "observiq-collector.exe",
+        "service": {
+          "name": "observiq-collector",
+          "start": "delayed",
+          "display-name": "observiq-collector",
+          "description": "ObservIQ's distribution of the OpenTelemetry collector.",
+          "arguments": "--config &quot;[INSTALLDIR]config.yaml&quot;"
+        }
+      },
+      {
+          "path": "config.yaml"
+      },
+      {
+          "path": "opentelemetry-java-contrib-jmx-metrics.jar"
+      }
+    ],
+    "directories": [
+      {
+        "name": "plugins"
+      }
+    ],
+    "registries": [
+      {
+        "path": "HKCU\\Software\\observiq\\observiq-collector",
+        "values": [
+          {
+            "name": "Version",
+            "value": "v[ProductVersion]"
+          },
+          {
+            "name": "InstallDir",
+            "value": "[INSTALLDIR]"
+          }
+        ]
+      },
+      {
+        "path": "HKLM\\SYSTEM\\CurrentControlSet\\Services\\EventLog\\Application\\observiq-collector",
+        "values": [
+          {
+            "name": "TypesSupported",
+            "type": "integer",
+            "value": "7"
+          }
+        ]
+      }
+    ],
+    "hooks": [
+      {
+        "command": "net stop observiq-collector",
+        "when": "uninstall",
+        "execute": "immediate"
+      },
+      {
+        "command": "sc delete observiq-collector",
+        "when": "uninstall",
+        "execute": "deferred"
+      }
+    ]
+  }

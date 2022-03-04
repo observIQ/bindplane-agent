@@ -1,0 +1,26 @@
+.PHONY: vagrant-prep
+vagrant-prep:
+	./scripts/vagrant-prep.sh
+
+.PHONY: fetch-dependencies
+fetch-dependencies:
+	./scripts/fetch-dependencies.sh
+
+.PHONY: build-msi
+build-msi: fetch-dependencies
+	cd ..; $(MAKE) build-windows
+	./scripts/build-msi.sh
+
+.PHONY: test-install-msi
+test-install-msi:
+	./scripts/test-install-msi.sh
+
+.PHONY: test-uninstall-msi
+test-uninstall-msi:
+	./scripts/test-uninstall-msi.sh
+
+.PHONY: clean
+clean:
+	rm -rf go-msi.exe config.yaml cinc-auditor.msi observiq-collector.exe observiq-collector.msi \
+		opentelemetry-java-contrib-jmx-metrics.jar wix-binaries.zip wix.dynamic.json \
+		wix stanza-plugins plugins

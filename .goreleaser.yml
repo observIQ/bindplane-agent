@@ -49,6 +49,8 @@ signs:
 # https://goreleaser.com/customization/release/
 release:
   draft: false
+  extra_files:
+    - glob: "./observiq-collector-*.msi"
 
 # https://goreleaser.com/customization/changelog/
 changelog:

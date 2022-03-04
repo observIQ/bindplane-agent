@@ -4,6 +4,16 @@ cover.html
 local
 .DS_Store
 .vscode
+.vagrant
 dist
 cosign.*
 gpg.*
+*.msi
+*.exe
+*.zip
+windows/**/wix.dynamic.json
+windows/**/wix
+stanza-plugins
+windows/config.yaml
+windows/opentelemetry-java-contrib-jmx-metrics.jar
+plugins

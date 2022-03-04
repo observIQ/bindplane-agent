@@ -16,6 +16,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	"github.com/observiq/observiq-collector/internal/version"
@@ -34,13 +35,20 @@ func main() {
 	// defer cancel()
 
 	settings := collector.NewSettings(*configPaths, version.Version(), nil)
-	svc, err := service.New(settings)
+	if err := run(context.Background(), settings); err != nil {
+		log.Fatal(err)
+	}
+}
+
+func runInteractive(ctx context.Context, params service.CollectorSettings) error {
+	svc, err := service.New(params)
 	if err != nil {
-		log.Panicf("Failed to create service: %s", err)
+		return fmt.Errorf("failed to create new service: %w", err)
 	}
 
-	err = svc.Run(context.Background())
-	if err != nil {
-		log.Panicf("Service received error: %s", err)
+	if err := svc.Run(ctx); err != nil {
+		return fmt.Errorf("collector server run finished with error: %w", err)
 	}
+
+	return nil
 }
