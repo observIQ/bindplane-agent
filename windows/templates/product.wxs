@@ -23,7 +23,9 @@
 
       <MediaTemplate EmbedCab="yes" {{if gt (.Compression | len) 0}}CompressionLevel="{{.Compression}}"{{end}}/>
 
-      <MajorUpgrade DowngradeErrorMessage="A newer version of this software is already installed."/>
+      <MajorUpgrade
+        Schedule="afterInstallExecute"
+        DowngradeErrorMessage="A newer version of this software is already installed."/>
 
       {{if gt (.Banner | len) 0 }} <WixVariable Id="WixUIBannerBmp" Value="{{.Banner}}"/> {{end}}
       {{if gt (.Dialog | len) 0 }} <WixVariable Id="WixUIDialogBmp" Value="{{.Dialog}}"/> {{end}}
@@ -53,7 +55,12 @@
             <Directory Id="INSTALLDIR" Name="{{.Product}}">
                 {{define "FILES"}}
                 {{range $f := .}}
-                <Component Id="ApplicationFiles{{$f.ID}}" Guid="*">
+                <Component 
+                    Id="ApplicationFiles{{$f.ID}}" 
+                    Guid="*"
+                    Permanent="{{if $f.Permanent}}yes{{else}}no{{end}}"
+                    NeverOverwrite="{{if $f.NeverOverwrite}}yes{{else}}no{{end}}">
+                    
                     <File Id="ApplicationFile{{$f.ID}}" Source="{{$f.Path}}"/>
                     {{if $f.Service}}
                     <ServiceInstall Id="ServiceInstall{{$f.ID}}" Type="ownProcess" Name="{{$f.Service.Name}}" Start="{{$f.Service.Start}}" Account="LocalSystem" ErrorControl="normal"
