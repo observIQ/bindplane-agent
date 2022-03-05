@@ -1507,8 +1507,8 @@ github.com/observiq/go-syslog/v3 v3.0.2/go.mod h1:9abcumkQwDUY0VgWdH6CaaJ3Ks39A7
 github.com/observiq/goflow/v3 v3.4.4 h1:wobLnBqdKGQVdkBDymngcQgbg+9ZzUGEdljUnCS2XoA=
 github.com/observiq/goflow/v3 v3.4.4/go.mod h1:VVPbaBEcfR0r+VaYwg6iDXws68r68AsCwLFegONP4nM=
 github.com/observiq/nanojack v0.0.0-20201106172433-343928847ebc h1:49ewVBwLcy+eYqI4R0ICilCI4dPjddpFXWv3liXzUxM=
-github.com/observiq/opentelemetry-collector-contrib/exporter/googlecloudexporter v0.0.0-20220302140143-6186c5f3961e h1:CcxA/cCVl1b+vW3w6r5N3BRnt1bQsyOPbSTWIbV9buw=
-github.com/observiq/opentelemetry-collector-contrib/exporter/googlecloudexporter v0.0.0-20220302140143-6186c5f3961e/go.mod h1:Hm0BYBpzZQnGmtdGGqjEqgNX7vOdm61KOv1q19VzrS0=
+github.com/observiq/opentelemetry-collector-contrib/exporter/googlecloudexporter v0.0.0-20220304152956-bb36c08bd895 h1:A1VpJlUjKeQpzf4Y7bo/5Np5U/3K62Z1q3aRyVcuLgA=
+github.com/observiq/opentelemetry-collector-contrib/exporter/googlecloudexporter v0.0.0-20220304152956-bb36c08bd895/go.mod h1:F8F4AFZw+bVR9gZf8pB6oFqqo6qs3BVi4OczfrkMMOI=
 github.com/oklog/oklog v0.3.2/go.mod h1:FCV+B7mhrz4o+ueLpx+KqkyXRGMWOYEvfiXtdGtbWGs=
 github.com/oklog/run v1.0.0/go.mod h1:dlhp/R75TPv97u0XWUtDeV/lRKWPKSdTuV0TZvrmrQA=
 github.com/oklog/run v1.1.0/go.mod h1:sVPdnTZT1zYwAJeCMu2Th4T21pA3FPOQRfWjQlk7DVU=
