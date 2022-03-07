@@ -66,7 +66,7 @@ require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/cloudfoundryreceiver v0.45.1
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/collectdreceiver v0.45.1
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/couchdbreceiver v0.45.1
-	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/dockerstatsreceiver v0.45.1
+	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/dockerstatsreceiver v0.46.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/dotnetdiagnosticsreceiver v0.45.1
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/elasticsearchreceiver v0.45.1
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/filelogreceiver v0.45.1
@@ -181,7 +181,7 @@ require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/internal/aws/metrics v0.45.1 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/internal/aws/proxy v0.45.1 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/internal/aws/xray v0.45.1 // indirect
-	github.com/open-telemetry/opentelemetry-collector-contrib/internal/docker v0.45.1 // indirect
+	github.com/open-telemetry/opentelemetry-collector-contrib/internal/docker v0.46.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/internal/splunk v0.45.1 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/batchpersignal v0.45.1 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/resourcetotelemetry v0.45.1 // indirect
