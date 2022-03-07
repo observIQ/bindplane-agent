@@ -64,16 +64,5 @@
         ]
       }
     ],
-    "hooks": [
-      {
-        "command": "net stop observiq-collector",
-        "when": "uninstall",
-        "execute": "immediate"
-      },
-      {
-        "command": "sc delete observiq-collector",
-        "when": "uninstall",
-        "execute": "deferred"
-      }
-    ]
+    "hooks": []
   }
