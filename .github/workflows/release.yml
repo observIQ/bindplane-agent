@@ -24,9 +24,12 @@ jobs:
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-
+      - name: Install goreleaser
+        run: go install github.com/goreleaser/goreleaser
+        working-directory: ./internal/tools
       - name: Build Windows Binary
         run: |
-          make build-windows
+          goreleaser build --single-target --skip-validate --rm-dist
           cp dist/collector_windows_amd64.exe windows/observiq-collector.exe
       - name: Get Stanza Plugins Ref
         id: plugins
