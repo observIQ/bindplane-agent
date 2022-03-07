@@ -50,6 +50,40 @@ archives:
       - goos: windows
         format: zip
 
+nfpms:
+  - id: collector
+    package_name: observiq-collector
+    vendor: observIQ, Inc
+    description: observIQ's distribution of the OpenTelemetry collector
+    homepage: https://observiq.com/
+    license: Apache 2.0
+    formats:
+    - rpm
+    - deb
+    bindir: /usr/bin
+    contents:
+    - src: release_deps/plugins
+      dst: /opt/observiq-collector/plugins
+      file_info:
+        mode: 0774
+        owner: observiq-collector
+        group: observiq-collector
+    - src: release_deps/config.yaml
+      dst: /opt/observiq-collector/config.yaml
+      file_info:
+        mode: 0660
+        owner: observiq-collector
+        group: observiq-collector
+      type: config|noreplace
+    - src: release_deps/opentelemetry-java-contrib-jmx-metrics.jar
+      dst: /opt/observiq-collector/opentelemetry-java-contrib-jmx-metrics.jar
+      file_info:
+        mode: 0550
+        owner: observiq-collector
+        group: observiq-collector
+    scripts:
+      preinstall: "./scripts/package/preinstall.sh"
+      postinstall: ./scripts/package/postinstall.sh
 # https://goreleaser.com/customization/checksum/
 checksum:
   name_template: "{{ .ProjectName }}-v{{ .Version }}-SHA256SUMS"
