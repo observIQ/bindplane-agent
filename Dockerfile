@@ -44,7 +44,7 @@ ENV PATH=$PATH:/usr/local/openjdk-8/bin
 RUN mkdir -p /etc/otel
 
 # copy binary with unpredictable name due to dynamic GOOS / GOARCH
-COPY --from=build /collector/build/* /collector
+COPY --from=build /collector/dist/* /collector
 
 # copy jmx receiver dependency
 COPY --from=build /opt/opentelemetry-java-contrib-jmx-metrics.jar /opt/opentelemetry-java-contrib-jmx-metrics.jar
