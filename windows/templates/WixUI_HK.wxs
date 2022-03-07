@@ -20,6 +20,7 @@
          <DialogRef Id="ProgressDlg" />
          <DialogRef Id="ResumeDlg" />
          <DialogRef Id="UserExit" />
+         <DialogRef Id="CustomExitDialog" />
 
          <!--   Make sure to include custom dialogs in the installer database via a DialogRef command,
                especially if they are not included explicitly in the publish chain below -->
@@ -28,7 +29,7 @@
          <Publish Dialog="BrowseDlg" Control="OK" Event="DoAction" Value="WixUIValidatePath" Order="3">1</Publish>
          <Publish Dialog="BrowseDlg" Control="OK" Event="SpawnDialog" Value="InvalidDirDlg" Order="4"><![CDATA[WIXUI_INSTALLDIR_VALID<>"1"]]></Publish>
 
-         <Publish Dialog="ExitDialog" Control="Finish" Event="EndDialog" Value="Return" Order="999">1</Publish>
+         <Publish Dialog="CustomExitDialog" Control="Finish" Event="EndDialog" Value="Return" Order="999">1</Publish>
 
          <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="{{if gt (.License | len) 0}}LicenseAgreementDlg_HK{{else}}InstallDirDlg{{end}}">NOT Installed</Publish>
          <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="VerifyReadyDlg">Installed AND PATCH</Publish>
@@ -53,8 +54,17 @@
          <Publish Dialog="MaintenanceTypeDlg" Control="RepairButton" Event="NewDialog" Value="VerifyReadyDlg">1</Publish>
          <Publish Dialog="MaintenanceTypeDlg" Control="RemoveButton" Event="NewDialog" Value="VerifyReadyDlg">1</Publish>
          <Publish Dialog="MaintenanceTypeDlg" Control="Back" Event="NewDialog" Value="MaintenanceWelcomeDlg">1</Publish>
+
+         <InstallUISequence>
+               <Show Dialog="CustomExitDialog" OnExit="success"/>
+         </InstallUISequence>
+
+         <AdminUISequence>
+               <Show Dialog="CustomExitDialog" OnExit="success"/>
+         </AdminUISequence>
       </UI>
 
       <UIRef Id="WixUI_Common" />
+      <UIRef Id="CustomExitDialogUI" />
    </Fragment>
 </Wix>

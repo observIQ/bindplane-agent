@@ -16,10 +16,15 @@ else
 EXT?=
 endif
 
+PREVIOUS_TAG := $(shell git tag --sort=v:refname --no-contains HEAD | grep -E "[0-9]+\.[0-9]+\.[0-9]+$$" | tail -n1)
+CURRENT_TAG := $(shell git tag --sort=v:refname --points-at HEAD | grep -E "v[0-9]+\.[0-9]+\.[0-9]+$$" | tail -n1)
+# Version will be the tag pointing to the current commit, or the previous version tag if there is no such tag
+VERSION ?= $(if $(CURRENT_TAG),$(CURRENT_TAG),$(PREVIOUS_TAG)) 
+
 # Default build target; making this should build for the current os/arch
 .PHONY: collector
 collector:
-	go build -o $(OUTDIR)/collector_$(GOOS)_$(GOARCH)$(EXT) ./cmd/collector
+	go build -ldflags "-s -w -X github.com/observiq/observiq-collector/internal/version.version=$(VERSION)" -o $(OUTDIR)/collector_$(GOOS)_$(GOARCH)$(EXT) ./cmd/collector
 
 .PHONY: build-all
 build-all: build-linux build-darwin build-windows

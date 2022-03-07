@@ -24,9 +24,12 @@ jobs:
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-
+      - name: Install goreleaser
+        run: go install github.com/goreleaser/goreleaser
+        working-directory: ./internal/tools
       - name: Build Windows Binary
         run: |
-          make build-windows
+          goreleaser build --single-target --skip-validate --rm-dist
           cp dist/collector_windows_amd64.exe windows/observiq-collector.exe
       - name: Get Stanza Plugins Ref
         id: plugins
@@ -55,7 +58,7 @@ jobs:
       # Installs go-msi and wix.
       - name: Install Build Tools
         run: 	|
-          curl -f -L -o go-msi.exe https://github.com/observIQ/go-msi/releases/download/v2.0.0/go-msi.exe
+          curl -f -L -o go-msi.exe https://github.com/observIQ/go-msi/releases/download/v2.1.0/go-msi.exe
           curl -f -L -o wix310-binaries.zip http://wixtoolset.org/downloads/v3.10.3.3007/wix310-binaries.zip
           unzip wix310-binaries.zip
         working-directory: C:/build
