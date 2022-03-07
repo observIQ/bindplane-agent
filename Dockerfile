@@ -21,10 +21,13 @@ ARG GITHUB_TOKEN
 RUN \
     make install-tools && \
     goreleaser build --single-target --skip-validate --rm-dist
+
+# Find built executable, there is only one, and copy it to working dir
+RUN find /collector/dist -name observiq-collector -exec cp {} . \;
+
 RUN curl -L \
     --output /opt/opentelemetry-java-contrib-jmx-metrics.jar \
     "https://github.com/open-telemetry/opentelemetry-java-contrib/releases/download/${JMX_JAR_VERSION}/opentelemetry-jmx-metrics.jar"
-
 
 # Official OpenJDK has multi arch manifests for amd64 and arm64
 # Java is required for JMX receiver
@@ -44,8 +47,8 @@ ENV PATH=$PATH:/usr/local/openjdk-8/bin
 # config directory
 RUN mkdir -p /etc/otel
 
-# copy binary with unpredictable name due to dynamic GOOS / GOARCH
-COPY --from=build /collector/dist/* /collector
+# copy binary
+COPY --from=build /collector/observiq-collector /collector/
 
 # copy jmx receiver dependency
 COPY --from=build /opt/opentelemetry-java-contrib-jmx-metrics.jar /opt/opentelemetry-java-contrib-jmx-metrics.jar

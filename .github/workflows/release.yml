@@ -34,7 +34,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Copy Windows Binary
-        run: cp dist/collector_windows_amd64.exe windows/observiq-collector.exe
+        run: cp dist/collector_windows_amd64/observiq-collector.exe windows/observiq-collector.exe
       - name: Get Stanza Plugins Ref
         id: plugins
         run: echo "::set-output name=ref::$(Get-Content ./PLUGINS_VERSION)"
@@ -166,7 +166,7 @@ jobs:
           #  JMX_JAR_VERSION=v1.7.0
           tags: |
             observiq/observiq-collector:${{ steps.get-tag.outputs.tag }}
-          
+
   release:
     needs: [build-msi]
     runs-on: ubuntu-20.04

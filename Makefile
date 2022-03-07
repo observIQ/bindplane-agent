@@ -161,7 +161,7 @@ release: release-prep
 # Build and sign, skip release and ignore dirty git tree
 .PHONY: release-test
 release-test: release-prep
-	goreleaser release --parallelism 4 --skip-validate --skip-publish --rm-dist
+	goreleaser release --parallelism 4 --skip-validate --skip-publish --skip-sign --rm-dist
 
 .PHONY: for-all
 for-all:

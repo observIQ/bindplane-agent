@@ -24,7 +24,7 @@ builds:
       - -X github.com/observiq/observiq-collector/internal/version.version=v{{ .Version }}
       - -X github.com/observiq/observiq-collector/internal/version.gitHash={{ .FullCommit }}
       - -X github.com/observiq/observiq-collector/internal/version.date={{ .Date }}
-    no_unique_dist_dir: true
+    no_unique_dist_dir: false
 
 # https://goreleaser.com/customization/archive/
 archives:
