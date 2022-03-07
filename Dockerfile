@@ -19,7 +19,7 @@ COPY . /collector
 ARG JMX_JAR_VERSION=v1.7.0
 RUN \
     make install-tools && \
-    make collector
+    goreleaser build --single-target --skip-validate --rm-dist
 RUN curl -L \
     --output /opt/opentelemetry-java-contrib-jmx-metrics.jar \
     "https://github.com/open-telemetry/opentelemetry-java-contrib/releases/download/${JMX_JAR_VERSION}/opentelemetry-jmx-metrics.jar"
@@ -44,7 +44,7 @@ ENV PATH=$PATH:/usr/local/openjdk-8/bin
 RUN mkdir -p /etc/otel
 
 # copy binary with unpredictable name due to dynamic GOOS / GOARCH
-COPY --from=build /collector/build/* /collector
+COPY --from=build /collector/dist/* /collector
 
 # copy jmx receiver dependency
 COPY --from=build /opt/opentelemetry-java-contrib-jmx-metrics.jar /opt/opentelemetry-java-contrib-jmx-metrics.jar

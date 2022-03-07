@@ -71,7 +71,7 @@ install-tools:
 	cd $(TOOLS_MOD_DIR) && go install golang.org/x/tools/cmd/goimports	
 	cd $(TOOLS_MOD_DIR) && go install github.com/client9/misspell/cmd/misspell
 	cd $(TOOLS_MOD_DIR) && go install github.com/sigstore/cosign/cmd/cosign
-	cd $(TOOLS_MOD_DIR) && go install github.com/goreleaser/goreleaser@v1.3.1
+	cd $(TOOLS_MOD_DIR) && go install github.com/goreleaser/goreleaser
 	cd $(TOOLS_MOD_DIR) && go install github.com/securego/gosec/v2
 	cd $(TOOLS_MOD_DIR) && go install github.com/uw-labs/lichen
 
@@ -110,7 +110,7 @@ fmt:
 
 .PHONY: tidy
 tidy:
-	$(MAKE) for-all CMD="go mod tidy -go=1.17"
+	$(MAKE) for-all CMD="go mod tidy -compat=1.17"
 
 .PHONY: gosec
 gosec:
