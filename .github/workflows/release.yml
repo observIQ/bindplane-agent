@@ -24,13 +24,17 @@ jobs:
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-
-      - name: Install goreleaser
-        run: go install github.com/goreleaser/goreleaser
-        working-directory: ./internal/tools
-      - name: Build Windows Binary
-        run: |
-          goreleaser build --single-target --skip-validate --rm-dist
-          cp dist/collector_windows_amd64.exe windows/observiq-collector.exe
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v2
+        with:
+          # either 'goreleaser' (default) or 'goreleaser-pro'
+          distribution: goreleaser
+          version: "v1.5.0"
+          args: build --single-target --skip-validate --rm-dist
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Copy Windows Binary
+        run: cp dist/collector_windows_amd64.exe windows/observiq-collector.exe
       - name: Get Stanza Plugins Ref
         id: plugins
         run: echo "::set-output name=ref::$(Get-Content ./PLUGINS_VERSION)"
@@ -156,11 +160,13 @@ jobs:
           #platforms: linux/amd64,linux/arm64
           platforms: linux/amd64
           push: true
+          build-args: |
+            GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
           # uncomment to override jar version: https://github.com/open-telemetry/opentelemetry-java-contrib/releases
-          #build-args: |
           #  JMX_JAR_VERSION=v1.7.0
           tags: |
             observiq/observiq-collector:${{ steps.get-tag.outputs.tag }}
+          
   release:
     needs: [build-msi]
     runs-on: ubuntu-20.04
