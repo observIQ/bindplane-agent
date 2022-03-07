@@ -64,7 +64,7 @@ require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/awsxrayreceiver v0.45.1
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/carbonreceiver v0.45.1
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/cloudfoundryreceiver v0.45.1
-	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/collectdreceiver v0.45.1
+	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/collectdreceiver v0.46.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/couchdbreceiver v0.45.1
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/dockerstatsreceiver v0.45.1
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/dotnetdiagnosticsreceiver v0.45.1
