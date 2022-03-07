@@ -20,7 +20,7 @@ require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/awsxrayexporter v0.45.1
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/azuremonitorexporter v0.45.1
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/carbonexporter v0.45.1
-	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/elasticsearchexporter v0.45.1
+	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/elasticsearchexporter v0.46.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/f5cloudexporter v0.45.1
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/fileexporter v0.45.1
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlecloudexporter v0.46.0
@@ -144,7 +144,7 @@ require (
 	github.com/eapache/go-resiliency v1.2.0 // indirect
 	github.com/eapache/go-xerial-snappy v0.0.0-20180814174437-776d5712da21 // indirect
 	github.com/eapache/queue v1.1.0 // indirect
-	github.com/elastic/go-elasticsearch/v7 v7.17.0 // indirect
+	github.com/elastic/go-elasticsearch/v7 v7.17.1 // indirect
 	github.com/elastic/go-structform v0.0.9 // indirect
 	github.com/euank/go-kmsg-parser v2.0.0+incompatible // indirect
 	github.com/go-kit/kit v0.11.0 // indirect
