@@ -27,7 +27,7 @@ JAVA_CONTRIB_VERSION="$(cat "$PROJECT_BASE/JAVA_CONTRIB_VERSION")"
 
 echo "Retrieving java contrib at $JAVA_CONTRIB_VERSION"
 curl -fL -o "$DOWNLOAD_DIR/opentelemetry-java-contrib-jmx-metrics.jar" \
-    "https://github.com/open-telemetry/opentelemetry-java-contrib/releases/download/$(cat "$PROJECT_BASE/JAVA_CONTRIB_VERSION")/opentelemetry-jmx-metrics.jar" > /dev/null 2>&1
+    "https://github.com/open-telemetry/opentelemetry-java-contrib/releases/download/$JAVA_CONTRIB_VERSION/opentelemetry-jmx-metrics.jar" > /dev/null 2>&1
 
 
 echo "Retrieving stanza-plugs at commit $PLUGIN_VERSION"
