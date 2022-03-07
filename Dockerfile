@@ -17,6 +17,7 @@ FROM golang:1.17 as build
 WORKDIR /collector
 COPY . /collector
 ARG JMX_JAR_VERSION=v1.7.0
+ARG GITHUB_TOKEN
 RUN \
     make install-tools && \
     goreleaser build --single-target --skip-validate --rm-dist
