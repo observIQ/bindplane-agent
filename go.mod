@@ -37,7 +37,7 @@ require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/zipkinexporter v0.45.1
 	github.com/open-telemetry/opentelemetry-collector-contrib/extension/bearertokenauthextension v0.45.1
 	github.com/open-telemetry/opentelemetry-collector-contrib/extension/healthcheckextension v0.45.1
-	github.com/open-telemetry/opentelemetry-collector-contrib/extension/oidcauthextension v0.45.1
+	github.com/open-telemetry/opentelemetry-collector-contrib/extension/oidcauthextension v0.46.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/extension/pprofextension v0.45.1
 	github.com/open-telemetry/opentelemetry-collector-contrib/extension/storage v0.45.1
 	github.com/open-telemetry/opentelemetry-collector-contrib/processor/attributesprocessor v0.45.1
