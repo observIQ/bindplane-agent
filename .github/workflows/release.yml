@@ -2,7 +2,7 @@ name: release
 on:
   push:
     tags:
-      - 'v*'
+      - "v*"
 
 jobs:
   build-msi:
@@ -61,7 +61,7 @@ jobs:
           echo "C:/build" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
       # Installs go-msi and wix.
       - name: Install Build Tools
-        run: 	|
+        run: |
           curl -f -L -o go-msi.exe https://github.com/observIQ/go-msi/releases/download/v2.1.0/go-msi.exe
           curl -f -L -o wix310-binaries.zip http://wixtoolset.org/downloads/v3.10.3.3007/wix310-binaries.zip
           unzip wix310-binaries.zip
@@ -197,7 +197,10 @@ jobs:
         run: 'echo "$COSIGN_PRIVATE_KEY" >> cosign.key'
         shell: bash
         env:
-          COSIGN_PRIVATE_KEY : ${{secrets.ORG_COSIGN_PRIVATE_KEY}}
+          COSIGN_PRIVATE_KEY: ${{secrets.ORG_COSIGN_PRIVATE_KEY}}
+        # Prep dependencies needed release archiving
+      - name: Preparing Release Dependencies
+        run: make release-prep
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v2
         with:

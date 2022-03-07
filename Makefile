@@ -145,14 +145,22 @@ add-license:
 			echo "Add License finished successfully"; \
 		fi
 
+# Downloads and setups dependencies that are packaged with binary
+.PHONY: release-prep
+release-prep:
+	@rm -rf release_deps
+	@mkdir release_deps
+	./buildscripts/download-dependencies.sh release_deps
+	@cp config/example.yaml release_deps/config.yaml
+
 # Build, sign, and release
 .PHONY: release
-release:
+release: release-prep
 	goreleaser release --parallelism 4 --rm-dist
 
 # Build and sign, skip release and ignore dirty git tree
 .PHONY: release-test
-release-test:
+release-test: release-prep
 	goreleaser release --parallelism 4 --skip-validate --skip-publish --rm-dist
 
 .PHONY: for-all
