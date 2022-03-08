@@ -20,20 +20,25 @@ set -e
 
 DOWNLOAD_DIR="${1:-.}"
 START_DIR=$PWD
-BASEDIR="$(dirname "$(realpath "$0")")"
+BASEDIR="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 PROJECT_BASE="$BASEDIR/.."
+PLUGIN_VERSION="$(cat "$PROJECT_BASE/PLUGINS_VERSION")"
+JAVA_CONTRIB_VERSION="$(cat "$PROJECT_BASE/JAVA_CONTRIB_VERSION")"
 
+echo "Retrieving java contrib at $JAVA_CONTRIB_VERSION"
 curl -fL -o "$DOWNLOAD_DIR/opentelemetry-java-contrib-jmx-metrics.jar" \
-    "https://github.com/open-telemetry/opentelemetry-java-contrib/releases/download/$(cat "$PROJECT_BASE/JAVA_CONTRIB_VERSION")/opentelemetry-jmx-metrics.jar"
+    "https://github.com/open-telemetry/opentelemetry-java-contrib/releases/download/$JAVA_CONTRIB_VERSION/opentelemetry-jmx-metrics.jar" > /dev/null 2>&1
 
 
+echo "Retrieving stanza-plugs at commit $PLUGIN_VERSION"
 if [ ! -d "$DOWNLOAD_DIR/stanza-plugins" ]; then
-    git clone git@github.com:observIQ/stanza-plugins.git "$DOWNLOAD_DIR/stanza-plugins"
+    git clone git@github.com:observIQ/stanza-plugins.git "$DOWNLOAD_DIR/stanza-plugins" > /dev/null 2>&1
 fi
 
 cd "$DOWNLOAD_DIR/stanza-plugins"
-git fetch --all
-git checkout "$(cat "$PROJECT_BASE/PLUGINS_VERSION")"
+git fetch --all > /dev/null 2>&1
+git checkout $PLUGIN_VERSION > /dev/null 2>&1
 cd "$START_DIR"
 
 cp -r "$DOWNLOAD_DIR/stanza-plugins/plugins" "$DOWNLOAD_DIR"
+rm -rf "$DOWNLOAD_DIR/stanza-plugins"

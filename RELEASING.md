@@ -12,3 +12,11 @@ Releases are managed through GitHub releases. The steps to create a release are 
   - Mark the release as a full release once it is finished.
 
 4. Done! The collector is released
+
+# Testing Release locally
+
+In order to run the `make release-test` you need to setup the following in your environment:
+
+1. Run `make install-tools`
+2. Setup a github token per [goreleaser instructions](https://goreleaser.com/scm/github/#api-token)
+3. Run `make release-test`

@@ -2,7 +2,7 @@ name: release
 on:
   push:
     tags:
-      - 'v*'
+      - "v*"
 
 jobs:
   build-msi:
@@ -34,7 +34,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Copy Windows Binary
-        run: cp dist/collector_windows_amd64.exe windows/observiq-collector.exe
+        run: cp dist/collector_windows_amd64/observiq-collector.exe windows/observiq-collector.exe
       - name: Get Stanza Plugins Ref
         id: plugins
         run: echo "::set-output name=ref::$(Get-Content ./PLUGINS_VERSION)"
@@ -61,7 +61,7 @@ jobs:
           echo "C:/build" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
       # Installs go-msi and wix.
       - name: Install Build Tools
-        run: 	|
+        run: |
           curl -f -L -o go-msi.exe https://github.com/observIQ/go-msi/releases/download/v2.1.0/go-msi.exe
           curl -f -L -o wix310-binaries.zip http://wixtoolset.org/downloads/v3.10.3.3007/wix310-binaries.zip
           unzip wix310-binaries.zip
@@ -166,7 +166,7 @@ jobs:
           #  JMX_JAR_VERSION=v1.7.0
           tags: |
             observiq/observiq-collector:${{ steps.get-tag.outputs.tag }}
-          
+
   release:
     needs: [build-msi]
     runs-on: ubuntu-20.04
@@ -197,7 +197,7 @@ jobs:
         run: 'echo "$COSIGN_PRIVATE_KEY" >> cosign.key'
         shell: bash
         env:
-          COSIGN_PRIVATE_KEY : ${{secrets.ORG_COSIGN_PRIVATE_KEY}}
+          COSIGN_PRIVATE_KEY: ${{secrets.ORG_COSIGN_PRIVATE_KEY}}
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v2
         with:

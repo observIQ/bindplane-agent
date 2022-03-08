@@ -14,7 +14,7 @@
 # limitations under the License.
 
 set -e
-BASEDIR="$(dirname "$(realpath "$0")")"
+BASEDIR="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 PROJECT_BASE="$BASEDIR/../.."
 
 [ -f go-msi.exe ] || curl -f -L -o go-msi.exe https://github.com/observIQ/go-msi/releases/download/v2.1.0/go-msi.exe

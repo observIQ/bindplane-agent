@@ -1,7 +1,11 @@
+before:
+  hooks:
+    - make release-prep
+
 # https://goreleaser.com/customization/build/
 builds:
   - id: collector
-    binary: collector_{{ .Os }}_{{ .Arch }}
+    binary: observiq-collector
     main: ./cmd/collector
     env:
       - CGO_ENABLED=0
@@ -24,14 +28,27 @@ builds:
       - -X github.com/observiq/observiq-collector/internal/version.version=v{{ .Version }}
       - -X github.com/observiq/observiq-collector/internal/version.gitHash={{ .FullCommit }}
       - -X github.com/observiq/observiq-collector/internal/version.date={{ .Date }}
-    no_unique_dist_dir: true
+    no_unique_dist_dir: false
 
 # https://goreleaser.com/customization/archive/
 archives:
-  - builds:
-      - collector
-    # skip archiving as tar.gz / zip
-    format: binary
+  - format: tar.gz
+    name_template: "{{ .ProjectName }}-v{{ .Version }}-{{ .Os }}-{{ .Arch }}"
+    files:
+      - LICENSE
+      - src: release_deps/opentelemetry-java-contrib-jmx-metrics.jar
+        dst: "."
+        strip_parent: true
+      - src: release_deps/config.yaml
+        dst: "."
+        strip_parent: true
+      - src: release_deps/plugins/*
+        dst: plugins
+        strip_parent: true
+
+    format_overrides:
+      - goos: windows
+        format: zip
 
 # https://goreleaser.com/customization/checksum/
 checksum:

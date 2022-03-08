@@ -14,7 +14,7 @@
 # limitations under the License.
 
 set -e
-BASEDIR="$(dirname "$(realpath "$0")")"
+BASEDIR="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 PROJECT_BASE="$BASEDIR/../.."
 
 cp "$PROJECT_BASE/dist/collector_windows_amd64.exe" "observiq-collector.exe"
