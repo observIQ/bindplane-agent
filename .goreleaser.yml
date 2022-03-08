@@ -1,3 +1,7 @@
+before:
+  hooks:
+    - make release-prep
+
 # https://goreleaser.com/customization/build/
 builds:
   - id: collector

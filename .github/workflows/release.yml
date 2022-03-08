@@ -198,9 +198,6 @@ jobs:
         shell: bash
         env:
           COSIGN_PRIVATE_KEY: ${{secrets.ORG_COSIGN_PRIVATE_KEY}}
-        # Prep dependencies needed release archiving
-      - name: Preparing Release Dependencies
-        run: make release-prep
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v2
         with:

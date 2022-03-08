@@ -155,12 +155,12 @@ release-prep:
 
 # Build, sign, and release
 .PHONY: release
-release: release-prep
+release:
 	goreleaser release --parallelism 4 --rm-dist
 
 # Build and sign, skip release and ignore dirty git tree
 .PHONY: release-test
-release-test: release-prep
+release-test:
 	goreleaser release --parallelism 4 --skip-validate --skip-publish --skip-sign --rm-dist
 
 .PHONY: for-all
