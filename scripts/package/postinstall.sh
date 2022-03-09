@@ -72,8 +72,9 @@ install_service() {
 
 finish_permissions() {
     # Goreleaser does not set plugin file permissions, so do them here
-    chown -R stanza:stanza /opt/observiq-collector/plugins/*
-    chmod 0644 /opt/observiq-collector/plugins/*
+    # We also change the owner of the binary to observiq-collector
+    chown -R observiq-collector:observiq-collector /opt/observiq-collector/observiq-collector /opt/observiq-collector/plugins/*
+    chmod 0640 /opt/observiq-collector/plugins/*
 }
 
 

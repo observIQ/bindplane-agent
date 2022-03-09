@@ -60,12 +60,12 @@ nfpms:
     formats:
     - rpm
     - deb
-    bindir: /usr/bin
+    bindir: /opt/observiq-collector
     contents:
-    - src: release_deps/plugins
-      dst: /opt/observiq-collector/plugins
+    - dst: /opt/observiq-collector
+      type: dir
       file_info:
-        mode: 0774
+        mode: 0755
         owner: observiq-collector
         group: observiq-collector
     - src: release_deps/config.yaml
@@ -78,9 +78,20 @@ nfpms:
     - src: release_deps/opentelemetry-java-contrib-jmx-metrics.jar
       dst: /opt/observiq-collector/opentelemetry-java-contrib-jmx-metrics.jar
       file_info:
-        mode: 0550
+        mode: 0755
         owner: observiq-collector
         group: observiq-collector
+    - dst: /opt/observiq-collector/plugins
+      type: dir
+      file_info:
+        mode: 0750 # restrict plugins to owner / group only
+        owner: observiq-collector
+        group: observiq-collector
+    # Note: plugins owner/group/mode is set in the post-install script
+    # Attempting to set the permissions here results in the following error:
+    # nfpm failed: cannot write header of release_deps/plugins/amazon_eks.yaml to data.tar.gz: archive/tar: missed writing 1736 bytes
+    - src: release_deps/plugins/*
+      dst: /opt/observiq-collector/plugins
     scripts:
       preinstall: "./scripts/package/preinstall.sh"
       postinstall: ./scripts/package/postinstall.sh
