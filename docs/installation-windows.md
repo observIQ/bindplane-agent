@@ -11,13 +11,15 @@ Alternatively, the Powershell command below may be run to install the MSI with n
 msiexec /i "<path-to-msi>" /quiet
 ```
 
-## Next Steps
+## Configuring the Collector
 
 After installing, the `observiq-collector` service will be running and ready for configuration! 
 
 Logs from the collector will appear in the Application event log.
 
 By default, the config file for the collector can be found at `C:\Program Files\observiq-collector\config.yaml`. When changing the configuration,the collector service must be restarted in order for config changes to take effect.
+
+For more information on configuring the collector, see the [OpenTelemetry docs](https://opentelemetry.io/docs/collector/configuration/).
 
 ## Restarting the Collector
 Restarting the collector may be done through the services dialog.
