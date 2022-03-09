@@ -16,7 +16,7 @@ create_systemd_service() {
 
     echo "detected service file directory: ${systemd_service_dir}"
 
-    systemd_service_file="${systemd_service_dir}/stanza.service"
+    systemd_service_file="${systemd_service_dir}/observiq-collector.service"
 
     cat <<EOF > ${systemd_service_file}
 [Unit]
@@ -30,7 +30,7 @@ User=observiq-collector
 Group=observiq-collector
 Environment=PATH=/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin
 WorkingDirectory=/opt/observiq-collector
-ExecStart=/usr/bin/observiq-collector --config config.yaml
+ExecStart=/opt/observiq-collector/observiq-collector --config config.yaml
 SuccessExitStatus=0
 TimeoutSec=120
 StandardOutput=journal

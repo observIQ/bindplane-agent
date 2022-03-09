@@ -1,0 +1,28 @@
+ssh_pub_key = File.readlines("#{Dir.home}/.ssh/id_ed25519.pub").first.strip
+
+$script_rpm = <<-SCRIPT
+echo #{ssh_pub_key} >> /home/vagrant/.ssh/authorized_keys
+
+if command -v rpm > /dev/null 2>&1; then
+    sudo rpm -i '/dist/observiq-collector_*_linux_amd64.rpm'
+else
+    sudo dpkg -i /dist/observiq-collector_*_linux_amd64.deb
+fi
+
+sudo systemctl enable observiq-collector
+sudo systemctl start observiq-collector
+SCRIPT
+
+Vagrant.configure("2") do |config|
+    config.vm.define "centos8" do |instance|
+        instance.vm.synced_folder "../../dist", "/dist"
+        instance.vm.provision "shell", inline: $script_rpm
+        instance.vm.box = "almalinux/8" # alma is centos8 with valid repos
+    end
+
+    config.vm.define "debian11" do |instance|
+        instance.vm.synced_folder "../../dist", "/dist"
+        instance.vm.provision "shell", inline: $script_rpm
+        instance.vm.box = "debian/bullseye64"
+    end
+end

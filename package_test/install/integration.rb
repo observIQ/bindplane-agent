@@ -6,17 +6,6 @@ describe file('/opt/observiq-collector') do
 end
 
 [
-    '/opt/observiq-collector/plugins',
-].each do |dir|
-    describe file(dir) do
-        its('mode') { should cmp '0750' }
-        its('owner') { should eq 'observiq-collector' }
-        its('group') { should eq 'observiq-collector' }
-        its('type') { should cmp 'directory' }
-    end
-end
-
-[
     '/opt/observiq-collector/observiq-collector',
     '/opt/observiq-collector/opentelemetry-java-contrib-jmx-metrics.jar'
 ].each do |bin|
