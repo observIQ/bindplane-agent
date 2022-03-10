@@ -44,6 +44,18 @@ After downloading the MSI, simply double click it to open the installation wizar
 
 For more installation information see [installing on Windows](/docs/installation-windows.md).
 
+#### macOS
+
+To install the collector on macOS use the following brew commands:
+
+```sh
+brew tap observiq/homebrew-observiq-collecor
+brew update
+brew install observiq-collector
+```
+
+For more installation information see [installing on macOS](/docs/installation-mac.md).
+
 ### Next Steps
 
 Now that the collector is installed it is collecting basic metrics about the host machine printing them to the log. If you want to further configure your collector you may do so by editing the config file. To find your config file based on your OS reference the table below:
@@ -52,6 +64,7 @@ Now that the collector is installed it is collecting basic metrics about the hos
 | :--- | :---- |
 | Linux | /opt/observiq-otel-collector/config.yaml |
 | Windows | C:\Program Files\observIQ OpenTelemetry Collector\config.yaml |
+| macOS | $(brew --prefix observiq-collector)/config.yaml |
 
 For more information on configuration see the [Configuration section](#configuration).
 
