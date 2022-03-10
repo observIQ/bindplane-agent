@@ -28,7 +28,7 @@ end
     end
 end
 
-source_dir = 'release_deps/plugins/'
+source_dir = __dir__ + '/../../release_deps/plugins/'
 Find.find(source_dir) do |path|
     plugin_file = path.delete_prefix(source_dir)
     path = "/opt/observiq-collector/plugins/#{plugin_file}"
