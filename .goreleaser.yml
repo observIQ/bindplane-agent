@@ -171,10 +171,64 @@ brews:
         # Copy base config (skip this if you already have a config)
         cp #{prefix}/config.yaml $HOME/observiq-collector/
       ****************************************************************
+
+      ****************************************************************
+      Below are services commands to run to manage the collector service.
+      If you wish to run the collector at boot prefix these commands with sudo
+      otherwise the service will run at login.
+
+      To start the collector service run:
+
+        brew services start observiq-collector
+
+      To stop the collector service run:
+
+        brew services stop observiq-collector
+
+      To restart the collector service run:
+
+        brew services restart observiq-collector
+      ****************************************************************
+
+      ****************************************************************
+      To uninstall the collector and it's dependencies run the following commands:
+
+          rm -rf $HOME/observiq-collector
+          sudo rm /opt/opentelemetry-java-contrib-jmx-metrics.jar
+          brew services remove observiq-collector
+          brew uninstall observiq-collector
+
+      ****************************************************************
     install: |
       bin.install "observiq-collector"
       prefix.install "LICENSE", "config.yaml"
       prefix.install Dir["plugins"]
       lib.install "opentelemetry-java-contrib-jmx-metrics.jar"
+    plist: |
+      <?xml version="1.0" encoding="UTF-8"?>
+      <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+      <plist version="1.0">
+        <dict>
+
+          <key>Label</key>
+          <string>com.observiq.collector</string>
+
+          <key>ProgramArguments</key>
+          <array>
+            <string>#{bin}/observiq-collector</string>
+            <string>--config</string>
+            <string>#{prefix}/config.yaml</string>
+          </array>
+
+          <key>RunAtLoad</key>
+          <true/>
+
+          <key>StandardErrorPath</key>
+          <string>/tmp/observiq-collector.err</string>
+
+          <key>StandardOutPath</key>
+          <string>/tmp/observiq-collector.out</string>
+        </dict>
+      </plist>
     # For local testing
-    # skip_upload: "true"
+    skip_upload: "true"
