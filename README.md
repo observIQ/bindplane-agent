@@ -3,6 +3,9 @@
 The observIQ Collector is observIQ's distribution of the OpenTelemetry Collector. It provides everything you need to get setup and sending logs to 
 [observIQ](https://observiq.com/).
 
+## Installation
+
+* [Installing on Windows](/docs/installation-windows.md)
 ### Configs
 
 For sample configs, see the `./config` directory.
@@ -11,6 +14,9 @@ For general configuration help, see the [OpenTelemetry docs](https://opentelemet
 For configuration options of a specific component, take a look at the README found in their respective module roots.
 
 For a list of possible command line arguments to use with the collector, run the collector with the `--help` argument.
+
+
+
 # Included Components
 
 ### Receivers

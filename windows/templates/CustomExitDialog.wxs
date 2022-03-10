@@ -22,7 +22,7 @@ To restart collector the service, run:
                     <Condition Action="show">Installed</Condition>
                 </Control>
                 <Control Id="DocLink" Hidden="yes" Type="Hyperlink" X="135" Y="200" Width="220" Height="20" Transparent="yes">
-                    <Text><![CDATA[<a href="https://github.com/observIQ/observiq-collector/blob/windows-docs/docs/installation-windows.md#next-steps">Click here for online documentation on next steps!</a>]]></Text>
+                    <Text><![CDATA[<a href="https://github.com/observIQ/observiq-collector/blob/windows-docs/docs/installation-windows.md#configuring-the-collector">Click here for online documentation on configuration.</a>]]></Text>
                     <Condition Action="show">NOT Installed</Condition>
                 </Control>
                 <Control Id="Title" Type="Text" X="135" Y="20" Width="220" Height="60" Transparent="yes" NoPrefix="yes" Text="!(loc.ExitDialogTitle)" />
