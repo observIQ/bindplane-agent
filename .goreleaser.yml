@@ -160,16 +160,12 @@ brews:
       ****************************************************************
       After installation please run the following to finish setup:
 
-        mkdir $HOME/observiq-collector
-        
         # Default location for the opentelemetry-java-contrib-jmx-metrics.jar
         sudo cp #{lib}/opentelemetry-java-contrib-jmx-metrics.jar /opt/
 
-        # Install logreceiver plugins
-        cp -r #{prefix}/plugins $HOME/observiq-collector/
+      The configuration file that is run by the service is located at #{prefix}/config.yaml.
 
-        # Copy base config (skip this if you already have a config)
-        cp #{prefix}/config.yaml $HOME/observiq-collector/
+      If you are configuring a logreceiver the plug director is located at #{prefix}/plugins.
       ****************************************************************
 
       ****************************************************************
@@ -193,10 +189,9 @@ brews:
       ****************************************************************
       To uninstall the collector and it's dependencies run the following commands:
 
-          rm -rf $HOME/observiq-collector
-          sudo rm /opt/opentelemetry-java-contrib-jmx-metrics.jar
-          brew services remove observiq-collector
+          brew services stop observiq-collector
           brew uninstall observiq-collector
+          sudo rm /opt/opentelemetry-java-contrib-jmx-metrics.jar
 
       ****************************************************************
     install: |
@@ -231,4 +226,4 @@ brews:
         </dict>
       </plist>
     # For local testing
-    skip_upload: "true"
+    # skip_upload: "true"
