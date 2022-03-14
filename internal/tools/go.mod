@@ -5,7 +5,7 @@ go 1.17
 require (
 	github.com/client9/misspell v0.3.4
 	github.com/google/addlicense v1.0.0
-	github.com/goreleaser/goreleaser v1.6.1
+	github.com/goreleaser/goreleaser v1.6.3
 	github.com/securego/gosec/v2 v2.10.0
 	github.com/sigstore/cosign v1.6.0
 	github.com/uw-labs/lichen v0.1.5
