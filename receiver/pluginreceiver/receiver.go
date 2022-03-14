@@ -3,6 +3,7 @@ package pluginreceiver
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/service"
@@ -59,11 +60,14 @@ func startService(ctx context.Context, svc Service) error {
 		}
 	}()
 
+	ticker := time.NewTicker(time.Millisecond * 250)
+	defer ticker.Stop()
+
 	for {
 		select {
 		case err := <-errChan:
 			return err
-		default:
+		case <-ticker.C:
 			if svc.GetState() == service.Running {
 				return nil
 			}
