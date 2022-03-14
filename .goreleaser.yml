@@ -187,7 +187,7 @@ brews:
       ****************************************************************
 
       ****************************************************************
-      To uninstall the collector and it's dependencies run the following commands:
+      To uninstall the collector and its dependencies run the following commands:
 
           brew services stop observiq-collector
           brew uninstall observiq-collector
