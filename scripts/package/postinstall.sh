@@ -62,12 +62,13 @@ EOF
     echo "configured systemd service"
 
     cat << EOF
+
 The "observiq-collector" service has been configured!
 
 The collector's config file can be found here: 
   /opt/observiq-collector/config.yaml
 
-For more information of configuring the collector, see the OpenTelemetry docs:
+For more information on configuring the collector, see the OpenTelemetry docs:
   https://opentelemetry.io/docs/collector/configuration/
 
 To stop the observiq-collector service, run:
@@ -76,7 +77,7 @@ To stop the observiq-collector service, run:
 To start the observiq-collector service, run:
   sudo systemctl start observiq-collector
 
-to restart the observiq-collector service, run:
+To restart the observiq-collector service, run:
   sudo systemctl restart observiq-collector
 EOF
 }
