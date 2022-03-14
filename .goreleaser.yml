@@ -54,8 +54,9 @@ nfpms:
   - id: collector
     package_name: observiq-collector
     vendor: observIQ, Inc
+    maintainer: observIQ <support@observiq.com>
     description: observIQ's distribution of the OpenTelemetry collector
-    homepage: https://observiq.com/
+    homepage: https://github.com/observIQ/observiq-collector
     license: Apache 2.0
     formats:
     - rpm
@@ -76,7 +77,7 @@ nfpms:
         group: observiq-collector
       type: config|noreplace
     - src: release_deps/opentelemetry-java-contrib-jmx-metrics.jar
-      dst: /opt/observiq-collector/opentelemetry-java-contrib-jmx-metrics.jar
+      dst: /opt/opentelemetry-java-contrib-jmx-metrics.jar
       file_info:
         mode: 0755
         owner: observiq-collector
