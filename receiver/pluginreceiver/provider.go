@@ -61,27 +61,27 @@ func createFactoryProvider(factories component.Factories) *FactoryProvider {
 // The provider first searches its own list of factories, before then searching the host component.
 // An error is returned if the factory does not exist in either location.
 func (f *FactoryProvider) GetFactories(host component.Host, configMap *config.Map) (*component.Factories, error) {
-	var cfg config.Config
-	if err := configMap.Unmarshal(&cfg); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal config: %w", err)
+	var componentMap ComponentMap
+	if err := configMap.Unmarshal(&componentMap); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal component map: %w", err)
 	}
 
-	receiverFactories, err := f.getReceiverFactories(host, &cfg)
+	receiverFactories, err := f.getReceiverFactories(host, &componentMap)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get receiver factories: %w", err)
 	}
 
-	processorFactories, err := f.getProcessorFactories(host, &cfg)
+	processorFactories, err := f.getProcessorFactories(host, &componentMap)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get processor factories: %w", err)
 	}
 
-	exporterFactories, err := f.getExporterFactories(host, &cfg)
+	exporterFactories, err := f.getExporterFactories(host, &componentMap)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get exporter factories: %w", err)
 	}
 
-	extensionFactories, err := f.getExtensionFactories(host, &cfg)
+	extensionFactories, err := f.getExtensionFactories(host, &componentMap)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get extension factories: %w", err)
 	}
@@ -95,13 +95,13 @@ func (f *FactoryProvider) GetFactories(host component.Host, configMap *config.Ma
 }
 
 // getReceiverFactories returns the receiver factories required for the supplied config
-func (f *FactoryProvider) getReceiverFactories(host component.Host, cfg *config.Config) (map[config.Type]component.ReceiverFactory, error) {
+func (f *FactoryProvider) getReceiverFactories(host component.Host, componentMap *ComponentMap) (map[config.Type]component.ReceiverFactory, error) {
 	factories := map[config.Type]component.ReceiverFactory{}
 	for key, factory := range f.factories.Receivers {
 		factories[key] = factory
 	}
 
-	for receiver := range cfg.Receivers {
+	for receiver := range componentMap.Receivers {
 		receiverType := receiver.Type()
 		if _, ok := factories[receiverType]; ok {
 			continue
@@ -120,13 +120,13 @@ func (f *FactoryProvider) getReceiverFactories(host component.Host, cfg *config.
 }
 
 // getProcessorFactories returns the processor factories required for the supplied config
-func (f *FactoryProvider) getProcessorFactories(host component.Host, cfg *config.Config) (map[config.Type]component.ProcessorFactory, error) {
+func (f *FactoryProvider) getProcessorFactories(host component.Host, componentMap *ComponentMap) (map[config.Type]component.ProcessorFactory, error) {
 	factories := map[config.Type]component.ProcessorFactory{}
 	for key, factory := range f.factories.Processors {
 		factories[key] = factory
 	}
 
-	for processor := range cfg.Processors {
+	for processor := range componentMap.Processors {
 		processorType := processor.Type()
 		if _, ok := factories[processorType]; ok {
 			continue
@@ -145,13 +145,13 @@ func (f *FactoryProvider) getProcessorFactories(host component.Host, cfg *config
 }
 
 // getExtensionFactories returns the extension factories required for the supplied config
-func (f *FactoryProvider) getExtensionFactories(host component.Host, cfg *config.Config) (map[config.Type]component.ExtensionFactory, error) {
+func (f *FactoryProvider) getExtensionFactories(host component.Host, componentMap *ComponentMap) (map[config.Type]component.ExtensionFactory, error) {
 	factories := map[config.Type]component.ExtensionFactory{}
 	for key, factory := range f.factories.Extensions {
 		factories[key] = factory
 	}
 
-	for extension := range cfg.Extensions {
+	for extension := range componentMap.Extensions {
 		extensionType := extension.Type()
 		if _, ok := factories[extensionType]; ok {
 			continue
@@ -170,13 +170,13 @@ func (f *FactoryProvider) getExtensionFactories(host component.Host, cfg *config
 }
 
 // getExporterFactories returns the exporter factories required for the supplied config
-func (f *FactoryProvider) getExporterFactories(host component.Host, cfg *config.Config) (map[config.Type]component.ExporterFactory, error) {
+func (f *FactoryProvider) getExporterFactories(host component.Host, componentMap *ComponentMap) (map[config.Type]component.ExporterFactory, error) {
 	factories := map[config.Type]component.ExporterFactory{}
 	for key, factory := range f.factories.Exporters {
 		factories[key] = factory
 	}
 
-	for exporter := range cfg.Exporters {
+	for exporter := range componentMap.Exporters {
 		exporterType := exporter.Type()
 		if _, ok := factories[exporterType]; ok {
 			continue
@@ -192,4 +192,12 @@ func (f *FactoryProvider) getExporterFactories(host component.Host, cfg *config.
 	}
 
 	return factories, nil
+}
+
+// ComponentMap is a map of configured open telemetry components
+type ComponentMap struct {
+	Receivers  map[config.ComponentID]map[string]interface{} `mapstructure:"receivers"`
+	Processors map[config.ComponentID]map[string]interface{} `mapstructure:"processors"`
+	Exporters  map[config.ComponentID]map[string]interface{} `mapstructure:"exporters"`
+	Extensions map[config.ComponentID]map[string]interface{} `mapstructure:"extensions"`
 }

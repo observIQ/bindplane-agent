@@ -16,15 +16,15 @@ const typeStr = "plugin"
 // Config is the configuration of a plugin receiver
 type Config struct {
 	config.ReceiverSettings `mapstructure:",squash"`
-	path                    string                 `mapstructure:"path"`
-	parameters              map[string]interface{} `mapstructure:"parameters"`
+	Path                    string                 `mapstructure:"path"`
+	Parameters              map[string]interface{} `mapstructure:"parameters"`
 }
 
 // createDefaultConfig creates a default config for a plugin receiver
 func createDefaultConfig() config.Receiver {
 	return &Config{
 		ReceiverSettings: config.NewReceiverSettings(config.NewComponentID(typeStr)),
-		parameters:       make(map[string]interface{}),
+		Parameters:       make(map[string]interface{}),
 	}
 }
 
@@ -64,29 +64,31 @@ func createReceiver(cfg config.Receiver, set component.ReceiverCreateSettings, e
 		return nil, errors.New("config is not a plugin receiver config")
 	}
 
-	plugin, err := LoadPlugin(receiverConfig.path)
+	plugin, err := LoadPlugin(receiverConfig.Path)
 	if err != nil {
 		return nil, fmt.Errorf("failed to load plugin: %w", err)
 	}
 
-	if err := plugin.CheckParameters(receiverConfig.parameters); err != nil {
+	if err := plugin.CheckParameters(receiverConfig.Parameters); err != nil {
 		return nil, fmt.Errorf("invalid plugin parameter: %w", err)
 	}
 
-	configMap, err := plugin.RenderConfig(receiverConfig.parameters)
+	configMap, err := plugin.RenderConfig(receiverConfig.Parameters)
 	if err != nil {
 		return nil, fmt.Errorf("failed to render plugin: %w", err)
 	}
 	configProvider := createConfigProvider(configMap)
 	factories := createFactories(emitterFactory)
 	factoryProvider := createFactoryProvider(factories)
+	logger := set.Logger.Named(receiverConfig.ID().String())
 
 	return &Receiver{
+		plugin:          plugin,
 		configProvider:  configProvider,
 		factoryProvider: factoryProvider,
 		buildInfo:       set.BuildInfo,
-		logger:          set.Logger.Named(receiverConfig.ID().String()),
-		createSvc:       createDefaultService,
+		logger:          logger,
+		createService:   createDefaultService,
 	}, nil
 }
 

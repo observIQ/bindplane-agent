@@ -73,7 +73,7 @@ func TestGetFactories(t *testing.T) {
 			config: map[string]interface{}{
 				"receivers": 5,
 			},
-			expectedErr: errors.New("failed to unmarshal config"),
+			expectedErr: errors.New("failed to unmarshal component map"),
 		},
 		{
 			name: "missing receiver factory",

@@ -27,6 +27,7 @@ func TestReceiverGetFactoryFailure(t *testing.T) {
 	configMap := config.NewMapFromStringMap(cfg)
 
 	receiver := Receiver{
+		plugin:          &Plugin{},
 		configProvider:  createConfigProvider(configMap),
 		factoryProvider: &FactoryProvider{},
 		logger:          zap.NewNop(),
@@ -51,17 +52,18 @@ func TestReceiverCreateServiceFailure(t *testing.T) {
 	configMap := config.NewMapFromStringMap(cfg)
 
 	receiver := Receiver{
+		plugin:          &Plugin{},
 		configProvider:  createConfigProvider(configMap),
 		factoryProvider: &FactoryProvider{},
 		logger:          zap.NewNop(),
-		createSvc: func(set service.CollectorSettings) (Service, error) {
+		createService: func(set service.CollectorSettings) (Service, error) {
 			return nil, errors.New("failure")
 		},
 	}
 
 	err := receiver.Start(ctx, host)
 	require.Error(t, err)
-	require.Contains(t, err.Error(), "failed to create service")
+	require.Contains(t, err.Error(), "failed to create internal service")
 }
 
 func TestReceiverStartServiceFailure(t *testing.T) {
@@ -82,17 +84,18 @@ func TestReceiverStartServiceFailure(t *testing.T) {
 	svc.On("GetState").Return(service.Starting)
 
 	receiver := Receiver{
+		plugin:          &Plugin{},
 		configProvider:  createConfigProvider(configMap),
 		factoryProvider: &FactoryProvider{},
 		logger:          zap.NewNop(),
-		createSvc: func(set service.CollectorSettings) (Service, error) {
+		createService: func(set service.CollectorSettings) (Service, error) {
 			return svc, nil
 		},
 	}
 
 	err := receiver.Start(ctx, host)
 	require.Error(t, err)
-	require.Contains(t, err.Error(), "failed to start service")
+	require.Contains(t, err.Error(), "failed to start internal service")
 }
 
 func TestReceiverStartSuccess(t *testing.T) {
@@ -113,10 +116,11 @@ func TestReceiverStartSuccess(t *testing.T) {
 	svc.On("GetState").Return(service.Running)
 
 	receiver := Receiver{
+		plugin:          &Plugin{},
 		configProvider:  createConfigProvider(configMap),
 		factoryProvider: &FactoryProvider{},
 		logger:          zap.NewNop(),
-		createSvc: func(set service.CollectorSettings) (Service, error) {
+		createService: func(set service.CollectorSettings) (Service, error) {
 			return svc, nil
 		},
 	}
@@ -131,12 +135,12 @@ func TestReceiverShutdown(t *testing.T) {
 	err := receiver.Shutdown(ctx)
 	require.NoError(t, err)
 
-	svc := &MockService{}
-	svc.On("Shutdown").Return().Once()
-	receiver.svc = svc
+	service := &MockService{}
+	service.On("Shutdown").Return().Once()
+	receiver.service = service
 	err = receiver.Shutdown(ctx)
 	require.NoError(t, err)
-	svc.AssertExpectations(t)
+	service.AssertExpectations(t)
 }
 
 func TestCreateDefaultService(t *testing.T) {
@@ -146,6 +150,13 @@ func TestCreateDefaultService(t *testing.T) {
 	svc, err := createDefaultService(set)
 	require.NoError(t, err)
 	require.IsType(t, &service.Collector{}, svc)
+}
+
+func TestWrapLogger(t *testing.T) {
+	logger := zap.NewNop()
+	opt := wrapLogger(logger)
+	wrappedLogger := zap.NewNop().WithOptions(opt)
+	require.Equal(t, logger.Core(), wrappedLogger.Core())
 }
 
 // MockService is a mock type for the Service type

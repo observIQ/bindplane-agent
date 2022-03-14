@@ -24,22 +24,22 @@ func TestCreateReceiver(t *testing.T) {
 		{
 			name: "missing plugin",
 			cfg: &Config{
-				path: "./test/missing.yaml",
+				Path: "./test/missing.yaml",
 			},
 			expectedErr: errors.New("failed to load plugin"),
 		},
 		{
 			name: "invalid plugin yaml",
 			cfg: &Config{
-				path: "./test/plugin-invalid-yaml.yaml",
+				Path: "./test/plugin-invalid-yaml.yaml",
 			},
 			expectedErr: errors.New("failed to load plugin"),
 		},
 		{
 			name: "invalid plugin parameter",
 			cfg: &Config{
-				path: "./test/plugin-valid.yaml",
-				parameters: map[string]interface{}{
+				Path: "./test/plugin-valid.yaml",
+				Parameters: map[string]interface{}{
 					"env": 5,
 				},
 			},
@@ -48,8 +48,8 @@ func TestCreateReceiver(t *testing.T) {
 		{
 			name: "invalid plugin template",
 			cfg: &Config{
-				path: "./test/plugin-invalid-template.yaml",
-				parameters: map[string]interface{}{
+				Path: "./test/plugin-invalid-template.yaml",
+				Parameters: map[string]interface{}{
 					"env": "prod",
 				},
 			},
@@ -58,8 +58,8 @@ func TestCreateReceiver(t *testing.T) {
 		{
 			name: "valid plugin",
 			cfg: &Config{
-				path: "./test/plugin-valid.yaml",
-				parameters: map[string]interface{}{
+				Path: "./test/plugin-valid.yaml",
+				Parameters: map[string]interface{}{
 					"env": "prod",
 				},
 			},
@@ -92,8 +92,8 @@ func TestCreateLogsReceiver(t *testing.T) {
 	ctx := context.Background()
 	set := component.ReceiverCreateSettings{}
 	cfg := &Config{
-		path: "./test/plugin-valid.yaml",
-		parameters: map[string]interface{}{
+		Path: "./test/plugin-valid.yaml",
+		Parameters: map[string]interface{}{
 			"env": "prod",
 		},
 	}
@@ -109,8 +109,8 @@ func TestCreateMetricsReceiver(t *testing.T) {
 	ctx := context.Background()
 	set := component.ReceiverCreateSettings{}
 	cfg := &Config{
-		path: "./test/plugin-valid.yaml",
-		parameters: map[string]interface{}{
+		Path: "./test/plugin-valid.yaml",
+		Parameters: map[string]interface{}{
 			"env": "prod",
 		},
 	}
@@ -126,8 +126,8 @@ func TestCreateTracesReceiver(t *testing.T) {
 	ctx := context.Background()
 	set := component.ReceiverCreateSettings{}
 	cfg := &Config{
-		path: "./test/plugin-valid.yaml",
-		parameters: map[string]interface{}{
+		Path: "./test/plugin-valid.yaml",
+		Parameters: map[string]interface{}{
 			"env": "prod",
 		},
 	}
@@ -143,6 +143,6 @@ func TestCreateDefaultConfig(t *testing.T) {
 
 	pluginConfig, ok := config.(*Config)
 	require.True(t, ok)
-	require.Equal(t, make(map[string]interface{}), pluginConfig.parameters)
-	require.Empty(t, pluginConfig.path)
+	require.Equal(t, make(map[string]interface{}), pluginConfig.Parameters)
+	require.Empty(t, pluginConfig.Path)
 }
