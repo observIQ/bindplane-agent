@@ -165,7 +165,7 @@ brews:
 
       The configuration file that is run by the service is located at #{prefix}/config.yaml.
 
-      If you are configuring a logreceiver the plug director is located at #{prefix}/plugins.
+      If you are configuring a logreceiver the plugin directory is located at #{prefix}/plugins.
       ****************************************************************
 
       ****************************************************************
