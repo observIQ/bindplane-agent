@@ -76,7 +76,7 @@ func startService(ctx context.Context, svc Service) error {
 }
 
 // Shutdown stops the receiver's internal service
-func (r *Receiver) Shutdown(ctx context.Context) error {
+func (r *Receiver) Shutdown(_ context.Context) error {
 	if r.svc != nil {
 		r.svc.Shutdown()
 	}

@@ -26,7 +26,7 @@ func createConfigProvider(configMap *config.Map) *ConfigProvider {
 }
 
 // Get returns the underlying config of the provider
-func (c *ConfigProvider) Get(ctx context.Context, factories component.Factories) (*config.Config, error) {
+func (c *ConfigProvider) Get(_ context.Context, factories component.Factories) (*config.Config, error) {
 	config, err := c.unmarshaller.Unmarshal(c.configMap, factories)
 	if err != nil {
 		return nil, fmt.Errorf("failed to unmarshal config: %w", err)
@@ -41,7 +41,7 @@ func (c *ConfigProvider) Watch() <-chan error {
 }
 
 // Shutdown always returns nil and is a no-op
-func (c *ConfigProvider) Shutdown(ctx context.Context) error {
+func (c *ConfigProvider) Shutdown(_ context.Context) error {
 	return nil
 }
 

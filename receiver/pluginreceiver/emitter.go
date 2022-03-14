@@ -20,12 +20,12 @@ type Emitter struct {
 }
 
 // Start is a no-op that fulfills the component.Component interface
-func (e *Emitter) Start(ctx context.Context, host component.Host) error {
+func (e *Emitter) Start(_ context.Context, _ component.Host) error {
 	return nil
 }
 
 // Shutdown is a no-op that fulfills the component.Component interface
-func (e *Emitter) Shutdown(ctx context.Context) error {
+func (e *Emitter) Shutdown(_ context.Context) error {
 	return nil
 }
 

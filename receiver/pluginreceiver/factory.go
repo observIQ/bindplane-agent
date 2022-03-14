@@ -40,19 +40,19 @@ func NewFactory() component.ReceiverFactory {
 }
 
 // createLogsReceiver creates a plugin receiver with a logs consumer
-func createLogsReceiver(ctx context.Context, set component.ReceiverCreateSettings, cfg config.Receiver, consumer consumer.Logs) (component.LogsReceiver, error) {
+func createLogsReceiver(_ context.Context, set component.ReceiverCreateSettings, cfg config.Receiver, consumer consumer.Logs) (component.LogsReceiver, error) {
 	emitterFactory := createLogEmitterFactory(consumer)
 	return createReceiver(cfg, set, emitterFactory)
 }
 
 // createMetricsReceiver creates a plugin receiver with a metrics consumer
-func createMetricsReceiver(ctx context.Context, set component.ReceiverCreateSettings, cfg config.Receiver, consumer consumer.Metrics) (component.MetricsReceiver, error) {
+func createMetricsReceiver(_ context.Context, set component.ReceiverCreateSettings, cfg config.Receiver, consumer consumer.Metrics) (component.MetricsReceiver, error) {
 	emitterFactory := createMetricEmitterFactory(consumer)
 	return createReceiver(cfg, set, emitterFactory)
 }
 
 // createTracesReceiver creates a plugin receiver with a traces consumer
-func createTracesReceiver(ctx context.Context, set component.ReceiverCreateSettings, cfg config.Receiver, consumer consumer.Traces) (component.TracesReceiver, error) {
+func createTracesReceiver(_ context.Context, set component.ReceiverCreateSettings, cfg config.Receiver, consumer consumer.Traces) (component.TracesReceiver, error) {
 	emitterFactory := createTraceEmitterFactory(consumer)
 	return createReceiver(cfg, set, emitterFactory)
 }

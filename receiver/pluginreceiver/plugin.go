@@ -34,7 +34,7 @@ func LoadPlugin(path string) (*Plugin, error) {
 	return &plugin, nil
 }
 
-// Render renders the plugin's template as a config map
+// RenderConfig renders the plugin's template as a config map
 func (p *Plugin) RenderConfig(values map[string]interface{}) (*config.Map, error) {
 	template, err := template.New(p.Title).Parse(p.Template)
 	if err != nil {
