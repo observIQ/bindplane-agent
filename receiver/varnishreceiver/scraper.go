@@ -22,7 +22,7 @@ import (
 	"go.opentelemetry.io/collector/model/pdata"
 	"go.uber.org/zap"
 
-	"github.com/observIQ/observiq-collector/pkg/receiver/varnishreceiver/internal/metadata"
+	"github.com/observIQ/observiq-otel-collector/pkg/receiver/varnishreceiver/internal/metadata"
 )
 
 type varnishScraper struct {
