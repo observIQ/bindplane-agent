@@ -1,4 +1,4 @@
-module github.com/open-telemetry/opentelemetry-collector-contrib/receiver/varnishreceiver
+module github.com/observIQ/observiq-collector/pkg/receiver/varnishreceiver
 
 go 1.17
 
