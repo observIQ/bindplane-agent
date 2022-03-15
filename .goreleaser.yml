@@ -52,6 +52,7 @@ archives:
 
 nfpms:
   - id: collector
+    file_name_template: '{{ .PackageName }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}{{ if .Mips }}_{{ .Mips }}{{ end }}'
     package_name: observiq-collector
     vendor: observIQ, Inc
     maintainer: observIQ <support@observiq.com>
