@@ -73,7 +73,7 @@ nfpms:
     - src: release_deps/config.yaml
       dst: /opt/observiq-collector/config.yaml
       file_info:
-        mode: 0660
+        mode: 0640
         owner: observiq-collector
         group: observiq-collector
       type: config|noreplace
