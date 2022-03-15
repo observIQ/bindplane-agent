@@ -32,7 +32,7 @@ curl -fL -o "$DOWNLOAD_DIR/opentelemetry-java-contrib-jmx-metrics.jar" \
 
 echo "Retrieving stanza-plugs at commit $PLUGIN_VERSION"
 if [ ! -d "$DOWNLOAD_DIR/stanza-plugins" ]; then
-    git clone git@github.com:observIQ/stanza-plugins.git "$DOWNLOAD_DIR/stanza-plugins" > /dev/null 2>&1
+    git clone https://github.com/observIQ/stanza-plugins.git "$DOWNLOAD_DIR/stanza-plugins" > /dev/null 2>&1
 fi
 
 cd "$DOWNLOAD_DIR/stanza-plugins"
