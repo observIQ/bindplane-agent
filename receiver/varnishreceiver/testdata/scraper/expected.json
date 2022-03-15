@@ -1,0 +1,363 @@
+{
+   "resourceMetrics": [
+      {
+         "instrumentationLibraryMetrics": [
+            {
+               "instrumentationLibrary": {
+                  "name": "otelcol/varnishreceiver"
+               },
+               "metrics": [
+                  {
+                     "description": "The backend connection type count.",
+                     "name": "varnish.backend.connections.count",
+                     "sum": {
+                        "aggregationTemporality": "AGGREGATION_TEMPORALITY_CUMULATIVE",
+                        "dataPoints": [
+                           {
+                              "asInt": "8",
+                              "attributes": [
+                                 {
+                                    "key": "kind",
+                                    "value": {
+                                       "stringValue": "unhealthy"
+                                    }
+                                 }
+                              ],
+                              "startTimeUnixNano": "1646850161643931000",
+                              "timeUnixNano": "1646850161644006000"
+                           },
+                           {
+                              "asInt": "9",
+                              "attributes": [
+                                 {
+                                    "key": "kind",
+                                    "value": {
+                                       "stringValue": "busy"
+                                    }
+                                 }
+                              ],
+                              "startTimeUnixNano": "1646850161643931000",
+                              "timeUnixNano": "1646850161644006000"
+                           },
+                           {
+                              "asInt": "13",
+                              "attributes": [
+                                 {
+                                    "key": "kind",
+                                    "value": {
+                                       "stringValue": "retry"
+                                    }
+                                 }
+                              ],
+                              "startTimeUnixNano": "1646850161643931000",
+                              "timeUnixNano": "1646850161644006000"
+                           },
+                           {
+                              "asInt": "7",
+                              "attributes": [
+                                 {
+                                    "key": "kind",
+                                    "value": {
+                                       "stringValue": "success"
+                                    }
+                                 }
+                              ],
+                              "startTimeUnixNano": "1646850161643931000",
+                              "timeUnixNano": "1646850161644006000"
+                           },
+                           {
+                              "asInt": "12",
+                              "attributes": [
+                                 {
+                                    "key": "kind",
+                                    "value": {
+                                       "stringValue": "recycle"
+                                    }
+                                 }
+                              ],
+                              "startTimeUnixNano": "1646850161643931000",
+                              "timeUnixNano": "1646850161644006000"
+                           },
+                           {
+                              "asInt": "11",
+                              "attributes": [
+                                 {
+                                    "key": "kind",
+                                    "value": {
+                                       "stringValue": "reuse"
+                                    }
+                                 }
+                              ],
+                              "startTimeUnixNano": "1646850161643931000",
+                              "timeUnixNano": "1646850161644006000"
+                           },
+                           {
+                              "asInt": "10",
+                              "attributes": [
+                                 {
+                                    "key": "kind",
+                                    "value": {
+                                       "stringValue": "fail"
+                                    }
+                                 }
+                              ],
+                              "startTimeUnixNano": "1646850161643931000",
+                              "timeUnixNano": "1646850161644006000"
+                           }
+                        ],
+                        "isMonotonic": true
+                     },
+                     "unit": "{connections}"
+                  },
+                  {
+                     "description": "The backend requests count.",
+                     "name": "varnish.backend.requests.count",
+                     "sum": {
+                        "aggregationTemporality": "AGGREGATION_TEMPORALITY_CUMULATIVE",
+                        "dataPoints": [
+                           {
+                              "asInt": "22",
+                              "startTimeUnixNano": "1646850161643931000",
+                              "timeUnixNano": "1646850161644006000"
+                           }
+                        ],
+                        "isMonotonic": true
+                     },
+                     "unit": "{requests}"
+                  },
+                  {
+                     "description": "The cache operation type count.",
+                     "name": "varnish.cache.operations.count",
+                     "sum": {
+                        "aggregationTemporality": "AGGREGATION_TEMPORALITY_CUMULATIVE",
+                        "dataPoints": [
+                           {
+                              "asInt": "4",
+                              "attributes": [
+                                 {
+                                    "key": "operation",
+                                    "value": {
+                                       "stringValue": "hit"
+                                    }
+                                 }
+                              ],
+                              "startTimeUnixNano": "1646850161643931000",
+                              "timeUnixNano": "1646850161644006000"
+                           },
+                           {
+                              "asInt": "5",
+                              "attributes": [
+                                 {
+                                    "key": "operation",
+                                    "value": {
+                                       "stringValue": "hit_pass"
+                                    }
+                                 }
+                              ],
+                              "startTimeUnixNano": "1646850161643931000",
+                              "timeUnixNano": "1646850161644006000"
+                           },
+                           {
+                              "asInt": "6",
+                              "attributes": [
+                                 {
+                                    "key": "operation",
+                                    "value": {
+                                       "stringValue": "miss"
+                                    }
+                                 }
+                              ],
+                              "startTimeUnixNano": "1646850161643931000",
+                              "timeUnixNano": "1646850161644006000"
+                           }
+                        ],
+                        "isMonotonic": true
+                     },
+                     "unit": "{operations}"
+                  },
+                  {
+                     "description": "The client request count.",
+                     "name": "varnish.client.requests.count",
+                     "sum": {
+                        "aggregationTemporality": "AGGREGATION_TEMPORALITY_CUMULATIVE",
+                        "dataPoints": [
+                           {
+                              "asInt": "3",
+                              "startTimeUnixNano": "1646850161643931000",
+                              "timeUnixNano": "1646850161644006000"
+                           }
+                        ],
+                        "isMonotonic": true
+                     },
+                     "unit": "{requests}"
+                  },
+                  {
+                     "description": "The HTTP objects in the cache count.",
+                     "name": "varnish.object.count",
+                     "sum": {
+                        "aggregationTemporality": "AGGREGATION_TEMPORALITY_CUMULATIVE",
+                        "dataPoints": [
+                           {
+                              "asInt": "18",
+                              "startTimeUnixNano": "1646850161643931000",
+                              "timeUnixNano": "1646850161644006000"
+                           }
+                        ]
+                     },
+                     "unit": "{objects}"
+                  },
+                  {
+                     "description": "The expired objects from old age count.",
+                     "name": "varnish.object.expired.count",
+                     "sum": {
+                        "aggregationTemporality": "AGGREGATION_TEMPORALITY_CUMULATIVE",
+                        "dataPoints": [
+                           {
+                              "asInt": "19",
+                              "startTimeUnixNano": "1646850161643931000",
+                              "timeUnixNano": "1646850161644006000"
+                           }
+                        ],
+                        "isMonotonic": true
+                     },
+                     "unit": "{objects}"
+                  },
+                  {
+                     "description": "The moved operations done on the LRU list count.",
+                     "name": "varnish.object.moved.count",
+                     "sum": {
+                        "aggregationTemporality": "AGGREGATION_TEMPORALITY_CUMULATIVE",
+                        "dataPoints": [
+                           {
+                              "asInt": "21",
+                              "startTimeUnixNano": "1646850161643931000",
+                              "timeUnixNano": "1646850161644006000"
+                           }
+                        ],
+                        "isMonotonic": true
+                     },
+                     "unit": "{objects}"
+                  },
+                  {
+                     "description": "The objects that have been forcefully evicted from storage count.",
+                     "name": "varnish.object.nuked.count",
+                     "sum": {
+                        "aggregationTemporality": "AGGREGATION_TEMPORALITY_CUMULATIVE",
+                        "dataPoints": [
+                           {
+                              "asInt": "20",
+                              "startTimeUnixNano": "1646850161643931000",
+                              "timeUnixNano": "1646850161644006000"
+                           }
+                        ],
+                        "isMonotonic": true
+                     },
+                     "unit": "{objects}"
+                  },
+                  {
+                     "description": "The session connection type count.",
+                     "name": "varnish.session.count",
+                     "sum": {
+                        "aggregationTemporality": "AGGREGATION_TEMPORALITY_CUMULATIVE",
+                        "dataPoints": [
+                           {
+                              "asInt": "1",
+                              "attributes": [
+                                 {
+                                    "key": "kind",
+                                    "value": {
+                                       "stringValue": "accepted"
+                                    }
+                                 }
+                              ],
+                              "startTimeUnixNano": "1646850161643931000",
+                              "timeUnixNano": "1646850161644006000"
+                           },
+                           {
+                              "asInt": "17",
+                              "attributes": [
+                                 {
+                                    "key": "kind",
+                                    "value": {
+                                       "stringValue": "dropped"
+                                    }
+                                 }
+                              ],
+                              "startTimeUnixNano": "1646850161643931000",
+                              "timeUnixNano": "1646850161644006000"
+                           },
+                           {
+                              "asInt": "2",
+                              "attributes": [
+                                 {
+                                    "key": "kind",
+                                    "value": {
+                                       "stringValue": "failed"
+                                    }
+                                 }
+                              ],
+                              "startTimeUnixNano": "1646850161643931000",
+                              "timeUnixNano": "1646850161644006000"
+                           }
+                        ],
+                        "isMonotonic": true
+                     },
+                     "unit": "{connections}"
+                  },
+                  {
+                     "description": "The thread operation type count.",
+                     "name": "varnish.thread.operations.count",
+                     "sum": {
+                        "aggregationTemporality": "AGGREGATION_TEMPORALITY_CUMULATIVE",
+                        "dataPoints": [
+                           {
+                              "asInt": "14",
+                              "attributes": [
+                                 {
+                                    "key": "operation",
+                                    "value": {
+                                       "stringValue": "created"
+                                    }
+                                 }
+                              ],
+                              "startTimeUnixNano": "1646850161643931000",
+                              "timeUnixNano": "1646850161644006000"
+                           },
+                           {
+                              "asInt": "15",
+                              "attributes": [
+                                 {
+                                    "key": "operation",
+                                    "value": {
+                                       "stringValue": "destroyed"
+                                    }
+                                 }
+                              ],
+                              "startTimeUnixNano": "1646850161643931000",
+                              "timeUnixNano": "1646850161644006000"
+                           },
+                           {
+                              "asInt": "16",
+                              "attributes": [
+                                 {
+                                    "key": "operation",
+                                    "value": {
+                                       "stringValue": "failed"
+                                    }
+                                 }
+                              ],
+                              "startTimeUnixNano": "1646850161643931000",
+                              "timeUnixNano": "1646850161644006000"
+                           }
+                        ],
+                        "isMonotonic": true
+                     },
+                     "unit": "{operations}"
+                  }
+               ]
+            }
+         ],
+         "resource": {}
+      }
+   ]
+}
