@@ -15,6 +15,8 @@
 package varnishreceiver // import "github.com/open-telemetry/opentelemetry-collector-contrib/receiver/varnishreceiver"
 
 import "go.opentelemetry.io/collector/receiver/scraperhelper" // Config defines the configuration for the various elements of the receiver agent.
+
+// Config defines configuration for varnish metrics receiver.
 type Config struct {
 	scraperhelper.ScraperControllerSettings `mapstructure:",squash"`
 	WorkingDir                              string `mapstructure:"working_dir"`

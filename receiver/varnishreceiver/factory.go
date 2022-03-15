@@ -28,6 +28,7 @@ const (
 	typeStr = "varnish"
 )
 
+// NewFactory create a factory for the varnish receiver.
 func NewFactory() component.ReceiverFactory {
 	return component.NewReceiverFactory(
 		typeStr,
