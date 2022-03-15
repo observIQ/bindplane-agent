@@ -28,6 +28,6 @@ if id "$username" > /dev/null 2>&1; then
     echo "User ${username} already exists"
     exit 0
 else
-    useradd --shell /sbin/nologin --system "$username" -g iris
+    useradd --shell /sbin/nologin --system "$username" -g "$username"
 fi
 
