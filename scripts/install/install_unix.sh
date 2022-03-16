@@ -94,7 +94,14 @@ uninstall_package() {
             if [ "$desired_state" = "i" ]; then
                 echo "Existing DEB installation detected, uninstalling..."
                 dpkg -r "observiq-collector"
+            else
+                # The package is already uninstalled;
+                # This case can be hit when the package was uninstalled, but config files are left behind,
+                # which dpkg still keeps track of.
+                echo "dpkg was detected, but no observiq-collector package is currently installed, skipping..."
             fi
+        else
+            echo "dpkg was detected, but no observiq-collector package is currently installed, skipping..."
         fi
     fi
 
@@ -102,6 +109,8 @@ uninstall_package() {
         if rpm -q observiq-collector > /dev/null 2>&1; then
             echo "Existing RPM installation detected, uninstalling..."
             rpm -e "observiq-collector"
+        else
+            echo "rpm was detected, but no observiq-collector package is currently installed, skipping..."
         fi
     fi
 }
