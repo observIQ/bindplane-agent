@@ -20,8 +20,11 @@ sudo dpkg -i ./observiq-collector_linux_amd64.deb
 sudo systemctl enable --now observiq-collector
 ```
 
-### Install script
+### Install/Update script
 The collector may be installed through a shell script which will automatically determine which package to install.
+
+This script may also be used to update an existing installation.
+
 To install using the installation script, you may run:
 ```sh
 sudo sh -c "$(curl -fsSlL https://github.com/observiq/observiq-collector/releases/latest/download/install_unix.sh)" install_unix.sh
