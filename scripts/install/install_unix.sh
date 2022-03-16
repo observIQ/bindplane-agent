@@ -129,6 +129,7 @@ main() {
             ;;
         *)
             echo "Unrecognized command: $COMMAND"
+            echo "Usage: $0 [install|uninstall]"
             exit 1
             ;;
     esac
