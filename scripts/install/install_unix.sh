@@ -73,11 +73,11 @@ install_package() {
             ;;
         rpm)
             # -U installs OR upgrades
-            # just -i will fail if previous versions exist
+            # just -i will fail if previous versions exists
             rpm -U "$out_file_path"
             ;;
         *)
-            echo "Installation failed: Could not determine the package manager to use for installtion (package_type: ${package_type})"
+            echo "Installation failed: Could not determine the package manager to use for installation (package_type: ${package_type})"
             exit 1
             ;;
     esac
