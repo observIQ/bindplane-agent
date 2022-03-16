@@ -1,4 +1,4 @@
-module github.com/observIQ/observiq-otel-collector/pkg/receiver/varnishreceiver
+module github.com/observiq/observiq-otel-collector/pkg/receiver/varnishreceiver
 
 go 1.17
 

@@ -1,4 +1,4 @@
-// Copyright  The OpenTelemetry Authors
+// Copyright  observIQ, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package varnishreceiver // import "github.com/open-telemetry/opentelemetry-collector-contrib/receiver/varnishreceiver"
+package varnishreceiver // import "github.com/observiq/observiq-otel-collector/receiver/varnishreceiver"
 
 import (
 	"context"
@@ -22,7 +22,7 @@ import (
 	"go.opentelemetry.io/collector/model/pdata"
 	"go.uber.org/zap"
 
-	"github.com/observIQ/observiq-otel-collector/pkg/receiver/varnishreceiver/internal/metadata"
+	"github.com/observiq/observiq-otel-collector/receiver/varnishreceiver/internal/metadata"
 )
 
 type varnishScraper struct {
@@ -64,12 +64,12 @@ func (v *varnishScraper) scrape(context.Context) (pdata.Metrics, error) {
 	v.recordVarnishThreadOperationsCountDataPoint(now, stats)
 	v.recordVarnishSessionCountDataPoint(now, stats)
 
-	v.mb.RecordVarnishObjectExpiredCountDataPoint(now, stats.Counters.MAINNExpired.Value)
-	v.mb.RecordVarnishObjectNukedCountDataPoint(now, stats.Counters.MAINNLruNuked.Value)
-	v.mb.RecordVarnishObjectMovedCountDataPoint(now, stats.Counters.MAINNLruMoved.Value)
-	v.mb.RecordVarnishObjectCountDataPoint(now, stats.Counters.MAINNObject.Value)
-	v.mb.RecordVarnishClientRequestsCountDataPoint(now, stats.Counters.MAINClientReq.Value)
-	v.mb.RecordVarnishBackendRequestsCountDataPoint(now, stats.Counters.MAINBackendReq.Value)
+	v.mb.RecordVarnishObjectExpiredCountDataPoint(now, stats.Stat.MAINNExpired.Value)
+	v.mb.RecordVarnishObjectNukedCountDataPoint(now, stats.Stat.MAINNLruNuked.Value)
+	v.mb.RecordVarnishObjectMovedCountDataPoint(now, stats.Stat.MAINNLruMoved.Value)
+	v.mb.RecordVarnishObjectCountDataPoint(now, stats.Stat.MAINNObject.Value)
+	v.mb.RecordVarnishClientRequestsCountDataPoint(now, stats.Stat.MAINClientReq.Value)
+	v.mb.RecordVarnishBackendRequestsCountDataPoint(now, stats.Stat.MAINBackendReq.Value)
 
 	v.mb.Emit(md.ResourceMetrics().At(0).InstrumentationLibraryMetrics().At(0).Metrics())
 	return md, nil

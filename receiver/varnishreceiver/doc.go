@@ -1,4 +1,4 @@
-// Copyright The OpenTelemetry Authors
+// Copyright  observIQ, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,4 +17,4 @@
 
 //go:generate mdatagen --experimental-gen metadata.yaml
 
-package varnishreceiver // import "github.com/open-telemetry/opentelemetry-collector-contrib/receiver/varnishreceiver"
+package varnishreceiver // import "github.com/observiq/observiq-otel-collector/receiver/varnishreceiver"

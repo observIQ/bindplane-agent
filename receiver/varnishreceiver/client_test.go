@@ -1,4 +1,4 @@
-// Copyright  The OpenTelemetry Authors
+// Copyright  observIQ, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,11 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package varnishreceiver // import "github.com/open-telemetry/opentelemetry-collector-contrib/receiver/varnishreceiver"
+package varnishreceiver // import "github.com/observiq/observiq-otel-collector/receiver/varnishreceiver"
 
 import (
 	"errors"
-	"io/ioutil"
 	"os"
 	"path"
 	"testing"
@@ -71,18 +70,13 @@ func TestBuildCommand(t *testing.T) {
 	}
 }
 
-func getBytes(filename string) ([]byte, error) {
+func getBytes(t *testing.T, filename string) ([]byte, error) {
+	t.Helper()
 	if filename == "" {
 		return nil, errors.New("bad response")
 	}
 
-	file, err := os.Open(path.Join("testdata", "scraper", filename))
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-
-	body, err := ioutil.ReadAll(file)
+	body, err := os.ReadFile(path.Join("testdata", "scraper", filename))
 	if err != nil {
 		return nil, err
 	}
@@ -91,25 +85,19 @@ func getBytes(filename string) ([]byte, error) {
 }
 
 func TestGetStats(t *testing.T) {
-
-	mockExecuter := new(MockExecuter)
-	// mockExecuter.On("Execute", "varnishstat", "-j").Return([]byte(""), nil)
-	mockExecuter.On("Execute", "varnishstat", []string{"-j"}).Return(getBytes("mock_response6_0.json"))
-
+	mockExec := new(mockExecuter)
+	mockExec.On("Execute", "varnishstat", []string{"-j"}).Return(getBytes(t, "mock_response6_0.json"))
 	myclient := varnishClient{
-		exec:   mockExecuter,
+		exec:   mockExec,
 		cfg:    createDefaultConfig().(*Config),
 		logger: zap.NewNop(),
 	}
-
 	stats, err := myclient.GetStats()
 	require.NoError(t, err)
 	require.NotNil(t, stats)
 
-	mockExecuter6_5 := new(MockExecuter)
-	// mockExecuter6_5.On("Execute", "varnishstat", "-j").Return([]byte(""), nil)
-	mockExecuter6_5.On("Execute", "varnishstat", []string{"-j"}).Return(getBytes("mock_response6_5.json"))
-
+	mockExecuter6_5 := new(mockExecuter)
+	mockExecuter6_5.On("Execute", "varnishstat", []string{"-j"}).Return(getBytes(t, "mock_response6_5.json"))
 	myclient6_5 := varnishClient{
 		exec:   mockExecuter6_5,
 		cfg:    createDefaultConfig().(*Config),
@@ -119,17 +107,15 @@ func TestGetStats(t *testing.T) {
 	stats6_5, err := myclient6_5.GetStats()
 	require.NoError(t, err)
 	require.NotNil(t, stats)
-
 	require.EqualValues(t, stats, stats6_5)
-
 }
 
-type MockExecuter struct {
+type mockExecuter struct {
 	mock.Mock
 }
 
 // Execute provides a mock function with given fields: command, args
-func (_m *MockExecuter) Execute(command string, args []string) ([]byte, error) {
+func (_m *mockExecuter) Execute(command string, args []string) ([]byte, error) {
 	ret := _m.Called(command, args)
 
 	var r0 []byte

@@ -1,4 +1,4 @@
-// Copyright  The OpenTelemetry Authors
+// Copyright  observIQ, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package varnishreceiver // import "github.com/open-telemetry/opentelemetry-collector-contrib/receiver/varnishreceiver"
+package varnishreceiver // import "github.com/observiq/observiq-otel-collector/receiver/varnishreceiver"
 
 import (
 	"encoding/json"
@@ -64,7 +64,10 @@ func newVarnishClient(cfg *Config, _ component.Host, settings component.Telemetr
 	}
 }
 
-var varnishStat = "varnishstat"
+const (
+	varnishStat = "varnishstat"
+	counters    = "counters"
+)
 
 func (v *varnishClient) BuildCommand() (string, []string) {
 	argList := []string{"-j"}
@@ -94,20 +97,20 @@ func (v *varnishClient) GetStats() (*Stats, error) {
 
 // parseStats parses varnishStats json response into a Stats struct.
 func parseStats(rawStats []byte) (*Stats, error) {
-	stats := make(map[string]interface{})
-	if err := json.Unmarshal(rawStats, &stats); err != nil {
+	raw := make(map[string]interface{})
+	if err := json.Unmarshal(rawStats, &raw); err != nil {
 		return nil, err
 	}
 
 	// Varnish 6.5+ nests metrics inside a "counters" field.
 	// https://varnish-cache.org/docs/6.5/whats-new/upgrading-6.5.html#varnishstat
-	if _, exists := stats["counters"]; !exists {
-		var jsonParsed Stats6_4
+	if _, ok := raw[counters]; ok {
+		var jsonParsed FullStats
 		err := json.Unmarshal(rawStats, &jsonParsed)
 		if err != nil {
 			return nil, err
 		}
-		return jsonParsed.update(), nil
+		return &jsonParsed.Stats, nil
 	}
 
 	var jsonParsed Stats
