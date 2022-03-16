@@ -115,6 +115,7 @@ release:
   draft: false
   extra_files:
     - glob: "./observiq-collector-*.msi"
+    - glob: "./scripts/install/install_unix.sh"
 
 # https://goreleaser.com/customization/changelog/
 changelog:
