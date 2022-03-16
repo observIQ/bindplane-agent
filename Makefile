@@ -63,17 +63,17 @@ build-windows-amd64:
 	GOOS=windows GOARCH=amd64 $(MAKE) collector
 
 # tool-related commands
-TOOLS_MOD_DIR := ./internal/tools
 .PHONY: install-tools
 install-tools:
-	cd $(TOOLS_MOD_DIR) && go install github.com/mgechev/revive@latest 
-	cd $(TOOLS_MOD_DIR) && go install github.com/google/addlicense
-	cd $(TOOLS_MOD_DIR) && go install golang.org/x/tools/cmd/goimports	
-	cd $(TOOLS_MOD_DIR) && go install github.com/client9/misspell/cmd/misspell
-	cd $(TOOLS_MOD_DIR) && go install github.com/sigstore/cosign/cmd/cosign
-	cd $(TOOLS_MOD_DIR) && go install github.com/goreleaser/goreleaser
-	cd $(TOOLS_MOD_DIR) && go install github.com/securego/gosec/v2
-	cd $(TOOLS_MOD_DIR) && go install github.com/uw-labs/lichen
+	go install github.com/mgechev/revive@v1.1.4
+	go install github.com/google/addlicense@v1.0.0
+	go install golang.org/x/tools/cmd/goimports@latest
+	go install github.com/client9/misspell/cmd/misspell@v0.3.4
+	go install github.com/sigstore/cosign/cmd/cosign@v1.5.2
+	go install github.com/goreleaser/goreleaser@v1.6.3
+	go install github.com/securego/gosec/v2/cmd/gosec@v2.10.0
+	go install github.com/uw-labs/lichen@v0.1.5
+	
 
 .PHONY: lint
 lint:
