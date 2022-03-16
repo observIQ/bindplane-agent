@@ -64,12 +64,12 @@ func (v *varnishScraper) scrape(context.Context) (pdata.Metrics, error) {
 	v.recordVarnishThreadOperationsCountDataPoint(now, stats)
 	v.recordVarnishSessionCountDataPoint(now, stats)
 
-	v.mb.RecordVarnishObjectExpiredCountDataPoint(now, stats.Stat.MAINNExpired.Value)
-	v.mb.RecordVarnishObjectNukedCountDataPoint(now, stats.Stat.MAINNLruNuked.Value)
-	v.mb.RecordVarnishObjectMovedCountDataPoint(now, stats.Stat.MAINNLruMoved.Value)
-	v.mb.RecordVarnishObjectCountDataPoint(now, stats.Stat.MAINNObject.Value)
-	v.mb.RecordVarnishClientRequestsCountDataPoint(now, stats.Stat.MAINClientReq.Value)
-	v.mb.RecordVarnishBackendRequestsCountDataPoint(now, stats.Stat.MAINBackendReq.Value)
+	v.mb.RecordVarnishObjectExpiredCountDataPoint(now, stats.MAINNExpired.Value)
+	v.mb.RecordVarnishObjectNukedCountDataPoint(now, stats.MAINNLruNuked.Value)
+	v.mb.RecordVarnishObjectMovedCountDataPoint(now, stats.MAINNLruMoved.Value)
+	v.mb.RecordVarnishObjectCountDataPoint(now, stats.MAINNObject.Value)
+	v.mb.RecordVarnishClientRequestsCountDataPoint(now, stats.MAINClientReq.Value)
+	v.mb.RecordVarnishBackendRequestsCountDataPoint(now, stats.MAINBackendReq.Value)
 
 	v.mb.Emit(md.ResourceMetrics().At(0).InstrumentationLibraryMetrics().At(0).Metrics())
 	return md, nil

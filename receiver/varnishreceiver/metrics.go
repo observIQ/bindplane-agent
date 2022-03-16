@@ -24,90 +24,88 @@ import (
 type FullStats struct {
 	Version   int    `json:"version"`
 	Timestamp string `json:"timestamp"`
-	Stats     Stats
+	Counters  Stats  `json:"counters"`
 }
 
 // Stats holds the metric stats.
 type Stats struct {
-	Stat struct {
-		MAINBackendConn struct {
-			Value int64 `json:"value"`
-		} `json:"MAIN.backend_conn"`
-		MAINBackendUnhealthy struct {
-			Value int64 `json:"value"`
-		} `json:"MAIN.backend_unhealthy"`
-		MAINBackendBusy struct {
-			Value int64 `json:"value"`
-		} `json:"MAIN.backend_busy"`
-		MAINBackendFail struct {
-			Value int64 `json:"value"`
-		} `json:"MAIN.backend_fail"`
-		MAINBackendReuse struct {
-			Value int64 `json:"value"`
-		} `json:"MAIN.backend_reuse"`
-		MAINBackendRecycle struct {
-			Value int64 `json:"value"`
-		} `json:"MAIN.backend_recycle"`
-		MAINBackendRetry struct {
-			Value int64 `json:"value"`
-		} `json:"MAIN.backend_retry"`
-		MAINCacheHit struct {
-			Value int64 `json:"value"`
-		} `json:"MAIN.cache_hit"`
-		MAINCacheHitpass struct {
-			Value int64 `json:"value"`
-		} `json:"MAIN.cache_hitpass"`
-		MAINCacheMiss struct {
-			Value int64 `json:"value"`
-		} `json:"MAIN.cache_miss"`
-		MAINThreadsCreated struct {
-			Value int64 `json:"value"`
-		} `json:"MAIN.threads_created"`
-		MAINThreadsDestroyed struct {
-			Value int64 `json:"value"`
-		} `json:"MAIN.threads_destroyed"`
-		MAINThreadsFailed struct {
-			Value int64 `json:"value"`
-		} `json:"MAIN.threads_failed"`
-		MAINSessConn struct {
-			Value int64 `json:"value"`
-		} `json:"MAIN.sess_conn"`
-		MAINSessFail struct {
-			Value int64 `json:"value"`
-		} `json:"MAIN.sess_fail"`
-		MAINSessDropped struct {
-			Value int64 `json:"value"`
-		} `json:"MAIN.sess_dropped"`
-		MAINNObject struct {
-			Value int64 `json:"value"`
-		} `json:"MAIN.n_object"`
-		MAINNExpired struct {
-			Value int64 `json:"value"`
-		} `json:"MAIN.n_expired"`
-		MAINNLruNuked struct {
-			Value int64 `json:"value"`
-		} `json:"MAIN.n_lru_nuked"`
-		MAINNLruMoved struct {
-			Value int64 `json:"value"`
-		} `json:"MAIN.n_lru_moved"`
-		MAINClientReq struct {
-			Value int64 `json:"value"`
-		} `json:"MAIN.client_req"`
-		MAINBackendReq struct {
-			Value int64 `json:"value"`
-		} `json:"MAIN.backend_req"`
-	} `json:"counters"`
+	MAINBackendConn struct {
+		Value int64 `json:"value"`
+	} `json:"MAIN.backend_conn"`
+	MAINBackendUnhealthy struct {
+		Value int64 `json:"value"`
+	} `json:"MAIN.backend_unhealthy"`
+	MAINBackendBusy struct {
+		Value int64 `json:"value"`
+	} `json:"MAIN.backend_busy"`
+	MAINBackendFail struct {
+		Value int64 `json:"value"`
+	} `json:"MAIN.backend_fail"`
+	MAINBackendReuse struct {
+		Value int64 `json:"value"`
+	} `json:"MAIN.backend_reuse"`
+	MAINBackendRecycle struct {
+		Value int64 `json:"value"`
+	} `json:"MAIN.backend_recycle"`
+	MAINBackendRetry struct {
+		Value int64 `json:"value"`
+	} `json:"MAIN.backend_retry"`
+	MAINCacheHit struct {
+		Value int64 `json:"value"`
+	} `json:"MAIN.cache_hit"`
+	MAINCacheHitpass struct {
+		Value int64 `json:"value"`
+	} `json:"MAIN.cache_hitpass"`
+	MAINCacheMiss struct {
+		Value int64 `json:"value"`
+	} `json:"MAIN.cache_miss"`
+	MAINThreadsCreated struct {
+		Value int64 `json:"value"`
+	} `json:"MAIN.threads_created"`
+	MAINThreadsDestroyed struct {
+		Value int64 `json:"value"`
+	} `json:"MAIN.threads_destroyed"`
+	MAINThreadsFailed struct {
+		Value int64 `json:"value"`
+	} `json:"MAIN.threads_failed"`
+	MAINSessConn struct {
+		Value int64 `json:"value"`
+	} `json:"MAIN.sess_conn"`
+	MAINSessFail struct {
+		Value int64 `json:"value"`
+	} `json:"MAIN.sess_fail"`
+	MAINSessDropped struct {
+		Value int64 `json:"value"`
+	} `json:"MAIN.sess_dropped"`
+	MAINNObject struct {
+		Value int64 `json:"value"`
+	} `json:"MAIN.n_object"`
+	MAINNExpired struct {
+		Value int64 `json:"value"`
+	} `json:"MAIN.n_expired"`
+	MAINNLruNuked struct {
+		Value int64 `json:"value"`
+	} `json:"MAIN.n_lru_nuked"`
+	MAINNLruMoved struct {
+		Value int64 `json:"value"`
+	} `json:"MAIN.n_lru_moved"`
+	MAINClientReq struct {
+		Value int64 `json:"value"`
+	} `json:"MAIN.client_req"`
+	MAINBackendReq struct {
+		Value int64 `json:"value"`
+	} `json:"MAIN.backend_req"`
 }
 
 func (v *varnishScraper) recordVarnishBackendConnectionsCountDataPoint(now pdata.Timestamp, stats *Stats) {
 	attributeMappings := map[string]int64{
-		metadata.AttributeBackendConnectionType.Success:   stats.Stat.MAINBackendConn.Value,
-		metadata.AttributeBackendConnectionType.Recycle:   stats.Stat.MAINBackendRecycle.Value,
-		metadata.AttributeBackendConnectionType.Reuse:     stats.Stat.MAINBackendReuse.Value,
-		metadata.AttributeBackendConnectionType.Fail:      stats.Stat.MAINBackendFail.Value,
-		metadata.AttributeBackendConnectionType.Unhealthy: stats.Stat.MAINBackendUnhealthy.Value,
-		metadata.AttributeBackendConnectionType.Busy:      stats.Stat.MAINBackendBusy.Value,
-		metadata.AttributeBackendConnectionType.Retry:     stats.Stat.MAINBackendRetry.Value,
+		metadata.AttributeBackendConnectionType.Success:   stats.MAINBackendConn.Value,
+		metadata.AttributeBackendConnectionType.Recycle:   stats.MAINBackendRecycle.Value,
+		metadata.AttributeBackendConnectionType.Reuse:     stats.MAINBackendReuse.Value,
+		metadata.AttributeBackendConnectionType.Fail:      stats.MAINBackendFail.Value,
+		metadata.AttributeBackendConnectionType.Unhealthy: stats.MAINBackendUnhealthy.Value,
+		metadata.AttributeBackendConnectionType.Busy:      stats.MAINBackendBusy.Value,
+		metadata.AttributeBackendConnectionType.Retry:     stats.MAINBackendRetry.Value,
 	}
 
 	for attributeName, attributeValue := range attributeMappings {
@@ -117,9 +115,9 @@ func (v *varnishScraper) recordVarnishBackendConnectionsCountDataPoint(now pdata
 
 func (v *varnishScraper) recordVarnishCacheOperationsCountDataPoint(now pdata.Timestamp, stats *Stats) {
 	attributeMappings := map[string]int64{
-		metadata.AttributeCacheOperations.Hit:     stats.Stat.MAINCacheHit.Value,
-		metadata.AttributeCacheOperations.HitPass: stats.Stat.MAINCacheHitpass.Value,
-		metadata.AttributeCacheOperations.Miss:    stats.Stat.MAINCacheMiss.Value,
+		metadata.AttributeCacheOperations.Hit:     stats.MAINCacheHit.Value,
+		metadata.AttributeCacheOperations.HitPass: stats.MAINCacheHitpass.Value,
+		metadata.AttributeCacheOperations.Miss:    stats.MAINCacheMiss.Value,
 	}
 
 	for attributeName, attributeValue := range attributeMappings {
@@ -129,9 +127,9 @@ func (v *varnishScraper) recordVarnishCacheOperationsCountDataPoint(now pdata.Ti
 
 func (v *varnishScraper) recordVarnishThreadOperationsCountDataPoint(now pdata.Timestamp, stats *Stats) {
 	attributeMappings := map[string]int64{
-		metadata.AttributeThreadOperations.Created:   stats.Stat.MAINThreadsCreated.Value,
-		metadata.AttributeThreadOperations.Destroyed: stats.Stat.MAINThreadsDestroyed.Value,
-		metadata.AttributeThreadOperations.Failed:    stats.Stat.MAINThreadsFailed.Value,
+		metadata.AttributeThreadOperations.Created:   stats.MAINThreadsCreated.Value,
+		metadata.AttributeThreadOperations.Destroyed: stats.MAINThreadsDestroyed.Value,
+		metadata.AttributeThreadOperations.Failed:    stats.MAINThreadsFailed.Value,
 	}
 
 	for attributeName, attributeValue := range attributeMappings {
@@ -141,9 +139,9 @@ func (v *varnishScraper) recordVarnishThreadOperationsCountDataPoint(now pdata.T
 
 func (v *varnishScraper) recordVarnishSessionCountDataPoint(now pdata.Timestamp, stats *Stats) {
 	attributeMappings := map[string]int64{
-		metadata.AttributeSessionType.Accepted: stats.Stat.MAINSessConn.Value,
-		metadata.AttributeSessionType.Dropped:  stats.Stat.MAINSessDropped.Value,
-		metadata.AttributeSessionType.Failed:   stats.Stat.MAINSessFail.Value,
+		metadata.AttributeSessionType.Accepted: stats.MAINSessConn.Value,
+		metadata.AttributeSessionType.Dropped:  stats.MAINSessDropped.Value,
+		metadata.AttributeSessionType.Failed:   stats.MAINSessFail.Value,
 	}
 
 	for attributeName, attributeValue := range attributeMappings {

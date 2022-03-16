@@ -110,7 +110,8 @@ func parseStats(rawStats []byte) (*Stats, error) {
 		if err != nil {
 			return nil, err
 		}
-		return &jsonParsed.Stats, nil
+
+		return &jsonParsed.Counters, nil
 	}
 
 	var jsonParsed Stats

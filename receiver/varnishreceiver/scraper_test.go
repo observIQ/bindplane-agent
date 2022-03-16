@@ -20,28 +20,23 @@ import (
 	"fmt"
 	"os"
 	"path"
-	"path/filepath"
-	"reflect"
 	"testing"
 
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/component/componenttest"
-	"go.opentelemetry.io/collector/model/otlp"
 	"go.opentelemetry.io/collector/model/pdata"
-	"go.uber.org/multierr"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"go.uber.org/zap/zaptest/observer"
 )
 
 func TestScrape(t *testing.T) {
-
 	f := NewFactory()
 	cfg := f.CreateDefaultConfig().(*Config)
 	require.NotNil(t, cfg)
 
-	t.Run("scrape success 6.5", func(t *testing.T) {
+	t.Run("test success >= 6.5", func(t *testing.T) {
 		mockClient := new(mockClient)
 		mockClient.On("GetStats").Return(getStats(t, "mock_response6_5.json"))
 
@@ -49,26 +44,22 @@ func TestScrape(t *testing.T) {
 		scraper.client = mockClient
 		actualMetrics, err := scraper.scrape(context.Background())
 		require.NoError(t, err)
+		require.Equal(t, 1, actualMetrics.ResourceMetrics().Len())
 
-		expectedFile := filepath.Join("testdata", "scraper", "expected.json")
-		expectedMetrics, err := ReadMetrics(expectedFile)
-		require.NoError(t, err)
-		require.NoError(t, CompareMetrics(expectedMetrics, actualMetrics))
+		validateScraperResult(t, actualMetrics)
 	})
 
-	t.Run("scrape success < 6.5", func(t *testing.T) {
+	t.Run("test success < 6.5", func(t *testing.T) {
 		mockClient := new(mockClient)
 		mockClient.On("GetStats").Return(getStats(t, "mock_response6_0.json"))
+
 		scraper := newVarnishScraper(componenttest.NewNopTelemetrySettings(), cfg)
 		scraper.client = mockClient
-
 		actualMetrics, err := scraper.scrape(context.Background())
 		require.NoError(t, err)
+		require.Equal(t, 1, actualMetrics.ResourceMetrics().Len())
 
-		expectedFile := filepath.Join("testdata", "scraper", "expected.json")
-		expectedMetrics, err := ReadMetrics(expectedFile)
-		require.NoError(t, err)
-		require.NoError(t, CompareMetrics(expectedMetrics, actualMetrics))
+		validateScraperResult(t, actualMetrics)
 	})
 
 	t.Run("scrape error", func(t *testing.T) {
@@ -94,6 +85,113 @@ func TestScrape(t *testing.T) {
 			},
 		}, logs.AllUntimed())
 	})
+
+}
+
+func validateScraperResult(t *testing.T, actualMetrics pdata.Metrics) {
+	require.Equal(t, actualMetrics.MetricCount(), 10)
+	require.Equal(t, actualMetrics.DataPointCount(), 22)
+
+	ilms := actualMetrics.ResourceMetrics().At(0).InstrumentationLibraryMetrics()
+	require.Equal(t, 1, ilms.Len())
+	ms := ilms.At(0).Metrics()
+	for i := 0; i < ms.Len(); i++ {
+		m := ms.At(i)
+		switch m.Name() {
+		case "varnish.backend.connections.count":
+			dps := m.Sum().DataPoints()
+			require.Equal(t, 7, dps.Len())
+			attributeMappings := map[string]int64{}
+			for j := 0; j < dps.Len(); j++ {
+				dp := dps.At(j)
+				method := dp.Attributes().AsRaw()
+				label := fmt.Sprintf("%s method:%s", m.Name(), method)
+				attributeMappings[label] = dp.IntVal()
+			}
+			require.Equal(t, map[string]int64{
+				"varnish.backend.connections.count method:map[kind:busy]":      int64(9),
+				"varnish.backend.connections.count method:map[kind:fail]":      int64(10),
+				"varnish.backend.connections.count method:map[kind:recycle]":   int64(12),
+				"varnish.backend.connections.count method:map[kind:retry]":     int64(13),
+				"varnish.backend.connections.count method:map[kind:reuse]":     int64(11),
+				"varnish.backend.connections.count method:map[kind:success]":   int64(7),
+				"varnish.backend.connections.count method:map[kind:unhealthy]": int64(8),
+			},
+				attributeMappings)
+		case "varnish.cache.operations.count":
+			dps := m.Sum().DataPoints()
+			require.Equal(t, 3, dps.Len())
+			attributeMappings := map[string]int64{}
+			for j := 0; j < dps.Len(); j++ {
+				dp := dps.At(j)
+				method := dp.Attributes().AsRaw()
+				label := fmt.Sprintf("%s method:%s", m.Name(), method)
+				attributeMappings[label] = dp.IntVal()
+			}
+			require.Equal(t, map[string]int64{
+				"varnish.cache.operations.count method:map[operation:hit]":      int64(4),
+				"varnish.cache.operations.count method:map[operation:hit_pass]": int64(5),
+				"varnish.cache.operations.count method:map[operation:miss]":     int64(6),
+			},
+				attributeMappings)
+		case "varnish.thread.operations.count":
+			dps := m.Sum().DataPoints()
+			require.Equal(t, 3, dps.Len())
+			attributeMappings := map[string]int64{}
+			for j := 0; j < dps.Len(); j++ {
+				dp := dps.At(j)
+				method := dp.Attributes().AsRaw()
+				label := fmt.Sprintf("%s method:%s", m.Name(), method)
+				attributeMappings[label] = dp.IntVal()
+			}
+			require.Equal(t, map[string]int64{
+				"varnish.thread.operations.count method:map[operation:created]":   int64(14),
+				"varnish.thread.operations.count method:map[operation:destroyed]": int64(15),
+				"varnish.thread.operations.count method:map[operation:failed]":    int64(16),
+			},
+				attributeMappings)
+		case "varnish.session.count":
+			dps := m.Sum().DataPoints()
+			require.Equal(t, 3, dps.Len())
+			attributeMappings := map[string]int64{}
+			for j := 0; j < dps.Len(); j++ {
+				dp := dps.At(j)
+				method := dp.Attributes().AsRaw()
+				label := fmt.Sprintf("%s method:%s", m.Name(), method)
+				attributeMappings[label] = dp.IntVal()
+			}
+			require.Equal(t, map[string]int64{
+				"varnish.session.count method:map[kind:accepted]": int64(1),
+				"varnish.session.count method:map[kind:dropped]":  int64(17),
+				"varnish.session.count method:map[kind:failed]":   int64(2),
+			},
+				attributeMappings)
+		case "varnish.object.nuked.count":
+			dps := m.Sum().DataPoints()
+			require.Equal(t, 1, dps.Len())
+			require.EqualValues(t, int64(20), dps.At(0).IntVal())
+		case "varnish.object.moved.count":
+			dps := m.Sum().DataPoints()
+			require.Equal(t, 1, dps.Len())
+			require.EqualValues(t, int64(21), dps.At(0).IntVal())
+		case "varnish.object.expired.count":
+			dps := m.Sum().DataPoints()
+			require.Equal(t, 1, dps.Len())
+			require.EqualValues(t, int64(19), dps.At(0).IntVal())
+		case "varnish.object.count":
+			dps := m.Sum().DataPoints()
+			require.Equal(t, 1, dps.Len())
+			require.EqualValues(t, int64(18), dps.At(0).IntVal())
+		case "varnish.client.requests.count":
+			dps := m.Sum().DataPoints()
+			require.Equal(t, 1, dps.Len())
+			require.EqualValues(t, int64(3), dps.At(0).IntVal())
+		case "varnish.backend.requests.count":
+			dps := m.Sum().DataPoints()
+			require.Equal(t, 1, dps.Len())
+			require.EqualValues(t, int64(22), dps.At(0).IntVal())
+		}
+	}
 }
 
 func TestStart(t *testing.T) {
@@ -169,272 +267,4 @@ func (_m *mockClient) BuildCommand() (string, []string) {
 	}
 
 	return r0, r1
-}
-
-// ReadMetrics reads a pdata.Metrics from the specified file
-func ReadMetrics(filePath string) (pdata.Metrics, error) {
-	expectedFileBytes, err := os.ReadFile(filePath)
-	if err != nil {
-		return pdata.Metrics{}, err
-	}
-	unmarshaller := otlp.NewJSONMetricsUnmarshaler()
-	return unmarshaller.UnmarshalMetrics(expectedFileBytes)
-}
-
-// CompareOption is applied by the CompareMetricSlices function
-// to mutates an expected and/or actual result before comparing.
-type CompareOption interface {
-	apply(expected, actual pdata.Metrics)
-}
-
-// CompareMetrics compares the expected and actual pdata metrics.
-func CompareMetrics(expected, actual pdata.Metrics, options ...CompareOption) error {
-	expected, actual = expected.Clone(), actual.Clone()
-
-	for _, option := range options {
-		option.apply(expected, actual)
-	}
-
-	expectedMetrics, actualMetrics := expected.ResourceMetrics(), actual.ResourceMetrics()
-	if expectedMetrics.Len() != actualMetrics.Len() {
-		return fmt.Errorf("number of resources does not match")
-	}
-
-	numResources := expectedMetrics.Len()
-
-	// Keep track of matching resources so that each can only be matched once
-	matchingResources := make(map[pdata.ResourceMetrics]pdata.ResourceMetrics, numResources)
-
-	var errs error
-	for e := 0; e < numResources; e++ {
-		er := expectedMetrics.At(e)
-		var foundMatch bool
-		for a := 0; a < numResources; a++ {
-			ar := actualMetrics.At(a)
-			if _, ok := matchingResources[ar]; ok {
-				continue
-			}
-			if reflect.DeepEqual(er.Resource().Attributes().Sort().AsRaw(), ar.Resource().Attributes().Sort().AsRaw()) {
-				foundMatch = true
-				matchingResources[ar] = er
-				break
-			}
-		}
-
-		if !foundMatch {
-			errs = multierr.Append(errs, fmt.Errorf("missing expected resource with attributes: %v", er.Resource().Attributes().AsRaw()))
-		}
-	}
-
-	for i := 0; i < numResources; i++ {
-		if _, ok := matchingResources[actualMetrics.At(i)]; !ok {
-			errs = multierr.Append(errs, fmt.Errorf("extra resource with attributes: %v", actualMetrics.At(i).Resource().Attributes().AsRaw()))
-		}
-	}
-
-	if errs != nil {
-		return errs
-	}
-
-	for ar, er := range matchingResources {
-		if err := CompareResourceMetrics(er, ar); err != nil {
-			return err
-		}
-	}
-
-	return errs
-}
-
-// CompareResourceMetrics compares the expected and actual pdata resource metrics.
-func CompareResourceMetrics(expected, actual pdata.ResourceMetrics) error {
-	eilms := expected.InstrumentationLibraryMetrics()
-	ailms := actual.InstrumentationLibraryMetrics()
-
-	if eilms.Len() != ailms.Len() {
-		return fmt.Errorf("number of instrumentation libraries does not match")
-	}
-
-	eilms.Sort(sortInstrumentationLibrary)
-	ailms.Sort(sortInstrumentationLibrary)
-
-	for i := 0; i < eilms.Len(); i++ {
-		eilm, ailm := eilms.At(i), ailms.At(i)
-		eil, ail := eilm.InstrumentationLibrary(), ailm.InstrumentationLibrary()
-
-		if eil.Name() != ail.Name() {
-			return fmt.Errorf("instrumentation library Name does not match expected: %s, actual: %s", eil.Name(), ail.Name())
-		}
-		if eil.Version() != ail.Version() {
-			return fmt.Errorf("instrumentation library Version does not match expected: %s, actual: %s", eil.Version(), ail.Version())
-		}
-
-		if err := CompareMetricSlices(eilm.Metrics(), ailm.Metrics()); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-// CompareMetricSlices compares each part of two given MetricSlices and returns
-// an error if they don't match. The error describes what didn't match. The
-// expected and actual values are clones before options are applied.
-func CompareMetricSlices(expected, actual pdata.MetricSlice) error {
-	if expected.Len() != actual.Len() {
-		return fmt.Errorf("metric slices not of same length")
-	}
-
-	expectedByName, actualByName := metricsByName(expected), metricsByName(actual)
-
-	var errs error
-	for name := range actualByName {
-		_, ok := expectedByName[name]
-		if !ok {
-			errs = multierr.Append(errs, fmt.Errorf("unexpected metric: %s", name))
-		}
-	}
-	for name := range expectedByName {
-		if _, ok := actualByName[name]; !ok {
-			errs = multierr.Append(errs, fmt.Errorf("missing expected metric: %s", name))
-		}
-	}
-
-	if errs != nil {
-		return errs
-	}
-
-	for i := 0; i < actual.Len(); i++ {
-		actualMetric := actual.At(i)
-		expectedMetric := expectedByName[actualMetric.Name()]
-		if actualMetric.Description() != expectedMetric.Description() {
-			return fmt.Errorf("metric Description does not match expected: %s, actual: %s", expectedMetric.Description(), actualMetric.Description())
-		}
-		if actualMetric.Unit() != expectedMetric.Unit() {
-			return fmt.Errorf("metric Unit does not match expected: %s, actual: %s", expectedMetric.Unit(), actualMetric.Unit())
-		}
-		if actualMetric.DataType() != expectedMetric.DataType() {
-			return fmt.Errorf("metric DataType does not match expected: %s, actual: %s", expectedMetric.DataType(), actualMetric.DataType())
-		}
-
-		var expectedDataPoints pdata.NumberDataPointSlice
-		var actualDataPoints pdata.NumberDataPointSlice
-
-		switch actualMetric.DataType() {
-		case pdata.MetricDataTypeGauge:
-			expectedDataPoints = expectedMetric.Gauge().DataPoints()
-			actualDataPoints = actualMetric.Gauge().DataPoints()
-		case pdata.MetricDataTypeSum:
-			if actualMetric.Sum().AggregationTemporality() != expectedMetric.Sum().AggregationTemporality() {
-				return fmt.Errorf("metric AggregationTemporality does not match expected: %s, actual: %s", expectedMetric.Sum().AggregationTemporality(), actualMetric.Sum().AggregationTemporality())
-			}
-			if actualMetric.Sum().IsMonotonic() != expectedMetric.Sum().IsMonotonic() {
-				return fmt.Errorf("metric IsMonotonic does not match expected: %t, actual: %t", expectedMetric.Sum().IsMonotonic(), actualMetric.Sum().IsMonotonic())
-			}
-			expectedDataPoints = expectedMetric.Sum().DataPoints()
-			actualDataPoints = actualMetric.Sum().DataPoints()
-		}
-
-		if err := CompareNumberDataPointSlices(expectedDataPoints, actualDataPoints); err != nil {
-			return multierr.Combine(fmt.Errorf("datapoints for metric: `%s`, do not match expected", actualMetric.Name()), err)
-		}
-	}
-	return nil
-}
-
-// CompareNumberDataPointSlices compares each part of two given NumberDataPointSlices and returns
-// an error if they don't match. The error describes what didn't match.
-func CompareNumberDataPointSlices(expected, actual pdata.NumberDataPointSlice) error {
-	if expected.Len() != actual.Len() {
-		return fmt.Errorf("length of datapoints don't match")
-	}
-
-	numPoints := expected.Len()
-
-	// Keep track of matching data points so that each point can only be matched once
-	matchingDPS := make(map[pdata.NumberDataPoint]pdata.NumberDataPoint, numPoints)
-
-	var errs error
-	for e := 0; e < numPoints; e++ {
-		edp := expected.At(e)
-		var foundMatch bool
-		for a := 0; a < numPoints; a++ {
-			adp := actual.At(a)
-			if _, ok := matchingDPS[adp]; ok {
-				continue
-			}
-			if reflect.DeepEqual(edp.Attributes().Sort().AsRaw(), adp.Attributes().Sort().AsRaw()) {
-				foundMatch = true
-				matchingDPS[adp] = edp
-				break
-			}
-		}
-
-		if !foundMatch {
-			errs = multierr.Append(errs, fmt.Errorf("metric missing expected datapoint with attributes: %v", edp.Attributes().AsRaw()))
-		}
-	}
-
-	for i := 0; i < numPoints; i++ {
-		if _, ok := matchingDPS[actual.At(i)]; !ok {
-			errs = multierr.Append(errs, fmt.Errorf("metric has extra datapoint with attributes: %v", actual.At(i).Attributes().AsRaw()))
-		}
-	}
-
-	if errs != nil {
-		return errs
-	}
-
-	for adp, edp := range matchingDPS {
-		if err := CompareNumberDataPoints(edp, adp); err != nil {
-			return multierr.Combine(fmt.Errorf("datapoint with attributes: %v, does not match expected", adp.Attributes().AsRaw()), err)
-		}
-	}
-	return nil
-}
-
-// CompareNumberDataPoints compares each part of two given NumberDataPoints and returns
-// an error if they don't match. The error describes what didn't match.
-func CompareNumberDataPoints(expected, actual pdata.NumberDataPoint) error {
-	if expected.ValueType() != actual.ValueType() {
-		return fmt.Errorf("metric datapoint types don't match: expected type: %s, actual type: %s", numberTypeToString(expected.ValueType()), numberTypeToString(actual.ValueType()))
-	}
-	if expected.IntVal() != actual.IntVal() {
-		return fmt.Errorf("metric datapoint IntVal doesn't match expected: %d, actual: %d", expected.IntVal(), actual.IntVal())
-	}
-	if expected.DoubleVal() != actual.DoubleVal() {
-		return fmt.Errorf("metric datapoint DoubleVal doesn't match expected: %f, actual: %f", expected.DoubleVal(), actual.DoubleVal())
-	}
-	return nil
-}
-
-func numberTypeToString(t pdata.MetricValueType) string {
-	switch t {
-	case pdata.MetricValueTypeInt:
-		return "int"
-	case pdata.MetricValueTypeDouble:
-		return "double"
-	default:
-		return "none"
-	}
-}
-
-func metricsByName(metricSlice pdata.MetricSlice) map[string]pdata.Metric {
-	byName := make(map[string]pdata.Metric, metricSlice.Len())
-	for i := 0; i < metricSlice.Len(); i++ {
-		a := metricSlice.At(i)
-		byName[a.Name()] = a
-	}
-	return byName
-}
-
-func sortInstrumentationLibrary(a, b pdata.InstrumentationLibraryMetrics) bool {
-	if a.SchemaUrl() < b.SchemaUrl() {
-		return true
-	}
-	if a.InstrumentationLibrary().Name() < b.InstrumentationLibrary().Name() {
-		return true
-	}
-	if a.InstrumentationLibrary().Version() < b.InstrumentationLibrary().Version() {
-		return true
-	}
-	return false
 }
