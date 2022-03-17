@@ -139,7 +139,7 @@ main() {
 
     case "$COMMAND" in
         install)
-            echo "Installing the observIQ openTelemetry collector..."
+            echo "Installing the observIQ OpenTelemetry collector..."
             # Download and install the package
             download_package
             install_package
