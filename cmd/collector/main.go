@@ -19,8 +19,8 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/observiq/observiq-collector/collector"
 	"github.com/observiq/observiq-collector/internal/version"
-	"github.com/observiq/observiq-collector/pkg/collector"
 	"github.com/spf13/pflag"
 	"go.opentelemetry.io/collector/service"
 )

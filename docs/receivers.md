@@ -29,7 +29,7 @@ Below is a list of supported receivers with links to there documentation pages.
 - [kafkametricsreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.45.1/receiver/kafkametricsreceiver/README.md)
 - [kafkareceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.45.1/receiver/kafkareceiver/README.md)
 - [kubeletstatsreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.45.1/receiver/kubeletstatsreceiver/README.md)
-- [logsreceiver](../pkg/receiver/logsreceiver/README.md)
+- [logsreceiver](../receiver/logsreceiver/README.md)
 - [memcachedreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.45.1/receiver/memcachedreceiver/README.md)
 - [mongodbatlasreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.45.1/receiver/mongodbatlasreceiver/README.md)
 - [mongodbreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.45.1/receiver/mongodbreceiver/README.md)

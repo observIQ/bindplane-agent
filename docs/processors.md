@@ -16,7 +16,7 @@ Below is a list of supported processors with links to there documentation pages.
 - [metricstransformprocessor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.45.1/processor/metricstransformprocessor/README.md)
 - [normalizesumsprocessor](https://github.com/GoogleCloudPlatform/opentelemetry-operations-collector/blob/master/processor/normalizesumsprocessor/README.md)
 - [probabilisticsamplerprocessor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.45.1/processor/probabilisticsamplerprocessor/README.md)
-- [resourceattributetransposerprocessor](../pkg/processor/resourceattributetransposerprocessor/README.md)
+- [resourceattributetransposerprocessor](../processor/resourceattributetransposerprocessor/README.md)
 - [resourcedetectionprocessor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.45.1/processor/resourcedetectionprocessor/README.md)
 - [resourceprocessor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.45.1/processor/resourceprocessor/README.md)
 - [routingprocessor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.45.1/processor/routingprocessor/README.md)
