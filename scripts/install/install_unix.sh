@@ -146,7 +146,7 @@ main() {
             echo "Successfully installed the observIQ OpenTelemetry collector."
             ;;
         uninstall)
-            echo "Uninstalling the observIQ openTelemetry collector..."
+            echo "Uninstalling the observIQ OpenTelemetry collector..."
             uninstall_package
             echo "Successfully uninstalled the observIQ openTelemetry collector."
             ;;
