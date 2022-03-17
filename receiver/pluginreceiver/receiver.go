@@ -13,19 +13,19 @@ import (
 // Receiver is a receiver that runs an embedded open telemetry config
 // as an internal service.
 type Receiver struct {
-	plugin          *Plugin
-	configProvider  *ConfigProvider
-	factoryProvider *FactoryProvider
-	logger          *zap.Logger
-	createService   createServiceFunc
-	service         Service
+	plugin         *Plugin
+	configProvider *ConfigProvider
+	emitterFactory component.ExporterFactory
+	logger         *zap.Logger
+	createService  createServiceFunc
+	service        Service
 }
 
 // Start starts the receiver's internal service
 func (r *Receiver) Start(ctx context.Context, host component.Host) error {
 	r.logger.Info("Starting plugin...", zap.String("plugin", r.plugin.Title), zap.String("plugin-version", r.plugin.Version))
 
-	factories, err := r.factoryProvider.GetFactories(host, r.configProvider.configMap)
+	factories, err := r.configProvider.GetRequiredFactories(host, r.emitterFactory)
 	if err != nil {
 		return fmt.Errorf("failed to get factories from factory provider: %w", err)
 	}
@@ -39,7 +39,6 @@ func (r *Receiver) Start(ctx context.Context, host component.Host) error {
 	if err := startService(ctx, service); err != nil {
 		return fmt.Errorf("failed to start internal service: %w", err)
 	}
-	r.logger.Info("Started plugin")
 
 	return nil
 }

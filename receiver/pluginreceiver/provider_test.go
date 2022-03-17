@@ -16,7 +16,7 @@ import (
 )
 
 func TestConfigProviderWatch(t *testing.T) {
-	provider := createConfigProvider(&config.Map{})
+	provider := createConfigProvider(nil)
 	err := errors.New("config err")
 	go func() {
 		provider.errChan <- err
@@ -27,20 +27,20 @@ func TestConfigProviderWatch(t *testing.T) {
 }
 
 func TestConfigProviderShutdown(t *testing.T) {
-	provider := createConfigProvider(&config.Map{})
+	provider := createConfigProvider(nil)
 	err := provider.Shutdown(context.Background())
 	require.NoError(t, err)
 }
 
 func TestConfigProviderGet(t *testing.T) {
 	ctx := context.Background()
-	configMap := &config.Map{}
-	provider := createConfigProvider(configMap)
+	components := &ComponentMap{}
+	provider := createConfigProvider(components)
 	factories := component.Factories{}
 
 	unmarshaller := &MockUnmarshaller{}
-	unmarshaller.On("Unmarshal", configMap, mock.Anything).Return(nil, errors.New("failure")).Once()
-	unmarshaller.On("Unmarshal", configMap, mock.Anything).Return(&config.Config{}, nil).Once()
+	unmarshaller.On("Unmarshal", mock.Anything, mock.Anything).Return(nil, errors.New("failure")).Once()
+	unmarshaller.On("Unmarshal", mock.Anything, mock.Anything).Return(&config.Config{}, nil).Once()
 	provider.unmarshaller = unmarshaller
 
 	cfg, err := provider.Get(ctx, factories)
@@ -53,257 +53,120 @@ func TestConfigProviderGet(t *testing.T) {
 	require.Equal(t, &config.Config{}, cfg)
 }
 
-func TestGetFactories(t *testing.T) {
+func TestGetRequiredFactories(t *testing.T) {
 	testType := config.Type("test")
-	testReceiverFactory := receiverhelper.NewFactory(testType, nil)
-	testProcessorFactory := processorhelper.NewFactory(testType, nil)
-	testExporterFactory := exporterhelper.NewFactory(testType, nil)
-	testExtensionFactory := extensionhelper.NewFactory(testType, nil, nil)
+	testID := config.NewComponentID(testType)
+	duplicateTestID := config.NewComponentIDWithName(testType, "duplicate")
+
+	emitterFactory := exporterhelper.NewFactory(testType, nil)
+	receiverFactory := receiverhelper.NewFactory(testType, nil)
+	processorFactory := processorhelper.NewFactory(testType, nil)
+	extensionFactory := extensionhelper.NewFactory(testType, nil, nil)
+
+	host := &MockHost{}
+	host.On("GetFactory", component.KindReceiver, testType).Return(receiverFactory)
+	host.On("GetFactory", component.KindProcessor, testType).Return(processorFactory)
+	host.On("GetFactory", component.KindExtension, testType).Return(extensionFactory)
+	host.On("GetFactory", mock.Anything, mock.Anything).Return(nil)
 
 	testCases := []struct {
-		name              string
-		config            map[string]interface{}
-		providerFactories component.Factories
-		hostFactories     component.Factories
-		expectedResult    *component.Factories
-		expectedErr       error
+		name           string
+		components     *ComponentMap
+		expectedResult *component.Factories
+		expectedErr    error
 	}{
 		{
-			name: "invalid config",
-			config: map[string]interface{}{
-				"receivers": 5,
-			},
-			expectedErr: errors.New("failed to unmarshal component map"),
-		},
-		{
 			name: "missing receiver factory",
-			config: map[string]interface{}{
-				"receivers": map[string]interface{}{
-					"test": nil,
+			components: &ComponentMap{
+				Receivers: map[config.ComponentID]map[string]interface{}{
+					config.NewComponentID("missing"): nil,
 				},
 			},
 			expectedErr: errors.New("failed to get receiver factories"),
 		},
 		{
-			name: "receiver factory exists on provider",
-			config: map[string]interface{}{
-				"receivers": map[string]interface{}{
-					"test": nil,
-				},
-			},
-			providerFactories: component.Factories{
-				Receivers: map[config.Type]component.ReceiverFactory{
-					testType: testReceiverFactory,
-				},
-			},
-			expectedResult: &component.Factories{
-				Receivers: map[config.Type]component.ReceiverFactory{
-					testType: testReceiverFactory,
-				},
-				Processors: map[config.Type]component.ProcessorFactory{},
-				Extensions: map[config.Type]component.ExtensionFactory{},
-				Exporters:  map[config.Type]component.ExporterFactory{},
-			},
-		},
-		{
-			name: "receiver factory exists on host",
-			config: map[string]interface{}{
-				"receivers": map[string]interface{}{
-					"test": nil,
-				},
-			},
-			hostFactories: component.Factories{
-				Receivers: map[config.Type]component.ReceiverFactory{
-					testType: testReceiverFactory,
-				},
-			},
-			expectedResult: &component.Factories{
-				Receivers: map[config.Type]component.ReceiverFactory{
-					testType: testReceiverFactory,
-				},
-				Processors: map[config.Type]component.ProcessorFactory{},
-				Extensions: map[config.Type]component.ExtensionFactory{},
-				Exporters:  map[config.Type]component.ExporterFactory{},
-			},
-		},
-		{
 			name: "missing processor factory",
-			config: map[string]interface{}{
-				"processors": map[string]interface{}{
-					"test": nil,
+			components: &ComponentMap{
+				Processors: map[config.ComponentID]map[string]interface{}{
+					config.NewComponentID("missing"): nil,
 				},
 			},
 			expectedErr: errors.New("failed to get processor factories"),
 		},
 		{
-			name: "processor factory exists on provider",
-			config: map[string]interface{}{
-				"processors": map[string]interface{}{
-					"test": nil,
-				},
-			},
-			providerFactories: component.Factories{
-				Processors: map[config.Type]component.ProcessorFactory{
-					testType: testProcessorFactory,
-				},
-			},
-			expectedResult: &component.Factories{
-				Processors: map[config.Type]component.ProcessorFactory{
-					testType: testProcessorFactory,
-				},
-				Receivers:  map[config.Type]component.ReceiverFactory{},
-				Extensions: map[config.Type]component.ExtensionFactory{},
-				Exporters:  map[config.Type]component.ExporterFactory{},
-			},
-		},
-		{
-			name: "processor factory exists on host",
-			config: map[string]interface{}{
-				"processors": map[string]interface{}{
-					"test": nil,
-				},
-			},
-			hostFactories: component.Factories{
-				Processors: map[config.Type]component.ProcessorFactory{
-					testType: testProcessorFactory,
-				},
-			},
-			expectedResult: &component.Factories{
-				Processors: map[config.Type]component.ProcessorFactory{
-					testType: testProcessorFactory,
-				},
-				Receivers:  map[config.Type]component.ReceiverFactory{},
-				Extensions: map[config.Type]component.ExtensionFactory{},
-				Exporters:  map[config.Type]component.ExporterFactory{},
-			},
-		},
-		{
-			name: "missing exporter factory",
-			config: map[string]interface{}{
-				"exporters": map[string]interface{}{
-					"test": nil,
-				},
-			},
-			expectedErr: errors.New("failed to get exporter factories"),
-		},
-		{
-			name: "exporter factory exists on provider",
-			config: map[string]interface{}{
-				"exporters": map[string]interface{}{
-					"test": nil,
-				},
-			},
-			providerFactories: component.Factories{
-				Exporters: map[config.Type]component.ExporterFactory{
-					testType: testExporterFactory,
-				},
-			},
-			expectedResult: &component.Factories{
-				Exporters: map[config.Type]component.ExporterFactory{
-					testType: testExporterFactory,
-				},
-				Processors: map[config.Type]component.ProcessorFactory{},
-				Extensions: map[config.Type]component.ExtensionFactory{},
-				Receivers:  map[config.Type]component.ReceiverFactory{},
-			},
-		},
-		{
-			name: "exporter factory exists on host",
-			config: map[string]interface{}{
-				"exporters": map[string]interface{}{
-					"test": nil,
-				},
-			},
-			hostFactories: component.Factories{
-				Exporters: map[config.Type]component.ExporterFactory{
-					testType: testExporterFactory,
-				},
-			},
-			expectedResult: &component.Factories{
-				Exporters: map[config.Type]component.ExporterFactory{
-					testType: testExporterFactory,
-				},
-				Processors: map[config.Type]component.ProcessorFactory{},
-				Extensions: map[config.Type]component.ExtensionFactory{},
-				Receivers:  map[config.Type]component.ReceiverFactory{},
-			},
-		},
-		{
 			name: "missing extension factory",
-			config: map[string]interface{}{
-				"extensions": map[string]interface{}{
-					"test": nil,
+			components: &ComponentMap{
+				Extensions: map[config.ComponentID]map[string]interface{}{
+					config.NewComponentID("missing"): nil,
 				},
 			},
 			expectedErr: errors.New("failed to get extension factories"),
 		},
 		{
-			name: "extension factory exists on provider",
-			config: map[string]interface{}{
-				"extensions": map[string]interface{}{
-					"test": nil,
+			name: "all factories exist",
+			components: &ComponentMap{
+				Receivers: map[config.ComponentID]map[string]interface{}{
+					testID: nil,
 				},
-			},
-			providerFactories: component.Factories{
-				Extensions: map[config.Type]component.ExtensionFactory{
-					testType: testExtensionFactory,
+				Processors: map[config.ComponentID]map[string]interface{}{
+					testID: nil,
+				},
+				Extensions: map[config.ComponentID]map[string]interface{}{
+					testID: nil,
 				},
 			},
 			expectedResult: &component.Factories{
-				Extensions: map[config.Type]component.ExtensionFactory{
-					testType: testExtensionFactory,
+				Receivers: map[config.Type]component.ReceiverFactory{
+					testType: receiverFactory,
 				},
-				Processors: map[config.Type]component.ProcessorFactory{},
-				Receivers:  map[config.Type]component.ReceiverFactory{},
-				Exporters:  map[config.Type]component.ExporterFactory{},
+				Processors: map[config.Type]component.ProcessorFactory{
+					testType: processorFactory,
+				},
+				Exporters: map[config.Type]component.ExporterFactory{
+					emitterFactory.Type(): emitterFactory,
+				},
+				Extensions: map[config.Type]component.ExtensionFactory{
+					testType: extensionFactory,
+				},
 			},
 		},
 		{
-			name: "extension factory exists on host",
-			config: map[string]interface{}{
-				"extensions": map[string]interface{}{
-					"test": nil,
+			name: "duplicate receivers defined",
+			components: &ComponentMap{
+				Receivers: map[config.ComponentID]map[string]interface{}{
+					testID:          nil,
+					duplicateTestID: nil,
 				},
-			},
-			hostFactories: component.Factories{
-				Extensions: map[config.Type]component.ExtensionFactory{
-					testType: testExtensionFactory,
+				Processors: map[config.ComponentID]map[string]interface{}{
+					testID:          nil,
+					duplicateTestID: nil,
+				},
+				Extensions: map[config.ComponentID]map[string]interface{}{
+					testID:          nil,
+					duplicateTestID: nil,
 				},
 			},
 			expectedResult: &component.Factories{
-				Extensions: map[config.Type]component.ExtensionFactory{
-					testType: testExtensionFactory,
+				Receivers: map[config.Type]component.ReceiverFactory{
+					testType: receiverFactory,
 				},
-				Processors: map[config.Type]component.ProcessorFactory{},
-				Receivers:  map[config.Type]component.ReceiverFactory{},
-				Exporters:  map[config.Type]component.ExporterFactory{},
+				Processors: map[config.Type]component.ProcessorFactory{
+					testType: processorFactory,
+				},
+				Exporters: map[config.Type]component.ExporterFactory{
+					emitterFactory.Type(): emitterFactory,
+				},
+				Extensions: map[config.Type]component.ExtensionFactory{
+					testType: extensionFactory,
+				},
 			},
 		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			host := &MockHost{}
-			for key, factory := range tc.hostFactories.Receivers {
-				host.On("GetFactory", component.KindReceiver, key).Return(factory)
-			}
-
-			for key, factory := range tc.hostFactories.Processors {
-				host.On("GetFactory", component.KindProcessor, key).Return(factory)
-			}
-
-			for key, factory := range tc.hostFactories.Exporters {
-				host.On("GetFactory", component.KindExporter, key).Return(factory)
-			}
-
-			for key, factory := range tc.hostFactories.Extensions {
-				host.On("GetFactory", component.KindExtension, key).Return(factory)
-			}
-			host.On("GetFactory", mock.Anything, mock.Anything).Return(nil)
-			configMap := config.NewMapFromStringMap(tc.config)
-			provider := FactoryProvider{factories: tc.providerFactories}
-
-			factories, err := provider.GetFactories(host, configMap)
+			provider := createConfigProvider(tc.components)
+			factories, err := provider.GetRequiredFactories(host, emitterFactory)
 			switch tc.expectedErr {
 			case nil:
 				require.NoError(t, err)

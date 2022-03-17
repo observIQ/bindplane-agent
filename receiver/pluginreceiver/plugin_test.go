@@ -61,12 +61,12 @@ func TestLoadPlugin(t *testing.T) {
 	}
 }
 
-func TestRenderConfig(t *testing.T) {
+func TestRenderComponents(t *testing.T) {
 	testCases := []struct {
 		name           string
 		plugin         *Plugin
 		values         map[string]interface{}
-		expectedResult *config.Map
+		expectedResult *ComponentMap
 		expectedErr    error
 	}{
 		{
@@ -88,24 +88,45 @@ func TestRenderConfig(t *testing.T) {
 			plugin: &Plugin{
 				Template: "test template",
 			},
-			expectedErr: errors.New("failed to unmarshal template result as yaml"),
+			expectedErr: errors.New("failed to unmarshal yaml"),
 		},
 		{
 			name: "valid template",
 			plugin: &Plugin{
-				Template: "{{if .enabled}}receivers:{{end}}",
+				Template: `
+{{if .enabled}}
+receivers:
+{{end}}
+service:
+  pipelines:
+    metrics:`,
 			},
 			values: map[string]interface{}{
 				"enabled": true,
 			},
-			expectedResult: config.NewMapFromStringMap(map[string]interface{}{
-				"receivers": nil,
-			}),
+			expectedResult: &ComponentMap{
+				Exporters: map[config.ComponentID]map[string]interface{}{
+					config.NewComponentID(emitterTypeStr): nil,
+				},
+				Service: ServiceMap{
+					Pipelines: map[string]Pipeline{
+						"metrics": {
+							Exporters: []config.ComponentID{config.NewComponentID(emitterTypeStr)},
+						},
+					},
+				},
+			},
 		},
 		{
 			name: "valid template with defaults",
 			plugin: &Plugin{
-				Template: "{{if .enabled}}receivers:{{end}}",
+				Template: `
+{{if .enabled}}
+receivers:
+{{end}}
+service:
+  pipelines:
+    metrics:`,
 				Parameters: []Parameter{
 					{
 						Name:    "enabled",
@@ -113,15 +134,24 @@ func TestRenderConfig(t *testing.T) {
 					},
 				},
 			},
-			expectedResult: config.NewMapFromStringMap(map[string]interface{}{
-				"receivers": nil,
-			}),
+			expectedResult: &ComponentMap{
+				Exporters: map[config.ComponentID]map[string]interface{}{
+					config.NewComponentID(emitterTypeStr): nil,
+				},
+				Service: ServiceMap{
+					Pipelines: map[string]Pipeline{
+						"metrics": {
+							Exporters: []config.ComponentID{config.NewComponentID(emitterTypeStr)},
+						},
+					},
+				},
+			},
 		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			result, err := tc.plugin.RenderConfig(tc.values)
+			result, err := tc.plugin.RenderComponents(tc.values)
 			switch tc.expectedErr {
 			case nil:
 				require.NoError(t, err)

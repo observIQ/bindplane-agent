@@ -4,22 +4,24 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/mitchellh/mapstructure"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/config"
 	"go.opentelemetry.io/collector/config/configunmarshaler"
+	"gopkg.in/yaml.v2"
 )
 
 // ConfigProvider implements the service.ConfigProvider interface
 type ConfigProvider struct {
-	configMap    *config.Map
+	components   *ComponentMap
 	errChan      chan error
 	unmarshaller configunmarshaler.ConfigUnmarshaler
 }
 
 // createConfigProvider creates a config provider
-func createConfigProvider(configMap *config.Map) *ConfigProvider {
+func createConfigProvider(components *ComponentMap) *ConfigProvider {
 	return &ConfigProvider{
-		configMap:    configMap,
+		components:   components,
 		errChan:      make(chan error),
 		unmarshaller: configunmarshaler.NewDefault(),
 	}
@@ -27,9 +29,10 @@ func createConfigProvider(configMap *config.Map) *ConfigProvider {
 
 // Get returns the underlying config of the provider
 func (c *ConfigProvider) Get(_ context.Context, factories component.Factories) (*config.Config, error) {
-	config, err := c.unmarshaller.Unmarshal(c.configMap, factories)
+	configMap := c.components.ToConfigMap()
+	config, err := c.unmarshaller.Unmarshal(configMap, factories)
 	if err != nil {
-		return nil, fmt.Errorf("failed to unmarshal config: %w", err)
+		return nil, fmt.Errorf("failed to unmarshal config map: %w", err)
 	}
 
 	return config, nil
@@ -45,45 +48,25 @@ func (c *ConfigProvider) Shutdown(_ context.Context) error {
 	return nil
 }
 
-// FactoryProvider finds and provides factories for a config
-type FactoryProvider struct {
-	factories component.Factories
-}
-
-// createFactoryProvider creates a factory provider
-func createFactoryProvider(factories component.Factories) *FactoryProvider {
-	return &FactoryProvider{
-		factories: factories,
-	}
-}
-
-// GetFactories finds and returns all factories required for the supplied config.
-// The provider first searches its own list of factories, before then searching the host component.
-// An error is returned if the factory does not exist in either location.
-func (f *FactoryProvider) GetFactories(host component.Host, configMap *config.Map) (*component.Factories, error) {
-	var componentMap ComponentMap
-	if err := configMap.Unmarshal(&componentMap); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal component map: %w", err)
-	}
-
-	receiverFactories, err := f.getReceiverFactories(host, &componentMap)
+// GetRequiredFactories returns the factories required for the configured components
+func (c *ConfigProvider) GetRequiredFactories(host component.Host, emitterFactory component.ExporterFactory) (*component.Factories, error) {
+	receiverFactories, err := c.getReceiverFactories(host)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get receiver factories: %w", err)
 	}
 
-	processorFactories, err := f.getProcessorFactories(host, &componentMap)
+	processorFactories, err := c.getProcessorFactories(host)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get processor factories: %w", err)
 	}
 
-	exporterFactories, err := f.getExporterFactories(host, &componentMap)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get exporter factories: %w", err)
-	}
-
-	extensionFactories, err := f.getExtensionFactories(host, &componentMap)
+	extensionFactories, err := c.getExtensionFactories(host)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get extension factories: %w", err)
+	}
+
+	exporterFactories := map[config.Type]component.ExporterFactory{
+		emitterFactory.Type(): emitterFactory,
 	}
 
 	return &component.Factories{
@@ -94,14 +77,10 @@ func (f *FactoryProvider) GetFactories(host component.Host, configMap *config.Ma
 	}, nil
 }
 
-// getReceiverFactories returns the receiver factories required for the supplied config
-func (f *FactoryProvider) getReceiverFactories(host component.Host, componentMap *ComponentMap) (map[config.Type]component.ReceiverFactory, error) {
+// getReceiverFactories returns the receiver factories required for the configured receivers
+func (c *ConfigProvider) getReceiverFactories(host component.Host) (map[config.Type]component.ReceiverFactory, error) {
 	factories := map[config.Type]component.ReceiverFactory{}
-	for key, factory := range f.factories.Receivers {
-		factories[key] = factory
-	}
-
-	for receiver := range componentMap.Receivers {
+	for receiver := range c.components.Receivers {
 		receiverType := receiver.Type()
 		if _, ok := factories[receiverType]; ok {
 			continue
@@ -110,7 +89,7 @@ func (f *FactoryProvider) getReceiverFactories(host component.Host, componentMap
 		factory := host.GetFactory(component.KindReceiver, receiverType)
 		receiverFactory, ok := factory.(component.ReceiverFactory)
 		if !ok {
-			return nil, fmt.Errorf("%s factory does not exist", receiverType)
+			return nil, fmt.Errorf("receiver factory %s is missing from host", receiverType)
 		}
 
 		factories[receiverType] = receiverFactory
@@ -119,14 +98,10 @@ func (f *FactoryProvider) getReceiverFactories(host component.Host, componentMap
 	return factories, nil
 }
 
-// getProcessorFactories returns the processor factories required for the supplied config
-func (f *FactoryProvider) getProcessorFactories(host component.Host, componentMap *ComponentMap) (map[config.Type]component.ProcessorFactory, error) {
+// getProcessorFactories returns the processor factories required for the configured processors
+func (c *ConfigProvider) getProcessorFactories(host component.Host) (map[config.Type]component.ProcessorFactory, error) {
 	factories := map[config.Type]component.ProcessorFactory{}
-	for key, factory := range f.factories.Processors {
-		factories[key] = factory
-	}
-
-	for processor := range componentMap.Processors {
+	for processor := range c.components.Processors {
 		processorType := processor.Type()
 		if _, ok := factories[processorType]; ok {
 			continue
@@ -135,7 +110,7 @@ func (f *FactoryProvider) getProcessorFactories(host component.Host, componentMa
 		factory := host.GetFactory(component.KindProcessor, processorType)
 		processorFactory, ok := factory.(component.ProcessorFactory)
 		if !ok {
-			return nil, fmt.Errorf("%s factory does not exist", processorType)
+			return nil, fmt.Errorf("processor factory %s is missing from host", processorType)
 		}
 
 		factories[processorType] = processorFactory
@@ -144,14 +119,10 @@ func (f *FactoryProvider) getProcessorFactories(host component.Host, componentMa
 	return factories, nil
 }
 
-// getExtensionFactories returns the extension factories required for the supplied config
-func (f *FactoryProvider) getExtensionFactories(host component.Host, componentMap *ComponentMap) (map[config.Type]component.ExtensionFactory, error) {
+// getExtensionFactories returns the extension factories required for the configured extensions
+func (c *ConfigProvider) getExtensionFactories(host component.Host) (map[config.Type]component.ExtensionFactory, error) {
 	factories := map[config.Type]component.ExtensionFactory{}
-	for key, factory := range f.factories.Extensions {
-		factories[key] = factory
-	}
-
-	for extension := range componentMap.Extensions {
+	for extension := range c.components.Extensions {
 		extensionType := extension.Type()
 		if _, ok := factories[extensionType]; ok {
 			continue
@@ -160,7 +131,7 @@ func (f *FactoryProvider) getExtensionFactories(host component.Host, componentMa
 		factory := host.GetFactory(component.KindExtension, extensionType)
 		extensionFactory, ok := factory.(component.ExtensionFactory)
 		if !ok {
-			return nil, fmt.Errorf("%s factory does not exist", extensionType)
+			return nil, fmt.Errorf("extension factory %s is missing from host", extensionType)
 		}
 
 		factories[extensionType] = extensionFactory
@@ -169,35 +140,51 @@ func (f *FactoryProvider) getExtensionFactories(host component.Host, componentMa
 	return factories, nil
 }
 
-// getExporterFactories returns the exporter factories required for the supplied config
-func (f *FactoryProvider) getExporterFactories(host component.Host, componentMap *ComponentMap) (map[config.Type]component.ExporterFactory, error) {
-	factories := map[config.Type]component.ExporterFactory{}
-	for key, factory := range f.factories.Exporters {
-		factories[key] = factory
+// unmarshalComponents unmarshals a component map from yaml
+func unmarshalComponentMap(bytes []byte) (*ComponentMap, error) {
+	var components ComponentMap
+	if err := yaml.Unmarshal(bytes, &components); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal yaml: %w", err)
 	}
 
-	for exporter := range componentMap.Exporters {
-		exporterType := exporter.Type()
-		if _, ok := factories[exporterType]; ok {
-			continue
-		}
-
-		factory := host.GetFactory(component.KindExporter, exporterType)
-		exporterFactory, ok := factory.(component.ExporterFactory)
-		if !ok {
-			return nil, fmt.Errorf("%s factory does not exist", exporterType)
-		}
-
-		factories[exporterType] = exporterFactory
+	emitterID := config.NewComponentID(emitterTypeStr)
+	components.Exporters = map[config.ComponentID]map[string]interface{}{
+		emitterID: nil,
 	}
 
-	return factories, nil
+	for key, pipeline := range components.Service.Pipelines {
+		pipeline.Exporters = []config.ComponentID{emitterID}
+		components.Service.Pipelines[key] = pipeline
+	}
+
+	return &components, nil
 }
 
 // ComponentMap is a map of configured open telemetry components
 type ComponentMap struct {
-	Receivers  map[config.ComponentID]map[string]interface{} `mapstructure:"receivers"`
-	Processors map[config.ComponentID]map[string]interface{} `mapstructure:"processors"`
-	Exporters  map[config.ComponentID]map[string]interface{} `mapstructure:"exporters"`
-	Extensions map[config.ComponentID]map[string]interface{} `mapstructure:"extensions"`
+	Receivers  map[config.ComponentID]map[string]interface{} `yaml:"receivers" mapstructure:"receivers"`
+	Processors map[config.ComponentID]map[string]interface{} `yaml:"processors" mapstructure:"processors"`
+	Exporters  map[config.ComponentID]map[string]interface{} `yaml:"exporters" mapstructure:"exporters"`
+	Extensions map[config.ComponentID]map[string]interface{} `yaml:"extensions" mapstructure:"extensions"`
+	Service    ServiceMap                                    `yaml:"service" mapstructure:"service"`
+}
+
+// ToConfigMap returns the component map as a config map
+func (c *ComponentMap) ToConfigMap() *config.Map {
+	var mapString map[string]interface{}
+	_ = mapstructure.Decode(c, &mapString)
+	return config.NewMapFromStringMap(mapString)
+}
+
+// ServiceMap is a map of service components
+type ServiceMap struct {
+	Extensions []config.ComponentID `yaml:"extensions" mapstructure:"extensions"`
+	Pipelines  map[string]Pipeline  `yaml:"pipelines" mapstructure:"pipelines"`
+}
+
+// Pipeline is a component pipeline
+type Pipeline struct {
+	Receivers  []config.ComponentID `yaml:"receivers" mapstructure:"receivers"`
+	Processors []config.ComponentID `yaml:"processors" mapstructure:"processors"`
+	Exporters  []config.ComponentID `yaml:"exporters" mapstructure:"exporters"`
 }

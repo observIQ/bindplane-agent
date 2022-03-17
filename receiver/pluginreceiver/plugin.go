@@ -6,7 +6,6 @@ import (
 	"os"
 	"text/template"
 
-	"go.opentelemetry.io/collector/config"
 	"gopkg.in/yaml.v2"
 )
 
@@ -34,8 +33,8 @@ func LoadPlugin(path string) (*Plugin, error) {
 	return &plugin, nil
 }
 
-// RenderConfig renders the plugin's template as a config map
-func (p *Plugin) RenderConfig(values map[string]interface{}) (*config.Map, error) {
+// RenderComponents renders the plugin's template as a component map
+func (p *Plugin) RenderComponents(values map[string]interface{}) (*ComponentMap, error) {
 	template, err := template.New(p.Title).Parse(p.Template)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create plugin template: %w", err)
@@ -47,12 +46,7 @@ func (p *Plugin) RenderConfig(values map[string]interface{}) (*config.Map, error
 		return nil, fmt.Errorf("failed to execute template: %w", err)
 	}
 
-	var mapString map[string]interface{}
-	if err := yaml.Unmarshal(writer.Bytes(), &mapString); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal template result as yaml: %w", err)
-	}
-
-	return config.NewMapFromStringMap(mapString), nil
+	return unmarshalComponentMap(writer.Bytes())
 }
 
 // ApplyDefaults returns a copy of the values map with parameter defaults applied.

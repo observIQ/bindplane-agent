@@ -73,29 +73,19 @@ func createReceiver(cfg config.Receiver, set component.ReceiverCreateSettings, e
 		return nil, fmt.Errorf("invalid plugin parameter: %w", err)
 	}
 
-	configMap, err := plugin.RenderConfig(receiverConfig.Parameters)
+	components, err := plugin.RenderComponents(receiverConfig.Parameters)
 	if err != nil {
-		return nil, fmt.Errorf("failed to render plugin: %w", err)
+		return nil, fmt.Errorf("failed to render plugin components: %w", err)
 	}
-	configProvider := createConfigProvider(configMap)
-	factories := createFactories(emitterFactory)
-	factoryProvider := createFactoryProvider(factories)
+
+	configProvider := createConfigProvider(components)
 	logger := set.Logger.Named(receiverConfig.ID().String())
 
 	return &Receiver{
-		plugin:          plugin,
-		configProvider:  configProvider,
-		factoryProvider: factoryProvider,
-		logger:          logger,
-		createService:   createService,
+		plugin:         plugin,
+		configProvider: configProvider,
+		emitterFactory: emitterFactory,
+		logger:         logger,
+		createService:  createService,
 	}, nil
-}
-
-// createFactories creates a factories map with the emitter factory
-func createFactories(emitterFactory component.ExporterFactory) component.Factories {
-	return component.Factories{
-		Exporters: map[config.Type]component.ExporterFactory{
-			emitterFactory.Type(): emitterFactory,
-		},
-	}
 }

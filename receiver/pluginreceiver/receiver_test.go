@@ -20,18 +20,19 @@ func TestReceiverGetFactoryFailure(t *testing.T) {
 	host := &MockHost{}
 	host.On("GetFactory", mock.Anything, mock.Anything).Return(nil)
 
-	cfg := map[string]interface{}{
-		"receivers": map[string]interface{}{
-			"missing": nil,
+	components := ComponentMap{
+		Receivers: map[config.ComponentID]map[string]interface{}{
+			config.NewComponentID("missing"): nil,
 		},
 	}
-	configMap := config.NewMapFromStringMap(cfg)
+	configProvider := createConfigProvider(&components)
+	emitterFactory := createLogEmitterFactory(nil)
 
 	receiver := Receiver{
-		plugin:          &Plugin{},
-		configProvider:  createConfigProvider(configMap),
-		factoryProvider: &FactoryProvider{},
-		logger:          zap.NewNop(),
+		plugin:         &Plugin{},
+		configProvider: configProvider,
+		emitterFactory: emitterFactory,
+		logger:         zap.NewNop(),
 	}
 
 	err := receiver.Start(ctx, host)
@@ -45,18 +46,19 @@ func TestReceiverCreateServiceFailure(t *testing.T) {
 	host := &MockHost{}
 	host.On("GetFactory", mock.Anything, mock.Anything).Return(nopFactory)
 
-	cfg := map[string]interface{}{
-		"receivers": map[string]interface{}{
-			"nop": nil,
+	components := ComponentMap{
+		Receivers: map[config.ComponentID]map[string]interface{}{
+			config.NewComponentID("nop"): nil,
 		},
 	}
-	configMap := config.NewMapFromStringMap(cfg)
+	configProvider := createConfigProvider(&components)
+	emitterFactory := createLogEmitterFactory(nil)
 
 	receiver := Receiver{
-		plugin:          &Plugin{},
-		configProvider:  createConfigProvider(configMap),
-		factoryProvider: &FactoryProvider{},
-		logger:          zap.NewNop(),
+		plugin:         &Plugin{},
+		configProvider: configProvider,
+		emitterFactory: emitterFactory,
+		logger:         zap.NewNop(),
 		createService: func(factories component.Factories, configProvider service.ConfigProvider, logger *zap.Logger) (Service, error) {
 			return nil, errors.New("failure")
 		},
@@ -73,22 +75,23 @@ func TestReceiverStartServiceFailure(t *testing.T) {
 	host := &MockHost{}
 	host.On("GetFactory", mock.Anything, mock.Anything).Return(nopFactory)
 
-	cfg := map[string]interface{}{
-		"receivers": map[string]interface{}{
-			"nop": nil,
+	components := ComponentMap{
+		Receivers: map[config.ComponentID]map[string]interface{}{
+			config.NewComponentID("nop"): nil,
 		},
 	}
-	configMap := config.NewMapFromStringMap(cfg)
+	configProvider := createConfigProvider(&components)
+	emitterFactory := createLogEmitterFactory(nil)
 
 	svc := &MockService{}
 	svc.On("Run", mock.Anything).Return(errors.New("failure"))
 	svc.On("GetState").Return(service.Starting)
 
 	receiver := Receiver{
-		plugin:          &Plugin{},
-		configProvider:  createConfigProvider(configMap),
-		factoryProvider: &FactoryProvider{},
-		logger:          zap.NewNop(),
+		plugin:         &Plugin{},
+		configProvider: configProvider,
+		emitterFactory: emitterFactory,
+		logger:         zap.NewNop(),
 		createService: func(factories component.Factories, configProvider service.ConfigProvider, logger *zap.Logger) (Service, error) {
 			return svc, nil
 		},
@@ -105,22 +108,23 @@ func TestReceiverStartSuccess(t *testing.T) {
 	host := &MockHost{}
 	host.On("GetFactory", mock.Anything, mock.Anything).Return(nopFactory)
 
-	cfg := map[string]interface{}{
-		"receivers": map[string]interface{}{
-			"nop": nil,
+	components := ComponentMap{
+		Receivers: map[config.ComponentID]map[string]interface{}{
+			config.NewComponentID("nop"): nil,
 		},
 	}
-	configMap := config.NewMapFromStringMap(cfg)
+	configProvider := createConfigProvider(&components)
+	emitterFactory := createLogEmitterFactory(nil)
 
 	svc := &MockService{}
 	svc.On("Run", mock.Anything).WaitUntil(time.After(time.Second)).Return(errors.New("unexpected timeout"))
 	svc.On("GetState").Return(service.Running)
 
 	receiver := Receiver{
-		plugin:          &Plugin{},
-		configProvider:  createConfigProvider(configMap),
-		factoryProvider: &FactoryProvider{},
-		logger:          zap.NewNop(),
+		plugin:         &Plugin{},
+		configProvider: configProvider,
+		emitterFactory: emitterFactory,
+		logger:         zap.NewNop(),
 		createService: func(factories component.Factories, configProvider service.ConfigProvider, logger *zap.Logger) (Service, error) {
 			return svc, nil
 		},
