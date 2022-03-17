@@ -148,7 +148,7 @@ main() {
         uninstall)
             echo "Uninstalling the observIQ OpenTelemetry collector..."
             uninstall_package
-            echo "Successfully uninstalled the observIQ openTelemetry collector."
+            echo "Successfully uninstalled the observIQ OpenTelemetry collector."
             ;;
         *)
             echo "Unrecognized command: $COMMAND"
