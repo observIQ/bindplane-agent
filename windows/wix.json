@@ -12,7 +12,7 @@
       "service": {
         "name": "observiq-otel-collector",
         "start": "delayed",
-        "display-name": "observIQ Collector",
+        "display-name": "observIQ OpenTelemetry Collector",
         "description": "observIQ's distribution of the OpenTelemetry collector.",
         "arguments": "--config &quot;[INSTALLDIR]config.yaml&quot;"
       }

@@ -1,6 +1,6 @@
-# observIQ Collector
+# observIQ OpenTelemetry Collector
 
-The observIQ Collector is observIQ's distribution of the OpenTelemetry Collector. It provides everything you need to get setup and sending logs to 
+The observIQ OpenTelemetry Collector is observIQ's distribution of the OpenTelemetry Collector. It provides everything you need to get setup and sending logs to 
 [observIQ](https://observiq.com/).
 
 ## Installation

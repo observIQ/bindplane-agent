@@ -139,16 +139,16 @@ main() {
 
     case "$COMMAND" in
         install)
-            echo "Installing the observIQ collector..."
+            echo "Installing the observIQ openTelemetry collector..."
             # Download and install the package
             download_package
             install_package
-            echo "Successfully installed the observIQ collector."
+            echo "Successfully installed the observIQ openTelemetry collector."
             ;;
         uninstall)
-            echo "Uninstalling the observIQ collector..."
+            echo "Uninstalling the observIQ openTelemetry collector..."
             uninstall_package
-            echo "Successfully uninstalled the observIQ collector."
+            echo "Successfully uninstalled the observIQ openTelemetry collector."
             ;;
         *)
             echo "Unrecognized command: $COMMAND"
