@@ -16,6 +16,5 @@ windows/**/wix
 stanza-plugins
 windows/config.yaml
 opentelemetry-java-contrib-jmx-metrics.jar
-plugins
 release_deps
 tmp
