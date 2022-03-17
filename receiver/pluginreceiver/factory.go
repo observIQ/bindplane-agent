@@ -86,9 +86,8 @@ func createReceiver(cfg config.Receiver, set component.ReceiverCreateSettings, e
 		plugin:          plugin,
 		configProvider:  configProvider,
 		factoryProvider: factoryProvider,
-		buildInfo:       set.BuildInfo,
 		logger:          logger,
-		createService:   createDefaultService,
+		createService:   createService,
 	}, nil
 }
 

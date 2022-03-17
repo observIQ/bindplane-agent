@@ -8,6 +8,7 @@ import (
 
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
+	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/config"
 	"go.opentelemetry.io/collector/receiver/receiverhelper"
 	"go.opentelemetry.io/collector/service"
@@ -56,7 +57,7 @@ func TestReceiverCreateServiceFailure(t *testing.T) {
 		configProvider:  createConfigProvider(configMap),
 		factoryProvider: &FactoryProvider{},
 		logger:          zap.NewNop(),
-		createService: func(set service.CollectorSettings) (Service, error) {
+		createService: func(factories component.Factories, configProvider service.ConfigProvider, logger *zap.Logger) (Service, error) {
 			return nil, errors.New("failure")
 		},
 	}
@@ -88,7 +89,7 @@ func TestReceiverStartServiceFailure(t *testing.T) {
 		configProvider:  createConfigProvider(configMap),
 		factoryProvider: &FactoryProvider{},
 		logger:          zap.NewNop(),
-		createService: func(set service.CollectorSettings) (Service, error) {
+		createService: func(factories component.Factories, configProvider service.ConfigProvider, logger *zap.Logger) (Service, error) {
 			return svc, nil
 		},
 	}
@@ -120,7 +121,7 @@ func TestReceiverStartSuccess(t *testing.T) {
 		configProvider:  createConfigProvider(configMap),
 		factoryProvider: &FactoryProvider{},
 		logger:          zap.NewNop(),
-		createService: func(set service.CollectorSettings) (Service, error) {
+		createService: func(factories component.Factories, configProvider service.ConfigProvider, logger *zap.Logger) (Service, error) {
 			return svc, nil
 		},
 	}
@@ -141,22 +142,6 @@ func TestReceiverShutdown(t *testing.T) {
 	err = receiver.Shutdown(ctx)
 	require.NoError(t, err)
 	service.AssertExpectations(t)
-}
-
-func TestCreateDefaultService(t *testing.T) {
-	set := service.CollectorSettings{
-		ConfigProvider: &ConfigProvider{},
-	}
-	svc, err := createDefaultService(set)
-	require.NoError(t, err)
-	require.IsType(t, &service.Collector{}, svc)
-}
-
-func TestWrapLogger(t *testing.T) {
-	logger := zap.NewNop()
-	opt := wrapLogger(logger)
-	wrappedLogger := zap.NewNop().WithOptions(opt)
-	require.Equal(t, logger.Core(), wrappedLogger.Core())
 }
 
 // MockService is a mock type for the Service type
