@@ -23,7 +23,7 @@ RUN \
     goreleaser build --single-target --skip-validate --rm-dist
 
 # Find built executable, there is only one, and copy it to working dir
-RUN find /collector/dist -name observiq-collector -exec cp {} . \;
+RUN find /collector/dist -name observiq-otel-collector -exec cp {} . \;
 
 RUN curl -L \
     --output /opt/opentelemetry-java-contrib-jmx-metrics.jar \
@@ -48,7 +48,7 @@ ENV PATH=$PATH:/usr/local/openjdk-8/bin
 RUN mkdir -p /etc/otel
 
 # copy binary
-COPY --from=build /collector/observiq-collector /collector/
+COPY --from=build /collector/observiq-otel-collector /collector/
 
 # copy jmx receiver dependency
 COPY --from=build /opt/opentelemetry-java-contrib-jmx-metrics.jar /opt/opentelemetry-java-contrib-jmx-metrics.jar

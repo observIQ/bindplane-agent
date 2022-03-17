@@ -16,7 +16,7 @@
 
 set -e
 
-username="observiq-collector"
+username="observiq-otel-collector"
 
 if getent group "$username" > /dev/null 2>&1; then
     echo "Group ${username} already exists."

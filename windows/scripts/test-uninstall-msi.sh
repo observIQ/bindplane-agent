@@ -16,6 +16,6 @@
 set -e
 
 vagrant winrm -c "cd C:\vagrant; msiexec.exe /i cinc-auditor.msi /passive"
-vagrant winrm -c "cd C:\vagrant; msiexec.exe /x observiq-collector.msi /passive"
+vagrant winrm -c "cd C:\vagrant; msiexec.exe /x observiq-otel-collector.msi /passive"
 sleep 10
 vagrant winrm -c "cinc-auditor exec C:\vagrant\test\uninstall.rb"

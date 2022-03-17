@@ -15,7 +15,7 @@
 package factories
 
 import (
-	"github.com/observiq/observiq-collector/receiver/logsreceiver"
+	"github.com/observiq/observiq-otel-collector/receiver/logsreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/apachereceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/awscontainerinsightreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/awsecscontainermetricsreceiver"

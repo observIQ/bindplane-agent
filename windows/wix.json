@@ -1,68 +1,68 @@
 {
-    "product": "observiq-collector",
-    "company": "observIQ, Inc.",
-    "info": {
-      "help-link": "https://observiq.com/contact/",
-      "support-link": "https://observiq.com/contact/"
+  "product": "observiq-otel-collector",
+  "company": "observIQ, Inc.",
+  "info": {
+    "help-link": "https://observiq.com/contact/",
+    "support-link": "https://observiq.com/contact/"
+  },
+  "upgrade-code": "D67CCA1A-6708-4096-8BDE-5069739FB861",
+  "files": [
+    {
+      "path": "observiq-otel-collector.exe",
+      "service": {
+        "name": "observiq-otel-collector",
+        "start": "delayed",
+        "display-name": "observIQ Collector",
+        "description": "observIQ's distribution of the OpenTelemetry collector.",
+        "arguments": "--config &quot;[INSTALLDIR]config.yaml&quot;"
+      }
     },
-    "upgrade-code": "D67CCA1A-6708-4096-8BDE-5069739FB861",
-    "files": [
-      {
-        "path": "observiq-collector.exe",
-        "service": {
-          "name": "observiq-collector",
-          "start": "delayed",
-          "display-name": "observIQ Collector",
-          "description": "observIQ's distribution of the OpenTelemetry collector.",
-          "arguments": "--config &quot;[INSTALLDIR]config.yaml&quot;"
+    {
+      "path": "config.yaml"
+    },
+    {
+      "path": "opentelemetry-java-contrib-jmx-metrics.jar"
+    }
+  ],
+  "directories": [
+    {
+      "name": "plugins"
+    }
+  ],
+  "registries": [
+    {
+      "path": "HKCU\\Software\\observiq\\observiq-otel-collector",
+      "values": [
+        {
+          "name": "Version",
+          "value": "v[ProductVersion]"
+        },
+        {
+          "name": "InstallDir",
+          "value": "[INSTALLDIR]"
         }
-      },
-      {
-          "path": "config.yaml"
-      },
-      {
-          "path": "opentelemetry-java-contrib-jmx-metrics.jar"
-      }
-    ],
-    "directories": [
-      {
-        "name": "plugins"
-      }
-    ],
-    "registries": [
-      {
-        "path": "HKCU\\Software\\observiq\\observiq-collector",
-        "values": [
-          {
-            "name": "Version",
-            "value": "v[ProductVersion]"
-          },
-          {
-            "name": "InstallDir",
-            "value": "[INSTALLDIR]"
-          }
-        ]
-      },
-      {
-        "path": "HKLM\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\observiq-collector",
-        "values": [
-          {
-            "name": "NoModify",
-            "value": "1",
-            "type": "integer"
-          }
-        ]
-      },
-      {
-        "path": "HKLM\\SYSTEM\\CurrentControlSet\\Services\\EventLog\\Application\\observiq-collector",
-        "values": [
-          {
-            "name": "TypesSupported",
-            "type": "integer",
-            "value": "7"
-          }
-        ]
-      }
-    ],
-    "hooks": []
-  }
+      ]
+    },
+    {
+      "path": "HKLM\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\observiq-otel-collector",
+      "values": [
+        {
+          "name": "NoModify",
+          "value": "1",
+          "type": "integer"
+        }
+      ]
+    },
+    {
+      "path": "HKLM\\SYSTEM\\CurrentControlSet\\Services\\EventLog\\Application\\observiq-otel-collector",
+      "values": [
+        {
+          "name": "TypesSupported",
+          "type": "integer",
+          "value": "7"
+        }
+      ]
+    }
+  ],
+  "hooks": []
+}

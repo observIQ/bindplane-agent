@@ -30,7 +30,7 @@ create_systemd_service() {
 
     echo "detected service file directory: ${systemd_service_dir}"
 
-    systemd_service_file="${systemd_service_dir}/observiq-collector.service"
+    systemd_service_file="${systemd_service_dir}/observiq-otel-collector.service"
 
     cat <<EOF > ${systemd_service_file}
 [Unit]
@@ -40,11 +40,11 @@ StartLimitIntervalSec=120
 StartLimitBurst=5
 [Service]
 Type=simple
-User=observiq-collector
-Group=observiq-collector
+User=observiq-otel-collector
+Group=observiq-otel-collector
 Environment=PATH=/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin
-WorkingDirectory=/opt/observiq-collector
-ExecStart=/opt/observiq-collector/observiq-collector --config config.yaml
+WorkingDirectory=/opt/observiq-otel-collector
+ExecStart=/opt/observiq-otel-collector/observiq-otel-collector --config config.yaml
 SuccessExitStatus=0
 TimeoutSec=120
 StandardOutput=journal
@@ -63,22 +63,22 @@ EOF
 
     cat << EOF
 
-The "observiq-collector" service has been configured!
+The "observiq-otel-collector" service has been configured!
 
 The collector's config file can be found here: 
-  /opt/observiq-collector/config.yaml
+  /opt/observiq-otel-collector/config.yaml
 
 For more information on configuring the collector, see the OpenTelemetry docs:
   https://opentelemetry.io/docs/collector/configuration/
 
-To stop the observiq-collector service, run:
-  sudo systemctl stop observiq-collector
+To stop the observiq-otel-collector service, run:
+  sudo systemctl stop observiq-otel-collector
 
-To start the observiq-collector service, run:
-  sudo systemctl start observiq-collector
+To start the observiq-otel-collector service, run:
+  sudo systemctl start observiq-otel-collector
 
-To restart the observiq-collector service, run:
-  sudo systemctl restart observiq-collector
+To restart the observiq-otel-collector service, run:
+  sudo systemctl restart observiq-otel-collector
 EOF
 }
 
@@ -106,9 +106,9 @@ install_service() {
 
 finish_permissions() {
     # Goreleaser does not set plugin file permissions, so do them here
-    # We also change the owner of the binary to observiq-collector
-    chown -R observiq-collector:observiq-collector /opt/observiq-collector/observiq-collector /opt/observiq-collector/plugins/*
-    chmod 0640 /opt/observiq-collector/plugins/*
+    # We also change the owner of the binary to observiq-otel-collector
+    chown -R observiq-otel-collector:observiq-otel-collector /opt/observiq-otel-collector/observiq-otel-collector /opt/observiq-otel-collector/plugins/*
+    chmod 0640 /opt/observiq-otel-collector/plugins/*
 }
 
 

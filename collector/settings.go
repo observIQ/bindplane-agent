@@ -17,7 +17,7 @@ package collector
 import (
 	"os"
 
-	"github.com/observiq/observiq-collector/factories"
+	"github.com/observiq/observiq-otel-collector/factories"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/service"
 	"go.uber.org/zap"
