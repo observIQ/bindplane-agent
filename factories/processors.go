@@ -16,7 +16,7 @@ package factories
 
 import (
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-collector/processor/normalizesumsprocessor"
-	"github.com/observiq/observiq-collector/pkg/processor/resourceattributetransposerprocessor"
+	"github.com/observiq/observiq-collector/processor/resourceattributetransposerprocessor"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/attributesprocessor"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/cumulativetodeltaprocessor"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/deltatorateprocessor"

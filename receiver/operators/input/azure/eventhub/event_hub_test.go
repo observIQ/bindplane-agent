@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package loganalytics
+package eventhub
 
 import (
 	"testing"
 
-	"github.com/observiq/observiq-collector/pkg/receiver/operators/input/azure"
+	"github.com/observiq/observiq-collector/receiver/operators/input/azure"
 	"github.com/open-telemetry/opentelemetry-log-collection/testutil"
 	"github.com/stretchr/testify/require"
 )
@@ -96,7 +96,7 @@ func TestBuild(t *testing.T) {
 			true,
 		},
 		{
-			"startat-invalid",
+			"default-required-startat-invalid",
 			InputConfig{
 				Config: azure.Config{
 					Namespace:        "test",
@@ -113,13 +113,13 @@ func TestBuild(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			cfg := NewLogAnalyticsConfig("test_id")
+			cfg := NewEventHubConfig("test_id")
 			cfg.Namespace = tc.input.Namespace
 			cfg.Name = tc.input.Name
 			cfg.Group = tc.input.Group
 			cfg.ConnectionString = tc.input.ConnectionString
 
-			if tc.input.PrefetchCount != NewLogAnalyticsConfig("").PrefetchCount {
+			if tc.input.PrefetchCount != NewEventHubConfig("").PrefetchCount {
 				cfg.PrefetchCount = tc.input.PrefetchCount
 			}
 
