@@ -6,6 +6,7 @@ The observIQ Collector is observIQ's distribution of the OpenTelemetry Collector
 ## Installation
 
 * [Installing on Windows](/docs/installation-windows.md)
+* [Installing on Linux](/docs/installation-linux.md)
 ### Configs
 
 For sample configs, see the `./config` directory.
