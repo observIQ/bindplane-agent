@@ -143,7 +143,7 @@ main() {
             # Download and install the package
             download_package
             install_package
-            echo "Successfully installed the observIQ openTelemetry collector."
+            echo "Successfully installed the observIQ OpenTelemetry collector."
             ;;
         uninstall)
             echo "Uninstalling the observIQ openTelemetry collector..."
