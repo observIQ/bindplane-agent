@@ -19,7 +19,7 @@ endif
 PREVIOUS_TAG := $(shell git tag --sort=v:refname --no-contains HEAD | grep -E "[0-9]+\.[0-9]+\.[0-9]+$$" | tail -n1)
 CURRENT_TAG := $(shell git tag --sort=v:refname --points-at HEAD | grep -E "v[0-9]+\.[0-9]+\.[0-9]+$$" | tail -n1)
 # Version will be the tag pointing to the current commit, or the previous version tag if there is no such tag
-VERSION ?= $(if $(CURRENT_TAG),$(CURRENT_TAG),$(PREVIOUS_TAG)) 
+VERSION ?= $(if $(CURRENT_TAG),$(CURRENT_TAG),$(PREVIOUS_TAG))
 
 # Default build target; making this should build for the current os/arch
 .PHONY: collector
@@ -89,16 +89,16 @@ misspell-fix:
 
 .PHONY: test
 test:
-	go test -race ./...
+	$(MAKE) for-all CMD="go test -race ./..."
 
 .PHONY: test-with-cover
 test-with-cover:
-	go test -coverprofile=cover.out ./...
-	go tool cover -html=cover.out -o cover.html
+	$(MAKE) for-all CMD="go test -coverprofile=cover.out ./..."
+	$(MAKE) for-all CMD="go tool cover -html=cover.out -o cover.html"
 
 .PHONY: bench
 bench:
-	go test -benchmem -run=^$$ -bench ^* ./...
+	$(MAKE) for-all CMD="go test -benchmem -run=^$$ -bench ^* ./..."
 
 .PHONY: check-fmt
 check-fmt:

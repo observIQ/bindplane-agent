@@ -17,3 +17,6 @@ exceptions:
     # opencontainers/go-digest is Apache 2.0 licensed, the README and CONTRIBUTING docs
     # are creative commons. https://github.com/opencontainers/go-digest#copyright-and-license
     - path: "github.com/opencontainers/go-digest"
+  unresolvableLicense:
+    - path: "./processor/resourceattributetransposerprocessor"
+    - path: "./receiver/logsreceiver"
