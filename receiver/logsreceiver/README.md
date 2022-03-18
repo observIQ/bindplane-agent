@@ -10,7 +10,7 @@ Supported pipeline types: logs
 
 | Field        | Default | Description                                                                                                        |
 | ---          | ---     | ---                                                                                                                |
-| `pipeline`   | []      | An array of [operators](https://github.com/open-telemetry/opentelemetry-log-collection/blob/main/docs/operators/README.md#what-operators-are-available). See below for more details. |
+| `pipeline`   | []      | An array of [operators](https://github.com/open-telemetry/opentelemetry-log-collection/blob/main/docs/logsreceiver/operators/README.md#what-operators-are-available). See below for more details. |
 | `plugin_dir` | ""      | A path to a directory that contains [plugins](https://github.com/open-telemetry/opentelemetry-log-collection/blob/main/docs/plugins.md#defining-plugins). |
 
 ### Pipeline
@@ -30,7 +30,7 @@ Some `operators` are able to persist state across subsequent executions of the c
 
 - An [entry](https://github.com/open-telemetry/opentelemetry-log-collection/blob/main/docs/types/entry.md) is the base representation of log data as it moves through a pipeline. All operators either create, modify, or consume entries.
 - A [field](https://github.com/open-telemetry/opentelemetry-log-collection/blob/main/docs/types/field.md) is used to reference values in an entry.
-- A common [expression](https://github.com/open-telemetry/opentelemetry-log-collection/blob/main/docs/types/expression.md) syntax is used in several operators. For example, expressions can be used to [filter](https://github.com/open-telemetry/opentelemetry-log-collection/blob/main/docs/operators/filter.md) or [route](https://github.com/open-telemetry/opentelemetry-log-collection/blob/main/docs/operators/router.md) entries.
+- A common [expression](https://github.com/open-telemetry/opentelemetry-log-collection/blob/main/docs/types/expression.md) syntax is used in several operators. For example, expressions can be used to [filter](https://github.com/open-telemetry/opentelemetry-log-collection/blob/main/docs/logsreceiver/operators/filter.md) or [route](https://github.com/open-telemetry/opentelemetry-log-collection/blob/main/docs/logsreceiver/operators/router.md) entries.
 - [timestamp](https://github.com/open-telemetry/opentelemetry-log-collection/blob/main/docs/types/timestamp.md) parsing is available as a block within all parser operators, and also as a standalone operator. Many common timestamp layouts are supported.
 - [severity](https://github.com/open-telemetry/opentelemetry-log-collection/blob/main/docs/types/severity.md) parsing is available as a block within all parser operators, and also as a standalone operator. Stanza uses a flexible severity representation which is automatically interpreted by the stanza receiver.
 
