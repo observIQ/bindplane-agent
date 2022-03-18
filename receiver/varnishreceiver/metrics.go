@@ -154,8 +154,8 @@ func (v *varnishScraper) recordVarnishSessionCountDataPoint(now pdata.Timestamp,
 
 func (v *varnishScraper) recordVarnishClientRequestsCountDataPoint(now pdata.Timestamp, stats *Stats) {
 	attributeMappings := map[string]int64{
-		metadata.Attributes.ClientRequests: stats.MAINClientReq.Value,
-		metadata.Attributes.ClientRequests: stats.MAINReqDropped.Value,
+		metadata.AttributeClientRequests.Received: stats.MAINClientReq.Value,
+		metadata.AttributeClientRequests.Dropped:  stats.MAINReqDropped.Value,
 	}
 
 	for attributeName, attributeValue := range attributeMappings {
