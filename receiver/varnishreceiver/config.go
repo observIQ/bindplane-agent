@@ -14,11 +14,46 @@
 
 package varnishreceiver // import "github.com/observiq/observiq-otel-collector/receiver/varnishreceiver"
 
-import "go.opentelemetry.io/collector/receiver/scraperhelper" // Config defines the configuration for the various elements of the receiver agent.
+import (
+	"errors"
+	"fmt"
+	"os"
+
+	"go.opentelemetry.io/collector/receiver/scraperhelper"
+	"go.uber.org/multierr"
+)
+
+var (
+	errWorkingDirNotExist = errors.New(`"working_dir" does not exists %q`)
+	errExecDirNotExist    = errors.New(`"exec_dir" does not exists %q`)
+)
 
 // Config defines configuration for varnish metrics receiver.
 type Config struct {
 	scraperhelper.ScraperControllerSettings `mapstructure:",squash"`
 	WorkingDir                              string `mapstructure:"working_dir"`
 	ExecDir                                 string `mapstructure:"exec_dir"`
+}
+
+// Validate validates the config.
+func (c *Config) Validate() error {
+	var err error
+	if c.WorkingDir != "" {
+		if pathErr := pathExists(c.WorkingDir); pathErr != nil {
+			err = multierr.Append(err, fmt.Errorf(errWorkingDirNotExist.Error(), pathErr))
+		}
+	}
+	if c.ExecDir != "" {
+		if pathErr := pathExists(c.ExecDir); pathErr != nil {
+			err = multierr.Append(err, fmt.Errorf(errExecDirNotExist.Error(), pathExists(c.ExecDir)))
+		}
+	}
+
+	return err
+}
+
+// pathExists returns an err if the path does not.
+func pathExists(file string) error {
+	_, err := os.Stat(file)
+	return err
 }

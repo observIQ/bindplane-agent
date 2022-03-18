@@ -40,7 +40,7 @@ func (e *varnishExecuter) Execute(command string, args []string) ([]byte, error)
 	return exec.Command(command, args...).Output()
 }
 
-// client is an interface to get stats and version using an executer.
+// client is an interface to get stats and build the exec command using an executer.
 type client interface {
 	GetStats() (*Stats, error)
 	BuildCommand() (string, []string)
@@ -54,8 +54,7 @@ type varnishClient struct {
 	logger *zap.Logger
 }
 
-// newVarnishClient creates a client and does a health check via version validation.
-// If version is not supported, a log warning is sent.
+// newVarnishClient creates a client.
 func newVarnishClient(cfg *Config, _ component.Host, settings component.TelemetrySettings) client {
 	return &varnishClient{
 		cfg:    cfg,
@@ -69,6 +68,7 @@ const (
 	counters    = "counters"
 )
 
+// BuildCommand builds the exec command statement.
 func (v *varnishClient) BuildCommand() (string, []string) {
 	argList := []string{"-j"}
 	command := varnishStat
@@ -106,8 +106,7 @@ func parseStats(rawStats []byte) (*Stats, error) {
 	// https://varnish-cache.org/docs/6.5/whats-new/upgrading-6.5.html#varnishstat
 	if _, ok := raw[counters]; ok {
 		var jsonParsed FullStats
-		err := json.Unmarshal(rawStats, &jsonParsed)
-		if err != nil {
+		if err := json.Unmarshal(rawStats, &jsonParsed); err != nil {
 			return nil, err
 		}
 
@@ -115,8 +114,7 @@ func parseStats(rawStats []byte) (*Stats, error) {
 	}
 
 	var jsonParsed Stats
-	err := json.Unmarshal(rawStats, &jsonParsed)
-	if err != nil {
+	if err := json.Unmarshal(rawStats, &jsonParsed); err != nil {
 		return nil, err
 	}
 

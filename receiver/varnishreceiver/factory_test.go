@@ -31,10 +31,18 @@ func TestType(t *testing.T) {
 }
 
 func TestValidConfig(t *testing.T) {
-	factory := NewFactory()
-	cfg := factory.CreateDefaultConfig().(*Config)
-
-	require.NoError(t, cfg.Validate())
+	t.Run("default config", func(t *testing.T) {
+		factory := NewFactory()
+		cfg := factory.CreateDefaultConfig().(*Config)
+		require.NoError(t, cfg.Validate())
+	})
+	t.Run("config with fields", func(t *testing.T) {
+		factory := NewFactory()
+		cfg := factory.CreateDefaultConfig().(*Config)
+		cfg.WorkingDir = "factory_test.go"
+		cfg.ExecDir = "factory_test.go"
+		require.NoError(t, cfg.Validate())
+	})
 }
 
 func TestCreateMetricsReceiver(t *testing.T) {
@@ -55,7 +63,6 @@ func TestCreateMetricsReceiver(t *testing.T) {
 				)
 
 				require.NoError(t, err)
-
 			},
 		},
 		{
