@@ -34,7 +34,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Copy Windows Binary
-        run: cp dist/collector_windows_amd64/observiq-collector.exe windows/observiq-collector.exe
+        run: cp dist/collector_windows_amd64/observiq-otel-collector.exe windows/observiq-otel-collector.exe
       - name: Copy Plugins to MSI Build Directory
         run: cp -r release_deps/plugins windows/
       - name: Copy Example Config
@@ -58,10 +58,10 @@ jobs:
         id: get-tag
         run: printf '::set-output name=tag::%s' "$(printf '%s' "${{ github.ref }}" | sed 's/refs\/tags\///')"
       - name: "Build MSI from Tagged Release"
-        run: go-msi.exe make -m observiq-collector.msi --version ${{ steps.get-tag.outputs.tag }} --arch amd64
+        run: go-msi.exe make -m observiq-otel-collector.msi --version ${{ steps.get-tag.outputs.tag }} --arch amd64
         working-directory: C:/build
       - name: Install MSI
-        run: msiexec.exe /qn /i observiq-collector.msi
+        run: msiexec.exe /qn /i observiq-otel-collector.msi
         working-directory: C:/build
       - name: Install CINC (Inspec)
         run: . { iwr -useb https://omnitruck.cinc.sh/install.ps1 } | iex; install -project cinc-auditor -version 4
@@ -70,20 +70,20 @@ jobs:
         working-directory: C:/build/test
       - name: Uninstall MSI
         run: |
-          msiexec.exe /qn /x observiq-collector.msi
+          msiexec.exe /qn /x observiq-otel-collector.msi
           sleep 5
         working-directory: C:/build
       - name: Run CINC (Inspec) Uninstall Tests
         run: C:/cinc-project/cinc-auditor/bin/cinc-auditor.bat exec uninstall.rb
         working-directory: C:/build/test
       - name: "Rename MSI to include version tag"
-        run: mv observiq-collector.msi observiq-collector-${{ steps.get-tag.outputs.tag }}.msi
+        run: mv observiq-otel-collector.msi observiq-otel-collector-${{ steps.get-tag.outputs.tag }}.msi
         working-directory: C:/build
       - name: "Upload MSI"
         uses: actions/upload-artifact@v2
         with:
-          name: observiq-collector-${{ steps.get-tag.outputs.tag }}.msi
-          path: C:/build/observiq-collector-${{ steps.get-tag.outputs.tag }}.msi
+          name: observiq-otel-collector-${{ steps.get-tag.outputs.tag }}.msi
+          path: C:/build/observiq-otel-collector-${{ steps.get-tag.outputs.tag }}.msi
           # Short lived because Go Releaser will upload the msi to a release (github release, gcs, etc)
           retention-days: 1
   build-container-image:
@@ -153,7 +153,7 @@ jobs:
           # uncomment to override jar version: https://github.com/open-telemetry/opentelemetry-java-contrib/releases
           #  JMX_JAR_VERSION=v1.7.0
           tags: |
-            observiq/observiq-collector:${{ steps.get-tag.outputs.tag }}
+            observiq/observiq-otel-collector:${{ steps.get-tag.outputs.tag }}
 
   release:
     needs: [build-msi]
@@ -175,8 +175,8 @@ jobs:
       - name: Retrieve Windows MSI Installer
         uses: actions/download-artifact@v2
         with:
-          name: observiq-collector-${{ steps.get-tag.outputs.tag }}.msi
-          path: observiq-collector-${{ steps.get-tag.outputs.tag }}.msi
+          name: observiq-otel-collector-${{ steps.get-tag.outputs.tag }}.msi
+          path: observiq-otel-collector-${{ steps.get-tag.outputs.tag }}.msi
         # install tools for cosign
       - name: Install Dependencies
         run: |

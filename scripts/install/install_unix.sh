@@ -16,7 +16,7 @@
 set -e
 
 # Constants
-DOWNLOAD_URL_BASE="https://github.com/observiq/observiq-collector/releases"
+DOWNLOAD_URL_BASE="https://github.com/observiq/observiq-otel-collector/releases"
 TMP_DIR=${TMPDIR:-"/tmp"} # Allow this to be overriden by cannonical TMPDIR env var
 
 # Global variables
@@ -29,10 +29,10 @@ arch="unknown"
 # may be "deb" or "rpm"
 package_type="unknown"
 
-# package_file_name is the name of the package file (e.g. "observiq-collector_linux_amd64.deb")
+# package_file_name is the name of the package file (e.g. "observiq-otel-collector_linux_amd64.deb")
 package_file_name="unknown"
 
-# out_file_path is the full path to the downloaded package (e.g. "/tmp/observiq-collector_linux_amd64.deb")
+# out_file_path is the full path to the downloaded package (e.g. "/tmp/observiq-otel-collector_linux_amd64.deb")
 out_file_path="unknown"
 
 set_arch() {
@@ -68,7 +68,7 @@ set_package_type() {
 }
 
 set_file_name() {
-    package_file_name="observiq-collector_linux_${arch}.${package_type}"
+    package_file_name="observiq-otel-collector_linux_${arch}.${package_type}"
     out_file_path="$TMP_DIR/$package_file_name"
 }
 
@@ -97,34 +97,34 @@ install_package() {
     esac
 
     if command -v systemctl > /dev/null 2>&1; then
-        systemctl enable --now observiq-collector
+        systemctl enable --now observiq-otel-collector
     fi
 }
 
 uninstall_package() {
     if command -v dpkg > /dev/null 2>&1; then
-        if dpkg -l "observiq-collector" > /dev/null 2>&1; then
-            desired_state="$(dpkg -l observiq-collector | tail -n1 | cut -b 1)"
+        if dpkg -l "observiq-otel-collector" > /dev/null 2>&1; then
+            desired_state="$(dpkg -l observiq-otel-collector | tail -n1 | cut -b 1)"
             if [ "$desired_state" = "i" ]; then
                 echo "Existing DEB installation detected, uninstalling..."
-                dpkg -r "observiq-collector"
+                dpkg -r "observiq-otel-collector"
             else
                 # The package is already uninstalled;
                 # This case can be hit when the package was uninstalled, but config files are left behind,
                 # which dpkg still keeps track of.
-                echo "dpkg was detected, but no observiq-collector package is currently installed, skipping..."
+                echo "dpkg was detected, but no observiq-otel-collector package is currently installed, skipping..."
             fi
         else
-            echo "dpkg was detected, but no observiq-collector package is currently installed, skipping..."
+            echo "dpkg was detected, but no observiq-otel-collector package is currently installed, skipping..."
         fi
     fi
 
     if command -v rpm > /dev/null 2>&1; then
-        if rpm -q observiq-collector > /dev/null 2>&1; then
+        if rpm -q observiq-otel-collector > /dev/null 2>&1; then
             echo "Existing RPM installation detected, uninstalling..."
-            rpm -e "observiq-collector"
+            rpm -e "observiq-otel-collector"
         else
-            echo "rpm was detected, but no observiq-collector package is currently installed, skipping..."
+            echo "rpm was detected, but no observiq-otel-collector package is currently installed, skipping..."
         fi
     fi
 }
@@ -139,16 +139,16 @@ main() {
 
     case "$COMMAND" in
         install)
-            echo "Installing the observIQ collector..."
+            echo "Installing the observIQ OpenTelemetry collector..."
             # Download and install the package
             download_package
             install_package
-            echo "Successfully installed the observIQ collector."
+            echo "Successfully installed the observIQ OpenTelemetry collector."
             ;;
         uninstall)
-            echo "Uninstalling the observIQ collector..."
+            echo "Uninstalling the observIQ OpenTelemetry collector..."
             uninstall_package
-            echo "Successfully uninstalled the observIQ collector."
+            echo "Successfully uninstalled the observIQ OpenTelemetry collector."
             ;;
         *)
             echo "Unrecognized command: $COMMAND"

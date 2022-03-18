@@ -24,7 +24,7 @@ VERSION ?= $(if $(CURRENT_TAG),$(CURRENT_TAG),$(PREVIOUS_TAG))
 # Default build target; making this should build for the current os/arch
 .PHONY: collector
 collector:
-	go build -ldflags "-s -w -X github.com/observiq/observiq-collector/internal/version.version=$(VERSION)" -o $(OUTDIR)/collector_$(GOOS)_$(GOARCH)$(EXT) ./cmd/collector
+	go build -ldflags "-s -w -X github.com/observiq/observiq-otel-collector/internal/version.version=$(VERSION)" -o $(OUTDIR)/collector_$(GOOS)_$(GOARCH)$(EXT) ./cmd/collector
 
 .PHONY: build-all
 build-all: build-linux build-darwin build-windows
