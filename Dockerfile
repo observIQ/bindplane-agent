@@ -54,5 +54,5 @@ COPY --from=build /collector/observiq-otel-collector /collector/
 COPY --from=build /opt/opentelemetry-java-contrib-jmx-metrics.jar /opt/opentelemetry-java-contrib-jmx-metrics.jar
 
 # User should mount /etc/otel/config.yaml at runtime using docker volumes / k8s configmap
-ENTRYPOINT [ "/collector" ]
+ENTRYPOINT [ "/collector/observiq-otel-collector" ]
 CMD ["--config", "/etc/otel/config.yaml"]
