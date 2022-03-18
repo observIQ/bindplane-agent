@@ -5,7 +5,7 @@ go 1.17
 require (
 	github.com/Azure/azure-event-hubs-go/v3 v3.3.17
 	github.com/GoogleCloudPlatform/opentelemetry-operations-collector v0.0.3-0.20211123195618-f15f911ae5a1
-	github.com/aws/aws-sdk-go v1.43.18
+	github.com/aws/aws-sdk-go v1.43.20
 	github.com/gorilla/mux v1.8.0
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/jpillora/backoff v1.0.0
