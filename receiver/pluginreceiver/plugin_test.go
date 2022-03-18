@@ -66,6 +66,7 @@ func TestRenderComponents(t *testing.T) {
 		name           string
 		plugin         *Plugin
 		values         map[string]interface{}
+		dataType       config.DataType
 		expectedResult *ComponentMap
 		expectedErr    error
 	}{
@@ -96,6 +97,7 @@ func TestRenderComponents(t *testing.T) {
 				Template: `
 {{if .enabled}}
 receivers:
+  test:
 {{end}}
 service:
   pipelines:
@@ -105,6 +107,9 @@ service:
 				"enabled": true,
 			},
 			expectedResult: &ComponentMap{
+				Receivers: map[config.ComponentID]map[string]interface{}{
+					config.NewComponentID("test"): nil,
+				},
 				Exporters: map[config.ComponentID]map[string]interface{}{
 					config.NewComponentID(emitterTypeStr): nil,
 				},
@@ -123,6 +128,7 @@ service:
 				Template: `
 {{if .enabled}}
 receivers:
+  test:
 {{end}}
 service:
   pipelines:
@@ -135,6 +141,38 @@ service:
 				},
 			},
 			expectedResult: &ComponentMap{
+				Receivers: map[config.ComponentID]map[string]interface{}{
+					config.NewComponentID("test"): nil,
+				},
+				Exporters: map[config.ComponentID]map[string]interface{}{
+					config.NewComponentID(emitterTypeStr): nil,
+				},
+				Service: ServiceMap{
+					Pipelines: map[string]Pipeline{
+						"metrics": {
+							Exporters: []config.ComponentID{config.NewComponentID(emitterTypeStr)},
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "valid template with data type",
+			plugin: &Plugin{
+				Template: `
+{{if .metrics}}
+receivers:
+  test:
+{{end}}
+service:
+  pipelines:
+    metrics:`,
+			},
+			dataType: config.MetricsDataType,
+			expectedResult: &ComponentMap{
+				Receivers: map[config.ComponentID]map[string]interface{}{
+					config.NewComponentID("test"): nil,
+				},
 				Exporters: map[config.ComponentID]map[string]interface{}{
 					config.NewComponentID(emitterTypeStr): nil,
 				},
@@ -151,7 +189,7 @@ service:
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			result, err := tc.plugin.RenderComponents(tc.values)
+			result, err := tc.plugin.RenderComponents(tc.values, tc.dataType)
 			switch tc.expectedErr {
 			case nil:
 				require.NoError(t, err)
