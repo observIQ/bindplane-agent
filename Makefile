@@ -102,11 +102,11 @@ bench:
 
 .PHONY: check-fmt
 check-fmt:
-	$(MAKE) for-all CMD="goimports -d ./ | diff -u /dev/null -"
+	goimports -d ./ | diff -u /dev/null -
 
 .PHONY: fmt
 fmt:
-	$(MAKE) for-all CMD="goimports -w ."
+	goimports -w .
 
 .PHONY: tidy
 tidy:
