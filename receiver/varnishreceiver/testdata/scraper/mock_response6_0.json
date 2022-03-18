@@ -130,5 +130,11 @@
             "flag": "c",
             "format": "i",
             "value": 22
+        },
+        "MAIN.req_dropped": {
+            "description": "Requests dropped",
+            "flag": "c",
+            "format": "i",
+            "value": 23
         }
 }

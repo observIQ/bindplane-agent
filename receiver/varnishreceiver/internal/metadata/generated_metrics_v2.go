@@ -233,9 +233,10 @@ func (m *metricVarnishClientRequestsCount) init() {
 	m.data.SetDataType(pdata.MetricDataTypeSum)
 	m.data.Sum().SetIsMonotonic(true)
 	m.data.Sum().SetAggregationTemporality(pdata.MetricAggregationTemporalityCumulative)
+	m.data.Sum().DataPoints().EnsureCapacity(m.capacity)
 }
 
-func (m *metricVarnishClientRequestsCount) recordDataPoint(start pdata.Timestamp, ts pdata.Timestamp, val int64) {
+func (m *metricVarnishClientRequestsCount) recordDataPoint(start pdata.Timestamp, ts pdata.Timestamp, val int64, clientRequestsAttributeValue string) {
 	if !m.settings.Enabled {
 		return
 	}
@@ -243,6 +244,7 @@ func (m *metricVarnishClientRequestsCount) recordDataPoint(start pdata.Timestamp
 	dp.SetStartTimestamp(start)
 	dp.SetTimestamp(ts)
 	dp.SetIntVal(val)
+	dp.Attributes().Insert(A.ClientRequests, pdata.NewAttributeValueString(clientRequestsAttributeValue))
 }
 
 // updateCapacity saves max length of data point slices that will be used for the slice capacity.
@@ -658,8 +660,8 @@ func (mb *MetricsBuilder) RecordVarnishCacheOperationsCountDataPoint(ts pdata.Ti
 }
 
 // RecordVarnishClientRequestsCountDataPoint adds a data point to varnish.client.requests.count metric.
-func (mb *MetricsBuilder) RecordVarnishClientRequestsCountDataPoint(ts pdata.Timestamp, val int64) {
-	mb.metricVarnishClientRequestsCount.recordDataPoint(mb.startTime, ts, val)
+func (mb *MetricsBuilder) RecordVarnishClientRequestsCountDataPoint(ts pdata.Timestamp, val int64, clientRequestsAttributeValue string) {
+	mb.metricVarnishClientRequestsCount.recordDataPoint(mb.startTime, ts, val, clientRequestsAttributeValue)
 }
 
 // RecordVarnishObjectCountDataPoint adds a data point to varnish.object.count metric.
@@ -719,6 +721,8 @@ var Attributes = struct {
 	CacheName string
 	// CacheOperations (The cache operation types)
 	CacheOperations string
+	// ClientRequests (The client request types.)
+	ClientRequests string
 	// SessionType (The session connection types.)
 	SessionType string
 	// ThreadOperations (The thread operation types.)
@@ -727,6 +731,7 @@ var Attributes = struct {
 	"kind",
 	"cache_name",
 	"operation",
+	"kind",
 	"kind",
 	"operation",
 }
@@ -762,6 +767,15 @@ var AttributeCacheOperations = struct {
 	"hit",
 	"miss",
 	"hit_pass",
+}
+
+// AttributeClientRequests are the possible values that the attribute "client_requests" can have.
+var AttributeClientRequests = struct {
+	Received string
+	Dropped  string
+}{
+	"received",
+	"dropped",
 }
 
 // AttributeSessionType are the possible values that the attribute "session_type" can have.

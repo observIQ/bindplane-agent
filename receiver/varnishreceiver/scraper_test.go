@@ -185,7 +185,17 @@ func validateScraperResult(t *testing.T, actualMetrics pdata.Metrics) {
 		case "varnish.client.requests.count":
 			dps := m.Sum().DataPoints()
 			require.Equal(t, 1, dps.Len())
-			require.EqualValues(t, int64(3), dps.At(0).IntVal())
+			attributeMappings := map[string]int64{}
+			for j := 0; j < dps.Len(); j++ {
+				dp := dps.At(j)
+				method := dp.Attributes().AsRaw()
+				label := fmt.Sprintf("%s method:%s", m.Name(), method)
+				attributeMappings[label] = dp.IntVal()
+			}
+			require.Equal(t, map[string]int64{
+				"varnish.client.requests.count method:map[kind:kind]": int64(23),
+			},
+				attributeMappings)
 		case "varnish.backend.requests.count":
 			dps := m.Sum().DataPoints()
 			require.Equal(t, 1, dps.Len())

@@ -77,6 +77,9 @@ type Stats struct {
 	MAINSessDropped struct {
 		Value int64 `json:"value"`
 	} `json:"MAIN.sess_dropped"`
+	MAINReqDropped struct {
+		Value int64 `json:"value"`
+	} `json:"MAIN.req_dropped"`
 	MAINNObject struct {
 		Value int64 `json:"value"`
 	} `json:"MAIN.n_object"`
@@ -146,5 +149,16 @@ func (v *varnishScraper) recordVarnishSessionCountDataPoint(now pdata.Timestamp,
 
 	for attributeName, attributeValue := range attributeMappings {
 		v.mb.RecordVarnishSessionCountDataPoint(now, attributeValue, attributeName)
+	}
+}
+
+func (v *varnishScraper) recordVarnishClientRequestsCountDataPoint(now pdata.Timestamp, stats *Stats) {
+	attributeMappings := map[string]int64{
+		metadata.Attributes.ClientRequests: stats.MAINClientReq.Value,
+		metadata.Attributes.ClientRequests: stats.MAINReqDropped.Value,
+	}
+
+	for attributeName, attributeValue := range attributeMappings {
+		v.mb.RecordVarnishClientRequestsCountDataPoint(now, attributeValue, attributeName)
 	}
 }
