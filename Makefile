@@ -115,7 +115,7 @@ tidy:
 
 .PHONY: gosec
 gosec:
-	gosec ./...
+	gosec -exclude-dir receiver/varnishreceiver  ./...
 
 # This target performs all checks that CI will do (excluding the build itself)
 .PHONY: ci-checks
