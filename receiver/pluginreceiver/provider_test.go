@@ -55,9 +55,6 @@ func TestConfigProviderGet(t *testing.T) {
 
 func TestGetRequiredFactories(t *testing.T) {
 	testType := config.Type("test")
-	testID := config.NewComponentID(testType)
-	duplicateTestID := config.NewComponentIDWithName(testType, "duplicate")
-
 	emitterFactory := exporterhelper.NewFactory(testType, nil)
 	receiverFactory := receiverhelper.NewFactory(testType, nil)
 	processorFactory := processorhelper.NewFactory(testType, nil)
@@ -78,8 +75,8 @@ func TestGetRequiredFactories(t *testing.T) {
 		{
 			name: "missing receiver factory",
 			components: &ComponentMap{
-				Receivers: map[config.ComponentID]map[string]interface{}{
-					config.NewComponentID("missing"): nil,
+				Receivers: map[string]interface{}{
+					"missing": nil,
 				},
 			},
 			expectedErr: errors.New("failed to get receiver factories"),
@@ -87,8 +84,8 @@ func TestGetRequiredFactories(t *testing.T) {
 		{
 			name: "missing processor factory",
 			components: &ComponentMap{
-				Processors: map[config.ComponentID]map[string]interface{}{
-					config.NewComponentID("missing"): nil,
+				Processors: map[string]interface{}{
+					"missing": nil,
 				},
 			},
 			expectedErr: errors.New("failed to get processor factories"),
@@ -96,8 +93,8 @@ func TestGetRequiredFactories(t *testing.T) {
 		{
 			name: "missing extension factory",
 			components: &ComponentMap{
-				Extensions: map[config.ComponentID]map[string]interface{}{
-					config.NewComponentID("missing"): nil,
+				Extensions: map[string]interface{}{
+					"missing": nil,
 				},
 			},
 			expectedErr: errors.New("failed to get extension factories"),
@@ -105,14 +102,14 @@ func TestGetRequiredFactories(t *testing.T) {
 		{
 			name: "all factories exist",
 			components: &ComponentMap{
-				Receivers: map[config.ComponentID]map[string]interface{}{
-					testID: nil,
+				Receivers: map[string]interface{}{
+					"test": nil,
 				},
-				Processors: map[config.ComponentID]map[string]interface{}{
-					testID: nil,
+				Processors: map[string]interface{}{
+					"test": nil,
 				},
-				Extensions: map[config.ComponentID]map[string]interface{}{
-					testID: nil,
+				Extensions: map[string]interface{}{
+					"test": nil,
 				},
 			},
 			expectedResult: &component.Factories{
@@ -133,17 +130,17 @@ func TestGetRequiredFactories(t *testing.T) {
 		{
 			name: "duplicate receivers defined",
 			components: &ComponentMap{
-				Receivers: map[config.ComponentID]map[string]interface{}{
-					testID:          nil,
-					duplicateTestID: nil,
+				Receivers: map[string]interface{}{
+					"test":   nil,
+					"test/2": nil,
 				},
-				Processors: map[config.ComponentID]map[string]interface{}{
-					testID:          nil,
-					duplicateTestID: nil,
+				Processors: map[string]interface{}{
+					"test":   nil,
+					"test/2": nil,
 				},
-				Extensions: map[config.ComponentID]map[string]interface{}{
-					testID:          nil,
-					duplicateTestID: nil,
+				Extensions: map[string]interface{}{
+					"test":   nil,
+					"test/2": nil,
 				},
 			},
 			expectedResult: &component.Factories{
@@ -177,6 +174,60 @@ func TestGetRequiredFactories(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestComponentsToConfigMap(t *testing.T) {
+	components := ComponentMap{
+		Receivers: map[string]interface{}{
+			"receiver": nil,
+		},
+		Processors: map[string]interface{}{
+			"processor": nil,
+		},
+		Exporters: map[string]interface{}{
+			"exporter": nil,
+		},
+		Extensions: map[string]interface{}{
+			"extension": nil,
+		},
+		Service: ServiceMap{
+			Extensions: []string{"extension"},
+			Pipelines: map[string]PipelineMap{
+				"metrics": {
+					Receivers:  []string{"receiver"},
+					Processors: []string{"processor"},
+					Exporters:  []string{"exporter"},
+				},
+			},
+		},
+	}
+
+	stringMap := map[string]interface{}{
+		"receivers": map[string]interface{}{
+			"receiver": nil,
+		},
+		"processors": map[string]interface{}{
+			"processor": nil,
+		},
+		"exporters": map[string]interface{}{
+			"exporter": nil,
+		},
+		"extensions": map[string]interface{}{
+			"extension": nil,
+		},
+		"service": map[string]interface{}{
+			"extensions": []string{"extension"},
+			"pipelines": map[string]interface{}{
+				"metrics": map[string]interface{}{
+					"receivers":  []string{"receiver"},
+					"processors": []string{"processor"},
+					"exporters":  []string{"exporter"},
+				},
+			},
+		},
+	}
+
+	require.Equal(t, stringMap, components.ToConfigMap().ToStringMap())
 }
 
 // MockUnmarshaller is a mock type for the configunmarshaler.Unmarshaller type

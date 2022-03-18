@@ -101,22 +101,24 @@ receivers:
 {{end}}
 service:
   pipelines:
-    metrics:`,
+    metrics:
+      receivers: [test]`,
 			},
 			values: map[string]interface{}{
 				"enabled": true,
 			},
 			expectedResult: &ComponentMap{
-				Receivers: map[config.ComponentID]map[string]interface{}{
-					config.NewComponentID("test"): nil,
+				Receivers: map[string]interface{}{
+					"test": nil,
 				},
-				Exporters: map[config.ComponentID]map[string]interface{}{
-					config.NewComponentID(emitterTypeStr): nil,
+				Exporters: map[string]interface{}{
+					emitterTypeStr: nil,
 				},
 				Service: ServiceMap{
-					Pipelines: map[string]Pipeline{
+					Pipelines: map[string]PipelineMap{
 						"metrics": {
-							Exporters: []config.ComponentID{config.NewComponentID(emitterTypeStr)},
+							Receivers: []string{"test"},
+							Exporters: []string{emitterTypeStr},
 						},
 					},
 				},
@@ -141,16 +143,16 @@ service:
 				},
 			},
 			expectedResult: &ComponentMap{
-				Receivers: map[config.ComponentID]map[string]interface{}{
-					config.NewComponentID("test"): nil,
+				Receivers: map[string]interface{}{
+					"test": nil,
 				},
-				Exporters: map[config.ComponentID]map[string]interface{}{
-					config.NewComponentID(emitterTypeStr): nil,
+				Exporters: map[string]interface{}{
+					emitterTypeStr: nil,
 				},
 				Service: ServiceMap{
-					Pipelines: map[string]Pipeline{
+					Pipelines: map[string]PipelineMap{
 						"metrics": {
-							Exporters: []config.ComponentID{config.NewComponentID(emitterTypeStr)},
+							Exporters: []string{emitterTypeStr},
 						},
 					},
 				},
@@ -170,16 +172,16 @@ service:
 			},
 			dataType: config.MetricsDataType,
 			expectedResult: &ComponentMap{
-				Receivers: map[config.ComponentID]map[string]interface{}{
-					config.NewComponentID("test"): nil,
+				Receivers: map[string]interface{}{
+					"test": nil,
 				},
-				Exporters: map[config.ComponentID]map[string]interface{}{
-					config.NewComponentID(emitterTypeStr): nil,
+				Exporters: map[string]interface{}{
+					emitterTypeStr: nil,
 				},
 				Service: ServiceMap{
-					Pipelines: map[string]Pipeline{
+					Pipelines: map[string]PipelineMap{
 						"metrics": {
-							Exporters: []config.ComponentID{config.NewComponentID(emitterTypeStr)},
+							Exporters: []string{emitterTypeStr},
 						},
 					},
 				},

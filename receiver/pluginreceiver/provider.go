@@ -3,8 +3,8 @@ package pluginreceiver
 import (
 	"context"
 	"fmt"
+	"strings"
 
-	"github.com/mitchellh/mapstructure"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/config"
 	"go.opentelemetry.io/collector/config/configunmarshaler"
@@ -81,7 +81,7 @@ func (c *ConfigProvider) GetRequiredFactories(host component.Host, emitterFactor
 func (c *ConfigProvider) getReceiverFactories(host component.Host) (map[config.Type]component.ReceiverFactory, error) {
 	factories := map[config.Type]component.ReceiverFactory{}
 	for receiver := range c.components.Receivers {
-		receiverType := receiver.Type()
+		receiverType := parseComponentType(receiver)
 		if _, ok := factories[receiverType]; ok {
 			continue
 		}
@@ -102,7 +102,7 @@ func (c *ConfigProvider) getReceiverFactories(host component.Host) (map[config.T
 func (c *ConfigProvider) getProcessorFactories(host component.Host) (map[config.Type]component.ProcessorFactory, error) {
 	factories := map[config.Type]component.ProcessorFactory{}
 	for processor := range c.components.Processors {
-		processorType := processor.Type()
+		processorType := parseComponentType(processor)
 		if _, ok := factories[processorType]; ok {
 			continue
 		}
@@ -123,7 +123,7 @@ func (c *ConfigProvider) getProcessorFactories(host component.Host) (map[config.
 func (c *ConfigProvider) getExtensionFactories(host component.Host) (map[config.Type]component.ExtensionFactory, error) {
 	factories := map[config.Type]component.ExtensionFactory{}
 	for extension := range c.components.Extensions {
-		extensionType := extension.Type()
+		extensionType := parseComponentType(extension)
 		if _, ok := factories[extensionType]; ok {
 			continue
 		}
@@ -140,6 +140,12 @@ func (c *ConfigProvider) getExtensionFactories(host component.Host) (map[config.
 	return factories, nil
 }
 
+// parseComponentType parses a component type from a string
+func parseComponentType(value string) config.Type {
+	typeValue := strings.Split(value, "/")[0]
+	return config.Type(typeValue)
+}
+
 // unmarshalComponents unmarshals a component map from yaml
 func unmarshalComponentMap(bytes []byte) (*ComponentMap, error) {
 	var components ComponentMap
@@ -147,13 +153,12 @@ func unmarshalComponentMap(bytes []byte) (*ComponentMap, error) {
 		return nil, fmt.Errorf("failed to unmarshal yaml: %w", err)
 	}
 
-	emitterID := config.NewComponentID(emitterTypeStr)
-	components.Exporters = map[config.ComponentID]map[string]interface{}{
-		emitterID: nil,
+	components.Exporters = map[string]interface{}{
+		emitterTypeStr: nil,
 	}
 
 	for key, pipeline := range components.Service.Pipelines {
-		pipeline.Exporters = []config.ComponentID{emitterID}
+		pipeline.Exporters = []string{emitterTypeStr}
 		components.Service.Pipelines[key] = pipeline
 	}
 
@@ -162,29 +167,47 @@ func unmarshalComponentMap(bytes []byte) (*ComponentMap, error) {
 
 // ComponentMap is a map of configured open telemetry components
 type ComponentMap struct {
-	Receivers  map[config.ComponentID]map[string]interface{} `yaml:"receivers" mapstructure:"receivers"`
-	Processors map[config.ComponentID]map[string]interface{} `yaml:"processors" mapstructure:"processors"`
-	Exporters  map[config.ComponentID]map[string]interface{} `yaml:"exporters" mapstructure:"exporters"`
-	Extensions map[config.ComponentID]map[string]interface{} `yaml:"extensions" mapstructure:"extensions"`
-	Service    ServiceMap                                    `yaml:"service" mapstructure:"service"`
-}
-
-// ToConfigMap returns the component map as a config map
-func (c *ComponentMap) ToConfigMap() *config.Map {
-	var mapString map[string]interface{}
-	_ = mapstructure.Decode(c, &mapString)
-	return config.NewMapFromStringMap(mapString)
+	Receivers  map[string]interface{} `yaml:"receivers,omitempty"`
+	Processors map[string]interface{} `yaml:"processors,omitempty"`
+	Exporters  map[string]interface{} `yaml:"exporters,omitempty"`
+	Extensions map[string]interface{} `yaml:"extensions,omitempty"`
+	Service    ServiceMap             `yaml:"service,omitempty"`
 }
 
 // ServiceMap is a map of service components
 type ServiceMap struct {
-	Extensions []config.ComponentID `yaml:"extensions" mapstructure:"extensions"`
-	Pipelines  map[string]Pipeline  `yaml:"pipelines" mapstructure:"pipelines"`
+	Extensions []string               `yaml:"extensions,omitempty"`
+	Pipelines  map[string]PipelineMap `yaml:"pipelines,omitempty"`
 }
 
-// Pipeline is a component pipeline
-type Pipeline struct {
-	Receivers  []config.ComponentID `yaml:"receivers" mapstructure:"receivers"`
-	Processors []config.ComponentID `yaml:"processors" mapstructure:"processors"`
-	Exporters  []config.ComponentID `yaml:"exporters" mapstructure:"exporters"`
+// PipelineMap is a map of pipeline components
+type PipelineMap struct {
+	Receivers  []string `yaml:"receivers,omitempty"`
+	Processors []string `yaml:"processors,omitempty"`
+	Exporters  []string `yaml:"exporters,omitempty"`
+}
+
+// ToConfigMap returns the component map as a config map
+func (c *ComponentMap) ToConfigMap() *config.Map {
+	pipelines := map[string]interface{}{}
+	for key, pipeline := range c.Service.Pipelines {
+		pipelineMap := map[string]interface{}{}
+		pipelineMap["receivers"] = pipeline.Receivers
+		pipelineMap["processors"] = pipeline.Processors
+		pipelineMap["exporters"] = pipeline.Exporters
+		pipelines[key] = pipelineMap
+	}
+
+	stringMap := map[string]interface{}{
+		"receivers":  c.Receivers,
+		"processors": c.Processors,
+		"exporters":  c.Exporters,
+		"extensions": c.Extensions,
+		"service": map[string]interface{}{
+			"extensions": c.Service.Extensions,
+			"pipelines":  pipelines,
+		},
+	}
+
+	return config.NewMapFromStringMap(stringMap)
 }

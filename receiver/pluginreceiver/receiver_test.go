@@ -9,7 +9,6 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/component"
-	"go.opentelemetry.io/collector/config"
 	"go.opentelemetry.io/collector/receiver/receiverhelper"
 	"go.opentelemetry.io/collector/service"
 	"go.uber.org/zap"
@@ -21,8 +20,8 @@ func TestReceiverGetFactoryFailure(t *testing.T) {
 	host.On("GetFactory", mock.Anything, mock.Anything).Return(nil)
 
 	components := ComponentMap{
-		Receivers: map[config.ComponentID]map[string]interface{}{
-			config.NewComponentID("missing"): nil,
+		Receivers: map[string]interface{}{
+			"missing": nil,
 		},
 	}
 	configProvider := createConfigProvider(&components)
@@ -47,8 +46,8 @@ func TestReceiverCreateServiceFailure(t *testing.T) {
 	host.On("GetFactory", mock.Anything, mock.Anything).Return(nopFactory)
 
 	components := ComponentMap{
-		Receivers: map[config.ComponentID]map[string]interface{}{
-			config.NewComponentID("nop"): nil,
+		Receivers: map[string]interface{}{
+			"nop": nil,
 		},
 	}
 	configProvider := createConfigProvider(&components)
@@ -76,8 +75,8 @@ func TestReceiverStartServiceFailure(t *testing.T) {
 	host.On("GetFactory", mock.Anything, mock.Anything).Return(nopFactory)
 
 	components := ComponentMap{
-		Receivers: map[config.ComponentID]map[string]interface{}{
-			config.NewComponentID("nop"): nil,
+		Receivers: map[string]interface{}{
+			"nop": nil,
 		},
 	}
 	configProvider := createConfigProvider(&components)
@@ -109,8 +108,8 @@ func TestReceiverStartSuccess(t *testing.T) {
 	host.On("GetFactory", mock.Anything, mock.Anything).Return(nopFactory)
 
 	components := ComponentMap{
-		Receivers: map[config.ComponentID]map[string]interface{}{
-			config.NewComponentID("nop"): nil,
+		Receivers: map[string]interface{}{
+			"nop": nil,
 		},
 	}
 	configProvider := createConfigProvider(&components)
