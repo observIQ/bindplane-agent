@@ -13,7 +13,7 @@ require (
 	github.com/observiq/goflow/v3 v3.4.4
 	github.com/open-telemetry/opentelemetry-collector-contrib/extension/storage v0.47.0
 	github.com/open-telemetry/opentelemetry-log-collection v0.24.0
-	github.com/stretchr/testify v1.7.0
+	github.com/stretchr/testify v1.7.1
 	github.com/testcontainers/testcontainers-go v0.12.0
 	go.etcd.io/bbolt v1.3.6
 	go.opentelemetry.io/collector v0.47.0
