@@ -27,7 +27,7 @@ To access the services dialog, press Win + R, enter `services.msc` into the Run 
 
 ![The run dialog](./screenshots/windows/launch-services.png)
 
-Locate the `observiq-otel-collector` service, right click the entry, and click "Restart" to restart the collector.
+Locate the "observIQ OpenTelemetry Collector" service, right click the entry, and click "Restart" to restart the collector.
 
 ![The services dialog](./screenshots/windows/stop-restart-service.png)
 
@@ -43,7 +43,7 @@ To access the services dialog, press Win + R, enter `services.msc` into the Run 
 
 ![The run dialog](./screenshots/windows/launch-services.png)
 
-Locate the `observiq-otel-collector` service, right click the entry, and click "Stop" to stop the collector.
+Locate the "observIQ OpenTelemetry Collector" service, right click the entry, and click "Stop" to stop the collector.
 
 ![The services dialog](./screenshots/windows/stop-restart-service.png)
 
@@ -59,7 +59,7 @@ To access the services dialog, press Win + R, enter `services.msc` into the Run 
 
 ![The run dialog](./screenshots/windows/launch-services.png)
 
-Locate the `observiq-otel-collector` service, right click the entry, and click "Start" to start the collector.
+Locate the "observIQ OpenTelemetry Collector" service, right click the entry, and click "Start" to start the collector.
 
 ![The services dialog](./screenshots/windows/start-service.png)
 
