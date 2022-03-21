@@ -18,7 +18,8 @@
       }
     },
     {
-      "path": "config.yaml"
+      "path": "config.yaml",
+      "never_overwrite": true
     },
     {
       "path": "opentelemetry-java-contrib-jmx-metrics.jar"
