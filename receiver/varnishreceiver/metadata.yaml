@@ -20,7 +20,7 @@ attributes:
     description: The session connection types.
     enum: [accepted, dropped, failed]
   state:
-    value: kind
+    value: state
     description: The client request states.
     enum: [received, dropped]
 

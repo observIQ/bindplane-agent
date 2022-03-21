@@ -732,7 +732,7 @@ var Attributes = struct {
 	"cache_name",
 	"operation",
 	"kind",
-	"kind",
+	"state",
 	"operation",
 }
 
