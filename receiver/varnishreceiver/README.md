@@ -4,8 +4,6 @@ This Varnish Cache Metric Receiver will collects metrics using the [varnishstat]
 
 Supported pipeline types: `metrics`
 
-> :construction: This receiver is in **BETA**. Configuration fields and metric data model are subject to change.
-
 ## Prerequisites
 
 This Varnish Cache receiver will collect metrics for [supported versions](https://varnish-cache.org/releases/) 6.X - 7.0.X 
