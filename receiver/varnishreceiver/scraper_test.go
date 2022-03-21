@@ -256,26 +256,3 @@ func (_m *mockClient) GetStats() (*Stats, error) {
 
 	return r0, r1
 }
-
-// BuildCommand provides a mock function with given fields:
-func (_m *mockClient) BuildCommand() (string, []string) {
-	ret := _m.Called()
-
-	var r0 string
-	if rf, ok := ret.Get(0).(func() string); ok {
-		r0 = rf()
-	} else {
-		r0 = ret.Get(0).(string)
-	}
-
-	var r1 []string
-	if rf, ok := ret.Get(1).(func() []string); ok {
-		r1 = rf()
-	} else {
-		if ret.Get(1) != nil {
-			r1 = ret.Get(1).([]string)
-		}
-	}
-
-	return r0, r1
-}

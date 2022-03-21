@@ -1,6 +1,6 @@
 receivers:
     varnish:
-    collection_interval: 60s
+      collection_interval: 60s
 
 processors:
   nop:

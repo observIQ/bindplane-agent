@@ -12,7 +12,7 @@ This Varnish Cache receiver will collect metrics for [supported versions](https:
 
 The following configuration settings are optional:
 
-collection_interval (default = 60s): This receiver collects metrics on an interval. Valid time units are ns, us (or µs), ms, s, m, h.
+- collection_interval (default = 60s): This receiver collects metrics on an interval. Valid time units are ns, us (or µs), ms, s, m, h.
 
 - working_dir (Optional): The -n flag used in [varnishstat](https://varnish-cache.org/docs/7.0/reference/varnishstat.html#description) to get logs from a varnishd working directory.
 - exec_dir (Optional): The directory where the varnishadm and varnishstat executables are located. 

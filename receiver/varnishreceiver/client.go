@@ -43,7 +43,6 @@ func (e *varnishExecuter) Execute(command string, args []string) ([]byte, error)
 // client is an interface to get stats and build the exec command using an executer.
 type client interface {
 	GetStats() (*Stats, error)
-	BuildCommand() (string, []string)
 }
 
 var _ client = (*varnishClient)(nil)

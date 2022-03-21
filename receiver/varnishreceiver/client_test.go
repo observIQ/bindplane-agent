@@ -59,10 +59,9 @@ func TestBuildCommand(t *testing.T) {
 	}
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
-			client := newVarnishClient(
-				&tC.config,
-				componenttest.NewNopHost(),
-				componenttest.NewNopTelemetrySettings())
+			client := varnishClient{
+				cfg: &tC.config,
+			}
 			command, argList := client.BuildCommand()
 			require.EqualValues(t, tC.command, command)
 			require.EqualValues(t, tC.argList, argList)

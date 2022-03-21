@@ -21,6 +21,8 @@ import (
 
 	"go.opentelemetry.io/collector/receiver/scraperhelper"
 	"go.uber.org/multierr"
+
+	"github.com/observiq/observiq-otel-collector/receiver/varnishreceiver/internal/metadata"
 )
 
 var (
@@ -31,8 +33,9 @@ var (
 // Config defines configuration for varnish metrics receiver.
 type Config struct {
 	scraperhelper.ScraperControllerSettings `mapstructure:",squash"`
-	WorkingDir                              string `mapstructure:"working_dir"`
-	ExecDir                                 string `mapstructure:"exec_dir"`
+	Metrics                                 metadata.MetricsSettings `mapstructure:"metrics"`
+	WorkingDir                              string                   `mapstructure:"working_dir"`
+	ExecDir                                 string                   `mapstructure:"exec_dir"`
 }
 
 // Validate validates the config.
