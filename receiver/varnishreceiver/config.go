@@ -39,21 +39,15 @@ type Config struct {
 func (c *Config) Validate() error {
 	var err error
 	if c.WorkingDir != "" {
-		if pathErr := pathExists(c.WorkingDir); pathErr != nil {
+		if _, pathErr := os.Stat(c.WorkingDir); pathErr != nil {
 			err = multierr.Append(err, fmt.Errorf(errWorkingDirNotExist.Error(), pathErr))
 		}
 	}
 	if c.ExecDir != "" {
-		if pathErr := pathExists(c.ExecDir); pathErr != nil {
-			err = multierr.Append(err, fmt.Errorf(errExecDirNotExist.Error(), pathExists(c.ExecDir)))
+		if _, pathErr := os.Stat(c.ExecDir); pathErr != nil {
+			err = multierr.Append(err, fmt.Errorf(errExecDirNotExist.Error(), pathErr))
 		}
 	}
 
-	return err
-}
-
-// pathExists returns an err if the path does not.
-func pathExists(file string) error {
-	_, err := os.Stat(file)
 	return err
 }

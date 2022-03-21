@@ -74,12 +74,3 @@ func TestValidate(t *testing.T) {
 		})
 	}
 }
-
-func TestPathExists(t *testing.T) {
-	t.Run("path does not exist", func(t *testing.T) {
-		require.EqualError(t, pathExists("missing.go"), "stat missing.go: no such file or directory")
-	})
-	t.Run("path exists", func(t *testing.T) {
-		require.Nil(t, pathExists("config_test.go"))
-	})
-}
