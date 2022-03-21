@@ -23,4 +23,9 @@ jobs:
       - name: Run Gosec Security Scanner
         uses: securego/gosec@v2.10.0
         with:
+          args: '-exclude-dir receiver/varnishreceiver  ./...'
+      - name: Run Gosec Security Scanner on varnishreciver
+        working-directory: ./receiver/varnishreceiver
+        uses: securego/gosec@v2.10.0
+        with:
           args: './...'
