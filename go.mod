@@ -119,7 +119,7 @@ require (
 	github.com/alecthomas/participle/v2 v2.0.0-alpha7 // indirect
 	github.com/aliyun/aliyun-log-go-sdk v0.1.27 // indirect
 	github.com/apache/thrift v0.15.0 // indirect
-	github.com/aws/aws-sdk-go v1.43.18 // indirect
+	github.com/aws/aws-sdk-go v1.43.22 // indirect
 	github.com/bits-and-blooms/bitset v1.2.0 // indirect
 	github.com/blang/semver v3.5.1+incompatible // indirect
 	github.com/checkpoint-restore/go-criu/v5 v5.0.0 // indirect
