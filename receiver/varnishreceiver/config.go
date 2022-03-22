@@ -26,8 +26,8 @@ import (
 )
 
 var (
-	errWorkingDirNotExist = errors.New(`"working_dir" does not exists %q`)
-	errExecDirNotExist    = errors.New(`"exec_dir" does not exists %q`)
+	errWorkingDirNotExist = errors.New(`"working_dir" does not exists`)
+	errExecDirNotExist    = errors.New(`"exec_dir" does not exists`)
 )
 
 // Config defines configuration for varnish metrics receiver.
