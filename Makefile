@@ -1,7 +1,9 @@
 # All source code and documents, used when checking for misspellings
 ALLDOC := $(shell find . \( -name "*.md" -o -name "*.yaml" \) \
                                 -type f | sort)
-ALL_MODULES := $(shell find . -type f -name "go.mod" -exec dirname {} \; | sort )
+
+# This is temporary until we find an os agnostic solution
+ALL_MODULES := . ./processor/resourceattributetransposerprocessor ./receiver/logsreceiver ./receiver/varnishreceiver
 
 # All source code files
 ALL_SRC := $(shell find . -name '*.go' -o -name '*.sh' -o -name 'Dockerfile' -type f | sort)
