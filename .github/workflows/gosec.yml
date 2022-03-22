@@ -20,12 +20,12 @@ jobs:
     steps:
       - name: Checkout Source
         uses: actions/checkout@v2
+      - name: Setup Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: "1.17"
+          check-latest: true
+      - name: Install Goec
+        run: go install github.com/securego/gosec/v2/cmd/gosec@v2.10.0
       - name: Run Gosec Security Scanner
-        uses: securego/gosec@v2.10.0
-        with:
-          args: '-exclude-dir receiver/varnishreceiver  ./...'
-      - name: Run Gosec Security Scanner on varnishreciver
-        working-directory: ./receiver/varnishreceiver
-        uses: securego/gosec@v2.10.0
-        with:
-          args: './...'
+        run: make gosec
