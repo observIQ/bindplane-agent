@@ -1,6 +1,6 @@
 # Receivers
 
-Below is a list of supported receivers with links to there documentation pages.
+Below is a list of supported receivers with links to their documentation pages.
 
 - [apachereceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.45.1/receiver/apachereceiver/README.md)
 - [awscontainerinsightreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.45.1/receiver/awscontainerinsightreceiver/README.md)
