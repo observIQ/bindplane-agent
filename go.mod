@@ -119,7 +119,7 @@ require (
 	github.com/alecthomas/participle/v2 v2.0.0-alpha7 // indirect
 	github.com/aliyun/aliyun-log-go-sdk v0.1.27 // indirect
 	github.com/apache/thrift v0.15.0 // indirect
-	github.com/aws/aws-sdk-go v1.43.18 // indirect
+	github.com/aws/aws-sdk-go v1.43.22 // indirect
 	github.com/bits-and-blooms/bitset v1.2.0 // indirect
 	github.com/blang/semver v3.5.1+incompatible // indirect
 	github.com/checkpoint-restore/go-criu/v5 v5.0.0 // indirect
@@ -215,8 +215,8 @@ require (
 	gopkg.in/ini.v1 v1.66.2 // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
-	k8s.io/apimachinery v0.23.4 // indirect
-	k8s.io/client-go v0.23.4 // indirect
+	k8s.io/apimachinery v0.23.5 // indirect
+	k8s.io/client-go v0.23.5 // indirect
 	k8s.io/klog v1.0.0 // indirect
 )
 
@@ -401,7 +401,7 @@ require (
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/square/go-jose.v2 v2.5.1 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
-	k8s.io/api v0.23.4 // indirect
+	k8s.io/api v0.23.5 // indirect
 	k8s.io/klog/v2 v2.40.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20211115234752-e816edb12b65 // indirect
 	k8s.io/kubelet v0.23.3 // indirect
