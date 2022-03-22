@@ -1,6 +1,6 @@
 # Exporters
 
-Below is a list of supported exports with links to there documentation pages.
+Below is a list of supported exports with links to their documentation pages.
 
 - [alibabacloudlogserviceexporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.45.1/exporter/alibabacloudlogserviceexporter/README.md)
 - [awscloudwatchlogsexporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.45.1/exporter/awscloudwatchlogsexporter/README.md)

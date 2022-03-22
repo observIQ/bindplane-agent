@@ -1,6 +1,6 @@
 # Processors
 
-Below is a list of supported processors with links to there documentation pages.
+Below is a list of supported processors with links to their documentation pages.
 
 - [attributesprocessor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.45.1/processor/attributesprocessor/README.md)
 - [batchprocessor](https://github.com/open-telemetry/opentelemetry-collector/tree/v0.45.0/processor/batchprocessor/README.md)
