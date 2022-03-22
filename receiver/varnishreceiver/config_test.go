@@ -25,26 +25,26 @@ func TestValidate(t *testing.T) {
 	testCases := []struct {
 		desc                string
 		cfg                 Config
-		expectedErrContains error
+		expectedErrContains string
 	}{
 		{
 			desc:                "empty config",
 			cfg:                 Config{},
-			expectedErrContains: nil,
+			expectedErrContains: "",
 		},
 		{
 			desc: "missing exec dir",
 			cfg: Config{
 				ExecDir: "missing/exec",
 			},
-			expectedErrContains: errExecDirNotExist,
+			expectedErrContains: `"exec_dir" does not exists`,
 		},
 		{
 			desc: "missing working dir",
 			cfg: Config{
 				WorkingDir: "missing/working",
 			},
-			expectedErrContains: errWorkingDirNotExist,
+			expectedErrContains: `"working_dir" does not exists`,
 		},
 		{
 			desc: "valid exec and working dir",
@@ -52,14 +52,14 @@ func TestValidate(t *testing.T) {
 				WorkingDir: testDir,
 				ExecDir:    testDir,
 			},
-			expectedErrContains: nil,
+			expectedErrContains: "",
 		},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.desc, func(t *testing.T) {
 			actualErr := tc.cfg.Validate()
-			if tc.expectedErrContains != nil {
-				require.Contains(t, actualErr.Error(), tc.expectedErrContains.Error())
+			if tc.expectedErrContains != "" {
+				require.Contains(t, actualErr.Error(), tc.expectedErrContains)
 			} else {
 				require.NoError(t, actualErr)
 			}
