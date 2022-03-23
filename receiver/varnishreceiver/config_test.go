@@ -24,9 +24,10 @@ import (
 func TestValidate(t *testing.T) {
 	testDir := t.TempDir()
 	testCases := []struct {
-		desc                string
-		cfg                 Config
-		expectedErrContains string
+		desc                 string
+		cfg                  Config
+		expectedInstanceName string
+		expectedErrContains  string
 	}{
 		{
 			desc:                "empty config",
@@ -46,6 +47,13 @@ func TestValidate(t *testing.T) {
 				InstanceName: "missing/instance_name",
 			},
 			expectedErrContains: `"instance_name" does not exists`,
+		},
+		{
+			desc: "invalid instance name",
+			cfg: Config{
+				InstanceName: testDir + "/",
+			},
+			expectedErrContains: `"instance_name" has invalid trailing "/"`,
 		},
 		{
 			desc: "valid exec and instance name",

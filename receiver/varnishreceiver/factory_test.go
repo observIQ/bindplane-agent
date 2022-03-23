@@ -50,7 +50,6 @@ func TestValidConfig(t *testing.T) {
 		cfg.ExecDir = testDir
 		require.NoError(t, cfg.Validate())
 		require.NoError(t, cfg.SetDefaultHostname())
-		require.EqualValues(t, cfg.InstanceName, cfg.InstanceName)
 	})
 }
 

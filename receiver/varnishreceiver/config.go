@@ -17,6 +17,7 @@ package varnishreceiver // import "github.com/observiq/observiq-otel-collector/r
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"go.opentelemetry.io/collector/receiver/scraperhelper"
 
@@ -36,6 +37,12 @@ func (c *Config) Validate() error {
 	if c.InstanceName != "" {
 		if _, err := os.Stat(c.InstanceName); err != nil {
 			return fmt.Errorf(`"instance_name" does not exists: %w`, err)
+		} else {
+			lastIndex := strings.LastIndex(c.InstanceName, "/")
+			if lastIndex+1 == len(c.InstanceName) {
+				return fmt.Errorf(`"instance_name" has invalid trailing "/" %s`, c.InstanceName)
+			}
+			c.InstanceName = c.InstanceName[lastIndex+1:]
 		}
 	}
 	if c.ExecDir != "" {
