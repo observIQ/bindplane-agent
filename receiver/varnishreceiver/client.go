@@ -70,12 +70,9 @@ const (
 // BuildCommand builds the exec command statement.
 func (v *varnishClient) BuildCommand() (string, []string) {
 	argList := []string{"-j"}
+	argList = append(argList, "-n", v.cfg.CacheDir)
+
 	command := varnishStat
-
-	if v.cfg.InstanceName != "" {
-		argList = append(argList, "-n", v.cfg.InstanceName)
-	}
-
 	if v.cfg.ExecDir != "" {
 		command = v.cfg.ExecDir
 	}

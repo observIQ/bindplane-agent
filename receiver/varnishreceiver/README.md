@@ -14,7 +14,7 @@ The following configuration settings are optional:
 
 - collection_interval (default = 60s): This receiver collects metrics on an interval. Valid time units are ns, us (or µs), ms, s, m, h.
 
-- instance_name (Optional): This specifies the instance name to use when collecting metrics. If not specified, this will default to the host name.
+- cache_dir (Optional): This specifies the cache dir to use when collecting metrics. If not specified, this will default to the host name.
 - exec_dir (Optional): The directory where the varnishadm and varnishstat executables are located. 
 
 ### Example Configuration

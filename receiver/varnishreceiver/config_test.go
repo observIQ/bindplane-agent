@@ -15,7 +15,6 @@
 package varnishreceiver // import "github.com/observiq/observiq-otel-collector/receiver/varnishreceiver"
 
 import (
-	"os"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -24,10 +23,10 @@ import (
 func TestValidate(t *testing.T) {
 	testDir := t.TempDir()
 	testCases := []struct {
-		desc                 string
-		cfg                  Config
-		expectedInstanceName string
-		expectedErrContains  string
+		desc                string
+		cfg                 Config
+		expectedCacheDir    string
+		expectedErrContains string
 	}{
 		{
 			desc:                "empty config",
@@ -42,24 +41,17 @@ func TestValidate(t *testing.T) {
 			expectedErrContains: `"exec_dir" does not exists`,
 		},
 		{
-			desc: "missing instance name",
+			desc: "missing cache dir",
 			cfg: Config{
-				InstanceName: "missing/instance_name",
+				CacheDir: "missing/cache_dir",
 			},
-			expectedErrContains: `"instance_name" does not exists`,
+			expectedErrContains: `"cache_dir" does not exists`,
 		},
 		{
-			desc: "invalid instance name",
+			desc: "valid exec and cache_dir",
 			cfg: Config{
-				InstanceName: testDir + "/",
-			},
-			expectedErrContains: `"instance_name" has invalid trailing "/"`,
-		},
-		{
-			desc: "valid exec and instance name",
-			cfg: Config{
-				InstanceName: testDir,
-				ExecDir:      testDir,
+				CacheDir: testDir,
+				ExecDir:  testDir,
 			},
 			expectedErrContains: "",
 		},
@@ -74,24 +66,4 @@ func TestValidate(t *testing.T) {
 			}
 		})
 	}
-}
-
-func TestSetDefaultHostname(t *testing.T) {
-	t.Run("set default hostname to empty config instance name", func(t *testing.T) {
-		cfg := Config{}
-		hostname, err := os.Hostname()
-		require.NoError(t, err)
-		err = cfg.SetDefaultHostname()
-		require.NoError(t, err)
-		require.EqualValues(t, cfg.InstanceName, hostname)
-	})
-
-	t.Run("reuse existing config instance name", func(t *testing.T) {
-		cfg := Config{
-			InstanceName: "varnishcache",
-		}
-		err := cfg.SetDefaultHostname()
-		require.NoError(t, err)
-		require.EqualValues(t, cfg.InstanceName, "varnishcache")
-	})
 }

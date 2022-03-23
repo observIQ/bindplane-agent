@@ -17,7 +17,6 @@ package varnishreceiver // import "github.com/observiq/observiq-otel-collector/r
 import (
 	"fmt"
 	"os"
-	"strings"
 
 	"go.opentelemetry.io/collector/receiver/scraperhelper"
 
@@ -28,40 +27,21 @@ import (
 type Config struct {
 	scraperhelper.ScraperControllerSettings `mapstructure:",squash"`
 	Metrics                                 metadata.MetricsSettings `mapstructure:"metrics"`
-	InstanceName                            string                   `mapstructure:"instance_name"`
+	CacheDir                                string                   `mapstructure:"cache_dir"`
 	ExecDir                                 string                   `mapstructure:"exec_dir"`
 }
 
 // Validate validates the config.
 func (c *Config) Validate() error {
-	if c.InstanceName != "" {
-		if _, err := os.Stat(c.InstanceName); err != nil {
-			return fmt.Errorf(`"instance_name" does not exists: %w`, err)
-		} else {
-			lastIndex := strings.LastIndex(c.InstanceName, "/")
-			if lastIndex+1 == len(c.InstanceName) {
-				return fmt.Errorf(`"instance_name" has invalid trailing "/" %s`, c.InstanceName)
-			}
-			c.InstanceName = c.InstanceName[lastIndex+1:]
+	if c.CacheDir != "" {
+		if _, err := os.Stat(c.CacheDir); err != nil {
+			return fmt.Errorf(`"cache_dir" does not exists: %w`, err)
 		}
 	}
 	if c.ExecDir != "" {
 		if _, err := os.Stat(c.ExecDir); err != nil {
 			return fmt.Errorf(`"exec_dir" does not exists: %w`, err)
 		}
-	}
-
-	return nil
-}
-
-// SetDefaultHostname sets a default hostname if config InstanceName is empty.
-func (c *Config) SetDefaultHostname() error {
-	if c.InstanceName == "" {
-		hostname, err := os.Hostname()
-		if err != nil {
-			return err
-		}
-		c.InstanceName = hostname
 	}
 
 	return nil
