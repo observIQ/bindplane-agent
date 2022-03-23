@@ -143,18 +143,18 @@ changelog:
 
 # https://goreleaser.com/customization/homebrew/
 brews:
-  - name: observiq-collector
+  - name: observiq-otel-collector
     tap:
       owner: observIQ
-      name: homebrew-observiq-collector
+      name: homebrew-observiq-otel-collector
       branch: main
     download_strategy: CurlDownloadStrategy
     folder: Formula
-    url_template: https://github.com/observIQ/observiq-collector/releases/download/{{ .Tag }}/{{ .ArtifactName }}
+    url_template: https://github.com/observIQ/observiq-otel-collector/releases/download/{{ .Tag }}/{{ .ArtifactName }}
     commit_author:
       name: observiq
       email: support@observiq.com
-    homepage: "https://github.com/observIQ/observiq-collector"
+    homepage: "https://github.com/observIQ/observiq-otel-collector"
     license: "Apache 2.0"
     caveats: |
       ****************************************************************
@@ -175,27 +175,27 @@ brews:
 
       To start the collector service run:
 
-        brew services start observiq-collector
+        brew services start observiq-otel-collector
 
       To stop the collector service run:
 
-        brew services stop observiq-collector
+        brew services stop observiq-otel-collector
 
       To restart the collector service run:
 
-        brew services restart observiq-collector
+        brew services restart observiq-otel-collector
       ****************************************************************
 
       ****************************************************************
       To uninstall the collector and its dependencies run the following commands:
 
-          brew services stop observiq-collector
-          brew uninstall observiq-collector
+          brew services stop observiq-otel-collector
+          brew uninstall observiq-otel-collector
           sudo rm /opt/opentelemetry-java-contrib-jmx-metrics.jar
 
       ****************************************************************
     install: |
-      bin.install "observiq-collector"
+      bin.install "observiq-otel-collector"
       prefix.install "LICENSE", "config.yaml"
       prefix.install Dir["plugins"]
       lib.install "opentelemetry-java-contrib-jmx-metrics.jar"
@@ -210,7 +210,7 @@ brews:
 
           <key>ProgramArguments</key>
           <array>
-            <string>#{bin}/observiq-collector</string>
+            <string>#{bin}/observiq-otel-collector</string>
             <string>--config</string>
             <string>#{prefix}/config.yaml</string>
           </array>
@@ -219,10 +219,10 @@ brews:
           <true/>
 
           <key>StandardErrorPath</key>
-          <string>/tmp/observiq-collector.err</string>
+          <string>/tmp/observiq-otel-collector.err</string>
 
           <key>StandardOutPath</key>
-          <string>/tmp/observiq-collector.out</string>
+          <string>/tmp/observiq-otel-collector.out</string>
         </dict>
       </plist>
     # For local testing
