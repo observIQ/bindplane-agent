@@ -50,11 +50,11 @@ func TestBuildCommand(t *testing.T) {
 		{
 			desc: "with instance name and exec dir",
 			config: Config{
-				InstanceName: "varnishcache",
+				InstanceName: "path/to/varnishinstance",
 				ExecDir:      "/exec/dir/varnishstat",
 			},
 			command: "/exec/dir/varnishstat",
-			argList: []string{"-j", "-n", "varnishcache"},
+			argList: []string{"-j", "-n", "path/to/varnishinstance"},
 		},
 	}
 	for _, tC := range testCases {
