@@ -5,7 +5,7 @@
 The installation for macOS is supported via [Homebrew](https://brew.sh/).
 
 ```sh
-brew tap observiq/homebrew-observiq-collecor
+brew tap observiq/homebrew-observiq-otel-collector
 brew update
 brew install observiq-otel-collector
 ```
