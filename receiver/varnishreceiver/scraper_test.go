@@ -78,7 +78,7 @@ func TestScrape(t *testing.T) {
 			{
 				Entry: zapcore.Entry{Level: zap.ErrorLevel, Message: "Failed to execute varnishstat"},
 				Context: []zapcore.Field{
-					zap.String("Working Directory:", cfg.WorkingDir),
+					zap.String("Instance Name:", cfg.InstanceName),
 					zap.String("Executable Directory:", cfg.ExecDir),
 					zap.Error(errors.New("bad response")),
 				},

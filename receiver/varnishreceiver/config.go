@@ -27,21 +27,34 @@ import (
 type Config struct {
 	scraperhelper.ScraperControllerSettings `mapstructure:",squash"`
 	Metrics                                 metadata.MetricsSettings `mapstructure:"metrics"`
-	WorkingDir                              string                   `mapstructure:"working_dir"`
+	InstanceName                            string                   `mapstructure:"instance_name"`
 	ExecDir                                 string                   `mapstructure:"exec_dir"`
 }
 
 // Validate validates the config.
 func (c *Config) Validate() error {
-	if c.WorkingDir != "" {
-		if _, err := os.Stat(c.WorkingDir); err != nil {
-			return fmt.Errorf(`"working_dir" does not exists: %w`, err)
+	if c.InstanceName != "" {
+		if _, err := os.Stat(c.InstanceName); err != nil {
+			return fmt.Errorf(`"instance_name" does not exists: %w`, err)
 		}
 	}
 	if c.ExecDir != "" {
 		if _, err := os.Stat(c.ExecDir); err != nil {
 			return fmt.Errorf(`"exec_dir" does not exists: %w`, err)
 		}
+	}
+
+	return nil
+}
+
+// SetDefaultHostname sets a default hostname if config InstanceName is empty.
+func (c *Config) SetDefaultHostname() error {
+	if c.InstanceName == "" {
+		hostname, err := os.Hostname()
+		if err != nil {
+			return err
+		}
+		c.InstanceName = hostname
 	}
 
 	return nil

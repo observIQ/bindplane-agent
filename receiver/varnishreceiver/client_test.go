@@ -42,19 +42,19 @@ func TestBuildCommand(t *testing.T) {
 		argList []string
 	}{
 		{
-			desc:    "no working or exec dir",
+			desc:    "no instance name or exec dir",
 			config:  Config{},
 			command: "varnishstat",
 			argList: []string{"-j"},
 		},
 		{
-			desc: "with working and exec dir",
+			desc: "with instance name and exec dir",
 			config: Config{
-				WorkingDir: "/working/dir",
-				ExecDir:    "/exec/dir/varnishstat",
+				InstanceName: "varnishcache",
+				ExecDir:      "/exec/dir/varnishstat",
 			},
 			command: "/exec/dir/varnishstat",
-			argList: []string{"-j", "-n", "/working/dir"},
+			argList: []string{"-j", "-n", "varnishcache"},
 		},
 	}
 	for _, tC := range testCases {

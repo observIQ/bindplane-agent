@@ -49,7 +49,7 @@ func (v *varnishScraper) scrape(context.Context) (pdata.Metrics, error) {
 	stats, err := v.client.GetStats()
 	if err != nil {
 		v.settings.Logger.Error("Failed to execute varnishstat",
-			zap.String("Working Directory:", v.config.WorkingDir),
+			zap.String("Instance Name:", v.config.InstanceName),
 			zap.String("Executable Directory:", v.config.ExecDir),
 			zap.Error(err),
 		)
@@ -58,6 +58,8 @@ func (v *varnishScraper) scrape(context.Context) (pdata.Metrics, error) {
 
 	now := pdata.NewTimestampFromTime(time.Now())
 	md := v.mb.NewMetricData()
+
+	md.ResourceMetrics().At(0).Resource().Attributes().UpsertString(metadata.A.CacheName, v.config.InstanceName)
 
 	v.recordVarnishBackendConnectionsCountDataPoint(now, stats)
 	v.recordVarnishCacheOperationsCountDataPoint(now, stats)

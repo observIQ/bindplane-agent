@@ -16,6 +16,7 @@ package varnishreceiver // import "github.com/observiq/observiq-otel-collector/r
 
 import (
 	"context"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -35,13 +36,21 @@ func TestValidConfig(t *testing.T) {
 		factory := NewFactory()
 		cfg := factory.CreateDefaultConfig().(*Config)
 		require.NoError(t, cfg.Validate())
+		require.EqualValues(t, cfg.InstanceName, "")
+		require.NoError(t, cfg.SetDefaultHostname())
+		hostname, err := os.Hostname()
+		require.NoError(t, err)
+		require.EqualValues(t, cfg.InstanceName, hostname)
 	})
 	t.Run("config with fields", func(t *testing.T) {
+		testDir := t.TempDir()
 		factory := NewFactory()
 		cfg := factory.CreateDefaultConfig().(*Config)
-		cfg.WorkingDir = "factory_test.go"
-		cfg.ExecDir = "factory_test.go"
+		cfg.InstanceName = testDir
+		cfg.ExecDir = testDir
 		require.NoError(t, cfg.Validate())
+		require.NoError(t, cfg.SetDefaultHostname())
+		require.EqualValues(t, cfg.InstanceName, cfg.InstanceName)
 	})
 }
 

@@ -72,8 +72,8 @@ func (v *varnishClient) BuildCommand() (string, []string) {
 	argList := []string{"-j"}
 	command := varnishStat
 
-	if v.cfg.WorkingDir != "" {
-		argList = append(argList, "-n", v.cfg.WorkingDir)
+	if v.cfg.InstanceName != "" {
+		argList = append(argList, "-n", v.cfg.InstanceName)
 	}
 
 	if v.cfg.ExecDir != "" {

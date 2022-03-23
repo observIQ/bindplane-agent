@@ -15,6 +15,7 @@
 package varnishreceiver // import "github.com/observiq/observiq-otel-collector/receiver/varnishreceiver"
 
 import (
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -40,17 +41,17 @@ func TestValidate(t *testing.T) {
 			expectedErrContains: `"exec_dir" does not exists`,
 		},
 		{
-			desc: "missing working dir",
+			desc: "missing instance name",
 			cfg: Config{
-				WorkingDir: "missing/working",
+				InstanceName: "missing/instance_name",
 			},
-			expectedErrContains: `"working_dir" does not exists`,
+			expectedErrContains: `"instance_name" does not exists`,
 		},
 		{
-			desc: "valid exec and working dir",
+			desc: "valid exec and instance name",
 			cfg: Config{
-				WorkingDir: testDir,
-				ExecDir:    testDir,
+				InstanceName: testDir,
+				ExecDir:      testDir,
 			},
 			expectedErrContains: "",
 		},
@@ -65,4 +66,24 @@ func TestValidate(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestSetDefaultHostname(t *testing.T) {
+	t.Run("set default hostname to empty config instance name", func(t *testing.T) {
+		cfg := Config{}
+		hostname, err := os.Hostname()
+		require.NoError(t, err)
+		err = cfg.SetDefaultHostname()
+		require.NoError(t, err)
+		require.EqualValues(t, cfg.InstanceName, hostname)
+	})
+
+	t.Run("reuse existing config instance name", func(t *testing.T) {
+		cfg := Config{
+			InstanceName: "varnishcache",
+		}
+		err := cfg.SetDefaultHostname()
+		require.NoError(t, err)
+		require.EqualValues(t, cfg.InstanceName, "varnishcache")
+	})
 }

@@ -52,6 +52,9 @@ func createMetricsReceiver(
 	consumer consumer.Metrics,
 ) (component.MetricsReceiver, error) {
 	cfg := rConf.(*Config)
+	if err := cfg.SetDefaultHostname(); err != nil {
+		return nil, err
+	}
 	ns := newVarnishScraper(params.TelemetrySettings, cfg)
 	scraper, err := scraperhelper.NewScraper(typeStr, ns.scrape, scraperhelper.WithStart(ns.start))
 	if err != nil {
