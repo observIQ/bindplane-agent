@@ -45,11 +45,7 @@ func newVarnishScraper(settings component.TelemetrySettings, config *Config) *va
 
 func (v *varnishScraper) start(_ context.Context, host component.Host) error {
 	v.client = newVarnishClient(v.config, host, v.settings)
-	err := v.setCacheName()
-	if err != nil {
-		return err
-	}
-	return nil
+	return v.setCacheName()
 }
 
 // setCacheName sets the cache name to the targeted varnish instance.
