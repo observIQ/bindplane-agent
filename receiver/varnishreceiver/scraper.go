@@ -17,7 +17,7 @@ package varnishreceiver // import "github.com/observiq/observiq-otel-collector/r
 import (
 	"context"
 	"os"
-	"strings"
+	"path/filepath"
 	"time"
 
 	"go.opentelemetry.io/collector/component"
@@ -58,9 +58,8 @@ func (v *varnishScraper) setCacheName() error {
 		v.cacheName = hostname
 		return nil
 	}
-	// cache dir is a valid named file dir and does not end in /.
-	lastIndex := strings.LastIndex(v.config.CacheDir, "/")
-	v.cacheName = v.config.CacheDir[lastIndex+1:]
+
+	v.cacheName = filepath.Base(v.config.CacheDir)
 	return nil
 }
 
