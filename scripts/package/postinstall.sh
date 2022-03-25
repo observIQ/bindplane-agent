@@ -68,7 +68,10 @@ The "observiq-otel-collector" service has been configured!
 The collector's config file can be found here: 
   /opt/observiq-otel-collector/config.yaml
 
-For more information on configuring the collector, see the OpenTelemetry docs:
+For more information on configuring the collector, see the docs:
+  https://github.com/observIQ/observiq-otel-collector/blob/main/docs/installation-linux.md#configuring-the-collector
+
+Also see the official OpenTelemetry docs for configuring the collector:
   https://opentelemetry.io/docs/collector/configuration/
 
 To stop the observiq-otel-collector service, run:
