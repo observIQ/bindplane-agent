@@ -76,6 +76,12 @@ nfpms:
           mode: 0640
           owner: observiq-otel-collector
           group: observiq-otel-collector
+      - src: LICENSE
+        dst: /opt/observiq-otel-collector/LICENSE
+        file_info:
+          mode: 0644
+          owner: observiq-otel-collector
+          group: observiq-otel-collector
         type: config|noreplace
       - src: release_deps/opentelemetry-java-contrib-jmx-metrics.jar
         dst: /opt/opentelemetry-java-contrib-jmx-metrics.jar
