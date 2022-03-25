@@ -28,4 +28,3 @@ mkdir -p wix
 $PROJECT_BASE/buildscripts/download-dependencies.sh
 
 cp "$PROJECT_BASE/config/example.yaml" "./config.yaml"
-cp "$PROJECT_BASE/LICENSE" "./LICENSE"
