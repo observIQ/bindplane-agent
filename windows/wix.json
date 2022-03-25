@@ -1,5 +1,5 @@
 {
-  "product": "observiq-otel-collector",
+  "product": "observIQ OpenTelemetry Collector",
   "company": "observIQ, Inc.",
   "license": "./LICENSE",
   "info": {
@@ -36,7 +36,7 @@
   ],
   "registries": [
     {
-      "path": "HKCU\\Software\\observiq\\observiq-otel-collector",
+      "path": "HKCU\\Software\\observiq\\observIQ OpenTelemetry Collector",
       "values": [
         {
           "name": "Version",
@@ -49,7 +49,7 @@
       ]
     },
     {
-      "path": "HKLM\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\observiq-otel-collector",
+      "path": "HKLM\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\observIQ OpenTelemetry Collector",
       "values": [
         {
           "name": "NoModify",
@@ -59,7 +59,7 @@
       ]
     },
     {
-      "path": "HKLM\\SYSTEM\\CurrentControlSet\\Services\\EventLog\\Application\\observiq-otel-collector",
+      "path": "HKLM\\SYSTEM\\CurrentControlSet\\Services\\EventLog\\Application\\observIQ OpenTelemetry Collector",
       "values": [
         {
           "name": "TypesSupported",

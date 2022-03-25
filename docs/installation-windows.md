@@ -74,7 +74,7 @@ To uninstall the collector on Windows, navigate to the control panel, then to th
 
 ![The control panel](./screenshots/windows/control-panel-uninstall.png)
 
-Locate the `observiq-otel-collector` entry, and select uninstall. 
+Locate the `"observIQ OpenTelemetry Collector"` entry, and select uninstall. 
 
 ![The uninstall or change a program dialog](./screenshots/windows/uninstall-collector.png)
 
@@ -82,5 +82,5 @@ Follow the wizard to complete removal of the collector.
 
 Alternatively, Powershell command below may be run to uninstall the collector.
 ```pwsh
-(Get-WmiObject -Class Win32_Product -Filter "Name = 'observiq-otel-collector'").Uninstall()
+(Get-WmiObject -Class Win32_Product -Filter "Name = 'observIQ OpenTelemetry Collector'").Uninstall()
 ```
