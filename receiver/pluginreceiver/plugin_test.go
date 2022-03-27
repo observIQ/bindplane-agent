@@ -158,40 +158,11 @@ service:
 				},
 			},
 		},
-		{
-			name: "valid template with data type",
-			plugin: &Plugin{
-				Template: `
-{{if .metrics}}
-receivers:
-  test:
-{{end}}
-service:
-  pipelines:
-    metrics:`,
-			},
-			dataType: config.MetricsDataType,
-			expectedResult: &ComponentMap{
-				Receivers: map[string]interface{}{
-					"test": nil,
-				},
-				Exporters: map[string]interface{}{
-					emitterTypeStr: nil,
-				},
-				Service: ServiceMap{
-					Pipelines: map[string]PipelineMap{
-						"metrics": {
-							Exporters: []string{emitterTypeStr},
-						},
-					},
-				},
-			},
-		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			result, err := tc.plugin.RenderComponents(tc.values, tc.dataType)
+			result, err := tc.plugin.RenderComponents(tc.values)
 			switch tc.expectedErr {
 			case nil:
 				require.NoError(t, err)

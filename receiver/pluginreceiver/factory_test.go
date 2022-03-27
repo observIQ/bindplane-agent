@@ -72,7 +72,7 @@ func TestCreateReceiver(t *testing.T) {
 			set := component.ReceiverCreateSettings{}
 			consumer := &MockConsumer{}
 			emitterFactory := createLogEmitterFactory(consumer)
-			receiver, err := createReceiver(tc.cfg, set, emitterFactory, config.LogsDataType)
+			receiver, err := createReceiver(tc.cfg, set, emitterFactory)
 
 			switch tc.expectedErr {
 			case nil:

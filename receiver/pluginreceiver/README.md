@@ -76,8 +76,8 @@ The following keys are used when defining a parameter.
 **Warning**: Parameters must adhere to their definition. Invalid parameters will return an error during configuration.
 
 ### Template
-The plugin template is a templated OpenTelemetry config. When the  receiver starts, it uses the plugin's parameters and standard go [templating](https://pkg.go.dev/text/template) to render an internal OpenTelemetry collector.
+The plugin template is a templated OpenTelemetry config. When the receiver starts, it uses the plugin's parameters and standard go [templating](https://pkg.go.dev/text/template) to render an internal OpenTelemetry collector.
 
-The supplied template must result in a valid OpenTelemetry config, with the exception of exporter components. Exporters are not supported and should be excluded from the template.
+**Warning**: The supplied template must result in a valid OpenTelemetry config, with the exception of exporter components. Exporters are not supported and should be excluded from the template.
 
-If the template requires isolating behavior to a specific data type, the `.logs`, `.metrics`, and `.traces` keys can be used. These keywords are supplied as booleans whenever the plugin receiver is used in a pipeline of that type.
+**Warning**: A template can only define one data type. If the template results in two different pipeline data types, such as for logs and metrics, this will result in a configuration error.

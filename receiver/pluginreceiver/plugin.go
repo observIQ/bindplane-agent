@@ -6,7 +6,6 @@ import (
 	"os"
 	"text/template"
 
-	"go.opentelemetry.io/collector/config"
 	"gopkg.in/yaml.v2"
 )
 
@@ -35,14 +34,13 @@ func LoadPlugin(path string) (*Plugin, error) {
 }
 
 // RenderComponents renders the plugin's template as a component map
-func (p *Plugin) RenderComponents(values map[string]interface{}, dataType config.Type) (*ComponentMap, error) {
+func (p *Plugin) RenderComponents(values map[string]interface{}) (*ComponentMap, error) {
 	template, err := template.New(p.Title).Parse(p.Template)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create plugin template: %w", err)
 	}
 
 	templateValues := p.ApplyDefaults(values)
-	templateValues[string(dataType)] = true
 
 	var writer bytes.Buffer
 	if err := template.Execute(&writer, templateValues); err != nil {
