@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"os"
+	"path/filepath"
 	"text/template"
 
 	"gopkg.in/yaml.v2"
@@ -20,7 +21,8 @@ type Plugin struct {
 
 // LoadPlugin loads a plugin from a file path
 func LoadPlugin(path string) (*Plugin, error) {
-	bytes, err := os.ReadFile(path)
+	cleanPath := filepath.Clean(path)
+	bytes, err := os.ReadFile(cleanPath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read file: %w", err)
 	}
