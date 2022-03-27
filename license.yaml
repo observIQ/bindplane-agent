@@ -20,3 +20,4 @@ exceptions:
   unresolvableLicense:
     - path: "./processor/resourceattributetransposerprocessor"
     - path: "./receiver/logsreceiver"
+    - path: "./receiver/pluginreceiver"
