@@ -4,6 +4,16 @@
 
 Installation is done through deb and rpm packages. Installing the collector will also install the `observiq-otel-collector` service on systemd systems.
 
+### Install/Update script
+The collector may be installed through a shell script which will automatically determine which package to install.
+
+This script may also be used to update an existing installation.
+
+To install using the installation script, you may run:
+```sh
+sudo sh -c "$(curl -fsSlL https://github.com/observiq/observiq-otel-collector/releases/latest/download/install_unix.sh)" install_unix.sh
+```
+
 ### RPM Installation
 First download the RPM package for your architecture from the [releases page](https://github.com/observIQ/observiq-otel-collector/releases/latest).
 Then you may install the package using `rpm`, see this example for installing the amd64 package:
@@ -18,16 +28,6 @@ Then you may install the package using `dpkg`, see this example for installing t
 ```sh
 sudo dpkg -i ./observiq-otel-collector_linux_amd64.deb
 sudo systemctl enable --now observiq-otel-collector
-```
-
-### Install/Update script
-The collector may be installed through a shell script which will automatically determine which package to install.
-
-This script may also be used to update an existing installation.
-
-To install using the installation script, you may run:
-```sh
-sudo sh -c "$(curl -fsSlL https://github.com/observiq/observiq-otel-collector/releases/latest/download/install_unix.sh)" install_unix.sh
 ```
 
 ## Configuring the Collector
