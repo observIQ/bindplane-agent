@@ -80,6 +80,20 @@ download_package() {
     echo "${out_file_path} successfully downloaded!"
 }
 
+package_version() {
+    case "$package_type" in
+        deb)
+            dpkg -s observiq-otel-collector | grep -i '^Version:' | cut -d' ' -f2
+            ;;
+        rpm)
+            rpm -q --queryformat '%{VERSION}' "observiq-otel-collector"
+            ;;
+        *)
+            echo "unknown"
+            ;;
+    esac
+}
+
 install_package() {
     case "$package_type" in
         deb)
@@ -143,7 +157,9 @@ main() {
             # Download and install the package
             download_package
             install_package
-            echo "Successfully installed the observIQ OpenTelemetry collector."
+            echo ""
+            echo ""
+            echo "Successfully installed version $(package_version) of the observIQ OpenTelemetry collector."
             ;;
         uninstall)
             echo "Uninstalling the observIQ OpenTelemetry collector..."
