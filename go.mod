@@ -6,6 +6,7 @@ require (
 	github.com/GoogleCloudPlatform/opentelemetry-operations-collector v0.0.3-0.20220215000048-11a223a1d94f
 	github.com/observiq/observiq-otel-collector/processor/resourceattributetransposerprocessor v0.2.0
 	github.com/observiq/observiq-otel-collector/receiver/logsreceiver v0.2.0
+	github.com/observiq/observiq-otel-collector/receiver/pluginreceiver v0.2.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/alibabacloudlogserviceexporter v0.45.1
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/awscloudwatchlogsexporter v0.45.1
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/awsemfexporter v0.45.1
@@ -417,6 +418,8 @@ replace github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googl
 replace github.com/observiq/observiq-otel-collector/processor/resourceattributetransposerprocessor v0.2.0 => ./processor/resourceattributetransposerprocessor
 
 replace github.com/observiq/observiq-otel-collector/receiver/logsreceiver v0.2.0 => ./receiver/logsreceiver
+
+replace github.com/observiq/observiq-otel-collector/receiver/pluginreceiver v0.2.0 => ./receiver/pluginreceiver
 
 replace go.opentelemetry.io/collector v0.47.0 => go.opentelemetry.io/collector v0.46.0
 

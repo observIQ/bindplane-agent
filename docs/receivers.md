@@ -37,6 +37,7 @@ Below is a list of supported receivers with links to their documentation pages.
 - [nginxreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.45.1/receiver/nginxreceiver/README.md)
 - [opencensusreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.45.1/receiver/opencensusreceiver/README.md)
 - [otlpreceiver](https://github.com/open-telemetry/opentelemetry-collector/tree/v0.45.0/receiver/otlpreceiver/README.md)
+- [pluginreceiver](../receiver/pluginreceiver/README.md)
 - [podmanreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.45.1/receiver/podmanreceiver/README.md)
 - [postgresqlreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.45.1/receiver/postgresqlreceiver/README.md)
 - [prometheusexecreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.45.1/receiver/prometheusexecreceiver/README.md)
