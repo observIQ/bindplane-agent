@@ -107,7 +107,7 @@ func (p *Plugin) CheckParameters(values map[string]interface{}) error {
 	return nil
 }
 
-// checkDefined checks if any of the supplied values are defined by the plugin
+// checkDefined checks if any of the supplied values are not defined by the plugin
 func (p *Plugin) checkDefined(values map[string]interface{}) error {
 	parameterMap := make(map[string]Parameter)
 	for _, parameter := range p.Parameters {
