@@ -17,7 +17,6 @@ package pluginreceiver
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/config"
@@ -156,8 +155,8 @@ func (c *ConfigProvider) getExtensionFactories(host component.Host) (map[config.
 
 // parseComponentType parses a component type from a string
 func parseComponentType(value string) config.Type {
-	typeValue := strings.Split(value, "/")[0]
-	return config.Type(typeValue)
+	componentID, _ := config.NewComponentIDFromString(value)
+	return componentID.Type()
 }
 
 // unmarshalComponents unmarshals a component map from yaml
