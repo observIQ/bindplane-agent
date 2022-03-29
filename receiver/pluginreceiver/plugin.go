@@ -160,6 +160,8 @@ func (p *Plugin) checkType(values map[string]interface{}) error {
 			if _, ok := value.(bool); !ok {
 				return fmt.Errorf("parameter %s must be a bool", parameter.Name)
 			}
+		default:
+			return fmt.Errorf("unsupported parameter type: %s", parameter.Type)
 		}
 	}
 

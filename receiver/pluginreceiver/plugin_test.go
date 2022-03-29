@@ -348,6 +348,21 @@ func TestCheckParameters(t *testing.T) {
 			expectedErr: errors.New("must be a bool"),
 		},
 		{
+			name: "unsupported type",
+			plugin: &Plugin{
+				Parameters: []Parameter{
+					{
+						Name: "param1",
+						Type: "invalidType",
+					},
+				},
+			},
+			values: map[string]interface{}{
+				"param1": "value1",
+			},
+			expectedErr: errors.New("unsupported parameter type: invalidType"),
+		},
+		{
 			name: "not supported value",
 			plugin: &Plugin{
 				Parameters: []Parameter{
