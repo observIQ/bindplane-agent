@@ -109,9 +109,9 @@ func (p *Plugin) CheckParameters(values map[string]interface{}) error {
 
 // checkDefined checks if any of the supplied values are not defined by the plugin
 func (p *Plugin) checkDefined(values map[string]interface{}) error {
-	parameterMap := make(map[string]Parameter)
+	parameterMap := make(map[string]struct{})
 	for _, parameter := range p.Parameters {
-		parameterMap[parameter.Name] = parameter
+		parameterMap[parameter.Name] = struct{}{}
 	}
 
 	for key := range values {
