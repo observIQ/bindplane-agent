@@ -91,15 +91,13 @@ func createReceiver(cfg config.Receiver, set component.ReceiverCreateSettings, e
 	if err != nil {
 		return nil, fmt.Errorf("failed to render plugin components: %w", err)
 	}
-
 	configProvider := createConfigProvider(components)
-	logger := set.Logger.Named(receiverConfig.ID().String())
 
 	return &Receiver{
 		plugin:         plugin,
 		configProvider: configProvider,
 		emitterFactory: emitterFactory,
-		logger:         logger,
+		logger:         set.Logger,
 		createService:  createService,
 	}, nil
 }
