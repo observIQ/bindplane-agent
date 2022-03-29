@@ -69,7 +69,7 @@ The collector's config file can be found here:
   /opt/observiq-otel-collector/config.yaml
 
 To view logs from the collector, run:
-  journalctl -u observiq-otel-collector.service
+  sudo journalctl -u observiq-otel-collector.service
 
 For more information on configuring the collector, see the docs:
   https://github.com/observIQ/observiq-otel-collector/blob/main/docs/installation-linux.md#configuring-the-collector
