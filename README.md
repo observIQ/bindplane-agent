@@ -89,3 +89,7 @@ For supported extensions and their documentation see [extensions](/docs/extensio
 # Community
 
 The observIQ OpenTelemetry Collector is an open source project. If you'd like to contribute, take a look at our [contribution guidelines](/CONTRIBUTING.md) and [developer guide](/docs/development.md). We look forward to building with you.
+
+# How can we help?
+
+If you need any additional help feel free to file a GitHub issue or reach out to us at support@observiq.com.
