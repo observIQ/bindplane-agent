@@ -35,6 +35,12 @@ package_file_name="unknown"
 # out_file_path is the full path to the downloaded package (e.g. "/tmp/observiq-otel-collector_linux_amd64.deb")
 out_file_path="unknown"
 
+# Colors
+RED='\003[0;31m'
+GREEN='\003[0;32m'
+YELLOW='\003[1;33m'
+NC='\003[0m'
+
 set_arch() {
     os_arch=$(uname -m)
     case "$os_arch" in
@@ -50,7 +56,7 @@ set_arch() {
         arch="arm"
         ;;
     *)
-        echo "Installation failed: Unsupported os arch: $os_arch"
+        echo "\t${RED}Installation failed: Unsupported os arch: $os_arch"
         exit 1
         ;;
     esac
@@ -62,7 +68,7 @@ set_package_type() {
     elif command -v rpm > /dev/null 2>&1; then
         package_type="rpm"
     else
-        echo "Installation failed: Could not find dpkg or rpm on the system"
+        echo "\t${RED}Installation failed: Could not find dpkg or rpm on the system"
         exit 1
     fi
 }
@@ -75,9 +81,9 @@ set_file_name() {
 download_package() {
     download_url="${DOWNLOAD_URL_BASE}/latest/download/${package_file_name}"
     
-    echo "Downloading ${download_url} to ${out_file_path}..."
+    echo "\tDownloading ${download_url} to ${out_file_path}..."
     curl -L "$download_url" -o "$out_file_path" --progress-bar --fail
-    echo "${out_file_path} successfully downloaded!"
+    echo "\t\t${out_file_path} ${GREEN}successfully downloaded!"
 }
 
 package_version() {
@@ -89,7 +95,7 @@ package_version() {
             rpm -q --queryformat '%{VERSION}' "observiq-otel-collector"
             ;;
         *)
-            echo "unknown"
+            echo "${YELLOW}unknown"
             ;;
     esac
 }
@@ -105,7 +111,7 @@ install_package() {
             rpm -U "$out_file_path"
             ;;
         *)
-            echo "Installation failed: Could not determine the package manager to use for installation (package_type: ${package_type})"
+            echo "${RED}Installation failed: Could not determine the package manager to use for installation (package_type: ${package_type})"
             exit 1
             ;;
     esac
@@ -120,25 +126,25 @@ uninstall_package() {
         if dpkg -l "observiq-otel-collector" > /dev/null 2>&1; then
             desired_state="$(dpkg -l observiq-otel-collector | tail -n1 | cut -b 1)"
             if [ "$desired_state" = "i" ]; then
-                echo "Existing DEB installation detected, uninstalling..."
+                echo "\tExisting DEB installation detected, uninstalling..."
                 dpkg -r "observiq-otel-collector"
             else
                 # The package is already uninstalled;
                 # This case can be hit when the package was uninstalled, but config files are left behind,
                 # which dpkg still keeps track of.
-                echo "dpkg was detected, but no observiq-otel-collector package is currently installed, skipping..."
+                echo "\t\t${YELLOW}dpkg was detected, but no observiq-otel-collector package is currently installed, skipping..."
             fi
         else
-            echo "dpkg was detected, but no observiq-otel-collector package is currently installed, skipping..."
+            echo "\t\t${YELLOW}dpkg was detected, but no observiq-otel-collector package is currently installed, skipping..."
         fi
     fi
 
     if command -v rpm > /dev/null 2>&1; then
         if rpm -q observiq-otel-collector > /dev/null 2>&1; then
-            echo "Existing RPM installation detected, uninstalling..."
+            echo "\tExisting RPM installation detected, uninstalling..."
             rpm -e "observiq-otel-collector"
         else
-            echo "rpm was detected, but no observiq-otel-collector package is currently installed, skipping..."
+            echo "\t\t${YELLOW}rpm was detected, but no observiq-otel-collector package is currently installed, skipping..."
         fi
     fi
 }
@@ -159,15 +165,15 @@ main() {
             install_package
             echo ""
             echo ""
-            echo "Successfully installed version $(package_version) of the observIQ OpenTelemetry collector."
+            echo "${GREEN}Successfully installed version $(package_version) of the observIQ OpenTelemetry collector."
             ;;
         uninstall)
             echo "Uninstalling the observIQ OpenTelemetry collector..."
             uninstall_package
-            echo "Successfully uninstalled the observIQ OpenTelemetry collector."
+            echo "${GREEN}Successfully uninstalled the observIQ OpenTelemetry collector."
             ;;
         *)
-            echo "Unrecognized command: $COMMAND"
+            echo "${RED}Unrecognized command: $COMMAND"
             echo "Usage: $0 [install|uninstall]"
             exit 1
             ;;
