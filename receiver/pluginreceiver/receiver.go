@@ -80,6 +80,8 @@ func startService(ctx context.Context, svc Service) error {
 
 	for {
 		select {
+		case <-ctx.Done():
+			return ctx.Err()
 		case err := <-errChan:
 			return err
 		case <-ticker.C:

@@ -115,6 +115,41 @@ func TestReceiverStartServiceFailure(t *testing.T) {
 	require.Contains(t, err.Error(), "failed to start internal service")
 }
 
+func TestReceiverStartServiceContext(t *testing.T) {
+	nopFactory := receiverhelper.NewFactory("nop", nil)
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+
+	host := &MockHost{}
+	host.On("GetFactory", mock.Anything, mock.Anything).Return(nopFactory)
+
+	components := ComponentMap{
+		Receivers: map[string]interface{}{
+			"nop": nil,
+		},
+	}
+	configProvider := createConfigProvider(&components)
+	emitterFactory := createLogEmitterFactory(nil)
+
+	svc := &MockService{}
+	svc.On("Run", mock.Anything).Return(nil)
+	svc.On("GetState").Return(service.Starting)
+
+	receiver := Receiver{
+		plugin:         &Plugin{},
+		configProvider: configProvider,
+		emitterFactory: emitterFactory,
+		logger:         zap.NewNop(),
+		createService: func(factories component.Factories, configProvider service.ConfigProvider, logger *zap.Logger) (Service, error) {
+			return svc, nil
+		},
+	}
+
+	err := receiver.Start(ctx, host)
+	require.Error(t, err)
+	require.Contains(t, err.Error(), context.Canceled.Error())
+}
+
 func TestReceiverStartSuccess(t *testing.T) {
 	nopFactory := receiverhelper.NewFactory("nop", nil)
 	ctx := context.Background()
