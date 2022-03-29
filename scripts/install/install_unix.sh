@@ -36,10 +36,11 @@ package_file_name="unknown"
 out_file_path="unknown"
 
 # Colors
-RED='\003[0;31m'
-GREEN='\003[0;32m'
-YELLOW='\003[1;33m'
-NC='\003[0m'
+RED='\e[31m'
+GREEN='\e[32m'
+YELLOW='\e[33m'
+CYAN='\e[36m'
+NC='\e[0m'
 
 set_arch() {
     os_arch=$(uname -m)
@@ -56,7 +57,7 @@ set_arch() {
         arch="arm"
         ;;
     *)
-        echo "\t${RED}Installation failed: Unsupported os arch: $os_arch"
+        echo "\t${RED}Installation failed: Unsupported os arch: $os_arch${NC}"
         exit 1
         ;;
     esac
@@ -68,7 +69,7 @@ set_package_type() {
     elif command -v rpm > /dev/null 2>&1; then
         package_type="rpm"
     else
-        echo "\t${RED}Installation failed: Could not find dpkg or rpm on the system"
+        echo "\t${RED}Installation failed: Could not find dpkg or rpm on the system${NC}"
         exit 1
     fi
 }
@@ -81,9 +82,10 @@ set_file_name() {
 download_package() {
     download_url="${DOWNLOAD_URL_BASE}/latest/download/${package_file_name}"
     
-    echo "\tDownloading ${download_url} to ${out_file_path}..."
-    curl -L "$download_url" -o "$out_file_path" --progress-bar --fail
-    echo "\t\t${out_file_path} ${GREEN}successfully downloaded!"
+    echo "\tDownloading ${CYAN}${download_url}${NC} to ${CYAN}${out_file_path}${NC}..."
+    echo ""
+    curl -L "$download_url" -s -o "$out_file_path" --fail
+    echo "\t\t${CYAN}${out_file_path} ${GREEN}successfully downloaded!${NC}"
 }
 
 package_version() {
@@ -95,7 +97,7 @@ package_version() {
             rpm -q --queryformat '%{VERSION}' "observiq-otel-collector"
             ;;
         *)
-            echo "${YELLOW}unknown"
+            echo "${YELLOW}unknown${NC}"
             ;;
     esac
 }
@@ -103,15 +105,19 @@ package_version() {
 install_package() {
     case "$package_type" in
         deb)
-            dpkg -i "$out_file_path"
+	        echo "\tInstalling ${CYAN}${out_file_path}${NC} via dpkg..."
+	        echo ""
+            dpkg -i "$out_file_path" | sed 's/^/\t\t/'
             ;;
         rpm)
             # -U installs OR upgrades
             # just -i will fail if previous versions exists
-            rpm -U "$out_file_path"
+	        echo "\tInstalling ${CYAN}${out_file_path}${NC} via rpm..."
+	        echo ""
+            rpm -U "$out_file_path" | sed 's/^/\t\t/'
             ;;
         *)
-            echo "${RED}Installation failed: Could not determine the package manager to use for installation (package_type: ${package_type})"
+            echo "\t${RED}Installation failed: Could not determine the package manager to use for installation (package_type: ${package_type})${NC}"
             exit 1
             ;;
     esac
@@ -119,6 +125,9 @@ install_package() {
     if command -v systemctl > /dev/null 2>&1; then
         systemctl enable --now observiq-otel-collector
     fi
+
+    echo ""
+    echo "\t${GREEN}Successfully installed version $(package_version) of the observIQ OpenTelemetry collector.${NC}"
 }
 
 uninstall_package() {
@@ -127,29 +136,41 @@ uninstall_package() {
             desired_state="$(dpkg -l observiq-otel-collector | tail -n1 | cut -b 1)"
             if [ "$desired_state" = "i" ]; then
                 echo "\tExisting DEB installation detected, uninstalling..."
-                dpkg -r "observiq-otel-collector"
+		        echo ""
+                dpkg -r "observiq-otel-collector" > /dev/null
             else
                 # The package is already uninstalled;
                 # This case can be hit when the package was uninstalled, but config files are left behind,
                 # which dpkg still keeps track of.
-                echo "\t\t${YELLOW}dpkg was detected, but no observiq-otel-collector package is currently installed, skipping..."
+                echo "\t\t${YELLOW}dpkg was detected, but no observiq-otel-collector package is currently installed, skipping...${NC}"
             fi
         else
-            echo "\t\t${YELLOW}dpkg was detected, but no observiq-otel-collector package is currently installed, skipping..."
+            echo "\t\t${YELLOW}dpkg was detected, but no observiq-otel-collector package is currently installed, skipping...${NC}"
         fi
     fi
 
     if command -v rpm > /dev/null 2>&1; then
         if rpm -q observiq-otel-collector > /dev/null 2>&1; then
             echo "\tExisting RPM installation detected, uninstalling..."
-            rpm -e "observiq-otel-collector"
+	        echo ""
+            rpm -e "observiq-otel-collector" > /dev/null
         else
-            echo "\t\t${YELLOW}rpm was detected, but no observiq-otel-collector package is currently installed, skipping..."
+            echo "\t\t${YELLOW}rpm was detected, but no observiq-otel-collector package is currently installed, skipping...${NC}"
         fi
     fi
+    echo "\t\t${GREEN}Successfully uninstalled the observIQ OpenTelemetry collector."
 }
 
 main() {
+
+    # Check to ensure the script is run with root permissions
+    SYSTEM_USER_NAME=$(id -un)
+    if [ "${SYSTEM_USER_NAME}" != 'root' ]
+    then
+        echo "${RED}Script needs to be run as root or with sudo permissions${NC}"
+	    exit 1
+    fi
+
     # Determine system parameters
     set_arch
     set_package_type
@@ -160,21 +181,20 @@ main() {
     case "$COMMAND" in
         install)
             echo "Installing the observIQ OpenTelemetry collector..."
+	        echo ""
             # Download and install the package
             download_package
+	        echo ""
             install_package
-            echo ""
-            echo ""
-            echo "${GREEN}Successfully installed version $(package_version) of the observIQ OpenTelemetry collector."
             ;;
         uninstall)
             echo "Uninstalling the observIQ OpenTelemetry collector..."
+	        echo ""
             uninstall_package
-            echo "${GREEN}Successfully uninstalled the observIQ OpenTelemetry collector."
             ;;
         *)
-            echo "${RED}Unrecognized command: $COMMAND"
-            echo "Usage: $0 [install|uninstall]"
+            echo "${RED}Unrecognized command: $COMMAND${NC}"
+            echo "${YELLOW}Usage: $0 [install|uninstall]${NC}"
             exit 1
             ;;
     esac
