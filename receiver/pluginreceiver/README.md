@@ -54,7 +54,7 @@ template: |
         receivers: [hostmetrics]
 ```
 ### Metadata
-Metadata fields are used to catalog and distinguish plugins. The following fields are used for metadata:
+Metadata fields are used to catalog and distinguish plugins. The following fields are required for a plugin:
 - `title`
 - `description`
 - `version`
@@ -63,13 +63,13 @@ Metadata fields are used to catalog and distinguish plugins. The following field
 Parameters are the fields used to configure a plugin. The values of these fields are used when rendering the plugin's template, resulting in a dynamic pipeline. 
 
 The following keys are used when defining a parameter.
-| Key | Description |
-| --- | --- |
-| `name`      | The name of the parameter. This is the key used when configuring the parameter within the receiver. |
-| `type`      | The data type expected for this parameter. Supported values include `string`, `[]string`, `int`, `bool`. |
-| `default`   | The default value of the parameter. If not supplied during configuration, the parameter will default to this value.   |
-| `required`  | Specifies if the parameter must be supplied during configuration. |
-| `supported` | Specifies a list of supported values that can be used for this parameter. |
+| Key | Required | Description |
+| --- | --- | --- |
+| `name`      | `true`  | The name of the parameter. This is the key used when configuring the parameter within the receiver. |
+| `type`      | `true`  | The data type expected for this parameter. Supported values include `string`, `[]string`, `int`, `bool`. |
+| `default`   | `false` | The default value of the parameter. If not supplied during configuration, the parameter will default to this value.   |
+| `required`  | `false` | Specifies if the parameter must be supplied during configuration. |
+| `supported` | `false` | Specifies a list of supported values that can be used for this parameter. |
 
 **Warning**: Parameters must be defined. Undefined parameters will return an error during configuration.
 
