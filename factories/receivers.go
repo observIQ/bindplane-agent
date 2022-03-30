@@ -16,6 +16,7 @@ package factories
 
 import (
 	"github.com/observiq/observiq-otel-collector/receiver/logsreceiver"
+	"github.com/observiq/observiq-otel-collector/receiver/pluginreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/apachereceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/awscontainerinsightreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/awsecscontainermetricsreceiver"
@@ -104,6 +105,7 @@ var defaultReceivers = []component.ReceiverFactory{
 	nginxreceiver.NewFactory(),
 	opencensusreceiver.NewFactory(),
 	otlpreceiver.NewFactory(),
+	pluginreceiver.NewFactory(),
 	podmanreceiver.NewFactory(),
 	postgresqlreceiver.NewFactory(),
 	prometheusexecreceiver.NewFactory(),
