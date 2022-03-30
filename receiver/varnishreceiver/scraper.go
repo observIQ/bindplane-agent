@@ -84,6 +84,7 @@ func (v *varnishScraper) scrape(context.Context) (pdata.Metrics, error) {
 	v.recordVarnishThreadOperationsCountDataPoint(now, stats)
 	v.recordVarnishSessionCountDataPoint(now, stats)
 	v.recordVarnishClientRequestsCountDataPoint(now, stats)
+	v.recordVarnishClientRequestErrorCountDataPoint(now, stats)
 
 	v.mb.RecordVarnishObjectExpiredDataPoint(now, stats.MAINNExpired.Value)
 	v.mb.RecordVarnishObjectNukedDataPoint(now, stats.MAINNLruNuked.Value)

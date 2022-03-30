@@ -15,6 +15,9 @@
 package varnishreceiver // import "github.com/observiq/observiq-otel-collector/receiver/varnishreceiver"
 
 import (
+	"fmt"
+	"net/http"
+
 	"go.opentelemetry.io/collector/model/pdata"
 
 	"github.com/observiq/observiq-otel-collector/receiver/varnishreceiver/internal/metadata"
@@ -92,6 +95,15 @@ type Stats struct {
 	MAINNLruMoved struct {
 		Value int64 `json:"value"`
 	} `json:"MAIN.n_lru_moved"`
+	MAINClientReq400 struct {
+		Value int64 `json:"value"`
+	} `json:"MAIN.client_req_400"`
+	MAINClientReq417 struct {
+		Value int64 `json:"value"`
+	} `json:"MAIN.client_req_417"`
+	MAINClientResp500 struct {
+		Value int64 `json:"value"`
+	} `json:"MAIN.client_resp_500"`
 	MAINClientReq struct {
 		Value int64 `json:"value"`
 	} `json:"MAIN.client_req"`
@@ -160,5 +172,17 @@ func (v *varnishScraper) recordVarnishClientRequestsCountDataPoint(now pdata.Tim
 
 	for attributeName, attributeValue := range attributeMappings {
 		v.mb.RecordVarnishClientRequestCountDataPoint(now, attributeValue, attributeName)
+	}
+}
+
+func (v *varnishScraper) recordVarnishClientRequestErrorCountDataPoint(now pdata.Timestamp, stats *Stats) {
+	attributeMappings := map[string]int64{
+		fmt.Sprint(http.StatusBadRequest):          stats.MAINClientReq400.Value,
+		fmt.Sprint(http.StatusExpectationFailed):   stats.MAINClientReq417.Value,
+		fmt.Sprint(http.StatusInternalServerError): stats.MAINClientResp500.Value,
+	}
+
+	for attributeName, attributeValue := range attributeMappings {
+		v.mb.RecordVarnishClientRequestErrorCountDataPoint(now, attributeValue, attributeName)
 	}
 }
