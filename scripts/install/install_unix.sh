@@ -10,7 +10,7 @@ DOWNLOAD_BASE="https://github.com/observiq/observiq-otel-collector/releases"
 
 # Script Constants
 TMP_DIR=${TMPDIR:-"/tmp"} # Allow this to be overriden by cannonical TMPDIR env var
-PREREQS="curl hostname printf systemctl ps sed uname cut tar"
+PREREQS="curl printf systemctl sed uname cut"
 SCRIPT_NAME="$0"
 INDENT_WIDTH='  '
 indent=""
