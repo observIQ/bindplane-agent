@@ -165,6 +165,8 @@ Usage:
   $(fg_yellow '-v, --version')
       Defines the version of the observIQ OpenTelemetry Collector.
       If not provided, this will default to the latest version.
+      Alternatively the COLLECTOR_VERSION environment variable can be
+      set to configure the collector version.
       Example: '-v 1.2.12' will download 1.2.12.
 
   $(fg_yellow '-l, --url')
@@ -264,7 +266,7 @@ setup_installation()
 }
 
 set_file_name() {
-    package_file_name="${PACKAGE_NAME}_${arch}.${package_type}"
+    local package_file_name="${PACKAGE_NAME}_${arch}.${package_type}"
     out_file_path="$TMP_DIR/$package_file_name"
 }
 
@@ -273,7 +275,7 @@ set_proxy()
   if [ -n "$proxy" ]; then
     info "Using proxy from arguments: $proxy"
     if [ -n "$proxy_user" ]; then
-      while [ -z "$proxy_password" ] && [ ! "$accept_defaults" = "yes" ]; do
+      while [ -z "$proxy_password" ] ; do
         increase_indent
         command printf "${indent}$(fg_blue "$proxy_user@$proxy")'s password: "
         stty -echo
@@ -289,13 +291,6 @@ set_proxy()
       host="$(echo "$proxy" | cut -d'/' -f3)"
       full_proxy="$protocol//$proxy_user:$proxy_password@$host"
     fi
-
-  elif [ -n "$http_proxy" ]; then
-    info "Using proxy from profile: $http_proxy"
-    proxy="$http_proxy"
-  elif [ -n "$https_proxy" ]; then
-    info "Using proxy from profile: $https_proxy"
-    proxy="$https_proxy"
   fi
 
   if [ -z "$full_proxy" ]; then
@@ -304,7 +299,7 @@ set_proxy()
 }
 
 # This will set the os based on the current runtime environment.
-# Accepted values are darwin and linux. This value cannot be overriden.
+# Accepted values are linux. This value cannot be overriden.
 set_os()
 {
   os_key=$(uname -s)
@@ -313,7 +308,7 @@ set_os()
       os="linux"
       ;;
     *)
-      error "Unsupported os type: $os_key"
+      error_exit "$LINENO" "Unsupported os type: $os_key"
       ;;
   esac
 }
@@ -335,7 +330,7 @@ set_os_arch()
       os_arch="arm"
       ;;
     *)
-      error "Unsupported os arch: $os_arch"
+      error_exit "$LINENO" "Unsupported os arch: $os_arch"
       ;;
   esac
 }
@@ -348,7 +343,7 @@ set_package_type()
   elif command -v rpm > /dev/null 2>&1; then
       package_type="rpm"
   else
-      error "Could not find dpkg or rpm on the system"
+      error_exit "$LINENO" "Could not find dpkg or rpm on the system"
   fi
 }
 
@@ -364,14 +359,6 @@ set_download_urls()
 
   if [ -z "$url" ] ; then
     url=$DOWNLOAD_BASE
-  fi
-
-  if [ -z "$arch" ] ; then 
-    os_arch=$arch
-  fi
-
-  if [ -z "$pkg_type" ] ; then
-    package_type=$pkg_type
   fi
 
   if [ -z "$version" ] ; then
@@ -402,7 +389,7 @@ root_check()
   if [ "${system_user_name}" != 'root' ]
   then
     failed
-    error_exit "Script needs to be run as root or with sudo permissions"
+    error_exit "$LINENO" "Script needs to be run as root or with sudo"
   fi
 }
 
@@ -417,7 +404,7 @@ os_check()
       ;;
     *)
       failed
-      error_exit "The operating system $(fg_yellow "$os_type") is not supported by this script."
+      error_exit "$LINENO" "The operating system $(fg_yellow "$os_type") is not supported by this script."
       ;;
   esac
 }
@@ -433,7 +420,7 @@ os_arch_check()
       ;;
     *)
       failed
-      error_exit "The operating system architecture $(fg_yellow "$arch") is not supported by this script."
+      error_exit "$LINENO" "The operating system architecture $(fg_yellow "$arch") is not supported by this script."
       ;;
   esac
 }
@@ -458,10 +445,9 @@ dependencies_check()
 
   if [ -n "$FAILED_PREREQS" ]; then
     failed
-    error_exit "The following dependencies are required by this script: [$FAILED_PREREQS]"
+    error_exit "$LINENO" "The following dependencies are required by this script: [$FAILED_PREREQS]"
   fi
   succeeded
-  return 0
 }
 
 # This will check to ensure either dpkg or rpm is installedon the system
@@ -470,15 +456,11 @@ package_type_check()
   info "Checking for package manager..."
   if command -v dpkg > /dev/null 2>&1; then
       succeeded
-      pkg_type="deb"
-      return 0
   elif command -v rpm > /dev/null 2>&1; then
       succeeded
-      pkg_type="rpm"
-      return 0
   else
       failed
-      error_exit "Could not find dpkg or rpm on the system"
+      error_exit "$LINENO" "Could not find dpkg or rpm on the system"
   fi
 }
 
@@ -505,8 +487,8 @@ install_package()
   eval curl -L "$proxy_args" "$collector_download_url" -o "$out_file_path" --progress-bar --fail || error_exit "$LINENO" "Failed to download package"
   succeeded
 
-  info "Extracting package..."
-  extract_package || error_exit "$LINENO" "Failed to extract package"
+  info "Installing package..."
+  unpack_package || error_exit "$LINENO" "Failed to extract package"
   succeeded
 
   info "Enabling service..."
@@ -517,7 +499,7 @@ install_package()
   decrease_indent
 }
 
-extract_package()
+unpack_package()
 {
   case "$package_type" in
     deb)
@@ -622,7 +604,7 @@ main()
         -P|--proxy-password)
           proxy_password=$2 ; shift 2 ;;
         -r|--uninstall)
-          uninstall # TODO
+          uninstall
           force_exit
           ;;
         -h|--help)
