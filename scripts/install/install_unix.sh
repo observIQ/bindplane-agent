@@ -366,7 +366,7 @@ check_prereqs()
   decrease_indent
 }
 
-# This
+# This checks to see if the user who is running the script has root permissions.
 root_check()
 {
   system_user_name=$(id -un)
