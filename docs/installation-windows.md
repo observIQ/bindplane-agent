@@ -17,7 +17,7 @@ After installing, the `observiq-otel-collector` service will be running and read
 
 Logs from the collector will appear in the Application event log.
 
-By default, the config file for the collector can be found at `C:\Program Files\observiq-otel-collector\config.yaml`. When changing the configuration,the collector service must be restarted in order for config changes to take effect.
+By default, the config file for the collector can be found at `C:\Program Files\observIQ OpenTelemetry Collector\config.yaml`. When changing the configuration,the collector service must be restarted in order for config changes to take effect.
 
 For more information on configuring the collector, see the [OpenTelemetry docs](https://opentelemetry.io/docs/collector/configuration/).
 

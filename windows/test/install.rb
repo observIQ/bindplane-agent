@@ -1,4 +1,4 @@
-collector_home="C:/Program Files/observiq-otel-collector"
+collector_home="C:/Program Files/observIQ OpenTelemetry Collector"
 
 [
     "#{collector_home}/plugins"
