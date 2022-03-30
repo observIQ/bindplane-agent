@@ -1,6 +1,7 @@
 # Google Cloud Exporter Prerequisites
 
-The Google Cloud Exporter supports Metrics, Logs, and Traces.
+The Google Cloud Exporter supports Metrics, Logs, and Traces. This directory contains sub directories with usercase
+specific configurations, all of which are compatible with Google Cloud Monitoring.
 
 ## Google Cloud APIs
 
@@ -53,7 +54,7 @@ Environment=GOOGLE_APPLICATION_CREDENTIALS=/opt/observiq-otel-collector/sa.json
 If an override is already in place, simply insert the `Environment` parameter into the existing `Service` section.
 
 Restart the collector
-```
+```bash
 sudo systemctl restart observiq-otel-collector
 ```
 
@@ -64,8 +65,8 @@ In this example, the key is placed at `C:/observiq/collector/sa.json`.
 Set the `GOOGLE_APPLICATION_CREDENTIALS` with the command prompt `setx` command.
 
 Run the following command
-```
-setx GOOGLE_APPLICATION_CREDENTIALS "C:/observiq/collector/sa.json"
+```cmd
+setx GOOGLE_APPLICATION_CREDENTIALS "C:/observiq/collector/sa.json" /m
 ```
 
 Restart the service using the `services` application.
