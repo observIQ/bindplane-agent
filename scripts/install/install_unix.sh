@@ -149,13 +149,13 @@ usage()
   USAGE=$(cat <<EOF
 Usage:
   $(fg_yellow '-v, --version')
-      Defines the version of the observIQ Opentelemetry Collector.
+      Defines the version of the observIQ OpenTelemetry Collector.
       If not provided, this will default to the latest version.
       Example: '-v 1.2.12' will download 1.2.12.
 
   $(fg_yellow '-l, --url')
       Defines the URL that the components will be downloaded from.
-      If not provided, this will default to observIQ Opentelemetry Collector\'s GitHub releases.
+      If not provided, this will default to observIQ OpenTelemetry Collector\'s GitHub releases.
       Example: '-l http://my.domain.org/observiq-otel-collector' will download from there.
 
   $(fg_yellow '-x, --proxy')
@@ -472,7 +472,7 @@ package_type_check()
 # extracting the binaries, and then removing the archive.
 install_package()
 {
-  banner "Installing observIQ Opentelemetry Collector"
+  banner "Installing observIQ OpenTelemetry Collector"
   increase_indent
 
   proxy_args=""
@@ -499,7 +499,7 @@ install_package()
   systemctl enable --now observiq-otel-collector > /dev/null || error_exit "$LINENO" "Failed to enable service"
   succeeded
 
-  success "observIQ Opentelemetry Collector installation complete!"
+  success "observIQ OpenTelemetry Collector installation complete!"
   decrease_indent
 }
 
@@ -570,7 +570,7 @@ uninstall()
   observiq_banner
 
   set_package_type
-  banner "Uninstalling observIQ Opentelemetry Collector"
+  banner "Uninstalling observIQ OpenTelemetry Collector"
   increase_indent
 
   info "Checking permissions..."
