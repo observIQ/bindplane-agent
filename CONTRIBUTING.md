@@ -28,10 +28,12 @@ $ git checkout -b <YOUR_BRANCH_NAME>
 $ make test
 $ git add
 $ git commit
-$ git push <YOUR_FORK> <YOUR_BRANCH_NAME>
+$ git push --set-upstream <YOUR_FORK> <YOUR_BRANCH_NAME>
 ```
 
-Open a pull request against the main `observiq-otel-collector` repo.
+Open a pull request from your fork and feature branch to the main branch of the `observiq-otel-collector` repo.
+
+**Note**: If the PR is not ready for review, mark it as [`draft`](https://github.blog/2019-02-14-introducing-draft-pull-requests/).
 
 #### Commands to run before submitting PR
 
@@ -40,13 +42,9 @@ Our CI runs the following checks on each PR. You can run the following local com
 - Build (`make collector`)
 - CI Checks (`make ci-checks`)
 
+### How to Receive Feedback
 
-### How to Receive Comments
-
-* If the PR is not ready for review, mark it as [`draft`](https://github.blog/2019-02-14-introducing-draft-pull-requests/).
-* If you're stuck, tag a maintainer and ask a question. We're here to help each other.
-* Make sure CI passes.
-
+If you're stuck, tag a maintainer and ask a question. We're here to help each other.
 
 ### How to Get PRs Merged
 
@@ -55,3 +53,5 @@ A PR is considered to be **ready to merge** when:
 * It has received approval from at least two maintainers.
 * CI passes.
 * Major feedback is resolved.
+
+Tag a maintainer to request a merge once the above is complete.

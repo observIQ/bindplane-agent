@@ -29,7 +29,7 @@ To install using the installation script, you may run:
 sudo sh -c "$(curl -fsSlL https://github.com/observiq/observiq-otel-collector/releases/latest/download/install_unix.sh)" install_unix.sh
 ```
 
-For other installation options see [installing on Linux](/docs/installation-linux.md).
+To install directly with the appropriate package manager, see [installing on Linux](/docs/installation-linux.md).
 
 #### Windows
 
