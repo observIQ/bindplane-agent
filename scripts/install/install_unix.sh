@@ -254,7 +254,6 @@ setup_installation()
     increase_indent
 
     # Installation variables
-    set_os
     set_os_arch
     set_package_type
     set_download_urls
@@ -266,7 +265,7 @@ setup_installation()
 }
 
 set_file_name() {
-    local package_file_name="${PACKAGE_NAME}_${arch}.${package_type}"
+    package_file_name="${PACKAGE_NAME}_${arch}.${package_type}"
     out_file_path="$TMP_DIR/$package_file_name"
 }
 
@@ -296,21 +295,6 @@ set_proxy()
   if [ -z "$full_proxy" ]; then
     full_proxy="$proxy"
   fi
-}
-
-# This will set the os based on the current runtime environment.
-# Accepted values are linux. This value cannot be overriden.
-set_os()
-{
-  os_key=$(uname -s)
-  case "$os_key" in
-    Linux)
-      os="linux"
-      ;;
-    *)
-      error_exit "$LINENO" "Unsupported os type: $os_key"
-      ;;
-  esac
 }
 
 
