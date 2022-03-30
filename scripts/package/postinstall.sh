@@ -72,10 +72,7 @@ To view logs from the collector, run:
   sudo journalctl -u observiq-otel-collector.service
 
 For more information on configuring the collector, see the docs:
-  https://github.com/observIQ/observiq-otel-collector/blob/main/docs/installation-linux.md#configuring-the-collector
-
-Also see the official OpenTelemetry docs for configuring the collector:
-  https://opentelemetry.io/docs/collector/configuration/
+  https://github.com/observiq/observiq-otel-collector/tree/main#observiq-opentelemetry-collector
 
 To stop the observiq-otel-collector service, run:
   sudo systemctl stop observiq-otel-collector
@@ -85,6 +82,8 @@ To start the observiq-otel-collector service, run:
 
 To restart the observiq-otel-collector service, run:
   sudo systemctl restart observiq-otel-collector
+
+If you have any other questions please contact us at support@observiq.com
 EOF
 }
 

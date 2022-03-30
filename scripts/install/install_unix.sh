@@ -496,7 +496,7 @@ install_package()
   succeeded
 
   info "Enabling service..."
-  systemctl enable --now observiq-otel-collector > /dev/null || error_exit "$LINENO" "Failed to enable service"
+  systemctl enable --now observiq-otel-collector > /dev/null 2>&1 || error_exit "$LINENO" "Failed to enable service"
   succeeded
 
   success "observIQ OpenTelemetry Collector installation complete!"
@@ -536,11 +536,10 @@ display_results()
     increase_indent
     info "For more information on configuring the collector, see the docs:"
     increase_indent
-    info "https://github.com/observIQ/observiq-otel-collector/blob/main/docs/installation-linux.md#configuring-the-collector"
+    info "$(fg_cyan "https://github.com/observiq/observiq-otel-collector/tree/main#observiq-opentelemetry-collector")$(reset)"
     decrease_indent
-    info "Also see the official OpenTelemetry docs for configuring the collector:"
+    info "If you have any other questions please contact us at $(fg_cyan support@observiq.com)$(reset)"
     increase_indent
-    info "https://opentelemetry.io/docs/collector/configuration/"
     decrease_indent
     decrease_indent
 
