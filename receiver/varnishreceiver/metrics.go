@@ -112,7 +112,7 @@ func (v *varnishScraper) recordVarnishBackendConnectionsCountDataPoint(now pdata
 	}
 
 	for attributeName, attributeValue := range attributeMappings {
-		v.mb.RecordVarnishBackendConnectionsCountDataPoint(now, attributeValue, attributeName)
+		v.mb.RecordVarnishBackendConnectionCountDataPoint(now, attributeValue, attributeName)
 	}
 }
 
@@ -124,7 +124,7 @@ func (v *varnishScraper) recordVarnishCacheOperationsCountDataPoint(now pdata.Ti
 	}
 
 	for attributeName, attributeValue := range attributeMappings {
-		v.mb.RecordVarnishCacheOperationsCountDataPoint(now, attributeValue, attributeName)
+		v.mb.RecordVarnishCacheOperationCountDataPoint(now, attributeValue, attributeName)
 	}
 }
 
@@ -136,7 +136,7 @@ func (v *varnishScraper) recordVarnishThreadOperationsCountDataPoint(now pdata.T
 	}
 
 	for attributeName, attributeValue := range attributeMappings {
-		v.mb.RecordVarnishThreadOperationsCountDataPoint(now, attributeValue, attributeName)
+		v.mb.RecordVarnishThreadOperationCountDataPoint(now, attributeValue, attributeName)
 	}
 }
 
@@ -159,6 +159,6 @@ func (v *varnishScraper) recordVarnishClientRequestsCountDataPoint(now pdata.Tim
 	}
 
 	for attributeName, attributeValue := range attributeMappings {
-		v.mb.RecordVarnishClientRequestsCountDataPoint(now, attributeValue, attributeName)
+		v.mb.RecordVarnishClientRequestCountDataPoint(now, attributeValue, attributeName)
 	}
 }
