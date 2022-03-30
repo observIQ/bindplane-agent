@@ -8,7 +8,7 @@ Clone this repository, and run `make install-tools`
 
 To create a build for your current machine, run `make collector`
 
-To build for a specific architecture, see the [Makefile](./Makefile)
+To build for a specific architecture, see the [Makefile](../Makefile)
 
 To build all targets, run `make build-all`
 
