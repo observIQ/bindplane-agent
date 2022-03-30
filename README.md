@@ -1,7 +1,5 @@
 # observIQ OpenTelemetry Collector
 
-<p align="center"><img src="docs/images/logo.png?raw=true"></p>
-
 <center>
 
 [![Action Status](https://github.com/observIQ/observiq-otel-collector/workflows/Build/badge.svg)](https://github.com/observIQ/observiq-otel-collector/actions)
