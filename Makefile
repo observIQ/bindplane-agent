@@ -65,7 +65,7 @@ build-windows-amd64:
 # tool-related commands
 .PHONY: install-tools
 install-tools:
-	go install github.com/mgechev/revive@v1.1.4
+	go install github.com/mgechev/revive@v1.2.0
 	go install github.com/google/addlicense@v1.0.0
 	go install golang.org/x/tools/cmd/goimports@latest
 	go install github.com/client9/misspell/cmd/misspell@v0.3.4
