@@ -51,7 +51,7 @@ Now that the collector is installed it is collecting basic metrics about the hos
 | OS | Default Location |
 | :--- | :---- |
 | Linux | /opt/observiq-otel-collector/config.yaml |
-| Windows | C:\Program Files\observiq-otel-collector\config.yaml |
+| Windows | C:\Program Files\observIQ OpenTelemetry Collector\config.yaml |
 
 For more information on configuration see the [Configuration section](#configuration).
 
