@@ -89,5 +89,5 @@ sudo dpkg -r observiq-otel-collector
 
 To uninstall an installation made with the install script, run:
 ```sh
-sudo sh -c "$(curl -fsSlL https://github.com/observiq/observiq-otel-collector/releases/latest/download/install_unix.sh)" install_unix.sh uninstall
+sudo sh -c "$(curl -fsSlL https://github.com/observiq/observiq-otel-collector/releases/latest/download/install_unix.sh)" install_unix.sh -r
 ```
