@@ -120,7 +120,7 @@ signs:
 release:
   draft: false
   extra_files:
-    - glob: "./observiq-otel-collector-*.msi"
+    - glob: "./observiq-otel-collector*.msi"
     - glob: "./scripts/install/install_unix.sh"
 
 # https://goreleaser.com/customization/changelog/

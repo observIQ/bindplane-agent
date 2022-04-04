@@ -78,14 +78,11 @@ jobs:
       - name: Run CINC (Inspec) Uninstall Tests
         run: C:/cinc-project/cinc-auditor/bin/cinc-auditor.bat exec uninstall.rb
         working-directory: C:/build/test
-      - name: "Rename MSI to include version tag"
-        run: mv observiq-otel-collector.msi observiq-otel-collector-${{ steps.get-tag.outputs.tag }}.msi
-        working-directory: C:/build
       - name: "Upload MSI"
         uses: actions/upload-artifact@v2
         with:
-          name: observiq-otel-collector-${{ steps.get-tag.outputs.tag }}.msi
-          path: C:/build/observiq-otel-collector-${{ steps.get-tag.outputs.tag }}.msi
+          name: observiq-otel-collector.msi
+          path: C:/build/observiq-otel-collector.msi
           # Short lived because Go Releaser will upload the msi to a release (github release, gcs, etc)
           retention-days: 1
   build-container-image:
@@ -171,14 +168,11 @@ jobs:
         with:
           go-version: 1.17
           check-latest: true
-      - name: "Get Tag From Environment"
-        id: get-tag
-        run: printf '::set-output name=tag::%s' "$(printf '%s' "${{ github.ref }}" | sed 's/refs\/tags\///')"
       - name: Retrieve Windows MSI Installer
         uses: actions/download-artifact@v2
         with:
-          name: observiq-otel-collector-${{ steps.get-tag.outputs.tag }}.msi
-          path: observiq-otel-collector-${{ steps.get-tag.outputs.tag }}.msi
+          name: observiq-otel-collector.msi
+          path: observiq-otel-collector.msi
         # install tools for cosign
       - name: Install Dependencies
         run: |
