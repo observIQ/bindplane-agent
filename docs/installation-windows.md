@@ -2,7 +2,7 @@
 
 ## Installing
 
-To install the collector on Windows run the Powershell command below may be run to install the MSI with no UI.
+To install the collector on Windows run the Powershell command below to install the MSI with no UI.
 ```pwsh
 msiexec /i "https://github.com/observIQ/observiq-otel-collector/releases/latest/download/observiq-otel-collector.msi" /quiet
 ```
