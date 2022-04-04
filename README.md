@@ -38,7 +38,7 @@ To install the collector on Windows run the Powershell command below to install 
 msiexec /i "https://github.com/observIQ/observiq-otel-collector/releases/latest/download/observiq-otel-collector.msi" /quiet
 ```
 
-Alternately, for an interactive install [download the latest MSI](https://github.com/observIQ/observiq-otel-collector/releases/latest).
+Alternately, for an interactive installation [download the latest MSI](https://github.com/observIQ/observiq-otel-collector/releases/latest).
 
 After downloading the MSI, simply double click it to open the installation wizard. Follow the instructions to configure and install the collector.
 
