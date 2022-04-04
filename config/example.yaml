@@ -13,7 +13,7 @@ receivers:
       filesystem:
       memory:
       network:
-      # These scrapers do not support MacOS please comment them out to reduce errors in collector logs
+      # Remove these scrapers for macOS collectors as they are not supported and will generate errors in the logs
       cpu:
       disk:
 
