@@ -8,7 +8,14 @@ receivers:
   hostmetrics:
     collection_interval: 1m
     scrapers:
+      # Theses scrapers work on all operating systems
       load:
+      filesystem:
+      memory:
+      network:
+      # These scrapers do not support MacOS please comment them out to reduce errors in collector logs
+      cpu:
+      disk:
 
   # The syslog receiver; this configuration will listen on every network interface on port 514
   # for UDP syslog messages using the rfc3164 protocol.
@@ -22,26 +29,26 @@ receivers:
 # 'processors' specify configurations of processors.
 # See the README for more information about the processors available for configuration.
 processors:
-  # The batch processor; This processor will aggregate incoming metrics into a batch, releasing them if 
+  # The batch processor; This processor will aggregate incoming metrics into a batch, releasing them if
   # a certain time has passed or if a certain number of entries have been aggregated.
   # For more information on configuring the batch processor, refer to the documentation here:
   # https://github.com/open-telemetry/opentelemetry-collector/tree/main/processor/batchprocessor
   batch:
 
 # 'exporters' specify configurations for certain exporters.
-# See the README for more information on the exporters available for configuration. 
+# See the README for more information on the exporters available for configuration.
 exporters:
   # The logging exporter; This exporter logs to stdout.
   # For more information on configuring the logging exporter, refer to the documentation here:
-  # https://github.com/open-telemetry/opentelemetry-collector/tree/main/exporter/loggingexporter 
+  # https://github.com/open-telemetry/opentelemetry-collector/tree/main/exporter/loggingexporter
   logging:
     loglevel: debug
 
-# 'service' specifies how to construct the data pipelines using the configurations above. 
+# 'service' specifies how to construct the data pipelines using the configurations above.
 service:
   pipelines:
     # 'metrics' specifies a metrics pipeline; metrics are scraped using the 'hostmetrics' receiver,
-    # which are aggregated into batches by the 'batch' processor, 
+    # which are aggregated into batches by the 'batch' processor,
     # and are exported using the 'logging' exporter, printing the metrics to stdout.
     metrics:
       receivers: [hostmetrics]
