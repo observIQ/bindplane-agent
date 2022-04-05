@@ -1,0 +1,54 @@
+receivers:
+  mysql:
+    endpoint: localhost:3306
+    username: $MYSQL_USERNAME
+    password: $MYSQL_PASSWORD
+    database: otel
+    collection_interval: 60s
+
+processors:
+  # Resourcedetection is used to add a unique (host.name)
+  # to the metric resource(s), allowing users to filter
+  # between multiple agent systems.
+  resourcedetection:
+    detectors: ["system"]
+    system:
+      hostname_sources: ["os"]
+
+  resourceattributetransposer:
+    operations:
+      # Rabbitmq metrics require unique metric labels, otherwise the Google
+      # API will reject some metrics as "out of order" / duplicates. This happens
+      # when there are multiple rabbitmq instances or multiple vhosts / queues.
+      - from: host.name
+        to: hostname
+      - from: rabbitmq.queue.name
+        to: queue
+      - from: rabbitmq.node.name
+        to: node
+      - from: rabbitmq.vhost.name
+        to: vhost
+
+  normalizesums:
+
+  batch:
+
+exporters:
+  googlecloud:
+    retry_on_failure:
+      enabled: false
+    metric:
+      prefix: custom.googleapis.com
+
+service:
+  pipelines:
+    metrics:
+      receivers:
+      - mysql
+      processors:
+      - resourcedetection
+      - resourceattributetransposer
+      - normalizesums
+      - batch
+      exporters:
+      - googlecloud
