@@ -17,17 +17,11 @@ processors:
 
   resourceattributetransposer:
     operations:
-      # Rabbitmq metrics require unique metric labels, otherwise the Google
+      # Mysql metrics require unique metric labels, otherwise the Google
       # API will reject some metrics as "out of order" / duplicates. This happens
-      # when there are multiple rabbitmq instances or multiple vhosts / queues.
+      # when there are multiple mysql instances or multiple vhosts / queues.
       - from: host.name
         to: hostname
-      - from: rabbitmq.queue.name
-        to: queue
-      - from: rabbitmq.node.name
-        to: node
-      - from: rabbitmq.vhost.name
-        to: vhost
 
   normalizesums:
 
