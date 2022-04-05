@@ -2,7 +2,7 @@ receivers:
   mongodb:
     hosts:
       - endpoint: 127.0.0.1:27017
-    collection_interval: 10s
+    collection_interval: 60s
     # disable TLS
     tls:
       insecure: true
