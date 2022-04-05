@@ -17,9 +17,6 @@ processors:
 
   resourceattributetransposer:
     operations:
-      # Mysql metrics require unique metric labels, otherwise the Google
-      # API will reject some metrics as "out of order" / duplicates. This happens
-      # when there are multiple mysql instances or multiple vhosts / queues.
       - from: host.name
         to: hostname
 
