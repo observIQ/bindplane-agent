@@ -1,10 +1,10 @@
 # RabbitMQ Metrics with Google Cloud
 
-The RabbitMQ Receiver can be used to send RabbitMQ metrics to Google Cloud Monitoring. See the [documentation](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/rabbitmqreceiver/README.m) for more details.
+The RabbitMQ Receiver can be used to send RabbitMQ metrics to Google Cloud Monitoring.
 
 ## Prerequisites
 
-See the [prerequisites section](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/rabbitmqreceiver/README.md#prerequisites) for RabbitMQ prerequisites.
+See the [documentation](https://github.com/observIQ/observiq-otel-collector/blob/main/docs/receivers.md) for RabbitMQ prerequisites.
 
 See the [prerequisites](../prerequisites.md) doc for Google Cloud prerequisites.
 
