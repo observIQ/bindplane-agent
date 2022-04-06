@@ -39,23 +39,10 @@ RUN curl -L \
 FROM openjdk:8u312-slim-buster as openjdk
 
 
-# Certs stage stages ca-certificates
-#
-FROM debian:11-slim as certs
-RUN apt-get update -qq && apt-get install -qq -y ca-certificates
-
-
 # Final Stage
 #
-FROM debian:11-slim
+FROM gcr.io/observiq-container-images/stanza-base:v1.2.0
 WORKDIR /
-
-RUN adduser \
-    --disabled-password \
-    --gecos "" \
-    --no-create-home \
-    --uid 10005 \
-    otel
 
 COPY --from=openjdk /usr/local/openjdk-8 /usr/local/openjdk-8
 ENV JAVA_HOME=/usr/local/openjdk-8
@@ -63,7 +50,13 @@ ENV PATH=$PATH:/usr/local/openjdk-8/bin
 
 COPY --from=build /collector/observiq-otel-collector /collector/
 COPY --from=build /opt/opentelemetry-java-contrib-jmx-metrics.jar /opt/opentelemetry-java-contrib-jmx-metrics.jar
-COPY --from=certs /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+
+RUN adduser \
+    --disabled-password \
+    --gecos "" \
+    --no-create-home \
+    --uid 10005 \
+    otel
 
 USER otel
 
