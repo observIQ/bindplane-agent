@@ -62,13 +62,9 @@ build-darwin-arm64:
 build-windows-amd64:
 	GOOS=windows GOARCH=amd64 $(MAKE) collector
 
-.PHONY: install-tools-goreleaser
-install-tools-goreleaser:
-	go install github.com/goreleaser/goreleaser@v1.6.3
-
 # tool-related commands
 .PHONY: install-tools
-install-tools: install-tools-goreleaser
+install-tools:
 	go install github.com/mgechev/revive@v1.2.0
 	go install github.com/google/addlicense@v1.0.0
 	go install golang.org/x/tools/cmd/goimports@latest

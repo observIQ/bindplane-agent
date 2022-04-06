@@ -22,7 +22,7 @@ COPY . /collector
 ARG JMX_JAR_VERSION=v1.7.0
 ARG GITHUB_TOKEN
 RUN \
-    make install-tools-goreleaser && \
+    make install-tools && \
     goreleaser build --single-target --skip-validate --rm-dist
 
 RUN cp "dist/collector_linux_$(go env GOARCH)/observiq-otel-collector" .
