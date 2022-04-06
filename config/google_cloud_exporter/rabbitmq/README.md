@@ -22,13 +22,15 @@ sudo systemctl edit observiq-otel-collector
 ```
 
 If this is the first time an override is being created, the file will be empty. Paste the following contents into the file. If the `Service` section is already present, append the two `Environment` lines to the `Service` section.
+
+Replace `otel` with your RabbitMQ username and password.
 ```
 [Service]
 Environment=RABBITMQ_USERNAME=otel
 Environment=RABBITMQ_PASSWORD=otel
 ```
 
-After restarting the collector, the configuration will attempt to use the username:password `otel:otel`.
+After restarting the collector, the configuration will attempt to use the configured username and password.
 
 ```bash
 sudo systemctl restart observiq-otel-collector
