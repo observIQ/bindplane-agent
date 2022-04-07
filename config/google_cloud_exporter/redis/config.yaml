@@ -1,0 +1,42 @@
+receivers:
+  redis:
+    endpoint: "localhost:6379"
+    collection_interval: 60s
+
+processors:
+  # Resourcedetection is used to add a unique (host.name)
+  # to the metric resource(s), allowing users to filter
+  # between multiple agent systems.
+  resourcedetection:
+    detectors: ["system"]
+    system:
+      hostname_sources: ["os"]
+
+  resourceattributetransposer:
+    operations:
+      - from: host.name
+        to: hostname
+
+  normalizesums:
+
+  batch:
+
+exporters:
+  googlecloud:
+    retry_on_failure:
+      enabled: false
+    metric:
+      prefix: custom.googleapis.com
+
+service:
+  pipelines:
+    metrics:
+      receivers:
+      - redis
+      processors:
+      - resourcedetection
+      - resourceattributetransposer
+      - normalizesums
+      - batch
+      exporters:
+      - googlecloud
