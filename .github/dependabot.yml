@@ -7,6 +7,7 @@ updates:
     ignore:
       # Opentelemetry updates will be done manually
       - dependency-name: "github.com/open-telemetry/opentelemetry-collector*"
+      - dependency-name: "go.opentelemetry.io/collector/*"
     commit-message:
       prefix: "deps"
       include: "scope"
@@ -17,6 +18,11 @@ updates:
     ignore:
       # Opentelemetry updates will be done manually
       - dependency-name: "github.com/open-telemetry/opentelemetry-collector*"
+      - dependency-name: "go.opentelemetry.io/collector/*"
+
+      # AWS we want to ignore nightly patch releases
+      - dependency-name: "github.com/aws/aws-sdk-go"
+        update-types: ["version-update:semver-patch"]
     commit-message:
       prefix: "deps"
       include: "scope"
@@ -27,6 +33,17 @@ updates:
     ignore:
       # Opentelemetry updates will be done manually
       - dependency-name: "github.com/open-telemetry/opentelemetry-collector*"
+      - dependency-name: "go.opentelemetry.io/collector/*"
+    commit-message:
+      prefix: "deps"
+      include: "scope"
+  - package-ecosystem: "gomod"
+    directory: "/receiver/pluginreceiver"
+    schedule:
+      interval: "weekly"
+    ignore:
+      # Opentelemetry updates will be done manually
+      - dependency-name: "go.opentelemetry.io/collector/*"
     commit-message:
       prefix: "deps"
       include: "scope"
