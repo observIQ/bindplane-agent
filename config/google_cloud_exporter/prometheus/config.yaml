@@ -26,7 +26,7 @@ processors:
   resourceattributetransposer:
     operations:
     - from: "host.name"
-      to: "hostname"
+      to: "agent"
     - from: "instance"
       to: "instance"
     - from: "service.name"

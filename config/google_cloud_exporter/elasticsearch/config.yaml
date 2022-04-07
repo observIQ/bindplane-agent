@@ -16,7 +16,7 @@ processors:
   resourceattributetransposer:
     operations:
       - from: host.name
-        to: hostname
+        to: agent
       - from: elasticsearch.cluster.name
         to: cluster_name
       - from: elasticsearch.node.name
