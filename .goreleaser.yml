@@ -1,3 +1,5 @@
+project_name: observiq-otel-collector
+
 before:
   hooks:
     - make release-prep
@@ -175,22 +177,22 @@ brews:
 
       To start the collector service run:
 
-        brew services start observiq-otel-collector
+        brew services start observiq/observiq-otel-collector/observiq-otel-collector
 
       To stop the collector service run:
 
-        brew services stop observiq-otel-collector
+        brew services stop observiq/observiq-otel-collector/observiq-otel-collector
 
       To restart the collector service run:
 
-        brew services restart observiq-otel-collector
+        brew services restart observiq/observiq-otel-collector/observiq-otel-collector
       ****************************************************************
 
       ****************************************************************
       To uninstall the collector and its dependencies run the following commands:
 
-          brew services stop observiq-otel-collector
-          brew uninstall observiq-otel-collector
+          brew services stop observiq/observiq-otel-collector/observiq-otel-collector
+          brew uninstall observiq/observiq-otel-collector/observiq-otel-collector
           sudo rm /opt/opentelemetry-java-contrib-jmx-metrics.jar
 
       ****************************************************************
@@ -219,10 +221,10 @@ brews:
           <true/>
 
           <key>StandardErrorPath</key>
-          <string>/tmp/observiq-otel-collector.err</string>
+          <string>/tmp/observiq-otel-collector.log</string>
 
           <key>StandardOutPath</key>
-          <string>/tmp/observiq-otel-collector.out</string>
+          <string>/tmp/observiq-otel-collector.log</string>
         </dict>
       </plist>
     # For local testing

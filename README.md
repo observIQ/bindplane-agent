@@ -49,9 +49,9 @@ For more installation information see [installing on Windows](/docs/installation
 To install the collector on macOS use the following brew commands:
 
 ```sh
-brew tap observiq/homebrew-observiq-collecor
+brew tap observiq/homebrew-observiq-otel-collector
 brew update
-brew install observiq-collector
+brew install observiq/observiq-otel-collector/observiq-otel-collector
 ```
 
 For more installation information see [installing on macOS](/docs/installation-mac.md).
@@ -64,7 +64,7 @@ Now that the collector is installed it is collecting basic metrics about the hos
 | :--- | :---- |
 | Linux | /opt/observiq-otel-collector/config.yaml |
 | Windows | C:\Program Files\observIQ OpenTelemetry Collector\config.yaml |
-| macOS | $(brew --prefix observiq-otel-collector)/config.yaml |
+| macOS | $(brew --prefix observiq/observiq-otel-collector/observiq-otel-collector)/config.yaml |
 
 For more information on configuration see the [Configuration section](#configuration).
 
