@@ -1,6 +1,6 @@
 # Redis Metrics with Google Cloud
 
-The Redis Receiver can be used to send Redis metrics to Google Cloud Monitoring. See the [documentation](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/redisreceiver) for more details.
+The Redis Receiver can be used to send Redis metrics to Google Cloud Monitoring.
 
 ## Limitations
 
