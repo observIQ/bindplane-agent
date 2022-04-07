@@ -12,7 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Golang has multi arch manifests for amd64 and arm64
+
+# Build stage builds the release version of observiq-otel-collector
+# and downloads the opentelemetry-jmx-metrics.jar used by JMX receivers
+#
 FROM golang:1.17 as build
 WORKDIR /collector
 COPY . /collector
@@ -22,36 +25,40 @@ RUN \
     make install-tools && \
     goreleaser build --single-target --skip-validate --rm-dist
 
-# Find built executable, there is only one, and copy it to working dir
-RUN find /collector/dist -name observiq-otel-collector -exec cp {} . \;
+RUN cp "dist/collector_linux_$(go env GOARCH)/observiq-otel-collector" .
 
 RUN curl -L \
     --output /opt/opentelemetry-java-contrib-jmx-metrics.jar \
     "https://github.com/open-telemetry/opentelemetry-java-contrib/releases/download/${JMX_JAR_VERSION}/opentelemetry-jmx-metrics.jar"
 
-# Official OpenJDK has multi arch manifests for amd64 and arm64
-# Java is required for JMX receiver
+
+# OpenJDK stage provides the Java runtime used by JMX receivers.
 # Contrib's integration tests use openjdk 1.8.0
 # https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/jmxreceiver/testdata/Dockerfile.cassandra
+#
 FROM openjdk:8u312-slim-buster as openjdk
 
 
-FROM gcr.io/observiq-container-images/stanza-base:v1.1.0
+# Final Stage
+#
+FROM gcr.io/observiq-container-images/stanza-base:v1.2.0
 WORKDIR /
 
-# configure java runtime
 COPY --from=openjdk /usr/local/openjdk-8 /usr/local/openjdk-8
 ENV JAVA_HOME=/usr/local/openjdk-8
 ENV PATH=$PATH:/usr/local/openjdk-8/bin
 
-# config directory
-RUN mkdir -p /etc/otel
-
-# copy binary
 COPY --from=build /collector/observiq-otel-collector /collector/
-
-# copy jmx receiver dependency
 COPY --from=build /opt/opentelemetry-java-contrib-jmx-metrics.jar /opt/opentelemetry-java-contrib-jmx-metrics.jar
+
+RUN adduser \
+    --disabled-password \
+    --gecos "" \
+    --no-create-home \
+    --uid 10005 \
+    otel
+
+USER otel
 
 # User should mount /etc/otel/config.yaml at runtime using docker volumes / k8s configmap
 ENTRYPOINT [ "/collector/observiq-otel-collector" ]
