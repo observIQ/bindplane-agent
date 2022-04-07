@@ -4,7 +4,7 @@ The Host Metrics Receiver can be used to send system metrics from an agent host 
 
 ## Prerequisites
 
-See the [prerequisites](../prerequisites.md) doc for Google Cloud prerequisites.
+See the [prerequisites](../README.md) doc for Google Cloud prerequisites.
 
 ## Configuration
 

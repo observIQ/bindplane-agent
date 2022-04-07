@@ -8,4 +8,4 @@ The collector must be installed on the Mongodb system.
 
 ## Prerequisites
 
-See the [prerequisites](../prerequisites.md) doc for Google Cloud prerequisites.
+See the [prerequisites](../README.md) doc for Google Cloud prerequisites.

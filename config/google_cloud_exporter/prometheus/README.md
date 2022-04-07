@@ -4,7 +4,7 @@ The Prometheus Receiver can be used to send prometheus style metrics scraped fro
 
 ## Prerequisites
 
-See the [prerequisites](../prerequisites.md) doc for Google Cloud prerequisites.
+See the [prerequisites](../README.md) doc for Google Cloud prerequisites.
 
 ## Configuration
 

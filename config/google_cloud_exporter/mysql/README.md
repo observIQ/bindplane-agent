@@ -10,7 +10,7 @@ The collector must be installed on the Mysql system.
 
 See the [documentation](https://github.com/observIQ/observiq-otel-collector/blob/main/docs/receivers.md) for Mysql prerequisites.
 
-See the [prerequisites](../prerequisites.md) doc for Google Cloud prerequisites.
+See the [prerequisites](../README.md) doc for Google Cloud prerequisites.
 
 ## Authentication Environment Variables
 
