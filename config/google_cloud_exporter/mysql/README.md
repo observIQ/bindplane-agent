@@ -1,6 +1,6 @@
 # Mysql Metrics with Google Cloud
 
-The Mysql Receiver can be used to send Mysql metrics to Google Cloud Monitoring. See the [documentation](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/mysqlreceiver) for more details.
+The Mysql Receiver can be used to send Mysql metrics to Google Cloud Monitoring.
 
 ## Limitations
 
@@ -8,7 +8,7 @@ The collector must be installed on the Mysql system.
 
 ## Prerequisites
 
-See the [prerequisites section](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/mysqlreceiver#prerequisites) for Mysql prerequisites.
+See the [documentation](https://github.com/observIQ/observiq-otel-collector/blob/main/docs/receivers.md) for Mysql prerequisites.
 
 See the [prerequisites](../prerequisites.md) doc for Google Cloud prerequisites.
 
@@ -26,10 +26,12 @@ sudo systemctl edit observiq-otel-collector
 ```
 
 If this is the first time an override is being created, the file will be empty. Paste the following contents into the file. If the `Service` section is already present, append the two `Environment` lines to the `Service` section.
+
+Replace `otel` with your Mysql username and password.
 ```
 [Service]
 Environment=MYSQL_USERNAME=otel
-Environment=MYSQL_PASSWORD=password
+Environment=MYSQL_PASSWORD=otel
 ```
 
 After restarting the collector, the configuration will attempt to use the username:password `otel:otel`.

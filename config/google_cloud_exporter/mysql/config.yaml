@@ -3,7 +3,6 @@ receivers:
     endpoint: localhost:3306
     username: $MYSQL_USERNAME
     password: $MYSQL_PASSWORD
-    database: otel
     collection_interval: 60s
 
 processors:
