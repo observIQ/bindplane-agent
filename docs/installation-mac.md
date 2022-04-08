@@ -54,6 +54,9 @@ To uninstall the collector run the following commands:
 brew services stop observiq/observiq-otel-collector/observiq-otel-collector
 brew uninstall observiq/observiq-otel-collector/observiq-otel-collector
 
+# To remove the plist file
+launchctl remove com.observiq.collector
+
 # If you moved the opentelemetry-java-contrib-jmx-metrics.jar
 sudo rm /opt/opentelemetry-java-contrib-jmx-metrics.jar
 ```
