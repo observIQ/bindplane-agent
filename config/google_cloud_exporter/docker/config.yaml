@@ -1,0 +1,46 @@
+receivers:
+  docker_stats:
+    collection_interval: 60s
+
+processors:
+  resourcedetection:
+    detectors: ["system"]
+    system:
+      hostname_sources: ["os"]
+
+  resourceattributetransposer:
+    operations:
+      - from: host.name
+        to: agent
+      - from: container.hostname
+        to: hostname
+      - from: container.id
+        to: container_id
+      - from: container.image.name
+        to: image
+      - from: container.name
+        to: name
+
+  normalizesums:
+
+  batch:
+
+exporters:
+  googlecloud:
+    retry_on_failure:
+      enabled: false
+    metric:
+      prefix: custom.googleapis.com
+
+service:
+  pipelines:
+    metrics:
+      receivers:
+      - docker_stats
+      processors:
+      - resourcedetection
+      - resourceattributetransposer
+      - normalizesums
+      - batch
+      exporters:
+      - googlecloud
