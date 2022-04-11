@@ -160,11 +160,6 @@ brews:
     license: "Apache 2.0"
     caveats: |
       ****************************************************************
-      After installation please run the following to finish setup:
-
-        # Default location for the opentelemetry-java-contrib-jmx-metrics.jar
-        sudo cp #{lib}/opentelemetry-java-contrib-jmx-metrics.jar /opt/
-
       The configuration file that is run by the service is located at #{prefix}/config.yaml.
 
       If you are configuring a logreceiver the plugin directory is located at #{prefix}/plugins.
