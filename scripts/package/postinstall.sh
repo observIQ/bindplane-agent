@@ -43,6 +43,7 @@ Type=simple
 User=observiq-otel-collector
 Group=observiq-otel-collector
 Environment=PATH=/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin
+Environment=OIQ_OTEL_COLLECTOR_STORAGE=/opt/observiq-otel-collector/storage
 WorkingDirectory=/opt/observiq-otel-collector
 ExecStart=/opt/observiq-otel-collector/observiq-otel-collector --config config.yaml
 SuccessExitStatus=0
