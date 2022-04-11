@@ -32,6 +32,9 @@
   "directories": [
     {
       "name": "plugins"
+    },
+    {
+      "name": "storage"
     }
   ],
   "registries": [
