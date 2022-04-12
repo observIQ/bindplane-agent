@@ -42,6 +42,3 @@ cd "$START_DIR"
 
 cp -r "$DOWNLOAD_DIR/stanza-plugins/plugins" "$DOWNLOAD_DIR"
 rm -rf "$DOWNLOAD_DIR/stanza-plugins"
-
-mkdir "$DOWNLOAD_DIR/storage"
-touch "$DOWNLOAD_DIR/storage/.include"
