@@ -8,6 +8,8 @@ The Prometheus Receiver can be used to send [Cadvisor](https://github.com/google
 
 See the [prerequisites](../prerequisites.md) doc for Google Cloud prerequisites.
 
+[Cadvisor](https://github.com/google/cadvisor) should be running as a container with the name `cadvisor`.
+
 ## Deployment
 
 Run as a container
