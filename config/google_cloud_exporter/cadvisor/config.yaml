@@ -1,0 +1,58 @@
+receivers:
+  prometheus:
+    config:
+      scrape_configs:
+      - job_name: 'cadvisor' # A friendly name, will be added as 'service.name' resource label
+        scrape_interval: 60s
+        static_configs:
+        - targets:
+          - cadvisor:8080
+
+processors:
+  resource:
+    attributes:
+    # DOCKER_AGENT_HOSTNAME is set when running `docker run` or docker-compose.
+    - key: agent_host
+      value: "$DOCKER_AGENT_HOSTNAME"
+      action: upsert
+
+  # Metrics require unique metric labels, otherwise the Google
+  # API will reject some metrics as "out of order" / duplicates.
+  # The combination of hostname, instance, and service will make each
+  # metric unique, allowing a single receiver to scrape multiple prometheus
+  # exporter endpoints.
+  resourceattributetransposer:
+    operations:
+    - from: "agent_host"
+      to: "agent"
+    - from: "instance"
+      to: "instance"
+    - from: "service.name"
+      to: "service"
+
+  normalizesums:
+
+  batch:
+
+exporters: 
+  googlecloud:
+    retry_on_failure:
+      enabled: false
+    metric:
+      prefix: custom.googleapis.com
+  logging:
+    logLevel: debug
+
+service:
+  pipelines:
+    metrics:
+      receivers:
+      - prometheus
+      processors:
+      - resource
+      - resourceattributetransposer
+      - normalizesums
+      - batch
+      exporters:
+      #- googlecloud
+      - logging
