@@ -47,6 +47,9 @@ archives:
       - src: release_deps/plugins/*
         dst: plugins
         strip_parent: true
+      - src: release_deps/storage/*
+        dst: storage
+        strip_parent: true
 
     format_overrides:
       - goos: windows
@@ -206,6 +209,7 @@ brews:
       bin.install "observiq-otel-collector"
       prefix.install "LICENSE", "config.yaml"
       prefix.install Dir["plugins"]
+      prefix.install Dir["storage"]
       lib.install "opentelemetry-java-contrib-jmx-metrics.jar"
     plist: |
       <?xml version="1.0" encoding="UTF-8"?>
