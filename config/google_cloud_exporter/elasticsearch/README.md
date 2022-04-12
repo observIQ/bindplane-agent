@@ -4,7 +4,7 @@ The Elasticsearch Receiver can be used to send Elasticsearch metrics to Google C
 
 ## Prerequisites
 
-See the [prerequisites](../prerequisites.md) doc for Google Cloud prerequisites.
+See the [prerequisites](../README.md) doc for Google Cloud prerequisites.
 
 ## Environment
 

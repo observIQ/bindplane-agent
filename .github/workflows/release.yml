@@ -188,6 +188,5 @@ jobs:
           version: "v1.5.0"
           args: release --rm-dist
         env:
-          # Default github token should have enough permissions to make a release
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.ORG_GORELEASER_GITHUB_TOKEN }}
           COSIGN_PWD: ${{ secrets.ORG_COSIGN_PWD }}

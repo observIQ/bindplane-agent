@@ -6,7 +6,7 @@ The RabbitMQ Receiver can be used to send RabbitMQ metrics to Google Cloud Monit
 
 See the [documentation](https://github.com/observIQ/observiq-otel-collector/blob/main/docs/receivers.md) for RabbitMQ prerequisites.
 
-See the [prerequisites](../prerequisites.md) doc for Google Cloud prerequisites.
+See the [prerequisites](../README.md) doc for Google Cloud prerequisites.
 
 ## Authentication Environment Variables
 
