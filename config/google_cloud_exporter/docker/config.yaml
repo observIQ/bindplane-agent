@@ -8,6 +8,15 @@ processors:
     system:
       hostname_sources: ["os"]
 
+  resource:
+    attributes:
+    # When running within a docker container, detect the host's hostname
+    # from the environment and overwrite the hostname detected by resource
+    # detection.
+    - key: host.name
+      value: "$DOCKER_AGENT_HOSTNAME"
+      action: upsert
+
   resourceattributetransposer:
     operations:
       - from: host.name
@@ -39,6 +48,7 @@ service:
       - docker_stats
       processors:
       - resourcedetection
+      - resource
       - resourceattributetransposer
       - normalizesums
       - batch
