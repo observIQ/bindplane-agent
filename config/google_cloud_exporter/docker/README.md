@@ -22,8 +22,7 @@ sudo usermod -aG docker observiq-otel-collector
 
 **On Host**
 
-If the agent is running on the Docker host (not within a container), deployment is as simple as installing the agent
-and updating the configuration.
+If the agent is running on the Docker host (not within a container), deployment is as simple as installing the agent and updating the configuration.
 
 **Docker Container**
 
