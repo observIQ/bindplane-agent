@@ -38,6 +38,7 @@ docker run -d \
     --volume="$(pwd)/config.yaml:/etc/otel/config.yaml" \
     --volume="$(pwd)/credentials.json:/etc/otel/credentials.json" \
     -e "GOOGLE_APPLICATION_CREDENTIALS=/etc/otel/credentials.json" \
+    -e "DOCKER_AGENT_HOSTNAME=$(hostname)" \
     observiq/observiq-otel-collector:v0.4.1
 ```
 
@@ -60,6 +61,7 @@ services:
           memory: 256M
     environment:
       - GOOGLE_APPLICATION_CREDENTIALS=/etc/otel/credentials.json
+      - DOCKER_AGENT_HOSTNAME=${HOSTNAME}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ${PWD}/config.yaml:/etc/otel/config.yaml
