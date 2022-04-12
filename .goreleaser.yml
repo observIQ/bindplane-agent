@@ -110,7 +110,7 @@ nfpms:
       - dst: /opt/observiq-otel-collector/storage
         type: dir
         file_info:
-          mode: 0755
+          mode: 0750
           owner: observiq-otel-collector
           group: observiq-otel-collector
     scripts:
