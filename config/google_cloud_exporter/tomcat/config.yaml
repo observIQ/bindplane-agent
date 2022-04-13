@@ -2,7 +2,7 @@ receivers:
   jmx:
     jar_path: /opt/opentelemetry-java-contrib-jmx-metrics.jar
     endpoint: localhost:9000
-    target_system: jvm
+    target_system: tomcat,jvm
     collection_interval: 60s
     properties:
       otel.resource.attributes: jmx_source=tomcat,jmx_endpoint=localhost:9000
