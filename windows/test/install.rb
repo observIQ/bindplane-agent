@@ -1,7 +1,8 @@
 collector_home="C:/Program Files/observIQ OpenTelemetry Collector"
 
 [
-    "#{collector_home}/plugins"
+    "#{collector_home}/plugins",
+    "#{collector_home}/storage"
 ].each do |dir|
     describe file(dir) do
         it { should exist }
