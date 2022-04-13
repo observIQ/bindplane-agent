@@ -102,12 +102,6 @@ receivers:
       paging:
       processes:
 
-      # Uncomment "process" and "mute_process_name_error" to enable
-      # per process metrics for cpu, memory, and disk.
-      # This feature requires root / Administrative privileges.
-      #process:
-      #  mute_process_name_error: true
-
 
 processors:
   # Resourcedetection is used to add a unique (host.name)
@@ -153,6 +147,8 @@ service:
       exporters:
       - googlecloud
 ```
+
+Further details for this example can be found [here](/config/google_cloud_exporter/hostmetrics).
 
 # Community
 
