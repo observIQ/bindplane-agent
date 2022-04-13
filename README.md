@@ -99,9 +99,11 @@ For supported extensions and their documentation see [extensions](/docs/extensio
 
 ## Example
 
-Here is an example `config.yaml` setup for hostmetrics on Google Cloud. To make sure your environment is set up with required prerequisites, see our [Google Cloud Exporter Prerequisites](/config/google_cloud_exporter/README.md) page.
+Here is an example `config.yaml` setup for hostmetrics on Google Cloud. To make sure your environment is set up with required prerequisites, see our [Google Cloud Exporter Prerequisites](/config/google_cloud_exporter/README.md) page. Further details for this GCP example can be found [here](/config/google_cloud_exporter/hostmetrics).
 
 ```yaml
+# Receivers collect metrics from a source. The hostmetrics receiver will get
+# CPU load metrics about the machine the collector is running on every minute.
 receivers:
   hostmetrics:
     collection_interval: 60s
@@ -115,7 +117,7 @@ receivers:
       paging:
       processes:
 
-
+# Processors are run on data between being received and being exported.
 processors:
   # Resourcedetection is used to add a unique (host.name)
   # to the metric resource(s), allowing users to filter
@@ -125,6 +127,7 @@ processors:
     system:
       hostname_sources: ["os"]
 
+  # Resourceattributetransposer is used to add labels to metrics.
   resourceattributetransposer:
     operations:
       # Process metrics require unique metric labels, otherwise the Google
@@ -135,11 +138,15 @@ processors:
         to: "pid"
       - from: "process.executable.name"
         to: "binary"
-
+  
+  # Normalizesums smoothes out data points for more comprehensive visualizations.
   normalizesums:
 
+  # The batch processor aggregates incoming metrics into a batch, releasing them if
+  # a certain time has passed or if a certain number of entries have been aggregated.
   batch:
 
+# Exporters send the data to a destination, in this case GCP.
 exporters: 
   googlecloud:
     retry_on_failure:
@@ -147,6 +154,7 @@ exporters:
     metric:
       prefix: custom.googleapis.com
 
+# Service specifies how to construct the data pipelines using the configurations above.
 service:
   pipelines:
     metrics:
@@ -160,8 +168,6 @@ service:
       exporters:
       - googlecloud
 ```
-
-Further details for this example can be found [here](/config/google_cloud_exporter/hostmetrics).
 
 # Community
 
