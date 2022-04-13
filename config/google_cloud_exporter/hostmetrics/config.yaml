@@ -32,7 +32,7 @@ processors:
       # Process metrics require unique metric labels, otherwise the Google
       # API will reject some metrics as "out of order" / duplicates.
       - from: "host.name"
-        to: "hostname"
+        to: "agent"
       - from: "process.pid"
         to: "pid"
       - from: "process.executable.name"

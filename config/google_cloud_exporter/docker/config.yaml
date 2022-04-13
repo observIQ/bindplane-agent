@@ -1,26 +1,34 @@
 receivers:
-  elasticsearch:
-    nodes: ["_local"]
-    endpoint: http://localhost:9200
+  docker_stats:
     collection_interval: 60s
 
 processors:
-  # Resourcedetection is used to add a unique (host.name)
-  # to the metric resource(s), allowing users to filter
-  # between multiple agent systems.
   resourcedetection:
     detectors: ["system"]
     system:
       hostname_sources: ["os"]
 
+  resource:
+    attributes:
+    # When running within a docker container, detect the host's hostname
+    # from the environment and overwrite the hostname detected by resource
+    # detection.
+    - key: host.name
+      value: "$DOCKER_AGENT_HOSTNAME"
+      action: upsert
+
   resourceattributetransposer:
     operations:
       - from: host.name
         to: agent
-      - from: elasticsearch.cluster.name
-        to: cluster_name
-      - from: elasticsearch.node.name
-        to: node_name
+      - from: container.hostname
+        to: hostname
+      - from: container.id
+        to: container_id
+      - from: container.image.name
+        to: image
+      - from: container.name
+        to: name
 
   normalizesums:
 
@@ -37,9 +45,10 @@ service:
   pipelines:
     metrics:
       receivers:
-      - elasticsearch
+      - docker_stats
       processors:
       - resourcedetection
+      - resource
       - resourceattributetransposer
       - normalizesums
       - batch

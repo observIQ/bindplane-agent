@@ -19,7 +19,7 @@ processors:
   resourceattributetransposer:
     operations:
       - from: host.name
-        to: hostname
+        to: agent
 
   normalizesums:
 

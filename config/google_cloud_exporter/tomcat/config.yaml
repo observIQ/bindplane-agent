@@ -1,13 +1,13 @@
 receivers:
-  elasticsearch:
-    nodes: ["_local"]
-    endpoint: http://localhost:9200
+  jmx:
+    jar_path: /opt/opentelemetry-java-contrib-jmx-metrics.jar
+    endpoint: localhost:9000
+    target_system: tomcat,jvm
     collection_interval: 60s
+    properties:
+      otel.resource.attributes: jmx_source=tomcat,jmx_endpoint=localhost:9000
 
 processors:
-  # Resourcedetection is used to add a unique (host.name)
-  # to the metric resource(s), allowing users to filter
-  # between multiple agent systems.
   resourcedetection:
     detectors: ["system"]
     system:
@@ -15,18 +15,18 @@ processors:
 
   resourceattributetransposer:
     operations:
-      - from: host.name
-        to: agent
-      - from: elasticsearch.cluster.name
-        to: cluster_name
-      - from: elasticsearch.node.name
-        to: node_name
+      - from: "host.name"
+        to: "agent"
+      - from: "jmx_source"
+        to: "jmx_source"
+      - from: "jmx_endpoint"
+        to: "jmx_endpoint"
 
   normalizesums:
 
   batch:
 
-exporters:
+exporters: 
   googlecloud:
     retry_on_failure:
       enabled: false
@@ -37,7 +37,7 @@ service:
   pipelines:
     metrics:
       receivers:
-      - elasticsearch
+      - jmx
       processors:
       - resourcedetection
       - resourceattributetransposer

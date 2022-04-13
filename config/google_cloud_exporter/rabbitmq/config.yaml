@@ -21,7 +21,7 @@ processors:
       # API will reject some metrics as "out of order" / duplicates. This happens
       # when there are multiple rabbitmq instances or multiple vhosts / queues.
       - from: host.name
-        to: hostname
+        to: agent
       - from: rabbitmq.queue.name
         to: queue
       - from: rabbitmq.node.name

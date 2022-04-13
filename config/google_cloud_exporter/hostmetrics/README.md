@@ -1,6 +1,6 @@
 # Host Metrics with Google Cloud
 
-The Host Metrics Receiver can be used to send system metrics from an agent host to Google Cloud Monitoring. See the [documentation](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/hostmetricsreceiver) for more details.
+The Host Metrics Receiver can be used to send system metrics from an agent host to Google Cloud Monitoring.
 
 ## Prerequisites
 
