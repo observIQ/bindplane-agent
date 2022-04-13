@@ -40,8 +40,6 @@ exporters:
       enabled: false
     metric:
       prefix: custom.googleapis.com
-  logging:
-    logLevel: debug
 
 service:
   pipelines:
@@ -54,5 +52,4 @@ service:
       - normalizesums
       - batch
       exporters:
-      #- googlecloud
-      - logging
+      - googlecloud
