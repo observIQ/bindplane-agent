@@ -17,6 +17,10 @@ set -e
 BASEDIR="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 PROJECT_BASE="$BASEDIR/../.."
 
+# Empty storage directory required by wix.json
+mkdir -p storage
+touch storage/.include
+
 cp "$PROJECT_BASE/dist/collector_windows_amd64.exe" "observiq-otel-collector.exe"
 
 vagrant winrm -c \

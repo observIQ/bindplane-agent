@@ -1,3 +1,5 @@
+project_name: observiq-otel-collector
+
 before:
   hooks:
     - make release-prep
@@ -100,6 +102,14 @@ nfpms:
       # nfpm failed: cannot write header of release_deps/plugins/amazon_eks.yaml to data.tar.gz: archive/tar: missed writing 1736 bytes
       - src: release_deps/plugins/*
         dst: /opt/observiq-otel-collector/plugins
+      # Storage dir is used by stateful receivers, such as filelog receiver. It allows
+      # receivers to track their progress and buffer data.
+      - dst: /opt/observiq-otel-collector/storage
+        type: dir
+        file_info:
+          mode: 0750
+          owner: observiq-otel-collector
+          group: observiq-otel-collector
     scripts:
       preinstall: "./scripts/package/preinstall.sh"
       postinstall: ./scripts/package/postinstall.sh
@@ -140,3 +150,88 @@ changelog:
       order: 30
     - title: Other
       order: 999
+
+# https://goreleaser.com/customization/homebrew/
+brews:
+  - name: observiq-otel-collector
+    tap:
+      owner: observIQ
+      name: homebrew-observiq-otel-collector
+      branch: main
+    download_strategy: CurlDownloadStrategy
+    folder: Formula
+    url_template: https://github.com/observIQ/observiq-otel-collector/releases/download/{{ .Tag }}/{{ .ArtifactName }}
+    commit_author:
+      name: observiq
+      email: support@observiq.com
+    homepage: "https://github.com/observIQ/observiq-otel-collector"
+    license: "Apache 2.0"
+    caveats: |
+      ****************************************************************
+      The configuration file that is run by the service is located at #{prefix}/config.yaml.
+
+      If you are configuring a logreceiver the plugin directory is located at #{prefix}/plugins.
+      ****************************************************************
+
+      ****************************************************************
+      Below are services commands to run to manage the collector service.
+      If you wish to run the collector at boot prefix these commands with sudo
+      otherwise the service will run at login.
+
+      To start the collector service run:
+
+        brew services start observiq/observiq-otel-collector/observiq-otel-collector
+
+      To stop the collector service run:
+
+        brew services stop observiq/observiq-otel-collector/observiq-otel-collector
+
+      To restart the collector service run:
+
+        brew services restart observiq/observiq-otel-collector/observiq-otel-collector
+      ****************************************************************
+
+      ****************************************************************
+      To uninstall the collector and its dependencies run the following commands:
+
+          brew services stop observiq/observiq-otel-collector/observiq-otel-collector
+          brew uninstall observiq/observiq-otel-collector/observiq-otel-collector
+          launchctl remove com.observiq.collector
+
+          # If you moved the opentelemetry-java-contrib-jmx-metrics.jar
+          sudo rm /opt/opentelemetry-java-contrib-jmx-metrics.jar
+
+      ****************************************************************
+    install: |
+      bin.install "observiq-otel-collector"
+      prefix.install "LICENSE", "config.yaml"
+      prefix.install Dir["plugins"]
+      lib.install "opentelemetry-java-contrib-jmx-metrics.jar"
+    plist: |
+      <?xml version="1.0" encoding="UTF-8"?>
+      <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+      <plist version="1.0">
+        <dict>
+
+          <key>Label</key>
+          <string>com.observiq.collector</string>
+
+          <key>ProgramArguments</key>
+          <array>
+            <string>#{bin}/observiq-otel-collector</string>
+            <string>--config</string>
+            <string>#{prefix}/config.yaml</string>
+          </array>
+
+          <key>RunAtLoad</key>
+          <true/>
+
+          <key>StandardErrorPath</key>
+          <string>/tmp/observiq-otel-collector.log</string>
+
+          <key>StandardOutPath</key>
+          <string>/tmp/observiq-otel-collector.log</string>
+        </dict>
+      </plist>
+    # For local testing
+    # skip_upload: "true"

@@ -27,27 +27,20 @@ processors:
     system:
       hostname_sources: ["os"]
 
-  resourceattributetransposer:
-    operations:
-      # Process metrics require unique metric labels, otherwise the Google
-      # API will reject some metrics as "out of order" / duplicates.
-      - from: "host.name"
-        to: "agent"
-      - from: "process.pid"
-        to: "pid"
-      - from: "process.executable.name"
-        to: "binary"
-
   normalizesums:
 
   batch:
 
 exporters: 
-  googlecloud:
-    retry_on_failure:
-      enabled: false
-    metric:
-      prefix: custom.googleapis.com
+  # The prometheus exporter exposes a TCP port on the collector, that is then scraped
+  # by your Google Prometheus server.
+  prometheus:
+    # The endpoint of the agent, that will be scraped by
+    # your prometheus server.
+    endpoint: "127.0.0.1:9000"
+    # copies resource attributes to metric labels
+    resource_to_telemetry_conversion:
+      enabled: true
 
 service:
   pipelines:
@@ -56,8 +49,7 @@ service:
       - hostmetrics
       processors:
       - resourcedetection
-      - resourceattributetransposer
       - normalizesums
       - batch
       exporters:
-      - googlecloud
+      - prometheus
