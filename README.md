@@ -84,6 +84,76 @@ For supported exporters and their documentation see [exporters](/docs/exporters.
 
 For supported extensions and their documentation see [extensions](/docs/extensions.md).
 
+## Example
+
+Here is an example `config.yaml` setup for hostmetrics on Google Cloud. To make sure your environment is set up with required prerequisites, see our [Google Cloud Exporter Prerequisites](/config/google_cloud_exporter/README.md) page.
+
+```yaml
+receivers:
+  hostmetrics:
+    collection_interval: 60s
+    scrapers:
+      cpu:
+      disk:
+      load:
+      filesystem:
+      memory:
+      network:
+      paging:
+      processes:
+
+      # Uncomment "process" and "mute_process_name_error" to enable
+      # per process metrics for cpu, memory, and disk.
+      # This feature requires root / Administrative privileges.
+      #process:
+      #  mute_process_name_error: true
+
+
+processors:
+  # Resourcedetection is used to add a unique (host.name)
+  # to the metric resource(s), allowing users to filter
+  # between multiple systems.
+  resourcedetection:
+    detectors: ["system"]
+    system:
+      hostname_sources: ["os"]
+
+  resourceattributetransposer:
+    operations:
+      # Process metrics require unique metric labels, otherwise the Google
+      # API will reject some metrics as "out of order" / duplicates.
+      - from: "host.name"
+        to: "hostname"
+      - from: "process.pid"
+        to: "pid"
+      - from: "process.executable.name"
+        to: "binary"
+
+  normalizesums:
+
+  batch:
+
+exporters: 
+  googlecloud:
+    retry_on_failure:
+      enabled: false
+    metric:
+      prefix: custom.googleapis.com
+
+service:
+  pipelines:
+    metrics:
+      receivers:
+      - hostmetrics
+      processors:
+      - resourcedetection
+      - resourceattributetransposer
+      - normalizesums
+      - batch
+      exporters:
+      - googlecloud
+```
+
 # Community
 
 The observIQ OpenTelemetry Collector is an open source project. If you'd like to contribute, take a look at our [contribution guidelines](/CONTRIBUTING.md) and [developer guide](/docs/development.md). We look forward to building with you.
