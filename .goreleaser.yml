@@ -206,7 +206,6 @@ brews:
       bin.install "observiq-otel-collector"
       prefix.install "LICENSE", "config.yaml"
       prefix.install Dir["plugins"]
-      FileUtils.mkdir_p(File.expand_path("~/observiq-otel-collector/storage")) unless File.exists?(File.expand_path("~/observiq-otel-collector/storage"))
       lib.install "opentelemetry-java-contrib-jmx-metrics.jar"
     plist: |
       <?xml version="1.0" encoding="UTF-8"?>
@@ -236,5 +235,3 @@ brews:
       </plist>
     # For local testing
     # skip_upload: "true"
-
-
