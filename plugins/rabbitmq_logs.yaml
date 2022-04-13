@@ -1,0 +1,34 @@
+version: 0.0.1
+title: RabbitMQ
+description: Log parser for RabbitMQ
+parameters:
+  - name: daemon_log_path
+    type: string
+    default: "/var/log/rabbitmq/rabbit@*.log"
+  - name: start_at
+    type: string
+    supported:
+      - beginning
+      - end
+    default: end
+template: |
+  receivers:
+    filelog:
+      include: [ '{{ .daemon_log_path }}' ]
+      multiline:
+        line_start_pattern: '\d+-\d+-\d+ \d+:\d+:\d+\.\d+\+\d+:\d+'
+      start_at: {{ .start_at }}
+      attributes:
+        log_type: rabbitmq
+      operators:
+        - type: regex_parser
+          regex: '^(?P<timestamp>\d+-\d+-\d+ \d+:\d+:\d+\.\d+\+\d+:\d+) \[(?P<severity>\w+)\] \<(?P<process_id>\d+\.\d+\.\d+)\> (?P<message>.*)'
+          timestamp:
+            parse_from: body.timestamp
+            layout: '%Y-%m-%d %H:%M:%S.%s%j'
+          severity:
+            parse_from: body.severity
+  service:
+    pipelines:
+      logs:
+        receivers: [filelog]
