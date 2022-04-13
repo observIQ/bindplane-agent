@@ -1,6 +1,6 @@
 # Prometheus Metrics with Google Cloud
 
-The Prometheus Receiver can be used to send prometheus style metrics scraped from prometheus exporters to Google Cloud Monitoring. See the [documentation](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/prometheusexecreceiver) for more details.
+The Prometheus Receiver can be used to send prometheus style metrics scraped from prometheus exporters to Google Cloud Monitoring.
 
 ## Prerequisites
 
