@@ -32,6 +32,19 @@
   "directories": [
     {
       "name": "plugins"
+    },
+    {
+      "name": "storage"
+    }
+  ],
+  "environments": [
+    {
+      "name": "OIQ_OTEL_COLLECTOR_STORAGE",
+      "value": "[INSTALLDIR]storage",
+      "permanent": "no",
+      "system": "yes",
+      "action": "set",
+      "part": "all"
     }
   ],
   "registries": [

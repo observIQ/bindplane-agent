@@ -102,6 +102,14 @@ nfpms:
       # nfpm failed: cannot write header of release_deps/plugins/amazon_eks.yaml to data.tar.gz: archive/tar: missed writing 1736 bytes
       - src: release_deps/plugins/*
         dst: /opt/observiq-otel-collector/plugins
+      # Storage dir is used by stateful receivers, such as filelog receiver. It allows
+      # receivers to track their progress and buffer data.
+      - dst: /opt/observiq-otel-collector/storage
+        type: dir
+        file_info:
+          mode: 0750
+          owner: observiq-otel-collector
+          group: observiq-otel-collector
     scripts:
       preinstall: "./scripts/package/preinstall.sh"
       postinstall: ./scripts/package/postinstall.sh
