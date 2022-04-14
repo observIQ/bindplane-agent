@@ -137,6 +137,8 @@ jobs:
       - name: Get Tag From Environment
         id: get-tag
         run: printf '::set-output name=tag::%s' "$(printf '%s' "${{ github.ref }}" | sed 's/refs\/tags\///')"
+      - name: Build Binaries
+        run: make release-test
       - name: Build and push
         uses: docker/build-push-action@v2
         with:
