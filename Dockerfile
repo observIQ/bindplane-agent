@@ -20,7 +20,7 @@ FROM golang:1.17 as build
 WORKDIR /collector
 ARG JMX_JAR_VERSION=v1.7.0
 
-COPY dist distq
+COPY dist dist
 
 RUN cp "dist/collector_linux_$(go env GOARCH)/observiq-otel-collector" .
 
