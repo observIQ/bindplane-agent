@@ -74,7 +74,7 @@ jobs:
           # uncomment to override jar version: https://github.com/open-telemetry/opentelemetry-java-contrib/releases
           #  JMX_JAR_VERSION=v1.7.0
           tags: |
-            observiq/observiq-otel-collector:${{ steps.get-tag.outputs.tag }}
+            observiq/observiq-otel-collector:latest
   build_linux:
     runs-on: ubuntu-20.04
     steps:
