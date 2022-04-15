@@ -12,10 +12,15 @@ processors:
     system:
       hostname_sources: ["os"]
 
-  resourceattributetransposer:
-    operations:
-      - from: host.name
-        to: agent
+  # Used for Google generic_node mapping.
+  resource:
+    attributes:
+    - key: namespace
+      value: "redis"
+      action: upsert
+    - key: location
+      value: "global"
+      action: upsert
 
   normalizesums:
 
@@ -27,6 +32,16 @@ exporters:
       enabled: false
     metric:
       prefix: custom.googleapis.com
+    resource_mappings:
+    - source_type: ""
+      target_type: generic_node
+      label_mappings:
+      - source_key: host.name
+        target_key: node_id
+      - source_key: location
+        target_key: location
+      - source_key: namespace
+        target_key: namespace
 
 service:
   pipelines:
@@ -35,7 +50,7 @@ service:
       - redis
       processors:
       - resourcedetection
-      - resourceattributetransposer
+      - resource
       - normalizesums
       - batch
       exporters:
