@@ -1,8 +1,9 @@
 name: release
 on:
-  push:
-    tags:
-      - "v*"
+  #push:
+  #  tags:
+  #    - "v*"
+  pull_request:
 
 jobs:
   build-msi:
@@ -87,7 +88,7 @@ jobs:
           retention-days: 1
 
   release:
-    needs: [build-msi]
+    #needs: [build-msi]
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout Repo
@@ -128,7 +129,10 @@ jobs:
         with:
           distribution: goreleaser
           version: "v1.5.0"
-          args: release --rm-dist
+          #args: release --rm-dist
+          args: release --rm-dist --skip-publish
         env:
           GITHUB_TOKEN: ${{ secrets.ORG_GORELEASER_GITHUB_TOKEN }}
           COSIGN_PWD: ${{ secrets.ORG_COSIGN_PWD }}
+      - name: TEMP get images
+        run: docker images
