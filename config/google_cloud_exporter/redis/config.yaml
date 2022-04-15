@@ -19,7 +19,7 @@ processors:
       value: "redis"
       action: upsert
     - key: location
-      value: "us-east1-b"
+      value: "global"
       action: upsert
 
   normalizesums:
