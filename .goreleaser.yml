@@ -113,6 +113,42 @@ nfpms:
     scripts:
       preinstall: "./scripts/package/preinstall.sh"
       postinstall: ./scripts/package/postinstall.sh
+
+# Build container images with docker buildx (mutli arch builds)
+dockers:
+  - goos: linux
+    goarch: amd64
+    ids:
+      - collector
+    image_templates:
+      - "observiq/observiq-otel-collector:latest"
+      - "observiq/observiq-otel-collector:{{ .Major }}.{{ .Minor }}.{{ .Patch }}"
+      - "observiq/observiq-otel-collector:{{ .Major }}.{{ .Minor }}"
+      - "observiq/observiq-otel-collector:{{ .Major }}"
+    dockerfile: ./Dockerfile
+    use: buildx
+    build_flag_templates:
+      - "--label=created={{.Date}}"
+      - "--label=title={{.ProjectName}}"
+      - "--label=revision={{.FullCommit}}"
+      - "--label=version={{.Version}}"
+  - goos: linux
+    goarch: arm64
+    ids:
+      - collector
+    image_templates:
+      - "observiq/observiq-otel-collector:latest"
+      - "observiq/observiq-otel-collector:{{ .Major }}.{{ .Minor }}.{{ .Patch }}"
+      - "observiq/observiq-otel-collector:{{ .Major }}.{{ .Minor }}"
+      - "observiq/observiq-otel-collector:{{ .Major }}"
+    dockerfile: ./Dockerfile
+    use: buildx
+    build_flag_templates:
+      - "--label=created={{.Date}}"
+      - "--label=title={{.ProjectName}}"
+      - "--label=revision={{.FullCommit}}"
+      - "--label=version={{.Version}}"
+
 # https://goreleaser.com/customization/checksum/
 checksum:
   name_template: "{{ .ProjectName }}-v{{ .Version }}-SHA256SUMS"
