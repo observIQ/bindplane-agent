@@ -1,94 +1,93 @@
 name: release
 on:
-  #push:
-  #  tags:
-  #    - "v*"
-  pull_request:
+  push:
+   tags:
+     - "v*"
 
 jobs:
-  # build-msi:
-  #   runs-on: windows-2019
-  #   steps:
-  #     - name: Checkout Sources
-  #       uses: actions/checkout@v2
-  #     - name: Setup Go
-  #       uses: actions/setup-go@v2
-  #       with:
-  #         go-version: "1.17"
-  #         check-latest: true
-  #     - name: Cache Go Modules
-  #       uses: actions/cache@v2
-  #       with:
-  #         path: |
-  #           %LocalAppData%\go-build
-  #           ~/go/pkg/mod
-  #         key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-  #         restore-keys: |
-  #           ${{ runner.os }}-go-
-  #     - name: Run GoReleaser
-  #       uses: goreleaser/goreleaser-action@v2
-  #       with:
-  #         # either 'goreleaser' (default) or 'goreleaser-pro'
-  #         distribution: goreleaser
-  #         version: "v1.5.0"
-  #         args: build --single-target --skip-validate --rm-dist
-  #       env:
-  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  #     - name: Copy Windows Binary
-  #       run: cp dist/collector_windows_amd64/observiq-otel-collector.exe windows/observiq-otel-collector.exe
-  #     - name: Copy Plugins to MSI Build Directory
-  #       run: cp -r release_deps/plugins windows/
-  #     - name: Copy Example Config
-  #       run: cp config/example.yaml windows/config.yaml
-  #     - name: Copy JMX Receiver Jar
-  #       run: cp release_deps/opentelemetry-java-contrib-jmx-metrics.jar windows/opentelemetry-java-contrib-jmx-metrics.jar
-  #     - name: Copy LICENSE
-  #       run: cp LICENSE windows/LICENSE
-  #     # HACK: Copy build directory to C drive to avoid this error, since there must be a relative path from the tempdir that go-msi uses
-  #     # for the MSI to build properly
-  #     - name: Copy Build Dir
-  #       run: |
-  #         cp -r windows C:/build
-  #         echo "C:/build" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
-  #     # Installs go-msi and wix.
-  #     - name: Install Build Tools
-  #       run: |
-  #         curl -f -L -o go-msi.exe https://github.com/observIQ/go-msi/releases/download/v2.1.0/go-msi.exe
-  #         curl -f -L -o wix310-binaries.zip http://wixtoolset.org/downloads/v3.10.3.3007/wix310-binaries.zip
-  #         unzip wix310-binaries.zip
-  #       working-directory: C:/build
-  #     - name: Get Tag From Environment
-  #       id: get-tag
-  #       run: printf '::set-output name=tag::%s' "$(printf '%s' "${{ github.ref }}" | sed 's/refs\/tags\///')"
-  #     - name: "Build MSI from Tagged Release"
-  #       run: go-msi.exe make -m observiq-otel-collector.msi --version ${{ steps.get-tag.outputs.tag }} --arch amd64
-  #       working-directory: C:/build
-  #     - name: Install MSI
-  #       run: msiexec.exe /qn /i observiq-otel-collector.msi
-  #       working-directory: C:/build
-  #     - name: Install CINC (Inspec)
-  #       run: . { iwr -useb https://omnitruck.cinc.sh/install.ps1 } | iex; install -project cinc-auditor -version 4
-  #     - name: Run CINC (Inspec) Install Tests
-  #       run: C:/cinc-project/cinc-auditor/bin/cinc-auditor.bat exec install.rb
-  #       working-directory: C:/build/test
-  #     - name: Uninstall MSI
-  #       run: |
-  #         msiexec.exe /qn /x observiq-otel-collector.msi
-  #         sleep 5
-  #       working-directory: C:/build
-  #     - name: Run CINC (Inspec) Uninstall Tests
-  #       run: C:/cinc-project/cinc-auditor/bin/cinc-auditor.bat exec uninstall.rb
-  #       working-directory: C:/build/test
-  #     - name: "Upload MSI"
-  #       uses: actions/upload-artifact@v2
-  #       with:
-  #         name: observiq-otel-collector.msi
-  #         path: C:/build/observiq-otel-collector.msi
-  #         # Short lived because Go Releaser will upload the msi to a release (github release, gcs, etc)
-  #         retention-days: 1
+  build-msi:
+    runs-on: windows-2019
+    steps:
+      - name: Checkout Sources
+        uses: actions/checkout@v2
+      - name: Setup Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: "1.17"
+          check-latest: true
+      - name: Cache Go Modules
+        uses: actions/cache@v2
+        with:
+          path: |
+            %LocalAppData%\go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v2
+        with:
+          # either 'goreleaser' (default) or 'goreleaser-pro'
+          distribution: goreleaser
+          version: "v1.5.0"
+          args: build --single-target --skip-validate --rm-dist
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Copy Windows Binary
+        run: cp dist/collector_windows_amd64/observiq-otel-collector.exe windows/observiq-otel-collector.exe
+      - name: Copy Plugins to MSI Build Directory
+        run: cp -r release_deps/plugins windows/
+      - name: Copy Example Config
+        run: cp config/example.yaml windows/config.yaml
+      - name: Copy JMX Receiver Jar
+        run: cp release_deps/opentelemetry-java-contrib-jmx-metrics.jar windows/opentelemetry-java-contrib-jmx-metrics.jar
+      - name: Copy LICENSE
+        run: cp LICENSE windows/LICENSE
+      # HACK: Copy build directory to C drive to avoid this error, since there must be a relative path from the tempdir that go-msi uses
+      # for the MSI to build properly
+      - name: Copy Build Dir
+        run: |
+          cp -r windows C:/build
+          echo "C:/build" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+      # Installs go-msi and wix.
+      - name: Install Build Tools
+        run: |
+          curl -f -L -o go-msi.exe https://github.com/observIQ/go-msi/releases/download/v2.1.0/go-msi.exe
+          curl -f -L -o wix310-binaries.zip http://wixtoolset.org/downloads/v3.10.3.3007/wix310-binaries.zip
+          unzip wix310-binaries.zip
+        working-directory: C:/build
+      - name: Get Tag From Environment
+        id: get-tag
+        run: printf '::set-output name=tag::%s' "$(printf '%s' "${{ github.ref }}" | sed 's/refs\/tags\///')"
+      - name: "Build MSI from Tagged Release"
+        run: go-msi.exe make -m observiq-otel-collector.msi --version ${{ steps.get-tag.outputs.tag }} --arch amd64
+        working-directory: C:/build
+      - name: Install MSI
+        run: msiexec.exe /qn /i observiq-otel-collector.msi
+        working-directory: C:/build
+      - name: Install CINC (Inspec)
+        run: . { iwr -useb https://omnitruck.cinc.sh/install.ps1 } | iex; install -project cinc-auditor -version 4
+      - name: Run CINC (Inspec) Install Tests
+        run: C:/cinc-project/cinc-auditor/bin/cinc-auditor.bat exec install.rb
+        working-directory: C:/build/test
+      - name: Uninstall MSI
+        run: |
+          msiexec.exe /qn /x observiq-otel-collector.msi
+          sleep 5
+        working-directory: C:/build
+      - name: Run CINC (Inspec) Uninstall Tests
+        run: C:/cinc-project/cinc-auditor/bin/cinc-auditor.bat exec uninstall.rb
+        working-directory: C:/build/test
+      - name: "Upload MSI"
+        uses: actions/upload-artifact@v2
+        with:
+          name: observiq-otel-collector.msi
+          path: C:/build/observiq-otel-collector.msi
+          # Short lived because Go Releaser will upload the msi to a release (github release, gcs, etc)
+          retention-days: 1
 
   release:
-    #needs: [build-msi]
+    needs: [build-msi]
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout Repo
@@ -111,11 +110,11 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      # - name: Retrieve Windows MSI Installer
-      #   uses: actions/download-artifact@v2
-      #   with:
-      #     name: observiq-otel-collector.msi
-      #     path: observiq-otel-collector.msi
+      - name: Retrieve Windows MSI Installer
+        uses: actions/download-artifact@v2
+        with:
+          name: observiq-otel-collector.msi
+          path: observiq-otel-collector.msi
         # install tools for cosign
       - name: Install Dependencies
         run: make install-tools
@@ -129,8 +128,7 @@ jobs:
         with:
           distribution: goreleaser
           version: "v1.5.0"
-          #args: release --rm-dist
-          args: release --rm-dist --skip-publish --snapshot
+          args: release --rm-dist
         env:
           GITHUB_TOKEN: ${{ secrets.ORG_GORELEASER_GITHUB_TOKEN }}
           COSIGN_PWD: ${{ secrets.ORG_COSIGN_PWD }}
