@@ -4,6 +4,7 @@ go 1.17
 
 require (
 	github.com/GoogleCloudPlatform/opentelemetry-operations-collector v0.0.3-0.20220215000048-11a223a1d94f
+	github.com/observiq/observiq-otel-collector/exporter/googlecloudexporter v0.2.0
 	github.com/observiq/observiq-otel-collector/processor/resourceattributetransposerprocessor v0.2.0
 	github.com/observiq/observiq-otel-collector/receiver/logsreceiver v0.2.0
 	github.com/observiq/observiq-otel-collector/receiver/pluginreceiver v0.2.0
@@ -18,7 +19,6 @@ require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/elasticsearchexporter v0.45.1
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/f5cloudexporter v0.45.1
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/fileexporter v0.45.1
-	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlecloudexporter v0.46.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlecloudpubsubexporter v0.45.1
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/influxdbexporter v0.46.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/jaegerexporter v0.45.1
@@ -109,7 +109,6 @@ require (
 require (
 	cloud.google.com/go v0.100.2 // indirect
 	cloud.google.com/go/compute v1.5.0 // indirect
-	cloud.google.com/go/logging v1.4.2 // indirect
 	cloud.google.com/go/monitoring v1.2.0 // indirect
 	cloud.google.com/go/spanner v1.29.0 // indirect
 	cloud.google.com/go/trace v1.0.0 // indirect
@@ -273,6 +272,7 @@ require (
 	github.com/observiq/ctimefmt v1.0.0 // indirect
 	github.com/observiq/go-syslog/v3 v3.0.2 // indirect
 	github.com/observiq/goflow/v3 v3.4.4 // indirect
+	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlecloudexporter v0.46.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/internal/aws/awsutil v0.45.1 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/internal/aws/containerinsight v0.45.1 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/internal/aws/cwlogs v0.45.1 // indirect
@@ -413,13 +413,13 @@ require (
 	golang.org/x/sys v0.0.0-20220209214540-3681064d5158
 )
 
-replace github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlecloudexporter v0.46.0 => github.com/observiq/opentelemetry-collector-contrib/exporter/googlecloudexporter v0.0.0-20220304152956-bb36c08bd895
-
 replace github.com/observiq/observiq-otel-collector/processor/resourceattributetransposerprocessor v0.2.0 => ./processor/resourceattributetransposerprocessor
 
 replace github.com/observiq/observiq-otel-collector/receiver/logsreceiver v0.2.0 => ./receiver/logsreceiver
 
 replace github.com/observiq/observiq-otel-collector/receiver/pluginreceiver v0.2.0 => ./receiver/pluginreceiver
+
+replace github.com/observiq/observiq-otel-collector/exporter/googlecloudexporter v0.2.0 => ./exporter/googlecloudexporter
 
 replace go.opentelemetry.io/collector v0.47.0 => go.opentelemetry.io/collector v0.46.0
 
