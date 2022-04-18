@@ -1,0 +1,103 @@
+version: 0.0.1
+title: Elasticsearch
+description: Log parser for Elasticsearch
+parameters:
+  - name: enable_json_logs
+    type: bool
+    default: true
+  - name: json_log_paths
+    type: "[]string"
+    default:
+      - "/var/log/elasticsearch/*_server.json"
+      - "/var/log/elasticsearch/*_deprecation.json"
+      - "/var/log/elasticsearch/*_index_search_slowlog.json"
+      - "/var/log/elasticsearch/*_index_indexing_slowlog.json"
+      - "/var/log/elasticsearch/*_audit.json"
+  - name: enable_gc_logs
+    type: bool
+    default: false
+  - name: gc_log_paths
+    type: "[]string"
+    default:
+      - "/var/log/elasticsearch/gc.log*"
+  - name: start_at
+    type: string
+    supported:
+      - beginning
+      - end
+    default: end
+template: |
+  receivers:
+    {{if .enable_json_logs}}
+    filelog/json:
+      include: {{ .json_log_paths }}
+      multiline: 
+        line_start_pattern: '^{.*'
+      start_at: {{ .start_at }}
+      operators:
+      - type: json_parser
+        severity:
+          parse_from: level
+          preserve_to: level
+          preset: none
+          mapping:
+            debug:
+              - DEBUG
+              - TRACE
+            info: INFO
+            warning:
+              - WARN
+              - DEPRECATION
+            error:
+              - ERROR
+              - CRITICAL
+            critical: FATAL
+      - type: router
+        routes:
+          - output: local_timestamp_parser
+            expr: '$body.timestamp != nil and $body.timestamp matches "^%Y-%m-%dT%H:%M:%S,%L[\\+-]\\d{2}:\\d{2}"'
+          - output: utc_timestamp_parser
+            expr: '$body.timestamp != nil and $body.timestamp matches "^%Y-%m-%dT%H:%M:%S,%LZ"'
+
+      - type: time_parser
+        id: local_timestamp_parser
+        parse_from: timestamp
+        layout: '%Y-%m-%dT%H:%M:%S.%s%j`'
+        output: add_type
+
+      - type: time_parser
+        id: utc_timestamp_parser
+        parse_from: timestamp
+        layout: '%Y-%m-%dT%H:%M:%S.%sZ'
+        output: add_type
+
+      - id: add_type
+        type: add
+        field: $attributes.log_type
+        value: 'elasticsearch'
+    {{end}}
+
+    {{if .enable_gc_logs}}
+    filelog/gc:
+      include: {{ .gc_log_paths }}
+      start_at: {{ .start_at }}
+      attributes:
+        log_type: elasticsearch.gc
+      operators:
+        - type: regex_parser
+          regex: '^\[(?P<timestamp>\d+-\d+-\d+T\d+:\d+:\d+.\d+\+\d+)\]\[\d+\]\[(?P<type>[A-z,]+)\s*\]\s*(?:GC\((?P<gc_run>\d+)\))?\s*(?P<message>.*)'
+          timestamp:
+            parse_from: timestamp
+            layout: '%Y-%m-%dT%H:%M:%S.%s%z'
+    {{end}}
+
+  service:
+    pipelines:
+      logs:
+        receivers:
+          {{if .enable_json_logs}}
+          - filelog/json
+          {{end}}
+          {{if .enable_gc_logs}}
+          - filelog/gc
+          {{end}}
