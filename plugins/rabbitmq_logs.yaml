@@ -31,7 +31,7 @@ template: |
           severity:
             parse_from: severity
             mapping:
-              trace: 'noti'
+              info2: 'noti'
   service:
     pipelines:
       logs:
