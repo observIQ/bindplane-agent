@@ -12,7 +12,7 @@ func TestCreateDefaultConfig(t *testing.T) {
 	googleCfg, ok := cfg.(*Config)
 	require.True(t, ok)
 
-	require.Equal(t, config.NewComponentID("googlecloud"), googleCfg.ID())
+	require.Equal(t, config.NewComponentID(typeStr), googleCfg.ID())
 	require.Equal(t, defaultMetricPrefix, googleCfg.GCPConfig.MetricConfig.Prefix)
 	require.Equal(t, defaultUserAgent, googleCfg.GCPConfig.UserAgent)
 	require.Nil(t, googleCfg.Validate())

@@ -50,7 +50,7 @@ func (c *Config) Validate() error {
 func createDefaultConfig() config.Exporter {
 	defaultNamespace, _ := os.Hostname()
 	return &Config{
-		ExporterSettings: config.NewExporterSettings(config.NewComponentID("googlecloud")),
+		ExporterSettings: config.NewExporterSettings(config.NewComponentID(typeStr)),
 		Location:         defaultLocation,
 		Namespace:        defaultNamespace,
 		GCPConfig:        createDefaultGCPConfig(),

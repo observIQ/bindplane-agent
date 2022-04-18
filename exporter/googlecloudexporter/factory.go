@@ -18,10 +18,13 @@ import (
 // gcpFactory is the factory used to create the underlying gcp exporter
 var gcpFactory = gcp.NewFactory()
 
+// typeStr is the type of the google cloud exporter
+const typeStr = "googlecloud"
+
 // NewFactory creates a factory for the googlecloud exporter
 func NewFactory() component.ExporterFactory {
 	return component.NewExporterFactory(
-		"googlecloud",
+		typeStr,
 		createDefaultConfig,
 		component.WithMetricsExporter(createMetricsExporter),
 		component.WithLogsExporter(createLogsExporter),

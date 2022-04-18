@@ -16,7 +16,7 @@ func TestCreateMetricExporterSuccess(t *testing.T) {
 	mockExporter := &MockExporter{}
 
 	gcpFactory = component.NewExporterFactory(
-		"googlecloud",
+		typeStr,
 		gcpFactory.CreateDefaultConfig,
 		component.WithMetricsExporter(func(_ context.Context, _ component.ExporterCreateSettings, _ config.Exporter) (component.MetricsExporter, error) {
 			return mockExporter, nil
@@ -43,7 +43,7 @@ func TestCreateLogsExporterSuccess(t *testing.T) {
 	mockExporter := &MockExporter{}
 
 	gcpFactory = component.NewExporterFactory(
-		"googlecloud",
+		typeStr,
 		gcpFactory.CreateDefaultConfig,
 		component.WithLogsExporter(func(_ context.Context, _ component.ExporterCreateSettings, _ config.Exporter) (component.LogsExporter, error) {
 			return mockExporter, nil
@@ -70,7 +70,7 @@ func TestCreateTracesExporterSuccess(t *testing.T) {
 	mockExporter := &MockExporter{}
 
 	gcpFactory = component.NewExporterFactory(
-		"googlecloud",
+		typeStr,
 		gcpFactory.CreateDefaultConfig,
 		component.WithTracesExporter(func(_ context.Context, _ component.ExporterCreateSettings, _ config.Exporter) (component.TracesExporter, error) {
 			return mockExporter, nil
@@ -95,7 +95,7 @@ func TestCreateTracesExporterSuccess(t *testing.T) {
 
 func TestCreateExporterFailure(t *testing.T) {
 	gcpFactory = component.NewExporterFactory(
-		"googlecloud",
+		typeStr,
 		gcpFactory.CreateDefaultConfig,
 	)
 	defer func() {
@@ -123,7 +123,7 @@ func TestCreateExporterFailure(t *testing.T) {
 func TestCreateProcessorFailure(t *testing.T) {
 	mockExporter := &MockExporter{}
 	gcpFactory = component.NewExporterFactory(
-		"googlecloud",
+		typeStr,
 		gcpFactory.CreateDefaultConfig,
 		component.WithMetricsExporter(func(_ context.Context, _ component.ExporterCreateSettings, _ config.Exporter) (component.MetricsExporter, error) {
 			return mockExporter, nil
