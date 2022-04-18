@@ -21,3 +21,4 @@ exceptions:
     - path: "./processor/resourceattributetransposerprocessor"
     - path: "./receiver/logsreceiver"
     - path: "./receiver/pluginreceiver"
+    - path: "./exporter/googlecloudexporter"
