@@ -14,7 +14,7 @@ Below is a list of supported exports with links to their documentation pages.
 - [elasticsearchexporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.45.1/exporter/elasticsearchexporter/README.md)
 - [f5cloudexporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.45.1/exporter/f5cloudexporter/README.md)
 - [fileexporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.45.1/exporter/fileexporter/README.md)
-- [googlecloudexporter](https://github.com/observIQ/opentelemetry-collector-contrib/blob/google-exporter-add-logging/exporter/googlecloudexporter/README.md)
+- [googlecloudexporter](../exporter/googlecloudexporter/README.md)
 - [googlecloudpubsubexporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.45.1/exporter/googlecloudpubsubexporter/README.md)
 - [influxdbexporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.46.0/exporter/influxdbexporter/README.md)
 - [jaegerexporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.45.1/exporter/jaegerexporter/README.md)
