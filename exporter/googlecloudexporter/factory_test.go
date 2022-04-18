@@ -1,0 +1,174 @@
+package googlecloudexporter
+
+import (
+	"context"
+	"testing"
+
+	"github.com/mitchellh/mapstructure"
+	gcp "github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlecloudexporter"
+	"github.com/stretchr/testify/require"
+	"go.opentelemetry.io/collector/component"
+	"go.opentelemetry.io/collector/component/componenttest"
+	"go.opentelemetry.io/collector/config"
+)
+
+func TestCreateMetricExporterSuccess(t *testing.T) {
+	mockExporter := &MockExporter{}
+
+	gcpFactory = component.NewExporterFactory(
+		"googlecloud",
+		gcpFactory.CreateDefaultConfig,
+		component.WithMetricsExporter(func(_ context.Context, _ component.ExporterCreateSettings, _ config.Exporter) (component.MetricsExporter, error) {
+			return mockExporter, nil
+		}),
+	)
+	defer func() {
+		gcpFactory = gcp.NewFactory()
+	}()
+
+	factory := NewFactory()
+	cfg := createDefaultConfig()
+	ctx := context.Background()
+	set := componenttest.NewNopExporterCreateSettings()
+
+	exporter, err := factory.CreateMetricsExporter(ctx, set, cfg)
+	require.NoError(t, err)
+
+	googleExporter, ok := exporter.(*Exporter)
+	require.True(t, ok)
+	require.Equal(t, googleExporter.metricsExporter, mockExporter)
+}
+
+func TestCreateLogsExporterSuccess(t *testing.T) {
+	mockExporter := &MockExporter{}
+
+	gcpFactory = component.NewExporterFactory(
+		"googlecloud",
+		gcpFactory.CreateDefaultConfig,
+		component.WithLogsExporter(func(_ context.Context, _ component.ExporterCreateSettings, _ config.Exporter) (component.LogsExporter, error) {
+			return mockExporter, nil
+		}),
+	)
+	defer func() {
+		gcpFactory = gcp.NewFactory()
+	}()
+
+	factory := NewFactory()
+	cfg := createDefaultConfig()
+	ctx := context.Background()
+	set := componenttest.NewNopExporterCreateSettings()
+
+	exporter, err := factory.CreateLogsExporter(ctx, set, cfg)
+	require.NoError(t, err)
+
+	googleExporter, ok := exporter.(*Exporter)
+	require.True(t, ok)
+	require.Equal(t, googleExporter.logsExporter, mockExporter)
+}
+
+func TestCreateTracesExporterSuccess(t *testing.T) {
+	mockExporter := &MockExporter{}
+
+	gcpFactory = component.NewExporterFactory(
+		"googlecloud",
+		gcpFactory.CreateDefaultConfig,
+		component.WithTracesExporter(func(_ context.Context, _ component.ExporterCreateSettings, _ config.Exporter) (component.TracesExporter, error) {
+			return mockExporter, nil
+		}),
+	)
+	defer func() {
+		gcpFactory = gcp.NewFactory()
+	}()
+
+	factory := NewFactory()
+	cfg := createDefaultConfig()
+	ctx := context.Background()
+	set := componenttest.NewNopExporterCreateSettings()
+
+	exporter, err := factory.CreateTracesExporter(ctx, set, cfg)
+	require.NoError(t, err)
+
+	googleExporter, ok := exporter.(*Exporter)
+	require.True(t, ok)
+	require.Equal(t, googleExporter.tracesExporter, mockExporter)
+}
+
+func TestCreateExporterFailure(t *testing.T) {
+	gcpFactory = component.NewExporterFactory(
+		"googlecloud",
+		gcpFactory.CreateDefaultConfig,
+	)
+	defer func() {
+		gcpFactory = gcp.NewFactory()
+	}()
+
+	factory := NewFactory()
+	cfg := createDefaultConfig()
+	ctx := context.Background()
+	set := componenttest.NewNopExporterCreateSettings()
+
+	_, err := factory.CreateMetricsExporter(ctx, set, cfg)
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "failed to create metrics exporter")
+
+	_, err = factory.CreateLogsExporter(ctx, set, cfg)
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "failed to create logs exporter")
+
+	_, err = factory.CreateTracesExporter(ctx, set, cfg)
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "failed to create traces exporter")
+}
+
+func TestCreateProcessorFailure(t *testing.T) {
+	mockExporter := &MockExporter{}
+	gcpFactory = component.NewExporterFactory(
+		"googlecloud",
+		gcpFactory.CreateDefaultConfig,
+		component.WithMetricsExporter(func(_ context.Context, _ component.ExporterCreateSettings, _ config.Exporter) (component.MetricsExporter, error) {
+			return mockExporter, nil
+		}),
+		component.WithLogsExporter(func(_ context.Context, _ component.ExporterCreateSettings, _ config.Exporter) (component.LogsExporter, error) {
+			return mockExporter, nil
+		}),
+		component.WithTracesExporter(func(_ context.Context, _ component.ExporterCreateSettings, _ config.Exporter) (component.TracesExporter, error) {
+			return mockExporter, nil
+		}),
+	)
+	defer func() {
+		gcpFactory = gcp.NewFactory()
+	}()
+
+	factory := NewFactory()
+	cfg := createDefaultConfig()
+
+	googleCfg, ok := cfg.(*Config)
+	require.True(t, ok)
+
+	invalidParams := map[string]interface{}{
+		"attributes": []map[string]interface{}{
+			{
+				"key":    "invalid",
+				"value":  "invalid",
+				"action": "invalid",
+			},
+		},
+	}
+	err := mapstructure.Decode(&invalidParams, googleCfg.AttributerConfig)
+	require.NoError(t, err)
+
+	ctx := context.Background()
+	set := componenttest.NewNopExporterCreateSettings()
+
+	_, err = factory.CreateMetricsExporter(ctx, set, cfg)
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "failed to create metrics processor")
+
+	_, err = factory.CreateLogsExporter(ctx, set, cfg)
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "failed to create logs processor")
+
+	_, err = factory.CreateTracesExporter(ctx, set, cfg)
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "failed to create traces processor")
+}
