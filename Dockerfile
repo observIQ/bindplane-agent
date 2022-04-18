@@ -13,22 +13,13 @@
 # limitations under the License.
 
 
-# Build stage builds the release version of observiq-otel-collector
-# and downloads the opentelemetry-jmx-metrics.jar used by JMX receivers
+# JMX stage downloads the opentelemetry-jmx-metrics.jar used by JMX receivers
 #
-FROM golang:1.17 as build
-WORKDIR /collector
-COPY . /collector
+FROM curlimages/curl:7.82.0 as jmxjar
 ARG JMX_JAR_VERSION=v1.7.0
-ARG GITHUB_TOKEN
-RUN \
-    make install-tools && \
-    goreleaser build --single-target --skip-validate --rm-dist
-
-RUN cp "dist/collector_linux_$(go env GOARCH)/observiq-otel-collector" .
-
+USER root
 RUN curl -L \
-    --output /opt/opentelemetry-java-contrib-jmx-metrics.jar \
+    --output /opentelemetry-java-contrib-jmx-metrics.jar \
     "https://github.com/open-telemetry/opentelemetry-java-contrib/releases/download/${JMX_JAR_VERSION}/opentelemetry-jmx-metrics.jar"
 
 
@@ -48,8 +39,8 @@ COPY --from=openjdk /usr/local/openjdk-8 /usr/local/openjdk-8
 ENV JAVA_HOME=/usr/local/openjdk-8
 ENV PATH=$PATH:/usr/local/openjdk-8/bin
 
-COPY --from=build /collector/observiq-otel-collector /collector/
-COPY --from=build /opt/opentelemetry-java-contrib-jmx-metrics.jar /opt/opentelemetry-java-contrib-jmx-metrics.jar
+COPY observiq-otel-collector /collector/observiq-otel-collector
+COPY --from=jmxjar /opentelemetry-java-contrib-jmx-metrics.jar /opt/opentelemetry-java-contrib-jmx-metrics.jar
 
 RUN adduser \
     --disabled-password \
