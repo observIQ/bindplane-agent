@@ -66,7 +66,7 @@ func (c *collector) Run(ctx context.Context) error {
 	}
 
 	// The OT collector only supports using settings once during the lifetime
-	// of a single collector insance. We must remake the settings on each startup.
+	// of a single collector instance. We must remake the settings on each startup.
 	settings := NewSettings([]string{c.configPath}, c.version, c.loggingOpts)
 
 	// The OT collector only supports calling run once during the lifetime
