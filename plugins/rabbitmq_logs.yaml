@@ -26,10 +26,10 @@ template: |
         - type: regex_parser
           regex: '^(?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d+\+\d{2}:\d{2}) \[(?P<severity>[a-z]+)\] \<(?P<process_id>\d+\.\d+\.\d+)\> (?P<message>.*)'
           timestamp:
-            parse_from: timestamp
+            parse_from: attributes.timestamp
             layout: '%Y-%m-%d %H:%M:%S.%s%j'
           severity:
-            parse_from: severity
+            parse_from: attributes.severity
             mapping:
               info2: 'noti'
   service:
