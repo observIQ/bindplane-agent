@@ -23,8 +23,8 @@ import (
 	"go.opentelemetry.io/collector/model/pdata"
 )
 
-// Exporter is a google cloud exporter wrapped with additional functionality
-type Exporter struct {
+// exporter is a google cloud exporter wrapped with additional functionality
+type exporter struct {
 	metricsProcessors []component.MetricsProcessor
 	metricsExporter   component.MetricsExporter
 	metricsConsumer   consumer.Metrics
@@ -39,7 +39,7 @@ type Exporter struct {
 }
 
 // ConsumeMetrics consumes metrics
-func (e *Exporter) ConsumeMetrics(ctx context.Context, md pdata.Metrics) error {
+func (e *exporter) ConsumeMetrics(ctx context.Context, md pdata.Metrics) error {
 	if e.metricsConsumer == nil {
 		return nil
 	}
@@ -47,7 +47,7 @@ func (e *Exporter) ConsumeMetrics(ctx context.Context, md pdata.Metrics) error {
 }
 
 // ConsumeTraces consumes traces
-func (e *Exporter) ConsumeTraces(ctx context.Context, td pdata.Traces) error {
+func (e *exporter) ConsumeTraces(ctx context.Context, td pdata.Traces) error {
 	if e.tracesConsumer == nil {
 		return nil
 	}
@@ -55,7 +55,7 @@ func (e *Exporter) ConsumeTraces(ctx context.Context, td pdata.Traces) error {
 }
 
 // ConsumeLogs consumes logs
-func (e *Exporter) ConsumeLogs(ctx context.Context, ld pdata.Logs) error {
+func (e *exporter) ConsumeLogs(ctx context.Context, ld pdata.Logs) error {
 	if e.logsConsumer == nil {
 		return nil
 	}
@@ -63,12 +63,12 @@ func (e *Exporter) ConsumeLogs(ctx context.Context, ld pdata.Logs) error {
 }
 
 // Capabilities returns the capabilities of the exporter
-func (e *Exporter) Capabilities() consumer.Capabilities {
+func (e *exporter) Capabilities() consumer.Capabilities {
 	return consumer.Capabilities{MutatesData: true}
 }
 
 // Start starts the exporter
-func (e *Exporter) Start(ctx context.Context, host component.Host) error {
+func (e *exporter) Start(ctx context.Context, host component.Host) error {
 	if e.tracesExporter != nil {
 		if err := e.tracesExporter.Start(ctx, host); err != nil {
 			return fmt.Errorf("failed to start traces exporter: %w", err)
@@ -109,7 +109,7 @@ func (e *Exporter) Start(ctx context.Context, host component.Host) error {
 }
 
 // Shutdown will shutdown the exporter
-func (e *Exporter) Shutdown(ctx context.Context) error {
+func (e *exporter) Shutdown(ctx context.Context) error {
 	for i := len(e.tracesProcessors) - 1; i >= 0; i-- {
 		if err := e.tracesProcessors[i].Shutdown(ctx); err != nil {
 			return fmt.Errorf("failed to shutdown traces processor: %w", err)

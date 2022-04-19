@@ -8,7 +8,7 @@ This exporter can be used to send metrics, traces, and logs to Google Cloud Moni
 | ---                 | ---                   | ---      | ---         |
 | `project`           |                       | `false`  | The GCP project used when exporting telemetry data. |
 | `endpoint`          |                       | `false`  | The endpoint used when exporting telemetry data. |
-| `location`          | `us-east1-b`          | `false`  | The GCP location attribute attached to telemetry data. |
+| `location`          | `global`              | `false`  | The GCP location attribute attached to telemetry data. |
 | `namespace`         | `{hostname}`          | `false`  | The GCP namespace attribute attached to telemetry data. |
 | `user_agent`        | `observIQ-otel-agent` | `false`  | Overrides the user agent used when making requests. |
 | `timeout`           | `12s`                 | `false`  | The timeout for API calls. |

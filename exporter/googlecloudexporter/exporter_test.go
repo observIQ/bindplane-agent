@@ -27,7 +27,7 @@ import (
 )
 
 func TestExporterCapabilities(t *testing.T) {
-	exporter := &Exporter{}
+	exporter := &exporter{}
 	capabilities := exporter.Capabilities()
 	assert.True(t, capabilities.MutatesData)
 }
@@ -37,7 +37,7 @@ func TestExporterWithConsumers(t *testing.T) {
 	consumer.On("ConsumeLogs", mock.Anything, mock.Anything).Return(nil).Once()
 	consumer.On("ConsumeMetrics", mock.Anything, mock.Anything).Return(nil).Once()
 	consumer.On("ConsumeTraces", mock.Anything, mock.Anything).Return(nil).Once()
-	exporter := &Exporter{
+	exporter := &exporter{
 		metricsConsumer: consumer,
 		logsConsumer:    consumer,
 		tracesConsumer:  consumer,
@@ -57,7 +57,7 @@ func TestExporterWithConsumers(t *testing.T) {
 }
 
 func TestExporterWithoutConsumers(t *testing.T) {
-	exporter := &Exporter{}
+	exporter := &exporter{}
 
 	ctx := context.Background()
 	err := exporter.ConsumeLogs(ctx, pdata.NewLogs())
@@ -73,33 +73,33 @@ func TestExporterWithoutConsumers(t *testing.T) {
 func TestExporterStart(t *testing.T) {
 	testCases := []struct {
 		name          string
-		exporter      *Exporter
+		exporter      *exporter
 		expectedError error
 	}{
 		{
 			name: "Successful metrics",
-			exporter: &Exporter{
+			exporter: &exporter{
 				metricsProcessors: []component.MetricsProcessor{createValidProcessor()},
 				metricsExporter:   createValidExporter(),
 			},
 		},
 		{
 			name: "Successful traces",
-			exporter: &Exporter{
+			exporter: &exporter{
 				tracesProcessors: []component.TracesProcessor{createValidProcessor()},
 				tracesExporter:   createValidExporter(),
 			},
 		},
 		{
 			name: "Successful logs",
-			exporter: &Exporter{
+			exporter: &exporter{
 				logsProcessors: []component.LogsProcessor{createValidProcessor()},
 				logsExporter:   createValidExporter(),
 			},
 		},
 		{
 			name: "Failing metrics processor",
-			exporter: &Exporter{
+			exporter: &exporter{
 				metricsProcessors: []component.MetricsProcessor{
 					createValidProcessor(),
 					createFailingProcessor(),
@@ -110,7 +110,7 @@ func TestExporterStart(t *testing.T) {
 		},
 		{
 			name: "Failing traces processor",
-			exporter: &Exporter{
+			exporter: &exporter{
 				tracesProcessors: []component.TracesProcessor{
 					createValidProcessor(),
 					createFailingProcessor(),
@@ -121,7 +121,7 @@ func TestExporterStart(t *testing.T) {
 		},
 		{
 			name: "Failing logs processor",
-			exporter: &Exporter{
+			exporter: &exporter{
 				logsProcessors: []component.LogsProcessor{
 					createValidProcessor(),
 					createFailingProcessor(),
@@ -132,7 +132,7 @@ func TestExporterStart(t *testing.T) {
 		},
 		{
 			name: "Failing metrics processor",
-			exporter: &Exporter{
+			exporter: &exporter{
 				metricsProcessors: []component.MetricsProcessor{
 					createValidProcessor(),
 					createValidProcessor(),
@@ -143,7 +143,7 @@ func TestExporterStart(t *testing.T) {
 		},
 		{
 			name: "Failing traces processor",
-			exporter: &Exporter{
+			exporter: &exporter{
 				tracesProcessors: []component.TracesProcessor{
 					createValidProcessor(),
 					createValidProcessor(),
@@ -154,7 +154,7 @@ func TestExporterStart(t *testing.T) {
 		},
 		{
 			name: "Failing logs processor",
-			exporter: &Exporter{
+			exporter: &exporter{
 				logsProcessors: []component.LogsProcessor{
 					createValidProcessor(),
 					createValidProcessor(),
@@ -183,33 +183,33 @@ func TestExporterStart(t *testing.T) {
 func TestExporterShutdown(t *testing.T) {
 	testCases := []struct {
 		name          string
-		exporter      *Exporter
+		exporter      *exporter
 		expectedError error
 	}{
 		{
 			name: "Successful metrics",
-			exporter: &Exporter{
+			exporter: &exporter{
 				metricsProcessors: []component.MetricsProcessor{createValidProcessor()},
 				metricsExporter:   createValidExporter(),
 			},
 		},
 		{
 			name: "Successful traces",
-			exporter: &Exporter{
+			exporter: &exporter{
 				tracesProcessors: []component.TracesProcessor{createValidProcessor()},
 				tracesExporter:   createValidExporter(),
 			},
 		},
 		{
 			name: "Successful logs",
-			exporter: &Exporter{
+			exporter: &exporter{
 				logsProcessors: []component.LogsProcessor{createValidProcessor()},
 				logsExporter:   createValidExporter(),
 			},
 		},
 		{
 			name: "Failing metrics processor",
-			exporter: &Exporter{
+			exporter: &exporter{
 				metricsProcessors: []component.MetricsProcessor{
 					createValidProcessor(),
 					createFailingProcessor(),
@@ -220,7 +220,7 @@ func TestExporterShutdown(t *testing.T) {
 		},
 		{
 			name: "Failing traces processor",
-			exporter: &Exporter{
+			exporter: &exporter{
 				tracesProcessors: []component.TracesProcessor{
 					createValidProcessor(),
 					createFailingProcessor(),
@@ -231,7 +231,7 @@ func TestExporterShutdown(t *testing.T) {
 		},
 		{
 			name: "Failing logs processor",
-			exporter: &Exporter{
+			exporter: &exporter{
 				logsProcessors: []component.LogsProcessor{
 					createValidProcessor(),
 					createFailingProcessor(),
@@ -242,7 +242,7 @@ func TestExporterShutdown(t *testing.T) {
 		},
 		{
 			name: "Failing metrics processor",
-			exporter: &Exporter{
+			exporter: &exporter{
 				metricsProcessors: []component.MetricsProcessor{
 					createValidProcessor(),
 					createValidProcessor(),
@@ -253,7 +253,7 @@ func TestExporterShutdown(t *testing.T) {
 		},
 		{
 			name: "Failing traces processor",
-			exporter: &Exporter{
+			exporter: &exporter{
 				tracesProcessors: []component.TracesProcessor{
 					createValidProcessor(),
 					createValidProcessor(),
@@ -264,7 +264,7 @@ func TestExporterShutdown(t *testing.T) {
 		},
 		{
 			name: "Failing logs processor",
-			exporter: &Exporter{
+			exporter: &exporter{
 				logsProcessors: []component.LogsProcessor{
 					createValidProcessor(),
 					createValidProcessor(),

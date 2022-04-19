@@ -45,10 +45,10 @@ func TestCreateMetricExporterSuccess(t *testing.T) {
 	ctx := context.Background()
 	set := componenttest.NewNopExporterCreateSettings()
 
-	exporter, err := factory.CreateMetricsExporter(ctx, set, cfg)
+	testExporter, err := factory.CreateMetricsExporter(ctx, set, cfg)
 	require.NoError(t, err)
 
-	googleExporter, ok := exporter.(*Exporter)
+	googleExporter, ok := testExporter.(*exporter)
 	require.True(t, ok)
 	require.Equal(t, googleExporter.metricsExporter, mockExporter)
 }
@@ -72,10 +72,10 @@ func TestCreateLogsExporterSuccess(t *testing.T) {
 	ctx := context.Background()
 	set := componenttest.NewNopExporterCreateSettings()
 
-	exporter, err := factory.CreateLogsExporter(ctx, set, cfg)
+	testExporter, err := factory.CreateLogsExporter(ctx, set, cfg)
 	require.NoError(t, err)
 
-	googleExporter, ok := exporter.(*Exporter)
+	googleExporter, ok := testExporter.(*exporter)
 	require.True(t, ok)
 	require.Equal(t, googleExporter.logsExporter, mockExporter)
 }
@@ -99,10 +99,10 @@ func TestCreateTracesExporterSuccess(t *testing.T) {
 	ctx := context.Background()
 	set := componenttest.NewNopExporterCreateSettings()
 
-	exporter, err := factory.CreateTracesExporter(ctx, set, cfg)
+	testExporter, err := factory.CreateTracesExporter(ctx, set, cfg)
 	require.NoError(t, err)
 
-	googleExporter, ok := exporter.(*Exporter)
+	googleExporter, ok := testExporter.(*exporter)
 	require.True(t, ok)
 	require.Equal(t, googleExporter.tracesExporter, mockExporter)
 }

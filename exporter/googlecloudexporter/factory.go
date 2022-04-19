@@ -50,7 +50,7 @@ func NewFactory() component.ExporterFactory {
 func createMetricsExporter(ctx context.Context, set component.ExporterCreateSettings, cfg config.Exporter) (component.MetricsExporter, error) {
 	exporterConfig := cfg.(*Config)
 
-	exporter, err := gcpFactory.CreateMetricsExporter(ctx, set, exporterConfig.GCPConfig)
+	gcpExporter, err := gcpFactory.CreateMetricsExporter(ctx, set, exporterConfig.GCPConfig)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create metrics exporter: %w", err)
 	}
@@ -78,7 +78,7 @@ func createMetricsExporter(ctx context.Context, set component.ExporterCreateSett
 		BuildInfo:         set.BuildInfo,
 	}
 
-	var consumer consumer.Metrics = exporter
+	var consumer consumer.Metrics = gcpExporter
 	for i, processorConfig := range processorConfigs {
 		processorConfig.SetIDName(exporterConfig.ID().String())
 		factory := processorFactories[i]
@@ -90,9 +90,9 @@ func createMetricsExporter(ctx context.Context, set component.ExporterCreateSett
 		consumer = processor
 	}
 
-	return &Exporter{
+	return &exporter{
 		metricsProcessors: processors,
-		metricsExporter:   exporter,
+		metricsExporter:   gcpExporter,
 		metricsConsumer:   consumer,
 	}, nil
 }
@@ -101,7 +101,7 @@ func createMetricsExporter(ctx context.Context, set component.ExporterCreateSett
 func createLogsExporter(ctx context.Context, set component.ExporterCreateSettings, cfg config.Exporter) (component.LogsExporter, error) {
 	exporterConfig := cfg.(*Config)
 
-	exporter, err := gcpFactory.CreateLogsExporter(ctx, set, exporterConfig.GCPConfig)
+	gcpExporter, err := gcpFactory.CreateLogsExporter(ctx, set, exporterConfig.GCPConfig)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create logs exporter: %w", err)
 	}
@@ -125,7 +125,7 @@ func createLogsExporter(ctx context.Context, set component.ExporterCreateSetting
 		BuildInfo:         set.BuildInfo,
 	}
 
-	var consumer consumer.Logs = exporter
+	var consumer consumer.Logs = gcpExporter
 	for i, processorConfig := range processorConfigs {
 		processorConfig.SetIDName(exporterConfig.ID().String())
 		factory := processorFactories[i]
@@ -137,9 +137,9 @@ func createLogsExporter(ctx context.Context, set component.ExporterCreateSetting
 		consumer = processor
 	}
 
-	return &Exporter{
+	return &exporter{
 		logsProcessors: processors,
-		logsExporter:   exporter,
+		logsExporter:   gcpExporter,
 		logsConsumer:   consumer,
 	}, nil
 }
@@ -148,7 +148,7 @@ func createLogsExporter(ctx context.Context, set component.ExporterCreateSetting
 func createTracesExporter(ctx context.Context, set component.ExporterCreateSettings, cfg config.Exporter) (component.TracesExporter, error) {
 	exporterConfig := cfg.(*Config)
 
-	exporter, err := gcpFactory.CreateTracesExporter(ctx, set, exporterConfig.GCPConfig)
+	gcpExporter, err := gcpFactory.CreateTracesExporter(ctx, set, exporterConfig.GCPConfig)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create traces exporter: %w", err)
 	}
@@ -172,7 +172,7 @@ func createTracesExporter(ctx context.Context, set component.ExporterCreateSetti
 		BuildInfo:         set.BuildInfo,
 	}
 
-	var consumer consumer.Traces = exporter
+	var consumer consumer.Traces = gcpExporter
 	for i, processorConfig := range processorConfigs {
 		processorConfig.SetIDName(exporterConfig.ID().String())
 		factory := processorFactories[i]
@@ -184,9 +184,9 @@ func createTracesExporter(ctx context.Context, set component.ExporterCreateSetti
 		consumer = processor
 	}
 
-	return &Exporter{
+	return &exporter{
 		tracesProcessors: processors,
-		tracesExporter:   exporter,
+		tracesExporter:   gcpExporter,
 		tracesConsumer:   consumer,
 	}, nil
 }

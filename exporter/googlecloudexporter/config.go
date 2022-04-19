@@ -31,7 +31,7 @@ import (
 const (
 	defaultMetricPrefix = "workloads.googleapis.com"
 	defaultUserAgent    = "observIQ-otel-collector"
-	defaultLocation     = "us-east1-b"
+	defaultLocation     = "global"
 	genericNodeResource = "generic_node"
 )
 
