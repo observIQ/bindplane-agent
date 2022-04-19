@@ -4,6 +4,7 @@ go 1.17
 
 require (
 	github.com/GoogleCloudPlatform/opentelemetry-operations-collector v0.0.3-0.20220215000048-11a223a1d94f
+	github.com/observiq/observiq-otel-collector/exporter/googlecloudexporter v0.2.0
 	github.com/observiq/observiq-otel-collector/processor/resourceattributetransposerprocessor v0.2.0
 	github.com/observiq/observiq-otel-collector/receiver/pluginreceiver v0.2.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/alibabacloudlogserviceexporter v0.45.1
@@ -17,7 +18,6 @@ require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/elasticsearchexporter v0.45.1
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/f5cloudexporter v0.45.1
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/fileexporter v0.45.1
-	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlecloudexporter v0.46.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlecloudpubsubexporter v0.45.1
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/influxdbexporter v0.46.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/jaegerexporter v0.45.1
@@ -266,6 +266,8 @@ require (
 	github.com/nginxinc/nginx-prometheus-exporter v0.8.1-0.20201110005315-f5a5f8086c19 // indirect
 	github.com/observiq/ctimefmt v1.0.0 // indirect
 	github.com/observiq/go-syslog/v3 v3.0.2 // indirect
+	github.com/observiq/goflow/v3 v3.4.4 // indirect
+	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlecloudexporter v0.46.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/internal/aws/awsutil v0.45.1 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/internal/aws/containerinsight v0.45.1 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/internal/aws/cwlogs v0.45.1 // indirect
@@ -411,6 +413,8 @@ replace github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googl
 replace github.com/observiq/observiq-otel-collector/processor/resourceattributetransposerprocessor v0.2.0 => ./processor/resourceattributetransposerprocessor
 
 replace github.com/observiq/observiq-otel-collector/receiver/pluginreceiver v0.2.0 => ./receiver/pluginreceiver
+
+replace github.com/observiq/observiq-otel-collector/exporter/googlecloudexporter v0.2.0 => ./exporter/googlecloudexporter
 
 replace go.opentelemetry.io/collector v0.47.0 => go.opentelemetry.io/collector v0.46.0
 
