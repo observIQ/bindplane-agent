@@ -25,7 +25,10 @@ PROJECT_BASE="$BASEDIR/../.."
 mkdir -p wix
 [ -d wix/sdk ] || unzip -o wix-binaries.zip -d wix
 
-$PROJECT_BASE/buildscripts/download-dependencies.sh
+make -C "$PROJECT_BASE" release-prep
 
-cp "$PROJECT_BASE/config/example.yaml" "./config.yaml"
-cp "$PROJECT_BASE/LICENSE" "./LICENSE"
+cp -r "$PROJECT_BASE/release_deps/plugins" "$BASEDIR/.."
+cp "$PROJECT_BASE/release_deps/opentelemetry-java-contrib-jmx-metrics.jar" "$BASEDIR/.."
+cp "$PROJECT_BASE/release_deps/config.yaml" "$BASEDIR/.."
+
+cp "$PROJECT_BASE/LICENSE" "$BASEDIR/.."

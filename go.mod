@@ -6,7 +6,6 @@ require (
 	github.com/GoogleCloudPlatform/opentelemetry-operations-collector v0.0.3-0.20220215000048-11a223a1d94f
 	github.com/observiq/observiq-otel-collector/exporter/googlecloudexporter v0.2.0
 	github.com/observiq/observiq-otel-collector/processor/resourceattributetransposerprocessor v0.2.0
-	github.com/observiq/observiq-otel-collector/receiver/logsreceiver v0.2.0
 	github.com/observiq/observiq-otel-collector/receiver/pluginreceiver v0.2.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/alibabacloudlogserviceexporter v0.45.1
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/awscloudwatchlogsexporter v0.45.1
@@ -119,10 +118,7 @@ require (
 	code.cloudfoundry.org/rfc5424 v0.0.0-20201103192249-000122071b78 // indirect
 	contrib.go.opencensus.io/exporter/prometheus v0.4.0 // indirect
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.10 // indirect
-	github.com/Azure/azure-amqp-common-go/v3 v3.2.3 // indirect
-	github.com/Azure/azure-event-hubs-go/v3 v3.3.17 // indirect
 	github.com/Azure/azure-sdk-for-go v61.1.0+incompatible // indirect
-	github.com/Azure/go-amqp v0.17.0 // indirect
 	github.com/Azure/go-autorest v14.2.0+incompatible // indirect
 	github.com/Azure/go-autorest/autorest v0.11.23 // indirect
 	github.com/Azure/go-autorest/autorest/adal v0.9.18 // indirect
@@ -163,7 +159,6 @@ require (
 	github.com/cyphar/filepath-securejoin v0.2.2 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dennwc/varint v1.0.0 // indirect
-	github.com/devigned/tab v0.1.1 // indirect
 	github.com/digitalocean/godo v1.73.0 // indirect
 	github.com/docker/distribution v2.8.0+incompatible // indirect
 	github.com/docker/docker v20.10.12+incompatible // indirect
@@ -246,7 +241,6 @@ require (
 	github.com/kolo/xmlrpc v0.0.0-20201022064351-38db28db192b // indirect
 	github.com/leoluk/perflib_exporter v0.1.0 // indirect
 	github.com/lib/pq v1.10.4 // indirect
-	github.com/libp2p/go-reuseport v0.0.1 // indirect
 	github.com/linode/linodego v1.2.1 // indirect
 	github.com/lufia/plan9stats v0.0.0-20211012122336-39d0f177ccd0 // indirect
 	github.com/magiconair/properties v1.8.6 // indirect
@@ -417,8 +411,6 @@ require (
 replace github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlecloudexporter v0.46.0 => github.com/observiq/opentelemetry-collector-contrib/exporter/googlecloudexporter v0.0.0-20220304152956-bb36c08bd895
 
 replace github.com/observiq/observiq-otel-collector/processor/resourceattributetransposerprocessor v0.2.0 => ./processor/resourceattributetransposerprocessor
-
-replace github.com/observiq/observiq-otel-collector/receiver/logsreceiver v0.2.0 => ./receiver/logsreceiver
 
 replace github.com/observiq/observiq-otel-collector/receiver/pluginreceiver v0.2.0 => ./receiver/pluginreceiver
 

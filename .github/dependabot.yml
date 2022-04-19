@@ -12,21 +12,6 @@ updates:
       prefix: "deps"
       include: "scope"
   - package-ecosystem: "gomod"
-    directory: "/receiver/logsreceiver"
-    schedule:
-      interval: "weekly"
-    ignore:
-      # Opentelemetry updates will be done manually
-      - dependency-name: "github.com/open-telemetry/opentelemetry-collector*"
-      - dependency-name: "go.opentelemetry.io/collector/*"
-
-      # AWS we want to ignore nightly patch releases
-      - dependency-name: "github.com/aws/aws-sdk-go"
-        update-types: ["version-update:semver-patch"]
-    commit-message:
-      prefix: "deps"
-      include: "scope"
-  - package-ecosystem: "gomod"
     directory: "/processor/resourceattributetransposerprocessor"
     schedule:
       interval: "weekly"
