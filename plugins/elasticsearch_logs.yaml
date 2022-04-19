@@ -30,64 +30,78 @@ template: |
   receivers:
     {{if .enable_json_logs}}
     filelog/json:
-      include: {{ .json_log_paths }}
+      include:
+        {{ range $i, $fp := .json_log_paths }}
+        - '{{ $fp }}'
+        {{end}}
       multiline: 
         line_start_pattern: '^{.*'
       start_at: {{ .start_at }}
+      
       operators:
-      - type: json_parser
-        severity:
-          parse_from: level
-          preserve_to: level
-          preset: none
-          mapping:
-            debug:
-              - DEBUG
-              - TRACE
-            info: INFO
-            warning:
-              - WARN
-              - DEPRECATION
-            error:
-              - ERROR
-              - CRITICAL
-            critical: FATAL
-      - type: router
-        routes:
-          - output: local_timestamp_parser
-            expr: '$body.timestamp != nil and $body.timestamp matches "^%Y-%m-%dT%H:%M:%S,%L[\\+-]\\d{2}:\\d{2}"'
-          - output: utc_timestamp_parser
-            expr: '$body.timestamp != nil and $body.timestamp matches "^%Y-%m-%dT%H:%M:%S,%LZ"'
+        # Example of log line:
+        # {"type": "server", "timestamp": "2022-04-19T17:58:52,268Z", "level": "INFO", "component": "o.e.i.g.DatabaseNodeService", "cluster.name": "elasticsearch", "node.name": "elasticsearch-logs", "message": "successfully reloaded changed geoip database file [/tmp/elasticsearch-7402075885842888530/geoip-databases/bHR_rnLGRnWwu_LOSqF38A/GeoLite2-City.mmdb]", "cluster.uuid": "sBvVayeKRsGRKrFe1k0D8g", "node.id": "bHR_rnLGRnWwu_LOSqF38A"  }
+        - type: json_parser
+          severity:
+            parse_from: attributes.level
+            preserve_to: attributes.level
+            preset: none
+            mapping:
+              debug:
+                - DEBUG
+                - TRACE
+              info: INFO
+              warning:
+                - WARN
+                - DEPRECATION
+              error:
+                - ERROR
+                - CRITICAL
+              critical: FATAL
+          output: time_parser_router
+          
+        - id: time_parser_router
+          type: router
+          routes:
+            - output: local_timestamp_parser
+              expr: 'attributes.timestamp != nil and attributes.timestamp matches "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2},\\d+[\\+-]\\d{2}:\\d{2}"'
+            - output: utc_timestamp_parser
+              expr: 'attributes.timestamp != nil and attributes.timestamp matches "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2},\\d+Z"'
 
-      - type: time_parser
-        id: local_timestamp_parser
-        parse_from: timestamp
-        layout: '%Y-%m-%dT%H:%M:%S.%s%j`'
-        output: add_type
+        - id: local_timestamp_parser
+          type: time_parser
+          parse_from: attributes.timestamp
+          layout: '%Y-%m-%dT%H:%M:%S.%s%j`'
+          output: add_type
 
-      - type: time_parser
-        id: utc_timestamp_parser
-        parse_from: timestamp
-        layout: '%Y-%m-%dT%H:%M:%S.%sZ'
-        output: add_type
+        - id: utc_timestamp_parser
+          type: time_parser
+          parse_from: attributes.timestamp
+          layout: '%Y-%m-%dT%H:%M:%S.%sZ'
+          output: add_type
 
-      - id: add_type
-        type: add
-        field: $attributes.log_type
-        value: 'elasticsearch'
+        - id: add_type
+          type: add
+          field: attributes.log_type
+          value: 'elasticsearch'
     {{end}}
 
     {{if .enable_gc_logs}}
     filelog/gc:
-      include: {{ .gc_log_paths }}
+      include:
+        {{ range $i, $fp := .gc_log_paths }}
+        - '{{ $fp }}'
+        {{end}}
       start_at: {{ .start_at }}
       attributes:
         log_type: elasticsearch.gc
       operators:
+        # Example log line:
+        # [2022-04-19T18:39:43.710+0000][380][safepoint   ] Safepoint "Cleanup", Time since last: 4000695937 ns, Reaching safepoint: 78114 ns, At safepoint: 5387 ns, Total: 83501 ns
         - type: regex_parser
           regex: '^\[(?P<timestamp>\d+-\d+-\d+T\d+:\d+:\d+.\d+\+\d+)\]\[\d+\]\[(?P<type>[A-z,]+)\s*\]\s*(?:GC\((?P<gc_run>\d+)\))?\s*(?P<message>.*)'
           timestamp:
-            parse_from: timestamp
+            parse_from: attributes.timestamp
             layout: '%Y-%m-%dT%H:%M:%S.%s%z'
     {{end}}
 
