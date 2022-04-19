@@ -153,6 +153,7 @@ release-prep:
 	@rm -rf release_deps
 	@mkdir release_deps
 	./buildscripts/download-dependencies.sh release_deps
+	@cp -r ./plugins release_deps/
 	@cp config/example.yaml release_deps/config.yaml
 
 # Build, sign, and release
