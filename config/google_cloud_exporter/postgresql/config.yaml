@@ -1,0 +1,62 @@
+receivers:
+  postgresql:
+    endpoint: localhost:5432
+    username: $POSTGRESQL_USERNAME
+    password: $POSTGRESQL_PASSWORD
+    collection_interval: 60s
+    # TLS is enabled by default, this disables it.
+    tls:
+      insecure: true
+
+processors:
+  # Resourcedetection is used to add a unique (host.name)
+  # to the metric resource(s), allowing users to filter
+  # between multiple agent systems.
+  resourcedetection:
+    detectors: ["system"]
+    system:
+      hostname_sources: ["os"]
+
+  # Used for Google generic_node mapping.
+  resource:
+    attributes:
+    - key: namespace
+      value: "postgres"
+      action: upsert
+    - key: location
+      value: "global"
+      action: upsert
+
+  normalizesums:
+
+  batch:
+
+exporters:
+  googlecloud:
+    retry_on_failure:
+      enabled: false
+    metric:
+      prefix: custom.googleapis.com
+    resource_mappings:
+    - source_type: ""
+      target_type: generic_node
+      label_mappings:
+      - source_key: host.name
+        target_key: node_id
+      - source_key: location
+        target_key: location
+      - source_key: namespace
+        target_key: namespace
+
+service:
+  pipelines:
+    metrics:
+      receivers:
+      - postgresql
+      processors:
+      - resourcedetection
+      - resource
+      - normalizesums
+      - batch
+      exporters:
+      - googlecloud
