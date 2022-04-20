@@ -47,17 +47,18 @@ template: |
             preserve_to: attributes.level
             preset: none
             mapping:
+              trace:
+                - TRACE
               debug:
-                - DEBUG
                 - TRACE
               info: INFO
-              warning:
+              warn:
                 - WARN
                 - DEPRECATION
               error:
                 - ERROR
                 - CRITICAL
-              critical: FATAL
+              fatal: FATAL
           output: time_parser_router
           
         - id: time_parser_router
