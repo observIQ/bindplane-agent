@@ -18,6 +18,9 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/observiq/observiq-otel-collector/collector"
 	"github.com/observiq/observiq-otel-collector/internal/version"
@@ -30,12 +33,11 @@ func main() {
 	_ = pflag.String("log-level", "", "not implemented") // TEMP(jsirianni): Required for OTEL k8s operator
 	pflag.Parse()
 
-	// TODO: Add this back in when https://github.com/open-telemetry/opentelemetry-collector/issues/4842 is resolved
-	// ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
-	// defer cancel()
+	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer cancel()
 
 	settings := collector.NewSettings(*configPaths, version.Version(), nil)
-	if err := run(context.Background(), settings); err != nil {
+	if err := run(ctx, settings); err != nil {
 		log.Fatal(err)
 	}
 }

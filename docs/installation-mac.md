@@ -16,7 +16,7 @@ To verify the collector is working you can check the output at `/tmp/observiq-ot
 
 ### Additional Install Steps
 
-If you plan on JMX collecting metrics via the [JMX Receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.45.1/receiver/jmxreceiver/README.md) you can copy the `opentelemetry-java-contrib-jmx-metrics.jar` to the default location to make configuration easier.
+If you plan on JMX collecting metrics via the [JMX Receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.49.0/receiver/jmxreceiver/README.md) you can copy the `opentelemetry-java-contrib-jmx-metrics.jar` to the default location to make configuration easier.
 
 ```sh
 sudo cp $(brew --prefix observiq/observiq-otel-collector/observiq-otel-collector)/lib/opentelemetry-java-contrib-jmx-metrics.jar /opt

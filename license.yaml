@@ -19,5 +19,5 @@ exceptions:
     - path: "github.com/opencontainers/go-digest"
   unresolvableLicense:
     - path: "./processor/resourceattributetransposerprocessor"
-    - path: "./receiver/logsreceiver"
     - path: "./receiver/pluginreceiver"
+    - path: "./exporter/googlecloudexporter"
