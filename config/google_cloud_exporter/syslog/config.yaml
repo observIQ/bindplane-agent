@@ -5,7 +5,7 @@ receivers:
     protocol: rfc3164
     operators:
       - type: add
-        field: $$attributes.log_type
+        field: attributes.log_type
         value: syslog
 
 exporters: 
