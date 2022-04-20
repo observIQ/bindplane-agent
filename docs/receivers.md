@@ -39,7 +39,6 @@ Below is a list of supported receivers with links to their documentation pages.
 - [pluginreceiver](../receiver/pluginreceiver/README.md)
 - [podmanreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.49.0/receiver/podmanreceiver/README.md)
 - [postgresqlreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.49.0/receiver/postgresqlreceiver/README.md)
-- [prometheusexecreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.49.0/receiver/prometheusexecreceiver/README.md)
 - [prometheusreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.49.0/receiver/prometheusreceiver/README.md)
 - [rabbitmqreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.49.0/receiver/rabbitmqreceiver/README.md)
 - [redisreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.49.0/receiver/redisreceiver/README.md)

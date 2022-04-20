@@ -1113,8 +1113,6 @@ github.com/karrick/godirwalk v1.8.0/go.mod h1:H5KPZjojv4lE+QYImBI8xVtrBRgYrIVsaR
 github.com/karrick/godirwalk v1.10.3/go.mod h1:RoGL9dQei4vP9ilrpETWE8CLOZ1kiN0LhBygSwrAsHA=
 github.com/karrick/godirwalk v1.16.1 h1:DynhcF+bztK8gooS0+NDJFrdNZjJ3gzVzC545UNA9iw=
 github.com/karrick/godirwalk v1.16.1/go.mod h1:j4mkqPuvaLI8mp1DroR3P6ad7cyYd4c1qeJ3RV7ULlk=
-github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51 h1:Z9n2FFNUXsshfwJMBgNA0RU6/i7WVaAegv3PtuIHPMs=
-github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51/go.mod h1:CzGEWj7cYgsdH8dAjBGEr58BoE7ScuLd+fwFZ44+/x8=
 github.com/kisielk/errcheck v1.1.0/go.mod h1:EZBBE59ingxPouuu3KfxchcWSUPOHkagtvWXihfKN4Q=
 github.com/kisielk/errcheck v1.2.0/go.mod h1:/BMXB+zMLi60iA8Vv6Ksmxu/1UDYcXs4uQLJ+jE2L00=
 github.com/kisielk/errcheck v1.5.0/go.mod h1:pFxgyoBC7bSaBwPgfKdkLd5X25qrDl4LWUI2bnpBCr8=
@@ -1563,8 +1561,6 @@ github.com/open-telemetry/opentelemetry-collector-contrib/receiver/podmanreceive
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/podmanreceiver v0.49.0/go.mod h1:T6inyfBUa1OiCTndCNkirMsf2HVbtu63OkAAExqRDkw=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/postgresqlreceiver v0.49.0 h1:lOgnShKFoFMepBd+Y7BN/YGvGAeQxVHsg14ZmGjOWYU=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/postgresqlreceiver v0.49.0/go.mod h1:RFkDPzlDlQU2cVjrT2oAiWm+NNYnG6DK1QXJV/tvFFI=
-github.com/open-telemetry/opentelemetry-collector-contrib/receiver/prometheusexecreceiver v0.49.0 h1:qZBu+Oy5khgfeQ84d6GjqK4ahsSM4rfkpclNhivsX+A=
-github.com/open-telemetry/opentelemetry-collector-contrib/receiver/prometheusexecreceiver v0.49.0/go.mod h1:KfelpqveWAjtiH3RffmUXiJw9Jpp2EIcOa9M83nzmfE=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/prometheusreceiver v0.49.0 h1:sZI1BvI2MTeZIhwVlm2KH7imFEGgg+HUcJKK0/YF43s=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/prometheusreceiver v0.49.0/go.mod h1:d7wm8Kg1wkGtqe6G5Wke+G53x0xEBTGYn1NnDJOVoJ0=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/rabbitmqreceiver v0.49.0 h1:w24Mf7JygCMpYdz5WSRkpeA7pprtdPd09JzCSHJ9eqo=
