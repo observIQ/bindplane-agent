@@ -15,6 +15,8 @@
 package googlecloudexporter
 
 import (
+	"os"
+
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-collector/processor/normalizesumsprocessor"
 	"github.com/mitchellh/mapstructure"
 	"github.com/observiq/observiq-otel-collector/processor/resourceattributetransposerprocessor"
@@ -60,9 +62,11 @@ func (c *Config) Validate() error {
 
 // createDefaultConfig creates the default config for the exporter
 func createDefaultConfig() config.Exporter {
+	defaultNamespace, _ := os.Hostname()
 	return &Config{
 		ExporterSettings: config.NewExporterSettings(config.NewComponentID(typeStr)),
 		Location:         defaultLocation,
+		Namespace:        defaultNamespace,
 		GCPConfig:        createDefaultGCPConfig(),
 		BatchConfig:      createDefaultBatchConfig(),
 		NormalizeConfig:  createDefaultNormalizerConfig(),
@@ -92,7 +96,7 @@ func createDefaultGCPConfig() *gcp.Config {
 					TargetKey: "location",
 				},
 				{
-					SourceKey: "host.name",
+					SourceKey: "namespace",
 					TargetKey: "namespace",
 				},
 			},
