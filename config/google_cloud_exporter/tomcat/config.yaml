@@ -18,8 +18,6 @@ processors:
     operations:
       - from: "host.name"
         to: "agent"
-      - from: "source"
-        to: "source"
 
   # Used for Google generic_node mapping.
   resource:
