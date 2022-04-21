@@ -29,7 +29,7 @@ template: |
   receivers:
     filelog:
       include:
-        {{ range $i, $fp := .postgresql_log_path }}
+        {{ range $fp := .postgresql_log_path }}
         - '{{ $fp }}'
         {{end}}
       start_at: {{ .start_at }}
@@ -66,14 +66,16 @@ template: |
                 - 'FATAL'
                 - 'PANIC'
 
+        # If duration field is not empty it's a slow query log
         - id: slow_query
           type: add
           if: 'attributes.duration != ""'
           field: attributes.log_type
           value: 'postgresql.slow_query'
 
+        # If user matches a remote call send to client_address parser
         - type: router
-          default: statement_regex_parser
+          default: statement_router
           routes:
             - output: client_address_regex_parser
               expr: 'attribute.user != nil and attribute.user matches "[\\w\\.]*\\([\\d]*\\)"'
@@ -82,10 +84,17 @@ template: |
           type: regex_parser
           parse_from: attributes.user
           regex: '(?P<user>[^\(]*)\((?P<client_address_port>[^\)]*)\)'
-          output: statement_regex_parser
+          output: statement_router
+
+        # If log has a statement to parse send on to statement parsers
+        - id: statement_router
+          type: router
+          default: end_filter
+          routes:
+            - output: statement_regex_parser
+              expr: 'attributes.message matches "STATEMENT:\\s+|statement:\\s+"'
 
         - id: statement_regex_parser
-          if: 'attributes.message matches "STATEMENT:\\s+|statement:\\s+"'
           type: regex_parser
           parse_from: attributes.message
           regex: '(STATEMENT:\s*|statement:\s*)(?P<statement>[\w\W]+)'
@@ -173,6 +182,11 @@ template: |
           if: 'attributes.statement != nil and attributes.statement matches "^VACUUM|^vacuum"'
           field: attributes.sql_command
           value: "VACUUM"
+
+        # Noop filter to allow an exit point for other operators to go to if they are a leaf in the pipeline
+        - id: end_filter
+          type: filter
+          expr: 'body == ""'
 
   service:
     pipelines:

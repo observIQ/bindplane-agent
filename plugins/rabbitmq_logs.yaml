@@ -15,7 +15,7 @@ template: |
   receivers:
     filelog:
       include:
-        {{ range $i, $fp := .daemon_log_paths }}
+        {{ range $fp := .daemon_log_paths }}
         - '{{ $fp }}'
         {{end}}
       multiline:

@@ -25,7 +25,7 @@ template: |
   receivers:
     filelog:
       include:
-        {{ range $i, $fp := .file_path }}
+        {{ range $fp := .file_path }}
         - '{{ $fp }}'
         {{end}}
       start_at: {{ .start_at }}
