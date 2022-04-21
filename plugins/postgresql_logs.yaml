@@ -101,85 +101,85 @@ template: |
 
         - id: sql_command_alter
           type: add
-          if: 'attributes.statement != nil and attributes.statement matches "^ALTER|^alter"'
+          if: 'attributes.statement matches "^ALTER|^alter"'
           field: attributes.sql_command
           value: "ALTER"
 
         - id: sql_command_commit
           type: add
-          if: 'attributes.statement != nil and attributes.statement matches "^COMMIT|^commit"'
+          if: 'attributes.statement matches "^COMMIT|^commit"'
           field: attributes.sql_command
           value: "COMMIT"
 
         - id: sql_command_copy
           type: add
-          if: 'attributes.statement != nil and attributes.statement matches "^COPY|^copy"'
+          if: 'attributes.statement matches "^COPY|^copy"'
           field: attributes.sql_command
           value: "COPY"
 
         - id: sql_command_create
           type: add
-          if: 'attributes.statement != nil and attributes.statement matches "^CREATE|^create"'
+          if: 'attributes.statement matches "^CREATE|^create"'
           field: attributes.sql_command
           value: "CREATE"
 
         - id: sql_command_delete
           type: add
-          if: 'attributes.statement != nil and attributes.statement matches "^DELETE|^delete"'
+          if: 'attributes.statement matches "^DELETE|^delete"'
           field: attributes.sql_command
           value: "DELETE"
 
         - id: sql_command_drop
           type: add
-          if: 'attributes.statement != nil and attributes.statement matches "^DROP|^drop"'
+          if: 'attributes.statement matches "^DROP|^drop"'
           field: attributes.sql_command
           value: "DROP"
 
         - id: sql_command_grant
           type: add
-          if: 'attributes.statement != nil and attributes.statement matches "^GRANT|^grant"'
+          if: 'attributes.statement matches "^GRANT|^grant"'
           field: attributes.sql_command
           value: "GRANT"
 
         - id: sql_command_insert
           type: add
-          if: 'attributes.statement != nil and attributes.statement matches "^INSERT|^insert"'
+          if: 'attributes.statement matches "^INSERT|^insert"'
           field: attributes.sql_command
           value: "INSERT"
 
         - id: sql_command_revoke
           type: add
-          if: 'attributes.statement != nil and attributes.statement matches "^REVOKE|^revoke"'
+          if: 'attributes.statement matches "^REVOKE|^revoke"'
           field: attributes.sql_command
           value: "REVOKE"
 
         - id: sql_command_rollback
           type: add
-          if: 'attributes.statement != nil and attributes.statement matches "^ROLLBACK|^rollback"'
+          if: 'attributes.statement matches "^ROLLBACK|^rollback"'
           field: attributes.sql_command
           value: "ROLLBACK"
 
         - id: sql_command_select
           type: add
-          if: 'attributes.statement != nil and attributes.statement matches "^SELECT|^select"'
+          if: 'attributes.statement matches "^SELECT|^select"'
           field: attributes.sql_command
           value: "SELECT"
 
         - id: sql_command_truncate
           type: add
-          if: 'attributes.statement != nil and attributes.statement matches "^TRUNCATE|^truncate"'
+          if: 'attributes.statement matches "^TRUNCATE|^truncate"'
           field: attributes.sql_command
           value: "TRUNCATE"
 
         - id: sql_command_update
           type: add
-          if: 'attributes.statement != nil and attributes.statement matches "^UPDATE|^update"'
+          if: 'attributes.statement matches "^UPDATE|^update"'
           field: attributes.sql_command
           value: "UPDATE"
 
         - id: sql_command_vacuum
           type: add
-          if: 'attributes.statement != nil and attributes.statement matches "^VACUUM|^vacuum"'
+          if: 'attributes.statement matches "^VACUUM|^vacuum"'
           field: attributes.sql_command
           value: "VACUUM"
 
