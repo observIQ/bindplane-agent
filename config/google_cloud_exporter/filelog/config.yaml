@@ -1,0 +1,19 @@
+receivers:
+  filelog:
+    include:
+    - /var/log/messages
+    start_at: end
+
+exporters: 
+  googlecloud:
+    retry_on_failure:
+      enabled: false
+    project: REPLACE_ME
+
+service:
+  pipelines:
+    logs:
+      receivers:
+      - filelog
+      exporters:
+      - googlecloud

@@ -1,0 +1,23 @@
+receivers:
+  syslog:
+    udp:
+      listen_address: "0.0.0.0:5140"
+    protocol: rfc3164
+    operators:
+      - type: add
+        field: attributes.log_type
+        value: syslog
+
+exporters: 
+  googlecloud:
+    retry_on_failure:
+      enabled: false
+    project: REPLACE_ME
+
+service:
+  pipelines:
+    logs:
+      receivers:
+      - syslog
+      exporters:
+      - googlecloud

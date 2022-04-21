@@ -1,0 +1,21 @@
+receivers:
+  journald:
+    priority: info
+    operators:
+      - type: add
+        field: attributes.log_type
+        value: journald
+
+exporters: 
+  googlecloud:
+    retry_on_failure:
+      enabled: false
+    project: REPLACE_ME
+
+service:
+  pipelines:
+    logs:
+      receivers:
+      - journald
+      exporters:
+      - googlecloud
