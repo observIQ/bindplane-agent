@@ -24,9 +24,13 @@ import (
 
 	"github.com/observiq/observiq-otel-collector/collector"
 	"github.com/observiq/observiq-otel-collector/internal/version"
+
 	"github.com/spf13/pflag"
 	"go.opentelemetry.io/collector/service"
+	"go.uber.org/zap"
 )
+
+const defaultFileLogLevel = zap.InfoLevel
 
 func main() {
 	var configPaths = pflag.StringSlice("config", []string{"./config.yaml"}, "the collector config path")
