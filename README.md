@@ -56,6 +56,10 @@ brew install observiq/observiq-otel-collector/observiq-otel-collector
 
 For more installation information see [installing on macOS](/docs/installation-mac.md).
 
+#### Kubernetes
+
+To deploy the collector on Kubernetes, further documentation can be found at our [observiq-otel-collector-k8s](https://github.com/observIQ/observiq-otel-collector-k8s) repository.
+
 ### Next Steps
 
 Now that the collector is installed it is collecting basic metrics about the host machine printing them to the log. If you want to further configure your collector you may do so by editing the config file. To find your config file based on your OS reference the table below:
