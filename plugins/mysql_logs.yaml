@@ -14,14 +14,14 @@ description: |
 parameters:
   - name: enable_general_log
     type: bool
-    default: false
+    default: true
   - name: general_log_paths
     type: "[]string"
     default:
       - "/var/log/mysql/general.log"
   - name: enable_slow_log
     type: bool
-    default: false
+    default: true
   - name: slow_query_log_paths
     type: "[]string"
     default:
