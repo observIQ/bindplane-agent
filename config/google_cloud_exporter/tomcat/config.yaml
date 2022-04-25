@@ -5,7 +5,8 @@ receivers:
     target_system: tomcat,jvm
     collection_interval: 60s
     properties:
-      otel.resource.attributes: jmx_source=tomcat,jmx_endpoint=localhost:9000
+      # Attribute 'endpoint' will be used for generic_node's node_id field.
+      otel.resource.attributes: endpoint=localhost:9000
 
 processors:
   resourcedetection:
@@ -17,10 +18,16 @@ processors:
     operations:
       - from: "host.name"
         to: "agent"
-      - from: "jmx_source"
-        to: "jmx_source"
-      - from: "jmx_endpoint"
-        to: "jmx_endpoint"
+
+  # Used for Google generic_node mapping.
+  resource:
+    attributes:
+    - key: namespace
+      value: "tomcat"
+      action: upsert
+    - key: location
+      value: "global"
+      action: upsert
 
   normalizesums:
 
@@ -32,6 +39,16 @@ exporters:
       enabled: false
     metric:
       prefix: custom.googleapis.com
+    resource_mappings:
+    - source_type: ""
+      target_type: generic_node
+      label_mappings:
+      - source_key: endpoint
+        target_key: node_id
+      - source_key: location
+        target_key: location
+      - source_key: namespace
+        target_key: namespace
 
 service:
   pipelines:
@@ -41,6 +58,7 @@ service:
       processors:
       - resourcedetection
       - resourceattributetransposer
+      - resource
       - normalizesums
       - batch
       exporters:

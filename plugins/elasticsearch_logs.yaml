@@ -31,7 +31,7 @@ template: |
     {{if .enable_json_logs}}
     filelog/json:
       include:
-        {{ range $i, $fp := .json_log_paths }}
+        {{ range $fp := .json_log_paths }}
         - '{{ $fp }}'
         {{end}}
       multiline: 
@@ -70,7 +70,7 @@ template: |
     {{if .enable_gc_logs}}
     filelog/gc:
       include:
-        {{ range $i, $fp := .gc_log_paths }}
+        {{ range $fp := .gc_log_paths }}
         - '{{ $fp }}'
         {{end}}
       start_at: {{ .start_at }}

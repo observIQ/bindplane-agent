@@ -17,47 +17,27 @@ receivers:
       #process:
       #  mute_process_name_error: true
 
-
-processors:
-  # Resourcedetection is used to add a unique (host.name)
-  # to the metric resource(s), allowing users to filter
-  # between multiple systems.
-  resourcedetection:
-    detectors: ["system"]
-    system:
-      hostname_sources: ["os"]
-
-  resourceattributetransposer:
-    operations:
-      # Process metrics require unique metric labels, otherwise the Google
-      # API will reject some metrics as "out of order" / duplicates.
-      - from: "host.name"
-        to: "agent"
-      - from: "process.pid"
-        to: "pid"
-      - from: "process.executable.name"
-        to: "binary"
-
-  normalizesums:
-
-  batch:
-
 exporters: 
+  # observIQ collector wraps the upstream Google Cloud exporter
+  # with the following processors:
+  #   - resource detection processor
+  #   - resource attributes transposer processor
+  #   - normalizesums processor
+  #   - batch processor
+  #
+  # In additon to wrapping processors, the following settings are configured:
+  #   - retry_on_failure.enabled: false
+  #   - metric.prefix: workload.googleapis.com
+  #   - resource mapping: default to generic_node monitored resource type.
+  #     - node_id: host.name
+  #     - namespace: host.name
+  #     - location: global
   googlecloud:
-    retry_on_failure:
-      enabled: false
-    metric:
-      prefix: custom.googleapis.com
 
 service:
   pipelines:
     metrics:
       receivers:
       - hostmetrics
-      processors:
-      - resourcedetection
-      - resourceattributetransposer
-      - normalizesums
-      - batch
       exporters:
       - googlecloud
