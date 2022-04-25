@@ -1,15 +1,8 @@
 # Prometheus Exporter Prerequisites
 
+The Prometheus Exporter can be scraped by an existing Promethus Server.
+
 ## Configure Prometheus to scrape the collector
 
-Using the basic configuration provided in [these docs](https://prometheus.io/docs/prometheus/latest/getting_started/#configuring-prometheus-to-monitor-itself) instead of:
+Prometheus must be configured to scrape the exporter's configured IP and port. 
 
-```
-static_configs:
-    - targets: ['localhost:<PROMETHEUS_PORT>']
-```
-edit the config target the collector:
-```
-static_configs:
-    - targets: ['localhost:<COLLECTOR_PORT>']
-```
