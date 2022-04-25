@@ -1,20 +1,31 @@
 version: 0.0.1
 title: MySQL
+description: |
+  Log parser for MySQL.
+  This plugin supports error logging as well as query logging.
+
+  To enable general query logging run the following with an admin user:
+   SET GLOBAL general_log_file = '/var/log/mysql/general.log';
+   SET GLOBAL general_log = 'ON';
+
+  To enable slow query logging run the following with an admin user:
+    SET GLOBAL slow_query_log_file = '/var/log/mysql/slow-query.log';
+    SET GLOBAL slow_query_log = 'ON';
 parameters:
   - name: enable_general_log
     type: bool
-    default: true
+    default: false
   - name: general_log_paths
     type: "[]string"
     default:
       - "/var/log/mysql/general.log"
   - name: enable_slow_log
     type: bool
-    default: true
+    default: false
   - name: slow_query_log_paths
     type: "[]string"
     default:
-      - "/var/log/mysql/slow.log"
+      - "/var/log/mysql/slow*.log"
   - name: enable_error_log
     type: bool
     default: true
@@ -312,7 +323,7 @@ template: |
                 - system
               info2:
                 - note
-    {{end]}}
+    {{end}}
 
     {{if .enable_general_log}}
     filelog/general_log:
