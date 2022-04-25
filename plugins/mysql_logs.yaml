@@ -63,6 +63,14 @@ template: |
       multiline:
         line_start_pattern: '# Time: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d+Z\s|/\w+/\w+/mysqld,'
       operators:
+        # Example of log line:
+        # # Time: 2022-04-25T16:58:49.001283Z
+        # # User@Host: root[root] @ localhost []  Id:    12
+        # # Query_time: 0.038360  Lock_time: 0.000035 Rows_sent: 0  Rows_examined: 0
+        # SET timestamp=1650905928;
+        # create table stuff (
+        # id int
+        # );
         - id: slow_query_router
           type: router
           routes:
@@ -307,6 +315,8 @@ template: |
       multiline:
         line_start_pattern: '\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d+Z'
       operators:
+        # Example of log line:
+        # 2022-04-25T12:06:16.500574Z 1 [System] [MY-013576] [InnoDB] InnoDB initialization has started.
         - type: regex_parser
           regex: '(?P<timestamp>\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d+Z)\s+(?P<tid>\d+)\s+\[(?P<mysql_severity>[^\]]+)]\s+(?P<message>[\d\D\s]+)'
           timestamp:
@@ -335,6 +345,12 @@ template: |
       multiline:
         line_start_pattern: '\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d+Z|/\w+/\w+/mysqld,'
       operators:
+        # Example of log line:
+        # /usr/sbin/mysqld, Version: 5.7.27-log (MySQL Community Server (GPL)). started with:
+        # Tcp port: 0  Unix socket: /var/lib/mysql/mysql.sock
+        # Time                 Id Command    Argument
+        # 
+        # 2020-06-19T13:06:37.479323Z	    1 Query	DROP PREPARE stmt;
         - type: router
           routes:
             - output: general_regex_parser
@@ -568,6 +584,8 @@ template: |
         {{end}}
       start_at: {{ .start_at }}
       operators:
+        # Example of log line:
+        # 20210317 11:41:24,oiq-int-mysql,root,localhost,4,0,"FAILED ""CONNECT""",,,0
         - id: single_quote_router
           type: router
           default: mariadb_audit_regex_parser_lt
