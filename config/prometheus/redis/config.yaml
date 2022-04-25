@@ -1,0 +1,26 @@
+receivers:
+  redis:
+    endpoint: "localhost:6379"
+    collection_interval: 60s
+
+processors:
+  batch:
+
+  normalizesums:
+
+exporters:
+  prometheus:
+    endpoint: "localhost:9000"
+    resource_to_telemetry_conversion:
+      enabled: true
+
+service:
+  pipelines:
+    metrics:
+      receivers:
+      - redis
+      processors:
+      - batch
+      - normalizesums
+      exporters:
+      - prometheus

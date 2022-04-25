@@ -1,0 +1,28 @@
+receivers:
+  mysql:
+    endpoint: localhost:3306
+    username: $MYSQL_USERNAME
+    password: $MYSQL_PASSWORD
+    collection_interval: 60s
+
+processors:
+  batch:
+
+  normalizesums:
+
+exporters:
+  prometheus:
+    endpoint: "localhost:9000"
+    resource_to_telemetry_conversion:
+      enabled: true
+
+service:
+  pipelines:
+    metrics:
+      receivers:
+      - mysql
+      processors:
+      - normalizesums
+      - batch
+      exporters:
+      - prometheus
