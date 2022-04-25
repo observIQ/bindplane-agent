@@ -13,14 +13,18 @@ processors:
     system:
       hostname_sources: ["os"]
 
+  resource:
+    attributes:
+    - key: location
+      value: global
+      action: upsert
+
   resourceattributetransposer:
     operations:
       - from: host.name
         to: agent
       - from: elasticsearch.cluster.name
         to: cluster_name
-      - from: elasticsearch.node.name
-        to: node_name
 
   normalizesums:
 
@@ -31,7 +35,17 @@ exporters:
     retry_on_failure:
       enabled: false
     metric:
-      prefix: custom.googleapis.com
+      prefix: workload.googleapis.com
+    resource_mappings:
+      - source_type: ""
+        target_type: generic_node
+        label_mappings:
+          - source_key: elasticsearch.node.name
+            target_key: node_id
+          - source_key: elasticsearch.node.name
+            target_key: namespace
+          - source_key: location
+            target_key: location
 
 service:
   pipelines:
@@ -40,6 +54,7 @@ service:
       - elasticsearch
       processors:
       - resourcedetection
+      - resource
       - resourceattributetransposer
       - normalizesums
       - batch
