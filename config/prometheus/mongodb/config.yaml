@@ -1,0 +1,26 @@
+receivers:
+  mongodb:
+    hosts:
+      - endpoint: localhost:27017
+
+processors:
+  normalizesums:
+
+  batch:
+
+exporters:
+  prometheus:
+    endpoint: "localhost:9000"
+    resource_to_telemetry_conversion:
+      enabled: true
+
+service:
+  pipelines:
+    metrics:
+      receivers:
+      - mongodb
+      processors:
+      - normalizesums
+      - batch
+      exporters:
+      - prometheus
