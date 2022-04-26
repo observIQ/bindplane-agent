@@ -55,6 +55,8 @@ template: |
                 - D5
           output: add_log_type
 
+        # Example log line:
+        # {"t":{"$date":"2022-04-26T16:15:44.876+00:00"},"s":"I",  "c":"INDEX",    "id":20345,   "ctx":"LogicalSessionCacheRefresh","msg":"Index build: done building","attr":{"buildUUID":null,"namespace":"config.system.sessions","index":"lsidTTLIndex","commitTimestamp":null}}
         - id: 4_4_parser
           type: json_parser
           parse_from: body
