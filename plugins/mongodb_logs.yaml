@@ -1,0 +1,128 @@
+version: 0.0.1
+title: MongoDB
+description: Log parser for MongoDB
+parameters:
+  - name: log_paths
+    type: "[]string"
+    default: ["/var/log/mongodb/mongodb.log*"]
+  - name: start_at
+    type: string
+    supported:
+      - beginning
+      - end
+    default: end
+template: |
+  receivers:
+    filelog:
+      include:
+        {{ range $fp := .daemon_log_paths }}
+        - '{{ $fp }}'
+        {{end}}
+      exclude:
+        {{ range $fp := .daemon_log_paths }}
+        - '{{ $fp }}*.gz'
+        {{end}}
+      start_at: {{ .start_at }}
+      operators:
+        - type: router
+          default: legacy_parser
+          routes:
+            - expr: 'body matches "^{.*}$|^{.*}\\n$"'
+              output: 4_4_parser
+
+        - id: legacy_parser
+          type: regex_parser
+          regex: '^(?P<timestamp>\S+)\s+(?P<severity>\w+)\s+(?P<component>[\w-]+)\s+\[(?P<context>\S+)\]\s+(?P<message>.*)$'
+          timestamp:
+            parse_from: attributes:timestamp
+            #2019-02-06T09:22:43.967-0500
+            layout: '%Y-%m-%dT%H:%M:%S.%f%z'
+          severity:
+            parse_from: attributes.severity
+            mapping:
+              fatal: F
+              error: E
+              warn: W
+              info: I
+              debug:
+                - D
+                - D1
+                - D2
+                - D3
+                - D4
+                - D5
+          output: add_plugin_id
+
+        - id: 4_4_parser
+          type: json_parser
+          parse_from: body
+          timestamp:
+            parse_from: attributes.t.date
+            #2020-11-03T14:24:07.436-05:00
+            layout: '%Y-%m-%dT%H:%M:%S.%f%j'
+          severity:
+            parse_from: attributes.s
+            mapping:
+              fatal: F
+              error: E
+              warn: W
+              info: I
+              debug:
+                - D
+                - D1
+                - D2
+                - D3
+                - D4
+                - D5
+          output: remove_t
+
+        - id: remove_t
+          type: remove
+          field: attributes.t
+
+        - id: move_component
+          type: move
+          from: attributes.c
+          to: attributes.component
+
+        - id: move_context
+          type: move
+          from: attributes.ctx
+          to: attributes.context
+
+        - id: move_message
+          type: move
+          from: attributes.msg
+          to: attributes.message
+
+        # When message is 'WiredTiger message', data.attr.message
+        # always exists, and should be promoted to message
+        - id: wiredtiger_router
+          type: router
+          default: add_log_type
+          routes:
+            - expr: 'attributes.message == "WiredTiger message"'
+              output: move_wiredtiger_type
+
+        - id: move_wiredtiger_type
+          type: move
+          from: attributes.message
+          to: attributes.message_type
+          output: move_wiredtiger_msg
+
+        - id: move_wiredtiger_msg
+          type: move
+          from: attributes.attr.message
+          to: attributes.message
+          output: add_log_type
+          
+        - id: add_log_type
+          type: add
+          field: 'attributes.log_type'
+          value: 'mongodb'
+
+  service:
+    pipelines:
+      logs:
+        receivers:
+          - filelog
