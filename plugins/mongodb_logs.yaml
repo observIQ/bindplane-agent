@@ -17,11 +17,11 @@ template: |
   receivers:
     filelog:
       include:
-        {{ range $fp := .daemon_log_paths }}
+        {{ range $fp := .log_paths }}
         - '{{ $fp }}'
         {{end}}
       exclude:
-        {{ range $fp := .daemon_log_paths }}
+        {{ range $fp := .log_paths }}
         - '{{ $fp }}*.gz'
         {{end}}
       start_at: {{ .start_at }}
@@ -36,7 +36,7 @@ template: |
           type: regex_parser
           regex: '^(?P<timestamp>\S+)\s+(?P<severity>\w+)\s+(?P<component>[\w-]+)\s+\[(?P<context>\S+)\]\s+(?P<message>.*)$'
           timestamp:
-            parse_from: attributes:timestamp
+            parse_from: attributes.timestamp
             #2019-02-06T09:22:43.967-0500
             layout: '%Y-%m-%dT%H:%M:%S.%f%z'
           severity:
@@ -53,13 +53,13 @@ template: |
                 - D3
                 - D4
                 - D5
-          output: add_plugin_id
+          output: add_log_type
 
         - id: 4_4_parser
           type: json_parser
           parse_from: body
           timestamp:
-            parse_from: attributes.t.date
+            parse_from: attributes.t.$date
             #2020-11-03T14:24:07.436-05:00
             layout: '%Y-%m-%dT%H:%M:%S.%f%j'
           severity:
@@ -76,11 +76,15 @@ template: |
                 - D3
                 - D4
                 - D5
-          output: remove_t
+          output: move_component
+        # Commented out remove operatore out and output until remove operator is added in.
+        # Tracking in PR https://github.com/open-telemetry/opentelemetry-collector-contrib/pull/9545
+          #output: remove_t
 
-        - id: remove_t
-          type: remove
-          field: attributes.t
+
+        # - id: remove_t
+        #   type: remove
+        #   field: attributes.t
 
         - id: move_component
           type: move
