@@ -1,0 +1,65 @@
+receivers:
+  jmx:
+    jar_path: /opt/opentelemetry-java-contrib-jmx-metrics.jar
+    endpoint: localhost:8004
+    target_system: hadoop,jvm
+    collection_interval: 60s
+    properties:
+      # Attribute 'endpoint' will be used for generic_node's node_id field.
+      otel.resource.attributes: endpoint=localhost:8004
+
+processors:
+  resourcedetection:
+    detectors: ["system"]
+    system:
+      hostname_sources: ["os"]
+
+  resourceattributetransposer:
+    operations:
+      - from: "host.name"
+        to: "agent"
+
+  # Used for Google generic_node mapping.
+  resource:
+    attributes:
+    - key: namespace
+      value: "hadoop"
+      action: upsert
+    - key: location
+      value: "global"
+      action: upsert
+
+  normalizesums:
+
+  batch:
+
+exporters: 
+  googlecloud:
+    retry_on_failure:
+      enabled: false
+    metric:
+      prefix: workload.googleapis.com
+    resource_mappings:
+    - source_type: ""
+      target_type: generic_node
+      label_mappings:
+      - source_key: endpoint
+        target_key: node_id
+      - source_key: location
+        target_key: location
+      - source_key: namespace
+        target_key: namespace
+
+service:
+  pipelines:
+    metrics:
+      receivers:
+      - jmx
+      processors:
+      - resourcedetection
+      - resourceattributetransposer
+      - resource
+      - normalizesums
+      - batch
+      exporters:
+      - googlecloud
