@@ -1,4 +1,4 @@
-# Tomcat Metrics with Google Cloud
+# Hadoop Metrics with Google Cloud
 
 The JMX Receiver can be used to send Hadoop metrics to Google Cloud Monitoring.
 
