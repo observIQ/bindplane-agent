@@ -109,6 +109,7 @@ require (
 	cloud.google.com/go v0.100.2 // indirect
 	cloud.google.com/go/compute v1.6.0 // indirect
 	cloud.google.com/go/iam v0.3.0 // indirect
+	cloud.google.com/go/logging v1.4.2 // indirect
 	cloud.google.com/go/monitoring v1.4.0 // indirect
 	cloud.google.com/go/pubsub v1.20.0 // indirect
 	cloud.google.com/go/spanner v1.31.0 // indirect
@@ -128,7 +129,6 @@ require (
 	github.com/Azure/go-autorest/autorest/validation v0.3.1 // indirect
 	github.com/Azure/go-autorest/logger v0.2.1 // indirect
 	github.com/Azure/go-autorest/tracing v0.6.0 // indirect
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector v0.28.0 // indirect
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.4.0 // indirect
 	github.com/Microsoft/go-winio v0.5.1 // indirect
 	github.com/ReneKroon/ttlcache/v2 v2.11.0 // indirect
@@ -408,6 +408,8 @@ require (
 	github.com/spf13/cobra v1.4.0 // indirect
 	golang.org/x/sys v0.0.0-20220328115105-d36c6a25d886
 )
+
+replace github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlecloudexporter v0.50.0 => github.com/observiq/opentelemetry-collector-contrib/exporter/googlecloudexporter v0.0.0-20220304152956-bb36c08bd895
 
 replace github.com/observiq/observiq-otel-collector/processor/resourceattributetransposerprocessor v0.5.0 => ./processor/resourceattributetransposerprocessor
 
