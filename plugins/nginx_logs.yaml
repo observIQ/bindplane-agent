@@ -77,12 +77,15 @@ template: |
               layout: '%d/%b/%Y:%H:%M:%S %z'
             severity:
               parse_from: "attributes.status"
-              preserve_to: "attributes.http_request_status"
               mapping:
                 info: 2xx
                 info2: 3xx
                 warn: 4xx
                 error: 5xx
+          - id: move_status
+            type: move
+            from: attributes.status
+            to: attributes.http_request_status
           - id: request_parser
             type: regex_parser
             parse_from: "attributes.request"
