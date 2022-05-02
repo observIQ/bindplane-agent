@@ -32,7 +32,7 @@ parameters:
       - end
     default: end
   - name: encoding
-    type: enum
+    type: string
     supported:
       - nop
       - utf-8
