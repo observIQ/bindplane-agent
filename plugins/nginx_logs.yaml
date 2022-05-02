@@ -58,10 +58,10 @@ template: |
           - type: regex_parser
             regex: '^(?P<http_request_remoteIp>[^ ]*) (?P<host>[^ ]*) (?P<user>[^ ]*) \[(?P<time_local>[^\]]*)\] "(?P<http_request_requestMethod>\S+)(?: +(?P<http_request_requestUrl>[^\"]*?)(?: +(?P<http_request_protocol>\S+))?)?" (?P<http_request_status>[^ ]*) (?P<http_request_responseSize>[^ ]*)(?: "(?P<http_request_referer>[^\"]*)" "(?P<http_request_userAgent>[^\"]*)")?$'
             timestamp:
-              parse_from: "$body.time_local"
+              parse_from: "attributes.time_local"
               layout: '%d/%b/%Y:%H:%M:%S %z'
             severity:
-              parse_from: "$body.http_request_status"
+              parse_from: "attributes.http_request_status"
               mapping:
                 info: 2xx
                 info2: 3xx
@@ -73,11 +73,11 @@ template: |
           - id: access_parser
             type: json_parser
             timestamp:
-              parse_from: "$body.time_local"
+              parse_from: "attributes.time_local"
               layout: '%d/%b/%Y:%H:%M:%S %z'
             severity:
-              parse_from: "$body.status"
-              preserve_to: "$body.http_request_status"
+              parse_from: "attributes.status"
+              preserve_to: "attributes.http_request_status"
               mapping:
                 info: 2xx
                 info2: 3xx
@@ -85,9 +85,8 @@ template: |
                 error: 5xx
           - id: request_parser
             type: regex_parser
-            parse_from: "$body.request"
-            preserve_to: "$body.request"
-            if: '$body.request != nil and $body.request matches "\\S+ +[^ ]* "'
+            parse_from: "attributes.request"
+            if: 'attributes.request != nil and attributes.request matches "\\S+ +[^ ]* "'
             regex: '(?P<method>\S+) +(?P<path>[^ ]*) ((?P<protocol>[^/]*)/(?P<protocol_version>.*)|.*)?'
           {{end}} # end observiq format parsing
       {{end}} # end access log receiver
@@ -106,10 +105,10 @@ template: |
           - type: regex_parser
             regex: '^(?P<time>\d+[./-]\d+[./-]\d+[- ]\d+:\d+:\d+) \[(?P<log_level>[^\]]*)\] (?P<pid>\d+)#(?P<tid>\d+):(?: \*(?P<connection>\d+))? (?P<message>.*?)(?:, client: (?P<client>[^,]+))?(?:, server: (?P<server>[^,]+))?(?:, request: "(?P<request>[^"]*)")?(?:, subrequest: \"(?P<subrequest>[^\"]*)\")?(?:, upstream: \"(?P<upstream>[^"]*)\")?(?:, host: \"(?P<host>[^\"]*)\")?(?:, referrer: \"(?P<referer>[^"]*)\")?$'
             timestamp:
-              parse_from: "$body.time"
+              parse_from: "attributes.time"
               layout: '%Y/%m/%d %T'
             severity:
-              parse_from: "$body.log_level"
+              parse_from: "attributes.log_level"
               mapping:
                 info: 2xx
                 info2: 3xx
