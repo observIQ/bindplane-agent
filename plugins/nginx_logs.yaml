@@ -121,9 +121,9 @@ template: |
       pipelines:
         logs:
           receivers:
-          {{ if .enable_access_log }}
-          - filelog/access_log
-          {{ end }}
-          {{ if .enable_error_log }}
-          - filelog/error_log
-          {{ end }}
+            {{ if .enable_access_log }}
+            - filelog/access_log
+            {{ end }}
+            {{ if .enable_error_log }}
+            - filelog/error_log
+            {{ end }}
