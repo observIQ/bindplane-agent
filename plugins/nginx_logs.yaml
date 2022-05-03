@@ -62,6 +62,7 @@ template: |
               layout: '%d/%b/%Y:%H:%M:%S %z'
             severity:
               parse_from: "attributes.http_request_status"
+              preserve_to: "attributes.http_request_status"
               mapping:
                 info: 2xx
                 info2: 3xx
@@ -77,6 +78,7 @@ template: |
               layout: '%d/%b/%Y:%H:%M:%S %z'
             severity:
               parse_from: "attributes.status"
+              preserve_to: "attributes.status"
               mapping:
                 info: 2xx
                 info2: 3xx
@@ -113,10 +115,8 @@ template: |
             severity:
               parse_from: "attributes.log_level"
               mapping:
-                info: 2xx
-                info2: 3xx
-                warn: 4xx
-                error: 5xx
+                error2: crit
+                error3: emerg
       {{end}} # end error log receiver
 
     service:
