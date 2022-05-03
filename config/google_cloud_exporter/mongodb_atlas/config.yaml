@@ -2,7 +2,7 @@ receivers:
   mongodbatlas:
     public_key: $MONGODB_ATLAS_PUBLIC_KEY
     private_key: $MONGODB_ATLAS_PRIVATE_KEY
-    collection_interval: 5m
+    collection_interval: 1m
 
 processors:
   resourcedetection:
