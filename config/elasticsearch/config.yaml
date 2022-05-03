@@ -1,0 +1,27 @@
+receivers:
+  filelog:
+    include:
+    - /var/log/log-file.json
+    start_at: beginning
+    resource:
+      log_type: app
+    operators:
+      - type: move
+        from: body
+        to: body.message
+      - type: json_parser
+
+exporters:
+  elasticsearch:
+    endpoints:
+    - "https://<HOST-1>:9200"
+    - "https://<HOST-2>:9200"
+    - "https://<HOST-3>:9200"
+
+service:
+  pipelines:
+    logs:
+      receivers:
+      - filelog
+      exporters:
+      - elasticsearch
