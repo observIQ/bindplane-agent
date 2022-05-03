@@ -96,7 +96,7 @@ template: |
           {{end}} # end observiq format parsing
       {{end}} # end access log receiver
 
-      {{- if .enable_error_log -}}
+      {{ if .enable_error_log }}
       filelog/error_log:
         include:
           {{ range $fp := .error_log_paths }}
