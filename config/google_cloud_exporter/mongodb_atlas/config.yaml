@@ -1,26 +1,29 @@
 receivers:
-  # mongodbatlas will set host.name, it is important that
-  # this value is preserved and not overwritten by something
-  # like resourcedetection processor. host.name will map to
-  # node_id for Google's generic_node Monitored Resource Type.
   mongodbatlas:
     public_key: $MONGODB_ATLAS_PUBLIC_KEY
     private_key: $MONGODB_ATLAS_PRIVATE_KEY
-    collection_interval: 60s
+    collection_interval: 5m
 
 processors:
+  resourcedetection:
+    detectors: ["system"]
+    system:
+      hostname_sources: ["os"]
+
   # Copy useful mongodb specific attributes that will otherwise
   # be dropped by the Google exporter.
   resourceattributetransposer:
     operations:
-      - from: mongodb.atlas.org_name
+      - from: host.name
+        to: agent
+      - from: mongodb_atlas.org_name
         to: org_name
-      - from: mongodb.atlas.project
+      - from: mongodb_atlas.project.name
         to: project
-      - from: mongodb.atlas.database_name
+      - from: mongodb_atlas.db.name
         to: database
-      - from: mongodb.atlas.partition
-        to: partition
+      - from: mongodb_atlas.process.type_name
+        to: process_type
 
   # Used for Google generic_node mapping.
   resource:
@@ -46,7 +49,7 @@ exporters:
     - source_type: ""
       target_type: generic_node
       label_mappings:
-      - source_key: host.name
+      - source_key: mongodb_atlas.host.name
         target_key: node_id
       - source_key: location
         target_key: location
@@ -59,6 +62,7 @@ service:
       receivers:
       - mongodbatlas
       processors:
+      - resourcedetection
       - resourceattributetransposer
       - resource
       - normalizesums
