@@ -10,6 +10,7 @@ receivers:
         from: body
         to: body.message
       - type: json_parser
+        parse_from: body.message
 
 exporters:
   elasticsearch:
