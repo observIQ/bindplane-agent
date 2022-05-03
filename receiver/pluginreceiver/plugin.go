@@ -156,7 +156,7 @@ func (p *Plugin) checkType(values map[string]interface{}) error {
 
 			for _, v := range raw {
 				if _, ok := v.(string); !ok {
-					return fmt.Errorf("parameter %s must be a []string", parameter.Name)
+					return fmt.Errorf("parameter %s: expected string, but got %v", parameter.Name, v)
 				}
 			}
 		case intType:
