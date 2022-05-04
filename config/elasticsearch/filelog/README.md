@@ -11,4 +11,5 @@ An Elasticsearch cluster/endpoint to send log data to.
 An example configuration is located [here](./config.yaml).
 
 1. Copy [config.yaml](./config.yaml) to `/opt/observiq-otel-collector/config.yaml`
-2. Restart the collector: `sudo systemctl restart observiq-otel-collector`
+2. Modify `config.yaml` to include the Elasticsearch Exporter
+3. Restart the collector: `sudo systemctl restart observiq-otel-collector`
