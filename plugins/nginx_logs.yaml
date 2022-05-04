@@ -22,7 +22,7 @@ parameters:
     type: bool
     default: true
   - name: error_log_paths
-    type: string
+    type: "[]string"
     default: 
       - "/var/log/nginx/error.log*"
   - name: start_at
