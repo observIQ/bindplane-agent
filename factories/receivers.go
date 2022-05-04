@@ -17,6 +17,7 @@ package factories
 import (
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-collector/receiver/varnishreceiver"
 	"github.com/observiq/observiq-otel-collector/receiver/pluginreceiver"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/activedirectorydsreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/apachereceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/awscontainerinsightreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/awsecscontainermetricsreceiver"
@@ -72,6 +73,7 @@ import (
 )
 
 var defaultReceivers = []component.ReceiverFactory{
+	activedirectorydsreceiver.NewFactory(),
 	apachereceiver.NewFactory(),
 	awscontainerinsightreceiver.NewFactory(),
 	awsecscontainermetricsreceiver.NewFactory(),

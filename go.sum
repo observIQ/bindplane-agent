@@ -1501,6 +1501,8 @@ github.com/open-telemetry/opentelemetry-collector-contrib/processor/tailsampling
 github.com/open-telemetry/opentelemetry-collector-contrib/processor/tailsamplingprocessor v0.50.0/go.mod h1:QVnwqwZR1ixtvPHC4WUui5z5X2YqFS9naDXsFUeBf70=
 github.com/open-telemetry/opentelemetry-collector-contrib/processor/transformprocessor v0.50.0 h1:yhPINafDbUKMpbo4WKYAbnw+DnTV/zcXR1+wXnXZKMY=
 github.com/open-telemetry/opentelemetry-collector-contrib/processor/transformprocessor v0.50.0/go.mod h1:m93jL/g/Pe12ox34o6k70c2JZdbYDwOwG+NoxD13xWk=
+github.com/open-telemetry/opentelemetry-collector-contrib/receiver/activedirectorydsreceiver v0.50.0 h1:Fnod5GVQvfpmNhRwnS8CeHMMuBiDmK2CvksGanmpmRA=
+github.com/open-telemetry/opentelemetry-collector-contrib/receiver/activedirectorydsreceiver v0.50.0/go.mod h1:RPOM1T4iIDHriUp4fhC2ucJ4lvIVvXV+6or01trZpaQ=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/apachereceiver v0.50.0 h1:/lDv+D2BeOyOr4t/OIGUQ3vWDfn88qjRiUrLfX7D8dg=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/apachereceiver v0.50.0/go.mod h1:vxWOkqKjOA908RPzw0BCNYrgJQ2CcjoQaryB6Or4vGU=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/awscontainerinsightreceiver v0.50.0 h1:RD1g7JgfMKamPz16BNqpAgv32TmKBrCeDZKxAw9EgEc=

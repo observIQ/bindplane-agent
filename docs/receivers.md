@@ -2,6 +2,7 @@
 
 Below is a list of supported receivers with links to their documentation pages.
 
+- [activedirectorydsreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.50.0/receiver/activedirectorydsreceiver/README.md)
 - [apachereceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.50.0/receiver/apachereceiver/README.md)
 - [awscontainerinsightreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.50.0/receiver/awscontainerinsightreceiver/README.md)
 - [awsecscontainermetricsreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.50.0/receiver/awsecscontainermetricsreceiver/README.md)
