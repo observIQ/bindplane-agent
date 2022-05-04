@@ -33,6 +33,7 @@ func TestValidateSuppliedPlugins(t *testing.T) {
 	require.NoError(t, err)
 
 	for _, entry := range entries {
+		entry := entry
 		t.Run(fmt.Sprintf("Loading %s", entry.Name()), func(t *testing.T) {
 			t.Parallel()
 			fullFilePath, err := filepath.Abs(filepath.Join(pluginDirPath, entry.Name()))
@@ -44,6 +45,33 @@ func TestValidateSuppliedPlugins(t *testing.T) {
 
 			_, err = plugin.RenderComponents(map[string]interface{}{})
 			assert.NoError(t, err, "Failed to render components for plugin %s", entry.Name())
+		})
+	}
+}
+
+// TestValidateSuppliedPluginsLoadSuppliedDefaults ensures each plugin can be loaded if the defaults
+// are supplied for configuration (e.g. no mismatched types for defaults, no unsupported values for defaults)
+func TestValidateSuppliedPluginsLoadSuppliedDefaults(t *testing.T) {
+	entries, err := os.ReadDir(pluginDirPath)
+	require.NoError(t, err)
+
+	for _, entry := range entries {
+		entry := entry
+		t.Run(fmt.Sprintf("Loading %s", entry.Name()), func(t *testing.T) {
+			t.Parallel()
+			fullFilePath, err := filepath.Abs(filepath.Join(pluginDirPath, entry.Name()))
+			require.NoError(t, err, "Failed to determine path of file %s", entry.Name())
+
+			// Load the plugin
+			plugin, err := LoadPlugin(fullFilePath)
+			require.NoError(t, err, "Failed to load file %s", entry.Name())
+
+			parameterMap := plugin.ApplyDefaults(map[string]interface{}{})
+
+			require.NoError(t, plugin.checkDefined(parameterMap))
+			require.NoError(t, plugin.checkSupported(parameterMap))
+			require.NoError(t, plugin.checkType(parameterMap))
+			// We explicitly don't call checkRequired here, since parameters may not have specified defaults
 		})
 	}
 }
