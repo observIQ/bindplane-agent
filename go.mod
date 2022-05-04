@@ -3,7 +3,7 @@ module github.com/observiq/observiq-otel-collector
 go 1.17
 
 require (
-	github.com/GoogleCloudPlatform/opentelemetry-operations-collector v0.0.3-0.20220418202105-578ec8bc6fbf
+	github.com/GoogleCloudPlatform/opentelemetry-operations-collector v0.0.3-0.20220427142336-1ba794f22664
 	github.com/observiq/observiq-otel-collector/exporter/googlecloudexporter v0.5.0
 	github.com/observiq/observiq-otel-collector/processor/resourceattributetransposerprocessor v0.5.0
 	github.com/observiq/observiq-otel-collector/receiver/pluginreceiver v0.5.0
@@ -100,14 +100,14 @@ require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/zookeeperreceiver v0.50.0
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.7.1
-	go.opentelemetry.io/collector v0.50.0
+	go.opentelemetry.io/collector v0.50.1-0.20220429151328-041f39835df7
 	go.uber.org/multierr v1.8.0
 	go.uber.org/zap v1.21.0
 )
 
 require (
 	cloud.google.com/go v0.100.2 // indirect
-	cloud.google.com/go/compute v1.6.0 // indirect
+	cloud.google.com/go/compute v1.6.1 // indirect
 	cloud.google.com/go/iam v0.3.0 // indirect
 	cloud.google.com/go/logging v1.4.2 // indirect
 	cloud.google.com/go/monitoring v1.4.0 // indirect
@@ -129,6 +129,7 @@ require (
 	github.com/Azure/go-autorest/autorest/validation v0.3.1 // indirect
 	github.com/Azure/go-autorest/logger v0.2.1 // indirect
 	github.com/Azure/go-autorest/tracing v0.6.0 // indirect
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector v0.28.0 // indirect
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.4.0 // indirect
 	github.com/Microsoft/go-winio v0.5.1 // indirect
 	github.com/ReneKroon/ttlcache/v2 v2.11.0 // indirect
@@ -140,7 +141,7 @@ require (
 	github.com/antonmedv/expr v1.9.0 // indirect
 	github.com/apache/thrift v0.16.0 // indirect
 	github.com/armon/go-metrics v0.3.10 // indirect
-	github.com/aws/aws-sdk-go v1.44.0 // indirect
+	github.com/aws/aws-sdk-go v1.44.5 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/blang/semver v3.5.1+incompatible // indirect
 	github.com/bmatcuk/doublestar/v3 v3.0.0 // indirect
@@ -197,7 +198,7 @@ require (
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/cadvisor v0.44.0 // indirect
-	github.com/google/go-cmp v0.5.7 // indirect
+	github.com/google/go-cmp v0.5.8 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/gofuzz v1.2.0 // indirect
 	github.com/google/uuid v1.3.0 // indirect
@@ -353,33 +354,33 @@ require (
 	go.mongodb.org/mongo-driver v1.9.0 // indirect
 	go.opencensus.io v0.23.0 // indirect
 	go.opentelemetry.io/collector/model v0.50.0 // indirect
-	go.opentelemetry.io/collector/pdata v0.50.0 // indirect
-	go.opentelemetry.io/collector/semconv v0.50.0 // indirect
-	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.31.0 // indirect
-	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.31.0 // indirect
-	go.opentelemetry.io/contrib/zpages v0.31.0 // indirect
-	go.opentelemetry.io/otel v1.6.3 // indirect
-	go.opentelemetry.io/otel/exporters/prometheus v0.29.0 // indirect
-	go.opentelemetry.io/otel/metric v0.29.0 // indirect
-	go.opentelemetry.io/otel/sdk v1.6.3 // indirect
-	go.opentelemetry.io/otel/sdk/metric v0.29.0 // indirect
-	go.opentelemetry.io/otel/trace v1.6.3 // indirect
+	go.opentelemetry.io/collector/pdata v0.50.1-0.20220429151328-041f39835df7 // indirect
+	go.opentelemetry.io/collector/semconv v0.50.1-0.20220429151328-041f39835df7 // indirect
+	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.32.0 // indirect
+	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.32.0 // indirect
+	go.opentelemetry.io/contrib/zpages v0.32.0 // indirect
+	go.opentelemetry.io/otel v1.7.0 // indirect
+	go.opentelemetry.io/otel/exporters/prometheus v0.30.0 // indirect
+	go.opentelemetry.io/otel/metric v0.30.0 // indirect
+	go.opentelemetry.io/otel/sdk v1.7.0 // indirect
+	go.opentelemetry.io/otel/sdk/metric v0.30.0 // indirect
+	go.opentelemetry.io/otel/trace v1.7.0 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/goleak v1.1.12 // indirect
 	golang.org/x/crypto v0.0.0-20220214200702-86341886e292 // indirect
 	golang.org/x/mod v0.5.1 // indirect
-	golang.org/x/net v0.0.0-20220325170049-de3da57026de // indirect
-	golang.org/x/oauth2 v0.0.0-20220309155454-6242fa91716a // indirect
+	golang.org/x/net v0.0.0-20220412020605-290c469a71a5 // indirect
+	golang.org/x/oauth2 v0.0.0-20220411215720-9780585627b5 // indirect
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
 	golang.org/x/term v0.0.0-20210927222741-03fcf44c2211 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/time v0.0.0-20220224211638-0e9765cccd65 // indirect
 	golang.org/x/tools v0.1.9 // indirect
-	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
+	golang.org/x/xerrors v0.0.0-20220411194840-2f41105eb62f // indirect
 	gonum.org/v1/gonum v0.11.0 // indirect
-	google.golang.org/api v0.74.0 // indirect
+	google.golang.org/api v0.77.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
-	google.golang.org/genproto v0.0.0-20220413183235-5e96e2839df9 // indirect
+	google.golang.org/genproto v0.0.0-20220421151946-72621c1f0bd3 // indirect
 	google.golang.org/grpc v1.46.0 // indirect
 	google.golang.org/protobuf v1.28.0 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
@@ -406,10 +407,10 @@ require (
 	github.com/klauspost/compress v1.15.1 // indirect
 	github.com/shirou/gopsutil/v3 v3.22.3 // indirect
 	github.com/spf13/cobra v1.4.0 // indirect
-	golang.org/x/sys v0.0.0-20220328115105-d36c6a25d886
+	golang.org/x/sys v0.0.0-20220412211240-33da011f77ad
 )
 
-replace github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlecloudexporter v0.50.0 => github.com/observiq/opentelemetry-collector-contrib/exporter/googlecloudexporter v0.0.0-20220304152956-bb36c08bd895
+replace github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlecloudexporter v0.50.0 => github.com/observiq/opentelemetry-collector-contrib/exporter/googlecloudexporter v0.0.0-20220504030020-bb60df1ad6e0
 
 replace github.com/observiq/observiq-otel-collector/processor/resourceattributetransposerprocessor v0.5.0 => ./processor/resourceattributetransposerprocessor
 
@@ -419,3 +420,6 @@ replace github.com/observiq/observiq-otel-collector/exporter/googlecloudexporter
 
 // see https://github.com/google/gnostic/issues/262
 replace github.com/googleapis/gnostic v0.5.6 => github.com/googleapis/gnostic v0.5.5
+
+// Version on main is causing issues in the azuremonitorexporter so we replace it back to released version
+replace go.opentelemetry.io/collector/pdata v0.50.1-0.20220429151328-041f39835df7 => go.opentelemetry.io/collector/pdata v0.50.0

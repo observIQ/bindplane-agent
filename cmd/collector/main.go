@@ -36,8 +36,12 @@ func main() {
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer cancel()
 
-	settings := collector.NewSettings(*configPaths, version.Version(), nil)
-	if err := run(ctx, settings); err != nil {
+	settings, err := collector.NewSettings(*configPaths, version.Version(), nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if err := run(ctx, *settings); err != nil {
 		log.Fatal(err)
 	}
 }
