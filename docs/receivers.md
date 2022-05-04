@@ -20,6 +20,7 @@ Below is a list of supported receivers with links to their documentation pages.
 - [googlecloudpubsubreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.50.0/receiver/googlecloudpubsubreceiver/README.md)
 - [googlecloudspannerreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.50.0/receiver/googlecloudspannerreceiver/README.md)
 - [hostmetricsreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.50.0/receiver/hostmetricsreceiver/README.md)
+- [iisreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.50.0/receiver/iisreceiver/README.md)
 - [influxdbreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.50.0/receiver/influxdbreceiver/README.md)
 - [jaegerreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.50.0/receiver/jaegerreceiver/README.md)
 - [jmxreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.50.0/receiver/jmxreceiver/README.md)
