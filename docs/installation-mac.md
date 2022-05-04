@@ -14,6 +14,16 @@ You can then run `brew services start observiq/observiq-otel-collector/observiq-
 
 To verify the collector is working you can check the output at `/tmp/observiq-otel-collector.log`.
 
+### Install/Update script
+The collector may be installed through a shell script which will wrap brew commands.
+
+This script may also be used to update an existing installation.
+
+To install using the installation script, you may run:
+```sh
+sh -c "$(curl -fsSlL https://github.com/observiq/observiq-otel-collector/releases/latest/download/install_macos.sh)" install_macos.sh
+```
+
 ### Additional Install Steps
 
 If you plan on JMX collecting metrics via the [JMX Receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.49.0/receiver/jmxreceiver/README.md) you can copy the `opentelemetry-java-contrib-jmx-metrics.jar` to the default location to make configuration easier.
@@ -37,21 +47,19 @@ The collector uses `brew services` the following commands control the collector 
 
 ```sh
 # Start the collector
-brew services start observiq/observiq-otel-collector/observiq-otel-collector
+launchctl start com.observiq.collector
 
 # Stop the collector
-brew services stop observiq/observiq-otel-collector/observiq-otel-collector
-
-# Restart the collector
-brew services restart observiq/observiq-otel-collector/observiq-otel-collector
+launchctl stop com.observiq.collector
 ```
 
 ## Uninstalling
 
+### Uninstall brew
+
 To uninstall the collector run the following commands:
 
 ```sh
-brew services stop observiq/observiq-otel-collector/observiq-otel-collector
 brew uninstall observiq/observiq-otel-collector/observiq-otel-collector
 
 # To remove the plist file
@@ -59,4 +67,11 @@ launchctl remove com.observiq.collector
 
 # If you moved the opentelemetry-java-contrib-jmx-metrics.jar
 sudo rm /opt/opentelemetry-java-contrib-jmx-metrics.jar
+```
+
+### Uninstall script
+
+To uninstall an installation made with the install script, run:
+```sh
+sh -c "$(curl -fsSlL https://github.com/observiq/observiq-otel-collector/releases/latest/download/install_macos.sh)" install_macos.sh -r
 ```
