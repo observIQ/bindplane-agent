@@ -1464,8 +1464,8 @@ github.com/open-telemetry/opentelemetry-collector-contrib/pkg/translator/prometh
 github.com/open-telemetry/opentelemetry-collector-contrib/pkg/translator/prometheusremotewrite v0.50.0/go.mod h1:+8Eu3aRDOQHRQNofQVCSwBup+rf5GEc6fgJXwWR/6os=
 github.com/open-telemetry/opentelemetry-collector-contrib/pkg/translator/zipkin v0.50.0 h1:hubY7wB1cWyi2L6KjJk1h0Yq/DLlcb/JIj6tdyUuGvM=
 github.com/open-telemetry/opentelemetry-collector-contrib/pkg/translator/zipkin v0.50.0/go.mod h1:geVAFD3jCo9OdqU1a74FYR7gmLEYdbxmh537Q5HjzQY=
-github.com/open-telemetry/opentelemetry-collector-contrib/pkg/winperfcounters v0.49.1-0.20220414180250-8e47182c7af2 h1:QmD10HJC/tHcO3sEROE5hJtMlPaBi+E/hVQrYqsckYc=
-github.com/open-telemetry/opentelemetry-collector-contrib/pkg/winperfcounters v0.49.1-0.20220414180250-8e47182c7af2/go.mod h1:znP6rVWBdXa7BtI1KDgFyMoLxgWwGds8hFc/Km1ShQs=
+github.com/open-telemetry/opentelemetry-collector-contrib/pkg/winperfcounters v0.50.0 h1:IZpurybIBnlYe+hChP4yyJP+FAH/XCJ6Zd5y11tnjGI=
+github.com/open-telemetry/opentelemetry-collector-contrib/pkg/winperfcounters v0.50.0/go.mod h1:znP6rVWBdXa7BtI1KDgFyMoLxgWwGds8hFc/Km1ShQs=
 github.com/open-telemetry/opentelemetry-collector-contrib/processor/attributesprocessor v0.50.0 h1:ga3a246GgLsLNQSmF+yQNtieaxHrsn8QQ5kv+OQz3VY=
 github.com/open-telemetry/opentelemetry-collector-contrib/processor/attributesprocessor v0.50.0/go.mod h1:/QtL8DXLvgVkuNxUooPXrOPC0y8KxRT5AVlQv+zf72w=
 github.com/open-telemetry/opentelemetry-collector-contrib/processor/cumulativetodeltaprocessor v0.50.0 h1:1PM87M9R+APOJc4KCeQgSs+9Mi/jpt/u7Piy9RYkGhA=
@@ -1580,6 +1580,8 @@ github.com/open-telemetry/opentelemetry-collector-contrib/receiver/sapmreceiver 
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/sapmreceiver v0.50.0/go.mod h1:87mB3z8i8WSr74sLkFYv7YSm/sc0NtwcOJPh+mQRHLk=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/simpleprometheusreceiver v0.50.0 h1:9gkDnlqOm99QZPlaG3luofn/RKJ/P1q5vfpL2e09ZcI=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/simpleprometheusreceiver v0.50.0/go.mod h1:VgcmvT4SC4SVsb4A9Vd08I4r1MM/6moZEsp0rHLzJJ4=
+github.com/open-telemetry/opentelemetry-collector-contrib/receiver/sqlserverreceiver v0.50.0 h1:gK5ReSFKSamgvnzoNAR+x220cLd8OonkIHuBjWi2nAM=
+github.com/open-telemetry/opentelemetry-collector-contrib/receiver/sqlserverreceiver v0.50.0/go.mod h1:mTVi4GF8Lg8cxddVP6bUPfyQZx0MKUPcyZHTx/9afBA=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/statsdreceiver v0.50.0 h1:kBZhUYiWNSShNo2gnpWS2cAaeZxlmFnpfWiHyAaY02o=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/statsdreceiver v0.50.0/go.mod h1:hcTnPHCzLHEri99xOoZRrONIM0FYZDQv8uYRezZ3IZE=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/syslogreceiver v0.50.0 h1:GHKmK5rJePNEavWvjqsaYeTx6cBJvb7G/ajAx2/Pu4M=

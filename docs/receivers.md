@@ -46,6 +46,7 @@ Below is a list of supported receivers with links to their documentation pages.
 - [sapmreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.50.0/receiver/sapmreceiver/README.md)
 - [simpleprometheusreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.50.0/receiver/simpleprometheusreceiver/README.md)
 - [statsdreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.50.0/receiver/statsdreceiver/README.md)
+- [sqlserverreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.50.0/receiver/sqlserverreceiver/README.md)
 - [syslogreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.50.0/receiver/syslogreceiver/README.md)
 - [tcplogreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.50.0/receiver/tcplogreceiver/README.md)
 - [udplogreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.50.0/receiver/udplogreceiver/README.md)

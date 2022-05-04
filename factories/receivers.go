@@ -57,6 +57,7 @@ import (
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/riakreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/sapmreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/simpleprometheusreceiver"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/sqlserverreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/statsdreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/syslogreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/tcplogreceiver"
@@ -114,6 +115,7 @@ var defaultReceivers = []component.ReceiverFactory{
 	sapmreceiver.NewFactory(),
 	simpleprometheusreceiver.NewFactory(),
 	statsdreceiver.NewFactory(),
+	sqlserverreceiver.NewFactory(),
 	syslogreceiver.NewFactory(),
 	tcplogreceiver.NewFactory(),
 	udplogreceiver.NewFactory(),
