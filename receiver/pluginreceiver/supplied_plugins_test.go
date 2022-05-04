@@ -33,18 +33,18 @@ func TestValidateSuppliedPlugins(t *testing.T) {
 	require.NoError(t, err)
 
 	for _, entry := range entries {
-		entry := entry
+		entryName := entry.Name()
 		t.Run(fmt.Sprintf("Loading %s", entry.Name()), func(t *testing.T) {
 			t.Parallel()
-			fullFilePath, err := filepath.Abs(filepath.Join(pluginDirPath, entry.Name()))
-			assert.NoError(t, err, "Failed to determine path of file %s", entry.Name())
+			fullFilePath, err := filepath.Abs(filepath.Join(pluginDirPath, entryName))
+			assert.NoError(t, err, "Failed to determine path of file %s", entryName)
 
 			// Load the plugin
 			plugin, err := LoadPlugin(fullFilePath)
-			assert.NoError(t, err, "Failed to load file %s", entry.Name())
+			assert.NoError(t, err, "Failed to load file %s", entryName)
 
 			_, err = plugin.RenderComponents(map[string]interface{}{})
-			assert.NoError(t, err, "Failed to render components for plugin %s", entry.Name())
+			assert.NoError(t, err, "Failed to render components for plugin %s", entryName)
 		})
 	}
 }
@@ -56,15 +56,15 @@ func TestValidateSuppliedPluginsLoadSuppliedDefaults(t *testing.T) {
 	require.NoError(t, err)
 
 	for _, entry := range entries {
-		entry := entry
-		t.Run(fmt.Sprintf("Loading %s", entry.Name()), func(t *testing.T) {
+		entryName := entry.Name()
+		t.Run(fmt.Sprintf("Loading %s", entryName), func(t *testing.T) {
 			t.Parallel()
-			fullFilePath, err := filepath.Abs(filepath.Join(pluginDirPath, entry.Name()))
-			require.NoError(t, err, "Failed to determine path of file %s", entry.Name())
+			fullFilePath, err := filepath.Abs(filepath.Join(pluginDirPath, entryName))
+			require.NoError(t, err, "Failed to determine path of file %s", entryName)
 
 			// Load the plugin
 			plugin, err := LoadPlugin(fullFilePath)
-			require.NoError(t, err, "Failed to load file %s", entry.Name())
+			require.NoError(t, err, "Failed to load file %s", entryName)
 
 			parameterMap := plugin.ApplyDefaults(map[string]interface{}{})
 
