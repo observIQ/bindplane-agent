@@ -20,7 +20,7 @@ parameters:
   - name: listen_address
     type: string
     default: "0.0.0.0:514"
-    # Enable TLS for TCP connections
+    # TLS options for TCP connections
   - name: enable_tls
     type: bool
     default: false
