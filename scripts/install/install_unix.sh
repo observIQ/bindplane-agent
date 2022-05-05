@@ -531,7 +531,7 @@ install_package()
   unpack_package || error_exit "$LINENO" "Failed to extract package"
   succeeded
 
-  # If an endpoint was specified, we need to write the manager.yml
+  # If an endpoint was specified, we need to write the manager.yaml
   if [ -n "$OPAMP_ENDPOINT" ]; then
     info "Creating manager yaml..."
     create_manager_yml "$MANAGEMENT_YML_PATH"
@@ -647,7 +647,7 @@ uninstall()
   systemctl disable observiq-otel-collector > /dev/null 2>&1 || error_exit "$LINENO" "Failed to disable service"
   succeeded
 
-  info "Removing any existing manager.yml..."
+  info "Removing any existing manager.yaml..."
   rm -f "$MANAGEMENT_YML_PATH"
   succeeded
 
