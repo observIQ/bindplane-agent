@@ -67,11 +67,14 @@ func (c *collector) Run(ctx context.Context) error {
 
 	// The OT collector only supports using settings once during the lifetime
 	// of a single collector instance. We must remake the settings on each startup.
-	settings := NewSettings([]string{c.configPath}, c.version, c.loggingOpts)
+	settings, err := NewSettings([]string{c.configPath}, c.version, c.loggingOpts)
+	if err != nil {
+		return err
+	}
 
 	// The OT collector only supports calling run once during the lifetime
 	// of a service. We must make a new instance each time we run the collector.
-	svc, err := service.New(settings)
+	svc, err := service.New(*settings)
 	if err != nil {
 		err := fmt.Errorf("failed to create service: %w", err)
 		c.sendStatus(false, err)
