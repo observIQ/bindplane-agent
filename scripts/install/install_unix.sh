@@ -563,7 +563,7 @@ unpack_package()
   return 0
 }
 
-# create_manager_yml creates the manager.yml at the specified path, containing opamp information, if $OPAMP_ENDPOINT is not empty.
+# create_manager_yml creates the manager.yml at the specified path, containing opamp information.
 create_manager_yml()
 {
   manager_yml_path="$1"
