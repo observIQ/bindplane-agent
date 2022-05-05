@@ -20,11 +20,8 @@ import (
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlecloudexporter"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/config"
-<<<<<<< HEAD
 	"go.opentelemetry.io/collector/service/featuregate"
-=======
 	"google.golang.org/api/option"
->>>>>>> 4293a7e (Added first pass at google credential handling)
 )
 
 func TestCreateDefaultConfig(t *testing.T) {
@@ -42,6 +39,9 @@ func TestCreateDefaultConfig(t *testing.T) {
 }
 
 func TestSetClientOptionsWithCredentials(t *testing.T) {
+	// Set feature gate so correct config is returned
+	featuregate.GetRegistry().Apply(map[string]bool{"exporter.googlecloud.OTLPDirect": false})
+
 	testCases := []struct {
 		name   string
 		config *Config
@@ -50,7 +50,7 @@ func TestSetClientOptionsWithCredentials(t *testing.T) {
 		{
 			name: "With no credentials",
 			config: &Config{
-				GCPConfig: &googlecloudexporter.Config{},
+				GCPConfig: &googlecloudexporter.LegacyConfig{},
 			},
 			opts: []option.ClientOption{},
 		},
@@ -58,7 +58,7 @@ func TestSetClientOptionsWithCredentials(t *testing.T) {
 			name: "With credentials json",
 			config: &Config{
 				Credentials: "testjson",
-				GCPConfig:   &googlecloudexporter.Config{},
+				GCPConfig:   &googlecloudexporter.LegacyConfig{},
 			},
 			opts: []option.ClientOption{
 				option.WithCredentialsJSON([]byte("testjson")),
@@ -68,7 +68,7 @@ func TestSetClientOptionsWithCredentials(t *testing.T) {
 			name: "With credentials file",
 			config: &Config{
 				CredentialsFile: "testfile",
-				GCPConfig:       &googlecloudexporter.Config{},
+				GCPConfig:       &googlecloudexporter.LegacyConfig{},
 			},
 			opts: []option.ClientOption{
 				option.WithCredentialsFile("testfile"),
@@ -79,7 +79,7 @@ func TestSetClientOptionsWithCredentials(t *testing.T) {
 			config: &Config{
 				Credentials:     "testjson",
 				CredentialsFile: "testfile",
-				GCPConfig:       &googlecloudexporter.Config{},
+				GCPConfig:       &googlecloudexporter.LegacyConfig{},
 			},
 			opts: []option.ClientOption{
 				option.WithCredentialsJSON([]byte("testjson")),
