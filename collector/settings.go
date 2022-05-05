@@ -19,6 +19,8 @@ import (
 
 	"github.com/observiq/observiq-otel-collector/factories"
 	"go.opentelemetry.io/collector/component"
+	"go.opentelemetry.io/collector/config"
+	"go.opentelemetry.io/collector/config/mapprovider/filemapprovider"
 	"go.opentelemetry.io/collector/service"
 	"go.uber.org/zap"
 )
@@ -26,20 +28,31 @@ import (
 const buildDescription = "observIQ's opentelemetry-collector distribution"
 
 // NewSettings returns new settings for the collector with default values.
-func NewSettings(configPaths []string, version string, loggingOpts []zap.Option) service.CollectorSettings {
+func NewSettings(configPaths []string, version string, loggingOpts []zap.Option) (*service.CollectorSettings, error) {
 	factories, _ := factories.DefaultFactories()
 	buildInfo := component.BuildInfo{
 		Command:     os.Args[0],
 		Description: buildDescription,
 		Version:     version,
 	}
-	provider := service.MustNewDefaultConfigProvider(configPaths, []string{})
 
-	return service.CollectorSettings{
+	fmp := filemapprovider.New()
+	configProviderSettings := service.ConfigProviderSettings{
+		Locations:     configPaths,
+		MapProviders:  map[string]config.MapProvider{fmp.Scheme(): fmp},
+		MapConverters: make([]config.MapConverterFunc, 0),
+		Unmarshaler:   nil,
+	}
+	provider, err := service.NewConfigProvider(configProviderSettings)
+	if err != nil {
+		return nil, err
+	}
+
+	return &service.CollectorSettings{
 		Factories:               factories,
 		BuildInfo:               buildInfo,
 		LoggingOptions:          loggingOpts,
 		ConfigProvider:          provider,
 		DisableGracefulShutdown: true,
-	}
+	}, nil
 }
