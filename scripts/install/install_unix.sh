@@ -184,7 +184,7 @@ Usage:
       Defines the proxy password to be used for communication by the install script.
     
   $(fg_yellow '-e, --endpoint')
-      Defines the endpoint of an OpAmp compatible management server for this collector install.
+      Defines the endpoint of an OpAMP compatible management server for this collector install.
       This parameter may also be provided through the ENDPOINT environment variable.
       
       Specifying this will install the collector in a managed mode, as opposed to the
@@ -192,13 +192,13 @@ Usage:
   
   $(fg_yellow '-k, --labels')
       Defines a list of comma seperated labels to be used for this agent when communicating 
-      with an OpAmp compatible server.
+      with an OpAMP compatible server.
       
       This parameter may also be provided through the LABELS environment variable.
       The '--endpoint' flag must be specified if this flag is specified.
 
   $(fg_yellow '-s, --secret-key')
-    Defines the secret key to be used when communicating with an OpAmp compatible server.
+    Defines the secret key to be used when communicating with an OpAMP compatible server.
     
     This parameter may also be provided through the SECRET_KEY environment variable.
     The '--endpoint' flag must be specified if this flag is specified.
