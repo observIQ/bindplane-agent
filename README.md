@@ -51,7 +51,7 @@ For more installation information see [installing on Windows](/docs/installation
 
 #### macOS
 
-To install the collector on macOS use the following brew commands:
+To install using the installation script, you may run:
 
 ```sh
 sh -c "$(curl -fsSlL https://github.com/observiq/observiq-otel-collector/releases/latest/download/install_macos.sh)" install_macos.sh
