@@ -10,13 +10,18 @@
 
 </center>
 
-## About
-
-The observIQ OpenTelemetry Collector is observIQ's distribution of the OpenTelemetry Collector.
+observIQ OpenTelemetry Collector is observIQ’s distribution of the [OpenTelemetry collector](https://github.com/open-telemetry/opentelemetry-collector). It provides a simple and unified solution to collect, refine, and ship telemetry data anywhere.
 
 ## Benefits
 
-The observIQ OpenTelemetry Collector provides a customer centric experience based around the OpenTelemetry Collector. It provides customer friendly installation as well as curated configurations for common workflows.
+### Focused on usability
+Increases the accessibility of OpenTelemetry by providing simplified installation scripts, tested example configurations, and end-to-end documentation making it easy to get started
+
+### All the best parts of OpenTelemetry and more
+Bundled with all core OpenTelemetry receivers, processors, and exporters as well as additional capabilities for monitoring complex or enterprise technologies not yet available in upstream releases
+ 
+### Always Production-ready and fully-supported
+Tested, verified, and supported by observIQ
 
 ## Quick Start
 
