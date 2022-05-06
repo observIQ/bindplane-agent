@@ -13,9 +13,9 @@ end
 [
     "#{collector_home}/observiq-otel-collector.exe",
     "#{collector_home}/config.yaml",
-    "#{collector_home}/plugins/aerospike.yaml",
-    "#{collector_home}/plugins/microsoft_iis.yaml",
-    "#{collector_home}/plugins/zookeeper.yaml"
+    "#{collector_home}/plugins/elasticsearch_logs.yaml",
+    "#{collector_home}/plugins/mysql_logs.yaml",
+    "#{collector_home}/plugins/redis_logs.yaml"
 ].each do |file|
     describe file(file) do
         it { should exist }
