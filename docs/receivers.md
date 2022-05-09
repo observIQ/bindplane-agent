@@ -52,7 +52,7 @@ Below is a list of supported receivers with links to their documentation pages.
 - [syslogreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.50.0/receiver/syslogreceiver/README.md)
 - [tcplogreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.50.0/receiver/tcplogreceiver/README.md)
 - [udplogreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.50.0/receiver/udplogreceiver/README.md)
-- [varnishreceiver](https://github.com/GoogleCloudPlatform/opentelemetry-operations-collector/tree/master/receiver/varnishreceiver)
+- [varnishreceiver](https://github.com/GoogleCloudPlatform/opentelemetry-operations-collector/blob/1ba794f22664266994c03a5c0b0893179f526e34/receiver/varnishreceiver/README.md)
 - [vcenterreceiver](https://github.com/observIQ/opentelemetry-collector-contrib/blob/vcenterreceiver-vsan-support/receiver/vcenterreceiver/README.md)
 - [windowsperfcountersreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.50.0/receiver/windowsperfcountersreceiver/README.md)
 - [zipkinreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.50.0/receiver/zipkinreceiver/README.md)
