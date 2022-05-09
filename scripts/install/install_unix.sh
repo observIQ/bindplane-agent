@@ -20,8 +20,10 @@ PACKAGE_NAME="observiq-otel-collector_linux"
 DOWNLOAD_BASE="https://github.com/observiq/observiq-otel-collector/releases"
 
 # Script Constants
+COLLECTOR_USER="observiq-otel-collector"
 TMP_DIR=${TMPDIR:-"/tmp"} # Allow this to be overriden by cannonical TMPDIR env var
-PREREQS="curl printf systemctl sed uname cut"
+MANAGEMENT_YML_PATH="/opt/observiq-otel-collector/manager.yaml"
+PREREQS="curl printf systemctl sed uname cut uuidgen"
 SCRIPT_NAME="$0"
 INDENT_WIDTH='  '
 indent=""
@@ -180,7 +182,26 @@ Usage:
 
   $(fg_yellow '-P, --proxy-password')
       Defines the proxy password to be used for communication by the install script.
+    
+  $(fg_yellow '-e, --endpoint')
+      Defines the endpoint of an OpAMP compatible management server for this collector install.
+      This parameter may also be provided through the ENDPOINT environment variable.
+      
+      Specifying this will install the collector in a managed mode, as opposed to the
+      normal headless mode.
+  
+  $(fg_yellow '-k, --labels')
+      Defines a list of comma seperated labels to be used for this agent when communicating 
+      with an OpAMP compatible server.
+      
+      This parameter may also be provided through the LABELS environment variable.
+      The '--endpoint' flag must be specified if this flag is specified.
 
+  $(fg_yellow '-s, --secret-key')
+    Defines the secret key to be used when communicating with an OpAMP compatible server.
+    
+    This parameter may also be provided through the SECRET_KEY environment variable.
+    The '--endpoint' flag must be specified if this flag is specified.
 EOF
   )
   info "$USAGE"
@@ -256,6 +277,9 @@ setup_installation()
     set_download_urls
     set_proxy
     set_file_name
+    set_opamp_endpoint
+    set_opamp_labels
+    set_opamp_secret_key
 
     success "Configuration complete!"
     decrease_indent
@@ -346,6 +370,41 @@ set_download_urls()
     collector_download_url="$url/latest/download/${PACKAGE_NAME}_${os_arch}.${package_type}"
   else
     collector_download_url="$url/download/v$version/${PACKAGE_NAME}_${os_arch}.${package_type}"
+  fi
+}
+
+set_opamp_endpoint()
+{
+  if [ -z "$opamp_endpoint" ] ; then
+    opamp_endpoint="$ENDPOINT"
+  fi
+
+  OPAMP_ENDPOINT="$opamp_endpoint"
+}
+
+set_opamp_labels()
+{
+  if [ -z "$opamp_labels" ] ; then
+    opamp_labels=$LABELS
+  fi
+
+  OPAMP_LABELS="$opamp_labels"
+
+  if [ -n "$OPAMP_LABELS" ] && [ -z "$OPAMP_ENDPOINT" ]; then
+    error_exit "$LINENO" "An endpoint must be specified when providing labels"
+  fi
+}
+
+set_opamp_secret_key()
+{
+  if [ -z "$opamp_secret_key" ] ; then
+    opamp_secret_key=$SECRET_KEY
+  fi
+
+  OPAMP_SECRET_KEY="$opamp_secret_key"
+
+  if [ -n "$OPAMP_SECRET_KEY" ] && [ -z "$OPAMP_ENDPOINT" ]; then
+    error_exit "$LINENO" "An endpoint must be specified when providing a secret key"
   fi
 }
 
@@ -472,6 +531,13 @@ install_package()
   unpack_package || error_exit "$LINENO" "Failed to extract package"
   succeeded
 
+  # If an endpoint was specified, we need to write the manager.yaml
+  if [ -n "$OPAMP_ENDPOINT" ]; then
+    info "Creating manager yaml..."
+    create_manager_yml "$MANAGEMENT_YML_PATH"
+    succeeded
+  fi
+
   info "Enabling service..."
   systemctl enable --now observiq-otel-collector > /dev/null 2>&1 || error_exit "$LINENO" "Failed to enable service"
   succeeded
@@ -495,6 +561,26 @@ unpack_package()
       ;;
   esac
   return 0
+}
+
+# create_manager_yml creates the manager.yml at the specified path, containing opamp information.
+create_manager_yml()
+{
+  manager_yml_path="$1"
+
+  # Note here: We create the file and change permissions of the file here BEFORE writing info to it
+  # We do this because the file may contain a secret key, so we want 0 window when the
+  # file is readable by anyone other than the collector & root
+  command printf '' >> "$manager_yml_path"
+
+  chgrp "$COLLECTOR_USER" "$manager_yml_path"
+  chown "$COLLECTOR_USER" "$manager_yml_path"
+  chmod 0640 "$manager_yml_path"
+
+  command printf 'endpoint: "%s"\n' "$OPAMP_ENDPOINT" > "$manager_yml_path"
+  [ -n "$OPAMP_LABELS" ] && command printf 'labels: "%s"\n' "$OPAMP_LABELS" >> "$manager_yml_path"
+  [ -n "$OPAMP_SECRET_KEY" ] && command printf 'secret_key: "%s"\n' "$OPAMP_SECRET_KEY" >> "$manager_yml_path"
+  command printf 'agent_id: "%s"\n' "$(uuidgen -r)" >> "$manager_yml_path"
 }
 
 # This will display the results of an installation
@@ -561,6 +647,10 @@ uninstall()
   systemctl disable observiq-otel-collector > /dev/null 2>&1 || error_exit "$LINENO" "Failed to disable service"
   succeeded
 
+  info "Removing any existing manager.yaml..."
+  rm -f "$MANAGEMENT_YML_PATH"
+  succeeded
+
   info "Removing package..."
   uninstall_package || error_exit "$LINENO" "Failed to remove package"
   succeeded
@@ -584,6 +674,12 @@ main()
           proxy_user=$2 ; shift 2 ;;
         -P|--proxy-password)
           proxy_password=$2 ; shift 2 ;;
+        -e|--endpoint)
+          opamp_endpoint=$2 ; shift 2 ;;
+        -k|--labels)
+          opamp_labels=$2 ; shift 2 ;;
+        -s|--secret-key)
+          opamp_secret_key=$2 ; shift 2 ;;
         -r|--uninstall)
           uninstall
           force_exit
