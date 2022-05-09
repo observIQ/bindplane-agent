@@ -163,13 +163,7 @@ Usage:
 
   $(fg_yellow '-u, --upgrade')
       Stops the collector services and upgrades the collector via brew.
-  
-  $(fg_yellow '-e, --endpoint')
-      Defines the endpoint of an OpAmp compatible management server for this collector install.
-      
-      Specifying this will install the collector in a managed mode, as opposed to the
-      normal headless mode.
-  
+   
   $(fg_yellow '-e, --endpoint')
       Defines the endpoint of an OpAMP compatible management server for this collector install.
       This parameter may also be provided through the ENDPOINT environment variable.
