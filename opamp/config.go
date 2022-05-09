@@ -33,10 +33,10 @@ var (
 
 // Config contains the configuration for the collector to communicate with an OpAmp enabled platform.
 type Config struct {
-	Endpoint  string   `yaml:"endpoint"`
-	SecretKey *string  `yaml:"secret_key"`
-	AgentID   string   `yaml:"agent_id"`
-	Labels    []string `yaml:"labels"`
+	Endpoint  string  `yaml:"endpoint"`
+	SecretKey *string `yaml:"secret_key"`
+	AgentID   string  `yaml:"agent_id"`
+	Labels    *string `yaml:"labels"`
 }
 
 // ParseConfig given a configuration file location will parse the config

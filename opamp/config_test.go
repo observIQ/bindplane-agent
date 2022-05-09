@@ -25,6 +25,7 @@ import (
 func TestParseConfig(t *testing.T) {
 	// Keep this outside so it can be referenced as pointer
 	secretKeyContents := "b92222ee-a1fc-4bb1-98db-26de3448541b"
+	labelsContents := "one=foo,two=bar"
 
 	testCases := []struct {
 		desc                string
@@ -57,18 +58,13 @@ func TestParseConfig(t *testing.T) {
 endpoint: localhost:1234
 secret_key: b92222ee-a1fc-4bb1-98db-26de3448541b
 agent_id: 8321f735-a52c-4f49-aca9-66f9266c5fe5
-labels:
-  - one
-  - two
+labels: "one=foo,two=bar"
 `,
 			expectedConfig: &Config{
 				Endpoint:  "localhost:1234",
 				SecretKey: &secretKeyContents,
 				AgentID:   "8321f735-a52c-4f49-aca9-66f9266c5fe5",
-				Labels: []string{
-					"one",
-					"two",
-				},
+				Labels:    &labelsContents,
 			},
 			expectedErrContents: nil,
 		},
