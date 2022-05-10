@@ -13,7 +13,5 @@ service:
       receivers:
       - iis
       processors:
-      - normalizesums
-      - batch
       exporters:
       - googlecloud
