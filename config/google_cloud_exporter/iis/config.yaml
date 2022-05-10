@@ -1,0 +1,30 @@
+receivers:
+  iis:
+    collection_interval: 10s
+
+processors:
+
+  normalizesums:
+
+  batch:
+
+exporters:
+  googlecloud:
+    retry_on_failure:
+      enabled: false
+    metric:
+      prefix: workload.googleapis.com
+    resource_mappings:
+      - source_type: ""
+        target_type: generic_node
+
+service:
+  pipelines:
+    metrics:
+      receivers:
+      - iis
+      processors:
+      - normalizesums
+      - batch
+      exporters:
+      - googlecloud
