@@ -37,6 +37,7 @@ type Config struct {
 	SecretKey *string `yaml:"secret_key"`
 	AgentID   string  `yaml:"agent_id"`
 	Labels    *string `yaml:"labels"`
+	AgentName *string `yaml:"agent_name"`
 }
 
 // ParseConfig given a configuration file location will parse the config
