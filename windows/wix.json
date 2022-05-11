@@ -35,6 +35,9 @@
     },
     {
       "name": "storage"
+    }, 
+    {
+      "name": "install"
     }
   ],
   "environments": [
