@@ -3,7 +3,8 @@ module github.com/observiq/observiq-otel-collector
 go 1.17
 
 require (
-	github.com/GoogleCloudPlatform/opentelemetry-operations-collector v0.0.2
+	github.com/GoogleCloudPlatform/opentelemetry-operations-collector v0.0.3-0.20220427142336-1ba794f22664
+	github.com/observiq/observiq-otel-collector/exporter/googlecloudexporter v0.5.0
 	github.com/observiq/observiq-otel-collector/processor/resourceattributetransposerprocessor v0.5.0
 	github.com/observiq/observiq-otel-collector/receiver/pluginreceiver v0.5.0
 	github.com/observiq/opentelemetry-collector-contrib/receiver/vcenterreceiver v0.0.0-20220504180047-0f9b0ab55655
@@ -412,7 +413,7 @@ require (
 require (
 	github.com/containerd/containerd v1.6.1 // indirect
 	github.com/klauspost/compress v1.15.1 // indirect
-	github.com/shirou/gopsutil/v3 v3.22.4 // indirect
+	github.com/shirou/gopsutil/v3 v3.22.4
 	github.com/spf13/cobra v1.4.0 // indirect
 	golang.org/x/sys v0.0.0-20220412211240-33da011f77ad
 )

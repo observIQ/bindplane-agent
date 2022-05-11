@@ -16,7 +16,7 @@ const unknownValue = "unknown"
 func Hostname() (string, error) {
 	info, err := host.Info()
 	if err != nil {
-		return "", err
+		return unknownValue, err
 	}
 
 	return info.Hostname, nil
@@ -26,7 +26,7 @@ func Hostname() (string, error) {
 func Name() (string, error) {
 	info, err := host.Info()
 	if err != nil {
-		return "", err
+		return unknownValue, err
 	}
 	return parseName(info, runtime.GOOS), nil
 }
