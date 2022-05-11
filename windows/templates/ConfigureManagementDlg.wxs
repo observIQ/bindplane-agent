@@ -33,7 +33,7 @@
                     <Condition Action="hide"><![CDATA[NOT (ENABLEMANAGEMENT)]]></Condition>
                 </Control>
 
-                <Control Id="LabelsLabel" Type="Text" X="20" Y="180" Width="290" Height="15" Transparent="yes" NoPrefix="yes" Text="{\WixUI_Font_Title}Labels Labels (name1=value1,name2=value2,...)" Hidden="yes" >
+                <Control Id="LabelsLabel" Type="Text" X="20" Y="180" Width="290" Height="15" Transparent="yes" NoPrefix="yes" Text="{\WixUI_Font_Title}Labels (name1=value1,name2=value2,...)" Hidden="yes" >
                     <Condition Action="show"><![CDATA[ENABLEMANAGEMENT]]></Condition>
                     <Condition Action="hide"><![CDATA[NOT (ENABLEMANAGEMENT)]]></Condition>
                 </Control> 
