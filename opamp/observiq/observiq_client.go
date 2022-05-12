@@ -69,7 +69,7 @@ func NewClient(defaultLogger *zap.SugaredLogger, config opamp.Config, configMana
 
 	// Create collect client based on URL scheme
 	switch opampURL.Scheme {
-	case "wss":
+	case "ws", "wss":
 		observiqClient.opampClient = client.NewWebSocket(clientLogger)
 	default:
 		return nil, ErrUnsupportedURL
@@ -79,25 +79,31 @@ func NewClient(defaultLogger *zap.SugaredLogger, config opamp.Config, configMana
 }
 
 // Connect initiates a connection to the OpAmp server based on the supplied configuration
-func (c *Client) Connect(config opamp.Config) error {
+func (c *Client) Connect(ctx context.Context, config opamp.Config) error {
 	effectiveConfig, err := c.configManager.ComposeEffectiveConfig()
 	if err != nil {
-		c.logger.Errorf("Error while composing effective config", zap.Error(err))
+		c.logger.Error("Error while composing effective config", zap.Error(err))
 		return fmt.Errorf("failed to compose effective config: %w", err)
 	}
 
-	settings := client.StartSettings{
+	description, err := c.ident.ToAgentDescription()
+	if err != nil {
+		c.logger.Error("Error composing agent description", zap.Error(err))
+	}
+
+	settings := types.StartSettings{
 		OpAMPServerURL:      config.Endpoint,
 		AuthorizationHeader: *config.SecretKey,
 		TLSConfig:           nil, // TODO add support for TLS
 		InstanceUid:         config.AgentID,
-		AgentDescription:    c.ident.ToAgentDescription(),
+		AgentDescription:    description,
 		Callbacks: types.CallbacksStruct{
-			OnConnectFunc:       c.onConnectHandler,
-			OnConnectFailedFunc: c.onConnectFailedHandler,
-			OnErrorFunc:         c.onErrorHandler,
-			OnRemoteConfigFunc:  c.onRemoteConfigHandler,
-			// The below handlers are not currently implemented
+			OnConnectFunc:          c.onConnectHandler,
+			OnConnectFailedFunc:    c.onConnectFailedHandler,
+			OnErrorFunc:            c.onErrorHandler,
+			OnRemoteConfigFunc:     c.onRemoteConfigHandler,
+			GetEffectiveConfigFunc: c.onGetEffectiveConfig,
+			// Not implemented
 			// OnOpampConnectionSettingsFunc
 			// OnOpampConnectionSettingsAcceptedFunc
 			// OnOwnTelemetryConnectionSettingsFunc
@@ -107,10 +113,9 @@ func (c *Client) Connect(config opamp.Config) error {
 			// OnCommandFunc
 		},
 		LastRemoteConfigHash: effectiveConfig.GetHash(),
-		LastEffectiveConfig:  effectiveConfig,
 	}
 
-	return c.opampClient.Start(settings)
+	return c.opampClient.Start(ctx, settings)
 }
 
 // Disconnect disconnects from the server
@@ -122,7 +127,12 @@ func (c *Client) Disconnect(ctx context.Context) error {
 
 func (c *Client) onConnectHandler() {
 	c.logger.Info("Successfully connected to server")
-	if err := c.opampClient.SetAgentDescription(c.ident.ToAgentDescription()); err != nil {
+	desc, err := c.ident.ToAgentDescription()
+	if err != nil {
+		c.logger.Warn("Failure when composing agent description. Sending partial description", zap.Error(err))
+	}
+
+	if err := c.opampClient.SetAgentDescription(desc); err != nil {
 		c.logger.Error("Failed to set agent description", zap.Error(err))
 	}
 }
@@ -152,4 +162,8 @@ func (c *Client) onRemoteConfigHandler(_ context.Context, remoteConfig *protobuf
 	}
 
 	return effectiveConfig, false, nil
+}
+
+func (c *Client) onGetEffectiveConfig(_ context.Context) (*protobufs.EffectiveConfig, error) {
+	return c.configManager.ComposeEffectiveConfig()
 }

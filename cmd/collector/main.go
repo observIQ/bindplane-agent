@@ -31,11 +31,17 @@ import (
 	"github.com/spf13/pflag"
 	"go.opentelemetry.io/collector/service"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
+var defaultLogger *zap.Logger
+
 func main() {
-	var configPaths = pflag.StringSlice("config", []string{"./config.yaml"}, "the collector config path")
+	setupDefaultLogger()
+
+	configPaths := pflag.StringSlice("config", []string{"./config.yaml"}, "the collector config path")
 	managerConfigPath := pflag.String("manager", "./manager.yaml", "The configuration for remote management")
+	loggingConfigPath := pflag.String("logging", "./logging.yaml", "The configuration for logging")
 	_ = pflag.String("log-level", "", "not implemented") // TEMP(jsirianni): Required for OTEL k8s operator
 	pflag.Parse()
 
@@ -44,27 +50,29 @@ func main() {
 
 	settings, err := collector.NewSettings(*configPaths, version.Version(), nil)
 	if err != nil {
-		log.Fatal(err)
+		defaultLogger.Fatal("Settings configuration failed", zap.Error(err))
 	}
 
 	if _, err := os.Stat(*managerConfigPath); err == nil {
+		log.Println("Starting Management Path")
 		// Management config exists
-		configManger := observiq.NewAgentConfigManager()
-		configManger.AddConfig("config.yaml", (*configPaths)[0], opamp.NewYamlValidator(make(map[string]interface{})))
-		configManger.AddConfig("manager.yaml", *managerConfigPath, opamp.NewYamlValidator(new(opamp.Config)))
+		configManger := observiq.NewAgentConfigManager(defaultLogger.Sugar())
+		configManger.AddConfig(opamp.CollectorConfigName, (*configPaths)[0], opamp.NewYamlValidator(make(map[string]interface{})))
+		configManger.AddConfig(opamp.ManagerConfigName, *managerConfigPath, opamp.NewYamlValidator(new(opamp.Config)))
+		configManger.AddConfig(opamp.LoggingConfigName, *loggingConfigPath, opamp.NoopValidator)
 
 		currCollector := collector.New((*configPaths)[0], version.Version(), []zap.Option{})
 
 		if err := runRemoteManaged(ctx, currCollector, configManger, *managerConfigPath); err != nil {
-			log.Fatalln(err)
+			defaultLogger.Fatal("Remote Managment failed", zap.Error(err))
 		}
 	} else if errors.Is(err, os.ErrNotExist) {
 		// Run standalone
 		if err := run(ctx, *settings); err != nil {
-			log.Fatalln(err)
+			defaultLogger.Fatal("Collector error", zap.Error(err))
 		}
 	} else {
-		log.Fatalln("Error while searching for management config", err)
+		defaultLogger.Fatal("Error while searching for management config", zap.Error(err))
 	}
 
 }
@@ -89,7 +97,7 @@ func runRemoteManaged(ctx context.Context, currCollector collector.Collector, co
 	}
 
 	shutdownChan := make(chan struct{})
-	client, err := observiq.NewClient(zap.NewNop().Sugar(), *opampConfig, configManager, shutdownChan)
+	client, err := observiq.NewClient(defaultLogger.Sugar(), *opampConfig, configManager, shutdownChan)
 	if err != nil {
 		return err
 	}
@@ -98,7 +106,7 @@ func runRemoteManaged(ctx context.Context, currCollector collector.Collector, co
 		return fmt.Errorf("collector failed to start: %w", err)
 	}
 
-	if err := client.Connect(*opampConfig); err != nil {
+	if err := client.Connect(ctx, *opampConfig); err != nil {
 		return err
 	}
 
@@ -121,4 +129,13 @@ func runRemoteManaged(ctx context.Context, currCollector collector.Collector, co
 	}
 
 	return nil
+}
+
+func setupDefaultLogger() {
+	encoderConfig := zap.NewProductionEncoderConfig()
+	encoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
+	encoder := zapcore.NewConsoleEncoder(encoderConfig)
+	syncer := zapcore.Lock(os.Stdout)
+	core := zapcore.NewCore(encoder, syncer, zapcore.DebugLevel)
+	defaultLogger = zap.New(core)
 }

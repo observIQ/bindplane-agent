@@ -23,8 +23,18 @@ import (
 	"sort"
 
 	"github.com/observiq/observiq-otel-collector/opamp"
+	"github.com/open-telemetry/opamp-go/client"
 	"github.com/open-telemetry/opamp-go/protobufs"
+	"go.uber.org/zap"
+	"gopkg.in/yaml.v3"
 )
+
+// acceptableConfigs is a lookup of configs that are able to be written/updated
+var acceptableConfigs = map[string]struct{}{
+	opamp.CollectorConfigName: {},
+	opamp.ManagerConfigName:   {},
+	opamp.LoggingConfigName:   {},
+}
 
 // Enforce interface
 var _ opamp.ConfigManager = (*AgentConfigManager)(nil)
@@ -33,12 +43,15 @@ var _ opamp.ConfigManager = (*AgentConfigManager)(nil)
 type AgentConfigManager struct {
 	configMap  map[string]string
 	validators map[string]opamp.ValidatorFunc
+	logger     *zap.SugaredLogger
 }
 
 // NewAgentConfigManager creates a new AgentConfigManager
-func NewAgentConfigManager() *AgentConfigManager {
+func NewAgentConfigManager(defaultLogger *zap.SugaredLogger) *AgentConfigManager {
 	return &AgentConfigManager{
-		configMap: make(map[string]string),
+		configMap:  make(map[string]string),
+		validators: make(map[string]opamp.ValidatorFunc),
+		logger:     defaultLogger.Named("config manager"),
 	}
 }
 
@@ -73,15 +86,15 @@ func (a *AgentConfigManager) ComposeEffectiveConfig() (*protobufs.EffectiveConfi
 		configNames = append(configNames, configName)
 	}
 
-	// Compute Hash
-	configHash := computeHash(configNames, contentMap)
-
-	return &protobufs.EffectiveConfig{
-		Hash: configHash,
+	effectiveConfig := &protobufs.EffectiveConfig{
 		ConfigMap: &protobufs.AgentConfigMap{
 			ConfigMap: contentMap,
 		},
-	}, nil
+	}
+
+	// Compute Hash
+	client.CalcHashEffectiveConfig(effectiveConfig)
+	return effectiveConfig, nil
 }
 
 // ApplyConfigChanges compares the remoteConfig to the existing and applies changes
@@ -106,8 +119,15 @@ func (a *AgentConfigManager) ApplyConfigChanges(remoteConfig *protobufs.AgentRem
 
 	// loop through all remote configs and compare then with existing configs
 	for configName, remoteContents := range remoteConfigMap {
+		// For security check the log file we want is acceptable
+		if _, ok := acceptableConfigs[configName]; !ok {
+			a.logger.Info("Not support config received skipping", zap.String("config", configName))
+			continue
+		}
+
 		currentContents, ok := currentConfigMap[configName]
 		if !ok {
+			a.logger.Info("Untracked config found", zap.String("config", configName))
 			// We don't current track this config file we should add it
 			changed = true
 
@@ -126,18 +146,27 @@ func (a *AgentConfigManager) ApplyConfigChanges(remoteConfig *protobufs.AgentRem
 			continue
 		}
 
+		a.logger.Info("Changed made to config file, updating", zap.String("config", configName))
+
 		// A single file has changed set overall change to true
 		changed = true
 
+		// Update the config file
 		validator := a.validators[configName]
-		if !validator(remoteContents.GetBody()) {
-			return effectiveConfig, false, fmt.Errorf("Failed to validate config %s: %w", configName, err)
-		}
+		configPath := a.configMap[configName]
+		newContents := remoteContents.GetBody()
 
-		// Write file
-		filePath := a.configMap[configName]
-		if err := os.WriteFile(filePath, remoteContents.GetBody(), 0600); err != nil {
-			return nil, false, fmt.Errorf("failed to update config file %s: %w", configName, err)
+		// See if we're updating the manager config.
+		// Updating the manager config could be a security risk so we want to limit what fields are updatable
+		switch configPath {
+		case opamp.ManagerConfigName:
+			if err := updateManagerConfig(configPath, newContents, validator); err != nil {
+				return effectiveConfig, false, fmt.Errorf("failed to update config %s: %w", configName, err)
+			}
+		default:
+			if err := updateConfigFile(configName, configPath, newContents, validator); err != nil {
+				return effectiveConfig, false, fmt.Errorf("failed to update config %s: %w", configName, err)
+			}
 		}
 	}
 
@@ -168,6 +197,44 @@ func computeHash(configNames []string, contentMap map[string]*protobufs.AgentCon
 	return h.Sum(nil)
 }
 
-func writeConfigFile(filePath string, contents []byte) error {
-	return os.WriteFile(filePath, contents, 0600)
+func updateManagerConfig(configPath string, contents []byte, validator opamp.ValidatorFunc) error {
+	// Unmarshal config and only pull fields out that are allowed to be updated.
+	var newConfig opamp.Config
+	if err := yaml.Unmarshal(contents, &newConfig); err != nil {
+		return fmt.Errorf("failed to validate config %s", opamp.ManagerConfigName)
+	}
+
+	// Read in existing config file
+	currConfig, err := opamp.ParseConfig(configPath)
+	if err != nil {
+		return err
+	}
+
+	// Update allowed fields
+	currConfig.AgentName = newConfig.AgentName
+	currConfig.Labels = newConfig.Labels
+
+	// Marshal back into bytes
+	newContents, err := yaml.Marshal(currConfig)
+	if err != nil {
+		return fmt.Errorf("failed to reformat manager config: %w", err)
+	}
+
+	// Run through update config workflow
+	// Note this will rerun the validator which we know works but it keeps file writing in a single place
+	return updateConfigFile(opamp.ManagerConfigName, configPath, newContents, validator)
+}
+
+func updateConfigFile(configName, configPath string, contents []byte, validator opamp.ValidatorFunc) error {
+	// validate file
+	if !validator(contents) {
+		return fmt.Errorf("failed to validate config %s", configName)
+	}
+
+	// Write file
+	if err := os.WriteFile(configPath, contents, 0600); err != nil {
+		return fmt.Errorf("failed to update config file %s: %w", configName, err)
+	}
+
+	return nil
 }

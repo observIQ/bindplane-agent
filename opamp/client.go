@@ -20,7 +20,7 @@ import "context"
 type Client interface {
 
 	// Connect initiates a connection to the OpAmp server based on the supplied configuration
-	Connect(config Config) error
+	Connect(ctx context.Context, config Config) error
 
 	// Disconnect disconnects from the server
 	Disconnect(ctx context.Context) error
