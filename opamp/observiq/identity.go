@@ -1,3 +1,17 @@
+// Copyright  observIQ, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package observiq
 
 import (
@@ -24,8 +38,8 @@ type identity struct {
 	mac         string
 }
 
-// NewIdentity constructs a new identity for this collector
-func NewIdentity(logger *zap.SugaredLogger, config opamp.Config) *identity {
+// newIdentity constructs a new identity for this collector
+func newIdentity(logger *zap.SugaredLogger, config opamp.Config) *identity {
 	// Grab various fields from OS
 	hostname, err := ios.Hostname()
 	if err != nil {
@@ -40,7 +54,7 @@ func NewIdentity(logger *zap.SugaredLogger, config opamp.Config) *identity {
 	return &identity{
 		agentID:     config.AgentID,
 		agentName:   config.AgentName,
-		serviceName: "com.observiq.collector", // TODO figure this out
+		serviceName: "com.observiq.collector", // TODO figure out if this should be hardcoded like so or read from system.
 		version:     version.Version(),
 		labels:      config.Labels,
 		oSArch:      runtime.GOARCH,

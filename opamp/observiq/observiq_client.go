@@ -1,3 +1,17 @@
+// Copyright  observIQ, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 // Package observiq contains OpAmp structures compatible with the observiq client
 package observiq
 
@@ -28,16 +42,23 @@ type Client struct {
 	logger        *zap.SugaredLogger
 	ident         *identity
 	configManager opamp.ConfigManager
+
+	// Channel that when closed signals to the listeners that a shutdown is necessary
+	// NOTE: This currently is a stopgap until we can hot reload configurations
+	shutdownChan chan struct{}
 }
 
 // NewClient creates a new OpAmp client
-func NewClient(defaultLogger *zap.SugaredLogger, configManager opamp.ConfigManager, config opamp.Config) (opamp.Client, error) {
+// The passed in configmanager should be preloaded with all known configs.
+// The shutdown channel will be closed when a reconfiguration occurs an a process shutdown is required.
+func NewClient(defaultLogger *zap.SugaredLogger, config opamp.Config, configManager opamp.ConfigManager, shutdownChan chan struct{}) (opamp.Client, error) {
 	clientLogger := defaultLogger.Named("opamp")
 
 	observiqClient := &Client{
 		logger:        clientLogger,
-		ident:         NewIdentity(clientLogger, config),
+		ident:         newIdentity(clientLogger, config),
 		configManager: configManager,
+		shutdownChan:  shutdownChan,
 	}
 
 	// Parse URL to determin scheme
@@ -126,7 +147,8 @@ func (c *Client) onRemoteConfigHandler(_ context.Context, remoteConfig *protobuf
 	// Since we can't hot reload configs we need to restart in order to take advantage of the new configurations.
 	// We will exit and trust the service manager wrapping us to restart
 	if changed {
-		// TODO restart and remove return
+		// Close shutdown channel to signal restart
+		close(c.shutdownChan)
 	}
 
 	return effectiveConfig, false, nil

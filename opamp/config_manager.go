@@ -1,6 +1,32 @@
+// Copyright  observIQ, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package opamp
 
-import "github.com/open-telemetry/opamp-go/protobufs"
+import (
+	"path/filepath"
+
+	"github.com/open-telemetry/opamp-go/protobufs"
+)
+
+const (
+	// YAMLContentType content type for .yml or .yaml file
+	YAMLContentType = "text/yaml"
+
+	// JSONContentType content type for .json file
+	JSONContentType = "text/json"
+)
 
 // ConfigManager handles remote configuration of local configs
 type ConfigManager interface {
@@ -13,4 +39,18 @@ type ConfigManager interface {
 	// ApplyConfigChanges compares the remoteConfig to the existing and applies changes.
 	// Calculates new effective config
 	ApplyConfigChanges(remoteConfig *protobufs.AgentRemoteConfig) (effectiveConfig *protobufs.EffectiveConfig, changed bool, err error)
+}
+
+// DetermineContentType looks at the file extension for the given filepath and returns the content type
+func DetermineContentType(filePath string) string {
+	extension := filepath.Ext(filePath)
+
+	switch extension {
+	case ".json":
+		return JSONContentType
+	case ".yml", ".yaml":
+		return YAMLContentType
+	default:
+		return ""
+	}
 }

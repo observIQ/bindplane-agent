@@ -1,3 +1,17 @@
+// Copyright  observIQ, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package observiq
 
 import (
@@ -12,10 +26,13 @@ import (
 	"github.com/open-telemetry/opamp-go/protobufs"
 )
 
+// Enforce interface
+var _ opamp.ConfigManager = (*AgentConfigManager)(nil)
+
 // AgentConfigManager keeps track of active configs for the agent
 type AgentConfigManager struct {
 	configMap  map[string]string
-	validators map[string]opmap.ValidatorFunc
+	validators map[string]opamp.ValidatorFunc
 }
 
 // NewAgentConfigManager creates a new AgentConfigManager
@@ -51,7 +68,7 @@ func (a *AgentConfigManager) ComposeEffectiveConfig() (*protobufs.EffectiveConfi
 		// Add to contentMap
 		contentMap[configName] = &protobufs.AgentConfigFile{
 			Body:        configContents,
-			ContentType: "text/yaml", // TODO dynamically figure out content type
+			ContentType: opamp.DetermineContentType(configPath),
 		}
 
 		configNames = append(configNames, configName)
@@ -88,11 +105,20 @@ func (a *AgentConfigManager) ApplyConfigChanges(remoteConfig *protobufs.AgentRem
 	currentConfigMap := effectiveConfig.GetConfigMap().GetConfigMap()
 	remoteConfigMap := remoteConfig.GetConfig().GetConfigMap()
 
+	// loop through all remote configs and compare then with existing configs
 	for configName, remoteContents := range remoteConfigMap {
 		currentContents, ok := currentConfigMap[configName]
 		if !ok {
 			// We don't current track this config file we should add it
-			// TODO add this file
+			changed = true
+
+			// Write out the file
+			if err := os.WriteFile(configName, remoteContents.GetBody(), 0600); err != nil {
+				return nil, false, fmt.Errorf("failed to write new config file %s: %w", configName, err)
+			}
+
+			// Track new config
+			a.AddConfig(configName, configName, opamp.NoopValidator)
 			continue
 		}
 
@@ -112,7 +138,7 @@ func (a *AgentConfigManager) ApplyConfigChanges(remoteConfig *protobufs.AgentRem
 		// Write file
 		filePath := a.configMap[configName]
 		if err := os.WriteFile(filePath, remoteContents.GetBody(), 0600); err != nil {
-			return nil, false, fmt.Errorf("failed to write config file %s: %w", configName, err)
+			return nil, false, fmt.Errorf("failed to update config file %s: %w", configName, err)
 		}
 	}
 
