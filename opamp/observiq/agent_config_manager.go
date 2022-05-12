@@ -45,9 +45,7 @@ func NewAgentConfigManager() *AgentConfigManager {
 // AddConfig adds a config to be tracked by the config manager with it's corresponding validator function.
 // If the config already is tracked it'll be overwritten with the new configPath
 func (a *AgentConfigManager) AddConfig(configName, configPath string, validator opamp.ValidatorFunc) {
-	cleanPath := filepath.Clean(configPath)
-
-	a.configMap[configName] = cleanPath
+	a.configMap[configName] = configPath
 	a.validators[configName] = validator
 }
 
@@ -60,7 +58,8 @@ func (a *AgentConfigManager) ComposeEffectiveConfig() (*protobufs.EffectiveConfi
 
 	for configName, configPath := range a.configMap {
 		// Read in config file
-		configContents, err := os.ReadFile(configPath)
+		cleanPath := filepath.Clean(configPath)
+		configContents, err := os.ReadFile(cleanPath)
 		if err != nil {
 			return nil, fmt.Errorf("error reading config file %s: %w", configName, err)
 		}
