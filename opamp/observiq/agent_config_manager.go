@@ -23,7 +23,6 @@ import (
 	"sort"
 
 	"github.com/observiq/observiq-otel-collector/opamp"
-	"github.com/open-telemetry/opamp-go/client"
 	"github.com/open-telemetry/opamp-go/protobufs"
 	"go.uber.org/zap"
 	"gopkg.in/yaml.v3"
@@ -86,15 +85,15 @@ func (a *AgentConfigManager) ComposeEffectiveConfig() (*protobufs.EffectiveConfi
 		configNames = append(configNames, configName)
 	}
 
-	effectiveConfig := &protobufs.EffectiveConfig{
+	// Compute Hash
+	configHash := computeHash(configNames, contentMap)
+
+	return &protobufs.EffectiveConfig{
+		Hash: configHash,
 		ConfigMap: &protobufs.AgentConfigMap{
 			ConfigMap: contentMap,
 		},
-	}
-
-	// Compute Hash
-	client.CalcHashEffectiveConfig(effectiveConfig)
-	return effectiveConfig, nil
+	}, nil
 }
 
 // ApplyConfigChanges compares the remoteConfig to the existing and applies changes
@@ -141,7 +140,7 @@ func (a *AgentConfigManager) ApplyConfigChanges(remoteConfig *protobufs.AgentRem
 			continue
 		}
 
-		// File has not changed
+		// Check to see if file contents are the same
 		if bytes.Equal(currentContents.GetBody(), remoteContents.GetBody()) {
 			continue
 		}
@@ -158,7 +157,7 @@ func (a *AgentConfigManager) ApplyConfigChanges(remoteConfig *protobufs.AgentRem
 
 		// See if we're updating the manager config.
 		// Updating the manager config could be a security risk so we want to limit what fields are updatable
-		switch configPath {
+		switch configName {
 		case opamp.ManagerConfigName:
 			if err := updateManagerConfig(configPath, newContents, validator); err != nil {
 				return effectiveConfig, false, fmt.Errorf("failed to update config %s: %w", configName, err)
