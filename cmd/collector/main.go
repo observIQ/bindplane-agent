@@ -31,7 +31,15 @@ import (
 func main() {
 	var configPaths = pflag.StringSlice("config", []string{"./config.yaml"}, "the collector config path")
 	_ = pflag.String("log-level", "", "not implemented") // TEMP(jsirianni): Required for OTEL k8s operator
+	var showVersion = pflag.BoolP("version", "v", false, "prints the version of the collector")
 	pflag.Parse()
+
+	if *showVersion {
+		fmt.Println("observiq-otel-collector version", version.Version())
+		fmt.Println("commit:", version.GitHash())
+		fmt.Println("built at:", version.Date())
+		return
+	}
 
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer cancel()
