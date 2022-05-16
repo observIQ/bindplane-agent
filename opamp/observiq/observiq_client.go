@@ -102,7 +102,7 @@ func (c *Client) Connect(ctx context.Context, config opamp.Config) error {
 			OnConnectFailedFunc:    c.onConnectFailedHandler,
 			OnErrorFunc:            c.onErrorHandler,
 			OnRemoteConfigFunc:     c.onRemoteConfigHandler,
-			GetEffectiveConfigFunc: c.onGetEffectiveConfig,
+			GetEffectiveConfigFunc: c.onGetEffectiveConfigHandler,
 			// Not implemented
 			// OnOpampConnectionSettingsFunc
 			// OnOpampConnectionSettingsAcceptedFunc
@@ -164,6 +164,7 @@ func (c *Client) onRemoteConfigHandler(_ context.Context, remoteConfig *protobuf
 	return effectiveConfig, false, nil
 }
 
-func (c *Client) onGetEffectiveConfig(_ context.Context) (*protobufs.EffectiveConfig, error) {
+func (c *Client) onGetEffectiveConfigHandler(_ context.Context) (*protobufs.EffectiveConfig, error) {
+	c.logger.Debug("Remote Compose Effective config handler")
 	return c.configManager.ComposeEffectiveConfig()
 }

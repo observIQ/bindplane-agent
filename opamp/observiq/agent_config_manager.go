@@ -145,11 +145,6 @@ func (a *AgentConfigManager) ApplyConfigChanges(remoteConfig *protobufs.AgentRem
 			continue
 		}
 
-		a.logger.Info("Changed made to config file, updating", zap.String("config", configName))
-
-		// A single file has changed set overall change to true
-		changed = true
-
 		// Update the config file
 		validator := a.validators[configName]
 		configPath := a.configMap[configName]
@@ -159,13 +154,21 @@ func (a *AgentConfigManager) ApplyConfigChanges(remoteConfig *protobufs.AgentRem
 		// Updating the manager config could be a security risk so we want to limit what fields are updatable
 		switch configName {
 		case opamp.ManagerConfigName:
-			if err := updateManagerConfig(configPath, newContents, validator); err != nil {
+			managerChange, err := updateManagerConfig(configPath, newContents, validator)
+			if err != nil {
 				return effectiveConfig, false, fmt.Errorf("failed to update config %s: %w", configName, err)
 			}
+
+			if managerChange {
+				a.logger.Info("Changed made to config file, updating", zap.String("config", configName))
+				changed = true
+			}
 		default:
+			a.logger.Info("Changed made to config file, updating", zap.String("config", configName))
 			if err := updateConfigFile(configName, configPath, newContents, validator); err != nil {
 				return effectiveConfig, false, fmt.Errorf("failed to update config %s: %w", configName, err)
 			}
+			changed = true
 		}
 	}
 
@@ -196,32 +199,43 @@ func computeHash(configNames []string, contentMap map[string]*protobufs.AgentCon
 	return h.Sum(nil)
 }
 
-func updateManagerConfig(configPath string, contents []byte, validator opamp.ValidatorFunc) error {
+// updateManagerConfig compares the new config with the existing config. If contents have changed will update
+func updateManagerConfig(configPath string, contents []byte, validator opamp.ValidatorFunc) (changed bool, err error) {
 	// Unmarshal config and only pull fields out that are allowed to be updated.
 	var newConfig opamp.Config
 	if err := yaml.Unmarshal(contents, &newConfig); err != nil {
-		return fmt.Errorf("failed to validate config %s", opamp.ManagerConfigName)
+		return false, fmt.Errorf("failed to validate config %s", opamp.ManagerConfigName)
 	}
 
 	// Read in existing config file
 	currConfig, err := opamp.ParseConfig(configPath)
 	if err != nil {
-		return err
+		return false, err
 	}
 
-	// Update allowed fields
+	// Check if the updatable fields are equal
+	// If so then exit
+	if currConfig.CmpUpdatableFields(newConfig) {
+		return false, nil
+	}
+
+	// Updatable fields
 	currConfig.AgentName = newConfig.AgentName
 	currConfig.Labels = newConfig.Labels
 
 	// Marshal back into bytes
 	newContents, err := yaml.Marshal(currConfig)
 	if err != nil {
-		return fmt.Errorf("failed to reformat manager config: %w", err)
+		return false, fmt.Errorf("failed to reformat manager config: %w", err)
 	}
 
 	// Run through update config workflow
 	// Note this will rerun the validator which we know works but it keeps file writing in a single place
-	return updateConfigFile(opamp.ManagerConfigName, configPath, newContents, validator)
+	if err := updateConfigFile(opamp.ManagerConfigName, configPath, newContents, validator); err != nil {
+		return false, err
+	}
+
+	return true, nil
 }
 
 func updateConfigFile(configName, configPath string, contents []byte, validator opamp.ValidatorFunc) error {

@@ -45,6 +45,8 @@ type Config struct {
 	Endpoint  string  `yaml:"endpoint"`
 	SecretKey *string `yaml:"secret_key,omitempty"`
 	AgentID   string  `yaml:"agent_id"`
+
+	// Updatable fields
 	Labels    *string `yaml:"labels,omitempty"`
 	AgentName *string `yaml:"agent_name,omitempty"`
 }
@@ -66,4 +68,28 @@ func ParseConfig(configLocation string) (*Config, error) {
 	}
 
 	return &config, nil
+}
+
+// CmpUpdatableFields compares updatable fields for equality
+func (c Config) CmpUpdatableFields(o Config) (equal bool) {
+	if !cmpStingPtr(c.AgentName, o.AgentName) {
+		return false
+	}
+
+	return cmpStingPtr(c.Labels, o.Labels)
+}
+
+func cmpStingPtr(p1, p2 *string) bool {
+	switch {
+	case p1 == nil && p2 == nil:
+		return true
+	case p1 == nil && p2 != nil:
+		fallthrough
+	case p1 != nil && p2 == nil:
+		fallthrough
+	case *p1 != *p2:
+		return false
+	default:
+		return true
+	}
 }
