@@ -299,6 +299,13 @@ install_package()
   info "Installing collector..."
   brew update > /dev/null 2>&1 || error_exit "$LINENO" "Failed to run brew update"
   brew install $FORMULA_NAME > /dev/null 2>&1 || error_exit "$LINENO" "Failed to install formula"
+
+  increase_indent
+  info ""
+  info "In order to install the jmx metrics jar to the correct location, root permissions are needed."
+  info "Please enter your password if prompted to complete installation."
+  info ""
+  decrease_indent
   sudo cp "$(brew --prefix $FORMULA_NAME)/lib/opentelemetry-java-contrib-jmx-metrics.jar" /opt 2>&1 || error_exit "$LINENO" "Failed to move jmx jar to /opt"
   succeeded
 
@@ -356,7 +363,15 @@ uninstall()
 
   info "Uninstalling collector..."
   brew uninstall $FORMULA_NAME > /dev/null 2>&1 || error_exit "$LINENO" "Failed to uninstall formula"
-  sudo rm /opt/opentelemetry-java-contrib-jmx-metrics.jar > /dev/null 2>&1 || error_exit "$LINENO" "Failed to remove jmx jar from /opt"
+  
+  increase_indent
+  info ""
+  info "In order to remove the jmx metrics jar, root permissions are needed."
+  info "Please enter your password if prompted to complete installation."
+  info ""
+  decrease_indent
+
+  sudo rm -f /opt/opentelemetry-java-contrib-jmx-metrics.jar > /dev/null 2>&1 || error_exit "$LINENO" "Failed to remove jmx jar from /opt"
   succeeded
 
   info "Untapping formula..."
@@ -385,6 +400,14 @@ upgrade()
   info "Upgrading collector..."
   brew update > /dev/null 2>&1 || error_exit "$LINENO" "Failed to run brew update"
   brew upgrade $FORMULA_NAME > /dev/null 2>&1 || error_exit "$LINENO" "Failed to upgrade formula"
+
+  increase_indent
+  info ""
+  info "In order to install the jmx metrics jar to the correct location, root permissions are needed."
+  info "Please enter your password if prompted to complete installation."
+  info ""
+  decrease_indent
+  
   sudo cp "$(brew --prefix $FORMULA_NAME)/lib/opentelemetry-java-contrib-jmx-metrics.jar" /opt 2>&1 || error_exit "$LINENO" "Failed to move jmx jar to /opt"
   succeeded
 
