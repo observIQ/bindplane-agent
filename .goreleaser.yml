@@ -178,7 +178,7 @@ checksum:
   name_template: "{{ .ProjectName }}-v{{ .Version }}-SHA256SUMS"
   algorithm: sha256
 
-# # https://goreleaser.com/customization/sign/
+# https://goreleaser.com/customization/sign/
 signs:
   - cmd: cosign
     stdin: "{{ .Env.COSIGN_PWD }}"
@@ -221,11 +221,11 @@ brews:
       branch: main
     download_strategy: CurlDownloadStrategy
     folder: Formula
-    url_template: https://github.com/observiq/observiq-otel-collector/releases/download/{{ .Tag }}/{{ .ArtifactName }}
+    url_template: https://github.com/observIQ/observiq-otel-collector/releases/download/{{ .Tag }}/{{ .ArtifactName }}
     commit_author:
       name: observiq
       email: support@observiq.com
-    homepage: "https://github.com/observiq/observiq-otel-collector"
+    homepage: "https://github.com/observIQ/observiq-otel-collector"
     license: "Apache 2.0"
     caveats: |
       ****************************************************************
