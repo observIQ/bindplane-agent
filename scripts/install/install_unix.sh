@@ -538,9 +538,18 @@ install_package()
     succeeded
   fi
 
-  info "Enabling service..."
-  systemctl enable --now observiq-otel-collector > /dev/null 2>&1 || error_exit "$LINENO" "Failed to enable service"
-  succeeded
+  if [ "$(systemctl is-enabled observiq-otel-collector)" = "enabled" ]; then
+    # The unit is already enabled; It may be running, too, if this was an upgrade.
+    # We'll want to restart, which will start it if it wasn't running already,
+    # and restart in the case that this was an upgrade on a running collector.
+    info "Restarting service..."
+    systemctl restart observiq-otel-collector
+    succeeded
+  else
+    info "Enabling service..."
+    systemctl enable --now observiq-otel-collector > /dev/null 2>&1 || error_exit "$LINENO" "Failed to enable service"
+    succeeded
+  fi
 
   success "observIQ OpenTelemetry Collector installation complete!"
   decrease_indent
