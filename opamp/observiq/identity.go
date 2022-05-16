@@ -15,13 +15,11 @@
 package observiq
 
 import (
-	"fmt"
 	"runtime"
 
 	ios "github.com/observiq/observiq-otel-collector/internal/os"
 	"github.com/observiq/observiq-otel-collector/internal/version"
 	"github.com/observiq/observiq-otel-collector/opamp"
-	"github.com/open-telemetry/opamp-go/client"
 	"github.com/open-telemetry/opamp-go/protobufs"
 	"go.uber.org/zap"
 )
@@ -95,12 +93,6 @@ func (i *identity) ToAgentDescription() (*protobufs.AgentDescription, error) {
 	agentDesc := &protobufs.AgentDescription{
 		IdentifyingAttributes:    identifyingAttributes,
 		NonIdentifyingAttributes: nonIdentifyingAttributes,
-	}
-
-	// Compute hash
-	if err := client.CalcHashAgentDescription(agentDesc); err != nil {
-		// Still return agentDesc it will just be missing a hash
-		return agentDesc, fmt.Errorf("error while computing agent description hash: %w", err)
 	}
 
 	return agentDesc, nil

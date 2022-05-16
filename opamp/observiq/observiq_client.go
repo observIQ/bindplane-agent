@@ -80,15 +80,15 @@ func NewClient(defaultLogger *zap.SugaredLogger, config opamp.Config, configMana
 
 // Connect initiates a connection to the OpAmp server based on the supplied configuration
 func (c *Client) Connect(ctx context.Context, config opamp.Config) error {
-	effectiveConfig, err := c.configManager.ComposeEffectiveConfig()
-	if err != nil {
-		c.logger.Error("Error while composing effective config", zap.Error(err))
-		return fmt.Errorf("failed to compose effective config: %w", err)
-	}
-
+	// Compose and set the agent description
 	description, err := c.ident.ToAgentDescription()
 	if err != nil {
 		c.logger.Error("Error composing agent description", zap.Error(err))
+	}
+
+	if err := c.opampClient.SetAgentDescription(description); err != nil {
+		c.logger.Error("Error while setting agent description", zap.Error(err))
+		return err
 	}
 
 	settings := types.StartSettings{
@@ -96,14 +96,15 @@ func (c *Client) Connect(ctx context.Context, config opamp.Config) error {
 		AuthorizationHeader: *config.SecretKey,
 		TLSConfig:           nil, // TODO add support for TLS
 		InstanceUid:         config.AgentID,
-		AgentDescription:    description,
 		Callbacks: types.CallbacksStruct{
-			OnConnectFunc:          c.onConnectHandler,
-			OnConnectFailedFunc:    c.onConnectFailedHandler,
-			OnErrorFunc:            c.onErrorHandler,
-			OnRemoteConfigFunc:     c.onRemoteConfigHandler,
+			OnConnectFunc:       c.onConnectHandler,
+			OnConnectFailedFunc: c.onConnectFailedHandler,
+			OnErrorFunc:         c.onErrorHandler,
+			OnRemoteConfigFunc:  c.onRemoteConfigHandler,
+			SaveRemoteConfigStatusFunc: func(ctx context.Context, status *protobufs.RemoteConfigStatus) {
+			},
 			GetEffectiveConfigFunc: c.onGetEffectiveConfigHandler,
-			// Not implemented
+			// Unimplemented Handles
 			// OnOpampConnectionSettingsFunc
 			// OnOpampConnectionSettingsAcceptedFunc
 			// OnOwnTelemetryConnectionSettingsFunc
@@ -112,7 +113,6 @@ func (c *Client) Connect(ctx context.Context, config opamp.Config) error {
 			// OnAgentIdentificationFunc
 			// OnCommandFunc
 		},
-		LastRemoteConfigHash: effectiveConfig.GetHash(),
 	}
 
 	return c.opampClient.Start(ctx, settings)
