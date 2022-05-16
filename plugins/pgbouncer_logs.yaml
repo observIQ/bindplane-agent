@@ -4,7 +4,8 @@ description: Log parser for PgBouncer
 parameters:
   - name: file_path
     type: "[]string"
-    default: "/var/log/pgbouncer/pgbouncer.log"
+    default: 
+      - "/var/log/pgbouncer/pgbouncer.log"
   - name: start_at
     type: string
     supported:
