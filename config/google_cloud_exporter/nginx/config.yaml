@@ -1,0 +1,15 @@
+receivers:
+  nginx:
+    collection_interval: 60s
+    endpoint: "http://localhost:80/status"
+
+exporters: 
+  googlecloud:
+
+service:
+  pipelines:
+    metrics:
+      receivers:
+      - nginx
+      exporters:
+      - googlecloud
