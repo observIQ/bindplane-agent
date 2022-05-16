@@ -1,0 +1,41 @@
+version: 0.0.1
+title: Apache Common
+description: Log parser for Apache common format
+parameters:
+  - name: file_path
+    type: "[]string"
+    default:
+      - "/var/log/apache2/access.log"
+  - name: start_at
+    type: string
+    supported:
+      - beginning
+      - end
+    default: end
+template: |
+  receivers:
+    filelog:
+      include:
+        {{ range $fp := .file_path }}
+        - '{{ $fp }}'
+        {{end}}
+      start_at: {{ .start_at }}
+      operators:
+        - type: regex_parser
+          regex: '^(?P<remote_addr>[^ ]*) (?P<remote_host>[^ ]*) (?P<remote_user>[^ ]*) \[(?P<time>[^\]]*)\] "(?P<method>\S+) +(?P<path>[^ ]*)( (?P<protocol>[^/]*)/(?P<protocol_version>[^\"]*)|[^\"]*)?" (?P<status>[^ ]*) (?P<body_bytes_sent>[^ ]*)(?: "(?P<http_referer>[^\"]*)" "(?P<http_user_agent>[^\"]*)"(?:\s+(?P<http_x_forwarded_for>[^ ]+))?)?'
+          timestamp:
+            parse_from: attributes.time
+            layout: '%d/%b/%Y:%H:%M:%S %z'
+          severity:
+            parse_from: attributes.status
+            preset: none
+            mapping:
+              info: 2xx
+              info2: 3xx
+              warn: 4xx
+              error: 5xx
+
+  service:
+    pipelines:
+      logs:
+        receivers: [filelog]
