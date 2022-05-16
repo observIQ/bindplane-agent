@@ -19,17 +19,18 @@ template: |
         - '{{ $fp }}'
         {{end}}
       start_at: {{ .start_at }}
+      output: pgbouncer_parser
       operators:
-        - type: regex_parser
+        - id: pgbouncer_parser
+          type: regex_parser
           regex: '^(?P<timestamp>\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}.\d{3}(\s*[^\d\s]{3})?)\s*(\[)?(?P<pid>\d+)(\])? (?P<severity>\w+) (?P<message>.*)'
           severity:
             parse_from: attributes.severity
             mapping:
-              critical: fatal
-              info: log
+              info2: log
               notice: stats
               debug: noise
-          output: add_type
+          output: time_parser_router
 
         - id: time_parser_router
           type: router
