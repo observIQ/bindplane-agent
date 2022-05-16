@@ -19,3 +19,8 @@ windows/plugins
 opentelemetry-java-contrib-jmx-metrics.jar
 release_deps
 tmp
+
+# OpAmp Files
+collector.yaml
+manager.yaml
+logging.yaml
