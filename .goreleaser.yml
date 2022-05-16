@@ -59,7 +59,7 @@ nfpms:
     vendor: observIQ, Inc
     maintainer: observIQ <support@observiq.com>
     description: observIQ's distribution of the OpenTelemetry collector
-    homepage: https://github.com/observiq/observiq-otel-collector
+    homepage: https://github.com/observIQ/observiq-otel-collector
     license: Apache 2.0
     formats:
       - rpm
