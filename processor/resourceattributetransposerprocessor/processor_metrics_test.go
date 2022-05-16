@@ -28,8 +28,8 @@ import (
 	"go.uber.org/zap"
 )
 
-func TestProcessorStart(t *testing.T) {
-	p := newResourceAttributeTransposerProcessor(
+func TestMetricsProcessorStart(t *testing.T) {
+	p := newMetricsProcessor(
 		zap.NewNop(),
 		consumertest.NewNop(),
 		createDefaultConfig().(*Config),
@@ -39,8 +39,8 @@ func TestProcessorStart(t *testing.T) {
 	require.NoError(t, err)
 }
 
-func TestProcessorShutdown(t *testing.T) {
-	p := newResourceAttributeTransposerProcessor(
+func TestMetricsProcessorShutdown(t *testing.T) {
+	p := newMetricsProcessor(
 		zap.NewNop(),
 		consumertest.NewNop(),
 		createDefaultConfig().(*Config),
@@ -50,8 +50,8 @@ func TestProcessorShutdown(t *testing.T) {
 	require.NoError(t, err)
 }
 
-func TestProcessorCapabilities(t *testing.T) {
-	p := newResourceAttributeTransposerProcessor(
+func TestMetricsProcessorCapabilities(t *testing.T) {
+	p := newMetricsProcessor(
 		zap.NewNop(),
 		consumertest.NewNop(),
 		createDefaultConfig().(*Config),
@@ -77,7 +77,7 @@ func TestConsumeMetricsNoop(t *testing.T) {
 		metricsOut = args[1].(pdata.Metrics)
 	}).Return(nil)
 
-	p := newResourceAttributeTransposerProcessor(
+	p := newMetricsProcessor(
 		zap.NewNop(),
 		consumer,
 		createDefaultConfig().(*Config),
@@ -140,7 +140,7 @@ func TestConsumeMetricsMoveExistingAttribs(t *testing.T) {
 		},
 	}
 
-	p := newResourceAttributeTransposerProcessor(
+	p := newMetricsProcessor(
 		zap.NewNop(),
 		consumer,
 		cfg,
@@ -186,7 +186,7 @@ func TestConsumeMetricsMoveToMultipleMetrics(t *testing.T) {
 		},
 	}
 
-	p := newResourceAttributeTransposerProcessor(
+	p := newMetricsProcessor(
 		zap.NewNop(),
 		consumer,
 		cfg,
@@ -237,7 +237,7 @@ func TestConsumeMetricsMixedExistence(t *testing.T) {
 		},
 	}
 
-	p := newResourceAttributeTransposerProcessor(
+	p := newMetricsProcessor(
 		zap.NewNop(),
 		consumer,
 		cfg,
@@ -278,7 +278,7 @@ func TestConsumeMetricsSum(t *testing.T) {
 		},
 	}
 
-	p := newResourceAttributeTransposerProcessor(
+	p := newMetricsProcessor(
 		zap.NewNop(),
 		consumer,
 		cfg,
@@ -319,7 +319,7 @@ func TestConsumeMetricsHistogram(t *testing.T) {
 		},
 	}
 
-	p := newResourceAttributeTransposerProcessor(
+	p := newMetricsProcessor(
 		zap.NewNop(),
 		consumer,
 		cfg,
@@ -360,7 +360,7 @@ func TestConsumeMetricsSummary(t *testing.T) {
 		},
 	}
 
-	p := newResourceAttributeTransposerProcessor(
+	p := newMetricsProcessor(
 		zap.NewNop(),
 		consumer,
 		cfg,
@@ -401,7 +401,7 @@ func TestConsumeMetricsNone(t *testing.T) {
 		},
 	}
 
-	p := newResourceAttributeTransposerProcessor(
+	p := newMetricsProcessor(
 		zap.NewNop(),
 		consumer,
 		cfg,
@@ -443,7 +443,7 @@ func TestConsumeMetricsDoesNotOverwrite(t *testing.T) {
 		},
 	}
 
-	p := newResourceAttributeTransposerProcessor(
+	p := newMetricsProcessor(
 		zap.NewNop(),
 		consumer,
 		cfg,
@@ -489,7 +489,7 @@ func TestConsumeMetricsDoesNotOverwrite2(t *testing.T) {
 		},
 	}
 
-	p := newResourceAttributeTransposerProcessor(
+	p := newMetricsProcessor(
 		zap.NewNop(),
 		consumer,
 		cfg,
@@ -522,6 +522,11 @@ func (m *mockConsumer) Start(ctx context.Context, host component.Host) error {
 func (m *mockConsumer) Capabilities() consumer.Capabilities {
 	args := m.Called()
 	return args.Get(0).(consumer.Capabilities)
+}
+
+func (m *mockConsumer) ConsumeLogs(ctx context.Context, md pdata.Logs) error {
+	args := m.Called(ctx, md)
+	return args.Error(0)
 }
 
 func (m *mockConsumer) ConsumeMetrics(ctx context.Context, md pdata.Metrics) error {
