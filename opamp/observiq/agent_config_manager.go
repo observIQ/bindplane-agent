@@ -103,18 +103,13 @@ func (a *AgentConfigManager) ApplyConfigChanges(remoteConfig *protobufs.AgentRem
 		return nil, false, err
 	}
 
-	// No remote config
-	if remoteConfig == nil {
-		return
-	}
-
-	// No config changes return current effective config
-	if bytes.Equal(remoteConfig.GetConfigHash(), effectiveConfig.GetHash()) {
-		return
-	}
-
 	currentConfigMap := effectiveConfig.GetConfigMap().GetConfigMap()
 	remoteConfigMap := remoteConfig.GetConfig().GetConfigMap()
+
+	// No remote config Map
+	if remoteConfigMap == nil {
+		return
+	}
 
 	// loop through all remote configs and compare then with existing configs
 	for configName, remoteContents := range remoteConfigMap {

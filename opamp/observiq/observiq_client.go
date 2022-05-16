@@ -97,14 +97,13 @@ func (c *Client) Connect(ctx context.Context, config opamp.Config) error {
 		TLSConfig:           nil, // TODO add support for TLS
 		InstanceUid:         config.AgentID,
 		Callbacks: types.CallbacksStruct{
-			OnConnectFunc:       c.onConnectHandler,
-			OnConnectFailedFunc: c.onConnectFailedHandler,
-			OnErrorFunc:         c.onErrorHandler,
-			OnRemoteConfigFunc:  c.onRemoteConfigHandler,
-			SaveRemoteConfigStatusFunc: func(ctx context.Context, status *protobufs.RemoteConfigStatus) {
-			},
+			OnConnectFunc:          c.onConnectHandler,
+			OnConnectFailedFunc:    c.onConnectFailedHandler,
+			OnErrorFunc:            c.onErrorHandler,
+			OnRemoteConfigFunc:     c.onRemoteConfigHandler,
 			GetEffectiveConfigFunc: c.onGetEffectiveConfigHandler,
 			// Unimplemented Handles
+			// SaveRemoteConfigStatusFunc:
 			// OnOpampConnectionSettingsFunc
 			// OnOpampConnectionSettingsAcceptedFunc
 			// OnOwnTelemetryConnectionSettingsFunc
