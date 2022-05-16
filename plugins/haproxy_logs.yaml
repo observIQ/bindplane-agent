@@ -1,0 +1,262 @@
+version: 0.0.1
+title: HAProxy
+description: Log parser for HAProxy
+parameters:
+  - name: file_log_path
+    type: "[]string"
+  - name: log_format
+    type: string
+    supported:
+      - default
+      - observiq
+    default: default
+  - name: start_at
+    type: string
+    supported:
+      - beginning
+      - end
+    default: end
+template: | 
+  receivers:
+    filelog:
+      include:
+        {{ range $fp := .file_log_path }}
+        - '{{ $fp }}'
+        {{ end }}
+      start_at: {{ .start_at }}
+      operators:
+        - id: default_parser
+          if: '$record.message != nil and $record.message matches "^\\w{3}\\s+\\d{1,2}\\s+\\d{2}:\\d{2}:\\d{2}\\s+[^\\s]+\\s+[^\\[]+\\[[^\\]]+\\]:"'
+          type: regex_parser
+          parse_from: $record.message
+          regex: '^(?P<timestamp>\w{3}\s+\d{2}\s+\d{2}:\d{2}:\d{2})\s+(?P<host>[^\s]+)\s+(?P<process_name>[^\[]+)\[(?P<pid>[^\]]+)\]:(\s)?(?P<message>.*)'
+          timestamp:
+            parse_from: timestamp
+            layout_type: gotime
+            layout: 'Jan 02 15:04:05'
+
+        # Route to correct parser
+        - id: message_router
+          type: router
+          default: message_move
+          routes:
+            - output: httplog_parser
+              expr: '$record.message != nil and $record.message matches "^(\\s)?[^:]+:[^\\s]+\\s+\\[[^\\]]+\\]\\s+[^\\s]+\\s+[^/]+/[^\\s]+\\s+[^/]+/[^/]+/[^/]+/[^/]+/[^\\s]+\\s+[^\\s]+\\s+[^\\s]+\\s+[^\\s]+\\s+[^\\s]+\\s+[\\w-]{4}\\s+[^/]+/[^/]+/[^/]+/[^/]+/[^\\s]+\\s+[^/]+/[^\\s]+\\s+"'
+            - output: tcplog_parser
+              expr: '$record.message != nil and $record.message matches "^(\\s)?[^:]+:[^\\s]+\\s+\\[[^\\]]+\\]\\s+[^\\s]+\\s+[^/]+/[^\\s]+\\s+[^/]+/[^/]+/[^\\s]+\\s+[^\\s]+\\s+[\\w-]{2}\\s+[^/]+/[^/]+/[^/]+/[^/]+/[^\\s]+\\s+[^/]+/[\\d]+"'
+            - output: error_parser
+              expr: '$record.message != nil and $record.message matches "^\\s*\\[[^\\]]+\\]\\s*.*"'
+              labels:
+                log_type: 'haproxy.error'
+
+        # Parse http format log message
+        - id: httplog_parser
+          type: regex_parser
+          parse_from: $record.message
+          regex: '^(\s)?(?P<frontend_ip>[^:]+):(?P<frontend_port>[^\s]+)\s+\[(?P<accept_date>[^\]]+)\]\s+(?P<frontend_name_transport>[^\s]+)\s+(?P<backend_name>[^/]+)/(?P<server_name>[^\s]+)\s+(?P<client_request_send_time>[^/]+)/(?P<queue_wait_time>[^/]+)/(?P<response_time>[^/]+)/(?P<response_send_time>[^/]+)/(?P<client_request_active_time>[^\s]+)\s+(?P<status>[^\s]+)\s+(?P<bytes_read>[^\s]+)\s+(?P<captured_request_cookie>[^\s]+)\s+(?P<captured_response_cookie>[^\s]+)\s+(?P<termination_state>[\w-]{4})\s+(?P<process_concurrent_connections>[^/]+)/(?P<frontend_concurrent_connections>[^/]+)/(?P<backend_concurrent_connections>[^/]+)/(?P<server_concurrent_connections>[^/]+)/(?P<retries>[^\s]+)\s+(?P<server_queue>[^/]+)/(?P<backend_queue>[^\s]+) ({[\w\d[:ascii:]]+}\s)?({[\w\d[:ascii:]]+}\s)?"(?P<method>\S+) +(?P<uri>[^ ]*)( (?P<protocol>[^/]*)/(?P<protocol_version>[^\"]*)|[^\"]*)?"'
+          output: frontend_type_http_add
+
+        - id: frontend_type_http_add
+          type: add
+          field: frontend_type
+          value: http
+          output: status_severity_parser
+
+        # Parse tcp format log message
+        - id: tcplog_parser
+          type: regex_parser
+          parse_from: $record.message
+          regex: '^(\s)?(?P<frontend_ip>[^:]+):(?P<frontend_port>[^\s]+)\s+\[(?P<accept_date>[^\]]+)\]\s+(?P<frontend_name_transport>[^\s]+)\s+(?P<backend_name>[^/]+)/(?P<server_name>[^\s]+)\s+(?P<queue_wait_time>[^/]+)/(?P<server_response_time>[^/]+)/(?P<session_duration>[^\s]+)\s+(?P<bytes_read>[^\s]+)\s+(?P<termination_state>[\w-]{2})\s+(?P<process_concurrent_connections>[^/]+)/(?P<frontend_concurrent_connections>[^/]+)/(?P<backend_concurrent_connections>[^/]+)/(?P<server_concurrent_connections>[^/]+)/(?P<retries>[^\s]+)\s+(?P<server_queue>[^/]+)/(?P<backend_queue>[\d]+)'
+          output: frontend_type_tcp_add
+
+        - id: frontend_type_tcp_add
+          type: add
+          field: frontend_type
+          value: tcp
+          output: add_info_severity
+
+        # Default severity to info
+        - id: add_info_severity
+          type: add
+          field: $record.severity
+          value: 'info'
+          output: error_severity_parser # Use error parser to parse our added info severity
+
+        # Route to correct parser
+        - id: message_router
+          type: router
+          default: message_move
+          routes:
+            - output: observiq_parser
+              expr: '$record.message != nil and $record.message matches "^{.*}$|^{.*}\\n$"'
+            - output: error_parser
+              expr: '$record.message != nil and $record.message matches "^\\s*\\[[^\\]]+\\]\\s*.*"'
+              labels:
+                log_type: 'haproxy.error'
+
+        # Parse observiq format log message
+        - id: observiq_parser
+          type: json_parser
+          if: '$record.message != nil and $record.message matches "^{.*}$|^{.*}\\n$"'
+          parse_from: $record.message
+          output: status_severity_parser
+
+        # Group of parsers and restructure operators
+        # Parse status if it exists
+        - id: status_severity_parser
+          type: severity_parser
+          if: '$record.status != nil'
+          parse_from: $record.status
+          preserve_to: $record.status
+          preset: none
+          mapping:
+            info: 2xx
+            notice: 3xx
+            warning: 4xx
+            error: 5xx
+          output: uri_parser
+
+        # Parse uri if it exists
+        - type: uri_parser
+          if: '$record.uri != nil'
+          parse_from: $record.uri
+          output: query_move
+
+        # Rename query to query_parameter
+        - id: query_move
+          type: move
+          if: '$record.query != nil'
+          from: $record.query
+          to: $record.query_parameter
+          output: protocol_parser
+
+        # Normalize protocol/version in JSON http_version to match regex http parser
+        - id: protocol_parser
+          type: regex_parser
+          if: '$record.http_version != nil'
+          parse_from: $record.http_version
+          regex: '(?P<protocol>[^/]*)/(?P<protocol_version>.*)'
+
+      # frontend_ssl_version
+      # frontend_ssl_ciphers
+      # method
+      # protocol
+      # protocol_version
+      # referer
+        # Promote fields to labels
+        - id: frontend_ssl_version_move
+          type: move
+          if: '$record.frontend_ssl_version != nil'
+          from: '$record.frontend_ssl_version'
+          to: '$labels["frontend_ssl_version"]'
+        - id: frontend_ssl_ciphers_move
+          type: move
+          if: '$record.frontend_ssl_ciphers != nil'
+          from: '$record.frontend_ssl_ciphers'
+          to: '$labels["frontend_ssl_ciphers"]'
+        - id: method_move
+          type: move
+          if: '$record.method != nil'
+          from: '$record.method'
+          to: '$labels["method"]'
+        - id: protocol_move
+          type: move
+          if: '$record.protocol != nil'
+          from: '$record.protocol'
+          to: '$labels["protocol"]'
+        - id: protocol_version_move
+          type: move
+          if: '$record.protocol_version != nil'
+          from: '$record.protocol_version'
+          to: '$labels["protocol_version"]'
+        - id: referer_move
+          type: move
+          if: '$record.referer != nil'
+          from: '$record.referer'
+          to: '$labels["referer"]'
+
+        # Promote fields to resources
+        - id: frontend_type_move
+          type: move
+          if: '$record.frontend_type != nil'
+          from: '$record.frontend_type'
+          to: '$resource["frontend_type"]'
+        - id: frontend_ip_move
+          type: move
+          if: '$record.frontend_ip != nil'
+          from: '$record.frontend_ip'
+          to: '$resource["frontend_ip"]'
+        - id: frontend_port_move
+          type: move
+          if: '$record.frontend_port != nil'
+          from: '$record.frontend_port'
+          to: '$resource["frontend_port"]'
+        - id: path_move
+          type: move
+          if: '$record.move != nil'
+          from: '$record.path'
+          to: '$resource["path"]'
+        - id: query_parameter_move
+          type: move
+          if: '$record.query_parameter != nil'
+          from: '$record.query_parameter'
+          to: '$resource["query_parameter"]'
+        - id: frontend_name_move
+          type: move
+          if: '$record.frontend_name != nil'
+          from: '$record.frontend_name'
+          to: '$resource["frontend_name"]'
+        - id: backend_name_move
+          type: move
+          if: '$record.backend_name != nil'
+          from: '$record.backend_name'
+          to: '$resource["backend_name"]'
+        - id: server_name_move
+          type: move
+          if: '$record.server_name != nil'
+          from: '$record.server_name'
+          to: '$resource["server_name"]'
+        - id: host_move
+          type: move
+          if: '$record.host != nil'
+          from: '$record.host'
+          to: '$resource["host"]'
+          output: add_type
+
+        # Parser error logs
+        # Severities: emerg alert crit err warning notice info debug
+        - id: error_parser
+          type: regex_parser
+          parse_from: $record.message
+          regex: ^\s*\[(?P<severity>[^\]]+)\]\s*(?P<message>.*)
+          output: error_severity_parser
+
+        - id: error_severity_parser
+          type: severity_parser
+          if: '$record.severity != nil'
+          parse_from: $record.severity
+          mapping:
+            critical: crit
+            emergency: emerg
+            error: err
+          output: add_type
+
+        # If $record.message still exists and $record.host doesn't that means we were unable to parse and just need to promote to $record
+        - id: message_move
+          type: move
+          if: $record.message != nil and $record.host == nil
+          from: $record.message
+          to: $record
+          output: add_type
+
+        - id: add_type
+          type: add
+          field: attributes.log_type
+          value: 'haproxy'
+
+  service:
+    pipelines:
+      logs:
+        receivers: [filelog]
+
+
