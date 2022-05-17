@@ -81,12 +81,7 @@ func NewClient(defaultLogger *zap.SugaredLogger, config opamp.Config, configMana
 // Connect initiates a connection to the OpAmp server based on the supplied configuration
 func (c *Client) Connect(ctx context.Context, config opamp.Config) error {
 	// Compose and set the agent description
-	description, err := c.ident.ToAgentDescription()
-	if err != nil {
-		c.logger.Error("Error composing agent description", zap.Error(err))
-	}
-
-	if err := c.opampClient.SetAgentDescription(description); err != nil {
+	if err := c.opampClient.SetAgentDescription(c.ident.ToAgentDescription()); err != nil {
 		c.logger.Error("Error while setting agent description", zap.Error(err))
 		return err
 	}
@@ -126,12 +121,8 @@ func (c *Client) Disconnect(ctx context.Context) error {
 
 func (c *Client) onConnectHandler() {
 	c.logger.Info("Successfully connected to server")
-	desc, err := c.ident.ToAgentDescription()
-	if err != nil {
-		c.logger.Warn("Failure when composing agent description. Sending partial description", zap.Error(err))
-	}
 
-	if err := c.opampClient.SetAgentDescription(desc); err != nil {
+	if err := c.opampClient.SetAgentDescription(c.ident.ToAgentDescription()); err != nil {
 		c.logger.Error("Failed to set agent description", zap.Error(err))
 	}
 }

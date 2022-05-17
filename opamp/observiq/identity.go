@@ -54,7 +54,7 @@ func newIdentity(logger *zap.SugaredLogger, config opamp.Config) *identity {
 	return &identity{
 		agentID:     config.AgentID,
 		agentName:   config.AgentName,
-		serviceName: "com.observiq.collector", // TODO figure out if this should be hardcoded like so or read from system.
+		serviceName: "com.observiq.collector", // Hardcoded defines this type of agent to the server
 		version:     version.Version(),
 		labels:      config.Labels,
 		oSArch:      runtime.GOARCH,
@@ -65,7 +65,7 @@ func newIdentity(logger *zap.SugaredLogger, config opamp.Config) *identity {
 	}
 }
 
-func (i *identity) ToAgentDescription() (*protobufs.AgentDescription, error) {
+func (i *identity) ToAgentDescription() *protobufs.AgentDescription {
 	identifyingAttributes := []*protobufs.KeyValue{
 		opamp.StringKeyValue("service.instance.id", i.agentID),
 		opamp.StringKeyValue("service.name", i.serviceName),
@@ -95,5 +95,5 @@ func (i *identity) ToAgentDescription() (*protobufs.AgentDescription, error) {
 		NonIdentifyingAttributes: nonIdentifyingAttributes,
 	}
 
-	return agentDesc, nil
+	return agentDesc
 }
