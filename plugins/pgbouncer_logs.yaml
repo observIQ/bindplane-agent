@@ -20,7 +20,6 @@ template: |
         - '{{ $fp }}'
         {{end}}
       start_at: {{ .start_at }}
-      output: pgbouncer_parser
       operators:
         - id: pgbouncer_parser
           type: regex_parser
@@ -28,11 +27,12 @@ template: |
           severity:
             parse_from: attributes.severity
             mapping:
-              info2: log
-              notice: stats
+              info: log
+              info2: stats
               debug: noise
           output: time_parser_router
 
+        # Handle different timestamps
         - id: time_parser_router
           type: router
           default: message_router
@@ -45,7 +45,7 @@ template: |
         - id: time_parser_with_timezone
           type: time_parser
           parse_from: attributes.timestamp
-          layout: '%d %b %Y %H:%M:%S.%s'
+          layout: '%Y-%m-%d %H:%M:%S.%L %Z'
           output: message_router
 
         - id: time_parser_without_timezone
@@ -58,10 +58,10 @@ template: |
           type: router
           default: add_type
           routes:
-          - expr: 'attributes.message matches "^[Ss]tats: "'
-            output: stats_parser
-          - expr: 'attributes.message matches "^[CS]-\\w*"'
-            output: request_parser
+            - expr: 'attributes.message matches "^[Ss]tats: "'
+              output: stats_parser
+            - expr: 'attributes.message matches "^[CS]-\\w*"'
+              output: request_parser
 
         - id: stats_parser
           type: regex_parser
@@ -72,7 +72,7 @@ template: |
         - id: request_parser
           type: regex_parser
           parse_from: attributes.message
-          regex: '^[CS]-\w*:\s(\()?(?P<db_name>\w*)(\))?\/(\()?(?P<user_name>\w*)(\))?@(?P<host>[^:]*):(?P<port>\d*)\s*(?P<message>[^\(]*)(\s*\(age=(?P<age>\d*)s\))?'
+          regex: '^[CS]-\w*:\s\(?(?P<db_name>\w*)\)?\/\(?(?P<user_name>[^@]*)\)?@(?P<host>[^:]*):(?P<port>\d*)\s*'
           output: add_type
 
         - id: add_type
