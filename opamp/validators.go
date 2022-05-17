@@ -44,7 +44,7 @@ func NewYamlValidator(target interface{}) ValidatorFunc {
 // NewJSONValidator creates a new Validator that checks does a json unmarshal against the target interface{}
 func NewJSONValidator(target interface{}) ValidatorFunc {
 	return func(b []byte) bool {
-		if err := json.Unmarshal(b, target); err != nil {
+		if err := json.Unmarshal(b, &target); err != nil {
 			return false
 		}
 
