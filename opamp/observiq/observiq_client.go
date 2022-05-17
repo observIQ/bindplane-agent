@@ -88,9 +88,9 @@ func (c *Client) Connect(ctx context.Context, config opamp.Config) error {
 
 	settings := types.StartSettings{
 		OpAMPServerURL:      config.Endpoint,
-		AuthorizationHeader: *config.SecretKey,
+		AuthorizationHeader: config.GetSecretKey(),
 		TLSConfig:           nil, // TODO add support for TLS
-		InstanceUid:         config.AgentID,
+		InstanceUid:         c.ident.agentID,
 		Callbacks: types.CallbacksStruct{
 			OnConnectFunc:          c.onConnectHandler,
 			OnConnectFailedFunc:    c.onConnectFailedHandler,

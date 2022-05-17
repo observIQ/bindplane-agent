@@ -70,6 +70,15 @@ func ParseConfig(configLocation string) (*Config, error) {
 	return &config, nil
 }
 
+// GetSecretKey returns secret key if set else returns empty string
+func (c Config) GetSecretKey() string {
+	if c.SecretKey == nil {
+		return ""
+	}
+
+	return *c.SecretKey
+}
+
 // CmpUpdatableFields compares updatable fields for equality
 func (c Config) CmpUpdatableFields(o Config) (equal bool) {
 	if !cmpStingPtr(c.AgentName, o.AgentName) {

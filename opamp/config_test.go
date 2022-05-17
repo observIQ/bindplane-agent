@@ -277,3 +277,32 @@ func TestCmpUpdatableFields(t *testing.T) {
 		})
 	}
 }
+
+func TestGetSecretKey(t *testing.T) {
+	secretKeyContents := "b92222ee-a1fc-4bb1-98db-26de3448541b"
+	testCases := []struct {
+		desc     string
+		config   Config
+		expected string
+	}{
+		{
+			desc:     "Missing secretKey",
+			config:   Config{},
+			expected: "",
+		},
+		{
+			desc: "Has secretKey",
+			config: Config{
+				SecretKey: &secretKeyContents,
+			},
+			expected: secretKeyContents,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.desc, func(t *testing.T) {
+			actual := tc.config.GetSecretKey()
+			require.Equal(t, tc.expected, actual)
+		})
+	}
+}
