@@ -61,6 +61,8 @@ func main() {
 		defaultLogger.Fatal("Settings configuration failed", zap.Error(err))
 	}
 
+	// See if manager config file exists. If so run in remote managed mode otherwise standalone mode
+	// TODO(cpheps) clean this up in follow up work
 	if _, err := os.Stat(*managerConfigPath); err == nil {
 		log.Println("Starting Management Path")
 		// Management config exists

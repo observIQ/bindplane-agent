@@ -16,11 +16,9 @@ package observiq
 
 import (
 	"bytes"
-	"crypto/sha256"
 	"fmt"
 	"os"
 	"path/filepath"
-	"sort"
 
 	"github.com/observiq/observiq-otel-collector/opamp"
 	"github.com/open-telemetry/opamp-go/protobufs"
@@ -85,11 +83,7 @@ func (a *AgentConfigManager) ComposeEffectiveConfig() (*protobufs.EffectiveConfi
 		configNames = append(configNames, configName)
 	}
 
-	// Compute Hash
-	configHash := computeHash(configNames, contentMap)
-
 	return &protobufs.EffectiveConfig{
-		Hash: configHash,
 		ConfigMap: &protobufs.AgentConfigMap{
 			ConfigMap: contentMap,
 		},
@@ -176,22 +170,6 @@ func (a *AgentConfigManager) ApplyConfigChanges(remoteConfig *protobufs.AgentRem
 	}
 
 	return
-}
-
-func computeHash(configNames []string, contentMap map[string]*protobufs.AgentConfigFile) []byte {
-	// Sort config names
-	sort.Strings(configNames)
-
-	// Compute hash
-	h := sha256.New()
-
-	// Add each config file to the hash in alphabetical order
-	for _, configName := range configNames {
-		configContents := contentMap[configName].Body
-		h.Write(configContents)
-	}
-
-	return h.Sum(nil)
 }
 
 // updateManagerConfig compares the new config with the existing config. If contents have changed will update
