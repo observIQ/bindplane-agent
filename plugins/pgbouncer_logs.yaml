@@ -1,0 +1,86 @@
+version: 0.0.1
+title: PgBouncer
+description: Log parser for PgBouncer
+parameters:
+  - name: file_path
+    type: "[]string"
+    default: 
+      - "/var/log/pgbouncer/pgbouncer.log"
+  - name: start_at
+    type: string
+    supported:
+      - beginning
+      - end
+    default: end
+template: |
+  receivers:
+    filelog:
+      include:
+        {{ range $fp := .file_path }}
+        - '{{ $fp }}'
+        {{end}}
+      start_at: {{ .start_at }}
+      operators:
+        - id: pgbouncer_parser
+          type: regex_parser
+          regex: '^(?P<timestamp>\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}.\d{3}(\s*[^\d\s]{3})?)\s*(\[)?(?P<pid>\d+)(\])? (?P<severity>\w+) (?P<message>.*)'
+          severity:
+            parse_from: attributes.severity
+            mapping:
+              info: log
+              info2: stats
+              debug: noise
+          output: time_parser_router
+
+        # Handle different timestamps
+        - id: time_parser_router
+          type: router
+          default: message_router
+          routes:
+            - output: time_parser_with_timezone
+              expr: 'attributes.timestamp != nil and attributes.timestamp matches "^\\d{4}-\\d{2}-\\d{2}\\s\\d{2}:\\d{2}:\\d{2}.\\d{3}\\s[^\\d\\s]{3}"'
+            - output: time_parser_without_timezone
+              expr: 'attributes.timestamp != nil and attributes.timestamp matches "^\\d{4}-\\d{2}-\\d{2}\\s\\d{2}:\\d{2}:\\d{2}.\\d{3}"'
+
+        - id: time_parser_with_timezone
+          type: time_parser
+          parse_from: attributes.timestamp
+          layout: '%Y-%m-%d %H:%M:%S.%L %Z'
+          output: message_router
+
+        - id: time_parser_without_timezone
+          type: time_parser
+          parse_from: attributes.timestamp
+          layout: '%Y-%m-%d %H:%M:%S.%L'
+          output: message_router
+
+        - id: message_router
+          type: router
+          default: add_type
+          routes:
+            - expr: 'attributes.message matches "^[Ss]tats: "'
+              output: stats_parser
+            - expr: 'attributes.message matches "^[CS]-\\w*"'
+              output: request_parser
+
+        - id: stats_parser
+          type: regex_parser
+          parse_from: attributes.message
+          regex: '^[Ss]tats: (?P<xacts_per_second>\d+)[^,]*,\s(?P<queries_per_second>\d+)[^,]*,\sin\s(?P<in_bytes_per_second>\d+)[^,]*,\sout\s(?P<out_bytes_per_second>\d+)[^,]*,\sxact\s(?P<xact_microsecond>\d+)[^,]*,\squery\s(?P<query_microsecond>\d+)\sus(,)?\swait(\stime)?\s(?P<wait_time_microsecond>\d+).*'
+          output: add_type
+
+        - id: request_parser
+          type: regex_parser
+          parse_from: attributes.message
+          regex: '^[CS]-\w*:\s\(?(?P<db_name>\w*)\)?\/\(?(?P<user_name>[^@]*)\)?@(?P<host>[^:]*):(?P<port>\d*)\s*'
+          output: add_type
+
+        - id: add_type
+          type: add
+          field: attributes.log_type
+          value: 'pgbouncer'
+        
+  service:
+    pipelines:
+      logs:
+        receivers: [filelog]

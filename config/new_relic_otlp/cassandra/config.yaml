@@ -1,0 +1,36 @@
+receivers:
+  jmx:
+    jar_path: /opt/opentelemetry-java-contrib-jmx-metrics.jar
+    endpoint: localhost:7199
+    target_system: cassandra,jvm
+    collection_interval: 60s
+    properties:
+      # Attribute 'endpoint' will be used for generic_node's node_id field.
+      otel.resource.attributes: endpoint=localhost:7199
+
+processors:
+  resourcedetection:
+    detectors: ["system"]
+    system:
+      hostname_sources: ["os"]
+
+  batch:
+
+exporters:
+  otlp:
+    endpoint: https://otlp.nr-data.net:443
+    headers:
+      api-key: 00000-00000-00000
+    tls:
+      insecure: false
+
+service:
+  pipelines:
+    metrics:
+      receivers:
+      - jmx
+      processors:
+      - resourcedetection
+      - batch
+      exporters:
+      - otlp
