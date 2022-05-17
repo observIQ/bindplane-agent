@@ -7,9 +7,9 @@ New Relic supports native ingestion of OTLP telemetry. The [Open Telemetry OTLP 
 **Endpoint**
 
 Update the exporter configuration's `endpoint` value with the New Relic OTLP endpoint you wish to send metrics to.
-- https://otlp.nr-data.net
-- https://otlp.eu01.nr-data.net
-- https://gov-otlp.nr-data.net
+- https://otlp.nr-data.net:443
+- https://otlp.eu01.nr-data.net:433
+- https://gov-otlp.nr-data.net:443
 
 You can read more [here](https://docs.newrelic.com/docs/more-integrations/open-source-telemetry-integrations/opentelemetry/opentelemetry-setup/).
 
@@ -24,7 +24,7 @@ Using the `endpoint` and `api-key` values from the Prerequisites step, configure
 ```yaml
 exporters:
   otlp:
-    endpoint: https://otlp.nr-data.net
+    endpoint: https://otlp.nr-data.net:443
     headers:
       api-key: 00000-00000-00000
     tls:

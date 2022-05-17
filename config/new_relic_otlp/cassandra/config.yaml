@@ -1,7 +1,6 @@
 receivers:
   jmx:
-    #jar_path: /opt/opentelemetry-java-contrib-jmx-metrics.jar
-    jar_path: ./release_deps/opentelemetry-java-contrib-jmx-metrics.jar
+    jar_path: /opt/opentelemetry-java-contrib-jmx-metrics.jar
     endpoint: localhost:7199
     target_system: cassandra,jvm
     collection_interval: 60s
@@ -19,7 +18,7 @@ processors:
 
 exporters:
   otlp:
-    endpoint: https://otlp.nr-data.net
+    endpoint: https://otlp.nr-data.net:443
     headers:
       api-key: 00000-00000-00000
     tls:
