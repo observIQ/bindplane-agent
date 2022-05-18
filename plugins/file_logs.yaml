@@ -58,14 +58,14 @@ template: |
         line_start_pattern: {{ .multiline_line_start_pattern }}
       encoding: {{ .encoding }}
       operators:
-        # {{ if (eq .parse_format "json")}}
+        {{ if (eq .parse_format "json")}}
         - type: json_parser
-        # {{ end }}
+        {{ end }}
 
-        # {{ if (eq .parse_format "regex")}}
+        {{ if (eq .parse_format "regex")}}
         - type: regex_parser
           regex: {{ .regex_pattern }}
-        # {{ end }}
+        {{ end }}
 
         - id: add_type
           type: add
