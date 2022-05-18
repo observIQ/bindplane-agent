@@ -26,6 +26,9 @@
       "path": "opentelemetry-java-contrib-jmx-metrics.jar"
     },
     {
+      "path": "VERSION.txt"
+    },
+    {
       "path": "LICENSE"
     }
   ],

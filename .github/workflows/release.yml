@@ -43,6 +43,8 @@ jobs:
         run: cp release_deps/opentelemetry-java-contrib-jmx-metrics.jar windows/opentelemetry-java-contrib-jmx-metrics.jar
       - name: Copy LICENSE
         run: cp LICENSE windows/LICENSE
+      - name: Copy VERSION file
+        run: cp release_deps/VERSION.txt windows/VERSION.txt
       # HACK: Copy build directory to C drive to avoid this error, since there must be a relative path from the tempdir that go-msi uses
       # for the MSI to build properly
       - name: Copy Build Dir

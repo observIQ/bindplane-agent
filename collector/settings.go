@@ -20,6 +20,7 @@ import (
 	"github.com/observiq/observiq-otel-collector/factories"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/config"
+	"go.opentelemetry.io/collector/config/mapconverter/expandmapconverter"
 	"go.opentelemetry.io/collector/config/mapprovider/filemapprovider"
 	"go.opentelemetry.io/collector/service"
 	"go.uber.org/zap"
@@ -40,7 +41,7 @@ func NewSettings(configPaths []string, version string, loggingOpts []zap.Option)
 	configProviderSettings := service.ConfigProviderSettings{
 		Locations:     configPaths,
 		MapProviders:  map[string]config.MapProvider{fmp.Scheme(): fmp},
-		MapConverters: make([]config.MapConverterFunc, 0),
+		MapConverters: []config.MapConverterFunc{expandmapconverter.New()},
 		Unmarshaler:   nil,
 	}
 	provider, err := service.NewConfigProvider(configProviderSettings)
