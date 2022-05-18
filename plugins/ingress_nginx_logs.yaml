@@ -93,7 +93,7 @@ template: |
 
           - id: add_type
             type: add
-            field: resource.log_type
+            field: attributes.log_type
             value: ingress-nginx
     
   service:
