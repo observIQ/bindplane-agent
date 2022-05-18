@@ -81,14 +81,14 @@ func (c Config) GetSecretKey() string {
 
 // CmpUpdatableFields compares updatable fields for equality
 func (c Config) CmpUpdatableFields(o Config) (equal bool) {
-	if !cmpStingPtr(c.AgentName, o.AgentName) {
+	if !cmpStringPtr(c.AgentName, o.AgentName) {
 		return false
 	}
 
-	return cmpStingPtr(c.Labels, o.Labels)
+	return cmpStringPtr(c.Labels, o.Labels)
 }
 
-func cmpStingPtr(p1, p2 *string) bool {
+func cmpStringPtr(p1, p2 *string) bool {
 	switch {
 	case p1 == nil && p2 == nil:
 		return true
