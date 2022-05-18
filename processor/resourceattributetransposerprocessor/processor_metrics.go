@@ -24,17 +24,17 @@ import (
 )
 
 type metricsProcessor struct {
-	metricsConsumer consumer.Metrics
-	logger          *zap.Logger
-	config          *Config
+	consumer consumer.Metrics
+	logger   *zap.Logger
+	config   *Config
 }
 
 // newMetricsProcessor returns a new resourceToMetricsAttributesProcessor
 func newMetricsProcessor(logger *zap.Logger, consumer consumer.Metrics, config *Config) *metricsProcessor {
 	return &metricsProcessor{
-		metricsConsumer: consumer,
-		logger:          logger,
-		config:          config,
+		consumer: consumer,
+		logger:   logger,
+		config:   config,
 	}
 }
 
@@ -71,7 +71,7 @@ func (p metricsProcessor) ConsumeMetrics(ctx context.Context, md pdata.Metrics) 
 			}
 		}
 	}
-	return p.metricsConsumer.ConsumeMetrics(ctx, md)
+	return p.consumer.ConsumeMetrics(ctx, md)
 }
 
 // Shutdown stops the processor. It's a noop.
