@@ -20,7 +20,9 @@ import (
 
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
+	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/component/componenttest"
+	"go.opentelemetry.io/collector/consumer"
 	"go.opentelemetry.io/collector/consumer/consumertest"
 	"go.opentelemetry.io/collector/model/pdata"
 	"go.opentelemetry.io/collector/pdata/pcommon"
@@ -73,7 +75,7 @@ func TestConsumeLogs(t *testing.T) {
 
 	var logsOut pdata.Logs
 
-	consumer := &mockConsumer{}
+	consumer := &mockLogsConsumer{}
 	consumer.On("ConsumeLogs", ctx, logs).Run(func(args mock.Arguments) {
 		logsOut = args[1].(pdata.Logs)
 	}).Return(nil)
@@ -138,7 +140,7 @@ func TestConsumeLogsMoveToMultipleMetrics(t *testing.T) {
 
 	var logsOut pdata.Logs
 
-	consumer := &mockConsumer{}
+	consumer := &mockLogsConsumer{}
 	consumer.On("ConsumeLogs", ctx, logs).Run(func(args mock.Arguments) {
 		logsOut = args[1].(pdata.Logs)
 	}).Return(nil)
@@ -183,7 +185,7 @@ func TestConsumeLogsDoesNotOverwrite(t *testing.T) {
 
 	var logsOut pdata.Logs
 
-	consumer := &mockConsumer{}
+	consumer := &mockLogsConsumer{}
 	consumer.On("ConsumeLogs", ctx, logs).Run(func(args mock.Arguments) {
 		logsOut = args[1].(pdata.Logs)
 	}).Return(nil)
@@ -225,7 +227,7 @@ func TestConsumeLogsDoesNotOverwrite2(t *testing.T) {
 
 	var logsOut pdata.Logs
 
-	consumer := &mockConsumer{}
+	consumer := &mockLogsConsumer{}
 	consumer.On("ConsumeLogs", ctx, logs).Run(func(args mock.Arguments) {
 		logsOut = args[1].(pdata.Logs)
 	}).Return(nil)
@@ -262,4 +264,28 @@ func createLogs() pdata.Logs {
 	logs := pdata.NewLogs()
 	logs.ResourceLogs().AppendEmpty().ScopeLogs().AppendEmpty().LogRecords().AppendEmpty()
 	return logs
+}
+
+type mockLogsConsumer struct {
+	mock.Mock
+}
+
+func (m *mockLogsConsumer) Start(ctx context.Context, host component.Host) error {
+	args := m.Called(ctx, host)
+	return args.Error(0)
+}
+
+func (m *mockLogsConsumer) Capabilities() consumer.Capabilities {
+	args := m.Called()
+	return args.Get(0).(consumer.Capabilities)
+}
+
+func (m *mockLogsConsumer) ConsumeLogs(ctx context.Context, md pdata.Logs) error {
+	args := m.Called(ctx, md)
+	return args.Error(0)
+}
+
+func (m *mockLogsConsumer) Shutdown(ctx context.Context) error {
+	args := m.Called(ctx)
+	return args.Error(0)
 }

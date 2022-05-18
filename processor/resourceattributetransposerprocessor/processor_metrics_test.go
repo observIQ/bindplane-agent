@@ -72,7 +72,7 @@ func TestConsumeMetricsNoop(t *testing.T) {
 
 	var metricsOut pdata.Metrics
 
-	consumer := &mockConsumer{}
+	consumer := &mockMetricsConsumer{}
 	consumer.On("ConsumeMetrics", ctx, metrics).Run(func(args mock.Arguments) {
 		metricsOut = args[1].(pdata.Metrics)
 	}).Return(nil)
@@ -103,7 +103,7 @@ func TestConsumeMetricsMoveExistingAttribs(t *testing.T) {
 
 	var metricsOut pdata.Metrics
 
-	consumer := &mockConsumer{}
+	consumer := &mockMetricsConsumer{}
 	consumer.On("ConsumeMetrics", ctx, metrics).Run(func(args mock.Arguments) {
 		metricsOut = args[1].(pdata.Metrics)
 	}).Return(nil)
@@ -173,7 +173,7 @@ func TestConsumeMetricsMoveToMultipleMetrics(t *testing.T) {
 
 	var metricsOut pdata.Metrics
 
-	consumer := &mockConsumer{}
+	consumer := &mockMetricsConsumer{}
 	consumer.On("ConsumeMetrics", ctx, metrics).Run(func(args mock.Arguments) {
 		metricsOut = args[1].(pdata.Metrics)
 	}).Return(nil)
@@ -224,7 +224,7 @@ func TestConsumeMetricsMixedExistence(t *testing.T) {
 
 	var metricsOut pdata.Metrics
 
-	consumer := &mockConsumer{}
+	consumer := &mockMetricsConsumer{}
 	consumer.On("ConsumeMetrics", ctx, metrics).Run(func(args mock.Arguments) {
 		metricsOut = args[1].(pdata.Metrics)
 	}).Return(nil)
@@ -265,7 +265,7 @@ func TestConsumeMetricsSum(t *testing.T) {
 
 	var metricsOut pdata.Metrics
 
-	consumer := &mockConsumer{}
+	consumer := &mockMetricsConsumer{}
 	consumer.On("ConsumeMetrics", ctx, metrics).Run(func(args mock.Arguments) {
 		metricsOut = args[1].(pdata.Metrics)
 	}).Return(nil)
@@ -306,7 +306,7 @@ func TestConsumeMetricsHistogram(t *testing.T) {
 
 	var metricsOut pdata.Metrics
 
-	consumer := &mockConsumer{}
+	consumer := &mockMetricsConsumer{}
 	consumer.On("ConsumeMetrics", ctx, metrics).Run(func(args mock.Arguments) {
 		metricsOut = args[1].(pdata.Metrics)
 	}).Return(nil)
@@ -347,7 +347,7 @@ func TestConsumeMetricsSummary(t *testing.T) {
 
 	var metricsOut pdata.Metrics
 
-	consumer := &mockConsumer{}
+	consumer := &mockMetricsConsumer{}
 	consumer.On("ConsumeMetrics", ctx, metrics).Run(func(args mock.Arguments) {
 		metricsOut = args[1].(pdata.Metrics)
 	}).Return(nil)
@@ -388,7 +388,7 @@ func TestConsumeMetricsNone(t *testing.T) {
 
 	var metricsOut pdata.Metrics
 
-	consumer := &mockConsumer{}
+	consumer := &mockMetricsConsumer{}
 	consumer.On("ConsumeMetrics", ctx, metrics).Run(func(args mock.Arguments) {
 		metricsOut = args[1].(pdata.Metrics)
 	}).Return(nil)
@@ -426,7 +426,7 @@ func TestConsumeMetricsDoesNotOverwrite(t *testing.T) {
 
 	var metricsOut pdata.Metrics
 
-	consumer := &mockConsumer{}
+	consumer := &mockMetricsConsumer{}
 	consumer.On("ConsumeMetrics", ctx, metrics).Run(func(args mock.Arguments) {
 		metricsOut = args[1].(pdata.Metrics)
 	}).Return(nil)
@@ -472,7 +472,7 @@ func TestConsumeMetricsDoesNotOverwrite2(t *testing.T) {
 
 	var metricsOut pdata.Metrics
 
-	consumer := &mockConsumer{}
+	consumer := &mockMetricsConsumer{}
 	consumer.On("ConsumeMetrics", ctx, metrics).Run(func(args mock.Arguments) {
 		metricsOut = args[1].(pdata.Metrics)
 	}).Return(nil)
@@ -510,31 +510,26 @@ func TestConsumeMetricsDoesNotOverwrite2(t *testing.T) {
 	}, getMetricAttrsFromMetrics(metricsOut))
 }
 
-type mockConsumer struct {
+type mockMetricsConsumer struct {
 	mock.Mock
 }
 
-func (m *mockConsumer) Start(ctx context.Context, host component.Host) error {
+func (m *mockMetricsConsumer) Start(ctx context.Context, host component.Host) error {
 	args := m.Called(ctx, host)
 	return args.Error(0)
 }
 
-func (m *mockConsumer) Capabilities() consumer.Capabilities {
+func (m *mockMetricsConsumer) Capabilities() consumer.Capabilities {
 	args := m.Called()
 	return args.Get(0).(consumer.Capabilities)
 }
 
-func (m *mockConsumer) ConsumeLogs(ctx context.Context, md pdata.Logs) error {
+func (m *mockMetricsConsumer) ConsumeMetrics(ctx context.Context, md pdata.Metrics) error {
 	args := m.Called(ctx, md)
 	return args.Error(0)
 }
 
-func (m *mockConsumer) ConsumeMetrics(ctx context.Context, md pdata.Metrics) error {
-	args := m.Called(ctx, md)
-	return args.Error(0)
-}
-
-func (m *mockConsumer) Shutdown(ctx context.Context) error {
+func (m *mockMetricsConsumer) Shutdown(ctx context.Context) error {
 	args := m.Called(ctx)
 	return args.Error(0)
 }
