@@ -1,7 +1,5 @@
 # Disclaimer
- `main` branch is stable but currently under development so documentation may not be fully up to date with the current feature set.
-
-It is advised that if one is to look at documentation, they should refer a specific tag/release.
+While the `main` branch is stable, it is still under development and documentation may not fully reflect the current feature set. Please refer to documentation for your specific release.
 
 # observIQ OpenTelemetry Collector
 
