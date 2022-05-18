@@ -142,6 +142,8 @@ dockers:
       - "--label=revision={{.FullCommit}}"
       - "--label=version={{.Version}}"
       - "--platform=linux/amd64"
+    extra_files:
+      - plugins
   - goos: linux
     goarch: arm64
     ids:
@@ -159,6 +161,8 @@ dockers:
       - "--label=revision={{.FullCommit}}"
       - "--label=version={{.Version}}"
       - "--platform=linux/arm64"
+    extra_files:
+      - plugins
 
 docker_manifests:
   - name_template: "observiq/observiq-otel-collector:latest"

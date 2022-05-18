@@ -41,6 +41,7 @@ ENV PATH=$PATH:/usr/local/openjdk-8/bin
 
 COPY observiq-otel-collector /collector/observiq-otel-collector
 COPY --from=jmxjar /opentelemetry-java-contrib-jmx-metrics.jar /opt/opentelemetry-java-contrib-jmx-metrics.jar
+COPY plugins /etc/otel/plugins
 
 RUN adduser \
     --disabled-password \
