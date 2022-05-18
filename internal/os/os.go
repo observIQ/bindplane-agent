@@ -26,9 +26,12 @@ import (
 
 const unknownValue = "unknown"
 
+// hostInfo is a singleton for collecting host info
+var hostInfo *host.InfoStat
+
 // Hostname retrieves the hostname of the machine
 func Hostname() (string, error) {
-	info, err := host.Info()
+	info, err := getHostInfo()
 	if err != nil {
 		return unknownValue, err
 	}
@@ -38,11 +41,22 @@ func Hostname() (string, error) {
 
 // Name returns the name of the os.
 func Name() (string, error) {
-	info, err := host.Info()
+	info, err := getHostInfo()
 	if err != nil {
 		return unknownValue, err
 	}
 	return parseName(info, runtime.GOOS), nil
+}
+
+// getHostInfo sets hostInfo singleton if not set else returns it
+func getHostInfo() (*host.InfoStat, error) {
+	if hostInfo != nil {
+		return hostInfo, nil
+	}
+
+	var err error
+	hostInfo, err = host.Info()
+	return hostInfo, err
 }
 
 // parseName parses the os name from the supplied info.
