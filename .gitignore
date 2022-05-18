@@ -17,5 +17,6 @@ windows/config.yaml
 windows/LICENSE
 windows/plugins
 opentelemetry-java-contrib-jmx-metrics.jar
+VERSION.txt
 release_deps
 tmp

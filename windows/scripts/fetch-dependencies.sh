@@ -30,5 +30,6 @@ make -C "$PROJECT_BASE" release-prep
 cp -r "$PROJECT_BASE/release_deps/plugins" "$BASEDIR/.."
 cp "$PROJECT_BASE/release_deps/opentelemetry-java-contrib-jmx-metrics.jar" "$BASEDIR/.."
 cp "$PROJECT_BASE/release_deps/config.yaml" "$BASEDIR/.."
+cp "$PROJECT_BASE/release_deps/VERSION.txt" "$BASEDIR/.."
 
 cp "$PROJECT_BASE/LICENSE" "$BASEDIR/.."
