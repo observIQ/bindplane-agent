@@ -65,15 +65,25 @@ func main() {
 	// TODO(cpheps) clean this up in follow up work
 	if _, err := os.Stat(*managerConfigPath); err == nil {
 		log.Println("Starting Management Path")
-		// Management config exists
-		configManger := observiq.NewAgentConfigManager(defaultLogger.Sugar())
-		configManger.AddConfig(opamp.CollectorConfigName, (*configPaths)[0], opamp.NewYamlValidator(make(map[string]interface{})))
-		configManger.AddConfig(opamp.ManagerConfigName, *managerConfigPath, opamp.NewYamlValidator(new(opamp.Config)))
-		configManger.AddConfig(opamp.LoggingConfigName, *loggingConfigPath, opamp.NoopValidator)
+		opampConfig, err := opamp.ParseConfig(*managerConfigPath)
+		if err != nil {
+			defaultLogger.Fatal("Failed to parse manager config", zap.Error(err))
+		}
 
+		// Create collector
 		currCollector := collector.New((*configPaths)[0], version.Version(), []zap.Option{})
 
-		if err := runRemoteManaged(ctx, currCollector, configManger, *managerConfigPath); err != nil {
+		// Create client Args
+		clientArgs := &observiq.NewClientArgs{
+			DefaultLogger:       defaultLogger.Sugar(),
+			Config:              *opampConfig,
+			Collector:           currCollector,
+			ManagerConfigPath:   *managerConfigPath,
+			CollectorConfigPath: (*configPaths)[0],
+			LoggerConfigPath:    *loggingConfigPath,
+		}
+
+		if err := runRemoteManaged(ctx, clientArgs); err != nil {
 			defaultLogger.Fatal("Remote Managment failed", zap.Error(err))
 		}
 	} else if errors.Is(err, os.ErrNotExist) {
@@ -100,36 +110,21 @@ func runInteractive(ctx context.Context, params service.CollectorSettings) error
 	return nil
 }
 
-func runRemoteManaged(ctx context.Context, currCollector collector.Collector, configManager opamp.ConfigManager, managerConfigPath string) error {
-	opampConfig, err := opamp.ParseConfig(managerConfigPath)
+func runRemoteManaged(ctx context.Context, clientArgs *observiq.NewClientArgs) error {
+	// Create new client
+	client, err := observiq.NewClient(clientArgs)
 	if err != nil {
 		return err
 	}
 
-	shutdownChan := make(chan struct{})
-	client, err := observiq.NewClient(defaultLogger.Sugar(), *opampConfig, configManager, shutdownChan)
-	if err != nil {
+	// Connect to manager platform
+	if err := client.Connect(ctx, clientArgs.Config.Endpoint, clientArgs.Config.GetSecretKey()); err != nil {
 		return err
 	}
 
-	if err := currCollector.Run(ctx); err != nil {
-		return fmt.Errorf("collector failed to start: %w", err)
-	}
-
-	if err := client.Connect(ctx, *opampConfig); err != nil {
-		return err
-	}
-
-	// Wait for one shutdown or the other
-	select {
-	case <-ctx.Done():
-		log.Println("Signal received")
-	case <-shutdownChan:
-		log.Println("Received shutdown from client")
-	}
-
-	// Stop collector
-	currCollector.Stop()
+	// Wait for close signal
+	<-ctx.Done()
+	log.Println("Signal received")
 
 	// Disconnect from opamp
 	waitCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)

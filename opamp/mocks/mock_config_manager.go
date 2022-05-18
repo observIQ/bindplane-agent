@@ -15,9 +15,9 @@ type MockConfigManager struct {
 	mock.Mock
 }
 
-// AddConfig provides a mock function with given fields: configName, configPath, validator
-func (_m *MockConfigManager) AddConfig(configName string, configPath string, validator opamp.ValidatorFunc) {
-	_m.Called(configName, configPath, validator)
+// AddConfig provides a mock function with given fields: configName, reloader
+func (_m *MockConfigManager) AddConfig(configName string, reloader *opamp.ManagedConfig) {
+	_m.Called(configName, reloader)
 }
 
 // ApplyConfigChanges provides a mock function with given fields: remoteConfig

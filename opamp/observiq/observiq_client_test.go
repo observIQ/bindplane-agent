@@ -18,8 +18,8 @@ import (
 	"context"
 	"errors"
 	"testing"
-	"time"
 
+	colmocks "github.com/observiq/observiq-otel-collector/collector/mocks"
 	"github.com/observiq/observiq-otel-collector/opamp"
 	"github.com/observiq/observiq-otel-collector/opamp/mocks"
 	"github.com/open-telemetry/opamp-go/client/types"
@@ -65,10 +65,18 @@ func TestNewClient(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.desc, func(t *testing.T) {
 			testLogger := zap.NewNop().Sugar()
-			mockManager := new(mocks.MockConfigManager)
-			shutdownChan := make(chan struct{})
+			mockCollector := colmocks.NewMockCollector(t)
 
-			actual, err := NewClient(testLogger, tc.config, mockManager, shutdownChan)
+			args := &NewClientArgs{
+				DefaultLogger:       testLogger,
+				Config:              tc.config,
+				Collector:           mockCollector,
+				ManagerConfigPath:   "manager.yaml",
+				CollectorConfigPath: "collector.yaml",
+				LoggerConfigPath:    "logger.yaml",
+			}
+
+			actual, err := NewClient(args)
 
 			if tc.expectedErr != nil {
 				assert.ErrorContains(t, err, tc.expectedErr.Error())
@@ -81,9 +89,9 @@ func TestNewClient(t *testing.T) {
 
 				// Do a shallow check on all fields to assert they exist and are equal to passed in params were possible
 				assert.NotNil(t, observiqClient.opampClient)
-				assert.Equal(t, mockManager, observiqClient.configManager)
-				assert.Equal(t, shutdownChan, observiqClient.shutdownChan)
+				assert.NotNil(t, observiqClient.configManager)
 				assert.Equal(t, testLogger.Named("opamp"), observiqClient.logger)
+				assert.Equal(t, mockCollector, observiqClient.collector)
 				assert.NotNil(t, observiqClient.ident)
 			}
 
@@ -109,10 +117,10 @@ func TestClientConnect(t *testing.T) {
 					logger:        zap.NewNop().Sugar(),
 					ident:         &identity{},
 					configManager: nil,
-					shutdownChan:  make(chan struct{}),
+					collector:     nil,
 				}
 
-				err := c.Connect(context.Background(), opamp.Config{})
+				err := c.Connect(context.Background(), "ws://localhost:1234", "136bdd08-2074-40b7-ac1c-6706ac24c4f2")
 				assert.ErrorIs(t, err, expectedErr)
 			},
 		},
@@ -121,57 +129,72 @@ func TestClientConnect(t *testing.T) {
 			testFunc: func(*testing.T) {
 				expectedErr := errors.New("oops")
 
-				mockOpAmpClient := new(mocks.MockClient)
+				mockOpAmpClient := mocks.NewMockClient(t)
 				mockOpAmpClient.On("SetAgentDescription", mock.Anything).Return(nil)
 				mockOpAmpClient.On("Start", mock.Anything, mock.Anything).Return(expectedErr)
 
-				secretKey := "136bdd08-2074-40b7-ac1c-6706ac24c4f2"
-				config := opamp.Config{
-					Endpoint:  "ws://localhost:1234",
-					SecretKey: &secretKey,
-					AgentID:   "a69dcef0-0261-4f4f-9ac0-a483af42a6ba",
-				}
+				mockCollector := colmocks.NewMockCollector(t)
+				mockCollector.On("Run", mock.Anything).Return(nil)
 
 				c := &Client{
-					opampClient: mockOpAmpClient,
-					logger:      zap.NewNop().Sugar(),
-					ident: &identity{
-						agentID: config.AgentID,
-					},
+					opampClient:   mockOpAmpClient,
+					logger:        zap.NewNop().Sugar(),
+					ident:         &identity{agentID: "a69dcef0-0261-4f4f-9ac0-a483af42a6ba"},
 					configManager: nil,
-					shutdownChan:  make(chan struct{}),
+					collector:     mockCollector,
 				}
 
-				err := c.Connect(context.Background(), config)
+				err := c.Connect(context.Background(), "ws://localhost:1234", "136bdd08-2074-40b7-ac1c-6706ac24c4f2")
+				assert.ErrorIs(t, err, expectedErr)
+			},
+		},
+		{
+			desc: "Collector fails to start",
+			testFunc: func(*testing.T) {
+				mockOpAmpClient := mocks.NewMockClient(t)
+				mockOpAmpClient.On("SetAgentDescription", mock.Anything).Return(nil)
+
+				expectedErr := errors.New("oops")
+
+				mockCollector := colmocks.NewMockCollector(t)
+				mockCollector.On("Run", mock.Anything).Return(expectedErr)
+
+				c := &Client{
+					opampClient:   mockOpAmpClient,
+					logger:        zap.NewNop().Sugar(),
+					ident:         &identity{agentID: "a69dcef0-0261-4f4f-9ac0-a483af42a6ba"},
+					configManager: nil,
+					collector:     mockCollector,
+				}
+
+				endpoint, secretKey := "ws://localhost:1234", "136bdd08-2074-40b7-ac1c-6706ac24c4f2"
+
+				err := c.Connect(context.Background(), endpoint, secretKey)
 				assert.ErrorIs(t, err, expectedErr)
 			},
 		},
 		{
 			desc: "Connect successful",
 			testFunc: func(*testing.T) {
-				mockOpAmpClient := new(mocks.MockClient)
+				mockOpAmpClient := mocks.NewMockClient(t)
 				mockOpAmpClient.On("SetAgentDescription", mock.Anything).Return(nil)
 
-				secretKey := "136bdd08-2074-40b7-ac1c-6706ac24c4f2"
-				config := opamp.Config{
-					Endpoint:  "ws://localhost:1234",
-					SecretKey: &secretKey,
-					AgentID:   "a69dcef0-0261-4f4f-9ac0-a483af42a6ba",
-				}
+				mockCollector := colmocks.NewMockCollector(t)
+				mockCollector.On("Run", mock.Anything).Return(nil)
 
 				c := &Client{
-					opampClient: mockOpAmpClient,
-					logger:      zap.NewNop().Sugar(),
-					ident: &identity{
-						agentID: config.AgentID,
-					},
+					opampClient:   mockOpAmpClient,
+					logger:        zap.NewNop().Sugar(),
+					ident:         &identity{agentID: "a69dcef0-0261-4f4f-9ac0-a483af42a6ba"},
 					configManager: nil,
-					shutdownChan:  make(chan struct{}),
+					collector:     mockCollector,
 				}
 
+				endpoint, secretKey := "ws://localhost:1234", "136bdd08-2074-40b7-ac1c-6706ac24c4f2"
+
 				expectedSettings := types.StartSettings{
-					OpAMPServerURL:      config.Endpoint,
-					AuthorizationHeader: *config.SecretKey,
+					OpAMPServerURL:      endpoint,
+					AuthorizationHeader: secretKey,
 					TLSConfig:           nil,
 					InstanceUid:         c.ident.agentID,
 					Callbacks: types.CallbacksStruct{
@@ -191,7 +214,7 @@ func TestClientConnect(t *testing.T) {
 					// assert is unable to compare function pointers
 				})
 
-				err := c.Connect(context.Background(), config)
+				err := c.Connect(context.Background(), endpoint, secretKey)
 				assert.NoError(t, err)
 			},
 		},
@@ -203,12 +226,15 @@ func TestClientConnect(t *testing.T) {
 }
 
 func TestClientDisconnect(t *testing.T) {
-	mockOpAmpClient := new(mocks.MockClient)
 	ctx := context.Background()
+	mockOpAmpClient := new(mocks.MockClient)
 	mockOpAmpClient.On("Stop", ctx).Return(nil)
+	mockCollector := colmocks.NewMockCollector(t)
+	mockCollector.On("Stop").Return()
 
 	c := &Client{
 		opampClient: mockOpAmpClient,
+		collector:   mockCollector,
 	}
 
 	c.Disconnect(ctx)
@@ -286,23 +312,15 @@ func TestClient_onRemoteConfigHandler(t *testing.T) {
 				mockManager := new(mocks.MockConfigManager)
 				mockManager.On("ApplyConfigChanges", mock.Anything).Return(expectedEffCfg, true, nil)
 
-				shutdownChan := make(chan struct{}, 1)
 				c := &Client{
 					configManager: mockManager,
 					logger:        zap.NewNop().Sugar(),
-					shutdownChan:  shutdownChan,
 				}
 
 				effCfg, changed, err := c.onRemoteConfigHandler(context.Background(), &protobufs.AgentRemoteConfig{})
 				assert.NoError(t, err)
 				assert.Equal(t, expectedEffCfg, effCfg)
-				assert.False(t, changed)
-
-				shutDownFunc := func() bool {
-					<-shutdownChan
-					return true
-				}
-				assert.Eventually(t, shutDownFunc, 1*time.Minute, 200*time.Millisecond)
+				assert.True(t, changed)
 			},
 		},
 		{
@@ -312,25 +330,15 @@ func TestClient_onRemoteConfigHandler(t *testing.T) {
 				mockManager := new(mocks.MockConfigManager)
 				mockManager.On("ApplyConfigChanges", mock.Anything).Return(expectedEffCfg, false, nil)
 
-				shutdownChan := make(chan struct{}, 1)
 				c := &Client{
 					configManager: mockManager,
 					logger:        zap.NewNop().Sugar(),
-					shutdownChan:  shutdownChan,
 				}
 
 				effCfg, changed, err := c.onRemoteConfigHandler(context.Background(), &protobufs.AgentRemoteConfig{})
 				assert.NoError(t, err)
 				assert.Equal(t, expectedEffCfg, effCfg)
 				assert.False(t, changed)
-
-				// If we pushed to a closed channel we should panic
-				// if channel is still open means it didn't signal a shutdown
-				testShutdownOpen := func() {
-					shutdownChan <- struct{}{}
-
-				}
-				assert.NotPanics(t, testShutdownOpen)
 			},
 		},
 	}

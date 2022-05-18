@@ -65,6 +65,32 @@ func newIdentity(logger *zap.SugaredLogger, config opamp.Config) *identity {
 	}
 }
 
+// Copy creates a deep copy of this identity
+func (i *identity) Copy() *identity {
+	identCpy := &identity{
+		agentID:     i.agentID,
+		serviceName: i.serviceName,
+		version:     i.version,
+		oSArch:      i.oSArch,
+		oSDetails:   i.oSDetails,
+		oSFamily:    i.oSFamily,
+		hostname:    i.hostname,
+		mac:         i.mac,
+	}
+
+	if i.agentName != nil {
+		identCpy.agentName = new(string)
+		*identCpy.agentName = *i.agentName
+	}
+
+	if i.labels != nil {
+		identCpy.labels = new(string)
+		*identCpy.labels = *i.labels
+	}
+
+	return identCpy
+}
+
 func (i *identity) ToAgentDescription() *protobufs.AgentDescription {
 	identifyingAttributes := []*protobufs.KeyValue{
 		opamp.StringKeyValue("service.instance.id", i.agentID),

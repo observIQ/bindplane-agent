@@ -24,16 +24,14 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
-	"gopkg.in/yaml.v3"
 )
 
 func TestNewAgentConfigManager(t *testing.T) {
 	logger := zap.NewNop().Sugar()
 
 	expected := &AgentConfigManager{
-		configMap:  make(map[string]string),
-		validators: make(map[string]opamp.ValidatorFunc),
-		logger:     logger.Named("config manager"),
+		configMap: make(map[string]*opamp.ManagedConfig),
+		logger:    logger.Named("config manager"),
 	}
 
 	actual := NewAgentConfigManager(logger)
@@ -45,11 +43,13 @@ func TestAddConfig(t *testing.T) {
 
 	configName := "config.json"
 	cfgPath := "path/to/config.json"
+	managedConfig := &opamp.ManagedConfig{
+		ConfigPath: cfgPath,
+		Reload:     opamp.NoopReloadFunc,
+	}
 
-	manager.AddConfig(configName, cfgPath, opamp.NoopValidator)
-	require.Equal(t, cfgPath, manager.configMap[configName])
-	// require package cannot Equal on function pointers so we just assert that a validator exists
-	require.NotNil(t, manager.validators[configName])
+	manager.AddConfig(configName, managedConfig)
+	require.Equal(t, managedConfig, manager.configMap[configName])
 }
 
 func TestComposeEffectiveConfig(t *testing.T) {
@@ -62,7 +62,11 @@ func TestComposeEffectiveConfig(t *testing.T) {
 			testFunc: func(*testing.T) {
 				tmpDir := t.TempDir()
 				manager := NewAgentConfigManager(zap.NewNop().Sugar())
-				manager.AddConfig("not_real.yaml", filepath.Join(tmpDir, "not_real.yaml"), opamp.NoopValidator)
+				managedCfg := &opamp.ManagedConfig{
+					ConfigPath: filepath.Join(tmpDir, "not_real.yaml"),
+					Reload:     opamp.NoopReloadFunc,
+				}
+				manager.AddConfig("not_real.yaml", managedCfg)
 
 				effCfg, err := manager.ComposeEffectiveConfig()
 				assert.ErrorContains(t, err, "error reading config file")
@@ -88,8 +92,14 @@ func TestComposeEffectiveConfig(t *testing.T) {
 				assert.NoError(t, err)
 
 				manager := NewAgentConfigManager(zap.NewNop().Sugar())
-				manager.AddConfig(configOne, configOnePath, opamp.NoopValidator)
-				manager.AddConfig(configTwo, configTwoPath, opamp.NoopValidator)
+				manager.AddConfig(configOne, &opamp.ManagedConfig{
+					ConfigPath: configOnePath,
+					Reload:     opamp.NoopReloadFunc,
+				})
+				manager.AddConfig(configTwo, &opamp.ManagedConfig{
+					ConfigPath: configTwoPath,
+					Reload:     opamp.NoopReloadFunc,
+				})
 
 				expected := &protobufs.EffectiveConfig{
 					ConfigMap: &protobufs.AgentConfigMap{
@@ -128,14 +138,17 @@ func TestApplyConfigChanges(t *testing.T) {
 			desc: "No remote config To Apply",
 			testFunc: func(*testing.T) {
 				tmpDir := t.TempDir()
-				configPath := filepath.Join(tmpDir, opamp.ManagerConfigName)
+				configPath := filepath.Join(tmpDir, ManagerConfigName)
 				configContents := []byte(`key: value`)
 
 				err := os.WriteFile(configPath, configContents, 0600)
 				assert.NoError(t, err)
 
 				manager := NewAgentConfigManager(zap.NewNop().Sugar())
-				manager.AddConfig(opamp.ManagerConfigName, configPath, opamp.NoopValidator)
+				manager.AddConfig(ManagerConfigName, &opamp.ManagedConfig{
+					ConfigPath: configPath,
+					Reload:     opamp.NoopReloadFunc,
+				})
 
 				remoteConfig := &protobufs.AgentRemoteConfig{
 					Config: &protobufs.AgentConfigMap{},
@@ -144,7 +157,7 @@ func TestApplyConfigChanges(t *testing.T) {
 				expectedEffCfg := &protobufs.EffectiveConfig{
 					ConfigMap: &protobufs.AgentConfigMap{
 						ConfigMap: map[string]*protobufs.AgentConfigFile{
-							opamp.ManagerConfigName: {
+							ManagerConfigName: {
 								Body:        configContents,
 								ContentType: opamp.YAMLContentType,
 							},
@@ -162,19 +175,22 @@ func TestApplyConfigChanges(t *testing.T) {
 			desc: "Remote config contains unchanged file",
 			testFunc: func(*testing.T) {
 				tmpDir := t.TempDir()
-				configPath := filepath.Join(tmpDir, opamp.ManagerConfigName)
+				configPath := filepath.Join(tmpDir, ManagerConfigName)
 				configContents := []byte(`key: value`)
 
 				err := os.WriteFile(configPath, configContents, 0600)
 				assert.NoError(t, err)
 
 				manager := NewAgentConfigManager(zap.NewNop().Sugar())
-				manager.AddConfig(opamp.ManagerConfigName, configPath, opamp.NoopValidator)
+				manager.AddConfig(ManagerConfigName, &opamp.ManagedConfig{
+					ConfigPath: configPath,
+					Reload:     opamp.NoopReloadFunc,
+				})
 
 				remoteConfig := &protobufs.AgentRemoteConfig{
 					Config: &protobufs.AgentConfigMap{
 						ConfigMap: map[string]*protobufs.AgentConfigFile{
-							opamp.ManagerConfigName: {
+							ManagerConfigName: {
 								Body:        configContents,
 								ContentType: opamp.YAMLContentType,
 							},
@@ -185,7 +201,7 @@ func TestApplyConfigChanges(t *testing.T) {
 				expectedEffCfg := &protobufs.EffectiveConfig{
 					ConfigMap: &protobufs.AgentConfigMap{
 						ConfigMap: map[string]*protobufs.AgentConfigFile{
-							opamp.ManagerConfigName: {
+							ManagerConfigName: {
 								Body:        configContents,
 								ContentType: opamp.YAMLContentType,
 							},
@@ -203,14 +219,17 @@ func TestApplyConfigChanges(t *testing.T) {
 			desc: "Remote config contains unknown file",
 			testFunc: func(*testing.T) {
 				tmpDir := t.TempDir()
-				configPath := filepath.Join(tmpDir, opamp.ManagerConfigName)
+				configPath := filepath.Join(tmpDir, ManagerConfigName)
 				configContents := []byte(`key: value`)
 
 				err := os.WriteFile(configPath, configContents, 0600)
 				assert.NoError(t, err)
 
 				manager := NewAgentConfigManager(zap.NewNop().Sugar())
-				manager.AddConfig(opamp.ManagerConfigName, configPath, opamp.NoopValidator)
+				manager.AddConfig(ManagerConfigName, &opamp.ManagedConfig{
+					ConfigPath: configPath,
+					Reload:     opamp.NoopReloadFunc,
+				})
 
 				remoteConfig := &protobufs.AgentRemoteConfig{
 					Config: &protobufs.AgentConfigMap{
@@ -226,7 +245,7 @@ func TestApplyConfigChanges(t *testing.T) {
 				expectedEffCfg := &protobufs.EffectiveConfig{
 					ConfigMap: &protobufs.AgentConfigMap{
 						ConfigMap: map[string]*protobufs.AgentConfigFile{
-							opamp.ManagerConfigName: {
+							ManagerConfigName: {
 								Body:        configContents,
 								ContentType: opamp.YAMLContentType,
 							},
@@ -244,7 +263,7 @@ func TestApplyConfigChanges(t *testing.T) {
 			desc: "Remote config contains untracked known file",
 			testFunc: func(*testing.T) {
 				tmpDir := t.TempDir()
-				configPath := filepath.Join(tmpDir, opamp.ManagerConfigName)
+				configPath := filepath.Join(tmpDir, ManagerConfigName)
 				configContents := []byte(`key: value`)
 
 				newFileContents := []byte(`logger: value`)
@@ -253,16 +272,19 @@ func TestApplyConfigChanges(t *testing.T) {
 				assert.NoError(t, err)
 
 				manager := NewAgentConfigManager(zap.NewNop().Sugar())
-				manager.AddConfig(opamp.ManagerConfigName, configPath, opamp.NoopValidator)
+				manager.AddConfig(ManagerConfigName, &opamp.ManagedConfig{
+					ConfigPath: configPath,
+					Reload:     opamp.NoopReloadFunc,
+				})
 
 				remoteConfig := &protobufs.AgentRemoteConfig{
 					Config: &protobufs.AgentConfigMap{
 						ConfigMap: map[string]*protobufs.AgentConfigFile{
-							opamp.ManagerConfigName: {
+							ManagerConfigName: {
 								Body:        configContents,
 								ContentType: opamp.YAMLContentType,
 							},
-							opamp.LoggingConfigName: {
+							LoggingConfigName: {
 								Body:        newFileContents,
 								ContentType: opamp.YAMLContentType,
 							},
@@ -273,11 +295,11 @@ func TestApplyConfigChanges(t *testing.T) {
 				expectedEffCfg := &protobufs.EffectiveConfig{
 					ConfigMap: &protobufs.AgentConfigMap{
 						ConfigMap: map[string]*protobufs.AgentConfigFile{
-							opamp.ManagerConfigName: {
+							ManagerConfigName: {
 								Body:        configContents,
 								ContentType: opamp.YAMLContentType,
 							},
-							opamp.LoggingConfigName: {
+							LoggingConfigName: {
 								Body:        newFileContents,
 								ContentType: opamp.YAMLContentType,
 							},
@@ -289,133 +311,17 @@ func TestApplyConfigChanges(t *testing.T) {
 				assert.NoError(t, err)
 				assert.Equal(t, expectedEffCfg, effCfg)
 				assert.True(t, changed)
-				assert.FileExists(t, filepath.Join(".", opamp.LoggingConfigName))
+				assert.FileExists(t, filepath.Join(".", LoggingConfigName))
 
-				err = os.Remove(filepath.Join(".", opamp.LoggingConfigName))
+				err = os.Remove(filepath.Join(".", LoggingConfigName))
 				assert.NoError(t, err)
 			},
 		},
 		{
-			desc: "Remote config contains no changes to updatable fields in managerFile",
+			desc: "Remote config contains changes to file",
 			testFunc: func(*testing.T) {
 				tmpDir := t.TempDir()
-
-				// Setup manager config
-				managerCfg := opamp.Config{
-					Endpoint: "ws://localhost:1234",
-					AgentID:  "6868876d-bf87-466c-bfad-5b6ca2c1f993",
-				}
-				configContents, err := yaml.Marshal(&managerCfg)
-				require.NoError(t, err)
-
-				configPath := filepath.Join(tmpDir, opamp.ManagerConfigName)
-
-				err = os.WriteFile(configPath, configContents, 0600)
-				assert.NoError(t, err)
-
-				manager := NewAgentConfigManager(zap.NewNop().Sugar())
-				manager.AddConfig(opamp.ManagerConfigName, configPath, opamp.NoopValidator)
-
-				// Write new manager config contents that should not trigger changes
-				newManagerCfg := opamp.Config{
-					Endpoint: "http://other.host.com",
-					AgentID:  "6868876d-bf87-466c-bfad-5b6ca2c1f993",
-				}
-				newConfigContents, err := yaml.Marshal(&newManagerCfg)
-				require.NoError(t, err)
-
-				remoteConfig := &protobufs.AgentRemoteConfig{
-					Config: &protobufs.AgentConfigMap{
-						ConfigMap: map[string]*protobufs.AgentConfigFile{
-							opamp.ManagerConfigName: {
-								Body:        newConfigContents,
-								ContentType: opamp.YAMLContentType,
-							},
-						},
-					},
-				}
-
-				expectedEffCfg := &protobufs.EffectiveConfig{
-					ConfigMap: &protobufs.AgentConfigMap{
-						ConfigMap: map[string]*protobufs.AgentConfigFile{
-							opamp.ManagerConfigName: {
-								Body:        configContents,
-								ContentType: opamp.YAMLContentType,
-							},
-						},
-					},
-				}
-				effCfg, changed, err := manager.ApplyConfigChanges(remoteConfig)
-
-				assert.NoError(t, err)
-				assert.Equal(t, expectedEffCfg, effCfg)
-				assert.False(t, changed)
-			},
-		},
-		{
-			desc: "Remote config contains changes to updatable fields in managerFile",
-			testFunc: func(*testing.T) {
-				tmpDir := t.TempDir()
-
-				// Setup manager config
-				managerCfg := opamp.Config{
-					Endpoint: "ws://localhost:1234",
-					AgentID:  "6868876d-bf87-466c-bfad-5b6ca2c1f993",
-				}
-				configContents, err := yaml.Marshal(&managerCfg)
-				require.NoError(t, err)
-
-				configPath := filepath.Join(tmpDir, opamp.ManagerConfigName)
-
-				err = os.WriteFile(configPath, configContents, 0600)
-				assert.NoError(t, err)
-
-				manager := NewAgentConfigManager(zap.NewNop().Sugar())
-				manager.AddConfig(opamp.ManagerConfigName, configPath, opamp.NoopValidator)
-
-				agentName := "name"
-				// Write new manager config contents that should trigger changes
-				newManagerCfg := opamp.Config{
-					Endpoint:  "ws://localhost:1234",
-					AgentID:   "6868876d-bf87-466c-bfad-5b6ca2c1f993",
-					AgentName: &agentName,
-				}
-				newConfigContents, err := yaml.Marshal(&newManagerCfg)
-				require.NoError(t, err)
-
-				remoteConfig := &protobufs.AgentRemoteConfig{
-					Config: &protobufs.AgentConfigMap{
-						ConfigMap: map[string]*protobufs.AgentConfigFile{
-							opamp.ManagerConfigName: {
-								Body:        newConfigContents,
-								ContentType: opamp.YAMLContentType,
-							},
-						},
-					},
-				}
-
-				expectedEffCfg := &protobufs.EffectiveConfig{
-					ConfigMap: &protobufs.AgentConfigMap{
-						ConfigMap: map[string]*protobufs.AgentConfigFile{
-							opamp.ManagerConfigName: {
-								Body:        newConfigContents,
-								ContentType: opamp.YAMLContentType,
-							},
-						},
-					},
-				}
-				effCfg, changed, err := manager.ApplyConfigChanges(remoteConfig)
-
-				assert.NoError(t, err)
-				assert.Equal(t, expectedEffCfg, effCfg)
-				assert.True(t, changed)
-			},
-		},
-		{
-			desc: "Remote config contains changed non-manager file",
-			testFunc: func(*testing.T) {
-				tmpDir := t.TempDir()
-				configPath := filepath.Join(tmpDir, opamp.LoggingConfigName)
+				configPath := filepath.Join(tmpDir, LoggingConfigName)
 				configContents := []byte(`key: value`)
 
 				newFileContents := []byte(`logger: value`)
@@ -424,12 +330,19 @@ func TestApplyConfigChanges(t *testing.T) {
 				assert.NoError(t, err)
 
 				manager := NewAgentConfigManager(zap.NewNop().Sugar())
-				manager.AddConfig(opamp.LoggingConfigName, configPath, opamp.NoopValidator)
+				manager.AddConfig(LoggingConfigName, &opamp.ManagedConfig{
+					ConfigPath: configPath,
+					Reload: func(data []byte) (changed bool, err error) {
+						err = os.WriteFile(configPath, data, 0600)
+						assert.NoError(t, err)
+						return true, err
+					},
+				})
 
 				remoteConfig := &protobufs.AgentRemoteConfig{
 					Config: &protobufs.AgentConfigMap{
 						ConfigMap: map[string]*protobufs.AgentConfigFile{
-							opamp.LoggingConfigName: {
+							LoggingConfigName: {
 								Body:        newFileContents,
 								ContentType: opamp.YAMLContentType,
 							},
@@ -440,7 +353,7 @@ func TestApplyConfigChanges(t *testing.T) {
 				expectedEffCfg := &protobufs.EffectiveConfig{
 					ConfigMap: &protobufs.AgentConfigMap{
 						ConfigMap: map[string]*protobufs.AgentConfigFile{
-							opamp.LoggingConfigName: {
+							LoggingConfigName: {
 								Body:        newFileContents,
 								ContentType: opamp.YAMLContentType,
 							},

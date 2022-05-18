@@ -31,7 +31,7 @@ const (
 // ConfigManager handles remote configuration of local configs
 type ConfigManager interface {
 	// AddConfig adds a config to be tracked by the config manager with it's corresponding validator function.
-	AddConfig(configName, configPath string, validator ValidatorFunc)
+	AddConfig(configName string, reloader *ManagedConfig)
 
 	// ComposeEffectiveConfig reads in all config files and calculates the effective config
 	ComposeEffectiveConfig() (*protobufs.EffectiveConfig, error)

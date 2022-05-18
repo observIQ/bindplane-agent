@@ -23,15 +23,6 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-const (
-	// CollectorConfigName is the key of the collector config in OpAmp
-	CollectorConfigName = "collector.yaml"
-	// ManagerConfigName is the key of the manager config in OpAmp
-	ManagerConfigName = "manager.yaml"
-	// LoggingConfigName is the key of the logging config in OpAmp
-	LoggingConfigName = "logging.yaml"
-)
-
 var (
 	// errPrefixReadFile for error when reading config file
 	errPrefixReadFile = "failed to read OpAmp config file"

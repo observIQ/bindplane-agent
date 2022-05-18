@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"net/url"
 
+	"github.com/observiq/observiq-otel-collector/collector"
 	"github.com/observiq/observiq-otel-collector/opamp"
 	"github.com/open-telemetry/opamp-go/client"
 	"github.com/open-telemetry/opamp-go/client/types"
@@ -42,27 +43,37 @@ type Client struct {
 	logger        *zap.SugaredLogger
 	ident         *identity
 	configManager opamp.ConfigManager
+	collector     collector.Collector
+}
 
-	// Channel that when closed signals to the listeners that a shutdown is necessary
-	// NOTE: This currently is a stopgap until we can hot reload configurations
-	shutdownChan chan struct{}
+// NewClientArgs arguments passed when creating a new client
+type NewClientArgs struct {
+	DefaultLogger *zap.SugaredLogger
+	Config        opamp.Config
+	Collector     collector.Collector
+
+	ManagerConfigPath   string
+	CollectorConfigPath string
+	LoggerConfigPath    string
 }
 
 // NewClient creates a new OpAmp client
 // The passed in configmanager should be preloaded with all known configs.
 // The shutdown channel will be closed when a reconfiguration occurs an a process shutdown is required.
-func NewClient(defaultLogger *zap.SugaredLogger, config opamp.Config, configManager opamp.ConfigManager, shutdownChan chan struct{}) (opamp.Client, error) {
-	clientLogger := defaultLogger.Named("opamp")
+func NewClient(args *NewClientArgs) (opamp.Client, error) {
+	clientLogger := args.DefaultLogger.Named("opamp")
+
+	configManager := NewAgentConfigManager(args.DefaultLogger)
 
 	observiqClient := &Client{
 		logger:        clientLogger,
-		ident:         newIdentity(clientLogger, config),
+		ident:         newIdentity(clientLogger, args.Config),
 		configManager: configManager,
-		shutdownChan:  shutdownChan,
+		collector:     args.Collector,
 	}
 
 	// Parse URL to determin scheme
-	opampURL, err := url.Parse(config.Endpoint)
+	opampURL, err := url.Parse(args.Config.Endpoint)
 	if err != nil {
 		return nil, err
 	}
@@ -75,11 +86,27 @@ func NewClient(defaultLogger *zap.SugaredLogger, config opamp.Config, configMana
 		return nil, ErrUnsupportedURL
 	}
 
+	// Add configs to config manager
+	configManager.AddConfig(ManagerConfigName, &opamp.ManagedConfig{
+		ConfigPath: args.ManagerConfigPath,
+		Reload:     managerReload(observiqClient, args.ManagerConfigPath),
+	})
+
+	configManager.AddConfig(CollectorConfigName, &opamp.ManagedConfig{
+		ConfigPath: args.CollectorConfigPath,
+		Reload:     collectorReload(observiqClient, args.CollectorConfigPath),
+	})
+
+	configManager.AddConfig(args.LoggerConfigPath, &opamp.ManagedConfig{
+		ConfigPath: args.LoggerConfigPath,
+		Reload:     loggerReload(observiqClient, args.LoggerConfigPath),
+	})
+
 	return observiqClient, nil
 }
 
 // Connect initiates a connection to the OpAmp server based on the supplied configuration
-func (c *Client) Connect(ctx context.Context, config opamp.Config) error {
+func (c *Client) Connect(ctx context.Context, endpoint, secretKey string) error {
 	// Compose and set the agent description
 	if err := c.opampClient.SetAgentDescription(c.ident.ToAgentDescription()); err != nil {
 		c.logger.Error("Error while setting agent description", zap.Error(err))
@@ -87,8 +114,8 @@ func (c *Client) Connect(ctx context.Context, config opamp.Config) error {
 	}
 
 	settings := types.StartSettings{
-		OpAMPServerURL:      config.Endpoint,
-		AuthorizationHeader: config.GetSecretKey(),
+		OpAMPServerURL:      endpoint,
+		AuthorizationHeader: secretKey,
 		TLSConfig:           nil, // TODO add support for TLS
 		InstanceUid:         c.ident.agentID,
 		Callbacks: types.CallbacksStruct{
@@ -109,11 +136,17 @@ func (c *Client) Connect(ctx context.Context, config opamp.Config) error {
 		},
 	}
 
+	// Start the embedded collector
+	if err := c.collector.Run(ctx); err != nil {
+		return fmt.Errorf("collector failed to start: %w", err)
+	}
+
 	return c.opampClient.Start(ctx, settings)
 }
 
 // Disconnect disconnects from the server
 func (c *Client) Disconnect(ctx context.Context) error {
+	c.collector.Stop()
 	return c.opampClient.Stop(ctx)
 }
 
@@ -144,14 +177,7 @@ func (c *Client) onRemoteConfigHandler(_ context.Context, remoteConfig *protobuf
 		return nil, changed, fmt.Errorf("Failed to apply config changes: %w", err)
 	}
 
-	// Since we can't hot reload configs we need to restart in order to take advantage of the new configurations.
-	// We will exit and trust the service manager wrapping us to restart
-	if changed {
-		// Close shutdown channel to signal restart
-		close(c.shutdownChan)
-	}
-
-	return effectiveConfig, false, nil
+	return effectiveConfig, changed, nil
 }
 
 func (c *Client) onGetEffectiveConfigHandler(_ context.Context) (*protobufs.EffectiveConfig, error) {

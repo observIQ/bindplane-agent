@@ -14,14 +14,19 @@
 
 package opamp
 
-import "context"
+// ReloadFunc is a function that handles reloading a config given the new contents
+type ReloadFunc func([]byte) (changed bool, err error)
 
-// Client implements a connection with OpAmp enabled server
-type Client interface {
+// NoopReloadFunc used as a noop reload function if unsure of how to reload
+func NoopReloadFunc([]byte) (bool, error) {
+	return false, nil
+}
 
-	// Connect initiates a connection to the OpAmp server based on the supplied configuration
-	Connect(ctx context.Context, endpoint, secretKey string) error
+// ManagedConfig is a structure that can manager an on disk config file
+type ManagedConfig struct {
+	// ConfigPath is the path on disk where the configuration lives
+	ConfigPath string
 
-	// Disconnect disconnects from the server
-	Disconnect(ctx context.Context) error
+	// Reload will be called when any changes to this config occur.
+	Reload ReloadFunc
 }
