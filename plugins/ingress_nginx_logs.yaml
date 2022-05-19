@@ -12,6 +12,10 @@ parameters:
       - beginning
       - end
     default: end
+  # An optional cluster name
+  - name: cluster_name
+    type: string
+    default: ""
 template: |
   receivers:
       filelog:
@@ -20,6 +24,10 @@ template: |
           - '{{ $fp }}'
           {{ end }}
         start_at: {{ .start_at }}
+        resource:
+          {{ if .cluster_name }}
+          k8s.cluster.name: {{ .cluster_name }}
+          {{ end }}
         operators:
           # Initial log object looks like this:
           # '{"log":"NGINX Ingress controller\n","stream":"stdout","time":"2022-05-18T01:27:30.100955955Z"}'
