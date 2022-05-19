@@ -30,12 +30,6 @@ parameters:
   - name: log_type
     type: string
     default: csv
-  - name: start_at
-    type: string
-    supported:
-    - beginning
-    - end
-    default: end
 template: |
   receivers:
     filelog:
@@ -50,9 +44,7 @@ template: |
         - '{{ $fp }}'
         {{end}}
       {{end}}
-      {{ if .encoding }}
       encoding: '{{ .encoding }}'
-      {{end}}
       attributes:
         log_type: '{{ .log_type }}'
       operators:
