@@ -20,10 +20,6 @@ template: |
           - '{{ $fp }}'
           {{ end }}
         start_at: {{ .start_at }}
-        poll_interval: 500ms
-        resource:
-          k8s.node.name: "EXPR(env('K8S_NODE_NAME'))"
-          k8s.cluster.name: poc
         operators:
           # Initial log object looks like this:
           # '{"log":"NGINX Ingress controller\n","stream":"stdout","time":"2022-05-18T01:27:30.100955955Z"}'
