@@ -340,12 +340,15 @@ set_download_urls()
 
   if [ -z "$url" ] ; then
     url=$DOWNLOAD_BASE
-  fi
 
-  if [ -z "$version" ] ; then
-    collector_download_url="$url/latest/download/${PACKAGE_NAME}_${os_arch}.${package_type}"
+    # Only if we're using the base download url apply version formatting
+    if [ -z "$version" ] ; then
+      collector_download_url="$url/latest/download/${PACKAGE_NAME}_${os_arch}.${package_type}"
+    else
+      collector_download_url="$url/download/v$version/${PACKAGE_NAME}_${os_arch}.${package_type}"
+    fi
   else
-    collector_download_url="$url/download/v$version/${PACKAGE_NAME}_${os_arch}.${package_type}"
+    collector_download_url="$url"
   fi
 }
 
