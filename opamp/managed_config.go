@@ -22,7 +22,7 @@ func NoopReloadFunc([]byte) (bool, error) {
 	return false, nil
 }
 
-// ManagedConfig is a structure that can manager an on disk config file
+// ManagedConfig is a structure that can manage an on disk config file
 type ManagedConfig struct {
 	// ConfigPath is the path on disk where the configuration lives
 	ConfigPath string
