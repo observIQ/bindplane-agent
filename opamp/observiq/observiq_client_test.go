@@ -249,32 +249,6 @@ func TestClientDisconnect(t *testing.T) {
 	mockOpAmpClient.AssertExpectations(t)
 }
 
-func TestClient_onConnectionHandler(t *testing.T) {
-	mockOpAmpClient := new(mocks.MockClient)
-
-	c := &Client{
-		logger:      zap.NewNop().Sugar(),
-		opampClient: mockOpAmpClient,
-		ident: &identity{
-			agentID:     "4322d8d1-f3e0-46db-b68d-b01a4689ef19",
-			agentName:   nil,
-			serviceName: "com.observiq.collector",
-			version:     "v1.2.3",
-			labels:      nil,
-			oSArch:      "amd64",
-			oSDetails:   "os details",
-			oSFamily:    "linux",
-			hostname:    "my-linux-box",
-			mac:         "68-C7-B4-EB-A8-D2",
-		},
-	}
-
-	mockOpAmpClient.On("SetAgentDescription", mock.Anything).Return(nil)
-
-	c.onConnectHandler()
-	mockOpAmpClient.AssertExpectations(t)
-}
-
 func TestClient_onGetEffectiveConfigHandler(t *testing.T) {
 	mockManager := new(mocks.MockConfigManager)
 

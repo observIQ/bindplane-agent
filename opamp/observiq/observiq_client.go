@@ -158,10 +158,6 @@ func (c *Client) Disconnect(ctx context.Context) error {
 
 func (c *Client) onConnectHandler() {
 	c.logger.Info("Successfully connected to server")
-
-	if err := c.opampClient.SetAgentDescription(c.ident.ToAgentDescription()); err != nil {
-		c.logger.Error("Failed to set agent description", zap.Error(err))
-	}
 }
 
 func (c *Client) onConnectFailedHandler(err error) {
