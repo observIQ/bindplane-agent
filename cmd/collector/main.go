@@ -41,7 +41,6 @@ func main() {
 
 	configPaths := pflag.StringSlice("config", []string{"./config.yaml"}, "the collector config path")
 	managerConfigPath := pflag.String("manager", "./manager.yaml", "The configuration for remote management")
-	loggingConfigPath := pflag.String("logging", "./logging.yaml", "The configuration for logging")
 	_ = pflag.String("log-level", "", "not implemented") // TEMP(jsirianni): Required for OTEL k8s operator
 	var showVersion = pflag.BoolP("version", "v", false, "prints the version of the collector")
 	pflag.Parse()
@@ -73,6 +72,13 @@ func main() {
 		// Create collector
 		currCollector := collector.New((*configPaths)[0], version.Version(), []zap.Option{})
 
+		// Create a blank log file as iris needs this currently
+		logFilePath := "./logging.yaml"
+		_, err = os.Create(logFilePath)
+		if err != nil {
+			defaultLogger.Fatal("Failed to create logging.yaml. Please create an empty logging.yaml file next to the collector if you wish to proceed in managed mode", zap.Error(err))
+		}
+
 		// Create client Args
 		clientArgs := &observiq.NewClientArgs{
 			DefaultLogger:       defaultLogger.Sugar(),
@@ -80,7 +86,7 @@ func main() {
 			Collector:           currCollector,
 			ManagerConfigPath:   *managerConfigPath,
 			CollectorConfigPath: (*configPaths)[0],
-			LoggerConfigPath:    *loggingConfigPath,
+			LoggerConfigPath:    logFilePath, // temporary as iris needs a logging file
 		}
 
 		if err := runRemoteManaged(ctx, clientArgs); err != nil {
