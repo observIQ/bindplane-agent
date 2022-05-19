@@ -90,7 +90,7 @@ func main() {
 		}
 
 		if err := runRemoteManaged(ctx, clientArgs); err != nil {
-			defaultLogger.Fatal("Remote Managment failed", zap.Error(err))
+			defaultLogger.Fatal("Remote Management failed", zap.Error(err))
 		}
 	} else if errors.Is(err, os.ErrNotExist) {
 		// Run standalone
