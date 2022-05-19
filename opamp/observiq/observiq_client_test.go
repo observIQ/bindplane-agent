@@ -31,6 +31,7 @@ import (
 )
 
 func TestNewClient(t *testing.T) {
+	secretKey := "136bdd08-2074-40b7-ac1c-6706ac24c4f2"
 	testCases := []struct {
 		desc        string
 		config      opamp.Config
@@ -55,8 +56,9 @@ func TestNewClient(t *testing.T) {
 		{
 			desc: "Valid Config",
 			config: opamp.Config{
-				Endpoint: "ws://localhost:1234",
-				AgentID:  "b24181a8-bc16-4ec1-b3af-ca6f7b669af8",
+				Endpoint:  "ws://localhost:1234",
+				AgentID:   "b24181a8-bc16-4ec1-b3af-ca6f7b669af8",
+				SecretKey: &secretKey,
 			},
 			expectedErr: nil,
 		},
@@ -93,6 +95,8 @@ func TestNewClient(t *testing.T) {
 				assert.Equal(t, testLogger.Named("opamp"), observiqClient.logger)
 				assert.Equal(t, mockCollector, observiqClient.collector)
 				assert.NotNil(t, observiqClient.ident)
+				assert.Equal(t, observiqClient.endpoint, tc.config.Endpoint)
+				assert.Equal(t, observiqClient.secretKey, tc.config.GetSecretKey())
 			}
 
 		})
@@ -118,9 +122,11 @@ func TestClientConnect(t *testing.T) {
 					ident:         &identity{},
 					configManager: nil,
 					collector:     nil,
+					endpoint:      "ws://localhost:1234",
+					secretKey:     "136bdd08-2074-40b7-ac1c-6706ac24c4f2",
 				}
 
-				err := c.Connect(context.Background(), "ws://localhost:1234", "136bdd08-2074-40b7-ac1c-6706ac24c4f2")
+				err := c.Connect(context.Background())
 				assert.ErrorIs(t, err, expectedErr)
 			},
 		},
@@ -142,9 +148,11 @@ func TestClientConnect(t *testing.T) {
 					ident:         &identity{agentID: "a69dcef0-0261-4f4f-9ac0-a483af42a6ba"},
 					configManager: nil,
 					collector:     mockCollector,
+					endpoint:      "ws://localhost:1234",
+					secretKey:     "136bdd08-2074-40b7-ac1c-6706ac24c4f2",
 				}
 
-				err := c.Connect(context.Background(), "ws://localhost:1234", "136bdd08-2074-40b7-ac1c-6706ac24c4f2")
+				err := c.Connect(context.Background())
 				assert.ErrorIs(t, err, expectedErr)
 			},
 		},
@@ -165,11 +173,11 @@ func TestClientConnect(t *testing.T) {
 					ident:         &identity{agentID: "a69dcef0-0261-4f4f-9ac0-a483af42a6ba"},
 					configManager: nil,
 					collector:     mockCollector,
+					endpoint:      "ws://localhost:1234",
+					secretKey:     "136bdd08-2074-40b7-ac1c-6706ac24c4f2",
 				}
 
-				endpoint, secretKey := "ws://localhost:1234", "136bdd08-2074-40b7-ac1c-6706ac24c4f2"
-
-				err := c.Connect(context.Background(), endpoint, secretKey)
+				err := c.Connect(context.Background())
 				assert.ErrorIs(t, err, expectedErr)
 			},
 		},
@@ -188,13 +196,13 @@ func TestClientConnect(t *testing.T) {
 					ident:         &identity{agentID: "a69dcef0-0261-4f4f-9ac0-a483af42a6ba"},
 					configManager: nil,
 					collector:     mockCollector,
+					endpoint:      "ws://localhost:1234",
+					secretKey:     "136bdd08-2074-40b7-ac1c-6706ac24c4f2",
 				}
 
-				endpoint, secretKey := "ws://localhost:1234", "136bdd08-2074-40b7-ac1c-6706ac24c4f2"
-
 				expectedSettings := types.StartSettings{
-					OpAMPServerURL:      endpoint,
-					AuthorizationHeader: secretKey,
+					OpAMPServerURL:      c.endpoint,
+					AuthorizationHeader: c.secretKey,
 					TLSConfig:           nil,
 					InstanceUid:         c.ident.agentID,
 					Callbacks: types.CallbacksStruct{
@@ -214,7 +222,7 @@ func TestClientConnect(t *testing.T) {
 					// assert is unable to compare function pointers
 				})
 
-				err := c.Connect(context.Background(), endpoint, secretKey)
+				err := c.Connect(context.Background())
 				assert.NoError(t, err)
 			},
 		},

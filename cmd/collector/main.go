@@ -124,7 +124,7 @@ func runRemoteManaged(ctx context.Context, clientArgs *observiq.NewClientArgs) e
 	}
 
 	// Connect to manager platform
-	if err := client.Connect(ctx, clientArgs.Config.Endpoint, clientArgs.Config.GetSecretKey()); err != nil {
+	if err := client.Connect(ctx); err != nil {
 		return err
 	}
 

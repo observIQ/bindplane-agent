@@ -44,6 +44,10 @@ type Client struct {
 	ident         *identity
 	configManager opamp.ConfigManager
 	collector     collector.Collector
+
+	// Parameters needed for connection
+	endpoint  string
+	secretKey string
 }
 
 // NewClientArgs arguments passed when creating a new client
@@ -70,6 +74,8 @@ func NewClient(args *NewClientArgs) (opamp.Client, error) {
 		ident:         newIdentity(clientLogger, args.Config),
 		configManager: configManager,
 		collector:     args.Collector,
+		endpoint:      args.Config.Endpoint,
+		secretKey:     args.Config.GetSecretKey(),
 	}
 
 	// Parse URL to determin scheme
@@ -106,7 +112,7 @@ func NewClient(args *NewClientArgs) (opamp.Client, error) {
 }
 
 // Connect initiates a connection to the OpAmp server based on the supplied configuration
-func (c *Client) Connect(ctx context.Context, endpoint, secretKey string) error {
+func (c *Client) Connect(ctx context.Context) error {
 	// Compose and set the agent description
 	if err := c.opampClient.SetAgentDescription(c.ident.ToAgentDescription()); err != nil {
 		c.logger.Error("Error while setting agent description", zap.Error(err))
@@ -114,8 +120,8 @@ func (c *Client) Connect(ctx context.Context, endpoint, secretKey string) error 
 	}
 
 	settings := types.StartSettings{
-		OpAMPServerURL:      endpoint,
-		AuthorizationHeader: secretKey,
+		OpAMPServerURL:      c.endpoint,
+		AuthorizationHeader: c.secretKey,
 		TLSConfig:           nil, // TODO add support for TLS
 		InstanceUid:         c.ident.agentID,
 		Callbacks: types.CallbacksStruct{
