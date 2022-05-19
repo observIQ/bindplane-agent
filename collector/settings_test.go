@@ -15,15 +15,30 @@
 package collector
 
 import (
+	"context"
+	"reflect"
 	"testing"
 
+	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/filelogreceiver"
 	"github.com/stretchr/testify/require"
+	"go.opentelemetry.io/collector/config"
 	"go.uber.org/zap"
 )
 
 func TestNewSettings(t *testing.T) {
-	configPaths := []string{"./test/valid.yaml"}
+	t.Setenv("FILE", "./test.log")
+	configPaths := []string{"./test/valid_with_env_var.yaml"}
 	settings, err := NewSettings(configPaths, "0.0.0", nil)
+	require.NoError(t, err)
+
+	// Make sure environment variable replacement is working
+	provider, err := settings.ConfigProvider.Get(context.Background(), settings.Factories)
+	require.NoError(t, err)
+	receivcfg := provider.Receivers[config.NewComponentID("filelog")]
+	config := receivcfg.(*filelogreceiver.FileLogConfig)
+	actualConfVal := reflect.ValueOf(config.Input["include"]).Index(0).Interface().(string)
+	require.Equal(t, "./test.log", actualConfVal)
+
 	require.NoError(t, err)
 	require.Equal(t, settings.LoggingOptions, []zap.Option(nil))
 	require.True(t, settings.DisableGracefulShutdown)
