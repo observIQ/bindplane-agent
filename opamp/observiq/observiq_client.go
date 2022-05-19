@@ -62,8 +62,6 @@ type NewClientArgs struct {
 }
 
 // NewClient creates a new OpAmp client
-// The passed in configmanager should be preloaded with all known configs.
-// The shutdown channel will be closed when a reconfiguration occurs an a process shutdown is required.
 func NewClient(args *NewClientArgs) (opamp.Client, error) {
 	clientLogger := args.DefaultLogger.Named("opamp")
 
@@ -111,7 +109,7 @@ func NewClient(args *NewClientArgs) (opamp.Client, error) {
 	return observiqClient, nil
 }
 
-// Connect initiates a connection to the OpAmp server based on the supplied configuration
+// Connect initiates a connection to the OpAmp server
 func (c *Client) Connect(ctx context.Context) error {
 	// Compose and set the agent description
 	if err := c.opampClient.SetAgentDescription(c.ident.ToAgentDescription()); err != nil {
