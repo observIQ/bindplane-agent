@@ -15,7 +15,7 @@
         "start": "delayed",
         "display-name": "observIQ OpenTelemetry Collector",
         "description": "observIQ's distribution of the OpenTelemetry collector.",
-        "arguments": "--config &quot;[INSTALLDIR]config.yaml&quot;"
+        "arguments": "--config &quot;[INSTALLDIR]config.yaml&quot; --manager &quot;[INSTALLDIR]manager.yaml&quot;"
       }
     },
     {
