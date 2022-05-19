@@ -1,0 +1,199 @@
+version: 0.0.1
+title: Apache Kafka
+description: Log parser for Apache Kafka
+parameters:
+  - name: enable_server_log
+    type: bool
+    default: true
+  - name: server_log_path
+    type: "[]string"
+    default: 
+    - "/home/kafka/kafka/logs/server.log*"
+  - name: enable_controller_log
+    type: bool
+    default: true
+  - name: controller_log_path
+    type: "[]string"
+    default: 
+    - "/home/kafka/kafka/logs/controller.log*"
+  - name: enable_state_change_log
+    type: bool
+    default: true
+  - name: state_change_log_path
+    type: "[]string"
+    default: 
+    - "/home/kafka/kafka/logs/state-change.log*"
+  - name: enable_log_cleaner_log
+    type: bool
+    default: true
+  - name: log_cleaner_log_path
+    type: "[]string"
+    default: 
+    - "/home/kafka/kafka/logs/log-cleaner.log*"
+  - name: start_at
+    type: string
+    supported:
+      - beginning
+      - end
+    default: end
+template: |
+  receivers:
+    {{ if .enable_server_log }}
+    filelog/server_log:
+      include:
+        {{ range $fp := .server_log_path }}
+        - '{{ $fp }}'
+        {{ end }}
+      multiline:
+        line_start_pattern: '\[\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3}\]'
+      start_at: {{ .start_at }}
+      operators:
+        - type: regex_parser
+          regex: '^\[(?P<date_time>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}),(?P<milliseconds>\d{3})\] (?P<severity>[^ ]+) (?P<message>.*)'
+          severity:
+            parse_from: attributes.severity
+            mapping:
+              info2: notice
+              error2: critical
+              error3: alert
+              fatal2: emergency
+              fatal3: catastrophe
+        - type: add
+          field: attributes.timestamp
+          value_expr: 'attributes.date_time + "." + attributes.milliseconds'
+        - type: remove 
+          field: attributes.date_time
+        - type: remove 
+          field: attributes.milliseconds
+        - type: time_parser
+          parse_from: attributes.timestamp
+          layout: '%F %T.%L'
+          output: add_type
+        - id: add_type
+          type: add
+          field: attributes.log_type
+          value: 'kafka.server'
+    {{ end }}
+
+    {{ if .enable_controller_log }}
+    filelog/controller_log:
+      include:
+        {{ range $fp := .controller_log_path }}
+        - '{{ $fp }}'
+        {{ end }}
+      multiline:
+        line_start_pattern: '\[\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3}\]'
+      start_at: {{ .start_at }}
+      output: regex_parser
+      operators:
+        - type: regex_parser
+          parse_from: attributes.log_entry
+          regex: '^\[(?P<date_time>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}),(?P<milliseconds>\d{3})\] (?P<severity>[^ ]+) (?P<message>.*)'
+          severity:
+            parse_from: attributes.severity
+            mapping:
+              info2: notice
+              error2: critical
+              error3: alert
+              fatal2: emergency
+              fatal3: catastrophe
+        - type: restructure
+          ops:
+            - add:
+                field: attributes.timestamp
+                value_expr: 'attributes.date_time + "." + attributes.milliseconds'
+            - remove: date_time
+            - remove: milliseconds
+        - type: time_parser
+          parse_from: attributes.timestamp
+          layout: '%F %T.%L'
+          output: add_type
+        - id: add_type
+          type: add
+          field: attributes.log_type
+          value: 'kafka.controller'
+    {{ end }}
+
+    {{ if .enable_state_change_log }}
+    filelog/state_change_log:
+      include:
+        {{ range $fp := .state_change_log_path }}
+        - '{{ $fp }}'
+        {{ end }}
+      multiline:
+        line_start_pattern: '\[\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3}\]'
+      start_at: {{ .start_at }}
+      output: regex_parser
+      operators:
+        - type: regex_parser
+          parse_from: attributes.log_entry
+          regex: '^\[(?P<date_time>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}),(?P<milliseconds>\d{3})\] (?P<severity>[^ ]+) (?P<message>.*)'
+          severity:
+            parse_from: attributes.severity
+            mapping:
+              info2: notice
+              error2: critical
+              error3: alert
+              fatal2: emergency
+              fatal3: catastrophe
+        - type: restructure
+          ops:
+            - add:
+                field: attributes.timestamp
+                value_expr: 'attributes.date_time + "." + attributes.milliseconds'
+            - remove: date_time
+            - remove: milliseconds
+        - type: time_parser
+          parse_from: attributes.timestamp
+          layout: '%F %T.%L'
+          output: add_type
+        - id: add_type
+          type: add
+          field: attributes.log_type
+          value: 'kafka.state_change'
+    {{ end }}
+
+    {{ if .enable_log_cleaner_log }}
+    filelog/log_cleaner:
+      include:
+          {{ range $fp := .log_cleaner_log_path }}
+          - '{{ $fp }}'
+          {{ end }}
+        multiline:
+          line_start_pattern: '\[\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3}\]'
+        start_at: {{ .start_at }}
+        output: regex_parser
+        operators:
+        - type: regex_parser
+          parse_from: log_entry
+          regex: '^\[(?P<date_time>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}),(?P<milliseconds>\d{3})\] (?P<severity>[^ ]+) (?P<message>.*)'
+          severity:
+            parse_from: severity
+            mapping:
+              info2: notice
+              error2: critical
+              error3: alert
+              fatal2: emergency
+              fatal3: catastrophe
+        - type: restructure
+          ops:
+            - add:
+                field: attributes.timestamp
+                value_expr: 'attributes.date_time + "." + attributes.milliseconds'
+            - remove: date_time
+            - remove: milliseconds
+        - type: time_parser
+          parse_from: timestamp
+          layout: '%F %T.%L'
+          output: add_type
+        - id: add_type
+          type: add
+          field: attributes.log_type
+          value: 'kafka.log_cleaner'
+    {{ end }}
+
+  service:
+    pipelines:
+      logs:
+        recievers:
+          - filelog
