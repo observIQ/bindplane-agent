@@ -32,7 +32,7 @@ FROM openjdk:8u312-slim-buster as openjdk
 
 # Final Stage
 #
-FROM gcr.io/observiq-container-images/stanza-base:v1.2.0
+FROM gcr.io/observiq-container-images/stanza-base:v1.2.2
 WORKDIR /
 
 COPY --from=openjdk /usr/local/openjdk-8 /usr/local/openjdk-8
@@ -41,6 +41,7 @@ ENV PATH=$PATH:/usr/local/openjdk-8/bin
 
 COPY observiq-otel-collector /collector/observiq-otel-collector
 COPY --from=jmxjar /opentelemetry-java-contrib-jmx-metrics.jar /opt/opentelemetry-java-contrib-jmx-metrics.jar
+COPY plugins /etc/otel/plugins
 
 RUN adduser \
     --disabled-password \
