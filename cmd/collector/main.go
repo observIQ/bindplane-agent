@@ -130,7 +130,7 @@ func runRemoteManaged(ctx context.Context, clientArgs *observiq.NewClientArgs) e
 
 	// Wait for close signal
 	<-ctx.Done()
-	defaultLogger.Info("Signal received")
+	defaultLogger.Info("Exit signal received shutting down collector")
 
 	// Disconnect from opamp
 	waitCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
