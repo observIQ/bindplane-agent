@@ -139,12 +139,12 @@ func runServiceInteractive(ctx context.Context, logger *zap.Logger, svc Runnable
 		return fmt.Errorf("failed to start service: %w", err)
 	}
 
-	var err error
+	var svcErr error
 	// Service is started; Wait for a stop signal.
 	select {
 	case <-ctx.Done():
-	case err = <-svc.Error():
-		logger.Error("Unexpected error while running service", zap.Error(err))
+	case svcErr = <-svc.Error():
+		logger.Error("Unexpected error while running service", zap.Error(svcErr))
 	}
 
 	stopTimeoutCtx, stopCancel := context.WithTimeout(context.Background(), stopTimeout)
@@ -154,5 +154,5 @@ func runServiceInteractive(ctx context.Context, logger *zap.Logger, svc Runnable
 		return fmt.Errorf("failed to stop service: %w", err)
 	}
 
-	return err
+	return svcErr
 }
