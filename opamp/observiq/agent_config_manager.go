@@ -68,9 +68,6 @@ func (a *AgentConfigManager) AddConfig(configName string, managedConfig *opamp.M
 func (a *AgentConfigManager) ComposeEffectiveConfig() (*protobufs.EffectiveConfig, error) {
 	contentMap := make(map[string]*protobufs.AgentConfigFile, len(a.configMap))
 
-	// Used to track config names to alphabetize later in hash compution
-	configNames := make([]string, 0, len(a.configMap))
-
 	for configName, managedConfig := range a.configMap {
 		// Read in config file
 		cleanPath := filepath.Clean(managedConfig.ConfigPath)
@@ -84,8 +81,6 @@ func (a *AgentConfigManager) ComposeEffectiveConfig() (*protobufs.EffectiveConfi
 			Body:        configContents,
 			ContentType: opamp.DetermineContentType(managedConfig.ConfigPath),
 		}
-
-		configNames = append(configNames, configName)
 	}
 
 	return &protobufs.EffectiveConfig{
@@ -114,26 +109,17 @@ func (a *AgentConfigManager) ApplyConfigChanges(remoteConfig *protobufs.AgentRem
 	for configName, remoteContents := range remoteConfigMap {
 		// For security check the log file we want is acceptable
 		if _, ok := acceptableConfigs[configName]; !ok {
-			a.logger.Info("Not support config received skipping", zap.String("config", configName))
+			a.logger.Warn("Not supported config received skipping", zap.String("config", configName))
 			continue
 		}
 
 		currentContents, ok := currentConfigMap[configName]
 		if !ok {
-			a.logger.Info("Untracked config found", zap.String("config", configName))
 			// We don't current track this config file we should add it
-			changed = true
-
-			// Write out the file
-			if err := os.WriteFile(configName, remoteContents.GetBody(), 0600); err != nil {
-				return nil, false, fmt.Errorf("failed to write new config file %s: %w", configName, err)
+			if err := a.trackNewConfig(configName, remoteContents.GetBody()); err != nil {
+				return effectiveConfig, false, err
 			}
-
-			// Track new config
-			a.AddConfig(configName, &opamp.ManagedConfig{
-				ConfigPath: filepath.Join(".", configName),
-				Reload:     opamp.NoopReloadFunc,
-			})
+			changed = true
 			continue
 		}
 
@@ -164,4 +150,21 @@ func (a *AgentConfigManager) ApplyConfigChanges(remoteConfig *protobufs.AgentRem
 	}
 
 	return
+}
+
+func (a *AgentConfigManager) trackNewConfig(configName string, contents []byte) error {
+	a.logger.Info("Untracked config found", zap.String("config", configName))
+
+	// Write out the file
+	if err := os.WriteFile(configName, contents, 0600); err != nil {
+		return fmt.Errorf("failed to write new config file %s: %w", configName, err)
+	}
+
+	// Track new config
+	a.AddConfig(configName, &opamp.ManagedConfig{
+		ConfigPath: filepath.Join(".", configName),
+		Reload:     opamp.NoopReloadFunc,
+	})
+
+	return nil
 }
