@@ -26,11 +26,11 @@ import (
 )
 
 const (
-	// FileOutput is an output option for logging to a file.
-	FileOutput string = "file"
+	// fileOutput is an output option for logging to a file.
+	fileOutput string = "file"
 
-	// StdOutput is an output option for logging to stdout.
-	StdOutput string = "stdout"
+	// stdOutput is an output option for logging to stdout.
+	stdOutput string = "stdout"
 )
 
 // LoggerConfig is the configuration of a logger.
@@ -44,7 +44,7 @@ type LoggerConfig struct {
 // set, stdout logging will be enabled.
 func NewLoggerConfig(configPath string) (*LoggerConfig, error) {
 	conf := &LoggerConfig{
-		Output: StdOutput,
+		Output: stdOutput,
 		Level:  zapcore.InfoLevel,
 	}
 
@@ -94,9 +94,9 @@ func (l *LoggerConfig) Options() ([]zap.Option, error) {
 // An unknown output will return a nop core.
 func (l *LoggerConfig) core() (zapcore.Core, error) {
 	switch l.Output {
-	case FileOutput:
+	case fileOutput:
 		return zapcore.NewCore(newEncoder(), zapcore.AddSync(l.File), l.Level), nil
-	case StdOutput:
+	case stdOutput:
 		return zapcore.NewCore(newEncoder(), zapcore.Lock(os.Stdout), l.Level), nil
 	default:
 		return nil, fmt.Errorf("unrecognized output type: %s", l.Output)

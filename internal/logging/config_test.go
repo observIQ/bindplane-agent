@@ -35,7 +35,7 @@ func TestNewLoggerConfig(t *testing.T) {
 			"no-config",
 			"",
 			&LoggerConfig{
-				Output: StdOutput,
+				Output: stdOutput,
 				Level:  zapcore.InfoLevel,
 			},
 		},
@@ -43,7 +43,7 @@ func TestNewLoggerConfig(t *testing.T) {
 			"file config",
 			"testdata/info.yaml",
 			&LoggerConfig{
-				Output: FileOutput,
+				Output: fileOutput,
 				Level:  zapcore.InfoLevel,
 				File: &lumberjack.Logger{
 					Filename:   "log/collector.log",
@@ -57,7 +57,7 @@ func TestNewLoggerConfig(t *testing.T) {
 			"stdout config",
 			"testdata/stdout.yaml",
 			&LoggerConfig{
-				Output: StdOutput,
+				Output: stdOutput,
 				Level:  zapcore.DebugLevel,
 			},
 		},
@@ -65,7 +65,7 @@ func TestNewLoggerConfig(t *testing.T) {
 			"config with environment variables in filename",
 			"testdata/expand-env.yaml",
 			&LoggerConfig{
-				Output: FileOutput,
+				Output: fileOutput,
 				Level:  zapcore.InfoLevel,
 				File: &lumberjack.Logger{
 					Filename:   "/some/path/collector.log",
@@ -79,7 +79,7 @@ func TestNewLoggerConfig(t *testing.T) {
 			"config does not exist",
 			"testdata/does-not-exist.yaml",
 			&LoggerConfig{
-				Output: StdOutput,
+				Output: stdOutput,
 				Level:  zapcore.InfoLevel,
 			},
 		},
