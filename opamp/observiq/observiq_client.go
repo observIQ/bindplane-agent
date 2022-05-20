@@ -119,7 +119,7 @@ func (c *Client) Connect(ctx context.Context) error {
 
 	settings := types.StartSettings{
 		OpAMPServerURL:      c.endpoint,
-		AuthorizationHeader: fmt.Sprintf("Secret-Key: %s", c.secretKey),
+		AuthorizationHeader: fmt.Sprintf("Secret-Key %s", c.secretKey),
 		TLSConfig:           nil, // TODO add support for TLS
 		InstanceUid:         c.ident.agentID,
 		Callbacks: types.CallbacksStruct{
