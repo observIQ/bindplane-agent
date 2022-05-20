@@ -21,5 +21,3 @@ opentelemetry-java-contrib-jmx-metrics.jar
 VERSION.txt
 release_deps
 tmp
-go.work
-go.work.sum
