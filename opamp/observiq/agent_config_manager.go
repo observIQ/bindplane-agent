@@ -117,7 +117,7 @@ func (a *AgentConfigManager) ApplyConfigChanges(remoteConfig *protobufs.AgentRem
 			continue
 		}
 
-		_, ok := a.configMap[configName]
+		managedConfig, ok := a.configMap[configName]
 		// This check is impossible to hit now but will be a use case we'll have in the future so leaving this tested code in for now.
 		if !ok {
 			// We don't current track this config file we should add it
@@ -130,7 +130,7 @@ func (a *AgentConfigManager) ApplyConfigChanges(remoteConfig *protobufs.AgentRem
 		}
 
 		// Update the config file
-		configChanged, err := a.updateExistingConfig(configName, remoteContents.GetBody())
+		configChanged, err := a.updateExistingConfig(configName, managedConfig, remoteContents.GetBody())
 		if err != nil {
 			returnErr = err
 			return
@@ -142,9 +142,7 @@ func (a *AgentConfigManager) ApplyConfigChanges(remoteConfig *protobufs.AgentRem
 	return
 }
 
-func (a *AgentConfigManager) updateExistingConfig(configName string, newContents []byte) (changed bool, err error) {
-	managedConfig := a.configMap[configName]
-
+func (a *AgentConfigManager) updateExistingConfig(configName string, managedConfig *opamp.ManagedConfig, newContents []byte) (changed bool, err error) {
 	remoteHash := opamp.ComputeHash(newContents)
 
 	// Nothing to update
