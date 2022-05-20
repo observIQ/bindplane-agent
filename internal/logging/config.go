@@ -18,6 +18,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -48,18 +49,20 @@ func NewLoggerConfig(configPath string) (*LoggerConfig, error) {
 		Level:  zapcore.InfoLevel,
 	}
 
-	if configPath == "" {
+	cleanPath := filepath.Clean(configPath)
+
+	if cleanPath == "" {
 		return conf, nil
 	}
 
 	// If the file doesn't exist, we just return the default config.
-	if _, err := os.Stat(configPath); errors.Is(err, os.ErrNotExist) {
+	if _, err := os.Stat(cleanPath); errors.Is(err, os.ErrNotExist) {
 		return conf, nil
 	} else if err != nil {
 		return nil, err
 	}
 
-	confBytes, err := os.ReadFile(configPath)
+	confBytes, err := os.ReadFile(cleanPath)
 	if err != nil {
 		return nil, err
 	}
