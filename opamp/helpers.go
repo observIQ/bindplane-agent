@@ -14,7 +14,11 @@
 
 package opamp
 
-import "github.com/open-telemetry/opamp-go/protobufs"
+import (
+	"crypto/sha256"
+
+	"github.com/open-telemetry/opamp-go/protobufs"
+)
 
 // StringKeyValue converts a string key-value pair into a protobuf.KeyValue struct
 func StringKeyValue(key, value string) *protobufs.KeyValue {
@@ -24,4 +28,9 @@ func StringKeyValue(key, value string) *protobufs.KeyValue {
 			Value: &protobufs.AnyValue_StringValue{StringValue: value},
 		},
 	}
+}
+
+// ComputeHash computes a sha256 hash of the passed in data
+func ComputeHash(data []byte) []byte {
+	return sha256.New().Sum(data)
 }

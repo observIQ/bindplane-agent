@@ -306,3 +306,19 @@ func TestGetSecretKey(t *testing.T) {
 		})
 	}
 }
+
+func TestConfigCopy(t *testing.T) {
+	secretKeyContents := "b92222ee-a1fc-4bb1-98db-26de3448541b"
+	labelsContents := "one=foo,two=bar"
+	agentNameContents := "My Agent"
+	cfg := Config{
+		Endpoint:  "ws://localhost:1234",
+		SecretKey: &secretKeyContents,
+		AgentID:   "20ce90b8-506c-4a3b-8134-21aa8d526e03",
+		Labels:    &labelsContents,
+		AgentName: &agentNameContents,
+	}
+
+	copyCfg := cfg.Copy()
+	require.Equal(t, cfg, *copyCfg)
+}

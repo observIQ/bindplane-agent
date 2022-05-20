@@ -136,3 +136,24 @@ func TestToAgentDescription(t *testing.T) {
 		})
 	}
 }
+
+func Test_identityCopy(t *testing.T) {
+	labelsContents := "one=foo,two=bar"
+	agentNameContents := "My Agent"
+	ident := &identity{
+		agentID:     "4322d8d1-f3e0-46db-b68d-b01a4689ef19",
+		agentName:   &agentNameContents,
+		serviceName: "com.observiq.collector",
+		version:     "v1.2.3",
+		labels:      &labelsContents,
+		oSArch:      "amd64",
+		oSDetails:   "os details",
+		oSFamily:    "linux",
+		hostname:    "my-linux-box",
+		mac:         "68-C7-B4-EB-A8-D2",
+	}
+
+	copyIdent := ident.Copy()
+
+	require.Equal(t, ident, copyIdent)
+}

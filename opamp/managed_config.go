@@ -14,12 +14,32 @@
 
 package opamp
 
+import (
+	"fmt"
+	"os"
+	"path/filepath"
+)
+
 // ReloadFunc is a function that handles reloading a config given the new contents
 type ReloadFunc func([]byte) (changed bool, err error)
 
 // NoopReloadFunc used as a noop reload function if unsure of how to reload
 func NoopReloadFunc([]byte) (bool, error) {
 	return false, nil
+}
+
+// NewManagedConfig creates a new Managed config and computes its hash
+func NewManagedConfig(configPath string, reload ReloadFunc) (*ManagedConfig, error) {
+	managedConfig := &ManagedConfig{
+		ConfigPath: configPath,
+		Reload:     reload,
+	}
+
+	if err := managedConfig.ComputeConfigHash(); err != nil {
+		return nil, fmt.Errorf("failed to compute hash for config %w", err)
+	}
+
+	return managedConfig, nil
 }
 
 // ManagedConfig is a structure that can manage an on disk config file
@@ -29,4 +49,24 @@ type ManagedConfig struct {
 
 	// Reload will be called when any changes to this config occur.
 	Reload ReloadFunc
+
+	// currentConfigHash is the hash of the config currently being used
+	currentConfigHash []byte
+}
+
+// GetCurrentConfigHash retrieves the current config hash
+func (m *ManagedConfig) GetCurrentConfigHash() []byte {
+	return m.currentConfigHash
+}
+
+// ComputeConfigHash reads in the config file and computes the hash for it saving it on the ManagedConfig
+func (m *ManagedConfig) ComputeConfigHash() error {
+	cleanPath := filepath.Clean(m.ConfigPath)
+	contents, err := os.ReadFile(cleanPath)
+	if err != nil {
+		return err
+	}
+
+	m.currentConfigHash = ComputeHash(contents)
+	return nil
 }

@@ -66,7 +66,7 @@ func newIdentity(logger *zap.SugaredLogger, config opamp.Config) *identity {
 }
 
 // Copy creates a deep copy of this identity
-func (i *identity) Copy() *identity {
+func (i identity) Copy() *identity {
 	identCpy := &identity{
 		agentID:     i.agentID,
 		serviceName: i.serviceName,

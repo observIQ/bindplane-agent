@@ -59,6 +59,7 @@ func NewAgentConfigManager(defaultLogger *zap.SugaredLogger) *AgentConfigManager
 }
 
 // AddConfig adds a config to be tracked by the config manager.
+// It will also compute the current hash of the config
 // If the config already is tracked it'll be overwritten with the new managed config
 func (a *AgentConfigManager) AddConfig(configName string, managedConfig *opamp.ManagedConfig) {
 	a.configMap[configName] = managedConfig
@@ -91,13 +92,16 @@ func (a *AgentConfigManager) ComposeEffectiveConfig() (*protobufs.EffectiveConfi
 }
 
 // ApplyConfigChanges compares the remoteConfig to the existing and applies changes
-func (a *AgentConfigManager) ApplyConfigChanges(remoteConfig *protobufs.AgentRemoteConfig) (effectiveConfig *protobufs.EffectiveConfig, changed bool, err error) {
-	effectiveConfig, err = a.ComposeEffectiveConfig()
-	if err != nil {
-		return nil, false, err
-	}
+func (a *AgentConfigManager) ApplyConfigChanges(remoteConfig *protobufs.AgentRemoteConfig) (effectiveConfig *protobufs.EffectiveConfig, changed bool, returnErr error) {
+	// Always compute effective config at the end. This ensures we always have the most up to date copy when we respond to the server
+	defer func() {
+		var err error
+		effectiveConfig, err = a.ComposeEffectiveConfig()
+		if err != nil {
+			a.logger.Error("Failed to compute effective config while applying config changes", zap.Error(returnErr))
+		}
+	}()
 
-	currentConfigMap := effectiveConfig.GetConfigMap().GetConfigMap()
 	remoteConfigMap := remoteConfig.GetConfig().GetConfigMap()
 
 	// No remote config Map
@@ -113,39 +117,54 @@ func (a *AgentConfigManager) ApplyConfigChanges(remoteConfig *protobufs.AgentRem
 			continue
 		}
 
-		currentContents, ok := currentConfigMap[configName]
+		_, ok := a.configMap[configName]
+		// This check is impossible to hit now but will be a use case we'll have in the future so leaving this tested code in for now.
 		if !ok {
 			// We don't current track this config file we should add it
 			if err := a.trackNewConfig(configName, remoteContents.GetBody()); err != nil {
-				return effectiveConfig, false, err
+				returnErr = err
+				return
 			}
 			changed = true
 			continue
 		}
 
-		// Check to see if file contents are the same
-		if bytes.Equal(currentContents.GetBody(), remoteContents.GetBody()) {
-			continue
-		}
-
 		// Update the config file
-		managedConfig := a.configMap[configName]
-		newContents := remoteContents.GetBody()
-
-		a.logger.Info("Applying changes to config file", zap.String("config", configName))
-		configChanged, err := managedConfig.Reload(newContents)
+		configChanged, err := a.updateExistingConfig(configName, remoteContents.GetBody())
 		if err != nil {
-			return effectiveConfig, false, fmt.Errorf("failed to reload config: %s: %w", configName, err)
+			returnErr = err
+			return
 		}
 
 		changed = changed || configChanged
 	}
 
-	// If files have changed recompute effective config
+	return
+}
+
+func (a *AgentConfigManager) updateExistingConfig(configName string, newContents []byte) (changed bool, err error) {
+	managedConfig := a.configMap[configName]
+
+	remoteHash := opamp.ComputeHash(newContents)
+
+	// Nothing to update
+	if bytes.Equal(managedConfig.GetCurrentConfigHash(), remoteHash) {
+		return false, nil
+	}
+
+	a.logger.Info("Applying changes to config file", zap.String("config", configName))
+	changed, err = managedConfig.Reload(newContents)
+	if err != nil {
+		err = fmt.Errorf("failed to reload config: %s: %w", configName, err)
+		return
+	}
+
+	// If the config changed recompute the hash for it
 	if changed {
-		effectiveConfig, err = a.ComposeEffectiveConfig()
+		err = managedConfig.ComputeConfigHash()
 		if err != nil {
-			return nil, true, err
+			err = fmt.Errorf("failed hash compute for config %s: %w", configName, err)
+			return
 		}
 	}
 
@@ -160,11 +179,13 @@ func (a *AgentConfigManager) trackNewConfig(configName string, contents []byte) 
 		return fmt.Errorf("failed to write new config file %s: %w", configName, err)
 	}
 
+	managedConfig, err := opamp.NewManagedConfig(filepath.Join(".", configName), opamp.NoopReloadFunc)
+	if err != nil {
+		return err
+	}
+
 	// Track new config
-	a.AddConfig(configName, &opamp.ManagedConfig{
-		ConfigPath: filepath.Join(".", configName),
-		Reload:     opamp.NoopReloadFunc,
-	})
+	a.AddConfig(configName, managedConfig)
 
 	return nil
 }

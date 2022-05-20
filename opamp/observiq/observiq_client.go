@@ -45,9 +45,7 @@ type Client struct {
 	configManager opamp.ConfigManager
 	collector     collector.Collector
 
-	// Parameters needed for connection
-	endpoint  string
-	secretKey string
+	currentConfig opamp.Config
 }
 
 // NewClientArgs arguments passed when creating a new client
@@ -72,13 +70,17 @@ func NewClient(args *NewClientArgs) (opamp.Client, error) {
 		ident:         newIdentity(clientLogger, args.Config),
 		configManager: configManager,
 		collector:     args.Collector,
-		endpoint:      args.Config.Endpoint,
-		secretKey:     args.Config.GetSecretKey(),
+		currentConfig: args.Config,
 	}
 
 	// Parse URL to determin scheme
 	opampURL, err := url.Parse(args.Config.Endpoint)
 	if err != nil {
+		return nil, err
+	}
+
+	// Add managed configs
+	if err := observiqClient.addManagedConfigs(args); err != nil {
 		return nil, err
 	}
 
@@ -90,23 +92,30 @@ func NewClient(args *NewClientArgs) (opamp.Client, error) {
 		return nil, ErrUnsupportedURL
 	}
 
-	// Add configs to config manager
-	configManager.AddConfig(ManagerConfigName, &opamp.ManagedConfig{
-		ConfigPath: args.ManagerConfigPath,
-		Reload:     managerReload(observiqClient, args.ManagerConfigPath),
-	})
-
-	configManager.AddConfig(CollectorConfigName, &opamp.ManagedConfig{
-		ConfigPath: args.CollectorConfigPath,
-		Reload:     collectorReload(observiqClient, args.CollectorConfigPath),
-	})
-
-	configManager.AddConfig(args.LoggerConfigPath, &opamp.ManagedConfig{
-		ConfigPath: args.LoggerConfigPath,
-		Reload:     loggerReload(observiqClient, args.LoggerConfigPath),
-	})
-
 	return observiqClient, nil
+}
+
+func (c *Client) addManagedConfigs(args *NewClientArgs) error {
+	// Add configs to config manager
+	managerManagedConfig, err := opamp.NewManagedConfig(args.ManagerConfigPath, managerReload(c, args.ManagerConfigPath))
+	if err != nil {
+		return fmt.Errorf("failed to create manager managed config: %w", err)
+	}
+	c.configManager.AddConfig(ManagerConfigName, managerManagedConfig)
+
+	collectorManagedConfig, err := opamp.NewManagedConfig(args.CollectorConfigPath, collectorReload(c, args.CollectorConfigPath))
+	if err != nil {
+		return fmt.Errorf("failed to create collector managed config: %w", err)
+	}
+	c.configManager.AddConfig(CollectorConfigName, collectorManagedConfig)
+
+	loggerManagedConfig, err := opamp.NewManagedConfig(args.LoggerConfigPath, loggerReload(c, args.LoggerConfigPath))
+	if err != nil {
+		return fmt.Errorf("failed to create logger managed config: %w", err)
+	}
+	c.configManager.AddConfig(LoggingConfigName, loggerManagedConfig)
+
+	return nil
 }
 
 // Connect initiates a connection to the OpAmp server
@@ -118,8 +127,8 @@ func (c *Client) Connect(ctx context.Context) error {
 	}
 
 	settings := types.StartSettings{
-		OpAMPServerURL:      c.endpoint,
-		AuthorizationHeader: fmt.Sprintf("Secret-Key %s", c.secretKey),
+		OpAMPServerURL:      c.currentConfig.Endpoint,
+		AuthorizationHeader: fmt.Sprintf("Secret-Key %s", c.currentConfig.GetSecretKey()),
 		TLSConfig:           nil, // TODO add support for TLS
 		InstanceUid:         c.ident.agentID,
 		Callbacks: types.CallbacksStruct{

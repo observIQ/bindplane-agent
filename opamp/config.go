@@ -61,6 +61,29 @@ func ParseConfig(configLocation string) (*Config, error) {
 	return &config, nil
 }
 
+// Copy creates a deep copy of this config
+func (c Config) Copy() *Config {
+	cfgCopy := &Config{
+		Endpoint: c.Endpoint,
+		AgentID:  c.AgentID,
+	}
+
+	if c.SecretKey != nil {
+		cfgCopy.SecretKey = new(string)
+		*cfgCopy.SecretKey = *c.SecretKey
+	}
+	if c.Labels != nil {
+		cfgCopy.Labels = new(string)
+		*cfgCopy.Labels = *c.Labels
+	}
+	if c.AgentName != nil {
+		cfgCopy.AgentName = new(string)
+		*cfgCopy.AgentName = *c.AgentName
+	}
+
+	return cfgCopy
+}
+
 // GetSecretKey returns secret key if set else returns empty string
 func (c Config) GetSecretKey() string {
 	if c.SecretKey == nil {

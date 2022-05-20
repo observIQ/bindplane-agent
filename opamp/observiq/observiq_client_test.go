@@ -18,6 +18,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
+	"path/filepath"
 	"testing"
 
 	colmocks "github.com/observiq/observiq-otel-collector/collector/mocks"
@@ -70,13 +72,27 @@ func TestNewClient(t *testing.T) {
 			testLogger := zap.NewNop().Sugar()
 			mockCollector := colmocks.NewMockCollector(t)
 
+			tmpDir := t.TempDir()
+
+			managerPath := filepath.Join(tmpDir, "manager.yaml")
+			_, err := os.Create(managerPath)
+			assert.NoError(t, err)
+
+			collectorPath := filepath.Join(tmpDir, "collector.yaml")
+			_, err = os.Create(collectorPath)
+			assert.NoError(t, err)
+
+			loggerPath := filepath.Join(tmpDir, "logger.yaml")
+			_, err = os.Create(loggerPath)
+			assert.NoError(t, err)
+
 			args := &NewClientArgs{
 				DefaultLogger:       testLogger,
 				Config:              tc.config,
 				Collector:           mockCollector,
-				ManagerConfigPath:   "manager.yaml",
-				CollectorConfigPath: "collector.yaml",
-				LoggerConfigPath:    "logger.yaml",
+				ManagerConfigPath:   managerPath,
+				CollectorConfigPath: collectorPath,
+				LoggerConfigPath:    loggerPath,
 			}
 
 			actual, err := NewClient(args)
@@ -96,8 +112,7 @@ func TestNewClient(t *testing.T) {
 				assert.Equal(t, testLogger.Named("opamp"), observiqClient.logger)
 				assert.Equal(t, mockCollector, observiqClient.collector)
 				assert.NotNil(t, observiqClient.ident)
-				assert.Equal(t, observiqClient.endpoint, tc.config.Endpoint)
-				assert.Equal(t, observiqClient.secretKey, tc.config.GetSecretKey())
+				assert.Equal(t, observiqClient.currentConfig, tc.config)
 			}
 
 		})
@@ -105,6 +120,7 @@ func TestNewClient(t *testing.T) {
 }
 
 func TestClientConnect(t *testing.T) {
+	secretKeyContents := "136bdd08-2074-40b7-ac1c-6706ac24c4f2"
 	testCases := []struct {
 		desc     string
 		testFunc func(*testing.T)
@@ -123,8 +139,10 @@ func TestClientConnect(t *testing.T) {
 					ident:         &identity{},
 					configManager: nil,
 					collector:     nil,
-					endpoint:      "ws://localhost:1234",
-					secretKey:     "136bdd08-2074-40b7-ac1c-6706ac24c4f2",
+					currentConfig: opamp.Config{
+						Endpoint:  "ws://localhost:1234",
+						SecretKey: &secretKeyContents,
+					},
 				}
 
 				err := c.Connect(context.Background())
@@ -149,8 +167,10 @@ func TestClientConnect(t *testing.T) {
 					ident:         &identity{agentID: "a69dcef0-0261-4f4f-9ac0-a483af42a6ba"},
 					configManager: nil,
 					collector:     mockCollector,
-					endpoint:      "ws://localhost:1234",
-					secretKey:     "136bdd08-2074-40b7-ac1c-6706ac24c4f2",
+					currentConfig: opamp.Config{
+						Endpoint:  "ws://localhost:1234",
+						SecretKey: &secretKeyContents,
+					},
 				}
 
 				err := c.Connect(context.Background())
@@ -174,8 +194,10 @@ func TestClientConnect(t *testing.T) {
 					ident:         &identity{agentID: "a69dcef0-0261-4f4f-9ac0-a483af42a6ba"},
 					configManager: nil,
 					collector:     mockCollector,
-					endpoint:      "ws://localhost:1234",
-					secretKey:     "136bdd08-2074-40b7-ac1c-6706ac24c4f2",
+					currentConfig: opamp.Config{
+						Endpoint:  "ws://localhost:1234",
+						SecretKey: &secretKeyContents,
+					},
 				}
 
 				err := c.Connect(context.Background())
@@ -197,13 +219,15 @@ func TestClientConnect(t *testing.T) {
 					ident:         &identity{agentID: "a69dcef0-0261-4f4f-9ac0-a483af42a6ba"},
 					configManager: nil,
 					collector:     mockCollector,
-					endpoint:      "ws://localhost:1234",
-					secretKey:     "136bdd08-2074-40b7-ac1c-6706ac24c4f2",
+					currentConfig: opamp.Config{
+						Endpoint:  "ws://localhost:1234",
+						SecretKey: &secretKeyContents,
+					},
 				}
 
 				expectedSettings := types.StartSettings{
-					OpAMPServerURL:      c.endpoint,
-					AuthorizationHeader: fmt.Sprintf("Secret-Key %s", c.secretKey),
+					OpAMPServerURL:      c.currentConfig.Endpoint,
+					AuthorizationHeader: fmt.Sprintf("Secret-Key %s", c.currentConfig.GetSecretKey()),
 					TLSConfig:           nil,
 					InstanceUid:         c.ident.agentID,
 					Callbacks: types.CallbacksStruct{

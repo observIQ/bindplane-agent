@@ -48,40 +48,20 @@ func Test_managerReload(t *testing.T) {
 			},
 		},
 		{
-			desc: "Invalid new config contents",
-			testFunc: func(*testing.T) {
-				tmpDir := t.TempDir()
-				client := &Client{}
-				reloadFunc := managerReload(client, filepath.Join(tmpDir, ManagerConfigName))
-
-				newConfig := &opamp.Config{
-					Endpoint: "ws://localhost:1234",
-					AgentID:  "d4691426-b0bb-41f7-84a8-320a9ec0ea2e",
-				}
-
-				newContents, err := yaml.Marshal(newConfig)
-				assert.NoError(t, err)
-
-				changed, err := reloadFunc(newContents)
-				assert.ErrorContains(t, err, "failed to read OpAmp config file")
-				assert.False(t, changed)
-			},
-		},
-		{
 			desc: "No Changes to updatable fields",
 			testFunc: func(*testing.T) {
 				tmpDir := t.TempDir()
 
 				managerFilePath := filepath.Join(tmpDir, ManagerConfigName)
-				client := &Client{}
+				client := &Client{
+					currentConfig: opamp.Config{
+						Endpoint: "ws://localhost:1234",
+						AgentID:  "d4691426-b0bb-41f7-84a8-320a9ec0ea2e",
+					},
+				}
 				reloadFunc := managerReload(client, managerFilePath)
 
-				newConfig := &opamp.Config{
-					Endpoint: "ws://localhost:1234",
-					AgentID:  "d4691426-b0bb-41f7-84a8-320a9ec0ea2e",
-				}
-
-				newContents, err := yaml.Marshal(newConfig)
+				newContents, err := yaml.Marshal(client.currentConfig)
 				assert.NoError(t, err)
 
 				// Write new updates to file to ensure there's no changes
@@ -109,8 +89,9 @@ func Test_managerReload(t *testing.T) {
 				mockOpAmpClient.On("SetAgentDescription", mock.Anything).Return(nil)
 
 				client := &Client{
-					opampClient: mockOpAmpClient,
-					ident:       newIdentity(zap.NewNop().Sugar(), *currConfig),
+					opampClient:   mockOpAmpClient,
+					ident:         newIdentity(zap.NewNop().Sugar(), *currConfig),
+					currentConfig: *currConfig,
 				}
 				reloadFunc := managerReload(client, managerFilePath)
 
@@ -138,6 +119,7 @@ func Test_managerReload(t *testing.T) {
 
 				// Verify client identity was updated
 				assert.Equal(t, newConfig.AgentName, client.ident.agentName)
+				assert.Equal(t, newConfig.AgentName, client.currentConfig.AgentName)
 
 				// Verify new file was written
 				data, err := os.ReadFile(managerFilePath)
@@ -162,8 +144,9 @@ func Test_managerReload(t *testing.T) {
 				mockOpAmpClient.On("SetAgentDescription", mock.Anything).Return(expectedErr)
 
 				client := &Client{
-					opampClient: mockOpAmpClient,
-					ident:       newIdentity(zap.NewNop().Sugar(), *currConfig),
+					opampClient:   mockOpAmpClient,
+					ident:         newIdentity(zap.NewNop().Sugar(), *currConfig),
+					currentConfig: *currConfig,
 				}
 				reloadFunc := managerReload(client, managerFilePath)
 
@@ -191,6 +174,9 @@ func Test_managerReload(t *testing.T) {
 
 				// Verify client identity was rolledback
 				assert.Equal(t, currConfig.AgentName, client.ident.agentName)
+
+				// Verify config rollback
+				assert.Equal(t, client.currentConfig, *currConfig)
 
 				// Verify config rolledback
 				data, err := os.ReadFile(managerFilePath)

@@ -15,6 +15,7 @@
 package observiq
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
 	"testing"
@@ -145,10 +146,9 @@ func TestApplyConfigChanges(t *testing.T) {
 				assert.NoError(t, err)
 
 				manager := NewAgentConfigManager(zap.NewNop().Sugar())
-				manager.AddConfig(ManagerConfigName, &opamp.ManagedConfig{
-					ConfigPath: configPath,
-					Reload:     opamp.NoopReloadFunc,
-				})
+				mangedConfig, err := opamp.NewManagedConfig(configPath, opamp.NoopReloadFunc)
+				assert.NoError(t, err)
+				manager.AddConfig(ManagerConfigName, mangedConfig)
 
 				remoteConfig := &protobufs.AgentRemoteConfig{
 					Config: &protobufs.AgentConfigMap{},
@@ -182,10 +182,9 @@ func TestApplyConfigChanges(t *testing.T) {
 				assert.NoError(t, err)
 
 				manager := NewAgentConfigManager(zap.NewNop().Sugar())
-				manager.AddConfig(ManagerConfigName, &opamp.ManagedConfig{
-					ConfigPath: configPath,
-					Reload:     opamp.NoopReloadFunc,
-				})
+				mangedConfig, err := opamp.NewManagedConfig(configPath, opamp.NoopReloadFunc)
+				assert.NoError(t, err)
+				manager.AddConfig(ManagerConfigName, mangedConfig)
 
 				remoteConfig := &protobufs.AgentRemoteConfig{
 					Config: &protobufs.AgentConfigMap{
@@ -226,10 +225,10 @@ func TestApplyConfigChanges(t *testing.T) {
 				assert.NoError(t, err)
 
 				manager := NewAgentConfigManager(zap.NewNop().Sugar())
-				manager.AddConfig(ManagerConfigName, &opamp.ManagedConfig{
-					ConfigPath: configPath,
-					Reload:     opamp.NoopReloadFunc,
-				})
+
+				mangedConfig, err := opamp.NewManagedConfig(configPath, opamp.NoopReloadFunc)
+				assert.NoError(t, err)
+				manager.AddConfig(ManagerConfigName, mangedConfig)
 
 				remoteConfig := &protobufs.AgentRemoteConfig{
 					Config: &protobufs.AgentConfigMap{
@@ -272,10 +271,9 @@ func TestApplyConfigChanges(t *testing.T) {
 				assert.NoError(t, err)
 
 				manager := NewAgentConfigManager(zap.NewNop().Sugar())
-				manager.AddConfig(ManagerConfigName, &opamp.ManagedConfig{
-					ConfigPath: configPath,
-					Reload:     opamp.NoopReloadFunc,
-				})
+				mangedConfig, err := opamp.NewManagedConfig(configPath, opamp.NoopReloadFunc)
+				assert.NoError(t, err)
+				manager.AddConfig(ManagerConfigName, mangedConfig)
 
 				remoteConfig := &protobufs.AgentRemoteConfig{
 					Config: &protobufs.AgentConfigMap{
@@ -330,14 +328,13 @@ func TestApplyConfigChanges(t *testing.T) {
 				assert.NoError(t, err)
 
 				manager := NewAgentConfigManager(zap.NewNop().Sugar())
-				manager.AddConfig(LoggingConfigName, &opamp.ManagedConfig{
-					ConfigPath: configPath,
-					Reload: func(data []byte) (changed bool, err error) {
-						err = os.WriteFile(configPath, data, 0600)
-						assert.NoError(t, err)
-						return true, err
-					},
+				mangedConfig, err := opamp.NewManagedConfig(configPath, func(data []byte) (changed bool, err error) {
+					err = os.WriteFile(configPath, data, 0600)
+					assert.NoError(t, err)
+					return true, err
 				})
+				assert.NoError(t, err)
+				manager.AddConfig(LoggingConfigName, mangedConfig)
 
 				remoteConfig := &protobufs.AgentRemoteConfig{
 					Config: &protobufs.AgentConfigMap{
@@ -365,6 +362,55 @@ func TestApplyConfigChanges(t *testing.T) {
 				assert.NoError(t, err)
 				assert.Equal(t, expectedEffCfg, effCfg)
 				assert.True(t, changed)
+			},
+		},
+		{
+			desc: "Remote config contains changes to file, reload fails",
+			testFunc: func(*testing.T) {
+				tmpDir := t.TempDir()
+				configPath := filepath.Join(tmpDir, LoggingConfigName)
+				configContents := []byte(`key: value`)
+
+				newFileContents := []byte(`logger: value`)
+
+				expectedError := errors.New("oops")
+
+				err := os.WriteFile(configPath, configContents, 0600)
+				assert.NoError(t, err)
+
+				manager := NewAgentConfigManager(zap.NewNop().Sugar())
+				mangedConfig, err := opamp.NewManagedConfig(configPath, func(data []byte) (changed bool, err error) {
+					return false, expectedError
+				})
+				assert.NoError(t, err)
+				manager.AddConfig(LoggingConfigName, mangedConfig)
+
+				remoteConfig := &protobufs.AgentRemoteConfig{
+					Config: &protobufs.AgentConfigMap{
+						ConfigMap: map[string]*protobufs.AgentConfigFile{
+							LoggingConfigName: {
+								Body:        newFileContents,
+								ContentType: opamp.YAMLContentType,
+							},
+						},
+					},
+				}
+
+				expectedEffCfg := &protobufs.EffectiveConfig{
+					ConfigMap: &protobufs.AgentConfigMap{
+						ConfigMap: map[string]*protobufs.AgentConfigFile{
+							LoggingConfigName: {
+								Body:        configContents,
+								ContentType: opamp.YAMLContentType,
+							},
+						},
+					},
+				}
+				effCfg, changed, err := manager.ApplyConfigChanges(remoteConfig)
+
+				assert.ErrorIs(t, err, expectedError)
+				assert.Equal(t, expectedEffCfg, effCfg)
+				assert.False(t, changed)
 			},
 		},
 	}

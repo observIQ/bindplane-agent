@@ -33,15 +33,9 @@ func managerReload(client *Client, managerConfigPath string) opamp.ReloadFunc {
 			return false, fmt.Errorf("failed to validate config %s", ManagerConfigName)
 		}
 
-		// Read in existing config file
-		currConfig, err := opamp.ParseConfig(managerConfigPath)
-		if err != nil {
-			return false, err
-		}
-
 		// Check if the updatable fields are equal
 		// If so then exit
-		if currConfig.CmpUpdatableFields(newConfig) {
+		if client.currentConfig.CmpUpdatableFields(newConfig) {
 			return false, nil
 		}
 
@@ -58,12 +52,13 @@ func managerReload(client *Client, managerConfigPath string) opamp.ReloadFunc {
 			}
 		}()
 
-		// Updatable fields
-		currConfig.AgentName = newConfig.AgentName
-		currConfig.Labels = newConfig.Labels
+		//create a copies for rollback
+		rollBackCfg := client.currentConfig.Copy()
+		rollbackIdent := client.ident.Copy()
 
-		// Create a copy identity for rollback
-		rollbackCopy := client.ident.Copy()
+		// Updatable config fields
+		client.currentConfig.AgentName = newConfig.AgentName
+		client.currentConfig.Labels = newConfig.Labels
 
 		// Update identity
 		client.ident.agentName = newConfig.AgentName
@@ -71,13 +66,14 @@ func managerReload(client *Client, managerConfigPath string) opamp.ReloadFunc {
 
 		// Write out new config file
 		// Marshal back into bytes
-		newContents, err := yaml.Marshal(currConfig)
+		newContents, err := yaml.Marshal(client.currentConfig)
 		if err != nil {
 			// Rollback file
 			if rollbackErr := rollbackFunc(); rollbackErr != nil {
 				client.logger.Error("Rollback failed for manager config", zap.Error(rollbackErr))
 			}
-			client.ident = rollbackCopy
+			client.ident = rollbackIdent
+			client.currentConfig = *rollBackCfg
 			return false, fmt.Errorf("failed to reformat manager config: %w", err)
 		}
 
@@ -87,7 +83,8 @@ func managerReload(client *Client, managerConfigPath string) opamp.ReloadFunc {
 			if rollbackErr := rollbackFunc(); rollbackErr != nil {
 				client.logger.Error("Rollback failed for collector config", zap.Error(rollbackErr))
 			}
-			client.ident = rollbackCopy
+			client.ident = rollbackIdent
+			client.currentConfig = *rollBackCfg
 			return false, err
 		}
 
@@ -97,7 +94,8 @@ func managerReload(client *Client, managerConfigPath string) opamp.ReloadFunc {
 			if rollbackErr := rollbackFunc(); rollbackErr != nil {
 				client.logger.Error("Rollback failed for collector config", zap.Error(rollbackErr))
 			}
-			client.ident = rollbackCopy
+			client.ident = rollbackIdent
+			client.currentConfig = *rollBackCfg
 			return false, fmt.Errorf("failed to set agent description: %w ", err)
 		}
 
