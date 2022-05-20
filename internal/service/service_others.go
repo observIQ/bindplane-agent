@@ -17,7 +17,7 @@
 package service
 
 import (
-	"os"
+	"context"
 	"os/signal"
 	"syscall"
 
@@ -26,9 +26,8 @@ import (
 
 // RunService runs the given service, calling its start and stop functions.
 func RunService(logger *zap.Logger, rSvc RunnableService) error {
-	stopSignal := make(chan os.Signal, 1)
-	signal.Notify(stopSignal, syscall.SIGINT, syscall.SIGTERM)
-	defer signal.Stop(stopSignal)
+	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer cancel()
 
-	return runServiceInteractive(logger, stopSignal, rSvc)
+	return runServiceInteractive(ctx, logger, rSvc)
 }

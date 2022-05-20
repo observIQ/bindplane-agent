@@ -18,7 +18,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"os"
 	"sync"
 	"time"
 
@@ -132,8 +131,8 @@ func (s StandaloneCollectorService) Stop(ctx context.Context) error {
 // runServiceInteractive runs the service in an "interactive" mode (responds to SIGINT and SIGTERM).
 // This mode is always used in linux, and is used in Windows when the collector
 // is not running as a service.
-func runServiceInteractive(logger *zap.Logger, stopSignal <-chan os.Signal, svc RunnableService) error {
-	startupTimeoutCtx, startupCancel := context.WithTimeout(context.Background(), startTimeout)
+func runServiceInteractive(ctx context.Context, logger *zap.Logger, svc RunnableService) error {
+	startupTimeoutCtx, startupCancel := context.WithTimeout(ctx, startTimeout)
 	defer startupCancel()
 
 	if err := svc.Start(startupTimeoutCtx); err != nil {
@@ -143,7 +142,7 @@ func runServiceInteractive(logger *zap.Logger, stopSignal <-chan os.Signal, svc 
 	var err error
 	// Service is started; Wait for a stop signal.
 	select {
-	case <-stopSignal:
+	case <-ctx.Done():
 	case err = <-svc.Error():
 		logger.Error("Unexpected error while running service", zap.Error(err))
 	}

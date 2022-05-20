@@ -17,7 +17,6 @@ package service
 import (
 	"context"
 	"errors"
-	"os"
 	"testing"
 	"time"
 
@@ -264,20 +263,21 @@ func TestRunServiceInteractive(t *testing.T) {
 	t.Run("Normal start/stop", func(t *testing.T) {
 		svc := &mocks.RunnableService{}
 
+		ctx, cancel := context.WithCancel(context.Background())
+
 		svc.On("Start", mock.Anything).Return(nil)
 		svc.On("Error").Return((<-chan error)(make(chan error)))
 		svc.On("Stop", mock.Anything).Return(nil)
 
-		stopSignal := make(chan os.Signal, 1)
-
 		var err error
 		svcDone := make(chan struct{})
 		go func() {
-			err = runServiceInteractive(zap.NewNop(), stopSignal, svc)
+			err = runServiceInteractive(ctx, zap.NewNop(), svc)
 			close(svcDone)
 		}()
 
-		stopSignal <- os.Interrupt
+		<-time.After(500 * time.Millisecond)
+		cancel()
 
 		select {
 		case <-svcDone: // OK
@@ -295,12 +295,13 @@ func TestRunServiceInteractive(t *testing.T) {
 
 		svc.On("Start", mock.Anything).Return(startErr)
 
-		stopSignal := make(chan os.Signal, 1)
+		ctx, cancel := context.WithCancel(context.Background())
+		defer cancel()
 
 		var err error
 		svcDone := make(chan struct{})
 		go func() {
-			err = runServiceInteractive(zap.NewNop(), stopSignal, svc)
+			err = runServiceInteractive(ctx, zap.NewNop(), svc)
 			close(svcDone)
 		}()
 
@@ -325,12 +326,13 @@ func TestRunServiceInteractive(t *testing.T) {
 		svc.On("Error").Return((<-chan error)(errChan))
 		svc.On("Stop", mock.Anything).Return(nil)
 
-		stopSignal := make(chan os.Signal, 1)
+		ctx, cancel := context.WithCancel(context.Background())
+		defer cancel()
 
 		var err error
 		svcDone := make(chan struct{})
 		go func() {
-			err = runServiceInteractive(zap.NewNop(), stopSignal, svc)
+			err = runServiceInteractive(ctx, zap.NewNop(), svc)
 			close(svcDone)
 		}()
 
@@ -353,16 +355,17 @@ func TestRunServiceInteractive(t *testing.T) {
 		svc.On("Error").Return((<-chan error)(make(chan error)))
 		svc.On("Stop", mock.Anything).Return(stopErr)
 
-		stopSignal := make(chan os.Signal, 1)
+		ctx, cancel := context.WithCancel(context.Background())
 
 		var err error
 		svcDone := make(chan struct{})
 		go func() {
-			err = runServiceInteractive(zap.NewNop(), stopSignal, svc)
+			err = runServiceInteractive(ctx, zap.NewNop(), svc)
 			close(svcDone)
 		}()
 
-		stopSignal <- os.Interrupt
+		<-time.After(500 * time.Millisecond)
+		cancel()
 
 		select {
 		case <-svcDone: // OK
@@ -386,12 +389,13 @@ func TestRunServiceInteractive(t *testing.T) {
 		svc.On("Error").Return((<-chan error)(errChan))
 		svc.On("Stop", mock.Anything).Return(stopErr)
 
-		stopSignal := make(chan os.Signal, 1)
+		ctx, cancel := context.WithCancel(context.Background())
+		defer cancel()
 
 		var err error
 		svcDone := make(chan struct{})
 		go func() {
-			err = runServiceInteractive(zap.NewNop(), stopSignal, svc)
+			err = runServiceInteractive(ctx, zap.NewNop(), svc)
 			close(svcDone)
 		}()
 

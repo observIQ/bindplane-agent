@@ -45,11 +45,10 @@ func RunService(logger *zap.Logger, rSvc RunnableService) error {
 		// Service name doesn't need to be specified when directly run by the service manager.
 		return svc.Run("", newWindowsServiceHandler(logger, rSvc))
 	} else {
-		stopSignal := make(chan os.Signal, 1)
-		signal.Notify(stopSignal, syscall.SIGINT, syscall.SIGTERM)
-		defer signal.Stop(stopSignal)
+		ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+		defer cancel()
 
-		return runServiceInteractive(logger, stopSignal, rSvc)
+		return runServiceInteractive(ctx, logger, rSvc)
 	}
 }
 
