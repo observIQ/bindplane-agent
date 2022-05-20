@@ -13,16 +13,21 @@
 // limitations under the License.
 
 //go:build !windows
-// +build !windows
 
-package main
+package service
 
 import (
 	"context"
+	"os/signal"
+	"syscall"
 
-	"go.opentelemetry.io/collector/service"
+	"go.uber.org/zap"
 )
 
-func run(ctx context.Context, params service.CollectorSettings) error {
-	return runInteractive(ctx, params)
+// RunService runs the given service, calling its start and stop functions.
+func RunService(logger *zap.Logger, rSvc RunnableService) error {
+	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer cancel()
+
+	return runServiceInteractive(ctx, logger, rSvc)
 }

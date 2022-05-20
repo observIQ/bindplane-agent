@@ -364,12 +364,15 @@ set_download_urls()
 
   if [ -z "$url" ] ; then
     url=$DOWNLOAD_BASE
-  fi
 
-  if [ -z "$version" ] ; then
-    collector_download_url="$url/latest/download/${PACKAGE_NAME}_${os_arch}.${package_type}"
+    # Only if we're using the base download url apply version formatting
+    if [ -z "$version" ] ; then
+      collector_download_url="$url/latest/download/${PACKAGE_NAME}_${os_arch}.${package_type}"
+    else
+      collector_download_url="$url/download/v$version/${PACKAGE_NAME}_${os_arch}.${package_type}"
+    fi
   else
-    collector_download_url="$url/download/v$version/${PACKAGE_NAME}_${os_arch}.${package_type}"
+    collector_download_url="$url"
   fi
 }
 
@@ -601,7 +604,7 @@ display_results()
     info "Collector Config:   $(fg_cyan "/opt/observiq-otel-collector/config.yaml")$(reset)"
     info "Start Command:      $(fg_cyan "sudo systemctl start observiq-otel-collector")$(reset)"
     info "Stop Command:       $(fg_cyan "sudo systemctl stop observiq-otel-collector")$(reset)"
-    info "Logs Command:       $(fg_cyan "sudo journalctl -u observiq-otel-collector.service")$(reset)"
+    info "Logs Command:       $(fg_cyan "sudo tail -F /opt/observiq-otel-collector/log/collector.log")$(reset)"
     decrease_indent
 
     banner 'Support'

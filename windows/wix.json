@@ -15,11 +15,15 @@
         "start": "delayed",
         "display-name": "observIQ OpenTelemetry Collector",
         "description": "observIQ's distribution of the OpenTelemetry collector.",
-        "arguments": "--config &quot;[INSTALLDIR]config.yaml&quot;"
+        "arguments": "--config &quot;[INSTALLDIR]config.yaml&quot; --logging &quot;[INSTALLDIR]logging.yaml&quot;"
       }
     },
     {
       "path": "config.yaml",
+      "never_overwrite": true
+    },
+    {
+      "path": "logging.yaml",
       "never_overwrite": true
     },
     {
@@ -51,6 +55,14 @@
       "system": "yes",
       "action": "set",
       "part": "all"
+    },
+    {
+      "name": "OIQ_OTEL_COLLECTOR_HOME",
+      "value": "[INSTALLDIR]",
+      "permanent": "no",
+      "system": "yes",
+      "action": "set",
+      "part": "all"
     }
   ],
   "registries": [
@@ -74,16 +86,6 @@
           "name": "NoModify",
           "value": "1",
           "type": "integer"
-        }
-      ]
-    },
-    {
-      "path": "HKLM\\SYSTEM\\CurrentControlSet\\Services\\EventLog\\Application\\observIQ OpenTelemetry Collector",
-      "values": [
-        {
-          "name": "TypesSupported",
-          "type": "integer",
-          "value": "7"
         }
       ]
     }

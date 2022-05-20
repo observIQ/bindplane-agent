@@ -35,7 +35,7 @@ type Collector interface {
 
 // collector is the standard implementation of the Collector interface.
 type collector struct {
-	configPath  string
+	configPaths []string
 	version     string
 	loggingOpts []zap.Option
 	mux         sync.Mutex
@@ -45,9 +45,9 @@ type collector struct {
 }
 
 // New returns a new collector.
-func New(configPath string, version string, loggingOpts []zap.Option) Collector {
+func New(configPaths []string, version string, loggingOpts []zap.Option) Collector {
 	return &collector{
-		configPath:  configPath,
+		configPaths: configPaths,
 		version:     version,
 		loggingOpts: loggingOpts,
 		statusChan:  make(chan *Status, 10),
@@ -67,7 +67,7 @@ func (c *collector) Run(ctx context.Context) error {
 
 	// The OT collector only supports using settings once during the lifetime
 	// of a single collector instance. We must remake the settings on each startup.
-	settings, err := NewSettings([]string{c.configPath}, c.version, c.loggingOpts)
+	settings, err := NewSettings(c.configPaths, c.version, c.loggingOpts)
 	if err != nil {
 		return err
 	}
