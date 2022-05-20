@@ -1,5 +1,0 @@
-agent_name: arm-otel-collector
-endpoint: ws://localhost:3001/v1/opamp
-secret_key: fdb2c8ce-a985-41f2-b655-d53631c984ec
-agent_id: 4ec02b0f-3cb7-498d-9172-bfaa28718ee8
-labels: configuration=arm.localdomain-config

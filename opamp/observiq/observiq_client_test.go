@@ -17,6 +17,7 @@ package observiq
 import (
 	"context"
 	"errors"
+	"fmt"
 	"testing"
 
 	colmocks "github.com/observiq/observiq-otel-collector/collector/mocks"
@@ -202,7 +203,7 @@ func TestClientConnect(t *testing.T) {
 
 				expectedSettings := types.StartSettings{
 					OpAMPServerURL:      c.endpoint,
-					AuthorizationHeader: c.secretKey,
+					AuthorizationHeader: fmt.Sprintf("Secret-Key %s", c.secretKey),
 					TLSConfig:           nil,
 					InstanceUid:         c.ident.agentID,
 					Callbacks: types.CallbacksStruct{
