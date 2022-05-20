@@ -1,0 +1,78 @@
+version: 0.0.1
+title: File
+description: Log parser for generic files
+parameters:
+  - name: file_path
+    type: "[]string"
+    required: true
+  - name: exclude_file_path
+    type: "[]string"
+    default: []
+  # Optional multiline handling
+  - name: multiline_line_start_pattern
+    type: string
+    default: ""
+  - name: encoding
+    type: string
+    supported:
+      - nop
+      - utf-8
+      - utf-16le
+      - utf-16be
+      - ascii
+      - big5
+    default: utf-8
+  - name: parse_format
+    type: string
+    supported:
+      - none
+      - json
+      - regex
+    default: none
+  # Required when parse_format is 'regex'
+  - name: regex_pattern
+    type: string
+    default: ""
+  - name: log_type
+    type: string
+    default: "file"
+  - name: start_at
+    type: string
+    supported:
+      - beginning
+      - end
+    default: end
+template: |
+  receivers:
+    filelog:
+      include:
+        {{ range $fp := .file_path }}
+        - '{{ $fp }}'
+        {{end}}
+      exclude:
+        {{ range $fp := .exclude_file_path }}
+        - '{{ $fp }}'
+        {{end}}
+      start_at: {{ .start_at }}
+      multiline:
+        line_start_pattern: {{ .multiline_line_start_pattern }}
+      encoding: {{ .encoding }}
+      operators:
+        {{ if (eq .parse_format "json")}}
+        - type: json_parser
+        {{ end }}
+
+        {{ if (eq .parse_format "regex")}}
+        - type: regex_parser
+          regex: {{ .regex_pattern }}
+        {{ end }}
+
+        - id: add_type
+          type: add
+          field: attributes.log_type
+          value: {{ .log_type }}
+    
+  service:
+    pipelines:
+      logs:
+        receivers: [filelog]
