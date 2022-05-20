@@ -22,6 +22,7 @@ import (
 	"time"
 
 	"github.com/observiq/observiq-otel-collector/collector"
+	colmock "github.com/observiq/observiq-otel-collector/collector/mocks"
 	"github.com/observiq/observiq-otel-collector/internal/service/mocks"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -30,7 +31,7 @@ import (
 
 func TestStandaloneCollectorService(t *testing.T) {
 	t.Run("Collector starts and stops normally", func(t *testing.T) {
-		col := &mocks.Collector{}
+		col := &colmock.Collector{}
 		col.On("Run", context.Background()).Return(nil)
 		col.On("Status").Return((<-chan *collector.Status)(make(chan *collector.Status)))
 		col.On("Stop", mock.Anything).Return(nil)
@@ -69,7 +70,7 @@ func TestStandaloneCollectorService(t *testing.T) {
 	})
 
 	t.Run("Collector.Run errors", func(t *testing.T) {
-		col := &mocks.Collector{}
+		col := &colmock.Collector{}
 		runError := errors.New("run failed")
 
 		col.On("Run", context.Background()).Return(runError)
@@ -104,7 +105,7 @@ func TestStandaloneCollectorService(t *testing.T) {
 	})
 
 	t.Run("Start context times out", func(t *testing.T) {
-		col := &mocks.Collector{}
+		col := &colmock.Collector{}
 
 		col.On("Run", context.Background()).Run(func(args mock.Arguments) { time.Sleep(100 * time.Second) })
 		col.On("Status").Return((<-chan *collector.Status)(make(chan *collector.Status)))
@@ -135,7 +136,7 @@ func TestStandaloneCollectorService(t *testing.T) {
 	})
 
 	t.Run("Stop context times out", func(t *testing.T) {
-		col := &mocks.Collector{}
+		col := &colmock.Collector{}
 		col.On("Run", context.Background()).Return(nil)
 		col.On("Status").Return((<-chan *collector.Status)(make(chan *collector.Status)))
 		col.On("Stop", mock.Anything).Run(func(args mock.Arguments) { time.Sleep(100 * time.Second) })
@@ -177,7 +178,7 @@ func TestStandaloneCollectorService(t *testing.T) {
 	})
 
 	t.Run("Collector status has an error", func(t *testing.T) {
-		col := &mocks.Collector{}
+		col := &colmock.Collector{}
 		colStatusErr := errors.New("Collector errored")
 		colStatus := make(chan *collector.Status, 1)
 		colStatus <- &collector.Status{
@@ -219,7 +220,7 @@ func TestStandaloneCollectorService(t *testing.T) {
 	})
 
 	t.Run("Collector status is not running", func(t *testing.T) {
-		col := &mocks.Collector{}
+		col := &colmock.Collector{}
 		colStatus := make(chan *collector.Status, 1)
 		colStatus <- &collector.Status{
 			Running: false,
