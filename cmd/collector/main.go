@@ -20,16 +20,15 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"os/signal"
-	"syscall"
 	"time"
 
 	"github.com/observiq/observiq-otel-collector/collector"
+	"github.com/observiq/observiq-otel-collector/internal/logging"
+	"github.com/observiq/observiq-otel-collector/internal/service"
 	"github.com/observiq/observiq-otel-collector/internal/version"
 	"github.com/observiq/observiq-otel-collector/opamp"
 	"github.com/observiq/observiq-otel-collector/opamp/observiq"
 	"github.com/spf13/pflag"
-	"go.opentelemetry.io/collector/service"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -41,6 +40,8 @@ func main() {
 
 	configPaths := pflag.StringSlice("config", []string{"./config.yaml"}, "the collector config path")
 	managerConfigPath := pflag.String("manager", "./manager.yaml", "The configuration for remote management")
+	loggingPath := pflag.String("logging", "./logging.yaml", "the collector logging config path")
+
 	_ = pflag.String("log-level", "", "not implemented") // TEMP(jsirianni): Required for OTEL k8s operator
 	var showVersion = pflag.BoolP("version", "v", false, "prints the version of the collector")
 	pflag.Parse()
@@ -52,13 +53,20 @@ func main() {
 		return
 	}
 
-	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
-	defer cancel()
+	logOpts, err := logOptions(loggingPath)
+	if err != nil {
+		log.Fatalf("Failed to get log options: %v", err)
+	}
 
-	settings, err := collector.NewSettings(*configPaths, version.Version(), nil)
+	// logOpts will override options here
+	logger, err := zap.NewProduction(logOpts...)
 	if err != nil {
 		defaultLogger.Fatal("Settings configuration failed", zap.Error(err))
 	}
+
+	var runnableService service.RunnableService
+
+	col := collector.New(*configPaths, version.Version(), logOpts)
 
 	// See if manager config file exists. If so run in remote managed mode otherwise standalone mode
 	// TODO(cpheps) clean this up in follow up work
@@ -69,51 +77,45 @@ func main() {
 			defaultLogger.Fatal("Failed to parse manager config", zap.Error(err))
 		}
 
-		// Create collector
-		currCollector := collector.New((*configPaths)[0], version.Version(), []zap.Option{})
-
-		// Create a blank log file as iris needs this currently
-		logFilePath := "./logging.yaml"
-		_, err = os.Create(logFilePath)
-		if err != nil {
-			defaultLogger.Fatal("Failed to create logging.yaml. Please create an empty logging.yaml file next to the collector if you wish to proceed in managed mode", zap.Error(err))
-		}
-
 		// Create client Args
 		clientArgs := &observiq.NewClientArgs{
 			DefaultLogger:       defaultLogger.Sugar(),
 			Config:              *opampConfig,
-			Collector:           currCollector,
+			Collector:           col,
 			ManagerConfigPath:   *managerConfigPath,
 			CollectorConfigPath: (*configPaths)[0],
-			LoggerConfigPath:    logFilePath, // temporary as iris needs a logging file
+			LoggerConfigPath:    *loggingPath, // temporary as iris needs a logging file
 		}
 
-		if err := runRemoteManaged(ctx, clientArgs); err != nil {
+		if err := runRemoteManaged(context.Background(), clientArgs); err != nil {
 			defaultLogger.Fatal("Remote Management failed", zap.Error(err))
 		}
 	} else if errors.Is(err, os.ErrNotExist) {
-		// Run standalone
-		if err := run(ctx, *settings); err != nil {
-			defaultLogger.Fatal("Collector error", zap.Error(err))
-		}
+
+		runnableService = service.NewStandaloneCollectorService(col)
 	} else {
 		defaultLogger.Fatal("Error while searching for management config", zap.Error(err))
+		log.Fatalf("Failed to set up logger: %v", err)
+	}
+
+	err = service.RunService(logger, runnableService)
+	if err != nil {
+		logger.Fatal("RunService returned error", zap.Error(err))
 	}
 
 }
 
-func runInteractive(ctx context.Context, params service.CollectorSettings) error {
-	svc, err := service.New(params)
+func logOptions(loggingConfigPath *string) ([]zap.Option, error) {
+	if loggingConfigPath == nil {
+		return nil, nil
+	}
+
+	l, err := logging.NewLoggerConfig(*loggingConfigPath)
 	if err != nil {
-		return fmt.Errorf("failed to create new service: %w", err)
+		return nil, fmt.Errorf("failed to create logger config: %w", err)
 	}
 
-	if err := svc.Run(ctx); err != nil {
-		return fmt.Errorf("collector server run finished with error: %w", err)
-	}
-
-	return nil
+	return l.Options()
 }
 
 func runRemoteManaged(ctx context.Context, clientArgs *observiq.NewClientArgs) error {

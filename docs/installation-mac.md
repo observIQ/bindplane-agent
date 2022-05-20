@@ -12,7 +12,7 @@ brew install observiq/observiq-otel-collector/observiq-otel-collector
 
 You can then run `brew services start observiq/observiq-otel-collector/observiq-otel-collector` to start the collector with the supplied configuration.
 
-To verify the collector is working you can check the output at `/tmp/observiq-otel-collector.log`.
+To verify the collector is working you can check the output at `$(brew --prefix observiq/observiq-otel-collector/observiq-otel-collector)/log/collector.log`.
 
 ### Install/Update script
 The collector may be installed through a shell script which will wrap brew commands.

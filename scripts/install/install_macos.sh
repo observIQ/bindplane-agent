@@ -418,7 +418,7 @@ display_results()
     info "Collector Config:   $(fg_cyan "$collector_home/config.yaml")$(reset)"
     info "Start Command:      $(fg_cyan "launchctl start $SERVICE_NAME")$(reset)"
     info "Stop Command:       $(fg_cyan "launchctl stop $SERVICE_NAME")$(reset)"
-    info "Logs Command:       $(fg_cyan "tail -f /tmp/observiq-otel-collector.log")$(reset)"
+    info "Logs Command:       $(fg_cyan "tail -F $collector_home/log/collector.log")$(reset)"
     decrease_indent
 
     banner 'Support'
