@@ -186,14 +186,14 @@
               Value="&quot;[POWERSHELLEXE]&quot; -ExecutionPolicy Bypass -NoProfile -Command &quot;&amp; '[INSTALLDIR]install\generate-manager-yaml.ps1' -install_dir '[INSTALLDIR]' -endpoint '[OPAMPENDPOINT]' -secret_key '[OPAMPSECRETKEY]' -labels '[OPAMPLABELS]'&quot;"
               Execute="immediate"/>
 
-      <CustomAction Id="CustomExecCreateManagerYaml" BinaryKey="WixCA" DllEntry="WixQuietExec" Execute="deferred" Impersonate="yes" Return="check" />
+      <CustomAction Id="CustomExecCreateManagerYaml" BinaryKey="WixCA" DllEntry="WixQuietExec" Execute="deferred" Impersonate="no" Return="check" />
 
       <CustomAction Id="CustomExecRemoveManagerYaml_set"
               Property="CustomExecRemoveManagerYaml"
               Value="&quot;[POWERSHELLEXE]&quot; -ExecutionPolicy Bypass -NoProfile -Command &quot;Remove-Item -Force -ErrorAction Continue -Path '[INSTALLDIR]manager.yaml'&quot;"
               Execute="immediate"/>
 
-      <CustomAction Id="CustomExecRemoveManagerYaml" BinaryKey="WixCA" DllEntry="WixQuietExec" Execute="deferred" Impersonate="yes" Return="ignore" />
+      <CustomAction Id="CustomExecRemoveManagerYaml" BinaryKey="WixCA" DllEntry="WixQuietExec" Execute="deferred" Impersonate="no" Return="ignore" />
 
       <InstallExecuteSequence>
          {{range $i, $h := .Hooks}}
