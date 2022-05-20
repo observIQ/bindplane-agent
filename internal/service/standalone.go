@@ -9,6 +9,14 @@ import (
 	"github.com/observiq/observiq-otel-collector/collector"
 )
 
+// StandaloneCollectorService is a RunnableService that runs the collector in standalone mode.
+type StandaloneCollectorService struct {
+	col      collector.Collector
+	doneChan chan struct{}
+	errChan  chan error
+	wg       *sync.WaitGroup
+}
+
 // NewStandaloneCollectorService creates a new StandaloneCollectorService
 func NewStandaloneCollectorService(c collector.Collector) StandaloneCollectorService {
 	return StandaloneCollectorService{

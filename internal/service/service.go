@@ -17,10 +17,8 @@ package service
 import (
 	"context"
 	"fmt"
-	"sync"
 	"time"
 
-	"github.com/observiq/observiq-otel-collector/collector"
 	"go.uber.org/zap"
 )
 
@@ -38,14 +36,6 @@ type RunnableService interface {
 	Stop(ctx context.Context) error
 	// Error returns an error channel that should emit an error when the service must unexpectedly quit.
 	Error() <-chan error
-}
-
-// StandaloneCollectorService is a RunnableService that runs the collector in standalone mode.
-type StandaloneCollectorService struct {
-	col      collector.Collector
-	doneChan chan struct{}
-	errChan  chan error
-	wg       *sync.WaitGroup
 }
 
 // runServiceInteractive runs the service in an "interactive" mode (responds to SIGINT and SIGTERM).
