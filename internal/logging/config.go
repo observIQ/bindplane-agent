@@ -49,11 +49,11 @@ func NewLoggerConfig(configPath string) (*LoggerConfig, error) {
 		Level:  zapcore.InfoLevel,
 	}
 
-	cleanPath := filepath.Clean(configPath)
-
-	if cleanPath == "" {
+	if configPath == "" {
 		return conf, nil
 	}
+
+	cleanPath := filepath.Clean(configPath)
 
 	// If the file doesn't exist, we just return the default config.
 	if _, err := os.Stat(cleanPath); errors.Is(err, os.ErrNotExist) {
