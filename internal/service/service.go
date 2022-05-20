@@ -80,14 +80,14 @@ func (s StandaloneCollectorService) Start(ctx context.Context) error {
 
 	// monitor status for errors, so we don't zombie the service
 	s.wg.Add(1)
-	go s.monitorStatus(s.wg)
+	go s.monitorStatus()
 	return nil
 }
 
 // monitorStatus monitors the collector's status for errors, and reports them
 // to the error channel to trigger a shutdown.
-func (s StandaloneCollectorService) monitorStatus(wg *sync.WaitGroup) {
-	defer wg.Done()
+func (s StandaloneCollectorService) monitorStatus() {
+	defer s.wg.Done()
 	statusChan := s.col.Status()
 	for {
 		select {
