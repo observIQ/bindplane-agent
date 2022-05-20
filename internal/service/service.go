@@ -1,3 +1,17 @@
+// Copyright  observIQ, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package service
 
 import (
@@ -17,7 +31,7 @@ const (
 	stopTimeout  = 10 * time.Second
 )
 
-// Interface for a service that is able to be run as a service.
+// RunnableService may be run as a service.
 type RunnableService interface {
 	// Start asynchronously starts the underlying service. The service may not necessarily be "ready"
 	// once this returns, but could be asynchronously starting up.
@@ -28,6 +42,7 @@ type RunnableService interface {
 	Error() <-chan error
 }
 
+// StandaloneCollectorService is a RunnableService that runs the collector in standalone mode.
 type StandaloneCollectorService struct {
 	col      collector.Collector
 	doneChan chan struct{}
@@ -35,6 +50,7 @@ type StandaloneCollectorService struct {
 	wg       *sync.WaitGroup
 }
 
+// NewStandaloneCollectorService creates a new StandaloneCollectorService
 func NewStandaloneCollectorService(c collector.Collector) StandaloneCollectorService {
 	return StandaloneCollectorService{
 		col:      c,
@@ -44,6 +60,7 @@ func NewStandaloneCollectorService(c collector.Collector) StandaloneCollectorSer
 	}
 }
 
+// Start starts the collector
 func (s StandaloneCollectorService) Start(ctx context.Context) error {
 	collectorStartedChan := make(chan struct{})
 	go func() {
@@ -88,10 +105,12 @@ func (s StandaloneCollectorService) monitorStatus(wg *sync.WaitGroup) {
 	}
 }
 
+// Error returns a channel that can emit asynchronous, unrecoverable errors
 func (s StandaloneCollectorService) Error() <-chan error {
 	return s.errChan
 }
 
+// Stop shuts down the underlying collector
 func (s StandaloneCollectorService) Stop(ctx context.Context) error {
 	close(s.doneChan)
 
