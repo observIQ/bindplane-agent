@@ -21,21 +21,9 @@ func NewStandaloneCollectorService(c collector.Collector) StandaloneCollectorSer
 
 // Start starts the collector
 func (s StandaloneCollectorService) Start(ctx context.Context) error {
-	collectorStartedChan := make(chan struct{})
-	go func() {
-		// Start's context is only valid for the lifetime of "Start",
-		// but the collector expects a context that is valid for the lifetime of the service.
-		err := s.col.Run(context.Background())
-		if err != nil {
-			s.errChan <- err
-		}
-		close(collectorStartedChan)
-	}()
-
-	select {
-	case <-collectorStartedChan: // OK
-	case <-ctx.Done():
-		return fmt.Errorf("failed while waiting for service startup: %w", ctx.Err())
+	err := s.col.Run(ctx)
+	if err != nil {
+		return fmt.Errorf("failed while starting collector: %w", err)
 	}
 
 	// monitor status for errors, so we don't zombie the service

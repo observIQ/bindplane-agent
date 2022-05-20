@@ -52,10 +52,7 @@ type StandaloneCollectorService struct {
 // This mode is always used in linux, and is used in Windows when the collector
 // is not running as a service.
 func runServiceInteractive(ctx context.Context, logger *zap.Logger, svc RunnableService) error {
-	startupTimeoutCtx, startupCancel := context.WithTimeout(ctx, startTimeout)
-	defer startupCancel()
-
-	if err := svc.Start(startupTimeoutCtx); err != nil {
+	if err := svc.Start(ctx); err != nil {
 		return fmt.Errorf("failed to start service: %w", err)
 	}
 

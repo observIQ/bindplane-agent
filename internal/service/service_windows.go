@@ -75,10 +75,7 @@ func (sh *windowsServiceHandler) Execute(args []string, r <-chan svc.ChangeReque
 
 	s <- svc.Status{State: svc.StartPending}
 
-	startupTimeoutCtx, startupCancel := context.WithTimeout(context.Background(), startTimeout)
-	defer startupCancel()
-
-	err := sh.svc.Start(startupTimeoutCtx)
+	err := sh.svc.Start(context.Background())
 	if err != nil {
 		sh.logger.Error("Failed to start service", zap.Error(err))
 		return false, statusCodeServiceException
