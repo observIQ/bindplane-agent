@@ -43,6 +43,7 @@ Type=simple
 User=observiq-otel-collector
 Group=observiq-otel-collector
 Environment=PATH=/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin
+Environment=OIQ_OTEL_COLLECTOR_HOME=/opt/observiq-otel-collector
 Environment=OIQ_OTEL_COLLECTOR_STORAGE=/opt/observiq-otel-collector/storage
 WorkingDirectory=/opt/observiq-otel-collector
 ExecStart=/opt/observiq-otel-collector/observiq-otel-collector --config config.yaml
@@ -70,7 +71,7 @@ The collector's config file can be found here:
   /opt/observiq-otel-collector/config.yaml
 
 To view logs from the collector, run:
-  sudo journalctl -u observiq-otel-collector.service
+  sudo tail -F /opt/observiq-otel-collector/log/collector.log
 
 For more information on configuring the collector, see the docs:
   https://github.com/observiq/observiq-otel-collector/tree/main#observiq-opentelemetry-collector

@@ -15,21 +15,21 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"log"
-	"os"
-	"os/signal"
-	"syscall"
 
 	"github.com/observiq/observiq-otel-collector/collector"
+	"github.com/observiq/observiq-otel-collector/internal/logging"
+	"github.com/observiq/observiq-otel-collector/internal/service"
 	"github.com/observiq/observiq-otel-collector/internal/version"
+	"go.uber.org/zap"
+
 	"github.com/spf13/pflag"
-	"go.opentelemetry.io/collector/service"
 )
 
 func main() {
 	var configPaths = pflag.StringSlice("config", []string{"./config.yaml"}, "the collector config path")
+	var loggingPath = pflag.String("logging", "./logging.yaml", "the collector logging config path")
 	_ = pflag.String("log-level", "", "not implemented") // TEMP(jsirianni): Required for OTEL k8s operator
 	var showVersion = pflag.BoolP("version", "v", false, "prints the version of the collector")
 	pflag.Parse()
@@ -41,28 +41,33 @@ func main() {
 		return
 	}
 
-	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
-	defer cancel()
-
-	settings, err := collector.NewSettings(*configPaths, version.Version(), nil)
+	logOpts, err := logOptions(loggingPath)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Failed to get log options: %v", err)
 	}
 
-	if err := run(ctx, *settings); err != nil {
-		log.Fatal(err)
+	// logOpts will override options here
+	logger, err := zap.NewProduction(logOpts...)
+	if err != nil {
+		log.Fatalf("Failed to set up logger: %v", err)
+	}
+
+	col := collector.New(*configPaths, version.Version(), logOpts)
+	err = service.RunService(logger, service.NewStandaloneCollectorService(col))
+	if err != nil {
+		logger.Fatal("RunService returned error", zap.Error(err))
 	}
 }
 
-func runInteractive(ctx context.Context, params service.CollectorSettings) error {
-	svc, err := service.New(params)
+func logOptions(loggingConfigPath *string) ([]zap.Option, error) {
+	if loggingConfigPath == nil {
+		return nil, nil
+	}
+
+	l, err := logging.NewLoggerConfig(*loggingConfigPath)
 	if err != nil {
-		return fmt.Errorf("failed to create new service: %w", err)
+		return nil, fmt.Errorf("failed to create logger config: %w", err)
 	}
 
-	if err := svc.Run(ctx); err != nil {
-		return fmt.Errorf("collector server run finished with error: %w", err)
-	}
-
-	return nil
+	return l.Options()
 }
