@@ -44,6 +44,9 @@ archives:
       - src: release_deps/config.yaml
         dst: "."
         strip_parent: true
+      - src: release_deps/logging.yaml
+        dst: "."
+        strip_parent: true
       - src: release_deps/plugins/*
         dst: plugins
         strip_parent: true
@@ -77,6 +80,13 @@ nfpms:
           group: observiq-otel-collector
       - src: release_deps/config.yaml
         dst: /opt/observiq-otel-collector/config.yaml
+        file_info:
+          mode: 0640
+          owner: observiq-otel-collector
+          group: observiq-otel-collector
+        type: config|noreplace
+      - src: release_deps/logging.yaml
+        dst: /opt/observiq-otel-collector/logging.yaml
         file_info:
           mode: 0640
           owner: observiq-otel-collector
@@ -278,7 +288,7 @@ brews:
       ****************************************************************
     install: |
       bin.install "observiq-otel-collector"
-      prefix.install "LICENSE", "config.yaml", "VERSION.txt"
+      prefix.install "LICENSE", "config.yaml", "VERSION.txt", "logging.yaml"
       prefix.install Dir["plugins"]
       lib.install "opentelemetry-java-contrib-jmx-metrics.jar"
     plist: |
@@ -290,11 +300,19 @@ brews:
           <key>Label</key>
           <string>com.observiq.collector</string>
 
+          <key>EnvironmentVariables</key>
+          <dict>
+            <key>OIQ_OTEL_COLLECTOR_HOME</key>
+            <string>#{prefix}</string>
+          </dict>
+
           <key>ProgramArguments</key>
           <array>
             <string>#{bin}/observiq-otel-collector</string>
             <string>--config</string>
             <string>#{prefix}/config.yaml</string>
+            <string>--logging</string>
+            <string>#{prefix}/logging.yaml</string>
           </array>
 
           <key>RunAtLoad</key>
