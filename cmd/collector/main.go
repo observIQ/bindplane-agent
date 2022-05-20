@@ -52,7 +52,7 @@ func main() {
 		log.Fatalf("Failed to set up logger: %v", err)
 	}
 
-	col := collector.New((*configPaths)[0], version.Version(), logOpts)
+	col := collector.New(*configPaths, version.Version(), logOpts)
 	err = service.RunService(logger, service.NewStandaloneCollectorService(col))
 	if err != nil {
 		logger.Fatal("RunService returned error", zap.Error(err))

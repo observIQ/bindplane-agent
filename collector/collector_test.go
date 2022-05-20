@@ -25,7 +25,7 @@ import (
 func TestCollectorRunValid(t *testing.T) {
 	ctx := context.Background()
 
-	collector := New("./test/valid.yaml", "0.0.0", nil)
+	collector := New([]string{"./test/valid.yaml"}, "0.0.0", nil)
 	err := collector.Run(ctx)
 	require.NoError(t, err)
 
@@ -39,7 +39,7 @@ func TestCollectorRunValid(t *testing.T) {
 }
 
 func TestCollectorRunMultiple(t *testing.T) {
-	collector := New("./test/valid.yaml", "0.0.0", nil)
+	collector := New([]string{"./test/valid.yaml"}, "0.0.0", nil)
 	for i := 1; i < 5; i++ {
 		ctx := context.Background()
 
@@ -62,7 +62,7 @@ func TestCollectorRunMultiple(t *testing.T) {
 func TestCollectorRunInvalidConfig(t *testing.T) {
 	ctx := context.Background()
 
-	collector := New("./test/invalid.yaml", "0.0.0", nil)
+	collector := New([]string{"./test/invalid.yaml"}, "0.0.0", nil)
 	err := collector.Run(ctx)
 	require.Error(t, err)
 
@@ -88,7 +88,7 @@ func TestCollectorRunInvalidConfig(t *testing.T) {
 func TestCollectorRunTwice(t *testing.T) {
 	ctx := context.Background()
 
-	collector := New("./test/valid.yaml", "0.0.0", nil)
+	collector := New([]string{"./test/valid.yaml"}, "0.0.0", nil)
 	err := collector.Run(ctx)
 	require.NoError(t, err)
 	defer collector.Stop()
@@ -109,7 +109,7 @@ func TestCollectorRunTwice(t *testing.T) {
 func TestCollectorRestart(t *testing.T) {
 	ctx := context.Background()
 
-	collector := New("./test/valid.yaml", "0.0.0", nil)
+	collector := New([]string{"./test/valid.yaml"}, "0.0.0", nil)
 	err := collector.Run(ctx)
 	require.NoError(t, err)
 
@@ -132,7 +132,7 @@ func TestCollectorRestart(t *testing.T) {
 }
 
 func TestCollectorPrematureStop(t *testing.T) {
-	collector := New("./test/valid.yaml", "0.0.0", nil)
+	collector := New([]string{"./test/valid.yaml"}, "0.0.0", nil)
 	collector.Stop()
 	require.Equal(t, 0, len(collector.Status()))
 }
