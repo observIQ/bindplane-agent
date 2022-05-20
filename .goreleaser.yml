@@ -317,12 +317,6 @@ brews:
 
           <key>RunAtLoad</key>
           <true/>
-
-          <key>StandardErrorPath</key>
-          <string>/tmp/observiq-otel-collector.log</string>
-
-          <key>StandardOutPath</key>
-          <string>/tmp/observiq-otel-collector.log</string>
         </dict>
       </plist>
     # For local testing
