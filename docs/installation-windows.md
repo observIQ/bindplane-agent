@@ -15,7 +15,7 @@ After downloading the MSI, simply double click it to open the installation wizar
 
 After installing, the `observiq-otel-collector` service will be running and ready for configuration! 
 
-Logs from the collector will appear in the Application event log.
+The collector logs to `C:\Program Files\observIQ OpenTelemetry Collector\log\collector.log` by default.
 
 By default, the config file for the collector can be found at `C:\Program Files\observIQ OpenTelemetry Collector\config.yaml`. When changing the configuration,the collector service must be restarted in order for config changes to take effect.
 
