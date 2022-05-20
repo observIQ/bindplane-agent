@@ -518,7 +518,7 @@ display_results()
     info "Collector Config:   $(fg_cyan "/opt/observiq-otel-collector/config.yaml")$(reset)"
     info "Start Command:      $(fg_cyan "sudo systemctl start observiq-otel-collector")$(reset)"
     info "Stop Command:       $(fg_cyan "sudo systemctl stop observiq-otel-collector")$(reset)"
-    info "Logs Command:       $(fg_cyan "sudo journalctl -u observiq-otel-collector.service")$(reset)"
+    info "Logs Command:       $(fg_cyan "sudo tail -F /opt/observiq-otel-collector/log/collector.log")$(reset)"
     decrease_indent
 
     banner 'Support'
