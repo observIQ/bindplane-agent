@@ -75,16 +75,26 @@ func TestNewClient(t *testing.T) {
 			tmpDir := t.TempDir()
 
 			managerPath := filepath.Join(tmpDir, "manager.yaml")
-			_, err := os.Create(managerPath)
+			managerFile, err := os.Create(managerPath)
 			assert.NoError(t, err)
 
 			collectorPath := filepath.Join(tmpDir, "collector.yaml")
-			_, err = os.Create(collectorPath)
+			collectorFile, err := os.Create(collectorPath)
 			assert.NoError(t, err)
 
 			loggerPath := filepath.Join(tmpDir, "logger.yaml")
-			_, err = os.Create(loggerPath)
+			loggerFile, err := os.Create(loggerPath)
 			assert.NoError(t, err)
+
+			// We need to close the files specifically so windows can clean up the tmp dir
+			defer func() {
+				err := managerFile.Close()
+				assert.NoError(t, err)
+				err = collectorFile.Close()
+				assert.NoError(t, err)
+				err = loggerFile.Close()
+				assert.NoError(t, err)
+			}()
 
 			args := &NewClientArgs{
 				DefaultLogger:       testLogger,
