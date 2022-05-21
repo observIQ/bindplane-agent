@@ -270,6 +270,8 @@ func Test_collectorReload(t *testing.T) {
 	}
 }
 
+// Test_loggerReload tests general cases since there are a lot of failure points with parsing the logging config
+// We verify a success case and a case where the collector fails to accept the config
 func Test_loggerReload(t *testing.T) {
 	testCases := []struct {
 		desc     string
@@ -288,19 +290,70 @@ func Test_loggerReload(t *testing.T) {
 				err := os.WriteFile(loggerFilePath, currContents, 0600)
 				assert.NoError(t, err)
 
-				client := &Client{}
+				mockCol := colmocks.NewMockCollector(t)
+				mockCol.On("GetLoggingOpts").Return([]zap.Option{})
+				mockCol.On("SetLoggingOpts", mock.Anything)
+				mockCol.On("Restart", mock.Anything).Return(nil)
+
+				client := &Client{
+					collector: mockCol,
+				}
 
 				reloadFunc := loggerReload(client, loggerFilePath)
 
-				newContents := []byte("valid: config")
+				newContents := []byte("output: stdout\nlevel: debug")
 				changed, err := reloadFunc(newContents)
 				assert.NoError(t, err)
 				assert.True(t, changed)
 
-				// Verify config rolledback
+				// Verify config updated
 				data, err := os.ReadFile(loggerFilePath)
 				assert.NoError(t, err)
 				assert.Equal(t, newContents, data)
+				// Verify logger was set
+				assert.NotNil(t, client.logger)
+			},
+		},
+		{
+			desc: "Collector fails to restart, rollback",
+			testFunc: func(t *testing.T) {
+				tmpDir := t.TempDir()
+
+				loggerFilePath := filepath.Join(tmpDir, LoggingConfigName)
+
+				currContents := []byte("current: config")
+
+				// Write Config file so we can verify it remained the same
+				err := os.WriteFile(loggerFilePath, currContents, 0600)
+				assert.NoError(t, err)
+
+				expectedErr := errors.New("oops")
+
+				mockCol := colmocks.NewMockCollector(t)
+				mockCol.On("GetLoggingOpts").Return([]zap.Option{})
+				mockCol.On("SetLoggingOpts", mock.Anything)
+				mockCol.On("Restart", mock.Anything).Return(expectedErr).Once()
+				mockCol.On("Restart", mock.Anything).Return(nil).Once()
+
+				currLogger := zap.NewNop().Sugar()
+				client := &Client{
+					collector: mockCol,
+					logger:    currLogger,
+				}
+
+				reloadFunc := loggerReload(client, loggerFilePath)
+
+				newContents := []byte("output: stdout\nlevel: debug")
+				changed, err := reloadFunc(newContents)
+				assert.ErrorIs(t, err, expectedErr)
+				assert.False(t, changed)
+
+				// Verify config updated
+				data, err := os.ReadFile(loggerFilePath)
+				assert.NoError(t, err)
+				assert.Equal(t, currContents, data)
+				// Verify logger was set
+				assert.Equal(t, currLogger, client.logger)
 			},
 		},
 	}

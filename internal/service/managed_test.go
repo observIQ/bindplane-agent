@@ -31,7 +31,7 @@ import (
 // for a bad manger config. This function starts an entire observiq client which is tested
 // in it's own package so we don't do robust testing here.
 func TestNewManagedCollectorService_BadManagerConfig(t *testing.T) {
-	mockCol := colmocks.NewCollector(t)
+	mockCol := colmocks.NewMockCollector(t)
 	managedService, err := NewManagedCollectorService(mockCol, zap.NewNop(), "./bad_manger.yaml", "./bad_collector.yaml", "./bad_logging.yaml")
 	assert.ErrorContains(t, err, "failed to parse manager config")
 	assert.Nil(t, managedService)

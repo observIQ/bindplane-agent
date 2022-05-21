@@ -20,6 +20,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/observiq/observiq-otel-collector/internal/logging"
 	"github.com/observiq/observiq-otel-collector/opamp"
 	"go.uber.org/zap"
 	"gopkg.in/yaml.v3"
@@ -129,7 +130,7 @@ func collectorReload(client *Client, collectorConfigPath string) opamp.ReloadFun
 				client.logger.Error("Rollback failed for collector config", zap.Error(rollbackErr))
 			}
 
-			// Restart collector with new file
+			// Restart collector with original file
 			if rollbackErr := client.collector.Restart(context.Background()); rollbackErr != nil {
 				client.logger.Error("Collector failed for restart during rollback", zap.Error(rollbackErr))
 			}
@@ -162,6 +163,53 @@ func loggerReload(client *Client, loggerConfigPath string) opamp.ReloadFunc {
 			}
 			return false, err
 		}
+
+		// Parse new logging config
+		l, err := logging.NewLoggerConfig(loggerConfigPath)
+		if err != nil {
+			if rollbackErr := rollbackFunc(); rollbackErr != nil {
+				client.logger.Error("Rollback failed for logging config", zap.Error(rollbackErr))
+			}
+			return false, err
+		}
+
+		// Parse out options
+		opts, err := l.Options()
+		if err != nil {
+			if rollbackErr := rollbackFunc(); rollbackErr != nil {
+				client.logger.Error("Rollback failed for logging config", zap.Error(rollbackErr))
+			}
+			return false, fmt.Errorf("failed updating logging config: %w", err)
+		}
+
+		// Create new logger for client
+		logger, err := zap.NewProduction(opts...)
+		if err != nil {
+			if rollbackErr := rollbackFunc(); rollbackErr != nil {
+				client.logger.Error("Rollback failed for logging config", zap.Error(rollbackErr))
+			}
+			return false, fmt.Errorf("failed updating logging config: %w", err)
+		}
+
+		// Apply logging opts to collector
+		rollbackOpts := client.collector.GetLoggingOpts()
+		client.collector.SetLoggingOpts(opts)
+		if err := client.collector.Restart(context.Background()); err != nil {
+			if rollbackErr := rollbackFunc(); rollbackErr != nil {
+				client.logger.Error("Rollback failed for logging config", zap.Error(rollbackErr))
+			}
+
+			// Restart collector with original logging opts
+			client.collector.SetLoggingOpts(rollbackOpts)
+			if rollbackErr := client.collector.Restart(context.Background()); rollbackErr != nil {
+				client.logger.Error("Collector failed for restart during rollback", zap.Error(rollbackErr))
+			}
+
+			return false, fmt.Errorf("failed apply logging update to collector: %w", err)
+		}
+
+		// Assign new client logger
+		client.logger = logger.Sugar().Named("opamp")
 
 		return true, nil
 	}

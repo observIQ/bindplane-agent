@@ -30,6 +30,8 @@ type Collector interface {
 	Run(context.Context) error
 	Stop()
 	Restart(context.Context) error
+	SetLoggingOpts([]zap.Option)
+	GetLoggingOpts() []zap.Option
 	Status() <-chan *Status
 }
 
@@ -53,6 +55,16 @@ func New(configPaths []string, version string, loggingOpts []zap.Option) Collect
 		statusChan:  make(chan *Status, 10),
 		wg:          &sync.WaitGroup{},
 	}
+}
+
+// GetLoggingOpts returns the current logging options
+func (c *collector) GetLoggingOpts() []zap.Option {
+	return c.loggingOpts
+}
+
+// SetLoggingOpts sets the loggings options. These will take effect on next restart
+func (c *collector) SetLoggingOpts(opts []zap.Option) {
+	c.loggingOpts = opts
 }
 
 // Run will run the collector. This function will return an error
