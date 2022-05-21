@@ -215,6 +215,59 @@ func TestApplyConfigChanges(t *testing.T) {
 			},
 		},
 		{
+			desc: "Remote config contains unchanged file, but disk differs",
+			testFunc: func(*testing.T) {
+				tmpDir := t.TempDir()
+				configPath := filepath.Join(tmpDir, ManagerConfigName)
+				configContents := []byte(`key: value`)
+
+				err := os.WriteFile(configPath, configContents, 0600)
+				assert.NoError(t, err)
+
+				manager := NewAgentConfigManager(zap.NewNop().Sugar())
+				mangedConfig, err := opamp.NewManagedConfig(configPath, opamp.NoopReloadFunc)
+				assert.NoError(t, err)
+				manager.AddConfig(ManagerConfigName, mangedConfig)
+
+				remoteConfig := &protobufs.AgentRemoteConfig{
+					Config: &protobufs.AgentConfigMap{
+						ConfigMap: map[string]*protobufs.AgentConfigFile{
+							ManagerConfigName: {
+								Body:        configContents,
+								ContentType: opamp.YAMLContentType,
+							},
+						},
+					},
+				}
+
+				// change contents of on disk so they don't match memory
+				err = os.WriteFile(configPath, []byte("bad: config"), 0600)
+				assert.NoError(t, err)
+
+				expectedEffCfg := &protobufs.EffectiveConfig{
+					ConfigMap: &protobufs.AgentConfigMap{
+						ConfigMap: map[string]*protobufs.AgentConfigFile{
+							ManagerConfigName: {
+								Body:        configContents,
+								ContentType: opamp.YAMLContentType,
+							},
+						},
+					},
+				}
+
+				effCfg, changed, err := manager.ApplyConfigChanges(remoteConfig)
+
+				assert.NoError(t, err)
+				assert.Equal(t, expectedEffCfg, effCfg)
+				assert.True(t, changed)
+
+				// Verify on disk matches what is expected
+				diskContents, err := os.ReadFile(configPath)
+				assert.NoError(t, err)
+				assert.Equal(t, configContents, diskContents)
+			},
+		},
+		{
 			desc: "Remote config contains unknown file",
 			testFunc: func(*testing.T) {
 				tmpDir := t.TempDir()

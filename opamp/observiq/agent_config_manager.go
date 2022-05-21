@@ -147,7 +147,9 @@ func (a *AgentConfigManager) updateExistingConfig(configName string, managedConf
 
 	// Nothing to update
 	if bytes.Equal(managedConfig.GetCurrentConfigHash(), remoteHash) {
-		return false, nil
+		// Verify disk matches memory and remote. This will ensure if any changes were made to the config on disk
+		// the will be overwritten by what is expected.
+		return verifyDiskContents(managedConfig.ConfigPath, managedConfig.GetCurrentConfigHash(), newContents)
 	}
 
 	a.logger.Info("Applying changes to config file", zap.String("config", configName))
@@ -167,6 +169,30 @@ func (a *AgentConfigManager) updateExistingConfig(configName string, managedConf
 	}
 
 	return
+}
+
+// verifyDiskContents verifies the contents saved on disk match the in memory hash.
+// If not overwrite them with the passed in contents
+func verifyDiskContents(configPath string, memHash, contents []byte) (changed bool, err error) {
+	cleanPath := filepath.Clean(configPath)
+	currContents, err := os.ReadFile(cleanPath)
+	if err != nil {
+		return false, fmt.Errorf("error reading current config contents: %w", err)
+	}
+
+	diskHash := opamp.ComputeHash(currContents)
+
+	// Disk equals what's in memory and what's expected so do nothing
+	if bytes.Equal(diskHash, memHash) {
+		return false, nil
+	}
+
+	// Disk file doesn't match memory so overwrite with correct contents
+	if err := os.WriteFile(cleanPath, contents, 0600); err != nil {
+		return false, fmt.Errorf("failed to write contents to config file: %w", err)
+	}
+
+	return true, nil
 }
 
 func (a *AgentConfigManager) trackNewConfig(configName string, contents []byte) error {
