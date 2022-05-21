@@ -85,7 +85,7 @@ func Test_managerReload(t *testing.T) {
 					AgentID:  "d4691426-b0bb-41f7-84a8-320a9ec0ea2e",
 				}
 
-				mockOpAmpClient := mocks.NewMockClient(t)
+				mockOpAmpClient := mocks.NewMockOpAMPClient(t)
 				mockOpAmpClient.On("SetAgentDescription", mock.Anything).Return(nil)
 
 				client := &Client{
@@ -140,7 +140,7 @@ func Test_managerReload(t *testing.T) {
 				}
 
 				expectedErr := errors.New("oops")
-				mockOpAmpClient := mocks.NewMockClient(t)
+				mockOpAmpClient := mocks.NewMockOpAMPClient(t)
 				mockOpAmpClient.On("SetAgentDescription", mock.Anything).Return(expectedErr)
 
 				client := &Client{

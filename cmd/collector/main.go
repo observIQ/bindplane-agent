@@ -15,29 +15,20 @@
 package main
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"log"
 	"os"
-	"time"
 
 	"github.com/observiq/observiq-otel-collector/collector"
 	"github.com/observiq/observiq-otel-collector/internal/logging"
 	"github.com/observiq/observiq-otel-collector/internal/service"
 	"github.com/observiq/observiq-otel-collector/internal/version"
-	"github.com/observiq/observiq-otel-collector/opamp"
-	"github.com/observiq/observiq-otel-collector/opamp/observiq"
 	"github.com/spf13/pflag"
 	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
 )
 
-var defaultLogger *zap.Logger
-
 func main() {
-	setupDefaultLogger()
-
 	configPaths := pflag.StringSlice("config", []string{"./config.yaml"}, "the collector config path")
 	managerConfigPath := pflag.String("manager", "./manager.yaml", "The configuration for remote management")
 	loggingPath := pflag.String("logging", "./logging.yaml", "the collector logging config path")
@@ -61,7 +52,7 @@ func main() {
 	// logOpts will override options here
 	logger, err := zap.NewProduction(logOpts...)
 	if err != nil {
-		defaultLogger.Fatal("Settings configuration failed", zap.Error(err))
+		log.Fatalf("Failed to set up logger: %v", err)
 	}
 
 	var runnableService service.RunnableService
@@ -69,35 +60,21 @@ func main() {
 	col := collector.New(*configPaths, version.Version(), logOpts)
 
 	// See if manager config file exists. If so run in remote managed mode otherwise standalone mode
-	// TODO(cpheps) clean this up in follow up work
 	if _, err := os.Stat(*managerConfigPath); err == nil {
-		log.Println("Starting Management Path")
-		opampConfig, err := opamp.ParseConfig(*managerConfigPath)
+		logger.Info("Starting In Managed Mode")
+
+		runnableService, err = service.NewManagedCollectorService(col, logger, *managerConfigPath, (*configPaths)[0], *loggingPath)
 		if err != nil {
-			defaultLogger.Fatal("Failed to parse manager config", zap.Error(err))
-		}
-
-		// Create client Args
-		clientArgs := &observiq.NewClientArgs{
-			DefaultLogger:       defaultLogger.Sugar(),
-			Config:              *opampConfig,
-			Collector:           col,
-			ManagerConfigPath:   *managerConfigPath,
-			CollectorConfigPath: (*configPaths)[0],
-			LoggerConfigPath:    *loggingPath, // temporary as iris needs a logging file
-		}
-
-		if err := runRemoteManaged(context.Background(), clientArgs); err != nil {
-			defaultLogger.Fatal("Remote Management failed", zap.Error(err))
+			logger.Fatal("Failed to initiate managed mode", zap.Error(err))
 		}
 	} else if errors.Is(err, os.ErrNotExist) {
-
+		logger.Info("Starting Standalone Mode")
 		runnableService = service.NewStandaloneCollectorService(col)
 	} else {
-		defaultLogger.Fatal("Error while searching for management config", zap.Error(err))
-		log.Fatalf("Failed to set up logger: %v", err)
+		logger.Fatal("Error while searching for management config", zap.Error(err))
 	}
 
+	// Run service
 	err = service.RunService(logger, runnableService)
 	if err != nil {
 		logger.Fatal("RunService returned error", zap.Error(err))
@@ -116,39 +93,4 @@ func logOptions(loggingConfigPath *string) ([]zap.Option, error) {
 	}
 
 	return l.Options()
-}
-
-func runRemoteManaged(ctx context.Context, clientArgs *observiq.NewClientArgs) error {
-	// Create new client
-	client, err := observiq.NewClient(clientArgs)
-	if err != nil {
-		return err
-	}
-
-	// Connect to manager platform
-	if err := client.Connect(ctx); err != nil {
-		return err
-	}
-
-	// Wait for close signal
-	<-ctx.Done()
-	defaultLogger.Info("Exit signal received shutting down collector")
-
-	// Disconnect from opamp
-	waitCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-	if err := client.Disconnect(waitCtx); err != nil {
-		return fmt.Errorf("error when client disconnect: %w", err)
-	}
-
-	return nil
-}
-
-func setupDefaultLogger() {
-	encoderConfig := zap.NewProductionEncoderConfig()
-	encoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
-	encoder := zapcore.NewConsoleEncoder(encoderConfig)
-	syncer := zapcore.Lock(os.Stdout)
-	core := zapcore.NewCore(encoder, syncer, zapcore.DebugLevel)
-	defaultLogger = zap.New(core)
 }

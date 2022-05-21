@@ -130,7 +130,7 @@ func TestClientConnect(t *testing.T) {
 			testFunc: func(*testing.T) {
 				expectedErr := errors.New("oops")
 
-				mockOpAmpClient := new(mocks.MockClient)
+				mockOpAmpClient := new(mocks.MockOpAMPClient)
 				mockOpAmpClient.On("SetAgentDescription", mock.Anything).Return(expectedErr)
 
 				c := &Client{
@@ -154,7 +154,7 @@ func TestClientConnect(t *testing.T) {
 			testFunc: func(*testing.T) {
 				expectedErr := errors.New("oops")
 
-				mockOpAmpClient := mocks.NewMockClient(t)
+				mockOpAmpClient := mocks.NewMockOpAMPClient(t)
 				mockOpAmpClient.On("SetAgentDescription", mock.Anything).Return(nil)
 				mockOpAmpClient.On("Start", mock.Anything, mock.Anything).Return(expectedErr)
 
@@ -180,7 +180,7 @@ func TestClientConnect(t *testing.T) {
 		{
 			desc: "Collector fails to start",
 			testFunc: func(*testing.T) {
-				mockOpAmpClient := mocks.NewMockClient(t)
+				mockOpAmpClient := mocks.NewMockOpAMPClient(t)
 				mockOpAmpClient.On("SetAgentDescription", mock.Anything).Return(nil)
 
 				expectedErr := errors.New("oops")
@@ -207,7 +207,7 @@ func TestClientConnect(t *testing.T) {
 		{
 			desc: "Connect successful",
 			testFunc: func(*testing.T) {
-				mockOpAmpClient := mocks.NewMockClient(t)
+				mockOpAmpClient := mocks.NewMockOpAMPClient(t)
 				mockOpAmpClient.On("SetAgentDescription", mock.Anything).Return(nil)
 
 				mockCollector := colmocks.NewMockCollector(t)
@@ -260,7 +260,7 @@ func TestClientConnect(t *testing.T) {
 
 func TestClientDisconnect(t *testing.T) {
 	ctx := context.Background()
-	mockOpAmpClient := new(mocks.MockClient)
+	mockOpAmpClient := new(mocks.MockOpAMPClient)
 	mockOpAmpClient.On("Stop", ctx).Return(nil)
 	mockCollector := colmocks.NewMockCollector(t)
 	mockCollector.On("Stop").Return()
