@@ -61,7 +61,7 @@ func (m *ManagedConfig) GetCurrentConfigHash() []byte {
 	return m.currentConfigHash
 }
 
-// ComputeConfigHash reads in the config file and computes the hash for it saving it on the ManagedConfig
+// ComputeConfigHash reads in the config file, computes the hash for the contents, and saves it on the ManagedConfig.
 func (m *ManagedConfig) ComputeConfigHash() error {
 	cleanPath := filepath.Clean(m.ConfigPath)
 	contents, err := os.ReadFile(cleanPath)

@@ -29,9 +29,9 @@ import (
 )
 
 func main() {
-	configPaths := pflag.StringSlice("config", []string{"./config.yaml"}, "the collector config path")
+	collectorConfigPaths := pflag.StringSlice("config", []string{"./config.yaml"}, "the collector config path")
 	managerConfigPath := pflag.String("manager", "./manager.yaml", "The configuration for remote management")
-	loggingPath := pflag.String("logging", "./logging.yaml", "the collector logging config path")
+	loggingConfigPath := pflag.String("logging", "./logging.yaml", "the collector logging config path")
 
 	_ = pflag.String("log-level", "", "not implemented") // TEMP(jsirianni): Required for OTEL k8s operator
 	var showVersion = pflag.BoolP("version", "v", false, "prints the version of the collector")
@@ -44,7 +44,7 @@ func main() {
 		return
 	}
 
-	logOpts, err := logOptions(loggingPath)
+	logOpts, err := logOptions(loggingConfigPath)
 	if err != nil {
 		log.Fatalf("Failed to get log options: %v", err)
 	}
@@ -57,13 +57,13 @@ func main() {
 
 	var runnableService service.RunnableService
 
-	col := collector.New(*configPaths, version.Version(), logOpts)
+	col := collector.New(*collectorConfigPaths, version.Version(), logOpts)
 
 	// See if manager config file exists. If so run in remote managed mode otherwise standalone mode
 	if _, err := os.Stat(*managerConfigPath); err == nil {
 		logger.Info("Starting In Managed Mode")
 
-		runnableService, err = service.NewManagedCollectorService(col, logger, *managerConfigPath, (*configPaths)[0], *loggingPath)
+		runnableService, err = service.NewManagedCollectorService(col, logger, *managerConfigPath, (*collectorConfigPaths)[0], *loggingConfigPath)
 		if err != nil {
 			logger.Fatal("Failed to initiate managed mode", zap.Error(err))
 		}
