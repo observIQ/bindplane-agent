@@ -59,7 +59,6 @@ func NewAgentConfigManager(defaultLogger *zap.SugaredLogger) *AgentConfigManager
 }
 
 // AddConfig adds a config to be tracked by the config manager.
-// It will also compute the current hash of the config
 // If the config already is tracked it'll be overwritten with the new managed config
 func (a *AgentConfigManager) AddConfig(configName string, managedConfig *opamp.ManagedConfig) {
 	a.configMap[configName] = managedConfig

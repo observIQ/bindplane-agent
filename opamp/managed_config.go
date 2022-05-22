@@ -21,6 +21,8 @@ import (
 )
 
 // ReloadFunc is a function that handles reloading a config given the new contents
+// Reload function should return true for changed is the in memory or on disk copy of the config
+// was changed in any way. If neither was altered the changed return value should be false.
 type ReloadFunc func([]byte) (changed bool, err error)
 
 // NoopReloadFunc used as a noop reload function if unsure of how to reload
