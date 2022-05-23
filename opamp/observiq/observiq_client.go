@@ -40,7 +40,7 @@ var _ opamp.Client = (*Client)(nil)
 // Client represents a client that is connected to Iris via OpAmp
 type Client struct {
 	opampClient   client.OpAMPClient
-	logger        *zap.SugaredLogger
+	logger        *zap.Logger
 	ident         *identity
 	configManager opamp.ConfigManager
 	collector     collector.Collector
@@ -50,7 +50,7 @@ type Client struct {
 
 // NewClientArgs arguments passed when creating a new client
 type NewClientArgs struct {
-	DefaultLogger *zap.SugaredLogger
+	DefaultLogger *zap.Logger
 	Config        opamp.Config
 	Collector     collector.Collector
 
@@ -87,7 +87,7 @@ func NewClient(args *NewClientArgs) (opamp.Client, error) {
 	// Create collect client based on URL scheme
 	switch opampURL.Scheme {
 	case "ws", "wss":
-		observiqClient.opampClient = client.NewWebSocket(clientLogger)
+		observiqClient.opampClient = client.NewWebSocket(clientLogger.Sugar())
 	default:
 		return nil, ErrUnsupportedURL
 	}

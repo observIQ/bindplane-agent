@@ -28,7 +28,7 @@ import (
 )
 
 func TestNewAgentConfigManager(t *testing.T) {
-	logger := zap.NewNop().Sugar()
+	logger := zap.NewNop()
 
 	expected := &AgentConfigManager{
 		configMap: make(map[string]*opamp.ManagedConfig),
@@ -40,7 +40,7 @@ func TestNewAgentConfigManager(t *testing.T) {
 }
 
 func TestAddConfig(t *testing.T) {
-	manager := NewAgentConfigManager(zap.NewNop().Sugar())
+	manager := NewAgentConfigManager(zap.NewNop())
 
 	configName := "config.json"
 	cfgPath := "path/to/config.json"
@@ -62,7 +62,7 @@ func TestComposeEffectiveConfig(t *testing.T) {
 			desc: "File missing from disk error",
 			testFunc: func(*testing.T) {
 				tmpDir := t.TempDir()
-				manager := NewAgentConfigManager(zap.NewNop().Sugar())
+				manager := NewAgentConfigManager(zap.NewNop())
 				managedCfg := &opamp.ManagedConfig{
 					ConfigPath: filepath.Join(tmpDir, "not_real.yaml"),
 					Reload:     opamp.NoopReloadFunc,
@@ -92,7 +92,7 @@ func TestComposeEffectiveConfig(t *testing.T) {
 				err = os.WriteFile(configTwoPath, configTwoContents, 0600)
 				assert.NoError(t, err)
 
-				manager := NewAgentConfigManager(zap.NewNop().Sugar())
+				manager := NewAgentConfigManager(zap.NewNop())
 				manager.AddConfig(configOne, &opamp.ManagedConfig{
 					ConfigPath: configOnePath,
 					Reload:     opamp.NoopReloadFunc,
@@ -145,7 +145,7 @@ func TestApplyConfigChanges(t *testing.T) {
 				err := os.WriteFile(configPath, configContents, 0600)
 				assert.NoError(t, err)
 
-				manager := NewAgentConfigManager(zap.NewNop().Sugar())
+				manager := NewAgentConfigManager(zap.NewNop())
 				mangedConfig, err := opamp.NewManagedConfig(configPath, opamp.NoopReloadFunc)
 				assert.NoError(t, err)
 				manager.AddConfig(ManagerConfigName, mangedConfig)
@@ -181,7 +181,7 @@ func TestApplyConfigChanges(t *testing.T) {
 				err := os.WriteFile(configPath, configContents, 0600)
 				assert.NoError(t, err)
 
-				manager := NewAgentConfigManager(zap.NewNop().Sugar())
+				manager := NewAgentConfigManager(zap.NewNop())
 				mangedConfig, err := opamp.NewManagedConfig(configPath, opamp.NoopReloadFunc)
 				assert.NoError(t, err)
 				manager.AddConfig(ManagerConfigName, mangedConfig)
@@ -224,7 +224,7 @@ func TestApplyConfigChanges(t *testing.T) {
 				err := os.WriteFile(configPath, configContents, 0600)
 				assert.NoError(t, err)
 
-				manager := NewAgentConfigManager(zap.NewNop().Sugar())
+				manager := NewAgentConfigManager(zap.NewNop())
 				mangedConfig, err := opamp.NewManagedConfig(configPath, opamp.NoopReloadFunc)
 				assert.NoError(t, err)
 				manager.AddConfig(ManagerConfigName, mangedConfig)
@@ -277,7 +277,7 @@ func TestApplyConfigChanges(t *testing.T) {
 				err := os.WriteFile(configPath, configContents, 0600)
 				assert.NoError(t, err)
 
-				manager := NewAgentConfigManager(zap.NewNop().Sugar())
+				manager := NewAgentConfigManager(zap.NewNop())
 
 				mangedConfig, err := opamp.NewManagedConfig(configPath, opamp.NoopReloadFunc)
 				assert.NoError(t, err)
@@ -323,7 +323,7 @@ func TestApplyConfigChanges(t *testing.T) {
 				err := os.WriteFile(configPath, configContents, 0600)
 				assert.NoError(t, err)
 
-				manager := NewAgentConfigManager(zap.NewNop().Sugar())
+				manager := NewAgentConfigManager(zap.NewNop())
 				mangedConfig, err := opamp.NewManagedConfig(configPath, opamp.NoopReloadFunc)
 				assert.NoError(t, err)
 				manager.AddConfig(ManagerConfigName, mangedConfig)
@@ -380,7 +380,7 @@ func TestApplyConfigChanges(t *testing.T) {
 				err := os.WriteFile(configPath, configContents, 0600)
 				assert.NoError(t, err)
 
-				manager := NewAgentConfigManager(zap.NewNop().Sugar())
+				manager := NewAgentConfigManager(zap.NewNop())
 				mangedConfig, err := opamp.NewManagedConfig(configPath, func(data []byte) (changed bool, err error) {
 					err = os.WriteFile(configPath, data, 0600)
 					assert.NoError(t, err)
@@ -431,7 +431,7 @@ func TestApplyConfigChanges(t *testing.T) {
 				err := os.WriteFile(configPath, configContents, 0600)
 				assert.NoError(t, err)
 
-				manager := NewAgentConfigManager(zap.NewNop().Sugar())
+				manager := NewAgentConfigManager(zap.NewNop())
 				mangedConfig, err := opamp.NewManagedConfig(configPath, func(data []byte) (changed bool, err error) {
 					return false, expectedError
 				})

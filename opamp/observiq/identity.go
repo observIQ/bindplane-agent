@@ -39,7 +39,7 @@ type identity struct {
 }
 
 // newIdentity constructs a new identity for this collector
-func newIdentity(logger *zap.SugaredLogger, config opamp.Config) *identity {
+func newIdentity(logger *zap.Logger, config opamp.Config) *identity {
 	// Grab various fields from OS
 	hostname, err := ios.Hostname()
 	if err != nil {

@@ -209,7 +209,7 @@ func loggerReload(client *Client, loggerConfigPath string) opamp.ReloadFunc {
 		}
 
 		// Assign new client logger
-		client.logger = logger.Sugar().Named("opamp")
+		client.logger = logger.Named("opamp")
 
 		return true, nil
 	}

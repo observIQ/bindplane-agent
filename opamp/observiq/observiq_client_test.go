@@ -69,7 +69,7 @@ func TestNewClient(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.desc, func(t *testing.T) {
-			testLogger := zap.NewNop().Sugar()
+			testLogger := zap.NewNop()
 			mockCollector := colmocks.NewMockCollector(t)
 
 			tmpDir := t.TempDir()
@@ -145,7 +145,7 @@ func TestClientConnect(t *testing.T) {
 
 				c := &Client{
 					opampClient:   mockOpAmpClient,
-					logger:        zap.NewNop().Sugar(),
+					logger:        zap.NewNop(),
 					ident:         &identity{},
 					configManager: nil,
 					collector:     nil,
@@ -173,7 +173,7 @@ func TestClientConnect(t *testing.T) {
 
 				c := &Client{
 					opampClient:   mockOpAmpClient,
-					logger:        zap.NewNop().Sugar(),
+					logger:        zap.NewNop(),
 					ident:         &identity{agentID: "a69dcef0-0261-4f4f-9ac0-a483af42a6ba"},
 					configManager: nil,
 					collector:     mockCollector,
@@ -200,7 +200,7 @@ func TestClientConnect(t *testing.T) {
 
 				c := &Client{
 					opampClient:   mockOpAmpClient,
-					logger:        zap.NewNop().Sugar(),
+					logger:        zap.NewNop(),
 					ident:         &identity{agentID: "a69dcef0-0261-4f4f-9ac0-a483af42a6ba"},
 					configManager: nil,
 					collector:     mockCollector,
@@ -225,7 +225,7 @@ func TestClientConnect(t *testing.T) {
 
 				c := &Client{
 					opampClient:   mockOpAmpClient,
-					logger:        zap.NewNop().Sugar(),
+					logger:        zap.NewNop(),
 					ident:         &identity{agentID: "a69dcef0-0261-4f4f-9ac0-a483af42a6ba"},
 					configManager: nil,
 					collector:     mockCollector,
@@ -288,7 +288,7 @@ func TestClient_onGetEffectiveConfigHandler(t *testing.T) {
 	mockManager := new(mocks.MockConfigManager)
 
 	c := &Client{
-		logger:        zap.NewNop().Sugar(),
+		logger:        zap.NewNop(),
 		configManager: mockManager,
 	}
 
@@ -313,7 +313,7 @@ func TestClient_onRemoteConfigHandler(t *testing.T) {
 
 				c := &Client{
 					configManager: mockManager,
-					logger:        zap.NewNop().Sugar(),
+					logger:        zap.NewNop(),
 				}
 
 				effCfg, changed, err := c.onRemoteConfigHandler(context.Background(), &protobufs.AgentRemoteConfig{})
@@ -331,7 +331,7 @@ func TestClient_onRemoteConfigHandler(t *testing.T) {
 
 				c := &Client{
 					configManager: mockManager,
-					logger:        zap.NewNop().Sugar(),
+					logger:        zap.NewNop(),
 				}
 
 				effCfg, changed, err := c.onRemoteConfigHandler(context.Background(), &protobufs.AgentRemoteConfig{})
@@ -349,7 +349,7 @@ func TestClient_onRemoteConfigHandler(t *testing.T) {
 
 				c := &Client{
 					configManager: mockManager,
-					logger:        zap.NewNop().Sugar(),
+					logger:        zap.NewNop(),
 				}
 
 				effCfg, changed, err := c.onRemoteConfigHandler(context.Background(), &protobufs.AgentRemoteConfig{})

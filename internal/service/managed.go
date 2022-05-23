@@ -44,7 +44,7 @@ func NewManagedCollectorService(col collector.Collector, logger *zap.Logger, man
 
 	// Create client Args
 	clientArgs := &observiq.NewClientArgs{
-		DefaultLogger:       logger.Sugar(),
+		DefaultLogger:       logger,
 		Config:              *opampConfig,
 		Collector:           col,
 		ManagerConfigPath:   managerConfigPath,

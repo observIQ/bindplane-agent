@@ -90,7 +90,7 @@ func Test_managerReload(t *testing.T) {
 
 				client := &Client{
 					opampClient:   mockOpAmpClient,
-					ident:         newIdentity(zap.NewNop().Sugar(), *currConfig),
+					ident:         newIdentity(zap.NewNop(), *currConfig),
 					currentConfig: *currConfig,
 				}
 				reloadFunc := managerReload(client, managerFilePath)
@@ -145,7 +145,7 @@ func Test_managerReload(t *testing.T) {
 
 				client := &Client{
 					opampClient:   mockOpAmpClient,
-					ident:         newIdentity(zap.NewNop().Sugar(), *currConfig),
+					ident:         newIdentity(zap.NewNop(), *currConfig),
 					currentConfig: *currConfig,
 				}
 				reloadFunc := managerReload(client, managerFilePath)
@@ -335,7 +335,7 @@ func Test_loggerReload(t *testing.T) {
 				mockCol.On("Restart", mock.Anything).Return(expectedErr).Once()
 				mockCol.On("Restart", mock.Anything).Return(nil).Once()
 
-				currLogger := zap.NewNop().Sugar()
+				currLogger := zap.NewNop()
 				client := &Client{
 					collector: mockCol,
 					logger:    currLogger,

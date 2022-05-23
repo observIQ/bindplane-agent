@@ -47,11 +47,11 @@ var _ opamp.ConfigManager = (*AgentConfigManager)(nil)
 // AgentConfigManager keeps track of active configs for the agent
 type AgentConfigManager struct {
 	configMap map[string]*opamp.ManagedConfig
-	logger    *zap.SugaredLogger
+	logger    *zap.Logger
 }
 
 // NewAgentConfigManager creates a new AgentConfigManager
-func NewAgentConfigManager(defaultLogger *zap.SugaredLogger) *AgentConfigManager {
+func NewAgentConfigManager(defaultLogger *zap.Logger) *AgentConfigManager {
 	return &AgentConfigManager{
 		configMap: make(map[string]*opamp.ManagedConfig),
 		logger:    defaultLogger.Named("config manager"),

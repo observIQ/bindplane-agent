@@ -39,7 +39,7 @@ func Test_newIdentity(t *testing.T) {
 		AgentName: &agentNameContents,
 	}
 
-	got := newIdentity(zap.NewNop().Sugar(), cfg)
+	got := newIdentity(zap.NewNop(), cfg)
 
 	// Check all fields from config
 	require.Equal(t, cfg.AgentID, got.agentID)
