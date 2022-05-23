@@ -212,6 +212,9 @@ signs:
 # https://goreleaser.com/customization/release/
 release:
   draft: false
+
+  # publish to a prerelease first
+  prerelease: "true"
   extra_files:
     - glob: "./observiq-otel-collector*.msi"
     - glob: "./scripts/install/install_unix.sh"
