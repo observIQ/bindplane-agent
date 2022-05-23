@@ -28,7 +28,7 @@ import (
 
 func TestStandaloneCollectorService(t *testing.T) {
 	t.Run("Collector starts and stops normally", func(t *testing.T) {
-		col := &mocks.Collector{}
+		col := mocks.NewMockCollector(t)
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
 
@@ -70,15 +70,13 @@ func TestStandaloneCollectorService(t *testing.T) {
 	})
 
 	t.Run("Collector.Run errors", func(t *testing.T) {
-		col := &mocks.Collector{}
+		col := mocks.NewMockCollector(t)
 		runError := errors.New("run failed")
 
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
 
 		col.On("Run", ctx).Return(runError)
-		col.On("Status").Return((<-chan *collector.Status)(make(chan *collector.Status)))
-		col.On("Stop", mock.Anything).Return(nil)
 
 		srv := NewStandaloneCollectorService(col)
 
@@ -101,14 +99,14 @@ func TestStandaloneCollectorService(t *testing.T) {
 	})
 
 	t.Run("Stop context is cancelled", func(t *testing.T) {
-		col := &mocks.Collector{}
+		col := mocks.NewMockCollector(t)
 
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
 
 		col.On("Run", ctx).Return(nil)
-		col.On("Status").Return((<-chan *collector.Status)(make(chan *collector.Status)))
-		col.On("Stop", mock.Anything).Run(func(args mock.Arguments) { time.Sleep(100 * time.Second) })
+		col.On("Status").Return((<-chan *collector.Status)(make(chan *collector.Status))).Maybe()
+		col.On("Stop", mock.Anything).Run(func(args mock.Arguments) { time.Sleep(100 * time.Second) }).Maybe()
 
 		srv := NewStandaloneCollectorService(col)
 
@@ -128,17 +126,16 @@ func TestStandaloneCollectorService(t *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, 0, len(srv.Error()), "error channel has elements in it!")
 
-		stoppedChan := make(chan struct{})
+		errChan := make(chan error, 1)
 		go func() {
 			ctx, cancel := context.WithCancel(context.Background())
 			cancel()
 
-			err = srv.Stop(ctx)
-			close(stoppedChan)
+			errChan <- srv.Stop(ctx)
 		}()
 
 		select {
-		case <-stoppedChan: // OK
+		case err = <-errChan: // Get error and verify stop has finished
 		case <-time.After(time.Second):
 			t.Fatalf("Stop timed out")
 		}
@@ -148,7 +145,7 @@ func TestStandaloneCollectorService(t *testing.T) {
 	})
 
 	t.Run("Collector status has an error", func(t *testing.T) {
-		col := &mocks.Collector{}
+		col := mocks.NewMockCollector(t)
 		colStatusErr := errors.New("Collector errored")
 		colStatus := make(chan *collector.Status, 1)
 		colStatus <- &collector.Status{
@@ -193,7 +190,7 @@ func TestStandaloneCollectorService(t *testing.T) {
 	})
 
 	t.Run("Collector status is not running", func(t *testing.T) {
-		col := &mocks.Collector{}
+		col := mocks.NewMockCollector(t)
 		colStatus := make(chan *collector.Status, 1)
 		colStatus <- &collector.Status{
 			Running: false,

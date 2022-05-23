@@ -21,3 +21,8 @@ opentelemetry-java-contrib-jmx-metrics.jar
 VERSION.txt
 release_deps
 tmp
+
+# OpAmp Files
+collector.yaml
+manager.yaml
+logging.yaml

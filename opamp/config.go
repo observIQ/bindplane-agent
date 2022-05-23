@@ -34,9 +34,12 @@ var (
 // Config contains the configuration for the collector to communicate with an OpAmp enabled platform.
 type Config struct {
 	Endpoint  string  `yaml:"endpoint"`
-	SecretKey *string `yaml:"secret_key"`
+	SecretKey *string `yaml:"secret_key,omitempty"`
 	AgentID   string  `yaml:"agent_id"`
-	Labels    *string `yaml:"labels"`
+
+	// Updatable fields
+	Labels    *string `yaml:"labels,omitempty"`
+	AgentName *string `yaml:"agent_name,omitempty"`
 }
 
 // ParseConfig given a configuration file location will parse the config
@@ -56,4 +59,60 @@ func ParseConfig(configLocation string) (*Config, error) {
 	}
 
 	return &config, nil
+}
+
+// Copy creates a deep copy of this config
+func (c Config) Copy() *Config {
+	cfgCopy := &Config{
+		Endpoint: c.Endpoint,
+		AgentID:  c.AgentID,
+	}
+
+	if c.SecretKey != nil {
+		cfgCopy.SecretKey = new(string)
+		*cfgCopy.SecretKey = *c.SecretKey
+	}
+	if c.Labels != nil {
+		cfgCopy.Labels = new(string)
+		*cfgCopy.Labels = *c.Labels
+	}
+	if c.AgentName != nil {
+		cfgCopy.AgentName = new(string)
+		*cfgCopy.AgentName = *c.AgentName
+	}
+
+	return cfgCopy
+}
+
+// GetSecretKey returns secret key if set else returns empty string
+func (c Config) GetSecretKey() string {
+	if c.SecretKey == nil {
+		return ""
+	}
+
+	return *c.SecretKey
+}
+
+// CmpUpdatableFields compares updatable fields for equality
+func (c Config) CmpUpdatableFields(o Config) (equal bool) {
+	if !cmpStringPtr(c.AgentName, o.AgentName) {
+		return false
+	}
+
+	return cmpStringPtr(c.Labels, o.Labels)
+}
+
+func cmpStringPtr(p1, p2 *string) bool {
+	switch {
+	case p1 == nil && p2 == nil:
+		return true
+	case p1 == nil && p2 != nil:
+		fallthrough
+	case p1 != nil && p2 == nil:
+		fallthrough
+	case *p1 != *p2:
+		return false
+	default:
+		return true
+	}
 }
