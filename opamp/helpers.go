@@ -32,5 +32,7 @@ func StringKeyValue(key, value string) *protobufs.KeyValue {
 
 // ComputeHash computes a sha256 hash of the passed in data
 func ComputeHash(data []byte) []byte {
-	return sha256.New().Sum(data)
+	hash := sha256.New()
+	hash.Write(data)
+	return hash.Sum(nil)
 }
