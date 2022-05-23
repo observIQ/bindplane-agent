@@ -151,9 +151,11 @@ add-license:
 release-prep:
 	@rm -rf release_deps
 	@mkdir release_deps
+	@echo 'v$(CURR_VERSION)' > release_deps/VERSION.txt
 	./buildscripts/download-dependencies.sh release_deps
 	@cp -r ./plugins release_deps/
 	@cp config/example.yaml release_deps/config.yaml
+	@cp config/logging.yaml release_deps/logging.yaml
 
 # Build, sign, and release
 .PHONY: release

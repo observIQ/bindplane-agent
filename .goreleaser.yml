@@ -2,7 +2,7 @@ project_name: observiq-otel-collector
 
 before:
   hooks:
-    - make release-prep
+    - make release-prep CURR_VERSION={{ .Version }}
 
 # https://goreleaser.com/customization/build/
 builds:
@@ -44,8 +44,14 @@ archives:
       - src: release_deps/config.yaml
         dst: "."
         strip_parent: true
+      - src: release_deps/logging.yaml
+        dst: "."
+        strip_parent: true
       - src: release_deps/plugins/*
         dst: plugins
+        strip_parent: true
+      - src: release_deps/VERSION.txt
+        dst: "."
         strip_parent: true
 
     format_overrides:
@@ -79,8 +85,21 @@ nfpms:
           owner: observiq-otel-collector
           group: observiq-otel-collector
         type: config|noreplace
+      - src: release_deps/logging.yaml
+        dst: /opt/observiq-otel-collector/logging.yaml
+        file_info:
+          mode: 0640
+          owner: observiq-otel-collector
+          group: observiq-otel-collector
+        type: config|noreplace
       - src: LICENSE
         dst: /opt/observiq-otel-collector/LICENSE
+        file_info:
+          mode: 0644
+          owner: observiq-otel-collector
+          group: observiq-otel-collector
+      - src: release_deps/VERSION.txt
+        dst: /opt/observiq-otel-collector/VERSION.txt
         file_info:
           mode: 0644
           owner: observiq-otel-collector
@@ -133,6 +152,8 @@ dockers:
       - "--label=revision={{.FullCommit}}"
       - "--label=version={{.Version}}"
       - "--platform=linux/amd64"
+    extra_files:
+      - plugins
   - goos: linux
     goarch: arm64
     ids:
@@ -150,6 +171,8 @@ dockers:
       - "--label=revision={{.FullCommit}}"
       - "--label=version={{.Version}}"
       - "--platform=linux/arm64"
+    extra_files:
+      - plugins
 
 docker_manifests:
   - name_template: "observiq/observiq-otel-collector:latest"
@@ -189,6 +212,9 @@ signs:
 # https://goreleaser.com/customization/release/
 release:
   draft: false
+
+  # publish to a prerelease first
+  prerelease: "true"
   extra_files:
     - glob: "./observiq-otel-collector*.msi"
     - glob: "./scripts/install/install_unix.sh"
@@ -265,7 +291,7 @@ brews:
       ****************************************************************
     install: |
       bin.install "observiq-otel-collector"
-      prefix.install "LICENSE", "config.yaml"
+      prefix.install "LICENSE", "config.yaml", "VERSION.txt", "logging.yaml"
       prefix.install Dir["plugins"]
       lib.install "opentelemetry-java-contrib-jmx-metrics.jar"
     plist: |
@@ -277,21 +303,23 @@ brews:
           <key>Label</key>
           <string>com.observiq.collector</string>
 
+          <key>EnvironmentVariables</key>
+          <dict>
+            <key>OIQ_OTEL_COLLECTOR_HOME</key>
+            <string>#{prefix}</string>
+          </dict>
+
           <key>ProgramArguments</key>
           <array>
             <string>#{bin}/observiq-otel-collector</string>
             <string>--config</string>
             <string>#{prefix}/config.yaml</string>
+            <string>--logging</string>
+            <string>#{prefix}/logging.yaml</string>
           </array>
 
           <key>RunAtLoad</key>
           <true/>
-
-          <key>StandardErrorPath</key>
-          <string>/tmp/observiq-otel-collector.log</string>
-
-          <key>StandardOutPath</key>
-          <string>/tmp/observiq-otel-collector.log</string>
         </dict>
       </plist>
     # For local testing

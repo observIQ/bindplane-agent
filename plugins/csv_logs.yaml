@@ -1,0 +1,56 @@
+version: 0.0.1
+title: CSV
+description: Log parser for CSV
+parameters:
+  - name: log_paths
+    type: "[]string"
+    required: true
+  - name: start_at
+    type: string
+    supported:
+      - beginning
+      - end
+    default: end
+  - name: exclude_log_paths
+    type: "[]string"
+    default: []
+  - name: header
+    type: string
+    required: true
+  - name: encoding
+    type: string
+    supported:
+      - nop
+      - utf-8
+      - utf-16le
+      - utf-16be
+      - ascii
+      - big5
+    default: utf-8
+  - name: log_type
+    type: string
+    default: csv
+template: |
+  receivers:
+    filelog:
+      include:
+        {{ range $fp := .log_paths }}
+        - '{{ $fp }}'
+        {{end}}
+      start_at: {{ .start_at }}
+      {{ if .exclude_file_log_path }}
+      exclude:
+        {{ range $fp := .exclude_log_paths }}
+        - '{{ $fp }}'
+        {{end}}
+      {{end}}
+      encoding: '{{ .encoding }}'
+      attributes:
+        log_type: '{{ .log_type }}'
+      operators:
+      - type: csv_parser
+        header: {{ .header }}
+  service:
+    pipelines:
+      logs:
+        receivers: [filelog]
