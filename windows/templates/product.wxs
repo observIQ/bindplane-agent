@@ -48,6 +48,27 @@
       {{range $i, $c := .Conditions}}
       <Condition Message="{{$c.Message}}"><![CDATA[{{$c.Condition}}]]></Condition>
       {{end}}
+      
+
+      <!-- Load previous install directory (if it exists); This will populate the install dir with the current install dir
+           for upgrades. -->
+      <Property Id="INSTALLDIR">
+          <RegistrySearch Id='LOADINSTALLDIR' Type='raw'
+            Root='HKLM' Key='Software\Microsoft\Windows\CurrentVersion\Uninstall\[ProductName]' Name='InstallLocation' />
+      </Property>
+
+      <!-- Load Powershell location -->
+      <Property Id="POWERSHELLEXE">
+          <RegistrySearch Id="POWERSHELLEXE"
+                          Type="raw"
+                          Root="HKLM"
+                          Key="SOFTWARE\Microsoft\PowerShell\1\ShellIds\Microsoft.PowerShell"
+                          Name="Path" />
+      </Property>
+
+      <Condition Message="This application requires Windows PowerShell to be installed.">
+        <![CDATA[POWERSHELLEXE]]>
+      </Condition>
 
       <Directory Id="TARGETDIR" Name="SourceDir">
 
@@ -159,6 +180,21 @@
       <SetProperty Action="SetCustomExec{{$i}}" {{if eq $h.Execute "immediate"}} Id="WixQuietExecCmdLine" {{else}} Id="CustomExec{{$i}}" {{end}} Value="{{$h.CookedCommand}}" Before="CustomExec{{$i}}" Sequence="execute"/>
       <CustomAction Id="CustomExec{{$i}}" BinaryKey="WixCA" DllEntry="WixQuietExec" Execute="{{$h.Execute}}" Impersonate="{{$h.Impersonate}}" {{if gt ($h.Return | len) 0}} Return="{{$h.Return}}" {{end}}/>
       {{end}}
+
+      <CustomAction Id="CustomExecCreateManagerYaml_set"
+              Property="CustomExecCreateManagerYaml"
+              Value="&quot;[POWERSHELLEXE]&quot; -ExecutionPolicy Bypass -NoProfile -Command &quot;&amp; '[INSTALLDIR]install\generate-manager-yaml.ps1' -install_dir '[INSTALLDIR]' -endpoint '[OPAMPENDPOINT]' -secret_key '[OPAMPSECRETKEY]' -labels '[OPAMPLABELS]'&quot;"
+              Execute="immediate"/>
+
+      <CustomAction Id="CustomExecCreateManagerYaml" BinaryKey="WixCA" DllEntry="WixQuietExec" Execute="deferred" Impersonate="no" Return="check" />
+
+      <CustomAction Id="CustomExecRemoveManagerYaml_set"
+              Property="CustomExecRemoveManagerYaml"
+              Value="&quot;[POWERSHELLEXE]&quot; -ExecutionPolicy Bypass -NoProfile -Command &quot;Remove-Item -Force -ErrorAction Continue -Path '[INSTALLDIR]manager.yaml'&quot;"
+              Execute="immediate"/>
+
+      <CustomAction Id="CustomExecRemoveManagerYaml" BinaryKey="WixCA" DllEntry="WixQuietExec" Execute="deferred" Impersonate="no" Return="ignore" />
+
       <InstallExecuteSequence>
          {{range $i, $h := .Hooks}}
          <Custom Action="CustomExec{{$i}}" {{if eq $h.When "install"}} After="InstallFiles" {{else if eq $h.Execute "immediate"}} Before="InstallValidate" {{else}} After="InstallInitialize" {{end}}>
@@ -171,6 +207,22 @@
             {{end}}
          </Custom>
          {{end}}
+
+        <!-- Schedule the action that creates the manager.yaml file on initial install -->
+        <Custom Action="CustomExecCreateManagerYaml_set" After="InstallInitialize" >
+            <![CDATA[NOT Installed AND NOT REMOVE AND ENABLEMANAGEMENT AND NOT WIX_UPGRADE_DETECTED]]>
+        </Custom>
+        <Custom Action="CustomExecCreateManagerYaml" After="InstallFiles" >
+            <![CDATA[NOT Installed AND NOT REMOVE AND ENABLEMANAGEMENT AND NOT WIX_UPGRADE_DETECTED]]>
+        </Custom>
+        
+        <!-- Schedule the action that removes the manager.yaml file on final uninstall -->
+        <Custom Action="CustomExecRemoveManagerYaml_set" After="InstallInitialize" >
+            <![CDATA[REMOVE="ALL" and not UPGRADINGPRODUCTCODE]]>
+        </Custom>
+        <Custom Action="CustomExecRemoveManagerYaml" Before="RemoveFiles" >
+            <![CDATA[REMOVE="ALL" and not UPGRADINGPRODUCTCODE]]>
+        </Custom>
       </InstallExecuteSequence>
 
       <Feature Id="DefaultFeature" Level="1">

@@ -8,6 +8,7 @@ require (
 	github.com/observiq/observiq-otel-collector/processor/resourceattributetransposerprocessor v0.5.0
 	github.com/observiq/observiq-otel-collector/receiver/pluginreceiver v0.5.0
 	github.com/observiq/opentelemetry-collector-contrib/receiver/vcenterreceiver v0.0.0-20220504180047-0f9b0ab55655
+	github.com/open-telemetry/opamp-go v0.0.0-20220513220231-888d3adc29d8
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/alibabacloudlogserviceexporter v0.50.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/awscloudwatchlogsexporter v0.50.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/awsemfexporter v0.50.0
@@ -212,6 +213,7 @@ require (
 	github.com/googleapis/gnostic v0.5.6 // indirect
 	github.com/gophercloud/gophercloud v0.24.0 // indirect
 	github.com/gorilla/mux v1.8.0 // indirect
+	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/grafana/regexp v0.0.0-20220304095617-2e8d9baf4ac2 // indirect
 	github.com/grobie/gomemcache v0.0.0-20180201122607-1f779c573665 // indirect
 	github.com/grpc-ecosystem/grpc-gateway v1.16.0 // indirect
@@ -411,7 +413,7 @@ require (
 require (
 	github.com/containerd/containerd v1.6.1 // indirect
 	github.com/klauspost/compress v1.15.1 // indirect
-	github.com/shirou/gopsutil/v3 v3.22.3 // indirect
+	github.com/shirou/gopsutil/v3 v3.22.4
 	github.com/spf13/cobra v1.4.0 // indirect
 	golang.org/x/sys v0.0.0-20220503163025-988cb79eb6c6
 )

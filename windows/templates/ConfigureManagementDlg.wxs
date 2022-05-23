@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+    <Fragment>
+        <UI Id="ConfigureManagementUI">
+            <Dialog Id="ConfigureManagementDlg" Width="370" Height="270" Title="!(loc.WelcomeDlg_Title)">
+                <Control Id="Description" Type="Text" X="25" Y="23" Width="280" Height="15" Transparent="yes" NoPrefix="yes" Text="Optionally setup OpAMP for agent management." />
+                <Control Id="Title" Type="Text" X="15" Y="6" Width="200" Height="15" Transparent="yes" NoPrefix="yes" Text="{\WixUI_Font_Title}OpAMP Configuration" />
+                <Control Id="BannerBitmap" Type="Bitmap" X="0" Y="0" Width="370" Height="44" TabSkip="no" Text="!(loc.InstallDirDlgBannerBitmap)" />
+                <Control Id="BannerLine" Type="Line" X="0" Y="44" Width="370" Height="0" />
+                <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="370" Height="0" />
+
+                <Control Id="FurtherDescription" Type="Text" X="20" Y="60" Width="335" Height="10" Transparent="yes" NoPrefix="yes" Text="OpAMP functionality may be optionally configured to connect with an OpAMP compatible"/>
+                <Control Id="FurtherDescription2" Type="Text" X="20" Y="70" Width="290" Height="15" Transparent="yes" NoPrefix="yes" Text="server." /> 
+                <Control Id="EnableManagementCheckBox" Type="CheckBox" X="20" Y="95" Width="290" Height="15" Property="ENABLEMANAGEMENT" CheckBoxValue="1" Text="Enable OpAMP management" />
+
+
+                <Control Id="EndpointLabel" Type="Text" X="20" Y="110" Width="290" Height="15" Transparent="yes" NoPrefix="yes" Text="{\WixUI_Font_Title}Endpoint (Required)" Hidden="yes" >
+                    <Condition Action="show"><![CDATA[ENABLEMANAGEMENT]]></Condition>
+                    <Condition Action="hide"><![CDATA[NOT (ENABLEMANAGEMENT)]]></Condition>
+                </Control> 
+                <Control Id="Endpoint" Type="Edit" X="20" Y="125" Width="330" Height="15" Property="OPAMPENDPOINT" Hidden="yes">
+                    <Condition Action="show"><![CDATA[ENABLEMANAGEMENT]]></Condition>
+                    <Condition Action="hide"><![CDATA[NOT (ENABLEMANAGEMENT)]]></Condition>
+                </Control>
+
+                <Control Id="SecretKeyLabel" Type="Text" X="20" Y="145" Width="290" Height="15" Transparent="yes" NoPrefix="yes" Text="{\WixUI_Font_Title}Secret Key" Hidden="yes" >
+                    <Condition Action="show"><![CDATA[ENABLEMANAGEMENT]]></Condition>
+                    <Condition Action="hide"><![CDATA[NOT (ENABLEMANAGEMENT)]]></Condition>
+                </Control> 
+                <Control Id="SecretKey" Type="Edit" X="20" Y="160" Width="330" Height="15" Property="OPAMPSECRETKEY" Hidden="yes">
+                    <Condition Action="show"><![CDATA[ENABLEMANAGEMENT]]></Condition>
+                    <Condition Action="hide"><![CDATA[NOT (ENABLEMANAGEMENT)]]></Condition>
+                </Control>
+
+                <Control Id="LabelsLabel" Type="Text" X="20" Y="180" Width="290" Height="15" Transparent="yes" NoPrefix="yes" Text="{\WixUI_Font_Title}Labels (name1=value1,name2=value2,...)" Hidden="yes" >
+                    <Condition Action="show"><![CDATA[ENABLEMANAGEMENT]]></Condition>
+                    <Condition Action="hide"><![CDATA[NOT (ENABLEMANAGEMENT)]]></Condition>
+                </Control> 
+                <Control Id="Labels" Type="Edit" X="20" Y="195" Width="330" Height="15" Property="OPAMPLABELS" Hidden="yes">
+                    <Condition Action="show"><![CDATA[ENABLEMANAGEMENT]]></Condition>
+                    <Condition Action="hide"><![CDATA[NOT (ENABLEMANAGEMENT)]]></Condition>
+                </Control>
+
+                <Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17" Text="!(loc.WixUIBack)" />
+                <Control Id="Next" Type="PushButton" X="236" Y="243" Width="56" Height="17" Default="yes" Text="!(loc.WixUINext)" >
+                    <!-- Note: These conditions sort of work, but the user has to change focus for the button to enable/disable-->
+                    <!-- <Condition Action="enable">
+                        <![CDATA[ (NOT ENABLEMANAGEMENT) OR (OPAMPENDPOINT)]]>
+                    </Condition>
+                    <Condition Action="disable">
+                        <![CDATA[ENABLEMANAGEMENT AND (NOT OPAMPENDPOINT)]]>
+                    </Condition> -->
+                </Control>
+                <Control Id="Cancel" Type="PushButton" X="304" Y="243" Width="56" Height="17" Cancel="yes" Text="!(loc.WixUICancel)">
+                    <Publish Event="SpawnDialog" Value="CancelDlg">1</Publish>
+                </Control>
+            </Dialog>
+        </UI>
+    </Fragment>
+</Wix>

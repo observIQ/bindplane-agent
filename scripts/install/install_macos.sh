@@ -20,7 +20,9 @@ FORMULA_NAME="observiq/observiq-otel-collector/observiq-otel-collector"
 SERVICE_NAME="com.observiq.collector"
 
 # Script Constants
-PREREQS="printf brew sed uname"
+COLLECTOR_USER="observiq-otel-collector"
+PREREQS="printf brew sed uname uuidgen tr"
+MANAGEMENT_YML_NAME="manager.yaml"
 SCRIPT_NAME="$0"
 INDENT_WIDTH='  '
 indent=""
@@ -161,6 +163,26 @@ Usage:
 
   $(fg_yellow '-u, --upgrade')
       Stops the collector services and upgrades the collector via brew.
+   
+  $(fg_yellow '-e, --endpoint')
+      Defines the endpoint of an OpAMP compatible management server for this collector install.
+      This parameter may also be provided through the ENDPOINT environment variable.
+      
+      Specifying this will install the collector in a managed mode, as opposed to the
+      normal headless mode.
+  
+  $(fg_yellow '-k, --labels')
+      Defines a list of comma seperated labels to be used for this agent when communicating 
+      with an OpAMP compatible server.
+      
+      This parameter may also be provided through the LABELS environment variable.
+      The '--endpoint' flag must be specified if this flag is specified.
+    
+  $(fg_yellow '-s, --secret-key')
+    Defines the secret key to be used when communicating with an OpAMP compatible server.
+    
+    This parameter may also be provided through the SECRET_KEY environment variable.
+    The '--endpoint' flag must be specified if this flag is specified.
 
 EOF
   )
@@ -286,6 +308,56 @@ dependencies_check()
   succeeded
 }
 
+# This will set all installation variables
+# at the beginning of the script.
+setup_installation()
+{
+  banner "Configuring Installation Variables"
+  increase_indent
+
+  set_opamp_endpoint
+  set_opamp_labels
+  set_opamp_secret_key
+
+  success "Configuration complete!"
+  decrease_indent
+}
+
+set_opamp_endpoint()
+{
+  if [ -z "$opamp_endpoint" ] ; then
+    opamp_endpoint="$ENDPOINT"
+  fi
+
+  OPAMP_ENDPOINT="$opamp_endpoint"
+}
+
+set_opamp_labels()
+{
+  if [ -z "$opamp_labels" ] ; then
+    opamp_labels=$LABELS
+  fi
+
+  OPAMP_LABELS="$opamp_labels"
+
+  if [ -n "$OPAMP_LABELS" ] && [ -z "$OPAMP_ENDPOINT" ]; then
+    error_exit "$LINENO" "An endpoint must be specified when providing labels"
+  fi
+}
+
+set_opamp_secret_key()
+{
+  if [ -z "$opamp_secret_key" ] ; then
+    opamp_secret_key=$SECRET_KEY
+  fi
+
+  OPAMP_SECRET_KEY="$opamp_secret_key"
+
+  if [ -n "$OPAMP_SECRET_KEY" ] && [ -z "$OPAMP_ENDPOINT" ]; then
+    error_exit "$LINENO" "An endpoint must be specified when providing a secret key"
+  fi
+}
+
 # This will install the package by running brew to install then copying files to appropriate locations.
 install_package()
 {
@@ -309,12 +381,30 @@ install_package()
   sudo cp "$(brew --prefix $FORMULA_NAME)/lib/opentelemetry-java-contrib-jmx-metrics.jar" /opt 2>&1 || error_exit "$LINENO" "Failed to move jmx jar to /opt"
   succeeded
 
+  # If an endpoint was specified, we need to write the manager.yml
+  if [ -n "$OPAMP_ENDPOINT" ]; then
+    info "Creating manager yaml..."
+    create_manager_yml "$(brew --prefix $FORMULA_NAME)/$MANAGEMENT_YML_NAME"
+    succeeded
+  fi
+
+
   info "Enabling service..."
   brew services start $FORMULA_NAME > /dev/null 2>&1 || error_exit "$LINENO" "Failed to enable service"
   succeeded
 
   success "observIQ OpenTelemetry Collector installation complete!"
   decrease_indent
+}
+
+# create_manager_yml creates the manager.yml at the specified path, containing opamp information.
+create_manager_yml()
+{
+  manager_yml_path="$1"
+  command printf 'endpoint: "%s"\n' "$OPAMP_ENDPOINT" > "$manager_yml_path"
+  [ -n "$OPAMP_LABELS" ] && command printf 'labels: "%s"\n' "$OPAMP_LABELS" >> "$manager_yml_path"
+  [ -n "$OPAMP_SECRET_KEY" ] && command printf 'secret_key: "%s"\n' "$OPAMP_SECRET_KEY" >> "$manager_yml_path"
+  command printf 'agent_id: "%s"\n' "$(uuidgen | tr "[:upper:]" "[:lower:]")" >> "$manager_yml_path"
 }
 
 
@@ -359,6 +449,10 @@ uninstall()
 
   info "Removing service..."
   launchctl remove $SERVICE_NAME > /dev/null 2>&1 || error_exit "$LINENO" "Failed to remove service"
+  succeeded
+
+  info "Removing any existing manager.yaml..."
+  rm -f "$(brew --prefix $FORMULA_NAME)/$MANAGEMENT_YML_NAME"
   succeeded
 
   info "Uninstalling collector..."
@@ -436,6 +530,12 @@ main()
           usage
           force_exit
           ;;
+        -e|--endpoint)
+          opamp_endpoint=$2 ; shift 2 ;;
+        -k|--labels)
+          opamp_labels=$2 ; shift 2 ;;
+        -s|--secret-key)
+          opamp_secret_key=$2 ; shift 2 ;;
       --)
         shift; break ;;
       *)
@@ -449,6 +549,7 @@ main()
 
   observiq_banner
   check_prereqs
+  setup_installation
   check_existing_install
   install_package
   display_results
