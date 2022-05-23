@@ -49,7 +49,8 @@ template: |
 
           - id: controller_parser
             type: regex_parser
-            regex: '(?P<severity>\w)(?P<timestamp>\d{4} \d{2}:\d{2}:\d{2}.\d+)\s+(?P<pid>\d+)\s+(?P<src>[^:]*):(?P<src_line>[^\]]*)\] (?P<message>.*)'
+            # 'time' field replaces 'time' field from initial json parser.
+            regex: '(?P<severity>\w)(?P<time>\d{4} \d{2}:\d{2}:\d{2}.\d+)\s+(?P<pid>\d+)\s+(?P<src>[^:]*):(?P<src_line>[^\]]*)\] (?P<message>.*)'
             severity:
               parse_from: attributes.severity
               mapping:
@@ -59,7 +60,7 @@ template: |
                 error: e
                 critical: c
             timestamp:
-              parse_from: attributes.timestamp
+              parse_from: attributes.time
               layout: '%m%d %H:%M:%S.%s'
             output: controller_cleanup
 
@@ -71,9 +72,10 @@ template: |
 
           - id: access_parser
             type: regex_parser
-            regex: '(?P<remote_addr>\S+) - (?P<remote_user>\S+) \[(?P<time_local>[^\]]+)\] "(?P<method>\S+) +(?P<path>[^ ]*) ((?P<protocol>[^/]*)/(?P<protocol_version>.*)|.*)?" (?P<status>\d+) (?P<body_bytes_sent>\d+) "(?P<http_referer>\S+)" "(?P<http_user_agent>[^"]+)" (?P<request_length>\d+) (?P<request_time>[\d\.]+) \[(?P<proxy_upstream_name>[^\]]*)\] \[(?P<proxy_alternative_upstream_name>\s*)\] (?P<upstream_addr>\S+) (?P<upstream_response_length>[\d-]+) (?P<upstream_response_time>[\d\.-]+) (?P<upstream_status>[\d-]+) (?P<request_id>[a-z0-9]+)'
+            # 'time' field replaces 'time' field from initial json parser.
+            regex: '(?P<remote_addr>\S+) - (?P<remote_user>\S+) \[(?P<time>[^\]]+)\] "(?P<method>\S+) +(?P<path>[^ ]*) ((?P<protocol>[^/]*)/(?P<protocol_version>.*)|.*)?" (?P<status>\d+) (?P<body_bytes_sent>\d+) "(?P<http_referer>\S+)" "(?P<http_user_agent>[^"]+)" (?P<request_length>\d+) (?P<request_time>[\d\.]+) \[(?P<proxy_upstream_name>[^\]]*)\] \[(?P<proxy_alternative_upstream_name>\s*)\] (?P<upstream_addr>\S+) (?P<upstream_response_length>[\d-]+) (?P<upstream_response_time>[\d\.-]+) (?P<upstream_status>[\d-]+) (?P<request_id>[a-z0-9]+)'
             timestamp:
-              parse_from: attributes.time_local
+              parse_from: attributes.time
               layout: '%d/%b/%Y:%H:%M:%S %z'
             severity:
               parse_from: attributes.status
