@@ -150,7 +150,9 @@ func (c *Client) Connect(ctx context.Context) error {
 	}
 
 	// Start the embedded collector
-	if err := c.collector.Run(ctx); err != nil {
+	// Pass in the background context here so it's clear we need to shutdown the collector instead
+	// of the context shutting it down via a cancel.
+	if err := c.collector.Run(context.Background()); err != nil {
 		return fmt.Errorf("collector failed to start: %w", err)
 	}
 
