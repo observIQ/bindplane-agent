@@ -1,0 +1,52 @@
+version: 0.0.1
+title: JSON
+description: Log parser for JSON
+parameters:
+  - name: log_paths
+    type: "[]string"
+    required: true
+  - name: exclude_log_paths
+    type: "[]string"
+    default: []
+  - name: encoding
+    type: string
+    supported:
+      - nop
+      - utf-8
+      - utf-16le
+      - utf-16be
+    default: utf-8
+  - name: log_type
+    type: string
+    default: json
+  - name: start_at
+    type: string
+    supported:
+      - beginning
+      - end
+    default: end
+template: |
+  receivers:
+    filelog:
+      include:
+        {{ range $fp := .log_paths }}
+        - '{{ $fp }}'
+        {{end}}
+      start_at: {{ .start_at }}
+      {{ if .exclude_log_paths }}
+      exclude:
+        {{ range $fp := .exclude_log_paths }}
+        - '{{ $fp }}'
+        {{end}}
+      {{end}}
+      encoding: '{{ .encoding }}'
+      attributes:
+        log_type: '{{ .log_type }}'
+      operators:
+      - type: json_parser
+        parse_from: body
+
+  service:
+    pipelines:
+      logs:
+        receivers: [filelog]
