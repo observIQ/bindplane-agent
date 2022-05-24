@@ -47,10 +47,10 @@ The collector uses `brew services` the following commands control the collector 
 
 ```sh
 # Start the collector
-launchctl start com.observiq.collector
+brew services start com.observiq.collector
 
 # Stop the collector
-launchctl stop com.observiq.collector
+brew services stop com.observiq.collector
 ```
 
 ## Uninstalling
@@ -60,13 +60,11 @@ launchctl stop com.observiq.collector
 To uninstall the collector run the following commands:
 
 ```sh
+brew services stop observiq/observiq-otel-collector/observiq-otel-collector
 brew uninstall observiq/observiq-otel-collector/observiq-otel-collector
 
-# To remove the plist file
-launchctl remove com.observiq.collector
-
 # If you moved the opentelemetry-java-contrib-jmx-metrics.jar
-sudo rm /opt/opentelemetry-java-contrib-jmx-metrics.jar
+sudo rm -f /opt/opentelemetry-java-contrib-jmx-metrics.jar
 ```
 
 ### Uninstall script
