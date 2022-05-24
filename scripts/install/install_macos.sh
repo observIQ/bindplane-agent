@@ -20,7 +20,6 @@ FORMULA_NAME="observiq/observiq-otel-collector/observiq-otel-collector"
 SERVICE_NAME="com.observiq.collector"
 
 # Script Constants
-COLLECTOR_USER="observiq-otel-collector"
 PREREQS="printf brew sed uname uuidgen tr"
 MANAGEMENT_YML_NAME="manager.yaml"
 SCRIPT_NAME="$0"
@@ -158,6 +157,13 @@ usage()
   increase_indent
   USAGE=$(cat <<EOF
 Usage:
+  $(fg_yellow '-v, --version')
+      Defines the version of the observIQ OpenTelemetry Collector.
+      If not provided, this will default to the latest version.
+      Alternatively the COLLECTOR_VERSION environment variable can be
+      set to configure the collector version.
+      Example: '-v 1.2.12' will download 1.2.12. 
+
   $(fg_yellow '-r, --uninstall')
       Stops the collector services and uninstalls the collector via brew.
 
@@ -257,16 +263,6 @@ check_prereqs()
   decrease_indent
 }
 
-# Checks to see if there is an existing install of the collector
-check_existing_install()
-{
-  banner "Checking for existing install"
-  increase_indent
-  brew list observiq/observiq-otel-collector/observiq-otel-collector > /dev/null 2>&1 && error_exit "Installation already exists. If you wish to upgrade please rerun the script with the -u flag."
-  success "No current install"
-  decrease_indent
-}
-
 # This will check if the operating system is supported.
 os_check()
 {
@@ -318,6 +314,7 @@ setup_installation()
   set_opamp_endpoint
   set_opamp_labels
   set_opamp_secret_key
+  set_formula_name
 
   success "Configuration complete!"
   decrease_indent
@@ -358,6 +355,52 @@ set_opamp_secret_key()
   fi
 }
 
+set_formula_name()
+{
+  # If version flag is not set use the COLLECTOR_VERSION
+  if [ -z "$version" ] ; then
+    version=$COLLECTOR_VERSION
+  fi
+
+  # If version is set append it to formula name
+  if [ -n "$version" ] ; then
+    FORMULA_NAME="$FORMULA_NAME@$version"
+  fi
+}
+
+check_install_exists()
+{
+  set +e
+  brew list "$FORMULA_NAME" > /dev/null 2>&1
+  install_exists=$?
+  set -e
+}
+
+find_existing_formula_name()
+{
+  # This can return multiversion we are currently allowing this to go into a failure state.
+  # This can be fixed by the user by specifiying the version via the -v flag.
+  # This will be resolved in the future by either supporting multi versions correctly or only allowing a single version install.
+  set +e
+  found_name=$(brew list --full-name | grep "observiq/observiq-otel-collector/observiq-otel-collector")
+  set -e
+
+  if [ -n "$found_name" ]; then
+    FORMULA_NAME=$found_name
+  fi
+}
+
+set_formula_or_find_existing()
+{
+  # sets formula name with version
+  set_formula_name
+
+  # if not version is set then look at installed formulas
+  if [ -z "$version" ]; then
+    find_existing_formula_name
+  fi
+}
+
 # This will install the package by running brew to install then copying files to appropriate locations.
 install_package()
 {
@@ -368,9 +411,25 @@ install_package()
   brew tap observiq/homebrew-observiq-otel-collector > /dev/null 2>&1 || error_exit "$LINENO" "Failed to tap formula"
   succeeded
 
-  info "Installing collector..."
-  brew update > /dev/null 2>&1 || error_exit "$LINENO" "Failed to run brew update"
-  brew install $FORMULA_NAME > /dev/null 2>&1 || error_exit "$LINENO" "Failed to install formula"
+  info "Checking if install exists ..."
+  check_install_exists
+  succeeded
+
+  if [ $install_exists = 0 ] ; then
+    info "Found existing installation"
+    info ""
+
+    info "Stopping service..."
+    brew services stop "$FORMULA_NAME" > /dev/null 2>&1 || error_exit "$LINENO" "Failed to stop service"
+    succeeded
+
+    info "Reinstalling collector..."
+    brew reinstall "$FORMULA_NAME" > /dev/null 2>&1 || error_exit "$LINENO" "Failed to reinstall formula"
+  else
+    info "Installing collector..."
+    brew update > /dev/null 2>&1 || error_exit "$LINENO" "Failed to run brew update"
+    brew install "$FORMULA_NAME" > /dev/null 2>&1 || error_exit "$LINENO" "Failed to install formula"
+  fi
 
   increase_indent
   info ""
@@ -378,19 +437,19 @@ install_package()
   info "Please enter your password if prompted to complete installation."
   info ""
   decrease_indent
-  sudo cp "$(brew --prefix $FORMULA_NAME)/lib/opentelemetry-java-contrib-jmx-metrics.jar" /opt 2>&1 || error_exit "$LINENO" "Failed to move jmx jar to /opt"
+  sudo cp "$(brew --prefix "$FORMULA_NAME")/lib/opentelemetry-java-contrib-jmx-metrics.jar" /opt 2>&1 || error_exit "$LINENO" "Failed to move jmx jar to /opt"
   succeeded
 
   # If an endpoint was specified, we need to write the manager.yml
   if [ -n "$OPAMP_ENDPOINT" ]; then
     info "Creating manager yaml..."
-    create_manager_yml "$(brew --prefix $FORMULA_NAME)/$MANAGEMENT_YML_NAME"
+    create_manager_yml "$(brew --prefix "$FORMULA_NAME")/$MANAGEMENT_YML_NAME"
     succeeded
   fi
 
 
   info "Enabling service..."
-  brew services start $FORMULA_NAME > /dev/null 2>&1 || error_exit "$LINENO" "Failed to enable service"
+  brew services start "$FORMULA_NAME" > /dev/null 2>&1 || error_exit "$LINENO" "Failed to enable service"
   succeeded
 
   success "observIQ OpenTelemetry Collector installation complete!"
@@ -411,13 +470,13 @@ create_manager_yml()
 # This will display the results of an installation
 display_results()
 {
-    collector_home="$(brew --prefix $FORMULA_NAME)"
+    collector_home="$(brew --prefix "$FORMULA_NAME")"
     banner 'Information'
     increase_indent
     info "Collector Home:     $(fg_cyan "$collector_home")$(reset)"
     info "Collector Config:   $(fg_cyan "$collector_home/config.yaml")$(reset)"
-    info "Start Command:      $(fg_cyan "launchctl start $SERVICE_NAME")$(reset)"
-    info "Stop Command:       $(fg_cyan "launchctl stop $SERVICE_NAME")$(reset)"
+    info "Start Command:      $(fg_cyan "brew services start $FORMULA_NAME")$(reset)"
+    info "Stop Command:       $(fg_cyan "brew services stop $FORMULA_NAME")$(reset)"
     info "Logs Command:       $(fg_cyan "tail -F $collector_home/log/collector.log")$(reset)"
     decrease_indent
 
@@ -443,20 +502,32 @@ uninstall()
   banner "Uninstalling observIQ OpenTelemetry Collector"
   increase_indent
 
-  info "Stopping service..."
-  launchctl stop $SERVICE_NAME > /dev/null 2>&1 || error_exit "$LINENO" "Failed to stop service"
+  set_formula_or_find_existing
+  info "Uninstalling formula $(fg_green "$FORMULA_NAME")"
+  info ""
+
+  info "Checking if install exists ..."
+  check_install_exists
   succeeded
 
-  info "Removing service..."
-  launchctl remove $SERVICE_NAME > /dev/null 2>&1 || error_exit "$LINENO" "Failed to remove service"
+  # exit early if no installation found
+  if [ $install_exists = 1 ]; then
+    info "No installation found"
+    decrease_indent
+    banner "$(fg_green Uninstallation Complete!)"
+    return
+  fi
+
+  info "Stopping service..."
+  brew services stop "$FORMULA_NAME" > /dev/null 2>&1 || error_exit "$LINENO" "Failed to stop service"
   succeeded
 
   info "Removing any existing manager.yaml..."
-  rm -f "$(brew --prefix $FORMULA_NAME)/$MANAGEMENT_YML_NAME"
+  rm -f "$(brew --prefix "$FORMULA_NAME")/$MANAGEMENT_YML_NAME"
   succeeded
 
   info "Uninstalling collector..."
-  brew uninstall $FORMULA_NAME > /dev/null 2>&1 || error_exit "$LINENO" "Failed to uninstall formula"
+  brew uninstall "$FORMULA_NAME" > /dev/null 2>&1 || error_exit "$LINENO" "Failed to uninstall formula"
   
   increase_indent
   info ""
@@ -483,17 +554,21 @@ upgrade()
   banner "Upgrading observIQ OpenTelemetry Collector"
   increase_indent
 
+  set_formula_or_find_existing
+  info "Upgrading formula $(fg_green "$FORMULA_NAME")"
+  info ""
+
   info "Checking if install exists ..."
-  brew list observiq/observiq-otel-collector/observiq-otel-collector > /dev/null 2>&1 || error_exit "No installation currently exists"
+  brew list "$FORMULA_NAME" > /dev/null 2>&1 || error_exit "No installation currently exists"
   succeeded
 
   info "Stopping service..."
-  launchctl stop $SERVICE_NAME > /dev/null 2>&1 || error_exit "$LINENO" "Failed to stop service"
+  brew services stop "$FORMULA_NAME" > /dev/null 2>&1 || error_exit "$LINENO" "Failed to stop service"
   succeeded
 
   info "Upgrading collector..."
   brew update > /dev/null 2>&1 || error_exit "$LINENO" "Failed to run brew update"
-  brew upgrade $FORMULA_NAME > /dev/null 2>&1 || error_exit "$LINENO" "Failed to upgrade formula"
+  brew upgrade "$FORMULA_NAME" > /dev/null 2>&1 || error_exit "$LINENO" "Failed to upgrade formula"
 
   increase_indent
   info ""
@@ -502,11 +577,11 @@ upgrade()
   info ""
   decrease_indent
   
-  sudo cp "$(brew --prefix $FORMULA_NAME)/lib/opentelemetry-java-contrib-jmx-metrics.jar" /opt 2>&1 || error_exit "$LINENO" "Failed to move jmx jar to /opt"
+  sudo cp "$(brew --prefix "$FORMULA_NAME")/lib/opentelemetry-java-contrib-jmx-metrics.jar" /opt 2>&1 || error_exit "$LINENO" "Failed to move jmx jar to /opt"
   succeeded
 
   info "Starting service..."
-  launchctl start $SERVICE_NAME > /dev/null 2>&1 || error_exit "$LINENO" "Failed to start service"
+  brew services start "$FORMULA_NAME" > /dev/null 2>&1 || error_exit "$LINENO" "Failed to start service"
   succeeded
   decrease_indent
 
@@ -518,6 +593,8 @@ main()
   if [ $# -ge 1 ]; then
     while [ -n "$1" ]; do
       case "$1" in
+        -v|--version)
+          version=$2 ; shift 2 ;;
         -r|--uninstall)
           uninstall
           force_exit
@@ -550,7 +627,6 @@ main()
   observiq_banner
   check_prereqs
   setup_installation
-  check_existing_install
   install_package
   display_results
 }
