@@ -85,6 +85,9 @@ To start the observiq-otel-collector service, run:
 To restart the observiq-otel-collector service, run:
   sudo systemctl restart observiq-otel-collector
 
+To enable the service on startup, run:
+  sudo systemctl enable observiq-otel-collector
+
 If you have any other questions please contact us at support@observiq.com
 EOF
 }
