@@ -4,6 +4,7 @@ description: Log parser for JSON
 parameters:
   - name: log_paths
     type: "[]string"
+    required: true
   - name: exclude_log_paths
     type: "[]string"
     default: []
@@ -20,7 +21,7 @@ parameters:
     default: json
   - name: start_at
     type: string
-    valid_values:
+    supported:
       - beginning
       - end
     default: end
@@ -32,7 +33,7 @@ template: |
         - '{{ $fp }}'
         {{end}}
       start_at: {{ .start_at }}
-      {{ if .exclude_file_log_path }}
+      {{ if .exclude_log_paths }}
       exclude:
         {{ range $fp := .exclude_log_paths }}
         - '{{ $fp }}'
@@ -44,6 +45,7 @@ template: |
       operators:
       - type: json_parser
         parse_from: body
+
   service:
     pipelines:
       logs:
