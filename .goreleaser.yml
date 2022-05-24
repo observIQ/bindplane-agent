@@ -295,7 +295,8 @@ brews:
       prefix.install Dir["plugins"]
       lib.install "opentelemetry-java-contrib-jmx-metrics.jar"
     service: |
-      run [opt_bin/"observiq-otel-collector", "--config", opt_prefix/"config.yaml", "--logging", opt_prefix/"config.yaml", "--manager", opt_prefix/"manager.yaml"]
+      run [opt_bin/"observiq-otel-collector", "--config", opt_prefix/"config.yaml", "--logging", opt_prefix/"logging.yaml", "--manager", opt_prefix/"manager.yaml"]
+      environment_variables OIQ_OTEL_COLLECTOR_HOME: opt_prefix
       keep_alive true
     # For local testing
     # skip_upload: "true"

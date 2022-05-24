@@ -413,6 +413,13 @@ install_package()
   succeeded
 
   if [ $install_exists = 0 ] ; then
+    info "Found existing installation"
+    info ""
+
+    info "Stopping service..."
+    brew services stop "$FORMULA_NAME" > /dev/null 2>&1 || error_exit "$LINENO" "Failed to stop service"
+    succeeded
+
     info "Reinstalling collector..."
     brew reinstall "$FORMULA_NAME" > /dev/null 2>&1 || error_exit "$LINENO" "Failed to reinstall formula"
   else
