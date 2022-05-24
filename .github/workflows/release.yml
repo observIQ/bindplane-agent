@@ -34,7 +34,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Copy Windows Binary
-        run: cp dist/collector_windows_amd64/observiq-otel-collector.exe windows/observiq-otel-collector.exe
+        run: cp dist/collector_windows_amd64_v1/observiq-otel-collector.exe windows/observiq-otel-collector.exe
       - name: Copy Plugins to MSI Build Directory
         run: cp -r release_deps/plugins windows/
       - name: Copy Example Config
