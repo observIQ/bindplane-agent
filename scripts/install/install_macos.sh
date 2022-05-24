@@ -378,6 +378,9 @@ check_install_exists()
 
 find_existing_formula_name()
 {
+  # This can return multiversion we are currently allowing this to go into a failure state.
+  # This can be fixed by the user by specifiying the version via the -v flag.
+  # This will be resolved in the future by either supporting multi versions correctly or only allowing a single version install.
   set +e
   found_name=$(brew list --full-name | grep "observiq/observiq-otel-collector/observiq-otel-collector")
   set -e

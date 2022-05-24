@@ -268,22 +268,22 @@ brews:
 
       To start the collector service run:
 
-        brew services start observiq/observiq-otel-collector/observiq-otel-collector
+        brew services start observiq/observiq-otel-collector/observiq-otel-collector@{{ .Major }}.{{ .Minor }}.{{ .Patch }}
 
       To stop the collector service run:
 
-        brew services stop observiq/observiq-otel-collector/observiq-otel-collector
+        brew services stop observiq/observiq-otel-collector/observiq-otel-collector@{{ .Major }}.{{ .Minor }}.{{ .Patch }}
 
       To restart the collector service run:
 
-        brew services restart observiq/observiq-otel-collector/observiq-otel-collector
+        brew services restart observiq/observiq-otel-collector/observiq-otel-collector@{{ .Major }}.{{ .Minor }}.{{ .Patch }}
       ****************************************************************
 
       ****************************************************************
       To uninstall the collector and its dependencies run the following commands:
 
-          brew services stop observiq/observiq-otel-collector/observiq-otel-collector
-          brew uninstall observiq/observiq-otel-collector/observiq-otel-collector
+          brew services stop observiq/observiq-otel-collector/observiq-otel-collector@{{ .Major }}.{{ .Minor }}.{{ .Patch }}
+          brew uninstall observiq/observiq-otel-collector/observiq-otel-collector@{{ .Major }}.{{ .Minor }}.{{ .Patch }}
 
           # If you moved the opentelemetry-java-contrib-jmx-metrics.jar
           sudo rm /opt/opentelemetry-java-contrib-jmx-metrics.jar
