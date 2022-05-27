@@ -297,7 +297,9 @@ brews:
       ****************************************************************
     install: |
       bin.install "observiq-otel-collector"
-      prefix.install "LICENSE", "config.yaml", "VERSION.txt", "logging.yaml"
+      prefix.install "LICENSE", "VERSION.txt", "logging.yaml"
+      etc.install "config.yaml" => "observiq_config.yaml"
+      prefix.install_symlink etc/"observiq_config.yaml" => "config.yaml"
       prefix.install Dir["plugins"]
       lib.install "opentelemetry-java-contrib-jmx-metrics.jar"
     service: |
