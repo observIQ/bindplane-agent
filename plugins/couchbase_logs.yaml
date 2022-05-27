@@ -70,7 +70,7 @@ template: |
       start_at: {{ .start_at }}
       attributes:
         log_type: 'couchbase.error'
-        plugin_id: {{ .id }}
+        plugin_id: 'Couchbase'
       operators:
         - type: regex_parser
           regex: '^\[(?P<type>[^:]*):(?P<couchbase_severity>[^,]*),(?P<timestamp>\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d+-\d{2}:\d{2}),(?P<node>[^@]*)@(?P<host>[^:]*):(?P<source>[^\]]+)\](?P<message>(?s).*[^\n\s])[\n\s]*$'
@@ -92,7 +92,7 @@ template: |
       start_at: {{ .start_at }}
       attributes:
         log_type: 'couchbase.debug'
-        plugin_id: {{ .id }}
+        plugin_id: 'Couchbase'
       operators:
         - type: regex_parser
           regex: '^\[(?P<type>[^:]*):(?P<couchbase_severity>[^,]*),(?P<timestamp>\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d+-\d{2}:\d{2}),(?P<node>[^@]*)@(?P<host>[^:]*):(?P<source>[^\]]+)\](?P<message>(?s).*[^\n\s])[\n\s]*$'
@@ -116,7 +116,7 @@ template: |
       start_at: {{ .start_at }}
       attributes:
         log_type: 'couchbase.info'
-        plugin_id: {{ .id }}
+        plugin_id: 'Couchbase'
       operators:
         - type: regex_parser
           regex: '^\[(?P<type>[^:]*):(?P<couchbase_severity>[^,]*),(?P<timestamp>\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d+-\d{2}:\d{2}),(?P<node>[^@]*)@(?P<host>[^:]*):(?P<source>[^\]]+)\](?P<message>(?s).*[^\n\s])[\n\s]*$'
@@ -138,7 +138,7 @@ template: |
       start_at: {{ .start_at }}
       attributes:
         log_type: 'couchbase.http.access'
-        plugin_id: {{ .id }}
+        plugin_id: 'Couchbase'
       operators:
         - type: regex_parser
           regex: '(?P<ip_address>\d+.\d+.\d+.\d+)\s+(?P<user_identifier>.*) \[(?P<timestamp>\d{2}\/\w+\/\d{4}:\d{2}:\d{2}:\d{2} -\d{4})\] \\*"(?P<request_line>[^"]*)\\*" (?P<status>\d{3}) (?P<size>\d*) *-*(?P<message>.*)'
@@ -164,7 +164,7 @@ template: |
       start_at: {{ .start_at }}
       attributes:
         log_type: 'couchbase.http.access.internal'
-        plugin_id: {{ .id }}
+        plugin_id: 'Couchbase'
       operators:
         - type: regex_parser
           regex: '(?P<ip_address>\d+.\d+.\d+.\d+)\s+(?P<user_identifier>.*) \[(?P<timestamp>\d{2}\/\w+\/\d{4}:\d{2}:\d{2}:\d{2} -\d{4})\] \\*"(?P<request_line>[^"]*)\\*" (?P<status>\d{3}) (?P<size>\d*) *-*(?P<message>.*)'
@@ -193,7 +193,7 @@ template: |
       start_at: {{ .start_at }}
       attributes:
         log_type: 'couchbase.babysitter'
-        plugin_id: {{ .id }}
+        plugin_id: 'Couchbase'
       operators:
         - type: regex_parser
           regex: '^\[(?P<type>[^:]*):(?P<couchbase_severity>[^,]*),(?P<timestamp>\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d+-\d{2}:\d{2}),(?P<node>[^@]*)@(?P<host>[^:]*):(?P<source>[^\]]+)\](?P<message>(?s).*[^\n\s])[\n\s]*$'
@@ -215,7 +215,7 @@ template: |
       start_at: {{ .start_at }}
       attributes:
         log_type: 'couchbase.xdcr'
-        plugin_id: {{ .id }}
+        plugin_id: 'Couchbase'
       operators:
         - type: regex_parser
           regex: '(?P<timestamp>\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d*-\d{2}:\d{2}) (?P<couchbase_severity>[^ ]*) (?P<type>[^:]*):* (?P<message>.*)'
