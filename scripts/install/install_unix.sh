@@ -579,20 +579,21 @@ unpack_package()
 create_manager_yml()
 {
   manager_yml_path="$1"
+  if [ ! -f "$manager_yml_path" ]; then
+    # Note here: We create the file and change permissions of the file here BEFORE writing info to it
+    # We do this because the file may contain a secret key, so we want 0 window when the
+    # file is readable by anyone other than the collector & root
+    command printf '' >> "$manager_yml_path"
 
-  # Note here: We create the file and change permissions of the file here BEFORE writing info to it
-  # We do this because the file may contain a secret key, so we want 0 window when the
-  # file is readable by anyone other than the collector & root
-  command printf '' >> "$manager_yml_path"
+    chgrp "$COLLECTOR_USER" "$manager_yml_path"
+    chown "$COLLECTOR_USER" "$manager_yml_path"
+    chmod 0640 "$manager_yml_path"
 
-  chgrp "$COLLECTOR_USER" "$manager_yml_path"
-  chown "$COLLECTOR_USER" "$manager_yml_path"
-  chmod 0640 "$manager_yml_path"
-
-  command printf 'endpoint: "%s"\n' "$OPAMP_ENDPOINT" > "$manager_yml_path"
-  [ -n "$OPAMP_LABELS" ] && command printf 'labels: "%s"\n' "$OPAMP_LABELS" >> "$manager_yml_path"
-  [ -n "$OPAMP_SECRET_KEY" ] && command printf 'secret_key: "%s"\n' "$OPAMP_SECRET_KEY" >> "$manager_yml_path"
-  command printf 'agent_id: "%s"\n' "$(uuidgen -r)" >> "$manager_yml_path"
+    command printf 'endpoint: "%s"\n' "$OPAMP_ENDPOINT" > "$manager_yml_path"
+    [ -n "$OPAMP_LABELS" ] && command printf 'labels: "%s"\n' "$OPAMP_LABELS" >> "$manager_yml_path"
+    [ -n "$OPAMP_SECRET_KEY" ] && command printf 'secret_key: "%s"\n' "$OPAMP_SECRET_KEY" >> "$manager_yml_path"
+    command printf 'agent_id: "%s"\n' "$(uuidgen -r)" >> "$manager_yml_path"
+  fi
 }
 
 # This will display the results of an installation
