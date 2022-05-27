@@ -6,49 +6,49 @@ parameters:
     type: bool
     default: true
   - name: error_log_path
-    type: "string[]"
+    type: "[]string"
     default:
       - "/opt/couchbase/var/lib/couchbase/logs/error.log"
   - name: enable_debug_log
     type: bool
     default: false
   - name: debug_log_path
-    type: "string[]"
+    type: "[]string"
     default: 
       - "/opt/couchbase/var/lib/couchbase/logs/debug.log"
   - name: enable_info_log
     type: bool
     default: false
   - name: info_log_path
-    type: "string[]"
+    type: "[]string"
     default: 
       - "/opt/couchbase/var/lib/couchbase/logs/info.log"
   - name: enable_access_log
     type: bool
     default: true
   - name: http_access_log_path
-    type: "string[]"
+    type: "[]string"
     default: 
       - "/opt/couchbase/var/lib/couchbase/logs/http_access.log"
   - name: enable_internal_access_log
     type: bool
     default: false
   - name: http_internal_access_log_path
-    type: "string[]"
+    type: "[]string"
     default: 
       - "/opt/couchbase/var/lib/couchbase/logs/http_access_internal.log"
   - name: enable_babysitter_log
     type: bool
     default: true
   - name: babysitter_log_path
-    type: "string[]"
+    type: "[]string"
     default: 
       - "/opt/couchbase/var/lib/couchbase/logs/babysitter.log"
   - name: enable_xdcr_log
     type: bool
     default: false
   - name: xdcr_log_path
-    type: "string[]"
+    type: "[]string"
     default: 
       - "/opt/couchbase/var/lib/couchbase/logs/goxdcr.log"
   - name: start_at
