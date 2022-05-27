@@ -75,10 +75,10 @@ template: |
         - type: regex_parser
           regex: '^\[(?P<type>[^:]*):(?P<couchbase_severity>[^,]*),(?P<timestamp>\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d+-\d{2}:\d{2}),(?P<node>[^@]*)@(?P<host>[^:]*):(?P<source>[^\]]+)\](?P<message>(?s).*[^\n\s])[\n\s]*$'
           timestamp:
-            parse_from: timestamp
+            parse_from: attributes.timestamp
             layout: '%Y-%m-%dT%H:%M:%S.%L%j'
           severity:
-            parse_from: couchbase_severity
+            parse_from: attributes.couchbase_severity
     {{ end }} ## end error log receiver
 
     {{ if .enable_debug_log}}
@@ -97,10 +97,10 @@ template: |
         - type: regex_parser
           regex: '^\[(?P<type>[^:]*):(?P<couchbase_severity>[^,]*),(?P<timestamp>\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d+-\d{2}:\d{2}),(?P<node>[^@]*)@(?P<host>[^:]*):(?P<source>[^\]]+)\](?P<message>(?s).*[^\n\s])[\n\s]*$'
           timestamp:
-            parse_from: timestamp
+            parse_from: attributes.timestamp
             layout: '%Y-%m-%dT%H:%M:%S.%L%j'
           severity:
-            parse_from: couchbase_severity
+            parse_from: attributes.couchbase_severity
             mapping:
               warn: warn
     {{ end }} ## end debug log receiver
@@ -121,10 +121,10 @@ template: |
         - type: regex_parser
           regex: '^\[(?P<type>[^:]*):(?P<couchbase_severity>[^,]*),(?P<timestamp>\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d+-\d{2}:\d{2}),(?P<node>[^@]*)@(?P<host>[^:]*):(?P<source>[^\]]+)\](?P<message>(?s).*[^\n\s])[\n\s]*$'
           timestamp:
-            parse_from: timestamp
+            parse_from: attributes.timestamp
             layout: '%Y-%m-%dT%H:%M:%S.%L%j'
           severity:
-            parse_from: couchbase_severity
+            parse_from: attributes.couchbase_severity
             mapping:
               warn: warn
     {{ end }} ## end info log receiver
@@ -143,12 +143,11 @@ template: |
         - type: regex_parser
           regex: '(?P<ip_address>\d+.\d+.\d+.\d+)\s+(?P<user_identifier>.*) \[(?P<timestamp>\d{2}\/\w+\/\d{4}:\d{2}:\d{2}:\d{2} -\d{4})\] \\*"(?P<request_line>[^"]*)\\*" (?P<status>\d{3}) (?P<size>\d*) *-*(?P<message>.*)'
           timestamp:
-            parse_from: timestamp
+            parse_from: attributes.timestamp
             layout: '%d/%b/%Y:%H:%M:%S %z'
           severity:
-            parse_from: status
+            parse_from: attributes.status
             preset: none
-            preserve_to: status
             mapping:
               info: 2xx
               info2: 3xx
@@ -170,12 +169,11 @@ template: |
         - type: regex_parser
           regex: '(?P<ip_address>\d+.\d+.\d+.\d+)\s+(?P<user_identifier>.*) \[(?P<timestamp>\d{2}\/\w+\/\d{4}:\d{2}:\d{2}:\d{2} -\d{4})\] \\*"(?P<request_line>[^"]*)\\*" (?P<status>\d{3}) (?P<size>\d*) *-*(?P<message>.*)'
           timestamp:
-            parse_from: timestamp
+            parse_from: attributes.timestamp
             layout: '%d/%b/%Y:%H:%M:%S %z'
           severity:
-            parse_from: status
+            parse_from: attributes.status
             preset: none
-            preserve_to: status
             mapping:
               info: 2xx
               info2: 3xx
@@ -200,10 +198,10 @@ template: |
         - type: regex_parser
           regex: '^\[(?P<type>[^:]*):(?P<couchbase_severity>[^,]*),(?P<timestamp>\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d+-\d{2}:\d{2}),(?P<node>[^@]*)@(?P<host>[^:]*):(?P<source>[^\]]+)\](?P<message>(?s).*[^\n\s])[\n\s]*$'
           timestamp:
-            parse_from: timestamp
+            parse_from: attributes.timestamp
             layout: '%Y-%m-%dT%H:%M:%S.%L%j'
           severity:
-            parse_from: couchbase_severity
+            parse_from: attributes.couchbase_severity
     {{ end }} ## end babysitter log receiver
 
     {{ if .enable_xdcr_logs}}
@@ -222,10 +220,10 @@ template: |
         - type: regex_parser
           regex: '(?P<timestamp>\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d*-\d{2}:\d{2}) (?P<couchbase_severity>[^ ]*) (?P<type>[^:]*):* (?P<message>.*)'
           timestamp:
-            parse_from: timestamp
+            parse_from: attributes.timestamp
             layout: '%Y-%m-%dT%H:%M:%S.%L%j'
           severity:
-            parse_from: couchbase_severity
+            parse_from: attributes.couchbase_severity
     {{ end }} ## end xdcr log receiver
 
   service:
