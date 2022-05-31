@@ -44,7 +44,7 @@ template: |
       start_at: {{ .start_at }}
       operators:
         - type: regex_parser
-          if:  '$record matches "\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2},\\d{3}\\s+"'
+          if:  'body matches "\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2},\\d{3}\\s+"'
           regex: '^(?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}),\d{3}\s+(?P<hbase_severity>[A-Z]*)\s*?\[(?P<thread>[^\]]*)\]\s(?P<hbase_source>[^:]*):\s(?P<message>(?s).*)'
           timestamp:
             parse_from: attributes.timestamp
@@ -52,7 +52,7 @@ template: |
           severity:
             parse_from: attributes.hbase_severity
         - type: regex_parser
-          if: '$record matches "\\w+ \\w+ \\d{2} \\d{2}:\\d{2}:\\d{2} \\w+ \\d{4}"'
+          if: 'body matches "\\w+ \\w+ \\d{2} \\d{2}:\\d{2}:\\d{2} \\w+ \\d{4}"'
           regex: '^(?P<timestamp>\w+ \w+ \d{2} \d{2}:\d{2}:\d{2} \w+ \d{4}) (?P<message>(?s).*)'
           timestamp:
             parse_from: attributes.timestamp
@@ -72,7 +72,7 @@ template: |
       start_at: {{ .start_at }}
       operators:
         - type: regex_parser
-          if:  '$record matches "\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2},\\d{3}\\s+"'
+          if:  'body matches "\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2},\\d{3}\\s+"'
           regex: '^(?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}),\d{3}\s+(?P<hbase_severity>[A-Z]*)\s*?\[(?P<thread>[^\]]*)\]\s(?P<hbase_source>[^:]*):\s(?P<message>(?s).*)'
           timestamp:
             parse_from: attributes.timestamp
@@ -80,7 +80,7 @@ template: |
           severity:
             parse_from: attributes.hbase_severity
         - type: regex_parser
-          if: '$record matches "\\w+ \\w+ \\d{2} \\d{2}:\\d{2}:\\d{2} \\w+ \\d{4}"'
+          if: 'body matches "\\w+ \\w+ \\d{2} \\d{2}:\\d{2}:\\d{2} \\w+ \\d{4}"'
           regex: '^(?P<timestamp>\w+ \w+ \d{2} \d{2}:\d{2}:\d{2} \w+ \d{4}) (?P<message>(?s).*)'
           timestamp:
             parse_from: attributes.timestamp
@@ -100,7 +100,7 @@ template: |
       start_at: {{ .start_at }}
       operators:
         - type: regex_parser
-          if:  '$record matches "\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2},\\d{3}\\s+"'
+          if:  'body matches "\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2},\\d{3}\\s+"'
           regex: '^(?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}),\d{3}\s+(?P<hbase_severity>[A-Z]*)\s*?\[(?P<thread>[^\]]*)\]\s(?P<hbase_source>[^:]*):\s(?P<message>(?s).*)'
           timestamp:
             parse_from: attributes.timestamp
@@ -108,7 +108,7 @@ template: |
           severity:
             parse_from: attributes.hbase_severity
         - type: regex_parser
-          if: '$record matches "\\w+ \\w+ \\d{2} \\d{2}:\\d{2}:\\d{2} \\w+ \\d{4}"'
+          if: 'body matches "\\w+ \\w+ \\d{2} \\d{2}:\\d{2}:\\d{2} \\w+ \\d{4}"'
           regex: '^(?P<timestamp>\w+ \w+ \d{2} \d{2}:\d{2}:\d{2} \w+ \d{4}) (?P<message>(?s).*)'
           timestamp:
             parse_from: attributes.timestamp
