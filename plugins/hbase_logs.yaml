@@ -37,23 +37,23 @@ template: |
         {{ range $fp := .master_log_path }}
         - '{{ $fp }}'
         {{ end }}
+      attributes:
+        log_type: hbase.master
       multiline:
           line_start_pattern: '^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3}\s+|^\w+ \w+ \d{2} \d{2}:\d{2}:\d{2} \w+ \d{4}'
       start_at: {{ .start_at }}
       operators:
         - type: regex_parser
-          if:  '$record matches "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2},\\d{3}\\s+"'
-          regex: '^(?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}),\d{3}\s+(?P<hbase_severity>[A-Z]*)\s*?\[(?P<thread>[^\]]*)\]\s(?P<hbase_source>[^:]*):\s(?P<message>(?s).*)\n'
+          if:  '$record matches "\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2},\\d{3}\\s+"'
+          regex: '^(?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}),\d{3}\s+(?P<hbase_severity>[A-Z]*)\s*?\[(?P<thread>[^\]]*)\]\s(?P<hbase_source>[^:]*):\s(?P<message>(?s).*)'
           timestamp:
             parse_from: attributes.timestamp
             layout: '%Y-%m-%d %H:%M:%S'
           severity:
             parse_from: attributes.hbase_severity
-            mapping:
-              warning: warn
-              emergency: fatal
-          if: '$record matches "^\\w+ \\w+ \\d{2} \\d{2}:\\d{2}:\\d{2} \\w+ \\d{4}"'
-          regex: '^(?P<timestamp>\w+ \w+ \d{2} \d{2}:\d{2}:\d{2} \w+ \d{4}) (?P<message>(?s).*)\n'
+        - type: regex_parser
+          if: '$record matches "\\w+ \\w+ \\d{2} \\d{2}:\\d{2}:\\d{2} \\w+ \\d{4}"'
+          regex: '^(?P<timestamp>\w+ \w+ \d{2} \d{2}:\d{2}:\d{2} \w+ \d{4}) (?P<message>(?s).*)'
           timestamp:
             parse_from: attributes.timestamp
             layout: '%a %h %d %H:%M:%S %Z %Y'
@@ -65,23 +65,23 @@ template: |
         {{ range $fp := .region_log_path }}
         - '{{ $fp }}'
         {{ end }}
+      attributes:
+        log_type: hbase.region
       multiline:
        line_start_pattern: '^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3}\s+|^\w+ \w+ \d{2} \d{2}:\d{2}:\d{2} \w+ \d{4}'
       start_at: {{ .start_at }}
       operators:
         - type: regex_parser
-          if:  '$record matches "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2},\\d{3}\\s+"'
-          regex: '^(?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}),\d{3}\s+(?P<hbase_severity>[A-Z]*)\s*?\[(?P<thread>[^\]]*)\]\s(?P<hbase_source>[^:]*):\s(?P<message>(?s).*)\n'
+          if:  '$record matches "\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2},\\d{3}\\s+"'
+          regex: '^(?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}),\d{3}\s+(?P<hbase_severity>[A-Z]*)\s*?\[(?P<thread>[^\]]*)\]\s(?P<hbase_source>[^:]*):\s(?P<message>(?s).*)'
           timestamp:
             parse_from: attributes.timestamp
             layout: '%Y-%m-%d %H:%M:%S'
           severity:
             parse_from: attributes.hbase_severity
-            mapping:
-              warning: warn
-              emergency: fatal
-          if: '$record matches "^\\w+ \\w+ \\d{2} \\d{2}:\\d{2}:\\d{2} \\w+ \\d{4}"'
-          regex: '^(?P<timestamp>\w+ \w+ \d{2} \d{2}:\d{2}:\d{2} \w+ \d{4}) (?P<message>(?s).*)\n'
+        - type: regex_parser
+          if: '$record matches "\\w+ \\w+ \\d{2} \\d{2}:\\d{2}:\\d{2} \\w+ \\d{4}"'
+          regex: '^(?P<timestamp>\w+ \w+ \d{2} \d{2}:\d{2}:\d{2} \w+ \d{4}) (?P<message>(?s).*)'
           timestamp:
             parse_from: attributes.timestamp
             layout: '%a %h %d %H:%M:%S %Z %Y'
@@ -93,23 +93,23 @@ template: |
         {{ range $fp := .zookeeper_log_path }}
         - '{{ $fp }}'
         {{ end }}
+      attributes:
+        log_type: hbase.zookeeper
       multiline:
        line_start_pattern: '^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3}\s+|^\w+ \w+ \d{2} \d{2}:\d{2}:\d{2} \w+ \d{4}'
       start_at: {{ .start_at }}
       operators:
         - type: regex_parser
-          if:  '$record matches "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2},\\d{3}\\s+"'
-          regex: '^(?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}),\d{3}\s+(?P<hbase_severity>[A-Z]*)\s*?\[(?P<thread>[^\]]*)\]\s(?P<hbase_source>[^:]*):\s(?P<message>(?s).*)\n'
+          if:  '$record matches "\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2},\\d{3}\\s+"'
+          regex: '^(?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}),\d{3}\s+(?P<hbase_severity>[A-Z]*)\s*?\[(?P<thread>[^\]]*)\]\s(?P<hbase_source>[^:]*):\s(?P<message>(?s).*)'
           timestamp:
             parse_from: attributes.timestamp
             layout: '%Y-%m-%d %H:%M:%S'
           severity:
             parse_from: attributes.hbase_severity
-            mapping:
-              warning: warn
-              emergency: fatal
-          if: '$record matches "^\\w+ \\w+ \\d{2} \\d{2}:\\d{2}:\\d{2} \\w+ \\d{4}"'
-          regex: '^(?P<timestamp>\w+ \w+ \d{2} \d{2}:\d{2}:\d{2} \w+ \d{4}) (?P<message>(?s).*)\n'
+        - type: regex_parser
+          if: '$record matches "\\w+ \\w+ \\d{2} \\d{2}:\\d{2}:\\d{2} \\w+ \\d{4}"'
+          regex: '^(?P<timestamp>\w+ \w+ \d{2} \d{2}:\d{2}:\d{2} \w+ \d{4}) (?P<message>(?s).*)'
           timestamp:
             parse_from: attributes.timestamp
             layout: '%a %h %d %H:%M:%S %Z %Y'
