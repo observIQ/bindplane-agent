@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	_ "time/tzdata"
 
 	"github.com/observiq/observiq-otel-collector/collector"
 	"github.com/observiq/observiq-otel-collector/internal/logging"
