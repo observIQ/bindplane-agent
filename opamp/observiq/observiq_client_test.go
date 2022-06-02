@@ -18,11 +18,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/http"
 	"os"
 	"path/filepath"
 	"testing"
 
 	colmocks "github.com/observiq/observiq-otel-collector/collector/mocks"
+	"github.com/observiq/observiq-otel-collector/internal/version"
 	"github.com/observiq/observiq-otel-collector/opamp"
 	"github.com/observiq/observiq-otel-collector/opamp/mocks"
 	"github.com/open-telemetry/opamp-go/client/types"
@@ -236,10 +238,13 @@ func TestClientConnect(t *testing.T) {
 				}
 
 				expectedSettings := types.StartSettings{
-					OpAMPServerURL:      c.currentConfig.Endpoint,
-					AuthorizationHeader: fmt.Sprintf("Secret-Key %s", c.currentConfig.GetSecretKey()),
-					TLSConfig:           nil,
-					InstanceUid:         c.ident.agentID,
+					OpAMPServerURL: c.currentConfig.Endpoint,
+					Header: http.Header{
+						"Authorization": []string{fmt.Sprintf("Secret-Key %s", c.currentConfig.GetSecretKey())},
+						"User-Agent":    []string{fmt.Sprintf("observiq-otel-collector/%s", version.Version())},
+					},
+					TLSConfig:   nil,
+					InstanceUid: c.ident.agentID,
 					Callbacks: types.CallbacksStruct{
 						OnConnectFunc:          c.onConnectHandler,
 						OnConnectFailedFunc:    c.onConnectFailedHandler,
@@ -251,7 +256,7 @@ func TestClientConnect(t *testing.T) {
 				mockOpAmpClient.On("Start", mock.Anything, mock.Anything).Return(nil).Run(func(args mock.Arguments) {
 					settings := args.Get(1).(types.StartSettings)
 					assert.Equal(t, expectedSettings.OpAMPServerURL, settings.OpAMPServerURL)
-					assert.Equal(t, expectedSettings.AuthorizationHeader, settings.AuthorizationHeader)
+					assert.Equal(t, expectedSettings.Header, settings.Header)
 					assert.Equal(t, expectedSettings.TLSConfig, settings.TLSConfig)
 					assert.Equal(t, expectedSettings.InstanceUid, settings.InstanceUid)
 					// assert is unable to compare function pointers

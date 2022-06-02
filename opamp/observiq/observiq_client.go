@@ -19,9 +19,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/http"
 	"net/url"
 
 	"github.com/observiq/observiq-otel-collector/collector"
+	"github.com/observiq/observiq-otel-collector/internal/version"
 	"github.com/observiq/observiq-otel-collector/opamp"
 	"github.com/open-telemetry/opamp-go/client"
 	"github.com/open-telemetry/opamp-go/client/types"
@@ -127,10 +129,13 @@ func (c *Client) Connect(ctx context.Context) error {
 	}
 
 	settings := types.StartSettings{
-		OpAMPServerURL:      c.currentConfig.Endpoint,
-		AuthorizationHeader: fmt.Sprintf("Secret-Key %s", c.currentConfig.GetSecretKey()),
-		TLSConfig:           nil, // TODO add support for TLS
-		InstanceUid:         c.ident.agentID,
+		OpAMPServerURL: c.currentConfig.Endpoint,
+		Header: http.Header{
+			"Authorization": []string{fmt.Sprintf("Secret-Key %s", c.currentConfig.GetSecretKey())},
+			"User-Agent":    []string{fmt.Sprintf("observiq-otel-collector/%s", version.Version())},
+		},
+		TLSConfig:   nil, // TODO add support for TLS
+		InstanceUid: c.ident.agentID,
 		Callbacks: types.CallbacksStruct{
 			OnConnectFunc:          c.onConnectHandler,
 			OnConnectFailedFunc:    c.onConnectFailedHandler,
