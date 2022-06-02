@@ -21,7 +21,6 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"reflect"
 	"testing"
 
 	colmocks "github.com/observiq/observiq-otel-collector/collector/mocks"
@@ -257,7 +256,7 @@ func TestClientConnect(t *testing.T) {
 				mockOpAmpClient.On("Start", mock.Anything, mock.Anything).Return(nil).Run(func(args mock.Arguments) {
 					settings := args.Get(1).(types.StartSettings)
 					assert.Equal(t, expectedSettings.OpAMPServerURL, settings.OpAMPServerURL)
-					assert.True(t, reflect.DeepEqual(expectedSettings.Header, settings.Header), "Header elements should match")
+					assert.Equal(t, expectedSettings.Header, settings.Header)
 					assert.Equal(t, expectedSettings.TLSConfig, settings.TLSConfig)
 					assert.Equal(t, expectedSettings.InstanceUid, settings.InstanceUid)
 					// assert is unable to compare function pointers
