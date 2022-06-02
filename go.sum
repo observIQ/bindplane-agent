@@ -1367,8 +1367,8 @@ github.com/onsi/gomega v1.15.0/go.mod h1:cIuvLEne0aoVhAgh/O6ac0Op8WWw9H6eYCriF+t
 github.com/onsi/gomega v1.16.0/go.mod h1:HnhC7FXeEQY45zxNK3PPoIUhzk/80Xly9PcubAlGdZY=
 github.com/onsi/gomega v1.17.0 h1:9Luw4uT5HTjHTN8+aNcSThgH1vdXnmdJ8xIfZ4wyTRE=
 github.com/op/go-logging v0.0.0-20160315200505-970db520ece7/go.mod h1:HzydrMdWErDVzsI23lYNej1Htcns9BCg93Dk0bBINWk=
-github.com/open-telemetry/opamp-go v0.0.0-20220513220231-888d3adc29d8 h1:DOIfPeQbsf9NaKwlE15QTVO6/YhbapkIzY9jLrR5398=
-github.com/open-telemetry/opamp-go v0.0.0-20220513220231-888d3adc29d8/go.mod h1:IMdeuHGVc5CjKSu5/oNV0o+UmiXuahoHvoZ4GOmAI9M=
+github.com/open-telemetry/opamp-go v0.0.0-20220531162705-3f2eab449870 h1:BhAV0W1i8rqOC99bIQJq0jJiEvszE6oOl5hS8Pw2pKM=
+github.com/open-telemetry/opamp-go v0.0.0-20220531162705-3f2eab449870/go.mod h1:IMdeuHGVc5CjKSu5/oNV0o+UmiXuahoHvoZ4GOmAI9M=
 github.com/open-telemetry/opentelemetry-collector-contrib/exporter/alibabacloudlogserviceexporter v0.50.0 h1:BAKtE64RCE8IsXnmcuOD+qunAmkt/SFSXgTWuHPdnTI=
 github.com/open-telemetry/opentelemetry-collector-contrib/exporter/alibabacloudlogserviceexporter v0.50.0/go.mod h1:X285UAxq30cZA020O94CHFeQgDhOIDZ70TNd6kDPn3s=
 github.com/open-telemetry/opentelemetry-collector-contrib/exporter/awscloudwatchlogsexporter v0.50.0 h1:8IQDK4vNQ1QpSDWsV/PScSKof/vHE1ku1sO2RwAzeIY=
