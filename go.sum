@@ -139,10 +139,10 @@ github.com/GoogleCloudPlatform/opentelemetry-operations-collector v0.0.3-0.20220
 github.com/GoogleCloudPlatform/opentelemetry-operations-collector v0.0.3-0.20220601205114-2d57dc81373c/go.mod h1:Pzy07MlpQPrIHI7k5YHjxuPoPh9Mmkk/tQU7b488Kag=
 github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector v0.30.2-0.20220512190557-875976f87023 h1:a5qaC/K40oknHppvTFqQZkLMY7XZSvWyxcG/T6W6DF8=
 github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector v0.30.2-0.20220512190557-875976f87023/go.mod h1:kXt5P2nDYWk6ltkQi+YmcGCNMwS54nnYfLm8jrU0APk=
-github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.6.1 h1:LNl8Tg6N6qChoiM6lKC1Z44Z+CkPAdYx45L/lJDgThs=
-github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.6.1/go.mod h1:ZFRHg4zuQuc6sQyx16A53fB7kxPvPguSeE8GFVpT6rQ=
-github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.30.1 h1:JftlZfpIvptFTzSD/BXuoK9i0nT3D1GSz1EEBr+jjuM=
-github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.30.1/go.mod h1:j+FS9VBW3mwtHBmm9KOJEy5Tq68fCp7fE/R9bV/flIM=
+github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.7.0 h1:8vpIORQCKkwM0r/IZ1faAddG56t7byhqSxATphc+8MI=
+github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.7.0/go.mod h1:HuFNmMWVYJDj2IxyIlUOW2vguRBM8ct9mOuAtWRU2EQ=
+github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.31.0 h1:tfaeStvrph8eJEmo1iji3A4DXen3s6ZMM17nQmvo0WA=
+github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.31.0/go.mod h1:j+FS9VBW3mwtHBmm9KOJEy5Tq68fCp7fE/R9bV/flIM=
 github.com/HdrHistogram/hdrhistogram-go v1.0.1/go.mod h1:BWJ+nMSHY3L41Zj7CA3uXnloDp7xxV0YvstAE7nKTaM=
 github.com/HdrHistogram/hdrhistogram-go v1.1.0 h1:6dpdDPTRoo78HxAJ6T1HfMiKSnqhgRRqzCuPshRkQ7I=
 github.com/Knetic/govaluate v3.0.1-0.20171022003610-9aa49832a739+incompatible/go.mod h1:r7JcOSlj0wfOMncg0iLm8Leh48TZaKVeNIfJntJ2wa0=
@@ -1350,6 +1350,8 @@ github.com/nxadm/tail v1.4.8/go.mod h1:+ncqLTQzXmGhMZNUePPaPqPvBxHAIsmXswZKocGu+
 github.com/observiq/ctimefmt v1.0.0 h1:r7vTJ+Slkrt9fZ67mkf+mA6zAdR5nGIJRMTzkUyvilk=
 github.com/observiq/ctimefmt v1.0.0/go.mod h1:mxi62//WbSpG/roCO1c6MqZ7zQTvjVtYheqHN3eOjvc=
 github.com/observiq/nanojack v0.0.0-20201106172433-343928847ebc h1:49ewVBwLcy+eYqI4R0ICilCI4dPjddpFXWv3liXzUxM=
+github.com/observiq/opentelemetry-collector-contrib/exporter/googlecloudexporter v0.0.0-20220603042433-87e41a116c50 h1:mzC/Bd0Etocr3K/JEkKP+/nKusMEZVGwYUkDxZehcr0=
+github.com/observiq/opentelemetry-collector-contrib/exporter/googlecloudexporter v0.0.0-20220603042433-87e41a116c50/go.mod h1:5cFiYgGSyxcfCRGJIUQrMmtuhtTDHsRPfT0nUzvsvq4=
 github.com/observiq/opentelemetry-collector-contrib/receiver/vcenterreceiver v0.0.0-20220602163554-5c4290439ed1 h1:zSrAujdnvDaLluXSVb4uYMMCGJZqUoAlRs8FUxs9u2c=
 github.com/observiq/opentelemetry-collector-contrib/receiver/vcenterreceiver v0.0.0-20220602163554-5c4290439ed1/go.mod h1:H589dDnpjI6V15YDnt6dlDEtHWzNsbB9D3elJFLlnic=
 github.com/oklog/oklog v0.3.2/go.mod h1:FCV+B7mhrz4o+ueLpx+KqkyXRGMWOYEvfiXtdGtbWGs=
@@ -1414,8 +1416,6 @@ github.com/open-telemetry/opentelemetry-collector-contrib/exporter/f5cloudexport
 github.com/open-telemetry/opentelemetry-collector-contrib/exporter/f5cloudexporter v0.52.0/go.mod h1:6tOf9tEx+0VUdGRRsqsuRNMHIaymIn+mJg67GEGS++Y=
 github.com/open-telemetry/opentelemetry-collector-contrib/exporter/fileexporter v0.52.0 h1:DVS0TvvGkLXeXQpY+PgsaHUtvLad+sAbMrycI+6neBA=
 github.com/open-telemetry/opentelemetry-collector-contrib/exporter/fileexporter v0.52.0/go.mod h1:PnHufcgpS6U370ONf0jp1pUuoF8eAeTetOhk9Waj1Mo=
-github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlecloudexporter v0.52.0 h1:gqoIspLvpouyoq+BTA0ooiDCKNIKD5YKVmB63XacOh8=
-github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlecloudexporter v0.52.0/go.mod h1:8OCySVbWLkw1t7Ax+eYeq0X12psNDEf83EK2Vd+3U6s=
 github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlecloudpubsubexporter v0.52.0 h1:PSmbLsuRSkjODRQiIz4pp1duthykoI6VipAs9ORAOio=
 github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlecloudpubsubexporter v0.52.0/go.mod h1:KjmJJvbg6x+BbMMX/fjcrMZ/6Z5zYJ4NrwJhbLm7orA=
 github.com/open-telemetry/opentelemetry-collector-contrib/exporter/influxdbexporter v0.52.0 h1:pTZQaq7i0ldVryq7As2tNUfbAszk82Xg4QxOF1h6W1U=

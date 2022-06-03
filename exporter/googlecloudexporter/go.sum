@@ -81,10 +81,10 @@ github.com/GoogleCloudPlatform/opentelemetry-operations-collector v0.0.3-0.20220
 github.com/GoogleCloudPlatform/opentelemetry-operations-collector v0.0.3-0.20220601205114-2d57dc81373c/go.mod h1:Pzy07MlpQPrIHI7k5YHjxuPoPh9Mmkk/tQU7b488Kag=
 github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector v0.30.2-0.20220512190557-875976f87023 h1:a5qaC/K40oknHppvTFqQZkLMY7XZSvWyxcG/T6W6DF8=
 github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector v0.30.2-0.20220512190557-875976f87023/go.mod h1:kXt5P2nDYWk6ltkQi+YmcGCNMwS54nnYfLm8jrU0APk=
-github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.6.1 h1:LNl8Tg6N6qChoiM6lKC1Z44Z+CkPAdYx45L/lJDgThs=
-github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.6.1/go.mod h1:ZFRHg4zuQuc6sQyx16A53fB7kxPvPguSeE8GFVpT6rQ=
-github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.30.1 h1:JftlZfpIvptFTzSD/BXuoK9i0nT3D1GSz1EEBr+jjuM=
-github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.30.1/go.mod h1:j+FS9VBW3mwtHBmm9KOJEy5Tq68fCp7fE/R9bV/flIM=
+github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.7.0 h1:8vpIORQCKkwM0r/IZ1faAddG56t7byhqSxATphc+8MI=
+github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.7.0/go.mod h1:HuFNmMWVYJDj2IxyIlUOW2vguRBM8ct9mOuAtWRU2EQ=
+github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.31.0 h1:tfaeStvrph8eJEmo1iji3A4DXen3s6ZMM17nQmvo0WA=
+github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.31.0/go.mod h1:j+FS9VBW3mwtHBmm9KOJEy5Tq68fCp7fE/R9bV/flIM=
 github.com/Microsoft/go-winio v0.4.14/go.mod h1:qXqCSQ3Xa7+6tgxaGTIe4Kpcdsi+P8jBhyzoq1bpyYA=
 github.com/Microsoft/go-winio v0.5.1 h1:aPJp2QD7OOrhO5tQXqQoGSJc+DjDtWTGLOmNyAm6FgY=
 github.com/Microsoft/go-winio v0.5.1/go.mod h1:JPGBdM1cNvN/6ISo+n8V5iA4v8pBzdOpzfwIujj1a84=
@@ -474,6 +474,8 @@ github.com/npillmayer/nestext v0.1.3/go.mod h1:h2lrijH8jpicr25dFY+oAJLyzlya6jhnu
 github.com/nxadm/tail v1.4.4/go.mod h1:kenIhsEOeOJmVchQTgglprH7qJGnHDVpk1VPCcaMI8A=
 github.com/nxadm/tail v1.4.8 h1:nPr65rt6Y5JFSKQO7qToXr7pePgD6Gwiw05lkbyAQTE=
 github.com/nxadm/tail v1.4.8/go.mod h1:+ncqLTQzXmGhMZNUePPaPqPvBxHAIsmXswZKocGu+AU=
+github.com/observiq/opentelemetry-collector-contrib/exporter/googlecloudexporter v0.0.0-20220603042433-87e41a116c50 h1:mzC/Bd0Etocr3K/JEkKP+/nKusMEZVGwYUkDxZehcr0=
+github.com/observiq/opentelemetry-collector-contrib/exporter/googlecloudexporter v0.0.0-20220603042433-87e41a116c50/go.mod h1:5cFiYgGSyxcfCRGJIUQrMmtuhtTDHsRPfT0nUzvsvq4=
 github.com/oklog/run v1.0.0/go.mod h1:dlhp/R75TPv97u0XWUtDeV/lRKWPKSdTuV0TZvrmrQA=
 github.com/onsi/ginkgo v0.0.0-20170829012221-11459a886d9c/go.mod h1:lLunBs/Ym6LB5Z9jYTR76FiuTmxDTDusOGeTQH+WWjE=
 github.com/onsi/ginkgo v1.6.0/go.mod h1:lLunBs/Ym6LB5Z9jYTR76FiuTmxDTDusOGeTQH+WWjE=
@@ -487,8 +489,6 @@ github.com/onsi/gomega v1.7.1/go.mod h1:XdKZgCCFLUoM/7CFJVPcG8C1xQ1AJ0vpAezJrB7J
 github.com/onsi/gomega v1.10.1/go.mod h1:iN09h71vgCQne3DLsj+A5owkum+a2tYe+TOCB1ybHNo=
 github.com/onsi/gomega v1.17.0 h1:9Luw4uT5HTjHTN8+aNcSThgH1vdXnmdJ8xIfZ4wyTRE=
 github.com/onsi/gomega v1.17.0/go.mod h1:HnhC7FXeEQY45zxNK3PPoIUhzk/80Xly9PcubAlGdZY=
-github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlecloudexporter v0.52.0 h1:gqoIspLvpouyoq+BTA0ooiDCKNIKD5YKVmB63XacOh8=
-github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlecloudexporter v0.52.0/go.mod h1:8OCySVbWLkw1t7Ax+eYeq0X12psNDEf83EK2Vd+3U6s=
 github.com/open-telemetry/opentelemetry-collector-contrib/internal/aws/ecsutil v0.52.0 h1:EoYm3gfe3rGf1tUW6dij8xg36W7FNPXsx9trZwY3GlM=
 github.com/open-telemetry/opentelemetry-collector-contrib/internal/aws/ecsutil v0.52.0/go.mod h1:EysjZacDBcmCZdlH0QAmjpvkx+PJVNc9J8EitjlmUGs=
 github.com/open-telemetry/opentelemetry-collector-contrib/internal/common v0.52.0 h1:NDZs3lwnpSvZe1xI2j0VNb9FsLRwmLZ582DL6zwp+ZI=
