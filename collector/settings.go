@@ -41,8 +41,7 @@ func NewSettings(configPaths []string, version string, loggingOpts []zap.Option)
 	configProviderSettings := service.ConfigProviderSettings{
 		Locations:     configPaths,
 		MapProviders:  map[string]config.MapProvider{fmp.Scheme(): fmp},
-		MapConverters: []config.MapConverterFunc{expandmapconverter.New()},
-		Unmarshaler:   nil,
+		MapConverters: []config.MapConverter{expandmapconverter.New()},
 	}
 	provider, err := service.NewConfigProvider(configProviderSettings)
 	if err != nil {
