@@ -24,6 +24,7 @@ import (
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/awsecscontainermetricsreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/awsfirehosereceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/awsxrayreceiver"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/bigipreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/carbonreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/cloudfoundryreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/collectdreceiver"
@@ -80,6 +81,7 @@ var defaultReceivers = []component.ReceiverFactory{
 	awsecscontainermetricsreceiver.NewFactory(),
 	awsfirehosereceiver.NewFactory(),
 	awsxrayreceiver.NewFactory(),
+	bigipreceiver.NewFactory(),
 	carbonreceiver.NewFactory(),
 	cloudfoundryreceiver.NewFactory(),
 	collectdreceiver.NewFactory(),

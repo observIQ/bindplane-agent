@@ -1548,6 +1548,8 @@ github.com/open-telemetry/opentelemetry-collector-contrib/receiver/awsfirehosere
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/awsfirehosereceiver v0.52.0/go.mod h1:jATn5ZsMNsKdOHy4sqZqe66spS1VsR535NGObBtMIkg=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/awsxrayreceiver v0.52.0 h1:Ke6N1+nohOXiTAK+sYKPWBZOM9GFZ9/N4Q+5duCOobU=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/awsxrayreceiver v0.52.0/go.mod h1:L60YFlkddAFxSUlXuUWezWH48P4ZMHX51hg77E9Gdrw=
+github.com/open-telemetry/opentelemetry-collector-contrib/receiver/bigipreceiver v0.52.0 h1:1S63DguKXFnQL03eqTL4P98WDvG1PXTDPOL7fpf1fhc=
+github.com/open-telemetry/opentelemetry-collector-contrib/receiver/bigipreceiver v0.52.0/go.mod h1:k14RPRChTsjXKL5jso1kTI6rnGRFr9n70wKoNmd3Ac4=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/carbonreceiver v0.52.0 h1:X+0EMgxTCRs0NzDtfQQxErNmyubixpR/1sJUkibayfs=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/carbonreceiver v0.52.0/go.mod h1:EqO3C3ybUPWqsOIPTmJ90oh4iZ99TD4bieasHzBG5dw=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/cloudfoundryreceiver v0.52.0 h1:sOU+HLDq7BKK+eAOFmms6qsNLvkC7HVOBFIR/moxseA=
