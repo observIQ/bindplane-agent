@@ -1,0 +1,60 @@
+receivers:
+  mongodbatlas:
+    public_key: ${MONGODB_ATLAS_PUBLIC_KEY}
+    private_key: ${MONGODB_ATLAS_PRIVATE_KEY}
+    collection_interval: 60s
+
+processors:
+  # Copy useful mongodb specific attributes that will otherwise
+  # be dropped by the Google exporter.
+  resourceattributetransposer:
+    operations:
+      - from: mongodb_atlas.org_name
+        to: org_name
+      - from: mongodb_atlas.project.name
+        to: project
+      - from: mongodb_atlas.db.name
+        to: database
+      - from: mongodb_atlas.process.type_name
+        to: process_type
+
+  # Used for Google generic_node mapping.
+  resource:
+    attributes:
+    - key: namespace
+      value: mongodbatlas
+      action: upsert
+    - key: location
+      value: global
+      action: upsert
+
+exporters: 
+  googlecloud:
+    retry_on_failure:
+      enabled: false
+    metric:
+      prefix: workload.googleapis.com
+    resource_mappings:
+    - source_type: ""
+      target_type: generic_node
+      label_mappings:
+      - source_key: mongodb_atlas.host.name
+        target_key: node_id
+      - source_key: location
+        target_key: location
+      - source_key: namespace
+        target_key: namespace
+
+  logging:
+
+service:
+  pipelines:
+    metrics:
+      receivers:
+      - mongodbatlas
+      processors:
+      - resourceattributetransposer
+      - resource
+      exporters:
+      - googlecloud
+      - logging
