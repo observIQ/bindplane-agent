@@ -1,0 +1,39 @@
+receivers:
+  bigip:
+    username: F5_USERNAME
+    password: F5_PASSWORD
+    collection_interval: 60s
+    endpoint: https://10.2.1.10:443
+    tls:
+      insecure_skip_verify: true
+
+processors:
+  resourceattributetransposer:
+    operations:
+      - from: bigip.virtual_server.name
+        to: virutal_server_name
+      - from: bigip.virtual_server.destination
+        to: virtual_server_destination
+      - from: bigip.pool.name
+        to: pool_name
+      - from: bigip.pool_member.name
+        to: pool_member_name
+      - from: bigip.pool_member.ip_address
+        to: pool_member_address
+      - from: bigip.node.name
+        to: node_name
+      - from: bigip.node.ip_address
+        to: node_address
+
+exporters:
+  googlecloud:
+
+service:
+  pipelines:
+    metrics:
+      receivers:
+        - bigip
+      processors:
+        - resourceattributetransposer
+      exporters:
+        - googlecloud
