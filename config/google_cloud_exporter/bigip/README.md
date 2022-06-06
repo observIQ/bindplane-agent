@@ -1,6 +1,6 @@
-# Big IP F5 with Google Cloud
+# Big IP with Google Cloud
 
-The bigip Receiver can be used to metrics to Google Cloud Monitoring.
+The bigip Receiver can be used to send metrics to Google Cloud Monitoring.
 
 ## Prerequisites
 
@@ -8,8 +8,8 @@ See the [prerequisites](../README.md) doc for Google Cloud prerequisites.
 
 ## Limitations
 
-To avoid duplicate metrics, ensure each collector is scraping a single f5 system. This ensures
-there is a unique `node_id` (hostname of the collector) label for each f5 system being monitored.
+To avoid duplicate metrics, ensure each collector is scraping a single BIG-IP system. This ensures
+there is a unique `node_id` (hostname of the collector) label for each BIG-IP system being monitored.
 
 ## Configuration
 
@@ -22,8 +22,8 @@ An example configuration is located [here](./config.yaml).
 ## Authentication Environment Variables
 
 The configuration assumes the following environment variables are set:
-- `F5_USERNAME`
-- `F5_PASSWORD`
+- `BIGIP_USERNAME`
+- `BIGIP_PASSWORD`
 
 Set the variables by creating a [systemd override](https://wiki.archlinux.org/title/systemd#Replacement_unit_files).
 
@@ -34,11 +34,11 @@ sudo systemctl edit observiq-otel-collector
 
 If this is the first time an override is being created, the file will be empty. Paste the following contents into the file. If the `Service` section is already present, append the two `Environment` lines to the `Service` section.
 
-Replace `otel` with your Big IP F5 username and password.
+Replace `otel` with your Big IP username and password.
 ```
 [Service]
-Environment=F5_USERNAME=otel
-Environment=F5_PASSWORD=otel
+Environment=BIGIP_USERNAME=otel
+Environment=BIGIP_PASSWORD=otel
 ```
 
 After restarting the collector, the configuration will attempt to use the username:password `otel:otel`.

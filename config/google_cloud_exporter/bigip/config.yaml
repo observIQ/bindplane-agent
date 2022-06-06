@@ -1,7 +1,7 @@
 receivers:
   bigip:
-    username: F5_USERNAME
-    password: F5_PASSWORD
+    username: BIGIP_USERNAME
+    password: BIGIP_USERNAME
     collection_interval: 60s
     endpoint: https://10.2.1.10:443
     tls:
