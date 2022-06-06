@@ -40,7 +40,7 @@ StartLimitIntervalSec=120
 StartLimitBurst=5
 [Service]
 Type=simple
-User=observiq-otel-collector
+User=root
 Group=observiq-otel-collector
 Environment=PATH=/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin
 Environment=OIQ_OTEL_COLLECTOR_HOME=/opt/observiq-otel-collector
@@ -119,6 +119,13 @@ finish_permissions() {
     # We also change the owner of the binary to observiq-otel-collector
     chown -R observiq-otel-collector:observiq-otel-collector /opt/observiq-otel-collector/observiq-otel-collector /opt/observiq-otel-collector/plugins/*
     chmod 0640 /opt/observiq-otel-collector/plugins/*
+
+  # Initialize the log file to ensure it is owned by observiq-otel-collector.
+  # This prevents the service (running as root) from assigning ownership to
+  # the root user. By doing so, we allow the user to switch to observiq-otel-collector
+  # user for 'non root' installs.
+  touch /opt/observiq-otel-collector/log/collector.log
+  chown observiq-otel-collector:observiq-otel-collector /opt/observiq-otel-collector/log/collector.log
 }
 
 

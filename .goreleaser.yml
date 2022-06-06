@@ -129,6 +129,12 @@ nfpms:
           mode: 0750
           owner: observiq-otel-collector
           group: observiq-otel-collector
+      - dst: /opt/observiq-otel-collector/log
+        type: dir
+        file_info:
+          mode: 0750
+          owner: observiq-otel-collector
+          group: observiq-otel-collector
     scripts:
       preinstall: "./scripts/package/preinstall.sh"
       postinstall: ./scripts/package/postinstall.sh
