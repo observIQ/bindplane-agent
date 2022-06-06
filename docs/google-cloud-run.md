@@ -16,7 +16,7 @@ docker push gcr.io/myproject/observiq-otel-collector:1.1.0
 
 ## Deployment
 
-Follow the steps in [Image](./README.md#image) before continuing.
+Follow the steps in [Image](./google-cloud-run.md#image) before continuing.
 
 **Secrets**
 
