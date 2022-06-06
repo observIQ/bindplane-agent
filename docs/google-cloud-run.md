@@ -1,7 +1,6 @@
 ## Cloud Run
 
-This repo servces as a proof of concept for deploying [observiq-otel-collector](https://github.com/observIQ/observiq-otel-collector) to
-[Google Cloud Run](https://cloud.google.com/run). The configuration used in the example is for Mongodb Atlas.
+The collector can be deployed with [Google Cloud Run](https://cloud.google.com/run).
 
 ## Image
 
