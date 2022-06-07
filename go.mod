@@ -422,7 +422,7 @@ require (
 require (
 	github.com/containerd/containerd v1.6.6 // indirect
 	github.com/klauspost/compress v1.15.4 // indirect
-	github.com/shirou/gopsutil/v3 v3.22.4
+	github.com/shirou/gopsutil/v3 v3.22.5
 	github.com/spf13/cobra v1.4.0 // indirect
 	golang.org/x/sys v0.0.0-20220503163025-988cb79eb6c6
 )
