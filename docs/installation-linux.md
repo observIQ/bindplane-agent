@@ -33,20 +33,28 @@ sudo systemctl enable --now observiq-otel-collector
 ## Configuring the Collector
 After installing, systems with systemd installed will have the `observiq-otel-collector` service up and running!
 
-Logs from the collector will appear in journald. You may run `sudo tail -F /opt/observiq-otel-collector/log/collector.log` to view them.
+**Logging**
+
+Logs from the collector will appear in `/opt/observiq-otel-collector/log`. You may run `sudo tail -F /opt/observiq-otel-collector/log/collector.log` to view them.
+
+**Configuration**
 
 The config file for the collector can be found at `/opt/observiq-otel-collector/config.yaml`. When changing the configuration,the collector service must be restarted in order for config changes to take effect.
 
 For more information on configuring the collector, see the [OpenTelemetry docs](https://opentelemetry.io/docs/collector/configuration/).
 
-By default, the `observiq-otel-collector` service runs as the "observiq-otel-collector" user. Some OpenTelemetry components may require root permissions.
-To run the collector as root, you may create a systemd override.
+**Permissions**
+
+By default, the `observiq-otel-collector` service runs as the "root" user. Some OpenTelemetry components require root permissions in order to read log files owned by other users.
+
+It may be desirable to run the collector as an unprivileged user. For example, a metrics only collector does not require root access.
+
+To run the collector as the `observiq-otel-collector` user, you may create a systemd override.
 
 Run `sudo systemctl edit observiq-otel-collector` and paste the following config:
 ```
 [Service]
-User=root
-Group=root
+User=observiq-otel-collector
 ```
 
 Restart the collector for these changes to take effect.
