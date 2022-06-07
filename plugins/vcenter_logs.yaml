@@ -1,0 +1,85 @@
+version: 0.0.1
+title: VMware vCenter
+description: Log parser for VMware vCenter
+parameters:
+  - name: listen_port
+    type: int
+    default: 5140
+  - name: listen_ip
+    type: string
+    default: "0.0.0.0"
+  - name: listen_address
+    type: string
+    default: ""
+  - name: max_buffer_size
+    type: string
+    default: "1024kib"
+    required: false
+  - name: insecure
+    type: bool
+    default: false
+  - name: certificate_file
+    type: string
+    default: "/opt/cert"
+    required: true
+  - name: private_key_file
+    type: string
+    default: "/opt/key"
+    required: true
+
+
+template: |
+
+  # Set Defaults
+  # {{$listen_address := default "0.0.0.0:5140" .listen_address}}
+  # {{$length := len $listen_address}}
+  # {{$listen_ip := default "0.0.0.0" .listen_ip}}
+  # {{$listen_port := default 5140 .listen_port}}
+  # {{$max_buffer_size := default "1024kib" .max_buffer_size}}
+  # {{$insecure := default false .insecure}}
+  # {{$certificate_file := default "" .certificate_file}}
+  # {{$private_key_file := default "" .private_key_file}}
+
+# Pipeline Template
+  - id: vcenter_input
+    type: tcp_input
+    listen_address: '{{ if eq .length 0 }}{{ .listen_ip }}:{{ .listen_port }}{{ else }}{{ .listen_address }}{{ end }}'
+    max_buffer_size: {{ .max_buffer_size }}
+    labels:
+      log_type: vmware_vcenter
+      plugin_id: {{  }}
+    add_labels: true
+    tls:
+      enable: {{ $insecure }}
+      certificate: {{ $certificate_file }}
+      private_key: {{ $private_key_file }}
+    output: prefix_router
+
+  # vcenter will (sometimes) prepend an id to the messages, check
+  # for the id and drop it if it exsits
+  # example: '257 <14>1. . . '
+  - id: prefix_router
+    type: router
+    routes:
+      - expr: '$record matches "^\\d* "'
+        output: pre_parser
+    default: vcenter_parser
+
+  - id: pre_parser
+    type: regex_parser
+    regex: '^(?P<drop>\d* )(?P<syslog_message>[\w\W]*)'
+    output: pre_parser_restructure
+
+  - id: pre_parser_restructure
+    type: restructure
+    ops:
+      - remove: "$record.drop"
+      - move:
+          from: "$record.syslog_message"
+          to: "$record"
+    output: vcenter_parser
+
+  - id: vcenter_parser
+    type: syslog_parser
+    protocol: rfc5424
+    output: {{ .output }}
