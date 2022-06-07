@@ -15,9 +15,10 @@ there is a unique `node_id` (hostname of the collector) label for each BIG-IP sy
 
 An example configuration is located [here](./config.yaml).
 
-1. Copy [config.yaml](./config.yaml) to `/opt/observiq-otel-collector/config.yaml`
-2. Follow the [authentication section](./README.md#authentication-environment-variables) for configuring username and password.
-2. Restart the collector: `sudo systemctl restart observiq-otel-collector`
+1. Copy [config.yaml](./config.yaml) to `/opt/observiq-otel-collector/config.yaml`.
+2. Update the `endpoint` field with the endpoint of your Big IP F5 iControl REST API.
+3. Follow the [authentication section](./README.md#authentication-environment-variables) for configuring username and password.
+4. Restart the collector: `sudo systemctl restart observiq-otel-collector`.
 
 ## Authentication Environment Variables
 
