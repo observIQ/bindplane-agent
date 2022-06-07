@@ -33,7 +33,7 @@ jobs:
           # either 'goreleaser' (default) or 'goreleaser-pro'
           distribution: goreleaser
           version: "v1.9.1"
-          args: build --single-target --skip-validate --rm-dist
+          args: build --single-target --skip-validate --rm-dist --snapshot
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Copy Windows Binary

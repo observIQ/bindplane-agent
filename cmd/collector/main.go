@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 	_ "time/tzdata"
 
 	"github.com/observiq/observiq-otel-collector/collector"
@@ -74,6 +75,17 @@ func main() {
 	} else {
 		logger.Fatal("Error while searching for management config", zap.Error(err))
 	}
+
+	ex, err := os.Executable()
+	if err != nil {
+		logger.Fatal("Failed to retrieve executable directory", zap.Error(err))
+	}
+	exPath := filepath.Dir(ex)
+	logger.Warn(fmt.Sprintf("os.Executable Path: %s", exPath))
+
+	arg0 := os.Args[0]
+	arg0Path := filepath.Dir(arg0)
+	logger.Warn(fmt.Sprintf("os.Args[0] Path: %s", arg0Path))
 
 	// Run service
 	err = service.RunService(logger, runnableService)
