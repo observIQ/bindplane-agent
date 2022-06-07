@@ -1,0 +1,40 @@
+receivers:
+  bigip:
+    username: $BIGIP_USERNAME
+    password: $BIGIP_USERNAME
+    collection_interval: 60s
+    # Update the IP address to point to your Big IP iControl REST API.
+    endpoint: https://127.0.0.1:443
+    tls:
+      insecure_skip_verify: true
+
+processors:
+  resourceattributetransposer:
+    operations:
+      - from: bigip.virtual_server.name
+        to: virutal_server_name
+      - from: bigip.virtual_server.destination
+        to: virtual_server_destination
+      - from: bigip.pool.name
+        to: pool_name
+      - from: bigip.pool_member.name
+        to: pool_member_name
+      - from: bigip.pool_member.ip_address
+        to: pool_member_address
+      - from: bigip.node.name
+        to: node_name
+      - from: bigip.node.ip_address
+        to: node_address
+
+exporters:
+  googlecloud:
+
+service:
+  pipelines:
+    metrics:
+      receivers:
+        - bigip
+      processors:
+        - resourceattributetransposer
+      exporters:
+        - googlecloud
