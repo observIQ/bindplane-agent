@@ -27,8 +27,6 @@ import (
 const (
 	defaultMetricPrefix = "workload.googleapis.com"
 	defaultUserAgent    = "observIQ-otel-collector"
-	defaultLocation     = "global"
-	genericNodeResource = "generic_node"
 )
 
 // Config is the config the google cloud exporter
@@ -36,8 +34,6 @@ type Config struct {
 	config.ExporterSettings `mapstructure:",squash"`
 	Credentials             string                 `mapstructure:"credentials"`
 	CredentialsFile         string                 `mapstructure:"credentials_file"`
-	Location                string                 `mapstructure:"location"`
-	Namespace               string                 `mapstructure:"namespace"`
 	GCPConfig               *gcp.Config            `mapstructure:",squash"`
 	BatchConfig             *batchprocessor.Config `mapstructure:"batch"`
 }
@@ -73,11 +69,8 @@ func (c *Config) getClientOptions() []option.ClientOption {
 
 // createDefaultConfig creates the default config for the exporter
 func createDefaultConfig() config.Exporter {
-	defaultNamespace, _ := os.Hostname()
 	return &Config{
 		ExporterSettings: config.NewExporterSettings(config.NewComponentID(typeStr)),
-		Location:         defaultLocation,
-		Namespace:        defaultNamespace,
 		GCPConfig:        createDefaultGCPConfig(),
 		BatchConfig:      createDefaultBatchConfig(),
 	}
