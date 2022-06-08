@@ -2,6 +2,9 @@
 
 The collector can be deployed with [Google Cloud Run](https://cloud.google.com/run).
 
+This example uses a configuration for MongoDB Atlas, however this process can be used
+for other configurations as well.
+
 ## Image
 
 Push the collector image to your GCR account:
@@ -26,7 +29,7 @@ Follow the steps in [Image](./google-cloud-run.md#image) before continuing.
 4. Give the Cloud Run service account "secret accessor" for each secret (from steps 1-3)
 
 ![Secrets](assets/secrets.png)
-![Sample Config](assets/config.example.yaml)
+[Sample Config](assets/config.example.yaml)
 
 **Cloud Run**
 
