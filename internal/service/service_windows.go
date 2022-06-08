@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"syscall"
 
 	"go.uber.org/zap"
@@ -42,6 +43,17 @@ func RunService(logger *zap.Logger, rSvc RunnableService) error {
 	}
 
 	if isService {
+		// Change working directory to executable directory
+		ex, err := os.Executable()
+		if err != nil {
+			logger.Warn("Failed to retrieve executable directory", zap.Error(err))
+		} else {
+			execDirPath := filepath.Dir(ex)
+			if err := os.Chdir(execDirPath); err != nil {
+				logger.Warn("Failed to modify current working directory", zap.Error(err))
+			}
+		}
+
 		// Service name doesn't need to be specified when directly run by the service manager.
 		return svc.Run("", newWindowsServiceHandler(logger, rSvc))
 	} else {
