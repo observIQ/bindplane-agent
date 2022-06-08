@@ -73,7 +73,6 @@ cloud.google.com/go/storage v1.10.0/go.mod h1:FLPqc6j+Ki4BU591ie1oL6qBQGu2Bl/tZ9
 cloud.google.com/go/storage v1.14.0/go.mod h1:GrKmX003DSIwi9o29oFT7YDnHYwZoctc3fOKtUw0Xmo=
 cloud.google.com/go/storage v1.22.0/go.mod h1:GbaLEoMqbVm6sx3Z0R++gSiBlgMv6yUi2q1DeGFKQgE=
 cloud.google.com/go/storage v1.22.1/go.mod h1:S8N1cAStu7BOeFfE8KAQzmyyLkK8p/vmRq6kuBTW58Y=
-cloud.google.com/go/trace v1.0.0/go.mod h1:4iErSByzxkyHWzzlAj63/Gmjz0NH1ASqhJguHpGcr6A=
 cloud.google.com/go/trace v1.2.0 h1:oIaB4KahkIUOpLSAAjEJ8y2desbjY/x/RfP4O3KAtTI=
 cloud.google.com/go/trace v1.2.0/go.mod h1:Wc8y/uYyOhPy12KEnXG9XGrvfMz5F5SrYecQlbW1rwM=
 code.cloudfoundry.org/bytefmt v0.0.0-20190710193110-1eb035ffe2b6/go.mod h1:wN/zk7mhREp/oviagqUXY3EwuHhWyOvAdsn5Y4CzOrc=
@@ -1140,6 +1139,8 @@ github.com/open-telemetry/opentelemetry-collector-contrib/exporter/f5cloudexport
 github.com/open-telemetry/opentelemetry-collector-contrib/exporter/f5cloudexporter v0.53.0/go.mod h1:6ukJrLd7yY/xUFpU6Mn/GYBqJCCpoAVMdedalA+rHAs=
 github.com/open-telemetry/opentelemetry-collector-contrib/exporter/fileexporter v0.53.0 h1:IA7GsrAaP/r9sw2lRmTYYxoa8vZPqqrFfEBY5cZ2hfE=
 github.com/open-telemetry/opentelemetry-collector-contrib/exporter/fileexporter v0.53.0/go.mod h1:Xx2uMsA/4uzlM5JjtbWKdBOUR2JWrxqfr977qShVvxI=
+github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlecloudexporter v0.53.0 h1:+p44/9IvBFE/wrAX25gNG/0wo9a7+Q22XOhGuCWao2c=
+github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlecloudexporter v0.53.0/go.mod h1:e7JcZbmxGn2v2hlIGUN9BI/TOIRZsu/qoYso7BtM9VA=
 github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlecloudpubsubexporter v0.53.0 h1:ReVu6K+HxBGwOQhSoUk5bl+dMwk9cnjBVmsu3lscWnE=
 github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlecloudpubsubexporter v0.53.0/go.mod h1:RiacSDlsKVBLi9vCyZQ00QFceMf0RFCuF6b9rWhl8eY=
 github.com/open-telemetry/opentelemetry-collector-contrib/exporter/influxdbexporter v0.53.0 h1:gPJJxRWTqZwOFVci8rgVQIzP3pFwT3MiipvDD1DvIbI=

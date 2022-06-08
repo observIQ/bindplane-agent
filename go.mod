@@ -131,7 +131,7 @@ require (
 	code.cloudfoundry.org/go-loggregator v7.4.0+incompatible // indirect
 	code.cloudfoundry.org/rfc5424 v0.0.0-20201103192249-000122071b78 // indirect
 	contrib.go.opencensus.io/exporter/prometheus v0.4.1 // indirect
-	contrib.go.opencensus.io/exporter/stackdriver v0.13.11 // indirect
+	contrib.go.opencensus.io/exporter/stackdriver v0.13.13 // indirect
 	github.com/Azure/azure-sdk-for-go v65.0.0+incompatible // indirect
 	github.com/Azure/go-autorest v14.2.0+incompatible // indirect
 	github.com/Azure/go-autorest/autorest v0.11.27 // indirect
@@ -438,8 +438,6 @@ require (
 	github.com/spf13/cobra v1.4.0 // indirect
 	golang.org/x/sys v0.0.0-20220520151302-bc2c85ada10a
 )
-
-replace github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlecloudexporter v0.53.0 => github.com/observiq/opentelemetry-collector-contrib/exporter/googlecloudexporter v0.0.0-20220608171713-5be4317b53b9
 
 replace github.com/observiq/observiq-otel-collector/processor/resourceattributetransposerprocessor v0.5.0 => ./processor/resourceattributetransposerprocessor
 
