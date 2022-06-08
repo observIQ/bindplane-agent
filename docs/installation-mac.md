@@ -26,7 +26,7 @@ sh -c "$(curl -fsSlL https://github.com/observiq/observiq-otel-collector/release
 
 ### Additional Install Steps
 
-If you plan on collecting metrics via the [JMX Receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.52.0/receiver/jmxreceiver/README.md) you can copy the `opentelemetry-java-contrib-jmx-metrics.jar` to the default location to make configuration easier.
+If you plan on collecting metrics via the [JMX Receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.53.0/receiver/jmxreceiver/README.md) you can copy the `opentelemetry-java-contrib-jmx-metrics.jar` to the default location to make configuration easier.
 
 ```sh
 sudo cp $(brew --prefix observiq/observiq-otel-collector/observiq-otel-collector)/lib/opentelemetry-java-contrib-jmx-metrics.jar /opt
