@@ -28,8 +28,6 @@ parameters:
     required: true
 
 
-template: |
-
   # Set Defaults
   # {{$listen_address := default "0.0.0.0:5140" .listen_address}}
   # {{$length := len $listen_address}}
@@ -40,19 +38,20 @@ template: |
   # {{$certificate_file := default "" .certificate_file}}
   # {{$private_key_file := default "" .private_key_file}}
 
-# Pipeline Template
-  - id: vcenter_input
+template: |
+  receivers:
+  - id: vcenter
     type: tcp_input
     listen_address: '{{ if eq .length 0 }}{{ .listen_ip }}:{{ .listen_port }}{{ else }}{{ .listen_address }}{{ end }}'
     max_buffer_size: {{ .max_buffer_size }}
-    labels:
+    attributes:
       log_type: vmware_vcenter
-      plugin_id: {{  }}
-    add_labels: true
+      plugin_id: {{ .id }}
+    add_attributes: true
     tls:
-      enable: {{ $insecure }}
-      certificate: {{ $certificate_file }}
-      private_key: {{ $private_key_file }}
+      insecure: {{ .insecure }}
+      cert_file: {{ .certificate_file }}
+      key_file: {{ .private_key_file }}
     output: prefix_router
 
   # vcenter will (sometimes) prepend an id to the messages, check
@@ -61,25 +60,29 @@ template: |
   - id: prefix_router
     type: router
     routes:
-      - expr: '$record matches "^\\d* "'
-        output: pre_parser
+      - output: pre_parser
+      - expr: 'body matches "^\\d* "'
     default: vcenter_parser
 
   - id: pre_parser
     type: regex_parser
     regex: '^(?P<drop>\d* )(?P<syslog_message>[\w\W]*)'
-    output: pre_parser_restructure
 
-  - id: pre_parser_restructure
-    type: restructure
-    ops:
-      - remove: "$record.drop"
-      - move:
-          from: "$record.syslog_message"
-          to: "$record"
-    output: vcenter_parser
+  - id: remove_drop
+    type: remove
+    field: body.drop
+  
+  - id: move_syslog_message
+    type: move
+    from: body.syslog_message
+    to: body
 
   - id: vcenter_parser
     type: syslog_parser
     protocol: rfc5424
-    output: {{ .output }}
+
+  service:
+    pipelines:
+      logs:
+        receivers: 
+          - vcenter
