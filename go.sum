@@ -229,6 +229,7 @@ github.com/aws/aws-sdk-go-v2/service/sso v1.4.2/go.mod h1:NBvT9R1MEF+Ud6ApJKM0G+
 github.com/aws/aws-sdk-go-v2/service/sts v1.7.2/go.mod h1:8EzeIqfWt2wWT4rJVu3f21TfrhJ8AEMzVybRNSb/b4g=
 github.com/aws/smithy-go v1.5.0/go.mod h1:SObp3lf9smib00L/v3U2eAKG8FyQ7iLrJnQiAmR5n+E=
 github.com/aws/smithy-go v1.8.0/go.mod h1:SObp3lf9smib00L/v3U2eAKG8FyQ7iLrJnQiAmR5n+E=
+github.com/basgys/goxml2json v1.1.0 h1:4ln5i4rseYfXNd86lGEB+Vi652IsIXIvggKM/BhUKVw=
 github.com/benbjohnson/clock v1.0.3/go.mod h1:bGMdMPoPVvcYyt1gHDf4J2KE153Yf9BuiUKYMaxlTDM=
 github.com/benbjohnson/clock v1.1.0/go.mod h1:J11/hYXuz8f4ySSvYwY0FKfm+ezbsZBKZxNJlLklBHA=
 github.com/benbjohnson/clock v1.3.0 h1:ip6w0uFQkncKQ979AypyG0ER7mqUSBdKLOgAle/AT8A=
@@ -345,7 +346,6 @@ github.com/docker/go-units v0.3.3/go.mod h1:fgPhTUdO+D/Jk86RDLlptpiXQzgHJF7gydDD
 github.com/docker/go-units v0.4.0 h1:3uh0PgVws3nIA0Q+MwDC8yjEPf9zjRfZZWXZYDct3Tw=
 github.com/docker/go-units v0.4.0/go.mod h1:fgPhTUdO+D/Jk86RDLlptpiXQzgHJF7gydDDbaIK4Dk=
 github.com/docopt/docopt-go v0.0.0-20180111231733-ee0de3bc6815/go.mod h1:WwZ+bS3ebgob9U8Nd0kOddGdZWjyMGR8Wziv+TBNwSE=
-github.com/dougm/pretty v0.0.0-20171025230240-2ee9d7453c02 h1:tR3jsKPiO/mb6ntzk/dJlHZtm37CPfVp1C9KIo534+4=
 github.com/dustin/go-humanize v0.0.0-20171111073723-bb3d318650d4/go.mod h1:HtrtbFcZ19U5GC7JDqmcUSB87Iq5E25KnS6fMYU6eOk=
 github.com/dustin/go-humanize v1.0.0/go.mod h1:HtrtbFcZ19U5GC7JDqmcUSB87Iq5E25KnS6fMYU6eOk=
 github.com/eapache/go-resiliency v1.1.0/go.mod h1:kFI+JgMyC7bLPUVY133qvEBtVayf5mFgVsvEsIPBvNs=
@@ -1086,8 +1086,6 @@ github.com/observiq/ctimefmt v1.0.0/go.mod h1:mxi62//WbSpG/roCO1c6MqZ7zQTvjVtYhe
 github.com/observiq/nanojack v0.0.0-20201106172433-343928847ebc h1:49ewVBwLcy+eYqI4R0ICilCI4dPjddpFXWv3liXzUxM=
 github.com/observiq/opentelemetry-collector-contrib/exporter/googlecloudexporter v0.0.0-20220608171713-5be4317b53b9 h1:06N/sMeFbQkcBGmJcmaYwMeoXc+OJ5hczL5w4B0XREA=
 github.com/observiq/opentelemetry-collector-contrib/exporter/googlecloudexporter v0.0.0-20220608171713-5be4317b53b9/go.mod h1:0MHQj07CfPQZgGFpgmByrS5WvkPRjc22ud8X+9ecSTA=
-github.com/observiq/opentelemetry-collector-contrib/receiver/vcenterreceiver v0.0.0-20220602163554-5c4290439ed1 h1:zSrAujdnvDaLluXSVb4uYMMCGJZqUoAlRs8FUxs9u2c=
-github.com/observiq/opentelemetry-collector-contrib/receiver/vcenterreceiver v0.0.0-20220602163554-5c4290439ed1/go.mod h1:H589dDnpjI6V15YDnt6dlDEtHWzNsbB9D3elJFLlnic=
 github.com/oklog/oklog v0.3.2/go.mod h1:FCV+B7mhrz4o+ueLpx+KqkyXRGMWOYEvfiXtdGtbWGs=
 github.com/oklog/run v1.0.0/go.mod h1:dlhp/R75TPv97u0XWUtDeV/lRKWPKSdTuV0TZvrmrQA=
 github.com/oklog/run v1.1.0/go.mod h1:sVPdnTZT1zYwAJeCMu2Th4T21pA3FPOQRfWjQlk7DVU=
@@ -1358,6 +1356,8 @@ github.com/open-telemetry/opentelemetry-collector-contrib/receiver/tcplogreceive
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/tcplogreceiver v0.53.0/go.mod h1:m/Ij8jn58jMCyK39v9XnCTTilvwy2IgnaOjEc4f/anU=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/udplogreceiver v0.53.0 h1:Ttou4Gv/Hqrw5zETtcbJuglkEp2mJnPyZccC52pbbXw=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/udplogreceiver v0.53.0/go.mod h1:b0Dw3NJbrpJlg6WVx17foERlEuTskmRFfFIZ7XyDEe4=
+github.com/open-telemetry/opentelemetry-collector-contrib/receiver/vcenterreceiver v0.53.0 h1:JcRi+vjUrZam+DP9ckymdLDi9CmvbYZaP3ikC7Ev1G8=
+github.com/open-telemetry/opentelemetry-collector-contrib/receiver/vcenterreceiver v0.53.0/go.mod h1:vDv7Giubfxr32vwruIguas3omtXhD+cQIA8jaj7aG2U=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/windowsperfcountersreceiver v0.53.0 h1:r6pID+yHN7FIFHFMAuvRznBZtmRjoTWorp3bFE2pG6o=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/windowsperfcountersreceiver v0.53.0/go.mod h1:wO5BubrXB3DcnocAZXFHx1kEoQfcnb5mFcc5nQ84dzE=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/zipkinreceiver v0.53.0 h1:NK8YS+w+D+OAFagPE/bU53JticyP0m6VvTSw6aBWa+c=
