@@ -20,6 +20,7 @@ FORMULA_NAME="observiq/observiq-otel-collector/observiq-otel-collector"
 SERVICE_NAME="com.observiq.collector"
 
 # Script Constants
+BREW_ETC=$(brew --prefix)/etc/
 PREREQS="printf brew sed uname uuidgen tr"
 MANAGEMENT_YML_NAME="manager.yaml"
 SCRIPT_NAME="$0"
@@ -541,6 +542,11 @@ uninstall()
 
   info "Untapping formula..."
   brew untap observiq/homebrew-observiq-otel-collector > /dev/null 2>&1 || error_exit "$LINENO" "Failed to untap formula"
+  succeeded
+
+  info "Removing config files..."
+  rm -f $BREW_ETC/observiq_config.yaml.default > /dev/null 2>&1
+  rm -f $BREW_ETC/observiq_config.yaml > /dev/null 2>&1 || error_exit "$LINENO" "Failed to remove all config files"
   succeeded
   decrease_indent
 
