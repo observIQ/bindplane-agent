@@ -33,13 +33,21 @@ var (
 
 // Config contains the configuration for the collector to communicate with an OpAmp enabled platform.
 type Config struct {
-	Endpoint  string  `yaml:"endpoint"`
-	SecretKey *string `yaml:"secret_key,omitempty"`
-	AgentID   string  `yaml:"agent_id"`
+	Endpoint  string     `yaml:"endpoint"`
+	SecretKey *string    `yaml:"secret_key,omitempty"`
+	AgentID   string     `yaml:"agent_id"`
+	TLS       *TLSConfig `yaml:"tls_config,omitempty"`
 
 	// Updatable fields
 	Labels    *string `yaml:"labels,omitempty"`
 	AgentName *string `yaml:"agent_name,omitempty"`
+}
+
+type TLSConfig struct {
+	insecure bool
+	keyfile  *string
+	cerfile  *string
+	cafile   *string
 }
 
 // ParseConfig given a configuration file location will parse the config
