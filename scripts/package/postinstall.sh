@@ -16,49 +16,7 @@
 
 set -e
 
-create_systemd_service() {
-    if [ -d "/usr/lib/systemd/system" ]; then
-      systemd_service_dir="/usr/lib/systemd/system"
-    elif [ -d "/lib/systemd/system" ]; then
-      systemd_service_dir="/lib/systemd/system"
-    elif [ -d "/etc/systemd/system" ]; then
-      systemd_service_dir="/etc/systemd/system"
-    else
-      echo "failed to detect systemd service file directory"
-      exit 1
-    fi
-
-    echo "detected service file directory: ${systemd_service_dir}"
-
-    systemd_service_file="${systemd_service_dir}/observiq-otel-collector.service"
-
-    cat <<EOF > ${systemd_service_file}
-[Unit]
-Description=observIQ's distribution of the OpenTelemetry collector
-After=network.target
-StartLimitIntervalSec=120
-StartLimitBurst=5
-[Service]
-Type=simple
-User=root
-Group=observiq-otel-collector
-Environment=PATH=/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin
-Environment=OIQ_OTEL_COLLECTOR_HOME=/opt/observiq-otel-collector
-Environment=OIQ_OTEL_COLLECTOR_STORAGE=/opt/observiq-otel-collector/storage
-WorkingDirectory=/opt/observiq-otel-collector
-ExecStart=/opt/observiq-otel-collector/observiq-otel-collector --config config.yaml
-SuccessExitStatus=0
-TimeoutSec=120
-StandardOutput=journal
-Restart=on-failure
-RestartSec=5s
-[Install]
-WantedBy=multi-user.target
-EOF
-
-    chmod 0644 "${systemd_service_file}"
-    chown root:root "${systemd_service_file}"
-
+manage_systemd_service() {
     systemctl daemon-reload
 
     echo "configured systemd service"
@@ -103,11 +61,11 @@ init_type() {
   return
 }
 
-install_service() {
+manage_service() {
   service_type="$(init_type)"
   case "$service_type" in
     systemd)
-      create_systemd_service
+      manage_systemd_service
       ;;
     *)
       echo "could not detect init system, skipping service configuration"
@@ -115,10 +73,10 @@ install_service() {
 }
 
 finish_permissions() {
-    # Goreleaser does not set plugin file permissions, so do them here
-    # We also change the owner of the binary to observiq-otel-collector
-    chown -R observiq-otel-collector:observiq-otel-collector /opt/observiq-otel-collector/observiq-otel-collector /opt/observiq-otel-collector/plugins/*
-    chmod 0640 /opt/observiq-otel-collector/plugins/*
+  # Goreleaser does not set plugin file permissions, so do them here
+  # We also change the owner of the binary to observiq-otel-collector
+  chown -R observiq-otel-collector:observiq-otel-collector /opt/observiq-otel-collector/observiq-otel-collector /opt/observiq-otel-collector/plugins/*
+  chmod 0640 /opt/observiq-otel-collector/plugins/*
 
   # Initialize the log file to ensure it is owned by observiq-otel-collector.
   # This prevents the service (running as root) from assigning ownership to
@@ -130,4 +88,4 @@ finish_permissions() {
 
 
 finish_permissions
-install_service
+manage_service

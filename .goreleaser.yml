@@ -135,8 +135,15 @@ nfpms:
           mode: 0750
           owner: observiq-otel-collector
           group: observiq-otel-collector
+      - src: scripts/package/service/systemd/observiq-otel-collector.service
+        dst: /usr/lib/systemd/system/observiq-otel-collector.service
+        type: config
+        file_info:
+          mode: 0644
+          owner: root
+          group: root
     scripts:
-      preinstall: "./scripts/package/preinstall.sh"
+      preinstall: ./scripts/package/preinstall.sh
       postinstall: ./scripts/package/postinstall.sh
 
 # Build container images with docker buildx (mutli arch builds)
