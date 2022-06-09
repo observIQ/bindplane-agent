@@ -32,6 +32,7 @@ import (
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/dotnetdiagnosticsreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/elasticsearchreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/filelogreceiver"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/flinkmetricsreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/fluentforwardreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/googlecloudpubsubreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/googlecloudspannerreceiver"
@@ -92,6 +93,7 @@ var defaultReceivers = []component.ReceiverFactory{
 	dotnetdiagnosticsreceiver.NewFactory(),
 	elasticsearchreceiver.NewFactory(),
 	filelogreceiver.NewFactory(),
+	flinkmetricsreceiver.NewFactory(),
 	fluentforwardreceiver.NewFactory(),
 	googlecloudpubsubreceiver.NewFactory(),
 	googlecloudspannerreceiver.NewFactory(),
@@ -122,8 +124,8 @@ var defaultReceivers = []component.ReceiverFactory{
 	riakreceiver.NewFactory(),
 	sapmreceiver.NewFactory(),
 	simpleprometheusreceiver.NewFactory(),
-	statsdreceiver.NewFactory(),
 	sqlserverreceiver.NewFactory(),
+	statsdreceiver.NewFactory(),
 	syslogreceiver.NewFactory(),
 	tcplogreceiver.NewFactory(),
 	udplogreceiver.NewFactory(),
