@@ -100,9 +100,9 @@ func createDefaultBatchConfig() *batchprocessor.Config {
 
 // createDefaultDetectConfig creates a default detect config
 func createDefaultDetectConfig() *resourcedetectionprocessor.Config {
-	detectorFactory := resourcedetectionprocessor.NewFactory()
-	detectorConfig := detectorFactory.CreateDefaultConfig().(*resourcedetectionprocessor.Config)
-	detectorConfig.Detectors = []string{"system"}
-	detectorConfig.DetectorConfig.SystemConfig.HostnameSources = []string{"os"}
-	return detectorConfig
+	factory := resourcedetectionprocessor.NewFactory()
+	config := factory.CreateDefaultConfig().(*resourcedetectionprocessor.Config)
+	config.Detectors = []string{"system"}
+	config.DetectorConfig.SystemConfig.HostnameSources = []string{"os"}
+	return config
 }
