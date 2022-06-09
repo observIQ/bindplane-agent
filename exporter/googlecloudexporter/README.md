@@ -6,9 +6,9 @@ This exporter can be used to send metrics, traces, and logs to Google Cloud Moni
 ## Configuration
 | Field               | Default               | Required | Description |
 | ---                 | ---                   | ---      | ---         |
-| `metric`            |                       | `false`  | The [metric](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/exporter/googlecloudexporter#configuration-reference) settings of the exporter. |
-| `trace`             |                       | `false`  | The [trace](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/exporter/googlecloudexporter#configuration-reference) settings of the exporter. |
-| `log`               |                       | `false`  | The [log](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/exporter/googlecloudexporter#configuration-reference) settings of the exporter. |
+| `metric`            |                       | `false`  | The [metric](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/v0.53.0/exporter/googlecloudexporter#configuration-reference) settings of the exporter. |
+| `trace`             |                       | `false`  | The [trace](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/v0.53.0/exporter/googlecloudexporter#configuration-reference) settings of the exporter. |
+| `log`               |                       | `false`  | The [log](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/v0.53.0/exporter/googlecloudexporter#configuration-reference) settings of the exporter. |
 | `credentials`       |                       | `false`  | The credentials JSON used to authenticate the GCP client. |
 | `credentials_file`  |                       | `false`  | The credentials file used to authenticate the GCP client. Ignored if `credentials` is set. |
 | `project`           |                       | `false`  | The GCP project used when exporting telemetry data. |
