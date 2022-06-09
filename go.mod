@@ -101,6 +101,7 @@ require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/tcplogreceiver v0.53.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/udplogreceiver v0.53.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/vcenterreceiver v0.53.0
+	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/windowseventlogreceiver v0.53.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/windowsperfcountersreceiver v0.53.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/zipkinreceiver v0.53.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/zookeeperreceiver v0.53.0

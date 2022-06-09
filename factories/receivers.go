@@ -66,6 +66,7 @@ import (
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/tcplogreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/udplogreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/vcenterreceiver"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/windowseventlogreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/windowsperfcountersreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/zipkinreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/zookeeperreceiver"
@@ -128,6 +129,7 @@ var defaultReceivers = []component.ReceiverFactory{
 	udplogreceiver.NewFactory(),
 	varnishreceiver.NewFactory(),
 	vcenterreceiver.NewFactory(),
+	windowseventlogreceiver.NewFactory(),
 	windowsperfcountersreceiver.NewFactory(),
 	zipkinreceiver.NewFactory(),
 	zookeeperreceiver.NewFactory(),
