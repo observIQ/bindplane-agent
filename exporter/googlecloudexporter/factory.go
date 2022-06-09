@@ -19,8 +19,10 @@ import (
 	"fmt"
 
 	gcp "github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlecloudexporter"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/resourcedetectionprocessor"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/config"
+	"go.opentelemetry.io/collector/consumer"
 	"go.opentelemetry.io/collector/processor/batchprocessor"
 )
 
@@ -51,21 +53,38 @@ func createMetricsExporter(ctx context.Context, set component.ExporterCreateSett
 		return nil, fmt.Errorf("failed to create metrics exporter: %w", err)
 	}
 
+	processors := []component.MetricsProcessor{}
+	processorConfigs := []config.Processor{
+		exporterConfig.BatchConfig,
+		exporterConfig.DetectConfig,
+	}
+
+	processorFactories := []component.ProcessorFactory{
+		batchprocessor.NewFactory(),
+		resourcedetectionprocessor.NewFactory(),
+	}
+
 	processorSettings := component.ProcessorCreateSettings{
 		TelemetrySettings: set.TelemetrySettings,
 		BuildInfo:         set.BuildInfo,
 	}
 
-	exporterConfig.BatchConfig.SetIDName(exporterConfig.ID().String())
-	factory := batchprocessor.NewFactory()
-	batchProcessor, err := factory.CreateMetricsProcessor(ctx, processorSettings, exporterConfig.BatchConfig, gcpExporter)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create batch processor: %w", err)
+	var consumer consumer.Metrics = gcpExporter
+	for i, processorConfig := range processorConfigs {
+		processorConfig.SetIDName(exporterConfig.ID().String())
+		factory := processorFactories[i]
+		processor, err := factory.CreateMetricsProcessor(ctx, processorSettings, processorConfig, consumer)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create metrics processor %s: %w", processorConfig.ID().String(), err)
+		}
+		processors = append(processors, processor)
+		consumer = processor
 	}
 
 	return &exporter{
-		metricsBatcher:  batchProcessor,
-		metricsExporter: gcpExporter,
+		metricsProcessors: processors,
+		metricsExporter:   gcpExporter,
+		metricsConsumer:   consumer,
 	}, nil
 }
 
@@ -79,21 +98,38 @@ func createLogsExporter(ctx context.Context, set component.ExporterCreateSetting
 		return nil, fmt.Errorf("failed to create logs exporter: %w", err)
 	}
 
+	processors := []component.LogsProcessor{}
+	processorConfigs := []config.Processor{
+		exporterConfig.BatchConfig,
+		exporterConfig.DetectConfig,
+	}
+
+	processorFactories := []component.ProcessorFactory{
+		batchprocessor.NewFactory(),
+		resourcedetectionprocessor.NewFactory(),
+	}
+
 	processorSettings := component.ProcessorCreateSettings{
 		TelemetrySettings: set.TelemetrySettings,
 		BuildInfo:         set.BuildInfo,
 	}
 
-	exporterConfig.BatchConfig.SetIDName(exporterConfig.ID().String())
-	factory := batchprocessor.NewFactory()
-	batchProcessor, err := factory.CreateLogsProcessor(ctx, processorSettings, exporterConfig.BatchConfig, gcpExporter)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create batch processor: %w", err)
+	var consumer consumer.Logs = gcpExporter
+	for i, processorConfig := range processorConfigs {
+		processorConfig.SetIDName(exporterConfig.ID().String())
+		factory := processorFactories[i]
+		processor, err := factory.CreateLogsProcessor(ctx, processorSettings, processorConfig, consumer)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create logs processor %s: %w", processorConfig.ID().String(), err)
+		}
+		processors = append(processors, processor)
+		consumer = processor
 	}
 
 	return &exporter{
-		logsBatcher:  batchProcessor,
-		logsExporter: gcpExporter,
+		logsProcessors: processors,
+		logsExporter:   gcpExporter,
+		logsConsumer:   consumer,
 	}, nil
 }
 
@@ -107,20 +143,37 @@ func createTracesExporter(ctx context.Context, set component.ExporterCreateSetti
 		return nil, fmt.Errorf("failed to create traces exporter: %w", err)
 	}
 
+	processors := []component.TracesProcessor{}
+	processorConfigs := []config.Processor{
+		exporterConfig.BatchConfig,
+		exporterConfig.DetectConfig,
+	}
+
+	processorFactories := []component.ProcessorFactory{
+		batchprocessor.NewFactory(),
+		resourcedetectionprocessor.NewFactory(),
+	}
+
 	processorSettings := component.ProcessorCreateSettings{
 		TelemetrySettings: set.TelemetrySettings,
 		BuildInfo:         set.BuildInfo,
 	}
 
-	exporterConfig.BatchConfig.SetIDName(exporterConfig.ID().String())
-	factory := batchprocessor.NewFactory()
-	batchProcessor, err := factory.CreateTracesProcessor(ctx, processorSettings, exporterConfig.BatchConfig, gcpExporter)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create batch processor: %w", err)
+	var consumer consumer.Traces = gcpExporter
+	for i, processorConfig := range processorConfigs {
+		processorConfig.SetIDName(exporterConfig.ID().String())
+		factory := processorFactories[i]
+		processor, err := factory.CreateTracesProcessor(ctx, processorSettings, processorConfig, consumer)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create traces processor %s: %w", processorConfig.ID().String(), err)
+		}
+		processors = append(processors, processor)
+		consumer = processor
 	}
 
 	return &exporter{
-		tracesBatcher:  batchProcessor,
-		tracesExporter: gcpExporter,
+		tracesProcessors: processors,
+		tracesExporter:   gcpExporter,
+		tracesConsumer:   consumer,
 	}, nil
 }

@@ -18,6 +18,7 @@ import (
 	"os"
 
 	gcp "github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlecloudexporter"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/resourcedetectionprocessor"
 	"go.opentelemetry.io/collector/config"
 	"go.opentelemetry.io/collector/processor/batchprocessor"
 	"go.uber.org/multierr"
@@ -32,10 +33,11 @@ const (
 // Config is the config the google cloud exporter
 type Config struct {
 	config.ExporterSettings `mapstructure:",squash"`
-	Credentials             string                 `mapstructure:"credentials"`
-	CredentialsFile         string                 `mapstructure:"credentials_file"`
-	GCPConfig               *gcp.Config            `mapstructure:",squash"`
-	BatchConfig             *batchprocessor.Config `mapstructure:"batch"`
+	Credentials             string                             `mapstructure:"credentials"`
+	CredentialsFile         string                             `mapstructure:"credentials_file"`
+	GCPConfig               *gcp.Config                        `mapstructure:",squash"`
+	BatchConfig             *batchprocessor.Config             `mapstructure:"batch"`
+	DetectConfig            *resourcedetectionprocessor.Config `mapstructure:"detect"`
 }
 
 // Validate validates the config
@@ -43,6 +45,7 @@ func (c *Config) Validate() error {
 	var err error
 	err = multierr.Append(err, c.GCPConfig.Validate())
 	err = multierr.Append(err, c.BatchConfig.Validate())
+	err = multierr.Append(err, c.DetectConfig.Validate())
 	return err
 }
 
@@ -73,23 +76,33 @@ func createDefaultConfig() config.Exporter {
 		ExporterSettings: config.NewExporterSettings(config.NewComponentID(typeStr)),
 		GCPConfig:        createDefaultGCPConfig(),
 		BatchConfig:      createDefaultBatchConfig(),
+		DetectConfig:     createDefaultDetectConfig(),
 	}
 }
 
 // createDefaultGCPConfig creates a default GCP config
 func createDefaultGCPConfig() *gcp.Config {
-	gcpFactory := gcp.NewFactory()
-	gcpConfig := gcpFactory.CreateDefaultConfig().(*gcp.Config)
-	gcpConfig.RetrySettings.Enabled = false
-	gcpConfig.UserAgent = defaultUserAgent
-	gcpConfig.MetricConfig.Prefix = defaultMetricPrefix
-	gcpConfig.LogConfig.DefaultLogName, _ = os.Hostname()
-	return gcpConfig
+	factory := gcp.NewFactory()
+	config := factory.CreateDefaultConfig().(*gcp.Config)
+	config.RetrySettings.Enabled = false
+	config.UserAgent = defaultUserAgent
+	config.MetricConfig.Prefix = defaultMetricPrefix
+	config.LogConfig.DefaultLogName, _ = os.Hostname()
+	return config
 }
 
 // createDefaultBatchConfig creates a default batch config
 func createDefaultBatchConfig() *batchprocessor.Config {
-	batchFactory := batchprocessor.NewFactory()
-	batchConfig := batchFactory.CreateDefaultConfig().(*batchprocessor.Config)
-	return batchConfig
+	factory := batchprocessor.NewFactory()
+	config := factory.CreateDefaultConfig().(*batchprocessor.Config)
+	return config
+}
+
+// createDefaultDetectConfig creates a default detect config
+func createDefaultDetectConfig() *resourcedetectionprocessor.Config {
+	detectorFactory := resourcedetectionprocessor.NewFactory()
+	detectorConfig := detectorFactory.CreateDefaultConfig().(*resourcedetectionprocessor.Config)
+	detectorConfig.Detectors = []string{"system"}
+	detectorConfig.DetectorConfig.SystemConfig.HostnameSources = []string{"os"}
+	return detectorConfig
 }
