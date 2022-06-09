@@ -7,7 +7,6 @@ require (
 	github.com/observiq/observiq-otel-collector/exporter/googlecloudexporter v0.5.0
 	github.com/observiq/observiq-otel-collector/processor/resourceattributetransposerprocessor v0.5.0
 	github.com/observiq/observiq-otel-collector/receiver/pluginreceiver v0.5.0
-	github.com/observiq/opentelemetry-collector-contrib/receiver/vcenterreceiver v0.0.0-20220602163554-5c4290439ed1
 	github.com/open-telemetry/opamp-go v0.0.0-20220531162705-3f2eab449870
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/alibabacloudlogserviceexporter v0.53.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/awscloudwatchlogsexporter v0.53.0
@@ -101,6 +100,7 @@ require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/syslogreceiver v0.53.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/tcplogreceiver v0.53.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/udplogreceiver v0.53.0
+	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/vcenterreceiver v0.53.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/windowsperfcountersreceiver v0.53.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/zipkinreceiver v0.53.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/zookeeperreceiver v0.53.0

@@ -17,7 +17,6 @@ package factories
 import (
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-collector/receiver/varnishreceiver"
 	"github.com/observiq/observiq-otel-collector/receiver/pluginreceiver"
-	"github.com/observiq/opentelemetry-collector-contrib/receiver/vcenterreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/activedirectorydsreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/apachereceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/awscontainerinsightreceiver"
@@ -66,6 +65,7 @@ import (
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/syslogreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/tcplogreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/udplogreceiver"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/vcenterreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/windowsperfcountersreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/zipkinreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/zookeeperreceiver"
