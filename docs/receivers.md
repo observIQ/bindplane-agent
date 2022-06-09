@@ -57,5 +57,6 @@ Below is a list of supported receivers with links to their documentation pages.
 | UDP Log Receiver                            | [udplogreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.53.0/receiver/udplogreceiver/README.md) |
 | Varnish Cache Receiver                      | [varnishreceiver](https://github.com/GoogleCloudPlatform/opentelemetry-operations-collector/blob/1ba794f22664266994c03a5c0b0893179f526e34/receiver/varnishreceiver/README.md) |
 | vCenter Receiver                            | [vcenterreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.53.0/receiver/vcenterreceiver/README.md) |
+| Windows Event Log Receiver                  | [windowseventlogreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.53.0/receiver/windowseventlogreceiver/README.md) |
 | Windows Performance Counters Receiver       | [windowsperfcountersreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.53.0/receiver/windowsperfcountersreceiver/README.md) |
 | Zipkin Receiver                             | [zipkinreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.53.0/receiver/zipkinreceiver/README.md) |
