@@ -1,0 +1,16 @@
+receivers:
+  plugin:
+    path: './plugins/vcenter_logs.yaml'
+​
+exporters:
+  logging:
+    loglevel: debug
+​
+service:
+  pipelines:
+    logs:
+      receivers: [plugin]
+      exporters: [logging]
+  telemetry:
+    metrics:
+      level: none
