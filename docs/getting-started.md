@@ -118,59 +118,19 @@ receivers:
       paging:
       processes:
 
-# Processors are run on data between being received and being exported.
-processors:
-  # Resourcedetection is used to add a unique (host.name)
-  # to the metric resource(s), allowing users to filter
-  # between multiple systems.
-  resourcedetection:
-    detectors: ["system"]
-    system:
-      hostname_sources: ["os"]
-
-  # Resourceattributetransposer is used to add labels to metrics.
-  resourceattributetransposer:
-    operations:
-      # Process metrics require unique metric labels, otherwise the Google
-      # API will reject some metrics as "out of order" / duplicates.
-      - from: "host.name"
-          to: "hostname"
-      - from: "process.pid"
-          to: "pid"
-      - from: "process.executable.name"
-          to: "binary"
- 
-  # Normalizesums smoothes out data points for more
-  # comprehensive visualizations.
-  normalizesums:
-
-  # The batch processor aggregates incoming metrics into a batch,
-  # releasing them if a certain time has passed or if a certain number
-  # of entries have been aggregated.
-  batch:
-
 # Exporters send the data to a destination, in this case GCP.
 exporters:
   googlecloud:
     retry_on_failure:
       enabled: false
-    metric:
-      prefix: custom.googleapis.com
 
 # Service specifies how to construct the data pipelines using
 # the configurations above.
 service:
   pipelines:
     metrics:
-      receivers:
-      - hostmetrics
-      processors:
-      - resourcedetection
-      - resourceattributetransposer
-      - normalizesums
-      - batch
-      exporters:
-      - googlecloud
+      receivers: [hostmetrics]
+      exporters: [googlecloud]
 ```
 
 Restart the collector
