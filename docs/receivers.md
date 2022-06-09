@@ -6,6 +6,7 @@ Below is a list of supported receivers with links to their documentation pages.
 | ------------------------------------------- | ------------- |
 | Active Directory Domain Services Receiver   | [activedirectorydsreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.53.0/receiver/activedirectorydsreceiver/README.md) |
 | Apache CouchDB Receiver                     | [couchdbreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.53.0/receiver/couchdbreceiver/README.md) |
+| Apache Flink Metrics Receiver               | [flinkmetricsreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.53.0/receiver/flinkmetricsreceiver/README.md) |
 | Apache Web Server Receiver                  | [apachereceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.53.0/receiver/apachereceiver/README.md) |
 | Apache ZooKeeper Receiver                   | [zookeeperreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.53.0/receiver/zookeeperreceiver/README.md) |
 | AWS CloudWatch Container Insights Receiver  | [awscontainerinsightreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.53.0/receiver/awscontainerinsightreceiver/README.md) |
