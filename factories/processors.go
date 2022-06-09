@@ -24,6 +24,7 @@ import (
 	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/groupbyattrsprocessor"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/groupbytraceprocessor"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/k8sattributesprocessor"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/logstransformprocessor"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/metricsgenerationprocessor"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/metricstransformprocessor"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/probabilisticsamplerprocessor"
@@ -50,6 +51,7 @@ var defaultProcessors = []component.ProcessorFactory{
 	groupbyattrsprocessor.NewFactory(),
 	groupbytraceprocessor.NewFactory(),
 	k8sattributesprocessor.NewFactory(),
+	logstransformprocessor.NewFactory(),
 	memorylimiterprocessor.NewFactory(),
 	metricsgenerationprocessor.NewFactory(),
 	metricstransformprocessor.NewFactory(),
