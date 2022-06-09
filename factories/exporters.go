@@ -15,6 +15,7 @@
 package factories
 
 import (
+	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/googlemanagedprometheus"
 	"github.com/observiq/observiq-otel-collector/exporter/googlecloudexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/alibabacloudlogserviceexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/awscloudwatchlogsexporter"
@@ -60,6 +61,7 @@ var defaultExporters = []component.ExporterFactory{
 	fileexporter.NewFactory(),
 	googlecloudexporter.NewFactory(),
 	googlecloudpubsubexporter.NewFactory(),
+	googlemanagedprometheus.NewFactory(),
 	influxdbexporter.NewFactory(),
 	jaegerexporter.NewFactory(),
 	kafkaexporter.NewFactory(),
