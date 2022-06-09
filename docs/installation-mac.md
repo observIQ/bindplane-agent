@@ -65,6 +65,10 @@ brew uninstall observiq/observiq-otel-collector/observiq-otel-collector
 
 # If you moved the opentelemetry-java-contrib-jmx-metrics.jar
 sudo rm -f /opt/opentelemetry-java-contrib-jmx-metrics.jar
+
+# To remove configs
+rm -f $(brew --prefix)/etc/observiq_config.yaml
+rm -f $(brew --prefix)/etc/observiq_config.yaml.default
 ```
 
 ### Uninstall script
