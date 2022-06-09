@@ -1,0 +1,95 @@
+version: 0.0.1
+title: macOS
+description: Log parser for macOS
+parameters:
+  - name: enable_system_log
+    type: bool
+    default: true
+  - name: system_log_path
+    type: "[]string"
+    default:
+      - "/var/log/system.log"
+  - name: enable_install_log
+    type: bool
+    default: true
+  - name: install_log_path
+    type: "[]string"
+    default: 
+      - "/var/log/install.log"
+  - name: start_at
+    type: string
+    supported:
+      - beginning
+      - end
+    default: end
+template: |
+  receivers:
+    {{ if .enable_system_log }}
+    filelog/system_logs:
+      include: 
+        {{ range $fp := .system_log_path }}
+        - '{{ $fp }}'
+        {{ end }}
+      multiline: 
+        line_start_pattern: '\w{3}\s*\d{1,2} \d{2}:\d{2}:\d{2}'
+      start_at: {{ .start_at }}
+      attributes:
+        log_type: 'macos.system'
+      operators:
+        - type: regex_parser
+          regex: '^(?P<timestamp>\w{3}\s*\d{1,2} \d{2}:\d{2}:\d{2}) (---|(?P<host>[^ ]*))? ((?P<process>[^\[]*)\[(?P<pid>[^\]]*)\])?( \((?P<subprocess>[^\[]*)(\[(?P<spid>[^\]]*)\])?\))?(: )?(?P<message>[\w\W]*)'
+          timestamp:
+            parse_from: attributes.timestamp
+            layout_type: gotime
+            layout: 'Jan _2 15:04:05'
+    {{ end }} ## .enable_system_log
+
+    {{ if .enable_install_log }}
+    filelog/install_logs:
+      include: 
+        {{ range $fp := .install_log_path }}
+        - '{{ $fp }}'
+        {{ end }}
+      multiline: 
+        line_start_pattern: '^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}[+-]\d{2}|^\w{3}\s*\d{1,2} \d{2}:\d{2}:\d{2}'
+      start_at: {{ .start_at }}
+      operators:
+        - id: id_router
+          type: router
+          routes:
+            - output: time_parser_with_timezone
+              expr: $ matches '^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}[+-]\\d{2}'
+            - output: time_parser_without_timezone
+              expr: $ matches '^\\w{3}\\s*\\d{1,2} \\d{2}:\\d{2}:\\d{2}'
+        - id: time_parser_with_timezone
+          type: regex_parser
+          regex: '^(?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}[+-]\d{2}) (---|(?P<host>[^ ]*))? ((?P<process>[^\[]*)\[(?P<pid>[^\]]*)\])?( \((?P<subprocess>[^\[]*)(\[(?P<spid>[^\]]*)\])?\))?(: )?(?P<message>[\w\W]*)'
+          timestamp:
+            parse_from: attributes.timestamp
+            layout_type: gotime
+            layout: '2006-01-02 15:04:05-07'
+          output: add_type
+        - id: time_parser_without_timezone
+          type: regex_parser
+          regex: '^(?P<timestamp>\w{3}\s*\d{1,2} \d{2}:\d{2}:\d{2}) (---|(?P<host>[^ ]*))? ((?P<process>[^\[]*)\[(?P<pid>[^\]]*)\])?( \((?P<subprocess>[^\[]*)(\[(?P<spid>[^\]]*)\])?\))?(: )?(?P<message>[\w\W]*)'
+          timestamp:
+            parse_from: attributes.timestamp
+            layout_type: gotime
+            layout: 'Jan _2 15:04:05'
+          output: add_type
+        - id: add_type
+          type: add
+          field: attributes.log_type
+          value: 'macos.install'
+    {{ end }} ## .enable_install_log
+
+  service:
+    pipelines:
+      logs:
+        receivers: 
+          {{ if .enable_system_log }}
+          - filelog/system_logs
+          {{ end }}
+          {{ if .enable_install_log }}
+          - filelog/install_logs
+          {{ end }}
