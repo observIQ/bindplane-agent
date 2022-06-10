@@ -40,49 +40,47 @@ parameters:
 
 template: |
   receivers:
-  - id: vcenter
-    type: tcp_input
-    listen_address: '{{ if eq .length 0 }}{{ .listen_ip }}:{{ .listen_port }}{{ else }}{{ .listen_address }}{{ end }}'
-    max_buffer_size: {{ .max_buffer_size }}
-    attributes:
-      log_type: vmware_vcenter
-      plugin_id: {{ .id }}
-    add_attributes: true
-    tls:
-      insecure: {{ .insecure }}
-      cert_file: {{ .certificate_file }}
-      key_file: {{ .private_key_file }}
-    output: prefix_router
+    tcplog:
+      listen_address: '{{ if eq .length 0 }}{{ .listen_ip }}:{{ .listen_port }}{{ else }}{{ .listen_address }}{{ end }}'
+      max_buffer_size: {{ .max_buffer_size }}
+      attributes:
+        log_type: vmware_vcenter
+        plugin_id: {{ .id }}
+      add_attributes: true
+      tls:
+        insecure: {{ .insecure }}
+        cert_file: {{ .certificate_file }}
+        key_file: {{ .private_key_file }}
+      operators:
+        # vcenter will (sometimes) prepend an id to the messages, check
+        # for the id and drop it if it exsits
+        # example: '257 <14>1. . . '
+        - id: prefix_router
+          type: router
+          routes:
+            - output: pre_parser
+            - expr: 'body matches "^\\d* "'
+          default: vcenter_parser
 
-  # vcenter will (sometimes) prepend an id to the messages, check
-  # for the id and drop it if it exsits
-  # example: '257 <14>1. . . '
-  - id: prefix_router
-    type: router
-    routes:
-      - output: pre_parser
-      - expr: 'body matches "^\\d* "'
-    default: vcenter_parser
+        - id: pre_parser
+          type: regex_parser
+          regex: '^(?P<drop>\d* )(?P<syslog_message>[\w\W]*)'
 
-  - id: pre_parser
-    type: regex_parser
-    regex: '^(?P<drop>\d* )(?P<syslog_message>[\w\W]*)'
+        - id: remove_drop
+          type: remove
+          field: body.drop
+        
+        - id: move_syslog_message
+          type: move
+          from: body.syslog_message
+          to: body
 
-  - id: remove_drop
-    type: remove
-    field: body.drop
-  
-  - id: move_syslog_message
-    type: move
-    from: body.syslog_message
-    to: body
-
-  - id: vcenter_parser
-    type: syslog_parser
-    protocol: rfc5424
+        - id: vcenter_parser
+          type: syslog_parser
+          protocol: rfc5424
 
   service:
     pipelines:
       logs:
         receivers: 
-          - vcenter
+          - tcplog
