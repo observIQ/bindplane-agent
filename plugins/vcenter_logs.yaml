@@ -18,11 +18,9 @@ parameters:
   - name: certificate_file
     type: string
     default: "/opt/cert"
-    required: true
   - name: key_file
     type: string
     default: "/opt/key"
-    required: true
 
 
   # Set Defaults
