@@ -2,44 +2,37 @@ receivers:
   prometheus:
     config:
       scrape_configs:
-      - job_name: 'cadvisor' # A friendly name, will be added as 'service.name' resource label
+      - job_name: 'cadvisor'
         scrape_interval: 60s
         static_configs:
         - targets:
           - cadvisor:8080
 
 processors:
+  # Detect the running containers hostname
+  resourcedetection:
+    detectors: ["system"]
+    system:
+      hostname_sources: ["os"]
+
+  # Copy host.name to cadvisor.collector_hostname and then
+  # remove the origonal. Google will map to "generic_task",
+  # which drops host.name. We need to preserve the collector's
+  # hostname in order to guarantee uniqueness.
   resource:
     attributes:
-    # DOCKER_AGENT_HOSTNAME is set when running `docker run` or docker-compose.
-    - key: agent_host
-      value: "$DOCKER_AGENT_HOSTNAME"
-      action: upsert
-
-  # Metrics require unique metric labels, otherwise the Google
-  # API will reject some metrics as "out of order" / duplicates.
-  # The combination of hostname, instance, and service will make each
-  # metric unique, allowing a single receiver to scrape multiple prometheus
-  # exporter endpoints.
-  resourceattributetransposer:
-    operations:
-    - from: "agent_host"
-      to: "agent"
-    - from: "instance"
-      to: "instance"
-    - from: "service.name"
-      to: "service"
-
-  normalizesums:
-
-  batch:
+    - key: cadvisor.collector_hostname
+      from_attribute: host.name
+      action: insert
+    - key: host.name
+      action: delete
 
 exporters: 
   googlecloud:
-    retry_on_failure:
-      enabled: false
     metric:
-      prefix: custom.googleapis.com
+      prefix: workload.googleapis.com/cadvisor
+      resource_filters:
+        - prefix: cadvisor
 
 service:
   pipelines:
@@ -47,9 +40,7 @@ service:
       receivers:
       - prometheus
       processors:
+      - resourcedetection
       - resource
-      - resourceattributetransposer
-      - normalizesums
-      - batch
       exporters:
       - googlecloud
