@@ -4,7 +4,7 @@ description: Log parser for VMware vCenter
 parameters:
   - name: listen_port
     type: int
-    default: 5140
+    default: 5142
   - name: listen_ip
     type: string
     default: "0.0.0.0"
