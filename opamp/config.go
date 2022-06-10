@@ -16,7 +16,11 @@
 package opamp
 
 import (
+	"crypto/tls"
+	"crypto/x509"
 	"fmt"
+	"io/ioutil"
+	"log"
 	"os"
 	"path/filepath"
 
@@ -45,9 +49,44 @@ type Config struct {
 
 type TLSConfig struct {
 	insecure bool
-	keyfile  *string
-	cerfile  *string
-	cafile   *string
+	keyfile  string
+	certfile string
+	cafile   string
+}
+
+func (c Config) ToTLS() *tls.Config {
+	if c.TLS == nil {
+		return nil
+	}
+
+	if c.TLS.insecure {
+		return &tls.Config{
+			InsecureSkipVerify: true,
+		}
+	}
+
+	cert, err := tls.LoadX509KeyPair(c.TLS.certfile, c.TLS.keyfile)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Load CA cert
+	caCert, err := ioutil.ReadFile(c.TLS.cafile)
+	if err != nil {
+		log.Fatal(err)
+	}
+	caCertPool := x509.NewCertPool()
+	caCertPool.AppendCertsFromPEM(caCert)
+
+	// Setup HTTPS client
+	tlsConfig := &tls.Config{
+		Certificates: []tls.Certificate{cert},
+		RootCAs:      caCertPool,
+	}
+
+	tlsConfig.BuildNameToCertificate()
+
+	return tlsConfig
 }
 
 // ParseConfig given a configuration file location will parse the config

@@ -134,7 +134,7 @@ func (c *Client) Connect(ctx context.Context) error {
 			"Authorization": []string{fmt.Sprintf("Secret-Key %s", c.currentConfig.GetSecretKey())},
 			"User-Agent":    []string{fmt.Sprintf("observiq-otel-collector/%s", version.Version())},
 		},
-		TLSConfig:   nil, // TODO add support for TLS
+		TLSConfig:   c.currentConfig.ToTLS(),
 		InstanceUid: c.ident.agentID,
 		Callbacks: types.CallbacksStruct{
 			OnConnectFunc:          c.onConnectHandler,
