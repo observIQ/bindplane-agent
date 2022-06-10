@@ -26,15 +26,3 @@ If you wish to scrape metrics from external systems, update `config.yaml`'s prom
     - '10.128.1.32:9100'
     - '10.128.1.33:9100'
 ```
-
-## Metrics
-
-Metrics can be found with the `custom.googleapis.com` prefix.
-
-Example MQL query for [node exporter's](https://github.com/prometheus/node_exporter) `node_cpu_seconds_total`:
-```
-fetch global
-| metric 'custom.googleapis.com/node_cpu_seconds_total'
-| align rate(1m)
-| every 1m
-```

@@ -6,8 +6,6 @@ The Syslog receiver can be used to receive Syslog and forward to Google Cloud Lo
 
 See the [prerequisites](../README.md) doc for Google Cloud prerequisites.
 
-Edit the configuration and replace `project: REPLACE_ME` with the project id you wish to write logs to.
-
 ## Examples
 
 **Rsyslog RFC 3164**

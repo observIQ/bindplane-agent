@@ -2,8 +2,6 @@ receivers:
   iis:
     collection_interval: 60s
 
-processors:
-
 exporters:
   googlecloud:
 
@@ -12,6 +10,5 @@ service:
     metrics:
       receivers:
       - iis
-      processors:
       exporters:
       - googlecloud

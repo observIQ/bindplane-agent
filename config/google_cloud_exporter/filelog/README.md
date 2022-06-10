@@ -10,8 +10,6 @@ The collector must be installed on the target system. The user running the colle
 
 See the [prerequisites](../README.md) doc for Google Cloud prerequisites.
 
-Edit the configuration and replace `project: REPLACE_ME` with the project id you wish to write logs to.
-
 ## Examples
 
 **Raw log file**
