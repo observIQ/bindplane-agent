@@ -9,5 +9,3 @@ The collector must be installed on the Journald system. The system must use Syst
 ## Prerequisites
 
 See the [prerequisites](../README.md) doc for Google Cloud prerequisites.
-
-Edit the configuration and replace `project: REPLACE_ME` with the project id you wish to write logs to.

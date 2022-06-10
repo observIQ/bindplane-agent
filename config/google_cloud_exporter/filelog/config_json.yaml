@@ -12,9 +12,6 @@ receivers:
 
 exporters: 
   googlecloud:
-    retry_on_failure:
-      enabled: false
-    project: REPLACE_ME
 
 service:
   pipelines:
