@@ -8,21 +8,18 @@ parameters:
   - name: listen_ip
     type: string
     default: "0.0.0.0"
-  - name: listen_address
-    type: string
-    default: ""
   - name: max_buffer_size
     type: string
     default: "1024kib"
     required: false
-  - name: insecure
+  - name: enable_tls
     type: bool
     default: false
   - name: certificate_file
     type: string
     default: "/opt/cert"
     required: true
-  - name: private_key_file
+  - name: key_file
     type: string
     default: "/opt/key"
     required: true
@@ -36,21 +33,21 @@ parameters:
   # {{$max_buffer_size := default "1024kib" .max_buffer_size}}
   # {{$insecure := default false .insecure}}
   # {{$certificate_file := default "" .certificate_file}}
-  # {{$private_key_file := default "" .private_key_file}}
+  # {{$key_file := default "" .key_file}}
 
 template: |
   receivers:
     tcplog:
-      listen_address: '{{ if eq .length 0 }}{{ .listen_ip }}:{{ .listen_port }}{{ else }}{{ .listen_address }}{{ end }}'
-      max_buffer_size: {{ .max_buffer_size }}
+      listen_address: '{{ .listen_ip }}:{{ .listen_port }}'
+      max_log_size: {{ .max_buffer_size }}
       attributes:
         log_type: vmware_vcenter
-        plugin_id: {{ .id }}
       add_attributes: true
+      {{ if .enable_tls }}
       tls:
-        insecure: {{ .insecure }}
         cert_file: {{ .certificate_file }}
-        key_file: {{ .private_key_file }}
+        key_file: {{ .key_file }}
+      {{ end }}
       operators:
         # vcenter will (sometimes) prepend an id to the messages, check
         # for the id and drop it if it exsits
@@ -59,7 +56,7 @@ template: |
           type: router
           routes:
             - output: pre_parser
-            - expr: 'body matches "^\\d* "'
+              expr: 'body matches "^\\d* "'
           default: vcenter_parser
 
         - id: pre_parser
@@ -82,5 +79,4 @@ template: |
   service:
     pipelines:
       logs:
-        receivers: 
-          - tcplog
+        receivers: [tcplog]
