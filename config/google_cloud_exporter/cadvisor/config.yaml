@@ -16,7 +16,7 @@ processors:
       hostname_sources: ["os"]
 
   # Copy host.name to cadvisor.collector_hostname and then
-  # remove the origonal. Google will map to "generic_task",
+  # remove the original. Google will map to "generic_task",
   # which drops host.name. We need to preserve the collector's
   # hostname in order to guarantee uniqueness.
   resource:
