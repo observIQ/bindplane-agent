@@ -121,8 +121,6 @@ receivers:
 # Exporters send the data to a destination, in this case GCP.
 exporters:
   googlecloud:
-    retry_on_failure:
-      enabled: false
 
 # Service specifies how to construct the data pipelines using
 # the configurations above.
