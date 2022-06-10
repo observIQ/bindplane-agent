@@ -12,30 +12,35 @@ See the [prerequisites](../prerequisites.md) doc for Google Cloud prerequisites.
 
 ## Deployment
 
-Run as a container
+Run with Docker Compose. Docker Compose assumes that a `credentials.json`
+service account key exists in this directory.
 
 ```bash
-docker run -d \
-    --restart=always \
-    --volume="$(pwd)/config.yaml:/etc/otel/config.yaml" \
-    --volume="$(pwd)/credentials.json:/etc/otel/credentials.json" \
-    -e "GOOGLE_APPLICATION_CREDENTIALS=/etc/otel/credentials.json" \
-    -e "DOCKER_AGENT_HOSTNAME=$(hostname)" \
-    observiq/observiq-otel-collector:v0.4.1
-```
+ docker-compose up -d
+ ```
 
-Run with Docker Compose
-
+***docker-compose.yml***
 ```yaml
 version: "3.9"
 services:
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    restart: always
+    container_name: cadvisor
+    hostname: cadvisor
+    ports:
+    - 8080:8080
+    volumes:
+    - /:/rootfs:ro
+    - /var/run:/var/run:rw
+    - /sys:/sys:ro
+    - /var/lib/docker/:/var/lib/docker:ro
+
   collector:
+    image: observiq/observiq-otel-collector:1.1.0
     restart: always
-    # Run as root if using a configuration that requires
-    # root privileges.
-    #user: root
-    image: observiq/observiq-otel-collector:v0.4.1
-    restart: always
+    container_name: observiq-otel-collector
+    hostname: observiq-otel-collector
     deploy:
       resources:
         limits:
@@ -43,7 +48,6 @@ services:
           memory: 256M
     environment:
       - GOOGLE_APPLICATION_CREDENTIALS=/etc/otel/credentials.json
-      - DOCKER_AGENT_HOSTNAME=${HOSTNAME}
     volumes:
       - ${PWD}/config.yaml:/etc/otel/config.yaml
       - ${PWD}/credentials.json:/etc/otel/credentials.json
