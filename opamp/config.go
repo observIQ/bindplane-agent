@@ -33,6 +33,18 @@ var (
 
 	// errPrefixParse for error when parsing config
 	errPrefixParse = "failed to parse OpAmp config"
+
+	// errmissingtlsfiles for missing a required tls file
+	errmissingtlsfiles = "must specify both a key and cert file for TLS"
+
+	// errinvalidkeyfile for key file that is not readable
+	errinvalidkeyfile = "failed to read TLS key file"
+
+	// errinvalidcertfile for cert file that is not readable
+	errinvalidcertfile = "failed to read TLS cert file"
+
+	// errinvalidcafile for ca file that is not readable
+	errinvalidcafile = "failed to read TLS ca file"
 )
 
 // Config contains the configuration for the collector to communicate with an OpAmp enabled platform.
@@ -49,9 +61,9 @@ type Config struct {
 
 type TLSConfig struct {
 	insecure bool
-	keyfile  string
-	certfile string
-	cafile   string
+	keyfile  *string `yaml:"keyfile"`
+	certfile *string `yaml:"certfile"`
+	cafile   *string `yaml:"cafile"`
 }
 
 func (c Config) ToTLS() *tls.Config {
@@ -65,13 +77,13 @@ func (c Config) ToTLS() *tls.Config {
 		}
 	}
 
-	cert, err := tls.LoadX509KeyPair(c.TLS.certfile, c.TLS.keyfile)
+	cert, err := tls.LoadX509KeyPair(*c.TLS.certfile, *c.TLS.keyfile)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	// Load CA cert
-	caCert, err := ioutil.ReadFile(c.TLS.cafile)
+	caCert, err := ioutil.ReadFile(*c.TLS.cafile)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -90,7 +102,7 @@ func (c Config) ToTLS() *tls.Config {
 }
 
 // ParseConfig given a configuration file location will parse the config
-func ParseConfig(configLocation string) (*Config, error) {
+func (c Config) ParseConfig(configLocation string) (*Config, error) {
 	configPath := filepath.Clean(configLocation)
 
 	// Read in config file contents
@@ -105,12 +117,32 @@ func ParseConfig(configLocation string) (*Config, error) {
 		return nil, fmt.Errorf("%s: %w", errPrefixParse, err)
 	}
 
+	if c.TLS != nil && c.TLS.insecure == false {
+		if c.TLS.certfile == nil || c.TLS.keyfile == nil {
+			return nil, errors.New(errmissingtlsfiles)
+		}
+
+		if keydata, err := os.Stat(*c.TLS.keyfile); errors.Is(err, os.ErrNotExist) {
+			return nil, errors.New(errinvalidkeyfile)
+		}
+
+		if certdata, err := os.Stat(*c.TLS.certfile); errors.Is(err, os.ErrNotExist) { 
+			return nil, errors.New(errinvalidcertfile)
+		}
+
+		if c.TLS.cafile != nil {
+			if cadata, err := os.Stat(*c.TLS.cafile); errors.Is(err, os.ErrNotExist) {
+				return nil, errors.New(errinvalidcafile)
+			}
+		}
+
 	return &config, nil
 }
 
 // Copy creates a deep copy of this config
 func (c Config) Copy() *Config {
-	cfgCopy := &Config{
+	
+	cfgCopy := Config{
 		Endpoint: c.Endpoint,
 		AgentID:  c.AgentID,
 	}
@@ -127,8 +159,32 @@ func (c Config) Copy() *Config {
 		cfgCopy.AgentName = new(string)
 		*cfgCopy.AgentName = *c.AgentName
 	}
+	if c.TLS != nil {
+		cfgCopy.TLS = c.TLS.Copy()
+	}
 
 	return cfgCopy
+}
+
+func (t TLSConfig) Copy() *TLSConfig {
+	tlsCopy := TLSConfig{
+		insecure: t.insecure,
+	}
+
+	if t.cerfile != nil {
+		tlsCopy.cerfile = new(string)
+		*tlsCopy.cerfile = *t.cerfile
+	}
+	if t.keyfile != nil {
+		tlsCopy.keyfile = new(string)
+		*tlsCopy.keyfile = *t.keyfile
+	}
+	if t.cafile != nil {
+		tlsCopy.cafile = new(string)
+		*tlsCopy.cafile = *t.cafile
+	}
+
+	return &tlsCopy
 }
 
 // GetSecretKey returns secret key if set else returns empty string
