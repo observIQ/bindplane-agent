@@ -1,0 +1,19 @@
+receivers:
+  plugin:
+    path: './plugins/esxi_logs.yaml'
+    parameters:
+      - listen_ip: tcp://10.33.104.64
+      - listen_port: 5140
+
+exporters:
+  logging:
+    loglevel: debug
+
+service:
+  pipelines:
+    logs:
+      receivers: [plugin]
+      exporters: [logging]
+  telemetry:
+    metrics:
+      level: none
