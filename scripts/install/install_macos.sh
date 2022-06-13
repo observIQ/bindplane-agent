@@ -206,6 +206,15 @@ force_exit()
   exit 1
 }
 
+# like force_exit, but returns exit code 0
+force_exit_no_error()
+{
+  # Exit regardless of subshell level with no "Terminated" message
+  kill -PIPE $$
+  # Call exit to handle special circumstances (like running script during docker container build)
+  exit 0
+}
+
 error_exit()
 {
   line_num=$(if [ -n "$1" ]; then command printf ":$1"; fi)
@@ -603,15 +612,15 @@ main()
           version=$2 ; shift 2 ;;
         -r|--uninstall)
           uninstall
-          force_exit
+          force_exit_no_error
           ;;
         -u|--upgrade)
           upgrade
-          force_exit
+          force_exit_no_error
           ;;
         -h|--help)
           usage
-          force_exit
+          force_exit_no_error
           ;;
         -e|--endpoint)
           opamp_endpoint=$2 ; shift 2 ;;
