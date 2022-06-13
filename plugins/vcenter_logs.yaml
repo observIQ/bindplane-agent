@@ -22,17 +22,6 @@ parameters:
     type: string
     default: "/opt/key"
 
-
-  # Set Defaults
-  # {{$listen_address := default "0.0.0.0:5140" .listen_address}}
-  # {{$length := len $listen_address}}
-  # {{$listen_ip := default "0.0.0.0" .listen_ip}}
-  # {{$listen_port := default 5140 .listen_port}}
-  # {{$max_buffer_size := default "1024kib" .max_buffer_size}}
-  # {{$insecure := default false .insecure}}
-  # {{$certificate_file := default "" .certificate_file}}
-  # {{$key_file := default "" .key_file}}
-
 template: |
   receivers:
     tcplog:
@@ -63,12 +52,12 @@ template: |
 
         - id: remove_drop
           type: remove
-          field: body.drop
+          field: attributes.drop
         
         - id: move_syslog_message
           type: move
-          from: body.syslog_message
-          to: body
+          from: attributes.syslog_message
+          to: attributes
 
         - id: vcenter_parser
           type: syslog_parser
@@ -78,4 +67,4 @@ template: |
     pipelines:
       logs:
         receivers: [tcplog]
-        
+
