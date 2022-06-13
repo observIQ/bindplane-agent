@@ -603,15 +603,15 @@ main()
           version=$2 ; shift 2 ;;
         -r|--uninstall)
           uninstall
-          force_exit
+          exit 0
           ;;
         -u|--upgrade)
           upgrade
-          force_exit
+          exit 0
           ;;
         -h|--help)
           usage
-          force_exit
+          exit 0
           ;;
         -e|--endpoint)
           opamp_endpoint=$2 ; shift 2 ;;

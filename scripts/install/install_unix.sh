@@ -695,11 +695,11 @@ main()
           opamp_secret_key=$2 ; shift 2 ;;
         -r|--uninstall)
           uninstall
-          force_exit
+          exit 0
           ;;
         -h|--help)
           usage
-          force_exit
+          exit 0
           ;;
       --)
         shift; break ;;
