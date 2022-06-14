@@ -18,6 +18,7 @@ package opamp
 import (
 	"crypto/tls"
 	"crypto/x509"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -102,7 +103,7 @@ func (c Config) ToTLS() *tls.Config {
 }
 
 // ParseConfig given a configuration file location will parse the config
-func (c Config) ParseConfig(configLocation string) (*Config, error) {
+func ParseConfig(configLocation string) (*Config, error) {
 	configPath := filepath.Clean(configLocation)
 
 	// Read in config file contents
@@ -117,32 +118,32 @@ func (c Config) ParseConfig(configLocation string) (*Config, error) {
 		return nil, fmt.Errorf("%s: %w", errPrefixParse, err)
 	}
 
-	if c.TLS != nil && c.TLS.insecure == false {
-		if c.TLS.certfile == nil || c.TLS.keyfile == nil {
+	if config.TLS != nil && config.TLS.insecure == false {
+		if config.TLS.certfile == nil || config.TLS.keyfile == nil {
 			return nil, errors.New(errmissingtlsfiles)
 		}
 
-		if keydata, err := os.Stat(*c.TLS.keyfile); errors.Is(err, os.ErrNotExist) {
+		if _, err := os.Stat(*config.TLS.keyfile); errors.Is(err, os.ErrNotExist) {
 			return nil, errors.New(errinvalidkeyfile)
 		}
 
-		if certdata, err := os.Stat(*c.TLS.certfile); errors.Is(err, os.ErrNotExist) { 
+		if _, err := os.Stat(*config.TLS.certfile); errors.Is(err, os.ErrNotExist) {
 			return nil, errors.New(errinvalidcertfile)
 		}
 
-		if c.TLS.cafile != nil {
-			if cadata, err := os.Stat(*c.TLS.cafile); errors.Is(err, os.ErrNotExist) {
+		if config.TLS.cafile != nil {
+			if _, err := os.Stat(*config.TLS.cafile); errors.Is(err, os.ErrNotExist) {
 				return nil, errors.New(errinvalidcafile)
 			}
 		}
-
+	}
 	return &config, nil
 }
 
 // Copy creates a deep copy of this config
 func (c Config) Copy() *Config {
-	
-	cfgCopy := Config{
+
+	cfgCopy := &Config{
 		Endpoint: c.Endpoint,
 		AgentID:  c.AgentID,
 	}
@@ -171,9 +172,9 @@ func (t TLSConfig) Copy() *TLSConfig {
 		insecure: t.insecure,
 	}
 
-	if t.cerfile != nil {
-		tlsCopy.cerfile = new(string)
-		*tlsCopy.cerfile = *t.cerfile
+	if t.certfile != nil {
+		tlsCopy.certfile = new(string)
+		*tlsCopy.certfile = *t.certfile
 	}
 	if t.keyfile != nil {
 		tlsCopy.keyfile = new(string)
