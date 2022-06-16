@@ -1,0 +1,38 @@
+receivers:
+  kafkametrics:
+    collection_interval: 60s
+    brokers:
+      - localhost:9092
+    protocol_version: 2.0.0
+    scrapers:
+      - brokers
+      - topics
+      - consumers
+
+processors:
+  resourcedetection:
+    detectors: ["system"]
+    system:
+      hostname_sources: ["os"]
+
+  normalizesums:
+
+  batch:
+
+exporters:
+  prometheus:
+    endpoint: "localhost:9000"
+    resource_to_telemetry_conversion:
+      enabled: true
+
+service:
+  pipelines:
+    metrics:
+      receivers:
+      - kafkametrics
+      processors:
+      - resourcedetection
+      - normalizesums
+      - batch
+      exporters:
+      - prometheus
