@@ -4,6 +4,11 @@ receivers:
       - endpoint: localhost:27017
 
 processors:
+  resourcedetection:
+    detectors: ["system"]
+    system:
+      hostname_sources: ["os"]
+
   normalizesums:
 
   batch:
@@ -20,6 +25,7 @@ service:
       receivers:
       - mongodb
       processors:
+      - resourcedetection
       - normalizesums
       - batch
       exporters:
