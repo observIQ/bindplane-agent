@@ -4,9 +4,14 @@ receivers:
     collection_interval: 60s
 
 processors:
-  batch:
+  resourcedetection:
+    detectors: ["system"]
+    system:
+      hostname_sources: ["os"]
 
   normalizesums:
+
+  batch:
 
 exporters:
   prometheus:
@@ -20,7 +25,8 @@ service:
       receivers:
       - redis
       processors:
-      - batch
+      - resourcedetection
       - normalizesums
+      - batch
       exporters:
       - prometheus

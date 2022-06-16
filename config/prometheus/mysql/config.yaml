@@ -6,6 +6,11 @@ receivers:
     collection_interval: 60s
 
 processors:
+  resourcedetection:
+    detectors: ["system"]
+    system:
+      hostname_sources: ["os"]
+
   batch:
 
   normalizesums:
@@ -22,6 +27,7 @@ service:
       receivers:
       - mysql
       processors:
+      - resourcedetection
       - normalizesums
       - batch
       exporters:
