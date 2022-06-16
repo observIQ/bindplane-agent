@@ -38,8 +38,6 @@ template: |
         - '{{ $fp }}'
         {{end}}
       start_at: {{ .start_at }}
-      attributes:
-        plugin_id: oracledb
       multiline:
         line_start_pattern: '\w+\s+\w+\s{1,2}\d{1,2}\s+\d{2}:\d{2}:\d{2}\s+\d{4}\s+[-+]\d{2}:\d{2}\n|^Audit [fF]ile '
       operators:
@@ -86,8 +84,6 @@ template: |
         - '{{ $fp }}'
         {{end}}
       start_at: {{ .start_at }}
-      attributes:
-        plugin_id: oracledb
       multiline:
         line_start_pattern: '^\w+ \w+ \d{2} \d{2}:\d{2}:\d{2} \d{4}|\d{4}-\d{2}-\d{2}T\d{1,}:\d{2}:\d{2}.\d+[+-]\d+:\d+|^<msg time=\D\d{4}-\d{2}-\d{2}T\d{1,}:\d{2}:\d{2}.\d+[+-]\d+:\d+'
       operators:
@@ -147,8 +143,6 @@ template: |
       start_at: {{ .start_at }}
       multiline:
         line_start_pattern: '/[\w\d/]+:|\\[\w\d\\]+:|\d{4}-\d{2}-\d{2}T\d{1}:\d{2}:\d{2}.\d+[+-]\d+:\d+|<msg time=\D\d{4}-\d{2}-\d{2}T\d{1,}:\d{2}:\d{2}.\d+[+-]\d+:\d+'
-      attributes:
-        plugin_id: oracledb
       operators:
         - id: listener_router
           type: router
