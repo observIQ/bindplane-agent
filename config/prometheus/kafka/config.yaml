@@ -1,7 +1,13 @@
 receivers:
-  mongodb:
-    hosts:
-      - endpoint: localhost:27017
+  kafkametrics:
+    collection_interval: 60s
+    brokers:
+      - localhost:9092
+    protocol_version: 2.0.0
+    scrapers:
+      - brokers
+      - topics
+      - consumers
 
 processors:
   resourcedetection:
@@ -23,7 +29,7 @@ service:
   pipelines:
     metrics:
       receivers:
-      - mongodb
+      - kafkametrics
       processors:
       - resourcedetection
       - normalizesums
