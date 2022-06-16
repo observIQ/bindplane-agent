@@ -1,0 +1,41 @@
+version: 0.0.1
+title: Apache Zookeeper
+description: Log parser for Apache Zookeeper
+parameters:
+  - name: file_path
+    type: "[]string"
+    default: 
+      - "/home/kafka/kafka/logs/zookeeper.log"
+  - name: start_at
+    type: string
+    valid_values:
+      - beginning
+      - end
+    default: end
+template: |
+  receivers:
+    filelog:
+      include:
+        {{ range $fp := .file_path }}
+        - '{{ $fp }}'
+        {{ end }}
+      start_at: {{ .start_at }}
+      operators:
+        - type: regex_parser
+          regex: '^(?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}),\d{3} \[myid:(?P<myid>[^\]]*)\] - (?P<zookeeper_severity>[A-Z]+)\s+\[(?P<source>[^\]]+)\] - (?P<message>.*)'
+          timestamp:
+            parse_from: attributes.timestamp
+            layout: '%Y-%m-%d %H:%M:%S'
+          severity:
+            parse_from: attributes.zookeeper_severity
+            mapping:
+              info2: notice
+              error2: critical
+              error3: alert
+              fatal2: emergency
+              fatal3: catastrophe
+
+  service:
+    pipelines:
+      logs:
+        receivers: [filelog]
