@@ -21,7 +21,6 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 	"path/filepath"
 
@@ -45,7 +44,7 @@ var (
 	errinvalidcertfile = "failed to read TLS cert file"
 
 	// errinvalidcafile for ca file that is not readable
-	errinvalidcafile = "failed to read TLS ca file"
+	errinvalidcafile = "failed to read TLS CA file"
 )
 
 // Config contains the configuration for the collector to communicate with an OpAmp enabled platform.
@@ -67,26 +66,26 @@ type TLSConfig struct {
 	cafile   *string `yaml:"cafile"`
 }
 
-func (c Config) ToTLS() *tls.Config {
+func (c Config) ToTLS() (*tls.Config, error) {
 	if c.TLS == nil {
-		return nil
+		return nil, nil
 	}
 
 	if c.TLS.insecure {
 		return &tls.Config{
 			InsecureSkipVerify: true,
-		}
+		}, nil
 	}
 
 	cert, err := tls.LoadX509KeyPair(*c.TLS.certfile, *c.TLS.keyfile)
 	if err != nil {
-		log.Fatal(err)
+		return nil, errors.New(errmissingtlsfiles)
 	}
 
 	// Load CA cert
 	caCert, err := ioutil.ReadFile(*c.TLS.cafile)
 	if err != nil {
-		log.Fatal(err)
+		return nil, errors.New(errinvalidcafile)
 	}
 	caCertPool := x509.NewCertPool()
 	caCertPool.AppendCertsFromPEM(caCert)
@@ -99,7 +98,7 @@ func (c Config) ToTLS() *tls.Config {
 
 	tlsConfig.BuildNameToCertificate()
 
-	return tlsConfig
+	return tlsConfig, nil
 }
 
 // ParseConfig given a configuration file location will parse the config
@@ -161,13 +160,13 @@ func (c Config) Copy() *Config {
 		*cfgCopy.AgentName = *c.AgentName
 	}
 	if c.TLS != nil {
-		cfgCopy.TLS = c.TLS.Copy()
+		cfgCopy.TLS = c.TLS.copy()
 	}
 
 	return cfgCopy
 }
 
-func (t TLSConfig) Copy() *TLSConfig {
+func (t TLSConfig) copy() *TLSConfig {
 	tlsCopy := TLSConfig{
 		insecure: t.insecure,
 	}

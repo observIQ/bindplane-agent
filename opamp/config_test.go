@@ -28,12 +28,17 @@ func TestParseConfig(t *testing.T) {
 	secretKeyContents := "b92222ee-a1fc-4bb1-98db-26de3448541b"
 	labelsContents := "one=foo,two=bar"
 	agentNameContents := "My Agent"
+	keyFileContents := "My Key File"
+	certFileContents := "My Cert File"
+	caFileContents := "My CA File"
 
 	testCases := []struct {
 		desc                string
 		createFile          bool // Used to call file read failure
 		configContents      string
 		expectedConfig      *Config
+		tlsContents         string
+		expectedTLSCfg      *TLSConfig
 		expectedErrContents *string
 	}{
 		{
@@ -86,6 +91,38 @@ agent_id: 8321f735-a52c-4f49-aca9-66f9266c5fe5
 				Labels:    nil,
 				AgentName: nil,
 			},
+			expectedErrContents: nil,
+		},
+		{
+			desc:       "Successful Full Parse with TLS",
+			createFile: true,
+			configContents: `
+endpoint: localhost:1234
+secret_key: b92222ee-a1fc-4bb1-98db-26de3448541b
+agent_id: 8321f735-a52c-4f49-aca9-66f9266c5fe5
+labels: "one=foo,two=bar"
+agent_name: "My Agent"
+`,
+			tlsContents: `
+keyfile: "My Key File"
+certfile: "My Cert File"
+cafile: "My CA File"
+`,
+			expectedConfig: &Config{
+				Endpoint:  "localhost:1234",
+				SecretKey: &secretKeyContents,
+				AgentID:   "8321f735-a52c-4f49-aca9-66f9266c5fe5",
+				Labels:    &labelsContents,
+				AgentName: &agentNameContents,
+			},
+
+			expectedTLSCfg: &TLSConfig{
+				insecure: false,
+				keyfile:  &keyFileContents,
+				certfile: &certFileContents,
+				cafile:   &caFileContents,
+			},
+
 			expectedErrContents: nil,
 		},
 	}
@@ -311,12 +348,23 @@ func TestConfigCopy(t *testing.T) {
 	secretKeyContents := "b92222ee-a1fc-4bb1-98db-26de3448541b"
 	labelsContents := "one=foo,two=bar"
 	agentNameContents := "My Agent"
+	keyFileContents := "My Key File"
+	certFileContents := "My Cert File"
+	caFileContents := "My CA File"
+
+	tlscfg := TLSConfig{
+		insecure: false,
+		keyfile:  &keyFileContents,
+		certfile: &certFileContents,
+		cafile:   &caFileContents,
+	}
 	cfg := Config{
 		Endpoint:  "ws://localhost:1234",
 		SecretKey: &secretKeyContents,
 		AgentID:   "20ce90b8-506c-4a3b-8134-21aa8d526e03",
 		Labels:    &labelsContents,
 		AgentName: &agentNameContents,
+		TLS:       &tlscfg,
 	}
 
 	copyCfg := cfg.Copy()

@@ -128,13 +128,18 @@ func (c *Client) Connect(ctx context.Context) error {
 		return err
 	}
 
+	tlsCfg, err := c.currentConfig.ToTLS()
+	if err != nil {
+		return fmt.Errorf("failed creating TLS config: %w", err)
+	}
+
 	settings := types.StartSettings{
 		OpAMPServerURL: c.currentConfig.Endpoint,
 		Header: http.Header{
 			"Authorization": []string{fmt.Sprintf("Secret-Key %s", c.currentConfig.GetSecretKey())},
 			"User-Agent":    []string{fmt.Sprintf("observiq-otel-collector/%s", version.Version())},
 		},
-		TLSConfig:   c.currentConfig.ToTLS(),
+		TLSConfig:   tlsCfg,
 		InstanceUid: c.ident.agentID,
 		Callbacks: types.CallbacksStruct{
 			OnConnectFunc:          c.onConnectHandler,
