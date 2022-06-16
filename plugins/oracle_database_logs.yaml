@@ -204,6 +204,12 @@ template: |
     pipelines:
       logs:
         receivers:
+          {{ if .enable_audit_log }}
           - filelog/audit
+          {{ end }}
+          {{ if .enable_alert_log }}
           - filelog/alert
+          {{ end }}
+          {{ if .enable_listener_log }}
           - filelog/listener
+          {{ end }}
