@@ -10,14 +10,13 @@ parameters:
     default: "0.0.0.0"
 
 template: |
-  reciever:
+  receiver:
     tcplog:
       listen_address: '{{ .listen_ip }}:{{ .listen_port }}'
       attributes:
         log_type: cisco_asa
       add_attributes: true
       operators:
-
         - id: cisco_parser
           type: regex_parser
           regex: '^(?P<timestamp>[\d\w\s:\-]+?)(?: asa )?: %(?P<message_id>[\w\d-]+):\s(?P<message>.*)'
