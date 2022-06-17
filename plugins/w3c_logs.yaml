@@ -1,0 +1,149 @@
+version: 0.0.1
+title: W3C
+description: File Input W3C Parser
+min_stanza_version: 1.2.0
+parameters:
+  - name: file_log_path
+    type: strings
+    required: true
+  - name: exclude_file_log_path
+    type: strings
+    default: []
+  - name: encoding
+    type: enum
+    valid_values:
+      - utf-8
+      - utf-16le
+      - utf-16be
+      - ascii
+      - big5
+    default: utf-8
+  - name: log_type
+    type: string
+    default: w3c
+  - name: start_at
+    type: enum
+    valid_values:
+      - beginning
+      - end
+    default: end
+  - name: delete_after_read
+    type: bool
+    default: false
+  - name: max_concurrent_files
+    type: int
+    default: 512
+    advanced_config: true
+  - name: include_file_name
+    type: bool
+    default: true
+  - name: include_file_path
+    type: bool
+    default: false
+  - name: include_file_name_resolved
+    type: bool
+    default: false
+  - name: include_file_path_resolved
+    type: bool
+    default: false
+  - name: fields_header
+    type: string
+    default: Fields
+  - name: delimiter
+    type: string
+    default: "\t"
+  - name: header_delimiter
+    type: string
+    default: "\t"
+# Set Defaults
+# {{$encoding := default "utf-8" .encoding}}
+# {{$log_type := default "w3c" .log_type}}
+# {{$start_at := default "end" .start_at}}
+# {{$delete_after_read := default false .delete_after_read}}
+# {{$max_concurrent_files := default 512 .max_concurrent_files}}
+# {{$include_file_name := default true .include_file_name}}
+# {{$include_file_path := default false .include_file_path}}
+# {{$include_file_name_resolved := default false .include_file_name_resolved}}
+# {{$include_file_path_resolved := default false .include_file_path_resolved}}
+# {{$fields_header := default "Fields" .fields_header}}
+# {{$delimiter := default "\t" .delimiter}}
+# {{$header_delimiter := default "\t" .header_delimiter}}
+
+template: |
+  
+
+
+# Pipeline Template
+pipeline:
+  - type: file_input
+    start_at: '{{ $start_at }}'
+    delete_after_read: {{ $delete_after_read }}
+    max_concurrent_files: {{ $max_concurrent_files }}
+    label_regex: '^#(?P<key>.*?): (?P<value>.*)'
+    include_file_name: {{ $include_file_name }}
+    include_file_path: {{ $include_file_path }}
+    include_file_name_resolved: {{ $include_file_name_resolved }}
+    include_file_path_resolved: {{ $include_file_path_resolved }}
+    include:
+# {{ range $i, $fp := .file_log_path  }}
+      - '{{ $fp }}'
+# {{ end }}
+# {{ if .exclude_file_log_path }}
+    exclude:
+  # {{ range $i, $efp := .exclude_file_log_path  }}
+      - '{{ $efp }}'
+  # {{ end }}
+# {{ end }}
+# {{ if $encoding }}
+    encoding: '{{ $encoding }}'
+# {{ end }}
+    attributes:
+      plugin_id: {{ .id }}
+      log_type: '{{ $log_type }}'
+
+  # Ignore header lines that may exists in the file periodically
+  # or at the end. File input has already read the headers at the top
+  # of the file, and attached them as attributes to each entry.
+  # For example, some w3c logs may have these two fields at th end of a file:
+  #
+  # #End-Date: 2021-07-21 14:40:00
+  # #X-Records: 41373
+  #
+  - type: filter
+    expr: '$body matches "^#"'
+
+  - type: router
+    default: csv_parser
+    routes:
+      - output: quote_handler_parser
+        expr: $body matches '.*".*".*' and not ($body matches "^#")
+
+  # Some example log entries have quotes. This will cause an error.
+  # This parses first set of quotes. If more than one set of quotes exist then it will still error.
+  # All examples from logs seen at time of this comment have only contained one set of quotes.
+  # Example:
+  # #Fields: date time c-ip cs-username s-sitename s-computername s-ip s-port cs-method cs-uri-stem cs-uri-query sc-status sc-win32-status sc-bytes cs-bytes time-taken cs-version cs-host cs(User-Agent) cs(Cookie) cs(Referer)
+  # 2021-06-14 18:36:47 0.0.0.0 OutboundConnectionResponse SMTPSVC1 TSIC-PHOENIX - 25 - - 354+3.0.0+continue.++finished+with+"\r\n.\r\n" 0 0 46 0 531 SMTP - - - -
+  - id: quote_handler_parser
+    type: regex_parser
+    parse_from: $body
+    regex: '(?P<message1>[^"]*)(?P<first_quote>[\"])(?P<message2>[^"]*)(?P<second_quote>[\"])(?P<message3>.*)'
+    output: quote_handler_restructurer
+
+  # This will remove the first set of parsed quotes.
+  - id: quote_handler_restructurer
+    type: add
+    field: $body
+    value: 'EXPR($body.message1 + $body.message2 + $body.message3)'
+    output: csv_parser
+
+  # Leverage CSV parser's dynamic field name detection by specifying
+  # delimiter, header_delimiter, and header_label
+  - type: csv_parser
+    delimiter: '{{ $delimiter }}'
+    header_delimiter: '{{ $header_delimiter }}'
+    header_label: '{{ $fields_header }}'
+
+  - type: remove
+    field: '$attributes.{{ $fields_header }}'
+    output: {{ .output }}
