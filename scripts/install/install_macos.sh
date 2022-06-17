@@ -20,7 +20,7 @@ FORMULA_NAME="observiq/observiq-otel-collector/observiq-otel-collector"
 SERVICE_NAME="com.observiq.collector"
 
 # Script Constants
-BREW_ETC=$(brew --prefix)/etc/
+BREW_ETC=$(brew --prefix)/etc
 PREREQS="printf brew sed uname uuidgen tr"
 CONFIG_PREFIX="observiq_"
 CONFIG_YML_NAME="config.yaml"
