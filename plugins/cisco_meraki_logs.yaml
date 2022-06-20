@@ -12,14 +12,14 @@ parameters:
 template: |
   receivers:
     udplog:
-      listen_address: "{{ .listen_address }}"
+      listen_address: "{{ .listen_address }}:{{ .listen_port }}"
       add_attributes: true
       operators:
         - type: router
           default: catch_all_parser
           routes:
             - output: meraki_parser
-              expr: 'body matches "^<[^>]+>[\\d]+\\s+[\\d\\.]+\\s+[^\\s]+\\s+[^\\s]+\\s+[\\s\\S]*"'
+              expr: 'body matches "^<[^>]+>[\\d]+\\s*[\\d\\.]*\\s*[^\\s]*\\s*[^\\s]*\\s*[\\s\\S]*"'
         - id: meraki_parser
           type: regex_parser
           regex: '^<(?P<priority>[^>]+)>(?P<version>[\d]+)\s*(?P<timestamp>[\d\.]*)\s*(?P<hostname>[^\s]*)\s*(?P<app_name>[^\s]*)\s*(?P<message>[\s\S]*)'
@@ -296,7 +296,13 @@ template: |
         - id: src_parser
           type: regex_parser
           parse_from: attributes.src
-          regex: "(?P<src_ip>.*):(?P<src_port>[0-9]+)"
+          regex: '(?P<src_ip>\d+\.\d+\.\d+.\d+):?(?P<src_port>[0-9]*)'
+          output: dst_parser
+
+        - id: dst_parser
+          type: regex_parser
+          parse_from: attributes.dst
+          regex: '(?P<dst_ip>\d+\.\d+\.\d+.\d+):?(?P<dst_port>[0-9]*)'
           output: add_type
 
         - id: add_type
@@ -304,7 +310,7 @@ template: |
           field: attributes.log_type
           value: 'cisco.meraki'
 
-    service:
-      pipelines:
-        logs:
-          receivers: [udplog]
+  service:
+    pipelines:
+      logs:
+        receivers: [udplog]
