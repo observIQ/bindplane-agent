@@ -140,7 +140,7 @@ jobs:
       - name: Get Tag From Environment
         id: get-tag
         run: printf '::set-output name=tag::%s' "$(printf '%s' "${{ github.ref }}" | sed 's/refs\/tags\///')"
-      - name: Trigger Homebrew Action
+      - name: Trigger Installation Testing
         uses: peter-evans/repository-dispatch@v2
         with:
           token: ${{ secrets.ORG_GORELEASER_GITHUB_TOKEN }}
