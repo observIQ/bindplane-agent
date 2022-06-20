@@ -1,0 +1,84 @@
+version: 0.0.1
+title: Active Directory
+description: Log parser for Active Directory
+parameters:
+  - name: enable_dns_server
+    type: bool
+    default: true
+  - name: enable_dfs_replication
+    type: bool
+    default: true
+  - name: enable_file_replication
+    type: bool
+    default: false
+  - name: poll_interval
+    type: string
+    default: 1s
+  - name: max_reads
+    type: int
+    default: 1000
+  - name: start_at
+    type: string
+    supported:
+      - beginning
+      - end
+    default: end
+template: |
+  receivers:
+    windowseventlog/general:
+      channel: "Directory Service"
+      max_reads: {{ .max_reads }}
+      poll_interval: '{{ .poll_interval }}'
+      start_at: '{{ .start_at }}'
+      attributes:
+        log_type: "active_directory.general"
+    windowseventlog/web_services:
+      channel: "Active Directory Web Services"
+      max_reads: {{ .max_reads }}
+      poll_interval: '{{ .poll_interval }}'
+      start_at: '{{ .start_at }}'
+      attributes:
+        log_type: "active_directory.web_services"
+    # {{ if .enable_dns_server }}
+    windowseventlog/dns:
+      channel: "DNS Server"
+      max_reads: {{ .max_reads }}
+      poll_interval: '{{ .poll_interval }}'
+      start_at: '{{ .start_at }}'
+      attributes:
+        log_type: "active_directory.dns"
+    # {{ end }}
+    # {{ if .enable_dfs_replication }}
+    windowseventlog/dfs:
+      channel: "DFS Replication"
+      max_reads: {{ .max_reads }}
+      poll_interval: '{{ .poll_interval }}'
+      start_at: '{{ .start_at }}'
+      attributes:
+        log_type: "active_directory.dfs"
+    # {{ end }}
+    # {{ if .enable_file_replication }}
+    windowseventlog/frs:
+      channel: "File Replication Service"
+      max_reads: {{ .max_reads }}
+      poll_interval: '{{ .poll_interval }}'
+      start_at: '{{ .start_at }}'
+      attributes:
+        log_type: "active_directory.frs"
+    # {{ end }}
+
+  service:
+    pipelines:
+      logs:
+        receivers:
+          - windowseventlog/general
+          - windowseventlog/web_services
+          # {{ if .enable_dns_server }}
+          - windowseventlog/dns
+          # {{ end }}
+          # {{ if .enable_dfs_replication }}
+          - windowseventlog/dfs
+          # {{ end }}
+          # {{ if .enable_file_replication }}
+          - windowseventlog/frs
+          # {{ end }}
