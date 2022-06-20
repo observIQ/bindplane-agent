@@ -34,17 +34,17 @@ var (
 	// errPrefixParse for error when parsing config
 	errPrefixParse = "failed to parse OpAmp config"
 
-	// errmissingtlsfiles for missing a required tls file
-	errmissingtlsfiles = "must specify both a key and cert file for TLS"
+	// errMissingTLSFiles for missing a required tls file
+	errMissingTLSFiles = "must specify both a key and cert file for TLS"
 
-	// errinvalidkeyfile for key file that is not readable
-	errinvalidkeyfile = "failed to read TLS key file"
+	// errInvalidKeyFile for key file that is not readable
+	errInvalidKeyFile = "failed to read TLS key file"
 
-	// errinvalidcertfile for cert file that is not readable
-	errinvalidcertfile = "failed to read TLS cert file"
+	// errInvalidCertFile for cert file that is not readable
+	errInvalidCertFile = "failed to read TLS cert file"
 
-	// errinvalidcafile for ca file that is not readable
-	errinvalidcafile = "failed to read TLS CA file"
+	// errInvalidCAFile for ca file that is not readable
+	errInvalidCAFile = "failed to read TLS CA file"
 )
 
 // Config contains the configuration for the collector to communicate with an OpAmp enabled platform.
@@ -59,13 +59,15 @@ type Config struct {
 	AgentName *string `yaml:"agent_name,omitempty"`
 }
 
+// TLSConfig represents the TLS config to connect to OpAmp server
 type TLSConfig struct {
 	insecure bool
-	keyfile  *string `yaml:"keyfile"`
-	certfile *string `yaml:"certfile"`
-	cafile   *string `yaml:"cafile"`
+	KeyFile  *string `yaml:"key_file"`
+	CertFile *string `yaml:"cert_file"`
+	CAFile   *string `yaml:"ca_file"`
 }
 
+// ToTLS converts the config to a tls.Config
 func (c Config) ToTLS() (*tls.Config, error) {
 	if c.TLS == nil {
 		return nil, nil
@@ -77,23 +79,26 @@ func (c Config) ToTLS() (*tls.Config, error) {
 		}, nil
 	}
 
-	cert, err := tls.LoadX509KeyPair(*c.TLS.certfile, *c.TLS.keyfile)
+	cert, err := tls.LoadX509KeyPair(*c.TLS.CertFile, *c.TLS.KeyFile)
 	if err != nil {
-		return nil, errors.New(errmissingtlsfiles)
+		return nil, errors.New(errMissingTLSFiles)
 	}
-
-	// Load CA cert
-	caCert, err := ioutil.ReadFile(*c.TLS.cafile)
-	if err != nil {
-		return nil, errors.New(errinvalidcafile)
-	}
-	caCertPool := x509.NewCertPool()
-	caCertPool.AppendCertsFromPEM(caCert)
 
 	// Setup HTTPS client
 	tlsConfig := &tls.Config{
 		Certificates: []tls.Certificate{cert},
-		RootCAs:      caCertPool,
+	}
+
+	// Load CA cert
+	if c.TLS.CAFile != nil {
+		caCert, err := ioutil.ReadFile(*c.TLS.CAFile)
+		if err != nil {
+			return nil, errors.New(errInvalidCAFile)
+		}
+		caCertPool := x509.NewCertPool()
+		caCertPool.AppendCertsFromPEM(caCert)
+
+		tlsConfig.RootCAs = caCertPool
 	}
 
 	tlsConfig.BuildNameToCertificate()
@@ -118,21 +123,21 @@ func ParseConfig(configLocation string) (*Config, error) {
 	}
 
 	if config.TLS != nil && config.TLS.insecure == false {
-		if config.TLS.certfile == nil || config.TLS.keyfile == nil {
-			return nil, errors.New(errmissingtlsfiles)
+		if config.TLS.CertFile == nil || config.TLS.KeyFile == nil {
+			return nil, errors.New(errMissingTLSFiles)
 		}
 
-		if _, err := os.Stat(*config.TLS.keyfile); errors.Is(err, os.ErrNotExist) {
-			return nil, errors.New(errinvalidkeyfile)
+		if _, err := os.Stat(*config.TLS.KeyFile); errors.Is(err, os.ErrNotExist) {
+			return nil, errors.New(errInvalidKeyFile)
 		}
 
-		if _, err := os.Stat(*config.TLS.certfile); errors.Is(err, os.ErrNotExist) {
-			return nil, errors.New(errinvalidcertfile)
+		if _, err := os.Stat(*config.TLS.CertFile); errors.Is(err, os.ErrNotExist) {
+			return nil, errors.New(errInvalidCertFile)
 		}
 
-		if config.TLS.cafile != nil {
-			if _, err := os.Stat(*config.TLS.cafile); errors.Is(err, os.ErrNotExist) {
-				return nil, errors.New(errinvalidcafile)
+		if config.TLS.CAFile != nil {
+			if _, err := os.Stat(*config.TLS.CAFile); errors.Is(err, os.ErrNotExist) {
+				return nil, errors.New(errInvalidCAFile)
 			}
 		}
 	}
@@ -171,17 +176,17 @@ func (t TLSConfig) copy() *TLSConfig {
 		insecure: t.insecure,
 	}
 
-	if t.certfile != nil {
-		tlsCopy.certfile = new(string)
-		*tlsCopy.certfile = *t.certfile
+	if t.CertFile != nil {
+		tlsCopy.CertFile = new(string)
+		*tlsCopy.CertFile = *t.CertFile
 	}
-	if t.keyfile != nil {
-		tlsCopy.keyfile = new(string)
-		*tlsCopy.keyfile = *t.keyfile
+	if t.KeyFile != nil {
+		tlsCopy.KeyFile = new(string)
+		*tlsCopy.KeyFile = *t.KeyFile
 	}
-	if t.cafile != nil {
-		tlsCopy.cafile = new(string)
-		*tlsCopy.cafile = *t.cafile
+	if t.CAFile != nil {
+		tlsCopy.CAFile = new(string)
+		*tlsCopy.CAFile = *t.CAFile
 	}
 
 	return &tlsCopy

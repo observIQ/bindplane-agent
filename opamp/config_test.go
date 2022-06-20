@@ -118,9 +118,9 @@ cafile: "My CA File"
 
 			expectedTLSCfg: &TLSConfig{
 				insecure: false,
-				keyfile:  &keyFileContents,
-				certfile: &certFileContents,
-				cafile:   &caFileContents,
+				KeyFile:  &keyFileContents,
+				CertFile: &certFileContents,
+				CAFile:   &caFileContents,
 			},
 
 			expectedErrContents: nil,
@@ -354,9 +354,9 @@ func TestConfigCopy(t *testing.T) {
 
 	tlscfg := TLSConfig{
 		insecure: false,
-		keyfile:  &keyFileContents,
-		certfile: &certFileContents,
-		cafile:   &caFileContents,
+		KeyFile:  &keyFileContents,
+		CertFile: &certFileContents,
+		CAFile:   &caFileContents,
 	}
 	cfg := Config{
 		Endpoint:  "ws://localhost:1234",
