@@ -34,8 +34,8 @@ var (
 	// errPrefixParse for error when parsing config
 	errPrefixParse = "failed to parse OpAmp config"
 
-	// errMissingTLSFiles for missing a required tls file
-	errMissingTLSFiles = "must specify both a key and cert file for TLS"
+	// errMissingTLSFiles is the error when only one of Key or Cert is specified
+	errMissingTLSFiles = "must specify both Key and Certificate file"
 
 	// errInvalidKeyFile for key file that is not readable
 	errInvalidKeyFile = "failed to read TLS key file"
@@ -79,17 +79,9 @@ func (c Config) ToTLS() (*tls.Config, error) {
 		}, nil
 	}
 
-	cert, err := tls.LoadX509KeyPair(*c.TLS.CertFile, *c.TLS.KeyFile)
-	if err != nil {
-		return nil, errors.New(errMissingTLSFiles)
-	}
+	tlsConfig := &tls.Config{}
 
-	// Setup HTTPS client
-	tlsConfig := &tls.Config{
-		Certificates: []tls.Certificate{cert},
-	}
-
-	// Load CA cert
+	// Load CA cert if specified
 	if c.TLS.CAFile != nil {
 		caCert, err := ioutil.ReadFile(*c.TLS.CAFile)
 		if err != nil {
@@ -99,6 +91,16 @@ func (c Config) ToTLS() (*tls.Config, error) {
 		caCertPool.AppendCertsFromPEM(caCert)
 
 		tlsConfig.RootCAs = caCertPool
+	}
+
+	// Load cert and key file if specified
+	if c.TLS.CertFile != nil && c.TLS.KeyFile != nil {
+		cert, err := tls.LoadX509KeyPair(*c.TLS.CertFile, *c.TLS.KeyFile)
+		if err != nil {
+			return nil, fmt.Errorf("failed to ready Key and Cert file: %w", err)
+		}
+
+		tlsConfig.Certificates = []tls.Certificate{cert}
 	}
 
 	tlsConfig.BuildNameToCertificate()
@@ -122,23 +124,29 @@ func ParseConfig(configLocation string) (*Config, error) {
 		return nil, fmt.Errorf("%s: %w", errPrefixParse, err)
 	}
 
+	// Using Secure TLS check files
 	if config.TLS != nil && config.TLS.Insecure == false {
-		if config.TLS.CertFile == nil || config.TLS.KeyFile == nil {
-			return nil, errors.New(errMissingTLSFiles)
-		}
-
-		if _, err := os.Stat(*config.TLS.KeyFile); errors.Is(err, os.ErrNotExist) {
-			return nil, errors.New(errInvalidKeyFile)
-		}
-
-		if _, err := os.Stat(*config.TLS.CertFile); errors.Is(err, os.ErrNotExist) {
-			return nil, errors.New(errInvalidCertFile)
-		}
-
+		// If CA file is specified
 		if config.TLS.CAFile != nil {
+			// Validate CA file exists on disk
 			if _, err := os.Stat(*config.TLS.CAFile); errors.Is(err, os.ErrNotExist) {
 				return nil, errors.New(errInvalidCAFile)
 			}
+		}
+
+		switch {
+		case config.TLS.CertFile == nil && config.TLS.KeyFile == nil: // Not using mTLS
+			// Nothing to do. This case exists to make it easier to check all happy permutations for Key and Cert files
+		case config.TLS.CertFile != nil && config.TLS.KeyFile != nil: // Validate both files exist
+			if _, err := os.Stat(*config.TLS.KeyFile); errors.Is(err, os.ErrNotExist) {
+				return nil, errors.New(errInvalidKeyFile)
+			}
+
+			if _, err := os.Stat(*config.TLS.CertFile); errors.Is(err, os.ErrNotExist) {
+				return nil, errors.New(errInvalidCertFile)
+			}
+		default: // Case with only one file is specified
+			return nil, errors.New(errMissingTLSFiles)
 		}
 	}
 	return &config, nil
