@@ -136,3 +136,14 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.ORG_GORELEASER_GITHUB_TOKEN }}
           COSIGN_PWD: ${{ secrets.ORG_COSIGN_PWD }}
+      # Trigger installation tests in otel-collector-installer-testing
+      - name: Get Tag From Environment
+        id: get-tag
+        run: printf '::set-output name=tag::%s' "$(printf '%s' "${{ github.ref }}" | sed 's/refs\/tags\///')"
+      - name: Trigger Homebrew Action
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          token: ${{ secrets.ORG_GORELEASER_GITHUB_TOKEN }}
+          repository: observIQ/otel-collector-installer-testing
+          event-type: upstream_prerelease
+          client-payload: '{ "version": "${{ steps.get-tag.outputs.tag }}" }'
