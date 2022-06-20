@@ -5,14 +5,14 @@ parameters:
   - name: listen_port
     type: int
     default: 5140
-  - name: listen_address
+  - name: listen_ip
     type: string
     default: "0.0.0.0"
 
 template: |
   receivers:
     udplog:
-      listen_address: "{{ .listen_address }}:{{ .listen_port }}"
+      listen_address: "{{ .listen_ip }}:{{ .listen_port }}"
       add_attributes: true
       operators:
         - type: router
