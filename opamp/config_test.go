@@ -117,7 +117,7 @@ cafile: "My CA File"
 			},
 
 			expectedTLSCfg: &TLSConfig{
-				insecure: false,
+				Insecure: false,
 				KeyFile:  &keyFileContents,
 				CertFile: &certFileContents,
 				CAFile:   &caFileContents,
@@ -353,7 +353,7 @@ func TestConfigCopy(t *testing.T) {
 	caFileContents := "My CA File"
 
 	tlscfg := TLSConfig{
-		insecure: false,
+		Insecure: false,
 		KeyFile:  &keyFileContents,
 		CertFile: &certFileContents,
 		CAFile:   &caFileContents,

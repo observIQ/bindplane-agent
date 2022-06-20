@@ -61,7 +61,7 @@ type Config struct {
 
 // TLSConfig represents the TLS config to connect to OpAmp server
 type TLSConfig struct {
-	insecure bool
+	Insecure bool    `yaml:"insecure"`
 	KeyFile  *string `yaml:"key_file"`
 	CertFile *string `yaml:"cert_file"`
 	CAFile   *string `yaml:"ca_file"`
@@ -73,7 +73,7 @@ func (c Config) ToTLS() (*tls.Config, error) {
 		return nil, nil
 	}
 
-	if c.TLS.insecure {
+	if c.TLS.Insecure {
 		return &tls.Config{
 			InsecureSkipVerify: true,
 		}, nil
@@ -122,7 +122,7 @@ func ParseConfig(configLocation string) (*Config, error) {
 		return nil, fmt.Errorf("%s: %w", errPrefixParse, err)
 	}
 
-	if config.TLS != nil && config.TLS.insecure == false {
+	if config.TLS != nil && config.TLS.Insecure == false {
 		if config.TLS.CertFile == nil || config.TLS.KeyFile == nil {
 			return nil, errors.New(errMissingTLSFiles)
 		}
@@ -173,7 +173,7 @@ func (c Config) Copy() *Config {
 
 func (t TLSConfig) copy() *TLSConfig {
 	tlsCopy := TLSConfig{
-		insecure: t.insecure,
+		Insecure: t.Insecure,
 	}
 
 	if t.CertFile != nil {
