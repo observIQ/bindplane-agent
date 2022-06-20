@@ -15,6 +15,7 @@
 package opamp
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -33,68 +34,100 @@ func TestParseConfig(t *testing.T) {
 	// caFileContents := "My CA File"
 
 	testCases := []struct {
-		desc                string
-		createFile          bool // Used to call file read failure
-		configContents      string
-		expectedConfig      *Config
-		expectedErrContents *string
+		desc     string
+		testFunc func(*testing.T)
 	}{
 		{
-			desc:                "Failed File Read",
-			createFile:          false,
-			configContents:      "",
-			expectedConfig:      nil,
-			expectedErrContents: &errPrefixReadFile,
+			desc: "Failed File Read",
+			testFunc: func(t *testing.T) {
+				tmpDir := t.TempDir()
+				configPath := filepath.Join(tmpDir, "manager.yml")
+
+				cfg, err := ParseConfig(configPath)
+				assert.ErrorContains(t, err, errPrefixReadFile)
+				assert.Nil(t, cfg)
+			},
 		},
 		{
-			desc:       "Failed Marshal",
-			createFile: true,
-			configContents: `
-			{
-				"endpoint": "localhost:1234"
-			}`,
-			expectedConfig:      nil,
-			expectedErrContents: &errPrefixParse,
+			desc: "Failed Marshal",
+			testFunc: func(t *testing.T) {
+				configContents := `
+				{
+					"endpoint": "localhost:1234"
+				}`
+
+				tmpDir := t.TempDir()
+				configPath := filepath.Join(tmpDir, "manager.yml")
+
+				err := os.WriteFile(configPath, []byte(configContents), os.ModePerm)
+				require.NoError(t, err)
+
+				cfg, err := ParseConfig(configPath)
+				assert.ErrorContains(t, err, errPrefixParse)
+				assert.Nil(t, cfg)
+			},
 		},
 		{
-			desc:       "Successful Full Parse",
-			createFile: true,
-			configContents: `
+			desc: "Successful Full Parse",
+			testFunc: func(t *testing.T) {
+				configContents := `
 endpoint: localhost:1234
 secret_key: b92222ee-a1fc-4bb1-98db-26de3448541b
 agent_id: 8321f735-a52c-4f49-aca9-66f9266c5fe5
 labels: "one=foo,two=bar"
 agent_name: "My Agent"
-`,
-			expectedConfig: &Config{
-				Endpoint:  "localhost:1234",
-				SecretKey: &secretKeyContents,
-				AgentID:   "8321f735-a52c-4f49-aca9-66f9266c5fe5",
-				Labels:    &labelsContents,
-				AgentName: &agentNameContents,
+`
+
+				tmpDir := t.TempDir()
+				configPath := filepath.Join(tmpDir, "manager.yml")
+
+				err := os.WriteFile(configPath, []byte(configContents), os.ModePerm)
+				require.NoError(t, err)
+
+				expectedConfig := &Config{
+					Endpoint:  "localhost:1234",
+					SecretKey: &secretKeyContents,
+					AgentID:   "8321f735-a52c-4f49-aca9-66f9266c5fe5",
+					Labels:    &labelsContents,
+					AgentName: &agentNameContents,
+				}
+
+				cfg, err := ParseConfig(configPath)
+				assert.NoError(t, err)
+				assert.Equal(t, expectedConfig, cfg)
 			},
-			expectedErrContents: nil,
 		},
 		{
-			desc:       "Successful Partial Parse",
-			createFile: true,
-			configContents: `
+			desc: "Successful Partial Parse",
+			testFunc: func(t *testing.T) {
+				configContents := `
 endpoint: localhost:1234
 agent_id: 8321f735-a52c-4f49-aca9-66f9266c5fe5
-`,
-			expectedConfig: &Config{
-				Endpoint:  "localhost:1234",
-				SecretKey: nil,
-				AgentID:   "8321f735-a52c-4f49-aca9-66f9266c5fe5",
-				Labels:    nil,
-				AgentName: nil,
+`
+
+				tmpDir := t.TempDir()
+				configPath := filepath.Join(tmpDir, "manager.yml")
+
+				err := os.WriteFile(configPath, []byte(configContents), os.ModePerm)
+				require.NoError(t, err)
+
+				expectedConfig := &Config{
+					Endpoint:  "localhost:1234",
+					SecretKey: nil,
+					AgentID:   "8321f735-a52c-4f49-aca9-66f9266c5fe5",
+					Labels:    nil,
+					AgentName: nil,
+				}
+
+				cfg, err := ParseConfig(configPath)
+				assert.NoError(t, err)
+				assert.Equal(t, expectedConfig, cfg)
 			},
-			expectedErrContents: nil,
 		},
 		{
-			desc:       "Successful Full Parse with TLS Insecure",
-			createFile: true,
-			configContents: `
+			desc: "Successful Full Parse with TLS Insecure",
+			testFunc: func(t *testing.T) {
+				configContents := `
 endpoint: localhost:1234
 secret_key: b92222ee-a1fc-4bb1-98db-26de3448541b
 agent_id: 8321f735-a52c-4f49-aca9-66f9266c5fe5
@@ -102,24 +135,34 @@ labels: "one=foo,two=bar"
 agent_name: "My Agent"
 tls_config:
   insecure: true
-`,
-			expectedConfig: &Config{
-				Endpoint:  "localhost:1234",
-				SecretKey: &secretKeyContents,
-				AgentID:   "8321f735-a52c-4f49-aca9-66f9266c5fe5",
-				Labels:    &labelsContents,
-				AgentName: &agentNameContents,
-				TLS: &TLSConfig{
-					Insecure: true,
-				},
+`
+
+				tmpDir := t.TempDir()
+				configPath := filepath.Join(tmpDir, "manager.yml")
+
+				err := os.WriteFile(configPath, []byte(configContents), os.ModePerm)
+				require.NoError(t, err)
+
+				expectedConfig := &Config{
+					Endpoint:  "localhost:1234",
+					SecretKey: &secretKeyContents,
+					AgentID:   "8321f735-a52c-4f49-aca9-66f9266c5fe5",
+					Labels:    &labelsContents,
+					AgentName: &agentNameContents,
+					TLS: &TLSConfig{
+						Insecure: true,
+					},
+				}
+
+				cfg, err := ParseConfig(configPath)
+				assert.NoError(t, err)
+				assert.Equal(t, expectedConfig, cfg)
 			},
-
-			expectedErrContents: nil,
 		},
 		{
-			desc:       "Successful Full Parse with TLS Missing KeyFile & CertFile",
-			createFile: true,
-			configContents: `
+			desc: "TLS Missing KeyFile",
+			testFunc: func(t *testing.T) {
+				configContents := `
 endpoint: localhost:1234
 secret_key: b92222ee-a1fc-4bb1-98db-26de3448541b
 agent_id: 8321f735-a52c-4f49-aca9-66f9266c5fe5
@@ -127,15 +170,24 @@ labels: "one=foo,two=bar"
 agent_name: "My Agent"
 tls_config:
   insecure: false
-`,
-			expectedConfig: nil,
+  cert_file: /some/file.crt
+`
 
-			expectedErrContents: &errMissingTLSFiles,
+				tmpDir := t.TempDir()
+				configPath := filepath.Join(tmpDir, "manager.yml")
+
+				err := os.WriteFile(configPath, []byte(configContents), os.ModePerm)
+				require.NoError(t, err)
+
+				cfg, err := ParseConfig(configPath)
+				assert.ErrorContains(t, err, errMissingTLSFiles)
+				assert.Nil(t, cfg)
+			},
 		},
 		{
-			desc:       "Successful Full Parse with TLS Invalid KeyFile",
-			createFile: true,
-			configContents: `
+			desc: "TLS Missing CertFile",
+			testFunc: func(t *testing.T) {
+				configContents := `
 endpoint: localhost:1234
 secret_key: b92222ee-a1fc-4bb1-98db-26de3448541b
 agent_id: 8321f735-a52c-4f49-aca9-66f9266c5fe5
@@ -143,35 +195,54 @@ labels: "one=foo,two=bar"
 agent_name: "My Agent"
 tls_config:
   insecure: false
-  key_file: /garbage/key.pem
-  cert_file: /garbage/cert.pem
-`,
-			expectedConfig:      nil,
-			expectedErrContents: &errInvalidKeyFile,
+  key_file: /some/file.key
+`
+
+				tmpDir := t.TempDir()
+				configPath := filepath.Join(tmpDir, "manager.yml")
+
+				err := os.WriteFile(configPath, []byte(configContents), os.ModePerm)
+				require.NoError(t, err)
+
+				cfg, err := ParseConfig(configPath)
+				assert.ErrorContains(t, err, errMissingTLSFiles)
+				assert.Nil(t, cfg)
+			},
+		},
+		{
+			desc: "TLS Invalid KeyFile",
+			testFunc: func(t *testing.T) {
+				tmpDir := t.TempDir()
+				configPath := filepath.Join(tmpDir, "manager.yml")
+
+				certPath := filepath.Join(tmpDir, "file.crt")
+				_, err := os.Create(certPath)
+				require.NoError(t, err)
+
+				configContents := fmt.Sprintf(`
+endpoint: localhost:1234
+secret_key: b92222ee-a1fc-4bb1-98db-26de3448541b
+agent_id: 8321f735-a52c-4f49-aca9-66f9266c5fe5
+labels: "one=foo,two=bar"
+agent_name: "My Agent"
+tls_config:
+  insecure: false
+  key_file: /some/file.key
+  cert_file: %s
+`, certPath)
+
+				err = os.WriteFile(configPath, []byte(configContents), os.ModePerm)
+				require.NoError(t, err)
+
+				cfg, err := ParseConfig(configPath)
+				assert.ErrorContains(t, err, errInvalidKeyFile)
+				assert.Nil(t, cfg)
+			},
 		},
 	}
 
 	for _, tc := range testCases {
-		t.Run(tc.desc, func(t *testing.T) {
-			tmpDir := t.TempDir()
-			configPath := filepath.Join(tmpDir, "manager.yml")
-
-			// Only create a config file if we're configured too.
-			// This exists to trigger a file read failure
-			if tc.createFile {
-				err := os.WriteFile(configPath, []byte(tc.configContents), os.ModePerm)
-				require.NoError(t, err)
-			}
-
-			cfg, err := ParseConfig(configPath)
-			if tc.expectedErrContents == nil {
-				require.NoError(t, err)
-			} else {
-				require.ErrorContains(t, err, *tc.expectedErrContents)
-			}
-
-			require.Equal(t, tc.expectedConfig, cfg)
-		})
+		t.Run(tc.desc, tc.testFunc)
 	}
 }
 
