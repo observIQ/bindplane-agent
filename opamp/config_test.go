@@ -28,17 +28,15 @@ func TestParseConfig(t *testing.T) {
 	secretKeyContents := "b92222ee-a1fc-4bb1-98db-26de3448541b"
 	labelsContents := "one=foo,two=bar"
 	agentNameContents := "My Agent"
-	keyFileContents := "My Key File"
-	certFileContents := "My Cert File"
-	caFileContents := "My CA File"
+	// keyFileName := "key.pem"
+	// certFileContents := "My Cert File"
+	// caFileContents := "My CA File"
 
 	testCases := []struct {
 		desc                string
 		createFile          bool // Used to call file read failure
 		configContents      string
 		expectedConfig      *Config
-		tlsContents         string
-		expectedTLSCfg      *TLSConfig
 		expectedErrContents *string
 	}{
 		{
@@ -94,7 +92,7 @@ agent_id: 8321f735-a52c-4f49-aca9-66f9266c5fe5
 			expectedErrContents: nil,
 		},
 		{
-			desc:       "Successful Full Parse with TLS",
+			desc:       "Successful Full Parse with TLS Insecure",
 			createFile: true,
 			configContents: `
 endpoint: localhost:1234
@@ -102,11 +100,8 @@ secret_key: b92222ee-a1fc-4bb1-98db-26de3448541b
 agent_id: 8321f735-a52c-4f49-aca9-66f9266c5fe5
 labels: "one=foo,two=bar"
 agent_name: "My Agent"
-`,
-			tlsContents: `
-keyfile: "My Key File"
-certfile: "My Cert File"
-cafile: "My CA File"
+tls_config:
+  insecure: true
 `,
 			expectedConfig: &Config{
 				Endpoint:  "localhost:1234",
@@ -114,16 +109,45 @@ cafile: "My CA File"
 				AgentID:   "8321f735-a52c-4f49-aca9-66f9266c5fe5",
 				Labels:    &labelsContents,
 				AgentName: &agentNameContents,
-			},
-
-			expectedTLSCfg: &TLSConfig{
-				Insecure: false,
-				KeyFile:  &keyFileContents,
-				CertFile: &certFileContents,
-				CAFile:   &caFileContents,
+				TLS: &TLSConfig{
+					Insecure: true,
+				},
 			},
 
 			expectedErrContents: nil,
+		},
+		{
+			desc:       "Successful Full Parse with TLS Missing KeyFile & CertFile",
+			createFile: true,
+			configContents: `
+endpoint: localhost:1234
+secret_key: b92222ee-a1fc-4bb1-98db-26de3448541b
+agent_id: 8321f735-a52c-4f49-aca9-66f9266c5fe5
+labels: "one=foo,two=bar"
+agent_name: "My Agent"
+tls_config:
+  insecure: false
+`,
+			expectedConfig: nil,
+
+			expectedErrContents: &errMissingTLSFiles,
+		},
+		{
+			desc:       "Successful Full Parse with TLS Invalid KeyFile",
+			createFile: true,
+			configContents: `
+endpoint: localhost:1234
+secret_key: b92222ee-a1fc-4bb1-98db-26de3448541b
+agent_id: 8321f735-a52c-4f49-aca9-66f9266c5fe5
+labels: "one=foo,two=bar"
+agent_name: "My Agent"
+tls_config:
+  insecure: false
+  key_file: /garbage/key.pem
+  cert_file: /garbage/cert.pem
+`,
+			expectedConfig:      nil,
+			expectedErrContents: &errInvalidKeyFile,
 		},
 	}
 
