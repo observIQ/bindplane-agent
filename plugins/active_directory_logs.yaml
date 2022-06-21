@@ -39,7 +39,7 @@ template: |
       start_at: '{{ .start_at }}'
       attributes:
         log_type: "active_directory.web_services"
-    # {{ if .enable_dns_server }}
+    {{ if .enable_dns_server }}
     windowseventlog/dns:
       channel: "DNS Server"
       max_reads: {{ .max_reads }}
@@ -47,8 +47,8 @@ template: |
       start_at: '{{ .start_at }}'
       attributes:
         log_type: "active_directory.dns"
-    # {{ end }}
-    # {{ if .enable_dfs_replication }}
+    {{ end }}
+    {{ if .enable_dfs_replication }}
     windowseventlog/dfs:
       channel: "DFS Replication"
       max_reads: {{ .max_reads }}
@@ -56,8 +56,8 @@ template: |
       start_at: '{{ .start_at }}'
       attributes:
         log_type: "active_directory.dfs"
-    # {{ end }}
-    # {{ if .enable_file_replication }}
+    {{ end }}
+    {{ if .enable_file_replication }}
     windowseventlog/frs:
       channel: "File Replication Service"
       max_reads: {{ .max_reads }}
@@ -65,7 +65,7 @@ template: |
       start_at: '{{ .start_at }}'
       attributes:
         log_type: "active_directory.frs"
-    # {{ end }}
+    {{ end }}
 
   service:
     pipelines:
@@ -73,12 +73,12 @@ template: |
         receivers:
           - windowseventlog/general
           - windowseventlog/web_services
-          # {{ if .enable_dns_server }}
+          {{ if .enable_dns_server }}
           - windowseventlog/dns
-          # {{ end }}
-          # {{ if .enable_dfs_replication }}
+          {{ end }}
+          {{ if .enable_dfs_replication }}
           - windowseventlog/dfs
-          # {{ end }}
-          # {{ if .enable_file_replication }}
+          {{ end }}
+          {{ if .enable_file_replication }}
           - windowseventlog/frs
-          # {{ end }}
+          {{ end }}
