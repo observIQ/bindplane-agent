@@ -58,18 +58,18 @@ template: |
       include_file_name_resolved: {{ .include_file_name_resolved }}
       include_file_path_resolved: {{ .include_file_path_resolved }}
       include:
-    # {{ range $i, $fp := .file_log_path  }}
+      {{ range $i, $fp := .file_log_path  }}
         - '{{ $fp }}'
-    # {{ end }}
-    # {{ if .exclude_file_log_path }}
+      {{ end }}
+      {{ if .exclude_file_log_path }}
       exclude:
       {{ range $i, $efp := .exclude_file_log_path  }}
         - '{{ $efp }}'
       {{ end }}
-    # {{ end }}
-    # {{ if .encoding }}
+      {{ end }}
+      {{ if .encoding }}
       encoding: '{{ .encoding }}'
-    # {{ end }}
+      {{ end }}
       attributes:
         log_type: {{ .log_type }}
       operators:
@@ -90,7 +90,7 @@ template: |
         - id: quote_handler_restructurer
           type: add
           field: body
-          value: 'EXPR(body.message1 + body.message2 + body.message3)'
+          value: 'EXPR(attributes.message1 + attributes.message2 + attributes.message3)'
           output: csv_parser
 
         - type: csv_parser
