@@ -59,6 +59,12 @@ template: |
               info: detail
               error2: 'failed assertion'
 
+        # Timestamp and severity have been promoted to the entry
+        - type: remove
+          field: attributes.timestamp
+        - type: remove
+          field: attributes.severity
+
         # Aerospike logs the configuration at startup. This is not something we should
         # capture.
         - type: filter
