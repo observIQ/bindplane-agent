@@ -1,0 +1,103 @@
+version: 0.0.1
+title: W3C
+description: Log Parser for W3C
+parameters:
+  - name: file_log_path
+    type: "[]string"
+    required: true
+  - name: exclude_file_log_path
+    type: "[]string"
+    default: []
+  - name: encoding
+    type: string
+    supported:
+      - utf-8
+      - utf-16le
+      - utf-16be
+      - ascii
+      - big5
+    default: utf-8
+  - name: log_type
+    type: string
+    default: w3c
+  - name: start_at
+    type: string
+    supported:
+      - beginning
+      - end
+    default: end
+  - name: max_concurrent_files
+    type: int
+    default: 512
+  - name: include_file_name
+    type: bool
+    default: true
+  - name: include_file_path
+    type: bool
+    default: false
+  - name: include_file_name_resolved
+    type: bool
+    default: false
+  - name: include_file_path_resolved
+    type: bool
+    default: false
+  - name: header
+    type: "string"
+    required: true 
+  - name: delimiter
+    type: string
+    default: "\t"
+
+template: |
+  receivers:
+    filelog:
+      start_at: '{{ .start_at }}'
+      max_concurrent_files: {{ .max_concurrent_files }}
+      include_file_name: {{ .include_file_name }}
+      include_file_path: {{ .include_file_path }}
+      include_file_name_resolved: {{ .include_file_name_resolved }}
+      include_file_path_resolved: {{ .include_file_path_resolved }}
+      include:
+      {{ range $i, $fp := .file_log_path  }}
+        - '{{ $fp }}'
+      {{ end }}
+      {{ if .exclude_file_log_path }}
+      exclude:
+      {{ range $i, $efp := .exclude_file_log_path  }}
+        - '{{ $efp }}'
+      {{ end }}
+      {{ end }}
+      {{ if .encoding }}
+      encoding: '{{ .encoding }}'
+      {{ end }}
+      attributes:
+        log_type: {{ .log_type }}
+      operators:
+        - type: filter
+          expr: 'body matches "^#"'
+
+        - type: router
+          default: csv_parser
+          routes:
+            - output: quote_handler_parser
+              expr: body matches '.*".*".*' and not (body matches "^#")
+
+        - id: quote_handler_parser
+          type: regex_parser
+          parse_from: body
+          regex: '(?P<message1>[^"]*)(?P<first_quote>[\"])(?P<message2>[^"]*)(?P<second_quote>[\"])(?P<message3>.*)'
+
+        - id: quote_handler_restructurer
+          type: add
+          field: body
+          value: 'EXPR(attributes.message1 + attributes.message2 + attributes.message3)'
+          output: csv_parser
+
+        - type: csv_parser
+          delimiter: '{{ .delimiter }}'
+          header: '{{ .header }}'
+          
+  service:
+    pipelines:
+      logs:
+        receivers: [filelog]
