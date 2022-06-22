@@ -38,3 +38,4 @@ template: |
     pipelines:
       logs:
         receivers: [filelog]
+        
