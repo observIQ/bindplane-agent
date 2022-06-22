@@ -1,0 +1,40 @@
+# Plugin Info
+version: 0.0.1
+title: Solr
+description: Log parser for Solr
+parameters:
+  - name: file_log_path
+    type: "[]string"
+  - name: start_at
+    type: string
+    supported:
+      - beginning
+      - end
+    default: end
+
+template: |
+  receivers:
+    filelog:
+      include:
+      {{ range $i, $fp := .file_log_path  }}
+        - '{{ $fp }}'
+      {{ end }}
+      multiline:
+        line_start_pattern: '\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}\.\d{3}\s[A-z]+\s{1,5}'
+      start_at: {{ .start_at }}
+      attributes:
+        log_type: solr
+      operators:
+        - id: solr_parser
+          type: regex_parser
+          regex: '^(?P<timestamp>\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}\.\d{3,6})\s(?P<level>[A-z]+)\s{1,5}\((?P<thread>[^\)]+)\)\s\[c?:?(?P<collection>[^\s]*)\ss?:?(?P<shard>[^\s]*)\sr?:?(?P<replica>[^\s]*)\sx?:?(?P<core>[^\]]*)\]\s(?P<source>[^\s]+)\s(?P<message>(?:[\s\S])+)\s?=?>?(?P<exception>[\s\S]*)'
+          timestamp:
+            parse_from: attributes.timestamp
+            layout: '%Y-%m-%d %H:%M:%S.%L'
+          severity:
+            parse_from: attributes.level
+
+  service:
+    pipelines:
+      logs:
+        receivers: [filelog]
