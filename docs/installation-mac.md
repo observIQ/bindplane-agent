@@ -12,7 +12,7 @@ sudo sh -c "$(curl -fsSlL https://github.com/observiq/observiq-otel-collector/re
 
 ## Configuring the Collector
 
-After installing, the `observiq-otel-collector` you can change the configuration file printed out at the end of the brew installation.
+After installing the `observiq-otel-collector` you can change the configuration file printed out at the end of the installation.
 
 The default configuration file can be found at `/opt/observiq-otel-collector/config.yaml`.
 
