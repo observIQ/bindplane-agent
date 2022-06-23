@@ -3,7 +3,7 @@ module github.com/observiq/observiq-otel-collector
 go 1.17
 
 require (
-	github.com/GoogleCloudPlatform/opentelemetry-operations-collector v0.0.3-0.20220601205114-2d57dc81373c
+	github.com/GoogleCloudPlatform/opentelemetry-operations-collector v0.0.3-0.20220623152009-5106a9773670
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/googlemanagedprometheus v0.32.2
 	github.com/observiq/observiq-otel-collector/exporter/googlecloudexporter v0.5.0
 	github.com/observiq/observiq-otel-collector/processor/resourceattributetransposerprocessor v0.5.0

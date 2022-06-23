@@ -56,7 +56,7 @@ Below is a list of supported receivers with links to their documentation pages.
 | Syslog Receiver                             | [syslogreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.54.0/receiver/syslogreceiver/README.md) |
 | TCP Log Receiver                            | [tcplogreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.54.0/receiver/tcplogreceiver/README.md) |
 | UDP Log Receiver                            | [udplogreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.54.0/receiver/udplogreceiver/README.md) |
-| Varnish Cache Receiver                      | [varnishreceiver](https://github.com/GoogleCloudPlatform/opentelemetry-operations-collector/blob/0c567eed530ce47839387e7cb415813b712b0900/receiver/varnishreceiver/README.md) |
+| Varnish Cache Receiver                      | [varnishreceiver](https://github.com/GoogleCloudPlatform/opentelemetry-operations-collector/blob/5106a9773670fe687c23a67d5b4ab650e90b68cd/receiver/varnishreceiver/README.md) |
 | vCenter Receiver                            | [vcenterreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.54.0/receiver/vcenterreceiver/README.md) |
 | Windows Event Log Receiver                  | [windowseventlogreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.54.0/receiver/windowseventlogreceiver/README.md) |
 | Windows Performance Counters Receiver       | [windowsperfcountersreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.54.0/receiver/windowsperfcountersreceiver/README.md) |
