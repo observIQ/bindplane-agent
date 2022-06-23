@@ -5,6 +5,8 @@ description: Log parser for Solr
 parameters:
   - name: file_log_path
     type: "[]string"
+    default: 
+      - "/var/solr/logs/solr.log"
   - name: start_at
     type: string
     supported:
@@ -38,3 +40,4 @@ template: |
     pipelines:
       logs:
         receivers: [filelog]
+
