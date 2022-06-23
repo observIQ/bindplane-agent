@@ -1,0 +1,103 @@
+version: 0.0.1
+title: Wildfly
+description: Log parser for Wildfly
+parameters:
+  - name: standalone_file_path
+    type: "[]string"
+    default:  
+      - "/opt/wildfly/standalone/log/server.log"
+  - name: enable_domain_server
+    type: bool
+    default: false
+  - name: domain_server_path
+    type: "[]string"
+    default: 
+      - "/opt/wildfly/domain/servers/*/log/server.log"
+  - name: enable_domain_controller
+    type: bool
+    default: false      
+  - name: domain_controller_path
+    type: "[]string"
+    default: 
+      - "/opt/wildfly/domain/log/*.log"        
+  - name: start_at
+    type: string
+    supported:
+      - beginning
+      - end
+    default: end
+
+template: |
+  receivers:
+    filelog/standalone:
+      include:
+        {{ range $i, $fp := .standalone_file_path  }}
+          - '{{ $fp }}'
+        {{ end }}
+      start_at: {{ .start_at }}
+      multiline:
+        line_start_pattern: '\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3}'
+      attributes:
+        log_type: wildfly
+      operators:
+        - id: wildfly_parser
+          type: regex_parser
+          regex: '^(?P<timestamp>\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2},\d{3})\s+(?P<level>\w+)(?:\s+\[(?P<source>.+?)\])?(?:\s+\((?P<thread>.+?)\))?\s+(?P<message>(?:(?P<messageCode>[\d\w]+):)?[^\n]*)'
+          timestamp:
+            parse_from: attributes.timestamp
+            layout: '%Y-%m-%d %H:%M:%S,%L'
+          severity:
+            parse_from: attributes.level
+    
+    filelog/domain_server:
+      include:
+        {{ range $i, $fp := .domain_server_path  }}
+          - '{{ $fp }}'
+        {{ end }}
+      start_at: {{ .start_at }}
+      multiline:
+        line_start_pattern: '\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3}'
+      attributes:
+        log_type: wildfly
+      operators:
+        - id: wildfly_parser
+          type: regex_parser
+          regex: '^(?P<timestamp>\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2},\d{3})\s+(?P<level>\w+)(?:\s+\[(?P<source>.+?)\])?(?:\s+\((?P<thread>.+?)\))?\s+(?P<message>(?:(?P<messageCode>[\d\w]+):)?[^\n]*)'
+          timestamp:
+            parse_from: attributes.timestamp
+            layout: '%Y-%m-%d %H:%M:%S,%L'
+          severity:
+            parse_from: attributes.level
+
+    filelog/domain_controller:
+      include:
+      {{ range $i, $fp := .domain_controller_path  }}
+        - '{{ $fp }}'
+      {{ end }}
+      start_at: {{ .start_at }}
+      multiline:
+        line_start_pattern: '\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3}'
+      attributes:
+        log_type: wildfly.domain_controller
+      operators:
+        - id: wildfly_parser
+          type: regex_parser
+          regex: '^(?P<timestamp>\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2},\d{3})\s+(?P<level>\w+)(?:\s+\[(?P<source>.+?)\])?(?:\s+\((?P<thread>.+?)\))?\s+(?P<message>(?:(?P<messageCode>[\d\w]+):)?[^\n]*)'
+          timestamp:
+            parse_from: attributes.timestamp
+            layout: '%Y-%m-%d %H:%M:%S,%L'
+          severity:
+            parse_from: attributes.level
+
+  service:
+    pipelines:
+      logs:
+        receivers:  
+          - filelog/standalone
+        {{ if .enable_domain_server }}
+          - filelog/domain_server
+        {{ end }}
+        {{ if .enable_domain_controller }}
+          - filelog/domain_controller
+        {{ end }}
+
