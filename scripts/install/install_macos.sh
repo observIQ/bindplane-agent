@@ -359,19 +359,20 @@ set_os_arch()
 # If not specified, the version defaults to whatever the latest release on github is.
 set_download_urls()
 {
-  if [ -z "$version" ] ; then
-    # shellcheck disable=SC2153
-    version=$COLLECTOR_VERSION
-  fi
-
-  if [ -z "$version" ] ; then
-    version=$(latest_version)
-  fi
-
-  if [ -z "$version" ] ; then
-    error_exit "$LINENO" "Could not determine version to install"
-  fi
   if [ -z "$url" ] ; then
+    if [ -z "$version" ] ; then
+      # shellcheck disable=SC2153
+      version=$COLLECTOR_VERSION
+    fi
+
+    if [ -z "$version" ] ; then
+      version=$(latest_version)
+    fi
+
+    if [ -z "$version" ] ; then
+      error_exit "$LINENO" "Could not determine version to install"
+    fi
+    
     url=$DOWNLOAD_BASE
     collector_download_url="$url/download/v$version/observiq-otel-collector-v${version}-darwin-${os_arch}.tar.gz"
   else
