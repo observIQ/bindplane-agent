@@ -566,10 +566,14 @@ uninstall()
   rm -f "/Library/LaunchDaemons/$SERVICE_NAME.plist" || error_exit "$LINENO" "Failed to remove service file /Library/LaunchDaemons/$SERVICE_NAME.plist"
   succeeded
 
+  info "Backing up config.yaml to config.bak.yaml"
+  cp "$INSTALL_DIR/config.yaml" "$INSTALL_DIR/config.bak.yaml" || error_exit "$LINENO" "Failed to backup config.yaml to config.bak.yaml"
+  succeeded
+
   # Removes the whole install directory, including configs.
   info "Removing installed artifacts..."
   # This find command gets a list of all artifacts paths except config.yaml or the root directory.
-  FILES=$(cd "$INSTALL_DIR"; find "." -not \( -name config.yaml -or -name "." \))
+  FILES=$(cd "$INSTALL_DIR"; find "." -not \( -name config.bak.yaml -or -name "." \))
   for f in $FILES
   do
     rm -rf "${INSTALL_DIR:?}/$f" || error_exit "$LINENO" "Failed to remove artifact ${INSTALL_DIR:?}/$f"
@@ -578,8 +582,6 @@ uninstall()
   # Copy the old config to a backup. This is similar to how RPM handles this.
   # This way, the file is recoverable if the uninstall was somehow accidental,
   # but if a new install occurs, the default config will still be used.
-  cp "$INSTALL_DIR/config.yaml" "$INSTALL_DIR/config.bak.yaml" || error_exit "$LINENO" "Failed to backup config.yaml to config.bak.yaml"
-  rm -f "$INSTALL_DIR/config.yaml" || error_exit "$LINENO" "Failed to remove original config.yaml"
   succeeded
 
   info "Removing opentelemetry-java-contrib-jmx-metrics.jar from /opt..."
