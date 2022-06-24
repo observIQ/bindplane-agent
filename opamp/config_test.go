@@ -116,7 +116,7 @@ func TestToTLS(t *testing.T) {
 				assert.NotNil(t, actual)
 				assert.False(t, actual.InsecureSkipVerify)
 
-				// Can't compare root Ca's due to embedded function in Cert Pool structure
+				// Can't compare root CA's due to embedded function in Cert Pool structure
 			},
 		},
 		{
