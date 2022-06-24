@@ -73,13 +73,14 @@ func (c Config) ToTLS() (*tls.Config, error) {
 		return nil, nil
 	}
 
-	if c.TLS.Insecure {
-		return &tls.Config{
-			InsecureSkipVerify: true,
-		}, nil
+	tlsConfig := &tls.Config{
+		MinVersion: tls.VersionTLS12,
 	}
 
-	tlsConfig := &tls.Config{}
+	if c.TLS.Insecure {
+		tlsConfig.InsecureSkipVerify = true
+		return tlsConfig, nil
+	}
 
 	// Load CA cert if specified
 	if c.TLS.CAFile != nil {

@@ -62,6 +62,7 @@ func TestToTLS(t *testing.T) {
 
 				expectedConfig := tls.Config{
 					InsecureSkipVerify: true,
+					MinVersion:         tls.VersionTLS12,
 				}
 
 				actual, err := cfg.ToTLS()
@@ -78,7 +79,9 @@ func TestToTLS(t *testing.T) {
 					},
 				}
 
-				expectedConfig := tls.Config{}
+				expectedConfig := tls.Config{
+					MinVersion: tls.VersionTLS12,
+				}
 				expectedConfig.BuildNameToCertificate()
 
 				actual, err := cfg.ToTLS()
@@ -149,7 +152,9 @@ func TestToTLS(t *testing.T) {
 					},
 				}
 
-				expectedConfig := tls.Config{}
+				expectedConfig := tls.Config{
+					MinVersion: tls.VersionTLS12,
+				}
 
 				cert, err := tls.LoadX509KeyPair(certFileContents, keyFileContents)
 				expectedConfig.Certificates = []tls.Certificate{cert}
@@ -173,7 +178,9 @@ func TestToTLS(t *testing.T) {
 					},
 				}
 
-				expectedConfig := tls.Config{}
+				expectedConfig := tls.Config{
+					MinVersion: tls.VersionTLS12,
+				}
 
 				caCert, err := ioutil.ReadFile(caFileContents)
 				caCertPool := x509.NewCertPool()
