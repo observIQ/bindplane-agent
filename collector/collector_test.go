@@ -69,7 +69,7 @@ func TestCollectorRunInvalidConfig(t *testing.T) {
 	status := <-collector.Status()
 	require.False(t, status.Running)
 	require.Error(t, status.Err)
-	require.Contains(t, status.Err.Error(), "cannot build receivers")
+	require.Contains(t, status.Err.Error(), "cannot build pipelines")
 }
 
 // There currently exists a limitation in the collector lifecycle regarding context.
