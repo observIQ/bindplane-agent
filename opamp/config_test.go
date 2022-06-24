@@ -55,7 +55,7 @@ func TestToTLS(t *testing.T) {
 			testFunc: func(t *testing.T) {
 				cfg := Config{
 					TLS: &TLSConfig{
-						Insecure: true,
+						InsecureSkipVerify: true,
 					},
 				}
 
@@ -74,7 +74,7 @@ func TestToTLS(t *testing.T) {
 			testFunc: func(t *testing.T) {
 				cfg := Config{
 					TLS: &TLSConfig{
-						Insecure: false,
+						InsecureSkipVerify: false,
 					},
 				}
 
@@ -93,8 +93,8 @@ func TestToTLS(t *testing.T) {
 			testFunc: func(t *testing.T) {
 				cfg := Config{
 					TLS: &TLSConfig{
-						Insecure: false,
-						CAFile:   &invalidCAFile,
+						InsecureSkipVerify: false,
+						CAFile:             &invalidCAFile,
 					},
 				}
 
@@ -108,8 +108,8 @@ func TestToTLS(t *testing.T) {
 			testFunc: func(t *testing.T) {
 				cfg := Config{
 					TLS: &TLSConfig{
-						Insecure: false,
-						CAFile:   &caFileContents,
+						InsecureSkipVerify: false,
+						CAFile:             &caFileContents,
 					},
 				}
 
@@ -126,9 +126,9 @@ func TestToTLS(t *testing.T) {
 			testFunc: func(t *testing.T) {
 				cfg := Config{
 					TLS: &TLSConfig{
-						Insecure: false,
-						KeyFile:  &invalidKeyFile,
-						CertFile: &invalidCertFile,
+						InsecureSkipVerify: false,
+						KeyFile:            &invalidKeyFile,
+						CertFile:           &invalidCertFile,
 					},
 				}
 
@@ -145,9 +145,9 @@ func TestToTLS(t *testing.T) {
 			testFunc: func(t *testing.T) {
 				cfg := Config{
 					TLS: &TLSConfig{
-						Insecure: false,
-						KeyFile:  &keyFileContents,
-						CertFile: &certFileContents,
+						InsecureSkipVerify: false,
+						KeyFile:            &keyFileContents,
+						CertFile:           &certFileContents,
 					},
 				}
 
@@ -170,10 +170,10 @@ func TestToTLS(t *testing.T) {
 			testFunc: func(t *testing.T) {
 				cfg := Config{
 					TLS: &TLSConfig{
-						Insecure: false,
-						CAFile:   &caFileContents,
-						KeyFile:  &keyFileContents,
-						CertFile: &certFileContents,
+						InsecureSkipVerify: false,
+						CAFile:             &caFileContents,
+						KeyFile:            &keyFileContents,
+						CertFile:           &certFileContents,
 					},
 				}
 
@@ -300,7 +300,7 @@ agent_id: 8321f735-a52c-4f49-aca9-66f9266c5fe5
 			},
 		},
 		{
-			desc: "Successful Full Parse with TLS Insecure",
+			desc: "Successful Full Parse with TLS Insecure Skip Verify",
 			testFunc: func(t *testing.T) {
 				configContents := `
 endpoint: localhost:1234
@@ -309,7 +309,7 @@ agent_id: 8321f735-a52c-4f49-aca9-66f9266c5fe5
 labels: "one=foo,two=bar"
 agent_name: "My Agent"
 tls_config:
-  insecure: true
+  insecure_skip_verify: true
 `
 
 				tmpDir := t.TempDir()
@@ -325,7 +325,7 @@ tls_config:
 					Labels:    &labelsContents,
 					AgentName: &agentNameContents,
 					TLS: &TLSConfig{
-						Insecure: true,
+						InsecureSkipVerify: true,
 					},
 				}
 
@@ -344,7 +344,7 @@ agent_id: 8321f735-a52c-4f49-aca9-66f9266c5fe5
 labels: "one=foo,two=bar"
 agent_name: "My Agent"
 tls_config:
-  insecure: false
+  insecure_skip_verify: false
 `
 
 				tmpDir := t.TempDir()
@@ -360,7 +360,7 @@ tls_config:
 					Labels:    &labelsContents,
 					AgentName: &agentNameContents,
 					TLS: &TLSConfig{
-						Insecure: false,
+						InsecureSkipVerify: false,
 					},
 				}
 
@@ -382,7 +382,7 @@ agent_id: 8321f735-a52c-4f49-aca9-66f9266c5fe5
 labels: "one=foo,two=bar"
 agent_name: "My Agent"
 tls_config:
-  insecure: false
+  insecure_skip_verify: false
   ca_file: /some/bad/file-ca.crt
 `
 
@@ -411,7 +411,7 @@ agent_id: 8321f735-a52c-4f49-aca9-66f9266c5fe5
 labels: "one=foo,two=bar"
 agent_name: "My Agent"
 tls_config:
-  insecure: false
+  insecure_skip_verify: false
   ca_file: %s
 `, caPath)
 
@@ -425,8 +425,8 @@ tls_config:
 					Labels:    &labelsContents,
 					AgentName: &agentNameContents,
 					TLS: &TLSConfig{
-						Insecure: false,
-						CAFile:   &caPath,
+						InsecureSkipVerify: false,
+						CAFile:             &caPath,
 					},
 				}
 
@@ -448,7 +448,7 @@ agent_id: 8321f735-a52c-4f49-aca9-66f9266c5fe5
 labels: "one=foo,two=bar"
 agent_name: "My Agent"
 tls_config:
-  insecure: false
+  insecure_skip_verify: false
   key_file: /some/bad/file.key
   cert_file: /some/bad/file.crt
 `
@@ -478,7 +478,7 @@ agent_id: 8321f735-a52c-4f49-aca9-66f9266c5fe5
 labels: "one=foo,two=bar"
 agent_name: "My Agent"
 tls_config:
-  insecure: false
+  insecure_skip_verify: false
   key_file: %s
   cert_file: /some/bad/file.crt
 `, keyPath)
@@ -508,7 +508,7 @@ agent_id: 8321f735-a52c-4f49-aca9-66f9266c5fe5
 labels: "one=foo,two=bar"
 agent_name: "My Agent"
 tls_config:
-  insecure: false
+  insecure_skip_verify: false
   key_file: /some/bad/file.key
   cert_file: %s
 `, certPath)
@@ -538,7 +538,7 @@ agent_id: 8321f735-a52c-4f49-aca9-66f9266c5fe5
 labels: "one=foo,two=bar"
 agent_name: "My Agent"
 tls_config:
-  insecure: false
+  insecure_skip_verify: false
   key_file: %s
 `, keyPath)
 
@@ -567,7 +567,7 @@ agent_id: 8321f735-a52c-4f49-aca9-66f9266c5fe5
 labels: "one=foo,two=bar"
 agent_name: "My Agent"
 tls_config:
-  insecure: false
+  insecure_skip_verify: false
   cert_file: %s
 `, certPath)
 
@@ -600,7 +600,7 @@ agent_id: 8321f735-a52c-4f49-aca9-66f9266c5fe5
 labels: "one=foo,two=bar"
 agent_name: "My Agent"
 tls_config:
-  insecure: false
+  insecure_skip_verify: false
   key_file: %s
   cert_file: %s
 `, keyPath, certPath)
@@ -615,9 +615,9 @@ tls_config:
 					Labels:    &labelsContents,
 					AgentName: &agentNameContents,
 					TLS: &TLSConfig{
-						Insecure: false,
-						KeyFile:  &keyPath,
-						CertFile: &certPath,
+						InsecureSkipVerify: false,
+						KeyFile:            &keyPath,
+						CertFile:           &certPath,
 					},
 				}
 
@@ -835,10 +835,10 @@ func TestConfigCopy(t *testing.T) {
 	caFileContents := "My CA File"
 
 	tlscfg := TLSConfig{
-		Insecure: false,
-		KeyFile:  &keyFileContents,
-		CertFile: &certFileContents,
-		CAFile:   &caFileContents,
+		InsecureSkipVerify: false,
+		KeyFile:            &keyFileContents,
+		CertFile:           &certFileContents,
+		CAFile:             &caFileContents,
 	}
 	cfg := Config{
 		Endpoint:  "ws://localhost:1234",
