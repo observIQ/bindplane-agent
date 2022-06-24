@@ -401,8 +401,9 @@ tls_config:
 				configPath := filepath.Join(tmpDir, "manager.yml")
 
 				caPath := filepath.Join(tmpDir, "file-ca.crt")
-				_, err := os.Create(caPath)
+				f, err := os.Create(caPath)
 				require.NoError(t, err)
+				defer f.Close()
 
 				configContents := fmt.Sprintf(`
 endpoint: localhost:1234
@@ -468,8 +469,9 @@ tls_config:
 				configPath := filepath.Join(tmpDir, "manager.yml")
 
 				keyPath := filepath.Join(tmpDir, "file-key.crt")
-				_, err := os.Create(keyPath)
+				k, err := os.Create(keyPath)
 				require.NoError(t, err)
+				defer k.Close()
 
 				configContents := fmt.Sprintf(`
 endpoint: localhost:1234
@@ -498,8 +500,9 @@ tls_config:
 				configPath := filepath.Join(tmpDir, "manager.yml")
 
 				certPath := filepath.Join(tmpDir, "file-cert.crt")
-				_, err := os.Create(certPath)
+				c, err := os.Create(certPath)
 				require.NoError(t, err)
+				defer c.Close()
 
 				configContents := fmt.Sprintf(`
 endpoint: localhost:1234
@@ -528,8 +531,9 @@ tls_config:
 				configPath := filepath.Join(tmpDir, "manager.yml")
 
 				keyPath := filepath.Join(tmpDir, "file-cert.crt")
-				_, err := os.Create(keyPath)
+				k, err := os.Create(keyPath)
 				require.NoError(t, err)
+				defer k.Close()
 
 				configContents := fmt.Sprintf(`
 endpoint: localhost:1234
@@ -557,8 +561,9 @@ tls_config:
 				configPath := filepath.Join(tmpDir, "manager.yml")
 
 				certPath := filepath.Join(tmpDir, "file-cert.crt")
-				_, err := os.Create(certPath)
+				c, err := os.Create(certPath)
 				require.NoError(t, err)
+				defer c.Close()
 
 				configContents := fmt.Sprintf(`
 endpoint: localhost:1234
@@ -586,12 +591,14 @@ tls_config:
 				configPath := filepath.Join(tmpDir, "manager.yml")
 
 				keyPath := filepath.Join(tmpDir, "file-key.crt")
-				_, err := os.Create(keyPath)
+				k, err := os.Create(keyPath)
 				require.NoError(t, err)
+				defer k.Close()
 
 				certPath := filepath.Join(tmpDir, "file-cert.crt")
-				_, err = os.Create(certPath)
+				c, err := os.Create(certPath)
 				require.NoError(t, err)
+				defer c.Close()
 
 				configContents := fmt.Sprintf(`
 endpoint: localhost:1234
