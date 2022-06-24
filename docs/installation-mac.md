@@ -26,10 +26,10 @@ The collector uses `launchctl` to control the collector lifecycle using the foll
 
 ```sh
 # Start the collector
-launchctl start com.observiq.collector
+sudo launchctl start com.observiq.collector
 
 # Stop the collector
-launchctl stop com.observiq.collector
+sudo launchctl stop com.observiq.collector
 ```
 
 ## Uninstalling
