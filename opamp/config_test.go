@@ -133,7 +133,7 @@ func TestToTLS(t *testing.T) {
 				}
 
 				_, err := tls.LoadX509KeyPair(invalidCertFile, invalidKeyFile)
-				errinvalidKeyorCertFile := fmt.Sprintf("failed to ready Key and Cert file: %s", err)
+				errinvalidKeyorCertFile := fmt.Sprintf("failed to read Key and Cert file: %s", err)
 
 				actual, err := cfg.ToTLS()
 				assert.ErrorContains(t, err, errinvalidKeyorCertFile)
