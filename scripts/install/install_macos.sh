@@ -598,8 +598,8 @@ main()
 
   observiq_banner
 
-  root_check
   check_prereqs
+  root_check  
 
   if [ $# -ge 1 ]; then
     while [ -n "$1" ]; do
