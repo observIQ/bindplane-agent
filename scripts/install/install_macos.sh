@@ -496,6 +496,7 @@ install_package()
     info "Uninstalling existing service file..."
     launchctl stop "$SERVICE_NAME" > /dev/null 2>&1 || error_exit "$LINENO" "Failed to stop service $SERVICE_NAME"
     launchctl unload -w "/Library/LaunchDaemons/$SERVICE_NAME.plist" > /dev/null 2>&1 || error_exit "$LINENO" "Failed to unload service file /Library/LaunchDaemons/$SERVICE_NAME.plist"
+    succeeded
   fi
 
   # Install service file
