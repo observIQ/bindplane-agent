@@ -23,5 +23,7 @@
     <true/>
     <key>KeepAlive</key>
     <true/>
+    <key>WorkingDirectory</key>
+    <string>[INSTALLDIR]</string>
 </dict>
 </plist>
