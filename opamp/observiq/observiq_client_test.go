@@ -162,6 +162,33 @@ func TestClientConnect(t *testing.T) {
 			},
 		},
 		{
+			desc: "TLS fails",
+			testFunc: func(*testing.T) {
+
+				mockOpAmpClient := new(mocks.MockOpAMPClient)
+				mockOpAmpClient.On("SetAgentDescription", mock.Anything).Return(nil)
+				badCAFile := "bad-ca.cert"
+
+				c := &Client{
+					opampClient:   mockOpAmpClient,
+					logger:        zap.NewNop(),
+					ident:         &identity{},
+					configManager: nil,
+					collector:     nil,
+					currentConfig: opamp.Config{
+						Endpoint:  "ws://localhost:1234",
+						SecretKey: &secretKeyContents,
+						TLS: &opamp.TLSConfig{
+							CAFile: &badCAFile,
+						},
+					},
+				}
+
+				err := c.Connect(context.Background())
+				assert.Error(t, err)
+			},
+		},
+		{
 			desc: "Start fails",
 			testFunc: func(*testing.T) {
 				expectedErr := errors.New("oops")
