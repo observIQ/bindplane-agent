@@ -372,7 +372,7 @@ set_download_urls()
     if [ -z "$version" ] ; then
       error_exit "$LINENO" "Could not determine version to install"
     fi
-    
+
     url=$DOWNLOAD_BASE
     collector_download_url="$url/download/v$version/observiq-otel-collector-v${version}-darwin-${os_arch}.tar.gz"
   else
@@ -561,8 +561,6 @@ display_results()
 
 uninstall()
 {
-  observiq_banner
-
   banner "Uninstalling observIQ OpenTelemetry Collector"
   increase_indent
 
