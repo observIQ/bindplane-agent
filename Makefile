@@ -90,7 +90,9 @@ misspell-fix:
 
 .PHONY: test
 test:
-	$(MAKE) for-all CMD="go test -race ./..."
+	# Temporarily remove -race flag from tests due to an issue in mapstructure failing with -race flag after v1.3.1 https://github.com/mitchellh/mapstructure/issues/290
+	# $(MAKE) for-all CMD="go test -race ./..."
+	$(MAKE) for-all CMD="go test ./..."
 
 .PHONY: test-with-cover
 test-with-cover:
