@@ -415,9 +415,7 @@ set_opamp_secret_key()
   fi
 }
 
-# latest_version gets the tag of the latest release.
-# It's also super hacky; It assumes that the output is formatted prettily.
-# Ideally we'd use jq, but we want to avoid external dependencies
+# latest_version gets the tag of the latest release, without the v prefix.
 latest_version()
 {
   curl -sSL -H"Accept: application/vnd.github.v3+json" https://api.github.com/repos/observIQ/observiq-otel-collector/releases/latest | \
@@ -433,7 +431,6 @@ install_package()
 
   # Remove temporary directory, if it exists
   rm -rf "$TMP_DIR"
-  mkdir -p "$TMP_DIR"
   mkdir -p "$TMP_DIR/artifacts"
 
   # Download into tmp dir
