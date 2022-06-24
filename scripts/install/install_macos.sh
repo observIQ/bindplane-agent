@@ -561,6 +561,15 @@ uninstall()
   banner "Uninstalling observIQ OpenTelemetry Collector"
   increase_indent
 
+  if [ ! -f "$INSTALL_DIR/observiq-otel-collector" ]; then
+    # If the collector binary is not present, we assume that the collector is not installed
+    # In this case, do nothing.
+    info "No install detected, skipping..."
+    decrease_indent
+    banner "$(fg_green Uninstallation Complete!)"
+    return 0
+  fi
+
   info "Uninstalling service file..."
   launchctl unload -w "/Library/LaunchDaemons/$SERVICE_NAME.plist" || error_exit "$LINENO" "Failed to unload service file /Library/LaunchDaemons/$SERVICE_NAME.plist"
   rm -f "/Library/LaunchDaemons/$SERVICE_NAME.plist" || error_exit "$LINENO" "Failed to remove service file /Library/LaunchDaemons/$SERVICE_NAME.plist"
