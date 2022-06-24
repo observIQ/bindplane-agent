@@ -20,7 +20,6 @@ import (
 	"crypto/x509"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 
@@ -84,7 +83,7 @@ func (c Config) ToTLS() (*tls.Config, error) {
 
 	// Load CA cert if specified
 	if c.TLS.CAFile != nil {
-		caCert, err := ioutil.ReadFile(*c.TLS.CAFile)
+		caCert, err := os.ReadFile(*c.TLS.CAFile)
 		if err != nil {
 			return nil, errors.New(errInvalidCAFile)
 		}
@@ -98,7 +97,7 @@ func (c Config) ToTLS() (*tls.Config, error) {
 	if c.TLS.CertFile != nil && c.TLS.KeyFile != nil {
 		cert, err := tls.LoadX509KeyPair(*c.TLS.CertFile, *c.TLS.KeyFile)
 		if err != nil {
-			return nil, fmt.Errorf("failed to ready Key and Cert file: %w", err)
+			return nil, fmt.Errorf("failed to read Key and Cert file: %w", err)
 		}
 
 		tlsConfig.Certificates = []tls.Certificate{cert}

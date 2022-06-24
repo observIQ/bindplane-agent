@@ -18,7 +18,6 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
@@ -182,7 +181,7 @@ func TestToTLS(t *testing.T) {
 					MinVersion: tls.VersionTLS12,
 				}
 
-				caCert, err := ioutil.ReadFile(caFileContents)
+				caCert, err := os.ReadFile(caFileContents)
 				caCertPool := x509.NewCertPool()
 				caCertPool.AppendCertsFromPEM(caCert)
 				expectedConfig.RootCAs = caCertPool
