@@ -494,7 +494,6 @@ install_package()
   if [ -f "/Library/LaunchDaemons/$SERVICE_NAME.plist" ]; then
     # Existing service file, we should stop & unload first.
     info "Uninstalling existing service file..."
-    launchctl stop "$SERVICE_NAME" > /dev/null 2>&1 || error_exit "$LINENO" "Failed to stop service $SERVICE_NAME"
     launchctl unload -w "/Library/LaunchDaemons/$SERVICE_NAME.plist" > /dev/null 2>&1 || error_exit "$LINENO" "Failed to unload service file /Library/LaunchDaemons/$SERVICE_NAME.plist"
     succeeded
   fi
@@ -561,11 +560,6 @@ uninstall()
 {
   banner "Uninstalling observIQ OpenTelemetry Collector"
   increase_indent
-
-  info "Stopping service..."
-  launchctl stop "$SERVICE_NAME" || error_exit "$LINENO" "Failed to stop service $SERVICE_NAME"
-  succeeded
-
 
   info "Uninstalling service file..."
   launchctl unload -w "/Library/LaunchDaemons/$SERVICE_NAME.plist" || error_exit "$LINENO" "Failed to unload service file /Library/LaunchDaemons/$SERVICE_NAME.plist"
