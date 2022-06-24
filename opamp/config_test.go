@@ -31,9 +31,9 @@ func TestToTLS(t *testing.T) {
 	invalidCAFile := "/some/bad/file-ca.crt"
 	invalidKeyFile := "/some/bad/file.key"
 	invalidCertFile := "/some/bad/file.crt"
-	caFileContents := "/Users/dmikolay/Github/observiq-otel-collector/opamp/testdata/test-ca.crt"
-	keyFileContents := "/Users/dmikolay/Github/observiq-otel-collector/opamp/testdata/test.key"
-	certFileContents := "/Users/dmikolay/Github/observiq-otel-collector/opamp/testdata/test.crt"
+	caFileContents := "./testdata/test-ca.crt"
+	keyFileContents := "./testdata/test.key"
+	certFileContents := "./testdata/test.crt"
 
 	testCases := []struct {
 		desc     string
