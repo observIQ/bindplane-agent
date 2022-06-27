@@ -90,9 +90,7 @@ misspell-fix:
 
 .PHONY: test
 test:
-	# Temporarily remove -race flag from tests due to an issue in mapstructure failing with -race flag after v1.3.1 https://github.com/mitchellh/mapstructure/issues/290
-	# $(MAKE) for-all CMD="go test -race ./..."
-	$(MAKE) for-all CMD="go test ./..."
+	$(MAKE) for-all CMD="go test -race ./..."
 
 .PHONY: test-with-cover
 test-with-cover:
@@ -158,6 +156,7 @@ release-prep:
 	@cp -r ./plugins release_deps/
 	@cp config/example.yaml release_deps/config.yaml
 	@cp config/logging.yaml release_deps/logging.yaml
+	@cp service/com.observiq.collector.plist release_deps/com.observiq.collector.plist
 
 # Build, sign, and release
 .PHONY: release

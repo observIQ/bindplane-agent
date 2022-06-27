@@ -16,17 +16,14 @@
 set -e
 
 # Collector Constants
-FORMULA_NAME="observiq/observiq-otel-collector/observiq-otel-collector"
 SERVICE_NAME="com.observiq.collector"
+DOWNLOAD_BASE="https://github.com/observiq/observiq-otel-collector/releases"
 
 # Script Constants
-BREW_ETC=$(brew --prefix)/etc
-PREREQS="printf brew sed uname uuidgen tr"
-CONFIG_PREFIX="observiq_"
-CONFIG_YML_NAME="config.yaml"
-MANAGEMENT_YML_NAME="manager.yaml"
-ETC_CONFIG_YML_NAME=$CONFIG_PREFIX$CONFIG_YML_NAME
-ETC_MANAGEMENT_YML_NAME=$CONFIG_PREFIX$MANAGEMENT_YML_NAME
+PREREQS="printf sed uname uuidgen tr find grep"
+TMP_DIR="${TMPDIR:-"/tmp/"}observiq-otel-collector" # Allow this to be overriden by cannonical TMPDIR env var
+INSTALL_DIR="/opt/observiq-otel-collector"
+MANAGEMENT_YML_PATH="$INSTALL_DIR/manager.yaml"
 SCRIPT_NAME="$0"
 INDENT_WIDTH='  '
 indent=""
@@ -167,13 +164,15 @@ Usage:
       If not provided, this will default to the latest version.
       Alternatively the COLLECTOR_VERSION environment variable can be
       set to configure the collector version.
-      Example: '-v 1.2.12' will download 1.2.12. 
+      Example: '-v 1.2.12' will download 1.2.12.
 
   $(fg_yellow '-r, --uninstall')
-      Stops the collector services and uninstalls the collector via brew.
+      Stops the collector services and uninstalls the collector.
 
-  $(fg_yellow '-u, --upgrade')
-      Stops the collector services and upgrades the collector via brew.
+  $(fg_yellow '-l, --url')
+      Defines the URL that the components will be downloaded from.
+      If not provided, this will default to observIQ OpenTelemetry Collector\'s GitHub releases.
+      Example: '-l http://my.domain.org/observiq-otel-collector' will download from there.
    
   $(fg_yellow '-e, --endpoint')
       Defines the endpoint of an OpAMP compatible management server for this collector install.
@@ -284,6 +283,17 @@ os_check()
   esac
 }
 
+# This checks to see if the user who is running the script has root permissions.
+root_check()
+{
+  system_user_name=$(id -un)
+  if [ "${system_user_name}" != 'root' ]
+  then
+    failed
+    error_exit "$LINENO" "Script needs to be run as root or with sudo"
+  fi
+}
+
 # This will check if the current environment has
 # all required shell dependencies to run the installation.
 dependencies_check()
@@ -316,13 +326,58 @@ setup_installation()
   banner "Configuring Installation Variables"
   increase_indent
 
+  set_os_arch
+  set_download_urls
   set_opamp_endpoint
   set_opamp_labels
   set_opamp_secret_key
-  set_formula_name
 
   success "Configuration complete!"
   decrease_indent
+}
+
+set_os_arch()
+{
+  os_arch=$(uname -m)
+  case "$os_arch" in 
+    # arm64 strings. These are from https://stackoverflow.com/questions/45125516/possible-values-for-uname-m
+    aarch64|arm64|aarch64_be|armv8b|armv8l)
+      os_arch="arm64"
+      ;;
+    x86_64)
+      os_arch="amd64"
+      ;;
+    *)
+      # We only support arm64/amd64 architectures for macOS
+      error_exit "$LINENO" "Unsupported os arch: $os_arch"
+      ;;
+  esac
+}
+
+# This will set the urls to use when downloading the collector and its plugins.
+# These urls are constructed based on the --version flag or COLLECTOR_VERSION env variable.
+# If not specified, the version defaults to whatever the latest release on github is.
+set_download_urls()
+{
+  if [ -z "$url" ] ; then
+    if [ -z "$version" ] ; then
+      # shellcheck disable=SC2153
+      version=$COLLECTOR_VERSION
+    fi
+
+    if [ -z "$version" ] ; then
+      version=$(latest_version)
+    fi
+
+    if [ -z "$version" ] ; then
+      error_exit "$LINENO" "Could not determine version to install"
+    fi
+
+    url=$DOWNLOAD_BASE
+    collector_download_url="$url/download/v$version/observiq-otel-collector-v${version}-darwin-${os_arch}.tar.gz"
+  else
+    collector_download_url="$url"
+  fi
 }
 
 set_opamp_endpoint()
@@ -360,106 +415,101 @@ set_opamp_secret_key()
   fi
 }
 
-set_formula_name()
+# latest_version gets the tag of the latest release, without the v prefix.
+latest_version()
 {
-  # If version flag is not set use the COLLECTOR_VERSION
-  if [ -z "$version" ] ; then
-    version=$COLLECTOR_VERSION
-  fi
-
-  # If version is set append it to formula name
-  if [ -n "$version" ] ; then
-    FORMULA_NAME="$FORMULA_NAME@$version"
-  fi
+  curl -sSL -H"Accept: application/vnd.github.v3+json" https://api.github.com/repos/observIQ/observiq-otel-collector/releases/latest | \
+    grep "\"tag_name\"" | \
+    sed -E 's/ *"tag_name": "v([0-9]+\.[0-9]+\.[0-9+])",/\1/'
 }
 
-check_install_exists()
-{
-  set +e
-  brew list "$FORMULA_NAME" > /dev/null 2>&1
-  install_exists=$?
-  set -e
-}
-
-find_existing_formula_name()
-{
-  # This can return multiversion we are currently allowing this to go into a failure state.
-  # This can be fixed by the user by specifiying the version via the -v flag.
-  # This will be resolved in the future by either supporting multi versions correctly or only allowing a single version install.
-  set +e
-  found_name=$(brew list --full-name | grep "observiq/observiq-otel-collector/observiq-otel-collector")
-  set -e
-
-  if [ -n "$found_name" ]; then
-    FORMULA_NAME=$found_name
-  fi
-}
-
-set_formula_or_find_existing()
-{
-  # sets formula name with version
-  set_formula_name
-
-  # if not version is set then look at installed formulas
-  if [ -z "$version" ]; then
-    find_existing_formula_name
-  fi
-}
-
-# This will install the package by running brew to install then copying files to appropriate locations.
+# This will install the package by downloading & unpacking the tarball into the install directory
 install_package()
 {
   banner "Installing observIQ OpenTelemetry Collector"
-  increase_indent
+  increase_indent 
 
-  info "Tapping formula..."
-  brew tap observiq/homebrew-observiq-otel-collector > /dev/null 2>&1 || error_exit "$LINENO" "Failed to tap formula"
+  # Remove temporary directory, if it exists
+  rm -rf "$TMP_DIR"
+  mkdir -p "$TMP_DIR/artifacts"
+
+  # Download into tmp dir
+  info "Downloading tarball into temporary directory..."
+  curl -L "$collector_download_url" -o "$TMP_DIR/observiq-otel-collector.tar.gz" --progress-bar --fail || error_exit "$LINENO" "Failed to download package"
   succeeded
 
-  info "Checking if install exists ..."
-  check_install_exists
+  # unpack
+  info "Unpacking tarball..."
+  tar -xzf "$TMP_DIR/observiq-otel-collector.tar.gz" -C "$TMP_DIR/artifacts" || error_exit "$LINENO" "Failed to unack archive $TMP_DIR/observiq-otel-collector.tar.gz"
   succeeded
 
-  if [ $install_exists = 0 ] ; then
-    info "Found existing installation"
-    info ""
+  mkdir -p "$INSTALL_DIR" || error_exit "$LINENO" "Failed to create directory $INSTALL_DIR"
 
-    info "Stopping service..."
-    brew services stop "$FORMULA_NAME" > /dev/null 2>&1 || error_exit "$LINENO" "Failed to stop service"
-    succeeded
-
-    info "Reinstalling collector..."
-    brew reinstall "$FORMULA_NAME" > /dev/null 2>&1 || error_exit "$LINENO" "Failed to reinstall formula"
-  else
-    info "Installing collector..."
-    brew update > /dev/null 2>&1 || error_exit "$LINENO" "Failed to run brew update"
-    brew install "$FORMULA_NAME" > /dev/null 2>&1 || error_exit "$LINENO" "Failed to install formula"
-  fi
-
+  info "Creating install directory structure..."
   increase_indent
-  info ""
-  info "In order to install the jmx metrics jar to the correct location, root permissions are needed."
-  info "Please enter your password if prompted to complete installation."
-  info ""
+  # Find all directorys in the unpackaged tar
+  DIRS=$(cd "$TMP_DIR/artifacts"; find "." -type d)
+  for d in $DIRS
+  do
+    mkdir -p "$INSTALL_DIR/$d" || error_exit "$LINENO" "Failed to create directory $INSTALL_DIR/$d"
+  done
   decrease_indent
-  sudo cp "$(brew --prefix "$FORMULA_NAME")/lib/opentelemetry-java-contrib-jmx-metrics.jar" /opt 2>&1 || error_exit "$LINENO" "Failed to move jmx jar to /opt"
   succeeded
 
-  # If an endpoint was specified, we need to write the manager.yml
-  if [ -n "$OPAMP_ENDPOINT" ]; then
-    info "Creating manager yaml..."
-    create_manager_yml "$BREW_ETC/$ETC_MANAGEMENT_YML_NAME" 
+  info "Copying artifacts to install directory..."
+  increase_indent
+
+  # This find command gets a list of all artifacts paths except config.yaml, logging.yaml, or opentelemetry-java-contrib-jmx-metrics.jar
+  FILES=$(cd "$TMP_DIR/artifacts"; find "." -type f -not \( -name config.yaml -or -name logging.yaml -or -name opentelemetry-java-contrib-jmx-metrics.jar \))
+  # Move files to install dir
+  for f in $FILES
+  do
+    cp "$TMP_DIR/artifacts/$f" "$INSTALL_DIR/$f" || error_exit "$LINENO" "Failed to copy artifact $f to install dir"
+  done
+  decrease_indent
+  succeeded
+
+  if [ ! -f "$INSTALL_DIR/config.yaml" ]; then
+    info "Copying default config.yaml..."
+    cp "$TMP_DIR/artifacts/config.yaml" "$INSTALL_DIR/config.yaml" || error_exit "$LINENO" "Failed to copy default config.yaml to install dir"
     succeeded
   fi
 
-  # Create symlink if needed
-  if [ -f "$BREW_ETC/$ETC_MANAGEMENT_YML_NAME" ]; then
-    ln -s $BREW_ETC/$ETC_MANAGEMENT_YML_NAME $(brew --prefix "$FORMULA_NAME")/$MANAGEMENT_YML_NAME
+  if [ ! -f "$INSTALL_DIR/logging.yaml" ]; then
+    info "Copying default logging.yaml..."
+    cp "$TMP_DIR/artifacts/logging.yaml" "$INSTALL_DIR/logging.yaml" || error_exit "$LINENO" "Failed to copy default logging.yaml to install dir"
+    succeeded
   fi
 
+  # If an endpoint was specified, we need to write the manager.yaml
+  if [ -n "$OPAMP_ENDPOINT" ]; then
+    create_manager_yml "$MANAGEMENT_YML_PATH"
+  fi
 
-  info "Enabling service..."
-  brew services start "$FORMULA_NAME" > /dev/null 2>&1 || error_exit "$LINENO" "Failed to enable service"
+  # Install jmx jar
+  info "Moving opentelemetry-java-contrib-jmx-metrics.jar to /opt..."
+  mv "$TMP_DIR/artifacts/opentelemetry-java-contrib-jmx-metrics.jar" "/opt/opentelemetry-java-contrib-jmx-metrics.jar" || error_exit "$LINENO" "Failed to copy opentelemetry-java-contrib-jmx-metrics.jar to /opt"
+  succeeded
+
+  if [ -f "/Library/LaunchDaemons/$SERVICE_NAME.plist" ]; then
+    # Existing service file, we should stop & unload first.
+    info "Uninstalling existing service file..."
+    launchctl unload -w "/Library/LaunchDaemons/$SERVICE_NAME.plist" > /dev/null 2>&1 || error_exit "$LINENO" "Failed to unload service file /Library/LaunchDaemons/$SERVICE_NAME.plist"
+    succeeded
+  fi
+
+  # Install service file
+  info "Installing service file..."
+  sed "s|\\[INSTALLDIR\\]|${INSTALL_DIR}/|g" "$INSTALL_DIR/install/$SERVICE_NAME.plist" | tee "/Library/LaunchDaemons/$SERVICE_NAME.plist" > /dev/null 2>&1 || error_exit "$LINENO" "Failed to install service file"
+  launchctl load -w "/Library/LaunchDaemons/$SERVICE_NAME.plist" > /dev/null 2>&1 || error_exit "$LINENO" "Failed to load service file /Library/LaunchDaemons/$SERVICE_NAME.plist"
+  succeeded
+
+  info "Starting service..."
+  launchctl start "$SERVICE_NAME" || error_exit "$LINENO" "Failed to start service file $SERVICE_NAME"
+  succeeded
+
+  info "Removing temporary files..."
+  rm -rf "$TMP_DIR" || error_exit "$LINENO" "Failed to remove temp dir: $TMP_DIR"
   succeeded
 
   success "observIQ OpenTelemetry Collector installation complete!"
@@ -471,10 +521,12 @@ create_manager_yml()
 {
   manager_yml_path="$1"
   if [ ! -f "$manager_yml_path" ]; then
+    info "Creating manager yaml..."
     command printf 'endpoint: "%s"\n' "$OPAMP_ENDPOINT" > "$manager_yml_path"
     [ -n "$OPAMP_LABELS" ] && command printf 'labels: "%s"\n' "$OPAMP_LABELS" >> "$manager_yml_path"
     [ -n "$OPAMP_SECRET_KEY" ] && command printf 'secret_key: "%s"\n' "$OPAMP_SECRET_KEY" >> "$manager_yml_path"
     command printf 'agent_id: "%s"\n' "$(uuidgen | tr "[:upper:]" "[:lower:]")" >> "$manager_yml_path"
+    succeeded
   fi
 }
 
@@ -482,14 +534,13 @@ create_manager_yml()
 # This will display the results of an installation
 display_results()
 {
-    collector_home="$(brew --prefix "$FORMULA_NAME")"
     banner 'Information'
     increase_indent
-    info "Collector Home:     $(fg_cyan "$collector_home")$(reset)"
-    info "Collector Config:   $(fg_cyan "$collector_home/$CONFIG_YML_NAME")$(reset)"
-    info "Start Command:      $(fg_cyan "brew services start $FORMULA_NAME")$(reset)"
-    info "Stop Command:       $(fg_cyan "brew services stop $FORMULA_NAME")$(reset)"
-    info "Logs Command:       $(fg_cyan "tail -F $collector_home/log/collector.log")$(reset)"
+    info "Collector Home:     $(fg_cyan "$INSTALL_DIR")$(reset)"
+    info "Collector Config:   $(fg_cyan "$INSTALL_DIR/config.yaml")$(reset)"
+    info "Start Command:      $(fg_cyan "sudo launchctl start $SERVICE_NAME")$(reset)"
+    info "Stop Command:       $(fg_cyan "sudo launchctl stop $SERVICE_NAME")$(reset)"
+    info "Logs Command:       $(fg_cyan "sudo tail -F $INSTALL_DIR/log/collector.log")$(reset)"
     decrease_indent
 
     banner 'Support'
@@ -499,8 +550,6 @@ display_results()
     info "$(fg_cyan "https://github.com/observiq/observiq-otel-collector/tree/main#observiq-opentelemetry-collector")$(reset)"
     decrease_indent
     info "If you have any other questions please contact us at $(fg_cyan support@observiq.com)$(reset)"
-    increase_indent
-    decrease_indent
     decrease_indent
 
     banner "$(fg_green Installation Complete!)"
@@ -509,112 +558,69 @@ display_results()
 
 uninstall()
 {
-  observiq_banner
-
   banner "Uninstalling observIQ OpenTelemetry Collector"
   increase_indent
 
-  set_formula_or_find_existing
-  info "Uninstalling formula $(fg_green "$FORMULA_NAME")"
-  info ""
-
-  info "Checking if install exists ..."
-  check_install_exists
-  succeeded
-
-  # exit early if no installation found
-  if [ $install_exists = 1 ]; then
-    info "No installation found"
+  if [ ! -f "$INSTALL_DIR/observiq-otel-collector" ]; then
+    # If the collector binary is not present, we assume that the collector is not installed
+    # In this case, do nothing.
+    info "No install detected, skipping..."
     decrease_indent
     banner "$(fg_green Uninstallation Complete!)"
-    return
+    return 0
   fi
 
-  info "Stopping service..."
-  brew services stop "$FORMULA_NAME" > /dev/null 2>&1 || error_exit "$LINENO" "Failed to stop service"
+  info "Uninstalling service file..."
+  launchctl unload -w "/Library/LaunchDaemons/$SERVICE_NAME.plist" || error_exit "$LINENO" "Failed to unload service file /Library/LaunchDaemons/$SERVICE_NAME.plist"
+  rm -f "/Library/LaunchDaemons/$SERVICE_NAME.plist" || error_exit "$LINENO" "Failed to remove service file /Library/LaunchDaemons/$SERVICE_NAME.plist"
   succeeded
 
-  info "Uninstalling collector..."
-  brew uninstall "$FORMULA_NAME" > /dev/null 2>&1 || error_exit "$LINENO" "Failed to uninstall formula"
-  
-  increase_indent
-  info ""
-  info "In order to remove the jmx metrics jar, root permissions are needed."
-  info "Please enter your password if prompted to complete installation."
-  info ""
+  info "Backing up config.yaml to config.bak.yaml"
+  cp "$INSTALL_DIR/config.yaml" "$INSTALL_DIR/config.bak.yaml" || error_exit "$LINENO" "Failed to backup config.yaml to config.bak.yaml"
+  succeeded
+
+  # Removes the whole install directory, including configs.
+  info "Removing installed artifacts..."
+  # This find command gets a list of all artifacts paths except config.yaml or the root directory.
+  FILES=$(cd "$INSTALL_DIR"; find "." -not \( -name config.bak.yaml -or -name "." \))
+  for f in $FILES
+  do
+    rm -rf "${INSTALL_DIR:?}/$f" || error_exit "$LINENO" "Failed to remove artifact ${INSTALL_DIR:?}/$f"
+  done
+
+  # Copy the old config to a backup. This is similar to how RPM handles this.
+  # This way, the file is recoverable if the uninstall was somehow accidental,
+  # but if a new install occurs, the default config will still be used.
+  succeeded
+
+  info "Removing opentelemetry-java-contrib-jmx-metrics.jar from /opt..."
+  rm -f "/opt/opentelemetry-java-contrib-jmx-metrics.jar" || error_exit "$LINENO" "Failed to remove /opt/opentelemetry-java-contrib-jmx-metrics.jar"
+  succeeded
+
   decrease_indent
-
-  sudo rm -f /opt/opentelemetry-java-contrib-jmx-metrics.jar > /dev/null 2>&1 || error_exit "$LINENO" "Failed to remove jmx jar from /opt"
-  succeeded
-
-  info "Untapping formula..."
-  brew untap observiq/homebrew-observiq-otel-collector > /dev/null 2>&1 || error_exit "$LINENO" "Failed to untap formula"
-  succeeded
-
-  info "Removing config files..."
-  rm -f $BREW_ETC/$ETC_CONFIG_YML_NAME.default > /dev/null 2>&1
-  rm -f $BREW_ETC/$ETC_CONFIG_YML_NAME > /dev/null 2>&1
-  rm -f $BREW_ETC/$ETC_MANAGEMENT_YML_NAME > /dev/null 2>&1
-  succeeded
-  decrease_indent
-
   banner "$(fg_green Uninstallation Complete!)"
-}
-
-upgrade()
-{
-  observiq_banner
-
-  banner "Upgrading observIQ OpenTelemetry Collector"
-  increase_indent
-
-  set_formula_or_find_existing
-  info "Upgrading formula $(fg_green "$FORMULA_NAME")"
-  info ""
-
-  info "Checking if install exists ..."
-  brew list "$FORMULA_NAME" > /dev/null 2>&1 || error_exit "No installation currently exists"
-  succeeded
-
-  info "Stopping service..."
-  brew services stop "$FORMULA_NAME" > /dev/null 2>&1 || error_exit "$LINENO" "Failed to stop service"
-  succeeded
-
-  info "Upgrading collector..."
-  brew update > /dev/null 2>&1 || error_exit "$LINENO" "Failed to run brew update"
-  brew upgrade "$FORMULA_NAME" > /dev/null 2>&1 || error_exit "$LINENO" "Failed to upgrade formula"
-
-  increase_indent
-  info ""
-  info "In order to install the jmx metrics jar to the correct location, root permissions are needed."
-  info "Please enter your password if prompted to complete installation."
-  info ""
-  decrease_indent
-  
-  sudo cp "$(brew --prefix "$FORMULA_NAME")/lib/opentelemetry-java-contrib-jmx-metrics.jar" /opt 2>&1 || error_exit "$LINENO" "Failed to move jmx jar to /opt"
-  succeeded
-
-  info "Starting service..."
-  brew services start "$FORMULA_NAME" > /dev/null 2>&1 || error_exit "$LINENO" "Failed to start service"
-  succeeded
-  decrease_indent
-
-  banner "$(fg_green Upgrade Complete!)"
 }
 
 main()
 {
+  # We do these checks before we process arguments, because
+  # some of these options bail early, and we'd like to be sure that those commands
+  # (e.g. uninstall) can run
+
+  observiq_banner
+
+  check_prereqs
+  root_check  
+
   if [ $# -ge 1 ]; then
     while [ -n "$1" ]; do
       case "$1" in
+        -l|--url)
+          url=$2 ; shift 2 ;;
         -v|--version)
           version=$2 ; shift 2 ;;
         -r|--uninstall)
           uninstall
-          exit 0
-          ;;
-        -u|--upgrade)
-          upgrade
           exit 0
           ;;
         -h|--help)
@@ -638,8 +644,6 @@ main()
     done
   fi
 
-  observiq_banner
-  check_prereqs
   setup_installation
   install_package
   display_results

@@ -57,7 +57,7 @@ For more installation information see [installing on Windows](/docs/installation
 To install using the installation script, you may run:
 
 ```sh
-sh -c "$(curl -fsSlL https://github.com/observiq/observiq-otel-collector/releases/latest/download/install_macos.sh)" install_macos.sh
+sudo sh -c "$(curl -fsSlL https://github.com/observiq/observiq-otel-collector/releases/latest/download/install_macos.sh)" install_macos.sh
 ```
 
 For more installation information see [installing on macOS](/docs/installation-mac.md).
@@ -74,7 +74,7 @@ Now that the collector is installed it is collecting basic metrics about the hos
 | :--- | :---- |
 | Linux | /opt/observiq-otel-collector/config.yaml |
 | Windows | C:\Program Files\observIQ OpenTelemetry Collector\config.yaml |
-| macOS | $(brew --prefix observiq/observiq-otel-collector/observiq-otel-collector)/config.yaml |
+| macOS | /opt/observiq-otel-collector/config.yaml |
 
 For more information on configuration see the [Configuration section](#configuration).
 
