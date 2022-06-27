@@ -16,6 +16,9 @@
 package opamp
 
 import (
+	"crypto/tls"
+	"crypto/x509"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -29,17 +32,78 @@ var (
 
 	// errPrefixParse for error when parsing config
 	errPrefixParse = "failed to parse OpAmp config"
+
+	// errMissingTLSFiles is the error when only one of Key or Cert is specified
+	errMissingTLSFiles = "must specify both Key and Certificate file"
+
+	// errInvalidKeyFile for key file that is not readable
+	errInvalidKeyFile = "failed to read TLS key file"
+
+	// errInvalidCertFile for cert file that is not readable
+	errInvalidCertFile = "failed to read TLS cert file"
+
+	// errInvalidCAFile for ca file that is not readable
+	errInvalidCAFile = "failed to read TLS CA file"
 )
 
 // Config contains the configuration for the collector to communicate with an OpAmp enabled platform.
 type Config struct {
-	Endpoint  string  `yaml:"endpoint"`
-	SecretKey *string `yaml:"secret_key,omitempty"`
-	AgentID   string  `yaml:"agent_id"`
+	Endpoint  string     `yaml:"endpoint"`
+	SecretKey *string    `yaml:"secret_key,omitempty"`
+	AgentID   string     `yaml:"agent_id"`
+	TLS       *TLSConfig `yaml:"tls_config,omitempty"`
 
 	// Updatable fields
 	Labels    *string `yaml:"labels,omitempty"`
 	AgentName *string `yaml:"agent_name,omitempty"`
+}
+
+// TLSConfig represents the TLS config to connect to OpAmp server
+type TLSConfig struct {
+	InsecureSkipVerify bool    `yaml:"insecure_skip_verify"`
+	KeyFile            *string `yaml:"key_file"`
+	CertFile           *string `yaml:"cert_file"`
+	CAFile             *string `yaml:"ca_file"`
+}
+
+// ToTLS converts the config to a tls.Config
+func (c Config) ToTLS() (*tls.Config, error) {
+	if c.TLS == nil {
+		return nil, nil
+	}
+
+	tlsConfig := &tls.Config{
+		MinVersion: tls.VersionTLS12,
+	}
+
+	if c.TLS.InsecureSkipVerify {
+		tlsConfig.InsecureSkipVerify = true
+		return tlsConfig, nil
+	}
+
+	// Load CA cert if specified
+	if c.TLS.CAFile != nil {
+		caCert, err := os.ReadFile(*c.TLS.CAFile)
+		if err != nil {
+			return nil, fmt.Errorf("failed to read CA file: %w", err)
+		}
+		caCertPool := x509.NewCertPool()
+		caCertPool.AppendCertsFromPEM(caCert)
+
+		tlsConfig.RootCAs = caCertPool
+	}
+
+	// Load cert and key file if specified
+	if c.TLS.CertFile != nil && c.TLS.KeyFile != nil {
+		cert, err := tls.LoadX509KeyPair(*c.TLS.CertFile, *c.TLS.KeyFile)
+		if err != nil {
+			return nil, fmt.Errorf("failed to read Key and Cert file: %w", err)
+		}
+
+		tlsConfig.Certificates = []tls.Certificate{cert}
+	}
+
+	return tlsConfig, nil
 }
 
 // ParseConfig given a configuration file location will parse the config
@@ -58,11 +122,37 @@ func ParseConfig(configLocation string) (*Config, error) {
 		return nil, fmt.Errorf("%s: %w", errPrefixParse, err)
 	}
 
+	// Using Secure TLS check files
+	if config.TLS != nil && config.TLS.InsecureSkipVerify == false {
+		// If CA file is specified
+		if config.TLS.CAFile != nil {
+			// Validate CA file exists on disk
+			if _, err := os.Stat(*config.TLS.CAFile); errors.Is(err, os.ErrNotExist) {
+				return nil, errors.New(errInvalidCAFile)
+			}
+		}
+
+		switch {
+		case config.TLS.CertFile == nil && config.TLS.KeyFile == nil: // Not using mTLS
+			// Nothing to do. This case exists to make it easier to check all happy permutations for Key and Cert files
+		case config.TLS.CertFile != nil && config.TLS.KeyFile != nil: // Validate both files exist
+			if _, err := os.Stat(*config.TLS.KeyFile); errors.Is(err, os.ErrNotExist) {
+				return nil, errors.New(errInvalidKeyFile)
+			}
+
+			if _, err := os.Stat(*config.TLS.CertFile); errors.Is(err, os.ErrNotExist) {
+				return nil, errors.New(errInvalidCertFile)
+			}
+		default: // Case with only one file is specified
+			return nil, errors.New(errMissingTLSFiles)
+		}
+	}
 	return &config, nil
 }
 
 // Copy creates a deep copy of this config
 func (c Config) Copy() *Config {
+
 	cfgCopy := &Config{
 		Endpoint: c.Endpoint,
 		AgentID:  c.AgentID,
@@ -80,8 +170,32 @@ func (c Config) Copy() *Config {
 		cfgCopy.AgentName = new(string)
 		*cfgCopy.AgentName = *c.AgentName
 	}
+	if c.TLS != nil {
+		cfgCopy.TLS = c.TLS.copy()
+	}
 
 	return cfgCopy
+}
+
+func (t TLSConfig) copy() *TLSConfig {
+	tlsCopy := TLSConfig{
+		InsecureSkipVerify: t.InsecureSkipVerify,
+	}
+
+	if t.CertFile != nil {
+		tlsCopy.CertFile = new(string)
+		*tlsCopy.CertFile = *t.CertFile
+	}
+	if t.KeyFile != nil {
+		tlsCopy.KeyFile = new(string)
+		*tlsCopy.KeyFile = *t.KeyFile
+	}
+	if t.CAFile != nil {
+		tlsCopy.CAFile = new(string)
+		*tlsCopy.CAFile = *t.CAFile
+	}
+
+	return &tlsCopy
 }
 
 // GetSecretKey returns secret key if set else returns empty string
