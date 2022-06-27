@@ -85,7 +85,7 @@ func (c Config) ToTLS() (*tls.Config, error) {
 	if c.TLS.CAFile != nil {
 		caCert, err := os.ReadFile(*c.TLS.CAFile)
 		if err != nil {
-			return nil, errors.New(errInvalidCAFile)
+			return nil, fmt.Errorf("failed to read CA file: %w", err)
 		}
 		caCertPool := x509.NewCertPool()
 		caCertPool.AppendCertsFromPEM(caCert)
@@ -102,8 +102,6 @@ func (c Config) ToTLS() (*tls.Config, error) {
 
 		tlsConfig.Certificates = []tls.Certificate{cert}
 	}
-
-	tlsConfig.BuildNameToCertificate()
 
 	return tlsConfig, nil
 }

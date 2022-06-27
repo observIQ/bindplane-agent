@@ -81,7 +81,6 @@ func TestToTLS(t *testing.T) {
 				expectedConfig := tls.Config{
 					MinVersion: tls.VersionTLS12,
 				}
-				expectedConfig.BuildNameToCertificate()
 
 				actual, err := cfg.ToTLS()
 				assert.NoError(t, err)
@@ -99,7 +98,7 @@ func TestToTLS(t *testing.T) {
 				}
 
 				actual, err := cfg.ToTLS()
-				assert.ErrorContains(t, err, errInvalidCAFile)
+				assert.ErrorContains(t, err, "failed to read CA file")
 				assert.Nil(t, actual)
 			},
 		},
@@ -158,8 +157,6 @@ func TestToTLS(t *testing.T) {
 				cert, err := tls.LoadX509KeyPair(certFileContents, keyFileContents)
 				expectedConfig.Certificates = []tls.Certificate{cert}
 
-				expectedConfig.BuildNameToCertificate()
-
 				actual, err := cfg.ToTLS()
 				assert.NoError(t, err)
 				assert.Equal(t, &expectedConfig, actual)
@@ -188,8 +185,6 @@ func TestToTLS(t *testing.T) {
 
 				cert, err := tls.LoadX509KeyPair(certFileContents, keyFileContents)
 				expectedConfig.Certificates = []tls.Certificate{cert}
-
-				expectedConfig.BuildNameToCertificate()
 
 				actual, err := cfg.ToTLS()
 				assert.NoError(t, err)
