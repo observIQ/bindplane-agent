@@ -156,6 +156,7 @@ release-prep:
 	@cp -r ./plugins release_deps/
 	@cp config/example.yaml release_deps/config.yaml
 	@cp config/logging.yaml release_deps/logging.yaml
+	@cp service/com.observiq.collector.plist release_deps/com.observiq.collector.plist
 
 # Build, sign, and release
 .PHONY: release
