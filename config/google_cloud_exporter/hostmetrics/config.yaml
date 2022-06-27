@@ -18,20 +18,6 @@ receivers:
       #  mute_process_name_error: true
 
 exporters: 
-  # observIQ collector wraps the upstream Google Cloud exporter
-  # with the following processors:
-  #   - resource detection processor
-  #   - resource attributes transposer processor
-  #   - normalizesums processor
-  #   - batch processor
-  #
-  # In additon to wrapping processors, the following settings are configured:
-  #   - retry_on_failure.enabled: false
-  #   - metric.prefix: workload.googleapis.com
-  #   - resource mapping: default to generic_node monitored resource type.
-  #     - node_id: host.name
-  #     - namespace: host.name
-  #     - location: global
   googlecloud:
 
 service:

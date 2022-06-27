@@ -20,9 +20,13 @@ FORMULA_NAME="observiq/observiq-otel-collector/observiq-otel-collector"
 SERVICE_NAME="com.observiq.collector"
 
 # Script Constants
-BREW_ETC=$(brew --prefix)/etc/
+BREW_ETC=$(brew --prefix)/etc
 PREREQS="printf brew sed uname uuidgen tr"
+CONFIG_PREFIX="observiq_"
+CONFIG_YML_NAME="config.yaml"
 MANAGEMENT_YML_NAME="manager.yaml"
+ETC_CONFIG_YML_NAME=$CONFIG_PREFIX$CONFIG_YML_NAME
+ETC_MANAGEMENT_YML_NAME=$CONFIG_PREFIX$MANAGEMENT_YML_NAME
 SCRIPT_NAME="$0"
 INDENT_WIDTH='  '
 indent=""
@@ -444,8 +448,13 @@ install_package()
   # If an endpoint was specified, we need to write the manager.yml
   if [ -n "$OPAMP_ENDPOINT" ]; then
     info "Creating manager yaml..."
-    create_manager_yml "$(brew --prefix "$FORMULA_NAME")/$MANAGEMENT_YML_NAME"
+    create_manager_yml "$BREW_ETC/$ETC_MANAGEMENT_YML_NAME" 
     succeeded
+  fi
+
+  # Create symlink if needed
+  if [ -f "$BREW_ETC/$ETC_MANAGEMENT_YML_NAME" ]; then
+    ln -s $BREW_ETC/$ETC_MANAGEMENT_YML_NAME $(brew --prefix "$FORMULA_NAME")/$MANAGEMENT_YML_NAME
   fi
 
 
@@ -461,10 +470,12 @@ install_package()
 create_manager_yml()
 {
   manager_yml_path="$1"
-  command printf 'endpoint: "%s"\n' "$OPAMP_ENDPOINT" > "$manager_yml_path"
-  [ -n "$OPAMP_LABELS" ] && command printf 'labels: "%s"\n' "$OPAMP_LABELS" >> "$manager_yml_path"
-  [ -n "$OPAMP_SECRET_KEY" ] && command printf 'secret_key: "%s"\n' "$OPAMP_SECRET_KEY" >> "$manager_yml_path"
-  command printf 'agent_id: "%s"\n' "$(uuidgen | tr "[:upper:]" "[:lower:]")" >> "$manager_yml_path"
+  if [ ! -f "$manager_yml_path" ]; then
+    command printf 'endpoint: "%s"\n' "$OPAMP_ENDPOINT" > "$manager_yml_path"
+    [ -n "$OPAMP_LABELS" ] && command printf 'labels: "%s"\n' "$OPAMP_LABELS" >> "$manager_yml_path"
+    [ -n "$OPAMP_SECRET_KEY" ] && command printf 'secret_key: "%s"\n' "$OPAMP_SECRET_KEY" >> "$manager_yml_path"
+    command printf 'agent_id: "%s"\n' "$(uuidgen | tr "[:upper:]" "[:lower:]")" >> "$manager_yml_path"
+  fi
 }
 
 
@@ -475,7 +486,7 @@ display_results()
     banner 'Information'
     increase_indent
     info "Collector Home:     $(fg_cyan "$collector_home")$(reset)"
-    info "Collector Config:   $(fg_cyan "$collector_home/config.yaml")$(reset)"
+    info "Collector Config:   $(fg_cyan "$collector_home/$CONFIG_YML_NAME")$(reset)"
     info "Start Command:      $(fg_cyan "brew services start $FORMULA_NAME")$(reset)"
     info "Stop Command:       $(fg_cyan "brew services stop $FORMULA_NAME")$(reset)"
     info "Logs Command:       $(fg_cyan "tail -F $collector_home/log/collector.log")$(reset)"
@@ -523,10 +534,6 @@ uninstall()
   brew services stop "$FORMULA_NAME" > /dev/null 2>&1 || error_exit "$LINENO" "Failed to stop service"
   succeeded
 
-  info "Removing any existing manager.yaml..."
-  rm -f "$(brew --prefix "$FORMULA_NAME")/$MANAGEMENT_YML_NAME"
-  succeeded
-
   info "Uninstalling collector..."
   brew uninstall "$FORMULA_NAME" > /dev/null 2>&1 || error_exit "$LINENO" "Failed to uninstall formula"
   
@@ -545,8 +552,9 @@ uninstall()
   succeeded
 
   info "Removing config files..."
-  rm -f $BREW_ETC/observiq_config.yaml.default > /dev/null 2>&1
-  rm -f $BREW_ETC/observiq_config.yaml > /dev/null 2>&1 || error_exit "$LINENO" "Failed to remove all config files"
+  rm -f $BREW_ETC/$ETC_CONFIG_YML_NAME.default > /dev/null 2>&1
+  rm -f $BREW_ETC/$ETC_CONFIG_YML_NAME > /dev/null 2>&1
+  rm -f $BREW_ETC/$ETC_MANAGEMENT_YML_NAME > /dev/null 2>&1
   succeeded
   decrease_indent
 
@@ -603,15 +611,15 @@ main()
           version=$2 ; shift 2 ;;
         -r|--uninstall)
           uninstall
-          force_exit
+          exit 0
           ;;
         -u|--upgrade)
           upgrade
-          force_exit
+          exit 0
           ;;
         -h|--help)
           usage
-          force_exit
+          exit 0
           ;;
         -e|--endpoint)
           opamp_endpoint=$2 ; shift 2 ;;

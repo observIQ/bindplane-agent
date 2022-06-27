@@ -2,56 +2,21 @@ receivers:
   prometheus:
     config:
       scrape_configs:
-      - job_name: 'nodeexporter' # A friendly name, will be added as 'service.name' resource label
+      - job_name: 'nodeexporter'
         scrape_interval: 60s
         static_configs:
-        # One or many target IP's to scrape.
         - targets:
           - '127.0.0.1:9100'
 
-processors:
-  # Resourcedetection is used to add a unique (host.name)
-  # to the metric resource(s), allowing users to filter
-  # between multiple agent systems.
-  resourcedetection:
-    detectors: ["system"]
-    system:
-      hostname_sources: ["os"]
-
-  # Metrics require unique metric labels, otherwise the Google
-  # API will reject some metrics as "out of order" / duplicates.
-  # The combination of hostname, instance, and service will make each
-  # metric unique, allowing a single receiver to scrape multiple prometheus
-  # exporter endpoints.
-  resourceattributetransposer:
-    operations:
-    - from: "host.name"
-      to: "agent"
-    - from: "instance"
-      to: "instance"
-    - from: "service.name"
-      to: "service"
-
-  normalizesums:
-
-  batch:
-
 exporters: 
   googlecloud:
-    retry_on_failure:
-      enabled: false
     metric:
-      prefix: custom.googleapis.com
+      prefix: workload.googleapis.com/nodeexporter
 
 service:
   pipelines:
     metrics:
       receivers:
       - prometheus
-      processors:
-      - resourcedetection
-      - resourceattributetransposer
-      - normalizesums
-      - batch
       exporters:
       - googlecloud

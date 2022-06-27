@@ -4,9 +4,8 @@ receivers:
     endpoint: localhost:7199
     target_system: cassandra,jvm
     collection_interval: 60s
-    properties:
-      # Attribute 'endpoint' will be used for generic_node's node_id field.
-      otel.resource.attributes: endpoint=localhost:7199
+    resource_attributes:
+      cassandra.endpoint: localhost:7199
 
 processors:
   resourcedetection:

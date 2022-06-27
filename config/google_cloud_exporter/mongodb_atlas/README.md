@@ -35,3 +35,7 @@ After restarting the collector, the configuration will attempt to use the config
 ```bash
 sudo systemctl restart observiq-otel-collector
 ```
+
+## Warning
+The Google Cloud Exporter appears to have trouble when datapoints for a metric are very close together (sometimes they are < 30s apart for MongoDB Atlas).
+Because of this there will often be "Duplicate TimeSeries" errors logged, but generally the data should be ok.
