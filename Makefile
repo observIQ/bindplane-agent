@@ -52,27 +52,27 @@ build-windows: build-windows-amd64
 
 .PHONY: build-linux-amd64
 build-linux-amd64:
-	GOOS=linux GOARCH=amd64 $(MAKE) collector updater
+	GOOS=linux GOARCH=amd64 $(MAKE) build-binaries -j2
 
 .PHONY: build-linux-arm64
 build-linux-arm64:
-	GOOS=linux GOARCH=arm64 $(MAKE) collector updater
+	GOOS=linux GOARCH=arm64 $(MAKE) build-binaries -j2
 
 .PHONY: build-linux-arm
 build-linux-arm:
-	GOOS=linux GOARCH=arm $(MAKE) collector updater
+	GOOS=linux GOARCH=arm $(MAKE) build-binaries -j2
 
 .PHONY: build-darwin-amd64
 build-darwin-amd64:
-	GOOS=darwin GOARCH=amd64 $(MAKE) collector updater
+	GOOS=darwin GOARCH=amd64 $(MAKE) build-binaries -j2
 
 .PHONY: build-darwin-arm64
 build-darwin-arm64:
-	GOOS=darwin GOARCH=arm64 $(MAKE) collector updater
+	GOOS=darwin GOARCH=arm64 $(MAKE) build-binaries -j2
 
 .PHONY: build-windows-amd64
 build-windows-amd64:
-	GOOS=windows GOARCH=amd64 $(MAKE) collector updater
+	GOOS=windows GOARCH=amd64 $(MAKE) build-binaries -j2
 
 # tool-related commands
 .PHONY: install-tools
