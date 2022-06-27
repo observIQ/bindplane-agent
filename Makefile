@@ -32,7 +32,7 @@ collector:
 # Builds just the updater for current GOOS/GOARCH pair
 .PHONY: updater
 updater:
-	go build -ldflags "-s -w -X github.com/observiq/observiq-otel-collector/internal/version.version=$(VERSION)" -o $(OUTDIR)/updater_$(GOOS)_$(GOARCH)$(EXT) ./cmd/updater
+	cd ./updater/; go build -ldflags "-s -w -X github.com/observiq/observiq-otel-collector/internal/version.version=$(VERSION)" -o ../$(OUTDIR)/updater_$(GOOS)_$(GOARCH)$(EXT) ./cmd/updater
 
 # Builds the updater + collector for current GOOS/GOARCH pair
 .PHONY: build-binaries

@@ -33,6 +33,7 @@ builds:
     no_unique_dist_dir: false
   - id: updater
     binary: updater
+    dir: ./updater/
     main: ./cmd/updater
     env:
       - CGO_ENABLED=0
