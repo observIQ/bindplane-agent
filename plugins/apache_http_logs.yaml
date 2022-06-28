@@ -179,3 +179,5 @@ template: |
         # {{ if .enable_error_log }}
           - filelog/error_log
         # {{ end }}
+
+        
