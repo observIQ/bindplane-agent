@@ -12,24 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package version
 
 import (
-	"fmt"
+	"testing"
 
-	"github.com/observiq/observiq-otel-collector/updater/internal/version"
-	"github.com/spf13/pflag"
+	"github.com/stretchr/testify/require"
 )
 
-// Unimplemented
-func main() {
-	var showVersion = pflag.BoolP("version", "v", false, "prints the version of the collector")
-	pflag.Parse()
-
-	if *showVersion {
-		fmt.Println("observiq-otel-collector updater version", version.Version())
-		fmt.Println("commit:", version.GitHash())
-		fmt.Println("built at:", version.Date())
-		return
-	}
+func TestDefaults(t *testing.T) {
+	require.Equal(t, version, Version())
+	require.Equal(t, gitHash, GitHash())
+	require.Equal(t, date, Date())
 }

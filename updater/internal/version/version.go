@@ -12,24 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package version
 
-import (
-	"fmt"
-
-	"github.com/observiq/observiq-otel-collector/updater/internal/version"
-	"github.com/spf13/pflag"
+// these will be replaced at link time by make.
+var (
+	version = "latest"  // Semantic version, or "latest" by default
+	gitHash = "unknown" // Commit hash from which this build was generated
+	date    = "unknown" // Date the build was generated
 )
 
-// Unimplemented
-func main() {
-	var showVersion = pflag.BoolP("version", "v", false, "prints the version of the collector")
-	pflag.Parse()
+// Version returns the version of the collector.
+func Version() string {
+	return version
+}
 
-	if *showVersion {
-		fmt.Println("observiq-otel-collector updater version", version.Version())
-		fmt.Println("commit:", version.GitHash())
-		fmt.Println("built at:", version.Date())
-		return
-	}
+// GitHash returns the githash associated with the collector's version.
+func GitHash() string {
+	return gitHash
+}
+
+// Date returns the publish date associated with the collector's version.
+func Date() string {
+	return date
 }
