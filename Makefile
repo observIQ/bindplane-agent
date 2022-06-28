@@ -127,7 +127,8 @@ tidy:
 
 .PHONY: gosec
 gosec:
-	gosec ./...
+	gosec -exclude-dir updater  ./...
+	cd updater; gosec ./...
 
 # This target performs all checks that CI will do (excluding the build itself)
 .PHONY: ci-checks
