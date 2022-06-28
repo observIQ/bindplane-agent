@@ -138,9 +138,9 @@ nfpms:
           mode: 0750
           owner: observiq-otel-collector
           group: observiq-otel-collector
-      - src: scripts/package/service/systemd/observiq-otel-collector.service
+      - src: service/observiq-otel-collector.service
         dst: /usr/lib/systemd/system/observiq-otel-collector.service
-        type: config
+        type: config|noreplace
         file_info:
           mode: 0644
           owner: root
