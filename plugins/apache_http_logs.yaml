@@ -3,6 +3,10 @@ title: Apache HTTP Server
 description: Log parser for Apache HTTP Server
 parameters:
   # For optimal Apache HTTP parsing and enrichment, we recommend choosing 'observIQ' log format in which log Apache logging configuration is modified to output log entries as JSON files.
+ 
+  # The 'observIQ' log format is defined for access logs and error logs as follows:
+  # Logformat "{\"timestamp\":\"%{%Y-%m-%dT%T}t.%{usec_frac}t%{%z}t\",\"remote_addr\":\"%a\",\"protocol\":\"%H\",\"method\":\"%m\",\"query\":\"%q\",\"path\":\"%U\",\"status\":\"%>s\",\"http_user_agent\":\"%{User-agent}i\",\"http_referer\":\"%{Referer}i\",\"remote_user\":\"%u\",\"body_bytes_sent\":\"%b\",\"request_time_microseconds\":\"%D\",\"http_x_forwarded_for\":\"%{X-Forwarded-For}i\"}" observiq
+  # ErrorLogFormat "{\"time\":\"%{cu}t\",\"module\":\"%-m\",\"client\":\"%-a\",\"http_x_forwarded_for\":\"%-{X-Forwarded-For}i\",\"log_level\":\"%-l\",\"pid\":\"%-P\",\"tid\":\"%-T\",\"message\":\"%-M\",\"logid\":{\"request\":\"%-L\",\"connection\":\"%-{c}L\"},\"request_note_name\":\"%-{name}n\"}"
   - name: log_format
     description: When choosing the 'default' option, the agent will expect and parse logs in a format that matches the default logging configuration. When choosing the 'observIQ' option, the agent will expect and parse logs in an optimized JSON format that adheres to the observIQ specification, requiring an update to the apache2.conf file.
     type: string
