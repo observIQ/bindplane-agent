@@ -19,7 +19,7 @@ import (
 	"go.uber.org/multierr"
 )
 
-// DefaultFactories returns the default factories used by the observIQ OpenTelemetry collector
+// DefaultFactories returns the default factories used by the observIQ Distro for OpenTelemetry Collector
 func DefaultFactories() (component.Factories, error) {
 	return combineFactories(defaultReceivers, defaultProcessors, defaultExporters, defaultExtensions)
 }

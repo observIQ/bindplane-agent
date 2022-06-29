@@ -1,7 +1,7 @@
 # Disclaimer
 While the `main` branch is stable, it is still under development and documentation may not fully reflect the current feature set. Please refer to documentation for your specific release.
 
-# observIQ OpenTelemetry Collector
+# observIQ Distro for OpenTelemetry Collector
 
 <center>
 
@@ -13,7 +13,7 @@ While the `main` branch is stable, it is still under development and documentati
 
 </center>
 
-observIQ OpenTelemetry Collector is observIQ’s distribution of the [OpenTelemetry collector](https://github.com/open-telemetry/opentelemetry-collector). It provides a simple and unified solution to collect, refine, and ship telemetry data anywhere.
+observIQ Distro for OpenTelemetry Collector is observIQ’s distribution of the [OpenTelemetry collector](https://github.com/open-telemetry/opentelemetry-collector). It provides a simple and unified solution to collect, refine, and ship telemetry data anywhere.
 
 ## Benefits
 
@@ -80,7 +80,7 @@ For more information on configuration see the [Configuration section](#configura
 
 ## Configuration
 
-The observIQ OpenTelemetry Collector uses OpenTelemetry configuration.
+The observIQ Distro for OpenTelemetry Collector uses OpenTelemetry configuration.
 
 For sample configs, see the [config](/config/) directory.
 For general configuration help, see the [OpenTelemetry docs](https://opentelemetry.io/docs/collector/configuration/).
@@ -141,7 +141,7 @@ service:
 
 # Community
 
-The observIQ OpenTelemetry Collector is an open source project. If you'd like to contribute, take a look at our [contribution guidelines](/CONTRIBUTING.md) and [developer guide](/docs/development.md). We look forward to building with you.
+The observIQ Distro for OpenTelemetry Collector is an open source project. If you'd like to contribute, take a look at our [contribution guidelines](/CONTRIBUTING.md) and [developer guide](/docs/development.md). We look forward to building with you.
 
 # How can we help?
 
