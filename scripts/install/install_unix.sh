@@ -16,7 +16,7 @@
 set -e
 
 # Collector Constants
-PACKAGE_NAME="observiq-otel-collector_linux"
+PACKAGE_NAME="observiq-otel-collector"
 DOWNLOAD_BASE="https://github.com/observiq/observiq-otel-collector/releases"
 
 # Script Constants
@@ -286,7 +286,11 @@ setup_installation()
 }
 
 set_file_name() {
-    package_file_name="${PACKAGE_NAME}_${arch}.${package_type}"
+  if [ -z "$version" ] ; then
+    package_file_name="${PACKAGE_NAME}_linux_${arch}.${package_type}"
+  else
+    package_file_name="${PACKAGE_NAME}_v${version}_linux_${arch}.${package_type}"
+  fi
     out_file_path="$TMP_DIR/$package_file_name"
 }
 
@@ -354,23 +358,25 @@ set_package_type()
 
 # This will set the urls to use when downloading the collector and its plugins.
 # These urls are constructed based on the --version flag or COLLECTOR_VERSION env variable.
-# If not specified, the version defaults to "latest".
+# If not specified, the version defaults to whatever the latest release on github is.
 set_download_urls()
 {
-  if [ -z "$version" ] ; then
-    # shellcheck disable=SC2153
-    version=$COLLECTOR_VERSION
-  fi
-
   if [ -z "$url" ] ; then
-    url=$DOWNLOAD_BASE
-
-    # Only if we're using the base download url apply version formatting
     if [ -z "$version" ] ; then
-      collector_download_url="$url/latest/download/${PACKAGE_NAME}_${os_arch}.${package_type}"
-    else
-      collector_download_url="$url/download/v$version/${PACKAGE_NAME}_${os_arch}.${package_type}"
+      # shellcheck disable=SC2153
+      version=$COLLECTOR_VERSION
     fi
+
+    if [ -z "$version" ] ; then
+      version=$(latest_version)
+    fi
+
+    if [ -z "$version" ] ; then
+      error_exit "$LINENO" "Could not determine version to install"
+    fi
+
+    url=$DOWNLOAD_BASE
+    collector_download_url="$url/download/v$version/${PACKAGE_NAME}_v${version}_linux_${os_arch}.${package_type}"
   else
     collector_download_url="$url"
   fi
@@ -505,6 +511,14 @@ package_type_check()
       failed
       error_exit "$LINENO" "Could not find dpkg or rpm on the system"
   fi
+}
+
+# latest_version gets the tag of the latest release, without the v prefix.
+latest_version()
+{
+  curl -sSL -H"Accept: application/vnd.github.v3+json" https://api.github.com/repos/observIQ/observiq-otel-collector/releases/latest | \
+    grep "\"tag_name\"" | \
+    sed -E 's/ *"tag_name": "v([0-9]+\.[0-9]+\.[0-9+])",/\1/'
 }
 
 # This will install the package by downloading the archived collector,
