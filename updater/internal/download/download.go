@@ -21,6 +21,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 	"os"
@@ -49,12 +50,16 @@ func downloadFile(downloadURL string, outPath string) error {
 	if err != nil {
 		return fmt.Errorf("failed to open file: %w", err)
 	}
+	defer func() {
+		err := f.Close()
+		log.Default().Printf("Failed to close file: %s", err)
+	}()
 
 	if _, err = io.Copy(f, resp.Body); err != nil {
 		return fmt.Errorf("failed to copy request body to file: %w", err)
 	}
 
-	return f.Close()
+	return nil
 }
 
 // getOutputFilePath gets the output path relative to the base dir for the archive from the given URL.
@@ -85,6 +90,10 @@ func verifyContentHash(contentPath, hexExpectedContentHash string) error {
 	if err != nil {
 		return fmt.Errorf("failed to open file: %w", err)
 	}
+	defer func() {
+		err := f.Close()
+		log.Default().Printf("Failed to close file: %s", err)
+	}()
 
 	if _, err = io.Copy(fileHash, f); err != nil {
 		return fmt.Errorf("failed to calculate file hash: %w", err)
@@ -95,7 +104,7 @@ func verifyContentHash(contentPath, hexExpectedContentHash string) error {
 		return errors.New("content hashes were not equal")
 	}
 
-	return f.Close()
+	return nil
 }
 
 // FetchAndExtractArchive fetches the archive at the specified URL, placing it into dir.
