@@ -35,7 +35,7 @@ import (
 const (
 	// env variable name constants
 	endpointENV  = "OPAMP_ENDPOINT"
-	agentIdENV   = "OPAMP_AGENT_ID"
+	agentIDENV   = "OPAMP_AGENT_ID"
 	secretkeyENV = "OPAMP_SECRET_KEY" //#nosec G101
 	labelsENV    = "OPAMP_LABELS"
 	agentNameENV = "OPAMP_AGENT_NAME"
@@ -116,48 +116,45 @@ func checkManagerConfig(configPath *string) error {
 		// We found the file just return nil
 		return nil
 	case errors.Is(statErr, os.ErrNotExist):
+		var ep, ai string
+		var ok bool
 		// Endpoint is only required env
-		if ep, ok := os.LookupEnv(endpointENV); ok {
-			// manager.ymal file does *not* exist, create file using env variables
-			newConfig := &opamp.Config{}
+		if ep, ok = os.LookupEnv(endpointENV); !ok {
+			// Envs were not found and statErr is os.ErrNotExist so return that
+			return statErr
+		}
+		// manager.ymal file does *not* exist, create file using env variables
+		newConfig := &opamp.Config{}
 
-			newConfig.Endpoint = ep
+		newConfig.Endpoint = ep
+		if ai, ok = os.LookupEnv(agentIDENV); !ok {
+			ai = uuid.New().String()
+		}
+		newConfig.AgentID = ai
 
-			var ai string
-			if ai, ok = os.LookupEnv(agentIdENV); !ok {
-				ai = uuid.New().String()
-			}
-			newConfig.AgentID = ai
-
-			if sk, ok := os.LookupEnv(secretkeyENV); ok {
-				newConfig.SecretKey = &sk
-			}
-
-			if an, ok := os.LookupEnv(agentNameENV); ok {
-				newConfig.AgentName = &an
-			}
-
-			if label, ok := os.LookupEnv(labelsENV); ok {
-				newConfig.Labels = &label
-			}
-
-			data, err := yaml.Marshal(newConfig)
-			if err != nil {
-				return fmt.Errorf("failed to marshal config: %w", err)
-			}
-
-			// write data to a manager.yaml file, with 0777 file permission
-			if err := os.WriteFile(*configPath, data, 0600); err != nil {
-				return fmt.Errorf("failed to write config file created from ENVs: %w", err)
-			}
-
-			return nil
+		if sk, ok := os.LookupEnv(secretkeyENV); ok {
+			newConfig.SecretKey = &sk
 		}
 
-		// Envs were not found and statErr is os.ErrNotExist so return that
-		return statErr
-	}
+		if an, ok := os.LookupEnv(agentNameENV); ok {
+			newConfig.AgentName = &an
+		}
 
+		if label, ok := os.LookupEnv(labelsENV); ok {
+			newConfig.Labels = &label
+		}
+
+		data, err := yaml.Marshal(newConfig)
+		if err != nil {
+			return fmt.Errorf("failed to marshal config: %w", err)
+		}
+
+		// write data to a manager.yaml file, with 0600 file permission
+		if err := os.WriteFile(*configPath, data, 0600); err != nil {
+			return fmt.Errorf("failed to write config file created from ENVs: %w", err)
+		}
+		return nil
+	}
 	// Return non os.ErrNotExist
 	return statErr
 }

@@ -16,7 +16,7 @@ package main
 
 import (
 	"os"
-	"os/exec"
+	"path/filepath"
 	"testing"
 
 	"github.com/observiq/observiq-otel-collector/opamp"
@@ -25,7 +25,6 @@ import (
 )
 
 func TestCheckManagerNoConfig(t *testing.T) {
-	exec.Command("rm", "-r", "./manager.yaml").Run()
 	manager := "./manager.yaml"
 	err := checkManagerConfig(&manager)
 	require.ErrorIs(t, err, os.ErrNotExist)
@@ -36,11 +35,6 @@ func TestCheckManagerNoConfig(t *testing.T) {
 }
 
 func TestCheckManagerConfigNoFile(t *testing.T) {
-	exec.Command("rm", "-r", "./manager.yaml").Run()
-	manager := "./manager.yaml"
-	err := checkManagerConfig(&manager)
-	require.Error(t, err)
-
 	os.Setenv(endpointENV, "0.0.0.0")
 	defer os.Unsetenv(endpointENV)
 
@@ -52,13 +46,14 @@ func TestCheckManagerConfigNoFile(t *testing.T) {
 
 	os.Setenv(labelsENV, "this is a label")
 	defer os.Unsetenv(labelsENV)
-	defer os.Unsetenv(agentIdENV)
+	defer os.Unsetenv(agentIDENV)
 
-	manager = "./manager.yaml"
-	err = checkManagerConfig(&manager)
+	tmpdir := t.TempDir()
+	manager := filepath.Join(tmpdir, "manager.yaml")
+	err := checkManagerConfig(&manager)
 	require.NoError(t, err)
 
-	dat, err := os.ReadFile("./manager.yaml")
+	dat, err := os.ReadFile(manager)
 	out := &opamp.Config{}
 	err = yaml.Unmarshal(dat, out)
 	require.Equal(t,
@@ -71,7 +66,11 @@ func TestCheckManagerConfigNoFile(t *testing.T) {
 }
 
 func TestCheckManagerConfig(t *testing.T) {
-	manager := "./manager.yaml"
+	tmpdir := t.TempDir()
+	manager := filepath.Join(tmpdir, "manager.yaml")
+
+	data := []byte("temporary directory")
+	os.WriteFile(manager, data, 0600)
 	err := checkManagerConfig(&manager)
 	require.NoError(t, err)
 }
