@@ -17,7 +17,6 @@ package download
 import (
 	"bytes"
 	"fmt"
-	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -238,13 +237,18 @@ func TestDownloadAndVerifyExtraction(t *testing.T) {
 			tmpDir := t.TempDir()
 
 			s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				f, err := os.Open(tc.archivePath)
+				archiveBytes, err := os.ReadFile(tc.archivePath)
 				if err != nil {
 					t.Errorf("Failed to open archive for sending over http: %s", err)
 				}
-				defer f.Close()
 
-				_, err = io.Copy(w, f)
+				if filepath.Base(tc.archivePath) == "not-actually-tar.tar.gz" {
+					// This file is a text file, and git actually detects that and replaces line endings on windows
+					// Replace \r\n with \n so tests pass on windows systems
+					archiveBytes = bytes.ReplaceAll(archiveBytes, []byte("\r\n"), []byte("\n"))
+				}
+
+				_, err = w.Write(archiveBytes)
 				if err != nil {
 					t.Errorf("Failed to copy archive for sending over http: %s", err)
 				}
