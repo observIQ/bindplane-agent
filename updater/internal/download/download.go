@@ -1,3 +1,17 @@
+// Copyright  observIQ, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package download
 
 import (
@@ -18,8 +32,8 @@ import (
 const extractFolder = "latest"
 
 // Downloads the file into the outPath, truncating the file if it already exists
-func downloadFile(downloadUrl string, outPath string) error {
-	resp, err := http.Get(downloadUrl)
+func downloadFile(downloadURL string, outPath string) error {
+	resp, err := http.Get(downloadURL)
 	if err != nil {
 		return fmt.Errorf("could not GET url: %w", err)
 	}
@@ -43,8 +57,8 @@ func downloadFile(downloadUrl string, outPath string) error {
 }
 
 // getOutputFilePath gets the output path relative to the base dir for the archive from the given URL.
-func getOutputFilePath(basePath, downloadUrl string) (string, error) {
-	url, err := url.Parse(downloadUrl)
+func getOutputFilePath(basePath, downloadURL string) (string, error) {
+	url, err := url.Parse(downloadURL)
 	if err != nil {
 		return "", fmt.Errorf("cannot parse url: %w", err)
 	}
@@ -83,7 +97,11 @@ func verifyContentHash(contentPath, hexExpectedContentHash string) error {
 	return nil
 }
 
-func DownloadAndVerify(url, dir, expectedHash string) error {
+// FetchAndExtractArchive fetches the archive at the specified URL, placing it into dir.
+// It then checks to see if it matches the "expectedHash", a hex-encoded string representing the expected sha256 sum of the file.
+// If it matches, the archive is extracted into the $dir/latest directory.
+// If the archive cannot be extracted, downloaded, or verified, then an error is returned.
+func FetchAndExtractArchive(url, dir, expectedHash string) error {
 	archiveFilePath, err := getOutputFilePath(dir, url)
 	if err != nil {
 		return fmt.Errorf("failed to determine archive download path: %w", err)

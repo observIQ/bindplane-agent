@@ -27,7 +27,7 @@ import (
 // Unimplemented
 func main() {
 	var showVersion = pflag.BoolP("version", "v", false, "Prints the version of the collector and exits, if specified.")
-	var downloadUrl = pflag.String("url", "", "URL to download the update archive from.")
+	var downloadURL = pflag.String("url", "", "URL to download the update archive from.")
 	var tmpDir = pflag.String("tmpdir", "", "Temporary directory for artifacts. Parent of the 'rollback' directory.")
 	var contentHash = pflag.String("content-hash", "", "Hex encoded hash of the content at the specified URL.")
 	pflag.Parse()
@@ -39,7 +39,7 @@ func main() {
 		return
 	}
 
-	if *downloadUrl == "" {
+	if *downloadURL == "" {
 		log.Println("The --url flag must be specified!")
 		pflag.PrintDefaults()
 		os.Exit(1)
@@ -57,7 +57,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err := download.DownloadAndVerify(*downloadUrl, *tmpDir, *contentHash); err != nil {
+	if err := download.FetchAndExtractArchive(*downloadURL, *tmpDir, *contentHash); err != nil {
 		log.Fatalf("Failed to download and verify update: %s", err)
 	}
 
