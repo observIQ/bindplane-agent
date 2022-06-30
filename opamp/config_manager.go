@@ -38,7 +38,7 @@ type ConfigManager interface {
 
 	// ApplyConfigChanges compares the remoteConfig to the existing and applies changes.
 	// Calculates new effective config
-	ApplyConfigChanges(remoteConfig *protobufs.AgentRemoteConfig) (effectiveConfig *protobufs.EffectiveConfig, changed bool, err error)
+	ApplyConfigChanges(remoteConfig *protobufs.AgentRemoteConfig) (changed bool, err error)
 }
 
 // DetermineContentType looks at the file extension for the given filepath and returns the content type

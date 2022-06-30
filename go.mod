@@ -8,7 +8,7 @@ require (
 	github.com/observiq/observiq-otel-collector/exporter/googlecloudexporter v0.5.0
 	github.com/observiq/observiq-otel-collector/processor/resourceattributetransposerprocessor v0.5.0
 	github.com/observiq/observiq-otel-collector/receiver/pluginreceiver v0.5.0
-	github.com/open-telemetry/opamp-go v0.0.0-20220531162705-3f2eab449870
+	github.com/open-telemetry/opamp-go v0.2.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/alibabacloudlogserviceexporter v0.54.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/awscloudwatchlogsexporter v0.54.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/awsemfexporter v0.54.0
