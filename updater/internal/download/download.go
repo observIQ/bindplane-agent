@@ -33,6 +33,7 @@ const extractFolder = "latest"
 
 // Downloads the file into the outPath, truncating the file if it already exists
 func downloadFile(downloadURL string, outPath string) error {
+	//#nosec G107 HTTP request must be dynamic based on input
 	resp, err := http.Get(downloadURL)
 	if err != nil {
 		return fmt.Errorf("could not GET url: %w", err)
@@ -43,17 +44,17 @@ func downloadFile(downloadURL string, outPath string) error {
 		return fmt.Errorf("got non-200 status code (%d)", resp.StatusCode)
 	}
 
-	f, err := os.OpenFile(outPath, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0640)
+	outPathClean := filepath.Clean(outPath)
+	f, err := os.OpenFile(outPathClean, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0600)
 	if err != nil {
 		return fmt.Errorf("failed to open file: %w", err)
 	}
-	defer f.Close()
 
 	if _, err = io.Copy(f, resp.Body); err != nil {
 		return fmt.Errorf("failed to copy request body to file: %w", err)
 	}
 
-	return nil
+	return f.Close()
 }
 
 // getOutputFilePath gets the output path relative to the base dir for the archive from the given URL.
@@ -78,12 +79,12 @@ func verifyContentHash(contentPath, hexExpectedContentHash string) error {
 
 	// Hash file at contentPath using sha256
 	fileHash := sha256.New()
+	contentPathClean := filepath.Clean(contentPath)
 
-	f, err := os.Open(contentPath)
+	f, err := os.Open(contentPathClean)
 	if err != nil {
 		return fmt.Errorf("failed to open file: %w", err)
 	}
-	defer f.Close()
 
 	if _, err = io.Copy(fileHash, f); err != nil {
 		return fmt.Errorf("failed to calculate file hash: %w", err)
@@ -94,7 +95,7 @@ func verifyContentHash(contentPath, hexExpectedContentHash string) error {
 		return errors.New("content hashes were not equal")
 	}
 
-	return nil
+	return f.Close()
 }
 
 // FetchAndExtractArchive fetches the archive at the specified URL, placing it into dir.
