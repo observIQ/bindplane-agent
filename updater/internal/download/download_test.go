@@ -37,6 +37,23 @@ func TestDownloadFile(t *testing.T) {
 		assert.Equal(t, []byte("Hello"), b)
 	})
 
+	t.Run("Output file is existing directory", func(t *testing.T) {
+		tmpDir := t.TempDir()
+
+		s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if r.Method != http.MethodGet {
+				t.Errorf("Invalid request method: %s", r.Method)
+				return
+			}
+
+			w.Write([]byte("Hello"))
+		}))
+		defer s.Close()
+
+		err := downloadFile(s.URL, tmpDir)
+		require.ErrorContains(t, err, "failed to open file:")
+	})
+
 	t.Run("Invalid URL", func(t *testing.T) {
 		tmpDir := t.TempDir()
 		outPath := filepath.Join(tmpDir, "out.txt")
@@ -131,6 +148,12 @@ func TestVerifyContentHash(t *testing.T) {
 			hash:        "7e4ead2053637d9fcb7f3316e748becb8af163c6f851446eeef878a994ae5c4b",
 			expectedErr: "content hashes were not equal",
 		},
+		{
+			name:        "Content hash is not hex encoded",
+			contentPath: filepath.Join("testdata", "test.txt"),
+			hash:        "c87e2ca771bab6024c269b933389d2a92d4941c848c52f155b9b84e1f109fe3z",
+			expectedErr: "failed to decode content hash:",
+		},
 	}
 
 	for _, tc := range testCases {
@@ -145,7 +168,7 @@ func TestVerifyContentHash(t *testing.T) {
 	}
 }
 
-func TestDownloadAndVerify(t *testing.T) {
+func TestDownloadAndVerifyExtraction(t *testing.T) {
 	testCases := []struct {
 		name         string
 		archivePath  string
@@ -211,4 +234,22 @@ func TestDownloadAndVerify(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestDownloadAndVerifyHTTPFailure(t *testing.T) {
+	tmpDir := t.TempDir()
+
+	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusForbidden)
+	}))
+	defer s.Close()
+
+	err := DownloadAndVerify(fmt.Sprintf("%s/%s", s.URL, "some-archive.tar.gz"), tmpDir, "")
+	require.ErrorContains(t, err, "failed to download file:")
+}
+
+func TestDownloadAndVerifyInvalidURL(t *testing.T) {
+	tmpDir := t.TempDir()
+	err := DownloadAndVerify("http://\t/some-archive.tar.gz", tmpDir, "")
+	require.ErrorContains(t, err, "failed to determine archive download path:")
 }
