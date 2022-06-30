@@ -44,9 +44,9 @@ template: |
         log_type: 'cassandra.system'
       operators:
         - type: regex_parser
-          regex: '(?P<cassandra_severity>[A-Z]+)\s+\[(?P<type>[^\]]+)\]\s+(?P<timestamp>\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2},\d{3})\s+(?P<message>.*\S)'
+          regex: '(?P<severity>[A-Z]+)\s+\[(?P<type>[^\]]+)\]\s+(?P<timestamp>\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2},\d{3})\s+(?P<message>.*\S)'
           severity:
-            parse_from: attributes.cassandra_severity
+            parse_from: attributes.severity
         - type: time_parser
           parse_from: attributes.timestamp
           layout: '%F %T,%L'
@@ -65,9 +65,9 @@ template: |
         log_type: 'cassandra.debug'
       operators:
         - type: regex_parser
-          regex: '(?P<cassandra_severity>[A-Z]+)\s+\[(?P<type>[^\]]+)\]\s+(?P<timestamp>\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2},\d{3})\s+(?P<message>.*\S)'
+          regex: '(?P<severity>[A-Z]+)\s+\[(?P<type>[^\]]+)\]\s+(?P<timestamp>\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2},\d{3})\s+(?P<message>.*\S)'
           severity:
-            parse_from: attributes.cassandra_severity
+            parse_from: attributes.severity
           timestamp:
             parse_from: attributes.timestamp
             layout: '%F %T,%L'
@@ -80,45 +80,17 @@ template: |
         - '{{ $fp }}'
         {{ end }}
       multiline:
-        line_start_pattern: '\[\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}[+-]\d{4}\]\[\d+.\d+\w\]\[\d+\]\[\d+\]\[\w+\] \w+\(\d+\) (OpenJDK|Memory:|CommandLine|Heap)'
+        line_start_pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}[+-]\d{4}|^OpenJDK|^Memory:|^CommandLine|^Heap'
       start_at: {{ .start_at }}
       attributes:
         log_type: 'cassandra.gc'
       operators:
-        - id: id_router
-          type: router
-          routes:
-            - output: gc_log_parser_1
-              expr: $ matches '\\[\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}.\\d{3}[+-]\\d{4}][\\d+.\\d+\\w][\\d+][\\d+][\\w+ ]'
-            - output: gc_log_parser_2
-              expr: $ matches '\\[\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}.\\d{3}[+-]\\d{4}][\\d+.\\d+\\w][\\d+][\\d+][\\w+]'
-        - id: gc_log_parser_1
-          type: regex_parser
-          parse_from: "attributes.request"
-          if: 'attributes.request != nil'
-          regex: '(?P<timestamp>\[\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}[+-]\d{4}\]\[\d+.\d+\w\]\[\d+\]\[\d+\]\[\w+ \])(?P<message>[\s+\w+].*)'
-          # regex: '(?P<timestamp>\[\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}[+-]\d{4}\]\[\d+.\d+\w\]\[\d+\]\[\d+\]\[\w+ \])\s+.*stopped: (?P<total_stopped_seconds>[\d\.]+).* took: (?P<stopping_threads_seconds>[\d\.]+)'
-          timestamp:
-            parse_from: attributes.timestamp
-            layout: '%FT%T.%L%z'
-
-        - id: gc_log_parser_2
-          type: regex_parser
-          parse_from: "attributes.request"
-          if: 'attributes.request != nil'
-          regex: '(?P<timestamp>\[\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}[+-]\d{4}\]\[\d+.\d+\w\]\[\d+\]\[\d+\]\[\w+ \])(?P<message>[\s+\w+].*)'
-          timestamp:
-            parse_from: attributes.timestamp
-            layout: '%FT%T.%L%z'
-
-        - type: regex_parser
-          regex: '(?P<cassandra_severity>[A-Z]+)\s+\[(?P<type>[^\]]+)\]\s+(?P<timestamp>\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2},\d{3})\s+(?P<message>.*\S)'
-          severity:
-            parse_from: attributes.cassandra_severity
-
-        - type: time_parser
+      - type: regex_parser
+        if: 'body matches "[0-9]{4}-[0-9]{2}-[0-9]{2}T"'
+        regex: '(?P<timestamp>\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}[+-]\d{4}):\s+.*stopped: (?P<total_stopped_seconds>[\d\.]+).* took: (?P<stopping_threads_seconds>[\d\.]+)'
+        timestamp:
           parse_from: attributes.timestamp
-          layout: '%F %T,%L'
+          layout: '%FT%T.%L%z'
   {{ end }}
 
   service:
