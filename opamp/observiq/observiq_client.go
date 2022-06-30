@@ -136,8 +136,12 @@ func (c *Client) Connect(ctx context.Context) error {
 	settings := types.StartSettings{
 		OpAMPServerURL: c.currentConfig.Endpoint,
 		Header: http.Header{
-			"Authorization": []string{fmt.Sprintf("Secret-Key %s", c.currentConfig.GetSecretKey())},
-			"User-Agent":    []string{fmt.Sprintf("observiq-otel-collector/%s", version.Version())},
+			"Authorization":  []string{fmt.Sprintf("Secret-Key %s", c.currentConfig.GetSecretKey())},
+			"User-Agent":     []string{fmt.Sprintf("observiq-otel-collector/%s", version.Version())},
+			"OpAMP-Version":  []string{opamp.Version()},
+			"Agent-ID":       []string{c.ident.agentID},
+			"Agent-Version":  []string{version.Version()},
+			"Agent-Hostname": []string{c.ident.hostname},
 		},
 		TLSConfig:   tlsCfg,
 		InstanceUid: c.ident.agentID,
