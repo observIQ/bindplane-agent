@@ -27,7 +27,7 @@ To access the services dialog, press Win + R, enter `services.msc` into the Run 
 
 ![The run dialog](./screenshots/windows/launch-services.png)
 
-Locate the "observIQ Distro for OpenTelemetry" service, right click the entry, and click "Restart" to restart the collector.
+Locate the "observIQ Distro for OpenTelemetry Collector" service, right click the entry, and click "Restart" to restart the collector.
 
 ![The services dialog](./screenshots/windows/stop-restart-service.png)
 
@@ -43,7 +43,7 @@ To access the services dialog, press Win + R, enter `services.msc` into the Run 
 
 ![The run dialog](./screenshots/windows/launch-services.png)
 
-Locate the "observIQ Distro for OpenTelemetry" service, right click the entry, and click "Stop" to stop the collector.
+Locate the "observIQ Distro for OpenTelemetry Collector" service, right click the entry, and click "Stop" to stop the collector.
 
 ![The services dialog](./screenshots/windows/stop-restart-service.png)
 
@@ -59,7 +59,7 @@ To access the services dialog, press Win + R, enter `services.msc` into the Run 
 
 ![The run dialog](./screenshots/windows/launch-services.png)
 
-Locate the "observIQ OpenTelemetry Collector" service, right click the entry, and click "Start" to start the collector.
+Locate the "observIQ Distro for OpenTelemetry Collector" service, right click the entry, and click "Start" to start the collector.
 
 ![The services dialog](./screenshots/windows/start-service.png)
 
@@ -74,7 +74,7 @@ To uninstall the collector on Windows, navigate to the control panel, then to th
 
 ![The control panel](./screenshots/windows/control-panel-uninstall.png)
 
-Locate the `"observIQ Distro for OpenTelemetry"` entry, and select uninstall. 
+Locate the `"observIQ Distro for OpenTelemetry Collector"` entry, and select uninstall. 
 
 ![The uninstall or change a program dialog](./screenshots/windows/uninstall-collector.png)
 
@@ -82,5 +82,5 @@ Follow the wizard to complete removal of the collector.
 
 Alternatively, Powershell command below may be run to uninstall the collector.
 ```pwsh
-(Get-WmiObject -Class Win32_Product -Filter "Name = 'observIQ OpenTelemetry Collector'").Uninstall()
+(Get-WmiObject -Class Win32_Product -Filter "Name = 'observIQ Distro for OpenTelemetry Collector'").Uninstall()
 ```
