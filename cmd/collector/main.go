@@ -116,21 +116,22 @@ func checkManagerConfig(configPath *string) error {
 		// We found the file just return nil
 		return nil
 	case errors.Is(statErr, os.ErrNotExist):
-		var ep, ai string
 		var ok bool
-		// Endpoint is only required env
-		if ep, ok = os.LookupEnv(endpointENV); !ok {
-			// Envs were not found and statErr is os.ErrNotExist so return that
-			return statErr
-		}
+
 		// manager.ymal file does *not* exist, create file using env variables
 		newConfig := &opamp.Config{}
 
-		newConfig.Endpoint = ep
-		if ai, ok = os.LookupEnv(agentIDENV); !ok {
-			ai = uuid.New().String()
+		// Endpoint is only required env
+		newConfig.Endpoint, ok = os.LookupEnv(endpointENV)
+		if !ok {
+			// Envs were not found and statErr is os.ErrNotExist so return that
+			return statErr
 		}
-		newConfig.AgentID = ai
+
+		newConfig.AgentID, ok = os.LookupEnv(agentIDENV)
+		if !ok {
+			newConfig.AgentID = uuid.New().String()
+		}
 
 		if sk, ok := os.LookupEnv(secretkeyENV); ok {
 			newConfig.SecretKey = &sk
