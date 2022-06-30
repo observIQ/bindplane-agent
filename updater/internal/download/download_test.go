@@ -15,6 +15,7 @@
 package download
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"net/http"
@@ -238,6 +239,9 @@ func TestDownloadAndVerifyExtraction(t *testing.T) {
 				// Make sure test.txt exists in the output dir
 				expectedBytes, err := os.ReadFile(filepath.Join("testdata", "test.txt"))
 				require.NoError(t, err)
+
+				// Replace \r\n with \n so tests pass on windows systems
+				expectedBytes = bytes.ReplaceAll(expectedBytes, []byte("\r\n"), []byte("\n"))
 
 				actualBytes, err := os.ReadFile(filepath.Join(tmpDir, extractFolder, "test.txt"))
 				require.NoError(t, err)
