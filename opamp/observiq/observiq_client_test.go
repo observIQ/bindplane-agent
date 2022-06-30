@@ -273,7 +273,7 @@ func TestClientConnect(t *testing.T) {
 						"Authorization":  []string{fmt.Sprintf("Secret-Key %s", c.currentConfig.GetSecretKey())},
 						"User-Agent":     []string{fmt.Sprintf("observiq-otel-collector/%s", version.Version())},
 						"OpAMP-Version":  []string{opamp.Version()},
-						"AgentID":        []string{c.ident.agentID},
+						"Agent-ID":       []string{c.ident.agentID},
 						"Agent-Version":  []string{version.Version()},
 						"Agent-Hostname": []string{c.ident.hostname},
 					},
