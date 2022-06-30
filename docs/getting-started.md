@@ -139,7 +139,7 @@ systemctl restart observiq-otel-collector
 
 ## Viewing the metrics in Google Cloud Operations
 
-You should now be able to view the host metrics in your Metrics explorer. Nice work! This is how simple it is to collect host metrics with the observIQ OpenTelemetry collector.
+You should now be able to view the host metrics in your Metrics explorer. Nice work! This is how simple it is to collect host metrics with the observIQ Distro for OpenTelemetry Collector.
 
 ### Metrics collected
 

@@ -55,7 +55,15 @@
       <Property Id="INSTALLDIR">
           <RegistrySearch Id='LOADINSTALLDIR' Type='raw'
             Root='HKLM' Key='Software\Microsoft\Windows\CurrentVersion\Uninstall\[ProductName]' Name='InstallLocation' />
+          <!-- Load up the install dir form the previous ProductName if it exists there, instead.-->
+          <RegistrySearch Id='LOADINSTALLDIROLD' Type='raw'
+            Root='HKLM' Key='Software\Microsoft\Windows\CurrentVersion\Uninstall\observIQ OpenTelemetry Collector' Name='InstallLocation' />
       </Property>
+      
+      <!-- Set default install dir to be "C:\Program Files\observIQ OpenTelemetry Collector" instead of "C:\Program Files\[ProductName]"-->
+      <SetProperty Id="INSTALLDIR" Value="[$(var.Program_Files)]\observIQ OpenTelemetry Collector" Before="CostInitialize">
+        <![CDATA[NOT INSTALLDIR]]>
+      </SetProperty>
 
       <!-- Load Powershell location -->
       <Property Id="POWERSHELLEXE">
@@ -73,7 +81,7 @@
       <Directory Id="TARGETDIR" Name="SourceDir">
 
         <Directory Id="$(var.Program_Files)">
-            <Directory Id="INSTALLDIR" Name="{{.Product}}">
+            <Directory Id="INSTALLDIR" Name="observIQ OpenTelemetry Collector">
                 {{define "FILES"}}
                 {{range $f := .}}
                 <Component 
@@ -132,6 +140,11 @@
         </Component>
         {{end}}
         <Component Id="RegistryEntriesARP" Guid="*">
+            <!-- 
+                Remove old registry key; This one sticks around for some reason after upgrading to the new product name, which is a problem,
+                since this registry key is the one that makes it show up in the "Uninstall a program" dialog.
+            -->
+            <RemoveRegistryKey Action="removeOnInstall" Root="HKLM" Key="Software\Microsoft\Windows\CurrentVersion\Uninstall\observIQ OpenTelemetry Collector"/>
             <RegistryKey Root="HKLM" Key="Software\Microsoft\Windows\CurrentVersion\Uninstall\[ProductName]">
                 <RegistryValue Type="string" Name="AuthorizedCDFPrefix" Value=""/>
                 <RegistryValue Type="string" Name="Comments" Value="{{.Info.Comments}}"/>
@@ -155,6 +168,7 @@
                 <RegistryValue Type="string" Name="URLInfoAbout" Value="{{.Info.SupportLink}}"/>
                 <RegistryValue Type="string" Name="URLUpdateInfo" Value="{{.Info.UpdateInfoLink}}"/>
                 <RegistryValue Type="integer" Name="Version" Value="{{.Version.Hex}}"/>
+                <RegistryValue Type="integer" Name="NoModify" Value="1"/>
             </RegistryKey>
         </Component>
 
