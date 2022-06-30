@@ -38,6 +38,7 @@ const (
 	agentID   = "OPAMP_AGENT_ID"
 	secretKey = "OPAMP_SECRET_KEY"
 	labels    = "OPAMP_LABELS"
+	agentName = "OPAMP_AGENT_NAME"
 )
 
 func main() {
@@ -128,17 +129,21 @@ func checkManagerConfig(configPath *string) error {
 				newConfig.SecretKey = &sk
 			}
 
+			if an, ok := os.LookupEnv(agentName); ok {
+				newConfig.AgentName = &an
+			}
+
 			if label, ok := os.LookupEnv(labels); ok {
 				newConfig.Labels = &label
 			}
 
 			var data []byte
 			if data, err = yaml.Marshal(newConfig); err != nil {
-				return err
+				return fmt.Errorf("failed to marshal config: %w", err)
 			}
 			// write data to a manager.yaml file, with 0777 file permission
 			if err := os.WriteFile(*configPath, data, 0777); err != nil {
-				return err
+				return fmt.Errorf("failed to write config file created from ENVs: %w", err)
 			}
 			return err
 		}
