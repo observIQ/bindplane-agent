@@ -109,14 +109,18 @@ func logOptions(loggingConfigPath *string) ([]zap.Option, error) {
 }
 
 func checkManagerConfig(configPath *string) error {
-	if _, err := os.Stat(*configPath); err == nil {
-		// manager config file exists, return and verify
-		return err
+	_, statErr := os.Stat(*configPath)
 
-	} else if errors.Is(err, os.ErrNotExist) {
-		// manager.ymal file does *not* exist, create file using env variables
-		newConfig := &opamp.Config{}
+	switch {
+	case statErr == nil:
+		// We found the file just return nil
+		return nil
+	case errors.Is(statErr, os.ErrNotExist):
+		// Endpoint is only required env
 		if ep, ok := os.LookupEnv(endpoint); ok {
+			// manager.ymal file does *not* exist, create file using env variables
+			newConfig := &opamp.Config{}
+
 			newConfig.Endpoint = ep
 
 			var ai string
@@ -137,17 +141,23 @@ func checkManagerConfig(configPath *string) error {
 				newConfig.Labels = &label
 			}
 
-			var data []byte
-			if data, err = yaml.Marshal(newConfig); err != nil {
+			data, err := yaml.Marshal(newConfig)
+			if err != nil {
 				return fmt.Errorf("failed to marshal config: %w", err)
 			}
+
 			// write data to a manager.yaml file, with 0777 file permission
 			if err := os.WriteFile(*configPath, data, 0777); err != nil {
 				return fmt.Errorf("failed to write config file created from ENVs: %w", err)
 			}
-			return err
+
+			return nil
 		}
-		return os.ErrNotExist
+
+		// Envs were not found and statErr is os.ErrNotExist so return that
+		return statErr
 	}
-	return os.ErrInvalid
+
+	// Return non os.ErrNotExist
+	return statErr
 }
