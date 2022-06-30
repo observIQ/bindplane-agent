@@ -190,9 +190,7 @@ func (c *Client) onErrorHandler(errResp *protobufs.ServerErrorResponse) {
 }
 
 func (c *Client) onMessageFuncHandler(ctx context.Context, msg *types.MessageData) {
-	switch {
-	// Fill in other message types as needed
-	case msg.RemoteConfig != nil:
+	if msg.RemoteConfig != nil {
 		if err := c.onRemoteConfigHandler(ctx, msg.RemoteConfig); err != nil {
 			c.logger.Error("Error while processing Remote Config Change", zap.Error(err))
 		}
