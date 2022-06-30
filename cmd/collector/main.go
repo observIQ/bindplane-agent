@@ -134,11 +134,11 @@ func checkManagerConfig(configPath *string) error {
 
 			var data []byte
 			if data, err = yaml.Marshal(newConfig); err != nil {
-				panic(err)
+				return err
 			}
 			// write data to a manager.yaml file, with 0777 file permission
 			if err := os.WriteFile(*configPath, data, 0777); err != nil {
-				panic(err)
+				return err
 			}
 			return err
 		}
