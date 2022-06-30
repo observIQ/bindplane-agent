@@ -21,7 +21,6 @@ import (
 
 	"github.com/observiq/observiq-otel-collector/opamp"
 	"github.com/stretchr/testify/require"
-	"gopkg.in/yaml.v3"
 )
 
 func TestCheckManagerNoConfig(t *testing.T) {
@@ -41,28 +40,33 @@ func TestCheckManagerConfigNoFile(t *testing.T) {
 	os.Setenv(agentNameENV, "agent name")
 	defer os.Unsetenv(agentNameENV)
 
+	os.Setenv(agentIDENV, "agent ID")
+	defer os.Unsetenv(agentIDENV)
+
 	os.Setenv(secretkeyENV, "secretKey")
 	defer os.Unsetenv(secretkeyENV)
 
 	os.Setenv(labelsENV, "this is a label")
 	defer os.Unsetenv(labelsENV)
-	defer os.Unsetenv(agentIDENV)
 
 	tmpdir := t.TempDir()
 	manager := filepath.Join(tmpdir, "manager.yaml")
 	err := checkManagerConfig(&manager)
 	require.NoError(t, err)
 
-	dat, err := os.ReadFile(manager)
-	out := &opamp.Config{}
-	err = yaml.Unmarshal(dat, out)
-	require.Equal(t,
-		&opamp.Config{
-			Endpoint: "0.0.0.0",
-		},
-		&opamp.Config{
-			Endpoint: out.Endpoint,
-		})
+	actual, _ := opamp.ParseConfig(manager)
+	expected := &opamp.Config{
+		Endpoint:  "0.0.0.0",
+		AgentID:   "agent ID",
+		AgentName: new(string),
+		SecretKey: new(string),
+		Labels:    new(string),
+	}
+	*expected.AgentName = "agent name"
+	*expected.SecretKey = "secretKey"
+	*expected.Labels = "this is a label"
+
+	require.Equal(t, expected, actual)
 }
 
 func TestCheckManagerConfig(t *testing.T) {
