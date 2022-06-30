@@ -36,7 +36,7 @@ const (
 	// env variable name constants
 	endpoint  = "OPAMP_ENDPOINT"
 	agentID   = "OPAMP_AGENT_ID"
-	secretKey = "OPAMP_SECRET_KEY"
+	secretKey = "OPAMP_SECRET_KEY" //#nosec G101
 	labels    = "OPAMP_LABELS"
 	agentName = "OPAMP_AGENT_NAME"
 )
@@ -147,7 +147,7 @@ func checkManagerConfig(configPath *string) error {
 			}
 
 			// write data to a manager.yaml file, with 0777 file permission
-			if err := os.WriteFile(*configPath, data, 0777); err != nil {
+			if err := os.WriteFile(*configPath, data, 0600); err != nil {
 				return fmt.Errorf("failed to write config file created from ENVs: %w", err)
 			}
 

@@ -24,6 +24,17 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+func TestCheckManagerNoConfig(t *testing.T) {
+	exec.Command("rm", "-r", "./manager.yaml").Run()
+	manager := "./manager.yaml"
+	err := checkManagerConfig(&manager)
+	require.ErrorIs(t, err, os.ErrNotExist)
+
+	tmp := "\000"
+	err = checkManagerConfig(&tmp)
+	require.Error(t, err)
+}
+
 func TestCheckManagerConfigNoFile(t *testing.T) {
 	exec.Command("rm", "-r", "./manager.yaml").Run()
 	manager := "./manager.yaml"
@@ -32,6 +43,9 @@ func TestCheckManagerConfigNoFile(t *testing.T) {
 
 	os.Setenv(endpoint, "0.0.0.0")
 	defer os.Unsetenv(endpoint)
+
+	os.Setenv(agentName, "agent name")
+	defer os.Unsetenv(agentName)
 
 	os.Setenv(secretKey, "secretKey")
 	defer os.Unsetenv(secretKey)
