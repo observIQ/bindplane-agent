@@ -21,12 +21,22 @@ import (
 	"os"
 	_ "time/tzdata"
 
+	"github.com/google/uuid"
 	"github.com/observiq/observiq-otel-collector/collector"
 	"github.com/observiq/observiq-otel-collector/internal/logging"
 	"github.com/observiq/observiq-otel-collector/internal/service"
 	"github.com/observiq/observiq-otel-collector/internal/version"
+	"github.com/observiq/observiq-otel-collector/opamp"
 	"github.com/spf13/pflag"
 	"go.uber.org/zap"
+	"gopkg.in/yaml.v3"
+)
+
+const (
+	ENDPOINT   = "OPAMP_ENDPOINT"
+	AGENT_ID   = "OPAMP_AGENT_ID"
+	SECRET_KEY = "OPAMP_SECRET_KEY"
+	LABELS     = "OPAMP_LABELS"
 )
 
 func main() {
@@ -61,7 +71,7 @@ func main() {
 	col := collector.New(*collectorConfigPaths, version.Version(), logOpts)
 
 	// See if manager config file exists. If so run in remote managed mode otherwise standalone mode
-	if _, err := os.Stat(*managerConfigPath); err == nil {
+	if err := checkManagerConfig(managerConfigPath); err == nil {
 		logger.Info("Starting In Managed Mode")
 
 		runnableService, err = service.NewManagedCollectorService(col, logger, *managerConfigPath, (*collectorConfigPaths)[0], *loggingConfigPath)
@@ -94,4 +104,46 @@ func logOptions(loggingConfigPath *string) ([]zap.Option, error) {
 	}
 
 	return l.Options()
+}
+
+func checkManagerConfig(configPath *string) error {
+	if _, err := os.Stat(*configPath); err == nil {
+		// manager config file exists, return and verify
+		return err
+
+	} else if errors.Is(err, os.ErrNotExist) {
+		// manager.ymal file does *not* exist, create file using env variables
+		newConfig := &opamp.Config{}
+		if endpoint, ok := os.LookupEnv(ENDPOINT); ok {
+			newConfig.Endpoint = endpoint
+
+			var agentID string
+			if agentID, ok = os.LookupEnv(AGENT_ID); !ok {
+				agentID = uuid.New().String()
+			}
+			newConfig.AgentID = agentID
+
+			if secret_key, ok := os.LookupEnv(SECRET_KEY); ok {
+				newConfig.SecretKey = &secret_key
+			}
+
+			if labels, ok := os.LookupEnv(LABELS); ok {
+				newConfig.Labels = &labels
+			}
+
+			var data []byte
+			if data, err = yaml.Marshal(newConfig); err != nil {
+				panic(err)
+			}
+			// write data to a manager.yaml file, with 0777 file permission
+			if err := os.WriteFile("./manager.yaml", data, 0777); err != nil {
+				panic(err)
+			}
+
+			return err
+		} else {
+			return os.ErrNotExist
+		}
+	}
+	return os.ErrInvalid
 }
