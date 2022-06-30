@@ -1,3 +1,17 @@
+// Copyright  observIQ, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package main
 
 import (
@@ -10,27 +24,21 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-func TestCheckManagerConfig(t *testing.T) {
-	manager := "./manager.yaml"
-	err := checkManagerConfig(&manager)
-	require.NoError(t, err)
-}
-
 func TestCheckManagerConfigNoFile(t *testing.T) {
 	exec.Command("rm", "-r", "./manager.yaml").Run()
 	manager := "./manager.yaml"
 	err := checkManagerConfig(&manager)
 	require.Error(t, err)
 
-	os.Setenv(ENDPOINT, "0.0.0.0")
-	defer os.Unsetenv(ENDPOINT)
+	os.Setenv(endpoint, "0.0.0.0")
+	defer os.Unsetenv(endpoint)
 
-	os.Setenv(SECRET_KEY, "secret_key")
-	defer os.Unsetenv(SECRET_KEY)
+	os.Setenv(secretKey, "secretKey")
+	defer os.Unsetenv(secretKey)
 
-	os.Setenv(LABELS, "this is a label")
-	defer os.Unsetenv(LABELS)
-	defer os.Unsetenv(AGENT_ID)
+	os.Setenv(labels, "this is a label")
+	defer os.Unsetenv(labels)
+	defer os.Unsetenv(agentID)
 
 	manager = "./manager.yaml"
 	err = checkManagerConfig(&manager)
@@ -46,4 +54,10 @@ func TestCheckManagerConfigNoFile(t *testing.T) {
 		&opamp.Config{
 			Endpoint: out.Endpoint,
 		})
+}
+
+func TestCheckManagerConfig(t *testing.T) {
+	manager := "./manager.yaml"
+	err := checkManagerConfig(&manager)
+	require.NoError(t, err)
 }

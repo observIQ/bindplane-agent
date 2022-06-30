@@ -33,10 +33,11 @@ import (
 )
 
 const (
-	ENDPOINT   = "OPAMP_ENDPOINT"
-	AGENT_ID   = "OPAMP_AGENT_ID"
-	SECRET_KEY = "OPAMP_SECRET_KEY"
-	LABELS     = "OPAMP_LABELS"
+	// env variable name constants
+	endpoint  = "OPAMP_ENDPOINT"
+	agentID   = "OPAMP_AGENT_ID"
+	secretKey = "OPAMP_SECRET_KEY"
+	labels    = "OPAMP_LABELS"
 )
 
 func main() {
@@ -114,21 +115,21 @@ func checkManagerConfig(configPath *string) error {
 	} else if errors.Is(err, os.ErrNotExist) {
 		// manager.ymal file does *not* exist, create file using env variables
 		newConfig := &opamp.Config{}
-		if endpoint, ok := os.LookupEnv(ENDPOINT); ok {
-			newConfig.Endpoint = endpoint
+		if ep, ok := os.LookupEnv(endpoint); ok {
+			newConfig.Endpoint = ep
 
-			var agentID string
-			if agentID, ok = os.LookupEnv(AGENT_ID); !ok {
-				agentID = uuid.New().String()
+			var ai string
+			if ai, ok = os.LookupEnv(agentID); !ok {
+				ai = uuid.New().String()
 			}
-			newConfig.AgentID = agentID
+			newConfig.AgentID = ai
 
-			if secret_key, ok := os.LookupEnv(SECRET_KEY); ok {
-				newConfig.SecretKey = &secret_key
+			if sk, ok := os.LookupEnv(secretKey); ok {
+				newConfig.SecretKey = &sk
 			}
 
-			if labels, ok := os.LookupEnv(LABELS); ok {
-				newConfig.Labels = &labels
+			if label, ok := os.LookupEnv(labels); ok {
+				newConfig.Labels = &label
 			}
 
 			var data []byte
@@ -139,11 +140,9 @@ func checkManagerConfig(configPath *string) error {
 			if err := os.WriteFile(*configPath, data, 0777); err != nil {
 				panic(err)
 			}
-
 			return err
-		} else {
-			return os.ErrNotExist
 		}
+		return os.ErrNotExist
 	}
 	return os.ErrInvalid
 }
