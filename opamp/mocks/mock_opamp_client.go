@@ -48,6 +48,34 @@ func (_m *MockOpAMPClient) SetAgentDescription(descr *protobufs.AgentDescription
 	return r0
 }
 
+// SetPackageStatuses provides a mock function with given fields: statuses
+func (_m *MockOpAMPClient) SetPackageStatuses(statuses *protobufs.PackageStatuses) error {
+	ret := _m.Called(statuses)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(*protobufs.PackageStatuses) error); ok {
+		r0 = rf(statuses)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// SetRemoteConfigStatus provides a mock function with given fields: status
+func (_m *MockOpAMPClient) SetRemoteConfigStatus(status *protobufs.RemoteConfigStatus) error {
+	ret := _m.Called(status)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(*protobufs.RemoteConfigStatus) error); ok {
+		r0 = rf(status)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // Start provides a mock function with given fields: ctx, settings
 func (_m *MockOpAMPClient) Start(ctx context.Context, settings types.StartSettings) error {
 	ret := _m.Called(ctx, settings)
@@ -90,7 +118,7 @@ func (_m *MockOpAMPClient) UpdateEffectiveConfig(ctx context.Context) error {
 	return r0
 }
 
-// NewMockClient creates a new instance of MockClient. It also registers the testing.TB interface on the mock and a cleanup function to assert the mocks expectations.
+// NewMockOpAMPClient creates a new instance of MockOpAMPClient. It also registers the testing.TB interface on the mock and a cleanup function to assert the mocks expectations.
 func NewMockOpAMPClient(t testing.TB) *MockOpAMPClient {
 	mock := &MockOpAMPClient{}
 	mock.Mock.Test(t)

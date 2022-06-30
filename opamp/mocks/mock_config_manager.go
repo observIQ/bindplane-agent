@@ -21,33 +21,24 @@ func (_m *MockConfigManager) AddConfig(configName string, reloader *opamp.Manage
 }
 
 // ApplyConfigChanges provides a mock function with given fields: remoteConfig
-func (_m *MockConfigManager) ApplyConfigChanges(remoteConfig *protobufs.AgentRemoteConfig) (*protobufs.EffectiveConfig, bool, error) {
+func (_m *MockConfigManager) ApplyConfigChanges(remoteConfig *protobufs.AgentRemoteConfig) (bool, error) {
 	ret := _m.Called(remoteConfig)
 
-	var r0 *protobufs.EffectiveConfig
-	if rf, ok := ret.Get(0).(func(*protobufs.AgentRemoteConfig) *protobufs.EffectiveConfig); ok {
+	var r0 bool
+	if rf, ok := ret.Get(0).(func(*protobufs.AgentRemoteConfig) bool); ok {
 		r0 = rf(remoteConfig)
 	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*protobufs.EffectiveConfig)
-		}
+		r0 = ret.Get(0).(bool)
 	}
 
-	var r1 bool
-	if rf, ok := ret.Get(1).(func(*protobufs.AgentRemoteConfig) bool); ok {
+	var r1 error
+	if rf, ok := ret.Get(1).(func(*protobufs.AgentRemoteConfig) error); ok {
 		r1 = rf(remoteConfig)
 	} else {
-		r1 = ret.Get(1).(bool)
+		r1 = ret.Error(1)
 	}
 
-	var r2 error
-	if rf, ok := ret.Get(2).(func(*protobufs.AgentRemoteConfig) error); ok {
-		r2 = rf(remoteConfig)
-	} else {
-		r2 = ret.Error(2)
-	}
-
-	return r0, r1, r2
+	return r0, r1
 }
 
 // ComposeEffectiveConfig provides a mock function with given fields:

@@ -91,16 +91,7 @@ func (a *AgentConfigManager) ComposeEffectiveConfig() (*protobufs.EffectiveConfi
 }
 
 // ApplyConfigChanges compares the remoteConfig to the existing and applies changes
-func (a *AgentConfigManager) ApplyConfigChanges(remoteConfig *protobufs.AgentRemoteConfig) (effectiveConfig *protobufs.EffectiveConfig, changed bool, returnErr error) {
-	// Always compute effective config at the end. This ensures we always have the most up to date copy when we respond to the server
-	defer func() {
-		var err error
-		effectiveConfig, err = a.ComposeEffectiveConfig()
-		if err != nil {
-			a.logger.Error("Failed to compute effective config while applying config changes", zap.Error(returnErr))
-		}
-	}()
-
+func (a *AgentConfigManager) ApplyConfigChanges(remoteConfig *protobufs.AgentRemoteConfig) (changed bool, returnErr error) {
 	remoteConfigMap := remoteConfig.GetConfig().GetConfigMap()
 
 	// No remote config Map

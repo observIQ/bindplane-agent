@@ -283,7 +283,7 @@ func TestClientConnect(t *testing.T) {
 						OnConnectFunc:          c.onConnectHandler,
 						OnConnectFailedFunc:    c.onConnectFailedHandler,
 						OnErrorFunc:            c.onErrorHandler,
-						OnRemoteConfigFunc:     c.onRemoteConfigHandler,
+						OnMessageFunc:          c.onMessageFuncHandler,
 						GetEffectiveConfigFunc: c.onGetEffectiveConfigHandler,
 					},
 				}
@@ -324,7 +324,7 @@ func TestClientDisconnect(t *testing.T) {
 }
 
 func TestClient_onGetEffectiveConfigHandler(t *testing.T) {
-	mockManager := new(mocks.MockConfigManager)
+	mockManager := mocks.NewMockConfigManager(t)
 
 	c := &Client{
 		logger:        zap.NewNop(),
@@ -343,58 +343,154 @@ func TestClient_onRemoteConfigHandler(t *testing.T) {
 		testFunc func(*testing.T)
 	}{
 		{
-			desc: "Config Changes return error",
+			desc: "Config Changes return error, no change",
 			testFunc: func(*testing.T) {
 				expectedErr := errors.New("oops")
 				expectedChanged := false
-				mockManager := new(mocks.MockConfigManager)
-				mockManager.On("ApplyConfigChanges", mock.Anything).Return(&protobufs.EffectiveConfig{}, expectedChanged, expectedErr)
+				mockManager := mocks.NewMockConfigManager(t)
+				mockManager.On("ApplyConfigChanges", mock.Anything).Return(expectedChanged, expectedErr)
+
+				remoteConfig := &protobufs.AgentRemoteConfig{
+					ConfigHash: []byte("hash"),
+				}
+
+				mockOpAmpClient := mocks.NewMockOpAMPClient(t)
+				mockOpAmpClient.On("SetRemoteConfigStatus", mock.Anything).Return(nil).Run(func(args mock.Arguments) {
+					status := args.Get(0).(*protobufs.RemoteConfigStatus)
+
+					assert.NotNil(t, status)
+					assert.Equal(t, remoteConfig.GetConfigHash(), status.GetLastRemoteConfigHash())
+					assert.Equal(t, protobufs.RemoteConfigStatus_FAILED, status.GetStatus())
+					assert.Contains(t, status.GetErrorMessage(), expectedErr.Error())
+
+				})
 
 				c := &Client{
 					configManager: mockManager,
 					logger:        zap.NewNop(),
+					opampClient:   mockOpAmpClient,
 				}
 
-				effCfg, changed, err := c.onRemoteConfigHandler(context.Background(), &protobufs.AgentRemoteConfig{})
-				assert.Nil(t, effCfg)
-				assert.Equal(t, expectedChanged, changed)
-				assert.ErrorIs(t, err, expectedErr)
+				err := c.onRemoteConfigHandler(context.Background(), remoteConfig)
+				assert.NoError(t, err)
 			},
 		},
 		{
 			desc: "Config Changes occur",
 			testFunc: func(*testing.T) {
-				expectedEffCfg := &protobufs.EffectiveConfig{}
-				mockManager := new(mocks.MockConfigManager)
-				mockManager.On("ApplyConfigChanges", mock.Anything).Return(expectedEffCfg, true, nil)
+				mockManager := mocks.NewMockConfigManager(t)
+				mockManager.On("ApplyConfigChanges", mock.Anything).Return(true, nil)
+
+				remoteConfig := &protobufs.AgentRemoteConfig{
+					ConfigHash: []byte("hash"),
+				}
+
+				mockOpAmpClient := mocks.NewMockOpAMPClient(t)
+				mockOpAmpClient.On("UpdateEffectiveConfig", mock.Anything).Return(nil)
+				mockOpAmpClient.On("SetRemoteConfigStatus", mock.Anything).Return(nil).Run(func(args mock.Arguments) {
+					status := args.Get(0).(*protobufs.RemoteConfigStatus)
+
+					assert.NotNil(t, status)
+					assert.Equal(t, remoteConfig.GetConfigHash(), status.GetLastRemoteConfigHash())
+					assert.Equal(t, protobufs.RemoteConfigStatus_APPLIED, status.GetStatus())
+					assert.Equal(t, "", status.GetErrorMessage())
+
+				})
 
 				c := &Client{
 					configManager: mockManager,
 					logger:        zap.NewNop(),
+					opampClient:   mockOpAmpClient,
 				}
 
-				effCfg, changed, err := c.onRemoteConfigHandler(context.Background(), &protobufs.AgentRemoteConfig{})
+				err := c.onRemoteConfigHandler(context.Background(), remoteConfig)
 				assert.NoError(t, err)
-				assert.Equal(t, expectedEffCfg, effCfg)
-				assert.True(t, changed)
 			},
 		},
 		{
 			desc: "No Config Changes occur",
 			testFunc: func(*testing.T) {
-				expectedEffCfg := &protobufs.EffectiveConfig{}
-				mockManager := new(mocks.MockConfigManager)
-				mockManager.On("ApplyConfigChanges", mock.Anything).Return(expectedEffCfg, false, nil)
+				mockManager := mocks.NewMockConfigManager(t)
+				mockManager.On("ApplyConfigChanges", mock.Anything).Return(false, nil)
+
+				remoteConfig := &protobufs.AgentRemoteConfig{
+					ConfigHash: []byte("hash"),
+				}
+
+				mockOpAmpClient := mocks.NewMockOpAMPClient(t)
+				mockOpAmpClient.On("SetRemoteConfigStatus", mock.Anything).Return(nil).Run(func(args mock.Arguments) {
+					status := args.Get(0).(*protobufs.RemoteConfigStatus)
+
+					assert.NotNil(t, status)
+					assert.Equal(t, remoteConfig.GetConfigHash(), status.GetLastRemoteConfigHash())
+					assert.Equal(t, protobufs.RemoteConfigStatus_APPLIED, status.GetStatus())
+					assert.Equal(t, "", status.GetErrorMessage())
+
+				})
 
 				c := &Client{
 					configManager: mockManager,
 					logger:        zap.NewNop(),
+					opampClient:   mockOpAmpClient,
 				}
 
-				effCfg, changed, err := c.onRemoteConfigHandler(context.Background(), &protobufs.AgentRemoteConfig{})
+				err := c.onRemoteConfigHandler(context.Background(), remoteConfig)
 				assert.NoError(t, err)
-				assert.Equal(t, expectedEffCfg, effCfg)
-				assert.False(t, changed)
+			},
+		},
+		{
+			desc: "SetRemoteConfigStatus errors",
+			testFunc: func(*testing.T) {
+				expectedErr := errors.New("oops")
+
+				mockManager := mocks.NewMockConfigManager(t)
+				mockManager.On("ApplyConfigChanges", mock.Anything).Return(false, nil)
+
+				mockOpAmpClient := mocks.NewMockOpAMPClient(t)
+				mockOpAmpClient.On("SetRemoteConfigStatus", mock.Anything).Return(expectedErr)
+
+				c := &Client{
+					configManager: mockManager,
+					logger:        zap.NewNop(),
+					opampClient:   mockOpAmpClient,
+				}
+
+				err := c.onRemoteConfigHandler(context.Background(), &protobufs.AgentRemoteConfig{})
+				assert.ErrorIs(t, err, expectedErr)
+			},
+		},
+		{
+			desc: "UpdateEffectiveConfig errors",
+			testFunc: func(*testing.T) {
+				expectedErr := errors.New("oops")
+
+				mockManager := mocks.NewMockConfigManager(t)
+				mockManager.On("ApplyConfigChanges", mock.Anything).Return(true, nil)
+
+				remoteConfig := &protobufs.AgentRemoteConfig{
+					ConfigHash: []byte("hash"),
+				}
+
+				mockOpAmpClient := mocks.NewMockOpAMPClient(t)
+				mockOpAmpClient.On("UpdateEffectiveConfig", mock.Anything).Return(expectedErr)
+				mockOpAmpClient.On("SetRemoteConfigStatus", mock.Anything).Return(nil).Run(func(args mock.Arguments) {
+					status := args.Get(0).(*protobufs.RemoteConfigStatus)
+
+					assert.NotNil(t, status)
+					assert.Equal(t, remoteConfig.GetConfigHash(), status.GetLastRemoteConfigHash())
+					assert.Equal(t, protobufs.RemoteConfigStatus_APPLIED, status.GetStatus())
+					assert.Equal(t, "", status.GetErrorMessage())
+
+				})
+
+				c := &Client{
+					configManager: mockManager,
+					logger:        zap.NewNop(),
+					opampClient:   mockOpAmpClient,
+				}
+
+				err := c.onRemoteConfigHandler(context.Background(), remoteConfig)
+				assert.ErrorIs(t, err, expectedErr)
 			},
 		},
 	}
