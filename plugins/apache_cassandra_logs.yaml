@@ -3,141 +3,136 @@ title: Apache Cassandra
 description: Log parser for Apache Cassandra
 parameters:
   - name: enable_system_logs
-    label: Enable System Logs
-    description: Enable collection of Cassandra system logs
     type: bool
     default: true
   - name: system_log_path
-    label: Apache Cassandra System Log Path
-    description: Path to the Apache Cassandra system log file.
-    type: string
-    default: "/var/log/cassandra/cassandra.log"
-    relevant_if:
-      enable_system_logs:
-        equals: true
+    type: "[]string"
+    default: 
+    - "/var/log/cassandra/system.log"
   - name: enable_debug_logs
-    label: Enable Debug Logs
-    description: Enable collection of Cassandra debug logs
     type: bool
     default: true
   - name: debug_log_path
-    label: Apache Cassandra Debug Log Path
-    description: Path to the Apache Cassandra debug log file.
-    type: string
-    default: "/var/log/cassandra/debug.log"
-    relevant_if:
-      enable_debug_logs:
-        equals: true
+    type: "[]string"
+    default:
+    - "/var/log/cassandra/debug.log"
   - name: enable_gc_logs
-    label: Enable Garbage Collection Logs
-    description: Enable collection of Cassandra garbage collection logs
     type: bool
     default: true
   - name: gc_log_path
-    label: Apache Cassandra Garbage Collection Log Path
-    description: Path to the Apache Cassandra garbage collection log file.
-    type: string
-    default: "/var/log/cassandra/gc.log"
-    relevant_if:
-      enable_gc_logs:
-        equals: true
+    type: "[]string"
+    default:
+    - "/var/log/cassandra/gc.log"
   - name: start_at
-    label: Start At
-    description: "Start reading file from 'beginning' or 'end'"
-    type: enum
+    type: string
     valid_values:
      - beginning
      - end
     default: end
 template: |
   receivers:
-  {{ if .enable_system_logs }}
-  filelog/system_logs
-    include:
-      {{ range $fp := .system_log_path }}
-      - '{{ $fp }}'
-      {{ end }}
-    multiline:
-      line_start_pattern: '[A-Z]+\s+\[[^\]]+\]'
-    start_at: {{ .start_at }}
-    attributes:
-      log_type: 'cassandra.system'
-    operators:
-      - type: regex_parser
-        regex: '(?P<cassandra_severity>[A-Z]+)\s+\[(?P<type>[^\]]+)\]\s+(?P<time1>\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2}),(?P<time2>\d+)\s+(?P<message>.*\S)'
-        severity:
-          parse_from: cassandra_severity
-      - type: restructure
-        ops:
-          - add:
-              field: timestamp
-              value_expr: 'attributes.time1 + "." + attributes.time2'
-          - remove: time1
-          - remove: time2
-      - type: time_parser
-        parse_from: attributes.timestamp
-        layout: '%F %T.%L'
-  {{ end }}
-
-  {{ if .enable_debug_logs }}
-  filelog/debug_logs
-    include:
-      {{ range $fp := .debug_log_path }}
-      - '{{ $fp }}'
-      {{ end }}
-    multiline:
-      line_start_pattern: '^[A-Z]+\s+\[[a-z]+\]\s\d{4}-\d{2}-\d{2}'
-    start_at: {{ .start_at }}
-    attributes:
-      log_type: 'cassandra.debug'
-    operators:
-      - type: regex_parser
-        regex: '(?P<cassandra_severity>[A-Z]+)\s+\[(?P<type>[^\]]+)\]\s+(?P<time1>\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2}),(?P<time2>\d+)\s+(?P<message>.*\S)'
-        severity:
-          parse_from: cassandra_severity
-      - type: restructure
-        ops:
-          - add:
-              field: timestamp
-              value_expr: 'attributes.time1 + "." + attributes.time2'
-          - remove: time1
-          - remove: time2
-      - type: time_parser
-        parse_from: attributes.timestamp
-        layout: '%F %T.%L'
-  {{ end }}
-
-  {{ if .enable_gc_logs }}
-  filelog/gc_logs
-    include:
-      {{ range $fp := .gc_log_path }}
-      - '{{ $fp }}'
-      {{ end }}
-    multiline:
-      line_start_pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}[+-]\d{4}|^OpenJDK|^Memory:|^CommandLine|^Heap'
-    start_at: {{ .start_at }}
-    attributes:
-      log_type: 'cassandra.gc'
-    operators:
-      - type: regex_parser
-        parse_from: "attributes.request"
-        if: 'attributes.request matches "[0-9]{4}-[0-9]{2}-[0-9]{2}T"'
-        regex: '(?P<timestamp>\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}[+-]\d{4}):\s+.*stopped: (?P<total_stopped_seconds>[\d\.]+).* took: (?P<stopping_threads_seconds>[\d\.]+)'
-        timestamp:
+    {{ if .enable_system_logs }}
+    filelog/system_logs:
+      include:
+        {{ range $fp := .system_log_path }}
+        - '{{ $fp }}'
+        {{ end }}
+      multiline:
+        line_start_pattern: '[A-Z]+\s+\[[^\]]+\]'
+      start_at: {{ .start_at }}
+      attributes:
+        log_type: 'cassandra.system'
+      operators:
+        - type: regex_parser
+          regex: '(?P<cassandra_severity>[A-Z]+)\s+\[(?P<type>[^\]]+)\]\s+(?P<timestamp>\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2},\d{3})\s+(?P<message>.*\S)'
+          severity:
+            parse_from: attributes.cassandra_severity
+        - type: time_parser
           parse_from: attributes.timestamp
-          layout: '%FT%T.%L%z'
-      - type: regex_parser
-        regex: '(?P<cassandra_severity>[A-Z]+)\s+\[(?P<type>[^\]]+)\]\s+(?P<time1>\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2}),(?P<time2>\d+)\s+(?P<message>.*\S)'
-        severity:
-          parse_from: cassandra_severity
-      - type: restructure
-        ops:
-          - add:
-              field: timestamp
-              value_expr: 'attributes.time1 + "." + attributes.time2'
-          - remove: time1
-          - remove: time2
-      - type: time_parser
-        parse_from: attributes.timestamp
-        layout: '%F %T.%L'
+          layout: '%F %T,%L'
+    {{ end }}
+
+    {{ if .enable_debug_logs }}
+    filelog/debug_logs:
+      include:
+        {{ range $fp := .debug_log_path }}
+        - '{{ $fp }}'
+        {{ end }}
+      multiline:
+        line_start_pattern: '[A-Z]+\s+\[[^\]]+\]'
+      start_at: {{ .start_at }}
+      attributes:
+        log_type: 'cassandra.debug'
+      operators:
+        - type: regex_parser
+          regex: '(?P<cassandra_severity>[A-Z]+)\s+\[(?P<type>[^\]]+)\]\s+(?P<timestamp>\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2},\d{3})\s+(?P<message>.*\S)'
+          severity:
+            parse_from: attributes.cassandra_severity
+          timestamp:
+            parse_from: attributes.timestamp
+            layout: '%F %T,%L'
+    {{ end }}
+
+    {{ if .enable_gc_logs }}
+    filelog/gc_logs:
+      include:
+        {{ range $fp := .gc_log_path }}
+        - '{{ $fp }}'
+        {{ end }}
+      multiline:
+        line_start_pattern: '\[\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}[+-]\d{4}\]\[\d+.\d+\w\]\[\d+\]\[\d+\]\[\w+\] \w+\(\d+\) (OpenJDK|Memory:|CommandLine|Heap)'
+      start_at: {{ .start_at }}
+      attributes:
+        log_type: 'cassandra.gc'
+      operators:
+        - id: id_router
+          type: router
+          routes:
+            - output: gc_log_parser_1
+              expr: $ matches '\\[\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}.\\d{3}[+-]\\d{4}][\\d+.\\d+\\w][\\d+][\\d+][\\w+ ]'
+            - output: gc_log_parser_2
+              expr: $ matches '\\[\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}.\\d{3}[+-]\\d{4}][\\d+.\\d+\\w][\\d+][\\d+][\\w+]'
+        - id: gc_log_parser_1
+          type: regex_parser
+          parse_from: "attributes.request"
+          if: 'attributes.request != nil'
+          regex: '(?P<timestamp>\[\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}[+-]\d{4}\]\[\d+.\d+\w\]\[\d+\]\[\d+\]\[\w+ \])(?P<message>[\s+\w+].*)'
+          # regex: '(?P<timestamp>\[\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}[+-]\d{4}\]\[\d+.\d+\w\]\[\d+\]\[\d+\]\[\w+ \])\s+.*stopped: (?P<total_stopped_seconds>[\d\.]+).* took: (?P<stopping_threads_seconds>[\d\.]+)'
+          timestamp:
+            parse_from: attributes.timestamp
+            layout: '%FT%T.%L%z'
+
+        - id: gc_log_parser_2
+          type: regex_parser
+          parse_from: "attributes.request"
+          if: 'attributes.request != nil'
+          regex: '(?P<timestamp>\[\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}[+-]\d{4}\]\[\d+.\d+\w\]\[\d+\]\[\d+\]\[\w+ \])(?P<message>[\s+\w+].*)'
+          timestamp:
+            parse_from: attributes.timestamp
+            layout: '%FT%T.%L%z'
+
+        - type: regex_parser
+          regex: '(?P<cassandra_severity>[A-Z]+)\s+\[(?P<type>[^\]]+)\]\s+(?P<timestamp>\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2},\d{3})\s+(?P<message>.*\S)'
+          severity:
+            parse_from: attributes.cassandra_severity
+
+        - type: time_parser
+          parse_from: attributes.timestamp
+          layout: '%F %T,%L'
   {{ end }}
+
+  service:
+    pipelines:
+      logs:
+        receivers:
+          {{ if .enable_system_logs }}
+          - filelog/system_logs
+          {{ end }}
+
+          {{ if .enable_debug_logs }}
+          - filelog/debug_logs
+          {{ end }}
+
+          {{ if .enable_gc_logs }}
+          - filelog/gc_logs
+          {{ end }}
