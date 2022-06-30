@@ -174,7 +174,8 @@ func TestVerifyContentHash(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			if runtime.GOOS == "windows" {
+			_, statErr := os.Stat(tc.contentPath)
+			if runtime.GOOS == "windows" && statErr == nil {
 				// Cloning the repo on windows changes the line endings depending on git configuration.
 				// We need to thwart that mechanism.
 				// Make sure test.txt exists in the output dir
