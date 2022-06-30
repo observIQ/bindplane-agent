@@ -41,18 +41,18 @@ func TestCheckManagerConfigNoFile(t *testing.T) {
 	err := checkManagerConfig(&manager)
 	require.Error(t, err)
 
-	os.Setenv(endpoint, "0.0.0.0")
-	defer os.Unsetenv(endpoint)
+	os.Setenv(endpointENV, "0.0.0.0")
+	defer os.Unsetenv(endpointENV)
 
-	os.Setenv(agentName, "agent name")
-	defer os.Unsetenv(agentName)
+	os.Setenv(agentNameENV, "agent name")
+	defer os.Unsetenv(agentNameENV)
 
-	os.Setenv(secretKey, "secretKey")
-	defer os.Unsetenv(secretKey)
+	os.Setenv(secretkeyENV, "secretKey")
+	defer os.Unsetenv(secretkeyENV)
 
-	os.Setenv(labels, "this is a label")
-	defer os.Unsetenv(labels)
-	defer os.Unsetenv(agentID)
+	os.Setenv(labelsENV, "this is a label")
+	defer os.Unsetenv(labelsENV)
+	defer os.Unsetenv(agentIdENV)
 
 	manager = "./manager.yaml"
 	err = checkManagerConfig(&manager)

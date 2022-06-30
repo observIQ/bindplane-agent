@@ -34,11 +34,11 @@ import (
 
 const (
 	// env variable name constants
-	endpoint  = "OPAMP_ENDPOINT"
-	agentID   = "OPAMP_AGENT_ID"
-	secretKey = "OPAMP_SECRET_KEY" //#nosec G101
-	labels    = "OPAMP_LABELS"
-	agentName = "OPAMP_AGENT_NAME"
+	endpointENV  = "OPAMP_ENDPOINT"
+	agentIdENV   = "OPAMP_AGENT_ID"
+	secretkeyENV = "OPAMP_SECRET_KEY" //#nosec G101
+	labelsENV    = "OPAMP_LABELS"
+	agentNameENV = "OPAMP_AGENT_NAME"
 )
 
 func main() {
@@ -117,27 +117,27 @@ func checkManagerConfig(configPath *string) error {
 		return nil
 	case errors.Is(statErr, os.ErrNotExist):
 		// Endpoint is only required env
-		if ep, ok := os.LookupEnv(endpoint); ok {
+		if ep, ok := os.LookupEnv(endpointENV); ok {
 			// manager.ymal file does *not* exist, create file using env variables
 			newConfig := &opamp.Config{}
 
 			newConfig.Endpoint = ep
 
 			var ai string
-			if ai, ok = os.LookupEnv(agentID); !ok {
+			if ai, ok = os.LookupEnv(agentIdENV); !ok {
 				ai = uuid.New().String()
 			}
 			newConfig.AgentID = ai
 
-			if sk, ok := os.LookupEnv(secretKey); ok {
+			if sk, ok := os.LookupEnv(secretkeyENV); ok {
 				newConfig.SecretKey = &sk
 			}
 
-			if an, ok := os.LookupEnv(agentName); ok {
+			if an, ok := os.LookupEnv(agentNameENV); ok {
 				newConfig.AgentName = &an
 			}
 
-			if label, ok := os.LookupEnv(labels); ok {
+			if label, ok := os.LookupEnv(labelsENV); ok {
 				newConfig.Labels = &label
 			}
 
