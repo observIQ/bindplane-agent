@@ -22,6 +22,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"runtime"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -102,25 +103,25 @@ func TestGetOutputFilePath(t *testing.T) {
 	}{
 		{
 			name:     "Input url is valid zip",
-			basepath: "/tmp/observiq-otel-collector-update",
+			basepath: filepath.Join("/", "tmp", "observiq-otel-collector-update"),
 			url:      "http://example.com/some-file.zip",
-			out:      "/tmp/observiq-otel-collector-update/some-file.zip",
+			out:      filepath.Join("/", "tmp", "observiq-otel-collector-update", "some-file.zip"),
 		},
 		{
 			name:     "Input url is valid tar",
-			basepath: "/tmp/observiq-otel-collector-update",
+			basepath: filepath.Join("/", "tmp", "observiq-otel-collector-update"),
 			url:      "http://example.com/some-file.tar.gz",
-			out:      "/tmp/observiq-otel-collector-update/some-file.tar.gz",
+			out:      filepath.Join("/", "tmp", "observiq-otel-collector-update", "some-file.tar.gz"),
 		},
 		{
 			name:        "Input url is invalid",
-			basepath:    "/tmp/observiq-otel-collector-update",
+			basepath:    filepath.Join("tmp", "observiq-otel-collector-update"),
 			url:         "http://local\thost/some-file.zip",
 			expectedErr: "cannot parse url",
 		},
 		{
 			name:        "Input url has no path",
-			basepath:    "/tmp/observiq-otel-collector-update",
+			basepath:    filepath.Join("tmp", "observiq-otel-collector-update"),
 			url:         "http://example.com",
 			expectedErr: "input url must have path",
 		},
@@ -173,6 +174,23 @@ func TestVerifyContentHash(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
+			if runtime.GOOS == "windows" {
+				// Cloning the repo on windows changes the line endings depending on git configuration.
+				// We need to thwart that mechanism.
+				// Make sure test.txt exists in the output dir
+				tmpDir := t.TempDir()
+				fileBytes, err := os.ReadFile(tc.contentPath)
+				require.NoError(t, err)
+
+				// Replace \r\n with \n so tests pass on windows systems
+				newlinesOnly := bytes.ReplaceAll(fileBytes, []byte("\r\n"), []byte("\n"))
+
+				// Change content path to new file, and write it.
+				tc.contentPath = filepath.Join(tmpDir, filepath.Base(tc.contentPath))
+				err = os.WriteFile(tc.contentPath, newlinesOnly, 0666)
+				require.NoError(t, err)
+
+			}
 			err := verifyContentHash(tc.contentPath, tc.hash)
 			if tc.expectedErr == "" {
 				require.NoError(t, err)

@@ -52,7 +52,9 @@ func downloadFile(downloadURL string, outPath string) error {
 	}
 	defer func() {
 		err := f.Close()
-		log.Default().Printf("Failed to close file: %s", err)
+		if err != nil {
+			log.Default().Printf("Failed to close file: %s", err.Error())
+		}
 	}()
 
 	if _, err = io.Copy(f, resp.Body); err != nil {
@@ -92,7 +94,9 @@ func verifyContentHash(contentPath, hexExpectedContentHash string) error {
 	}
 	defer func() {
 		err := f.Close()
-		log.Default().Printf("Failed to close file: %s", err)
+		if err != nil {
+			log.Default().Printf("Failed to close file: %s", err.Error())
+		}
 	}()
 
 	if _, err = io.Copy(fileHash, f); err != nil {
