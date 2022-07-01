@@ -18,7 +18,7 @@ receivers:
         timestamp:
           parse_from: attributes.time
           layout: '%Y-%m-%d %H:%M:%S'
-          
+
 exporters:
   googlecloud:
     # To add logging to Google CLoud, add the log parameter to the exporter.
@@ -42,7 +42,7 @@ service:
 
 ## Using the Plugin Receiver
 
-To add logging using the Plugin receiver, add the receiver into your `config.yaml` similar to the example below. For more information on the Plugin receiver, see the [documentation page](./receiver/pluginreceiver/README.md). To see a full list of available plugins, see the [plugins folder](./plugins/).
+To add logging using the Plugin receiver, add the receiver into your `config.yaml` similar to the example below. For more information on the Plugin receiver, see the [documentation page](/receiver/pluginreceiver/README.md). To see a full list of available plugins, see the [plugins folder](/plugins/).
 
 ```yaml
 receivers:
