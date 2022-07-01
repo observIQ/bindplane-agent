@@ -4,7 +4,7 @@ The observIQ Distro for OpenTelemetry Collector offers two methods of collecting
 
 ## Using Indivudal Receivers
 
-To add logging using an individual receiver, add the receiver into your `config.yaml` similar to the Filelog example below. The available logging receivers are:
+To add logging using an individual receiver, add the receiver into your `config.yaml` similar to the Filelog example below. The available logging receivers include:
 
  * [Filelog Receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/filelogreceiver)
  * [TCP Log Receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/tcplogreceiver)
@@ -12,6 +12,8 @@ To add logging using an individual receiver, add the receiver into your `config.
  * [Syslog Receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/syslogreceiver)
  * [Journald Receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/journaldreceiver)
  * [Windows Events Receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/windowseventlogreceiver)
+
+To see a full list of receivers, check the [Receivers](/docs/receivers.md) page.
 
 The example below uses the Filelog receiver. Additional [operators](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/pkg/stanza/docs/operators/README.md#what-operators-are-available) can be added to further parse logs. To see more details on the Filelog receiver, see the [OTel documentation](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/filelogreceiver). 
 
