@@ -1,18 +1,27 @@
 # Logging
 
-The observIQ OTel Collector offers two methods of collecting logs. First is the Filelog receiver which simply gathers logs from specified filepaths. Additional [operators](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/pkg/stanza/docs/operators/README.md#what-operators-are-available) can be added to further parse logs. Second is the Plugin receiver which utilizes pre-configured plugins to gather logs from many different sources.
+The observIQ Distro for OpenTelemetry Collector offers two methods of collecting logs. First is indivudial receivers such as Filelog and Journald. Second is the Plugin receiver which utilizes pre-configured plugins to gather logs from many different sources.
 
-## Using the Filelog Receiver
+## Using Indivudal Receivers
 
-To add logging using the Filelog receiver, add the receiver into your `config.yaml` similar to the example below. To see more details on the Filelog receiver, see the [OTel documentation](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/filelogreceiver).
+To add logging using an individual receiver, add the receiver into your `config.yaml` similar to the Filelog example below. The available logging receivers are:
+
+ * [Filelog Receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/filelogreceiver)
+ * [TCP Log Receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/tcplogreceiver)
+ * [UDP Log Receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/udplogreceiver)
+ * [Syslog Receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/syslogreceiver)
+ * [Journald Receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/journaldreceiver)
+ * [Windows Events Receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/windowseventlogreceiver)
+
+The example below uses the Filelog receiver. Additional [operators](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/pkg/stanza/docs/operators/README.md#what-operators-are-available) can be added to further parse logs. To see more details on the Filelog receiver, see the [OTel documentation](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/filelogreceiver). 
 
 ```yaml
 receivers:
   filelog:
-    # add relevent log paths to the include parameter
+    # Add relevent log paths to the include parameter
     include: ["/tmp/*.log"]
     start_at: "end"
-    # optionally add operators for further parsing
+    # Optionally add operators for further parsing
     operators:
       - type: json_parser
         timestamp:
@@ -24,7 +33,7 @@ exporters:
     # To add logging to Google CLoud, add the log parameter to the exporter.
     project: my-project
     log:
-      # optionally, default_log_name parameter is not required
+      # Optionally, default_log_name parameter is not required
       default_log_name: opentelemetry.io/grpc-collector-exported-log
 
 processors:
