@@ -82,13 +82,17 @@ archives:
       - src: release_deps/windows_service.json
         dst: install
         strip_parent: true
+      - src: release_deps/com.observiq.collector.plist
+        dst: "install"
+        strip_parent: true
+
     format_overrides:
       - goos: windows
         format: zip
 
 nfpms:
   - id: collector
-    file_name_template: "{{ .PackageName }}_{{ .Os }}_{{ .Arch }}"
+    file_name_template: "{{ .PackageName }}_v{{ .Version }}_{{ .Os }}_{{ .Arch }}"
     package_name: observiq-otel-collector
     vendor: observIQ, Inc
     maintainer: observIQ <support@observiq.com>
@@ -163,8 +167,15 @@ nfpms:
           mode: 0750
           owner: observiq-otel-collector
           group: observiq-otel-collector
+      - src: service/observiq-otel-collector.service
+        dst: /usr/lib/systemd/system/observiq-otel-collector.service
+        type: config|noreplace
+        file_info:
+          mode: 0644
+          owner: root
+          group: root
     scripts:
-      preinstall: "./scripts/package/preinstall.sh"
+      preinstall: ./scripts/package/preinstall.sh
       postinstall: ./scripts/package/postinstall.sh
 
 # Build container images with docker buildx (mutli arch builds)
@@ -271,68 +282,3 @@ changelog:
       order: 30
     - title: Other
       order: 999
-
-# https://goreleaser.com/customization/homebrew/
-brews:
-  - name: observiq-otel-collector@{{ .Major }}.{{ .Minor }}.{{ .Patch }}
-    description: "observIQ's distribution of the OpenTelemetry Collector"
-    tap:
-      owner: observIQ
-      name: homebrew-observiq-otel-collector
-      branch: main
-    download_strategy: CurlDownloadStrategy
-    folder: Formula
-    url_template: https://github.com/observIQ/observiq-otel-collector/releases/download/{{ .Tag }}/{{ .ArtifactName }}
-    commit_author:
-      name: observiq
-      email: support@observiq.com
-    homepage: "https://github.com/observIQ/observiq-otel-collector"
-    license: "Apache 2.0"
-    caveats: |
-      ****************************************************************
-      The configuration file that is run by the service is located at #{prefix}/config.yaml.
-
-      If you are configuring a logreceiver the plugin directory is located at #{prefix}/plugins.
-      ****************************************************************
-
-      ****************************************************************
-      Below are services commands to run to manage the collector service.
-      If you wish to run the collector at boot prefix these commands with sudo
-      otherwise the service will run at login.
-
-      To start the collector service run:
-
-        brew services start observiq/observiq-otel-collector/observiq-otel-collector@{{ .Major }}.{{ .Minor }}.{{ .Patch }}
-
-      To stop the collector service run:
-
-        brew services stop observiq/observiq-otel-collector/observiq-otel-collector@{{ .Major }}.{{ .Minor }}.{{ .Patch }}
-
-      To restart the collector service run:
-
-        brew services restart observiq/observiq-otel-collector/observiq-otel-collector@{{ .Major }}.{{ .Minor }}.{{ .Patch }}
-      ****************************************************************
-
-      ****************************************************************
-      To uninstall the collector and its dependencies run the following commands:
-
-          brew services stop observiq/observiq-otel-collector/observiq-otel-collector@{{ .Major }}.{{ .Minor }}.{{ .Patch }}
-          brew uninstall observiq/observiq-otel-collector/observiq-otel-collector@{{ .Major }}.{{ .Minor }}.{{ .Patch }}
-
-          # If you moved the opentelemetry-java-contrib-jmx-metrics.jar
-          sudo rm /opt/opentelemetry-java-contrib-jmx-metrics.jar
-
-      ****************************************************************
-    install: |
-      bin.install "observiq-otel-collector"
-      prefix.install "LICENSE", "VERSION.txt", "logging.yaml"
-      etc.install "config.yaml" => "observiq_config.yaml"
-      prefix.install_symlink etc/"observiq_config.yaml" => "config.yaml"
-      prefix.install Dir["plugins"]
-      lib.install "opentelemetry-java-contrib-jmx-metrics.jar"
-    service: |
-      run [opt_bin/"observiq-otel-collector", "--config", opt_prefix/"config.yaml", "--logging", opt_prefix/"logging.yaml", "--manager", opt_prefix/"manager.yaml"]
-      environment_variables OIQ_OTEL_COLLECTOR_HOME: opt_prefix
-      keep_alive true
-    # For local testing
-    # skip_upload: "true"

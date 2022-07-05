@@ -164,11 +164,14 @@ func TestApplyConfigChanges(t *testing.T) {
 						},
 					},
 				}
-				effCfg, changed, err := manager.ApplyConfigChanges(remoteConfig)
+				changed, err := manager.ApplyConfigChanges(remoteConfig)
+				assert.NoError(t, err)
+				assert.False(t, changed)
 
+				// Verify effective config is as expected
+				effCfg, err := manager.ComposeEffectiveConfig()
 				assert.NoError(t, err)
 				assert.Equal(t, expectedEffCfg, effCfg)
-				assert.False(t, changed)
 			},
 		},
 		{
@@ -207,11 +210,15 @@ func TestApplyConfigChanges(t *testing.T) {
 						},
 					},
 				}
-				effCfg, changed, err := manager.ApplyConfigChanges(remoteConfig)
+				changed, err := manager.ApplyConfigChanges(remoteConfig)
 
 				assert.NoError(t, err)
-				assert.Equal(t, expectedEffCfg, effCfg)
 				assert.False(t, changed)
+
+				// Verify effective config is as expected
+				effCfg, err := manager.ComposeEffectiveConfig()
+				assert.NoError(t, err)
+				assert.Equal(t, expectedEffCfg, effCfg)
 			},
 		},
 		{
@@ -255,16 +262,19 @@ func TestApplyConfigChanges(t *testing.T) {
 					},
 				}
 
-				effCfg, changed, err := manager.ApplyConfigChanges(remoteConfig)
-
+				changed, err := manager.ApplyConfigChanges(remoteConfig)
 				assert.NoError(t, err)
-				assert.Equal(t, expectedEffCfg, effCfg)
 				assert.True(t, changed)
 
 				// Verify on disk matches what is expected
 				diskContents, err := os.ReadFile(configPath)
 				assert.NoError(t, err)
 				assert.Equal(t, configContents, diskContents)
+
+				// Verify effective config is as expected
+				effCfg, err := manager.ComposeEffectiveConfig()
+				assert.NoError(t, err)
+				assert.Equal(t, expectedEffCfg, effCfg)
 			},
 		},
 		{
@@ -304,11 +314,14 @@ func TestApplyConfigChanges(t *testing.T) {
 						},
 					},
 				}
-				effCfg, changed, err := manager.ApplyConfigChanges(remoteConfig)
+				changed, err := manager.ApplyConfigChanges(remoteConfig)
+				assert.NoError(t, err)
+				assert.False(t, changed)
 
+				// Verify effective config is as expected
+				effCfg, err := manager.ComposeEffectiveConfig()
 				assert.NoError(t, err)
 				assert.Equal(t, expectedEffCfg, effCfg)
-				assert.False(t, changed)
 			},
 		},
 		{
@@ -357,13 +370,18 @@ func TestApplyConfigChanges(t *testing.T) {
 						},
 					},
 				}
-				effCfg, changed, err := manager.ApplyConfigChanges(remoteConfig)
+				changed, err := manager.ApplyConfigChanges(remoteConfig)
 
 				assert.NoError(t, err)
-				assert.Equal(t, expectedEffCfg, effCfg)
 				assert.True(t, changed)
 				assert.FileExists(t, filepath.Join(".", LoggingConfigName))
 
+				// Verify effective config is as expected
+				effCfg, err := manager.ComposeEffectiveConfig()
+				assert.NoError(t, err)
+				assert.Equal(t, expectedEffCfg, effCfg)
+
+				// Cleanup
 				err = os.Remove(filepath.Join(".", LoggingConfigName))
 				assert.NoError(t, err)
 			},
@@ -410,11 +428,14 @@ func TestApplyConfigChanges(t *testing.T) {
 						},
 					},
 				}
-				effCfg, changed, err := manager.ApplyConfigChanges(remoteConfig)
+				changed, err := manager.ApplyConfigChanges(remoteConfig)
+				assert.NoError(t, err)
+				assert.True(t, changed)
 
+				// Verify effective config is as expected
+				effCfg, err := manager.ComposeEffectiveConfig()
 				assert.NoError(t, err)
 				assert.Equal(t, expectedEffCfg, effCfg)
-				assert.True(t, changed)
 			},
 		},
 		{
@@ -459,11 +480,14 @@ func TestApplyConfigChanges(t *testing.T) {
 						},
 					},
 				}
-				effCfg, changed, err := manager.ApplyConfigChanges(remoteConfig)
-
+				changed, err := manager.ApplyConfigChanges(remoteConfig)
 				assert.ErrorIs(t, err, expectedError)
-				assert.Equal(t, expectedEffCfg, effCfg)
 				assert.False(t, changed)
+
+				// Verify effective config is as expected
+				effCfg, err := manager.ComposeEffectiveConfig()
+				assert.NoError(t, err)
+				assert.Equal(t, expectedEffCfg, effCfg)
 			},
 		},
 	}

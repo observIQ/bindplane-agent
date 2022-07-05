@@ -17,16 +17,22 @@ sudo sh -c "$(curl -fsSlL https://github.com/observiq/observiq-otel-collector/re
 ### RPM Installation
 First download the RPM package for your architecture from the [releases page](https://github.com/observIQ/observiq-otel-collector/releases/latest).
 Then you may install the package using `rpm`, see this example for installing the amd64 package:
+
+**Note**: Replace `${VERSION}` with the version of the package you downloaded.
+
 ```sh
-sudo rpm -U ./observiq-otel-collector_linux_amd64.rpm
+sudo rpm -U ./observiq-otel-collector_v${VERSION}_linux_amd64.rpm
 sudo systemctl enable --now observiq-otel-collector
 ```
 
 ### DEB Installation
 First download the DEB package for your architecture from the [releases page](https://github.com/observIQ/observiq-otel-collector/releases/latest).
 Then you may install the package using `dpkg`, see this example for installing the amd64 package:
+
+**Note**: Replace `${VERSION}` with the version of the package you downloaded.
+
 ```sh
-sudo dpkg -i ./observiq-otel-collector_linux_amd64.deb
+sudo dpkg -i ./observiq-otel-collector_v${VERSION}_linux_amd64.deb
 sudo systemctl enable --now observiq-otel-collector
 ```
 

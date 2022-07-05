@@ -134,7 +134,7 @@ jobs:
         with:
           distribution: goreleaser
           version: "v1.9.1"
-          args: release --rm-dist
+          args: release --rm-dist --timeout 60m
         env:
           GITHUB_TOKEN: ${{ secrets.ORG_GORELEASER_GITHUB_TOKEN }}
           COSIGN_PWD: ${{ secrets.ORG_COSIGN_PWD }}

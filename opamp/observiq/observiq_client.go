@@ -128,29 +128,34 @@ func (c *Client) Connect(ctx context.Context) error {
 		return err
 	}
 
+	tlsCfg, err := c.currentConfig.ToTLS()
+	if err != nil {
+		return fmt.Errorf("failed creating TLS config: %w", err)
+	}
+
 	settings := types.StartSettings{
 		OpAMPServerURL: c.currentConfig.Endpoint,
 		Header: http.Header{
-			"Authorization": []string{fmt.Sprintf("Secret-Key %s", c.currentConfig.GetSecretKey())},
-			"User-Agent":    []string{fmt.Sprintf("observiq-otel-collector/%s", version.Version())},
+			"Authorization":  []string{fmt.Sprintf("Secret-Key %s", c.currentConfig.GetSecretKey())},
+			"User-Agent":     []string{fmt.Sprintf("observiq-otel-collector/%s", version.Version())},
+			"OpAMP-Version":  []string{opamp.Version()},
+			"Agent-ID":       []string{c.ident.agentID},
+			"Agent-Version":  []string{version.Version()},
+			"Agent-Hostname": []string{c.ident.hostname},
 		},
-		TLSConfig:   nil, // TODO add support for TLS
+		TLSConfig:   tlsCfg,
 		InstanceUid: c.ident.agentID,
 		Callbacks: types.CallbacksStruct{
 			OnConnectFunc:          c.onConnectHandler,
 			OnConnectFailedFunc:    c.onConnectFailedHandler,
 			OnErrorFunc:            c.onErrorHandler,
-			OnRemoteConfigFunc:     c.onRemoteConfigHandler,
+			OnMessageFunc:          c.onMessageFuncHandler,
 			GetEffectiveConfigFunc: c.onGetEffectiveConfigHandler,
-			// Unimplemented Handles
-			// SaveRemoteConfigStatusFunc:
+			// Unimplemented handlers
 			// OnOpampConnectionSettingsFunc
 			// OnOpampConnectionSettingsAcceptedFunc
-			// OnOwnTelemetryConnectionSettingsFunc
-			// OnOtherConnectionSettingsFunc
-			// OnPackagesAvailableFunc
-			// OnAgentIdentificationFunc
 			// OnCommandFunc
+			// SaveRemoteConfigStatusFunc
 		},
 	}
 
@@ -184,16 +189,44 @@ func (c *Client) onErrorHandler(errResp *protobufs.ServerErrorResponse) {
 	c.logger.Error("Server returned an error response", zap.String("Error", errResp.GetErrorMessage()))
 }
 
-func (c *Client) onRemoteConfigHandler(_ context.Context, remoteConfig *protobufs.AgentRemoteConfig) (*protobufs.EffectiveConfig, bool, error) {
+func (c *Client) onMessageFuncHandler(ctx context.Context, msg *types.MessageData) {
+	c.logger.Debug("On message handler")
+	if msg.RemoteConfig != nil {
+		if err := c.onRemoteConfigHandler(ctx, msg.RemoteConfig); err != nil {
+			c.logger.Error("Error while processing Remote Config Change", zap.Error(err))
+		}
+	}
+}
+
+func (c *Client) onRemoteConfigHandler(ctx context.Context, remoteConfig *protobufs.AgentRemoteConfig) error {
 	c.logger.Debug("Remote config handler")
 
-	effectiveConfig, changed, err := c.configManager.ApplyConfigChanges(remoteConfig)
-	if err != nil {
-		c.logger.Error("Failed applying remote config", zap.Error(err))
-		return nil, changed, fmt.Errorf("Failed to apply config changes: %w", err)
+	changed, err := c.configManager.ApplyConfigChanges(remoteConfig)
+	remoteCfgStatus := &protobufs.RemoteConfigStatus{
+		LastRemoteConfigHash: remoteConfig.GetConfigHash(),
+		Status:               protobufs.RemoteConfigStatus_APPLIED,
 	}
 
-	return effectiveConfig, changed, nil
+	// If we received and error apply it to the config
+	if err != nil {
+		c.logger.Error("Failed applying remote config", zap.Error(err))
+
+		remoteCfgStatus.Status = protobufs.RemoteConfigStatus_FAILED
+		remoteCfgStatus.ErrorMessage = fmt.Sprintf("Failed to apply config changes: %s", err.Error())
+	}
+
+	// Set the remote config status
+	if err := c.opampClient.SetRemoteConfigStatus(remoteCfgStatus); err != nil {
+		return fmt.Errorf("failed to set remote config status: %w", err)
+	}
+
+	// If we changed the config call UpdateEffectiveConfig
+	if changed {
+		if err := c.opampClient.UpdateEffectiveConfig(ctx); err != nil {
+			return fmt.Errorf("failed to update effective config: %w", err)
+		}
+	}
+	return nil
 }
 
 func (c *Client) onGetEffectiveConfigHandler(_ context.Context) (*protobufs.EffectiveConfig, error) {

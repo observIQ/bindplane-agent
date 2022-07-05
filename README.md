@@ -1,7 +1,7 @@
 # Disclaimer
 While the `main` branch is stable, it is still under development and documentation may not fully reflect the current feature set. Please refer to documentation for your specific release.
 
-# observIQ OpenTelemetry Collector
+# observIQ Distro for OpenTelemetry Collector
 
 <center>
 
@@ -13,7 +13,7 @@ While the `main` branch is stable, it is still under development and documentati
 
 </center>
 
-observIQ OpenTelemetry Collector is observIQ’s distribution of the [OpenTelemetry collector](https://github.com/open-telemetry/opentelemetry-collector). It provides a simple and unified solution to collect, refine, and ship telemetry data anywhere.
+observIQ Distro for OpenTelemetry Collector is observIQ’s distribution of the [OpenTelemetry collector](https://github.com/open-telemetry/opentelemetry-collector). It provides a simple and unified solution to collect, refine, and ship telemetry data anywhere.
 
 ## Benefits
 
@@ -57,7 +57,7 @@ For more installation information see [installing on Windows](/docs/installation
 To install using the installation script, you may run:
 
 ```sh
-sh -c "$(curl -fsSlL https://github.com/observiq/observiq-otel-collector/releases/latest/download/install_macos.sh)" install_macos.sh
+sudo sh -c "$(curl -fsSlL https://github.com/observiq/observiq-otel-collector/releases/latest/download/install_macos.sh)" install_macos.sh
 ```
 
 For more installation information see [installing on macOS](/docs/installation-mac.md).
@@ -74,13 +74,13 @@ Now that the collector is installed it is collecting basic metrics about the hos
 | :--- | :---- |
 | Linux | /opt/observiq-otel-collector/config.yaml |
 | Windows | C:\Program Files\observIQ OpenTelemetry Collector\config.yaml |
-| macOS | $(brew --prefix observiq/observiq-otel-collector/observiq-otel-collector)/config.yaml |
+| macOS | /opt/observiq-otel-collector/config.yaml |
 
 For more information on configuration see the [Configuration section](#configuration).
 
 ## Configuration
 
-The observIQ OpenTelemetry Collector uses OpenTelemetry configuration.
+The observIQ Distro for OpenTelemetry Collector uses OpenTelemetry configuration.
 
 For sample configs, see the [config](/config/) directory.
 For general configuration help, see the [OpenTelemetry docs](https://opentelemetry.io/docs/collector/configuration/).
@@ -141,7 +141,7 @@ service:
 
 # Community
 
-The observIQ OpenTelemetry Collector is an open source project. If you'd like to contribute, take a look at our [contribution guidelines](/CONTRIBUTING.md) and [developer guide](/docs/development.md). We look forward to building with you.
+The observIQ Distro for OpenTelemetry Collector is an open source project. If you'd like to contribute, take a look at our [contribution guidelines](/CONTRIBUTING.md) and [developer guide](/docs/development.md). We look forward to building with you.
 
 # How can we help?
 

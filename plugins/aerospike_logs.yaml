@@ -1,0 +1,81 @@
+version: 0.0.1
+title: Aerospike
+description: Log parser for Aerospike
+parameters:
+  # optional
+  - name: journald_directory
+    type: string
+  - name: start_at
+    type: string
+    supported:
+      - beginning
+      - end
+    default: end
+template: |
+  receivers:
+    journald:
+      {{ if .journald_directory }}
+      directory: {{ .journald_directory }}
+      {{ end }}
+      units: [aerospike]
+      start_at: {{ .start_at }}
+      operators:
+        # Capture relevant journald fields before replacing body
+        # with the Aerospike log body
+        - type: move
+          from: body._HOSTNAME
+          to: resource["host.name"]
+        - type: move
+          from: body.__CURSOR
+          to: attributes.journald_cursor
+        - type: move
+          from: body._PID
+          to: attributes.pid
+        - type: move
+          from: body.PRIORITY
+          to: attributes.priority
+        - type: move
+          from: body.SYSLOG_FACILITY
+          to: attributes.facility
+        - type: move
+          from: body._SYSTEMD_UNIT
+          to: attributes.systemd_unit
+
+        # Replce raw journald message with aerospike log body.
+        - type: move
+          from: body.MESSAGE
+          to: body
+
+        # Parse Aerospike's log and update the entry's Timestamp and Severity
+        # fields with the values from the Aerospike log.
+        - type: regex_parser
+          regex: '^(?P<timestamp>[a-zA-z]+ \d{2} \d{4} \d{2}:\d{2}:\d{2} [A-Z]+): (?P<severity>[A-Z]*( [A-Z]*)?) \((?P<context>[^\)]*)\): \((?P<source_file>[^:]*):(?P<source_location>[^:]*)\)\s*({(?P<namespace>[^}]*)} )?.*'
+          timestamp:
+            parse_from: attributes.timestamp
+            layout: '%b %d %Y %H:%M:%S %Z'
+          severity:
+            parse_from: attributes.severity
+            mapping:
+              info: detail
+              error2: 'failed assertion'
+
+        # Timestamp and severity have been promoted to the entry
+        - type: remove
+          field: attributes.timestamp
+        - type: remove
+          field: attributes.severity
+
+        # Aerospike logs the configuration at startup. This is not something we should
+        # capture.
+        - type: filter
+          expr: 'attributes.context == "config"'
+
+        - type: add
+          field: attributes.log_type
+          value: aerospike
+
+  service:
+    pipelines:
+      logs:
+        receivers: [journald]
+

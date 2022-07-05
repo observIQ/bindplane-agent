@@ -21,12 +21,24 @@ import (
 	"os"
 	_ "time/tzdata"
 
+	"github.com/google/uuid"
 	"github.com/observiq/observiq-otel-collector/collector"
 	"github.com/observiq/observiq-otel-collector/internal/logging"
 	"github.com/observiq/observiq-otel-collector/internal/service"
 	"github.com/observiq/observiq-otel-collector/internal/version"
+	"github.com/observiq/observiq-otel-collector/opamp"
 	"github.com/spf13/pflag"
 	"go.uber.org/zap"
+	"gopkg.in/yaml.v3"
+)
+
+const (
+	// env variable name constants
+	endpointENV  = "OPAMP_ENDPOINT"
+	agentIDENV   = "OPAMP_AGENT_ID"
+	secretkeyENV = "OPAMP_SECRET_KEY" //#nosec G101
+	labelsENV    = "OPAMP_LABELS"
+	agentNameENV = "OPAMP_AGENT_NAME"
 )
 
 func main() {
@@ -61,7 +73,7 @@ func main() {
 	col := collector.New(*collectorConfigPaths, version.Version(), logOpts)
 
 	// See if manager config file exists. If so run in remote managed mode otherwise standalone mode
-	if _, err := os.Stat(*managerConfigPath); err == nil {
+	if err := checkManagerConfig(managerConfigPath); err == nil {
 		logger.Info("Starting In Managed Mode")
 
 		runnableService, err = service.NewManagedCollectorService(col, logger, *managerConfigPath, (*collectorConfigPaths)[0], *loggingConfigPath)
@@ -94,4 +106,56 @@ func logOptions(loggingConfigPath *string) ([]zap.Option, error) {
 	}
 
 	return l.Options()
+}
+
+func checkManagerConfig(configPath *string) error {
+	_, statErr := os.Stat(*configPath)
+
+	switch {
+	case statErr == nil:
+		// We found the file just return nil
+		return nil
+	case errors.Is(statErr, os.ErrNotExist):
+		var ok bool
+
+		// manager.ymal file does *not* exist, create file using env variables
+		newConfig := &opamp.Config{}
+
+		// Endpoint is only required env
+		newConfig.Endpoint, ok = os.LookupEnv(endpointENV)
+		if !ok {
+			// Envs were not found and statErr is os.ErrNotExist so return that
+			return statErr
+		}
+
+		newConfig.AgentID, ok = os.LookupEnv(agentIDENV)
+		if !ok {
+			newConfig.AgentID = uuid.New().String()
+		}
+
+		if sk, ok := os.LookupEnv(secretkeyENV); ok {
+			newConfig.SecretKey = &sk
+		}
+
+		if an, ok := os.LookupEnv(agentNameENV); ok {
+			newConfig.AgentName = &an
+		}
+
+		if label, ok := os.LookupEnv(labelsENV); ok {
+			newConfig.Labels = &label
+		}
+
+		data, err := yaml.Marshal(newConfig)
+		if err != nil {
+			return fmt.Errorf("failed to marshal config: %w", err)
+		}
+
+		// write data to a manager.yaml file, with 0600 file permission
+		if err := os.WriteFile(*configPath, data, 0600); err != nil {
+			return fmt.Errorf("failed to write config file created from ENVs: %w", err)
+		}
+		return nil
+	}
+	// Return non os.ErrNotExist
+	return statErr
 }

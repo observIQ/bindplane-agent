@@ -15,6 +15,9 @@
 package opamp
 
 import (
+	"crypto/tls"
+	"crypto/x509"
+	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -23,6 +26,177 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestToTLS(t *testing.T) {
+	invalidCAFile := "/some/bad/file-ca.crt"
+	invalidKeyFile := "/some/bad/file.key"
+	invalidCertFile := "/some/bad/file.crt"
+	caFileContents := "./testdata/test-ca.crt"
+	keyFileContents := "./testdata/test.key"
+	certFileContents := "./testdata/test.crt"
+
+	testCases := []struct {
+		desc     string
+		testFunc func(*testing.T)
+	}{
+		{
+			desc: "No TLS Provided",
+			testFunc: func(t *testing.T) {
+				cfg := Config{
+					TLS: nil,
+				}
+
+				actual, err := cfg.ToTLS()
+				assert.NoError(t, err)
+				assert.Nil(t, actual)
+			},
+		},
+		{
+			desc: "TLS Insecure",
+			testFunc: func(t *testing.T) {
+				cfg := Config{
+					TLS: &TLSConfig{
+						InsecureSkipVerify: true,
+					},
+				}
+
+				expectedConfig := tls.Config{
+					InsecureSkipVerify: true,
+					MinVersion:         tls.VersionTLS12,
+				}
+
+				actual, err := cfg.ToTLS()
+				assert.NoError(t, err)
+				assert.Equal(t, &expectedConfig, actual)
+			},
+		},
+		{
+			desc: "Insecure False, No Files Specified",
+			testFunc: func(t *testing.T) {
+				cfg := Config{
+					TLS: &TLSConfig{
+						InsecureSkipVerify: false,
+					},
+				}
+
+				expectedConfig := tls.Config{
+					MinVersion: tls.VersionTLS12,
+				}
+
+				actual, err := cfg.ToTLS()
+				assert.NoError(t, err)
+				assert.Equal(t, &expectedConfig, actual)
+			},
+		},
+		{
+			desc: "Insecure False, Invalid CA File Specified",
+			testFunc: func(t *testing.T) {
+				cfg := Config{
+					TLS: &TLSConfig{
+						InsecureSkipVerify: false,
+						CAFile:             &invalidCAFile,
+					},
+				}
+
+				actual, err := cfg.ToTLS()
+				assert.ErrorContains(t, err, "failed to read CA file")
+				assert.Nil(t, actual)
+			},
+		},
+		{
+			desc: "Insecure False, Valid CA File Specified",
+			testFunc: func(t *testing.T) {
+				cfg := Config{
+					TLS: &TLSConfig{
+						InsecureSkipVerify: false,
+						CAFile:             &caFileContents,
+					},
+				}
+
+				actual, err := cfg.ToTLS()
+				assert.NoError(t, err)
+				assert.NotNil(t, actual)
+				assert.False(t, actual.InsecureSkipVerify)
+
+				// Can't compare root CA's due to embedded function in Cert Pool structure
+			},
+		},
+		{
+			desc: "Insecure False, Invalid Key and Cert Files Specified",
+			testFunc: func(t *testing.T) {
+				cfg := Config{
+					TLS: &TLSConfig{
+						InsecureSkipVerify: false,
+						KeyFile:            &invalidKeyFile,
+						CertFile:           &invalidCertFile,
+					},
+				}
+
+				_, err := tls.LoadX509KeyPair(invalidCertFile, invalidKeyFile)
+				errinvalidKeyorCertFile := fmt.Sprintf("failed to read Key and Cert file: %s", err)
+
+				actual, err := cfg.ToTLS()
+				assert.ErrorContains(t, err, errinvalidKeyorCertFile)
+				assert.Nil(t, actual)
+			},
+		},
+		{
+			desc: "Insecure False, Valid Key and Cert Files Specified",
+			testFunc: func(t *testing.T) {
+				cfg := Config{
+					TLS: &TLSConfig{
+						InsecureSkipVerify: false,
+						KeyFile:            &keyFileContents,
+						CertFile:           &certFileContents,
+					},
+				}
+
+				expectedConfig := tls.Config{
+					MinVersion: tls.VersionTLS12,
+				}
+
+				cert, err := tls.LoadX509KeyPair(certFileContents, keyFileContents)
+				expectedConfig.Certificates = []tls.Certificate{cert}
+
+				actual, err := cfg.ToTLS()
+				assert.NoError(t, err)
+				assert.Equal(t, &expectedConfig, actual)
+			},
+		},
+		{
+			desc: "Insecure False, All TLS Files Valid and Specified",
+			testFunc: func(t *testing.T) {
+				cfg := Config{
+					TLS: &TLSConfig{
+						InsecureSkipVerify: false,
+						CAFile:             &caFileContents,
+						KeyFile:            &keyFileContents,
+						CertFile:           &certFileContents,
+					},
+				}
+
+				expectedConfig := tls.Config{
+					MinVersion: tls.VersionTLS12,
+				}
+
+				caCert, err := os.ReadFile(caFileContents)
+				caCertPool := x509.NewCertPool()
+				caCertPool.AppendCertsFromPEM(caCert)
+				expectedConfig.RootCAs = caCertPool
+
+				cert, err := tls.LoadX509KeyPair(certFileContents, keyFileContents)
+				expectedConfig.Certificates = []tls.Certificate{cert}
+
+				actual, err := cfg.ToTLS()
+				assert.NoError(t, err)
+				assert.Equal(t, expectedConfig.Certificates, actual.Certificates)
+			},
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.desc, tc.testFunc)
+	}
+}
+
 func TestParseConfig(t *testing.T) {
 	// Keep this outside so it can be referenced as pointer
 	secretKeyContents := "b92222ee-a1fc-4bb1-98db-26de3448541b"
@@ -30,87 +204,434 @@ func TestParseConfig(t *testing.T) {
 	agentNameContents := "My Agent"
 
 	testCases := []struct {
-		desc                string
-		createFile          bool // Used to call file read failure
-		configContents      string
-		expectedConfig      *Config
-		expectedErrContents *string
+		desc     string
+		testFunc func(*testing.T)
 	}{
 		{
-			desc:                "Failed File Read",
-			createFile:          false,
-			configContents:      "",
-			expectedConfig:      nil,
-			expectedErrContents: &errPrefixReadFile,
+			desc: "Failed File Read",
+			testFunc: func(t *testing.T) {
+				tmpDir := t.TempDir()
+				configPath := filepath.Join(tmpDir, "manager.yml")
+
+				cfg, err := ParseConfig(configPath)
+				assert.ErrorContains(t, err, errPrefixReadFile)
+				assert.Nil(t, cfg)
+			},
 		},
 		{
-			desc:       "Failed Marshal",
-			createFile: true,
-			configContents: `
-			{
-				"endpoint": "localhost:1234"
-			}`,
-			expectedConfig:      nil,
-			expectedErrContents: &errPrefixParse,
+			desc: "Failed Marshal",
+			testFunc: func(t *testing.T) {
+				configContents := `
+				{
+					"endpoint": "localhost:1234"
+				}`
+
+				tmpDir := t.TempDir()
+				configPath := filepath.Join(tmpDir, "manager.yml")
+
+				err := os.WriteFile(configPath, []byte(configContents), os.ModePerm)
+				require.NoError(t, err)
+
+				cfg, err := ParseConfig(configPath)
+				assert.ErrorContains(t, err, errPrefixParse)
+				assert.Nil(t, cfg)
+			},
 		},
 		{
-			desc:       "Successful Full Parse",
-			createFile: true,
-			configContents: `
+			desc: "Successful Full Parse",
+			testFunc: func(t *testing.T) {
+				configContents := `
 endpoint: localhost:1234
 secret_key: b92222ee-a1fc-4bb1-98db-26de3448541b
 agent_id: 8321f735-a52c-4f49-aca9-66f9266c5fe5
 labels: "one=foo,two=bar"
 agent_name: "My Agent"
-`,
-			expectedConfig: &Config{
-				Endpoint:  "localhost:1234",
-				SecretKey: &secretKeyContents,
-				AgentID:   "8321f735-a52c-4f49-aca9-66f9266c5fe5",
-				Labels:    &labelsContents,
-				AgentName: &agentNameContents,
+`
+
+				tmpDir := t.TempDir()
+				configPath := filepath.Join(tmpDir, "manager.yml")
+
+				err := os.WriteFile(configPath, []byte(configContents), os.ModePerm)
+				require.NoError(t, err)
+
+				expectedConfig := &Config{
+					Endpoint:  "localhost:1234",
+					SecretKey: &secretKeyContents,
+					AgentID:   "8321f735-a52c-4f49-aca9-66f9266c5fe5",
+					Labels:    &labelsContents,
+					AgentName: &agentNameContents,
+				}
+
+				cfg, err := ParseConfig(configPath)
+				assert.NoError(t, err)
+				assert.Equal(t, expectedConfig, cfg)
 			},
-			expectedErrContents: nil,
 		},
 		{
-			desc:       "Successful Partial Parse",
-			createFile: true,
-			configContents: `
+			desc: "Successful Partial Parse",
+			testFunc: func(t *testing.T) {
+				configContents := `
 endpoint: localhost:1234
 agent_id: 8321f735-a52c-4f49-aca9-66f9266c5fe5
-`,
-			expectedConfig: &Config{
-				Endpoint:  "localhost:1234",
-				SecretKey: nil,
-				AgentID:   "8321f735-a52c-4f49-aca9-66f9266c5fe5",
-				Labels:    nil,
-				AgentName: nil,
+`
+
+				tmpDir := t.TempDir()
+				configPath := filepath.Join(tmpDir, "manager.yml")
+
+				err := os.WriteFile(configPath, []byte(configContents), os.ModePerm)
+				require.NoError(t, err)
+
+				expectedConfig := &Config{
+					Endpoint:  "localhost:1234",
+					SecretKey: nil,
+					AgentID:   "8321f735-a52c-4f49-aca9-66f9266c5fe5",
+					Labels:    nil,
+					AgentName: nil,
+				}
+
+				cfg, err := ParseConfig(configPath)
+				assert.NoError(t, err)
+				assert.Equal(t, expectedConfig, cfg)
 			},
-			expectedErrContents: nil,
+		},
+		{
+			desc: "Successful Full Parse with TLS Insecure Skip Verify",
+			testFunc: func(t *testing.T) {
+				configContents := `
+endpoint: localhost:1234
+secret_key: b92222ee-a1fc-4bb1-98db-26de3448541b
+agent_id: 8321f735-a52c-4f49-aca9-66f9266c5fe5
+labels: "one=foo,two=bar"
+agent_name: "My Agent"
+tls_config:
+  insecure_skip_verify: true
+`
+
+				tmpDir := t.TempDir()
+				configPath := filepath.Join(tmpDir, "manager.yml")
+
+				err := os.WriteFile(configPath, []byte(configContents), os.ModePerm)
+				require.NoError(t, err)
+
+				expectedConfig := &Config{
+					Endpoint:  "localhost:1234",
+					SecretKey: &secretKeyContents,
+					AgentID:   "8321f735-a52c-4f49-aca9-66f9266c5fe5",
+					Labels:    &labelsContents,
+					AgentName: &agentNameContents,
+					TLS: &TLSConfig{
+						InsecureSkipVerify: true,
+					},
+				}
+
+				cfg, err := ParseConfig(configPath)
+				assert.NoError(t, err)
+				assert.Equal(t, expectedConfig, cfg)
+			},
+		},
+		{
+			desc: "Successful Full Parse with TLS Secure Root CA",
+			testFunc: func(t *testing.T) {
+				configContents := `
+endpoint: localhost:1234
+secret_key: b92222ee-a1fc-4bb1-98db-26de3448541b
+agent_id: 8321f735-a52c-4f49-aca9-66f9266c5fe5
+labels: "one=foo,two=bar"
+agent_name: "My Agent"
+tls_config:
+  insecure_skip_verify: false
+`
+
+				tmpDir := t.TempDir()
+				configPath := filepath.Join(tmpDir, "manager.yml")
+
+				err := os.WriteFile(configPath, []byte(configContents), os.ModePerm)
+				require.NoError(t, err)
+
+				expectedConfig := &Config{
+					Endpoint:  "localhost:1234",
+					SecretKey: &secretKeyContents,
+					AgentID:   "8321f735-a52c-4f49-aca9-66f9266c5fe5",
+					Labels:    &labelsContents,
+					AgentName: &agentNameContents,
+					TLS: &TLSConfig{
+						InsecureSkipVerify: false,
+					},
+				}
+
+				cfg, err := ParseConfig(configPath)
+				assert.NoError(t, err)
+				assert.Equal(t, expectedConfig, cfg)
+			},
+		},
+		{
+			desc: "TLS Invalid CA File",
+			testFunc: func(t *testing.T) {
+				tmpDir := t.TempDir()
+				configPath := filepath.Join(tmpDir, "manager.yml")
+
+				configContents := `
+endpoint: localhost:1234
+secret_key: b92222ee-a1fc-4bb1-98db-26de3448541b
+agent_id: 8321f735-a52c-4f49-aca9-66f9266c5fe5
+labels: "one=foo,two=bar"
+agent_name: "My Agent"
+tls_config:
+  insecure_skip_verify: false
+  ca_file: /some/bad/file-ca.crt
+`
+
+				err := os.WriteFile(configPath, []byte(configContents), os.ModePerm)
+				require.NoError(t, err)
+
+				cfg, err := ParseConfig(configPath)
+				assert.ErrorContains(t, err, errInvalidCAFile)
+				assert.Nil(t, cfg)
+			},
+		},
+		{
+			desc: "TLS Valid CA File",
+			testFunc: func(t *testing.T) {
+				tmpDir := t.TempDir()
+				configPath := filepath.Join(tmpDir, "manager.yml")
+
+				caPath := filepath.Join(tmpDir, "file-ca.crt")
+				f, err := os.Create(caPath)
+				require.NoError(t, err)
+				defer f.Close()
+
+				configContents := fmt.Sprintf(`
+endpoint: localhost:1234
+secret_key: b92222ee-a1fc-4bb1-98db-26de3448541b
+agent_id: 8321f735-a52c-4f49-aca9-66f9266c5fe5
+labels: "one=foo,two=bar"
+agent_name: "My Agent"
+tls_config:
+  insecure_skip_verify: false
+  ca_file: %s
+`, caPath)
+
+				err = os.WriteFile(configPath, []byte(configContents), os.ModePerm)
+				require.NoError(t, err)
+
+				expectedConfig := &Config{
+					Endpoint:  "localhost:1234",
+					SecretKey: &secretKeyContents,
+					AgentID:   "8321f735-a52c-4f49-aca9-66f9266c5fe5",
+					Labels:    &labelsContents,
+					AgentName: &agentNameContents,
+					TLS: &TLSConfig{
+						InsecureSkipVerify: false,
+						CAFile:             &caPath,
+					},
+				}
+
+				cfg, err := ParseConfig(configPath)
+				assert.NoError(t, err)
+				assert.Equal(t, expectedConfig, cfg)
+			},
+		},
+		{
+			desc: "TLS Invalid Key and Cert File",
+			testFunc: func(t *testing.T) {
+				tmpDir := t.TempDir()
+				configPath := filepath.Join(tmpDir, "manager.yml")
+
+				configContents := `
+endpoint: localhost:1234
+secret_key: b92222ee-a1fc-4bb1-98db-26de3448541b
+agent_id: 8321f735-a52c-4f49-aca9-66f9266c5fe5
+labels: "one=foo,two=bar"
+agent_name: "My Agent"
+tls_config:
+  insecure_skip_verify: false
+  key_file: /some/bad/file.key
+  cert_file: /some/bad/file.crt
+`
+
+				err := os.WriteFile(configPath, []byte(configContents), os.ModePerm)
+				require.NoError(t, err)
+
+				cfg, err := ParseConfig(configPath)
+				assert.ErrorContains(t, err, errInvalidKeyFile)
+				assert.Nil(t, cfg)
+			},
+		},
+		{
+			desc: "TLS Valid Key File Invalid Cert File",
+			testFunc: func(t *testing.T) {
+				tmpDir := t.TempDir()
+				configPath := filepath.Join(tmpDir, "manager.yml")
+
+				keyPath := filepath.Join(tmpDir, "file-key.crt")
+				k, err := os.Create(keyPath)
+				require.NoError(t, err)
+				defer k.Close()
+
+				configContents := fmt.Sprintf(`
+endpoint: localhost:1234
+secret_key: b92222ee-a1fc-4bb1-98db-26de3448541b
+agent_id: 8321f735-a52c-4f49-aca9-66f9266c5fe5
+labels: "one=foo,two=bar"
+agent_name: "My Agent"
+tls_config:
+  insecure_skip_verify: false
+  key_file: %s
+  cert_file: /some/bad/file.crt
+`, keyPath)
+
+				err = os.WriteFile(configPath, []byte(configContents), os.ModePerm)
+				require.NoError(t, err)
+
+				cfg, err := ParseConfig(configPath)
+				assert.ErrorContains(t, err, errInvalidCertFile)
+				assert.Nil(t, cfg)
+			},
+		},
+		{
+			desc: "TLS Valid Cert File Invalid Key File",
+			testFunc: func(t *testing.T) {
+				tmpDir := t.TempDir()
+				configPath := filepath.Join(tmpDir, "manager.yml")
+
+				certPath := filepath.Join(tmpDir, "file-cert.crt")
+				c, err := os.Create(certPath)
+				require.NoError(t, err)
+				defer c.Close()
+
+				configContents := fmt.Sprintf(`
+endpoint: localhost:1234
+secret_key: b92222ee-a1fc-4bb1-98db-26de3448541b
+agent_id: 8321f735-a52c-4f49-aca9-66f9266c5fe5
+labels: "one=foo,two=bar"
+agent_name: "My Agent"
+tls_config:
+  insecure_skip_verify: false
+  key_file: /some/bad/file.key
+  cert_file: %s
+`, certPath)
+
+				err = os.WriteFile(configPath, []byte(configContents), os.ModePerm)
+				require.NoError(t, err)
+
+				cfg, err := ParseConfig(configPath)
+				assert.ErrorContains(t, err, errInvalidKeyFile)
+				assert.Nil(t, cfg)
+			},
+		},
+		{
+			desc: "TLS Only Valid Key File Provided",
+			testFunc: func(t *testing.T) {
+				tmpDir := t.TempDir()
+				configPath := filepath.Join(tmpDir, "manager.yml")
+
+				keyPath := filepath.Join(tmpDir, "file-cert.crt")
+				k, err := os.Create(keyPath)
+				require.NoError(t, err)
+				defer k.Close()
+
+				configContents := fmt.Sprintf(`
+endpoint: localhost:1234
+secret_key: b92222ee-a1fc-4bb1-98db-26de3448541b
+agent_id: 8321f735-a52c-4f49-aca9-66f9266c5fe5
+labels: "one=foo,two=bar"
+agent_name: "My Agent"
+tls_config:
+  insecure_skip_verify: false
+  key_file: %s
+`, keyPath)
+
+				err = os.WriteFile(configPath, []byte(configContents), os.ModePerm)
+				require.NoError(t, err)
+
+				cfg, err := ParseConfig(configPath)
+				assert.ErrorContains(t, err, errMissingTLSFiles)
+				assert.Nil(t, cfg)
+			},
+		},
+		{
+			desc: "TLS Only Valid Cert File Provided",
+			testFunc: func(t *testing.T) {
+				tmpDir := t.TempDir()
+				configPath := filepath.Join(tmpDir, "manager.yml")
+
+				certPath := filepath.Join(tmpDir, "file-cert.crt")
+				c, err := os.Create(certPath)
+				require.NoError(t, err)
+				defer c.Close()
+
+				configContents := fmt.Sprintf(`
+endpoint: localhost:1234
+secret_key: b92222ee-a1fc-4bb1-98db-26de3448541b
+agent_id: 8321f735-a52c-4f49-aca9-66f9266c5fe5
+labels: "one=foo,two=bar"
+agent_name: "My Agent"
+tls_config:
+  insecure_skip_verify: false
+  cert_file: %s
+`, certPath)
+
+				err = os.WriteFile(configPath, []byte(configContents), os.ModePerm)
+				require.NoError(t, err)
+
+				cfg, err := ParseConfig(configPath)
+				assert.ErrorContains(t, err, errMissingTLSFiles)
+				assert.Nil(t, cfg)
+			},
+		},
+		{
+			desc: "Successful Full Parse with TLS Valid Key and Cert Files",
+			testFunc: func(t *testing.T) {
+				tmpDir := t.TempDir()
+				configPath := filepath.Join(tmpDir, "manager.yml")
+
+				keyPath := filepath.Join(tmpDir, "file-key.crt")
+				k, err := os.Create(keyPath)
+				require.NoError(t, err)
+				defer k.Close()
+
+				certPath := filepath.Join(tmpDir, "file-cert.crt")
+				c, err := os.Create(certPath)
+				require.NoError(t, err)
+				defer c.Close()
+
+				configContents := fmt.Sprintf(`
+endpoint: localhost:1234
+secret_key: b92222ee-a1fc-4bb1-98db-26de3448541b
+agent_id: 8321f735-a52c-4f49-aca9-66f9266c5fe5
+labels: "one=foo,two=bar"
+agent_name: "My Agent"
+tls_config:
+  insecure_skip_verify: false
+  key_file: %s
+  cert_file: %s
+`, keyPath, certPath)
+
+				err = os.WriteFile(configPath, []byte(configContents), os.ModePerm)
+				require.NoError(t, err)
+
+				expectedConfig := &Config{
+					Endpoint:  "localhost:1234",
+					SecretKey: &secretKeyContents,
+					AgentID:   "8321f735-a52c-4f49-aca9-66f9266c5fe5",
+					Labels:    &labelsContents,
+					AgentName: &agentNameContents,
+					TLS: &TLSConfig{
+						InsecureSkipVerify: false,
+						KeyFile:            &keyPath,
+						CertFile:           &certPath,
+					},
+				}
+
+				cfg, err := ParseConfig(configPath)
+				assert.NoError(t, err)
+				assert.Equal(t, expectedConfig, cfg)
+			},
 		},
 	}
 
 	for _, tc := range testCases {
-		t.Run(tc.desc, func(t *testing.T) {
-			tmpDir := t.TempDir()
-			configPath := filepath.Join(tmpDir, "manager.yml")
-
-			// Only create a config file if we're configured too.
-			// This exists to trigger a file read failure
-			if tc.createFile {
-				err := os.WriteFile(configPath, []byte(tc.configContents), os.ModePerm)
-				require.NoError(t, err)
-			}
-
-			cfg, err := ParseConfig(configPath)
-			if tc.expectedErrContents == nil {
-				require.NoError(t, err)
-			} else {
-				require.ErrorContains(t, err, *tc.expectedErrContents)
-			}
-
-			require.Equal(t, tc.expectedConfig, cfg)
-		})
+		t.Run(tc.desc, tc.testFunc)
 	}
 }
 
@@ -311,12 +832,23 @@ func TestConfigCopy(t *testing.T) {
 	secretKeyContents := "b92222ee-a1fc-4bb1-98db-26de3448541b"
 	labelsContents := "one=foo,two=bar"
 	agentNameContents := "My Agent"
+	keyFileContents := "My Key File"
+	certFileContents := "My Cert File"
+	caFileContents := "My CA File"
+
+	tlscfg := TLSConfig{
+		InsecureSkipVerify: false,
+		KeyFile:            &keyFileContents,
+		CertFile:           &certFileContents,
+		CAFile:             &caFileContents,
+	}
 	cfg := Config{
 		Endpoint:  "ws://localhost:1234",
 		SecretKey: &secretKeyContents,
 		AgentID:   "20ce90b8-506c-4a3b-8134-21aa8d526e03",
 		Labels:    &labelsContents,
 		AgentName: &agentNameContents,
+		TLS:       &tlscfg,
 	}
 
 	copyCfg := cfg.Copy()
