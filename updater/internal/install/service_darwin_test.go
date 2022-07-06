@@ -1,0 +1,195 @@
+//go:build darwin && !linux && !windows
+
+package install
+
+import (
+	"os"
+	"os/exec"
+	"path/filepath"
+	"regexp"
+	"testing"
+
+	"github.com/stretchr/testify/require"
+)
+
+func TestDarwinServiceInstall(t *testing.T) {
+	t.Run("Test install + uninstall", func(t *testing.T) {
+		installedServicePath := filepath.Join(os.Getenv("HOME"), "Library", "LaunchAgents", "darwin-service.plist")
+
+		uninstallService(t, installedServicePath)
+
+		d := &darwinService{
+			newServiceFilePath:       filepath.Join("testdata", "darwin-service.plist"),
+			serviceName:              "darwin-service",
+			installedServiceFilePath: installedServicePath,
+		}
+
+		err := d.Install()
+		require.NoError(t, err)
+		require.FileExists(t, installedServicePath)
+
+		// We want to check that the service was actually loaded
+		requireServiceLoadedStatus(t, true)
+
+		err = d.Uninstall()
+		require.NoError(t, err)
+		require.NoFileExists(t, installedServicePath)
+
+		// Make sure the service is no longer listed
+		requireServiceLoadedStatus(t, false)
+	})
+
+	t.Run("Test stop + start", func(t *testing.T) {
+		installedServicePath := filepath.Join(os.Getenv("HOME"), "Library", "LaunchAgents", "darwin-service.plist")
+
+		// TODO: Do this automagically
+		uninstallService(t, installedServicePath)
+
+		d := &darwinService{
+			newServiceFilePath:       filepath.Join("testdata", "darwin-service.plist"),
+			serviceName:              "darwin-service",
+			installedServiceFilePath: installedServicePath,
+		}
+
+		err := d.Install()
+		require.NoError(t, err)
+		require.FileExists(t, installedServicePath)
+
+		// We want to check that the service was actually loaded
+		requireServiceLoadedStatus(t, true)
+
+		err = d.Start()
+		require.NoError(t, err)
+
+		requireServiceRunningStatus(t, true)
+
+		err = d.Stop()
+		require.NoError(t, err)
+
+		requireServiceRunningStatus(t, false)
+
+		err = d.Uninstall()
+		require.NoError(t, err)
+		require.NoFileExists(t, installedServicePath)
+
+		// Make sure the service is no longer listed
+		requireServiceLoadedStatus(t, false)
+	})
+
+	t.Run("Test invalid path for input file", func(t *testing.T) {
+		installedServicePath := filepath.Join(os.Getenv("HOME"), "Library", "LaunchAgents", "darwin-service.plist")
+
+		uninstallService(t, installedServicePath)
+
+		d := &darwinService{
+			newServiceFilePath:       filepath.Join("testdata", "does-not-exist.plist"),
+			serviceName:              "darwin-service",
+			installedServiceFilePath: installedServicePath,
+		}
+
+		err := d.Install()
+		require.ErrorContains(t, err, "failed to open input file")
+		requireServiceLoadedStatus(t, false)
+	})
+
+	t.Run("Test invalid path for output file for install", func(t *testing.T) {
+		installedServicePath := filepath.Join(os.Getenv("HOME"), "Library", "LaunchAgents", "directory-does-not-exist", "darwin-service.plist")
+
+		uninstallService(t, installedServicePath)
+
+		d := &darwinService{
+			newServiceFilePath:       filepath.Join("testdata", "darwin-service.plist"),
+			serviceName:              "darwin-service",
+			installedServiceFilePath: installedServicePath,
+		}
+
+		err := d.Install()
+		require.ErrorContains(t, err, "failed to open output file")
+		requireServiceLoadedStatus(t, false)
+	})
+
+	t.Run("Uninstall fails if not installed", func(t *testing.T) {
+		installedServicePath := filepath.Join(os.Getenv("HOME"), "Library", "LaunchAgents", "darwin-service.plist")
+
+		uninstallService(t, installedServicePath)
+
+		d := &darwinService{
+			newServiceFilePath:       filepath.Join("testdata", "darwin-service.plist"),
+			serviceName:              "darwin-service",
+			installedServiceFilePath: installedServicePath,
+		}
+
+		err := d.Uninstall()
+		require.ErrorContains(t, err, "failed to remove service file")
+		requireServiceLoadedStatus(t, false)
+	})
+
+	t.Run("Start fails if service not found", func(t *testing.T) {
+		installedServicePath := filepath.Join(os.Getenv("HOME"), "Library", "LaunchAgents", "darwin-service.plist")
+
+		uninstallService(t, installedServicePath)
+
+		d := &darwinService{
+			newServiceFilePath:       filepath.Join("testdata", "darwin-service.plist"),
+			serviceName:              "darwin-service",
+			installedServiceFilePath: installedServicePath,
+		}
+
+		err := d.Start()
+		require.ErrorContains(t, err, "running launchctl failed")
+	})
+
+	t.Run("Stop fails if service not found", func(t *testing.T) {
+		installedServicePath := filepath.Join(os.Getenv("HOME"), "Library", "LaunchAgents", "darwin-service.plist")
+
+		uninstallService(t, installedServicePath)
+
+		d := &darwinService{
+			newServiceFilePath:       filepath.Join("testdata", "darwin-service.plist"),
+			serviceName:              "darwin-service",
+			installedServiceFilePath: installedServicePath,
+		}
+
+		err := d.Stop()
+		require.ErrorContains(t, err, "running launchctl failed")
+	})
+}
+
+// uninstallService is a helper that uninstalls the service manually for test setup, in case it is somehow leftover.
+func uninstallService(t *testing.T, installedPath string) {
+	cmd := exec.Command("launchctl", "unload", installedPath)
+	// May already be unloaded; We'll ignore the error.
+	_ = cmd.Run()
+
+	err := os.RemoveAll(installedPath)
+	require.NoError(t, err)
+}
+
+const exitCodeServiceNotFound = 113
+
+func requireServiceLoadedStatus(t *testing.T, loaded bool) {
+	t.Helper()
+
+	cmd := exec.Command("launchctl", "list", "darwin-service")
+	err := cmd.Run()
+	if loaded {
+		// If the service should be loaded, then we expect a 0 exit code, so no error is given
+		require.NoError(t, err)
+		return
+	}
+
+	eErr, ok := err.(*exec.ExitError)
+	require.True(t, ok, "launchctl list exited with non-ExitError: %s", eErr)
+	require.Equal(t, exitCodeServiceNotFound, eErr.ExitCode(), "unexpected exit code when asserting service is unloaded: %d", eErr.ExitCode())
+}
+
+var descriptionPIDRegex = regexp.MustCompile(`\s*"PID" = \d+;`)
+
+func requireServiceRunningStatus(t *testing.T, running bool) {
+	cmd := exec.Command("launchctl", "list", "darwin-service")
+	out, err := cmd.Output()
+	require.NoError(t, err)
+	matches := descriptionPIDRegex.Match(out)
+	// if the regex matches, the service is running.
+	require.Equal(t, matches, running, "Service state (running: %t) does not match expected state (running: %t)", matches, running)
+}
