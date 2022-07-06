@@ -16,7 +16,7 @@ import (
 func TestLinuxServiceInstall(t *testing.T) {
 	t.Run("Test install + uninstall", func(t *testing.T) {
 		installedServicePath := "/usr/lib/systemd/system/linux-service.service"
-		uninstallService(t, installedServicePath)
+		uninstallService(t, installedServicePath, "linux-service")
 
 		l := &linuxService{
 			newServiceFilePath:       filepath.Join("testdata", "linux-service.service"),
@@ -41,7 +41,7 @@ func TestLinuxServiceInstall(t *testing.T) {
 
 	t.Run("Test stop + start", func(t *testing.T) {
 		installedServicePath := "/usr/lib/systemd/system/linux-service.service"
-		uninstallService(t, installedServicePath)
+		uninstallService(t, installedServicePath, "linux-service")
 
 		l := &linuxService{
 			newServiceFilePath:       filepath.Join("testdata", "linux-service.service"),
@@ -76,7 +76,7 @@ func TestLinuxServiceInstall(t *testing.T) {
 
 	t.Run("Test invalid path for input file", func(t *testing.T) {
 		installedServicePath := "/usr/lib/systemd/system/linux-service.service"
-		uninstallService(t, installedServicePath)
+		uninstallService(t, installedServicePath, "linux-service")
 
 		l := &linuxService{
 			newServiceFilePath:       filepath.Join("testdata", "does-not-exist.service"),
@@ -91,7 +91,7 @@ func TestLinuxServiceInstall(t *testing.T) {
 
 	t.Run("Test invalid path for output file for install", func(t *testing.T) {
 		installedServicePath := "/usr/lib/systemd/system/dir-does-not-exist/linux-service.service"
-		uninstallService(t, installedServicePath)
+		uninstallService(t, installedServicePath, "linux-service")
 
 		l := &linuxService{
 			newServiceFilePath:       filepath.Join("testdata", "linux-service.service"),
@@ -106,7 +106,7 @@ func TestLinuxServiceInstall(t *testing.T) {
 
 	t.Run("Uninstall fails if not installed", func(t *testing.T) {
 		installedServicePath := "/usr/lib/systemd/system/linux-service.service"
-		uninstallService(t, installedServicePath)
+		uninstallService(t, installedServicePath, "linux-service")
 
 		l := &linuxService{
 			newServiceFilePath:       filepath.Join("testdata", "linux-service.service"),
@@ -121,7 +121,7 @@ func TestLinuxServiceInstall(t *testing.T) {
 
 	t.Run("Start fails if service not found", func(t *testing.T) {
 		installedServicePath := "/usr/lib/systemd/system/linux-service.service"
-		uninstallService(t, installedServicePath)
+		uninstallService(t, installedServicePath, "linux-service")
 
 		l := &linuxService{
 			newServiceFilePath:       filepath.Join("testdata", "linux-service.service"),
@@ -135,7 +135,7 @@ func TestLinuxServiceInstall(t *testing.T) {
 
 	t.Run("Stop fails if service not found", func(t *testing.T) {
 		installedServicePath := "/usr/lib/systemd/system/linux-service.service"
-		uninstallService(t, installedServicePath)
+		uninstallService(t, installedServicePath, "linux-service")
 
 		l := &linuxService{
 			newServiceFilePath:       filepath.Join("testdata", "linux-service.service"),
@@ -149,11 +149,11 @@ func TestLinuxServiceInstall(t *testing.T) {
 }
 
 // uninstallService is a helper that uninstalls the service manually for test setup, in case it is somehow leftover.
-func uninstallService(t *testing.T, installedPath string) {
-	cmd := exec.Command("systemctl", "stop", installedPath)
+func uninstallService(t *testing.T, installedPath, serviceName string) {
+	cmd := exec.Command("systemctl", "stop", serviceName)
 	_ = cmd.Run()
 
-	cmd = exec.Command("systemctl", "disable", installedPath)
+	cmd = exec.Command("systemctl", "disable", serviceName)
 	_ = cmd.Run()
 
 	err := os.RemoveAll(installedPath)
