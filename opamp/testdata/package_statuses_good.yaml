@@ -1,0 +1,25 @@
+packages:
+    package:
+        name: package
+        agenthasversion: "1.0"
+        agenthashash:
+            - 104
+            - 97
+            - 115
+            - 104
+            - 49
+        serverofferedversion: "2.0"
+        serverofferedhash:
+            - 104
+            - 97
+            - 115
+            - 104
+            - 50
+        status: 1
+        errormessage: bad
+serverprovidedallpackageshash:
+    - 104
+    - 97
+    - 115
+    - 104
+errormessage: whoops
