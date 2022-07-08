@@ -8,4 +8,4 @@ See the [prerequisites](../README.md) doc for Google Cloud prerequisites.
 
 ## Environment
 
-The IIS Receiver scrapes performance counters for metrics, limiting this reciever to Windows only, with performance counters enabled.
+The IIS Receiver scrapes performance counters for metrics, limiting this receiver to Windows only, with performance counters enabled.
