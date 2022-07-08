@@ -19,7 +19,7 @@ To install the collector with an OpAMP connection configuration set the followin
 msiexec /i "https://github.com/observIQ/observiq-otel-collector/releases/latest/download/observiq-otel-collector.msi" /quiet ENABLEMANAGEMENT=1 OPAMPENDPOINT=<your_endpoint> OPAMPSECRETKEY=<secret-key>
 ```
 
-To read more about the generated connection configuration file see [OpAMP docs](/opamp.md).
+To read more about the generated connection configuration file see [OpAMP docs](./opamp.md).
 
 ## Configuring the Collector
 

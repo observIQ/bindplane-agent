@@ -18,7 +18,7 @@ To install the collector with an OpAMP connection configuration set the followin
 sudo sh -c "$(curl -fsSlL https://github.com/observiq/observiq-otel-collector/releases/latest/download/install_macos.sh)" install_macos.sh -e <your_endpoint> -s <secret-key>
 ```
 
-To read more about the generated connection configuration file see [OpAMP docs](/opamp.md).
+To read more about the generated connection configuration file see [OpAMP docs](./opamp.md).
 
 ## Configuring the Collector
 
