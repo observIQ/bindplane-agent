@@ -11,6 +11,16 @@ Alternately, for an interactive installation [download the latest MSI](https://g
 
 After downloading the MSI, simply double click it to open the installation wizard. Follow the instructions to configure and install the collector.
 
+### Managed Mode
+
+To install the collector with an OpAMP connection configuration set the following flags. 
+
+```sh
+msiexec /i "https://github.com/observIQ/observiq-otel-collector/releases/latest/download/observiq-otel-collector.msi" /quiet ENABLEMANAGEMENT=1 OPAMPENDPOINT=<your_endpoint> OPAMPSECRETKEY=<secret-key>
+```
+
+To read more about the generated connection configuration file see [OpAMP docs](/opamp.md).
+
 ## Configuring the Collector
 
 After installing, the `observiq-otel-collector` service will be running and ready for configuration! 

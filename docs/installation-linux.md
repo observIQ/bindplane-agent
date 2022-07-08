@@ -14,6 +14,17 @@ To install using the installation script, you may run:
 sudo sh -c "$(curl -fsSlL https://github.com/observiq/observiq-otel-collector/releases/latest/download/install_unix.sh)" install_unix.sh
 ```
 
+#### Managed Mode
+
+To install the collector with an OpAMP connection configuration set the following flags. 
+
+```sh
+sudo sh -c "$(curl -fsSlL https://github.com/observiq/observiq-otel-collector/releases/latest/download/install_unix.sh)" install_unix.sh -e <your_endpoint> -s <secret-key>
+```
+
+To read more about the generated connection configuration file see [OpAMP docs](/opamp.md).
+
+
 ### RPM Installation
 First download the RPM package for your architecture from the [releases page](https://github.com/observIQ/observiq-otel-collector/releases/latest).
 Then you may install the package using `rpm`, see this example for installing the amd64 package:
