@@ -9,8 +9,9 @@ import (
 	"strings"
 
 	"golang.org/x/sys/windows/registry"
+	"golang.org/x/sys/windows/svc"
+	"golang.org/x/sys/windows/svc/mgr"
 
-	"github.com/kardianos/service"
 	"github.com/kballard/go-shellquote"
 )
 
@@ -33,18 +34,20 @@ type windowsService struct {
 
 // Start the service
 func (w windowsService) Start() error {
-	kServiceConfig := &service.Config{
-		Name: w.serviceName,
-	}
-
-	kService, err := service.New(nil, kServiceConfig)
+	m, err := mgr.Connect()
 	if err != nil {
-		return fmt.Errorf("failed to create underlying service manager: %w", err)
+		return fmt.Errorf("failed to connect to service manager: %w", err)
 	}
+	defer m.Disconnect()
 
-	err = kService.Start()
+	s, err := m.OpenService(w.serviceName)
 	if err != nil {
-		return fmt.Errorf("failed to start using underlying service manager: %w", err)
+		return fmt.Errorf("failed to open service: %w", err)
+	}
+	defer s.Close()
+
+	if err := s.Start(); err != nil {
+		return fmt.Errorf("failed to start service: %w", err)
 	}
 
 	return nil
@@ -52,18 +55,20 @@ func (w windowsService) Start() error {
 
 // Stop the service
 func (w windowsService) Stop() error {
-	kServiceConfig := &service.Config{
-		Name: w.serviceName,
-	}
-
-	kService, err := service.New(nil, kServiceConfig)
+	m, err := mgr.Connect()
 	if err != nil {
-		return fmt.Errorf("failed to create underlying service manager: %w", err)
+		return fmt.Errorf("failed to connect to service manager: %w", err)
 	}
+	defer m.Disconnect()
 
-	err = kService.Stop()
+	s, err := m.OpenService(w.serviceName)
 	if err != nil {
-		return fmt.Errorf("failed to stop using underlying service manager: %w", err)
+		return fmt.Errorf("failed to open service: %w", err)
+	}
+	defer s.Close()
+
+	if _, err := s.Control(svc.Stop); err != nil {
+		return fmt.Errorf("failed to start service: %w", err)
 	}
 
 	return nil
@@ -95,44 +100,48 @@ func (w windowsService) Install() error {
 		return fmt.Errorf("failed to parse start type in service config: %w", err)
 	}
 
-	kServiceConfig := &service.Config{
-		Name:        w.serviceName,
-		DisplayName: wsc.Service.DisplayName,
-		Description: wsc.Service.Description,
-		Executable:  filepath.Join(iDir, wsc.Path),
-		Arguments:   splitArgs,
-		Option: service.KeyValue{
-			service.StartType:  startType,
-			"DelayedAutoStart": delayed,
-		},
-	}
-
-	kService, err := service.New(nil, kServiceConfig)
+	m, err := mgr.Connect()
 	if err != nil {
-		return fmt.Errorf("failed to create underlying service manager: %w", err)
+		return fmt.Errorf("failed to connect to service manager: %w", err)
 	}
+	defer m.Disconnect()
 
-	if err = kService.Install(); err != nil {
-		return fmt.Errorf("failed to install using underlying service manager: %w", err)
+	s, err := m.CreateService(w.serviceName,
+		filepath.Join(iDir, wsc.Path),
+		mgr.Config{
+			Description:      wsc.Service.Description,
+			DisplayName:      wsc.Service.DisplayName,
+			StartType:        startType,
+			DelayedAutoStart: delayed,
+		},
+		splitArgs...,
+	)
+	if err != nil {
+		return fmt.Errorf("failed to create service: %w", err)
 	}
+	defer s.Close()
 
 	return nil
 }
 
 // Uninstalls the service
 func (w windowsService) Uninstall() error {
-	kServiceConfig := &service.Config{
-		Name: w.serviceName,
-	}
-
-	kService, err := service.New(nil, kServiceConfig)
+	m, err := mgr.Connect()
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to connect to service manager: %w", err)
 	}
+	defer m.Disconnect()
 
-	err = kService.Uninstall()
+	s, err := m.OpenService(w.serviceName)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to open service: %w", err)
+	}
+	defer s.Close()
+
+	// TODO: Should this wait for the service to no longer exist?
+	// This only marks the service for deletion, no guarantee is made about when it's actually deleted
+	if err = s.Delete(); err != nil {
+		return fmt.Errorf("failed to delete service: %w", err)
 	}
 
 	return nil
@@ -140,7 +149,7 @@ func (w windowsService) Uninstall() error {
 
 type windowsServiceConfig struct {
 	Path string `json:"path"`
-	// Note: Name is a part of this struct, but we keep the service name hardcoded; We do not want to use a different service name.
+	// Note: Name is a part of the on disk config, but we keep the service name hardcoded; We do not want to use a different service name.
 	Service struct {
 		// Start gives the start type of the service.
 		// See: https://wixtoolset.org/documentation/manual/v3/xsd/wix/serviceinstall.html
@@ -200,16 +209,16 @@ func installDir(productName string) (string, error) {
 
 // startType converts the start type from the windowsServiceConfig to a start type recongizable by
 // kardianos/service.
-func startType(wsc *windowsServiceConfig) (startType string, delayed bool, err error) {
+func startType(wsc *windowsServiceConfig) (startType uint32, delayed bool, err error) {
 	switch wsc.Service.Start {
 	case "auto":
-		startType = service.ServiceStartAutomatic
+		startType = mgr.StartAutomatic
 	case "demand":
-		startType = service.ServiceStartManual
+		startType = mgr.StartManual
 	case "disabled":
-		startType = service.ServiceStartDisabled
+		startType = mgr.StartDisabled
 	case "delayed":
-		startType = service.ServiceStartAutomatic
+		startType = mgr.StartAutomatic
 		delayed = true
 	default:
 		err = fmt.Errorf("invalid start type in service config: %s", wsc.Service.Start)

@@ -3,7 +3,6 @@ module github.com/observiq/observiq-otel-collector/updater
 go 1.17
 
 require (
-	github.com/kardianos/service v1.2.1
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51
 	github.com/mholt/archiver/v3 v3.5.1
 	github.com/spf13/pflag v1.0.5

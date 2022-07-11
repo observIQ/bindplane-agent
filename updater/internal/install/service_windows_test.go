@@ -129,16 +129,6 @@ func TestWindowsServiceInstall(t *testing.T) {
 		testProductName := "Test Product"
 
 		serviceJSON := filepath.Join(tempDir, "windows-service.json")
-		testServiceProgram := filepath.Join(tempDir, "windows-service.exe")
-		serviceGoFile, err := filepath.Abs(filepath.Join("testdata", "test-windows-service.go"))
-		require.NoError(t, err)
-
-		writeServiceFile(t, serviceJSON, filepath.Join("testdata", "windows-service.json"), serviceGoFile)
-		compileProgram(t, serviceGoFile, testServiceProgram)
-
-		defer uninstallService(t)
-		createInstallDirRegistryKey(t, testProductName, tempDir)
-		defer deleteInstallDirRegistryKey(t, testProductName)
 
 		w := &windowsService{
 			newServiceFilePath: serviceJSON,
@@ -146,8 +136,8 @@ func TestWindowsServiceInstall(t *testing.T) {
 			productName:        testProductName,
 		}
 
-		err = w.Uninstall()
-		require.ErrorContains(t, err, "service windows-service is not installed")
+		err := w.Uninstall()
+		require.ErrorContains(t, err, "failed to open service")
 		requireServiceLoadedStatus(t, false)
 	})
 
@@ -156,16 +146,6 @@ func TestWindowsServiceInstall(t *testing.T) {
 		testProductName := "Test Product"
 
 		serviceJSON := filepath.Join(tempDir, "windows-service.json")
-		testServiceProgram := filepath.Join(tempDir, "windows-service.exe")
-		serviceGoFile, err := filepath.Abs(filepath.Join("testdata", "test-windows-service.go"))
-		require.NoError(t, err)
-
-		writeServiceFile(t, serviceJSON, filepath.Join("testdata", "windows-service.json"), serviceGoFile)
-		compileProgram(t, serviceGoFile, testServiceProgram)
-
-		defer uninstallService(t)
-		createInstallDirRegistryKey(t, testProductName, tempDir)
-		defer deleteInstallDirRegistryKey(t, testProductName)
 
 		w := &windowsService{
 			newServiceFilePath: serviceJSON,
@@ -173,8 +153,8 @@ func TestWindowsServiceInstall(t *testing.T) {
 			productName:        testProductName,
 		}
 
-		err = w.Start()
-		require.ErrorContains(t, err, "failed to start using underlying service manager")
+		err := w.Start()
+		require.ErrorContains(t, err, "failed to open service")
 	})
 
 	t.Run("Stop fails if service not found", func(t *testing.T) {
@@ -182,16 +162,6 @@ func TestWindowsServiceInstall(t *testing.T) {
 		testProductName := "Test Product"
 
 		serviceJSON := filepath.Join(tempDir, "windows-service.json")
-		testServiceProgram := filepath.Join(tempDir, "windows-service.exe")
-		serviceGoFile, err := filepath.Abs(filepath.Join("testdata", "test-windows-service.go"))
-		require.NoError(t, err)
-
-		writeServiceFile(t, serviceJSON, filepath.Join("testdata", "windows-service.json"), serviceGoFile)
-		compileProgram(t, serviceGoFile, testServiceProgram)
-
-		defer uninstallService(t)
-		createInstallDirRegistryKey(t, testProductName, tempDir)
-		defer deleteInstallDirRegistryKey(t, testProductName)
 
 		w := &windowsService{
 			newServiceFilePath: serviceJSON,
@@ -199,8 +169,8 @@ func TestWindowsServiceInstall(t *testing.T) {
 			productName:        testProductName,
 		}
 
-		err = w.Stop()
-		require.ErrorContains(t, err, "failed to stop using underlying service manager")
+		err := w.Stop()
+		require.ErrorContains(t, err, "failed to open service")
 	})
 }
 
