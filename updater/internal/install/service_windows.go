@@ -3,11 +3,12 @@ package install
 import (
 	"encoding/json"
 	"fmt"
-	"internal/syscall/windows/registry"
 	"log"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"golang.org/x/sys/windows/registry"
 
 	"github.com/kardianos/service"
 	"github.com/kballard/go-shellquote"
@@ -75,7 +76,12 @@ func (w windowsService) Install() error {
 		return fmt.Errorf("failed to read service config: %w", err)
 	}
 
-	if err = expandArguments(wsc, w.productName); err != nil {
+	iDir, err := installDir(w.productName)
+	if err != nil {
+		return fmt.Errorf("failed to get install dir: %w", err)
+	}
+
+	if err = expandArguments(wsc, w.productName, iDir); err != nil {
 		return fmt.Errorf("failed to expand arguments in service config: %w", err)
 	}
 
@@ -93,7 +99,7 @@ func (w windowsService) Install() error {
 		Name:        w.serviceName,
 		DisplayName: wsc.Service.DisplayName,
 		Description: wsc.Service.Description,
-		Executable:  wsc.Path,
+		Executable:  filepath.Join(iDir, wsc.Path),
 		Arguments:   splitArgs,
 		Option: service.KeyValue{
 			service.StartType:  startType,
@@ -157,7 +163,7 @@ func readWindowsServiceConfig(path string) (*windowsServiceConfig, error) {
 	var wsc windowsServiceConfig
 	err = json.Unmarshal(b, &wsc)
 	if err != nil {
-		fmt.Errorf("failed to unmarshal json: %w", err)
+		return nil, fmt.Errorf("failed to unmarshal json: %w", err)
 	}
 
 	return &wsc, nil
@@ -165,12 +171,7 @@ func readWindowsServiceConfig(path string) (*windowsServiceConfig, error) {
 
 // expandArguments expands [INSTALLDIR] to the actual install directory and
 // expands '&quote;' to the literal '"'
-func expandArguments(wsc *windowsServiceConfig, productName string) error {
-	installDir, err := installDir(productName)
-	if err != nil {
-		return fmt.Errorf("failed to determine install dir: %w", err)
-	}
-
+func expandArguments(wsc *windowsServiceConfig, productName, installDir string) error {
 	wsc.Service.Arguments = string(replaceInstallDir([]byte(wsc.Service.Arguments), installDir))
 	wsc.Service.Arguments = strings.ReplaceAll(wsc.Service.Arguments, "&quot;", `"`)
 	return nil
