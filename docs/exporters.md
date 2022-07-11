@@ -24,6 +24,7 @@ Below is a list of supported exports with links to their documentation pages.
 | Load-Balancing (Trace ID Aware) Exporter                          | [loadbalancingexporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.54.0/exporter/loadbalancingexporter/README.md) |
 | Logging Exporter                                                  | [loggingexporter](https://github.com/open-telemetry/opentelemetry-collector/tree/v0.54.0/exporter/loggingexporter/README.md) |
 | Loki Exporter                                                     | [lokiexporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.54.0/exporter/lokiexporter/README.md) |
+| Logz.io Exporter                                                  | [logzioexporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.55.0/exporter/logzioexporter/README.md) |
 | observIQ Exporter                                                 | [observiqexporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.54.0/exporter/observiqexporter/README.md) |
 | OpenCensus gRPC Exporter                                          | [opencensusexporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.54.0/exporter/opencensusexporter/README.md) |
 | OTLP gRPC Exporter                                                | [otlpexporter](https://github.com/open-telemetry/opentelemetry-collector/tree/v0.54.0/exporter/otlpexporter/README.md) |

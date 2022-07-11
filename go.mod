@@ -26,6 +26,7 @@ require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/jaegerexporter v0.54.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/kafkaexporter v0.54.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/loadbalancingexporter v0.54.0
+	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/logzioexporter v0.55.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/lokiexporter v0.54.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/observiqexporter v0.54.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/opencensusexporter v0.54.0
@@ -110,8 +111,8 @@ require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/zipkinreceiver v0.54.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/zookeeperreceiver v0.54.0
 	github.com/spf13/pflag v1.0.5
-	github.com/stretchr/testify v1.7.5
-	go.opentelemetry.io/collector v0.54.0
+	github.com/stretchr/testify v1.8.0
+	go.opentelemetry.io/collector v0.55.0
 	go.uber.org/multierr v1.8.0
 	go.uber.org/zap v1.21.0
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0
@@ -307,7 +308,7 @@ require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/internal/aws/proxy v0.54.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/internal/aws/xray v0.54.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/internal/common v0.54.0 // indirect
-	github.com/open-telemetry/opentelemetry-collector-contrib/internal/coreinternal v0.54.0 // indirect
+	github.com/open-telemetry/opentelemetry-collector-contrib/internal/coreinternal v0.55.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/internal/docker v0.54.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/internal/k8sconfig v0.54.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/internal/kubelet v0.54.0 // indirect
@@ -318,7 +319,7 @@ require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/experimentalmetricmetadata v0.54.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/resourcetotelemetry v0.54.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/stanza v0.54.0 // indirect
-	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/translator/jaeger v0.54.0 // indirect
+	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/translator/jaeger v0.55.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/translator/opencensus v0.54.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/translator/prometheusremotewrite v0.54.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/translator/zipkin v0.54.0 // indirect
@@ -386,8 +387,8 @@ require (
 	go.mongodb.org/atlas v0.16.0 // indirect
 	go.mongodb.org/mongo-driver v1.9.1 // indirect
 	go.opencensus.io v0.23.0 // indirect
-	go.opentelemetry.io/collector/pdata v0.54.0 // indirect
-	go.opentelemetry.io/collector/semconv v0.54.0 // indirect
+	go.opentelemetry.io/collector/pdata v0.55.0 // indirect
+	go.opentelemetry.io/collector/semconv v0.55.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.32.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.32.0 // indirect
 	go.opentelemetry.io/contrib/zpages v0.32.0 // indirect
@@ -434,9 +435,9 @@ require (
 
 require (
 	github.com/containerd/containerd v1.6.6 // indirect
-	github.com/klauspost/compress v1.15.6 // indirect
-	github.com/shirou/gopsutil/v3 v3.22.5
-	github.com/spf13/cobra v1.4.0 // indirect
+	github.com/klauspost/compress v1.15.7 // indirect
+	github.com/shirou/gopsutil/v3 v3.22.6
+	github.com/spf13/cobra v1.5.0 // indirect
 	golang.org/x/sys v0.0.0-20220615213510-4f61da869c0c
 )
 
