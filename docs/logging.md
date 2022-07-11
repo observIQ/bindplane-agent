@@ -20,7 +20,7 @@ The example below uses the Filelog receiver. Additional [operators](https://gith
 ```yaml
 receivers:
   filelog:
-    # Add relevent log paths to the include parameter
+    # Add relevant log paths to the include parameter
     include: ["/tmp/*.log"]
     start_at: "end"
     # Optionally add operators for further parsing
