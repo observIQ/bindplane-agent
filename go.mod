@@ -446,6 +446,3 @@ replace github.com/observiq/observiq-otel-collector/processor/resourceattributet
 replace github.com/observiq/observiq-otel-collector/receiver/pluginreceiver => ./receiver/pluginreceiver
 
 replace github.com/observiq/observiq-otel-collector/exporter/googlecloudexporter => ./exporter/googlecloudexporter
-
-// see https://github.com/google/gnostic/issues/262
-replace github.com/googleapis/gnostic v0.5.6 => github.com/googleapis/gnostic v0.5.5
