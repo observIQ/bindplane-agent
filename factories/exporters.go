@@ -33,6 +33,7 @@ import (
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/jaegerexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/kafkaexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/loadbalancingexporter"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/logzioexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/lokiexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/observiqexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/opencensusexporter"
@@ -68,6 +69,7 @@ var defaultExporters = []component.ExporterFactory{
 	loadbalancingexporter.NewFactory(),
 	loggingexporter.NewFactory(),
 	lokiexporter.NewFactory(),
+	logzioexporter.NewFactory(),
 	observiqexporter.NewFactory(),
 	opencensusexporter.NewFactory(),
 	otlpexporter.NewFactory(),
