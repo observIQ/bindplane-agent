@@ -23,6 +23,8 @@ import (
 	"path/filepath"
 )
 
+// InstallArtifacts installs the unpacked artifacts in latestDirPath to installDirPath,
+// as well as installing the new service file using the provided Service interface
 func InstallArtifacts(latestDirPath, installDirPath string, svc Service) error {
 	// Stop service
 	err := svc.Stop()
@@ -32,7 +34,7 @@ func InstallArtifacts(latestDirPath, installDirPath string, svc Service) error {
 
 	// install files that go to installDirPath to their correct location,
 	// excluding any config files (logging.yaml, config.yaml, manager.yaml)
-	if err := installFiles(latestDirPath, installDirPath); err != nil {
+	if err := moveFiles(latestDirPath, installDirPath); err != nil {
 		return fmt.Errorf("failed to install new files: %w", err)
 	}
 
@@ -54,7 +56,7 @@ func InstallArtifacts(latestDirPath, installDirPath string, svc Service) error {
 	return nil
 }
 
-func installFiles(latestDirPath, installDirPath string) error {
+func moveFiles(latestDirPath, installDirPath string) error {
 	err := filepath.WalkDir(latestDirPath, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err

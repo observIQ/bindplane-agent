@@ -28,6 +28,7 @@ import (
 const darwinServiceName = "com.observiq.collector"
 const darwinServiceFilePath = "/Library/LaunchDaemons/com.observiq.collector.plist"
 
+// NewService returns an instance of the Service interface for managing the observiq-otel-collector service on the current OS.
 func NewService(latestPath string) Service {
 	return &darwinService{
 		newServiceFilePath:       filepath.Join(latestPath, "install", "com.observiq.collector.plist"),
@@ -117,6 +118,7 @@ func (d darwinService) Uninstall() error {
 	return nil
 }
 
+// InstallDir returns the filepath to the install directory
 func InstallDir() (string, error) {
 	return "/opt/observiq-otel-collector", nil
 }

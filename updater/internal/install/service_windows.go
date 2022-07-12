@@ -37,6 +37,7 @@ const (
 	serviceNotExistErrStr        = "The specified service does not exist as an installed service."
 )
 
+// NewService returns an instance of the Service interface for managing the observiq-otel-collector service on the current OS.
 func NewService(latestPath string) Service {
 	return &windowsService{
 		newServiceFilePath: filepath.Join(latestPath, "install", "windows_service.json"),
@@ -267,6 +268,7 @@ func startType(cfgStartType string) (startType uint32, delayed bool, err error) 
 	return
 }
 
+// InstallDir returns the filepath to the install directory
 func InstallDir() (string, error) {
 	return installDir(defaultProductName)
 }

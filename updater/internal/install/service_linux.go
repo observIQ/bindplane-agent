@@ -28,6 +28,7 @@ import (
 const linuxServiceName = "observiq-otel-collector"
 const linuxServiceFilePath = "/usr/lib/systemd/system/observiq-otel-collector.service"
 
+// NewService returns an instance of the Service interface for managing the observiq-otel-collector service on the current OS.
 func NewService(latestPath string) Service {
 	return linuxService{
 		newServiceFilePath:       filepath.Join(latestPath, "install", "observiq-otel-collector.service"),
@@ -47,6 +48,7 @@ type linuxService struct {
 
 // Start the service
 func (l linuxService) Start() error {
+	//#nosec G204 -- serviceName is not determined by user input
 	cmd := exec.Command("systemctl", "start", l.serviceName)
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("running systemctl failed: %w", err)
@@ -56,6 +58,7 @@ func (l linuxService) Start() error {
 
 // Stop the service
 func (l linuxService) Stop() error {
+	//#nosec G204 -- serviceName is not determined by user input
 	cmd := exec.Command("systemctl", "stop", l.serviceName)
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("running systemctl failed: %w", err)
@@ -96,6 +99,7 @@ func (l linuxService) Install() error {
 		return fmt.Errorf("reloading systemctl failed: %w", err)
 	}
 
+	//#nosec G204 -- serviceName is not determined by user input
 	cmd = exec.Command("systemctl", "enable", l.serviceName)
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("enabling unit file failed: %w", err)
@@ -106,6 +110,7 @@ func (l linuxService) Install() error {
 
 // Uninstalls the service
 func (l linuxService) Uninstall() error {
+	//#nosec G204 -- serviceName is not determined by user input
 	cmd := exec.Command("systemctl", "disable", l.serviceName)
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("failed to disable unit: %w", err)
@@ -123,6 +128,7 @@ func (l linuxService) Uninstall() error {
 	return nil
 }
 
+// InstallDir returns the filepath to the install directory
 func InstallDir() (string, error) {
 	return "/opt/observiq-otel-collector", nil
 }
