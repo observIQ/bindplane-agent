@@ -47,6 +47,7 @@ type darwinService struct {
 
 // Start the service
 func (d darwinService) Start() error {
+	//#nosec G204 -- serviceName is not determined by user input
 	cmd := exec.Command("launchctl", "start", d.serviceName)
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("running launchctl failed: %w", err)
@@ -56,6 +57,7 @@ func (d darwinService) Start() error {
 
 // Stop the service
 func (d darwinService) Stop() error {
+	//#nosec G204 -- serviceName is not determined by user input
 	cmd := exec.Command("launchctl", "stop", d.serviceName)
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("running launchctl failed: %w", err)
@@ -91,6 +93,7 @@ func (d darwinService) Install() error {
 		return fmt.Errorf("failed to copy service file: %w", err)
 	}
 
+	//#nosec G204 -- installedServiceFilePath is not determined by user input
 	cmd := exec.Command("launchctl", "load", d.installedServiceFilePath)
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("running launchctl failed: %w", err)
@@ -101,6 +104,7 @@ func (d darwinService) Install() error {
 
 // Uninstalls the service
 func (d darwinService) Uninstall() error {
+	//#nosec G204 -- installedServiceFilePath is not determined by user input
 	cmd := exec.Command("launchctl", "unload", d.installedServiceFilePath)
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("running launchctl failed: %w", err)

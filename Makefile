@@ -128,7 +128,8 @@ tidy:
 .PHONY: gosec
 gosec:
 	gosec -exclude-dir updater  ./...
-	cd updater; gosec ./...
+# exclude the testdata dir; it contains a go program for testing.
+	cd updater; gosec -exclude-dir internal/install/testdata ./...
 
 # This target performs all checks that CI will do (excluding the build itself)
 .PHONY: ci-checks

@@ -68,12 +68,14 @@ func installFiles(latestDirPath, installDirPath string) error {
 			return nil
 		}
 
-		relPath, err := filepath.Rel(latestDirPath, path)
+		cleanPath := filepath.Clean(path)
+
+		relPath, err := filepath.Rel(latestDirPath, cleanPath)
 		if err != nil {
 			return err
 		}
 
-		outPath := filepath.Join(installDirPath, relPath)
+		outPath := filepath.Clean(filepath.Join(installDirPath, relPath))
 		outDir := filepath.Dir(outPath)
 
 		if err := os.MkdirAll(outDir, 0750); err != nil {
@@ -91,7 +93,7 @@ func installFiles(latestDirPath, installDirPath string) error {
 			}
 		}()
 
-		inFile, err := os.Open(path)
+		inFile, err := os.Open(cleanPath)
 		if err != nil {
 			return fmt.Errorf("failed to open input file: %w", err)
 		}
