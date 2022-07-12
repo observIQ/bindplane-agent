@@ -1,0 +1,59 @@
+# OpAMP Configuration
+
+The observIQ Distro for OpenTelemetry Collector can be setup as an agent that is managed by the [BindPlane OP platform](https://github.com/observiq/bindplane-op) via OpAMP.
+
+## Configuration
+
+The collector can be configured to connect to the server a few different ways.
+
+### Config File
+
+The collector can be configured to read its connection config from a `manager.yaml` file. The `--manager` flag can be used to specify the location of this config file, by default it's `./manager.yaml`. The contents of the `manager.yaml` are detailed out in the table below.
+
+| Parameter  | Required | Description                                                        |
+| :--------  | :------: | :----------------------------------------------------------------- |
+| endpoint   | X        | The API endpoint to communicate with the server via websocket      |
+| secret_key |          | The Secret Key defined for the server to be used for authorization |
+| agent_id   | X        | A UUID used to uniquely identify the agent                         |
+| labels     |          | A comma separated list of labels in the form `label=value`         |
+| agent_name |          | Human readable name for the agent                                  |
+| tls_config |          | See [tls config](#tls-config) section                              |
+
+Here's an example of what a common `manager.yaml` looks like:
+
+```yaml
+endpoint: ws://bindplane.localnet/v1/opamp
+secret_key: 3d83f0cb-2567-42c7-ada6-960842924d11
+agent_id: dffb297b-1983-4a06-858e-eebf4ad3d419
+```
+
+#### TLS Config
+
+If TLS is enabled on the server the collector will need to be configured in order to connect. 
+
+**Note**: If using TLS on the server the `endpoint` field will need to have the `wss` protocol for TLS enabled websockets.
+
+| Parameter            | Required | Description                                                                                         |
+| :------------------- | :------: | :-------------------------------------------------------------------------------------------------- |
+| insecure_skip_verify |          | InsecureSkipVerify controls whether a client verifies the server's certificate chain and host name. |
+| key_file             |          | Path to the `.key` file                                                                             |
+| cert_file            |          | Path to the Certificate file                                                                        |
+| ca_file              |          | Path to the Certificate Authority file                                                              |
+
+### Environment variables
+
+The collector can also use environment variables to set portions of the connection configuration. This is useful for a containerized collector where a mounted volume might not be present. 
+
+If the collector can not find the specified `manager.yaml` file it will search for the environment variables and create a `manager.yaml` at the location of the `--manager` command argument.
+
+**Note**: Only the `OPAMP_ENDPOINT` is required. If this is not set and there is no `manager.yaml` the collector will start in its normal standalone mode.
+
+| Environment Variable | Required | Description                                                                       |
+| :------------------- | :------: | :-------------------------------------------------------------------------------- |
+| OPAMP_ENDPOINT       | X        | The API endpoint to communicate with the server via websocket                     |
+| OPAMP_SECRET_KEY     |          | The Secret Key defined for the server to be used for authorization                |
+| OPAMP_AGENT_ID       |          | A UUID used to uniquely identify the agent. If not supplied one will be generated |
+| OPAMP_LABELS         |          | A comma separated list of labels in the form `label=value`                        |
+| OPAMP_AGENT_NAME     |          | Human readable name for the agent                                                 |
+
+

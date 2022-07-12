@@ -26,6 +26,7 @@ require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/jaegerexporter v0.54.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/kafkaexporter v0.54.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/loadbalancingexporter v0.54.0
+	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/logzioexporter v0.55.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/lokiexporter v0.54.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/observiqexporter v0.54.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/opencensusexporter v0.54.0
@@ -110,8 +111,8 @@ require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/zipkinreceiver v0.54.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/zookeeperreceiver v0.54.0
 	github.com/spf13/pflag v1.0.5
-	github.com/stretchr/testify v1.7.5
-	go.opentelemetry.io/collector v0.54.0
+	github.com/stretchr/testify v1.8.0
+	go.opentelemetry.io/collector v0.55.0
 	go.uber.org/multierr v1.8.0
 	go.uber.org/zap v1.21.0
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0
@@ -307,7 +308,7 @@ require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/internal/aws/proxy v0.54.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/internal/aws/xray v0.54.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/internal/common v0.54.0 // indirect
-	github.com/open-telemetry/opentelemetry-collector-contrib/internal/coreinternal v0.54.0 // indirect
+	github.com/open-telemetry/opentelemetry-collector-contrib/internal/coreinternal v0.55.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/internal/docker v0.54.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/internal/k8sconfig v0.54.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/internal/kubelet v0.54.0 // indirect
@@ -318,7 +319,7 @@ require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/experimentalmetricmetadata v0.54.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/resourcetotelemetry v0.54.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/stanza v0.54.0 // indirect
-	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/translator/jaeger v0.54.0 // indirect
+	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/translator/jaeger v0.55.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/translator/opencensus v0.54.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/translator/prometheusremotewrite v0.54.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/translator/zipkin v0.54.0 // indirect
@@ -386,8 +387,8 @@ require (
 	go.mongodb.org/atlas v0.16.0 // indirect
 	go.mongodb.org/mongo-driver v1.9.1 // indirect
 	go.opencensus.io v0.23.0 // indirect
-	go.opentelemetry.io/collector/pdata v0.54.0 // indirect
-	go.opentelemetry.io/collector/semconv v0.54.0 // indirect
+	go.opentelemetry.io/collector/pdata v0.55.0 // indirect
+	go.opentelemetry.io/collector/semconv v0.55.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.32.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.32.0 // indirect
 	go.opentelemetry.io/contrib/zpages v0.32.0 // indirect
@@ -401,8 +402,8 @@ require (
 	go.uber.org/goleak v1.1.12 // indirect
 	golang.org/x/crypto v0.0.0-20220507011949-2cf3adece122 // indirect
 	golang.org/x/mod v0.6.0-dev.0.20220106191415-9b9b3d81d5e3 // indirect
-	golang.org/x/net v0.0.0-20220617184016-355a448f1bc9 // indirect
-	golang.org/x/oauth2 v0.0.0-20220608161450-d0670ef3b1eb // indirect
+	golang.org/x/net v0.0.0-20220624214902-1bab6f366d9e // indirect
+	golang.org/x/oauth2 v0.0.0-20220622183110-fd043fe589d2 // indirect
 	golang.org/x/sync v0.0.0-20220601150217-0de741cfad7f // indirect
 	golang.org/x/term v0.0.0-20210927222741-03fcf44c2211 // indirect
 	golang.org/x/text v0.3.7 // indirect
@@ -410,9 +411,9 @@ require (
 	golang.org/x/tools v0.1.10 // indirect
 	golang.org/x/xerrors v0.0.0-20220609144429-65e65417b02f // indirect
 	gonum.org/v1/gonum v0.11.0 // indirect
-	google.golang.org/api v0.85.0 // indirect
+	google.golang.org/api v0.86.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
-	google.golang.org/genproto v0.0.0-20220617124728-180714bec0ad // indirect
+	google.golang.org/genproto v0.0.0-20220624142145-8cd45d7dbd1f // indirect
 	google.golang.org/grpc v1.47.0 // indirect
 	google.golang.org/protobuf v1.28.0 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
@@ -434,10 +435,10 @@ require (
 
 require (
 	github.com/containerd/containerd v1.6.6 // indirect
-	github.com/klauspost/compress v1.15.6 // indirect
-	github.com/shirou/gopsutil/v3 v3.22.5
-	github.com/spf13/cobra v1.4.0 // indirect
-	golang.org/x/sys v0.0.0-20220615213510-4f61da869c0c
+	github.com/klauspost/compress v1.15.7 // indirect
+	github.com/shirou/gopsutil/v3 v3.22.6
+	github.com/spf13/cobra v1.5.0 // indirect
+	golang.org/x/sys v0.0.0-20220624220833-87e55d714810
 )
 
 replace github.com/observiq/observiq-otel-collector/processor/resourceattributetransposerprocessor => ./processor/resourceattributetransposerprocessor
@@ -445,6 +446,3 @@ replace github.com/observiq/observiq-otel-collector/processor/resourceattributet
 replace github.com/observiq/observiq-otel-collector/receiver/pluginreceiver => ./receiver/pluginreceiver
 
 replace github.com/observiq/observiq-otel-collector/exporter/googlecloudexporter => ./exporter/googlecloudexporter
-
-// see https://github.com/google/gnostic/issues/262
-replace github.com/googleapis/gnostic v0.5.6 => github.com/googleapis/gnostic v0.5.5
