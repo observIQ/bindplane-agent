@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:build darwin && !linux && !windows
+//go:build darwin
 
 package install
 
@@ -28,8 +28,8 @@ import (
 const darwinServiceName = "com.observiq.collector"
 const darwinServiceFilePath = "/Library/LaunchDaemons/com.observiq.collector.plist"
 
-// NewService returns an instance of the Service interface for managing the observiq-otel-collector service on the current OS.
-func NewService(latestPath string) Service {
+// newService returns an instance of the Service interface for managing the observiq-otel-collector service on the current OS.
+func newService(latestPath string) Service {
 	return &darwinService{
 		newServiceFilePath:       filepath.Join(latestPath, "install", "com.observiq.collector.plist"),
 		serviceName:              darwinServiceName,
@@ -119,7 +119,6 @@ func (d darwinService) Uninstall() error {
 }
 
 // InstallDir returns the filepath to the install directory
-//revive:disable-next-line:exported it stutters but is an apt name
-func InstallDir() (string, error) {
+func installDir() (string, error) {
 	return "/opt/observiq-otel-collector", nil
 }

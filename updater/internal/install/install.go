@@ -23,34 +23,55 @@ import (
 	"path/filepath"
 )
 
-// InstallArtifacts installs the unpacked artifacts in latestDirPath to installDirPath,
-// as well as installing the new service file using the provided Service interface
-//revive:disable-next-line:exported it stutter but is an apt name
-func InstallArtifacts(latestDirPath, installDirPath string, svc Service) error {
-	// Stop service
-	err := svc.Stop()
+// Installer allows you to install files from latestDir into installDir,
+// as well as update the service configuration using the "Install" method.
+type Installer struct {
+	latestDir  string
+	installDir string
+	svc        Service
+}
+
+// NewInstaller returns a new instance of an Installer.
+func NewInstaller(tempDir string) (*Installer, error) {
+	latestDir := filepath.Join(tempDir, "latest")
+	installDirPath, err := installDir()
 	if err != nil {
+		return nil, fmt.Errorf("failed to determine install dir: %w", err)
+	}
+
+	return &Installer{
+		latestDir:  latestDir,
+		svc:        newService(latestDir),
+		installDir: installDirPath,
+	}, nil
+}
+
+// Install installs the unpacked artifacts in latestDirPath to installDirPath,
+// as well as installing the new service file using the provided Service interface
+func (i Installer) Install() error {
+	// Stop service
+	if err := i.svc.Stop(); err != nil {
 		return fmt.Errorf("failed to stop service: %w", err)
 	}
 
 	// install files that go to installDirPath to their correct location,
 	// excluding any config files (logging.yaml, config.yaml, manager.yaml)
-	if err := moveFiles(latestDirPath, installDirPath); err != nil {
+	if err := moveFiles(i.latestDir, i.installDir); err != nil {
 		return fmt.Errorf("failed to install new files: %w", err)
 	}
 
 	// Uninstall previous service
-	if err := svc.Uninstall(); err != nil {
+	if err := i.svc.Uninstall(); err != nil {
 		return fmt.Errorf("failed to uninstall service: %w", err)
 	}
 
 	// Install new service
-	if err := svc.Install(); err != nil {
+	if err := i.svc.Install(); err != nil {
 		return fmt.Errorf("failed to install service: %w", err)
 	}
 
 	// Start service
-	if err := svc.Start(); err != nil {
+	if err := i.svc.Start(); err != nil {
 		return fmt.Errorf("failed to start service: %w", err)
 	}
 

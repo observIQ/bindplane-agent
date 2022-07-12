@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//go:build windows
+
 package install
 
 import (
@@ -37,8 +39,8 @@ const (
 	serviceNotExistErrStr        = "The specified service does not exist as an installed service."
 )
 
-// NewService returns an instance of the Service interface for managing the observiq-otel-collector service on the current OS.
-func NewService(latestPath string) Service {
+// newService returns an instance of the Service interface for managing the observiq-otel-collector service on the current OS.
+func newService(latestPath string) Service {
 	return &windowsService{
 		newServiceFilePath: filepath.Join(latestPath, "install", "windows_service.json"),
 		serviceName:        defaultServiceName,
@@ -228,7 +230,7 @@ func expandArguments(wsc *windowsServiceConfig, productName, installDir string) 
 	wsc.Service.Arguments = strings.ReplaceAll(wsc.Service.Arguments, "&quot;", `"`)
 }
 
-func installDir(productName string) (string, error) {
+func installDirFromRegistry(productName string) (string, error) {
 	keyPath := fmt.Sprintf(`Software\Microsoft\Windows\CurrentVersion\Uninstall\%s`, productName)
 	key, err := registry.OpenKey(registry.LOCAL_MACHINE, keyPath, registry.READ)
 	if err != nil {
@@ -268,8 +270,7 @@ func startType(cfgStartType string) (startType uint32, delayed bool, err error) 
 	return
 }
 
-// InstallDir returns the filepath to the install directory
-//revive:disable-next-line:exported it stutters but is an apt name
-func InstallDir() (string, error) {
-	return installDir(defaultProductName)
+// installDir returns the filepath to the install directory
+func installDir() (string, error) {
+	return installDirFromRegistry(defaultProductName)
 }

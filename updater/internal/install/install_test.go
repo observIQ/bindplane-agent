@@ -28,8 +28,12 @@ import (
 func TestInstallArtifacts(t *testing.T) {
 	t.Run("Installs artifacts correctly", func(t *testing.T) {
 		outDir := t.TempDir()
-		latestDir := filepath.Join("testdata", "example-install")
 		svc := mocks.NewService(t)
+		installer := &Installer{
+			latestDir:  filepath.Join("testdata", "example-install"),
+			installDir: outDir,
+			svc:        svc,
+		}
 
 		outDirConfig := filepath.Join(outDir, "config.yaml")
 		outDirLogging := filepath.Join(outDir, "logging.yaml")
@@ -47,7 +51,7 @@ func TestInstallArtifacts(t *testing.T) {
 		svc.On("Install").Once().Return(nil)
 		svc.On("Start").Once().Return(nil)
 
-		err = InstallArtifacts(latestDir, outDir, svc)
+		err = installer.Install()
 		require.NoError(t, err)
 
 		contentsEqual(t, outDirConfig, "# The original config file")
@@ -64,69 +68,93 @@ func TestInstallArtifacts(t *testing.T) {
 
 	t.Run("Stop fails", func(t *testing.T) {
 		outDir := t.TempDir()
-		latestDir := filepath.Join("testdata", "example-install")
 		svc := mocks.NewService(t)
+		installer := &Installer{
+			latestDir:  filepath.Join("testdata", "example-install"),
+			installDir: outDir,
+			svc:        svc,
+		}
 
 		svc.On("Stop").Once().Return(errors.New("stop failed"))
 
-		err := InstallArtifacts(latestDir, outDir, svc)
+		err := installer.Install()
 		require.ErrorContains(t, err, "failed to stop service")
 	})
 
 	t.Run("Uninstall fails", func(t *testing.T) {
 		outDir := t.TempDir()
-		latestDir := filepath.Join("testdata", "example-install")
 		svc := mocks.NewService(t)
+		installer := &Installer{
+			latestDir:  filepath.Join("testdata", "example-install"),
+			installDir: outDir,
+			svc:        svc,
+		}
 
 		svc.On("Stop").Once().Return(nil)
 		svc.On("Uninstall").Once().Return(errors.New("uninstall failed"))
 
-		err := InstallArtifacts(latestDir, outDir, svc)
+		err := installer.Install()
 		require.ErrorContains(t, err, "failed to uninstall service")
 	})
 
 	t.Run("Install fails", func(t *testing.T) {
 		outDir := t.TempDir()
-		latestDir := filepath.Join("testdata", "example-install")
 		svc := mocks.NewService(t)
+		installer := &Installer{
+			latestDir:  filepath.Join("testdata", "example-install"),
+			installDir: outDir,
+			svc:        svc,
+		}
 
 		svc.On("Stop").Once().Return(nil)
 		svc.On("Uninstall").Once().Return(nil)
 		svc.On("Install").Once().Return(errors.New("install failed"))
 
-		err := InstallArtifacts(latestDir, outDir, svc)
+		err := installer.Install()
 		require.ErrorContains(t, err, "failed to install service")
 	})
 
 	t.Run("Start fails", func(t *testing.T) {
 		outDir := t.TempDir()
-		latestDir := filepath.Join("testdata", "example-install")
 		svc := mocks.NewService(t)
+		installer := &Installer{
+			latestDir:  filepath.Join("testdata", "example-install"),
+			installDir: outDir,
+			svc:        svc,
+		}
 
 		svc.On("Stop").Once().Return(nil)
 		svc.On("Uninstall").Once().Return(nil)
 		svc.On("Install").Once().Return(nil)
 		svc.On("Start").Once().Return(errors.New("start failed"))
 
-		err := InstallArtifacts(latestDir, outDir, svc)
+		err := installer.Install()
 		require.ErrorContains(t, err, "failed to start service")
 	})
 
 	t.Run("Latest dir does not exist", func(t *testing.T) {
 		outDir := t.TempDir()
-		latestDir := filepath.Join("testdata", "non-existent-dir")
 		svc := mocks.NewService(t)
+		installer := &Installer{
+			latestDir:  filepath.Join("testdata", "non-existent-dir"),
+			installDir: outDir,
+			svc:        svc,
+		}
 
 		svc.On("Stop").Once().Return(nil)
 
-		err := InstallArtifacts(latestDir, outDir, svc)
+		err := installer.Install()
 		require.ErrorContains(t, err, "failed to install new files")
 	})
 
 	t.Run("An artifact exists already as a folder", func(t *testing.T) {
 		outDir := t.TempDir()
-		latestDir := filepath.Join("testdata", "example-install")
 		svc := mocks.NewService(t)
+		installer := &Installer{
+			latestDir:  filepath.Join("testdata", "example-install"),
+			installDir: outDir,
+			svc:        svc,
+		}
 
 		outDirConfig := filepath.Join(outDir, "config.yaml")
 		outDirLogging := filepath.Join(outDir, "logging.yaml")
@@ -144,7 +172,7 @@ func TestInstallArtifacts(t *testing.T) {
 
 		svc.On("Stop").Once().Return(nil)
 
-		err = InstallArtifacts(latestDir, outDir, svc)
+		err = installer.Install()
 		require.ErrorContains(t, err, "failed to install new files")
 	})
 }

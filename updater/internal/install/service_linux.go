@@ -28,8 +28,8 @@ import (
 const linuxServiceName = "observiq-otel-collector"
 const linuxServiceFilePath = "/usr/lib/systemd/system/observiq-otel-collector.service"
 
-// NewService returns an instance of the Service interface for managing the observiq-otel-collector service on the current OS.
-func NewService(latestPath string) Service {
+// newService returns an instance of the Service interface for managing the observiq-otel-collector service on the current OS.
+func newService(latestPath string) Service {
 	return linuxService{
 		newServiceFilePath:       filepath.Join(latestPath, "install", "observiq-otel-collector.service"),
 		serviceName:              linuxServiceName,
@@ -128,8 +128,7 @@ func (l linuxService) Uninstall() error {
 	return nil
 }
 
-// InstallDir returns the filepath to the install directory
-//revive:disable-next-line:exported it stutters but is an apt name
-func InstallDir() (string, error) {
+// installDir returns the filepath to the install directory
+func installDir() (string, error) {
 	return "/opt/observiq-otel-collector", nil
 }
