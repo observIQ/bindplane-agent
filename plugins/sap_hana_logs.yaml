@@ -2,15 +2,19 @@ version: 0.0.1
 title: SAP HANA
 description: Log parser for SAP HANA
 parameters:
-  - name: logs_directory
+  - name: file_path
     description: The directory to the SAP HANA trace logs. No trailing slash should be included.
     type: "[]string"
-    default: 
-      - "/usr/sap/*/HDB*/*/trace"
-  - name: file_name
-    description: 'The file name of the SAP HANA trace log. This can be a glob pattern. Use "*.trc" to get all files with file extension of "trc". The files nameserver_history*.trc, nameserver*loads*.trc, nameserver*unloads*.trc, and nameserver*executed_staments*.trc are excluded from the logs directory and will not be parsed.'
-    type: string
-    default: "*.trc"
+    default:
+      - "/usr/sap/*/HDB*/*/trace/*.trc"
+  - name: exclude
+    description: The directorys to exclude for the SAP HANA trace logs.
+    type: "[]string"
+    default:
+      - "/usr/sap/*/HDB*/*/trace/nameserver_history*.trc"
+      - "/usr/sap/*/HDB*/*/trace/nameserver*loads*.trc"
+      - "/usr/sap/*/HDB*/*/trace/nameserver*unlaods*.trc"
+      - "/usr/sap/*/HDB*/*/trace/nameserver*executed_statements*.trc"
   - name: start_at
     description: Start reading file from 'beginning' or 'end'
     type: string
@@ -23,39 +27,36 @@ template: |
   receivers:
     filelog:
       include:
-          # {{ range $fp := .logs_directory }}
-          - '{{ $fp }}/{{ .filename }}'
+          # {{ range $fp := .file_path }}
+             - '{{ $fp }}'
           # {{end}}
       exclude:
-          # {{ range $fp := .logs_directory }}
-            - '{{ $fp }}/nameserver_history*.trc'
-            - '{{ $fp }}/nameserver*loads*.trc'
-            - '{{ $fp }}/nameserver*unloads*.trc'
-            - '{{ $fp }}/nameserver*executed_statements*.trc'
+          #  {{ range $fp := .exclude }}
+             - '{{ $fp }}'
           # {{end}}
       multiline:
-        line_start_pattern: '\[\d+\]{[^}]+}\[[^\/]+\/[^\]]+\] \d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d+ [^ ]+ [^ ]+\s+[^ ]+ :'
+         line_start_pattern: '\[\d+\]{[^}]+}\[[^\/]+\/[^\]]+\] \d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d+ [^ ]+ [^ ]+\s+[^ ]+ :'
       start_at: {{ .start_at }}
       attributes:
-        log_type: sap_hana
+         log_type: sap_hana
       operators:
-        - id: sap_hana_parser
-          type: regex_parser
-          regex: '^\[(?P<thread_id>\d+)\]{(?P<connection_id>[^}]+)}\[(?P<transaction_id>[^\/]+)\/(?P<update_transaction_id>[^\]]+)\] (?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d+) (?P<sap_severity>[^ ]+) (?P<component>[^ ]+)\s+(?P<source_file>[^ ]+) : (?P<message>.*)'
-          timestamp:
-            parse_from: attributes.timestamp
-            layout: '%Y-%m-%d %H:%M:%S.%s'
-          severity:
-            parse_from: attributes.sap_severity
-            mapping:
-              debug: d
-              info: i
-              warn: w
-              error: e
-              fatal: f
+          - id: sap_hana_parser
+            type: regex_parser
+            regex: '^\[(?P<thread_id>\d+)\]{(?P<connection_id>[^}]+)}\[(?P<transaction_id>[^\/]+)\/(?P<update_transaction_id>[^\]]+)\] (?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d+) (?P<sap_severity>[^ ]+) (?P<component>[^ ]+)\s+(?P<source_file>[^ ]+) : (?P<message>.*)'
+            timestamp:
+              parse_from: attributes.timestamp
+              layout: '%Y-%m-%d %H:%M:%S.%s'
+            severity:
+              parse_from: attributes.sap_severity
+              mapping:
+                debug: d
+                info: i
+                warn: w
+                error: e
+                fatal: f
 
   service:
     pipelines:
-      logs:
-        receivers: [filelog] 
+          logs:
+            receivers: [filelog]
 
