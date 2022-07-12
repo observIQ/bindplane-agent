@@ -98,3 +98,7 @@ func (d darwinService) Uninstall() error {
 
 	return nil
 }
+
+func InstallDir() (string, error) {
+	return "/opt/observiq-otel-collector", nil
+}

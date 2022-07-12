@@ -108,3 +108,7 @@ func (l linuxService) Uninstall() error {
 
 	return nil
 }
+
+func InstallDir() (string, error) {
+	return "/opt/observiq-otel-collector", nil
+}

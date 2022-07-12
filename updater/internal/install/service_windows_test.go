@@ -237,6 +237,52 @@ func TestWindowsServiceInstall(t *testing.T) {
 	})
 }
 
+func TestStartType(t *testing.T) {
+	testCases := []struct {
+		cfgStartType string
+		startType    uint32
+		delayed      bool
+		expectedErr  string
+	}{
+		{
+			cfgStartType: "auto",
+			startType:    mgr.StartAutomatic,
+			delayed:      false,
+		},
+		{
+			cfgStartType: "demand",
+			startType:    mgr.StartManual,
+			delayed:      false,
+		},
+		{
+			cfgStartType: "disabled",
+			startType:    mgr.StartDisabled,
+			delayed:      false,
+		},
+		{
+			cfgStartType: "delayed",
+			startType:    mgr.StartAutomatic,
+			delayed:      true,
+		},
+		{
+			cfgStartType: "not-a-real-start-type",
+			expectedErr:  "invalid start type in service config",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(fmt.Sprintf("cfgStartType: %s", tc.cfgStartType), func(t *testing.T) {
+			st, d, err := startType(tc.cfgStartType)
+			if tc.expectedErr != "" {
+				require.ErrorContains(t, err, tc.expectedErr)
+			} else {
+				assert.Equal(t, tc.startType, st)
+				assert.Equal(t, tc.delayed, d)
+			}
+		})
+	}
+}
+
 // uninstallService is a helper that uninstalls the service manually for test setup, in case it is somehow leftover.
 func uninstallService(t *testing.T) {
 	m, err := mgr.Connect()
@@ -296,7 +342,7 @@ func requireServiceConfigMatches(t *testing.T, binaryPath, name string, startTyp
 	cfg, err := s.Config()
 	require.NoError(t, err)
 
-	expectedBinaryPathName := JoinArgs(append([]string{binaryPath}, args...)...)
+	expectedBinaryPathName := joinArgs(append([]string{binaryPath}, args...)...)
 	assert.Equal(t, displayName, cfg.DisplayName)
 	assert.Equal(t, description, cfg.Description)
 	assert.Equal(t, delayed, cfg.DelayedAutoStart)
@@ -385,7 +431,7 @@ func compileProgram(t *testing.T, inPath, outPath string) {
 	require.NoError(t, err)
 }
 
-func JoinArgs(args ...string) string {
+func joinArgs(args ...string) string {
 	sb := strings.Builder{}
 	for _, arg := range args {
 		if strings.Contains(arg, " ") {

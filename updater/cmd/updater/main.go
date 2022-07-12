@@ -18,8 +18,10 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 
 	"github.com/observiq/observiq-otel-collector/updater/internal/download"
+	"github.com/observiq/observiq-otel-collector/updater/internal/install"
 	"github.com/observiq/observiq-otel-collector/updater/internal/version"
 	"github.com/spf13/pflag"
 )
@@ -59,6 +61,18 @@ func main() {
 
 	if err := download.FetchAndExtractArchive(*downloadURL, *tmpDir, *contentHash); err != nil {
 		log.Fatalf("Failed to download and verify update: %s", err)
+	}
+
+	installDir, err := install.InstallDir()
+	if err != nil {
+		log.Fatalf("Failed to determine install dir: %s", err)
+	}
+
+	latestDir := filepath.Join(*tmpDir, "latest")
+	svc := install.NewService(latestDir)
+
+	if err := install.InstallArtifacts(latestDir, installDir, svc); err != nil {
+		log.Fatalf("Failed to install artifacts: %s", err)
 	}
 
 }

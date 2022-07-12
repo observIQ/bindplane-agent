@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"golang.org/x/sys/windows/registry"
 	"golang.org/x/sys/windows/svc"
@@ -15,11 +16,18 @@ import (
 	"github.com/kballard/go-shellquote"
 )
 
+const (
+	defaultProductName           = "observIQ Distro for OpenTelemetry Collector"
+	defaultServiceName           = "observiq-otel-collector"
+	uninstallServicePollInterval = 50 * time.Millisecond
+	serviceNotExistErr           = "The specified service does not exist as an installed service."
+)
+
 func NewService(latestPath string) Service {
 	return &windowsService{
 		newServiceFilePath: filepath.Join(latestPath, "install", "windows_service.json"),
-		serviceName:        "observiq-otel-collector",
-		productName:        "observIQ Distro for OpenTelemetry Collector",
+		serviceName:        defaultServiceName,
+		productName:        defaultProductName,
 	}
 }
 
@@ -86,16 +94,14 @@ func (w windowsService) Install() error {
 		return fmt.Errorf("failed to get install dir: %w", err)
 	}
 
-	if err = expandArguments(wsc, w.productName, iDir); err != nil {
-		return fmt.Errorf("failed to expand arguments in service config: %w", err)
-	}
+	expandArguments(wsc, w.productName, iDir)
 
 	splitArgs, err := shellquote.Split(wsc.Service.Arguments)
 	if err != nil {
 		return fmt.Errorf("failed to parse arguments in service config: %w", err)
 	}
 
-	startType, delayed, err := startType(wsc)
+	startType, delayed, err := startType(wsc.Service.Start)
 	if err != nil {
 		return fmt.Errorf("failed to parse start type in service config: %w", err)
 	}
@@ -136,14 +142,36 @@ func (w windowsService) Uninstall() error {
 	if err != nil {
 		return fmt.Errorf("failed to open service: %w", err)
 	}
-	defer s.Close()
 
-	// TODO: Should this wait for the service to no longer exist?
-	// This only marks the service for deletion, no guarantee is made about when it's actually deleted
 	if err = s.Delete(); err != nil {
+		sCloseErr := s.Close()
+		if sCloseErr != nil {
+			log.Default().Printf("Failed to close service: %s\n", err)
+		}
 		return fmt.Errorf("failed to delete service: %w", err)
 	}
 
+	if err := s.Close(); err != nil {
+		return fmt.Errorf("failed to close service: %w", err)
+	}
+
+	// Wait for the service to actually be deleted:
+	for {
+		s, err := m.OpenService(w.serviceName)
+		if err != nil {
+			if err.Error() == serviceNotExistErr {
+				// This is expected when the service is uninstalled.
+				break
+			}
+			return fmt.Errorf("got unexpected error when waiting for service deletion: %w", err)
+		}
+
+		if err := s.Close(); err != nil {
+			return fmt.Errorf("failed to close service: %w", err)
+		}
+		// rest with the handle closed to let the service manager remove the service
+		time.Sleep(uninstallServicePollInterval)
+	}
 	return nil
 }
 
@@ -180,10 +208,9 @@ func readWindowsServiceConfig(path string) (*windowsServiceConfig, error) {
 
 // expandArguments expands [INSTALLDIR] to the actual install directory and
 // expands '&quote;' to the literal '"'
-func expandArguments(wsc *windowsServiceConfig, productName, installDir string) error {
+func expandArguments(wsc *windowsServiceConfig, productName, installDir string) {
 	wsc.Service.Arguments = string(replaceInstallDir([]byte(wsc.Service.Arguments), installDir))
 	wsc.Service.Arguments = strings.ReplaceAll(wsc.Service.Arguments, "&quot;", `"`)
-	return nil
 }
 
 func installDir(productName string) (string, error) {
@@ -207,10 +234,10 @@ func installDir(productName string) (string, error) {
 	return val, nil
 }
 
-// startType converts the start type from the windowsServiceConfig to a start type recongizable by
-// kardianos/service.
-func startType(wsc *windowsServiceConfig) (startType uint32, delayed bool, err error) {
-	switch wsc.Service.Start {
+// startType converts the start type from the windowsServiceConfig to a start type recognizable by the windows
+// service API
+func startType(cfgStartType string) (startType uint32, delayed bool, err error) {
+	switch cfgStartType {
 	case "auto":
 		startType = mgr.StartAutomatic
 	case "demand":
@@ -221,7 +248,11 @@ func startType(wsc *windowsServiceConfig) (startType uint32, delayed bool, err e
 		startType = mgr.StartAutomatic
 		delayed = true
 	default:
-		err = fmt.Errorf("invalid start type in service config: %s", wsc.Service.Start)
+		err = fmt.Errorf("invalid start type in service config: %s", cfgStartType)
 	}
 	return
+}
+
+func InstallDir() (string, error) {
+	return installDir(defaultProductName)
 }
