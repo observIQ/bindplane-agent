@@ -20,7 +20,7 @@ const (
 	defaultProductName           = "observIQ Distro for OpenTelemetry Collector"
 	defaultServiceName           = "observiq-otel-collector"
 	uninstallServicePollInterval = 50 * time.Millisecond
-	serviceNotExistErr           = "The specified service does not exist as an installed service."
+	serviceNotExistErrStr        = "The specified service does not exist as an installed service."
 )
 
 func NewService(latestPath string) Service {
@@ -159,7 +159,7 @@ func (w windowsService) Uninstall() error {
 	for {
 		s, err := m.OpenService(w.serviceName)
 		if err != nil {
-			if err.Error() == serviceNotExistErr {
+			if err.Error() == serviceNotExistErrStr {
 				// This is expected when the service is uninstalled.
 				break
 			}
