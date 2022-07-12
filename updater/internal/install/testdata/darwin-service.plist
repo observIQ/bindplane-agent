@@ -9,5 +9,7 @@
         <string>sleep</string>
         <string>1000</string>
     </array>
+    <key>KeepAlive</key>
+    <true/>
 </dict>
 </plist>

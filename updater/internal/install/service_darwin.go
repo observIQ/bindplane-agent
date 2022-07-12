@@ -18,38 +18,44 @@ package install
 
 import (
 	"fmt"
-	"io"
-	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
 )
 
-const darwinServiceName = "com.observiq.collector"
-const darwinServiceFilePath = "/Library/LaunchDaemons/com.observiq.collector.plist"
+const (
+	darwinServiceFilePath = "/Library/LaunchDaemons/com.observiq.collector.plist"
+	darwinInstallDir      = "/opt/observiq-otel-collector"
+)
 
 // newService returns an instance of the Service interface for managing the observiq-otel-collector service on the current OS.
 func newService(latestPath string) Service {
 	return &darwinService{
 		newServiceFilePath:       filepath.Join(latestPath, "install", "com.observiq.collector.plist"),
-		serviceName:              darwinServiceName,
 		installedServiceFilePath: darwinServiceFilePath,
+		installDir:               darwinInstallDir,
 	}
 }
 
 type darwinService struct {
 	// newServiceFilePath is the file path to the new plist file
 	newServiceFilePath string
-	// serviceName is the name of the service
-	serviceName string
 	// installedServiceFilePath is the file path to the installed plist file
 	installedServiceFilePath string
+	// installDir is the root directory of the main installation
+	installDir string
 }
 
 // Start the service
 func (d darwinService) Start() error {
-	//#nosec G204 -- serviceName is not determined by user input
-	cmd := exec.Command("launchctl", "start", d.serviceName)
+	// Launchctl exits with error code 0 if the file does not exist.
+	// We want to ensure that we error in this scenario.
+	if _, err := os.Stat(d.installedServiceFilePath); err != nil {
+		return fmt.Errorf("failed to stat installed service file: %w", err)
+	}
+
+	//#nosec G204 -- installedServiceFilePath is not determined by user input
+	cmd := exec.Command("launchctl", "load", d.installedServiceFilePath)
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("running launchctl failed: %w", err)
 	}
@@ -58,8 +64,14 @@ func (d darwinService) Start() error {
 
 // Stop the service
 func (d darwinService) Stop() error {
-	//#nosec G204 -- serviceName is not determined by user input
-	cmd := exec.Command("launchctl", "stop", d.serviceName)
+	// Launchctl exits with error code 0 if the file does not exist.
+	// We want to ensure that we error in this scenario.
+	if _, err := os.Stat(d.installedServiceFilePath); err != nil {
+		return fmt.Errorf("failed to stat installed service file: %w", err)
+	}
+
+	//#nosec G204 -- installedServiceFilePath is not determined by user input
+	cmd := exec.Command("launchctl", "unload", d.installedServiceFilePath)
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("running launchctl failed: %w", err)
 	}
@@ -68,30 +80,14 @@ func (d darwinService) Stop() error {
 
 // Installs the service
 func (d darwinService) Install() error {
-	inFile, err := os.Open(d.newServiceFilePath)
+	serviceFileBytes, err := os.ReadFile(d.newServiceFilePath)
 	if err != nil {
 		return fmt.Errorf("failed to open input file: %w", err)
 	}
-	defer func() {
-		err := inFile.Close()
-		if err != nil {
-			log.Default().Printf("Service Install: Failed to close input file: %s", err)
-		}
-	}()
 
-	outFile, err := os.OpenFile(d.installedServiceFilePath, os.O_CREATE|os.O_WRONLY, 0600)
-	if err != nil {
-		return fmt.Errorf("failed to open output file: %w", err)
-	}
-	defer func() {
-		err := outFile.Close()
-		if err != nil {
-			log.Default().Printf("Service Install: Failed to close output file: %s", err)
-		}
-	}()
-
-	if _, err := io.Copy(outFile, inFile); err != nil {
-		return fmt.Errorf("failed to copy service file: %w", err)
+	expandedServiceFileBytes := replaceInstallDir(serviceFileBytes, d.installDir)
+	if err := os.WriteFile(d.installedServiceFilePath, expandedServiceFileBytes, 0600); err != nil {
+		return fmt.Errorf("failed to write service file: %w", err)
 	}
 
 	//#nosec G204 -- installedServiceFilePath is not determined by user input
@@ -120,5 +116,5 @@ func (d darwinService) Uninstall() error {
 
 // InstallDir returns the filepath to the install directory
 func installDir() (string, error) {
-	return "/opt/observiq-otel-collector", nil
+	return darwinInstallDir, nil
 }
