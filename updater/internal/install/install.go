@@ -25,6 +25,7 @@ import (
 
 // InstallArtifacts installs the unpacked artifacts in latestDirPath to installDirPath,
 // as well as installing the new service file using the provided Service interface
+//revive:disable-next-line:exported it stutter but is an apt name
 func InstallArtifacts(latestDirPath, installDirPath string, svc Service) error {
 	// Stop service
 	err := svc.Stop()

@@ -119,6 +119,7 @@ func (d darwinService) Uninstall() error {
 }
 
 // InstallDir returns the filepath to the install directory
+//revive:disable-next-line:exported it stutters but is an apt name
 func InstallDir() (string, error) {
 	return "/opt/observiq-otel-collector", nil
 }

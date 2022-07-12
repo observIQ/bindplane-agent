@@ -269,6 +269,7 @@ func startType(cfgStartType string) (startType uint32, delayed bool, err error) 
 }
 
 // InstallDir returns the filepath to the install directory
+//revive:disable-next-line:exported it stutters but is an apt name
 func InstallDir() (string, error) {
 	return installDir(defaultProductName)
 }
