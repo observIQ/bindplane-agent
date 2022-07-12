@@ -11,6 +11,7 @@ import (
 
 	"golang.org/x/sys/windows/registry"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/sys/windows/svc"
 	"golang.org/x/sys/windows/svc/mgr"
@@ -44,6 +45,68 @@ func TestWindowsServiceInstall(t *testing.T) {
 
 		//We want to check that the service was actually loaded
 		requireServiceLoadedStatus(t, true)
+
+		requireServiceConfigMatches(t,
+			testServiceProgram,
+			"windows-service",
+			mgr.StartAutomatic,
+			"Test Windows Service",
+			"This is a windows service to test",
+			true,
+			[]string{
+				"--config",
+				filepath.Join(tempDir, "test.yaml"),
+			},
+		)
+
+		err = w.Uninstall()
+		require.NoError(t, err)
+
+		//Make sure the service is no longer listed
+		requireServiceLoadedStatus(t, false)
+	})
+
+	t.Run("Test install + uninstall (space in install folder)", func(t *testing.T) {
+		tempDir := filepath.Join(t.TempDir(), "temp dir with spaces")
+		require.NoError(t, os.MkdirAll(tempDir, 0777))
+		testProductName := "Test Product"
+
+		serviceJSON := filepath.Join(tempDir, "windows-service.json")
+		testServiceProgram := filepath.Join(tempDir, "windows-service.exe")
+		serviceGoFile, err := filepath.Abs(filepath.Join("testdata", "test-windows-service.go"))
+		require.NoError(t, err)
+
+		writeServiceFile(t, serviceJSON, filepath.Join("testdata", "windows-service.json"), serviceGoFile)
+		compileProgram(t, serviceGoFile, testServiceProgram)
+
+		defer uninstallService(t)
+		createInstallDirRegistryKey(t, testProductName, tempDir)
+		defer deleteInstallDirRegistryKey(t, testProductName)
+
+		w := &windowsService{
+			newServiceFilePath: serviceJSON,
+			serviceName:        "windows-service",
+			productName:        testProductName,
+		}
+
+		err = w.Install()
+		require.NoError(t, err)
+
+		//We want to check that the service was actually loaded
+		requireServiceLoadedStatus(t, true)
+
+		requireServiceConfigMatches(t,
+			testServiceProgram,
+			"windows-service",
+			mgr.StartAutomatic,
+			"Test Windows Service",
+			"This is a windows service to test",
+			true,
+			[]string{
+				"--config",
+				filepath.Join(tempDir, "test.yaml"),
+			},
+		)
 
 		err = w.Uninstall()
 		require.NoError(t, err)
@@ -219,6 +282,30 @@ func requireServiceLoadedStatus(t *testing.T, loaded bool) {
 
 }
 
+func requireServiceConfigMatches(t *testing.T, binaryPath, name string, startType uint32, displayName, description string, delayed bool, args []string) {
+	t.Helper()
+
+	m, err := mgr.Connect()
+	require.NoError(t, err, "failed to connect to service manager")
+	defer m.Disconnect()
+
+	s, err := m.OpenService(name)
+	require.NoError(t, err, "failed to open service")
+	defer s.Close()
+
+	cfg, err := s.Config()
+	require.NoError(t, err)
+
+	expectedBinaryPathName := JoinArgs(append([]string{binaryPath}, args...)...)
+	assert.Equal(t, displayName, cfg.DisplayName)
+	assert.Equal(t, description, cfg.Description)
+	assert.Equal(t, delayed, cfg.DelayedAutoStart)
+	assert.Equal(t, startType, cfg.StartType)
+	assert.Equal(t, expectedBinaryPathName, cfg.BinaryPathName)
+	// We always install as LocalSystem, which is the "super user" of the system
+	assert.Equal(t, "LocalSystem", cfg.ServiceStartName)
+}
+
 func requireServiceRunningStatus(t *testing.T, running bool) {
 	t.Helper()
 
@@ -277,6 +364,10 @@ func deleteInstallDirRegistryKey(t *testing.T, productName string) {
 func createInstallDirRegistryKey(t *testing.T, productName, installDir string) {
 	t.Helper()
 
+	installDir, err := filepath.Abs(installDir)
+	require.NoError(t, err)
+	installDir += `\`
+
 	keyPath := fmt.Sprintf(`Software\Microsoft\Windows\CurrentVersion\Uninstall\%s`, productName)
 	key, _, err := registry.CreateKey(registry.LOCAL_MACHINE, keyPath, registry.WRITE)
 	require.NoError(t, err)
@@ -292,4 +383,21 @@ func compileProgram(t *testing.T, inPath, outPath string) {
 	cmd := exec.Command("go.exe", "build", "-o", outPath, inPath)
 	err := cmd.Run()
 	require.NoError(t, err)
+}
+
+func JoinArgs(args ...string) string {
+	sb := strings.Builder{}
+	for _, arg := range args {
+		if strings.Contains(arg, " ") {
+			sb.WriteString(`"`)
+			sb.WriteString(arg)
+			sb.WriteString(`"`)
+		} else {
+			sb.WriteString(arg)
+		}
+		sb.WriteString(" ")
+	}
+
+	str := sb.String()
+	return str[:len(str)-1]
 }

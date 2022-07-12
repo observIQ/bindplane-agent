@@ -5,6 +5,6 @@
       "start": "delayed",
       "display-name": "Test Windows Service",
       "description": "This is a windows service to test",
-      "arguments": "--print &quot;[INSTALLDIR]test.yaml&quot;"
+      "arguments": "--config &quot;[INSTALLDIR]test.yaml&quot;"
     }
 }
