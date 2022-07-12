@@ -55,7 +55,7 @@ jobs:
         env:
           RUNNING_AS_SU: 1
       - name: Run Tests (linux)
-        if: matrix.os != 'ubuntu-20.04'
+        if: matrix.os == 'ubuntu-20.04'
         run: sudo make test
         env:
           RUNNING_AS_SU: 1
