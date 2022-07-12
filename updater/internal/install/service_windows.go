@@ -106,7 +106,7 @@ func (w windowsService) Install() error {
 		return fmt.Errorf("failed to read service config: %w", err)
 	}
 
-	iDir, err := installDir(w.productName)
+	iDir, err := installDirFromRegistry(w.productName)
 	if err != nil {
 		return fmt.Errorf("failed to get install dir: %w", err)
 	}
@@ -239,7 +239,7 @@ func installDirFromRegistry(productName string) (string, error) {
 	defer func() {
 		err := key.Close()
 		if err != nil {
-			log.Default().Printf("getInstallDir: failed to close registry key")
+			log.Default().Printf("installDirFromRegistry: failed to close registry key")
 		}
 	}()
 
