@@ -12,7 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:build linux && root
+// an elevated user is needed to run the service tests
+//go:build linux && superuser
 
 package install
 

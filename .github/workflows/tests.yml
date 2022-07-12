@@ -51,3 +51,5 @@ jobs:
             ${{ runner.os }}-go-
       - name: Run Tests
         run: make test
+        env:
+          RUNNING_AS_SU: 1

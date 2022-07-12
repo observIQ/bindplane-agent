@@ -10,6 +10,12 @@ OUTDIR=./dist
 GOOS ?= $(shell go env GOOS)
 GOARCH ?= $(shell go env GOARCH)
 
+ifdef RUNNING_AS_SU
+TESTTAGS?=-tags superuser
+else
+TESTTAGS?=
+endif
+
 ifeq ($(GOOS), windows)
 EXT?=.exe
 else
@@ -102,7 +108,7 @@ misspell-fix:
 
 .PHONY: test
 test:
-	$(MAKE) for-all CMD="go test -race ./..."
+	$(MAKE) for-all CMD="go test $(TESTTAGS) -race ./..."
 
 .PHONY: test-with-cover
 test-with-cover:
