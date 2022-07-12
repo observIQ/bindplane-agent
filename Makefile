@@ -10,11 +10,7 @@ OUTDIR=./dist
 GOOS ?= $(shell go env GOOS)
 GOARCH ?= $(shell go env GOARCH)
 
-ifdef RUNNING_AS_SU
-TESTTAGS?=-tags superuser
-else
-TESTTAGS?=
-endif
+INTEGRATION_TEST_ARGS?=-tags integration
 
 ifeq ($(GOOS), windows)
 EXT?=.exe
@@ -108,12 +104,16 @@ misspell-fix:
 
 .PHONY: test
 test:
-	$(MAKE) for-all CMD="go test $(TESTTAGS) -race ./..."
+	$(MAKE) for-all CMD="go test -race ./..."
 
 .PHONY: test-with-cover
 test-with-cover:
 	$(MAKE) for-all CMD="go test -coverprofile=cover.out ./..."
 	$(MAKE) for-all CMD="go tool cover -html=cover.out -o cover.html"
+
+.PHONY: 
+test-updater-integration:
+	cd updater; go test $(INTEGRATION_TEST_ARGS) -race ./...
 
 .PHONY: bench
 bench:

@@ -13,7 +13,7 @@
 // limitations under the License.
 
 // an elevated user is needed to run the service tests
-//go:build windows && superuser
+//go:build windows && integration
 
 package install
 

@@ -13,7 +13,7 @@
 // limitations under the License.
 
 // an elevated user is needed to run the service tests
-//go:build linux && superuser
+//go:build linux && integration
 
 package install
 
@@ -26,8 +26,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// NOTE: These tests can only be run as root!
-// this file has a "root" tag that must be specified to run these tests!
+// NOTE: These tests must run as root in order to pass
 func TestLinuxServiceInstall(t *testing.T) {
 	t.Run("Test install + uninstall", func(t *testing.T) {
 		installedServicePath := "/usr/lib/systemd/system/linux-service.service"
