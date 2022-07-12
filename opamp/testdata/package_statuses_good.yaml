@@ -1,25 +1,26 @@
-packages:
+all_packages_hash:
+    - 104
+    - 97
+    - 115
+    - 104
+all_error_message: whoops
+package_states:
     package:
         name: package
-        agenthasversion: "1.0"
-        agenthashash:
+        updater_start: false
+        agent_version: "1.0"
+        agent_hash:
             - 104
             - 97
             - 115
             - 104
             - 49
-        serverofferedversion: "2.0"
-        serverofferedhash:
+        server_version: "2.0"
+        server_hash:
             - 104
             - 97
             - 115
             - 104
             - 50
         status: 1
-        errormessage: bad
-serverprovidedallpackageshash:
-    - 104
-    - 97
-    - 115
-    - 104
-errormessage: whoops
+        error_message: bad

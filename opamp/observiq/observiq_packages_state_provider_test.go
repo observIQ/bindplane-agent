@@ -426,19 +426,19 @@ func TestSetLastReportedStatuses(t *testing.T) {
 
 				bytes, err := os.ReadFile(testYaml)
 				assert.NoError(t, err)
-				var fileStatuses *protobufs.PackageStatuses
-				err = yaml.Unmarshal(bytes, &fileStatuses)
+				var fileStates packageStates
+				err = yaml.Unmarshal(bytes, &fileStates)
 				assert.NoError(t, err)
-				assert.Equal(t, allHash, fileStatuses.ServerProvidedAllPackagesHash)
-				assert.Equal(t, allErrMsg, fileStatuses.ErrorMessage)
-				assert.Equal(t, 1, len(fileStatuses.Packages))
-				assert.Equal(t, pkgName, fileStatuses.Packages[pkgName].GetName())
-				assert.Equal(t, agentVersion, fileStatuses.Packages[pkgName].GetAgentHasVersion())
-				assert.Equal(t, agentHash, fileStatuses.Packages[pkgName].GetAgentHasHash())
-				assert.Equal(t, serverVersion, fileStatuses.Packages[pkgName].GetServerOfferedVersion())
-				assert.Equal(t, serverHash, fileStatuses.Packages[pkgName].GetServerOfferedHash())
-				assert.Equal(t, protobufs.PackageStatus_InstallPending, fileStatuses.Packages[pkgName].GetStatus())
-				assert.Equal(t, errMsg, fileStatuses.Packages[pkgName].GetErrorMessage())
+				assert.Equal(t, allHash, fileStates.AllPackagesHash)
+				assert.Equal(t, allErrMsg, fileStates.AllErrorMessage)
+				assert.Equal(t, 1, len(fileStates.PackageStates))
+				assert.Equal(t, pkgName, fileStates.PackageStates[pkgName].Name)
+				assert.Equal(t, agentVersion, fileStates.PackageStates[pkgName].AgentVersion)
+				assert.Equal(t, agentHash, fileStates.PackageStates[pkgName].AgentHash)
+				assert.Equal(t, serverVersion, fileStates.PackageStates[pkgName].ServerVersion)
+				assert.Equal(t, serverHash, fileStates.PackageStates[pkgName].ServerHash)
+				assert.Equal(t, protobufs.PackageStatus_InstallPending, fileStates.PackageStates[pkgName].Status)
+				assert.Equal(t, errMsg, fileStates.PackageStates[pkgName].ErrorMessage)
 			},
 		},
 		{
@@ -476,19 +476,19 @@ func TestSetLastReportedStatuses(t *testing.T) {
 
 				bytes, err := os.ReadFile(testYaml)
 				assert.NoError(t, err)
-				var fileStatuses *protobufs.PackageStatuses
-				err = yaml.Unmarshal(bytes, &fileStatuses)
+				var fileStates packageStates
+				err = yaml.Unmarshal(bytes, &fileStates)
 				assert.NoError(t, err)
-				assert.Equal(t, allHash, fileStatuses.ServerProvidedAllPackagesHash)
-				assert.Equal(t, allErrMsg, fileStatuses.ErrorMessage)
-				assert.Equal(t, 1, len(fileStatuses.Packages))
-				assert.Equal(t, pkgName, fileStatuses.Packages[pkgName].GetName())
-				assert.Equal(t, agentVersion, fileStatuses.Packages[pkgName].GetAgentHasVersion())
-				assert.Equal(t, agentHash, fileStatuses.Packages[pkgName].GetAgentHasHash())
-				assert.Equal(t, serverVersion, fileStatuses.Packages[pkgName].GetServerOfferedVersion())
-				assert.Equal(t, serverHash, fileStatuses.Packages[pkgName].GetServerOfferedHash())
-				assert.Equal(t, protobufs.PackageStatus_InstallPending, fileStatuses.Packages[pkgName].GetStatus())
-				assert.Equal(t, errMsg, fileStatuses.Packages[pkgName].GetErrorMessage())
+				assert.Equal(t, allHash, fileStates.AllPackagesHash)
+				assert.Equal(t, allErrMsg, fileStates.AllErrorMessage)
+				assert.Equal(t, 1, len(fileStates.PackageStates))
+				assert.Equal(t, pkgName, fileStates.PackageStates[pkgName].Name)
+				assert.Equal(t, agentVersion, fileStates.PackageStates[pkgName].AgentVersion)
+				assert.Equal(t, agentHash, fileStates.PackageStates[pkgName].AgentHash)
+				assert.Equal(t, serverVersion, fileStates.PackageStates[pkgName].ServerVersion)
+				assert.Equal(t, serverHash, fileStates.PackageStates[pkgName].ServerHash)
+				assert.Equal(t, protobufs.PackageStatus_InstallPending, fileStates.PackageStates[pkgName].Status)
+				assert.Equal(t, errMsg, fileStates.PackageStates[pkgName].ErrorMessage)
 			},
 		},
 	}

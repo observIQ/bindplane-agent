@@ -39,7 +39,23 @@ type packagesStateProvider struct {
 	logger   *zap.Logger
 }
 
-// NewPackagesStateProvider creates a new OpAmp PackagesStateProvider
+type packageState struct {
+	Name          string                         `yaml:"name"`
+	UpdaterStart  bool                           `yaml:"updater_start"`
+	AgentVersion  string                         `yaml:"agent_version"`
+	AgentHash     []byte                         `yaml:"agent_hash"`
+	ServerVersion string                         `yaml:"server_version"`
+	ServerHash    []byte                         `yaml:"server_hash"`
+	Status        protobufs.PackageStatus_Status `yaml:"status"`
+	ErrorMessage  string                         `yaml:"error_message"`
+}
+type packageStates struct {
+	AllPackagesHash []byte                   `yaml:"all_packages_hash"`
+	AllErrorMessage string                   `yaml:"all_error_message"`
+	PackageStates   map[string]*packageState `yaml:"package_states"`
+}
+
+// newPackagesStateProvider creates a new OpAmp PackagesStateProvider
 func newPackagesStateProvider(logger *zap.Logger, yamlPath string) types.PackagesStateProvider {
 	return &packagesStateProvider{
 		yamlPath: filepath.Clean(yamlPath),
@@ -138,12 +154,12 @@ func (p *packagesStateProvider) LastReportedStatuses() (*protobufs.PackageStatus
 		return packageStatuses, fmt.Errorf("failed to read package statuses yaml: %w", err)
 	}
 
-	var readPackageStatuses protobufs.PackageStatuses
-	if err := yaml.Unmarshal(statusesBytes, &readPackageStatuses); err != nil {
+	var packageStates packageStates
+	if err := yaml.Unmarshal(statusesBytes, &packageStates); err != nil {
 		return packageStatuses, fmt.Errorf("failed to unmarshal package statuses: %w", err)
 	}
 
-	return &readPackageStatuses, nil
+	return packageStatesToStatuses(packageStates), nil
 }
 
 // SetLastReportedStatuses saves the given PackageStatuses into a yaml file
@@ -156,7 +172,9 @@ func (p *packagesStateProvider) SetLastReportedStatuses(statuses *protobufs.Pack
 		p.logger.Debug("Failed to delete package statuses yaml", zap.Error(err))
 	}
 
-	data, err := yaml.Marshal(statuses)
+	states := packageStatusesToStates(statuses)
+
+	data, err := yaml.Marshal(states)
 	if err != nil {
 		return fmt.Errorf("failed to marshal package statuses: %w", err)
 	}
@@ -167,4 +185,52 @@ func (p *packagesStateProvider) SetLastReportedStatuses(statuses *protobufs.Pack
 	}
 
 	return nil
+}
+
+func packageStatusesToStates(statuses *protobufs.PackageStatuses) *packageStates {
+	states := &packageStates{
+		AllPackagesHash: statuses.GetServerProvidedAllPackagesHash(),
+		AllErrorMessage: statuses.GetErrorMessage(),
+	}
+
+	packageStates := map[string]*packageState{}
+	for name, packageStatus := range statuses.Packages {
+		packageState := &packageState{
+			Name:          packageStatus.GetName(),
+			AgentVersion:  packageStatus.GetAgentHasVersion(),
+			AgentHash:     packageStatus.GetAgentHasHash(),
+			ServerVersion: packageStatus.GetServerOfferedVersion(),
+			ServerHash:    packageStatus.GetServerOfferedHash(),
+			Status:        packageStatus.GetStatus(),
+			ErrorMessage:  packageStatus.GetErrorMessage(),
+		}
+		packageStates[name] = packageState
+	}
+	states.PackageStates = packageStates
+
+	return states
+}
+
+func packageStatesToStatuses(states packageStates) *protobufs.PackageStatuses {
+	statuses := &protobufs.PackageStatuses{
+		ServerProvidedAllPackagesHash: states.AllPackagesHash,
+		ErrorMessage:                  states.AllErrorMessage,
+	}
+
+	packages := map[string]*protobufs.PackageStatus{}
+	for name, packageState := range states.PackageStates {
+		packageStatus := &protobufs.PackageStatus{
+			Name:                 packageState.Name,
+			AgentHasVersion:      packageState.AgentVersion,
+			AgentHasHash:         packageState.AgentHash,
+			ServerOfferedVersion: packageState.ServerVersion,
+			ServerOfferedHash:    packageState.ServerHash,
+			Status:               packageState.Status,
+			ErrorMessage:         packageState.ErrorMessage,
+		}
+		packages[name] = packageStatus
+	}
+	statuses.Packages = packages
+
+	return statuses
 }
