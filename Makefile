@@ -111,7 +111,7 @@ test-with-cover:
 	$(MAKE) for-all CMD="go test -coverprofile=cover.out ./..."
 	$(MAKE) for-all CMD="go tool cover -html=cover.out -o cover.html"
 
-.PHONY: 
+.PHONY: test-updater-integration 
 test-updater-integration:
 	cd updater; go test $(INTEGRATION_TEST_ARGS) -race ./...
 
