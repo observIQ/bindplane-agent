@@ -90,21 +90,14 @@ func (d darwinService) Install() error {
 		return fmt.Errorf("failed to write service file: %w", err)
 	}
 
-	//#nosec G204 -- installedServiceFilePath is not determined by user input
-	cmd := exec.Command("launchctl", "load", d.installedServiceFilePath)
-	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("running launchctl failed: %w", err)
-	}
-
-	return nil
+	return d.Start()
 }
 
 // Uninstalls the service
 func (d darwinService) Uninstall() error {
 	//#nosec G204 -- installedServiceFilePath is not determined by user input
-	cmd := exec.Command("launchctl", "unload", d.installedServiceFilePath)
-	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("running launchctl failed: %w", err)
+	if err := d.Stop(); err != nil {
+		return err
 	}
 
 	if err := os.Remove(d.installedServiceFilePath); err != nil {

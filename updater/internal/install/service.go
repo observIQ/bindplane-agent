@@ -35,9 +35,9 @@ type Service interface {
 	Uninstall() error
 }
 
-// This function replaces "[INSTALLDIR]" with the given installDir string.
+// replaceInstallDir replaces "[INSTALLDIR]" with the given installDir string.
 // This is meant to mimic windows "formatted" string syntax.
-func replaceInstallDir(b []byte, installDir string) []byte {
+func replaceInstallDir(unformattedBytes []byte, installDir string) []byte {
 	installDirClean := filepath.Clean(installDir) + string(os.PathSeparator)
-	return bytes.ReplaceAll(b, []byte("[INSTALLDIR]"), []byte(installDirClean))
+	return bytes.ReplaceAll(unformattedBytes, []byte("[INSTALLDIR]"), []byte(installDirClean))
 }
