@@ -8,7 +8,7 @@ parameters:
     default:
       - "/usr/sap/*/HDB*/*/trace/*.trc"
   - name: exclude
-    description: The directorys to exclude for the SAP HANA trace logs.
+    description: The directories to exclude for the SAP HANA trace logs.
     type: "[]string"
     default:
       - "/usr/sap/*/HDB*/*/trace/nameserver_history*.trc"
