@@ -129,7 +129,7 @@ func TestDarwinServiceInstall(t *testing.T) {
 		}
 
 		err := d.Uninstall()
-		require.ErrorContains(t, err, "failed to remove service file")
+		require.ErrorContains(t, err, "failed to stat installed service file")
 		requireServiceLoadedStatus(t, false)
 	})
 
