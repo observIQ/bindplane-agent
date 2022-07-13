@@ -80,15 +80,12 @@ func (i Installer) Install() error {
 
 func moveFiles(latestDirPath, installDirPath string) error {
 	err := filepath.WalkDir(latestDirPath, func(path string, d fs.DirEntry, err error) error {
-		if err != nil {
+		switch {
+		case err != nil:
 			return err
-		}
-
-		if d.IsDir() {
+		case d.IsDir():
 			return nil
-		}
-
-		if skipFile(path) {
+		case skipFile(path):
 			return nil
 		}
 
