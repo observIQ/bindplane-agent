@@ -78,24 +78,33 @@ func (i Installer) Install() error {
 	return nil
 }
 
+// moveFiles moves the file tree rooted at latestDirPath to installDirPath,
+// skipping configuration files
 func moveFiles(latestDirPath, installDirPath string) error {
 	err := filepath.WalkDir(latestDirPath, func(path string, d fs.DirEntry, err error) error {
 		switch {
 		case err != nil:
+			// if there was an error walking the directory, we want to bail out.
 			return err
 		case d.IsDir():
+			// Skip directories, we'll create them when we get a file in the directory.
 			return nil
 		case skipFile(path):
+			// Found a config file that we should skip copying.
 			return nil
 		}
 
 		cleanPath := filepath.Clean(path)
 
+		// We want the path relative to the directory we are walking in order to calculate where the file should be
+		// mirrored in the destination directory.
 		relPath, err := filepath.Rel(latestDirPath, cleanPath)
 		if err != nil {
 			return err
 		}
 
+		// use the relative path to get the outPath (where we should write the file), and
+		// to get the out directory (which we will create if it does not exist).
 		outPath := filepath.Clean(filepath.Join(installDirPath, relPath))
 		outDir := filepath.Dir(outPath)
 
@@ -103,6 +112,7 @@ func moveFiles(latestDirPath, installDirPath string) error {
 			return fmt.Errorf("failed to create dir: %w", err)
 		}
 
+		// Open the output file, creating it if it does not exist and truncating it.
 		outFile, err := os.OpenFile(outPath, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0600)
 		if err != nil {
 			return fmt.Errorf("failed to open output file: %w", err)
@@ -114,6 +124,7 @@ func moveFiles(latestDirPath, installDirPath string) error {
 			}
 		}()
 
+		// Open the input file for reading.
 		inFile, err := os.Open(cleanPath)
 		if err != nil {
 			return fmt.Errorf("failed to open input file: %w", err)
@@ -125,6 +136,7 @@ func moveFiles(latestDirPath, installDirPath string) error {
 			}
 		}()
 
+		// Copy the input file to the output file.
 		if _, err := io.Copy(outFile, inFile); err != nil {
 			return fmt.Errorf("failed to copy file: %w", err)
 		}
