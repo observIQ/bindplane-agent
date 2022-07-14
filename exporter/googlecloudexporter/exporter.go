@@ -28,7 +28,7 @@ import (
 )
 
 // hostname is the name of the current host
-var hostname, _ = os.Hostname()
+var hostname = getHostname()
 
 // exporter is a google cloud exporter wrapped with additional functionality
 type exporter struct {
@@ -207,4 +207,12 @@ func (e *exporter) appendTraceHost(td *ptrace.Traces) {
 			resourceAttrs.InsertString(string(semconv.HostNameKey), hostname)
 		}
 	}
+}
+
+// getHostname returns the current hostname or "unknown" if not found
+func getHostname() string {
+	if hostname, err := os.Hostname(); err == nil {
+		return hostname
+	}
+	return "unknown"
 }
