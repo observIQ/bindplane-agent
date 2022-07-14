@@ -19,7 +19,6 @@ import (
 	"fmt"
 
 	gcp "github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlecloudexporter"
-	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/resourcedetectionprocessor"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/config"
 	"go.opentelemetry.io/collector/consumer"
@@ -153,7 +152,6 @@ func createTracesExporter(ctx context.Context, set component.ExporterCreateSetti
 
 	processorFactories := []component.ProcessorFactory{
 		batchprocessor.NewFactory(),
-		resourcedetectionprocessor.NewFactory(),
 	}
 
 	processorSettings := component.ProcessorCreateSettings{
