@@ -49,28 +49,40 @@ type exporter struct {
 
 // ConsumeMetrics consumes metrics
 func (e *exporter) ConsumeMetrics(ctx context.Context, md pmetric.Metrics) error {
-	e.appendMetricAttrs(&md)
+	if e.appendHost {
+		e.appendMetricHost(&md)
+	}
+
 	if e.metricsConsumer == nil {
 		return nil
 	}
+
 	return e.metricsConsumer.ConsumeMetrics(ctx, md)
 }
 
 // ConsumeTraces consumes traces
 func (e *exporter) ConsumeTraces(ctx context.Context, td ptrace.Traces) error {
-	e.appendTraceAttrs(&td)
+	if e.appendHost {
+		e.appendTraceHost(&td)
+	}
+
 	if e.tracesConsumer == nil {
 		return nil
 	}
+
 	return e.tracesConsumer.ConsumeTraces(ctx, td)
 }
 
 // ConsumeLogs consumes logs
 func (e *exporter) ConsumeLogs(ctx context.Context, ld plog.Logs) error {
-	e.appendLogAttrs(&ld)
+	if e.appendHost {
+		e.appendLogHost(&ld)
+	}
+
 	if e.logsConsumer == nil {
 		return nil
 	}
+
 	return e.logsConsumer.ConsumeLogs(ctx, ld)
 }
 
@@ -161,8 +173,8 @@ func (e *exporter) Shutdown(ctx context.Context) error {
 	return nil
 }
 
-// appendMetricAttrs appends metric attributes if not present
-func (e *exporter) appendMetricAttrs(md *pmetric.Metrics) {
+// appendMetricHost appends hostname to metrics if not already present
+func (e *exporter) appendMetricHost(md *pmetric.Metrics) {
 	for i := 0; i < md.ResourceMetrics().Len(); i++ {
 		resourceAttrs := md.ResourceMetrics().At(i).Resource().Attributes()
 		_, hostNameExists := resourceAttrs.Get(string(semconv.HostNameKey))
@@ -173,8 +185,8 @@ func (e *exporter) appendMetricAttrs(md *pmetric.Metrics) {
 	}
 }
 
-// appendLogAttrs appends log attributes if not present
-func (e *exporter) appendLogAttrs(ld *plog.Logs) {
+// appendLogHost appends hostname to logs if not already present
+func (e *exporter) appendLogHost(ld *plog.Logs) {
 	for i := 0; i < ld.ResourceLogs().Len(); i++ {
 		resourceAttrs := ld.ResourceLogs().At(i).Resource().Attributes()
 		_, hostNameExists := resourceAttrs.Get(string(semconv.HostNameKey))
@@ -185,8 +197,8 @@ func (e *exporter) appendLogAttrs(ld *plog.Logs) {
 	}
 }
 
-// appendLogAttrs appends trace attributes if not present
-func (e *exporter) appendTraceAttrs(td *ptrace.Traces) {
+// appendTraceHost appends hostname to traces if not already present
+func (e *exporter) appendTraceHost(td *ptrace.Traces) {
 	for i := 0; i < td.ResourceSpans().Len(); i++ {
 		resourceAttrs := td.ResourceSpans().At(i).Resource().Attributes()
 		_, hostNameExists := resourceAttrs.Get(string(semconv.HostNameKey))

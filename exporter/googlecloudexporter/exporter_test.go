@@ -300,8 +300,8 @@ func TestAppendMetricAttrs(t *testing.T) {
 	metric1.Resource().Attributes().InsertString(string(semconv.HostNameKey), "test-hostname")
 	metric2 := metrics.ResourceMetrics().AppendEmpty()
 
-	e := exporter{appendHost: true}
-	e.appendMetricAttrs(&metrics)
+	e := exporter{}
+	e.appendMetricHost(&metrics)
 
 	metric1Host, ok := metric1.Resource().Attributes().Get(string(semconv.HostNameKey))
 	require.True(t, ok)
@@ -318,8 +318,8 @@ func TestAppendLogAttrs(t *testing.T) {
 	log1.Resource().Attributes().InsertString(string(semconv.HostNameKey), "test-hostname")
 	metric2 := logs.ResourceLogs().AppendEmpty()
 
-	e := exporter{appendHost: true}
-	e.appendLogAttrs(&logs)
+	e := exporter{}
+	e.appendLogHost(&logs)
 
 	log1Host, ok := log1.Resource().Attributes().Get(string(semconv.HostNameKey))
 	require.True(t, ok)
@@ -336,8 +336,8 @@ func TestAppendTraceAttrs(t *testing.T) {
 	trace1.Resource().Attributes().InsertString(string(semconv.HostNameKey), "test-hostname")
 	trace2 := traces.ResourceSpans().AppendEmpty()
 
-	e := exporter{appendHost: true}
-	e.appendTraceAttrs(&traces)
+	e := exporter{}
+	e.appendTraceHost(&traces)
 
 	trace1Host, ok := trace1.Resource().Attributes().Get(string(semconv.HostNameKey))
 	require.True(t, ok)
