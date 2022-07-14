@@ -179,7 +179,7 @@ func (e *exporter) appendMetricHost(md *pmetric.Metrics) {
 		resourceAttrs := md.ResourceMetrics().At(i).Resource().Attributes()
 		_, hostNameExists := resourceAttrs.Get(string(semconv.HostNameKey))
 		_, hostIDExists := resourceAttrs.Get(string(semconv.HostIDKey))
-		if !hostNameExists && !hostIDExists && e.appendHost {
+		if !hostNameExists && !hostIDExists {
 			resourceAttrs.InsertString(string(semconv.HostNameKey), hostname)
 		}
 	}
@@ -191,7 +191,7 @@ func (e *exporter) appendLogHost(ld *plog.Logs) {
 		resourceAttrs := ld.ResourceLogs().At(i).Resource().Attributes()
 		_, hostNameExists := resourceAttrs.Get(string(semconv.HostNameKey))
 		_, hostIDExists := resourceAttrs.Get(string(semconv.HostIDKey))
-		if !hostNameExists && !hostIDExists && e.appendHost {
+		if !hostNameExists && !hostIDExists {
 			resourceAttrs.InsertString(string(semconv.HostNameKey), hostname)
 		}
 	}
@@ -203,7 +203,7 @@ func (e *exporter) appendTraceHost(td *ptrace.Traces) {
 		resourceAttrs := td.ResourceSpans().At(i).Resource().Attributes()
 		_, hostNameExists := resourceAttrs.Get(string(semconv.HostNameKey))
 		_, hostIDExists := resourceAttrs.Get(string(semconv.HostIDKey))
-		if !hostNameExists && !hostIDExists && e.appendHost {
+		if !hostNameExists && !hostIDExists {
 			resourceAttrs.InsertString(string(semconv.HostNameKey), hostname)
 		}
 	}
