@@ -17,16 +17,23 @@ package googlecloudexporter
 import (
 	"context"
 	"fmt"
+	"os"
 
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/consumer"
 	"go.opentelemetry.io/collector/pdata/plog"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.opentelemetry.io/collector/pdata/ptrace"
+	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
 )
+
+// hostname is the name of the current host
+var hostname, _ = os.Hostname()
 
 // exporter is a google cloud exporter wrapped with additional functionality
 type exporter struct {
+	appendHost bool
+
 	metricsProcessors []component.MetricsProcessor
 	metricsExporter   component.MetricsExporter
 	metricsConsumer   consumer.Metrics
@@ -42,6 +49,7 @@ type exporter struct {
 
 // ConsumeMetrics consumes metrics
 func (e *exporter) ConsumeMetrics(ctx context.Context, md pmetric.Metrics) error {
+	e.appendMetricAttrs(&md)
 	if e.metricsConsumer == nil {
 		return nil
 	}
@@ -50,6 +58,7 @@ func (e *exporter) ConsumeMetrics(ctx context.Context, md pmetric.Metrics) error
 
 // ConsumeTraces consumes traces
 func (e *exporter) ConsumeTraces(ctx context.Context, td ptrace.Traces) error {
+	e.appendTraceAttrs(&td)
 	if e.tracesConsumer == nil {
 		return nil
 	}
@@ -58,6 +67,7 @@ func (e *exporter) ConsumeTraces(ctx context.Context, td ptrace.Traces) error {
 
 // ConsumeLogs consumes logs
 func (e *exporter) ConsumeLogs(ctx context.Context, ld plog.Logs) error {
+	e.appendLogAttrs(&ld)
 	if e.logsConsumer == nil {
 		return nil
 	}
@@ -149,4 +159,40 @@ func (e *exporter) Shutdown(ctx context.Context) error {
 	}
 
 	return nil
+}
+
+// appendMetricAttrs appends metric attributes if not present
+func (e *exporter) appendMetricAttrs(md *pmetric.Metrics) {
+	for i := 0; i < md.ResourceMetrics().Len(); i++ {
+		resourceAttrs := md.ResourceMetrics().At(i).Resource().Attributes()
+		_, hostNameExists := resourceAttrs.Get(string(semconv.HostNameKey))
+		_, hostIDExists := resourceAttrs.Get(string(semconv.HostIDKey))
+		if !hostNameExists && !hostIDExists && e.appendHost {
+			resourceAttrs.InsertString(string(semconv.HostNameKey), hostname)
+		}
+	}
+}
+
+// appendLogAttrs appends log attributes if not present
+func (e *exporter) appendLogAttrs(ld *plog.Logs) {
+	for i := 0; i < ld.ResourceLogs().Len(); i++ {
+		resourceAttrs := ld.ResourceLogs().At(i).Resource().Attributes()
+		_, hostNameExists := resourceAttrs.Get(string(semconv.HostNameKey))
+		_, hostIDExists := resourceAttrs.Get(string(semconv.HostIDKey))
+		if !hostNameExists && !hostIDExists && e.appendHost {
+			resourceAttrs.InsertString(string(semconv.HostNameKey), hostname)
+		}
+	}
+}
+
+// appendLogAttrs appends trace attributes if not present
+func (e *exporter) appendTraceAttrs(td *ptrace.Traces) {
+	for i := 0; i < td.ResourceSpans().Len(); i++ {
+		resourceAttrs := td.ResourceSpans().At(i).Resource().Attributes()
+		_, hostNameExists := resourceAttrs.Get(string(semconv.HostNameKey))
+		_, hostIDExists := resourceAttrs.Get(string(semconv.HostIDKey))
+		if !hostNameExists && !hostIDExists && e.appendHost {
+			resourceAttrs.InsertString(string(semconv.HostNameKey), hostname)
+		}
+	}
 }
