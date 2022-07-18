@@ -1,6 +1,6 @@
 version: 0.0.1
 title: Kubernetes Container Logs
-description: Log parser for Kubernetes Container logs
+description: Log parser for Kubernetes Container logs. This plugin is meant to be used with the OpenTelemetry Operator for Kubernetes (https://github.com/open-telemetry/opentelemetry-operator).
 parameters:
   - name: log_paths
     type: "[]string"
@@ -11,6 +11,7 @@ parameters:
     type: "[]string"
     description: A list of file glob patterns to exclude from reading
     default:
+      # Excludes logs for the collector
       - "/var/log/containers/observiq-*-collector-*"
   - name: start_at
     type: string
@@ -28,7 +29,8 @@ template: |
             - '{{ $fp }}'
           {{end}}
         start_at: {{ .start_at }}
-        log_type: "k8s.container_logs"
+        attributes:
+          log_type: "k8s.container_logs"
         exclude:
           {{ range $fp := .exclude_log_paths }}
             - '{{ $fp }}'
