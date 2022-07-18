@@ -1,0 +1,59 @@
+version: 0.0.1
+title: Kubernetes Kubelet
+description: Log parser for Kubelet journald logs
+parameters:
+  - name: journald_directory
+    description: Directory containing journal files to read entries from
+    type: string
+    default: /var/log/journal
+  - name: start_at
+    type: string
+    description: At startup, where to start reading logs from the file.
+    supported:
+      - beginning
+      - end
+    default: end
+
+template: |
+  receivers:
+    journald:
+      directory: {{ .journald_directory }}
+      start_at: {{ .start_at }}
+      units:
+        - kubelet
+      operators:
+          # Semantic conventions says node name should be a resource.
+          - type: move
+            from: body._HOSTNAME
+            to: resource["k8s.node.name"]
+          # Replace journald body with application's log message
+          - type: move
+            from: body.MESSAGE
+            to: body
+          # Parse kubelet klog formatted message
+          - type: regex_parser
+            regex: '(?P<severity>\w)(?P<timestamp>\d{4} \d{2}:\d{2}:\d{2}.\d+)\s+(?P<pid>\d+)\s+(?P<src>[^:]*):(?P<src_line>[^\]]*)\] (?P<message>.*)'
+            severity:
+              parse_from: attributes.severity
+              mapping:
+                debug: d
+                info: i
+                warning: w
+                error: e
+                critical: c
+            timestamp:
+              parse_from: attributes.timestamp
+              layout: '%m%d %H:%M:%S.%s'
+          # Replace raw klog body with the message field extracted
+          # by regex parser. The severity and timestmap have been
+          # promoted to the entry and are no longer useful in the body.
+          - type: move
+            from: attributes.message
+            to: body
+          - type: add
+            field: attributes.log_type
+            value: kubelet
+  service:
+    pipelines:
+      logs:
+        receivers: [journald]
