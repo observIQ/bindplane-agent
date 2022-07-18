@@ -1,6 +1,6 @@
 version: 0.0.1
 title: Kubernetes Container Logs
-description: Log parser for Container logs in a Kubernetes pod
+description: Log parser for Kubernetes Container logs
 parameters:
   - name: log_paths
     type: "[]string"
