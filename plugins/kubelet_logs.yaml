@@ -5,7 +5,6 @@ parameters:
   - name: journald_directory
     description: Directory containing journal files to read entries from
     type: string
-    default: /var/log/journal
   - name: start_at
     type: string
     description: At startup, where to start reading logs from the file.
@@ -17,7 +16,9 @@ parameters:
 template: |
   receivers:
     journald:
+      {{ if .journald_directory }}
       directory: {{ .journald_directory }}
+      {{ end }}
       start_at: {{ .start_at }}
       units:
         - kubelet
