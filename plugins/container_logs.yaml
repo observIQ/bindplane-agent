@@ -28,6 +28,7 @@ template: |
             - '{{ $fp }}'
           {{end}}
         start_at: {{ .start_at }}
+        log_type: "k8s.container_logs"
         exclude:
           {{ range $fp := .exclude_log_paths }}
             - '{{ $fp }}'

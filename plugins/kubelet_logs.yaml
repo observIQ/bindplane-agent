@@ -39,9 +39,9 @@ template: |
               mapping:
                 debug: d
                 info: i
-                warning: w
+                warn: w
                 error: e
-                critical: c
+                fatal: c
             timestamp:
               parse_from: attributes.timestamp
               layout: '%m%d %H:%M:%S.%s'
