@@ -17,14 +17,6 @@ receivers:
       start_at: end
       timezone: UTC
 
-processors:
-  resourcedetection:
-    detectors:
-      - system
-    system:
-      hostname_sources:
-        - os
-
 exporters:
   googlecloud:
 
@@ -33,14 +25,10 @@ service:
     logs:
       receivers:
         - plugin
-      processors:
-        - resourcedetection
       exporters:
         - googlecloud
     metrics:
       receivers:
         - apache
-      processors:
-        - resourcedetection
       exporters:
         - googlecloud
