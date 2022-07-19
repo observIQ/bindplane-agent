@@ -1,0 +1,46 @@
+version: 0.0.1
+title: Apache Combined
+description: Log parser for Apache combined format
+parameters:
+  - name: file_path
+    type: "[]string"
+    description: Paths to Apache combined formatted log files
+    default:
+      - "/var/log/apache_combined.log"
+  - name: start_at
+    type: string
+    description: At startup, where to start reading logs from the file.
+    supported:
+      - beginning
+      - end
+    default: end
+
+template: |
+  receivers:
+    filelog:
+      include:
+        {{ range $fp := .file_path }}
+        - '{{ $fp }}'
+        {{end}}
+      start_at: {{ .start_at }}
+      attributes:
+        log_type: apache_combined
+      operators:
+        - type: regex_parser
+          regex: '^(?P<remote_addr>[^ ]*) (?P<remote_host>[^ ]*) (?P<remote_user>[^ ]*) \[(?P<time>[^\]]*)\] "(?P<method>\S+) +(?P<path>[^ ]*)( (?P<protocol>[^/]*)/(?P<protocol_version>[^\"]*)|[^\"]*)?" (?P<status>[^ ]*) (?P<body_bytes_sent>[^ ]*) "(?P<http_referer>[^\"]*)" "(?P<http_user_agent>[^\"]*)'
+          timestamp:
+            parse_from: attributes.time
+            layout: '%d/%b/%Y:%H:%M:%S %z'
+          severity:
+            parse_from: attributes.status
+            preset: none
+            mapping:
+              info: 2xx
+              info2: 3xx
+              warn: 4xx
+              error: 5xx
+
+  service:
+    pipelines:
+      logs:
+        receivers: [filelog]
