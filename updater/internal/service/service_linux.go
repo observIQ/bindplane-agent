@@ -14,7 +14,7 @@
 
 //go:build linux
 
-package install
+package service
 
 import (
 	"fmt"
@@ -23,15 +23,17 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+
+	"github.com/observiq/observiq-otel-collector/updater/internal/path"
 )
 
 const linuxServiceName = "observiq-otel-collector"
 const linuxServiceFilePath = "/usr/lib/systemd/system/observiq-otel-collector.service"
 
-// newService returns an instance of the Service interface for managing the observiq-otel-collector service on the current OS.
-func newService(latestPath string) Service {
+// NewService returns an instance of the Service interface for managing the observiq-otel-collector service on the current OS.
+func NewService(latestPath string) Service {
 	return linuxService{
-		newServiceFilePath:       filepath.Join(latestPath, "install", "observiq-otel-collector.service"),
+		newServiceFilePath:       filepath.Join(path.ServiceFileDir(latestPath), "observiq-otel-collector.service"),
 		serviceName:              linuxServiceName,
 		installedServiceFilePath: linuxServiceFilePath,
 	}
@@ -66,8 +68,8 @@ func (l linuxService) Stop() error {
 	return nil
 }
 
-// Installs the service
-func (l linuxService) Install() error {
+// installs the service
+func (l linuxService) install() error {
 	inFile, err := os.Open(l.newServiceFilePath)
 	if err != nil {
 		return fmt.Errorf("failed to open input file: %w", err)
@@ -108,8 +110,8 @@ func (l linuxService) Install() error {
 	return nil
 }
 
-// Uninstalls the service
-func (l linuxService) Uninstall() error {
+// uninstalls the service
+func (l linuxService) uninstall() error {
 	//#nosec G204 -- serviceName is not determined by user input
 	cmd := exec.Command("systemctl", "disable", l.serviceName)
 	if err := cmd.Run(); err != nil {
@@ -128,7 +130,14 @@ func (l linuxService) Uninstall() error {
 	return nil
 }
 
-// installDir returns the filepath to the install directory
-func installDir() (string, error) {
-	return "/opt/observiq-otel-collector", nil
+func (l linuxService) Update() error {
+	if err := l.uninstall(); err != nil {
+		return fmt.Errorf("failed to uninstall old service: %w", err)
+	}
+
+	if err := l.install(); err != nil {
+		return fmt.Errorf("failed to install new service: %w", err)
+	}
+
+	return nil
 }

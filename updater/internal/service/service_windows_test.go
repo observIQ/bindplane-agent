@@ -15,7 +15,7 @@
 // an elevated user is needed to run the service tests
 //go:build windows && integration
 
-package install
+package service
 
 import (
 	"fmt"

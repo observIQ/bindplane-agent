@@ -14,7 +14,7 @@
 
 //go:build windows
 
-package install
+package service
 
 import (
 	"encoding/json"
@@ -25,11 +25,11 @@ import (
 	"strings"
 	"time"
 
-	"golang.org/x/sys/windows/registry"
 	"golang.org/x/sys/windows/svc"
 	"golang.org/x/sys/windows/svc/mgr"
 
 	"github.com/kballard/go-shellquote"
+	"github.com/observiq/observiq-otel-collector/updater/internal/path"
 )
 
 const (
@@ -39,10 +39,10 @@ const (
 	serviceNotExistErrStr        = "The specified service does not exist as an installed service."
 )
 
-// newService returns an instance of the Service interface for managing the observiq-otel-collector service on the current OS.
-func newService(latestPath string) Service {
+// NewService returns an instance of the Service interface for managing the observiq-otel-collector service on the current OS.
+func NewService(latestPath string) Service {
 	return &windowsService{
-		newServiceFilePath: filepath.Join(latestPath, "install", "windows_service.json"),
+		newServiceFilePath: filepath.Join(path.ServiceFileDir(latestPath), "windows_service.json"),
 		serviceName:        defaultServiceName,
 		productName:        defaultProductName,
 	}
@@ -108,7 +108,7 @@ func (w windowsService) Install() error {
 	}
 
 	// fetch the install directory so that we can determine the binary path that we need to execute
-	iDir, err := installDirFromRegistry(w.productName)
+	iDir, err := path.InstallDirFromRegistry(w.productName)
 	if err != nil {
 		return fmt.Errorf("failed to get install dir: %w", err)
 	}
@@ -202,6 +202,18 @@ func (w windowsService) Uninstall() error {
 	return nil
 }
 
+func (w windowsService) Update() error {
+	if err := w.Uninstall(); err != nil {
+		return fmt.Errorf("failed to uninstall old service: %w", err)
+	}
+
+	if err := w.Install(); err != nil {
+		return fmt.Errorf("failed to install new service: %w", err)
+	}
+
+	return nil
+}
+
 // windowsServiceConfig defines how the service should be configured, including the entrypoint for the service.
 type windowsServiceConfig struct {
 	// Path is the file that will be executed for the service. It is relative to the install directory.
@@ -247,30 +259,6 @@ func expandArguments(wsc *windowsServiceConfig, productName, installDir string) 
 	wsc.Service.Arguments = strings.ReplaceAll(wsc.Service.Arguments, "&quot;", `"`)
 }
 
-// installDirFromRegistry gets the installation dir of the given product from the Windows Registry
-func installDirFromRegistry(productName string) (string, error) {
-	// this key is created when installing using the MSI installer
-	keyPath := fmt.Sprintf(`Software\Microsoft\Windows\CurrentVersion\Uninstall\%s`, productName)
-	key, err := registry.OpenKey(registry.LOCAL_MACHINE, keyPath, registry.READ)
-	if err != nil {
-		return "", fmt.Errorf("failed to open registry key: %w", err)
-	}
-	defer func() {
-		err := key.Close()
-		if err != nil {
-			log.Default().Printf("installDirFromRegistry: failed to close registry key")
-		}
-	}()
-
-	// This value ("InstallLocation") contains the path to the install folder.
-	val, _, err := key.GetStringValue("InstallLocation")
-	if err != nil {
-		return "", fmt.Errorf("failed to read install dir: %w", err)
-	}
-
-	return val, nil
-}
-
 // startType converts the start type from the windowsServiceConfig to a start type recognizable by the windows
 // service API
 func startType(cfgStartType string) (startType uint32, delayed bool, err error) {
@@ -292,9 +280,4 @@ func startType(cfgStartType string) (startType uint32, delayed bool, err error) 
 		err = fmt.Errorf("invalid start type in service config: %s", cfgStartType)
 	}
 	return
-}
-
-// installDir returns the filepath to the install directory
-func installDir() (string, error) {
-	return installDirFromRegistry(defaultProductName)
 }

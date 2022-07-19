@@ -14,7 +14,7 @@
 
 //go:build darwin && integration
 
-package install
+package service
 
 import (
 	"os"
@@ -37,14 +37,14 @@ func TestDarwinServiceInstall(t *testing.T) {
 			installedServiceFilePath: installedServicePath,
 		}
 
-		err := d.Install()
+		err := d.install()
 		require.NoError(t, err)
 		require.FileExists(t, installedServicePath)
 
 		// We want to check that the service was actually loaded
 		requireServiceLoadedStatus(t, true)
 
-		err = d.Uninstall()
+		err = d.uninstall()
 		require.NoError(t, err)
 		require.NoFileExists(t, installedServicePath)
 
@@ -63,7 +63,7 @@ func TestDarwinServiceInstall(t *testing.T) {
 			installedServiceFilePath: installedServicePath,
 		}
 
-		err := d.Install()
+		err := d.install()
 		require.NoError(t, err)
 		require.FileExists(t, installedServicePath)
 
@@ -80,7 +80,7 @@ func TestDarwinServiceInstall(t *testing.T) {
 
 		requireServiceLoadedStatus(t, false)
 
-		err = d.Uninstall()
+		err = d.uninstall()
 		require.NoError(t, err)
 		require.NoFileExists(t, installedServicePath)
 
@@ -98,7 +98,7 @@ func TestDarwinServiceInstall(t *testing.T) {
 			installedServiceFilePath: installedServicePath,
 		}
 
-		err := d.Install()
+		err := d.install()
 		require.ErrorContains(t, err, "failed to open input file")
 		requireServiceLoadedStatus(t, false)
 	})
@@ -113,7 +113,7 @@ func TestDarwinServiceInstall(t *testing.T) {
 			installedServiceFilePath: installedServicePath,
 		}
 
-		err := d.Install()
+		err := d.install()
 		require.ErrorContains(t, err, "failed to write service file")
 		requireServiceLoadedStatus(t, false)
 	})
@@ -128,7 +128,7 @@ func TestDarwinServiceInstall(t *testing.T) {
 			installedServiceFilePath: installedServicePath,
 		}
 
-		err := d.Uninstall()
+		err := d.uninstall()
 		require.ErrorContains(t, err, "failed to stat installed service file")
 		requireServiceLoadedStatus(t, false)
 	})
