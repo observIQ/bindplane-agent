@@ -1,0 +1,40 @@
+version: 0.0.1
+title: Microsoft SQL Server
+description: Log Parser for Microsoft SQL Server Event Logs
+parameters:
+  - name: poll_interval
+    description: The interval at which a channel is checked for new log entries
+    type: string
+    default: 1s
+  - name: max_reads
+    description: The maximum number of events read into memory at one time
+    type: int
+    default: 1000
+  - name: start_at
+    description: Start reading file from 'beginning' or 'end'
+    type: string
+    supported:
+      - beginning
+      - end
+    default: end
+
+template: |
+  receivers:
+    windowseventlog:
+      channel: "Application"
+      max_reads: {{ .max_reads }}
+      poll_interval: '{{ .poll_interval }}'
+      start_at: '{{ .start_at }}'
+      operators:
+        - type: router
+          routes:
+            - output: add_type
+              expr: 'body.provider.name matches "MSSQLSERVER"'
+        - id: add_type
+          type: add
+          field: attributes.log_type
+          value: sql_server
+  service:
+    pipelines:
+      logs:
+        receivers: [windowseventlog]
