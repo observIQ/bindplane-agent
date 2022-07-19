@@ -21,7 +21,7 @@ parameters:
 template: |
   receivers:
     windowseventlog:
-      channel: Application
+      channel: "Application"
       max_reads: {{ .max_reads }}
       poll_interval: '{{ .poll_interval }}'
       start_at: '{{ .start_at }}'
@@ -29,12 +29,11 @@ template: |
         - type: router
           routes:
             - output: add_type
-              expr: 'attributes.provider.name matches "SQLSERVER"'
+              expr: 'body.provider.name matches "MSSQLSERVER"'
         - id: add_type
           type: add
           field: attributes.log_type
           value: sql_server
-
   service:
     pipelines:
       logs:
