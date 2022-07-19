@@ -37,9 +37,9 @@ type ServiceUpdateAction struct {
 	backupSvc service.Service
 }
 
-func NewServiceUpdateAction(tmpDir string) ServiceStartAction {
-	return ServiceStartAction{
-		svc: service.NewService(path.BackupDirFromTempDir(tmpDir)),
+func NewServiceUpdateAction(tmpDir string) ServiceUpdateAction {
+	return ServiceUpdateAction{
+		backupSvc: service.NewService(path.BackupDirFromTempDir(tmpDir)),
 	}
 }
 

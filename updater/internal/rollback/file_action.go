@@ -3,11 +3,10 @@ package rollback
 import (
 	"errors"
 	"fmt"
-	"io"
-	"log"
 	"os"
 	"path/filepath"
 
+	"github.com/observiq/observiq-otel-collector/updater/internal/file"
 	"github.com/observiq/observiq-otel-collector/updater/internal/path"
 )
 
@@ -25,11 +24,11 @@ type CopyFileAction struct {
 // NOTE: This action MUST be created BEFORE the action actually takes place; This allows
 // for previous existence of the file to be recorded.
 func NewCopyFileAction(fromPath, toPath, tmpDir string) (*CopyFileAction, error) {
-	fileExists := false
+	fileExists := true
 	_, err := os.Stat(toPath)
 	switch {
 	case errors.Is(err, os.ErrNotExist):
-		fileExists = true
+		fileExists = false
 	case err != nil:
 		return nil, fmt.Errorf("unexpected error stat-ing file: %w", err)
 	}
@@ -62,31 +61,8 @@ func (c CopyFileAction) Rollback() error {
 	}
 
 	backupFilePath := filepath.Join(c.rollbackDir, rel)
-	backupFile, err := os.Open(backupFilePath)
-	if err != nil {
-		return fmt.Errorf("failed to open to output file: %w", err)
-	}
-	defer func() {
-		err := backupFile.Close()
-		if err != nil {
-			log.Default().Printf("failed to close backup file: %s", err)
-		}
-	}()
-
-	toFile, err := os.Open(c.toPath)
-	if err != nil {
-		return fmt.Errorf("failed to open to output file: %w", err)
-	}
-	defer func() {
-		err := toFile.Close()
-		if err != nil {
-			log.Default().Printf("failed to close output file: %s", err)
-		}
-	}()
-
-	// Copy backup file over the in-place file in order to restore the original
-	if _, err := io.Copy(toFile, backupFile); err != nil {
-		return fmt.Errorf("failed to copy backup file into output file: %w", err)
+	if err := file.CopyFile(backupFilePath, c.toPath); err != nil {
+		return fmt.Errorf("failed to copy file: %w", err)
 	}
 
 	return nil

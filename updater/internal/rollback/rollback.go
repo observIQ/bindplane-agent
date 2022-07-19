@@ -3,6 +3,7 @@ package rollback
 import (
 	"fmt"
 	"io/fs"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -10,7 +11,6 @@ import (
 	"github.com/observiq/observiq-otel-collector/updater/internal/file"
 	"github.com/observiq/observiq-otel-collector/updater/internal/path"
 	"github.com/observiq/observiq-otel-collector/updater/internal/service"
-	"go.uber.org/multierr"
 )
 
 //go:generate mockery --name ActionAppender --filename action_appender.go
@@ -34,10 +34,11 @@ func NewRollbacker(tmpDir string) (*Rollbacker, error) {
 	}
 
 	return &Rollbacker{
-		backupDir:  path.BackupDirFromTempDir(tmpDir),
-		latestDir:  path.LatestDirFromTempDir(tmpDir),
-		installDir: installDir,
-		tmpDir:     tmpDir,
+		backupDir:   path.BackupDirFromTempDir(tmpDir),
+		latestDir:   path.LatestDirFromTempDir(tmpDir),
+		installDir:  installDir,
+		tmpDir:      tmpDir,
+		originalSvc: service.NewService(path.LatestDirFromTempDir(tmpDir)),
 	}, nil
 }
 
@@ -62,16 +63,15 @@ func (r Rollbacker) Backup() error {
 }
 
 // Rollback performs a rollback by undoing all recorded actions.
-func (r Rollbacker) Rollback() (err error) {
+func (r Rollbacker) Rollback() {
 	// We need to loop through the actions slice backwards, to roll back the actions in the correct order.
 	// e.g. if StartService was called last, we need to stop the service first, then rollback previous actions.
 	for i := len(r.actions) - 1; i >= 0; i-- {
 		action := r.actions[i]
-		// TODO: Evaluate if we need to use multierr here (I think it's useful, but others seem to hate this)
-		// Maybe we even just log and don't return the error upstream.
-		err = multierr.Append(err, action.Rollback())
+		if err := action.Rollback(); err != nil {
+			log.Default().Printf("Failed to run rollback option: %s", err)
+		}
 	}
-	return
 }
 
 // copyFiles moves the file tree rooted at latestDirPath to installDirPath,

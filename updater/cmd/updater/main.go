@@ -20,6 +20,7 @@ import (
 	"os"
 
 	"github.com/observiq/observiq-otel-collector/updater/internal/install"
+	"github.com/observiq/observiq-otel-collector/updater/internal/rollback"
 	"github.com/observiq/observiq-otel-collector/updater/internal/version"
 	"github.com/spf13/pflag"
 )
@@ -48,7 +49,22 @@ func main() {
 		log.Fatalf("Failed to create installer: %s", err)
 	}
 
-	if err := installer.Install(); err != nil {
-		log.Fatalf("Failed to install: %s", err)
+	rb, err := rollback.NewRollbacker(*tmpDir)
+	if err != nil {
+		log.Fatalf("Failed to create rollbacker: %s", err)
 	}
+
+	if err := rb.Backup(); err != nil {
+		log.Fatalf("Failed to backup: %s", err)
+	}
+
+	if err := installer.Install(rb); err != nil {
+		log.Default().Printf("Failed to install: %s", err)
+		// TODO: Change packagestatuses to have error message
+		rb.Rollback()
+		log.Default().Fatalf("Rollback complete")
+	}
+
+	// TODO: Monitor post install packagestatuses for failure/success
+	// If it doesn't pass, rollback
 }
