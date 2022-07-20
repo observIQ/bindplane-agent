@@ -50,6 +50,7 @@ type Client struct {
 	downloadableFileManager opamp.DownloadableFileManager
 	collector               collector.Collector
 	packagesStateProvider   types.PackagesStateProvider
+	updaterManager          UpdaterManager
 	mutex                   sync.Mutex
 	updatingPackage         bool
 
@@ -82,6 +83,7 @@ func NewClient(args *NewClientArgs) (opamp.Client, error) {
 		collector:               args.Collector,
 		currentConfig:           args.Config,
 		packagesStateProvider:   newPackagesStateProvider(clientLogger, packagestate.DefaultFileName),
+		updaterManager:          newUpdaterManager(clientLogger, args.TmpPath),
 	}
 
 	// Parse URL to determin scheme
@@ -415,11 +417,14 @@ func (c *Client) createPackageMaps(
 // installPackageFromFile tries to download and extract the given tarball and then start up the new Updater binary that was
 // inside of it
 func (c *Client) installPackageFromFile(file *protobufs.DownloadableFile, curPackageStatuses *protobufs.PackageStatuses) {
+	// There should be no reason for us to exit this function unless we detected a problem with the Updater's installation
+	defer c.safeSetUpdatingPackage(false)
+
 	if fileManagerErr := c.downloadableFileManager.FetchAndExtractArchive(file); fileManagerErr != nil {
 		// Change existing status to show that install failed and get ready to send
 		curPackageStatuses.Packages[packagestate.CollectorPackageName].Status = protobufs.PackageStatus_InstallFailed
 		curPackageStatuses.Packages[packagestate.CollectorPackageName].ErrorMessage =
-			fmt.Sprintf("Failed to download and verify package %s's downloadable file", packagestate.CollectorPackageName)
+			fmt.Sprintf("Failed to download and verify package %s's downloadable file: %s", packagestate.CollectorPackageName, fileManagerErr)
 
 		if err := c.packagesStateProvider.SetLastReportedStatuses(curPackageStatuses); err != nil {
 			c.logger.Error("Failed to save last reported package statuses", zap.Error(err))
@@ -429,11 +434,30 @@ func (c *Client) installPackageFromFile(file *protobufs.DownloadableFile, curPac
 			c.logger.Error("OpAMP client failed to set package statuses", zap.Error(err))
 		}
 
-		c.safeSetUpdatingPackage(false)
 		return
 	}
 
-	// TODO: Start Updater
+	if err := c.updaterManager.StartAndMonitorUpdater(); err != nil {
+		// Reread package statuses in case Updater changed anything
+		newPackageStatuses, err := c.packagesStateProvider.LastReportedStatuses()
+		if err != nil {
+			c.logger.Error("Failed to read last reported package statuses", zap.Error(err))
+		}
+
+		// Change existing status to show that install failed and get ready to send
+		newPackageStatuses.Packages[packagestate.CollectorPackageName].Status = protobufs.PackageStatus_InstallFailed
+		if newPackageStatuses.Packages[packagestate.CollectorPackageName].ErrorMessage == "" {
+			newPackageStatuses.Packages[packagestate.CollectorPackageName].ErrorMessage = fmt.Sprintf("Failed to run the latest Updater: %s", err)
+		}
+
+		if err := c.packagesStateProvider.SetLastReportedStatuses(newPackageStatuses); err != nil {
+			c.logger.Error("Failed to save last reported package statuses", zap.Error(err))
+		}
+
+		if err := c.opampClient.SetPackageStatuses(newPackageStatuses); err != nil {
+			c.logger.Error("OpAMP client failed to set package statuses", zap.Error(err))
+		}
+	}
 
 	return
 }
