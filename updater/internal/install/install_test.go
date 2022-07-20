@@ -75,23 +75,17 @@ func TestInstallArtifacts(t *testing.T) {
 		contentsEqual(t, filepath.Join(outDir, "test.txt"), "This is a test file\n")
 		contentsEqual(t, filepath.Join(outDir, "test-folder", "another-test.txt"), "This is a nested text file\n")
 
-		absLatestPath, err := filepath.Abs(installer.latestDir)
-		require.NoError(t, err)
-
-		absInstallPath, err := filepath.Abs(installer.installDir)
-		require.NoError(t, err)
-
 		copyTestTxtAction, err := rollback.NewCopyFileAction(
-			filepath.Join(absLatestPath, "test.txt"),
-			filepath.Join(absInstallPath, "test.txt"),
+			filepath.Join(installer.latestDir, "test.txt"),
+			filepath.Join(installer.installDir, "test.txt"),
 			installer.tmpDir,
 		)
 		require.NoError(t, err)
 		copyTestTxtAction.FileCreated = true
 
 		copyNestedTestTxtAction, err := rollback.NewCopyFileAction(
-			filepath.Join(absLatestPath, "test-folder", "test.txt"),
-			filepath.Join(absInstallPath, "test-folder", "test.txt"),
+			filepath.Join(installer.latestDir, "test-folder", "another-test.txt"),
+			filepath.Join(installer.installDir, "test-folder", "another-test.txt"),
 			installer.tmpDir,
 		)
 		require.NoError(t, err)
@@ -99,8 +93,8 @@ func TestInstallArtifacts(t *testing.T) {
 
 		require.Equal(t, []rollback.RollbackableAction{
 			rollback.NewServiceStopAction(svc),
-			copyTestTxtAction,
 			copyNestedTestTxtAction,
+			copyTestTxtAction,
 			rollback.NewServiceUpdateAction(installer.tmpDir),
 			rollback.NewServiceStartAction(svc),
 		}, actions)
@@ -134,10 +128,36 @@ func TestInstallArtifacts(t *testing.T) {
 
 		svc.On("Stop").Once().Return(nil)
 		svc.On("Update").Once().Return(errors.New("uninstall failed"))
-		rb.On("AppendAction", mock.Anything).Return(nil)
+
+		actions := []rollback.RollbackableAction{}
+		rb.On("AppendAction", mock.Anything).Run(func(args mock.Arguments) {
+			action := args.Get(0).(rollback.RollbackableAction)
+			actions = append(actions, action)
+		})
 
 		err := installer.Install(rb)
 		require.ErrorContains(t, err, "failed to update service")
+		copyTestTxtAction, err := rollback.NewCopyFileAction(
+			filepath.Join(installer.latestDir, "test.txt"),
+			filepath.Join(installer.installDir, "test.txt"),
+			installer.tmpDir,
+		)
+		require.NoError(t, err)
+		copyTestTxtAction.FileCreated = true
+
+		copyNestedTestTxtAction, err := rollback.NewCopyFileAction(
+			filepath.Join(installer.latestDir, "test-folder", "another-test.txt"),
+			filepath.Join(installer.installDir, "test-folder", "another-test.txt"),
+			installer.tmpDir,
+		)
+		require.NoError(t, err)
+		copyNestedTestTxtAction.FileCreated = true
+
+		require.Equal(t, []rollback.RollbackableAction{
+			rollback.NewServiceStopAction(svc),
+			copyNestedTestTxtAction,
+			copyTestTxtAction,
+		}, actions)
 	})
 
 	t.Run("Start fails", func(t *testing.T) {
@@ -153,10 +173,38 @@ func TestInstallArtifacts(t *testing.T) {
 		svc.On("Stop").Once().Return(nil)
 		svc.On("Update").Once().Return(nil)
 		svc.On("Start").Once().Return(errors.New("start failed"))
-		rb.On("AppendAction", mock.Anything).Return(nil)
+
+		actions := []rollback.RollbackableAction{}
+		rb.On("AppendAction", mock.Anything).Run(func(args mock.Arguments) {
+			action := args.Get(0).(rollback.RollbackableAction)
+			actions = append(actions, action)
+		})
 
 		err := installer.Install(rb)
 		require.ErrorContains(t, err, "failed to start service")
+
+		copyTestTxtAction, err := rollback.NewCopyFileAction(
+			filepath.Join(installer.latestDir, "test.txt"),
+			filepath.Join(installer.installDir, "test.txt"),
+			installer.tmpDir,
+		)
+		require.NoError(t, err)
+		copyTestTxtAction.FileCreated = true
+
+		copyNestedTestTxtAction, err := rollback.NewCopyFileAction(
+			filepath.Join(installer.latestDir, "test-folder", "another-test.txt"),
+			filepath.Join(installer.installDir, "test-folder", "another-test.txt"),
+			installer.tmpDir,
+		)
+		require.NoError(t, err)
+		copyNestedTestTxtAction.FileCreated = true
+
+		require.Equal(t, []rollback.RollbackableAction{
+			rollback.NewServiceStopAction(svc),
+			copyNestedTestTxtAction,
+			copyTestTxtAction,
+			rollback.NewServiceUpdateAction(installer.tmpDir),
+		}, actions)
 	})
 
 	t.Run("Latest dir does not exist", func(t *testing.T) {
@@ -170,10 +218,19 @@ func TestInstallArtifacts(t *testing.T) {
 		}
 
 		svc.On("Stop").Once().Return(nil)
-		rb.On("AppendAction", mock.Anything).Return(nil)
+
+		actions := []rollback.RollbackableAction{}
+		rb.On("AppendAction", mock.Anything).Run(func(args mock.Arguments) {
+			action := args.Get(0).(rollback.RollbackableAction)
+			actions = append(actions, action)
+		})
 
 		err := installer.Install(rb)
 		require.ErrorContains(t, err, "failed to install new files")
+
+		require.Equal(t, []rollback.RollbackableAction{
+			rollback.NewServiceStopAction(svc),
+		}, actions)
 	})
 
 	t.Run("An artifact exists already as a folder", func(t *testing.T) {
@@ -201,10 +258,40 @@ func TestInstallArtifacts(t *testing.T) {
 		require.NoError(t, err)
 
 		svc.On("Stop").Once().Return(nil)
-		rb.On("AppendAction", mock.Anything).Return(nil)
+
+		actions := []rollback.RollbackableAction{}
+		rb.On("AppendAction", mock.Anything).Run(func(args mock.Arguments) {
+			action := args.Get(0).(rollback.RollbackableAction)
+			actions = append(actions, action)
+		})
 
 		err = installer.Install(rb)
 		require.ErrorContains(t, err, "failed to install new files")
+		t.Logf("Error: %s", err)
+
+		copyTestTxtAction, err := rollback.NewCopyFileAction(
+			filepath.Join(installer.latestDir, "test.txt"),
+			filepath.Join(installer.installDir, "test.txt"),
+			installer.tmpDir,
+		)
+		require.NoError(t, err)
+		copyTestTxtAction.FileCreated = false
+
+		copyNestedTestTxtAction, err := rollback.NewCopyFileAction(
+			filepath.Join(installer.latestDir, "test-folder", "another-test.txt"),
+			filepath.Join(installer.installDir, "test-folder", "another-test.txt"),
+			installer.tmpDir,
+		)
+		require.NoError(t, err)
+		copyNestedTestTxtAction.FileCreated = true
+
+		require.Equal(t, []rollback.RollbackableAction{
+			rollback.NewServiceStopAction(svc),
+			copyNestedTestTxtAction,
+			// copyTestTxtAction is appended even though it failed; This is because we don't know WHY it failed, so we should keep it and try a rollback anyways,
+			// in case it was actually a partial write.
+			copyTestTxtAction,
+		}, actions)
 	})
 }
 
