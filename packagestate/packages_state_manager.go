@@ -28,8 +28,18 @@ import (
 // CollectorPackageName is the name for the top level packages for this collector
 const CollectorPackageName = "observiq-otel-collector"
 
-// PackagesStateManager manages state on disk via a JSON file
-type PackagesStateManager struct {
+// PackageStateManager tracks Package states
+type PackageStateManager interface {
+	// LoadStatuses retrieves the previously saved PackagesStatuses.
+	// If none were saved returns error
+	LoadStatuses() (*protobufs.PackageStatuses, error)
+
+	// SaveStatuses saves the given PackageStatuses
+	SaveStatuses(statuses *protobufs.PackageStatuses) error
+}
+
+// FilePackagesStateManager manages state on disk via a JSON file
+type FilePackagesStateManager struct {
 	jsonPath string
 	logger   *zap.Logger
 }
@@ -49,16 +59,16 @@ type packageStates struct {
 	PackageStates   map[string]*packageState `json:"package_states"`
 }
 
-// NewPackagesStateManager creates a new PackagesStateManager
-func NewPackagesStateManager(logger *zap.Logger, jsonPath string) *PackagesStateManager {
-	return &PackagesStateManager{
+// NewFilePackagesStateManager creates a new PackagesStateManager
+func NewFilePackagesStateManager(logger *zap.Logger, jsonPath string) PackageStateManager {
+	return &FilePackagesStateManager{
 		jsonPath: filepath.Clean(jsonPath),
 		logger:   logger,
 	}
 }
 
 // LoadStatuses retrieves the PackagesStatuses from a saved json file
-func (p *PackagesStateManager) LoadStatuses() (*protobufs.PackageStatuses, error) {
+func (p *FilePackagesStateManager) LoadStatuses() (*protobufs.PackageStatuses, error) {
 	p.logger.Debug("Loading package statuses")
 
 	statusesBytes, err := os.ReadFile(p.jsonPath)
@@ -75,7 +85,7 @@ func (p *PackagesStateManager) LoadStatuses() (*protobufs.PackageStatuses, error
 }
 
 // SaveStatuses saves the given PackageStatuses into a json file
-func (p *PackagesStateManager) SaveStatuses(statuses *protobufs.PackageStatuses) error {
+func (p *FilePackagesStateManager) SaveStatuses(statuses *protobufs.PackageStatuses) error {
 	p.logger.Debug("Saving package statuses")
 
 	// If there is any problem saving the new package statuses, make sure that we delete any existing file

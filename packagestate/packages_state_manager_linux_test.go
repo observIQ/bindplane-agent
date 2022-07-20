@@ -38,7 +38,7 @@ func TestLoadStatusesLinux(t *testing.T) {
 				cantReadJSON := filepath.Join(tmpDir, "noread.json")
 				os.WriteFile(cantReadJSON, nil, 0000)
 				logger := zap.NewNop()
-				p := &PackagesStateManager{
+				p := &FilePackagesStateManager{
 					logger:   logger,
 					jsonPath: cantReadJSON,
 				}
@@ -68,7 +68,7 @@ func TestSaveStatusesLinux(t *testing.T) {
 				os.Chmod(tmpDir, 0400)
 				testJSON := filepath.Join(tmpDir, "test.json")
 				logger := zap.NewNop()
-				p := &PackagesStateManager{
+				p := &FilePackagesStateManager{
 					logger:   logger,
 					jsonPath: testJSON,
 				}

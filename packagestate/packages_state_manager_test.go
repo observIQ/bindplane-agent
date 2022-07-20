@@ -35,10 +35,14 @@ func TestNewPackagesStateManager(t *testing.T) {
 			testFunc: func(t *testing.T) {
 				jsonPath := "test.json"
 				logger := zap.NewNop()
-				actual := NewPackagesStateManager(logger, jsonPath)
+				actual := NewFilePackagesStateManager(logger, jsonPath)
 
-				assert.Equal(t, logger, actual.logger)
-				assert.Equal(t, jsonPath, actual.jsonPath)
+				var expected PackageStateManager = &FilePackagesStateManager{
+					jsonPath: jsonPath,
+					logger:   logger,
+				}
+
+				assert.Equal(t, expected, actual)
 			},
 		},
 	}
@@ -58,7 +62,7 @@ func TestLoadStatuses(t *testing.T) {
 			testFunc: func(t *testing.T) {
 				noExistJSON := "garbage.json"
 				logger := zap.NewNop()
-				p := &PackagesStateManager{
+				p := &FilePackagesStateManager{
 					logger:   logger,
 					jsonPath: noExistJSON,
 				}
@@ -74,7 +78,7 @@ func TestLoadStatuses(t *testing.T) {
 			testFunc: func(t *testing.T) {
 				badJSON := "testdata/package_statuses_bad.json"
 				logger := zap.NewNop()
-				p := &PackagesStateManager{
+				p := &FilePackagesStateManager{
 					logger:   logger,
 					jsonPath: badJSON,
 				}
@@ -98,7 +102,7 @@ func TestLoadStatuses(t *testing.T) {
 				allHash := []byte("hash")
 				allErrMsg := "whoops"
 				logger := zap.NewNop()
-				p := &PackagesStateManager{
+				p := &FilePackagesStateManager{
 					logger:   logger,
 					jsonPath: goodJSON,
 				}
@@ -144,7 +148,7 @@ func TestSaveStatuses(t *testing.T) {
 				tmpDir := t.TempDir()
 				testJSON := filepath.Join(tmpDir, "test.json")
 				logger := zap.NewNop()
-				p := &PackagesStateManager{
+				p := &FilePackagesStateManager{
 					logger:   logger,
 					jsonPath: testJSON,
 				}
@@ -194,7 +198,7 @@ func TestSaveStatuses(t *testing.T) {
 				os.WriteFile(testJSON, nil, 0600)
 
 				logger := zap.NewNop()
-				p := &PackagesStateManager{
+				p := &FilePackagesStateManager{
 					logger:   logger,
 					jsonPath: testJSON,
 				}
