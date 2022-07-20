@@ -98,7 +98,6 @@ func (d darwinService) install() error {
 
 // Uninstalls the service
 func (d darwinService) uninstall() error {
-	//#nosec G204 -- installedServiceFilePath is not determined by user input
 	if err := d.Stop(); err != nil {
 		return err
 	}
@@ -123,6 +122,17 @@ func (d darwinService) Update() error {
 }
 
 func (d darwinService) Backup(outDir string) error {
+	oldFile, err := os.Open(d.installedServiceFilePath)
+	if err != nil {
+		return fmt.Errorf("failed to open old service file: %w", err)
+	}
+	defer func() {
+		err := oldFile.Close()
+		if err != nil {
+			log.Default().Printf("darwinService.Backup: failed to close out file: %s", err)
+		}
+	}()
+
 	// Create the file in the specified location; If the file already exists, an error will be returned,
 	// since we don't want to overwrite the file
 	backupFile, err := os.OpenFile(path.BackupServiceFile(outDir), os.O_CREATE|os.O_WRONLY|os.O_EXCL, 0600)
@@ -131,17 +141,6 @@ func (d darwinService) Backup(outDir string) error {
 	}
 	defer func() {
 		err := backupFile.Close()
-		if err != nil {
-			log.Default().Printf("darwinService.Backup: failed to close out file: %s", err)
-		}
-	}()
-
-	oldFile, err := os.Open(d.installedServiceFilePath)
-	if err != nil {
-		return fmt.Errorf("failed to open old service file: %w", err)
-	}
-	defer func() {
-		err := oldFile.Close()
 		if err != nil {
 			log.Default().Printf("darwinService.Backup: failed to close out file: %s", err)
 		}
