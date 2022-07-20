@@ -177,10 +177,8 @@ func (p *Plugin) checkType(values map[string]interface{}) error {
 			if !ok {
 				return fmt.Errorf("parameter %s must be a string", parameter.Name)
 			}
-			for tz := range tzlist {
-				if raw == tz {
-					return nil
-				}
+			if _, ok := tzlist[raw]; ok {
+				return nil
 			}
 			return fmt.Errorf("parameter %s must be a valid timezone", parameter.Name)
 		default:
