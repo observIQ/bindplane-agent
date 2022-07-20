@@ -34,14 +34,14 @@ var _ types.PackagesStateProvider = (*packagesStateProvider)(nil)
 
 // packagesStateProvider represents a PackagesStateProvider which uses a PackageStateManager to persist PackageStatuses
 type packagesStateProvider struct {
-	packageStateManager *packagestate.PackagesStateManager
+	packageStateManager packagestate.StateManager
 	logger              *zap.Logger
 }
 
 // newPackagesStateProvider creates a new OpAmp PackagesStateProvider
 func newPackagesStateProvider(logger *zap.Logger, jsonPath string) types.PackagesStateProvider {
 	return &packagesStateProvider{
-		packageStateManager: packagestate.NewPackagesStateManager(logger, jsonPath),
+		packageStateManager: packagestate.NewFileStateManager(logger, jsonPath),
 		logger:              logger,
 	}
 }

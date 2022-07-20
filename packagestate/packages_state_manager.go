@@ -28,8 +28,8 @@ import (
 // CollectorPackageName is the name for the top level packages for this collector
 const CollectorPackageName = "observiq-otel-collector"
 
-// PackageStateManager tracks Package states
-type PackageStateManager interface {
+// StateManager tracks Package states
+type StateManager interface {
 	// LoadStatuses retrieves the previously saved PackagesStatuses.
 	// If none were saved returns error
 	LoadStatuses() (*protobufs.PackageStatuses, error)
@@ -38,8 +38,8 @@ type PackageStateManager interface {
 	SaveStatuses(statuses *protobufs.PackageStatuses) error
 }
 
-// FilePackagesStateManager manages state on disk via a JSON file
-type FilePackagesStateManager struct {
+// FileStateManager manages state on disk via a JSON file
+type FileStateManager struct {
 	jsonPath string
 	logger   *zap.Logger
 }
@@ -59,16 +59,16 @@ type packageStates struct {
 	PackageStates   map[string]*packageState `json:"package_states"`
 }
 
-// NewFilePackagesStateManager creates a new PackagesStateManager
-func NewFilePackagesStateManager(logger *zap.Logger, jsonPath string) PackageStateManager {
-	return &FilePackagesStateManager{
+// NewFileStateManager creates a new PackagesStateManager
+func NewFileStateManager(logger *zap.Logger, jsonPath string) StateManager {
+	return &FileStateManager{
 		jsonPath: filepath.Clean(jsonPath),
 		logger:   logger,
 	}
 }
 
 // LoadStatuses retrieves the PackagesStatuses from a saved json file
-func (p *FilePackagesStateManager) LoadStatuses() (*protobufs.PackageStatuses, error) {
+func (p *FileStateManager) LoadStatuses() (*protobufs.PackageStatuses, error) {
 	p.logger.Debug("Loading package statuses")
 
 	statusesBytes, err := os.ReadFile(p.jsonPath)
@@ -85,7 +85,7 @@ func (p *FilePackagesStateManager) LoadStatuses() (*protobufs.PackageStatuses, e
 }
 
 // SaveStatuses saves the given PackageStatuses into a json file
-func (p *FilePackagesStateManager) SaveStatuses(statuses *protobufs.PackageStatuses) error {
+func (p *FileStateManager) SaveStatuses(statuses *protobufs.PackageStatuses) error {
 	p.logger.Debug("Saving package statuses")
 
 	// If there is any problem saving the new package statuses, make sure that we delete any existing file
