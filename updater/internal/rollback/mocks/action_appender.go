@@ -3,7 +3,7 @@
 package mocks
 
 import (
-	rollback "github.com/observiq/observiq-otel-collector/updater/internal/rollback"
+	action "github.com/observiq/observiq-otel-collector/updater/internal/action"
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -12,9 +12,9 @@ type ActionAppender struct {
 	mock.Mock
 }
 
-// AppendAction provides a mock function with given fields: action
-func (_m *ActionAppender) AppendAction(action rollback.RollbackableAction) {
-	_m.Called(action)
+// AppendAction provides a mock function with given fields: _a0
+func (_m *ActionAppender) AppendAction(_a0 action.RollbackableAction) {
+	_m.Called(_a0)
 }
 
 type mockConstructorTestingTNewActionAppender interface {

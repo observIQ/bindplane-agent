@@ -22,6 +22,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/observiq/observiq-otel-collector/updater/internal/action"
 	"github.com/observiq/observiq-otel-collector/updater/internal/file"
 	"github.com/observiq/observiq-otel-collector/updater/internal/path"
 	"github.com/observiq/observiq-otel-collector/updater/internal/service"
@@ -29,16 +30,15 @@ import (
 
 //go:generate mockery --name ActionAppender --filename action_appender.go
 type ActionAppender interface {
-	AppendAction(action RollbackableAction)
+	AppendAction(action action.RollbackableAction)
 }
 
 type Rollbacker struct {
 	originalSvc service.Service
 	backupDir   string
-	latestDir   string
 	installDir  string
 	tmpDir      string
-	actions     []RollbackableAction
+	actions     []action.RollbackableAction
 }
 
 func NewRollbacker(tmpDir string) (*Rollbacker, error) {
@@ -49,7 +49,6 @@ func NewRollbacker(tmpDir string) (*Rollbacker, error) {
 
 	return &Rollbacker{
 		backupDir:   path.BackupDirFromTempDir(tmpDir),
-		latestDir:   path.LatestDirFromTempDir(tmpDir),
 		installDir:  installDir,
 		tmpDir:      tmpDir,
 		originalSvc: service.NewService(path.LatestDirFromTempDir(tmpDir)),
@@ -57,7 +56,7 @@ func NewRollbacker(tmpDir string) (*Rollbacker, error) {
 }
 
 // AppendAction records the action that was performed, so that it may be undone later.
-func (r *Rollbacker) AppendAction(action RollbackableAction) {
+func (r *Rollbacker) AppendAction(action action.RollbackableAction) {
 	r.actions = append(r.actions, action)
 }
 
@@ -103,7 +102,7 @@ func copyFiles(inputPath, outputPath, tmpDir string) error {
 
 	err = filepath.WalkDir(inputPath, func(inPath string, d fs.DirEntry, err error) error {
 
-		fullPath, absErr := filepath.Abs(inputPath)
+		fullPath, absErr := filepath.Abs(inPath)
 		if absErr != nil {
 			return fmt.Errorf("failed to determine absolute path of file: %w", err)
 		}
@@ -113,7 +112,7 @@ func copyFiles(inputPath, outputPath, tmpDir string) error {
 			// if there was an error walking the directory, we want to bail out.
 			return err
 		case d.IsDir() && strings.HasPrefix(fullPath, absTmpDir):
-			// If this is the directory "tmp", we want to skip copying this directory,
+			// If this is the "tmp" directory, we want to skip copying this directory,
 			// since this folder is only for temporary files (and is where this binary is running right now)
 			return filepath.SkipDir
 		case d.IsDir():

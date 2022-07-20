@@ -14,6 +14,8 @@
 
 package path
 
+const defaultProductName           = "observIQ Distro for OpenTelemetry Collector"
+
 // InstallDirFromRegistry gets the installation dir of the given product from the Windows Registry
 func InstallDirFromRegistry(productName string) (string, error) {
 	// this key is created when installing using the MSI installer

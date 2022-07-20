@@ -21,7 +21,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/observiq/observiq-otel-collector/updater/internal/rollback"
+	"github.com/observiq/observiq-otel-collector/updater/internal/action"
 	rb_mocks "github.com/observiq/observiq-otel-collector/updater/internal/rollback/mocks"
 	"github.com/observiq/observiq-otel-collector/updater/internal/service/mocks"
 	"github.com/stretchr/testify/mock"
@@ -55,9 +55,9 @@ func TestInstallArtifacts(t *testing.T) {
 		svc.On("Update").Once().Return(nil)
 		svc.On("Start").Once().Return(nil)
 
-		actions := []rollback.RollbackableAction{}
+		actions := []action.RollbackableAction{}
 		rb.On("AppendAction", mock.Anything).Run(func(args mock.Arguments) {
-			action := args.Get(0).(rollback.RollbackableAction)
+			action := args.Get(0).(action.RollbackableAction)
 			actions = append(actions, action)
 		})
 
@@ -75,7 +75,7 @@ func TestInstallArtifacts(t *testing.T) {
 		contentsEqual(t, filepath.Join(outDir, "test.txt"), "This is a test file\n")
 		contentsEqual(t, filepath.Join(outDir, "test-folder", "another-test.txt"), "This is a nested text file\n")
 
-		copyTestTxtAction, err := rollback.NewCopyFileAction(
+		copyTestTxtAction, err := action.NewCopyFileAction(
 			filepath.Join(installer.latestDir, "test.txt"),
 			filepath.Join(installer.installDir, "test.txt"),
 			installer.tmpDir,
@@ -83,7 +83,7 @@ func TestInstallArtifacts(t *testing.T) {
 		require.NoError(t, err)
 		copyTestTxtAction.FileCreated = true
 
-		copyNestedTestTxtAction, err := rollback.NewCopyFileAction(
+		copyNestedTestTxtAction, err := action.NewCopyFileAction(
 			filepath.Join(installer.latestDir, "test-folder", "another-test.txt"),
 			filepath.Join(installer.installDir, "test-folder", "another-test.txt"),
 			installer.tmpDir,
@@ -91,12 +91,12 @@ func TestInstallArtifacts(t *testing.T) {
 		require.NoError(t, err)
 		copyNestedTestTxtAction.FileCreated = true
 
-		require.Equal(t, []rollback.RollbackableAction{
-			rollback.NewServiceStopAction(svc),
+		require.Equal(t, []action.RollbackableAction{
+			action.NewServiceStopAction(svc),
 			copyNestedTestTxtAction,
 			copyTestTxtAction,
-			rollback.NewServiceUpdateAction(installer.tmpDir),
-			rollback.NewServiceStartAction(svc),
+			action.NewServiceUpdateAction(installer.tmpDir),
+			action.NewServiceStartAction(svc),
 		}, actions)
 	})
 
@@ -129,15 +129,15 @@ func TestInstallArtifacts(t *testing.T) {
 		svc.On("Stop").Once().Return(nil)
 		svc.On("Update").Once().Return(errors.New("uninstall failed"))
 
-		actions := []rollback.RollbackableAction{}
+		actions := []action.RollbackableAction{}
 		rb.On("AppendAction", mock.Anything).Run(func(args mock.Arguments) {
-			action := args.Get(0).(rollback.RollbackableAction)
+			action := args.Get(0).(action.RollbackableAction)
 			actions = append(actions, action)
 		})
 
 		err := installer.Install(rb)
 		require.ErrorContains(t, err, "failed to update service")
-		copyTestTxtAction, err := rollback.NewCopyFileAction(
+		copyTestTxtAction, err := action.NewCopyFileAction(
 			filepath.Join(installer.latestDir, "test.txt"),
 			filepath.Join(installer.installDir, "test.txt"),
 			installer.tmpDir,
@@ -145,7 +145,7 @@ func TestInstallArtifacts(t *testing.T) {
 		require.NoError(t, err)
 		copyTestTxtAction.FileCreated = true
 
-		copyNestedTestTxtAction, err := rollback.NewCopyFileAction(
+		copyNestedTestTxtAction, err := action.NewCopyFileAction(
 			filepath.Join(installer.latestDir, "test-folder", "another-test.txt"),
 			filepath.Join(installer.installDir, "test-folder", "another-test.txt"),
 			installer.tmpDir,
@@ -153,8 +153,8 @@ func TestInstallArtifacts(t *testing.T) {
 		require.NoError(t, err)
 		copyNestedTestTxtAction.FileCreated = true
 
-		require.Equal(t, []rollback.RollbackableAction{
-			rollback.NewServiceStopAction(svc),
+		require.Equal(t, []action.RollbackableAction{
+			action.NewServiceStopAction(svc),
 			copyNestedTestTxtAction,
 			copyTestTxtAction,
 		}, actions)
@@ -174,16 +174,16 @@ func TestInstallArtifacts(t *testing.T) {
 		svc.On("Update").Once().Return(nil)
 		svc.On("Start").Once().Return(errors.New("start failed"))
 
-		actions := []rollback.RollbackableAction{}
+		actions := []action.RollbackableAction{}
 		rb.On("AppendAction", mock.Anything).Run(func(args mock.Arguments) {
-			action := args.Get(0).(rollback.RollbackableAction)
+			action := args.Get(0).(action.RollbackableAction)
 			actions = append(actions, action)
 		})
 
 		err := installer.Install(rb)
 		require.ErrorContains(t, err, "failed to start service")
 
-		copyTestTxtAction, err := rollback.NewCopyFileAction(
+		copyTestTxtAction, err := action.NewCopyFileAction(
 			filepath.Join(installer.latestDir, "test.txt"),
 			filepath.Join(installer.installDir, "test.txt"),
 			installer.tmpDir,
@@ -191,7 +191,7 @@ func TestInstallArtifacts(t *testing.T) {
 		require.NoError(t, err)
 		copyTestTxtAction.FileCreated = true
 
-		copyNestedTestTxtAction, err := rollback.NewCopyFileAction(
+		copyNestedTestTxtAction, err := action.NewCopyFileAction(
 			filepath.Join(installer.latestDir, "test-folder", "another-test.txt"),
 			filepath.Join(installer.installDir, "test-folder", "another-test.txt"),
 			installer.tmpDir,
@@ -199,11 +199,11 @@ func TestInstallArtifacts(t *testing.T) {
 		require.NoError(t, err)
 		copyNestedTestTxtAction.FileCreated = true
 
-		require.Equal(t, []rollback.RollbackableAction{
-			rollback.NewServiceStopAction(svc),
+		require.Equal(t, []action.RollbackableAction{
+			action.NewServiceStopAction(svc),
 			copyNestedTestTxtAction,
 			copyTestTxtAction,
-			rollback.NewServiceUpdateAction(installer.tmpDir),
+			action.NewServiceUpdateAction(installer.tmpDir),
 		}, actions)
 	})
 
@@ -219,17 +219,17 @@ func TestInstallArtifacts(t *testing.T) {
 
 		svc.On("Stop").Once().Return(nil)
 
-		actions := []rollback.RollbackableAction{}
+		actions := []action.RollbackableAction{}
 		rb.On("AppendAction", mock.Anything).Run(func(args mock.Arguments) {
-			action := args.Get(0).(rollback.RollbackableAction)
+			action := args.Get(0).(action.RollbackableAction)
 			actions = append(actions, action)
 		})
 
 		err := installer.Install(rb)
 		require.ErrorContains(t, err, "failed to install new files")
 
-		require.Equal(t, []rollback.RollbackableAction{
-			rollback.NewServiceStopAction(svc),
+		require.Equal(t, []action.RollbackableAction{
+			action.NewServiceStopAction(svc),
 		}, actions)
 	})
 
@@ -259,9 +259,9 @@ func TestInstallArtifacts(t *testing.T) {
 
 		svc.On("Stop").Once().Return(nil)
 
-		actions := []rollback.RollbackableAction{}
+		actions := []action.RollbackableAction{}
 		rb.On("AppendAction", mock.Anything).Run(func(args mock.Arguments) {
-			action := args.Get(0).(rollback.RollbackableAction)
+			action := args.Get(0).(action.RollbackableAction)
 			actions = append(actions, action)
 		})
 
@@ -269,7 +269,7 @@ func TestInstallArtifacts(t *testing.T) {
 		require.ErrorContains(t, err, "failed to install new files")
 		t.Logf("Error: %s", err)
 
-		copyTestTxtAction, err := rollback.NewCopyFileAction(
+		copyTestTxtAction, err := action.NewCopyFileAction(
 			filepath.Join(installer.latestDir, "test.txt"),
 			filepath.Join(installer.installDir, "test.txt"),
 			installer.tmpDir,
@@ -277,7 +277,7 @@ func TestInstallArtifacts(t *testing.T) {
 		require.NoError(t, err)
 		copyTestTxtAction.FileCreated = false
 
-		copyNestedTestTxtAction, err := rollback.NewCopyFileAction(
+		copyNestedTestTxtAction, err := action.NewCopyFileAction(
 			filepath.Join(installer.latestDir, "test-folder", "another-test.txt"),
 			filepath.Join(installer.installDir, "test-folder", "another-test.txt"),
 			installer.tmpDir,
@@ -285,8 +285,8 @@ func TestInstallArtifacts(t *testing.T) {
 		require.NoError(t, err)
 		copyNestedTestTxtAction.FileCreated = true
 
-		require.Equal(t, []rollback.RollbackableAction{
-			rollback.NewServiceStopAction(svc),
+		require.Equal(t, []action.RollbackableAction{
+			action.NewServiceStopAction(svc),
 			copyNestedTestTxtAction,
 			// copyTestTxtAction is appended even though it failed; This is because we don't know WHY it failed, so we should keep it and try a rollback anyways,
 			// in case it was actually a partial write.

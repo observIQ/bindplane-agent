@@ -20,6 +20,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/observiq/observiq-otel-collector/updater/internal/action"
 	"github.com/observiq/observiq-otel-collector/updater/internal/file"
 	"github.com/observiq/observiq-otel-collector/updater/internal/path"
 	"github.com/observiq/observiq-otel-collector/updater/internal/rollback"
@@ -58,7 +59,7 @@ func (i Installer) Install(rb rollback.ActionAppender) error {
 	if err := i.svc.Stop(); err != nil {
 		return fmt.Errorf("failed to stop service: %w", err)
 	}
-	rb.AppendAction(rollback.NewServiceStopAction(i.svc))
+	rb.AppendAction(action.NewServiceStopAction(i.svc))
 
 	// install files that go to installDirPath to their correct location,
 	// excluding any config files (logging.yaml, config.yaml, manager.yaml)
@@ -70,13 +71,13 @@ func (i Installer) Install(rb rollback.ActionAppender) error {
 	if err := i.svc.Update(); err != nil {
 		return fmt.Errorf("failed to update service: %w", err)
 	}
-	rb.AppendAction(rollback.NewServiceUpdateAction(i.tmpDir))
+	rb.AppendAction(action.NewServiceUpdateAction(i.tmpDir))
 
 	// Start service
 	if err := i.svc.Start(); err != nil {
 		return fmt.Errorf("failed to start service: %w", err)
 	}
-	rb.AppendAction(rollback.NewServiceStartAction(i.svc))
+	rb.AppendAction(action.NewServiceStartAction(i.svc))
 
 	return nil
 }
@@ -116,7 +117,7 @@ func copyFiles(inputPath, outputPath, tmpDir string, rb rollback.ActionAppender)
 		// We create the action record here, because we want to record whether the file exists or not before
 		// we open the file (which will end up creating the file).
 		// We will actually
-		cfa, err := rollback.NewCopyFileAction(inPath, outPath, tmpDir)
+		cfa, err := action.NewCopyFileAction(inPath, outPath, tmpDir)
 		if err != nil {
 			return fmt.Errorf("failed to create copy file action: %w", err)
 		}
