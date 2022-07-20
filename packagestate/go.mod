@@ -1,9 +1,9 @@
 module github.com/observiq/observiq-otel-collector/packagestate
 
-go 1.18
+go 1.17
 
 require (
-	github.com/open-telemetry/opamp-go v0.3.0
+	github.com/open-telemetry/opamp-go v0.2.0
 	github.com/stretchr/testify v1.8.0
 	go.uber.org/zap v1.21.0
 )

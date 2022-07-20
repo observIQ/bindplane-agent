@@ -7,6 +7,7 @@ require (
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/googlemanagedprometheus v0.32.2
 	github.com/google/uuid v1.3.0
 	github.com/observiq/observiq-otel-collector/exporter/googlecloudexporter v1.3.0
+	github.com/observiq/observiq-otel-collector/packagestate v0.0.0
 	github.com/observiq/observiq-otel-collector/processor/resourceattributetransposerprocessor v1.3.0
 	github.com/observiq/observiq-otel-collector/receiver/pluginreceiver v1.3.0
 	github.com/open-telemetry/opamp-go v0.2.0
@@ -110,7 +111,7 @@ require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/zipkinreceiver v0.54.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/zookeeperreceiver v0.54.0
 	github.com/spf13/pflag v1.0.5
-	github.com/stretchr/testify v1.7.5
+	github.com/stretchr/testify v1.8.0
 	go.opentelemetry.io/collector v0.54.0
 	go.uber.org/multierr v1.8.0
 	go.uber.org/zap v1.21.0
@@ -452,6 +453,8 @@ replace github.com/observiq/observiq-otel-collector/processor/resourceattributet
 replace github.com/observiq/observiq-otel-collector/receiver/pluginreceiver => ./receiver/pluginreceiver
 
 replace github.com/observiq/observiq-otel-collector/exporter/googlecloudexporter => ./exporter/googlecloudexporter
+
+replace github.com/observiq/observiq-otel-collector/packagestate => ./packagestate
 
 // see https://github.com/google/gnostic/issues/262
 replace github.com/googleapis/gnostic v0.5.6 => github.com/googleapis/gnostic v0.5.5

@@ -17,7 +17,6 @@ package packagestate
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -26,7 +25,10 @@ import (
 	"go.uber.org/zap"
 )
 
-// PackagesStateManager represents uses a json file to persist PackageStatuses
+// CollectorPackageName is the name for the top level packages for this collector
+const CollectorPackageName = "observiq-otel-collector"
+
+// PackagesStateManager manages state on disk via a JSON file
 type PackagesStateManager struct {
 	jsonPath string
 	logger   *zap.Logger
@@ -58,12 +60,6 @@ func NewPackagesStateManager(logger *zap.Logger, jsonPath string) *PackagesState
 // LoadStatuses retrieves the PackagesStatuses from a saved json file
 func (p *PackagesStateManager) LoadStatuses() (*protobufs.PackageStatuses, error) {
 	p.logger.Debug("Loading package statuses")
-
-	// If there's a problem reading the file, we just return a barebones PackageStatuses.
-	if _, err := os.Stat(p.jsonPath); errors.Is(err, os.ErrNotExist) {
-		p.logger.Debug("Package statuses json doesn't exist")
-		return nil, err
-	}
 
 	statusesBytes, err := os.ReadFile(p.jsonPath)
 	if err != nil {
