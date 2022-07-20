@@ -21,6 +21,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/observiq/observiq-otel-collector/updater/internal/rollback"
 	rb_mocks "github.com/observiq/observiq-otel-collector/updater/internal/rollback/mocks"
 	"github.com/observiq/observiq-otel-collector/updater/internal/service/mocks"
 	"github.com/stretchr/testify/mock"
@@ -54,7 +55,11 @@ func TestInstallArtifacts(t *testing.T) {
 		svc.On("Update").Once().Return(nil)
 		svc.On("Start").Once().Return(nil)
 
-		rb.On("AppendAction", mock.Anything).Return(nil)
+		actions := []rollback.RollbackableAction{}
+		rb.On("AppendAction", mock.Anything).Run(func(args mock.Arguments) {
+			action := args.Get(0).(rollback.RollbackableAction)
+			actions = append(actions, action)
+		})
 
 		err = installer.Install(rb)
 		require.NoError(t, err)
@@ -69,6 +74,36 @@ func TestInstallArtifacts(t *testing.T) {
 
 		contentsEqual(t, filepath.Join(outDir, "test.txt"), "This is a test file\n")
 		contentsEqual(t, filepath.Join(outDir, "test-folder", "another-test.txt"), "This is a nested text file\n")
+
+		absLatestPath, err := filepath.Abs(installer.latestDir)
+		require.NoError(t, err)
+
+		absInstallPath, err := filepath.Abs(installer.installDir)
+		require.NoError(t, err)
+
+		copyTestTxtAction, err := rollback.NewCopyFileAction(
+			filepath.Join(absLatestPath, "test.txt"),
+			filepath.Join(absInstallPath, "test.txt"),
+			installer.tmpDir,
+		)
+		require.NoError(t, err)
+		copyTestTxtAction.FileCreated = true
+
+		copyNestedTestTxtAction, err := rollback.NewCopyFileAction(
+			filepath.Join(absLatestPath, "test-folder", "test.txt"),
+			filepath.Join(absInstallPath, "test-folder", "test.txt"),
+			installer.tmpDir,
+		)
+		require.NoError(t, err)
+		copyNestedTestTxtAction.FileCreated = true
+
+		require.Equal(t, []rollback.RollbackableAction{
+			rollback.NewServiceStopAction(svc),
+			copyTestTxtAction,
+			copyNestedTestTxtAction,
+			rollback.NewServiceUpdateAction(installer.tmpDir),
+			rollback.NewServiceStartAction(svc),
+		}, actions)
 	})
 
 	t.Run("Stop fails", func(t *testing.T) {

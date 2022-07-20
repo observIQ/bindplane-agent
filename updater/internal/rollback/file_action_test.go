@@ -19,9 +19,9 @@ func TestNewCopyFileAction(t *testing.T) {
 		require.NoError(t, err)
 
 		require.Equal(t, &CopyFileAction{
-			fromPath:    inFile,
-			toPath:      outFile,
-			fileCreated: true,
+			FromPath:    inFile,
+			ToPath:      outFile,
+			FileCreated: true,
 			rollbackDir: filepath.Join(testTempDir, "rollback"),
 			latestDir:   filepath.Join(testTempDir, "latest"),
 		}, a)
@@ -41,9 +41,9 @@ func TestNewCopyFileAction(t *testing.T) {
 		require.NoError(t, err)
 
 		require.Equal(t, &CopyFileAction{
-			fromPath:    inFile,
-			toPath:      outFile,
-			fileCreated: false,
+			FromPath:    inFile,
+			ToPath:      outFile,
+			FileCreated: false,
 			rollbackDir: filepath.Join(testTempDir, "rollback"),
 			latestDir:   filepath.Join(testTempDir, "latest"),
 		}, a)

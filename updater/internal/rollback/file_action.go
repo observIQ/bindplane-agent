@@ -11,10 +11,10 @@ import (
 )
 
 type CopyFileAction struct {
-	fromPath string
-	toPath   string
-	// fileCreated is a bool that records whether this action had to create a new file or not
-	fileCreated bool
+	FromPath string
+	ToPath   string
+	// FileCreated is a bool that records whether this action had to create a new file or not
+	FileCreated bool
 	rollbackDir string
 	latestDir   string
 }
@@ -34,10 +34,10 @@ func NewCopyFileAction(fromPath, toPath, tmpDir string) (*CopyFileAction, error)
 	}
 
 	return &CopyFileAction{
-		fromPath: fromPath,
-		toPath:   toPath,
+		FromPath: fromPath,
+		ToPath:   toPath,
 		// The file will be created if it doesn't already exist
-		fileCreated: !fileExists,
+		FileCreated: !fileExists,
 		rollbackDir: path.BackupDirFromTempDir(tmpDir),
 		latestDir:   path.LatestDirFromTempDir(tmpDir),
 	}, nil
@@ -46,22 +46,22 @@ func NewCopyFileAction(fromPath, toPath, tmpDir string) (*CopyFileAction, error)
 // Rollback will undo the file copy, by either deleting the file if the file did not originally exist,
 // or it will copy the old file in the rollback dir if it already exists.
 func (c CopyFileAction) Rollback() error {
-	if c.fileCreated {
+	if c.FileCreated {
 		// File did not exist before this action.
 		// We just need to delete this file.
-		return os.RemoveAll(c.toPath)
+		return os.RemoveAll(c.ToPath)
 	}
 
 	// Copy from rollback dir over the current file
 	// the backup file should have the same relative path from
 	// rollback dir as the fromPath does from the latest dir
-	rel, err := filepath.Rel(c.latestDir, c.fromPath)
+	rel, err := filepath.Rel(c.latestDir, c.FromPath)
 	if err != nil {
-		return fmt.Errorf("could not determine relative path between latestDir (%s) and fromPath (%s): %w", c.latestDir, c.fromPath, err)
+		return fmt.Errorf("could not determine relative path between latestDir (%s) and fromPath (%s): %w", c.latestDir, c.FromPath, err)
 	}
 
 	backupFilePath := filepath.Join(c.rollbackDir, rel)
-	if err := file.CopyFile(backupFilePath, c.toPath); err != nil {
+	if err := file.CopyFile(backupFilePath, c.ToPath); err != nil {
 		return fmt.Errorf("failed to copy file: %w", err)
 	}
 
