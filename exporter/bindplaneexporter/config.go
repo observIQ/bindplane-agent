@@ -31,7 +31,7 @@ func createDefaultConfig() config.Exporter {
 	return &Config{
 		ExporterSettings: config.NewExporterSettings(config.NewComponentID(typeStr)),
 		Endpoint:         "localhost:3001/v1/livetail",
-		LiveTail:         "/opt/observiq-otel-collector/livetail.yaml",
+		LiveTail:         "./livetail.yaml",
 		TimeoutSettings:  exporterhelper.TimeoutSettings{Timeout: defaultTimeout},
 		RetrySettings:    exporterhelper.NewDefaultRetrySettings(),
 		QueueSettings:    exporterhelper.NewDefaultQueueSettings(),
