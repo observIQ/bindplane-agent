@@ -62,7 +62,7 @@ func getRecordsFromMetrics(metrics pmetric.Metrics) []MetricRecord {
 func getRecordsFromMetric(metric pmetric.Metric, resourceAttributes map[string]interface{}) []MetricRecord {
 	switch metric.DataType() {
 	case pmetric.MetricDataTypeSum:
-		return getMetricRecordsFromGauge(metric, resourceAttributes)
+		return getMetricRecordsFromSum(metric, resourceAttributes)
 	case pmetric.MetricDataTypeGauge:
 		return getMetricRecordsFromGauge(metric, resourceAttributes)
 	case pmetric.MetricDataTypeSummary:
