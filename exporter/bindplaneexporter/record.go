@@ -130,7 +130,6 @@ func getMetricRecordsFromSummary(metric pmetric.Metric, resourceAttributes map[s
 	points := summary.DataPoints()
 	for i := 0; i < points.Len(); i++ {
 		point := points.At(i)
-		point.QuantileValues().At(0).Quantile()
 		record := MetricRecord{
 			Name:       metricName,
 			Timestamp:  point.Timestamp().AsTime(),
