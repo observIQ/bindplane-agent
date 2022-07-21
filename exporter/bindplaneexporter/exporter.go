@@ -54,8 +54,8 @@ func (e *Exporter) Start(ctx context.Context, _ component.Host) error {
 	return nil
 }
 
-// Stop stops the exporter
-func (e *Exporter) Stop() error {
+// Shutdown shutsdown the exporter
+func (e *Exporter) Shutdown(_ context.Context) error {
 	_ = e.client.WriteControl(websocket.CloseMessage, []byte(""), time.Now().Add(10*time.Second))
 	return e.client.Close()
 }
