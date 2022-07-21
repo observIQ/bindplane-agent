@@ -52,6 +52,8 @@ type ServiceUpdateAction struct {
 }
 
 func NewServiceUpdateAction(tmpDir string) ServiceUpdateAction {
+	// FIXME: This does not point to the correct service file
+	// We need to point to the backup service file here.
 	return ServiceUpdateAction{
 		backupSvc: service.NewService(path.BackupDirFromTempDir(tmpDir)),
 	}

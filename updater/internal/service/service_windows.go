@@ -100,7 +100,7 @@ func (w windowsService) Stop() error {
 }
 
 // Installs the service
-func (w windowsService) Install() error {
+func (w windowsService) install() error {
 	// parse the service definition from disk
 	wsc, err := readWindowsServiceConfig(w.newServiceFilePath)
 	if err != nil {
@@ -123,7 +123,7 @@ func (w windowsService) Install() error {
 	}
 
 	// Get the start type
-	startType, delayed, err := startType(wsc.Service.Start)
+	startType, delayed, err := winapiStartType(wsc.Service.Start)
 	if err != nil {
 		return fmt.Errorf("failed to parse start type in service config: %w", err)
 	}
@@ -154,7 +154,7 @@ func (w windowsService) Install() error {
 }
 
 // Uninstalls the service
-func (w windowsService) Uninstall() error {
+func (w windowsService) uninstall() error {
 	m, err := mgr.Connect()
 	if err != nil {
 		return fmt.Errorf("failed to connect to service manager: %w", err)
@@ -203,12 +203,102 @@ func (w windowsService) Uninstall() error {
 }
 
 func (w windowsService) Update() error {
-	if err := w.Uninstall(); err != nil {
+	if err := w.uninstall(); err != nil {
 		return fmt.Errorf("failed to uninstall old service: %w", err)
 	}
 
-	if err := w.Install(); err != nil {
+	if err := w.install(); err != nil {
 		return fmt.Errorf("failed to install new service: %w", err)
+	}
+
+	return nil
+}
+
+func (w windowsService) Backup(outDir string) error {
+	m, err := mgr.Connect()
+	if err != nil {
+		return fmt.Errorf("failed to connect to service manager: %w", err)
+	}
+	defer m.Disconnect()
+
+	s, err := m.OpenService(w.serviceName)
+	if err != nil {
+		return fmt.Errorf("failed to open service: %w", err)
+	}
+	defer s.Close()
+
+	// Get the current config of the service
+	conf, err := s.Config()
+	if err != nil {
+		return fmt.Errorf("failed to get service config: %w", err)
+	}
+
+	// Split the service arguments into an array of arguments
+	args, err := shellquote.Split(conf.BinaryPathName)
+	if err != nil {
+		return fmt.Errorf("failed to split service config args: %w", err)
+	}
+
+	// The first argument is always the binary name; If the length of the array is 0, we know this is an invalid argument list.
+	if len(args) < 1 {
+		return fmt.Errorf("no binary specified in service config")
+	}
+
+	iDir, err := path.InstallDirFromRegistry(w.productName)
+	if err != nil {
+		return fmt.Errorf("failed to get install dir: %w", err)
+	}
+
+	// In the original config, the Path is the main binary path, relative to the install directory.
+	binaryPath, err := filepath.Rel(iDir, args[0])
+	if err != nil {
+		return fmt.Errorf("could not find service exe relative to install dir: %w", err)
+	}
+
+	// Stored argument string doesn't include the binary path (first arg)
+	args = args[1:]
+
+	// Args should end up being a string, where literal quotes are "&quot;"
+	argString := shellquote.Join(args...)
+	argString = strings.ReplaceAll(argString, "\"", "&quot;")
+
+	// Convert windows api start type to the config file service type
+	confStartType, err := configStartType(conf.StartType, conf.DelayedAutoStart)
+	if err != nil {
+		return fmt.Errorf("failed to get start type: %w", err)
+	}
+
+	// Construct the config
+	wsc := windowsServiceConfig{
+		Path: binaryPath,
+		Service: windowsServiceDefinitionConfig{
+			Start:       confStartType,
+			DisplayName: conf.DisplayName,
+			Description: conf.Description,
+			Arguments:   argString,
+		},
+	}
+
+	// Marshal config as json
+	wscBytes, err := json.Marshal(wsc)
+	if err != nil {
+		return fmt.Errorf("failed to marshal config: %w", err)
+	}
+
+	// Open with O_EXCL to fail if the file already exists
+	f, err := os.OpenFile(path.BackupServiceFile(outDir), os.O_CREATE|os.O_EXCL|os.O_WRONLY, 066)
+	if err != nil {
+		return fmt.Errorf("failed to create backup service file: %w", err)
+	}
+	defer func() {
+		if err := f.Close(); err != nil {
+			log.Default().Printf("windowsService.Backup: Failed to close backup service file: %s", err)
+		}
+	}()
+
+	// finally, write the config out so we can rollback.
+	if _, err := f.Write(wscBytes); err != nil {
+		return fmt.Errorf("failed to write backup service config: %w", err)
 	}
 
 	return nil
@@ -253,15 +343,15 @@ func readWindowsServiceConfig(path string) (*windowsServiceConfig, error) {
 }
 
 // expandArguments expands [INSTALLDIR] to the actual install directory and
-// expands '&quote;' to the literal '"'
+// expands '&quot;' to the literal '"'
 func expandArguments(wsc *windowsServiceConfig, productName, installDir string) {
 	wsc.Service.Arguments = string(replaceInstallDir([]byte(wsc.Service.Arguments), installDir))
 	wsc.Service.Arguments = strings.ReplaceAll(wsc.Service.Arguments, "&quot;", `"`)
 }
 
-// startType converts the start type from the windowsServiceConfig to a start type recognizable by the windows
+// winapiStartType converts the start type from the windowsServiceConfig to a start type recognizable by the windows
 // service API
-func startType(cfgStartType string) (startType uint32, delayed bool, err error) {
+func winapiStartType(cfgStartType string) (startType uint32, delayed bool, err error) {
 	switch cfgStartType {
 	case "auto":
 		// Automatically starts on system bootup.
@@ -280,4 +370,20 @@ func startType(cfgStartType string) (startType uint32, delayed bool, err error) 
 		err = fmt.Errorf("invalid start type in service config: %s", cfgStartType)
 	}
 	return
+}
+
+func configStartType(winapiStartType uint32, delayed bool) (string, error) {
+	switch winapiStartType {
+	case mgr.StartAutomatic:
+		if delayed {
+			return "delayed", nil
+		}
+		return "auto", nil
+	case mgr.StartDisabled:
+		return "disabled", nil
+	case mgr.StartManual:
+		return "manual", nil
+	default:
+		return "", fmt.Errorf("invalid winapi start type: %s", winapiStartType)
+	}
 }
