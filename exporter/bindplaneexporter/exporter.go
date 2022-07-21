@@ -33,8 +33,9 @@ func NewExporter(_ context.Context, cfg *Config, set component.ExporterCreateSet
 	v.AddConfigPath(cfg.LiveTail)
 
 	return &Exporter{
-		viper:  v,
-		logger: set.Logger.Named(cfg.ID().String()),
+		endpoint: cfg.Endpoint,
+		viper:    v,
+		logger:   set.Logger.Named(cfg.ID().String()),
 	}, nil
 }
 
