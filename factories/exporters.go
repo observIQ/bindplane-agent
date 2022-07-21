@@ -16,6 +16,7 @@ package factories
 
 import (
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/googlemanagedprometheus"
+	"github.com/observiq/observiq-otel-collector/exporter/bindplaneexporter"
 	"github.com/observiq/observiq-otel-collector/exporter/googlecloudexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/alibabacloudlogserviceexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/awscloudwatchlogsexporter"
@@ -55,6 +56,7 @@ var defaultExporters = []component.ExporterFactory{
 	awsprometheusremotewriteexporter.NewFactory(),
 	awsxrayexporter.NewFactory(),
 	azuremonitorexporter.NewFactory(),
+	bindplaneexporter.NewFactory(),
 	carbonexporter.NewFactory(),
 	componenttest.NewNopExporterFactory(),
 	elasticsearchexporter.NewFactory(),
