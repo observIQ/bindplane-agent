@@ -2,7 +2,11 @@ module github.com/observiq/observiq-otel-collector/exporter/bindplaneexporter
 
 go 1.17
 
-require go.opentelemetry.io/collector v0.55.0
+require (
+	github.com/gorilla/websocket v1.4.2
+	go.opentelemetry.io/collector v0.55.0
+	go.opentelemetry.io/collector/pdata v0.55.0
+)
 
 require (
 	github.com/cenkalti/backoff/v4 v4.1.3 // indirect
@@ -16,7 +20,6 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	go.opencensus.io v0.23.0 // indirect
-	go.opentelemetry.io/collector/pdata v0.55.0 // indirect
 	go.opentelemetry.io/otel v1.8.0 // indirect
 	go.opentelemetry.io/otel/metric v0.30.0 // indirect
 	go.opentelemetry.io/otel/trace v1.8.0 // indirect

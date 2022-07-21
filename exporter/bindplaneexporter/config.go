@@ -18,6 +18,7 @@ type Config struct {
 	exporterhelper.QueueSettings   `mapstructure:"sending_queue"`
 	exporterhelper.RetrySettings   `mapstructure:"retry_on_failure"`
 
+	Endpoint     string `mapstructure:"endpoint"`
 	LiveTailFile string `mapstructure:"live_tail_file"`
 }
 

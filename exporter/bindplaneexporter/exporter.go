@@ -2,23 +2,37 @@ package bindplaneexporter
 
 import (
 	"context"
+	"net/http"
 	"sync"
+	"time"
 
+	"github.com/gorilla/websocket"
 	"go.opentelemetry.io/collector/pdata/plog"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.opentelemetry.io/collector/pdata/ptrace"
 )
 
-// client is a stand-in interface until the websocket implementation is complete
-type client interface {
-	send(message Message)
-}
-
 // Exporter is the bindplane exporter
 type Exporter struct {
 	mux      sync.RWMutex
 	sessions []Session
-	client   client
+	client   *websocket.Conn
+}
+
+// NewExporter creates a new Exporter with a connection to the given endpoint
+func NewExporter(ctx context.Context, cfg Config) (*Exporter, error) {
+	wsClient, _, err := websocket.DefaultDialer.DialContext(ctx, cfg.Endpoint, http.Header{"Agent-ID": []string{"TODO"}})
+	if err != nil {
+		return nil, err
+	}
+	return &Exporter{
+		client: wsClient,
+	}, nil
+}
+
+func (e *Exporter) Stop() error {
+	_ = e.client.WriteControl(websocket.CloseMessage, []byte(""), time.Now().Add(10*time.Second))
+	return e.client.Close()
 }
 
 // ConsumeMetrics will consume metrics
@@ -44,7 +58,7 @@ func (e *Exporter) ConsumeMetrics(_ context.Context, metrics pmetric.Metrics) er
 		}
 
 		msg := NewMetricsMessage(record, sessionIDs)
-		e.client.send(msg)
+		e.client.WriteJSON(msg)
 	}
 
 	return nil
@@ -73,7 +87,7 @@ func (e *Exporter) ConsumeLogs(_ context.Context, logs plog.Logs) error {
 		}
 
 		msg := NewLogsMessage(record, sessionIDs)
-		e.client.send(msg)
+		e.client.WriteJSON(msg)
 	}
 
 	return nil
@@ -102,7 +116,7 @@ func (e *Exporter) ConsumeTraces(_ context.Context, traces ptrace.Traces) error 
 		}
 
 		msg := NewTracesMessage(record, sessionIDs)
-		e.client.send(msg)
+		e.client.WriteJSON(msg)
 	}
 
 	return nil
