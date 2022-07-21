@@ -28,7 +28,7 @@ import (
 // CollectorPackageName is the name for the top level packages for this collector
 const CollectorPackageName = "observiq-otel-collector"
 
-// DefaultFileName is the default name of the file use to start state
+// DefaultFileName is the default name of the file use to store state
 const DefaultFileName = "package_statuses.json"
 
 // StateManager tracks Package states

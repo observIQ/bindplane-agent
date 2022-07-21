@@ -40,7 +40,7 @@ type Monitor interface {
 	// If passed in statusErr is not nil it will record the error as the message
 	SetState(packageName string, status protobufs.PackageStatus_Status, statusErr error) error
 
-	// MonitorForSuccess will periodically check the state of the package. It will keep checking until the context is canceled.
+	// MonitorForSuccess will periodically check the state of the package. It will keep checking until the context is canceled or a failed/success state is detected.
 	// It will return an error if status is Failed or if the context times out.
 	MonitorForSuccess(ctx context.Context, packageName string) error
 }
@@ -51,7 +51,7 @@ type CollectorMonitor struct {
 	currentStatus *protobufs.PackageStatuses
 }
 
-// NewCollectorMonitor create a new Monitor specificalyl for the collector
+// NewCollectorMonitor create a new Monitor specifically for the collector
 func NewCollectorMonitor(logger *zap.Logger) (Monitor, error) {
 	// Get install directory
 	installDir, err := path.InstallDir()

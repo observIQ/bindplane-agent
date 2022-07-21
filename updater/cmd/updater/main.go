@@ -52,6 +52,7 @@ func main() {
 	}
 
 	// Create a monitor and load the package status file
+	// TODO replace nop logger with real one
 	monitor, err := state.NewCollectorMonitor(zap.NewNop())
 	if err != nil {
 		log.Fatalln("Failed to create monitor:", err)
