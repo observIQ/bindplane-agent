@@ -45,6 +45,7 @@ func (e *Exporter) Start(ctx context.Context, _ component.Host) error {
 	e.viper.OnConfigChange(func(_ fsnotify.Event) {
 		e.updateLiveTail()
 	})
+	e.viper.WatchConfig()
 
 	client, _, err := websocket.DefaultDialer.DialContext(ctx, e.endpoint, http.Header{})
 	if err != nil {
