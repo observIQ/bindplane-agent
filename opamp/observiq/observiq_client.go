@@ -118,9 +118,9 @@ func (c *Client) addManagedConfigs(args *NewClientArgs) error {
 	}
 	c.configManager.AddConfig(LoggingConfigName, loggerManagedConfig)
 
-	liveTailManagedConfig, err := opamp.NewManagedConfig(args.LiveTailConfigPath, opamp.NoopReloadFunc)
+	liveTailManagedConfig, err := opamp.NewManagedConfig(args.LiveTailConfigPath, liveTailReload(c, args.LiveTailConfigPath))
 	if err != nil {
-		return fmt.Errorf("failed to create logger managed config: %w", err)
+		return fmt.Errorf("failed to create live tail managed config: %w", err)
 	}
 	c.configManager.AddConfig(LiveTailConfigName, liveTailManagedConfig)
 

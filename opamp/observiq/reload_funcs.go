@@ -215,6 +215,17 @@ func loggerReload(client *Client, loggerConfigPath string) opamp.ReloadFunc {
 	}
 }
 
+func liveTailReload(_ *Client, liveTailPath string) opamp.ReloadFunc {
+	return func(contents []byte) (bool, error) {
+		// Write new config file
+		if err := updateConfigFile(LoggingConfigName, liveTailPath, contents); err != nil {
+			return false, err
+		}
+
+		return true, nil
+	}
+}
+
 func updateConfigFile(configName, configPath string, contents []byte) error {
 	// Write file
 	if err := os.WriteFile(configPath, contents, 0600); err != nil {
