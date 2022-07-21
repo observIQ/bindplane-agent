@@ -5,15 +5,15 @@ import (
 	"strings"
 )
 
-// SessionConfig is a session config file
-type SessionConfig struct {
-	Sessions []Session `json:"sessions"`
+// LiveTailConfig is a live tail config file
+type LiveTailConfig struct {
+	Sessions []Session `yaml:"sessions"`
 }
 
 // Session is a bindplane session
 type Session struct {
-	ID      string   `json:"id"`
-	Filters []string `json:"filters"`
+	ID      string   `yaml:"id"`
+	Filters []string `yaml:"filters"`
 }
 
 // Matches determines if a record matches the session filters

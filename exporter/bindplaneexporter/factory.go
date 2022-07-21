@@ -22,13 +22,17 @@ func NewFactory() component.ExporterFactory {
 }
 
 // createMetricsExporter creates a metrics exporter based on this config.
-func createMetricsExporter(_ context.Context, set component.ExporterCreateSettings, cfg config.Exporter) (component.MetricsExporter, error) {
+func createMetricsExporter(ctx context.Context, set component.ExporterCreateSettings, cfg config.Exporter) (component.MetricsExporter, error) {
 	eCfg := cfg.(*Config)
-	exporter := Exporter{}
+	exporter, err := NewExporter(ctx, eCfg, set)
+	if err != nil {
+		return nil, err
+	}
+
 	return exporterhelper.NewMetricsExporter(
 		cfg,
 		set,
-		exporter.ConsumeMetrics,
+		exporter.consumeMetrics,
 		exporterhelper.WithTimeout(eCfg.TimeoutSettings),
 		exporterhelper.WithQueue(eCfg.QueueSettings),
 		exporterhelper.WithRetry(eCfg.RetrySettings),
@@ -36,13 +40,17 @@ func createMetricsExporter(_ context.Context, set component.ExporterCreateSettin
 }
 
 // createLogExporter creates a logs exporter based on this config.
-func createLogsExporter(_ context.Context, set component.ExporterCreateSettings, cfg config.Exporter) (component.LogsExporter, error) {
+func createLogsExporter(ctx context.Context, set component.ExporterCreateSettings, cfg config.Exporter) (component.LogsExporter, error) {
 	eCfg := cfg.(*Config)
-	exporter := Exporter{}
+	exporter, err := NewExporter(ctx, eCfg, set)
+	if err != nil {
+		return nil, err
+	}
+
 	return exporterhelper.NewLogsExporter(
 		cfg,
 		set,
-		exporter.ConsumeLogs,
+		exporter.consumeLogs,
 		exporterhelper.WithTimeout(eCfg.TimeoutSettings),
 		exporterhelper.WithQueue(eCfg.QueueSettings),
 		exporterhelper.WithRetry(eCfg.RetrySettings),
@@ -50,13 +58,17 @@ func createLogsExporter(_ context.Context, set component.ExporterCreateSettings,
 }
 
 // createTracesExporter creates a traces exporter based on this config.
-func createTracesExporter(_ context.Context, set component.ExporterCreateSettings, cfg config.Exporter) (component.TracesExporter, error) {
+func createTracesExporter(ctx context.Context, set component.ExporterCreateSettings, cfg config.Exporter) (component.TracesExporter, error) {
 	eCfg := cfg.(*Config)
-	exporter := Exporter{}
+	exporter, err := NewExporter(ctx, eCfg, set)
+	if err != nil {
+		return nil, err
+	}
+
 	return exporterhelper.NewTracesExporter(
 		cfg,
 		set,
-		exporter.ConsumeTraces,
+		exporter.consumeTraces,
 		exporterhelper.WithTimeout(eCfg.TimeoutSettings),
 		exporterhelper.WithQueue(eCfg.QueueSettings),
 		exporterhelper.WithRetry(eCfg.RetrySettings),
