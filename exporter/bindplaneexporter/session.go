@@ -5,6 +5,11 @@ import (
 	"strings"
 )
 
+// SessionConfig is a session config file
+type SessionConfig struct {
+	Sessions []Session `json:"sessions"`
+}
+
 // Session is a bindplane session
 type Session struct {
 	ID      string   `json:"id"`

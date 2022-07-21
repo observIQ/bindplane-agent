@@ -18,13 +18,13 @@ type Config struct {
 	exporterhelper.QueueSettings   `mapstructure:"sending_queue"`
 	exporterhelper.RetrySettings   `mapstructure:"retry_on_failure"`
 
-	Endpoint     string `mapstructure:"endpoint"`
-	LiveTailFile string `mapstructure:"live_tail_file"`
+	Endpoint    string `mapstructure:"endpoint"`
+	SessionFile string `mapstructure:"session_file"`
 }
 
 // Validate validates the config
 func (c *Config) Validate() error {
-	_, err := os.Stat(c.LiveTailFile)
+	_, err := os.Stat(c.SessionFile)
 	if err != nil {
 		return err
 	}
@@ -35,7 +35,7 @@ func (c *Config) Validate() error {
 func createDefaultConfig() config.Exporter {
 	return &Config{
 		ExporterSettings: config.NewExporterSettings(config.NewComponentID(typeStr)),
-		LiveTailFile:     "/opt/observiq-otel-collector/live_tail.yaml",
+		SessionFile:      "/opt/observiq-otel-collector/sessions.yaml",
 		TimeoutSettings:  exporterhelper.TimeoutSettings{Timeout: defaultTimeout},
 		RetrySettings:    exporterhelper.NewDefaultRetrySettings(),
 		QueueSettings:    exporterhelper.NewDefaultQueueSettings(),
