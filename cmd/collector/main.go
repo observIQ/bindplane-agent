@@ -45,6 +45,7 @@ func main() {
 	collectorConfigPaths := pflag.StringSlice("config", []string{"./config.yaml"}, "the collector config path")
 	managerConfigPath := pflag.String("manager", "./manager.yaml", "The configuration for remote management")
 	loggingConfigPath := pflag.String("logging", "./logging.yaml", "the collector logging config path")
+	liveTailConfigPath := pflag.String("livetail", "./livetail.yaml", "the collector live tail config path")
 
 	_ = pflag.String("log-level", "", "not implemented") // TEMP(jsirianni): Required for OTEL k8s operator
 	var showVersion = pflag.BoolP("version", "v", false, "prints the version of the collector")
@@ -76,7 +77,7 @@ func main() {
 	if err := checkManagerConfig(managerConfigPath); err == nil {
 		logger.Info("Starting In Managed Mode")
 
-		runnableService, err = service.NewManagedCollectorService(col, logger, *managerConfigPath, (*collectorConfigPaths)[0], *loggingConfigPath)
+		runnableService, err = service.NewManagedCollectorService(col, logger, *managerConfigPath, (*collectorConfigPaths)[0], *loggingConfigPath, *liveTailConfigPath)
 		if err != nil {
 			logger.Fatal("Failed to initiate managed mode", zap.Error(err))
 		}

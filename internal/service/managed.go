@@ -33,10 +33,11 @@ type ManagedCollectorService struct {
 	managerConfigPath   string
 	collectorConfigPath string
 	loggerConfigPath    string
+	liveTailConfigPath  string
 }
 
 // NewManagedCollectorService creates a new ManagedCollectorService
-func NewManagedCollectorService(col collector.Collector, logger *zap.Logger, managerConfigPath, collectorConfigPath, loggerConfigPath string) (*ManagedCollectorService, error) {
+func NewManagedCollectorService(col collector.Collector, logger *zap.Logger, managerConfigPath, collectorConfigPath, loggerConfigPath, liveTailConfigPath string) (*ManagedCollectorService, error) {
 	opampConfig, err := opamp.ParseConfig(managerConfigPath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse manager config: %w", err)
@@ -50,6 +51,7 @@ func NewManagedCollectorService(col collector.Collector, logger *zap.Logger, man
 		ManagerConfigPath:   managerConfigPath,
 		CollectorConfigPath: collectorConfigPath,
 		LoggerConfigPath:    loggerConfigPath,
+		LiveTailConfigPath:  liveTailConfigPath,
 	}
 
 	// Create new client
@@ -64,6 +66,7 @@ func NewManagedCollectorService(col collector.Collector, logger *zap.Logger, man
 		managerConfigPath:   managerConfigPath,
 		collectorConfigPath: collectorConfigPath,
 		loggerConfigPath:    loggerConfigPath,
+		liveTailConfigPath:  liveTailConfigPath,
 	}, nil
 }
 

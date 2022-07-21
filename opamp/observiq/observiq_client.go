@@ -59,6 +59,7 @@ type NewClientArgs struct {
 	ManagerConfigPath   string
 	CollectorConfigPath string
 	LoggerConfigPath    string
+	LiveTailConfigPath  string
 }
 
 // NewClient creates a new OpAmp client
@@ -116,6 +117,12 @@ func (c *Client) addManagedConfigs(args *NewClientArgs) error {
 		return fmt.Errorf("failed to create logger managed config: %w", err)
 	}
 	c.configManager.AddConfig(LoggingConfigName, loggerManagedConfig)
+
+	liveTailManagedConfig, err := opamp.NewManagedConfig(args.LiveTailConfigPath, opamp.NoopReloadFunc)
+	if err != nil {
+		return fmt.Errorf("failed to create logger managed config: %w", err)
+	}
+	c.configManager.AddConfig(LiveTailConfigName, liveTailManagedConfig)
 
 	return nil
 }

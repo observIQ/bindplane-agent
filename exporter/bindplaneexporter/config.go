@@ -1,7 +1,6 @@
 package bindplaneexporter
 
 import (
-	"os"
 	"time"
 
 	"go.opentelemetry.io/collector/config"
@@ -24,10 +23,6 @@ type Config struct {
 
 // Validate validates the config
 func (c *Config) Validate() error {
-	_, err := os.Stat(c.LiveTail)
-	if err != nil {
-		return err
-	}
 	return nil
 }
 
@@ -35,6 +30,7 @@ func (c *Config) Validate() error {
 func createDefaultConfig() config.Exporter {
 	return &Config{
 		ExporterSettings: config.NewExporterSettings(config.NewComponentID(typeStr)),
+		Endpoint:         "localhost:3001/v1/livetail",
 		LiveTail:         "/opt/observiq-otel-collector/livetail.yaml",
 		TimeoutSettings:  exporterhelper.TimeoutSettings{Timeout: defaultTimeout},
 		RetrySettings:    exporterhelper.NewDefaultRetrySettings(),

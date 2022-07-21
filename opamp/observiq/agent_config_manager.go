@@ -32,6 +32,8 @@ const (
 	ManagerConfigName = "manager.yaml"
 	// LoggingConfigName is the key of the logging config in OpAmp
 	LoggingConfigName = "logging.yaml"
+	// LiveTailConfigName is the key of the live tail config in OpAmp
+	LiveTailConfigName = "livetail.yaml"
 )
 
 // acceptableConfigs is a lookup of configs that are able to be written/updated
@@ -39,6 +41,7 @@ var acceptableConfigs = map[string]struct{}{
 	CollectorConfigName: {},
 	ManagerConfigName:   {},
 	LoggingConfigName:   {},
+	LiveTailConfigName:  {},
 }
 
 // Enforce interface
