@@ -28,7 +28,7 @@ func createMetricsExporter(_ context.Context, set component.ExporterCreateSettin
 	return exporterhelper.NewMetricsExporter(
 		cfg,
 		set,
-		exporter.consumeMetrics,
+		exporter.ConsumeMetrics,
 		exporterhelper.WithTimeout(eCfg.TimeoutSettings),
 		exporterhelper.WithQueue(eCfg.QueueSettings),
 		exporterhelper.WithRetry(eCfg.RetrySettings),
@@ -42,7 +42,7 @@ func createLogsExporter(_ context.Context, set component.ExporterCreateSettings,
 	return exporterhelper.NewLogsExporter(
 		cfg,
 		set,
-		exporter.consumeLogs,
+		exporter.ConsumeLogs,
 		exporterhelper.WithTimeout(eCfg.TimeoutSettings),
 		exporterhelper.WithQueue(eCfg.QueueSettings),
 		exporterhelper.WithRetry(eCfg.RetrySettings),
@@ -56,7 +56,7 @@ func createTracesExporter(_ context.Context, set component.ExporterCreateSetting
 	return exporterhelper.NewTracesExporter(
 		cfg,
 		set,
-		exporter.consumeTraces,
+		exporter.ConsumeTraces,
 		exporterhelper.WithTimeout(eCfg.TimeoutSettings),
 		exporterhelper.WithQueue(eCfg.QueueSettings),
 		exporterhelper.WithRetry(eCfg.RetrySettings),

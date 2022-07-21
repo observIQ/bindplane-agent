@@ -13,7 +13,34 @@ const (
 
 // Message is a message sent to bindplane from the exporter
 type Message struct {
-	Type     string        `json:"type"`
-	Sessions []string      `json:"sessions"`
-	Records  []interface{} `json:"records"`
+	Type     string      `json:"type"`
+	Records  interface{} `json:"records"`
+	Sessions []string    `json:"sessions"`
+}
+
+// NewMetricsMessage creates a new message containing metrics
+func NewMetricsMessage(records []MetricRecord, sessions []string) Message {
+	return Message{
+		Type:     MetricsType,
+		Sessions: sessions,
+		Records:  records,
+	}
+}
+
+// NewLogsMessage creates a new message containing logs
+func NewLogsMessage(records []LogRecord, sessions []string) Message {
+	return Message{
+		Type:     LogsType,
+		Sessions: sessions,
+		Records:  records,
+	}
+}
+
+// NewTracesMessage creates a new message containing traces
+func NewTracesMessage(records []TraceRecord, sessions []string) Message {
+	return Message{
+		Type:     TracesType,
+		Sessions: sessions,
+		Records:  records,
+	}
 }
