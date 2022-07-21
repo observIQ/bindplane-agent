@@ -51,6 +51,7 @@ type CollectorMonitor struct {
 	currentStatus *protobufs.PackageStatuses
 }
 
+// NewCollectorMonitor create a new Monitor specificalyl for the collector
 func NewCollectorMonitor(logger *zap.Logger) (Monitor, error) {
 	// Get install directory
 	installDir, err := path.InstallDir()
