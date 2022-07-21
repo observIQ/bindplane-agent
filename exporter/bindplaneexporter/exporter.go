@@ -30,7 +30,7 @@ type Exporter struct {
 func NewExporter(_ context.Context, cfg *Config, set component.ExporterCreateSettings) (*Exporter, error) {
 	v := viper.New()
 	v.SetConfigType("yaml")
-	v.AddConfigPath(cfg.LiveTail)
+	v.SetConfigFile(cfg.LiveTail)
 
 	return &Exporter{
 		endpoint: cfg.Endpoint,
