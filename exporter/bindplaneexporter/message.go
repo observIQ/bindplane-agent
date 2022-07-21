@@ -14,7 +14,7 @@ const (
 // Message is a message sent to bindplane from the exporter
 type Message struct {
 	Type     string      `json:"type"`
-	Record   interface{} `json:"records"`
+	Record   interface{} `json:"record"`
 	Sessions []string    `json:"sessions"`
 }
 
