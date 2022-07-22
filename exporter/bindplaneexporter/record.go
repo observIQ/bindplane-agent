@@ -178,7 +178,7 @@ func getRecordsFromLogs(logs plog.Logs) []LogRecord {
 				log := scopeLogs.LogRecords().At(j)
 				record := LogRecord{
 					Timestamp:  log.Timestamp().AsTime(),
-					Body:       log.Body(),
+					Body:       log.Body().AsString(),
 					Severity:   log.SeverityText(),
 					Attributes: log.Attributes().AsRaw(),
 					Resource:   resourceAttributes,
