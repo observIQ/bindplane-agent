@@ -20,7 +20,7 @@ import (
 type Exporter struct {
 	endpoint       string
 	client         *websocket.Conn
-	clientMux      sync.RWMutex
+	clientMux      sync.Mutex
 	liveTailConfig *LiveTailConfig
 	liveTailMux    sync.RWMutex
 	viper          *viper.Viper
@@ -58,8 +58,8 @@ func (e *Exporter) Start(_ context.Context, _ component.Host) error {
 
 // Shutdown shutsdown the exporter
 func (e *Exporter) Shutdown(_ context.Context) error {
-	e.clientMux.RLock()
-	defer e.clientMux.RUnlock()
+	e.clientMux.Lock()
+	defer e.clientMux.Unlock()
 
 	e.cancel()
 
@@ -124,8 +124,8 @@ func (e *Exporter) handleWebsocketOpen(ctx context.Context) {
 
 // sendMessage sends a websocket message
 func (e *Exporter) sendMessage(msg Message) {
-	e.clientMux.RLock()
-	defer e.clientMux.RUnlock()
+	e.clientMux.Lock()
+	defer e.clientMux.Unlock()
 
 	if e.client == nil {
 		e.logger.Info("Failed to send message. Client not open.")
