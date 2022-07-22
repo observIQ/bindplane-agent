@@ -18,12 +18,14 @@ import (
 
 // Exporter is the bindplane exporter
 type Exporter struct {
-	mux            sync.RWMutex
 	endpoint       string
 	client         *websocket.Conn
+	clientMux      sync.RWMutex
 	liveTailConfig *LiveTailConfig
+	liveTailMux    sync.RWMutex
 	viper          *viper.Viper
 	logger         *zap.Logger
+	cancel         context.CancelFunc
 }
 
 // NewExporter creates a new Exporter with a connection to the given endpoint
@@ -40,32 +42,39 @@ func NewExporter(_ context.Context, cfg *Config, set component.ExporterCreateSet
 }
 
 // Start starts the exporter
-func (e *Exporter) Start(ctx context.Context, _ component.Host) error {
+func (e *Exporter) Start(_ context.Context, _ component.Host) error {
 	e.updateLiveTail()
 	e.viper.OnConfigChange(func(_ fsnotify.Event) {
 		e.updateLiveTail()
 	})
 	e.viper.WatchConfig()
 
-	client, _, err := websocket.DefaultDialer.DialContext(ctx, e.endpoint, http.Header{})
-	if err != nil {
-		return err
-	}
-	e.client = client
+	ctx, cancel := context.WithCancel(context.Background())
+	go e.handleWebsocketOpen(ctx)
+	e.cancel = cancel
 
 	return nil
 }
 
 // Shutdown shutsdown the exporter
 func (e *Exporter) Shutdown(_ context.Context) error {
+	e.clientMux.RLock()
+	defer e.clientMux.RUnlock()
+
+	e.cancel()
+
+	if e.client == nil {
+		return nil
+	}
+
 	_ = e.client.WriteControl(websocket.CloseMessage, []byte(""), time.Now().Add(10*time.Second))
 	return e.client.Close()
 }
 
 // updateLiveTail updates the live tail config
 func (e *Exporter) updateLiveTail() {
-	e.mux.Lock()
-	defer e.mux.Unlock()
+	e.liveTailMux.Lock()
+	defer e.liveTailMux.Unlock()
 
 	e.logger.Info("Updating live tail config")
 	if err := e.viper.ReadInConfig(); err != nil {
@@ -83,11 +92,56 @@ func (e *Exporter) updateLiveTail() {
 	e.liveTailConfig = cfg
 }
 
+// handleWebsocketOpen handles opening the websocket
+func (e *Exporter) handleWebsocketOpen(ctx context.Context) {
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		default:
+		}
+
+		client, _, err := websocket.DefaultDialer.DialContext(ctx, e.endpoint, http.Header{})
+		if err != nil {
+			e.logger.Error("Failed to create ws client", zap.Error(err))
+			time.Sleep(time.Second * 5)
+			continue
+		}
+
+		e.clientMux.Lock()
+		e.client = client
+		e.clientMux.Unlock()
+
+		if _, _, err = client.ReadMessage(); err != nil {
+			e.logger.Error("Websocket client received error", zap.Error(err))
+		}
+
+		e.clientMux.Lock()
+		e.client = nil
+		e.clientMux.Unlock()
+	}
+}
+
+// sendMessage sends a websocket message
+func (e *Exporter) sendMessage(msg Message) {
+	e.clientMux.RLock()
+	defer e.clientMux.RUnlock()
+
+	if e.client == nil {
+		e.logger.Info("Failed to send message. Client not open.")
+		return
+	}
+
+	if err := e.client.WriteJSON(msg); err != nil {
+		e.logger.Error("Failed to write message", zap.Error(err))
+	}
+}
+
 // consumeMetrics will consume metrics
 func (e *Exporter) consumeMetrics(_ context.Context, metrics pmetric.Metrics) error {
-	e.mux.RLock()
+	e.liveTailMux.RLock()
 	sessions := e.liveTailConfig.Sessions
-	e.mux.RUnlock()
+	e.liveTailMux.RUnlock()
 
 	if len(sessions) == 0 {
 		e.logger.Info("Skipping consume metrics. No active sessions.")
@@ -109,9 +163,7 @@ func (e *Exporter) consumeMetrics(_ context.Context, metrics pmetric.Metrics) er
 		}
 
 		msg := NewMetricsMessage(record, sessionIDs)
-		if err := e.client.WriteJSON(msg); err != nil {
-			e.logger.Error("Failed to write metrics message", zap.Error(err))
-		}
+		e.sendMessage(msg)
 	}
 
 	return nil
@@ -119,9 +171,9 @@ func (e *Exporter) consumeMetrics(_ context.Context, metrics pmetric.Metrics) er
 
 // consumeLogs will consume logs
 func (e *Exporter) consumeLogs(_ context.Context, logs plog.Logs) error {
-	e.mux.RLock()
+	e.liveTailMux.RLock()
 	sessions := e.liveTailConfig.Sessions
-	e.mux.RUnlock()
+	e.liveTailMux.RUnlock()
 
 	if len(sessions) == 0 {
 		e.logger.Info("Skipping consume logs. No active sessions.")
@@ -143,9 +195,7 @@ func (e *Exporter) consumeLogs(_ context.Context, logs plog.Logs) error {
 		}
 
 		msg := NewLogsMessage(record, sessionIDs)
-		if err := e.client.WriteJSON(msg); err != nil {
-			e.logger.Error("Failed to write logs message", zap.Error(err))
-		}
+		e.sendMessage(msg)
 	}
 
 	return nil
@@ -153,9 +203,9 @@ func (e *Exporter) consumeLogs(_ context.Context, logs plog.Logs) error {
 
 // consumeTraces will consume traces
 func (e *Exporter) consumeTraces(_ context.Context, traces ptrace.Traces) error {
-	e.mux.RLock()
+	e.liveTailMux.RLock()
 	sessions := e.liveTailConfig.Sessions
-	e.mux.RUnlock()
+	e.liveTailMux.RUnlock()
 
 	if len(sessions) == 0 {
 		e.logger.Info("Skipping consume traces. No active sessions.")
@@ -177,9 +227,7 @@ func (e *Exporter) consumeTraces(_ context.Context, traces ptrace.Traces) error 
 		}
 
 		msg := NewTracesMessage(record, sessionIDs)
-		if err := e.client.WriteJSON(msg); err != nil {
-			e.logger.Error("Failed to write traces message", zap.Error(err))
-		}
+		e.sendMessage(msg)
 	}
 
 	return nil
