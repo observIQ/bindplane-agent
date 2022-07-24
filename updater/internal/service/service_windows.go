@@ -260,7 +260,8 @@ func (w windowsService) Backup(outDir string) error {
 
 	// Args should end up being a string, where literal quotes are "&quot;"
 	argString := shellquote.Join(args...)
-	argString = strings.ReplaceAll(argString, "\"", "&quot;")
+	// shellquote uses ' to quote, so we convert those to "&quot;"
+	argString = strings.ReplaceAll(argString, "'", "&quot;")
 
 	// Convert windows api start type to the config file service type
 	confStartType, err := configStartType(conf.StartType, conf.DelayedAutoStart)
@@ -384,6 +385,6 @@ func configStartType(winapiStartType uint32, delayed bool) (string, error) {
 	case mgr.StartManual:
 		return "manual", nil
 	default:
-		return "", fmt.Errorf("invalid winapi start type: %s", winapiStartType)
+		return "", fmt.Errorf("invalid winapi start type: %d", winapiStartType)
 	}
 }
