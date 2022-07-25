@@ -345,7 +345,8 @@ type windowsServiceDefinitionConfig struct {
 
 // readWindowsServiceConfig reads the service config from the file at the given path
 func readWindowsServiceConfig(path string) (*windowsServiceConfig, error) {
-	b, err := os.ReadFile(path)
+	cleanPath := filepath.Clean(path)
+	b, err := os.ReadFile(cleanPath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read file: %w", err)
 	}
