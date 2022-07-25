@@ -12,6 +12,11 @@ allow:
   - "ISC"
   - "MPL-2.0"
 
+override:
+  - path: "github.com/hashicorp/cronexpr"
+    versions: "v1.1.1"
+    licenses: ["Apache-2.0"] # repo allows to choose between Apache-2.0 and GPL v3 https://github.com/hashicorp/cronexpr#license
+
 exceptions:
   licenseNotPermitted:
     # opencontainers/go-digest is Apache 2.0 licensed, the README and CONTRIBUTING docs
