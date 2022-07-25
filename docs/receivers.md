@@ -5,6 +5,7 @@ Below is a list of supported receivers with links to their documentation pages.
 | Name                                        | GitHub README |
 | ------------------------------------------- | ------------- |
 | Active Directory Domain Services Receiver   | [activedirectorydsreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.56.0/receiver/activedirectorydsreceiver/README.md) |
+| Aerospike Receiver   | [aerospikereceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.56.0/receiver/aerospikereceiver/README.md) |
 | Apache CouchDB Receiver                     | [couchdbreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.56.0/receiver/couchdbreceiver/README.md) |
 | Apache Flink Metrics Receiver               | [flinkmetricsreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.56.0/receiver/flinkmetricsreceiver/README.md) |
 | Apache Web Server Receiver                  | [apachereceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.56.0/receiver/apachereceiver/README.md) |
