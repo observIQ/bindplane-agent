@@ -33,10 +33,10 @@ func TestNewCopyFileAction(t *testing.T) {
 		require.NoError(t, err)
 
 		require.Equal(t, &CopyFileAction{
-			FromPath:    inFile,
+			FromPathRel: inFile,
 			ToPath:      outFile,
 			FileCreated: true,
-			rollbackDir: filepath.Join(testTempDir, "rollback"),
+			backupDir:   filepath.Join(testTempDir, "rollback"),
 			latestDir:   filepath.Join(testTempDir, "latest"),
 		}, a)
 	})
@@ -55,10 +55,10 @@ func TestNewCopyFileAction(t *testing.T) {
 		require.NoError(t, err)
 
 		require.Equal(t, &CopyFileAction{
-			FromPath:    inFile,
+			FromPathRel: inFile,
 			ToPath:      outFile,
 			FileCreated: false,
-			rollbackDir: filepath.Join(testTempDir, "rollback"),
+			backupDir:   filepath.Join(testTempDir, "rollback"),
 			latestDir:   filepath.Join(testTempDir, "latest"),
 		}, a)
 	})
@@ -90,7 +90,8 @@ func TestCopyFileActionRollback(t *testing.T) {
 		scratchDir := t.TempDir()
 		testTempDir := filepath.Join("testdata", "copyfileaction")
 		outFile := filepath.Join(scratchDir, "test.txt")
-		inFile := filepath.Join(testTempDir, "latest", "test.txt")
+		inFileRel := "test.txt"
+		inFile := filepath.Join(testTempDir, "latest", inFileRel)
 		originalFile := filepath.Join(testTempDir, "rollback", "test.txt")
 
 		originalBytes, err := os.ReadFile(originalFile)
@@ -99,7 +100,7 @@ func TestCopyFileActionRollback(t *testing.T) {
 		err = os.WriteFile(outFile, originalBytes, 0600)
 		require.NoError(t, err)
 
-		a, err := NewCopyFileAction(inFile, outFile, testTempDir)
+		a, err := NewCopyFileAction(inFileRel, outFile, testTempDir)
 		require.NoError(t, err)
 
 		// Overwrite original file with latest file

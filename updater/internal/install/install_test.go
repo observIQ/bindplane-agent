@@ -76,7 +76,7 @@ func TestInstallArtifacts(t *testing.T) {
 		contentsEqual(t, filepath.Join(outDir, "test-folder", "another-test.txt"), "This is a nested text file\n")
 
 		copyTestTxtAction, err := action.NewCopyFileAction(
-			filepath.Join(installer.latestDir, "test.txt"),
+			filepath.Join("test.txt"),
 			filepath.Join(installer.installDir, "test.txt"),
 			installer.tmpDir,
 		)
@@ -84,7 +84,7 @@ func TestInstallArtifacts(t *testing.T) {
 		copyTestTxtAction.FileCreated = true
 
 		copyNestedTestTxtAction, err := action.NewCopyFileAction(
-			filepath.Join(installer.latestDir, "test-folder", "another-test.txt"),
+			filepath.Join("test-folder", "another-test.txt"),
 			filepath.Join(installer.installDir, "test-folder", "another-test.txt"),
 			installer.tmpDir,
 		)
@@ -138,7 +138,7 @@ func TestInstallArtifacts(t *testing.T) {
 		err := installer.Install(rb)
 		require.ErrorContains(t, err, "failed to update service")
 		copyTestTxtAction, err := action.NewCopyFileAction(
-			filepath.Join(installer.latestDir, "test.txt"),
+			filepath.Join("test.txt"),
 			filepath.Join(installer.installDir, "test.txt"),
 			installer.tmpDir,
 		)
@@ -146,7 +146,7 @@ func TestInstallArtifacts(t *testing.T) {
 		copyTestTxtAction.FileCreated = true
 
 		copyNestedTestTxtAction, err := action.NewCopyFileAction(
-			filepath.Join(installer.latestDir, "test-folder", "another-test.txt"),
+			filepath.Join("test-folder", "another-test.txt"),
 			filepath.Join(installer.installDir, "test-folder", "another-test.txt"),
 			installer.tmpDir,
 		)
@@ -184,7 +184,7 @@ func TestInstallArtifacts(t *testing.T) {
 		require.ErrorContains(t, err, "failed to start service")
 
 		copyTestTxtAction, err := action.NewCopyFileAction(
-			filepath.Join(installer.latestDir, "test.txt"),
+			filepath.Join("test.txt"),
 			filepath.Join(installer.installDir, "test.txt"),
 			installer.tmpDir,
 		)
@@ -192,7 +192,7 @@ func TestInstallArtifacts(t *testing.T) {
 		copyTestTxtAction.FileCreated = true
 
 		copyNestedTestTxtAction, err := action.NewCopyFileAction(
-			filepath.Join(installer.latestDir, "test-folder", "another-test.txt"),
+			filepath.Join("test-folder", "another-test.txt"),
 			filepath.Join(installer.installDir, "test-folder", "another-test.txt"),
 			installer.tmpDir,
 		)
@@ -270,7 +270,7 @@ func TestInstallArtifacts(t *testing.T) {
 		t.Logf("Error: %s", err)
 
 		copyTestTxtAction, err := action.NewCopyFileAction(
-			filepath.Join(installer.latestDir, "test.txt"),
+			filepath.Join("test.txt"),
 			filepath.Join(installer.installDir, "test.txt"),
 			installer.tmpDir,
 		)
@@ -278,7 +278,7 @@ func TestInstallArtifacts(t *testing.T) {
 		copyTestTxtAction.FileCreated = false
 
 		copyNestedTestTxtAction, err := action.NewCopyFileAction(
-			filepath.Join(installer.latestDir, "test-folder", "another-test.txt"),
+			filepath.Join("test-folder", "another-test.txt"),
 			filepath.Join(installer.installDir, "test-folder", "another-test.txt"),
 			installer.tmpDir,
 		)

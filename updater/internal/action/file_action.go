@@ -26,22 +26,22 @@ import (
 
 // CopyFileAction is an action that records a file being copied from FromPath to ToPath
 type CopyFileAction struct {
-	// FromPath is the path where the file originated.
-	// This path must be in latestDir
-	FromPath string
+	// FromPathRel is the path where the file originated, relative to the "latest"
+	// directory
+	FromPathRel string
 	// ToPath is the path where the file was written.
 	ToPath string
 	// FileCreated is a bool that records whether this action had to create a new file or not
 	FileCreated bool
-	rollbackDir string
+	backupDir   string
 	latestDir   string
 }
 
 // NewCopyFileAction creates a new CopyFileAction that indicates a file was copied from
-// fromPath into toPath. tmpDir is specified for rollback purposes.
+// fromPathRel into toPath. tmpDir is specified for rollback purposes.
 // NOTE: This action MUST be created BEFORE the action actually takes place; This allows
 // for previous existence of the file to be recorded.
-func NewCopyFileAction(fromPath, toPath, tmpDir string) (*CopyFileAction, error) {
+func NewCopyFileAction(fromPathRel, toPath, tmpDir string) (*CopyFileAction, error) {
 	fileExists := true
 	_, err := os.Stat(toPath)
 	switch {
@@ -52,11 +52,11 @@ func NewCopyFileAction(fromPath, toPath, tmpDir string) (*CopyFileAction, error)
 	}
 
 	return &CopyFileAction{
-		FromPath: fromPath,
-		ToPath:   toPath,
+		FromPathRel: fromPathRel,
+		ToPath:      toPath,
 		// The file will be created if it doesn't already exist
 		FileCreated: !fileExists,
-		rollbackDir: path.BackupDirFromTempDir(tmpDir),
+		backupDir:   path.BackupDirFromTempDir(tmpDir),
 		latestDir:   path.LatestDirFromTempDir(tmpDir),
 	}, nil
 }
@@ -70,15 +70,8 @@ func (c CopyFileAction) Rollback() error {
 		return os.RemoveAll(c.ToPath)
 	}
 
-	// Copy from rollback dir over the current file
-	// the backup file should have the same relative path from
-	// rollback dir as the fromPath does from the latest dir
-	rel, err := filepath.Rel(c.latestDir, c.FromPath)
-	if err != nil {
-		return fmt.Errorf("could not determine relative path between latestDir (%s) and fromPath (%s): %w", c.latestDir, c.FromPath, err)
-	}
-
-	backupFilePath := filepath.Join(c.rollbackDir, rel)
+	// join the relative path to the backup directory to get the location of the backup path
+	backupFilePath := filepath.Join(c.backupDir, c.FromPathRel)
 	if err := file.CopyFile(backupFilePath, c.ToPath, true); err != nil {
 		return fmt.Errorf("failed to copy file: %w", err)
 	}

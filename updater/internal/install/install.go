@@ -116,8 +116,7 @@ func copyFiles(inputPath, outputPath, tmpDir string, rb rollback.ActionAppender)
 
 		// We create the action record here, because we want to record whether the file exists or not before
 		// we open the file (which will end up creating the file).
-		// We will actually
-		cfa, err := action.NewCopyFileAction(inPath, outPath, tmpDir)
+		cfa, err := action.NewCopyFileAction(relPath, outPath, tmpDir)
 		if err != nil {
 			return fmt.Errorf("failed to create copy file action: %w", err)
 		}
