@@ -201,21 +201,6 @@ func TestCollectorMonitorMonitorForSuccess(t *testing.T) {
 			},
 		},
 		{
-			desc: "State Manager fails to load",
-			testFunc: func(t *testing.T) {
-				expectedErr := errors.New("bad")
-				mockStateManger := mocks.NewMockStateManager(t)
-				mockStateManger.On("LoadStatuses").Return(nil, expectedErr)
-
-				collectorMonitor := &CollectorMonitor{
-					stateManager: mockStateManger,
-				}
-
-				err := collectorMonitor.MonitorForSuccess(context.Background(), "my_package")
-				assert.ErrorIs(t, err, expectedErr)
-			},
-		},
-		{
 			desc: "Package Status Indicates Failed Install",
 			testFunc: func(t *testing.T) {
 				pgkName := "my_package"
@@ -278,6 +263,31 @@ func TestCollectorMonitorMonitorForSuccess(t *testing.T) {
 
 				mockStateManger := mocks.NewMockStateManager(t)
 				mockStateManger.On("LoadStatuses").Once().Return(nil, os.ErrNotExist)
+				mockStateManger.On("LoadStatuses").Return(returnedStatus, nil)
+
+				collectorMonitor := &CollectorMonitor{
+					stateManager: mockStateManger,
+				}
+
+				err := collectorMonitor.MonitorForSuccess(context.Background(), pgkName)
+				assert.NoError(t, err)
+			},
+		},
+		{
+			desc: "Error reading file at first first then is successful",
+			testFunc: func(t *testing.T) {
+				pgkName := "my_package"
+				returnedStatus := &protobufs.PackageStatuses{
+					Packages: map[string]*protobufs.PackageStatus{
+						pgkName: {
+							Name:   pgkName,
+							Status: protobufs.PackageStatus_Installed,
+						},
+					},
+				}
+
+				mockStateManger := mocks.NewMockStateManager(t)
+				mockStateManger.On("LoadStatuses").Once().Return(nil, errors.New("bad"))
 				mockStateManger.On("LoadStatuses").Return(returnedStatus, nil)
 
 				collectorMonitor := &CollectorMonitor{

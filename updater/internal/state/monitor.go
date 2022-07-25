@@ -19,7 +19,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"os"
 	"path/filepath"
 	"time"
 
@@ -99,7 +98,7 @@ func (c *CollectorMonitor) SetState(packageName string, status protobufs.Package
 
 // MonitorForSuccess intermittently checks the package status file for either an install failed or success status.
 // If an InstallFailed status is read this returns ErrFailedStatus error.
-// If the context is canceled or there is an error reading the status file the error will be returned.
+// If the context is canceled the context error will be returned.
 func (c *CollectorMonitor) MonitorForSuccess(ctx context.Context, packageName string) error {
 	ticker := time.NewTicker(100 * time.Millisecond)
 	defer ticker.Stop()
@@ -111,11 +110,11 @@ func (c *CollectorMonitor) MonitorForSuccess(ctx context.Context, packageName st
 		case <-ticker.C:
 			packageStatus, err := c.stateManager.LoadStatuses()
 			switch {
-			case errors.Is(err, os.ErrNotExist):
-				// File may not exist for a short period of time while being written so just continue
-				continue
+			// If there is any error we'll just continue. Some valid reasons we could error and should retry:
+			// - File was deleted by new collector before it's rewritten
+			// - File is being written to while we're reading it so we'll get invalid JSON
 			case err != nil:
-				return fmt.Errorf("error while loaded status: %w", err)
+				continue
 			default:
 				targetPackage, ok := packageStatus.GetPackages()[packageName]
 				// Target package might not exist yet so continue
@@ -130,7 +129,7 @@ func (c *CollectorMonitor) MonitorForSuccess(ctx context.Context, packageName st
 					// Install successful
 					return nil
 				default:
-					// Collector may still be starting up
+					// Collector may still be starting up or we may have read the file while it's being written
 					continue
 				}
 			}
