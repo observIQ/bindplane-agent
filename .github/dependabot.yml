@@ -8,6 +8,7 @@ updates:
       # Opentelemetry updates will be done manually
       - dependency-name: "github.com/open-telemetry/opentelemetry-collector*"
       - dependency-name: "go.opentelemetry.io/collector/*"
+      - dependency-name: "github.com/open-telemetry/opamp-go"
     commit-message:
       prefix: "deps"
       include: "scope"
