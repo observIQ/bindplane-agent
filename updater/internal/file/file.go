@@ -26,7 +26,6 @@ import (
 // If the file does not exist, it is created. If the file does exist, it is truncated before writing.
 func CopyFile(pathIn, pathOut string, overwrite bool) error {
 	pathInClean := filepath.Clean(pathIn)
-	pathOutClean := filepath.Clean(pathOut)
 
 	// Open the input file for reading.
 	inFile, err := os.Open(pathInClean)
@@ -49,7 +48,9 @@ func CopyFile(pathIn, pathOut string, overwrite bool) error {
 		flags |= os.O_EXCL
 	}
 
+	pathOutClean := filepath.Clean(pathOut)
 	// Open the output file, creating it if it does not exist and truncating it.
+	//#nosec G304 -- out file is cleaned; this is a general purpose copy function
 	outFile, err := os.OpenFile(pathOutClean, flags, 0600)
 	if err != nil {
 		return fmt.Errorf("failed to open output file: %w", err)
