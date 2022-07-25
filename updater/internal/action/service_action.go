@@ -17,6 +17,7 @@ package action
 import (
 	"github.com/observiq/observiq-otel-collector/updater/internal/path"
 	"github.com/observiq/observiq-otel-collector/updater/internal/service"
+	"go.uber.org/zap"
 )
 
 // ServiceStopAction is an action that records that a service was stopped.
@@ -38,6 +39,10 @@ func (s ServiceStopAction) Rollback() error {
 	return s.svc.Start()
 }
 
+func (s ServiceStopAction) String() string {
+	return "ServiceStopAction{}"
+}
+
 // ServiceStartAction is an action that records that a service was started.
 type ServiceStartAction struct {
 	svc service.Service
@@ -57,6 +62,10 @@ func (s ServiceStartAction) Rollback() error {
 	return s.svc.Stop()
 }
 
+func (s ServiceStartAction) String() string {
+	return "ServiceStartAction{}"
+}
+
 // ServiceUpdateAction is an action that records that a service was updated.
 type ServiceUpdateAction struct {
 	backupSvc service.Service
@@ -65,9 +74,11 @@ type ServiceUpdateAction struct {
 var _ RollbackableAction = (*ServiceUpdateAction)(nil)
 
 // NewServiceUpdateAction creates a new ServiceUpdateAction
-func NewServiceUpdateAction(tmpDir string) *ServiceUpdateAction {
+func NewServiceUpdateAction(logger *zap.Logger, tmpDir string) *ServiceUpdateAction {
+	namedLogger := logger.Named("service-update-action")
 	return &ServiceUpdateAction{
 		backupSvc: service.NewService(
+			namedLogger,
 			"", // latestDir doesn't matter here
 			service.WithServiceFile(path.BackupServiceFile(path.ServiceFileDir(path.BackupDirFromTempDir(tmpDir)))),
 		),
@@ -77,4 +88,8 @@ func NewServiceUpdateAction(tmpDir string) *ServiceUpdateAction {
 // Rollback is an action that rolls back the service configuration to the one saved in the backup directory.
 func (s ServiceUpdateAction) Rollback() error {
 	return s.backupSvc.Update()
+}
+
+func (s ServiceUpdateAction) String() string {
+	return "ServiceUpdateAction{}"
 }

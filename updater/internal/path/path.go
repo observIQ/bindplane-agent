@@ -44,3 +44,8 @@ func ServiceFileDir(installBaseDir string) string {
 func BackupServiceFile(serviceFileDir string) string {
 	return filepath.Join(serviceFileDir, serviceFileBackupFilename)
 }
+
+// LogFile returns the full path to the log file for the updater
+func LogFile(installDir string) string {
+	return filepath.Join(installDir, "log", "updater.log")
+}
