@@ -128,8 +128,8 @@ github.com/GoogleCloudPlatform/opentelemetry-operations-go/detectors/gcp v0.32.3
 github.com/GoogleCloudPlatform/opentelemetry-operations-go/detectors/gcp v0.32.3/go.mod h1:s7Gpwj0tk7XnVCm4BQEmx/mbS36SuTCY/vMB2SNxe8o=
 github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector v0.32.3 h1:lH3MlsWLJrCZWtXBFPm3x13qGShQZyWN4724Xd5k8tw=
 github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector v0.32.3/go.mod h1:CAeDUmnMG3urxkSYOIbreCYRsiAIo4pqprz8WZevx14=
-github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/googlemanagedprometheus v0.32.2 h1:/U4z1upRwp3XEUldq+4LfKEcuc0kH8ZsB95jQ2MrcgQ=
-github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/googlemanagedprometheus v0.32.2/go.mod h1:Dbl28z/FsamWrRT9cwLwWxS1zQUTOkRzibiLSQ8ixNg=
+github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/googlemanagedprometheus v0.32.3 h1:WH/XKMguEBZ8lEj/zG4itQHyUFpcw3Qgj2w1iV2UUJ8=
+github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/googlemanagedprometheus v0.32.3/go.mod h1:w1Uf3fFiijR5jFRnb80E3cAVyZxFpUM0N/Q/+Biu/Xo=
 github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.8.3 h1:i84ZOPT35YCJROyuf97VP/VEdYhQce/8NTLOWq5tqJw=
 github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.8.3/go.mod h1:3+qm+VCJbVmQ9uscVz+8h1rRkJEy9ZNFGgpT1XB9mPg=
 github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.32.3 h1:FhsH8qgWFkkPlPXBZ68uuT/FH/R+DLTtVPxjLEBs1v4=
@@ -952,6 +952,8 @@ github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlecloudex
 github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlecloudexporter v0.56.0/go.mod h1:H8ar2u7qKTmXN1kR5S8zKOIMXYSs9hwyl3i/WnpVGyQ=
 github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlecloudpubsubexporter v0.56.0 h1:TtLsU/W5YQIYuBfxrZ9IBvXujMu/PFfMvBHcBJAYHXk=
 github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlecloudpubsubexporter v0.56.0/go.mod h1:VQNIe+WqdEuugpSHAauRwweuI1h7iegxeOb7mFEQ+j4=
+github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlemanagedprometheusexporter v0.56.0 h1:Gw9NK4wKf9orrLUgqvCKKMS+wPCRxqFnqErNX6dZ0fM=
+github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlemanagedprometheusexporter v0.56.0/go.mod h1:eTslWdUo8eWRRQYANNEJKemECJhAOp3OLkVvDzedHa4=
 github.com/open-telemetry/opentelemetry-collector-contrib/exporter/influxdbexporter v0.56.0 h1:1HNxYSvNGZZHpS34NppUI2vGAcnqTK8ov2wDuy+toXM=
 github.com/open-telemetry/opentelemetry-collector-contrib/exporter/influxdbexporter v0.56.0/go.mod h1:zfgQDvncbrTd05RJaQAWWEHtu9geSTI3z5k6HkcZfyA=
 github.com/open-telemetry/opentelemetry-collector-contrib/exporter/jaegerexporter v0.56.0 h1:lLMHD6H9lP+bcAnKb9Mf2qfIa/dJ7ivabXXItoFFbiU=
