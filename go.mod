@@ -4,7 +4,7 @@ go 1.17
 
 require (
 	github.com/GoogleCloudPlatform/opentelemetry-operations-collector v0.0.3-0.20220711143229-08f2752ed367
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/googlemanagedprometheus v0.32.2
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/googlemanagedprometheus v0.32.3
 	github.com/google/uuid v1.3.0
 	github.com/observiq/observiq-otel-collector/exporter/googlecloudexporter v1.3.0
 	github.com/observiq/observiq-otel-collector/processor/resourceattributetransposerprocessor v1.3.0
