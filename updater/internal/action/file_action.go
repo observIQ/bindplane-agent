@@ -37,6 +37,8 @@ type CopyFileAction struct {
 	latestDir   string
 }
 
+var _ RollbackableAction = (*CopyFileAction)(nil)
+
 // NewCopyFileAction creates a new CopyFileAction that indicates a file was copied from
 // fromPathRel into toPath. tmpDir is specified for rollback purposes.
 // NOTE: This action MUST be created BEFORE the action actually takes place; This allows

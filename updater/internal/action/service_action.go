@@ -24,9 +24,11 @@ type ServiceStopAction struct {
 	svc service.Service
 }
 
+var _ RollbackableAction = (*ServiceStopAction)(nil)
+
 // NewServiceStopAction creates a new ServiceStopAction
-func NewServiceStopAction(svc service.Service) ServiceStopAction {
-	return ServiceStopAction{
+func NewServiceStopAction(svc service.Service) *ServiceStopAction {
+	return &ServiceStopAction{
 		svc: svc,
 	}
 }
@@ -41,9 +43,11 @@ type ServiceStartAction struct {
 	svc service.Service
 }
 
+var _ RollbackableAction = (*ServiceStartAction)(nil)
+
 // NewServiceStartAction creates a new ServiceStartAction
-func NewServiceStartAction(svc service.Service) ServiceStartAction {
-	return ServiceStartAction{
+func NewServiceStartAction(svc service.Service) *ServiceStartAction {
+	return &ServiceStartAction{
 		svc: svc,
 	}
 }
@@ -58,9 +62,11 @@ type ServiceUpdateAction struct {
 	backupSvc service.Service
 }
 
+var _ RollbackableAction = (*ServiceUpdateAction)(nil)
+
 // NewServiceUpdateAction creates a new ServiceUpdateAction
-func NewServiceUpdateAction(tmpDir string) ServiceUpdateAction {
-	return ServiceUpdateAction{
+func NewServiceUpdateAction(tmpDir string) *ServiceUpdateAction {
+	return &ServiceUpdateAction{
 		backupSvc: service.NewService(
 			"", // latestDir doesn't matter here
 			service.WithServiceFile(path.BackupServiceFile(path.ServiceFileDir(path.BackupDirFromTempDir(tmpDir)))),
