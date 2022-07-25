@@ -18,12 +18,11 @@ package service
 
 import (
 	"fmt"
-	"io"
-	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
 
+	"github.com/observiq/observiq-otel-collector/updater/internal/file"
 	"github.com/observiq/observiq-otel-collector/updater/internal/path"
 )
 
@@ -138,32 +137,8 @@ func (d darwinService) Update() error {
 }
 
 func (d darwinService) Backup(outDir string) error {
-	oldFile, err := os.Open(d.installedServiceFilePath)
-	if err != nil {
-		return fmt.Errorf("failed to open old service file: %w", err)
-	}
-	defer func() {
-		err := oldFile.Close()
-		if err != nil {
-			log.Default().Printf("darwinService.Backup: failed to close out file: %s", err)
-		}
-	}()
-
-	// Create the file in the specified location; If the file already exists, an error will be returned,
-	// since we don't want to overwrite the file
-	backupFile, err := os.OpenFile(path.BackupServiceFile(outDir), os.O_CREATE|os.O_WRONLY|os.O_EXCL, 0600)
-	if err != nil {
-		return fmt.Errorf("failed to open output file: %w", err)
-	}
-	defer func() {
-		err := backupFile.Close()
-		if err != nil {
-			log.Default().Printf("darwinService.Backup: failed to close out file: %s", err)
-		}
-	}()
-
-	if _, err := io.Copy(backupFile, oldFile); err != nil {
-		return fmt.Errorf("failed to copy service file to backup: %w", err)
+	if err := file.CopyFile(d.installedServiceFilePath, path.BackupServiceFile(outDir), false); err != nil {
+		return fmt.Errorf("failed to copy service file: %w", err)
 	}
 
 	return nil

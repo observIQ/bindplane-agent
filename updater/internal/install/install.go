@@ -127,7 +127,7 @@ func copyFiles(inputPath, outputPath, tmpDir string, rb rollback.ActionAppender)
 		// and we will want to roll that back if that is the case.
 		rb.AppendAction(cfa)
 
-		if err := file.CopyFile(inPath, outPath); err != nil {
+		if err := file.CopyFile(inPath, outPath, true); err != nil {
 			return fmt.Errorf("failed to copy file: %w", err)
 		}
 

@@ -79,7 +79,7 @@ func (c CopyFileAction) Rollback() error {
 	}
 
 	backupFilePath := filepath.Join(c.rollbackDir, rel)
-	if err := file.CopyFile(backupFilePath, c.ToPath); err != nil {
+	if err := file.CopyFile(backupFilePath, c.ToPath, true); err != nil {
 		return fmt.Errorf("failed to copy file: %w", err)
 	}
 

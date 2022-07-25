@@ -96,8 +96,7 @@ func (r Rollbacker) Rollback() {
 	}
 }
 
-// copyFiles moves the file tree rooted at latestDirPath to installDirPath,
-// skipping configuration files. Appends CopyFileAction-s to the Rollbacker as it copies file.
+// copyFiles copies files from inputPath to output path, skipping tmpDir.
 func copyFiles(inputPath, outputPath, tmpDir string) error {
 	absTmpDir, err := filepath.Abs(tmpDir)
 	if err != nil {
@@ -140,7 +139,8 @@ func copyFiles(inputPath, outputPath, tmpDir string) error {
 			return fmt.Errorf("failed to create dir: %w", err)
 		}
 
-		if err := file.CopyFile(inPath, outPath); err != nil {
+		// Fail if copying the input file to the output file would fail
+		if err := file.CopyFile(inPath, outPath, false); err != nil {
 			return fmt.Errorf("failed to copy file: %w", err)
 		}
 

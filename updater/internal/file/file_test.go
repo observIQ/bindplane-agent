@@ -31,7 +31,7 @@ func TestCopyFile(t *testing.T) {
 		inFile := filepath.Join("testdata", "test.txt")
 		outFile := filepath.Join(tmpDir, "test.txt")
 
-		err := CopyFile(inFile, outFile)
+		err := CopyFile(inFile, outFile, true)
 		require.NoError(t, err)
 		require.FileExists(t, outFile)
 
@@ -63,7 +63,7 @@ func TestCopyFile(t *testing.T) {
 		err = os.WriteFile(outFile, []byte("This is a file that already exists"), 0640)
 		require.NoError(t, err)
 
-		err = CopyFile(inFile, outFile)
+		err = CopyFile(inFile, outFile, true)
 		require.NoError(t, err)
 		require.FileExists(t, outFile)
 
@@ -85,7 +85,7 @@ func TestCopyFile(t *testing.T) {
 		inFile := filepath.Join("testdata", "does-not-exist.txt")
 		outFile := filepath.Join(tmpDir, "test.txt")
 
-		err := CopyFile(inFile, outFile)
+		err := CopyFile(inFile, outFile, true)
 		require.ErrorContains(t, err, "failed to open input file")
 		require.NoFileExists(t, outFile)
 	})
@@ -99,12 +99,63 @@ func TestCopyFile(t *testing.T) {
 		err := os.WriteFile(outFile, []byte("This is a file that already exists"), 0600)
 		require.NoError(t, err)
 
-		err = CopyFile(inFile, outFile)
+		err = CopyFile(inFile, outFile, true)
 		require.ErrorContains(t, err, "failed to open input file")
 		require.FileExists(t, outFile)
 
 		contentsOut, err := os.ReadFile(outFile)
 		require.NoError(t, err)
 		require.Equal(t, []byte("This is a file that already exists"), contentsOut)
+	})
+
+	t.Run("Fails to overwrite the output file if 'overwrite' false", func(t *testing.T) {
+		tmpDir := t.TempDir()
+
+		inFile := filepath.Join("testdata", "test.txt")
+		outFile := filepath.Join(tmpDir, "test.txt")
+
+		err := os.WriteFile(outFile, []byte("This is a file that already exists"), 0640)
+		require.NoError(t, err)
+
+		err = CopyFile(inFile, outFile, false)
+		require.ErrorContains(t, err, "failed to open output file")
+		require.FileExists(t, outFile)
+
+		contentsOut, err := os.ReadFile(outFile)
+		require.NoError(t, err)
+		require.Equal(t, []byte("This is a file that already exists"), contentsOut)
+
+		fi, err := os.Stat(outFile)
+		require.NoError(t, err)
+		// file mode on windows acts unlike unix, we'll only check for this on linux/darwin
+		if runtime.GOOS != "windows" {
+			require.Equal(t, fs.FileMode(0640), fi.Mode())
+		}
+	})
+
+	t.Run("Copies file when output does not exist when 'overwrite' is false", func(t *testing.T) {
+		tmpDir := t.TempDir()
+
+		inFile := filepath.Join("testdata", "test.txt")
+		outFile := filepath.Join(tmpDir, "test.txt")
+
+		err := CopyFile(inFile, outFile, false)
+		require.NoError(t, err)
+		require.FileExists(t, outFile)
+
+		contentsIn, err := os.ReadFile(inFile)
+		require.NoError(t, err)
+
+		contentsOut, err := os.ReadFile(outFile)
+		require.NoError(t, err)
+
+		require.Equal(t, contentsIn, contentsOut)
+
+		fi, err := os.Stat(outFile)
+		require.NoError(t, err)
+		// file mode on windows acts unlike unix, we'll only check for this on linux/darwin
+		if runtime.GOOS != "windows" {
+			require.Equal(t, fs.FileMode(0600), fi.Mode())
+		}
 	})
 }

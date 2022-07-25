@@ -303,7 +303,7 @@ func (w windowsService) Backup(outDir string) error {
 	}
 
 	// Open with O_EXCL to fail if the file already exists
-	f, err := os.OpenFile(path.BackupServiceFile(outDir), os.O_CREATE|os.O_EXCL|os.O_WRONLY, 066)
+	f, err := os.OpenFile(path.BackupServiceFile(outDir), os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0600)
 	if err != nil {
 		return fmt.Errorf("failed to create backup service file: %w", err)
 	}

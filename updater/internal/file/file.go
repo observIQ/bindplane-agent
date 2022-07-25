@@ -24,7 +24,7 @@ import (
 
 // CopyFile copies the file from pathIn to pathOut.
 // If the file does not exist, it is created. If the file does exist, it is truncated before writing.
-func CopyFile(pathIn, pathOut string) error {
+func CopyFile(pathIn, pathOut string, overwrite bool) error {
 	pathInClean := filepath.Clean(pathIn)
 	pathOutClean := filepath.Clean(pathOut)
 
@@ -40,8 +40,17 @@ func CopyFile(pathIn, pathOut string) error {
 		}
 	}()
 
+	flags := os.O_CREATE | os.O_WRONLY
+	if overwrite {
+		// If we are OK to overwrite, we will truncate the file on open
+		flags |= os.O_TRUNC
+	} else {
+		// This flag will make OpenFile error if the file already exists
+		flags |= os.O_EXCL
+	}
+
 	// Open the output file, creating it if it does not exist and truncating it.
-	outFile, err := os.OpenFile(pathOutClean, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0600)
+	outFile, err := os.OpenFile(pathOutClean, flags, 0600)
 	if err != nil {
 		return fmt.Errorf("failed to open output file: %w", err)
 	}

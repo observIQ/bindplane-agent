@@ -208,7 +208,7 @@ func TestLinuxServiceInstall(t *testing.T) {
 
 		backupServiceDir := t.TempDir()
 		err := d.Backup(backupServiceDir)
-		require.ErrorContains(t, err, "failed to open old service file")
+		require.ErrorContains(t, err, "failed to copy service file")
 	})
 
 	t.Run("Backup installed service fails if output file already exists", func(t *testing.T) {
@@ -236,7 +236,7 @@ func TestLinuxServiceInstall(t *testing.T) {
 		os.WriteFile(path.BackupServiceFile(backupServiceDir), []byte("file exists"), 0600)
 
 		err = d.Backup(backupServiceDir)
-		require.ErrorContains(t, err, "failed to open output file")
+		require.ErrorContains(t, err, "failed to copy service file")
 	})
 }
 
