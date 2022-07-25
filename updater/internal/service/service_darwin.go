@@ -31,13 +31,27 @@ const (
 	darwinServiceFilePath = "/Library/LaunchDaemons/com.observiq.collector.plist"
 )
 
+type ServiceOption func(darwinSvc *darwinService)
+
+func WithServiceFile(svcFilePath string) ServiceOption {
+	return func(darwinSvc *darwinService) {
+		darwinSvc.newServiceFilePath = svcFilePath
+	}
+}
+
 // NewService returns an instance of the Service interface for managing the observiq-otel-collector service on the current OS.
-func NewService(latestPath string) Service {
-	return &darwinService{
+func NewService(latestPath string, opts ...ServiceOption) Service {
+	darwinSvc := &darwinService{
 		newServiceFilePath:       filepath.Join(path.ServiceFileDir(latestPath), "com.observiq.collector.plist"),
 		installedServiceFilePath: darwinServiceFilePath,
 		installDir:               path.DarwinInstallDir,
 	}
+
+	for _, opt := range opts {
+		opt(darwinSvc)
+	}
+
+	return darwinSvc
 }
 
 type darwinService struct {

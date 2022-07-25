@@ -39,13 +39,27 @@ const (
 	serviceNotExistErrStr        = "The specified service does not exist as an installed service."
 )
 
+type ServiceOption func(winSvc *windowsService)
+
+func WithServiceFile(svcFilePath string) ServiceOption {
+	return func(winSvc *windowsService) {
+		winSvc.newServiceFilePath = svcFilePath
+	}
+}
+
 // NewService returns an instance of the Service interface for managing the observiq-otel-collector service on the current OS.
-func NewService(latestPath string) Service {
-	return &windowsService{
+func NewService(latestPath string, opts ...ServiceOption) Service {
+	winSvc := &windowsService{
 		newServiceFilePath: filepath.Join(path.ServiceFileDir(latestPath), "windows_service.json"),
 		serviceName:        defaultServiceName,
 		productName:        defaultProductName,
 	}
+
+	for _, opt := range opts {
+		opt(winSvc)
+	}
+
+	return winSvc
 }
 
 type windowsService struct {
