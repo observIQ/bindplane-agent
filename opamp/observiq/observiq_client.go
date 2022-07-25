@@ -138,7 +138,7 @@ func (c *Client) Connect(ctx context.Context) error {
 		c.logger.Error("Error while setting agent description", zap.Error(err))
 
 		// Set package status file for error (for Updater to pick up), but do not force send to Server
-		c.attemptFailedInstall(fmt.Sprintf("Error while setting agent description: %s", err))
+		c.attemptFailedInstall(fmt.Sprintf("Error while setting agent description: %s", err.Error()))
 
 		return err
 	}
@@ -146,7 +146,7 @@ func (c *Client) Connect(ctx context.Context) error {
 	tlsCfg, err := c.currentConfig.ToTLS()
 	if err != nil {
 		// Set package status file for error (for Updater to pick up), but do not force send to Server
-		c.attemptFailedInstall(fmt.Sprintf("Failed creating TLS config: %s", err))
+		c.attemptFailedInstall(fmt.Sprintf("Failed creating TLS config: %s", err.Error()))
 
 		return fmt.Errorf("failed creating TLS config: %w", err)
 	}
@@ -183,7 +183,7 @@ func (c *Client) Connect(ctx context.Context) error {
 	// of the context shutting it down via a cancel.
 	if err := c.collector.Run(context.Background()); err != nil {
 		// Set package status file for error (for Updater to pick up), but do not force send to Server
-		c.attemptFailedInstall(fmt.Sprintf("Collector failed to start: %s", err))
+		c.attemptFailedInstall(fmt.Sprintf("Collector failed to start: %s", err.Error()))
 
 		return fmt.Errorf("collector failed to start: %w", err)
 	}
@@ -191,7 +191,7 @@ func (c *Client) Connect(ctx context.Context) error {
 	err = c.opampClient.Start(ctx, settings)
 	if err != nil {
 		// Set package status file for error (for Updater to pick up), but do not force send to Server
-		c.attemptFailedInstall(fmt.Sprintf("OpAMP client failed to start: %s", err))
+		c.attemptFailedInstall(fmt.Sprintf("OpAMP client failed to start: %s", err.Error()))
 	}
 
 	return err
@@ -244,7 +244,7 @@ func (c *Client) onConnectFailedHandler(err error) {
 	c.logger.Error("Failed to connect to server", zap.Error(err))
 
 	// Set package status file for error (for Updater to pick up), but do not force send to Server
-	c.attemptFailedInstall(fmt.Sprintf("Failed to connect to BindPlane: %s", err))
+	c.attemptFailedInstall(fmt.Sprintf("Failed to connect to BindPlane: %s", err.Error()))
 }
 
 func (c *Client) onErrorHandler(errResp *protobufs.ServerErrorResponse) {
@@ -424,7 +424,7 @@ func (c *Client) installPackageFromFile(file *protobufs.DownloadableFile, curPac
 		// Change existing status to show that install failed and get ready to send
 		curPackageStatuses.Packages[packagestate.CollectorPackageName].Status = protobufs.PackageStatus_InstallFailed
 		curPackageStatuses.Packages[packagestate.CollectorPackageName].ErrorMessage =
-			fmt.Sprintf("Failed to download and verify package %s's downloadable file: %s", packagestate.CollectorPackageName, fileManagerErr)
+			fmt.Sprintf("Failed to download and verify package %s's downloadable file: %s", packagestate.CollectorPackageName, fileManagerErr.Error())
 
 		if err := c.packagesStateProvider.SetLastReportedStatuses(curPackageStatuses); err != nil {
 			c.logger.Error("Failed to save last reported package statuses", zap.Error(err))
@@ -447,7 +447,7 @@ func (c *Client) installPackageFromFile(file *protobufs.DownloadableFile, curPac
 		// Change existing status to show that install failed and get ready to send
 		newPackageStatuses.Packages[packagestate.CollectorPackageName].Status = protobufs.PackageStatus_InstallFailed
 		if newPackageStatuses.Packages[packagestate.CollectorPackageName].ErrorMessage == "" {
-			newPackageStatuses.Packages[packagestate.CollectorPackageName].ErrorMessage = fmt.Sprintf("Failed to run the latest Updater: %s", err)
+			newPackageStatuses.Packages[packagestate.CollectorPackageName].ErrorMessage = fmt.Sprintf("Failed to run the latest Updater: %s", err.Error())
 		}
 
 		if err := c.packagesStateProvider.SetLastReportedStatuses(newPackageStatuses); err != nil {

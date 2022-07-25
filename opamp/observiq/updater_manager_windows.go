@@ -53,16 +53,25 @@ func (m WindowsUpdaterManager) StartAndMonitorUpdater() error {
 	if err != nil {
 		m.logger.Warn("Failed to get absolute path of tmp dir", zap.Error(err))
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(5*time.Second))
-	defer cancel()
-	cmd := exec.CommandContext(ctx, updaterPath, "--tmpdir", absTmpPath)
+	cmd := exec.Command(updaterPath, "--tmpdir", absTmpPath)
 
-	// Blocks until updater finishes
-	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("updater exited before shutting down collector: %w", err)
+	cmd.SysProcAttr = &syscall.SysProcAttr{
+		Setpgid: true,
+		Pgid:    0,
+	}
+	// Start does not block
+	if err := cmd.Start(); err != nil {
+		return fmt.Errorf("updater had an issue while starting: %w", err)
+	}
+
+	// See if we're still alive after 5 seconds
+	time.Sleep(5 * time.Second)
+
+	if err := cmd.Process.Kill(); err != nil {
+		m.logger.Error("Failed to get kill long running Updater", zap.Error(err))
 	}
 
 	// Ideally we should not get here as we will be killed by the updater.
 	// Updater should either exit before us with error or we die before it does.
-	return fmt.Errorf("updater exited before shutting down collector")
+	return fmt.Errorf("updater took too long to shut down the collector")
 }
