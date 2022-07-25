@@ -1083,6 +1083,8 @@ github.com/open-telemetry/opentelemetry-collector-contrib/processor/transformpro
 github.com/open-telemetry/opentelemetry-collector-contrib/processor/transformprocessor v0.56.0/go.mod h1:KLUVSA9E9Dl3GuDiLxeAE+td9PXa/K+gCNFgyry0sME=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/activedirectorydsreceiver v0.56.0 h1:bK8nix/3VJnaWPwO6+XbeIi+ga73xcn3aG0VXUNU+es=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/activedirectorydsreceiver v0.56.0/go.mod h1:lwsCK3ZPBPdSPBscwFw1BdwuxBhDp4zHLB69dBIDFKs=
+github.com/open-telemetry/opentelemetry-collector-contrib/receiver/aerospikereceiver v0.56.0 h1:CQZ+BjPv0k0pB2+778dyWmiYRs/iOphGHG8aUxFyduw=
+github.com/open-telemetry/opentelemetry-collector-contrib/receiver/aerospikereceiver v0.56.0/go.mod h1:nF68TIGGpL6nAdu1MmJlZqihRHzdxEGYFRndwaoygJY=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/apachereceiver v0.56.0 h1:RZ8/1imuhVcicSif6MRWKOzhsjg1xUphCp/5ZP3qtes=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/apachereceiver v0.56.0/go.mod h1:oY9z7iQjp7rWQND/0CHHhN9J13JfgU2QSGDLed+4ssU=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/awscontainerinsightreceiver v0.56.0 h1:E1VbV/6+ONOGt7+VbFTCbZVQrJAJl+qypCgUL+br71Y=
@@ -1717,6 +1719,7 @@ golang.org/x/sys v0.0.0-20181107165924-66b7b1311ac8/go.mod h1:STP8DvDyc/dI5b8T5h
 golang.org/x/sys v0.0.0-20181116152217-5ac8a444bdc5/go.mod h1:STP8DvDyc/dI5b8T5hshtkjS+E42TnysNCUPdjciGhY=
 golang.org/x/sys v0.0.0-20181122145206-62eef0e2fa9b/go.mod h1:STP8DvDyc/dI5b8T5hshtkjS+E42TnysNCUPdjciGhY=
 golang.org/x/sys v0.0.0-20190129075346-302c3dd5f1cc/go.mod h1:STP8DvDyc/dI5b8T5hshtkjS+E42TnysNCUPdjciGhY=
+golang.org/x/sys v0.0.0-20190204203706-41f3e6584952/go.mod h1:STP8DvDyc/dI5b8T5hshtkjS+E42TnysNCUPdjciGhY=
 golang.org/x/sys v0.0.0-20190215142949-d0b11bdaac8a/go.mod h1:STP8DvDyc/dI5b8T5hshtkjS+E42TnysNCUPdjciGhY=
 golang.org/x/sys v0.0.0-20190222072716-a9d3bda3a223/go.mod h1:STP8DvDyc/dI5b8T5hshtkjS+E42TnysNCUPdjciGhY=
 golang.org/x/sys v0.0.0-20190312061237-fead79001313/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
