@@ -15,7 +15,6 @@
 package factories
 
 import (
-	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/googlemanagedprometheus"
 	"github.com/observiq/observiq-otel-collector/exporter/googlecloudexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/alibabacloudlogserviceexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/awscloudwatchlogsexporter"
@@ -29,6 +28,7 @@ import (
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/f5cloudexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/fileexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlecloudpubsubexporter"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlemanagedprometheusexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/influxdbexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/jaegerexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/kafkaexporter"
@@ -61,14 +61,14 @@ var defaultExporters = []component.ExporterFactory{
 	fileexporter.NewFactory(),
 	googlecloudexporter.NewFactory(),
 	googlecloudpubsubexporter.NewFactory(),
-	googlemanagedprometheus.NewFactory(),
+	googlemanagedprometheusexporter.NewFactory(),
 	influxdbexporter.NewFactory(),
 	jaegerexporter.NewFactory(),
 	kafkaexporter.NewFactory(),
 	loadbalancingexporter.NewFactory(),
 	loggingexporter.NewFactory(),
-	lokiexporter.NewFactory(),
 	logzioexporter.NewFactory(),
+	lokiexporter.NewFactory(),
 	opencensusexporter.NewFactory(),
 	otlpexporter.NewFactory(),
 	otlphttpexporter.NewFactory(),
