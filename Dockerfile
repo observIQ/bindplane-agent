@@ -16,7 +16,7 @@
 # JMX stage downloads the opentelemetry-jmx-metrics.jar used by JMX receivers
 #
 FROM curlimages/curl:7.82.0 as jmxjar
-ARG JMX_JAR_VERSION=v1.15.0
+ARG JMX_JAR_VERSION=v1.16.0
 USER root
 RUN curl -L \
     --output /opentelemetry-java-contrib-jmx-metrics.jar \
