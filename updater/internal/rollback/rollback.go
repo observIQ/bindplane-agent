@@ -28,11 +28,14 @@ import (
 	"github.com/observiq/observiq-otel-collector/updater/internal/service"
 )
 
+// ActionAppender is an interface that allows actions to be appended to it.
 //go:generate mockery --name ActionAppender --filename action_appender.go
 type ActionAppender interface {
 	AppendAction(action action.RollbackableAction)
 }
 
+// Rollbacker is a struct that records rollback information,
+// and can use that information to perform a rollback.
 type Rollbacker struct {
 	originalSvc service.Service
 	backupDir   string
@@ -41,6 +44,7 @@ type Rollbacker struct {
 	actions     []action.RollbackableAction
 }
 
+// NewRollbacker returns a new Rollbacker
 func NewRollbacker(tmpDir string) (*Rollbacker, error) {
 	installDir, err := path.InstallDir()
 	if err != nil {

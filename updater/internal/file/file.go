@@ -22,6 +22,8 @@ import (
 	"path/filepath"
 )
 
+// CopyFile copies the file from pathIn to pathOut.
+// If the file does not exist, it is created. If the file does exist, it is truncated before writing.
 func CopyFile(pathIn, pathOut string) error {
 	pathInClean := filepath.Clean(pathIn)
 	pathOutClean := filepath.Clean(pathOut)

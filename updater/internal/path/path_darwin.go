@@ -14,6 +14,7 @@
 
 package path
 
+// DarwinInstallDir is the path to the install directory on Darwin.
 const DarwinInstallDir = "/opt/observiq-otel-collector"
 
 // InstallDir returns the filepath to the install directory

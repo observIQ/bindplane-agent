@@ -14,6 +14,7 @@
 
 package path
 
+// LinuxInstallDir is the install directory of the collector on linux.
 const LinuxInstallDir = "/opt/observiq-otel-collector"
 
 // InstallDir returns the filepath to the install directory

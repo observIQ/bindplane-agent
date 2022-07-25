@@ -30,16 +30,18 @@ import (
 const linuxServiceName = "observiq-otel-collector"
 const linuxServiceFilePath = "/usr/lib/systemd/system/observiq-otel-collector.service"
 
-type ServiceOption func(linuxSvc *linuxService)
+// Option is an extra option for creating a Service
+type Option func(linuxSvc *linuxService)
 
-func WithServiceFile(svcFilePath string) ServiceOption {
+// WithServiceFile returns an option setting the service file to use when updating using the service
+func WithServiceFile(svcFilePath string) Option {
 	return func(linuxSvc *linuxService) {
 		linuxSvc.newServiceFilePath = svcFilePath
 	}
 }
 
 // NewService returns an instance of the Service interface for managing the observiq-otel-collector service on the current OS.
-func NewService(latestPath string, opts ...ServiceOption) Service {
+func NewService(latestPath string, opts ...Option) Service {
 	linuxSvc := &linuxService{
 		newServiceFilePath:       filepath.Join(path.ServiceFileDir(latestPath), "observiq-otel-collector.service"),
 		serviceName:              linuxServiceName,

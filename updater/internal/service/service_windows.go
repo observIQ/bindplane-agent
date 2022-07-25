@@ -39,16 +39,18 @@ const (
 	serviceNotExistErrStr        = "The specified service does not exist as an installed service."
 )
 
-type ServiceOption func(winSvc *windowsService)
+// Option is an extra option for creating a Service
+type Option func(winSvc *windowsService)
 
-func WithServiceFile(svcFilePath string) ServiceOption {
+// WithServiceFile returns an option setting the service file to use when updating using the service
+func WithServiceFile(svcFilePath string) Option {
 	return func(winSvc *windowsService) {
 		winSvc.newServiceFilePath = svcFilePath
 	}
 }
 
 // NewService returns an instance of the Service interface for managing the observiq-otel-collector service on the current OS.
-func NewService(latestPath string, opts ...ServiceOption) Service {
+func NewService(latestPath string, opts ...Option) Service {
 	winSvc := &windowsService{
 		newServiceFilePath: filepath.Join(path.ServiceFileDir(latestPath), "windows_service.json"),
 		serviceName:        defaultServiceName,
@@ -128,7 +130,7 @@ func (w windowsService) install() error {
 	}
 
 	// expand the arguments to be properly formatted (expand [INSTALLDIR], clean '&quot;' to be '"')
-	expandArguments(wsc, w.productName, iDir)
+	expandArguments(wsc, iDir)
 
 	// Split the arguments; Arguments are "shell-like", in that they may contain spaces, and can be quoted to indicate that.
 	splitArgs, err := shellquote.Split(wsc.Service.Arguments)
@@ -359,7 +361,7 @@ func readWindowsServiceConfig(path string) (*windowsServiceConfig, error) {
 
 // expandArguments expands [INSTALLDIR] to the actual install directory and
 // expands '&quot;' to the literal '"'
-func expandArguments(wsc *windowsServiceConfig, productName, installDir string) {
+func expandArguments(wsc *windowsServiceConfig, installDir string) {
 	wsc.Service.Arguments = string(replaceInstallDir([]byte(wsc.Service.Arguments), installDir))
 	wsc.Service.Arguments = strings.ReplaceAll(wsc.Service.Arguments, "&quot;", `"`)
 }

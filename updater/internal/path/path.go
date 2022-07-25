@@ -23,18 +23,24 @@ const (
 	serviceFileBackupFilename = "backup.service"
 )
 
+// LatestDirFromTempDir gets the path to the "latest" dir, where the new artifacts are,
+// from the temporary directory
 func LatestDirFromTempDir(tmpDir string) string {
 	return filepath.Join(tmpDir, latestDirFragment)
 }
 
+// BackupDirFromTempDir gets the path to the "rollback" dir, where current artifacts are backed up,
+// from the temporary directory
 func BackupDirFromTempDir(tmpDir string) string {
 	return filepath.Join(tmpDir, rollbackDirFragment)
 }
 
+// ServiceFileDir gets the directory of the service file definitions from the install dir
 func ServiceFileDir(installBaseDir string) string {
 	return filepath.Join(installBaseDir, serviceFileDirFragment)
 }
 
+// BackupServiceFile returns the full path to the backup service file from the service file directory path
 func BackupServiceFile(serviceFileDir string) string {
 	return filepath.Join(serviceFileDir, serviceFileBackupFilename)
 }

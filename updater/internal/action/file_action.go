@@ -24,9 +24,13 @@ import (
 	"github.com/observiq/observiq-otel-collector/updater/internal/path"
 )
 
+// CopyFileAction is an action that records a file being copied from FromPath to ToPath
 type CopyFileAction struct {
+	// FromPath is the path where the file originated.
+	// This path must be in latestDir
 	FromPath string
-	ToPath   string
+	// ToPath is the path where the file was written.
+	ToPath string
 	// FileCreated is a bool that records whether this action had to create a new file or not
 	FileCreated bool
 	rollbackDir string

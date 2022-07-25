@@ -19,38 +19,46 @@ import (
 	"github.com/observiq/observiq-otel-collector/updater/internal/service"
 )
 
+// ServiceStopAction is an action that records that a service was stopped.
 type ServiceStopAction struct {
 	svc service.Service
 }
 
+// NewServiceStopAction creates a new ServiceStopAction
 func NewServiceStopAction(svc service.Service) ServiceStopAction {
 	return ServiceStopAction{
 		svc: svc,
 	}
 }
 
+// Rollback rolls back the stop action (starts the service)
 func (s ServiceStopAction) Rollback() error {
 	return s.svc.Start()
 }
 
+// ServiceStartAction is an action that records that a service was started.
 type ServiceStartAction struct {
 	svc service.Service
 }
 
+// NewServiceStartAction creates a new ServiceStartAction
 func NewServiceStartAction(svc service.Service) ServiceStartAction {
 	return ServiceStartAction{
 		svc: svc,
 	}
 }
 
+// Rollback rolls back the start action (stops the service)
 func (s ServiceStartAction) Rollback() error {
 	return s.svc.Stop()
 }
 
+// ServiceUpdateAction is an action that records that a service was updated.
 type ServiceUpdateAction struct {
 	backupSvc service.Service
 }
 
+// NewServiceUpdateAction creates a new ServiceUpdateAction
 func NewServiceUpdateAction(tmpDir string) ServiceUpdateAction {
 	return ServiceUpdateAction{
 		backupSvc: service.NewService(
@@ -60,6 +68,7 @@ func NewServiceUpdateAction(tmpDir string) ServiceUpdateAction {
 	}
 }
 
+// Rollback is an action that rolls back the service configuration to the one saved in the backup directory.
 func (s ServiceUpdateAction) Rollback() error {
 	return s.backupSvc.Update()
 }
