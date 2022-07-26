@@ -129,6 +129,8 @@ func TestNewClient(t *testing.T) {
 				assert.Equal(t, mockCollector, observiqClient.collector)
 				assert.NotNil(t, observiqClient.ident)
 				assert.Equal(t, observiqClient.currentConfig, tc.config)
+				assert.False(t, observiqClient.safeGetDisconnecting())
+				assert.False(t, observiqClient.safeGetUpdatingPackage())
 			}
 
 		})
@@ -439,6 +441,7 @@ func TestClientDisconnect(t *testing.T) {
 	}
 
 	c.Disconnect(ctx)
+	assert.True(t, c.safeGetDisconnecting())
 	mockOpAmpClient.AssertExpectations(t)
 }
 
@@ -659,6 +662,20 @@ func TestClient_onConnectFailedHandler(t *testing.T) {
 				c := &Client{
 					logger:                zap.NewNop(),
 					packagesStateProvider: mockStateProvider,
+				}
+
+				c.onConnectFailedHandler(expectedErr)
+			},
+		},
+		{
+			desc: "Disconnect do not change package status",
+			testFunc: func(*testing.T) {
+				mockStateProvider := new(mocks.MockPackagesStateProvider)
+
+				c := &Client{
+					logger:                zap.NewNop(),
+					packagesStateProvider: mockStateProvider,
+					disconnecting:         true,
 				}
 
 				c.onConnectFailedHandler(expectedErr)

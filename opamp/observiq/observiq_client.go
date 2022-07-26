@@ -54,6 +54,9 @@ type Client struct {
 	mutex                   sync.Mutex
 	updatingPackage         bool
 
+	// To signal if we are disconnecting already and not take any actions on connection failures
+	disconnecting bool
+
 	currentConfig opamp.Config
 }
 
@@ -199,6 +202,7 @@ func (c *Client) Connect(ctx context.Context) error {
 
 // Disconnect disconnects from the server
 func (c *Client) Disconnect(ctx context.Context) error {
+	c.safeSetDisconnecting(true)
 	c.collector.Stop()
 	return c.opampClient.Stop(ctx)
 }
@@ -243,8 +247,11 @@ func (c *Client) onConnectHandler() {
 func (c *Client) onConnectFailedHandler(err error) {
 	c.logger.Error("Failed to connect to server", zap.Error(err))
 
-	// Set package status file for error (for Updater to pick up), but do not force send to Server
-	c.attemptFailedInstall(fmt.Sprintf("Failed to connect to BindPlane: %s", err.Error()))
+	// We are currently disconnecting so any Connection failed error is expected and should not affect an install
+	if !c.safeGetDisconnecting() {
+		// Set package status file for error (for Updater to pick up), but do not force send to Server
+		c.attemptFailedInstall(fmt.Sprintf("Failed to connect to BindPlane: %s", err.Error()))
+	}
 }
 
 func (c *Client) onErrorHandler(errResp *protobufs.ServerErrorResponse) {
@@ -518,4 +525,16 @@ func (c *Client) safeGetUpdatingPackage() bool {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 	return c.updatingPackage
+}
+
+func (c *Client) safeSetDisconnecting(value bool) {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+	c.disconnecting = value
+}
+
+func (c *Client) safeGetDisconnecting() bool {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+	return c.disconnecting
 }
