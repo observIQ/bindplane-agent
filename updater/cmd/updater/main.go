@@ -36,8 +36,9 @@ import (
 
 // Unimplemented
 func main() {
-	var showVersion = pflag.BoolP("version", "v", false, "Prints the version of the collector and exits, if specified.")
+	var showVersion = pflag.BoolP("version", "v", false, "Prints the version of the updater and exits, if specified.")
 	var tmpDir = pflag.String("tmpdir", "", "Temporary directory for artifacts. Parent of the 'rollback' directory.")
+	var logLevelStr = pflag.String("loglevel", "debug", "Level with which to log")
 	pflag.Parse()
 
 	if *showVersion {
@@ -53,6 +54,11 @@ func main() {
 		os.Exit(1)
 	}
 
+	logLevel, err := logging.LevelFromString(*logLevelStr)
+	if err != nil {
+		log.Fatalf("Failed to parse loglevel: %s", err)
+	}
+
 	// We can't create the zap logger yet, because we don't know the install dir, which is needed
 	// to create the logger. So we pass a Nop logger here.
 	installDir, err := path.InstallDir(zap.NewNop())
@@ -60,7 +66,7 @@ func main() {
 		log.Fatalf("Failed to determine install directory: %s", err)
 	}
 
-	logger, err := logging.NewLogger(installDir)
+	logger, err := logging.NewLogger(installDir, logLevel)
 	if err != nil {
 		log.Fatalf("Failed to create logger: %s", err)
 	}
