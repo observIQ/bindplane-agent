@@ -25,11 +25,11 @@ import (
 
 // NewLogger returns a new logger, that logs to the log directory relative to installDir,
 // with the provided log level.
-func NewLogger(installDir string, level zapcore.Level) (*zap.Logger, error) {
+func NewLogger(installDir string) (*zap.Logger, error) {
 	prodConf := zap.NewProductionConfig()
 
 	prodLogger, err := prodConf.Build(zap.WrapCore(func(c zapcore.Core) zapcore.Core {
-		return core(installDir, level)
+		return core(installDir)
 	}))
 
 	if err != nil {
@@ -39,26 +39,18 @@ func NewLogger(installDir string, level zapcore.Level) (*zap.Logger, error) {
 	return prodLogger, nil
 }
 
-func core(installDir string, level zapcore.Level) zapcore.Core {
+func core(installDir string) zapcore.Core {
 	logger := &lumberjack.Logger{
 		Filename:   path.LogFile(installDir),
 		MaxSize:    10,
 		MaxBackups: 3,
 	}
 
-	return zapcore.NewCore(encoder(), zapcore.AddSync(logger), level)
+	return zapcore.NewCore(encoder(), zapcore.AddSync(logger), zapcore.DebugLevel)
 }
 
 func encoder() zapcore.Encoder {
 	encoderConfig := zap.NewProductionEncoderConfig()
 	encoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
 	return zapcore.NewJSONEncoder(encoderConfig)
-}
-
-// LevelFromString returns a zapcore.Level based on the levelString.
-// If the level string is unrecognized, then an error is returned.
-func LevelFromString(levelStr string) (zapcore.Level, error) {
-	var l zapcore.Level = zapcore.DebugLevel
-	err := l.Set(levelStr)
-	return l, err
 }
