@@ -10,11 +10,9 @@ require (
 	github.com/stretchr/testify v1.8.0
 	go.uber.org/zap v1.21.0
 	golang.org/x/sys v0.0.0-20210510120138-977fb7262007
-	gopkg.in/natefinch/lumberjack.v2 v2.0.0
 )
 
 require (
-	github.com/BurntSushi/toml v1.2.0 // indirect
 	github.com/benbjohnson/clock v1.1.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
