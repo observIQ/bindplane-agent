@@ -40,13 +40,12 @@ type Rollbacker struct {
 	originalSvc service.Service
 	backupDir   string
 	installDir  string
-	tmpDir      string
 	actions     []action.RollbackableAction
 	logger      *zap.Logger
 }
 
 // NewRollbacker returns a new Rollbacker
-func NewRollbacker(logger *zap.Logger, tmpDir string) (*Rollbacker, error) {
+func NewRollbacker(logger *zap.Logger, installDir string) (*Rollbacker, error) {
 	namedLogger := logger.Named("rollbacker")
 
 	installDir, err := path.InstallDir(namedLogger.Named("install-dir"))
@@ -55,11 +54,10 @@ func NewRollbacker(logger *zap.Logger, tmpDir string) (*Rollbacker, error) {
 	}
 
 	return &Rollbacker{
-		backupDir:   path.BackupDirFromTempDir(tmpDir),
+		backupDir:   path.BackupDir(installDir),
 		installDir:  installDir,
-		tmpDir:      tmpDir,
 		logger:      namedLogger,
-		originalSvc: service.NewService(namedLogger, path.LatestDirFromTempDir(tmpDir)),
+		originalSvc: service.NewService(namedLogger, installDir),
 	}, nil
 }
 
@@ -77,12 +75,12 @@ func (r Rollbacker) Backup() error {
 	}
 
 	// Copy all the files in the install directory to the backup directory
-	if err := copyFiles(r.logger, r.installDir, r.backupDir, r.tmpDir); err != nil {
+	if err := copyFiles(r.logger, r.installDir, r.backupDir, r.installDir); err != nil {
 		return fmt.Errorf("failed to copy files to backup dir: %w", err)
 	}
 
 	// Backup the service configuration so we can reload it in case of rollback
-	if err := r.originalSvc.Backup(path.ServiceFileDir(r.backupDir)); err != nil {
+	if err := r.originalSvc.Backup(); err != nil {
 		return fmt.Errorf("failed to backup service configuration: %w", err)
 	}
 
@@ -104,8 +102,8 @@ func (r Rollbacker) Rollback() {
 }
 
 // copyFiles copies files from inputPath to output path, skipping tmpDir.
-func copyFiles(logger *zap.Logger, inputPath, outputPath, tmpDir string) error {
-	absTmpDir, err := filepath.Abs(tmpDir)
+func copyFiles(logger *zap.Logger, inputPath, outputPath, installDir string) error {
+	absTmpDir, err := filepath.Abs(path.TempDir(installDir))
 	if err != nil {
 		return fmt.Errorf("failed to get absolute path for temporary directory: %w", err)
 	}

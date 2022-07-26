@@ -13,33 +13,3 @@
 // limitations under the License.
 
 package path
-
-import (
-	"path/filepath"
-	"testing"
-
-	"github.com/stretchr/testify/require"
-)
-
-func TestLatestDirFromTempDir(t *testing.T) {
-	require.Equal(t, filepath.Join("tmp", "latest"), LatestDirFromTempDir("tmp"))
-}
-
-func TestBackupDirFromTempDir(t *testing.T) {
-	require.Equal(t, filepath.Join("tmp", "rollback"), BackupDirFromTempDir("tmp"))
-}
-
-func TestServiceFileDir(t *testing.T) {
-	installDir := filepath.Join("tmp", "rollback")
-	require.Equal(t, filepath.Join(installDir, "install"), ServiceFileDir(installDir))
-}
-
-func TestBackupServiceFile(t *testing.T) {
-	serviceFileDir := filepath.Join("tmp", "rollback", "install")
-	require.Equal(t, filepath.Join(serviceFileDir, "backup.service"), BackupServiceFile(serviceFileDir))
-}
-
-func TestLogFile(t *testing.T) {
-	installDir := filepath.Join("install")
-	require.Equal(t, filepath.Join(installDir, "log", "updater.log"), LogFile(installDir))
-}

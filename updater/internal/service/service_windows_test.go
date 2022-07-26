@@ -50,13 +50,12 @@ func TestWindowsServiceInstall(t *testing.T) {
 		compileProgram(t, serviceGoFile, testServiceProgram)
 
 		defer uninstallService(t)
-		createInstallDirRegistryKey(t, testProductName, tempDir)
-		defer deleteInstallDirRegistryKey(t, testProductName)
 
 		w := &windowsService{
 			newServiceFilePath: serviceJSON,
 			serviceName:        "windows-service",
 			productName:        testProductName,
+			installDir:         tempDir,
 			logger:             zaptest.NewLogger(t),
 		}
 
@@ -100,13 +99,12 @@ func TestWindowsServiceInstall(t *testing.T) {
 		compileProgram(t, serviceGoFile, testServiceProgram)
 
 		defer uninstallService(t)
-		createInstallDirRegistryKey(t, testProductName, tempDir)
-		defer deleteInstallDirRegistryKey(t, testProductName)
 
 		w := &windowsService{
 			newServiceFilePath: serviceJSON,
 			serviceName:        "windows-service",
 			productName:        testProductName,
+			installDir:         tempDir,
 			logger:             zaptest.NewLogger(t),
 		}
 
@@ -149,13 +147,12 @@ func TestWindowsServiceInstall(t *testing.T) {
 		compileProgram(t, serviceGoFile, testServiceProgram)
 
 		defer uninstallService(t)
-		createInstallDirRegistryKey(t, testProductName, tempDir)
-		defer deleteInstallDirRegistryKey(t, testProductName)
 
 		w := &windowsService{
 			newServiceFilePath: serviceJSON,
 			serviceName:        "windows-service",
 			productName:        testProductName,
+			installDir:         tempDir,
 			logger:             zaptest.NewLogger(t),
 		}
 
@@ -195,13 +192,12 @@ func TestWindowsServiceInstall(t *testing.T) {
 		compileProgram(t, serviceGoFile, testServiceProgram)
 
 		defer uninstallService(t)
-		createInstallDirRegistryKey(t, testProductName, tempDir)
-		defer deleteInstallDirRegistryKey(t, testProductName)
 
 		w := &windowsService{
 			newServiceFilePath: filepath.Join(tempDir, "not-a-valid-service.json"),
 			serviceName:        "windows-service",
 			productName:        testProductName,
+			installDir:         tempDir,
 			logger:             zaptest.NewLogger(t),
 		}
 
@@ -219,6 +215,7 @@ func TestWindowsServiceInstall(t *testing.T) {
 		w := &windowsService{
 			newServiceFilePath: serviceJSON,
 			serviceName:        "windows-service",
+			installDir:         tempDir,
 			productName:        testProductName,
 		}
 
@@ -237,6 +234,7 @@ func TestWindowsServiceInstall(t *testing.T) {
 			newServiceFilePath: serviceJSON,
 			serviceName:        "windows-service",
 			productName:        testProductName,
+			installDir:         tempDir,
 			logger:             zaptest.NewLogger(t),
 		}
 
@@ -254,6 +252,7 @@ func TestWindowsServiceInstall(t *testing.T) {
 			newServiceFilePath: serviceJSON,
 			serviceName:        "windows-service",
 			productName:        testProductName,
+			installDir:         tempDir,
 			logger:             zaptest.NewLogger(t),
 		}
 
@@ -264,10 +263,8 @@ func TestWindowsServiceInstall(t *testing.T) {
 	t.Run("Test backup works", func(t *testing.T) {
 		tempDir := t.TempDir()
 		installDir := filepath.Join(tempDir, "install directory")
-		backupDir := filepath.Join(tempDir, "backup")
 
-		require.NoError(t, os.MkdirAll(installDir, 0775))
-		require.NoError(t, os.MkdirAll(backupDir, 0775))
+		require.NoError(t, os.MkdirAll(path.BackupDir(installDir), 0775))
 
 		testProductName := "Test Product"
 
@@ -312,10 +309,10 @@ func TestWindowsServiceInstall(t *testing.T) {
 		// Take a backup; Assert the backup makes sense.
 		// It will not be the same as the original service file due to expansion of INSTALLDIR
 		// which is OK and expected.
-		err = w.Backup(backupDir)
+		err = w.Backup()
 		require.NoError(t, err)
 
-		backupSvcFile := path.BackupServiceFile(backupDir)
+		backupSvcFile := path.BackupServiceFile(installDir)
 
 		svcCfg, err := readWindowsServiceConfig(backupSvcFile)
 		require.NoError(t, err)
