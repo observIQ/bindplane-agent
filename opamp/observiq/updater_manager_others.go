@@ -17,6 +17,7 @@
 package observiq
 
 import (
+	"errors"
 	"fmt"
 	"os/exec"
 	"path/filepath"
@@ -26,20 +27,18 @@ import (
 	"go.uber.org/zap"
 )
 
-const updaterFolder = "latest"
-
 // Ensure interface is satisfied
-var _ UpdaterManager = (*OthersUpdaterManager)(nil)
+var _ updaterManager = (*othersUpdaterManager)(nil)
 
-// OthersUpdaterManager handles starting a Updater binary and watching it for failure with a timeout
-type OthersUpdaterManager struct {
+// othersUpdaterManager handles starting a Updater binary and watching it for failure with a timeout
+type othersUpdaterManager struct {
 	tmpPath string
 	logger  *zap.Logger
 }
 
 // newUpdaterManager creates a new UpdaterManager
-func newUpdaterManager(defaultLogger *zap.Logger, tmpPath string) UpdaterManager {
-	return &OthersUpdaterManager{
+func newUpdaterManager(defaultLogger *zap.Logger, tmpPath string) updaterManager {
+	return &othersUpdaterManager{
 		tmpPath: filepath.Clean(tmpPath),
 		logger:  defaultLogger.Named("updater manager"),
 	}
@@ -47,14 +46,17 @@ func newUpdaterManager(defaultLogger *zap.Logger, tmpPath string) UpdaterManager
 
 // StartAndMonitorUpdater will start the Updater binary and wait to see if it finishes unexpectedly.
 // While waiting for Updater, it should kill the collector and we should never execute any code past running it
-func (m OthersUpdaterManager) StartAndMonitorUpdater() error {
-	updaterPath := filepath.Join(m.tmpPath, updaterFolder, "updater")
+func (m othersUpdaterManager) StartAndMonitorUpdater() error {
+	updaterPath := filepath.Join(m.tmpPath, updaterDir, updaterName)
 	absTmpPath, err := filepath.Abs(m.tmpPath)
 	if err != nil {
-		m.logger.Warn("Failed to get absolute path of tmp dir", zap.Error(err))
+		return fmt.Errorf("failed to get absolute path of tmp dir: %w", err)
 	}
+	//#nosec G204 -- paths are not determined via user input
 	cmd := exec.Command(updaterPath, "--tmpdir", absTmpPath)
 
+	// We need to set the processor group id to something different so that at least on mac, when the
+	// collector dies the updater won't die as well
 	cmd.SysProcAttr = &syscall.SysProcAttr{
 		Setpgid: true,
 		Pgid:    0,
@@ -67,11 +69,12 @@ func (m OthersUpdaterManager) StartAndMonitorUpdater() error {
 	// See if we're still alive after 5 seconds
 	time.Sleep(5 * time.Second)
 
+	// Updater might already be killed
 	if err := cmd.Process.Kill(); err != nil {
-		m.logger.Error("Failed to get kill long running Updater", zap.Error(err))
+		m.logger.Debug("Failed to kill failed Updater", zap.Error(err))
 	}
 
 	// Ideally we should not get here as we will be killed by the updater.
 	// Updater should either exit before us with error or we die before it does.
-	return fmt.Errorf("updater took too long to shut down the collector")
+	return errors.New("updater failed to update collector")
 }

@@ -17,9 +17,6 @@
 package observiq
 
 import (
-	"io"
-	"os"
-	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -38,7 +35,7 @@ func TestNewOthersUpdaterManager(t *testing.T) {
 				tmpPath := "/tmp"
 				logger := zap.NewNop()
 
-				expected := &OthersUpdaterManager{
+				expected := &othersUpdaterManager{
 					tmpPath: tmpPath,
 					logger:  logger.Named("updater manager"),
 				}
@@ -54,6 +51,8 @@ func TestNewOthersUpdaterManager(t *testing.T) {
 	}
 }
 
+// We don't have a good way to unit test the happy path,
+// which involves the entire collector being killed in the middle of this function
 func TestStartAndMonitorUpdater(t *testing.T) {
 	testCases := []struct {
 		desc     string
@@ -72,53 +71,31 @@ func TestStartAndMonitorUpdater(t *testing.T) {
 		{
 			desc: "Updater is not executable",
 			testFunc: func(t *testing.T) {
-				tmpDir := t.TempDir()
-				latestPath := filepath.Join(tmpDir, "latest")
-				os.Mkdir(latestPath, 0777)
-				badUpdaterPath := filepath.Join(latestPath, "updater")
-				os.Create(badUpdaterPath)
-				os.Chmod(badUpdaterPath, 0777)
-
-				updateManager := newUpdaterManager(zap.NewNop(), tmpDir)
+				updaterName = "badupdater"
+				updateManager := newUpdaterManager(zap.NewNop(), "./testdata")
 				err := updateManager.StartAndMonitorUpdater()
 
-				assert.ErrorContains(t, err, "exec format error")
+				assert.ErrorContains(t, err, "updater had an issue while starting:")
 			},
 		},
 		{
 			desc: "Updater exits quickly",
 			testFunc: func(t *testing.T) {
-				tmpDir := t.TempDir()
-				latestPath := filepath.Join(tmpDir, "latest")
-				os.Mkdir(latestPath, 0777)
-				badUpdaterPath := filepath.Join(latestPath, "updater")
-				file, _ := os.Create(badUpdaterPath)
-				os.Chmod(badUpdaterPath, 0777)
-				fastUpdaterFile, _ := os.Open("testdata/quickupdater")
-				io.Copy(file, fastUpdaterFile)
-
-				updateManager := newUpdaterManager(zap.NewNop(), tmpDir)
+				updaterName = "quickupdater"
+				updateManager := newUpdaterManager(zap.NewNop(), "./testdata")
 				err := updateManager.StartAndMonitorUpdater()
 
-				assert.EqualError(t, err, "updater exited before shutting down collector")
+				assert.EqualError(t, err, "updater failed to update collector")
 			},
 		},
 		{
 			desc: "Updater times out",
 			testFunc: func(t *testing.T) {
-				tmpDir := t.TempDir()
-				latestPath := filepath.Join(tmpDir, "latest")
-				os.Mkdir(latestPath, 0777)
-				badUpdaterPath := filepath.Join(latestPath, "updater")
-				file, _ := os.Create(badUpdaterPath)
-				os.Chmod(badUpdaterPath, 0777)
-				fastUpdaterFile, _ := os.Open("testdata/slowupdater")
-				io.Copy(file, fastUpdaterFile)
-
-				updateManager := newUpdaterManager(zap.NewNop(), tmpDir)
+				updaterName = "slowupdater"
+				updateManager := newUpdaterManager(zap.NewNop(), "./testdata")
 				err := updateManager.StartAndMonitorUpdater()
 
-				assert.ErrorContains(t, err, "signal: killed")
+				assert.ErrorContains(t, err, "updater failed to update collector")
 			},
 		},
 	}

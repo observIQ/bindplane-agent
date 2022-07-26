@@ -50,7 +50,7 @@ type Client struct {
 	downloadableFileManager opamp.DownloadableFileManager
 	collector               collector.Collector
 	packagesStateProvider   types.PackagesStateProvider
-	updaterManager          UpdaterManager
+	updaterManager          updaterManager
 	mutex                   sync.Mutex
 	updatingPackage         bool
 
@@ -444,7 +444,7 @@ func (c *Client) installPackageFromFile(file *protobufs.DownloadableFile, curPac
 		return
 	}
 
-	if err := c.updaterManager.StartAndMonitorUpdater(); err != nil {
+	if monitorErr := c.updaterManager.StartAndMonitorUpdater(); monitorErr != nil {
 		// Reread package statuses in case Updater changed anything
 		newPackageStatuses, err := c.packagesStateProvider.LastReportedStatuses()
 		if err != nil {
@@ -454,7 +454,7 @@ func (c *Client) installPackageFromFile(file *protobufs.DownloadableFile, curPac
 		// Change existing status to show that install failed and get ready to send
 		newPackageStatuses.Packages[packagestate.CollectorPackageName].Status = protobufs.PackageStatus_InstallFailed
 		if newPackageStatuses.Packages[packagestate.CollectorPackageName].ErrorMessage == "" {
-			newPackageStatuses.Packages[packagestate.CollectorPackageName].ErrorMessage = fmt.Sprintf("Failed to run the latest Updater: %s", err.Error())
+			newPackageStatuses.Packages[packagestate.CollectorPackageName].ErrorMessage = fmt.Sprintf("Failed to run the latest Updater: %s", monitorErr.Error())
 		}
 
 		if err := c.packagesStateProvider.SetLastReportedStatuses(newPackageStatuses); err != nil {

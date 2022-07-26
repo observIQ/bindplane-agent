@@ -12,14 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package observiq
+// For generation of windows slowupdater.exe
+package main
 
-const updaterDir = "latest"
+import "time"
 
-var updaterName = "updater"
-
-// updaterManager handles working with the Updater binary
-type updaterManager interface {
-	// StartAndMonitorUpdater starts the Updater binary and monitors it for failure
-	StartAndMonitorUpdater() error
+func main() {
+	time.Sleep(10 * time.Second)
 }
