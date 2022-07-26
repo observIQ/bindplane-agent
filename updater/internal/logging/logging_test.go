@@ -17,6 +17,7 @@ package logging
 import (
 	"os"
 	"path/filepath"
+	"runtime"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -65,6 +66,12 @@ func TestLevelFromString(t *testing.T) {
 }
 
 func TestNewLogger(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		// Skip on windows, because the log file will still be open
+		// when the test attempts to remove the temp dir, which ends up making
+		// the test fail.
+		t.SkipNow()
+	}
 	tmpDir := t.TempDir()
 	require.NoError(t, os.MkdirAll(filepath.Join(tmpDir, "log"), 0775))
 
