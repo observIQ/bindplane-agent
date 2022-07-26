@@ -81,7 +81,3 @@ func (c CopyFileAction) Rollback() error {
 
 	return nil
 }
-
-func (c CopyFileAction) String() string {
-	return fmt.Sprintf("CopyFileAction{FromPathRel: '%s', ToPath: '%s', FileCreated: '%t'}", c.FromPathRel, c.ToPath, c.FileCreated)
-}

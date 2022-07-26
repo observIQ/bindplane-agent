@@ -39,10 +39,6 @@ func (s ServiceStopAction) Rollback() error {
 	return s.svc.Start()
 }
 
-func (s ServiceStopAction) String() string {
-	return "ServiceStopAction{}"
-}
-
 // ServiceStartAction is an action that records that a service was started.
 type ServiceStartAction struct {
 	svc service.Service
@@ -60,10 +56,6 @@ func NewServiceStartAction(svc service.Service) *ServiceStartAction {
 // Rollback rolls back the start action (stops the service)
 func (s ServiceStartAction) Rollback() error {
 	return s.svc.Stop()
-}
-
-func (s ServiceStartAction) String() string {
-	return "ServiceStartAction{}"
 }
 
 // ServiceUpdateAction is an action that records that a service was updated.
@@ -88,8 +80,4 @@ func NewServiceUpdateAction(logger *zap.Logger, tmpDir string) *ServiceUpdateAct
 // Rollback is an action that rolls back the service configuration to the one saved in the backup directory.
 func (s ServiceUpdateAction) Rollback() error {
 	return s.backupSvc.Update()
-}
-
-func (s ServiceUpdateAction) String() string {
-	return "ServiceUpdateAction{}"
 }
