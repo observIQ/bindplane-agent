@@ -39,6 +39,7 @@ type CopyFileAction struct {
 }
 
 var _ RollbackableAction = (*CopyFileAction)(nil)
+var _ fmt.Stringer = (*CopyFileAction)(nil)
 
 // NewCopyFileAction creates a new CopyFileAction that indicates a file was copied from
 // fromPathRel into toPath. tmpDir is specified for rollback purposes.
@@ -80,4 +81,8 @@ func (c CopyFileAction) Rollback() error {
 	}
 
 	return nil
+}
+
+func (c CopyFileAction) String() string {
+	return fmt.Sprintf("CopyFileAction{FromPathRel: '%s', ToPath: '%s', FileCreated: '%t'}", c.FromPathRel, c.ToPath, c.FileCreated)
 }
