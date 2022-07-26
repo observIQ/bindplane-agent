@@ -17,7 +17,6 @@
 package observiq
 
 import (
-	"context"
 	"fmt"
 	"os/exec"
 	"path/filepath"
@@ -55,10 +54,10 @@ func (m WindowsUpdaterManager) StartAndMonitorUpdater() error {
 	}
 	cmd := exec.Command(updaterPath, "--tmpdir", absTmpPath)
 
-	cmd.SysProcAttr = &syscall.SysProcAttr{
-		Setpgid: true,
-		Pgid:    0,
-	}
+	// cmd.SysProcAttr = &syscall.SysProcAttr{
+	// 	Setpgid: true,
+	// 	Pgid:    0,
+	// }
 	// Start does not block
 	if err := cmd.Start(); err != nil {
 		return fmt.Errorf("updater had an issue while starting: %w", err)
