@@ -77,7 +77,7 @@ func (r Rollbacker) Backup() error {
 	}
 
 	// Copy all the files in the install directory to the backup directory
-	if err := r.copyFiles(r.installDir, r.backupDir, r.tmpDir); err != nil {
+	if err := copyFiles(r.logger, r.installDir, r.backupDir, r.tmpDir); err != nil {
 		return fmt.Errorf("failed to copy files to backup dir: %w", err)
 	}
 
@@ -104,7 +104,7 @@ func (r Rollbacker) Rollback() {
 }
 
 // copyFiles copies files from inputPath to output path, skipping tmpDir.
-func (r Rollbacker) copyFiles(inputPath, outputPath, tmpDir string) error {
+func copyFiles(logger *zap.Logger, inputPath, outputPath, tmpDir string) error {
 	absTmpDir, err := filepath.Abs(tmpDir)
 	if err != nil {
 		return fmt.Errorf("failed to get absolute path for temporary directory: %w", err)
@@ -147,7 +147,7 @@ func (r Rollbacker) copyFiles(inputPath, outputPath, tmpDir string) error {
 		}
 
 		// Fail if copying the input file to the output file would fail
-		if err := file.CopyFile(r.logger.Named("copy-file"), inPath, outPath, false); err != nil {
+		if err := file.CopyFile(logger.Named("copy-file"), inPath, outPath, false); err != nil {
 			return fmt.Errorf("failed to copy file: %w", err)
 		}
 

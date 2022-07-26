@@ -69,7 +69,7 @@ func (i Installer) Install(rb rollback.ActionAppender) error {
 
 	// install files that go to installDirPath to their correct location,
 	// excluding any config files (logging.yaml, config.yaml, manager.yaml)
-	if err := i.copyFiles(i.latestDir, i.installDir, i.tmpDir, rb); err != nil {
+	if err := copyFiles(i.logger, i.latestDir, i.installDir, i.tmpDir, rb); err != nil {
 		return fmt.Errorf("failed to install new files: %w", err)
 	}
 	i.logger.Debug("Install artifacts copied")
@@ -93,7 +93,7 @@ func (i Installer) Install(rb rollback.ActionAppender) error {
 
 // copyFiles moves the file tree rooted at latestDirPath to installDirPath,
 // skipping configuration files. Appends CopyFileAction-s to the Rollbacker as it copies file.
-func (i Installer) copyFiles(inputPath, outputPath, tmpDir string, rb rollback.ActionAppender) error {
+func copyFiles(logger *zap.Logger, inputPath, outputPath, tmpDir string, rb rollback.ActionAppender) error {
 	err := filepath.WalkDir(inputPath, func(inPath string, d fs.DirEntry, err error) error {
 		switch {
 		case err != nil:
@@ -125,7 +125,7 @@ func (i Installer) copyFiles(inputPath, outputPath, tmpDir string, rb rollback.A
 
 		// We create the action record here, because we want to record whether the file exists or not before
 		// we open the file (which will end up creating the file).
-		cfa, err := action.NewCopyFileAction(i.logger, relPath, outPath, tmpDir)
+		cfa, err := action.NewCopyFileAction(logger, relPath, outPath, tmpDir)
 		if err != nil {
 			return fmt.Errorf("failed to create copy file action: %w", err)
 		}
@@ -135,7 +135,7 @@ func (i Installer) copyFiles(inputPath, outputPath, tmpDir string, rb rollback.A
 		// and we will want to roll that back if that is the case.
 		rb.AppendAction(cfa)
 
-		if err := file.CopyFile(i.logger.Named("copy-file"), inPath, outPath, true); err != nil {
+		if err := file.CopyFile(logger.Named("copy-file"), inPath, outPath, true); err != nil {
 			return fmt.Errorf("failed to copy file: %w", err)
 		}
 
