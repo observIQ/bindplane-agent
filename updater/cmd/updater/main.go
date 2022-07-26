@@ -34,7 +34,6 @@ import (
 	"go.uber.org/zap"
 )
 
-// Unimplemented
 func main() {
 	var showVersion = pflag.BoolP("version", "v", false, "Prints the version of the updater and exits, if specified.")
 	var tmpDir = pflag.String("tmpdir", "", "Temporary directory for artifacts. Parent of the 'rollback' directory.")
