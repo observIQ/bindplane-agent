@@ -15,6 +15,7 @@
 package logging
 
 import (
+	"bytes"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -24,20 +25,55 @@ import (
 )
 
 func TestNewLogger(t *testing.T) {
-	if runtime.GOOS == "windows" {
-		// Skip on windows, because the log file will still be open
-		// when the test attempts to remove the temp dir, which ends up making
-		// the test fail.
-		t.SkipNow()
-	}
-	tmpDir := t.TempDir()
-	require.NoError(t, os.MkdirAll(filepath.Join(tmpDir, "log"), 0775))
+	t.Run("Existing file is removed", func(t *testing.T) {
+		if runtime.GOOS == "windows" {
+			// Skip on windows, because the log file will still be open
+			// when the test attempts to remove the temp dir, which ends up making
+			// the test fail.
+			t.SkipNow()
+		}
+		tmpDir := t.TempDir()
+		require.NoError(t, os.MkdirAll(filepath.Join(tmpDir, "log"), 0775))
 
-	logger, err := NewLogger(tmpDir)
-	require.NoError(t, err)
+		updaterLogPath := filepath.Join(tmpDir, "log", "updater.log")
 
-	logger.Info("This is a log message")
-	require.NoError(t, logger.Sync())
+		initialBytes := []byte("Some existing bytes")
+		require.NoError(t, os.WriteFile(updaterLogPath, initialBytes, 0660))
 
-	require.FileExists(t, filepath.Join(tmpDir, "log", "updater.log"))
+		logger, err := NewLogger(tmpDir)
+		require.NoError(t, err)
+
+		currentBytes, err := os.ReadFile(updaterLogPath)
+		require.NoError(t, err)
+
+		if bytes.HasPrefix(currentBytes, initialBytes) {
+			t.Fatalf("The log file was not deleted (current bytes: '%s')", currentBytes)
+		}
+
+		logger.Info("This is a log message")
+		require.NoError(t, logger.Sync())
+
+		require.FileExists(t, updaterLogPath)
+	})
+
+	t.Run("Logger creates file if existing file does not exist", func(t *testing.T) {
+		if runtime.GOOS == "windows" {
+			// Skip on windows, because the log file will still be open
+			// when the test attempts to remove the temp dir, which ends up making
+			// the test fail.
+			t.SkipNow()
+		}
+		tmpDir := t.TempDir()
+		require.NoError(t, os.MkdirAll(filepath.Join(tmpDir, "log"), 0775))
+
+		updaterLogPath := filepath.Join(tmpDir, "log", "updater.log")
+
+		logger, err := NewLogger(tmpDir)
+		require.NoError(t, err)
+
+		logger.Info("This is a log message")
+		require.NoError(t, logger.Sync())
+
+		require.FileExists(t, updaterLogPath)
+	})
 }

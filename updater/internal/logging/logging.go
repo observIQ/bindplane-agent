@@ -16,17 +16,25 @@ package logging
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/observiq/observiq-otel-collector/updater/internal/path"
 	"go.uber.org/zap"
 )
 
-// NewLogger returns a new logger, that logs to the log directory relative to installDir,
-// with the provided log level.
+// NewLogger returns a new logger, that logs to the log directory relative to installDir.
+// It deletes the previous log file, as well.
 func NewLogger(installDir string) (*zap.Logger, error) {
+	logFile := path.LogFile(installDir)
+
 	conf := zap.NewProductionConfig()
 	conf.OutputPaths = []string{
-		path.LogFile(installDir),
+		logFile,
+	}
+
+	err := os.RemoveAll(logFile)
+	if err != nil {
+		return nil, fmt.Errorf("failed to remove previous log file: %w", err)
 	}
 
 	prodLogger, err := conf.Build()
