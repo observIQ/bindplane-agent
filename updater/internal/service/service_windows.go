@@ -231,69 +231,10 @@ func (w windowsService) Update() error {
 }
 
 func (w windowsService) Backup(outDir string) error {
-	m, err := mgr.Connect()
+
+	wsc, err := w.currentServiceConfig()
 	if err != nil {
-		return fmt.Errorf("failed to connect to service manager: %w", err)
-	}
-	defer m.Disconnect()
-
-	s, err := m.OpenService(w.serviceName)
-	if err != nil {
-		return fmt.Errorf("failed to open service: %w", err)
-	}
-	defer s.Close()
-
-	// Get the current config of the service
-	conf, err := s.Config()
-	if err != nil {
-		return fmt.Errorf("failed to get service config: %w", err)
-	}
-
-	// Split the service arguments into an array of arguments
-	args, err := shellquote.Split(conf.BinaryPathName)
-	if err != nil {
-		return fmt.Errorf("failed to split service config args: %w", err)
-	}
-
-	// The first argument is always the binary name; If the length of the array is 0, we know this is an invalid argument list.
-	if len(args) < 1 {
-		return fmt.Errorf("no binary specified in service config")
-	}
-
-	iDir, err := path.InstallDirFromRegistry(w.productName)
-	if err != nil {
-		return fmt.Errorf("failed to get install dir: %w", err)
-	}
-
-	// In the original config, the Path is the main binary path, relative to the install directory.
-	binaryPath, err := filepath.Rel(iDir, args[0])
-	if err != nil {
-		return fmt.Errorf("could not find service exe relative to install dir: %w", err)
-	}
-
-	// Stored argument string doesn't include the binary path (first arg)
-	args = args[1:]
-
-	// Args should end up being a string, where literal quotes are "&quot;"
-	argString := shellquote.Join(args...)
-	// shellquote uses ' to quote, so we convert those to "&quot;"
-	argString = strings.ReplaceAll(argString, "'", "&quot;")
-
-	// Convert windows api start type to the config file service type
-	confStartType, err := configStartType(conf.StartType, conf.DelayedAutoStart)
-	if err != nil {
-		return fmt.Errorf("failed to get start type: %w", err)
-	}
-
-	// Construct the config
-	wsc := windowsServiceConfig{
-		Path: binaryPath,
-		Service: windowsServiceDefinitionConfig{
-			Start:       confStartType,
-			DisplayName: conf.DisplayName,
-			Description: conf.Description,
-			Arguments:   argString,
-		},
+		return fmt.Errorf("failed to construct service config: %w", err)
 	}
 
 	// Marshal config as json
@@ -365,6 +306,85 @@ func readWindowsServiceConfig(path string) (*windowsServiceConfig, error) {
 func expandArguments(wsc *windowsServiceConfig, installDir string) {
 	wsc.Service.Arguments = string(replaceInstallDir([]byte(wsc.Service.Arguments), installDir))
 	wsc.Service.Arguments = strings.ReplaceAll(wsc.Service.Arguments, "&quot;", `"`)
+}
+
+func (w windowsService) currentServiceConfig() (*windowsServiceConfig, error) {
+	m, err := mgr.Connect()
+	if err != nil {
+		return nil, fmt.Errorf("failed to connect to service manager: %w", err)
+	}
+	defer m.Disconnect()
+
+	s, err := m.OpenService(w.serviceName)
+	if err != nil {
+		return nil, fmt.Errorf("failed to open service: %w", err)
+	}
+	defer s.Close()
+
+	// Get the current config of the service
+	conf, err := s.Config()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get service config: %w", err)
+	}
+
+	fullBinaryPath, argString, err := splitServiceBinaryName(conf.BinaryPathName)
+	if err != nil {
+		return nil, fmt.Errorf("failed to split service BinaryPathName: %w", err)
+	}
+
+	iDir, err := path.InstallDirFromRegistry(w.productName)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get install dir: %w", err)
+	}
+
+	// In the original config, the Path is the main binary path, relative to the install directory.
+	binaryPath, err := filepath.Rel(iDir, fullBinaryPath)
+	if err != nil {
+		return nil, fmt.Errorf("could not find service exe relative to install dir: %w", err)
+	}
+
+	// Convert windows api start type to the config file service type
+	confStartType, err := configStartType(conf.StartType, conf.DelayedAutoStart)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get start type: %w", err)
+	}
+
+	// Construct the config
+	return &windowsServiceConfig{
+		Path: binaryPath,
+		Service: windowsServiceDefinitionConfig{
+			Start:       confStartType,
+			DisplayName: conf.DisplayName,
+			Description: conf.Description,
+			Arguments:   argString,
+		},
+	}, nil
+}
+
+func splitServiceBinaryName(binaryPathName string) (binaryPath, argString string, err error) {
+	// Split the service arguments into an array of arguments
+	args, err := shellquote.Split(binaryPathName)
+	if err != nil {
+		return "", "", fmt.Errorf("failed to split service config args: %w", err)
+	}
+
+	// The first argument is always the binary name; If the length of the array is 0, we know this is an invalid argument list.
+	if len(args) < 1 {
+		return "", "", fmt.Errorf("no binary specified in service config")
+	}
+
+	// The absolute path to the binary is the first argument
+	binaryPath = args[0]
+
+	// Stored argument string doesn't include the binary path (first arg)
+	args = args[1:]
+
+	// Args should end up being a string, where literal quotes are "&quot;"
+	argString = shellquote.Join(args...)
+	// shellquote uses ' to quote, so we convert those to "&quot;"
+	argString = strings.ReplaceAll(argString, "'", "&quot;")
+
+	return binaryPath, argString, nil
 }
 
 // winapiStartType converts the start type from the windowsServiceConfig to a start type recognizable by the windows
