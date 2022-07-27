@@ -14,6 +14,15 @@
 
 package observiq
 
+import (
+	"fmt"
+	"io"
+	"os"
+	"path/filepath"
+
+	"go.uber.org/zap"
+)
+
 const updaterDir = "latest"
 
 var updaterName = "updater"
@@ -22,4 +31,42 @@ var updaterName = "updater"
 type updaterManager interface {
 	// StartAndMonitorUpdater starts the Updater binary and monitors it for failure
 	StartAndMonitorUpdater() error
+}
+
+// copyExecutable copies the executable at the input file path to the cwd.
+// Returns the output path (which is just the filepath.Base of the input path)
+func copyExecutable(logger *zap.Logger, inputPath string) (string, error) {
+	inputFile, err := os.Open(inputPath)
+	if err != nil {
+		return "", fmt.Errorf("failed to open updater binary for reading: %w", err)
+	}
+	defer func() {
+		if err := inputFile.Close(); err != nil {
+			logger.Error("Failed to close input file", zap.Error(err))
+		}
+	}()
+
+	// Remove the file if it already exists, need this for macOS
+	if err := os.RemoveAll("./"); err != nil {
+		return "", fmt.Errorf("failed to remove any existing executable: %w", err)
+	}
+
+	// Output path is just whatever the actual file name is (e.g. updater.exe)
+	outputPath := filepath.Base(inputPath)
+	// Make 0700 instead of 0600 since the executable bit needs to be flipped
+	outputFile, err := os.OpenFile(outputPath, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0700)
+	if err != nil {
+		return "", fmt.Errorf("failed to open output file: %w", err)
+	}
+	defer func() {
+		if err := outputFile.Close(); err != nil {
+			logger.Error("Failed to close output file", zap.Error(err))
+		}
+	}()
+
+	if _, err := io.Copy(outputFile, inputFile); err != nil {
+		return "", fmt.Errorf("failed to copy executable to output: %w", err)
+	}
+
+	return outputPath, nil
 }

@@ -47,7 +47,11 @@ func newUpdaterManager(defaultLogger *zap.Logger, tmpPath string) updaterManager
 // StartAndMonitorUpdater will start the Updater binary and wait to see if it finishes unexpectedly.
 // While waiting for Updater, it should kill the collector and we should never execute any code past running it
 func (m othersUpdaterManager) StartAndMonitorUpdater() error {
-	updaterPath := filepath.Join(m.tmpPath, updaterDir, updaterName)
+	initialUpdaterPath := filepath.Join(m.tmpPath, updaterDir, updaterName)
+	updaterPath, err := copyExecutable(m.logger.Named("copy-executable"), initialUpdaterPath)
+	if err != nil {
+		return fmt.Errorf("failed to copy updater to cwd: %w", err)
+	}
 
 	//#nosec G204 -- paths are not determined via user input
 	cmd := exec.Command(updaterPath)
