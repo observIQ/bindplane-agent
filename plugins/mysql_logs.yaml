@@ -13,23 +13,29 @@ description: |
     SET GLOBAL slow_query_log = 'ON';
 parameters:
   - name: enable_general_log
+    description: Enable to collect MySQL general logs
     type: bool
     default: true
   - name: general_log_paths
+    description: Path to general log file
     type: "[]string"
     default:
       - "/var/log/mysql/general.log"
   - name: enable_slow_log
+    description: Enable to collect MySQL slow query logs
     type: bool
     default: true
   - name: slow_query_log_paths
+    description: Path to slow query log file
     type: "[]string"
     default:
       - "/var/log/mysql/slow*.log"
   - name: enable_error_log
+    description: Enable to collect MySQL error logs
     type: bool
     default: true
   - name: error_log_paths
+    description: Path to mysqld log file
     type: "[]string"
     default:
       # Default log path for CentOS / RHEL
@@ -39,13 +45,16 @@ parameters:
       # Default log path for Debian / Ubuntu
       - "/var/log/mysql/error.log"
   - name: enable_mariadb_audit_log
+    description: Enable to collect MySQL audit logs provided by MariaDB Audit plugin
     type: bool
     default: false
   - name: mariadb_audit_log_paths
+    description: Path to audit log file created by MariaDB plugin
     type: "[]string"
     default:
       - "/var/log/mysql/audit.log"
   - name: start_at
+    description: At startup, where to start reading logs from the file.
     type: string
     supported:
       - beginning

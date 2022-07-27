@@ -15,6 +15,7 @@ parameters:
     type: bool
     default: true
   - name: timezone
+    description: Timezone to use when parsing the timestamp
     type: timezone
     default: UTC
 

@@ -3,40 +3,50 @@ title: Apache Kafka
 description: Log parser for Apache Kafka
 parameters:
   - name: enable_server_log
+    description: Enable to collect Apache Kafka server logs
     type: bool
     default: true
   - name: server_log_path
+    description: Apache Kafka server log path
     type: "[]string"
     default: 
     - "/home/kafka/kafka/logs/server.log*"
   - name: enable_controller_log
+    description: Enable to collect Apache Kafka controller logs
     type: bool
     default: true
   - name: controller_log_path
+    description: Apache Kafka controller log path
     type: "[]string"
     default: 
     - "/home/kafka/kafka/logs/controller.log*"
   - name: enable_state_change_log
+    description: Enable to collect Apache Kafka state change logs
     type: bool
     default: true
   - name: state_change_log_path
+    description: Apache Kafka state-change log path
     type: "[]string"
     default: 
     - "/home/kafka/kafka/logs/state-change.log*"
   - name: enable_log_cleaner_log
+    description: Enable to collect Apache Kafka log cleaner logs
     type: bool
     default: true
   - name: log_cleaner_log_path
+    description: Apache Kafka log-cleaner log path
     type: "[]string"
     default: 
     - "/home/kafka/kafka/logs/log-cleaner.log*"
   - name: start_at
+    description: At startup, where to start reading logs from the file.
     type: string
     supported:
       - beginning
       - end
     default: end
   - name: timezone
+    description: Timezone to use when parsing the timestamp
     type: timezone
     default: UTC
 

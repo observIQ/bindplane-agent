@@ -3,10 +3,12 @@ title: Apache Common
 description: Log parser for Apache common format
 parameters:
   - name: file_path
+    description: Path to apache common formatted log file
     type: "[]string"
     default:
       - "/var/log/apache2/access.log"
   - name: start_at
+    description: At startup, where to start reading logs from the file.
     type: string
     supported:
       - beginning

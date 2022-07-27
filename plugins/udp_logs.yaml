@@ -3,15 +3,19 @@ title: UDP
 description: Log parser for UDP
 parameters:
   - name: listen_port
+    description: A port which the agent will listen for udp messages
     type: int
     required: true
   - name: log_type
+    description: Adds the specified 'Type' as a label to each log message
     type: string
     default: udp
   - name: listen_ip
+    description: A UDP ip address of the form `<ip>`
     type: string
     default: "0.0.0.0"
   - name: add_attributes
+    description: Adds net.transport, net.peer.ip, net.peer.port, net.host.ip and net.host.port attributes
     type: bool
     default: true
 template: |

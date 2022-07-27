@@ -6,14 +6,14 @@ parameters:
     description: Directory containing journal files to read entries from
     type: string
   - name: start_at
-    type: string
     description: At startup, where to start reading logs from the file.
+    type: string
     supported:
       - beginning
       - end
     default: end
   - name: timezone
-    description: Timezone of logs
+    description: Timezone to use when parsing the timestamp
     type: timezone
     default: UTC
 

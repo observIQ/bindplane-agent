@@ -21,12 +21,14 @@ parameters:
     default: 
       - "/opt/wildfly/domain/log/*.log"        
   - name: start_at
+    description: At startup, where to start reading logs from the file.
     type: string
     supported:
       - beginning
       - end
     default: end
   - name: timezone
+    description: Timezone to use when parsing the timestamp
     type: timezone
     default: UTC
 

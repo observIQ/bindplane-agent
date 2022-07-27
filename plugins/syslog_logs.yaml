@@ -3,34 +3,43 @@ title: Syslog
 description: Log receiver for Syslog
 parameters:
   - name: connection_type
+    description: Transport protocol to use (`udp` or `tcp`)
     type: string
     supported:
       - tcp
       - udp
     default: udp
   - name: protocol
+    description: Protocol of received syslog messages (`rfc3164 (BSD)` or `rfc5424 (IETF)`)
     type: string
     supported:
       - rfc3164
       - rfc5424
     default: rfc5424
-  - name: location
-    type: string
+  - name: timezone
+    description: Timezone to use when parsing the timestamp
+    type: timezone
     default: UTC
   - name: listen_address
+    description: Parameter Deprecated Use 'listen_ip' and 'listen_port' instead
     type: string
     default: "0.0.0.0:514"
     # TLS options for TCP connections
   - name: enable_tls
+    description: Enable TLS for the Syslog reciever
     type: bool
     default: false
   - name: tls_certificate_path
+    description: Path to the x509 PEM certificate or certificate chain to use for TLS
     type: string
   - name: tls_private_key_path
+    description: Path to the certificates x509 PEM private key to use for TLS
     type: string
   - name: tls_ca_path
+    description: Path to the CA file to use for TLS
     type: string
   - name: tls_min_version
+    description: Minimum version of TLS to use, client will negotiate highest possible
     type: string
     supported:
       - "1.0"
@@ -40,9 +49,11 @@ parameters:
     default: "1.2"
   # Max message size for TCP only
   - name: max_log_size
+    description: Maximum amount of bytes taken up by a log?
     type: string
     default: "1024kib"
   - name: data_flow
+    description: ????
     type: string
     supported:
       - high

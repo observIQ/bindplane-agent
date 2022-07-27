@@ -3,9 +3,11 @@ title: Elasticsearch
 description: Log parser for Elasticsearch
 parameters:
   - name: enable_json_logs
+    description: Enable to collect Elasticsearch json logs
     type: bool
     default: true
   - name: json_log_paths
+    description: The absolute path to the Elasticsearch json logs
     type: "[]string"
     default:
       - "/var/log/elasticsearch/*_server.json"
@@ -14,13 +16,16 @@ parameters:
       - "/var/log/elasticsearch/*_index_indexing_slowlog.json"
       - "/var/log/elasticsearch/*_audit.json"
   - name: enable_gc_logs
+    description: Enable to collect Elasticsearch garbage collection logs
     type: bool
     default: false
   - name: gc_log_paths
+    description: The absolute path to the Elasticsearch garbage collection logs
     type: "[]string"
     default:
       - "/var/log/elasticsearch/gc.log*"
   - name: start_at
+    description: At startup, where to start reading logs from the file.
     type: string
     supported:
       - beginning

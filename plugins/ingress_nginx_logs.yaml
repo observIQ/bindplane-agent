@@ -7,6 +7,7 @@ parameters:
     default:
       - "/var/log/containers/ingress-nginx-controller*.log"
   - name: start_at
+    description: At startup, where to start reading logs from the file.
     type: string
     supported:
       - beginning

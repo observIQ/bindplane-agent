@@ -3,27 +3,34 @@ title: oracle_database
 description: Oracle Database
 parameters:
   - name: enable_audit_log
+    description: Enable to collect OracleDB audit logs
     type: bool
     default: true
   - name: audit_log_path
+    description: Path to the audit log file
     type: "[]string"
     default:
       - "/u01/app/oracle/product/*/dbhome_1/admin/*/adump/*.aud"
   - name: enable_alert_log
+    description: Enable to collect OracleDB alert logs
     type: bool
     default: true
   - name: alert_log_path
+    description: Path to the alert log file
     type: "[]string"
     default:
       - /u01/app/oracle/product/*/dbhome_1/diag/rdbms/*/*/trace/alert_*.log
   - name: enable_listener_log
+    description: Enable to collect OracleDB listener logs
     type: bool
     default: true
   - name: listener_log_path
+    description: Path to the listener log file
     type: "[]string"
     default:
       - /u01/app/oracle/product/*/dbhome_1/diag/tnslsnr/*/listener/alert/log.xml
   - name: start_at
+    description: At startup, where to start reading logs from the file.
     type: string
     supported:
       - beginning

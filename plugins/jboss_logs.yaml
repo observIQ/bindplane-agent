@@ -3,16 +3,19 @@ title: JBoss
 description: Log parser for JBoss
 parameters:
   - name: file_path
+    description: The absolute path to the JBoss logs
     type: "[]string"
     default: 
       - "/usr/local/JBoss/EAP-*/*/log/server.log"
   - name: start_at
+    description: At startup, where to start reading logs from the file.
     type: string
     supported:
       - beginning
       - end
     default: end
   - name: timezone
+    description: Timezone to use when parsing the timestamp
     type: timezone
     default: UTC
 

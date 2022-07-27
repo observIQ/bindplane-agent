@@ -3,27 +3,34 @@ title: Apache HBase
 description: Log parser for Apache HBase
 parameters:
   - name: enable_master_log
+    description: Enable to collect HBase master logs
     type: bool
     default: true
   - name: master_log_path
+    description: The absolute path to the HBase master logs
     type: "[]string"
     default: 
     - "/usr/local/hbase*/logs/hbase*-master-*.log"
   - name: enable_region_log
+    description: Enable to collect HBase region logs
     type: bool
     default: true
   - name: region_log_path
+    description: The absolute path to the HBase region logs
     type: "[]string"
     default: 
     - "/usr/local/hbase*/logs/hbase*-regionserver-*.log"
   - name: enable_zookeeper_log
+    description: Enable to collect HBase zookeeper logs
     type: bool
     default: false
   - name: zookeeper_log_path
+    description: The absolute path to the HBase zookeeper logs
     type: "[]string"
     default: 
     - "/usr/local/hbase*/logs/hbase*-zookeeper-*.log"
   - name: start_at
+    description: At startup, where to start reading logs from the file.
     type: string
     supported:
       - beginning

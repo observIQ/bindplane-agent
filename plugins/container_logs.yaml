@@ -14,8 +14,8 @@ parameters:
       # Excludes logs for the collector
       - "/var/log/containers/observiq-*-collector-*"
   - name: start_at
-    type: string
     description: At startup, where to start reading logs from the file.
+    type: string
     supported:
       - beginning
       - end

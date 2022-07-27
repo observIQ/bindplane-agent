@@ -3,9 +3,11 @@ title: RabbitMQ
 description: Log parser for RabbitMQ
 parameters:
   - name: daemon_log_paths
+    description: The absolute path to the RabbitMQ Daemon logs
     type: "[]string"
     default: ["/var/log/rabbitmq/rabbit@*.log"]
   - name: start_at
+    description: At startup, where to start reading logs from the file.
     type: string
     supported:
       - beginning

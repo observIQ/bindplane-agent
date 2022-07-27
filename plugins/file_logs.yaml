@@ -3,16 +3,20 @@ title: File
 description: Log parser for generic files
 parameters:
   - name: file_path
+    description: Specify a single path or multiple paths to read one or many files. You may also use a wildcard (*) to read multiple files within a directory
     type: "[]string"
     required: true
   - name: exclude_file_path
+    description: Specify a single path or multiple paths to exclude one or many files from being read. You may also use a wildcard (*) to exclude multiple files from being read within a directory
     type: "[]string"
     default: []
   # Optional multiline handling
   - name: multiline_line_start_pattern
+    description: A Regex pattern that matches the start of a multiline log entry in the log file
     type: string
     default: ""
   - name: encoding
+    description: Specify the encoding of the file(s) being read. In most cases, you can leave the default option selected
     type: string
     supported:
       - nop
@@ -23,6 +27,7 @@ parameters:
       - big5
     default: utf-8
   - name: parse_format
+    description: ???
     type: string
     supported:
       - none
@@ -31,12 +36,15 @@ parameters:
     default: none
   # Required when parse_format is 'regex'
   - name: regex_pattern
+    description: ???
     type: string
     default: ""
   - name: log_type
+    description: Adds the specified 'Type' as a label to each log message
     type: string
     default: "file"
   - name: start_at
+    description: At startup, where to start reading logs from the file.
     type: string
     supported:
       - beginning

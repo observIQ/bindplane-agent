@@ -3,9 +3,11 @@ title: Cisco ASA
 description: Log parser for Cisco ASA
 parameters:
   - name: listen_port
+    description: A port which the agent will listen for syslog messages
     type: int
     default: 5140
   - name: listen_ip
+    description: A syslog ip address of the form `<ip>`
     type: string
     default: "0.0.0.0"
 

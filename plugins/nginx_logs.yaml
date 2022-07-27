@@ -6,32 +6,39 @@ parameters:
   # log_format observiq '{"remote_addr":"$remote_addr","remote_user":"$remote_user","time_local":"$time_local","request":"$request","status":"$status","body_bytes_sent":"$body_bytes_sent","http_referer":"$http_referer","http_user_agent":"$http_user_agent","request_length":"$request_length","request_time":"$request_time","upstream_addr":"$upstream_addr","upstream_response_length":"$upstream_response_length","upstream_response_time":"$upstream_response_time","upstream_status":"$upstream_status","proxy_add_x_forwarded_for":"$proxy_add_x_forwarded_for","bytes_sent":"$bytes_sent","time_iso8601":"$time_iso8601","upstream_connect_time":"$upstream_connect_time","upstream_header_time":"$upstream_header_time","http_x_forwarded_for":"$http_x_forwarded_for"}';
   # See https://docs.nginx.com/nginx/admin-guide/monitoring/logging/#setting-up-the-access-log for more information on configuring log format
   - name: log_format
+    description: Specifies the format of the access log entries. When choosing 'default', the agent will expect the log entries to match the default nginx log format. When choosing 'observiq', the agent will expect the log entries to match an optimized JSON format that adheres to the observIQ specification. See the Nginx documentation for more information.
     type: string
     supported:
       - default
       - observiq
     default: default
   - name: enable_access_log
+    description: Enable access log collection
     type: bool
     default: true
   - name: access_log_paths
+    description: Path to access log file
     type: "[]string"
     default:
       - "/var/log/nginx/access.log*"
   - name: enable_error_log
+    description: Enable error log collection
     type: bool
     default: true
   - name: error_log_paths
+    description: Path to error log file
     type: "[]string"
     default:
       - "/var/log/nginx/error.log*"
   - name: start_at
+    description: At startup, where to start reading logs from the file.
     type: string
     supported:
       - beginning
       - end
     default: end
   - name: encoding
+    description: Specify the encoding of the file(s) being read. In most cases, you can leave the default option selected
     type: string
     supported:
       - nop
@@ -42,6 +49,7 @@ parameters:
       - big5
     default: utf-8
   - name: data_flow
+    description: ???
     type: string
     supported:
       - high

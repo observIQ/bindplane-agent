@@ -11,7 +11,7 @@ parameters:
     type: int
     default: 1000
   - name: start_at
-    description: Start reading file from 'beginning' or 'end'
+    description: At startup, where to start reading logs from the file.
     type: string
     supported:
       - beginning
