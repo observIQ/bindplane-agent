@@ -1,0 +1,42 @@
+version: 0.0.1
+title: Windows DHCP
+description: Log parser for Windows DHCP
+parameters:
+  - name: file_path
+    type: "[]string"
+    default: 
+      - "C:/Windows/System32/dhcp/DhcpSrvLog-*.log"
+  - name: start_at
+    type: string
+    supported:
+      - beginning
+      - end
+    default: end
+template: |
+  receivers:
+    filelog:
+      include:
+      {{ range $fp := .file_path }}
+        - '{{ $fp }}'
+      {{ end }}
+      start_at: {{ .start_at }}
+      attributes:
+        log_type: 'microsoft_dhcp'
+      operators: 
+        - id: windows_dhcp_router
+          type: router
+          routes:
+            - output: windows_dhcp_parser
+              expr: body matches '^\\d+,\\d{2}\\/\\d{2}\\/\\d{2},\\d{2}:\\d{2}:\\d{2}'
+        - id: windows_dhcp_parser
+          type: regex_parser
+          regex: '^(?P<id>\d+),(?P<timestamp>\d{2}\/\d{2}\/\d{2},\d{2}:\d{2}:\d{2}),(?P<description>[^,]+),(?P<ip_address>[^,]*),(?P<hostname>[^,]*),(?P<mac_address>[^,]*),(?P<username>[^,]*),(?P<transaction_id>[^,]*),(?P<q_result>[^,]*),(?P<probation_time>[^,]*),(?P<correlation_id>[^,]*),(?P<dhc_id>[^,]*),(?P<vendor_class_hex>[^,]*)(,(?P<vendor_class_ascii>[^,]*),(?P<user_Class_hex>[^,]*),(?P<user_class_ascii>[^,]*),(?P<relay_agent_info>[^,]*),(?P<dns_reg_error>[^,]*))?'
+          timestamp:
+            parse_from: attributes.timestamp
+            layout: '%m/%d/%y,%H:%M:%S'
+    
+  service:
+    pipelines:
+      logs:
+        receivers:
+          - filelog 
