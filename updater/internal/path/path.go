@@ -16,16 +16,17 @@ package path
 
 import "path/filepath"
 
+// TempDir gets the path to the "tmp" dir, used for staging updates & backups
 func TempDir(installDir string) string {
 	return filepath.Join(installDir, "tmp")
 }
 
-// LatestDirFromTempDir gets the path to the "latest" dir, where the new artifacts are unpacked.
+// LatestDir gets the path to the "latest" dir, where the new artifacts are unpacked.
 func LatestDir(installDir string) string {
 	return filepath.Join(TempDir(installDir), "latest")
 }
 
-// BackupDirFromTempDir gets the path to the "rollback" dir, where current artifacts are backed up.
+// BackupDir gets the path to the "rollback" dir, where current artifacts are backed up.
 func BackupDir(installDir string) string {
 	return filepath.Join(TempDir(installDir), "rollback")
 }
