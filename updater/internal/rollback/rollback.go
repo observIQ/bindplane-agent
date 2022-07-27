@@ -75,7 +75,7 @@ func (r Rollbacker) Backup() error {
 	}
 
 	// Copy all the files in the install directory to the backup directory
-	if err := copyFiles(r.logger, r.installDir, r.backupDir, r.installDir); err != nil {
+	if err := backupFiles(r.logger, r.installDir, r.backupDir); err != nil {
 		return fmt.Errorf("failed to copy files to backup dir: %w", err)
 	}
 
@@ -101,14 +101,14 @@ func (r Rollbacker) Rollback() {
 	}
 }
 
-// copyFiles copies files from inputPath to output path, skipping tmpDir.
-func copyFiles(logger *zap.Logger, inputPath, outputPath, installDir string) error {
+// backupFiles copies files from installDir to output path, skipping tmpDir.
+func backupFiles(logger *zap.Logger, installDir, outputPath string) error {
 	absTmpDir, err := filepath.Abs(path.TempDir(installDir))
 	if err != nil {
 		return fmt.Errorf("failed to get absolute path for temporary directory: %w", err)
 	}
 
-	err = filepath.WalkDir(inputPath, func(inPath string, d fs.DirEntry, err error) error {
+	err = filepath.WalkDir(installDir, func(inPath string, d fs.DirEntry, err error) error {
 
 		fullPath, absErr := filepath.Abs(inPath)
 		if absErr != nil {
@@ -130,7 +130,7 @@ func copyFiles(logger *zap.Logger, inputPath, outputPath, installDir string) err
 
 		// We want the path relative to the directory we are walking in order to calculate where the file should be
 		// mirrored in the output directory.
-		relPath, err := filepath.Rel(inputPath, inPath)
+		relPath, err := filepath.Rel(installDir, inPath)
 		if err != nil {
 			return err
 		}

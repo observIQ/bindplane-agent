@@ -61,7 +61,7 @@ func (i Installer) Install(rb rollback.ActionAppender) error {
 
 	// install files that go to installDirPath to their correct location,
 	// excluding any config files (logging.yaml, config.yaml, manager.yaml)
-	if err := copyFiles(i.logger, i.latestDir, i.installDir, i.installDir, rb); err != nil {
+	if err := installFiles(i.logger, i.latestDir, i.installDir, rb); err != nil {
 		return fmt.Errorf("failed to install new files: %w", err)
 	}
 	i.logger.Debug("Install artifacts copied")
@@ -83,9 +83,9 @@ func (i Installer) Install(rb rollback.ActionAppender) error {
 	return nil
 }
 
-// copyFiles moves the file tree rooted at latestDirPath to installDirPath,
+// installFiles moves the file tree rooted at inputPath to installDir,
 // skipping configuration files. Appends CopyFileAction-s to the Rollbacker as it copies file.
-func copyFiles(logger *zap.Logger, inputPath, outputPath, installDir string, rb rollback.ActionAppender) error {
+func installFiles(logger *zap.Logger, inputPath, installDir string, rb rollback.ActionAppender) error {
 	err := filepath.WalkDir(inputPath, func(inPath string, d fs.DirEntry, err error) error {
 		switch {
 		case err != nil:
@@ -108,7 +108,7 @@ func copyFiles(logger *zap.Logger, inputPath, outputPath, installDir string, rb 
 
 		// use the relative path to get the outPath (where we should write the file), and
 		// to get the out directory (which we will create if it does not exist).
-		outPath := filepath.Join(outputPath, relPath)
+		outPath := filepath.Join(installDir, relPath)
 		outDir := filepath.Dir(outPath)
 
 		if err := os.MkdirAll(outDir, 0750); err != nil {
