@@ -54,7 +54,7 @@ func CopyFile(logger *zap.Logger, pathIn, pathOut string, overwrite bool) error 
 		if fileOutInfo != nil {
 			fileMode = fileOutInfo.Mode()
 		}
-		os.Remove(pathOutClean)
+		_ = os.Remove(pathOutClean)
 	} else {
 		// This flag will make OpenFile error if the file already exists
 		flags |= os.O_EXCL

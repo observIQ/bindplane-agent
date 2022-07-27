@@ -12,11 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// For generation of windows quickupdater.exe
+// For generation of windows slowupdater.exe
+// Change extension to .go and run `env GOOS=windows GOARCH=amd64 go build slowupdater.go` to build new slowupdater.exe
 package main
 
 import "time"
 
 func main() {
-	time.Sleep(1 * time.Second)
+	time.Sleep(10 * time.Second)
 }
