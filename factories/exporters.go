@@ -38,6 +38,9 @@ import (
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/opencensusexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/prometheusexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/prometheusremotewriteexporter"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/sapmexporter"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/signalfxexporter"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/splunkhecexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/zipkinexporter"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/component/componenttest"
@@ -75,4 +78,7 @@ var defaultExporters = []component.ExporterFactory{
 	prometheusexporter.NewFactory(),
 	prometheusremotewriteexporter.NewFactory(),
 	zipkinexporter.NewFactory(),
+	sapmexporter.NewFactory(),
+	signalfxexporter.NewFactory(),
+	splunkhecexporter.NewFactory(),
 }
