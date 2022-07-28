@@ -16,6 +16,7 @@ package path
 
 import (
 	"fmt"
+	"path/filepath"
 
 	"go.uber.org/zap"
 	"golang.org/x/sys/windows/registry"
@@ -50,4 +51,9 @@ func installDirFromRegistry(logger *zap.Logger, productName string) (string, err
 // InstallDir returns the filepath to the install directory
 func InstallDir(logger *zap.Logger) (string, error) {
 	return installDirFromRegistry(logger, defaultProductName)
+}
+
+// LogFile returns the full path to the log file for the updater
+func LogFile(installDir string) string {
+	return filepath.Join("winfile://", installDir, "log", "updater.log")
 }

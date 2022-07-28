@@ -14,7 +14,11 @@
 
 package path
 
-import "go.uber.org/zap"
+import (
+	"path/filepath"
+
+	"go.uber.org/zap"
+)
 
 // DarwinInstallDir is the path to the install directory on Darwin.
 const DarwinInstallDir = "/opt/observiq-otel-collector"
@@ -22,4 +26,9 @@ const DarwinInstallDir = "/opt/observiq-otel-collector"
 // InstallDir returns the filepath to the install directory
 func InstallDir(_ *zap.Logger) (string, error) {
 	return DarwinInstallDir, nil
+}
+
+// LogFile returns the full path to the log file for the updater
+func LogFile(installDir string) string {
+	return filepath.Join(installDir, "log", "updater.log")
 }

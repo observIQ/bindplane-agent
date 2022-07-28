@@ -78,3 +78,7 @@ func createInstallDirRegistryKey(t *testing.T, productName, installDir string) {
 	err = key.SetStringValue("InstallLocation", installDir)
 	require.NoError(t, err)
 }
+
+func TestLogFile(t *testing.T) {
+	require.Equal(t, filepath.Join("winfile:///", "install", "log", "updater.log"), LogFile("install"))
+}
