@@ -14,11 +14,7 @@
 
 package path
 
-import (
-	"path/filepath"
-
-	"go.uber.org/zap"
-)
+import "go.uber.org/zap"
 
 // LinuxInstallDir is the install directory of the collector on linux.
 const LinuxInstallDir = "/opt/observiq-otel-collector"
@@ -26,9 +22,4 @@ const LinuxInstallDir = "/opt/observiq-otel-collector"
 // InstallDir returns the filepath to the install directory
 func InstallDir(_ *zap.Logger) (string, error) {
 	return LinuxInstallDir, nil
-}
-
-// LogFile returns the full path to the log file for the updater
-func LogFile(installDir string) string {
-	return filepath.Join(installDir, "log", "updater.log")
 }
