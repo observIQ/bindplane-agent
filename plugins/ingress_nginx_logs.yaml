@@ -3,7 +3,7 @@ title: Ingress NGINX
 description: Log parser for Ingress NGINX
 parameters:
   - name: file_path
-    description: description: Specify a single path or multiple paths to read one or many files. You may also use a wildcard (*) to read multiple files within a directory
+    description: Specify a single path or multiple paths to read one or many files. You may also use a wildcard (*) to read multiple files within a directory
     type: "[]string"
     default:
       - "/var/log/containers/ingress-nginx-controller*.log"

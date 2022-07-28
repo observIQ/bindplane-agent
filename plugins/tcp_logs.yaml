@@ -29,7 +29,7 @@ parameters:
     description: File path for the X509 TLS private key chain
     type: string
   - name: tls_min_version
-    description: What minimum version of TLS to use
+    description: Minimum version of TLS to use
     type: string
     supported:
       - "1.0"

@@ -49,7 +49,7 @@ parameters:
     default: "1.2"
   # Max message size for TCP only
   - name: max_log_size
-    description: Maximum amount of bytes taken up by a log file
+    description: Maximum number of bytes for a single TCP message. Only applicable when connection_type is TCP 
     type: string
     default: "1024kib"
   - name: data_flow
