@@ -77,8 +77,8 @@ var defaultExporters = []component.ExporterFactory{
 	otlphttpexporter.NewFactory(),
 	prometheusexporter.NewFactory(),
 	prometheusremotewriteexporter.NewFactory(),
-	zipkinexporter.NewFactory(),
 	sapmexporter.NewFactory(),
 	signalfxexporter.NewFactory(),
 	splunkhecexporter.NewFactory(),
+	zipkinexporter.NewFactory(),
 }
