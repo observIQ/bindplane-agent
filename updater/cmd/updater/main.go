@@ -56,6 +56,7 @@ func main() {
 	logger, err := logging.NewLogger(installDir)
 	if err != nil {
 		log.Default().Printf("Failed to create logger: %s\n", err)
+		// No logger, can't really log if we fail to remove tmpdir
 		fail(zap.NewNop(), installDir)
 	}
 
@@ -109,6 +110,7 @@ func main() {
 
 		rb.Rollback()
 		removeTmpDir(logger, installDir)
+
 		logger.Error("Rollback complete")
 		fail(logger, installDir)
 	}
