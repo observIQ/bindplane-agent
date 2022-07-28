@@ -11,6 +11,7 @@ parameters:
     type: string
     default: "0.0.0.0"
   - name: max_buffer_size
+    description: Maximum size taken up by collected logs
     type: string
     default: "1024kib"
     required: false
