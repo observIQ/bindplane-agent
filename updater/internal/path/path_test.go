@@ -40,3 +40,7 @@ func TestServiceFileDir(t *testing.T) {
 func TestBackupServiceFile(t *testing.T) {
 	require.Equal(t, filepath.Join("install", "tmp", "rollback", "backup.service"), BackupServiceFile("install"))
 }
+
+func TestLogFile(t *testing.T) {
+	require.Equal(t, filepath.Join("install", "log", "updater.log"), LogFile("install"))
+}
