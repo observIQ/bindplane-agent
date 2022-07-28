@@ -49,7 +49,7 @@ func copyExecutable(logger *zap.Logger, inputPath, cwd string) (string, error) {
 	// Output path is just whatever the actual file name is (e.g. updater.exe),
 	// on top of the CWD. We take the absolute path, because it is needed to actually ensure you can
 	// exec a file not on your PATH.
-	outputPath, err := filepath.Abs(filepath.Base(inputPath))
+	outputPath, err := filepath.Abs(filepath.Join(cwd, filepath.Base(inputPath)))
 	if err != nil {
 		return "", fmt.Errorf("failed to get absolute path for output: %w", err)
 	}
