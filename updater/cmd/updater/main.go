@@ -19,6 +19,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"os"
 	"time"
 
 	"github.com/observiq/observiq-otel-collector/packagestate"
@@ -83,7 +84,10 @@ func main() {
 		if setErr := monitor.SetState(packagestate.CollectorPackageName, protobufs.PackageStatus_InstallFailed, err); setErr != nil {
 			logger.Error("Failed to set state on install failure", zap.Error(setErr))
 		}
+
 		rb.Rollback()
+		removeTmpDir(logger, installDir)
+
 		logger.Fatal("Rollback complete")
 	}
 
@@ -106,9 +110,20 @@ func main() {
 		}
 
 		rb.Rollback()
+		removeTmpDir(logger, installDir)
+
 		logger.Fatal("Rollback complete")
 	}
 
+	removeTmpDir(logger, installDir)
 	// Successful update
 	logger.Info("Update Complete")
+}
+
+// removeTmpDir removes the temporary directory and any files in it.
+func removeTmpDir(logger *zap.Logger, installDir string) {
+	err := os.RemoveAll(path.TempDir(installDir))
+	if err != nil {
+		logger.Error("failed to remove temporary directory", zap.Error(err))
+	}
 }
