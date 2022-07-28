@@ -34,8 +34,8 @@ type updaterManager interface {
 }
 
 // copyExecutable copies the executable at the input file path to the cwd.
-// Returns the output path (which is just the filepath.Base of the input path)
-func copyExecutable(logger *zap.Logger, inputPath string) (string, error) {
+// Returns the output path of the executable.
+func copyExecutable(logger *zap.Logger, inputPath, cwd string) (string, error) {
 	inputFile, err := os.Open(inputPath)
 	if err != nil {
 		return "", fmt.Errorf("failed to open updater binary for reading: %w", err)
@@ -46,13 +46,19 @@ func copyExecutable(logger *zap.Logger, inputPath string) (string, error) {
 		}
 	}()
 
+	// Output path is just whatever the actual file name is (e.g. updater.exe),
+	// on top of the CWD. We take the absolute path, because it is needed to actually ensure you can
+	// exec a file not on your PATH.
+	outputPath, err := filepath.Abs(filepath.Base(inputPath))
+	if err != nil {
+		return "", fmt.Errorf("failed to get absolute path for output: %w", err)
+	}
+
 	// Remove the file if it already exists, need this for macOS
-	if err := os.RemoveAll("./"); err != nil {
+	if err := os.RemoveAll(outputPath); err != nil {
 		return "", fmt.Errorf("failed to remove any existing executable: %w", err)
 	}
 
-	// Output path is just whatever the actual file name is (e.g. updater.exe)
-	outputPath := filepath.Base(inputPath)
 	// Make 0700 instead of 0600 since the executable bit needs to be flipped
 	outputFile, err := os.OpenFile(outputPath, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0700)
 	if err != nil {

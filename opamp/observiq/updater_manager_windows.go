@@ -36,19 +36,25 @@ type windowsUpdaterManager struct {
 }
 
 // newUpdaterManager creates a new updaterManager
-func newUpdaterManager(defaultLogger *zap.Logger, tmpPath string) updaterManager {
+func newUpdaterManager(defaultLogger *zap.Logger, tmpPath string) (updaterManager, error) {
 	updaterName = "updater.exe"
-	return &windowsUpdaterManager{
+	cwd, err := os.Getwd()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get cwd: %w", err)
+	}
+
+	return &othersUpdaterManager{
 		tmpPath: filepath.Clean(tmpPath),
 		logger:  defaultLogger.Named("updater manager"),
-	}
+		cwd:     cwd,
+	}, nil
 }
 
 // StartAndMonitorUpdater will start the Updater binary and wait to see if it finishes unexpectedly.
 // While waiting for Updater, it should kill the collector and we should never execute any code past running it
 func (m windowsUpdaterManager) StartAndMonitorUpdater() error {
 	initialUpdaterPath := filepath.Join(m.tmpPath, updaterDir, updaterName)
-	updaterPath, err := copyExecutable(m.logger.Named("copy-executable"), initialUpdaterPath)
+	updaterPath, err := copyExecutable(m.logger.Named("copy-executable"), initialUpdaterPath, m.cwd)
 	if err != nil {
 		return fmt.Errorf("failed to copy updater to cwd: %w", err)
 	}
