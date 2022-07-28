@@ -32,6 +32,9 @@ require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/opencensusexporter v0.56.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/prometheusexporter v0.56.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/prometheusremotewriteexporter v0.56.0
+	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/sapmexporter v0.56.0
+	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/signalfxexporter v0.56.0
+	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/splunkhecexporter v0.56.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/zipkinexporter v0.56.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/extension/bearertokenauthextension v0.56.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/extension/healthcheckextension v0.56.0
@@ -210,6 +213,7 @@ require (
 	github.com/go-redis/redis/v7 v7.4.1 // indirect
 	github.com/go-resty/resty/v2 v2.1.1-0.20191201195748-d7b97669fe48 // indirect
 	github.com/go-sql-driver/mysql v1.6.0 // indirect
+	github.com/go-stack/stack v1.8.1 // indirect
 	github.com/go-zookeeper/zk v1.0.2 // indirect
 	github.com/gobwas/glob v0.2.3 // indirect
 	github.com/godbus/dbus/v5 v5.0.6 // indirect
@@ -319,6 +323,7 @@ require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/internal/metadataproviders v0.56.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/internal/sharedcomponent v0.56.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/internal/splunk v0.56.0 // indirect
+	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/batchperresourceattr v0.56.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/batchpersignal v0.56.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/experimentalmetricmetadata v0.56.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/resourcetotelemetry v0.56.0 // indirect
@@ -328,6 +333,7 @@ require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/translator/opencensus v0.56.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/translator/prometheus v0.56.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/translator/prometheusremotewrite v0.56.0 // indirect
+	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/translator/signalfx v0.56.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/translator/zipkin v0.56.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/winperfcounters v0.56.0 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
@@ -360,7 +366,11 @@ require (
 	github.com/rs/cors v1.8.2 // indirect
 	github.com/scaleway/scaleway-sdk-go v1.0.0-beta.9 // indirect
 	github.com/seccomp/libseccomp-golang v0.9.2-0.20210429002308-3879420cc921 // indirect
+	github.com/signalfx/com_signalfx_metrics_protobuf v0.0.3 // indirect
+	github.com/signalfx/gohistogram v0.0.0-20160107210732-1ccfd2ff5083 // indirect
+	github.com/signalfx/golib/v3 v3.3.13 // indirect
 	github.com/signalfx/sapm-proto v0.11.0 // indirect
+	github.com/signalfx/signalfx-agent/pkg/apm v0.0.0-20201202163743-65b4fa925fc8 // indirect
 	github.com/sirupsen/logrus v1.8.1 // indirect
 	github.com/soheilhy/cmux v0.1.5 // indirect
 	github.com/spf13/afero v1.8.2 // indirect
