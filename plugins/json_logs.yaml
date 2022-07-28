@@ -24,7 +24,7 @@ parameters:
     type: string
     default: json
   - name: start_at
-    description: At startup, where to start reading logs from the file.
+    description: At startup, where to start reading logs from the file (`beginning` or `end`)
     type: string
     supported:
       - beginning

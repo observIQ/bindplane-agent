@@ -31,7 +31,7 @@ parameters:
     default:
       - "/var/log/nginx/error.log*"
   - name: start_at
-    description: At startup, where to start reading logs from the file.
+    description: At startup, where to start reading logs from the file (`beginning` or `end`)
     type: string
     supported:
       - beginning
@@ -49,7 +49,7 @@ parameters:
       - big5
     default: utf-8
   - name: data_flow
-    description: ???
+    description: High mode keeps all entries, low mode filters out based on http request status
     type: string
     supported:
       - high

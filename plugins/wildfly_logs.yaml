@@ -3,25 +3,30 @@ title: Wildfly
 description: Log parser for Wildfly
 parameters:
   - name: standalone_file_path
+    description: Path to standalone file logs
     type: "[]string"
     default:  
       - "/opt/wildfly/standalone/log/server.log"
   - name: enable_domain_server
+    description: Enable to collect domain server logs
     type: bool
     default: true
   - name: domain_server_path
+    description: Path to domain server logs
     type: "[]string"
     default: 
       - "/opt/wildfly/domain/servers/*/log/server.log"
   - name: enable_domain_controller
+    description: Enable to collect domain controller logs
     type: bool
     default: true      
   - name: domain_controller_path
+    description: Path to domain controller logs
     type: "[]string"
     default: 
       - "/opt/wildfly/domain/log/*.log"        
   - name: start_at
-    description: At startup, where to start reading logs from the file.
+    description: At startup, where to start reading logs from the file (`beginning` or `end`)
     type: string
     supported:
       - beginning

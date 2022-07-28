@@ -27,7 +27,7 @@ parameters:
       - big5
     default: utf-8
   - name: parse_format
-    description: ???
+    description: Format of parsed logs (`none`, `json`, or `regex`)
     type: string
     supported:
       - none
@@ -36,7 +36,7 @@ parameters:
     default: none
   # Required when parse_format is 'regex'
   - name: regex_pattern
-    description: ???
+    description: Pattern for regex parsed log
     type: string
     default: ""
   - name: log_type
@@ -44,7 +44,7 @@ parameters:
     type: string
     default: "file"
   - name: start_at
-    description: At startup, where to start reading logs from the file.
+    description: At startup, where to start reading logs from the file (`beginning` or `end`)
     type: string
     supported:
       - beginning

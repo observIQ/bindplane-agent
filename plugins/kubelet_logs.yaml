@@ -6,7 +6,7 @@ parameters:
     description: Directory containing journal files to read entries from
     type: string
   - name: start_at
-    description: At startup, where to start reading logs from the file.
+    description: At startup, where to start reading logs from the file (`beginning` or `end`)
     type: string
     supported:
       - beginning

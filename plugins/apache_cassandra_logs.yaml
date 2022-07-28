@@ -3,28 +3,34 @@ title: Apache Cassandra
 description: Log parser for Apache Cassandra
 parameters:
   - name: enable_system_logs
+    description: Enable to collect apache system logs
     type: bool
     default: true
   - name: system_log_path
+    description: Path to apache system logs
     type: "[]string"
     default: 
     - "/var/log/cassandra/system.log"
   - name: enable_debug_logs
+    description: Enable to collect apache debug logs
     type: bool
     default: true
   - name: debug_log_path
+    description: Path to apache debug logs
     type: "[]string"
     default:
     - "/var/log/cassandra/debug.log"
   - name: enable_gc_logs
+    description: Enable to collect apache garbage collection logs
     type: bool
     default: true
   - name: gc_log_path
+    description: Path to apache garbage collection logs
     type: "[]string"
     default:
     - "/var/log/cassandra/gc.log"
   - name: start_at
-    description: At startup, where to start reading logs from the file.
+    description: At startup, where to start reading logs from the file (`beginning` or `end`)
     type: string
     valid_values:
      - beginning

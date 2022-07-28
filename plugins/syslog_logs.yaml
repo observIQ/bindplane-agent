@@ -49,11 +49,11 @@ parameters:
     default: "1.2"
   # Max message size for TCP only
   - name: max_log_size
-    description: Maximum amount of bytes taken up by a log?
+    description: Maximum amount of bytes taken up by a log file
     type: string
     default: "1024kib"
   - name: data_flow
-    description: ????
+    description: High mode keeps all entries, low mode filters out log entries with a debug severity of (7)
     type: string
     supported:
       - high
@@ -79,7 +79,7 @@ template: |
           listen_address: '{{ .listen_address }}'
         {{ end }}
         protocol: {{ .protocol }}
-        location: '{{ .location }}'
+        location: '{{ .timezone }}'
         {{ if eq .data_flow "low" }}
         operators:
           # Filter entries with debug severity (7); There is no actual severity field left by the syslog parser,
