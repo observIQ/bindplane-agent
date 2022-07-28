@@ -25,8 +25,6 @@ import (
 
 const updaterDir = "latest"
 
-var updaterName = "updater"
-
 // updaterManager handles working with the Updater binary
 type updaterManager interface {
 	// StartAndMonitorUpdater starts the Updater binary and monitors it for failure

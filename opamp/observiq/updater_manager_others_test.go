@@ -39,9 +39,10 @@ func TestNewOthersUpdaterManager(t *testing.T) {
 				require.NoError(t, err)
 
 				expected := &othersUpdaterManager{
-					tmpPath: tmpPath,
-					logger:  logger.Named("updater manager"),
-					cwd:     cwd,
+					tmpPath:     tmpPath,
+					logger:      logger.Named("updater manager"),
+					updaterName: "updater",
+					cwd:         cwd,
 				}
 
 				actual, err := newUpdaterManager(logger, tmpPath)
@@ -66,6 +67,8 @@ func TestStartAndMonitorUpdater(t *testing.T) {
 		{
 			desc: "Updater does not exist at path",
 			testFunc: func(t *testing.T) {
+				t.Parallel()
+
 				tmpDir := t.TempDir()
 				updateManager, err := newUpdaterManager(zap.NewNop(), tmpDir)
 				require.NoError(t, err)
@@ -81,13 +84,15 @@ func TestStartAndMonitorUpdater(t *testing.T) {
 		{
 			desc: "Updater is not executable",
 			testFunc: func(t *testing.T) {
+				t.Parallel()
+
 				tmpDir := t.TempDir()
-				updaterName = "badupdater"
+
 				updateManager, err := newUpdaterManager(zap.NewNop(), "./testdata")
 				require.NoError(t, err)
 
-				oum := updateManager.(*othersUpdaterManager)
-				oum.cwd = tmpDir
+				updateManager.(*othersUpdaterManager).cwd = tmpDir
+				updateManager.(*othersUpdaterManager).updaterName = "badupdater"
 
 				err = updateManager.StartAndMonitorUpdater()
 
@@ -97,13 +102,15 @@ func TestStartAndMonitorUpdater(t *testing.T) {
 		{
 			desc: "Updater exits quickly",
 			testFunc: func(t *testing.T) {
+				t.Parallel()
+
 				tmpDir := t.TempDir()
-				updaterName = "quickupdater"
+
 				updateManager, err := newUpdaterManager(zap.NewNop(), "./testdata")
 				require.NoError(t, err)
 
-				oum := updateManager.(*othersUpdaterManager)
-				oum.cwd = tmpDir
+				updateManager.(*othersUpdaterManager).cwd = tmpDir
+				updateManager.(*othersUpdaterManager).updaterName = "quickupdater"
 
 				err = updateManager.StartAndMonitorUpdater()
 
@@ -113,13 +120,15 @@ func TestStartAndMonitorUpdater(t *testing.T) {
 		{
 			desc: "Updater times out",
 			testFunc: func(t *testing.T) {
+				t.Parallel()
+
 				tmpDir := t.TempDir()
-				updaterName = "slowupdater"
+
 				updateManager, err := newUpdaterManager(zap.NewNop(), "./testdata")
 				require.NoError(t, err)
 
-				oum := updateManager.(*othersUpdaterManager)
-				oum.cwd = tmpDir
+				updateManager.(*othersUpdaterManager).cwd = tmpDir
+				updateManager.(*othersUpdaterManager).updaterName = "slowupdater"
 
 				err = updateManager.StartAndMonitorUpdater()
 

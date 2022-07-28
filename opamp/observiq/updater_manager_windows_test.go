@@ -40,9 +40,10 @@ func TestNewWindowsUpdaterManager(t *testing.T) {
 				require.NoError(t, err)
 
 				expected := &windowsUpdaterManager{
-					tmpPath: tmpPath,
-					logger:  logger.Named("updater manager"),
-					cwd:     cwd,
+					tmpPath:     tmpPath,
+					logger:      logger.Named("updater manager"),
+					updaterName: "updater.exe",
+					cwd:         cwd,
 				}
 
 				actual, err := newUpdaterManager(logger, tmpPath)
