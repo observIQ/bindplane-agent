@@ -67,14 +67,13 @@ func main() {
 		fail(logger, installDir)
 	}
 
-	installer := install.NewInstaller(logger, installDir)
 	rb := rollback.NewRollbacker(logger, installDir)
-
 	if err := rb.Backup(); err != nil {
 		logger.Error("Failed to backup", zap.Error(err))
 		fail(logger, installDir)
 	}
 
+	installer := install.NewInstaller(logger, installDir)
 	if err := installer.Install(rb); err != nil {
 		logger.Error("Failed to install", zap.Error(err))
 
