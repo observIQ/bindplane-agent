@@ -83,7 +83,6 @@ func main() {
 		}
 
 		rb.Rollback()
-		removeTmpDir(logger, installDir)
 
 		logger.Error("Rollback complete")
 		fail(logger, installDir)
@@ -108,7 +107,6 @@ func main() {
 		}
 
 		rb.Rollback()
-		removeTmpDir(logger, installDir)
 
 		logger.Error("Rollback complete")
 		fail(logger, installDir)
@@ -119,6 +117,7 @@ func main() {
 	logger.Info("Update Complete")
 }
 
+// fail removes the temporary directory, and calls os.Exit(1)
 func fail(logger *zap.Logger, installDir string) {
 	removeTmpDir(logger, installDir)
 	os.Exit(1)
