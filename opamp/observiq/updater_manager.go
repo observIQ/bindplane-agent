@@ -34,7 +34,9 @@ type updaterManager interface {
 // copyExecutable copies the executable at the input file path to the cwd.
 // Returns the output path of the executable.
 func copyExecutable(logger *zap.Logger, inputPath, cwd string) (string, error) {
-	inputFile, err := os.Open(inputPath)
+	inputPathClean := filepath.Clean(inputPath)
+
+	inputFile, err := os.Open(inputPathClean)
 	if err != nil {
 		return "", fmt.Errorf("failed to open updater binary for reading: %w", err)
 	}
@@ -52,13 +54,15 @@ func copyExecutable(logger *zap.Logger, inputPath, cwd string) (string, error) {
 		return "", fmt.Errorf("failed to get absolute path for output: %w", err)
 	}
 
+	outputPathClean := filepath.Clean(outputPath)
+
 	// Remove the file if it already exists, need this for macOS
-	if err := os.RemoveAll(outputPath); err != nil {
+	if err := os.RemoveAll(outputPathClean); err != nil {
 		return "", fmt.Errorf("failed to remove any existing executable: %w", err)
 	}
 
-	// Make 0700 instead of 0600 since the executable bit needs to be flipped
-	outputFile, err := os.OpenFile(outputPath, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0700)
+	//#nosec G302 - 0700 instead of 0600 since the executable bit needs to be flipped
+	outputFile, err := os.OpenFile(outputPathClean, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0700)
 	if err != nil {
 		return "", fmt.Errorf("failed to open output file: %w", err)
 	}
@@ -72,5 +76,5 @@ func copyExecutable(logger *zap.Logger, inputPath, cwd string) (string, error) {
 		return "", fmt.Errorf("failed to copy executable to output: %w", err)
 	}
 
-	return outputPath, nil
+	return outputPathClean, nil
 }
