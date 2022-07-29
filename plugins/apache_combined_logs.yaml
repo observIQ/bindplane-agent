@@ -9,7 +9,7 @@ parameters:
       - "/var/log/apache_combined.log"
   - name: start_at
     type: string
-    description: At startup, where to start reading logs from the file.
+    description: At startup, where to start reading logs from the file (`beginning` or `end`)
     supported:
       - beginning
       - end

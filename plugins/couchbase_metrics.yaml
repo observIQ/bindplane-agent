@@ -3,15 +3,19 @@ title: Couchbase Metrics
 description: Metrics receiver for Couchbase
 parameters:
   - name: endpoint
+    description: Address to scrape metrics from
     type: string
     default: localhost:8091
   - name: username
+    description: Username to use as header of every scrape request
     type: string
     required: true
   - name: password
+    description: Password to use as header of every scrape request
     type: string
     required: true
   - name: scrape_interval
+    description: Time in between every scrape request
     type: string
     default: 60s
 template: |

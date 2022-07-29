@@ -3,20 +3,25 @@ title: macOS
 description: Log parser for macOS
 parameters:
   - name: enable_system_log
+    description: Enable to collect MacOS system logs
     type: bool
     default: true
   - name: system_log_path
+    description: The absolute path to the System log
     type: "[]string"
     default:
       - "/var/log/system.log"
   - name: enable_install_log
+    description: Enable to collect MacOS install logs
     type: bool
     default: true
   - name: install_log_path
+    description: The absolute path to the Install log
     type: "[]string"
     default: 
       - "/var/log/install.log"
   - name: start_at
+    description: At startup, where to start reading logs from the file (`beginning` or `end`)
     type: string
     supported:
       - beginning

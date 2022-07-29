@@ -3,25 +3,33 @@ title: TCP
 description: Log receiver for TCP
 parameters:
   - name: listen_port
+    description: A port which the agent will listen for tcp messages
     type: int
     required: true
   - name: listen_ip
+    description: The local IP address to listen for TCP connections on
     type: string
     default: "0.0.0.0"
   - name: log_type
+    description: Adds the specified 'Type' as a label to each log message.
     type: string
     default: tcp
   - name: add_attributes
+    description: Adds net.transport, net.peer.ip, net.peer.port, net.host.ip and net.host.port attributes
     type: bool
     default: false
   - name: enable_tls
+    description: Enable TLS for the TCP listener
     type: bool
     default: false
   - name: tls_certificate_path
+    description: File path for the X509 TLS certificate chain
     type: string
   - name: tls_private_key_path
+    description: File path for the X509 TLS private key chain
     type: string
   - name: tls_min_version
+    description: Minimum version of TLS to use
     type: string
     supported:
       - "1.0"

@@ -3,10 +3,12 @@ title: HAProxy
 description: Log parser for HAProxy
 parameters:
   - name: file_path
+    description: Specify a single path or multiple paths to read one or many files. You may also use a wildcard (*) to read multiple files within a directory
     type: "[]string"
     default:
       - "/var/log/haproxy/haproxy.log"
   - name: start_at
+    description: At startup, where to start reading logs from the file (`beginning` or `end`)
     type: string
     supported:
       - beginning
@@ -15,6 +17,7 @@ parameters:
   # HAProxy timestamps do not include a timestamp, so we need to set
   # it explicitly.
   - name: timezone
+    description: Timezone to use when parsing the timestamp
     type: timezone
     default: UTC
 

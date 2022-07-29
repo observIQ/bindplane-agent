@@ -3,10 +3,12 @@ title: CouchDB
 description: Log parser for CouchDB
 parameters:
   - name: log_paths
+    description: The absolute path to the CouchDB logs
     type: "[]string"
     default:
       - "/var/log/couchdb/couchdb.log"
   - name: start_at
+    description: At startup, where to start reading logs from the file (`beginning` or `end`)
     type: string
     supported:
       - beginning

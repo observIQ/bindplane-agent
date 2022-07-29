@@ -3,10 +3,12 @@ title: PgBouncer
 description: Log parser for PgBouncer
 parameters:
   - name: file_path
+    description: The absolute path to the PgBouncer logs
     type: "[]string"
     default: 
       - "/var/log/pgbouncer/pgbouncer.log"
   - name: start_at
+    description: At startup, where to start reading logs from the file (`beginning` or `end`)
     type: string
     supported:
       - beginning

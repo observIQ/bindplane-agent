@@ -11,6 +11,7 @@ description: |
     3. Save the configuration and restart PostgreSQL
 parameters:
   - name: postgresql_log_path
+    description: Path to the PostgreSQL log file
     type: "[]string"
     default:
       # Default log paths for Debain / Ubuntu
@@ -20,6 +21,7 @@ parameters:
       # Default log paths for CentOS / RHEL
       - "/var/lib/pgsql/*/data/log/postgresql*.log"
   - name: start_at
+    description: At startup, where to start reading logs from the file (`beginning` or `end`)
     type: string
     supported:
       - beginning

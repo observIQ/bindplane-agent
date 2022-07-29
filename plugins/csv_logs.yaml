@@ -3,21 +3,26 @@ title: CSV
 description: Log parser for CSV
 parameters:
   - name: log_paths
+    description: Specify a single path or multiple paths to read one or many files. You may also use a wildcard (*) to read multiple files within a directory
     type: "[]string"
     required: true
   - name: start_at
+    description: At startup, where to start reading logs from the file (`beginning` or `end`)
     type: string
     supported:
       - beginning
       - end
     default: end
   - name: exclude_log_paths
+    description: Specify a single path or multiple paths to exclude one or many files from being read. You may also use a wildcard (*) to exclude multiple files from being read within a directory.
     type: "[]string"
     default: []
   - name: header
+    description: Comma separated header string to be used as keys
     type: string
     required: true
   - name: encoding
+    description: Specify the encoding of the file(s) being read. In most cases, you can leave the default option selected
     type: string
     supported:
       - nop
@@ -28,6 +33,7 @@ parameters:
       - big5
     default: utf-8
   - name: log_type
+    description: Adds the specified 'Type' as a label to each log message
     type: string
     default: csv
 template: |

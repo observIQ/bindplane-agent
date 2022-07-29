@@ -3,18 +3,23 @@ title: VMware ESXi
 description: Log parser for VMware ESXi
 parameters:
   - name: listen_port
+    description: A port which the agent will listen for ESXi messages
     type: int
     default: 5140
   - name: listen_ip
+    description: The local IP address to listen for ESXi connections on
     type: string
     default: "0.0.0.0"
   - name: enable_tls
+    description: Enable TLS for the vCenter listener
     type: bool
     default: false
   - name: certificate_file
+    description: Path to TLS certificate file
     type: string
     default: "/opt/cert"
   - name: private_key_file
+    description: Path to TLS private key file
     type: string
     default: "/opt/key"
 

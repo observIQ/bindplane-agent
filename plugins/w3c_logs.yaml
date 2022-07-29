@@ -3,12 +3,15 @@ title: W3C
 description: Log Parser for W3C
 parameters:
   - name: file_log_path
+    description: Specify a single path or multiple paths to read one or many files. You may also use a wildcard (*) to read multiple files within a directory.
     type: "[]string"
     required: true
   - name: exclude_file_log_path
+    description: Specify a single path or multiple paths to exclude one or many files from being read. You may also use a wildcard (*) to exclude multiple files from being read within a directory.
     type: "[]string"
     default: []
   - name: encoding
+    description: Specify the encoding of the file(s) being read. In most cases, you can leave the default option selected.
     type: string
     supported:
       - utf-8
@@ -18,33 +21,42 @@ parameters:
       - big5
     default: utf-8
   - name: log_type
+    description: Adds the specified 'Type' as a label to each log message.
     type: string
     default: w3c
   - name: start_at
+    description: At startup, where to start reading logs from the file.
     type: string
     supported:
       - beginning
       - end
     default: end
   - name: max_concurrent_files
+    description: Max number of W3C files that will be open during a polling cycle
     type: int
     default: 512
   - name: include_file_name
+    description: Include File Name as a label
     type: bool
     default: true
   - name: include_file_path
+    description: Include File Path as a label
     type: bool
     default: false
   - name: include_file_name_resolved
+    description: Same as include_file_name, however, if file name is a symlink, the underlying file's name will be set as a label
     type: bool
     default: false
   - name: include_file_path_resolved
+    description: Same as include_file_path, however, if file path is a symlink, the underlying file's path will be set as a label
     type: bool
     default: false
   - name: header
+    description: The W3C header which specifies the field names
     type: "string"
     required: true 
   - name: delimiter
+    description: Delimiter character used between fields (Defaults to a tab character)
     type: string
     default: "\t"
 

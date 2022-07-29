@@ -1,36 +1,45 @@
-version: 0.0.1
+version: 0.1.0
 title: Syslog
 description: Log receiver for Syslog
 parameters:
   - name: connection_type
+    description: Transport protocol to use (`udp` or `tcp`)
     type: string
     supported:
       - tcp
       - udp
     default: udp
   - name: protocol
+    description: Protocol of received syslog messages (`rfc3164 (BSD)` or `rfc5424 (IETF)`)
     type: string
     supported:
       - rfc3164
       - rfc5424
     default: rfc5424
-  - name: location
-    type: string
+  - name: timezone
+    description: Timezone to use when parsing the timestamp
+    type: timezone
     default: UTC
   - name: listen_address
+    description: User's listen_ip and listen_port
     type: string
     default: "0.0.0.0:514"
     # TLS options for TCP connections
   - name: enable_tls
+    description: Enable TLS for the Syslog reciever
     type: bool
     default: false
   - name: tls_certificate_path
+    description: Path to the x509 PEM certificate or certificate chain to use for TLS
     type: string
   - name: tls_private_key_path
+    description: Path to the certificates x509 PEM private key to use for TLS
     type: string
   - name: tls_ca_path
+    description: Path to the CA file to use for TLS
     type: string
   - name: tls_min_version
+    description: Minimum version of TLS to use, client will negotiate highest possible
     type: string
     supported:
       - "1.0"
@@ -40,9 +49,11 @@ parameters:
     default: "1.2"
   # Max message size for TCP only
   - name: max_log_size
+    description: Maximum number of bytes for a single TCP message. Only applicable when connection_type is TCP 
     type: string
     default: "1024kib"
   - name: data_flow
+    description: High mode keeps all entries, low mode filters out log entries with a debug severity of (7)
     type: string
     supported:
       - high
@@ -68,7 +79,7 @@ template: |
           listen_address: '{{ .listen_address }}'
         {{ end }}
         protocol: {{ .protocol }}
-        location: '{{ .location }}'
+        location: '{{ .timezone }}'
         {{ if eq .data_flow "low" }}
         operators:
           # Filter entries with debug severity (7); There is no actual severity field left by the syslog parser,

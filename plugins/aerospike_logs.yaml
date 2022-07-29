@@ -4,8 +4,10 @@ description: Log parser for Aerospike
 parameters:
   # optional
   - name: journald_directory
+    description: The absolute path to the general Aerospike logs
     type: string
   - name: start_at
+    description: At startup, where to start reading logs from the file (`beginning` or `end`)
     type: string
     supported:
       - beginning

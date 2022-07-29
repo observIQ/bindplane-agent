@@ -4,10 +4,12 @@ title: Solr
 description: Log parser for Solr
 parameters:
   - name: file_log_path
+    description: The absolute path to the Solr logs
     type: "[]string"
     default: 
       - "/var/solr/logs/solr.log"
   - name: start_at
+    description: At startup, where to start reading logs from the file (`beginning` or `end`)
     type: string
     supported:
       - beginning

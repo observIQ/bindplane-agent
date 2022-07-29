@@ -3,27 +3,34 @@ title: Apache Hadoop
 description: Log parser for Apache Hadoop
 parameters:
   - name: enable_datanode_logs
+    description: Enable collection of Hadoop data node logs
     type: bool
     default: true
   - name: datanode_log_path
+    description: The absolute path to the data node logs
     type: "[]string"
     default:
       - "/usr/local/hadoop/logs/hadoop-*-datanode-*.log"
   - name: enable_resourcemgr_logs
+    description: Enable the collection of ResourceManager logs
     type: bool
     default: true
   - name: resourcemgr_log_path
+    description: The absolute path to the DataNode logs
     type: "[]string"
     default:
       - "/usr/local/hadoop/logs/hadoop-*-resourcemgr-*.log"
   - name: enable_namenode_logs
+    description: Enable collection of Hadoop NameNode logs
     type: bool
     default: true
   - name: namenode_log_path
+    description: The absolute path to the NameNode logs
     type: "[]string"
     default:
       - "/usr/local/hadoop/logs/hadoop-*-namenode-*.log"
   - name: start_at
+    description: At startup, where to start reading logs from the file (`beginning` or `end`)
     type: string
     supported:
       - beginning

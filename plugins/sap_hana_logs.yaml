@@ -16,13 +16,14 @@ parameters:
       - "/usr/sap/*/HDB*/*/trace/nameserver*unlaods*.trc"
       - "/usr/sap/*/HDB*/*/trace/nameserver*executed_statements*.trc"
   - name: start_at
-    description: Start reading file from 'beginning' or 'end'
+    description: At startup, where to start reading logs from the file (`beginning` or `end`)
     type: string
     supported:
       - beginning
       - end
     default: end
   - name: timezone
+    description: Timezone to use when parsing the timestamp
     type: timezone
     default: UTC
 

@@ -3,10 +3,12 @@ title: Ingress NGINX
 description: Log parser for Ingress NGINX
 parameters:
   - name: file_path
+    description: Specify a single path or multiple paths to read one or many files. You may also use a wildcard (*) to read multiple files within a directory
     type: "[]string"
     default:
       - "/var/log/containers/ingress-nginx-controller*.log"
   - name: start_at
+    description: At startup, where to start reading logs from the file (`beginning` or `end`)
     type: string
     supported:
       - beginning
@@ -14,6 +16,7 @@ parameters:
     default: end
   # An optional cluster name
   - name: cluster_name
+    description: Optional cluster name to be included in logs
     type: string
     default: ""
 template: |

@@ -3,11 +3,13 @@ title: MongoDB
 description: Log parser for MongoDB
 parameters:
   - name: log_paths
+    description: The path of the log files
     type: "[]string"
     default:
       - "/var/log/mongodb/mongodb.log*"
       - "/var/log/mongodb/mongod.log*"
   - name: start_at
+    description: At startup, where to start reading logs from the file (`beginning` or `end`)
     type: string
     supported:
       - beginning

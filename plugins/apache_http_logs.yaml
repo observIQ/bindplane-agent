@@ -41,13 +41,14 @@ parameters:
     default: 
       - "/var/log/apache2/error.log"
   - name: start_at
-    description: Start reading file from 'beginning' or 'end'
+    description: At startup, where to start reading logs from the file (`beginning` or `end`)
     type: string
     supported:
      - beginning
      - end
     default: end
   - name: timezone
+    description: Timezone to use when parsing the timestamp
     type: timezone
     default: UTC
 

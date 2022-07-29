@@ -3,9 +3,11 @@ title: Cisco Meraki
 description: Log parser for Cisco Meraki
 parameters:
   - name: listen_port
+    description: A port which the agent will listen for syslog messages
     type: int
     default: 5140
   - name: listen_ip
+    description: The local IP address to listen for syslog connections on
     type: string
     default: "0.0.0.0"
 

@@ -3,55 +3,70 @@ title: Couchbase
 description: Log parser for Couchbase
 parameters:
   - name: enable_error_log
+    description: Enable to collect Couchbase error logs
     type: bool
     default: true
   - name: error_log_path
+    description: The absolute path to the Couchbase error logs
     type: "[]string"
     default:
       - "/opt/couchbase/var/lib/couchbase/logs/error.log"
   - name: enable_debug_log
+    description: Enable to collect Couchbase debug logs
     type: bool
     default: false
   - name: debug_log_path
+    description: The absolute path to the Couchbase debug logs
     type: "[]string"
     default: 
       - "/opt/couchbase/var/lib/couchbase/logs/debug.log"
   - name: enable_info_log
+    description: Enable to collect Couchbase info logs
     type: bool
     default: false
   - name: info_log_path
+    description: The absolute path to the Couchbase information logs
     type: "[]string"
     default: 
       - "/opt/couchbase/var/lib/couchbase/logs/info.log"
   - name: enable_access_log
+    description: Enable to collect Couchbase http access logs
     type: bool
     default: true
   - name: http_access_log_path
+    description: The absolute path to the Couchbase http access logs
     type: "[]string"
     default: 
       - "/opt/couchbase/var/lib/couchbase/logs/http_access.log"
   - name: enable_internal_access_log
+    description: Enable to collect Couchbase internal http access logs
     type: bool
     default: false
   - name: http_internal_access_log_path
+    description: The absolute path to the Couchbase internal http access logs
     type: "[]string"
     default: 
       - "/opt/couchbase/var/lib/couchbase/logs/http_access_internal.log"
   - name: enable_babysitter_log
+    description: Enable to collect Couchbase babysitter logs
     type: bool
     default: true
   - name: babysitter_log_path
+    description: The absolute path to the Couchbase babysitter logs
     type: "[]string"
     default: 
       - "/opt/couchbase/var/lib/couchbase/logs/babysitter.log"
   - name: enable_xdcr_log
+    description: Enable to collect Couchbase Cross Datacenter Replication logs
     type: bool
     default: false
   - name: xdcr_log_path
+    description: The absolute path to the Couchbase Cross Datacenter Replication logs
     type: "[]string"
     default: 
       - "/opt/couchbase/var/lib/couchbase/logs/goxdcr.log"
   - name: start_at
+    description: At startup, where to start reading logs from the file (`beginning` or `end`)
     type: string
     supported:
       - beginning

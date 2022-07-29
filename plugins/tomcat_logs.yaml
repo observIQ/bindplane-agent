@@ -3,26 +3,32 @@ title: Apache Tomcat
 description: Log parser for Apache Tomcat
 parameters:
   - name: enable_access_log
+    description: Enable to collect Apache Tomcat access logs
     type: bool
     default: true
   - name: access_log_path
+    description: Path to access log file
     type: "[]string"
     default: 
     - "/usr/local/tomcat/logs/localhost_access_log.*.txt"
   - name: enable_catalina_log
+    description: Enable to collect Apache Tomcat catalina logs
     type: bool
     default: true
   - name: catalina_log_path
+    description: Path to catalina log file
     type: "[]string"
     default: 
     - "/usr/local/tomcat/logs/catalina.out"
   - name: start_at
+    description: At startup, where to start reading logs from the file (`beginning` or `end`)
     type: string
     supported:
      - beginning
      - end
     default: end
   - name: timezone
+    description: Timezone to use when parsing the timestam.
     type: timezone
     default: UTC
 template: |

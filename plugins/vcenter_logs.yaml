@@ -3,22 +3,28 @@ title: VMware vCenter
 description: Log parser for VMware vCenter
 parameters:
   - name: listen_port
+    description: A port which the agent will listen for vCenter messages
     type: int
     default: 5140
   - name: listen_ip
+    description: The local IP address to listen for vCenter connections on
     type: string
     default: "0.0.0.0"
   - name: max_buffer_size
+    description: Maximum size taken up by collected logs
     type: string
     default: "1024kib"
     required: false
   - name: enable_tls
+    description: Enable TLS for the vCenter listener
     type: bool
     default: false
   - name: certificate_file
+    description: Path to the x509 PEM certificate or certificate chain to use for TLS
     type: string
     default: "/opt/cert"
   - name: key_file
+    description: Path to the key file to use for TLS
     type: string
     default: "/opt/key"
 
