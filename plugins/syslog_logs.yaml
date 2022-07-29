@@ -1,4 +1,4 @@
-version: 0.0.1
+version: 0.1.0
 title: Syslog
 description: Log receiver for Syslog
 parameters:
@@ -21,7 +21,7 @@ parameters:
     type: timezone
     default: UTC
   - name: listen_address
-    description: Parameter Deprecated Use 'listen_ip' and 'listen_port' instead
+    description: User's listen_ip and listen_port
     type: string
     default: "0.0.0.0:514"
     # TLS options for TCP connections

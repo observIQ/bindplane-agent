@@ -7,7 +7,7 @@ parameters:
     type: int
     required: true
   - name: listen_ip
-    description: A ip address of the form `<ip>`
+    description: An ip address
     type: string
     default: "0.0.0.0"
   - name: log_type

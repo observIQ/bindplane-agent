@@ -7,7 +7,7 @@ parameters:
     type: int
     default: 5140
   - name: listen_ip
-    description: A vCenter ip address of the form `<ip>`
+    description: A vCenter ip address
     type: string
     default: "0.0.0.0"
   - name: max_buffer_size

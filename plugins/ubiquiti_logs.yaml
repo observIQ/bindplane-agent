@@ -7,7 +7,7 @@ parameters:
     type: int
     default: 514
   - name: listen_ip
-    description: A syslog ip address of the form `<ip>`
+    description: A syslog ip address
     type: string
     default: "0.0.0.0"
   - name: timezone

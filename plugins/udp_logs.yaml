@@ -11,7 +11,7 @@ parameters:
     type: string
     default: udp
   - name: listen_ip
-    description: A UDP ip address of the form `<ip>`
+    description: A UDP ip address
     type: string
     default: "0.0.0.0"
   - name: add_attributes

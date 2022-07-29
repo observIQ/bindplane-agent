@@ -7,7 +7,7 @@ parameters:
     type: int
     default: 5140
   - name: listen_ip
-    description: A ESXi ip address of the form `<ip>`
+    description: A ESXi ip address
     type: string
     default: "0.0.0.0"
   - name: enable_tls
