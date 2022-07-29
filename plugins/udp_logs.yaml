@@ -11,7 +11,7 @@ parameters:
     type: string
     default: udp
   - name: listen_ip
-    description: A UDP ip address
+    description: The local IP address to listen for UDP connections on
     type: string
     default: "0.0.0.0"
   - name: add_attributes

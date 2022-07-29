@@ -18,7 +18,7 @@ parameters:
     type: "[]string"
     default: []
   - name: header
-    description: Comma Separated header string to be used as keys
+    description: Comma separated header string to be used as keys
     type: string
     required: true
   - name: encoding

@@ -61,7 +61,7 @@ parameters:
     type: bool
     default: false
   - name: xdcr_log_path
-    description: The absolute path to the Couchbase cross datacenter replication logs
+    description: The absolute path to the Couchbase Cross Datacenter Replication logs
     type: "[]string"
     default: 
       - "/opt/couchbase/var/lib/couchbase/logs/goxdcr.log"

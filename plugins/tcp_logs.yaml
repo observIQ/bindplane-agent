@@ -7,7 +7,7 @@ parameters:
     type: int
     required: true
   - name: listen_ip
-    description: An ip address
+    description: The local IP address to listen for TCP connections on
     type: string
     default: "0.0.0.0"
   - name: log_type
