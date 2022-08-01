@@ -148,6 +148,8 @@ github.com/PuerkitoBio/purell v1.1.1/go.mod h1:c11w/QuzBsJSee3cPx9rAFu61PvFxuPbt
 github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578/go.mod h1:uGdkoq3SwY9Y+13GIhn11/XLaGBb4BfwItxLd5jeuXE=
 github.com/ReneKroon/ttlcache/v2 v2.11.0 h1:OvlcYFYi941SBN3v9dsDcC2N8vRxyHcCmJb3Vl4QMoM=
 github.com/ReneKroon/ttlcache/v2 v2.11.0/go.mod h1:mBxvsNY+BT8qLLd6CuAJubbKo6r0jh3nb5et22bbfGY=
+github.com/SAP/go-hdb v0.105.5 h1:mop9KOZU1ro9PjJLgqseHUZzwoOJh4d7f8Nrvf1a2Uo=
+github.com/SAP/go-hdb v0.105.5/go.mod h1:xbtJDvjqm9MQhIAnalynGNAbqxolS9W02qQo/vBqyaU=
 github.com/Shopify/sarama v1.19.0/go.mod h1:FVkBWblsNy7DGZRfXLU0O9RCGt5g3g3yEuWXgklEdEo=
 github.com/Shopify/sarama v1.30.0/go.mod h1:zujlQQx1kzHsh4jfV1USnptCQrHAEZ2Hk8fTKCulPVs=
 github.com/Shopify/sarama v1.34.1 h1:pVCQO7BMAK3s1jWhgi5v1W6lwZ6Veiekfc2vsgRS06Y=
@@ -1197,6 +1199,8 @@ github.com/open-telemetry/opentelemetry-collector-contrib/receiver/redisreceiver
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/redisreceiver v0.56.0/go.mod h1:K1iJAx8Hb8TkbDjC1+Pnqbess1l01seBPquvyVi6Qgc=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/riakreceiver v0.56.0 h1:PhKBlHquTgdbhRe5fw+Q3GbwDkRdn3SnfThSB7zJOXU=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/riakreceiver v0.56.0/go.mod h1:HS/cyMq7RnrLXUU8Q4YHRYmC1QQmZ60NKz4aPDAMews=
+github.com/open-telemetry/opentelemetry-collector-contrib/receiver/saphanareceiver v0.56.0 h1:24OGu7waFqYzTz9n65v2jy6Jfp/HJL7E0Fvx3CXYl10=
+github.com/open-telemetry/opentelemetry-collector-contrib/receiver/saphanareceiver v0.56.0/go.mod h1:nOHiI+uk3jYkHcgrN+dy8gfGq8T/3u5vMZgJV3jZFWQ=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/sapmreceiver v0.56.0 h1:4MNoieKGwHavdPa92krGC65eBdraJotcc8YbNb00CIU=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/sapmreceiver v0.56.0/go.mod h1:ASzeCNf+cFklTPhFUqJM85N+EOtQ6bS9hHZ2wLU5tws=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/simpleprometheusreceiver v0.56.0 h1:PrlGeraaldf6yPtyfMLYQpt/t+TOBk8+kfJ4/ZIkYps=

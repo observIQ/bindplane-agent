@@ -52,6 +52,7 @@ Below is a list of supported receivers with links to their documentation pages.
 | RabbitMQ Receiver                           | [rabbitmqreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.56.0/receiver/rabbitmqreceiver/README.md) |
 | Redis Receiver                              | [redisreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.56.0/receiver/redisreceiver/README.md) |
 | Riak Receiver                               | [riakreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.56.0/receiver/riakreceiver/README.md) |
+| SAP Hana Receiver                           | [saphanamreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/v0.56.0/receiver/saphanareceiver) |
 | SAPM Receiver                               | [sapmreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.56.0/receiver/sapmreceiver/README.md) |
 | StatsD Receiver                             | [statsdreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.56.0/receiver/statsdreceiver/README.md) |
 | Syslog Receiver                             | [syslogreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.56.0/receiver/syslogreceiver/README.md) |

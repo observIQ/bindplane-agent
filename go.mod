@@ -102,6 +102,7 @@ require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/rabbitmqreceiver v0.56.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/redisreceiver v0.56.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/riakreceiver v0.56.0
+	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/saphanareceiver v0.56.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/sapmreceiver v0.56.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/simpleprometheusreceiver v0.56.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/sqlserverreceiver v0.56.0
@@ -154,6 +155,7 @@ require (
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.32.3 // indirect
 	github.com/Microsoft/go-winio v0.5.2 // indirect
 	github.com/ReneKroon/ttlcache/v2 v2.11.0 // indirect
+	github.com/SAP/go-hdb v0.105.5 // indirect
 	github.com/Shopify/sarama v1.34.1 // indirect
 	github.com/Showmax/go-fqdn v1.0.0 // indirect
 	github.com/VividCortex/gohistogram v1.0.0 // indirect
