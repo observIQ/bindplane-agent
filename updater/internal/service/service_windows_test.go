@@ -36,9 +36,10 @@ import (
 )
 
 func TestWindowsServiceInstall(t *testing.T) {
-	t.Run("Test install + uninstall", func(t *testing.T) {
+	t.Run("Test Update", func(t *testing.T) {
 		tempDir := t.TempDir()
 		testProductName := "Test Product"
+		testServiceName := "windows-service"
 
 		serviceJSON := filepath.Join(tempDir, "windows-service.json")
 		testServiceProgram := filepath.Join(tempDir, "windows-service.exe")
@@ -48,24 +49,35 @@ func TestWindowsServiceInstall(t *testing.T) {
 		writeServiceFile(t, serviceJSON, filepath.Join("testdata", "windows-service.json"), serviceGoFile)
 		compileProgram(t, serviceGoFile, testServiceProgram)
 
-		defer uninstallService(t)
+		installService(t,
+			testServiceProgram,
+			testServiceName,
+			"Test Windows Service - Initial Display Name",
+			"This is the test windows service; initial desription",
+			mgr.StartAutomatic,
+			false)
+
+		t.Cleanup(func() {
+			uninstallService(t, testServiceName)
+			time.Sleep(100 * time.Millisecond)
+		})
 
 		w := &windowsService{
 			newServiceFilePath: serviceJSON,
-			serviceName:        "windows-service",
+			serviceName:        testServiceName,
 			productName:        testProductName,
 			installDir:         tempDir,
 			logger:             zaptest.NewLogger(t),
 		}
 
-		err = w.install()
+		err = w.Update()
 		require.NoError(t, err)
 
 		//We want to check that the service was actually loaded
 		requireServiceLoadedStatus(t, true)
 
 		requireServiceConfigMatches(t,
-			testServiceProgram,
+			fmt.Sprintf("\"%s\"", testServiceProgram),
 			"windows-service",
 			mgr.StartAutomatic,
 			"Test Windows Service",
@@ -73,21 +85,16 @@ func TestWindowsServiceInstall(t *testing.T) {
 			true,
 			[]string{
 				"--config",
-				filepath.Join(tempDir, "test.yaml"),
+				fmt.Sprintf("\"%s\"", filepath.Join(tempDir, "test.yaml")),
 			},
 		)
-
-		err = w.uninstall()
-		require.NoError(t, err)
-
-		//Make sure the service is no longer listed
-		requireServiceLoadedStatus(t, false)
 	})
 
-	t.Run("Test install + uninstall (space in install folder)", func(t *testing.T) {
+	t.Run("Test update (space in install folder)", func(t *testing.T) {
 		tempDir := filepath.Join(t.TempDir(), "temp dir with spaces")
 		require.NoError(t, os.MkdirAll(tempDir, 0777))
 		testProductName := "Test Product"
+		testServiceName := "windows-service"
 
 		serviceJSON := filepath.Join(tempDir, "windows-service.json")
 		testServiceProgram := filepath.Join(tempDir, "windows-service.exe")
@@ -97,17 +104,28 @@ func TestWindowsServiceInstall(t *testing.T) {
 		writeServiceFile(t, serviceJSON, filepath.Join("testdata", "windows-service.json"), serviceGoFile)
 		compileProgram(t, serviceGoFile, testServiceProgram)
 
-		defer uninstallService(t)
+		installService(t,
+			testServiceProgram,
+			testServiceName,
+			"Test Windows Service - Initial Display Name",
+			"This is the test windows service; initial desription",
+			mgr.StartAutomatic,
+			false)
+
+		t.Cleanup(func() {
+			uninstallService(t, testServiceName)
+			time.Sleep(100 * time.Millisecond)
+		})
 
 		w := &windowsService{
 			newServiceFilePath: serviceJSON,
-			serviceName:        "windows-service",
+			serviceName:        testServiceName,
 			productName:        testProductName,
 			installDir:         tempDir,
 			logger:             zaptest.NewLogger(t),
 		}
 
-		err = w.install()
+		err = w.Update()
 		require.NoError(t, err)
 
 		//We want to check that the service was actually loaded
@@ -125,17 +143,12 @@ func TestWindowsServiceInstall(t *testing.T) {
 				filepath.Join(tempDir, "test.yaml"),
 			},
 		)
-
-		err = w.uninstall()
-		require.NoError(t, err)
-
-		//Make sure the service is no longer listed
-		requireServiceLoadedStatus(t, false)
 	})
 
 	t.Run("Test stop + start", func(t *testing.T) {
 		tempDir := t.TempDir()
 		testProductName := "Test Product"
+		testServiceName := "windows-service"
 
 		serviceJSON := filepath.Join(tempDir, "windows-service.json")
 		testServiceProgram := filepath.Join(tempDir, "windows-service.exe")
@@ -145,7 +158,18 @@ func TestWindowsServiceInstall(t *testing.T) {
 		writeServiceFile(t, serviceJSON, filepath.Join("testdata", "windows-service.json"), serviceGoFile)
 		compileProgram(t, serviceGoFile, testServiceProgram)
 
-		defer uninstallService(t)
+		installService(t,
+			testServiceProgram,
+			testServiceName,
+			"Test Windows Service - Initial Display Name",
+			"This is the test windows service; initial desription",
+			mgr.StartManual,
+			false)
+
+		t.Cleanup(func() {
+			uninstallService(t, testServiceName)
+			time.Sleep(100 * time.Millisecond)
+		})
 
 		w := &windowsService{
 			newServiceFilePath: serviceJSON,
@@ -154,9 +178,6 @@ func TestWindowsServiceInstall(t *testing.T) {
 			installDir:         tempDir,
 			logger:             zaptest.NewLogger(t),
 		}
-
-		err = w.install()
-		require.NoError(t, err)
 
 		// We want to check that the service was actually loaded
 		requireServiceLoadedStatus(t, true)
@@ -170,17 +191,12 @@ func TestWindowsServiceInstall(t *testing.T) {
 		require.NoError(t, err)
 
 		requireServiceRunningStatus(t, false)
-
-		err = w.uninstall()
-		require.NoError(t, err)
-
-		// Make sure the service is no longer listed
-		requireServiceLoadedStatus(t, false)
 	})
 
-	t.Run("Test invalid path for input file", func(t *testing.T) {
+	t.Run("Test invalid path for input file on update", func(t *testing.T) {
 		tempDir := t.TempDir()
 		testProductName := "Test Product"
+		testServiceName := "windows-service"
 
 		serviceJSON := filepath.Join(tempDir, "windows-service.json")
 		testServiceProgram := filepath.Join(tempDir, "windows-service.exe")
@@ -190,35 +206,54 @@ func TestWindowsServiceInstall(t *testing.T) {
 		writeServiceFile(t, serviceJSON, filepath.Join("testdata", "windows-service.json"), serviceGoFile)
 		compileProgram(t, serviceGoFile, testServiceProgram)
 
-		defer uninstallService(t)
+		installService(t,
+			testServiceProgram,
+			testServiceName,
+			"Test Windows Service - Initial Display Name",
+			"This is the test windows service; initial desription",
+			mgr.StartManual,
+			false)
+
+		t.Cleanup(func() {
+			uninstallService(t, testServiceName)
+			time.Sleep(100 * time.Millisecond)
+		})
 
 		w := &windowsService{
 			newServiceFilePath: filepath.Join(tempDir, "not-a-valid-service.json"),
-			serviceName:        "windows-service",
+			serviceName:        testServiceName,
 			productName:        testProductName,
 			installDir:         tempDir,
 			logger:             zaptest.NewLogger(t),
 		}
 
-		err = w.install()
+		err = w.Update()
 		require.ErrorContains(t, err, "The system cannot find the file specified.")
-		requireServiceLoadedStatus(t, false)
+		requireServiceLoadedStatus(t, true)
+		requireServiceRunningStatus(t, false)
 	})
 
-	t.Run("Uninstall fails if not installed", func(t *testing.T) {
+	t.Run("Update fails if not installed", func(t *testing.T) {
 		tempDir := t.TempDir()
 		testProductName := "Test Product"
+		testServiceName := "windows-service"
 
 		serviceJSON := filepath.Join(tempDir, "windows-service.json")
+		testServiceProgram := filepath.Join(tempDir, "windows-service.exe")
+		serviceGoFile, err := filepath.Abs(filepath.Join("testdata", "test-windows-service.go"))
+		require.NoError(t, err)
+
+		writeServiceFile(t, serviceJSON, filepath.Join("testdata", "windows-service.json"), serviceGoFile)
+		compileProgram(t, serviceGoFile, testServiceProgram)
 
 		w := &windowsService{
 			newServiceFilePath: serviceJSON,
-			serviceName:        "windows-service",
+			serviceName:        testServiceName,
 			installDir:         tempDir,
 			productName:        testProductName,
 		}
 
-		err := w.uninstall()
+		err = w.Update()
 		require.ErrorContains(t, err, "failed to open service")
 		requireServiceLoadedStatus(t, false)
 	})
@@ -266,6 +301,7 @@ func TestWindowsServiceInstall(t *testing.T) {
 		require.NoError(t, os.MkdirAll(path.BackupDir(installDir), 0775))
 
 		testProductName := "Test Product"
+		testServiceName := "windows-service"
 
 		serviceJSON := filepath.Join(installDir, "windows-service.json")
 		testServiceProgram := filepath.Join(installDir, "windows-service.exe")
@@ -275,7 +311,18 @@ func TestWindowsServiceInstall(t *testing.T) {
 		writeServiceFile(t, serviceJSON, filepath.Join("testdata", "windows-service.json"), serviceGoFile)
 		compileProgram(t, serviceGoFile, testServiceProgram)
 
-		defer uninstallService(t)
+		installService(t,
+			testServiceProgram,
+			testServiceName,
+			"Test Windows Service - Initial Display Name",
+			"This is the test windows service; initial desription",
+			mgr.StartManual,
+			false)
+
+		t.Cleanup(func() {
+			uninstallService(t, testServiceName)
+			time.Sleep(100 * time.Millisecond)
+		})
 
 		w := &windowsService{
 			newServiceFilePath: serviceJSON,
@@ -285,8 +332,7 @@ func TestWindowsServiceInstall(t *testing.T) {
 			logger:             zaptest.NewLogger(t),
 		}
 
-		err = w.install()
-		require.NoError(t, err)
+		require.NoError(t, w.Update())
 
 		//We want to check that the service was actually loaded
 		requireServiceLoadedStatus(t, true)
@@ -325,7 +371,6 @@ func TestWindowsServiceInstall(t *testing.T) {
 			},
 		}, svcCfg)
 
-		err = w.uninstall()
 	})
 }
 
@@ -375,15 +420,35 @@ func TestStartType(t *testing.T) {
 	}
 }
 
+func installService(t *testing.T, binPath, serviceName, displayName, description string, startType uint32, delayed bool) {
+	t.Helper()
+
+	m, err := mgr.Connect()
+	if err != nil {
+		require.Fail(t, "failed to connect to service manager", "failed to connect to service manager: %s", err)
+	}
+	defer m.Disconnect()
+
+	s, err := m.CreateService(serviceName, binPath, mgr.Config{
+		DisplayName:      displayName,
+		Description:      description,
+		StartType:        startType,
+		DelayedAutoStart: delayed,
+	})
+	require.NoError(t, err)
+	require.NoError(t, s.Close())
+}
+
 // uninstallService is a helper that uninstalls the service manually for test setup, in case it is somehow leftover.
-func uninstallService(t *testing.T) {
+func uninstallService(t *testing.T, serviceName string) {
 	m, err := mgr.Connect()
 	require.NoError(t, err)
 	defer m.Disconnect()
 
-	s, err := m.OpenService("windows-service")
+	s, err := m.OpenService(serviceName)
 	if err != nil {
 		// Failed to open the service, we assume it doesn't exist
+		t.Logf("failed to open service: %s", err)
 		return
 	}
 	defer s.Close()
@@ -396,10 +461,33 @@ func uninstallService(t *testing.T) {
 			status, err = s.Query()
 			require.NoError(t, err)
 		}
+	} else {
+		t.Logf("failed to stop service: %s", err)
 	}
 
 	err = s.Delete()
 	require.NoError(t, err)
+
+	s.Close()
+
+	const serviceNotExistErrStr = "The specified service does not exist as an installed service."
+	for {
+		s, err := m.OpenService(serviceName)
+		if err != nil {
+			if err.Error() == serviceNotExistErrStr {
+				// This is expected when the service is uninstalled.
+				t.Logf("Service no longer exists: %s", err)
+				break
+			}
+			require.FailNow(t, "failed to uninstall service", "got unexpected error when waiting for service deletion: %s", err)
+		}
+
+		if err := s.Close(); err != nil {
+			require.FailNow(t, "failed to uninstall service", "got unexpected error when closing service handle: %s", err)
+		}
+		// rest with the handle closed to let the service manager remove the service
+		time.Sleep(50 * time.Millisecond)
+	}
 }
 
 func requireServiceLoadedStatus(t *testing.T, loaded bool) {

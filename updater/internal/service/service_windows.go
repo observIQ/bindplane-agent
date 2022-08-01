@@ -19,11 +19,9 @@ package service
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
-	"time"
 
 	"go.uber.org/zap"
 	"golang.org/x/sys/windows/svc"
@@ -34,10 +32,8 @@ import (
 )
 
 const (
-	defaultProductName           = "observIQ Distro for OpenTelemetry Collector"
-	defaultServiceName           = "observiq-otel-collector"
-	uninstallServicePollInterval = 50 * time.Millisecond
-	serviceNotExistErrStr        = "The specified service does not exist as an installed service."
+	defaultProductName = "observIQ Distro for OpenTelemetry Collector"
+	defaultServiceName = "observiq-otel-collector"
 )
 
 // Option is an extra option for creating a Service
@@ -120,8 +116,7 @@ func (w windowsService) Stop() error {
 	return nil
 }
 
-// Installs the service
-func (w windowsService) install() error {
+func (w windowsService) Update() error {
 	// parse the service definition from disk
 	wsc, err := readWindowsServiceConfig(w.newServiceFilePath)
 	if err != nil {
@@ -130,12 +125,6 @@ func (w windowsService) install() error {
 
 	// expand the arguments to be properly formatted (expand [INSTALLDIR], clean '&quot;' to be '"')
 	expandArguments(wsc, w.installDir)
-
-	// Split the arguments; Arguments are "shell-like", in that they may contain spaces, and can be quoted to indicate that.
-	splitArgs, err := shellquote.Split(wsc.Service.Arguments)
-	if err != nil {
-		return fmt.Errorf("failed to parse arguments in service config: %w", err)
-	}
 
 	// Get the start type
 	startType, delayed, err := winapiStartType(wsc.Service.Start)
@@ -149,81 +138,36 @@ func (w windowsService) install() error {
 	}
 	defer m.Disconnect()
 
-	// Create the service using the service manager.
-	s, err := m.CreateService(w.serviceName,
-		filepath.Join(w.installDir, wsc.Path),
-		mgr.Config{
-			Description:      wsc.Service.Description,
-			DisplayName:      wsc.Service.DisplayName,
-			StartType:        startType,
-			DelayedAutoStart: delayed,
-		},
-		splitArgs...,
-	)
-	if err != nil {
-		return fmt.Errorf("failed to create service: %w", err)
-	}
-	defer s.Close()
-
-	return nil
-}
-
-// Uninstalls the service
-func (w windowsService) uninstall() error {
-	m, err := mgr.Connect()
-	if err != nil {
-		return fmt.Errorf("failed to connect to service manager: %w", err)
-	}
-	defer m.Disconnect()
-
+	// Get this installed service hanlde
 	s, err := m.OpenService(w.serviceName)
 	if err != nil {
 		return fmt.Errorf("failed to open service: %w", err)
 	}
-
-	// Note on deleting services in windows:
-	// Deleting the service is not immediate. If there are open handles to the service (e.g. you have services.msc open)
-	// then the service deletion will be delayed, perhaps indefinitely. However, we want this logic to be synchronous, so
-	// we will try to wait for the service to actually be deleted.
-	if err = s.Delete(); err != nil {
-		sCloseErr := s.Close()
-		if sCloseErr != nil {
-			log.Default().Printf("Failed to close service: %s\n", err)
-		}
-		return fmt.Errorf("failed to delete service: %w", err)
-	}
-
-	if err := s.Close(); err != nil {
-		return fmt.Errorf("failed to close service: %w", err)
-	}
-
-	// Wait for the service to actually be deleted:
-	for {
-		s, err := m.OpenService(w.serviceName)
-		if err != nil {
-			if err.Error() == serviceNotExistErrStr {
-				// This is expected when the service is uninstalled.
-				break
-			}
-			return fmt.Errorf("got unexpected error when waiting for service deletion: %w", err)
-		}
-
+	defer func() {
 		if err := s.Close(); err != nil {
-			return fmt.Errorf("failed to close service: %w", err)
+			w.logger.Error("failed to close service after update", zap.Error(err))
 		}
-		// rest with the handle closed to let the service manager remove the service
-		time.Sleep(uninstallServicePollInterval)
-	}
-	return nil
-}
+	}()
 
-func (w windowsService) Update() error {
-	if err := w.uninstall(); err != nil {
-		return fmt.Errorf("failed to uninstall old service: %w", err)
+	origConf, err := s.Config()
+	if err != nil {
+		return fmt.Errorf("failed to get current service configuration: %w", err)
 	}
 
-	if err := w.install(); err != nil {
-		return fmt.Errorf("failed to install new service: %w", err)
+	// Get the full path the the collector
+	fullCollectorPath := filepath.Join(w.installDir, wsc.Path)
+	binaryPathName := fmt.Sprintf("\"%s\" %s", fullCollectorPath, wsc.Service.Arguments)
+
+	origConf.BinaryPathName = binaryPathName
+	origConf.Description = wsc.Service.Description
+	origConf.DisplayName = wsc.Service.DisplayName
+	origConf.StartType = startType
+	origConf.DelayedAutoStart = delayed
+
+	// Update the service in-place
+	err = s.UpdateConfig(origConf)
+	if err != nil {
+		return fmt.Errorf("failed to updater service: %w", err)
 	}
 
 	return nil
