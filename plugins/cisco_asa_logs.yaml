@@ -12,7 +12,7 @@ parameters:
     default: "0.0.0.0"
 
 template: |
-  receiver:
+  receivers:
     tcplog:
       listen_address: '{{ .listen_ip }}:{{ .listen_port }}'
       attributes:
