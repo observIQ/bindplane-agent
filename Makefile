@@ -206,7 +206,7 @@ clean:
 
 .PHONY: scan-licenses
 scan-licenses:
-	lichen --config=./license.yaml $$(find dist/collector_* | grep -v 'sig\|json\|CHANGELOG.md\|yaml\|SHA256' | xargs)
+	lichen --config=./license.yaml $$(find dist/collector_* dist/updater_*)
 
 .PHONY: generate
 generate:
