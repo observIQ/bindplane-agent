@@ -138,7 +138,7 @@ func (w windowsService) Update() error {
 	}
 	defer m.Disconnect()
 
-	// Get this installed service hanlde
+	// Get the installed service handle
 	s, err := m.OpenService(w.serviceName)
 	if err != nil {
 		return fmt.Errorf("failed to open service: %w", err)
@@ -149,23 +149,28 @@ func (w windowsService) Update() error {
 		}
 	}()
 
-	origConf, err := s.Config()
+	// Get the current config; We will use the current config as the basis
+	// for the new config.
+	newConf, err := s.Config()
 	if err != nil {
 		return fmt.Errorf("failed to get current service configuration: %w", err)
 	}
 
 	// Get the full path the the collector
 	fullCollectorPath := filepath.Join(w.installDir, wsc.Path)
+	// binary path is the path to the EXE, then the space separated list of arguments.
+	// we quote the collector path, in case it contains spaces.
 	binaryPathName := fmt.Sprintf("\"%s\" %s", fullCollectorPath, wsc.Service.Arguments)
 
-	origConf.BinaryPathName = binaryPathName
-	origConf.Description = wsc.Service.Description
-	origConf.DisplayName = wsc.Service.DisplayName
-	origConf.StartType = startType
-	origConf.DelayedAutoStart = delayed
+	// Fill in the new config values
+	newConf.BinaryPathName = binaryPathName
+	newConf.Description = wsc.Service.Description
+	newConf.DisplayName = wsc.Service.DisplayName
+	newConf.StartType = startType
+	newConf.DelayedAutoStart = delayed
 
 	// Update the service in-place
-	err = s.UpdateConfig(origConf)
+	err = s.UpdateConfig(newConf)
 	if err != nil {
 		return fmt.Errorf("failed to updater service: %w", err)
 	}
