@@ -134,7 +134,7 @@ func installFiles(logger *zap.Logger, inputPath, installDir, backupDir string, r
 		// and we will want to roll that back if that is the case.
 		rb.AppendAction(cfa)
 
-		if err := file.CopyFile(logger.Named("copy-file"), inPath, outPath, true); err != nil {
+		if err := file.CopyFileOverwrite(logger.Named("copy-file"), inPath, outPath); err != nil {
 			return fmt.Errorf("failed to copy file: %w", err)
 		}
 
@@ -195,7 +195,7 @@ func installFile(logger *zap.Logger, inPath, installDirPath, backupDirPath strin
 	// and we will want to roll that back if that is the case.
 	rb.AppendAction(cfa)
 
-	if err := file.CopyFile(logger.Named("copy-file"), inPath, outPath, true); err != nil {
+	if err := file.CopyFileOverwrite(logger.Named("copy-file"), inPath, outPath); err != nil {
 		return fmt.Errorf("failed to copy file: %w", err)
 	}
 
