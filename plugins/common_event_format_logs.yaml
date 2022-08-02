@@ -10,14 +10,14 @@ parameters:
     description: Specify a single path or multiple paths to exclude one or many files from being read. You may also use a wildcard (*) to exclude multiple files from being read within a directory
     type: "[]string"
     default: []
-  - name: location
-    description: Timezone to use when parsing the timestamp
-    type: timezone
-    default: UTC
   - name: log_type
     type: string
     description: Adds the specified 'Type' as a label to each log message.
     default: "cef"
+  - name: timezone
+    description: Timezone to use when parsing the timestamp
+    type: timezone
+    default: UTC
   - name: start_at
     type: string
     description: Start reading file from 'beginning' or 'end'
@@ -38,91 +38,25 @@ template: |
         - '{{ $fp }}'
         {{end}}
       start_at: {{ .start_at }}
-      operators:
-        - id: add_plugin_id
-          type: add
-          field: attributes.plugin_id
-          value: "common_event_format"
-        
-        - id: add_log_type
-          type: add
-          field: attributes.log_type
-          value: {{ .log_type }}
-
-        - id: timestamp
-          type: router
-          default: cef_parser_no_syslog_prefix
-          routes:
-            - expr: 'body matches "^\\w{3}\\s+\\d{1,2}\\s+\\d{2}:\\d{2}:\\d{2}"'
-              output: timestamp_parser
-        
-        - id: timestamp_parser
-          type: regex_parser
-          parse_from: body
+      operators:             
+        - type: regex_parser
           regex: '^(?P<timestamp>\w{3}\s+\d{1,2}\s+\d{2}:\d{2}:\d{2})\s+((?P<hostname>[^\s]+)\s+)?(?P<cef_headers>[\d\D]+)'
           timestamp:
             parse_from: attributes.timestamp
             layout_type: gotime
             layout: 'Jan 02 15:04:05'
-            location: {{ .location }}
+            location: {{ .timezone }}
 
-        - id: cef_parser_syslog_prefix
-          type: csv_parser
-          if: 'attributes.cef_headers != nil'
+        - type: csv_parser
           parse_from: attributes.cef_headers
           header: 'version|device_vendor|device_product|device_version|signature_id|name|severity|extensions'
           header_delimiter: "|"
           delimiter: "|"
-          output: version_parser
 
-        - id: cef_parser_no_syslog_prefix
-          type: csv_parser
-          header: 'version|device_vendor|device_product|device_version|signature_id|name|severity|extensions'
-          deader_delimiter: "|"
-          delimiter: "|"
-          output: version_parser
-
-        - id: version_parser
-          type: regex_parser
+        - type: regex_parser
           if: 'attributes.version != nil and attributes.version matches "CEF:[^\\|]*"'
           regex: 'CEF:(?P<version>[^\|]*)'
           parse_from: attributes.version
-
-        - id: promote_version
-          type: move
-          if: 'attributes.version != nil'
-          from: attributes.version
-          to: resource["attributes.version"]
-
-        - id: promote_device_product
-          type: move
-          if: 'attributes.device_product != nil'
-          from: attributes.device_product
-          to: resource["attributes.device"]
-
-        - id: promote_hostname
-          type: move
-          if: 'attributes.hostname != nil'
-          from: attributes.hostname
-          to: resource["attributes.hostname"]
-
-        - id: promote_device_vendor
-          type: move
-          if: 'attributes.device_vendor != nil'
-          from: attributes.device_vendor
-          to: resource["attributes.device_vendor"]
-
-        - id: promote_device_version
-          type: move
-          if: 'attributes.device_version != nil'
-          from: attributes.device_version
-          to: resource["attributes.device_version"]
-
-        - id: move_name
-          type: move
-          if: 'attributes.name != nil'
-          from: attributes.name
-          to: resource["attributes.name"]
 
         - type: severity_parser
           if: 'attributes.severity != nil'
@@ -130,7 +64,7 @@ template: |
           preset: none
           mapping:
             info:
-              - min: 1
+              - min: 0
                 max: 3
               - low
             warning:
@@ -145,7 +79,11 @@ template: |
               - min: 9
                 max: 10
               - very-high
-            output: {{ .output }}
+
+        - id: add_log_type
+          type: add
+          field: attributes.log_type
+          value: {{ .log_type }}
 
   service:
     pipelines:
