@@ -25,7 +25,7 @@ import (
 	"go.uber.org/zap"
 )
 
-// CopyFile copies the file from pathIn to pathOut.
+// CopyFileOverwrite copies the file from pathIn to pathOut.
 // The file is created if it does not exist. If the file does exist, it is removed, then re-written, preserving the file's mode.
 func CopyFileOverwrite(logger *zap.Logger, pathIn, pathOut string) error {
 	fileMode := fs.FileMode(0600)
