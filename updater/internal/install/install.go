@@ -47,7 +47,7 @@ type installer struct {
 }
 
 // NewInstaller returns a new instance of an Installer.
-func NewInstaller(logger *zap.Logger, installDir string, service service.Service) *installer {
+func NewInstaller(logger *zap.Logger, installDir string, service service.Service) Installer {
 	return &installer{
 		latestDir:  path.LatestDir(installDir),
 		svc:        service,

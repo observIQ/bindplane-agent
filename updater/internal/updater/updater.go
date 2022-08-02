@@ -18,6 +18,7 @@ import (
 	"go.uber.org/zap"
 )
 
+// Updater is a struct that can be used to perform a collector update
 type Updater struct {
 	installDir string
 	installer  install.Installer
@@ -27,6 +28,8 @@ type Updater struct {
 	logger     *zap.Logger
 }
 
+// NewUpdater creates a new updater which can be used to update the installation based at
+// installDir
 func NewUpdater(logger *zap.Logger, installDir string) (*Updater, error) {
 	monitor, err := state.NewCollectorMonitor(logger, installDir)
 	if err != nil {
@@ -44,6 +47,7 @@ func NewUpdater(logger *zap.Logger, installDir string) (*Updater, error) {
 	}, nil
 }
 
+// Update performs the update of the collector binary
 func (u *Updater) Update() error {
 	// Stop the service before backing up the install directory;
 	// We want to stop as early as possible so that we don't hit the collector's timeout
