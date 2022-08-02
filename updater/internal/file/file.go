@@ -38,6 +38,12 @@ func CopyFileOverwrite(logger *zap.Logger, pathIn, pathOut string) error {
 		fileMode = outFileInfo.Mode()
 	}
 
+	pathInClean := filepath.Clean(pathIn)
+	// If the input file cannot be opened for some reason, do NOT delete the file
+	if _, err := os.Stat(pathInClean); err != nil {
+		return fmt.Errorf("failed to stat input file: %w", err)
+	}
+
 	// Remove old file to prevent issues with mac
 	if err := os.Remove(pathOutClean); err != nil {
 		logger.Debug("Failed to remove output file", zap.Error(err))
@@ -73,6 +79,10 @@ func CopyFileRollback(logger *zap.Logger, pathIn, pathOut string) error {
 	case errors.Is(err, os.ErrNotExist):
 		return fmt.Errorf("input file does not exist: %w", err)
 	case err != nil:
+		// TODO: Should this actually error out?
+		// If we can't STAT the input file, what are the chances we can open for reading?
+		// we are going to delete the file, so we might be better off bailing here and leaving the
+		// newer file instead of deleting it and failing to copy the input file
 		logger.Error("failed to retrieve fileinfo for input file", zap.Error(err))
 	default:
 		fileMode = inFileInfo.Mode()

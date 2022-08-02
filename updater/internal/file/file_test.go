@@ -25,14 +25,14 @@ import (
 	"go.uber.org/zap/zaptest"
 )
 
-func TestCopyFile(t *testing.T) {
+func TestCopyFileOverwrite(t *testing.T) {
 	t.Run("Copies file when output does not exist", func(t *testing.T) {
 		tmpDir := t.TempDir()
 
 		inFile := filepath.Join("testdata", "test.txt")
 		outFile := filepath.Join(tmpDir, "test.txt")
 
-		err := CopyFile(zaptest.NewLogger(t), inFile, outFile, true, false)
+		err := CopyFileOverwrite(zaptest.NewLogger(t), inFile, outFile)
 		require.NoError(t, err)
 		require.FileExists(t, outFile)
 
@@ -52,34 +52,6 @@ func TestCopyFile(t *testing.T) {
 		}
 	})
 
-	t.Run("Copies file when output does not exist and uses new permissions when argument set", func(t *testing.T) {
-		tmpDir := t.TempDir()
-
-		inFile := filepath.Join("testdata", "test.txt")
-		outFile := filepath.Join(tmpDir, "test.txt")
-
-		err := CopyFile(zaptest.NewLogger(t), inFile, outFile, true, true)
-		require.NoError(t, err)
-		require.FileExists(t, outFile)
-
-		contentsIn, err := os.ReadFile(inFile)
-		require.NoError(t, err)
-
-		contentsOut, err := os.ReadFile(outFile)
-		require.NoError(t, err)
-
-		require.Equal(t, contentsIn, contentsOut)
-
-		fio, err := os.Stat(outFile)
-		require.NoError(t, err)
-		fii, err := os.Stat(outFile)
-		require.NoError(t, err)
-		// file mode on windows acts unlike unix, we'll only check for this on linux/darwin
-		if runtime.GOOS != "windows" {
-			require.Equal(t, fii.Mode(), fio.Mode())
-		}
-	})
-
 	t.Run("Copies file when output already exists", func(t *testing.T) {
 		tmpDir := t.TempDir()
 
@@ -95,7 +67,7 @@ func TestCopyFile(t *testing.T) {
 		fioOrig, err := os.Stat(outFile)
 		require.NoError(t, err)
 
-		err = CopyFile(zaptest.NewLogger(t), inFile, outFile, true, false)
+		err = CopyFileOverwrite(zaptest.NewLogger(t), inFile, outFile)
 		require.NoError(t, err)
 		require.FileExists(t, outFile)
 
@@ -117,8 +89,8 @@ func TestCopyFile(t *testing.T) {
 		inFile := filepath.Join("testdata", "does-not-exist.txt")
 		outFile := filepath.Join(tmpDir, "test.txt")
 
-		err := CopyFile(zaptest.NewLogger(t), inFile, outFile, true, false)
-		require.ErrorContains(t, err, "failed to open input file")
+		err := CopyFileOverwrite(zaptest.NewLogger(t), inFile, outFile)
+		require.ErrorContains(t, err, "failed to stat input file")
 		require.NoFileExists(t, outFile)
 	})
 
@@ -131,47 +103,24 @@ func TestCopyFile(t *testing.T) {
 		err := os.WriteFile(outFile, []byte("This is a file that already exists"), 0600)
 		require.NoError(t, err)
 
-		err = CopyFile(zaptest.NewLogger(t), inFile, outFile, true, false)
-		require.ErrorContains(t, err, "failed to open input file")
+		err = CopyFileOverwrite(zaptest.NewLogger(t), inFile, outFile)
+		require.ErrorContains(t, err, "failed to stat input file")
 		require.FileExists(t, outFile)
 
 		contentsOut, err := os.ReadFile(outFile)
 		require.NoError(t, err)
 		require.Equal(t, []byte("This is a file that already exists"), contentsOut)
 	})
+}
 
-	t.Run("Fails to overwrite the output file if 'overwrite' false", func(t *testing.T) {
+func TestCopyFileRollback(t *testing.T) {
+	t.Run("Copies file when output does not exist", func(t *testing.T) {
 		tmpDir := t.TempDir()
 
 		inFile := filepath.Join("testdata", "test.txt")
 		outFile := filepath.Join(tmpDir, "test.txt")
 
-		err := os.WriteFile(outFile, []byte("This is a file that already exists"), 0640)
-		require.NoError(t, err)
-
-		err = CopyFile(zaptest.NewLogger(t), inFile, outFile, false, false)
-		require.ErrorContains(t, err, "failed to open output file")
-		require.FileExists(t, outFile)
-
-		contentsOut, err := os.ReadFile(outFile)
-		require.NoError(t, err)
-		require.Equal(t, []byte("This is a file that already exists"), contentsOut)
-
-		fi, err := os.Stat(outFile)
-		require.NoError(t, err)
-		// file mode on windows acts unlike unix, we'll only check for this on linux/darwin
-		if runtime.GOOS != "windows" {
-			require.Equal(t, fs.FileMode(0640), fi.Mode())
-		}
-	})
-
-	t.Run("Copies file when output does not exist when 'overwrite' is false", func(t *testing.T) {
-		tmpDir := t.TempDir()
-
-		inFile := filepath.Join("testdata", "test.txt")
-		outFile := filepath.Join(tmpDir, "test.txt")
-
-		err := CopyFile(zaptest.NewLogger(t), inFile, outFile, false, false)
+		err := CopyFileNoOverwrite(zaptest.NewLogger(t), inFile, outFile)
 		require.NoError(t, err)
 		require.FileExists(t, outFile)
 
@@ -191,5 +140,82 @@ func TestCopyFile(t *testing.T) {
 		if runtime.GOOS != "windows" {
 			require.Equal(t, fii.Mode(), fio.Mode())
 		}
+	})
+
+	t.Run("Fails to overwrite the output file", func(t *testing.T) {
+		tmpDir := t.TempDir()
+
+		inFile := filepath.Join("testdata", "test.txt")
+		outFile := filepath.Join(tmpDir, "test.txt")
+
+		err := os.WriteFile(outFile, []byte("This is a file that already exists"), 0640)
+		require.NoError(t, err)
+
+		err = CopyFileNoOverwrite(zaptest.NewLogger(t), inFile, outFile)
+		require.ErrorContains(t, err, "failed to open output file")
+		require.FileExists(t, outFile)
+
+		contentsOut, err := os.ReadFile(outFile)
+		require.NoError(t, err)
+		require.Equal(t, []byte("This is a file that already exists"), contentsOut)
+
+		fi, err := os.Stat(outFile)
+		require.NoError(t, err)
+		// file mode on windows acts unlike unix, we'll only check for this on linux/darwin
+		if runtime.GOOS != "windows" {
+			require.Equal(t, fs.FileMode(0640), fi.Mode())
+		}
+	})
+
+	t.Run("Fails when input file does not exist", func(t *testing.T) {
+		tmpDir := t.TempDir()
+
+		inFile := filepath.Join("testdata", "does-not-exist.txt")
+		outFile := filepath.Join(tmpDir, "test.txt")
+
+		err := CopyFileNoOverwrite(zaptest.NewLogger(t), inFile, outFile)
+		require.ErrorContains(t, err, "failed to retrieve fileinfo for input file")
+		require.NoFileExists(t, outFile)
+	})
+}
+
+func TestCopyFileNoOverwrite(t *testing.T) {
+	t.Run("Copies file when output does not exist and uses inFile's permissions", func(t *testing.T) {
+		tmpDir := t.TempDir()
+
+		inFile := filepath.Join("testdata", "test.txt")
+		outFile := filepath.Join(tmpDir, "test.txt")
+
+		err := CopyFileRollback(zaptest.NewLogger(t), inFile, outFile)
+		require.NoError(t, err)
+		require.FileExists(t, outFile)
+
+		contentsIn, err := os.ReadFile(inFile)
+		require.NoError(t, err)
+
+		contentsOut, err := os.ReadFile(outFile)
+		require.NoError(t, err)
+
+		require.Equal(t, contentsIn, contentsOut)
+
+		fio, err := os.Stat(outFile)
+		require.NoError(t, err)
+		fii, err := os.Stat(outFile)
+		require.NoError(t, err)
+		// file mode on windows acts unlike unix, we'll only check for this on linux/darwin
+		if runtime.GOOS != "windows" {
+			require.Equal(t, fii.Mode(), fio.Mode())
+		}
+	})
+
+	t.Run("Fails when input file does not exist", func(t *testing.T) {
+		tmpDir := t.TempDir()
+
+		inFile := filepath.Join("testdata", "does-not-exist.txt")
+		outFile := filepath.Join(tmpDir, "test.txt")
+
+		err := CopyFileRollback(zaptest.NewLogger(t), inFile, outFile)
+		require.ErrorContains(t, err, "input file does not exist")
+		require.NoFileExists(t, outFile)
 	})
 }
