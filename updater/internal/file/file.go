@@ -26,7 +26,8 @@ import (
 )
 
 // CopyFileOverwrite copies the file from pathIn to pathOut.
-// The file is created if it does not exist. If the file does exist, it is removed, then re-written, preserving the file's mode.
+// The output file is created if it does not exist.
+// If the output file does exist, it is removed, then written from the input file, preserving the output file's mode.
 func CopyFileOverwrite(logger *zap.Logger, pathIn, pathOut string) error {
 	fileMode := fs.FileMode(0600)
 	pathOutClean := filepath.Clean(pathOut)
@@ -45,7 +46,7 @@ func CopyFileOverwrite(logger *zap.Logger, pathIn, pathOut string) error {
 	return copyFileInternal(logger, pathIn, pathOut, os.O_CREATE|os.O_WRONLY, fileMode)
 }
 
-// CopyFileNoOverwrite copies the file from pathIn to pathOut, preserving the input files mode.
+// CopyFileNoOverwrite copies the file from pathIn to pathOut, preserving the input file's mode.
 // If the output file already exists, this function returns an error.
 func CopyFileNoOverwrite(logger *zap.Logger, pathIn, pathOut string) error {
 	pathInClean := filepath.Clean(pathIn)
@@ -58,7 +59,6 @@ func CopyFileNoOverwrite(logger *zap.Logger, pathIn, pathOut string) error {
 
 	// the os.O_EXCL flag will make OpenFile error if the file already exists
 	return copyFileInternal(logger, pathIn, pathOut, os.O_EXCL|os.O_CREATE|os.O_WRONLY, inFileInfo.Mode())
-
 }
 
 // CopyFileRollback copies the file to the file from pathIn to pathOut, preserving the input file's mode if possible
@@ -99,7 +99,7 @@ func copyFileInternal(logger *zap.Logger, pathIn, pathOut string, outFlags int, 
 	defer func() {
 		err := inFile.Close()
 		if err != nil {
-			logger.Info("Failed to close input file", zap.Error(err))
+			logger.Error("Failed to close input file", zap.Error(err))
 		}
 	}()
 
@@ -113,7 +113,7 @@ func copyFileInternal(logger *zap.Logger, pathIn, pathOut string, outFlags int, 
 	defer func() {
 		err := outFile.Close()
 		if err != nil {
-			logger.Info("Failed to close output file", zap.Error(err))
+			logger.Error("Failed to close output file", zap.Error(err))
 		}
 	}()
 
