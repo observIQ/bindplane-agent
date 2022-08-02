@@ -29,15 +29,20 @@ import (
 	"go.uber.org/zap"
 )
 
-// ActionAppender is an interface that allows actions to be appended to it.
-//go:generate mockery --name ActionAppender --filename action_appender.go
-type ActionAppender interface {
+//Rollbacker is an interface that performs rollback/backup actions.
+//go:generate mockery --name Rollbacker --filename rollbacker.go
+type Rollbacker interface {
+	// AppendAction saves the action so that it can be rolled back later.
 	AppendAction(action action.RollbackableAction)
+	// Backup backs up the current installation
+	Backup() error
+	// Rollback undoes the actions recorded by AppendAction.
+	Rollback()
 }
 
-// Rollbacker is a struct that records rollback information,
+// rollbacker is a struct that records rollback information,
 // and can use that information to perform a rollback.
-type Rollbacker struct {
+type rollbacker struct {
 	originalSvc service.Service
 	backupDir   string
 	installDir  string
@@ -46,10 +51,10 @@ type Rollbacker struct {
 }
 
 // NewRollbacker returns a new Rollbacker
-func NewRollbacker(logger *zap.Logger, installDir string) *Rollbacker {
+func NewRollbacker(logger *zap.Logger, installDir string) Rollbacker {
 	namedLogger := logger.Named("rollbacker")
 
-	return &Rollbacker{
+	return &rollbacker{
 		backupDir:   path.BackupDir(installDir),
 		installDir:  installDir,
 		logger:      namedLogger,
@@ -58,12 +63,12 @@ func NewRollbacker(logger *zap.Logger, installDir string) *Rollbacker {
 }
 
 // AppendAction records the action that was performed, so that it may be undone later.
-func (r *Rollbacker) AppendAction(action action.RollbackableAction) {
+func (r *rollbacker) AppendAction(action action.RollbackableAction) {
 	r.actions = append(r.actions, action)
 }
 
 // Backup backs up the installDir to the rollbackDir
-func (r Rollbacker) Backup() error {
+func (r rollbacker) Backup() error {
 	r.logger.Debug("Backing up current installation")
 	// Remove any pre-existing backup
 	if err := os.RemoveAll(r.backupDir); err != nil {
@@ -96,7 +101,7 @@ func (r Rollbacker) Backup() error {
 }
 
 // Rollback performs a rollback by undoing all recorded actions.
-func (r Rollbacker) Rollback() {
+func (r rollbacker) Rollback() {
 	r.logger.Debug("Performing rollback")
 	// We need to loop through the actions slice backwards, to roll back the actions in the correct order.
 	// e.g. if StartService was called last, we need to stop the service first, then rollback previous actions.

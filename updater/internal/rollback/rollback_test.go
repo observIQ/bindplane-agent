@@ -37,7 +37,7 @@ func TestRollbackerBackup(t *testing.T) {
 		svc := service_mocks.NewService(t)
 		svc.On("Backup").Return(nil)
 
-		rb := &Rollbacker{
+		rb := &rollbacker{
 			originalSvc: svc,
 			backupDir:   outDir,
 			installDir:  installDir,
@@ -66,7 +66,7 @@ func TestRollbackerBackup(t *testing.T) {
 		svc := service_mocks.NewService(t)
 		svc.On("Backup").Return(fmt.Errorf("invalid permissions"))
 
-		rb := &Rollbacker{
+		rb := &rollbacker{
 			originalSvc: svc,
 			backupDir:   outDir,
 			installDir:  installDir,
@@ -90,7 +90,7 @@ func TestRollbackerBackup(t *testing.T) {
 		err = os.WriteFile(leftoverFile, []byte("leftover file"), 0600)
 		require.NoError(t, err)
 
-		rb := &Rollbacker{
+		rb := &rollbacker{
 			originalSvc: svc,
 			backupDir:   outDir,
 			installDir:  installDir,
@@ -112,7 +112,7 @@ func TestRollbackerRollback(t *testing.T) {
 	t.Run("Runs rollback actions in the correct order", func(t *testing.T) {
 		seq := 0
 
-		rb := &Rollbacker{
+		rb := &rollbacker{
 			logger: zaptest.NewLogger(t),
 		}
 
@@ -137,7 +137,7 @@ func TestRollbackerRollback(t *testing.T) {
 	t.Run("Continues despite rollback errors", func(t *testing.T) {
 		seq := 0
 
-		rb := &Rollbacker{
+		rb := &rollbacker{
 			logger: zaptest.NewLogger(t),
 		}
 

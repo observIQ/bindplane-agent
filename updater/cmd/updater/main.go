@@ -15,23 +15,13 @@
 package main
 
 import (
-	"context"
-	"errors"
 	"fmt"
 	"log"
-	"os"
-	"time"
 
-	"github.com/observiq/observiq-otel-collector/packagestate"
-	"github.com/observiq/observiq-otel-collector/updater/internal/action"
-	"github.com/observiq/observiq-otel-collector/updater/internal/install"
 	"github.com/observiq/observiq-otel-collector/updater/internal/logging"
 	"github.com/observiq/observiq-otel-collector/updater/internal/path"
-	"github.com/observiq/observiq-otel-collector/updater/internal/rollback"
-	"github.com/observiq/observiq-otel-collector/updater/internal/service"
-	"github.com/observiq/observiq-otel-collector/updater/internal/state"
+	"github.com/observiq/observiq-otel-collector/updater/internal/updater"
 	"github.com/observiq/observiq-otel-collector/updater/internal/version"
-	"github.com/open-telemetry/opamp-go/protobufs"
 	"github.com/spf13/pflag"
 	"go.uber.org/zap"
 )
@@ -57,100 +47,17 @@ func main() {
 
 	logger, err := logging.NewLogger(installDir)
 	if err != nil {
-		log.Default().Printf("Failed to create logger: %s\n", err)
-		// No logger, can't really log if we fail to remove tmpdir
-		fail(zap.NewNop(), installDir)
+		log.Fatalf("Failed to create logger: %s\n", err)
 	}
 
-	// Create a monitor and load the package status file
-	monitor, err := state.NewCollectorMonitor(logger, installDir)
+	updater, err := updater.NewUpdater(logger, installDir)
 	if err != nil {
-		logger.Error("Failed to create monitor", zap.Error(err))
-		fail(logger, installDir)
+		logger.Fatal("Failed to create updater", zap.Error(err))
 	}
 
-	rb := rollback.NewRollbacker(logger, installDir)
-	// Stop the service before backing up the install directory;
-	// We want to stop as early as possible so that we don't hit the collector's timeout
-	// while it waits to be shutdown.
-	service := service.NewService(logger, installDir)
-	if err := service.Stop(); err != nil {
-		logger.Error("Failed to stop service", zap.Error(err))
-		fail(logger, installDir)
-	}
-	// Record that we stopped the service
-	rb.AppendAction(action.NewServiceStopAction(service))
-
-	logger.Debug("Stopped the service")
-
-	if err := rb.Backup(); err != nil {
-		logger.Error("Failed to backup", zap.Error(err))
-
-		// Set the state to failed before rollback so collector knows it failed
-		if setErr := monitor.SetState(packagestate.CollectorPackageName, protobufs.PackageStatus_InstallFailed, err); setErr != nil {
-			logger.Error("Failed to set state on backup failure", zap.Error(setErr))
-		}
-
-		rb.Rollback()
-
-		logger.Error("Rollback complete")
-		fail(logger, installDir)
+	if err := updater.Update(); err != nil {
+		logger.Fatal("Failed to update", zap.Error(err))
 	}
 
-	installer := install.NewInstaller(logger, installDir, service)
-	if err := installer.Install(rb); err != nil {
-		logger.Error("Failed to install", zap.Error(err))
-
-		// Set the state to failed before rollback so collector knows it failed
-		if setErr := monitor.SetState(packagestate.CollectorPackageName, protobufs.PackageStatus_InstallFailed, err); setErr != nil {
-			logger.Error("Failed to set state on install failure", zap.Error(setErr))
-		}
-
-		rb.Rollback()
-
-		logger.Error("Rollback complete")
-		fail(logger, installDir)
-	}
-
-	// Create a context with timeout to wait for a success or failed status
-	checkCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	logger.Debug("Installation successful, begin monitor for success")
-
-	// Monitor the install state
-	if err := monitor.MonitorForSuccess(checkCtx, packagestate.CollectorPackageName); err != nil {
-		logger.Error("Failed to install", zap.Error(err))
-
-		// If this is not an error due to the collector setting a failed status we need to set a failed status
-		if !errors.Is(err, state.ErrFailedStatus) {
-			// Set the state to failed before rollback so collector knows it failed
-			if setErr := monitor.SetState(packagestate.CollectorPackageName, protobufs.PackageStatus_InstallFailed, err); setErr != nil {
-				logger.Error("Failed to set state on install failure", zap.Error(setErr))
-			}
-		}
-
-		rb.Rollback()
-
-		logger.Error("Rollback complete")
-		fail(logger, installDir)
-	}
-
-	removeTmpDir(logger, installDir)
-	// Successful update
-	logger.Info("Update Complete")
-}
-
-// fail removes the temporary directory, and calls os.Exit(1)
-func fail(logger *zap.Logger, installDir string) {
-	removeTmpDir(logger, installDir)
-	os.Exit(1)
-}
-
-// removeTmpDir removes the temporary directory and any files in it.
-func removeTmpDir(logger *zap.Logger, installDir string) {
-	err := os.RemoveAll(path.TempDir(installDir))
-	if err != nil {
-		logger.Error("failed to remove temporary directory", zap.Error(err))
-	}
+	logger.Debug("Updater finished successfully")
 }

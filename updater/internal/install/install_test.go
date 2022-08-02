@@ -34,9 +34,9 @@ func TestInstallArtifacts(t *testing.T) {
 	t.Run("Installs artifacts correctly", func(t *testing.T) {
 		outDir := t.TempDir()
 		svc := mocks.NewService(t)
-		rb := rb_mocks.NewActionAppender(t)
+		rb := rb_mocks.NewRollbacker(t)
 
-		installer := &Installer{
+		installer := &installer{
 			latestDir:  filepath.Join("testdata", "example-install"),
 			installDir: outDir,
 			backupDir:  filepath.Join("testdata", "rollback"),
@@ -133,9 +133,9 @@ func TestInstallArtifacts(t *testing.T) {
 			os.MkdirAll(outDir, 0700)
 
 			svc := mocks.NewService(t)
-			rb := rb_mocks.NewActionAppender(t)
+			rb := rb_mocks.NewRollbacker(t)
 
-			installer := &Installer{
+			installer := &installer{
 				latestDir:  filepath.Join("testdata", "example-install"),
 				installDir: outDir,
 				backupDir:  filepath.Join("testdata", "rollback"),
@@ -226,8 +226,8 @@ func TestInstallArtifacts(t *testing.T) {
 	t.Run("Update fails", func(t *testing.T) {
 		outDir := t.TempDir()
 		svc := mocks.NewService(t)
-		rb := rb_mocks.NewActionAppender(t)
-		installer := &Installer{
+		rb := rb_mocks.NewRollbacker(t)
+		installer := &installer{
 			latestDir:  filepath.Join("testdata", "example-install"),
 			installDir: outDir,
 			backupDir:  filepath.Join("testdata", "rollback"),
@@ -287,8 +287,8 @@ func TestInstallArtifacts(t *testing.T) {
 	t.Run("Start fails", func(t *testing.T) {
 		outDir := t.TempDir()
 		svc := mocks.NewService(t)
-		rb := rb_mocks.NewActionAppender(t)
-		installer := &Installer{
+		rb := rb_mocks.NewRollbacker(t)
+		installer := &installer{
 			latestDir:  filepath.Join("testdata", "example-install"),
 			installDir: outDir,
 			backupDir:  filepath.Join("testdata", "rollback"),
@@ -351,8 +351,8 @@ func TestInstallArtifacts(t *testing.T) {
 	t.Run("Latest dir does not exist", func(t *testing.T) {
 		outDir := t.TempDir()
 		svc := mocks.NewService(t)
-		rb := rb_mocks.NewActionAppender(t)
-		installer := &Installer{
+		rb := rb_mocks.NewRollbacker(t)
+		installer := &installer{
 			latestDir:  filepath.Join("testdata", "non-existent-dir"),
 			installDir: outDir,
 			svc:        svc,
