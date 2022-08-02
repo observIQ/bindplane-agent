@@ -67,7 +67,7 @@ template: |
               - min: 0
                 max: 3
               - low
-            warning:
+            warn:
               - min: 4
                 max: 6
               - medium
@@ -75,7 +75,7 @@ template: |
               - min: 7
                 max: 8
               - high
-            critical:
+            fatal:
               - min: 9
                 max: 10
               - very-high
