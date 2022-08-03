@@ -36,9 +36,9 @@ type Installer interface {
 	Install(rollback.Rollbacker) error
 }
 
-// installer allows you to install files from latestDir into installDir,
+// archiveInstaller allows you to install files from latestDir into installDir,
 // as well as update the service configuration using the "Install" method.
-type installer struct {
+type archiveInstaller struct {
 	latestDir  string
 	installDir string
 	backupDir  string
@@ -48,7 +48,7 @@ type installer struct {
 
 // NewInstaller returns a new instance of an Installer.
 func NewInstaller(logger *zap.Logger, installDir string, service service.Service) Installer {
-	return &installer{
+	return &archiveInstaller{
 		latestDir:  path.LatestDir(installDir),
 		svc:        service,
 		installDir: installDir,
@@ -60,7 +60,7 @@ func NewInstaller(logger *zap.Logger, installDir string, service service.Service
 // Install installs the unpacked artifacts in latestDir to installDir,
 // as well as installing the new service file using the installer's Service interface.
 // It then starts the service.
-func (i installer) Install(rb rollback.Rollbacker) error {
+func (i archiveInstaller) Install(rb rollback.Rollbacker) error {
 	// If JMX jar exists outside of install directory, make sure that gets backed up
 	if err := i.attemptSpecialJMXJarInstall(rb); err != nil {
 		return fmt.Errorf("failed to process special JMX jar: %w", err)
@@ -148,7 +148,7 @@ func installFiles(logger *zap.Logger, inputPath, installDir, backupDir string, r
 	return nil
 }
 
-func (i installer) attemptSpecialJMXJarInstall(rb rollback.Rollbacker) error {
+func (i archiveInstaller) attemptSpecialJMXJarInstall(rb rollback.Rollbacker) error {
 	jarPath := path.SpecialJMXJarFile(i.installDir)
 	jarDirPath := path.SpecialJarDir(i.installDir)
 	latestJarPath := path.LatestJMXJarFile(i.latestDir)

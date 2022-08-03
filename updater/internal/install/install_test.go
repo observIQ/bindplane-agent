@@ -36,7 +36,7 @@ func TestInstallArtifacts(t *testing.T) {
 		svc := mocks.NewService(t)
 		rb := rb_mocks.NewRollbacker(t)
 
-		installer := &installer{
+		installer := &archiveInstaller{
 			latestDir:  filepath.Join("testdata", "example-install"),
 			installDir: outDir,
 			backupDir:  filepath.Join("testdata", "rollback"),
@@ -135,7 +135,7 @@ func TestInstallArtifacts(t *testing.T) {
 			svc := mocks.NewService(t)
 			rb := rb_mocks.NewRollbacker(t)
 
-			installer := &installer{
+			installer := &archiveInstaller{
 				latestDir:  filepath.Join("testdata", "example-install"),
 				installDir: outDir,
 				backupDir:  filepath.Join("testdata", "rollback"),
@@ -227,7 +227,7 @@ func TestInstallArtifacts(t *testing.T) {
 		outDir := t.TempDir()
 		svc := mocks.NewService(t)
 		rb := rb_mocks.NewRollbacker(t)
-		installer := &installer{
+		installer := &archiveInstaller{
 			latestDir:  filepath.Join("testdata", "example-install"),
 			installDir: outDir,
 			backupDir:  filepath.Join("testdata", "rollback"),
@@ -288,7 +288,7 @@ func TestInstallArtifacts(t *testing.T) {
 		outDir := t.TempDir()
 		svc := mocks.NewService(t)
 		rb := rb_mocks.NewRollbacker(t)
-		installer := &installer{
+		installer := &archiveInstaller{
 			latestDir:  filepath.Join("testdata", "example-install"),
 			installDir: outDir,
 			backupDir:  filepath.Join("testdata", "rollback"),
@@ -352,7 +352,7 @@ func TestInstallArtifacts(t *testing.T) {
 		outDir := t.TempDir()
 		svc := mocks.NewService(t)
 		rb := rb_mocks.NewRollbacker(t)
-		installer := &installer{
+		installer := &archiveInstaller{
 			latestDir:  filepath.Join("testdata", "non-existent-dir"),
 			installDir: outDir,
 			svc:        svc,

@@ -40,9 +40,10 @@ type Rollbacker interface {
 	Rollback()
 }
 
-// rollbacker is a struct that records rollback information,
-// and can use that information to perform a rollback.
-type rollbacker struct {
+// filesystemRollbacker is a struct that records rollback information,
+// and can use that information to perform a rollback using files backed up
+// on the filesystem.
+type filesystemRollbacker struct {
 	originalSvc service.Service
 	backupDir   string
 	installDir  string
@@ -54,7 +55,7 @@ type rollbacker struct {
 func NewRollbacker(logger *zap.Logger, installDir string) Rollbacker {
 	namedLogger := logger.Named("rollbacker")
 
-	return &rollbacker{
+	return &filesystemRollbacker{
 		backupDir:   path.BackupDir(installDir),
 		installDir:  installDir,
 		logger:      namedLogger,
@@ -63,12 +64,12 @@ func NewRollbacker(logger *zap.Logger, installDir string) Rollbacker {
 }
 
 // AppendAction records the action that was performed, so that it may be undone later.
-func (r *rollbacker) AppendAction(action action.RollbackableAction) {
+func (r *filesystemRollbacker) AppendAction(action action.RollbackableAction) {
 	r.actions = append(r.actions, action)
 }
 
 // Backup backs up the installDir to the rollbackDir
-func (r rollbacker) Backup() error {
+func (r filesystemRollbacker) Backup() error {
 	r.logger.Debug("Backing up current installation")
 	// Remove any pre-existing backup
 	if err := os.RemoveAll(r.backupDir); err != nil {
@@ -101,7 +102,7 @@ func (r rollbacker) Backup() error {
 }
 
 // Rollback performs a rollback by undoing all recorded actions.
-func (r rollbacker) Rollback() {
+func (r filesystemRollbacker) Rollback() {
 	r.logger.Debug("Performing rollback")
 	// We need to loop through the actions slice backwards, to roll back the actions in the correct order.
 	// e.g. if StartService was called last, we need to stop the service first, then rollback previous actions.
