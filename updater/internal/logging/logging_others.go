@@ -22,6 +22,7 @@ import (
 
 	"github.com/observiq/observiq-otel-collector/updater/internal/path"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 // NewLogger returns a new logger, that logs to the log directory relative to installDir.
@@ -33,6 +34,7 @@ func NewLogger(installDir string) (*zap.Logger, error) {
 	conf.OutputPaths = []string{
 		logFile,
 	}
+	conf.Level.SetLevel(zapcore.DebugLevel)
 
 	err := os.RemoveAll(logFile)
 	if err != nil {
