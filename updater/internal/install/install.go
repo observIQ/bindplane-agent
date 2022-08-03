@@ -29,9 +29,16 @@ import (
 	"go.uber.org/zap"
 )
 
-// Installer allows you to install files from latestDir into installDir,
+//Installer is an interface that performs an Install of a new collector.
+//go:generate mockery --name Installer --filename installer.go
+type Installer interface {
+	// Install installs new artifacts over the old ones.
+	Install(rollback.Rollbacker) error
+}
+
+// archiveInstaller allows you to install files from latestDir into installDir,
 // as well as update the service configuration using the "Install" method.
-type Installer struct {
+type archiveInstaller struct {
 	latestDir  string
 	installDir string
 	backupDir  string
@@ -40,8 +47,8 @@ type Installer struct {
 }
 
 // NewInstaller returns a new instance of an Installer.
-func NewInstaller(logger *zap.Logger, installDir string, service service.Service) *Installer {
-	return &Installer{
+func NewInstaller(logger *zap.Logger, installDir string, service service.Service) Installer {
+	return &archiveInstaller{
 		latestDir:  path.LatestDir(installDir),
 		svc:        service,
 		installDir: installDir,
@@ -53,7 +60,7 @@ func NewInstaller(logger *zap.Logger, installDir string, service service.Service
 // Install installs the unpacked artifacts in latestDir to installDir,
 // as well as installing the new service file using the installer's Service interface.
 // It then starts the service.
-func (i Installer) Install(rb rollback.ActionAppender) error {
+func (i archiveInstaller) Install(rb rollback.Rollbacker) error {
 	// If JMX jar exists outside of install directory, make sure that gets backed up
 	if err := i.attemptSpecialJMXJarInstall(rb); err != nil {
 		return fmt.Errorf("failed to process special JMX jar: %w", err)
@@ -85,7 +92,7 @@ func (i Installer) Install(rb rollback.ActionAppender) error {
 
 // installFiles moves the file tree rooted at inputPath to installDir,
 // skipping configuration files. Appends CopyFileAction-s to the Rollbacker as it copies file.
-func installFiles(logger *zap.Logger, inputPath, installDir, backupDir string, rb rollback.ActionAppender) error {
+func installFiles(logger *zap.Logger, inputPath, installDir, backupDir string, rb rollback.Rollbacker) error {
 	err := filepath.WalkDir(inputPath, func(inPath string, d fs.DirEntry, err error) error {
 		switch {
 		case err != nil:
@@ -141,7 +148,7 @@ func installFiles(logger *zap.Logger, inputPath, installDir, backupDir string, r
 	return nil
 }
 
-func (i Installer) attemptSpecialJMXJarInstall(rb rollback.ActionAppender) error {
+func (i archiveInstaller) attemptSpecialJMXJarInstall(rb rollback.Rollbacker) error {
 	jarPath := path.SpecialJMXJarFile(i.installDir)
 	jarDirPath := path.SpecialJarDir(i.installDir)
 	latestJarPath := path.LatestJMXJarFile(i.latestDir)
@@ -164,7 +171,7 @@ func (i Installer) attemptSpecialJMXJarInstall(rb rollback.ActionAppender) error
 
 // installFile moves new file to output path.
 // Appends CopyFileAction-s to the Rollbacker as it copies file.
-func installFile(logger *zap.Logger, inPath, installDirPath, backupDirPath string, rb rollback.ActionAppender) error {
+func installFile(logger *zap.Logger, inPath, installDirPath, backupDirPath string, rb rollback.Rollbacker) error {
 	baseInPath := filepath.Base(inPath)
 
 	// use the relative path to get the outPath (where we should write the file), and
