@@ -116,7 +116,7 @@ func (m DownloadableFileManager) downloadFile(downloadURL string, outPath string
 
 // getOutputFilePath gets the output path relative to the base dir for the archive from the given URL.
 func getOutputFilePath(basePath, downloadURL string) (string, error) {
-	err := os.MkdirAll(basePath, 0600)
+	err := os.MkdirAll(basePath, 0700)
 	if err != nil {
 		return "", fmt.Errorf("problem with base url: %w", err)
 	}
