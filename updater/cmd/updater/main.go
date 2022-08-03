@@ -59,5 +59,5 @@ func main() {
 		logger.Fatal("Failed to update", zap.Error(err))
 	}
 
-	logger.Debug("Updater finished successfully")
+	logger.Info("Updater finished successfully")
 }
