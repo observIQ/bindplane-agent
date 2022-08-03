@@ -79,6 +79,8 @@ func CopyFileRollback(logger *zap.Logger, pathIn, pathOut string) error {
 	case errors.Is(err, os.ErrNotExist):
 		return fmt.Errorf("input file does not exist: %w", err)
 	case err != nil:
+		// Even though we failed to stat, we'll continue in this case to give the best chance
+		// of rolling back successfully.
 		logger.Error("failed to retrieve fileinfo for input file", zap.Error(err))
 	default:
 		fileMode = inFileInfo.Mode()
