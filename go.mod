@@ -28,7 +28,6 @@ require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/loadbalancingexporter v0.57.2
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/logzioexporter v0.57.2
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/lokiexporter v0.57.2
-	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/observiqexporter v0.55.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/opencensusexporter v0.57.2
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/prometheusexporter v0.57.2
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/prometheusremotewriteexporter v0.57.2

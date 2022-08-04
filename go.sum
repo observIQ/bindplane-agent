@@ -985,8 +985,6 @@ github.com/open-telemetry/opentelemetry-collector-contrib/exporter/logzioexporte
 github.com/open-telemetry/opentelemetry-collector-contrib/exporter/logzioexporter v0.57.2/go.mod h1:wa8dSuqHTaxgy2b63BSE3Z4v3liz4QF0q1ISAvfYekA=
 github.com/open-telemetry/opentelemetry-collector-contrib/exporter/lokiexporter v0.57.2 h1:gc2rRs3ZIEXr5+Z3dBVhn7GHF4v57MMwwINj9smvPjM=
 github.com/open-telemetry/opentelemetry-collector-contrib/exporter/lokiexporter v0.57.2/go.mod h1:5GGS1xttRbAI34Q7xEp2q51sTaam3QzXj2EYw/Mux74=
-github.com/open-telemetry/opentelemetry-collector-contrib/exporter/observiqexporter v0.55.0 h1:4dlOdCHY6ITmv6Be9Ir3pRnBie1ASvT/0Mo8bA6gUwI=
-github.com/open-telemetry/opentelemetry-collector-contrib/exporter/observiqexporter v0.55.0/go.mod h1:TdcdtJv5VDbBkFsHlyCzhmcN/IRRj94QYsymHVAqRe4=
 github.com/open-telemetry/opentelemetry-collector-contrib/exporter/opencensusexporter v0.57.2 h1:LE3X10OPpPNBs4XdIr3g44PjUrWZTdXDjPsxAuJuO0g=
 github.com/open-telemetry/opentelemetry-collector-contrib/exporter/opencensusexporter v0.57.2/go.mod h1:k298DwwlWmkyNvJpbCwGA+tMKeSXs9zjIgWoL4btXng=
 github.com/open-telemetry/opentelemetry-collector-contrib/exporter/prometheusexporter v0.57.2 h1:QKoq9F5hETdKdxsl8Fr7XDe92i8Xj3y+gNzuHPiPNiQ=
