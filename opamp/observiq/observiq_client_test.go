@@ -556,7 +556,7 @@ func TestClient_onConnectHandler(t *testing.T) {
 					assert.Equal(t, hash, status.Packages[packagestate.CollectorPackageName].AgentHasHash)
 					assert.Equal(t, newVersion, status.Packages[packagestate.CollectorPackageName].ServerOfferedVersion)
 					assert.Equal(t, newHash, status.Packages[packagestate.CollectorPackageName].ServerOfferedHash)
-					assert.Equal(t, "", status.Packages[packagestate.CollectorPackageName].ErrorMessage)
+					assert.Equal(t, "Failed because of collector version mismatch: expected 99.99.99, actual latest", status.Packages[packagestate.CollectorPackageName].ErrorMessage)
 					assert.Equal(t, protobufs.PackageStatus_InstallFailed, status.Packages[packagestate.CollectorPackageName].Status)
 				})
 
@@ -1379,7 +1379,7 @@ func TestClient_onPackagesAvailableHandler(t *testing.T) {
 					assert.Equal(t, 1, len(status.Packages))
 					assert.Equal(t, packagesAvailableNew.Packages[collectorPackageName].Version, status.Packages[collectorPackageName].ServerOfferedVersion)
 					assert.Equal(t, packagesAvailableNew.Packages[collectorPackageName].Hash, status.Packages[collectorPackageName].ServerOfferedHash)
-					assert.Equal(t, "Failed to download and verify package observiq-otel-collector's downloadable file: oops", status.Packages[collectorPackageName].ErrorMessage)
+					assert.Equal(t, "Failed to download and verify downloadable file: oops", status.Packages[collectorPackageName].ErrorMessage)
 					assert.Equal(t, protobufs.PackageStatus_InstallFailed, status.Packages[collectorPackageName].Status)
 					assert.Equal(t, collectorPackageName, status.Packages[collectorPackageName].Name)
 					assert.Equal(t, packageStatuses.Packages[collectorPackageName].AgentHasHash, status.Packages[collectorPackageName].AgentHasHash)
