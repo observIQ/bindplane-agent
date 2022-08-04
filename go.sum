@@ -118,6 +118,8 @@ github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
 github.com/DATA-DOG/go-sqlmock v1.3.3/go.mod h1:f/Ixk793poVmq4qj/V1dPUg2JEAKC73Q5eFN3EC/SaM=
 github.com/DataDog/datadog-go v3.2.0+incompatible/go.mod h1:LButxg5PwREeZtORoXG3tL4fMGNddJ+vMq1mwgfaqoQ=
+github.com/GoogleCloudPlatform/opentelemetry-operations-collector v0.0.3-0.20220804181753-b3246a402440 h1:B1ULGub0Guv6sWLBn0y/OdO11NmPpWz8JtvSCiNJ6nQ=
+github.com/GoogleCloudPlatform/opentelemetry-operations-collector v0.0.3-0.20220804181753-b3246a402440/go.mod h1:vZpMQGawvRxQZ79UKcp1kRCmLuy7HejL6APpro49FUk=
 github.com/GoogleCloudPlatform/opentelemetry-operations-go/detectors/gcp v0.32.4 h1:UyZMaiNzZpplk4mH8+NMVeHk6g/xmhx4RSziYWbw9WI=
 github.com/GoogleCloudPlatform/opentelemetry-operations-go/detectors/gcp v0.32.4/go.mod h1:s7Gpwj0tk7XnVCm4BQEmx/mbS36SuTCY/vMB2SNxe8o=
 github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector v0.32.4 h1:cuBjW4kDHYj01QZXfEpHB2OFJ2mDorD8u2H1DECRjZc=
@@ -925,8 +927,6 @@ github.com/nwaples/rardecode v1.1.0/go.mod h1:5DzqNKiOdpKKBH87u8VlvAnPZMXcGRhxWk
 github.com/nxadm/tail v1.4.4/go.mod h1:kenIhsEOeOJmVchQTgglprH7qJGnHDVpk1VPCcaMI8A=
 github.com/nxadm/tail v1.4.8 h1:nPr65rt6Y5JFSKQO7qToXr7pePgD6Gwiw05lkbyAQTE=
 github.com/nxadm/tail v1.4.8/go.mod h1:+ncqLTQzXmGhMZNUePPaPqPvBxHAIsmXswZKocGu+AU=
-github.com/observIQ/opentelemetry-operations-collector v0.0.3-0.20220804143341-7ae64090f52c h1:38spTgGw0dssMfw4VHsIkEzhbdxe3EO3Ajo3I94U4Qk=
-github.com/observIQ/opentelemetry-operations-collector v0.0.3-0.20220804143341-7ae64090f52c/go.mod h1:vZpMQGawvRxQZ79UKcp1kRCmLuy7HejL6APpro49FUk=
 github.com/observiq/ctimefmt v1.0.0 h1:r7vTJ+Slkrt9fZ67mkf+mA6zAdR5nGIJRMTzkUyvilk=
 github.com/observiq/ctimefmt v1.0.0/go.mod h1:mxi62//WbSpG/roCO1c6MqZ7zQTvjVtYheqHN3eOjvc=
 github.com/observiq/nanojack v0.0.0-20201106172433-343928847ebc h1:49ewVBwLcy+eYqI4R0ICilCI4dPjddpFXWv3liXzUxM=
