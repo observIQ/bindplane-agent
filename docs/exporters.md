@@ -30,7 +30,7 @@ Below is a list of supported exports with links to their documentation pages.
 | OTLP HTTP Exporter                                                | [otlphttpexporter](https://github.com/open-telemetry/opentelemetry-collector/tree/v0.57.2/exporter/otlphttpexporter/README.md) |
 | Prometheus Exporter                                               | [prometheusexporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.57.2/exporter/prometheusexporter/README.md) |
 | Prometheus Remote Write Exporter                                  | [prometheusremotewriteexporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.57.2/exporter/prometheusremotewriteexporter/README.md) |
-| SAPM Exporter                                                     | [sapmexporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/v0.56.0/exporter/sapmexporter/README.md) |
+| SAPM Exporter                                                     | [sapmexporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/v0.57.2/exporter/sapmexporter/README.md) |
 | SignalFX Metrics Exporter                                         | [signalfxexporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.57.2/exporter/signalfxexporter/README.md) |
-| Splunk HTTP Event Collector (HEC) Exporter                        | [splunkhecexporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/v0.56.0/exporter/splunkhecexporter/README.md) |
+| Splunk HTTP Event Collector (HEC) Exporter                        | [splunkhecexporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/v0.57.2/exporter/splunkhecexporter/README.md) |
 | Zipkin Exporter                                                   | [zipkinexporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.57.2/exporter/zipkinexporter/README.md) |
