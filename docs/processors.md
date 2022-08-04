@@ -16,7 +16,7 @@ Below is a list of supported processors with links to their documentation pages.
 | Memory Limiter Processor                | [memorylimiterprocessor](https://github.com/open-telemetry/opentelemetry-collector/tree/v0.57.2/processor/memorylimiterprocessor/README.md) |
 | Metrics Generation Processor            | [metricsgenerationprocessor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.57.2/processor/metricsgenerationprocessor/README.md) |
 | Metrics Transform Processor             | [metricstransformprocessor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.57.2/processor/metricstransformprocessor/README.md) |
-| Normalize Sums Processor                | [normalizesumsprocessor](https://github.com/GoogleCloudPlatform/opentelemetry-operations-collector/blob/08f2752ed36759c4139e8278559e15270e26e140/processor/normalizesumsprocessor/README.md) |
+| Normalize Sums Processor                | [normalizesumsprocessor](https://github.com/observIQ/opentelemetry-operations-collector/tree/7ae64090f52c7be045eb782fbc03bc2f465dcd89/processor/normalizesumsprocessor/README.md) |
 | Probabilistic Sampling Processor        | [probabilisticsamplerprocessor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.57.2/processor/probabilisticsamplerprocessor/README.md) |
 | Resource Attribute Transposer Processor | [resourceattributetransposerprocessor](../processor/resourceattributetransposerprocessor/README.md) |
 | Resource Detection Processor            | [resourcedetectionprocessor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.57.2/processor/resourcedetectionprocessor/README.md) |
