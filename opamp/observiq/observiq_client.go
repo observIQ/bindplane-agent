@@ -17,6 +17,7 @@ package observiq
 
 import (
 	"context"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"net/http"
@@ -227,6 +228,9 @@ func (c *Client) onConnectHandler() {
 	// If the current version matches the server offered version, this implies a good install and so we should set the PackageStatuses and
 	// send it to the OpAMP Server. If the version does not match, just change the PackageStatues JSON so that the Updater can start rollback.
 	if lastMainPackageStatus.ServerOfferedVersion == version.Version() {
+		c.logger.Info("Package update was successful",
+			zap.String("AllPackagesHash", hex.EncodeToString(lastPackageStatuses.ServerProvidedAllPackagesHash)),
+			zap.String("package", packagestate.CollectorPackageName))
 		lastMainPackageStatus.Status = protobufs.PackageStatus_Installed
 		lastMainPackageStatus.AgentHasVersion = version.Version()
 		lastMainPackageStatus.AgentHasHash = lastMainPackageStatus.ServerOfferedHash
@@ -240,7 +244,16 @@ func (c *Client) onConnectHandler() {
 			c.logger.Error("OpAMP client failed to set package statuses", zap.Error(err))
 		}
 	} else {
+		c.logger.Error(
+			fmt.Sprintf(
+				"Package update failed because of collector version mismatch: expected %s, actual %s",
+				lastMainPackageStatus.ServerOfferedVersion, version.Version()),
+			zap.String("package", packagestate.CollectorPackageName))
+
 		lastMainPackageStatus.Status = protobufs.PackageStatus_InstallFailed
+		lastMainPackageStatus.ErrorMessage =
+			fmt.Sprintf("Failed because of collector version mismatch: expected %s, actual %s",
+				lastMainPackageStatus.ServerOfferedVersion, version.Version())
 
 		if err := c.packagesStateProvider.SetLastReportedStatuses(lastPackageStatuses); err != nil {
 			c.logger.Error("Failed to set last reported package statuses", zap.Error(err))
@@ -319,6 +332,9 @@ func (c *Client) onPackagesAvailableHandler(packagesAvailable *protobufs.Package
 	// Don't respond to PackagesAvailable messages while currently installing. We use this in memory data rather than the
 	// PackageStatuses persistant data in order to ensure that we don't get stuck in a stuck state
 	if c.safeGetUpdatingPackage() {
+		c.logger.Warn(
+			"Not starting new package update as already installing new packages",
+			zap.String("AllPackagesHash", hex.EncodeToString(packagesAvailable.GetAllPackagesHash())))
 		curPackageStatuses.ErrorMessage = "Already installing new packages"
 		if err := c.opampClient.SetPackageStatuses(curPackageStatuses); err != nil {
 			c.logger.Error("OpAMP client failed to set package statuses", zap.Error(err))
@@ -395,6 +411,8 @@ func (c *Client) createPackageMaps(
 			}
 
 			if version.Version() == availPkg.GetVersion() {
+				c.logger.Info("Package update ignored because no new version offered",
+					zap.String("package", name))
 				if agentHash == nil {
 					pkgStatusMap[name].AgentHasHash = availPkg.GetHash()
 				}
@@ -406,12 +424,18 @@ func (c *Client) createPackageMaps(
 					pkgStatusMap[name].Status = protobufs.PackageStatus_Installing
 					pkgFileMap[name] = availPkg.GetFile()
 				} else {
+					c.logger.Error(
+						"Package update failed to determine valid downloadable file",
+						zap.String("package", name))
 					pkgStatusMap[name].Status = protobufs.PackageStatus_InstallFailed
 					pkgStatusMap[name].ErrorMessage = fmt.Sprintf("Package %s does not have a valid downloadable file", name)
 				}
 			}
 		// If it's not an expected package, return a failed status
 		default:
+			c.logger.Error(
+				"Package update failed because it is not supported",
+				zap.String("package", name))
 			pkgStatusMap[name] = &protobufs.PackageStatus{
 				Name:                 name,
 				ServerOfferedVersion: availPkg.GetVersion(),
@@ -428,17 +452,24 @@ func (c *Client) createPackageMaps(
 // installPackageFromFile tries to download and extract the given tarball and then start up the new Updater binary that was
 // inside of it
 func (c *Client) installPackageFromFile(file *protobufs.DownloadableFile, curPackageStatuses *protobufs.PackageStatuses) {
+	c.logger.Info("Package update started",
+		zap.String("AllPackagesHash", hex.EncodeToString(curPackageStatuses.ServerProvidedAllPackagesHash)),
+		zap.String("package", packagestate.CollectorPackageName))
 	// There should be no reason for us to exit this function unless we detected a problem with the Updater's installation
 	defer c.safeSetUpdatingPackage(false)
 
 	if fileManagerErr := c.downloadableFileManager.FetchAndExtractArchive(file); fileManagerErr != nil {
+		c.logger.Error(
+			fmt.Sprintf(
+				"Package update failed to download and verify downloadable file: %s", fileManagerErr.Error()),
+			zap.String("package", packagestate.CollectorPackageName))
 		// Remove the update artifacts that may exist, depending on where FetchAndExtractArchive failed.
 		c.downloadableFileManager.CleanupArtifacts()
 
 		// Change existing status to show that install failed and get ready to send
 		curPackageStatuses.Packages[packagestate.CollectorPackageName].Status = protobufs.PackageStatus_InstallFailed
 		curPackageStatuses.Packages[packagestate.CollectorPackageName].ErrorMessage =
-			fmt.Sprintf("Failed to download and verify package %s's downloadable file: %s", packagestate.CollectorPackageName, fileManagerErr.Error())
+			fmt.Sprintf("Failed to download and verify downloadable file: %s", fileManagerErr.Error())
 
 		if err := c.packagesStateProvider.SetLastReportedStatuses(curPackageStatuses); err != nil {
 			c.logger.Error("Failed to save last reported package statuses", zap.Error(err))
@@ -452,6 +483,9 @@ func (c *Client) installPackageFromFile(file *protobufs.DownloadableFile, curPac
 	}
 
 	if monitorErr := c.updaterManager.StartAndMonitorUpdater(); monitorErr != nil {
+		c.logger.Error(
+			fmt.Sprintf("Package update failed because of issue with latest Updater: %s", monitorErr),
+			zap.String("package", packagestate.CollectorPackageName))
 		// Remove the update artifacts
 		c.downloadableFileManager.CleanupArtifacts()
 
@@ -464,7 +498,7 @@ func (c *Client) installPackageFromFile(file *protobufs.DownloadableFile, curPac
 		// Change existing status to show that install failed and get ready to send
 		newPackageStatuses.Packages[packagestate.CollectorPackageName].Status = protobufs.PackageStatus_InstallFailed
 		if newPackageStatuses.Packages[packagestate.CollectorPackageName].ErrorMessage == "" {
-			newPackageStatuses.Packages[packagestate.CollectorPackageName].ErrorMessage = fmt.Sprintf("Failed to run the latest Updater: %s", monitorErr.Error())
+			newPackageStatuses.Packages[packagestate.CollectorPackageName].ErrorMessage = fmt.Sprintf("Failed to run the latest Updater: %s", monitorErr)
 		}
 
 		if err := c.packagesStateProvider.SetLastReportedStatuses(newPackageStatuses); err != nil {
@@ -490,6 +524,9 @@ func (c *Client) attemptFailedInstall(errMsg string) {
 	if lastPackageStatuses == nil {
 		return
 	}
+
+	c.logger.Error(fmt.Sprintf("Package update failed: %s", errMsg),
+		zap.String("package", packagestate.CollectorPackageName))
 
 	lastMainPackageStatus := lastPackageStatuses.Packages[packagestate.CollectorPackageName]
 	lastMainPackageStatus.Status = protobufs.PackageStatus_InstallFailed
