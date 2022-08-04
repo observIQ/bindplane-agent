@@ -75,7 +75,7 @@ func (c CopyFileAction) Rollback() error {
 
 	// join the relative path to the backup directory to get the location of the backup path
 	backupFilePath := filepath.Join(c.backupDir, c.FromPathRel)
-	if err := file.CopyFile(c.logger.Named("copy-file"), backupFilePath, c.ToPath, true, true); err != nil {
+	if err := file.CopyFileRollback(c.logger.Named("copy-file"), backupFilePath, c.ToPath); err != nil {
 		return fmt.Errorf("failed to copy file: %w", err)
 	}
 

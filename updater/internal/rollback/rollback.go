@@ -159,7 +159,7 @@ func backupFiles(logger *zap.Logger, installDir, outputPath string) error {
 		}
 
 		// Fail if copying the input file to the output file would fail
-		if err := file.CopyFile(logger.Named("copy-file"), inPath, outPath, false, false); err != nil {
+		if err := file.CopyFileNoOverwrite(logger.Named("copy-file"), inPath, outPath); err != nil {
 			return fmt.Errorf("failed to copy file: %w", err)
 		}
 
@@ -187,7 +187,7 @@ func backupFile(logger *zap.Logger, inPath, outputDirPath string) error {
 	}
 
 	// Fail if copying the input file to the output file would fail
-	if err := file.CopyFile(logger.Named("copy-file"), inPath, outPath, false, false); err != nil {
+	if err := file.CopyFileNoOverwrite(logger.Named("copy-file"), inPath, outPath); err != nil {
 		return fmt.Errorf("failed to copy file: %w", err)
 	}
 
