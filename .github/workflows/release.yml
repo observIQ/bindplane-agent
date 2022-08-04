@@ -157,4 +157,3 @@ jobs:
           repository: observIQ/amplify
           event-type: update_collector_version
           client-payload: '{ "version": "${{ steps.get-tag.outputs.tag }}" }'
-          
