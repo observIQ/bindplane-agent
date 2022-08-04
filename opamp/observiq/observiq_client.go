@@ -146,7 +146,7 @@ func (c *Client) Connect(ctx context.Context) error {
 		c.logger.Error("Error while setting agent description", zap.Error(err))
 
 		// Set package status file for error (for Updater to pick up), but do not force send to Server
-		c.attemptFailedInstall(fmt.Sprintf("Error while setting agent description: %s", err.Error()))
+		c.tryToFailPackageInstall(fmt.Sprintf("Failed setting agent description: %s", err.Error()), false)
 
 		return err
 	}
@@ -154,7 +154,7 @@ func (c *Client) Connect(ctx context.Context) error {
 	tlsCfg, err := c.currentConfig.ToTLS()
 	if err != nil {
 		// Set package status file for error (for Updater to pick up), but do not force send to Server
-		c.attemptFailedInstall(fmt.Sprintf("Failed creating TLS config: %s", err.Error()))
+		c.tryToFailPackageInstall(fmt.Sprintf("Failed creating TLS config: %s", err.Error()), false)
 
 		return fmt.Errorf("failed creating TLS config: %w", err)
 	}
@@ -191,7 +191,7 @@ func (c *Client) Connect(ctx context.Context) error {
 	// of the context shutting it down via a cancel.
 	if err := c.collector.Run(context.Background()); err != nil {
 		// Set package status file for error (for Updater to pick up), but do not force send to Server
-		c.attemptFailedInstall(fmt.Sprintf("Collector failed to start: %s", err.Error()))
+		c.tryToFailPackageInstall(fmt.Sprintf("Collector failed to start: %s", err.Error()), false)
 
 		return fmt.Errorf("collector failed to start: %w", err)
 	}
@@ -199,7 +199,7 @@ func (c *Client) Connect(ctx context.Context) error {
 	err = c.opampClient.Start(ctx, settings)
 	if err != nil {
 		// Set package status file for error (for Updater to pick up), but do not force send to Server
-		c.attemptFailedInstall(fmt.Sprintf("OpAMP client failed to start: %s", err.Error()))
+		c.tryToFailPackageInstall(fmt.Sprintf("OpAMP client failed to start: %s", err.Error()), false)
 	}
 
 	return err
@@ -217,48 +217,33 @@ func (c *Client) Disconnect(ctx context.Context) error {
 func (c *Client) onConnectHandler() {
 	c.logger.Info("Successfully connected to server")
 
-	// See if we can retrieve the PackageStatuses where the main package is in an installing state
-	lastPackageStatuses := c.getMainPackageInstallingLastStatuses()
-	if lastPackageStatuses == nil {
+	// See if we can retrieve the PackageStatuses where the collector package is in an installing state
+	pkgStatuses, err := c.getVerifiedPackageStatuses()
+	if err != nil {
+		c.logger.Error("Problem with PackageStatuses", zap.Error(err))
 		return
 	}
 
-	lastMainPackageStatus := lastPackageStatuses.Packages[packagestate.CollectorPackageName]
+	collectorPkgStatus := pkgStatuses.Packages[packagestate.CollectorPackageName]
+	// If we were not installing before the connection, nothing else to do
+	if collectorPkgStatus.Status != protobufs.PackageStatus_Installing {
+		return
+	}
+
 	// If in the middle of an install and we just connected, this is most likely becasue the collector was just spun up fresh by the Updater.
 	// If the current version matches the server offered version, this implies a good install and so we should set the PackageStatuses and
 	// send it to the OpAMP Server. If the version does not match, just change the PackageStatues JSON so that the Updater can start rollback.
-	if lastMainPackageStatus.ServerOfferedVersion == version.Version() {
-		c.logger.Info("Package update was successful",
-			zap.String("AllPackagesHash", hex.EncodeToString(lastPackageStatuses.ServerProvidedAllPackagesHash)),
-			zap.String("package", packagestate.CollectorPackageName))
-		lastMainPackageStatus.Status = protobufs.PackageStatus_Installed
-		lastMainPackageStatus.AgentHasVersion = version.Version()
-		lastMainPackageStatus.AgentHasHash = lastMainPackageStatus.ServerOfferedHash
 
-		if err := c.packagesStateProvider.SetLastReportedStatuses(lastPackageStatuses); err != nil {
-			c.logger.Error("Failed to set last reported package statuses", zap.Error(err))
-		}
+	if collectorPkgStatus.ServerOfferedVersion != version.Version() {
+		errMsg := fmt.Sprintf("Failed because of collector version mismatch: expected %s, actual %s",
+			collectorPkgStatus.ServerOfferedVersion, version.Version())
+		c.failPackageInstall(pkgStatuses, errMsg, false)
 
-		// Only immediately send to server on success. Rollback will send this for failure.
-		if err := c.opampClient.SetPackageStatuses(lastPackageStatuses); err != nil {
-			c.logger.Error("OpAMP client failed to set package statuses", zap.Error(err))
-		}
-	} else {
-		c.logger.Error(
-			fmt.Sprintf(
-				"Package update failed because of collector version mismatch: expected %s, actual %s",
-				lastMainPackageStatus.ServerOfferedVersion, version.Version()),
-			zap.String("package", packagestate.CollectorPackageName))
-
-		lastMainPackageStatus.Status = protobufs.PackageStatus_InstallFailed
-		lastMainPackageStatus.ErrorMessage =
-			fmt.Sprintf("Failed because of collector version mismatch: expected %s, actual %s",
-				lastMainPackageStatus.ServerOfferedVersion, version.Version())
-
-		if err := c.packagesStateProvider.SetLastReportedStatuses(lastPackageStatuses); err != nil {
-			c.logger.Error("Failed to set last reported package statuses", zap.Error(err))
-		}
+		return
 	}
+
+	// Installation of new collector was successful!
+	c.finishPackageInstall(pkgStatuses)
 }
 
 func (c *Client) onConnectFailedHandler(err error) {
@@ -267,12 +252,17 @@ func (c *Client) onConnectFailedHandler(err error) {
 	// We are currently disconnecting so any Connection failed error is expected and should not affect an install
 	if !c.safeGetDisconnecting() {
 		// Set package status file for error (for Updater to pick up), but do not force send to Server
-		c.attemptFailedInstall(fmt.Sprintf("Failed to connect to BindPlane: %s", err.Error()))
+		c.tryToFailPackageInstall(fmt.Sprintf("Failed to connect to OpAMP Server: %s", err.Error()), false)
 	}
 }
 
 func (c *Client) onErrorHandler(errResp *protobufs.ServerErrorResponse) {
 	c.logger.Error("Server returned an error response", zap.String("Error", errResp.GetErrorMessage()))
+}
+
+func (c *Client) onGetEffectiveConfigHandler(_ context.Context) (*protobufs.EffectiveConfig, error) {
+	c.logger.Debug("Remote Compose Effective config handler")
+	return c.configManager.ComposeEffectiveConfig()
 }
 
 func (c *Client) onMessageFuncHandler(ctx context.Context, msg *types.MessageData) {
@@ -320,12 +310,13 @@ func (c *Client) onRemoteConfigHandler(ctx context.Context, remoteConfig *protob
 	return nil
 }
 
-func (c *Client) onPackagesAvailableHandler(packagesAvailable *protobufs.PackagesAvailable) error {
+// onPackagesAvailableHandler handles when OnMessage contains a PackagesAvailable message
+func (c *Client) onPackagesAvailableHandler(availablePkgs *protobufs.PackagesAvailable) error {
 	c.logger.Debug("Packages available handler")
 
 	// Initialize PackageStatuses that will eventually be sent back to server
-	curPackageStatuses := &protobufs.PackageStatuses{
-		ServerProvidedAllPackagesHash: packagesAvailable.GetAllPackagesHash(),
+	curPkgStatuses := &protobufs.PackageStatuses{
+		ServerProvidedAllPackagesHash: availablePkgs.GetAllPackagesHash(),
 		Packages:                      map[string]*protobufs.PackageStatus{},
 	}
 
@@ -334,230 +325,274 @@ func (c *Client) onPackagesAvailableHandler(packagesAvailable *protobufs.Package
 	if c.safeGetUpdatingPackage() {
 		c.logger.Warn(
 			"Not starting new package update as already installing new packages",
-			zap.String("AllPackagesHash", hex.EncodeToString(packagesAvailable.GetAllPackagesHash())))
-		curPackageStatuses.ErrorMessage = "Already installing new packages"
-		if err := c.opampClient.SetPackageStatuses(curPackageStatuses); err != nil {
-			c.logger.Error("OpAMP client failed to set package statuses", zap.Error(err))
+			zap.String("AllPackagesHash", hex.EncodeToString(availablePkgs.GetAllPackagesHash())))
+
+		curPkgStatuses.ErrorMessage = "Already installing new packages"
+		// Dont' actually set the on file package statuses because we want to ignore this
+		if err := c.opampClient.SetPackageStatuses(curPkgStatuses); err != nil {
+			c.logger.Error("OpAMP client failed to set already installing package statuses", zap.Error(err))
 		}
-		return fmt.Errorf("failed because already installing packages")
+		return errors.New("failed because already installing packages")
 	}
 
-	// Retrieve last known status (this should return with minimal info even on first time)
-	lastPackageStatuses, err := c.packagesStateProvider.LastReportedStatuses()
-
+	// Retrieve last known status (this should return with minimal info even on first time).
 	// If there is a problem retrieving the last saved PackageStatuses, we will log the error
 	// but continue on as the only thing missing will be the agent package hash.
+	pkgStatuses, err := c.getVerifiedPackageStatuses()
 	if err != nil {
-		c.logger.Warn("Failed to retrieve last reported package statuses", zap.Error(err))
+		c.logger.Warn("Problem with package statuses on starting install", zap.Error(err))
 	}
 
-	var lastPkgStatusMap map[string]*protobufs.PackageStatus
-	if lastPackageStatuses != nil {
-		lastPkgStatusMap = lastPackageStatuses.GetPackages()
+	lastPkgStatusMap := make(map[string]*protobufs.PackageStatus)
+	if pkgStatuses != nil && pkgStatuses.GetPackages() != nil {
+		lastPkgStatusMap = pkgStatuses.GetPackages()
 	}
 
-	curPackages, curPackageFiles := c.createPackageMaps(packagesAvailable.GetPackages(), lastPkgStatusMap)
-	curPackageStatuses.Packages = curPackages
+	// Loop through all of the available packages sent from the server and create initial PackageStatuses
+	for pkgName, availablePkg := range availablePkgs.Packages {
+		lastPkgStatus := lastPkgStatusMap[pkgName]
+		curPkgStatuses.Packages[pkgName] = c.buildInitialPackageStatus(pkgName, availablePkg, lastPkgStatus)
+	}
 
 	// This is an error because we need this file for communication during the update
-	if err = c.packagesStateProvider.SetLastReportedStatuses(curPackageStatuses); err != nil {
+	if err = c.packagesStateProvider.SetLastReportedStatuses(curPkgStatuses); err != nil {
 		return fmt.Errorf("failed to save last reported package statuses: %w", err)
 	}
 
-	if err = c.opampClient.SetPackageStatuses(curPackageStatuses); err != nil {
+	if err = c.opampClient.SetPackageStatuses(curPkgStatuses); err != nil {
 		return fmt.Errorf("opamp client failed to set package statuses: %w", err)
 	}
 
 	// Start update if applicable
-	collectorDownloadableFile := curPackageFiles[packagestate.CollectorPackageName]
-	if collectorDownloadableFile != nil {
-		c.safeSetUpdatingPackage(true)
-		go c.installPackageFromFile(collectorDownloadableFile, curPackageStatuses)
+	if curPkgStatuses.Packages[packagestate.CollectorPackageName].Status == protobufs.PackageStatus_Installing {
+		collectorDownloadableFile := availablePkgs.GetPackages()[packagestate.CollectorPackageName].GetFile()
+		c.startCollectorPackageInstall(curPkgStatuses, collectorDownloadableFile)
 	}
 
 	return nil
 }
 
-func (c *Client) createPackageMaps(
-	pkgAvailMap map[string]*protobufs.PackageAvailable,
-	lastPkgStatusMap map[string]*protobufs.PackageStatus) (map[string]*protobufs.PackageStatus, map[string]*protobufs.DownloadableFile) {
-	pkgStatusMap := map[string]*protobufs.PackageStatus{}
-	pkgFileMap := map[string]*protobufs.DownloadableFile{}
+// buildInitialCollectorPackageStatus sets up the initial package status message any package
+func (c *Client) buildInitialPackageStatus(pkgName string, availablePkg *protobufs.PackageAvailable,
+	lastPkgStatus *protobufs.PackageStatus) *protobufs.PackageStatus {
+	var initPkgStatus *protobufs.PackageStatus
 
-	// Loop through all of the available packages sent from the server
-	for name, availPkg := range pkgAvailMap {
-		switch name {
-		// If it's an expected package, return an installing status
-		case packagestate.CollectorPackageName:
-			var agentHash []byte
-			if lastPkgStatusMap != nil && lastPkgStatusMap[name] != nil {
-				if lastPkgStatusMap[name].GetAgentHasVersion() != version.Version() {
-					c.logger.Debug(fmt.Sprintf(
-						"Version: %s and last reported package status version: %s differ",
-						version.Version(),
-						lastPkgStatusMap[name].GetAgentHasVersion()))
-				} else {
-					agentHash = lastPkgStatusMap[name].GetAgentHasHash()
-				}
-			}
+	switch pkgName {
+	case packagestate.CollectorPackageName:
+		initPkgStatus = c.buildInitialCollectorPackageStatus(pkgName, availablePkg, lastPkgStatus)
+	// If it's not an expected package, return a failed status
+	default:
+		c.logger.Error(
+			"Package update failed because it is not supported",
+			zap.String("package", pkgName))
 
-			pkgStatusMap[name] = &protobufs.PackageStatus{
-				Name:                 name,
-				AgentHasVersion:      version.Version(),
-				AgentHasHash:         agentHash,
-				ServerOfferedVersion: availPkg.GetVersion(),
-				ServerOfferedHash:    availPkg.GetHash(),
-				Status:               protobufs.PackageStatus_Installed,
-			}
-
-			if version.Version() == availPkg.GetVersion() {
-				c.logger.Info("Package update ignored because no new version offered",
-					zap.String("package", name))
-				if agentHash == nil {
-					pkgStatusMap[name].AgentHasHash = availPkg.GetHash()
-				}
-				break
-			}
-
-			if availPkg.GetVersion() != "" {
-				if availPkg.File != nil {
-					pkgStatusMap[name].Status = protobufs.PackageStatus_Installing
-					pkgFileMap[name] = availPkg.GetFile()
-				} else {
-					c.logger.Error(
-						"Package update failed to determine valid downloadable file",
-						zap.String("package", name))
-					pkgStatusMap[name].Status = protobufs.PackageStatus_InstallFailed
-					pkgStatusMap[name].ErrorMessage = fmt.Sprintf("Package %s does not have a valid downloadable file", name)
-				}
-			}
-		// If it's not an expected package, return a failed status
-		default:
-			c.logger.Error(
-				"Package update failed because it is not supported",
-				zap.String("package", name))
-			pkgStatusMap[name] = &protobufs.PackageStatus{
-				Name:                 name,
-				ServerOfferedVersion: availPkg.GetVersion(),
-				ServerOfferedHash:    availPkg.GetHash(),
-				Status:               protobufs.PackageStatus_InstallFailed,
-				ErrorMessage:         fmt.Sprintf("Package %s not supported", name),
-			}
+		initPkgStatus = &protobufs.PackageStatus{
+			Name:                 pkgName,
+			ServerOfferedVersion: availablePkg.GetVersion(),
+			ServerOfferedHash:    availablePkg.GetHash(),
+			Status:               protobufs.PackageStatus_InstallFailed,
+			ErrorMessage:         "Package not supported",
 		}
 	}
 
-	return pkgStatusMap, pkgFileMap
+	return initPkgStatus
 }
 
-// installPackageFromFile tries to download and extract the given tarball and then start up the new Updater binary that was
-// inside of it
-func (c *Client) installPackageFromFile(file *protobufs.DownloadableFile, curPackageStatuses *protobufs.PackageStatuses) {
+// buildInitialCollectorPackageStatus sets up the initial package status message for the collector package
+func (c *Client) buildInitialCollectorPackageStatus(pkgName string, availablePkg *protobufs.PackageAvailable,
+	lastPkgStatus *protobufs.PackageStatus) *protobufs.PackageStatus {
+	initPkgStatus := &protobufs.PackageStatus{
+		Name:                 pkgName,
+		AgentHasVersion:      version.Version(),
+		ServerOfferedVersion: availablePkg.GetVersion(),
+		ServerOfferedHash:    availablePkg.GetHash(),
+		Status:               protobufs.PackageStatus_Installed,
+	}
+
+	// If the new version is the same as the current version we are already installed
+	if version.Version() == availablePkg.GetVersion() {
+		c.logger.Info("Package update ignored because no new version offered",
+			zap.String("package", pkgName))
+		initPkgStatus.AgentHasHash = availablePkg.GetHash()
+
+		return initPkgStatus
+	}
+
+	// Only grab agentHash from last status if that version matches the current one
+	if lastPkgStatus != nil {
+		if lastPkgStatus.GetAgentHasVersion() == version.Version() {
+			initPkgStatus.AgentHasHash = lastPkgStatus.GetAgentHasHash()
+		} else {
+			c.logger.Debug(
+				fmt.Sprintf(
+					"Current version: %s and last reported package status version: %s differ",
+					version.Version(),
+					lastPkgStatus.GetAgentHasVersion()),
+				zap.String("package", pkgName))
+		}
+	}
+
+	// Bad install if no version is given
+	if availablePkg.GetVersion() == "" {
+		c.logger.Info("Packaged update failed because no new version detected",
+			zap.String("package", pkgName))
+		initPkgStatus.ErrorMessage = "Packaged update failed because no new version detected"
+		initPkgStatus.Status = protobufs.PackageStatus_InstallFailed
+
+		return initPkgStatus
+	}
+
+	// Bad install if no file is given
+	if availablePkg.File == nil {
+		c.logger.Info("Packaged update failed because no downloadable file detected",
+			zap.String("package", pkgName))
+		initPkgStatus.ErrorMessage = "Packaged update failed because no downloadable file detected"
+		initPkgStatus.Status = protobufs.PackageStatus_InstallFailed
+
+		return initPkgStatus
+	}
+
+	initPkgStatus.Status = protobufs.PackageStatus_Installing
+
+	return initPkgStatus
+}
+
+// startCollectorPackageInstall attempts to start updating the collector using a new tarball
+func (c *Client) startCollectorPackageInstall(curPkgStatuses *protobufs.PackageStatuses, collectorFile *protobufs.DownloadableFile) {
 	c.logger.Info("Package update started",
-		zap.String("AllPackagesHash", hex.EncodeToString(curPackageStatuses.ServerProvidedAllPackagesHash)),
+		zap.String("AllPackagesHash", hex.EncodeToString(curPkgStatuses.ServerProvidedAllPackagesHash)),
 		zap.String("package", packagestate.CollectorPackageName))
-	// There should be no reason for us to exit this function unless we detected a problem with the Updater's installation
+	// Start installing from file if applicable
+	if collectorFile != nil {
+		c.safeSetUpdatingPackage(true)
+		go c.installPackageFromFile(collectorFile)
+	} else {
+		c.tryToFailPackageInstall("No valid downloadable file found", true)
+	}
+}
+
+// installPackageFromFile tries to download and extract the given tarball and then start up the new
+// Updater binary that was inside of it
+func (c *Client) installPackageFromFile(file *protobufs.DownloadableFile) {
+	// There should be no reason for us to exit this function unless there is a problem with the Updater's installation
 	defer c.safeSetUpdatingPackage(false)
 
 	if fileManagerErr := c.downloadableFileManager.FetchAndExtractArchive(file); fileManagerErr != nil {
-		c.logger.Error(
-			fmt.Sprintf(
-				"Package update failed to download and verify downloadable file: %s", fileManagerErr.Error()),
-			zap.String("package", packagestate.CollectorPackageName))
 		// Remove the update artifacts that may exist, depending on where FetchAndExtractArchive failed.
 		c.downloadableFileManager.CleanupArtifacts()
-
-		// Change existing status to show that install failed and get ready to send
-		curPackageStatuses.Packages[packagestate.CollectorPackageName].Status = protobufs.PackageStatus_InstallFailed
-		curPackageStatuses.Packages[packagestate.CollectorPackageName].ErrorMessage =
-			fmt.Sprintf("Failed to download and verify downloadable file: %s", fileManagerErr.Error())
-
-		if err := c.packagesStateProvider.SetLastReportedStatuses(curPackageStatuses); err != nil {
-			c.logger.Error("Failed to save last reported package statuses", zap.Error(err))
-		}
-
-		if err := c.opampClient.SetPackageStatuses(curPackageStatuses); err != nil {
-			c.logger.Error("OpAMP client failed to set package statuses", zap.Error(err))
-		}
+		errMsg := fmt.Sprintf("Failed to download and verify the supplied downloadable file: %s", fileManagerErr)
+		c.tryToFailPackageInstall(errMsg, true)
 
 		return
 	}
 
 	if monitorErr := c.updaterManager.StartAndMonitorUpdater(); monitorErr != nil {
-		c.logger.Error(
-			fmt.Sprintf("Package update failed because of issue with latest Updater: %s", monitorErr),
-			zap.String("package", packagestate.CollectorPackageName))
 		// Remove the update artifacts
 		c.downloadableFileManager.CleanupArtifacts()
-
-		// Reread package statuses in case Updater changed anything
-		newPackageStatuses, err := c.packagesStateProvider.LastReportedStatuses()
-		if err != nil {
-			c.logger.Error("Failed to read last reported package statuses", zap.Error(err))
-		}
-
-		// Change existing status to show that install failed and get ready to send
-		newPackageStatuses.Packages[packagestate.CollectorPackageName].Status = protobufs.PackageStatus_InstallFailed
-		if newPackageStatuses.Packages[packagestate.CollectorPackageName].ErrorMessage == "" {
-			newPackageStatuses.Packages[packagestate.CollectorPackageName].ErrorMessage = fmt.Sprintf("Failed to run the latest Updater: %s", monitorErr)
-		}
-
-		if err := c.packagesStateProvider.SetLastReportedStatuses(newPackageStatuses); err != nil {
-			c.logger.Error("Failed to save last reported package statuses", zap.Error(err))
-		}
-
-		if err := c.opampClient.SetPackageStatuses(newPackageStatuses); err != nil {
-			c.logger.Error("OpAMP client failed to set package statuses", zap.Error(err))
-		}
+		c.tryToFailPackageInstall(fmt.Sprintf("Failed to run the latest Updater: %s", monitorErr), true)
 	}
 }
 
-func (c *Client) onGetEffectiveConfigHandler(_ context.Context) (*protobufs.EffectiveConfig, error) {
-	c.logger.Debug("Remote Compose Effective config handler")
-	return c.configManager.ComposeEffectiveConfig()
-}
-
-// attemptFailedInstall sets PackageStatuses status to failed and error message if we are in the middle of an install.
-// This should allow the updater to pick this up and start the rollback process
-func (c *Client) attemptFailedInstall(errMsg string) {
+// tryToFailPackageInstall sets PackageStatuses status to failed and error message if we are in the middle of an install.
+// The new status will only be immediately sent if explicitly told to
+func (c *Client) tryToFailPackageInstall(errMsg string, sendStatusNow bool) {
 	// See if we can retrieve the PackageStatuses where the main package is in an installing state
-	lastPackageStatuses := c.getMainPackageInstallingLastStatuses()
-	if lastPackageStatuses == nil {
+	pkgStatuses, err := c.getVerifiedPackageStatuses()
+	if err != nil {
+		c.logger.Error("Problem with PackageStatuses", zap.Error(err))
 		return
 	}
 
-	c.logger.Error(fmt.Sprintf("Package update failed: %s", errMsg),
+	collectorPackageStatus := pkgStatuses.Packages[packagestate.CollectorPackageName]
+	// If we were not installing before the connection, nothing else to do
+	if collectorPackageStatus.Status != protobufs.PackageStatus_Installing {
+		return
+	}
+
+	// Fail the package install
+	c.failPackageInstall(pkgStatuses, errMsg, sendStatusNow)
+}
+
+// failPackageInstall sets PackageStatuses status to failed and error message. The new status will only be
+// immediately sent if explicitly told to
+func (c *Client) failPackageInstall(pkgStatuses *protobufs.PackageStatuses, errMsg string, sendStatusNow bool) {
+	// See if we can retrieve the PackageStatuses where the main package is in an installing state
+	if pkgStatuses == nil {
+		c.logger.Error("Failed to attempt PackageStatuses failure as none were provided")
+		return
+	}
+
+	collectorPkgStatus, ok := pkgStatuses.Packages[packagestate.CollectorPackageName]
+	if !ok {
+		c.logger.Error("Failed to attempt PackageStatuses failure as no collector status provided")
+		return
+	}
+
+	collectorPkgStatus.Status = protobufs.PackageStatus_InstallFailed
+	if collectorPkgStatus.ErrorMessage == "" {
+		collectorPkgStatus.ErrorMessage = errMsg
+	}
+
+	c.logger.Error(fmt.Sprintf("Package update failed: %s", collectorPkgStatus.ErrorMessage),
 		zap.String("package", packagestate.CollectorPackageName))
 
-	lastMainPackageStatus := lastPackageStatuses.Packages[packagestate.CollectorPackageName]
-	lastMainPackageStatus.Status = protobufs.PackageStatus_InstallFailed
-	lastMainPackageStatus.ErrorMessage = errMsg
+	if err := c.packagesStateProvider.SetLastReportedStatuses(pkgStatuses); err != nil {
+		c.logger.Error("Failed to set failed install package statuses", zap.Error(err))
+	}
 
-	if err := c.packagesStateProvider.SetLastReportedStatuses(lastPackageStatuses); err != nil {
-		c.logger.Error("Failed to set last reported package statuses", zap.Error(err))
+	// Only send status to Server if this is set. Otherwise it will happen after collector is restarted
+	if sendStatusNow {
+		if err := c.opampClient.SetPackageStatuses(pkgStatuses); err != nil {
+			c.logger.Error("OpAMP client failed to set failed install package statuses", zap.Error(err))
+		}
 	}
 }
 
-func (c *Client) getMainPackageInstallingLastStatuses() *protobufs.PackageStatuses {
+// finishPackageInstall sets PackageStatuses status to installed and agent properties to the offered
+// server properties.
+func (c *Client) finishPackageInstall(pkgStatuses *protobufs.PackageStatuses) {
+	c.logger.Info("Package update was successful",
+		zap.String("AllPackagesHash", hex.EncodeToString(pkgStatuses.ServerProvidedAllPackagesHash)),
+		zap.String("package", packagestate.CollectorPackageName))
+
+	if pkgStatuses == nil {
+		c.logger.Error("Failed to set PackageStatuses to installed as none were provided")
+		return
+	}
+
+	collectorPkgStatus, ok := pkgStatuses.Packages[packagestate.CollectorPackageName]
+	if !ok {
+		c.logger.Error("Failed to set PackageStatuses to installed as no collector status provided")
+		return
+	}
+
+	collectorPkgStatus.Status = protobufs.PackageStatus_Installed
+	collectorPkgStatus.AgentHasVersion = version.Version()
+	collectorPkgStatus.AgentHasHash = collectorPkgStatus.ServerOfferedHash
+
+	if err := c.packagesStateProvider.SetLastReportedStatuses(pkgStatuses); err != nil {
+		c.logger.Error("Failed to set last reported package statuses", zap.Error(err))
+	}
+
+	if err := c.opampClient.SetPackageStatuses(pkgStatuses); err != nil {
+		c.logger.Error("OpAMP client failed to set package statuses", zap.Error(err))
+	}
+}
+
+// getVerifiedPackageStatuses returns the last available PackagesStatuses info only if
+// the collector package status exists
+func (c *Client) getVerifiedPackageStatuses() (*protobufs.PackageStatuses, error) {
 	lastPackageStatuses, err := c.packagesStateProvider.LastReportedStatuses()
 	if err != nil {
-		c.logger.Error("Failed to retrieve last reported package statuses", zap.Error(err))
-		return nil
+		return nil, fmt.Errorf("failed to retrieve last reported package statuses: %w", err)
 	}
 
-	// If we have no info on our main package, nothing else to do
+	// If we have no info on our collector package, nothing else to do
 	if lastPackageStatuses == nil || lastPackageStatuses.Packages == nil || lastPackageStatuses.Packages[packagestate.CollectorPackageName] == nil {
-		c.logger.Warn("Failed to retrieve last reported package statuses for main package")
-		return nil
+		return nil, errors.New("failed to retrieve last reported package status for collector package")
 	}
 
-	lastMainPackageStatus := lastPackageStatuses.Packages[packagestate.CollectorPackageName]
-
-	// If we were not installing before the connection, nothing else to do
-	if lastMainPackageStatus.Status != protobufs.PackageStatus_Installing {
-		return nil
-	}
-
-	return lastPackageStatuses
+	return lastPackageStatuses, nil
 }
 
 func (c *Client) safeSetUpdatingPackage(value bool) {
