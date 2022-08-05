@@ -1212,6 +1212,8 @@ github.com/open-telemetry/opentelemetry-collector-contrib/receiver/sapmreceiver 
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/sapmreceiver v0.57.2/go.mod h1:anbt4CqszTrdg6ECYls57g1SI3zk4MCGhfdVWIq2Qr8=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/simpleprometheusreceiver v0.57.2 h1:R2yRYB3THCd+klGquLaCEA33umOg0kIPGDRx40Ul8VE=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/simpleprometheusreceiver v0.57.2/go.mod h1:XOA9T4CBpBRpRhTnlKZcODVoT6skssVLvFiJoh9DAAU=
+github.com/open-telemetry/opentelemetry-collector-contrib/receiver/splunkhecreceiver v0.57.2 h1:OSGjdgj7jS4OGFUr3XsrNE3H67z/y8uyzw67bUlm0LY=
+github.com/open-telemetry/opentelemetry-collector-contrib/receiver/splunkhecreceiver v0.57.2/go.mod h1:mLjjFJpqLP7bNboYVwhIvziUNZ0y3KxVWPYfqYKBkGM=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/sqlserverreceiver v0.57.2 h1:wm6o2BAZ/CTPGDEA7nEfU/PLKLUo37Ws/G9Bw+5Gx2I=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/sqlserverreceiver v0.57.2/go.mod h1:kn2EShBSIeEtB4pO8KDPnXhNI7ngvJOUeZipN0qIBDk=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/statsdreceiver v0.57.2 h1:/RrCA8XTClGZHrPx1z5piL9WDfC6jmaHxeiYz0QRL4Q=

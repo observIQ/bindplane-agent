@@ -105,6 +105,7 @@ require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/saphanareceiver v0.57.2
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/sapmreceiver v0.57.2
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/simpleprometheusreceiver v0.57.2
+	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/splunkhecreceiver v0.57.2
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/sqlserverreceiver v0.57.2
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/statsdreceiver v0.57.2
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/syslogreceiver v0.57.2
