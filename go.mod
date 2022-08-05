@@ -3,7 +3,7 @@ module github.com/observiq/observiq-otel-collector
 go 1.17
 
 require (
-	github.com/GoogleCloudPlatform/opentelemetry-operations-collector v0.0.3-0.20220711143229-08f2752ed367
+	github.com/GoogleCloudPlatform/opentelemetry-operations-collector v0.0.3-0.20220804181753-b3246a402440
 	github.com/google/uuid v1.3.0
 	github.com/observiq/observiq-otel-collector/exporter/googlecloudexporter v1.3.0
 	github.com/observiq/observiq-otel-collector/packagestate v0.0.0
@@ -474,5 +474,3 @@ replace github.com/observiq/observiq-otel-collector/receiver/pluginreceiver => .
 replace github.com/observiq/observiq-otel-collector/exporter/googlecloudexporter => ./exporter/googlecloudexporter
 
 replace github.com/observiq/observiq-otel-collector/packagestate => ./packagestate
-
-replace github.com/GoogleCloudPlatform/opentelemetry-operations-collector v0.0.3-0.20220711143229-08f2752ed367 => github.com/observIQ/opentelemetry-operations-collector v0.0.3-0.20220804143341-7ae64090f52c
