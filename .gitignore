@@ -10,7 +10,7 @@ cosign.*
 gpg.*
 *.msi
 *.exe
-*.zip
+windows/*.zip
 windows/**/wix.dynamic.json
 windows/**/wix
 windows/config.yaml
@@ -20,7 +20,7 @@ windows/plugins
 opentelemetry-java-contrib-jmx-metrics.jar
 VERSION.txt
 release_deps
-tmp
+/tmp
 
 # OpAmp Files
 collector.yaml

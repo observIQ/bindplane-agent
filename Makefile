@@ -10,6 +10,8 @@ OUTDIR=./dist
 GOOS ?= $(shell go env GOOS)
 GOARCH ?= $(shell go env GOARCH)
 
+INTEGRATION_TEST_ARGS?=-tags integration
+
 ifeq ($(GOOS), windows)
 EXT?=.exe
 else
@@ -21,10 +23,22 @@ CURRENT_TAG := $(shell git tag --sort=v:refname --points-at HEAD | grep -E "v[0-
 # Version will be the tag pointing to the current commit, or the previous version tag if there is no such tag
 VERSION ?= $(if $(CURRENT_TAG),$(CURRENT_TAG),$(PREVIOUS_TAG))
 
-# Default build target; making this should build for the current os/arch
+# Build binaries for current GOOS/GOARCH by default
+.DEFAULT_GOAL := build-binaries
+
+# Builds just the collector for current GOOS/GOARCH pair
 .PHONY: collector
 collector:
 	go build -ldflags "-s -w -X github.com/observiq/observiq-otel-collector/internal/version.version=$(VERSION)" -o $(OUTDIR)/collector_$(GOOS)_$(GOARCH)$(EXT) ./cmd/collector
+
+# Builds just the updater for current GOOS/GOARCH pair
+.PHONY: updater
+updater:
+	cd ./updater/; go build -ldflags "-s -w -X github.com/observiq/observiq-otel-collector/internal/version.version=$(VERSION)" -o ../$(OUTDIR)/updater_$(GOOS)_$(GOARCH)$(EXT) ./cmd/updater
+
+# Builds the updater + collector for current GOOS/GOARCH pair
+.PHONY: build-binaries
+build-binaries: collector updater
 
 .PHONY: build-all
 build-all: build-linux build-darwin build-windows
@@ -40,27 +54,27 @@ build-windows: build-windows-amd64
 
 .PHONY: build-linux-amd64
 build-linux-amd64:
-	GOOS=linux GOARCH=amd64 $(MAKE) collector
+	GOOS=linux GOARCH=amd64 $(MAKE) build-binaries -j2
 
 .PHONY: build-linux-arm64
 build-linux-arm64:
-	GOOS=linux GOARCH=arm64 $(MAKE) collector
+	GOOS=linux GOARCH=arm64 $(MAKE) build-binaries -j2
 
 .PHONY: build-linux-arm
 build-linux-arm:
-	GOOS=linux GOARCH=arm $(MAKE) collector
+	GOOS=linux GOARCH=arm $(MAKE) build-binaries -j2
 
 .PHONY: build-darwin-amd64
 build-darwin-amd64:
-	GOOS=darwin GOARCH=amd64 $(MAKE) collector
+	GOOS=darwin GOARCH=amd64 $(MAKE) build-binaries -j2
 
 .PHONY: build-darwin-arm64
 build-darwin-arm64:
-	GOOS=darwin GOARCH=arm64 $(MAKE) collector
+	GOOS=darwin GOARCH=arm64 $(MAKE) build-binaries -j2
 
 .PHONY: build-windows-amd64
 build-windows-amd64:
-	GOOS=windows GOARCH=amd64 $(MAKE) collector
+	GOOS=windows GOARCH=amd64 $(MAKE) build-binaries -j2
 
 # tool-related commands
 .PHONY: install-tools
@@ -97,6 +111,10 @@ test-with-cover:
 	$(MAKE) for-all CMD="go test -coverprofile=cover.out ./..."
 	$(MAKE) for-all CMD="go tool cover -html=cover.out -o cover.html"
 
+.PHONY: test-updater-integration 
+test-updater-integration:
+	cd updater; go test $(INTEGRATION_TEST_ARGS) -race ./...
+
 .PHONY: bench
 bench:
 	$(MAKE) for-all CMD="go test -benchmem -run=^$$ -bench ^* ./..."
@@ -115,7 +133,9 @@ tidy:
 
 .PHONY: gosec
 gosec:
-	gosec ./...
+	gosec -exclude-dir updater  ./...
+# exclude the testdata dir; it contains a go program for testing.
+	cd updater; gosec -exclude-dir internal/service/testdata ./...
 
 # This target performs all checks that CI will do (excluding the build itself)
 .PHONY: ci-checks
@@ -157,6 +177,8 @@ release-prep:
 	@cp config/example.yaml release_deps/config.yaml
 	@cp config/logging.yaml release_deps/logging.yaml
 	@cp service/com.observiq.collector.plist release_deps/com.observiq.collector.plist
+	@jq ".files[] | select(.service != null)" windows/wix.json >> release_deps/windows_service.json
+	@cp service/observiq-otel-collector.service release_deps/observiq-otel-collector.service
 
 # Build, sign, and release
 .PHONY: release
@@ -184,7 +206,7 @@ clean:
 
 .PHONY: scan-licenses
 scan-licenses:
-	lichen --config=./license.yaml $$(find dist/collector_* | grep -v 'sig\|json\|CHANGELOG.md\|yaml\|SHA256' | xargs)
+	lichen --config=./license.yaml $$(find dist/collector_* dist/updater_*)
 
 .PHONY: generate
 generate:

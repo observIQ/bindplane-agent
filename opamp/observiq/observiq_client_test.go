@@ -21,12 +21,15 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"sync"
 	"testing"
+	"time"
 
 	colmocks "github.com/observiq/observiq-otel-collector/collector/mocks"
 	"github.com/observiq/observiq-otel-collector/internal/version"
 	"github.com/observiq/observiq-otel-collector/opamp"
 	"github.com/observiq/observiq-otel-collector/opamp/mocks"
+	"github.com/observiq/observiq-otel-collector/packagestate"
 	"github.com/open-telemetry/opamp-go/client/types"
 	"github.com/open-telemetry/opamp-go/protobufs"
 	"github.com/stretchr/testify/assert"
@@ -121,10 +124,13 @@ func TestNewClient(t *testing.T) {
 				// Do a shallow check on all fields to assert they exist and are equal to passed in params were possible
 				assert.NotNil(t, observiqClient.opampClient)
 				assert.NotNil(t, observiqClient.configManager)
+				assert.NotNil(t, observiqClient.packagesStateProvider)
 				assert.Equal(t, testLogger.Named("opamp"), observiqClient.logger)
 				assert.Equal(t, mockCollector, observiqClient.collector)
 				assert.NotNil(t, observiqClient.ident)
 				assert.Equal(t, observiqClient.currentConfig, tc.config)
+				assert.False(t, observiqClient.safeGetDisconnecting())
+				assert.False(t, observiqClient.safeGetUpdatingPackage())
 			}
 
 		})
@@ -144,6 +150,8 @@ func TestClientConnect(t *testing.T) {
 
 				mockOpAmpClient := new(mocks.MockOpAMPClient)
 				mockOpAmpClient.On("SetAgentDescription", mock.Anything).Return(expectedErr)
+				mockStateProvider := new(mocks.MockPackagesStateProvider)
+				mockStateProvider.On("LastReportedStatuses").Return(nil, nil)
 
 				c := &Client{
 					opampClient:   mockOpAmpClient,
@@ -155,6 +163,7 @@ func TestClientConnect(t *testing.T) {
 						Endpoint:  "ws://localhost:1234",
 						SecretKey: &secretKeyContents,
 					},
+					packagesStateProvider: mockStateProvider,
 				}
 
 				err := c.Connect(context.Background())
@@ -167,6 +176,8 @@ func TestClientConnect(t *testing.T) {
 
 				mockOpAmpClient := new(mocks.MockOpAMPClient)
 				mockOpAmpClient.On("SetAgentDescription", mock.Anything).Return(nil)
+				mockStateProvider := new(mocks.MockPackagesStateProvider)
+				mockStateProvider.On("LastReportedStatuses").Return(nil, nil)
 				badCAFile := "bad-ca.cert"
 
 				c := &Client{
@@ -182,6 +193,7 @@ func TestClientConnect(t *testing.T) {
 							CAFile: &badCAFile,
 						},
 					},
+					packagesStateProvider: mockStateProvider,
 				}
 
 				err := c.Connect(context.Background())
@@ -196,6 +208,8 @@ func TestClientConnect(t *testing.T) {
 				mockOpAmpClient := mocks.NewMockOpAMPClient(t)
 				mockOpAmpClient.On("SetAgentDescription", mock.Anything).Return(nil)
 				mockOpAmpClient.On("Start", mock.Anything, mock.Anything).Return(expectedErr)
+				mockStateProvider := new(mocks.MockPackagesStateProvider)
+				mockStateProvider.On("LastReportedStatuses").Return(nil, nil)
 
 				mockCollector := colmocks.NewMockCollector(t)
 				mockCollector.On("Run", mock.Anything).Return(nil)
@@ -210,6 +224,7 @@ func TestClientConnect(t *testing.T) {
 						Endpoint:  "ws://localhost:1234",
 						SecretKey: &secretKeyContents,
 					},
+					packagesStateProvider: mockStateProvider,
 				}
 
 				err := c.Connect(context.Background())
@@ -221,6 +236,8 @@ func TestClientConnect(t *testing.T) {
 			testFunc: func(*testing.T) {
 				mockOpAmpClient := mocks.NewMockOpAMPClient(t)
 				mockOpAmpClient.On("SetAgentDescription", mock.Anything).Return(nil)
+				mockStateProvider := new(mocks.MockPackagesStateProvider)
+				mockStateProvider.On("LastReportedStatuses").Return(nil, nil)
 
 				expectedErr := errors.New("oops")
 
@@ -237,6 +254,7 @@ func TestClientConnect(t *testing.T) {
 						Endpoint:  "ws://localhost:1234",
 						SecretKey: &secretKeyContents,
 					},
+					packagesStateProvider: mockStateProvider,
 				}
 
 				err := c.Connect(context.Background())
@@ -252,6 +270,8 @@ func TestClientConnect(t *testing.T) {
 				mockCollector := colmocks.NewMockCollector(t)
 				mockCollector.On("Run", mock.Anything).Return(nil)
 
+				mockPackagesStateProvider := mocks.NewMockPackagesStateProvider(t)
+
 				c := &Client{
 					opampClient: mockOpAmpClient,
 					logger:      zap.NewNop(),
@@ -265,6 +285,7 @@ func TestClientConnect(t *testing.T) {
 						Endpoint:  "ws://localhost:1234",
 						SecretKey: &secretKeyContents,
 					},
+					packagesStateProvider: mockPackagesStateProvider,
 				}
 
 				expectedSettings := types.StartSettings{
@@ -286,6 +307,7 @@ func TestClientConnect(t *testing.T) {
 						OnMessageFunc:          c.onMessageFuncHandler,
 						GetEffectiveConfigFunc: c.onGetEffectiveConfigHandler,
 					},
+					PackagesStateProvider: c.packagesStateProvider,
 				}
 				mockOpAmpClient.On("Start", mock.Anything, mock.Anything).Return(nil).Run(func(args mock.Arguments) {
 					settings := args.Get(1).(types.StartSettings)
@@ -293,11 +315,110 @@ func TestClientConnect(t *testing.T) {
 					assert.Equal(t, expectedSettings.Header, settings.Header)
 					assert.Equal(t, expectedSettings.TLSConfig, settings.TLSConfig)
 					assert.Equal(t, expectedSettings.InstanceUid, settings.InstanceUid)
+					assert.Equal(t, expectedSettings.PackagesStateProvider, settings.PackagesStateProvider)
 					// assert is unable to compare function pointers
 				})
 
 				err := c.Connect(context.Background())
 				assert.NoError(t, err)
+			},
+		},
+		{
+			desc: "Problem connecting & not installing",
+			testFunc: func(*testing.T) {
+				statuses := map[string]*protobufs.PackageStatus{
+					packagestate.CollectorPackageName: {
+						Name:                 packagestate.CollectorPackageName,
+						AgentHasVersion:      version.Version(),
+						ServerOfferedVersion: version.Version(),
+						Status:               protobufs.PackageStatus_Installed,
+					},
+				}
+				packageStatuses := &protobufs.PackageStatuses{
+					Packages: statuses,
+				}
+
+				expectedErr := errors.New("oops")
+
+				mockOpAmpClient := new(mocks.MockOpAMPClient)
+				mockOpAmpClient.On("SetAgentDescription", mock.Anything).Return(expectedErr)
+				mockStateProvider := new(mocks.MockPackagesStateProvider)
+				mockStateProvider.On("LastReportedStatuses").Return(packageStatuses, nil)
+
+				c := &Client{
+					opampClient:   mockOpAmpClient,
+					logger:        zap.NewNop(),
+					ident:         &identity{},
+					configManager: nil,
+					collector:     nil,
+					currentConfig: opamp.Config{
+						Endpoint:  "ws://localhost:1234",
+						SecretKey: &secretKeyContents,
+					},
+					packagesStateProvider: mockStateProvider,
+				}
+
+				c.Connect(context.Background())
+			},
+		},
+		{
+			desc: "Problem connecting & installing",
+			testFunc: func(*testing.T) {
+				allHash := []byte("allHash")
+				hash := []byte("hash")
+				newHash := []byte("newHash")
+				newVersion := "99.99.99"
+				statuses := map[string]*protobufs.PackageStatus{
+					packagestate.CollectorPackageName: {
+						Name:                 packagestate.CollectorPackageName,
+						AgentHasVersion:      version.Version(),
+						AgentHasHash:         hash,
+						ServerOfferedVersion: newVersion,
+						ServerOfferedHash:    newHash,
+						Status:               protobufs.PackageStatus_Installing,
+					},
+				}
+				packageStatuses := &protobufs.PackageStatuses{
+					ServerProvidedAllPackagesHash: allHash,
+					Packages:                      statuses,
+				}
+
+				expectedErr := errors.New("oops")
+
+				mockOpAmpClient := new(mocks.MockOpAMPClient)
+				mockOpAmpClient.On("SetAgentDescription", mock.Anything).Return(expectedErr)
+				mockStateProvider := new(mocks.MockPackagesStateProvider)
+				mockStateProvider.On("LastReportedStatuses").Return(packageStatuses, nil)
+				mockStateProvider.On("SetLastReportedStatuses", mock.Anything).Return(nil).Run(func(args mock.Arguments) {
+					status := args.Get(0).(*protobufs.PackageStatuses)
+
+					assert.NotNil(t, status)
+					assert.Equal(t, "", status.ErrorMessage)
+					assert.Equal(t, allHash, status.ServerProvidedAllPackagesHash)
+					assert.Equal(t, 1, len(status.Packages))
+					assert.Equal(t, packagestate.CollectorPackageName, status.Packages[packagestate.CollectorPackageName].Name)
+					assert.Equal(t, version.Version(), status.Packages[packagestate.CollectorPackageName].AgentHasVersion)
+					assert.Equal(t, hash, status.Packages[packagestate.CollectorPackageName].AgentHasHash)
+					assert.Equal(t, newVersion, status.Packages[packagestate.CollectorPackageName].ServerOfferedVersion)
+					assert.Equal(t, newHash, status.Packages[packagestate.CollectorPackageName].ServerOfferedHash)
+					assert.Equal(t, fmt.Sprintf("Error while setting agent description: %s", expectedErr), status.Packages[packagestate.CollectorPackageName].ErrorMessage)
+					assert.Equal(t, protobufs.PackageStatus_InstallFailed, status.Packages[packagestate.CollectorPackageName].Status)
+				})
+
+				c := &Client{
+					opampClient:   mockOpAmpClient,
+					logger:        zap.NewNop(),
+					ident:         &identity{},
+					configManager: nil,
+					collector:     nil,
+					currentConfig: opamp.Config{
+						Endpoint:  "ws://localhost:1234",
+						SecretKey: &secretKeyContents,
+					},
+					packagesStateProvider: mockStateProvider,
+				}
+
+				c.Connect(context.Background())
 			},
 		},
 	}
@@ -320,7 +441,334 @@ func TestClientDisconnect(t *testing.T) {
 	}
 
 	c.Disconnect(ctx)
+	assert.True(t, c.safeGetDisconnecting())
 	mockOpAmpClient.AssertExpectations(t)
+}
+
+func TestClient_onConnectHandler(t *testing.T) {
+	testCases := []struct {
+		desc     string
+		testFunc func(*testing.T)
+	}{
+		{
+			desc: "LastReportedStatus error",
+			testFunc: func(*testing.T) {
+				expectedErr := errors.New("oops")
+
+				mockStateProvider := new(mocks.MockPackagesStateProvider)
+				mockStateProvider.On("LastReportedStatuses").Return(nil, expectedErr)
+
+				c := &Client{
+					logger:                zap.NewNop(),
+					packagesStateProvider: mockStateProvider,
+				}
+
+				c.onConnectHandler()
+			},
+		},
+		{
+			desc: "LastReportedStatus no main package info",
+			testFunc: func(*testing.T) {
+				packageStatuses := &protobufs.PackageStatuses{
+					ServerProvidedAllPackagesHash: []byte("allHash"),
+					Packages:                      make(map[string]*protobufs.PackageStatus),
+				}
+
+				mockStateProvider := new(mocks.MockPackagesStateProvider)
+				mockStateProvider.On("LastReportedStatuses").Return(packageStatuses, nil)
+
+				c := &Client{
+					logger:                zap.NewNop(),
+					packagesStateProvider: mockStateProvider,
+				}
+
+				c.onConnectHandler()
+			},
+		},
+		{
+			desc: "Good LastReportedStatus but not installing",
+			testFunc: func(*testing.T) {
+				allHash := []byte("allHash")
+				hash := []byte("hash")
+				newHash := []byte("newHash")
+				newVersion := "99.99.99"
+				errorMessage := "problem"
+				statuses := map[string]*protobufs.PackageStatus{
+					packagestate.CollectorPackageName: {
+						Name:                 packagestate.CollectorPackageName,
+						AgentHasVersion:      version.Version(),
+						AgentHasHash:         hash,
+						ServerOfferedVersion: newVersion,
+						ServerOfferedHash:    newHash,
+						Status:               protobufs.PackageStatus_InstallFailed,
+						ErrorMessage:         errorMessage,
+					},
+				}
+				packageStatuses := &protobufs.PackageStatuses{
+					ServerProvidedAllPackagesHash: allHash,
+					Packages:                      statuses,
+				}
+
+				mockStateProvider := new(mocks.MockPackagesStateProvider)
+				mockStateProvider.On("LastReportedStatuses").Return(packageStatuses, nil)
+
+				c := &Client{
+					logger:                zap.NewNop(),
+					packagesStateProvider: mockStateProvider,
+				}
+
+				c.onConnectHandler()
+			},
+		},
+		{
+			desc: "Installing with version mismatch",
+			testFunc: func(*testing.T) {
+				allHash := []byte("allHash")
+				hash := []byte("hash")
+				newHash := []byte("newHash")
+				newVersion := "99.99.99"
+				statuses := map[string]*protobufs.PackageStatus{
+					packagestate.CollectorPackageName: {
+						Name:                 packagestate.CollectorPackageName,
+						AgentHasVersion:      version.Version(),
+						AgentHasHash:         hash,
+						ServerOfferedVersion: newVersion,
+						ServerOfferedHash:    newHash,
+						Status:               protobufs.PackageStatus_Installing,
+					},
+				}
+				packageStatuses := &protobufs.PackageStatuses{
+					ServerProvidedAllPackagesHash: allHash,
+					Packages:                      statuses,
+				}
+
+				mockStateProvider := new(mocks.MockPackagesStateProvider)
+				mockStateProvider.On("LastReportedStatuses").Return(packageStatuses, nil)
+				mockStateProvider.On("SetLastReportedStatuses", mock.Anything).Return(nil).Run(func(args mock.Arguments) {
+					status := args.Get(0).(*protobufs.PackageStatuses)
+
+					assert.NotNil(t, status)
+					assert.Equal(t, "", status.ErrorMessage)
+					assert.Equal(t, allHash, status.ServerProvidedAllPackagesHash)
+					assert.Equal(t, 1, len(status.Packages))
+					assert.Equal(t, packagestate.CollectorPackageName, status.Packages[packagestate.CollectorPackageName].Name)
+					assert.Equal(t, version.Version(), status.Packages[packagestate.CollectorPackageName].AgentHasVersion)
+					assert.Equal(t, hash, status.Packages[packagestate.CollectorPackageName].AgentHasHash)
+					assert.Equal(t, newVersion, status.Packages[packagestate.CollectorPackageName].ServerOfferedVersion)
+					assert.Equal(t, newHash, status.Packages[packagestate.CollectorPackageName].ServerOfferedHash)
+					assert.Equal(t, "Failed because of collector version mismatch: expected 99.99.99, actual latest", status.Packages[packagestate.CollectorPackageName].ErrorMessage)
+					assert.Equal(t, protobufs.PackageStatus_InstallFailed, status.Packages[packagestate.CollectorPackageName].Status)
+				})
+
+				c := &Client{
+					logger:                zap.NewNop(),
+					packagesStateProvider: mockStateProvider,
+				}
+
+				c.onConnectHandler()
+			},
+		},
+		{
+			desc: "Installing with new version match",
+			testFunc: func(*testing.T) {
+				allHash := []byte("allHash")
+				hash := []byte("hash")
+				newHash := []byte("newHash")
+				oldVersion := "99.99.99"
+				newVersion := version.Version()
+				statuses := map[string]*protobufs.PackageStatus{
+					packagestate.CollectorPackageName: {
+						Name:                 packagestate.CollectorPackageName,
+						AgentHasVersion:      oldVersion,
+						AgentHasHash:         hash,
+						ServerOfferedVersion: newVersion,
+						ServerOfferedHash:    newHash,
+						Status:               protobufs.PackageStatus_Installing,
+					},
+				}
+				packageStatuses := &protobufs.PackageStatuses{
+					ServerProvidedAllPackagesHash: allHash,
+					Packages:                      statuses,
+				}
+
+				mockStateProvider := new(mocks.MockPackagesStateProvider)
+				mockStateProvider.On("LastReportedStatuses").Return(packageStatuses, nil)
+				mockStateProvider.On("SetLastReportedStatuses", mock.Anything).Return(nil)
+				mockOpAmpClient := mocks.NewMockOpAMPClient(t)
+				mockOpAmpClient.On("SetPackageStatuses", mock.Anything).Return(nil).Run(func(args mock.Arguments) {
+					status := args.Get(0).(*protobufs.PackageStatuses)
+
+					assert.NotNil(t, status)
+					assert.Equal(t, "", status.ErrorMessage)
+					assert.Equal(t, allHash, status.ServerProvidedAllPackagesHash)
+					assert.Equal(t, 1, len(status.Packages))
+					assert.Equal(t, packagestate.CollectorPackageName, status.Packages[packagestate.CollectorPackageName].Name)
+					assert.Equal(t, newVersion, status.Packages[packagestate.CollectorPackageName].AgentHasVersion)
+					assert.Equal(t, newHash, status.Packages[packagestate.CollectorPackageName].AgentHasHash)
+					assert.Equal(t, newVersion, status.Packages[packagestate.CollectorPackageName].ServerOfferedVersion)
+					assert.Equal(t, newHash, status.Packages[packagestate.CollectorPackageName].ServerOfferedHash)
+					assert.Equal(t, "", status.Packages[packagestate.CollectorPackageName].ErrorMessage)
+					assert.Equal(t, protobufs.PackageStatus_Installed, status.Packages[packagestate.CollectorPackageName].Status)
+				})
+
+				c := &Client{
+					logger:                zap.NewNop(),
+					opampClient:           mockOpAmpClient,
+					packagesStateProvider: mockStateProvider,
+				}
+
+				c.onConnectHandler()
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.desc, tc.testFunc)
+	}
+}
+
+func TestClient_onConnectFailedHandler(t *testing.T) {
+	expectedErr := errors.New("oops")
+
+	testCases := []struct {
+		desc     string
+		testFunc func(*testing.T)
+	}{
+		{
+			desc: "LastReportedStatus error",
+			testFunc: func(*testing.T) {
+				mockStateProvider := new(mocks.MockPackagesStateProvider)
+				mockStateProvider.On("LastReportedStatuses").Return(nil, expectedErr)
+
+				c := &Client{
+					logger:                zap.NewNop(),
+					packagesStateProvider: mockStateProvider,
+				}
+
+				c.onConnectFailedHandler(expectedErr)
+			},
+		},
+		{
+			desc: "LastReportedStatus no main package info",
+			testFunc: func(*testing.T) {
+				packageStatuses := &protobufs.PackageStatuses{
+					ServerProvidedAllPackagesHash: []byte("allHash"),
+					Packages:                      make(map[string]*protobufs.PackageStatus),
+				}
+
+				mockStateProvider := new(mocks.MockPackagesStateProvider)
+				mockStateProvider.On("LastReportedStatuses").Return(packageStatuses, nil)
+
+				c := &Client{
+					logger:                zap.NewNop(),
+					packagesStateProvider: mockStateProvider,
+				}
+
+				c.onConnectFailedHandler(expectedErr)
+			},
+		},
+		{
+			desc: "Disconnect do not change package status",
+			testFunc: func(*testing.T) {
+				mockStateProvider := new(mocks.MockPackagesStateProvider)
+
+				c := &Client{
+					logger:                zap.NewNop(),
+					packagesStateProvider: mockStateProvider,
+					disconnecting:         true,
+				}
+
+				c.onConnectFailedHandler(expectedErr)
+			},
+		},
+		{
+			desc: "Good LastReportedStatus but not installing",
+			testFunc: func(*testing.T) {
+				allHash := []byte("allHash")
+				hash := []byte("hash")
+				newHash := []byte("newHash")
+				newVersion := "99.99.99"
+				errorMessage := "problem"
+				statuses := map[string]*protobufs.PackageStatus{
+					packagestate.CollectorPackageName: {
+						Name:                 packagestate.CollectorPackageName,
+						AgentHasVersion:      version.Version(),
+						AgentHasHash:         hash,
+						ServerOfferedVersion: newVersion,
+						ServerOfferedHash:    newHash,
+						Status:               protobufs.PackageStatus_InstallFailed,
+						ErrorMessage:         errorMessage,
+					},
+				}
+				packageStatuses := &protobufs.PackageStatuses{
+					ServerProvidedAllPackagesHash: allHash,
+					Packages:                      statuses,
+				}
+
+				mockStateProvider := new(mocks.MockPackagesStateProvider)
+				mockStateProvider.On("LastReportedStatuses").Return(packageStatuses, nil)
+
+				c := &Client{
+					logger:                zap.NewNop(),
+					packagesStateProvider: mockStateProvider,
+				}
+
+				c.onConnectFailedHandler(expectedErr)
+			},
+		},
+		{
+			desc: "Good LastReportedStatus and installing",
+			testFunc: func(*testing.T) {
+				allHash := []byte("allHash")
+				hash := []byte("hash")
+				newHash := []byte("newHash")
+				newVersion := "99.99.99"
+				statuses := map[string]*protobufs.PackageStatus{
+					packagestate.CollectorPackageName: {
+						Name:                 packagestate.CollectorPackageName,
+						AgentHasVersion:      version.Version(),
+						AgentHasHash:         hash,
+						ServerOfferedVersion: newVersion,
+						ServerOfferedHash:    newHash,
+						Status:               protobufs.PackageStatus_Installing,
+					},
+				}
+				packageStatuses := &protobufs.PackageStatuses{
+					ServerProvidedAllPackagesHash: allHash,
+					Packages:                      statuses,
+				}
+
+				mockStateProvider := new(mocks.MockPackagesStateProvider)
+				mockStateProvider.On("LastReportedStatuses").Return(packageStatuses, nil)
+				mockStateProvider.On("SetLastReportedStatuses", mock.Anything).Return(nil).Run(func(args mock.Arguments) {
+					status := args.Get(0).(*protobufs.PackageStatuses)
+
+					assert.NotNil(t, status)
+					assert.Equal(t, "", status.ErrorMessage)
+					assert.Equal(t, allHash, status.ServerProvidedAllPackagesHash)
+					assert.Equal(t, 1, len(status.Packages))
+					assert.Equal(t, packagestate.CollectorPackageName, status.Packages[packagestate.CollectorPackageName].Name)
+					assert.Equal(t, version.Version(), status.Packages[packagestate.CollectorPackageName].AgentHasVersion)
+					assert.Equal(t, hash, status.Packages[packagestate.CollectorPackageName].AgentHasHash)
+					assert.Equal(t, newVersion, status.Packages[packagestate.CollectorPackageName].ServerOfferedVersion)
+					assert.Equal(t, newHash, status.Packages[packagestate.CollectorPackageName].ServerOfferedHash)
+					assert.Equal(t, fmt.Sprintf("Failed to connect to BindPlane: %s", expectedErr), status.Packages[packagestate.CollectorPackageName].ErrorMessage)
+					assert.Equal(t, protobufs.PackageStatus_InstallFailed, status.Packages[packagestate.CollectorPackageName].Status)
+				})
+
+				c := &Client{
+					logger:                zap.NewNop(),
+					packagesStateProvider: mockStateProvider,
+				}
+
+				c.onConnectFailedHandler(expectedErr)
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.desc, tc.testFunc)
+	}
 }
 
 func TestClient_onGetEffectiveConfigHandler(t *testing.T) {
@@ -490,6 +938,528 @@ func TestClient_onRemoteConfigHandler(t *testing.T) {
 				}
 
 				err := c.onRemoteConfigHandler(context.Background(), remoteConfig)
+				assert.ErrorIs(t, err, expectedErr)
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.desc, tc.testFunc)
+	}
+}
+
+func TestClient_onPackagesAvailableHandler(t *testing.T) {
+	collectorPackageName := packagestate.CollectorPackageName
+	allHash := []byte("totalhash0")
+	newAllHash := []byte("totalhash1")
+	packageHash := []byte("hash0")
+	newPackageHash := []byte("hash1")
+	newVersion := "999.999.999"
+	expectedErr := errors.New("oops")
+
+	packages := map[string]*protobufs.PackageAvailable{
+		collectorPackageName: {
+			Version: version.Version(),
+			Hash:    packageHash,
+			File:    &protobufs.DownloadableFile{},
+		},
+	}
+	packagesAvailable := &protobufs.PackagesAvailable{
+		AllPackagesHash: newAllHash,
+		Packages:        packages,
+	}
+
+	statuses := map[string]*protobufs.PackageStatus{
+		collectorPackageName: {
+			Name:                 collectorPackageName,
+			AgentHasVersion:      version.Version(),
+			AgentHasHash:         packageHash,
+			ServerOfferedVersion: version.Version(),
+			ServerOfferedHash:    packageHash,
+			Status:               protobufs.PackageStatus_Installed,
+		},
+	}
+	packageStatuses := &protobufs.PackageStatuses{
+		ServerProvidedAllPackagesHash: allHash,
+		Packages:                      statuses,
+	}
+
+	testCases := []struct {
+		desc     string
+		testFunc func(*testing.T)
+	}{
+		{
+			desc: "Same PackagesAvailable version but bad Last PackagesStatuses",
+			testFunc: func(t *testing.T) {
+				mockProvider := mocks.NewMockPackagesStateProvider(t)
+				mockProvider.On("LastReportedStatuses").Return(nil, expectedErr)
+				mockProvider.On("SetLastReportedStatuses", mock.Anything).Return(nil)
+				mockOpAmpClient := mocks.NewMockOpAMPClient(t)
+				mockOpAmpClient.On("SetPackageStatuses", mock.Anything).Return(nil).Run(func(args mock.Arguments) {
+					status := args.Get(0).(*protobufs.PackageStatuses)
+
+					assert.NotNil(t, status)
+					assert.Equal(t, "", status.ErrorMessage)
+					assert.Equal(t, packagesAvailable.AllPackagesHash, status.ServerProvidedAllPackagesHash)
+					assert.Equal(t, 1, len(status.Packages))
+					assert.Equal(t, packagesAvailable.Packages[collectorPackageName].Version, status.Packages[collectorPackageName].ServerOfferedVersion)
+					assert.Equal(t, packagesAvailable.Packages[collectorPackageName].Hash, status.Packages[collectorPackageName].ServerOfferedHash)
+					assert.Equal(t, "", status.Packages[collectorPackageName].ErrorMessage)
+					assert.Equal(t, protobufs.PackageStatus_Installed, status.Packages[collectorPackageName].Status)
+					assert.Equal(t, collectorPackageName, status.Packages[collectorPackageName].Name)
+					assert.Equal(t, packagesAvailable.Packages[collectorPackageName].Hash, status.Packages[collectorPackageName].AgentHasHash)
+					assert.Equal(t, packagesAvailable.Packages[collectorPackageName].Version, status.Packages[collectorPackageName].AgentHasVersion)
+				})
+
+				c := &Client{
+					packagesStateProvider: mockProvider,
+					opampClient:           mockOpAmpClient,
+					logger:                zap.NewNop(),
+				}
+
+				err := c.onPackagesAvailableHandler(packagesAvailable)
+				assert.NoError(t, err)
+			},
+		},
+		{
+			desc: "Same PackagesAvailable version",
+			testFunc: func(t *testing.T) {
+				mockProvider := mocks.NewMockPackagesStateProvider(t)
+				mockProvider.On("LastReportedStatuses").Return(packageStatuses, nil)
+				mockProvider.On("SetLastReportedStatuses", mock.Anything).Return(nil)
+				mockOpAmpClient := mocks.NewMockOpAMPClient(t)
+				mockOpAmpClient.On("SetPackageStatuses", mock.Anything).Return(nil).Run(func(args mock.Arguments) {
+					status := args.Get(0).(*protobufs.PackageStatuses)
+
+					assert.NotNil(t, status)
+					assert.Equal(t, "", status.ErrorMessage)
+					assert.Equal(t, packagesAvailable.AllPackagesHash, status.ServerProvidedAllPackagesHash)
+					assert.Equal(t, 1, len(status.Packages))
+					assert.Equal(t, packagesAvailable.Packages[collectorPackageName].Version, status.Packages[collectorPackageName].ServerOfferedVersion)
+					assert.Equal(t, packagesAvailable.Packages[collectorPackageName].Hash, status.Packages[collectorPackageName].ServerOfferedHash)
+					assert.Equal(t, "", status.Packages[collectorPackageName].ErrorMessage)
+					assert.Equal(t, protobufs.PackageStatus_Installed, status.Packages[collectorPackageName].Status)
+					assert.Equal(t, collectorPackageName, status.Packages[collectorPackageName].Name)
+					assert.Equal(t, packageStatuses.Packages[collectorPackageName].AgentHasHash, status.Packages[collectorPackageName].AgentHasHash)
+					assert.Equal(t, packageStatuses.Packages[collectorPackageName].AgentHasVersion, status.Packages[collectorPackageName].AgentHasVersion)
+				})
+
+				c := &Client{
+					packagesStateProvider: mockProvider,
+					opampClient:           mockOpAmpClient,
+					logger:                zap.NewNop(),
+				}
+
+				err := c.onPackagesAvailableHandler(packagesAvailable)
+				assert.NoError(t, err)
+			},
+		},
+		{
+			desc: "Same PackagesAvailable version and non supported package",
+			testFunc: func(t *testing.T) {
+				badPackageName := "no-support-package"
+				packagesNotSupported := map[string]*protobufs.PackageAvailable{
+					collectorPackageName: {
+						Version: version.Version(),
+						Hash:    packageHash,
+						File:    &protobufs.DownloadableFile{},
+					},
+					badPackageName: {
+						Version: newVersion,
+						Hash:    packageHash,
+					},
+				}
+				packagesAvailableNotSupported := &protobufs.PackagesAvailable{
+					AllPackagesHash: newAllHash,
+					Packages:        packagesNotSupported,
+				}
+
+				mockProvider := mocks.NewMockPackagesStateProvider(t)
+				mockProvider.On("LastReportedStatuses").Return(packageStatuses, nil)
+				mockProvider.On("SetLastReportedStatuses", mock.Anything).Return(nil)
+				mockOpAmpClient := mocks.NewMockOpAMPClient(t)
+				mockOpAmpClient.On("SetPackageStatuses", mock.Anything).Return(nil).Run(func(args mock.Arguments) {
+					status := args.Get(0).(*protobufs.PackageStatuses)
+
+					assert.NotNil(t, status)
+					assert.Equal(t, "", status.ErrorMessage)
+					assert.Equal(t, packagesAvailableNotSupported.AllPackagesHash, status.ServerProvidedAllPackagesHash)
+					assert.Equal(t, 2, len(status.Packages))
+					assert.Equal(t, packagesAvailableNotSupported.Packages[collectorPackageName].Version, status.Packages[collectorPackageName].ServerOfferedVersion)
+					assert.Equal(t, packagesAvailableNotSupported.Packages[collectorPackageName].Hash, status.Packages[collectorPackageName].ServerOfferedHash)
+					assert.Equal(t, "", status.Packages[collectorPackageName].ErrorMessage)
+					assert.Equal(t, protobufs.PackageStatus_Installed, status.Packages[collectorPackageName].Status)
+					assert.Equal(t, collectorPackageName, status.Packages[collectorPackageName].Name)
+					assert.Equal(t, packagesAvailableNotSupported.Packages[collectorPackageName].Hash, status.Packages[collectorPackageName].AgentHasHash)
+					assert.Equal(t, packagesAvailableNotSupported.Packages[collectorPackageName].Version, status.Packages[collectorPackageName].AgentHasVersion)
+					assert.Equal(t, packagesAvailableNotSupported.Packages[badPackageName].Version, status.Packages[badPackageName].ServerOfferedVersion)
+					assert.Equal(t, packagesAvailableNotSupported.Packages[badPackageName].Hash, status.Packages[badPackageName].ServerOfferedHash)
+					assert.Equal(t, fmt.Sprintf("Package %s not supported", badPackageName), status.Packages[badPackageName].ErrorMessage)
+					assert.Equal(t, protobufs.PackageStatus_InstallFailed, status.Packages[badPackageName].Status)
+					assert.Equal(t, badPackageName, status.Packages[badPackageName].Name)
+					assert.Nil(t, status.Packages[badPackageName].AgentHasHash)
+					assert.Equal(t, "", status.Packages[badPackageName].AgentHasVersion)
+				})
+
+				c := &Client{
+					packagesStateProvider: mockProvider,
+					opampClient:           mockOpAmpClient,
+					logger:                zap.NewNop(),
+				}
+
+				err := c.onPackagesAvailableHandler(packagesAvailableNotSupported)
+				assert.NoError(t, err)
+			},
+		},
+		{
+			desc: "Same PackagesAvailable version but Last PackageStatuses version mismatch",
+			testFunc: func(t *testing.T) {
+				statusesDiffHash := map[string]*protobufs.PackageStatus{
+					collectorPackageName: {
+						Name:                 collectorPackageName,
+						AgentHasVersion:      newVersion,
+						AgentHasHash:         newPackageHash,
+						ServerOfferedVersion: newVersion,
+						ServerOfferedHash:    newPackageHash,
+						Status:               protobufs.PackageStatus_Installed,
+					},
+				}
+				packageStatusesDiffHash := &protobufs.PackageStatuses{
+					ServerProvidedAllPackagesHash: newAllHash,
+					Packages:                      statusesDiffHash,
+				}
+
+				mockProvider := mocks.NewMockPackagesStateProvider(t)
+				mockProvider.On("LastReportedStatuses").Return(packageStatusesDiffHash, nil)
+				mockProvider.On("SetLastReportedStatuses", mock.Anything).Return(nil)
+				mockOpAmpClient := mocks.NewMockOpAMPClient(t)
+				mockOpAmpClient.On("SetPackageStatuses", mock.Anything).Return(nil).Run(func(args mock.Arguments) {
+					status := args.Get(0).(*protobufs.PackageStatuses)
+
+					assert.NotNil(t, status)
+					assert.Equal(t, "", status.ErrorMessage)
+					assert.Equal(t, packagesAvailable.AllPackagesHash, status.ServerProvidedAllPackagesHash)
+					assert.Equal(t, 1, len(status.Packages))
+					assert.Equal(t, packagesAvailable.Packages[collectorPackageName].Version, status.Packages[collectorPackageName].ServerOfferedVersion)
+					assert.Equal(t, packagesAvailable.Packages[collectorPackageName].Hash, status.Packages[collectorPackageName].ServerOfferedHash)
+					assert.Equal(t, "", status.Packages[collectorPackageName].ErrorMessage)
+					assert.Equal(t, protobufs.PackageStatus_Installed, status.Packages[collectorPackageName].Status)
+					assert.Equal(t, collectorPackageName, status.Packages[collectorPackageName].Name)
+					assert.Equal(t, packagesAvailable.Packages[collectorPackageName].Hash, status.Packages[collectorPackageName].AgentHasHash)
+					assert.NotEqual(t, statusesDiffHash[collectorPackageName].AgentHasHash, status.Packages[collectorPackageName].AgentHasHash)
+					assert.Equal(t, packagesAvailable.Packages[collectorPackageName].Version, status.Packages[collectorPackageName].AgentHasVersion)
+					assert.NotEqual(t, statusesDiffHash[collectorPackageName].AgentHasVersion, status.Packages[collectorPackageName].AgentHasVersion)
+				})
+
+				c := &Client{
+					packagesStateProvider: mockProvider,
+					opampClient:           mockOpAmpClient,
+					logger:                zap.NewNop(),
+				}
+
+				err := c.onPackagesAvailableHandler(packagesAvailable)
+				assert.NoError(t, err)
+			},
+		},
+		// The version of this test where the update goes well can't exist because
+		// it would kill the collector. StartAndMonitorUpdater will always return an error
+		// if it does return.
+		{
+			desc: "New PackagesAvailable version with good file but bad update",
+			testFunc: func(t *testing.T) {
+				packagesNew := map[string]*protobufs.PackageAvailable{
+					collectorPackageName: {
+						Version: newVersion,
+						Hash:    newPackageHash,
+						File:    &protobufs.DownloadableFile{},
+					},
+				}
+				packagesAvailableNew := &protobufs.PackagesAvailable{
+					AllPackagesHash: newAllHash,
+					Packages:        packagesNew,
+				}
+				savedStatuses := map[string]*protobufs.PackageStatus{
+					collectorPackageName: {
+						Name:                 collectorPackageName,
+						AgentHasVersion:      version.Version(),
+						AgentHasHash:         packageHash,
+						ServerOfferedVersion: newVersion,
+						ServerOfferedHash:    newPackageHash,
+						Status:               protobufs.PackageStatus_Installing,
+					},
+				}
+				savedPackageStatuses := &protobufs.PackageStatuses{
+					ServerProvidedAllPackagesHash: newAllHash,
+					Packages:                      savedStatuses,
+				}
+				wg := sync.WaitGroup{}
+				wg.Add(2)
+				mockUpdaterManager := mocks.NewMockUpdaterManager(t)
+				mockUpdaterManager.On("StartAndMonitorUpdater").Return(expectedErr)
+				mockProvider := mocks.NewMockPackagesStateProvider(t)
+				mockProvider.On("LastReportedStatuses").Return(packageStatuses, nil).Once()
+				mockProvider.On("LastReportedStatuses").Return(savedPackageStatuses, nil)
+				mockProvider.On("SetLastReportedStatuses", mock.Anything).Return(nil)
+				mockFileManager := mocks.NewMockDownloadableFileManager(t)
+				mockFileManager.On("FetchAndExtractArchive", mock.Anything).Return(nil).Run(func(args mock.Arguments) {
+					wg.Done()
+				})
+				mockFileManager.On("CleanupArtifacts").Return().Times(1)
+
+				mockOpAmpClient := mocks.NewMockOpAMPClient(t)
+				mockOpAmpClient.On("SetPackageStatuses", mock.Anything).Return(nil).Once().Run(func(args mock.Arguments) {
+					status := args.Get(0).(*protobufs.PackageStatuses)
+
+					assert.NotNil(t, status)
+					assert.Equal(t, "", status.ErrorMessage)
+					assert.Equal(t, packagesAvailableNew.AllPackagesHash, status.ServerProvidedAllPackagesHash)
+					assert.Equal(t, 1, len(status.Packages))
+					assert.Equal(t, packagesAvailableNew.Packages[collectorPackageName].Version, status.Packages[collectorPackageName].ServerOfferedVersion)
+					assert.Equal(t, packagesAvailableNew.Packages[collectorPackageName].Hash, status.Packages[collectorPackageName].ServerOfferedHash)
+					assert.Equal(t, "", status.Packages[collectorPackageName].ErrorMessage)
+					assert.Equal(t, protobufs.PackageStatus_Installing, status.Packages[collectorPackageName].Status)
+					assert.Equal(t, collectorPackageName, status.Packages[collectorPackageName].Name)
+					assert.Equal(t, packageStatuses.Packages[collectorPackageName].AgentHasHash, status.Packages[collectorPackageName].AgentHasHash)
+					assert.Equal(t, packageStatuses.Packages[collectorPackageName].AgentHasVersion, status.Packages[collectorPackageName].AgentHasVersion)
+				})
+				mockOpAmpClient.On("SetPackageStatuses", mock.Anything).Return(nil).Run(func(args mock.Arguments) {
+					status := args.Get(0).(*protobufs.PackageStatuses)
+
+					assert.NotNil(t, status)
+					assert.Equal(t, "", status.ErrorMessage)
+					assert.Equal(t, packagesAvailableNew.AllPackagesHash, status.ServerProvidedAllPackagesHash)
+					assert.Equal(t, 1, len(status.Packages))
+					assert.Equal(t, packagesAvailableNew.Packages[collectorPackageName].Version, status.Packages[collectorPackageName].ServerOfferedVersion)
+					assert.Equal(t, packagesAvailableNew.Packages[collectorPackageName].Hash, status.Packages[collectorPackageName].ServerOfferedHash)
+					assert.Equal(t, "Failed to run the latest Updater: oops", status.Packages[collectorPackageName].ErrorMessage)
+					assert.Equal(t, protobufs.PackageStatus_InstallFailed, status.Packages[collectorPackageName].Status)
+					assert.Equal(t, collectorPackageName, status.Packages[collectorPackageName].Name)
+					assert.Equal(t, packageStatuses.Packages[collectorPackageName].AgentHasHash, status.Packages[collectorPackageName].AgentHasHash)
+					assert.Equal(t, packageStatuses.Packages[collectorPackageName].AgentHasVersion, status.Packages[collectorPackageName].AgentHasVersion)
+					wg.Done()
+				})
+
+				c := &Client{
+					packagesStateProvider:   mockProvider,
+					downloadableFileManager: mockFileManager,
+					opampClient:             mockOpAmpClient,
+					logger:                  zap.NewNop(),
+					updaterManager:          mockUpdaterManager,
+				}
+
+				err := c.onPackagesAvailableHandler(packagesAvailableNew)
+				assert.NoError(t, err)
+				wg.Wait()
+				assert.False(t, c.safeGetUpdatingPackage())
+			},
+		},
+		{
+			desc: "New PackagesAvailable version while already installing",
+			testFunc: func(t *testing.T) {
+				packagesNew := map[string]*protobufs.PackageAvailable{
+					collectorPackageName: {
+						Version: newVersion,
+						Hash:    newPackageHash,
+						File:    &protobufs.DownloadableFile{},
+					},
+				}
+				packagesAvailableNew := &protobufs.PackagesAvailable{
+					AllPackagesHash: newAllHash,
+					Packages:        packagesNew,
+				}
+
+				mockOpAmpClient := mocks.NewMockOpAMPClient(t)
+				mockOpAmpClient.On("SetPackageStatuses", mock.Anything).Return(nil).Run(func(args mock.Arguments) {
+					status := args.Get(0).(*protobufs.PackageStatuses)
+
+					assert.NotNil(t, status)
+					assert.Equal(t, "Already installing new packages", status.ErrorMessage)
+					assert.Equal(t, packagesAvailableNew.AllPackagesHash, status.ServerProvidedAllPackagesHash)
+					assert.Equal(t, 0, len(status.Packages))
+				})
+
+				c := &Client{
+					opampClient:     mockOpAmpClient,
+					logger:          zap.NewNop(),
+					updatingPackage: true,
+				}
+
+				err := c.onPackagesAvailableHandler(packagesAvailableNew)
+				assert.ErrorContains(t, err, "failed because already installing packages")
+			},
+		},
+		{
+			desc: "New PackagesAvailable version with no DownloadableFile",
+			testFunc: func(t *testing.T) {
+				packagesNoFile := map[string]*protobufs.PackageAvailable{
+					collectorPackageName: {
+						Version: newVersion,
+						Hash:    newPackageHash,
+					},
+				}
+				packagesAvailableNoFile := &protobufs.PackagesAvailable{
+					AllPackagesHash: newAllHash,
+					Packages:        packagesNoFile,
+				}
+
+				mockProvider := mocks.NewMockPackagesStateProvider(t)
+				mockProvider.On("LastReportedStatuses").Return(packageStatuses, nil)
+				mockProvider.On("SetLastReportedStatuses", mock.Anything).Return(nil)
+				mockOpAmpClient := mocks.NewMockOpAMPClient(t)
+				mockOpAmpClient.On("SetPackageStatuses", mock.Anything).Return(nil).Run(func(args mock.Arguments) {
+					status := args.Get(0).(*protobufs.PackageStatuses)
+
+					assert.NotNil(t, status)
+					assert.Equal(t, "", status.ErrorMessage)
+					assert.Equal(t, packagesAvailableNoFile.AllPackagesHash, status.ServerProvidedAllPackagesHash)
+					assert.Equal(t, 1, len(status.Packages))
+					assert.Equal(t, packagesAvailableNoFile.Packages[collectorPackageName].Version, status.Packages[collectorPackageName].ServerOfferedVersion)
+					assert.Equal(t, packagesAvailableNoFile.Packages[collectorPackageName].Hash, status.Packages[collectorPackageName].ServerOfferedHash)
+					assert.Equal(t, "Package observiq-otel-collector does not have a valid downloadable file", status.Packages[collectorPackageName].ErrorMessage)
+					assert.Equal(t, protobufs.PackageStatus_InstallFailed, status.Packages[collectorPackageName].Status)
+					assert.Equal(t, collectorPackageName, status.Packages[collectorPackageName].Name)
+					assert.Equal(t, packageStatuses.Packages[collectorPackageName].AgentHasHash, status.Packages[collectorPackageName].AgentHasHash)
+					assert.Equal(t, packageStatuses.Packages[collectorPackageName].AgentHasVersion, status.Packages[collectorPackageName].AgentHasVersion)
+				})
+
+				c := &Client{
+					packagesStateProvider: mockProvider,
+					opampClient:           mockOpAmpClient,
+					logger:                zap.NewNop(),
+				}
+
+				err := c.onPackagesAvailableHandler(packagesAvailableNoFile)
+				assert.NoError(t, err)
+			},
+		},
+		{
+			desc: "New PackagesAvailable version with bad DownloadableFile",
+			testFunc: func(t *testing.T) {
+				packagesNew := map[string]*protobufs.PackageAvailable{
+					collectorPackageName: {
+						Version: newVersion,
+						Hash:    newPackageHash,
+						File:    &protobufs.DownloadableFile{},
+					},
+				}
+				packagesAvailableNew := &protobufs.PackagesAvailable{
+					AllPackagesHash: newAllHash,
+					Packages:        packagesNew,
+				}
+
+				mockFileManager := mocks.NewMockDownloadableFileManager(t)
+				mockFileManager.On("FetchAndExtractArchive", mock.Anything).Return(expectedErr)
+				mockFileManager.On("CleanupArtifacts").Return().Times(1)
+				mockProvider := mocks.NewMockPackagesStateProvider(t)
+				mockProvider.On("LastReportedStatuses").Return(packageStatuses, nil)
+				mockProvider.On("SetLastReportedStatuses", mock.Anything).Return(nil)
+				mockOpAmpClient := mocks.NewMockOpAMPClient(t)
+				// This is for the initial status that is sent in the main function.
+				mockOpAmpClient.On("SetPackageStatuses", mock.Anything).Return(nil).Once().Run(func(args mock.Arguments) {
+					status := args.Get(0).(*protobufs.PackageStatuses)
+
+					assert.NotNil(t, status)
+					assert.Equal(t, "", status.ErrorMessage)
+					assert.Equal(t, packagesAvailableNew.AllPackagesHash, status.ServerProvidedAllPackagesHash)
+					assert.Equal(t, 1, len(status.Packages))
+					assert.Equal(t, packagesAvailableNew.Packages[collectorPackageName].Version, status.Packages[collectorPackageName].ServerOfferedVersion)
+					assert.Equal(t, packagesAvailableNew.Packages[collectorPackageName].Hash, status.Packages[collectorPackageName].ServerOfferedHash)
+					assert.Equal(t, "", status.Packages[collectorPackageName].ErrorMessage)
+					assert.Equal(t, protobufs.PackageStatus_Installing, status.Packages[collectorPackageName].Status)
+					assert.Equal(t, collectorPackageName, status.Packages[collectorPackageName].Name)
+					assert.Equal(t, packageStatuses.Packages[collectorPackageName].AgentHasHash, status.Packages[collectorPackageName].AgentHasHash)
+					assert.Equal(t, packageStatuses.Packages[collectorPackageName].AgentHasVersion, status.Packages[collectorPackageName].AgentHasVersion)
+				})
+				// This will be called within the goroutine that is spun up from the main function.
+				mockOpAmpClient.On("SetPackageStatuses", mock.Anything).Return(nil).Run(func(args mock.Arguments) {
+					status := args.Get(0).(*protobufs.PackageStatuses)
+					assert.NotNil(t, status)
+					assert.Equal(t, "", status.ErrorMessage)
+					assert.Equal(t, packagesAvailableNew.AllPackagesHash, status.ServerProvidedAllPackagesHash)
+					assert.Equal(t, 1, len(status.Packages))
+					assert.Equal(t, packagesAvailableNew.Packages[collectorPackageName].Version, status.Packages[collectorPackageName].ServerOfferedVersion)
+					assert.Equal(t, packagesAvailableNew.Packages[collectorPackageName].Hash, status.Packages[collectorPackageName].ServerOfferedHash)
+					assert.Equal(t, "Failed to download and verify downloadable file: oops", status.Packages[collectorPackageName].ErrorMessage)
+					assert.Equal(t, protobufs.PackageStatus_InstallFailed, status.Packages[collectorPackageName].Status)
+					assert.Equal(t, collectorPackageName, status.Packages[collectorPackageName].Name)
+					assert.Equal(t, packageStatuses.Packages[collectorPackageName].AgentHasHash, status.Packages[collectorPackageName].AgentHasHash)
+					assert.Equal(t, packageStatuses.Packages[collectorPackageName].AgentHasVersion, status.Packages[collectorPackageName].AgentHasVersion)
+				})
+
+				c := &Client{
+					packagesStateProvider:   mockProvider,
+					downloadableFileManager: mockFileManager,
+					opampClient:             mockOpAmpClient,
+					logger:                  zap.NewNop(),
+				}
+
+				err := c.onPackagesAvailableHandler(packagesAvailableNew)
+				assert.NoError(t, err)
+				assert.Eventually(t, func() bool { return c.safeGetUpdatingPackage() == false }, 10*time.Second, 10*time.Millisecond)
+			},
+		},
+		{
+			desc: "Same PackagesAvailable version but bad set last PackageStatuses",
+			testFunc: func(t *testing.T) {
+				mockProvider := mocks.NewMockPackagesStateProvider(t)
+				mockProvider.On("LastReportedStatuses").Return(packageStatuses, nil)
+				mockProvider.On("SetLastReportedStatuses", mock.Anything).Return(expectedErr).Run(func(args mock.Arguments) {
+					status := args.Get(0).(*protobufs.PackageStatuses)
+
+					assert.NotNil(t, status)
+					assert.Equal(t, "", status.ErrorMessage)
+					assert.Equal(t, packagesAvailable.AllPackagesHash, status.ServerProvidedAllPackagesHash)
+					assert.Equal(t, 1, len(status.Packages))
+					assert.Equal(t, packagesAvailable.Packages[collectorPackageName].Version, status.Packages[collectorPackageName].ServerOfferedVersion)
+					assert.Equal(t, packagesAvailable.Packages[collectorPackageName].Hash, status.Packages[collectorPackageName].ServerOfferedHash)
+					assert.Equal(t, "", status.Packages[collectorPackageName].ErrorMessage)
+					assert.Equal(t, protobufs.PackageStatus_Installed, status.Packages[collectorPackageName].Status)
+					assert.Equal(t, collectorPackageName, status.Packages[collectorPackageName].Name)
+					assert.Equal(t, packagesAvailable.Packages[collectorPackageName].Hash, status.Packages[collectorPackageName].AgentHasHash)
+					assert.Equal(t, packagesAvailable.Packages[collectorPackageName].Version, status.Packages[collectorPackageName].AgentHasVersion)
+				})
+				mockOpAmpClient := mocks.NewMockOpAMPClient(t)
+
+				c := &Client{
+					packagesStateProvider: mockProvider,
+					opampClient:           mockOpAmpClient,
+					logger:                zap.NewNop(),
+				}
+
+				err := c.onPackagesAvailableHandler(packagesAvailable)
+				assert.ErrorIs(t, err, expectedErr)
+			},
+		},
+		{
+			desc: "Same PackagesAvailable version but bad SEND PackageStatuses",
+			testFunc: func(t *testing.T) {
+				mockProvider := mocks.NewMockPackagesStateProvider(t)
+				mockProvider.On("LastReportedStatuses").Return(packageStatuses, nil)
+				mockProvider.On("SetLastReportedStatuses", mock.Anything).Return(nil)
+				mockOpAmpClient := mocks.NewMockOpAMPClient(t)
+				mockOpAmpClient.On("SetPackageStatuses", mock.Anything).Return(expectedErr).Run(func(args mock.Arguments) {
+					status := args.Get(0).(*protobufs.PackageStatuses)
+
+					assert.NotNil(t, status)
+					assert.Equal(t, "", status.ErrorMessage)
+					assert.Equal(t, packagesAvailable.AllPackagesHash, status.ServerProvidedAllPackagesHash)
+					assert.Equal(t, 1, len(status.Packages))
+					assert.Equal(t, packagesAvailable.Packages[collectorPackageName].Version, status.Packages[collectorPackageName].ServerOfferedVersion)
+					assert.Equal(t, packagesAvailable.Packages[collectorPackageName].Hash, status.Packages[collectorPackageName].ServerOfferedHash)
+					assert.Equal(t, "", status.Packages[collectorPackageName].ErrorMessage)
+					assert.Equal(t, protobufs.PackageStatus_Installed, status.Packages[collectorPackageName].Status)
+					assert.Equal(t, collectorPackageName, status.Packages[collectorPackageName].Name)
+					assert.Equal(t, packagesAvailable.Packages[collectorPackageName].Hash, status.Packages[collectorPackageName].AgentHasHash)
+					assert.Equal(t, packagesAvailable.Packages[collectorPackageName].Version, status.Packages[collectorPackageName].AgentHasVersion)
+				})
+
+				c := &Client{
+					packagesStateProvider: mockProvider,
+					opampClient:           mockOpAmpClient,
+					logger:                zap.NewNop(),
+				}
+
+				err := c.onPackagesAvailableHandler(packagesAvailable)
 				assert.ErrorIs(t, err, expectedErr)
 			},
 		},
