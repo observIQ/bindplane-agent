@@ -5,7 +5,7 @@ go 1.17
 require (
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51
 	github.com/observiq/observiq-otel-collector/packagestate v0.0.0-00010101000000-000000000000
-	github.com/open-telemetry/opamp-go v0.2.0
+	github.com/open-telemetry/opamp-go v0.3.0
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.8.0
 	go.uber.org/zap v1.21.0
