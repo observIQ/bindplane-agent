@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 	_ "time/tzdata"
 
 	"github.com/google/uuid"
@@ -161,7 +162,7 @@ func checkManagerConfig(configPath *string) error {
 }
 
 func ensureIdentity(configPath string) error {
-	cBytes, err := os.ReadFile(configPath)
+	cBytes, err := os.ReadFile(filepath.Clean(configPath))
 	if err != nil {
 		return fmt.Errorf("unable to read file: %w", err)
 	}
@@ -182,7 +183,7 @@ func ensureIdentity(configPath string) error {
 		return fmt.Errorf("failed to marshal sanitized config: %w", err)
 	}
 
-	if err = os.WriteFile(configPath, newBytes, 0600); err != nil {
+	if err = os.WriteFile(filepath.Clean(configPath), newBytes, 0600); err != nil {
 		return fmt.Errorf("failed to rewrite manager config with identifying fields: %w", err)
 	}
 	return nil

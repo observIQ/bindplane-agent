@@ -147,8 +147,8 @@ func TestManagerConfigCheckFileModes(t *testing.T) {
 			expectedErr: errors.New("failed to rewrite manager config with identifying fields"),
 		},
 		{
-			name:        "execute_only",
-			fileMode:    0100,
+			name:        "write_only",
+			fileMode:    0222,
 			expectedErr: errors.New("unable to read file"),
 		},
 		{
