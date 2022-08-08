@@ -110,11 +110,10 @@ func logOptions(loggingConfigPath *string) ([]zap.Option, error) {
 
 func checkManagerConfig(configPath *string) error {
 	_, statErr := os.Stat(*configPath)
-
 	switch {
 	case statErr == nil:
-		// We found the file just return nil
-		return nil
+		// We found the file, ensure it has identifying fields before establishing any opamp connections
+		return ensureIdentity(*configPath)
 	case errors.Is(statErr, os.ErrNotExist):
 		var ok bool
 
@@ -158,4 +157,32 @@ func checkManagerConfig(configPath *string) error {
 	}
 	// Return non os.ErrNotExist
 	return statErr
+}
+
+func ensureIdentity(configPath string) error {
+	cBytes, err := os.ReadFile(configPath)
+	if err != nil {
+		return fmt.Errorf("unable to read file: %w", err)
+	}
+	var candidateConfig opamp.Config
+	err = yaml.Unmarshal(cBytes, &candidateConfig)
+	if err != nil {
+		return fmt.Errorf("unable to interpret config file: %w", err)
+	}
+
+	// if they already have an AgentID, don't generate it
+	if candidateConfig.AgentID != "" {
+		return nil
+	}
+
+	candidateConfig.AgentID = uuid.NewString()
+	newBytes, err := yaml.Marshal(candidateConfig)
+	if err != nil {
+		return fmt.Errorf("failed to marshal sanitized config: %w", err)
+	}
+
+	if err = os.WriteFile(configPath, newBytes, 0600); err != nil {
+		return fmt.Errorf("failed to rewrite manager config with identifying fields: %w", err)
+	}
+	return nil
 }
