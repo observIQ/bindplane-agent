@@ -1,6 +1,6 @@
 module github.com/observiq/observiq-otel-collector/packagestate
 
-go 1.17
+go 1.18
 
 require (
 	github.com/open-telemetry/opamp-go v0.2.0

@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Package service handles interacting with the OS specific service manager
 package service
 
 import (
@@ -20,8 +21,9 @@ import (
 	"path/filepath"
 )
 
-//go:generate mockery --name Service --filename service.go
 // Service represents a controllable service
+//
+//go:generate mockery --name Service --filename service.go
 type Service interface {
 	// Start the service
 	Start() error

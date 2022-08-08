@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Package version exposes data on the collector set at compile time
 package version
 
 // these will be replaced at link time by make.

@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Package collector presents an interface that wraps the OTel Collector Core
 package collector
 
 import (

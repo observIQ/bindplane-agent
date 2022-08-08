@@ -1,6 +1,6 @@
 module github.com/observiq/observiq-otel-collector
 
-go 1.17
+go 1.18
 
 require (
 	github.com/GoogleCloudPlatform/opentelemetry-operations-collector v0.0.3-0.20220804181753-b3246a402440
