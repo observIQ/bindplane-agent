@@ -12,9 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Package action provides actions used in install
 package action
 
 // RollbackableAction is an interface to represents an install action that may be rolled back.
+//
 //go:generate mockery --name RollbackableAction --filename rollbackable_action.go
 type RollbackableAction interface {
 	Rollback() error

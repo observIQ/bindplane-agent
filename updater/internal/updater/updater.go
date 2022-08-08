@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Package updater handles all aspects of updating the collector from a provided archive
 package updater
 
 import (

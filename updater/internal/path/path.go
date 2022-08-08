@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Package path contains helper functions, some OS specific, for getting paths involved in updating.
 package path
 
 import "path/filepath"

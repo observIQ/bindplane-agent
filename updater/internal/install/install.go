@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Package install handles installation of new collector artifacts
 package install
 
 import (
@@ -29,7 +30,8 @@ import (
 	"go.uber.org/zap"
 )
 
-//Installer is an interface that performs an Install of a new collector.
+// Installer is an interface that performs an Install of a new collector.
+//
 //go:generate mockery --name Installer --filename installer.go
 type Installer interface {
 	// Install installs new artifacts over the old ones.
