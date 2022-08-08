@@ -14,6 +14,7 @@
 
 //go:build !windows
 
+// Package logging parses and applies logging configuration
 package logging
 
 import (

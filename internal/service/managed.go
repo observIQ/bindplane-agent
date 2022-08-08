@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Package service provides a service wrapper around the collector regardless of managed or standalone mode.
 package service
 
 import (

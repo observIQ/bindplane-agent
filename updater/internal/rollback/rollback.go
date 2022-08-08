@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Package rollback provides structures and interfaces for rolling back actions
 package rollback
 
 import (
@@ -29,7 +30,8 @@ import (
 	"go.uber.org/zap"
 )
 
-//Rollbacker is an interface that performs rollback/backup actions.
+// Rollbacker is an interface that performs rollback/backup actions.
+//
 //go:generate mockery --name Rollbacker --filename rollbacker.go
 type Rollbacker interface {
 	// AppendAction saves the action so that it can be rolled back later.

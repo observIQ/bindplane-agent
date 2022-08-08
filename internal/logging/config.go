@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Package logging parses and applies logging configuration
 package logging
 
 import (
