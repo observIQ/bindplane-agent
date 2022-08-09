@@ -15,12 +15,17 @@
 package main
 
 import (
+	"errors"
+	"fmt"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
 
+	"github.com/google/uuid"
 	"github.com/observiq/observiq-otel-collector/opamp"
 	"github.com/stretchr/testify/require"
+	"gopkg.in/yaml.v3"
 )
 
 func TestCheckManagerNoConfig(t *testing.T) {
@@ -69,12 +74,90 @@ func TestCheckManagerConfigNoFile(t *testing.T) {
 	require.Equal(t, expected, actual)
 }
 
-func TestCheckManagerConfig(t *testing.T) {
-	tmpdir := t.TempDir()
-	manager := filepath.Join(tmpdir, "manager.yaml")
-
-	data := []byte("temporary directory")
-	os.WriteFile(manager, data, 0600)
+func TestManagerConfigNoAgentIDWillSet(t *testing.T) {
+	tmpDir := t.TempDir()
+	manager := filepath.Join(tmpDir, "manager.yaml")
+	data := []byte("")
+	require.NoError(t, os.WriteFile(manager, data, 0600))
 	err := checkManagerConfig(&manager)
 	require.NoError(t, err)
+
+	cfgBytes, err := ioutil.ReadFile(manager)
+	require.NoError(t, err)
+
+	var config opamp.Config
+	require.NoError(t, yaml.Unmarshal(cfgBytes, &config))
+	require.NotEmpty(t, config.AgentID)
+	uuidv4, err := uuid.Parse(config.AgentID)
+	require.NoError(t, err)
+	require.NotEmpty(t, uuidv4)
+}
+
+func TestManagerConfigWillNotOverwriteCurrentAgentID(t *testing.T) {
+	tmpDir := t.TempDir()
+	manager := filepath.Join(tmpDir, "manager.yaml")
+
+	id := uuid.NewString()
+	data := []byte(fmt.Sprintf(`
+---
+agent_id: %s
+`, id))
+	require.NoError(t, os.WriteFile(manager, data, 0600))
+	err := checkManagerConfig(&manager)
+	require.NoError(t, err)
+
+	cfgBytes, err := ioutil.ReadFile(manager)
+	require.NoError(t, err)
+
+	var config opamp.Config
+	require.NoError(t, yaml.Unmarshal(cfgBytes, &config))
+	require.Equal(t, config.AgentID, id)
+}
+
+func TestManagerConfigWillErrorOnInvalidOpAmpConfig(t *testing.T) {
+	tmpDir := t.TempDir()
+	manager := filepath.Join(tmpDir, "manager.yaml")
+	data := []byte(`
+---
+agent_id:
+  - some-kind-of-array
+  - should-blow-up
+`)
+	require.NoError(t, os.WriteFile(manager, data, 0600))
+	err := checkManagerConfig(&manager)
+	require.Error(t, err)
+	require.ErrorContains(t, err, "unable to interpret config file")
+}
+
+func TestManagerConfigCheckFileModes(t *testing.T) {
+	tmpDir := t.TempDir()
+
+	testCases := []struct {
+		name        string
+		fileMode    os.FileMode
+		expectedErr error
+	}{
+		{
+			name:        "read_only",
+			fileMode:    0400,
+			expectedErr: errors.New("failed to rewrite manager config with identifying fields"),
+		},
+		{
+			name:     "valid_read_write",
+			fileMode: 0600,
+		},
+	}
+
+	for idx, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			manager := filepath.Join(tmpDir, fmt.Sprintf("manager-%d.yaml", idx))
+			require.NoError(t, os.WriteFile(manager, []byte(""), tc.fileMode))
+			err := checkManagerConfig(&manager)
+			if tc.expectedErr != nil {
+				require.ErrorContains(t, err, tc.expectedErr.Error())
+			} else {
+				require.NoError(t, err)
+			}
+		})
+	}
 }
