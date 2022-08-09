@@ -76,7 +76,6 @@ func TestCheckManagerConfigNoFile(t *testing.T) {
 
 func TestManagerConfigNoAgentIDWillSet(t *testing.T) {
 	tmpDir := t.TempDir()
-	defer os.RemoveAll(tmpDir)
 	manager := filepath.Join(tmpDir, "manager.yaml")
 	data := []byte("")
 	require.NoError(t, os.WriteFile(manager, data, 0600))
@@ -96,7 +95,6 @@ func TestManagerConfigNoAgentIDWillSet(t *testing.T) {
 
 func TestManagerConfigWillNotOverwriteCurrentAgentID(t *testing.T) {
 	tmpDir := t.TempDir()
-	defer os.RemoveAll(tmpDir)
 	manager := filepath.Join(tmpDir, "manager.yaml")
 
 	id := uuid.NewString()
@@ -118,7 +116,6 @@ agent_id: %s
 
 func TestManagerConfigWillErrorOnInvalidOpAmpConfig(t *testing.T) {
 	tmpDir := t.TempDir()
-	defer os.RemoveAll(tmpDir)
 	manager := filepath.Join(tmpDir, "manager.yaml")
 	data := []byte(`
 ---
@@ -134,7 +131,6 @@ agent_id:
 
 func TestManagerConfigCheckFileModes(t *testing.T) {
 	tmpDir := t.TempDir()
-	defer os.RemoveAll(tmpDir)
 
 	testCases := []struct {
 		name        string
