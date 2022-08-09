@@ -15,6 +15,10 @@ parameters:
       - iis
       - ncsa
     default: w3c
+  - name: w3c_header
+    description: "The W3C header which specifies the field names. Only applicable if log_format is w3c."
+    type: "string"
+    default: "date time s-ip cs-method cs-uri-stem cs-uri-query s-port cs-username c-ip cs(User-Agent) cs(Referer) sc-status sc-substatus sc-win32-status time-taken"
   - name: exclude_file_log_path
     description: Specify a single path or multiple paths to exclude one or many files from being read. You may also use a wildcard (*) to exclude multiple files from being read within a directory
     type: "[]string"
@@ -67,26 +71,55 @@ template: |
       include_file_path_resolved: {{ .include_file_path_resolved }}
       start_at: {{ .start_at }}
       operators: 
-    
-      - id: add_log_type
-        type: add
-        field: 'attributes.log_type'
-        value: 'microsoft_iis'
-
-      - id: body_parser
-        type: regex_parser
-        regex: '^(?P<timestamp>\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2})\s+(?P<address>[^\s]+)\s+(?P<operation>\w{3})\s+(?P<cs_uri_stem>[^\s]+)\s(?P<cs_uri_query>[^\s]+)\s+(?P<s_port>[^\s]+)\s+-\s+(?P<remoteIp>[^\s]+)\s+(?P<userAgent>[^\s]+)\s+-\s+(?P<status>\d{3})\s+(?P<sc_status>\d)\s+(?P<sc_win32_status>\d)\s+(?P<time_taken>[^\n]+)'
-        timestamp:
-          parse_from: attributes.timestamp
-          layout: '%Y-%m-%d %H:%M:%S'
-          location: {{.timezone}}
+      - type: filter
+        expr: 'body matches "^#"'
+        
+      - type: csv_parser
+        header: '{{ .w3c_header }}'
+        delimiter: " "
         severity: 
-          parse_from: attributes.status
+          parse_from: 'attributes["sc-status"]'
+          if: 'attributes["sc-status"] != nil'
           mapping:
             info: 2xx
             info2: 3xx
             warn: 4xx
             error: 5xx
+
+      # If both date & time field exists, parse the timestamp
+      - type: router
+        routes:
+        - output: add_timestamp
+          expr: 'attributes.date != nil and attributes.time != nil'
+        default: add_log_type
+
+      # Combines data + time fields into timestamp field
+      - id: add_timestamp
+        type: add
+        field: attributes.timestamp
+        value: EXPR(attributes.date + " " + attributes.time)
+
+      # Remove date field
+      - id: remove_date
+        type: remove
+        field: attributes.date
+
+      # Remove time field
+      - id: remove_time
+        type: remove
+        field: attributes.time
+
+      - id: time_parser
+        type: time_parser
+        if: 'attributes.timestamp != nil'
+        parse_from: attributes.timestamp
+        layout: '%Y-%m-%d %H:%M:%S'
+        location: {{.timezone}}
+
+      - id: add_log_type
+        type: add
+        field: 'attributes.log_type'
+        value: 'microsoft_iis'
     {{end}}
     # IIS format
     {{if eq .log_format "iis"}}
@@ -129,7 +162,7 @@ template: |
         if: 'attributes.date != nil'
         field: attributes.date
 
-      # Remove date field
+      # Remove time field
       - id: remove_time
         type: remove
         if: 'attributes.time != nil'
