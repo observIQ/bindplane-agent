@@ -7,6 +7,14 @@ parameters:
     type: "[]string"
     default: 
       - "C:/inetpub/logs/LogFiles/W3SVC*/**/*.log"
+  - name: log_format
+    description: "The format of the IIS logs. For more information on the various log formats, see: https://docs.microsoft.com/en-us/previous-versions/iis/6.0-sdk/ms525807%28v=vs.90%29"
+    type: "string"
+    supported:
+      - w3c
+      - iis
+      - ncsa
+    default: w3c
   - name: exclude_file_log_path
     description: Specify a single path or multiple paths to exclude one or many files from being read. You may also use a wildcard (*) to exclude multiple files from being read within a directory
     type: "[]string"
@@ -39,7 +47,9 @@ parameters:
       - end
     default: end
 template: |
-  receivers: 
+  receivers:
+    # W3C format
+    {{if eq .log_format "w3c"}}
     filelog:
       include: 
       {{ range $i, $fp := .file_path }}
@@ -77,7 +87,105 @@ template: |
             info2: 3xx
             warn: 4xx
             error: 5xx
-    
+    {{end}}
+    # IIS format
+    {{if eq .log_format "iis"}}
+    filelog:
+      include: 
+      {{ range $i, $fp := .file_path }}
+        - '{{ $fp }}'
+      {{ end }}
+      {{ if .exclude_file_log_path }}  
+      exclude: 
+      {{ range $i, $efp := .exclude_file_log_path }}
+        - '{{ $efp }}'
+      {{ end }}
+     {{ end }}
+      include_file_name: {{ .include_file_name }}
+      include_file_path: {{ .include_file_path }}
+      include_file_name_resolved: {{ .include_file_name_resolved }}
+      include_file_path_resolved: {{ .include_file_path_resolved }}
+      start_at: {{ .start_at }}
+      operators: 
+      - type: regex_parser
+        regex: '^(?P<remoteIp>[^,]+), (?P<user>[^,]+), (?P<date>[^,]+), (?P<time>[^,]+), (?P<service>[^,]+), (?P<server_name>[^,]+), (?P<address>[^,]+), (?P<time_taken>[^,]+), (?P<cs_bytes_sent>[^,]+), (?P<sc_bytes_sent>[^,]+), (?P<sc_status>[^,]+), (?P<sc_win32_status>[^,]+), (?P<operation>[^,]+), (?P<cs_uri_stem>[^,]+), (?P<cs_uri_query>[^,]+),$'
+        severity:
+          parse_from: attributes.sc_status
+          mapping:
+            info: 2xx
+            info2: 3xx
+            warn: 4xx
+            error: 5xx
+
+      - id: add_timestamp
+        type: add
+        if: 'attributes.date != nil and attributes.time != nil'
+        field: attributes.timestamp
+        value: EXPR(attributes.date + " " + attributes.time)
+
+      # Remove date field
+      - id: remove_date
+        type: remove
+        if: 'attributes.date != nil'
+        field: attributes.date
+
+      # Remove date field
+      - id: remove_time
+        type: remove
+        if: 'attributes.time != nil'
+        field: attributes.time
+
+      - id: time_parser
+        type: time_parser
+        if: 'attributes.timestamp != nil'
+        parse_from: attributes.timestamp
+        layout: '%q/%g/%Y %H:%M:%S'
+        location: {{.timezone}}
+
+      - id: add_log_type
+        type: add
+        field: 'attributes.log_type'
+        value: 'microsoft_iis'
+    {{end}}
+
+    # NCSA format
+    {{if eq .log_format "ncsa"}}
+    filelog:
+      include: 
+      {{ range $i, $fp := .file_path }}
+        - '{{ $fp }}'
+      {{ end }}
+      {{ if .exclude_file_log_path }}  
+      exclude: 
+      {{ range $i, $efp := .exclude_file_log_path }}
+        - '{{ $efp }}'
+      {{ end }}
+     {{ end }}
+      include_file_name: {{ .include_file_name }}
+      include_file_path: {{ .include_file_path }}
+      include_file_name_resolved: {{ .include_file_name_resolved }}
+      include_file_path_resolved: {{ .include_file_path_resolved }}
+      start_at: {{ .start_at }}
+      operators: 
+      - type: regex_parser
+        # Note: The second, uncaptured group here is "Remote log name". This value is always "-" in IIS, so we don't include it
+        regex: '^(?P<remoteIp>[^\s]+) (?:[^\s]+) (?P<user>[^\s]+) \[(?P<timestamp>[^]]+)\] "(?P<operation>[^\s]+) (?P<cs_uri_stem>[^\s?]+)(?:\?(?P<cs_uri_query>[^\s]+))? (?P<protocol>[^\s]+)" (?P<sc_status>[^\s]+) (?P<sc_bytes>[^\s]+)$'
+        severity:
+          parse_from: attributes.sc_status
+          mapping:
+            info: 2xx
+            info2: 3xx
+            warn: 4xx
+            error: 5xx
+        timestamp:
+          parse_from: attributes.timestamp
+          layout: '%d/%b/%Y:%H:%M:%S %z'
+      
+      - id: add_log_type
+        type: add
+        field: 'attributes.log_type'
+        value: 'microsoft_iis'
+    {{end}}
   service:
     pipelines:
       logs:
