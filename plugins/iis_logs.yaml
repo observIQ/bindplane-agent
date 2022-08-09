@@ -1,4 +1,4 @@
-version: 0.1.0
+version: 0.2.0
 title: IIS
 description: Log parser for IIS
 parameters:
@@ -73,7 +73,7 @@ template: |
       operators: 
       - type: filter
         expr: 'body matches "^#"'
-        
+
       - type: csv_parser
         header: '{{ .w3c_header }}'
         delimiter: " "
@@ -141,9 +141,9 @@ template: |
       start_at: {{ .start_at }}
       operators: 
       - type: regex_parser
-        regex: '^(?P<remoteIp>[^,]+), (?P<user>[^,]+), (?P<date>[^,]+), (?P<time>[^,]+), (?P<service>[^,]+), (?P<server_name>[^,]+), (?P<address>[^,]+), (?P<time_taken>[^,]+), (?P<cs_bytes_sent>[^,]+), (?P<sc_bytes_sent>[^,]+), (?P<sc_status>[^,]+), (?P<sc_win32_status>[^,]+), (?P<operation>[^,]+), (?P<cs_uri_stem>[^,]+), (?P<cs_uri_query>[^,]+),$'
+        regex: '^(?P<c_ip>[^,]+), (?P<cs_username>[^,]+), (?P<date>[^,]+), (?P<time>[^,]+), (?P<s_sitename>[^,]+), (?P<s_computername>[^,]+), (?P<s_ip>[^,]+), (?P<time_taken>[^,]+), (?P<cs_bytes>[^,]+), (?P<sc_bytes>[^,]+), (?P<sc_status>[^,]+), (?P<sc_win32_status>[^,]+), (?P<cs_method>[^,]+), (?P<cs_uri_stem>[^,]+), (?P<cs_uri_query>[^,]+),$'
         severity:
-          parse_from: attributes.sc_status
+          parse_from: 'attributes["sc_status"]'
           mapping:
             info: 2xx
             info2: 3xx
@@ -202,9 +202,9 @@ template: |
       operators: 
       - type: regex_parser
         # Note: The second, uncaptured group here is "Remote log name". This value is always "-" in IIS, so we don't include it
-        regex: '^(?P<remoteIp>[^\s]+) (?:[^\s]+) (?P<user>[^\s]+) \[(?P<timestamp>[^]]+)\] "(?P<operation>[^\s]+) (?P<cs_uri_stem>[^\s?]+)(?:\?(?P<cs_uri_query>[^\s]+))? (?P<protocol>[^\s]+)" (?P<sc_status>[^\s]+) (?P<sc_bytes>[^\s]+)$'
+        regex: '^(?P<c_ip>[^\s]+) (?:[^\s]+) (?P<cs_username>[^\s]+) \[(?P<timestamp>[^]]+)\] "(?P<cs_method>[^\s]+) (?P<cs_uri_stem>[^\s?]+)(?:\?(?P<cs_uri_query>[^\s]+))? (?P<cs_version>[^\s]+)" (?P<sc_status>[^\s]+) (?P<sc_bytes>[^\s]+)$'
         severity:
-          parse_from: attributes.sc_status
+          parse_from: 'attributes["sc_status"]'
           mapping:
             info: 2xx
             info2: 3xx
