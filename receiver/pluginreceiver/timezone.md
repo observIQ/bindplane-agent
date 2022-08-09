@@ -1,3 +1,7 @@
+# Timezone
+
+Below is a list of possible values for the `timezone` plugin parameter:
+
 - "UTC"
 - "Africa/Abidjan"
 - "Africa/Accra"
