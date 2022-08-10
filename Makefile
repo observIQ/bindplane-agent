@@ -84,7 +84,7 @@ install-tools:
 	go install golang.org/x/tools/cmd/goimports@latest
 	go install github.com/client9/misspell/cmd/misspell@v0.3.4
 	go install github.com/sigstore/cosign/cmd/cosign@v1.10.1
-	go install github.com/goreleaser/goreleaser@v1.9.1
+	go install github.com/goreleaser/goreleaser@v1.10.3
 	go install github.com/securego/gosec/v2/cmd/gosec@v2.10.0
 	go install github.com/uw-labs/lichen@v0.1.7
 	go install github.com/open-telemetry/opentelemetry-collector-contrib/cmd/mdatagen@v0.47.0
