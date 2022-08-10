@@ -96,7 +96,7 @@ lint:
 
 .PHONY: misspell
 misspell:
-	misspell $(ALLDOC)
+	misspell -error $(ALLDOC)
 
 .PHONY: misspell-fix
 misspell-fix:

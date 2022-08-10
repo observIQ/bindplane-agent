@@ -51,7 +51,7 @@ template: |
               layout: '%m%d %H:%M:%S.%s'
               location: {{ .timezone }}
           # Replace raw klog body with the message field extracted
-          # by regex parser. The severity and timestmap have been
+          # by regex parser. The severity and timestamp have been
           # promoted to the entry and are no longer useful in the body.
           - type: move
             from: attributes.message
