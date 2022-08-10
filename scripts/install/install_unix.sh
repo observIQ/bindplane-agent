@@ -576,10 +576,10 @@ unpack_package()
 {
   case "$package_type" in
     deb)
-      dpkg -i "$out_file_path" > /dev/null
+      dpkg -i "$out_file_path" > /dev/null || error_exit "$LINENO" "Failed to unpack package"
       ;;
     rpm)
-      rpm -U "$out_file_path" > /dev/null
+      rpm -U "$out_file_path" > /dev/null || error_exit "$LINENO" "Failed to unpack package"
       ;;
     *)
       error "Unrecognized package type"
