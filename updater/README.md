@@ -6,17 +6,17 @@ Because the updater interacts with the service manager, and may edit privileged 
 
 ## Updating Overview
 
-1. Collector receives PackagesAvailable message.
-2. Collector downloads tarball containing new updater and updated artifacts (e.g. new collector, plugins, etc.) based on the contents of the PackagesAvailable message.
-3. Collector unpacks tarball into `$INSTALL_DIR/tmp/latest`.
-4. Collector copies the newest updater binary from `$INSTALL_DIR/tmp/latest` to the working directory.
-5. Collector starts the updater in as a separate process in a new process group.
+1. The collector receives PackagesAvailable message.
+2. The collector downloads tarball containing new updater and updated artifacts (e.g. new collector, plugins, etc.) based on the contents of the PackagesAvailable message.
+3. The collector unpacks tarball into `$INSTALL_DIR/tmp/latest`.
+4. The collector copies the newest updater binary from `$INSTALL_DIR/tmp/latest` to the working directory.
+5. The collector starts the updater in as a separate process in a new process group.
   a. If the updater fails to stop the collector within 30 minutes, 
 
 6. The updater starts, then shuts down collector through the service manager.
 7. The collector shuts down, orphaning the updater process.
 8. The updater creates a backup of the current installation directory in `$INSTALL_DIR/tmp/rollback`.
-  a. If backing up fails for some reason, the updater starts the collector again and exits.
+   a. If backing up fails for some reason, the updater starts the collector again and exits.
 9. The updater installs new artifacts, copying the new files into the the installation directory.
    a. If installation fails for some reason, a rollback is initiated.
 10. The updater updates the service configuration.
@@ -27,6 +27,8 @@ Because the updater interacts with the service manager, and may edit privileged 
 
 ## Collector Status Monitoring
 The collector saves its current state (installing, installation failed, or installation successful) to a JSON file (`package_statuses.json`) on disk. The updater continuously polls this file for changes in order to detect whether the collector is healthy or not. 
+
+If the collector starts, is able to run successfully, and has its expected version (the version we are upgrading to), the collector will write that the installation was successful to the JSON file. Otherwise, it will write that the installation failed, and will expect the updater to perform a rollback.
 
 If the file indicates the installation failed, or the file still indicates the collector is in an installing state after 10 seconds, a rollback to the previous version is initiated by the updater.
 
