@@ -13,7 +13,7 @@ Because the updater interacts with the service manager, and may edit privileged 
 5. The collector starts the updater in as a separate process in a new process group.
   a. If the updater fails to stop the collector within 30 minutes, 
 
-6. The updater starts, then shuts down collector through the service manager.
+6. The updater starts, then shuts down the collector through the service manager.
 7. The collector shuts down, orphaning the updater process.
 8. The updater creates a backup of the current installation directory in `$INSTALL_DIR/tmp/rollback`.
    a. If backing up fails for some reason, the updater starts the collector again and exits.
