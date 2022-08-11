@@ -11,18 +11,18 @@ Because the updater interacts with the service manager, and may edit privileged 
 3. The collector unpacks tarball into `$INSTALL_DIR/tmp/latest`.
 4. The collector copies the newest updater binary from `$INSTALL_DIR/tmp/latest` to the working directory.
 5. The collector starts the updater in as a separate process in a new process group.
-  a. If the updater fails to stop the collector within 30 minutes, 
+  * If the updater fails to stop the collector within 30 minutes, 
 
 6. The updater starts, then shuts down the collector through the service manager.
 7. The collector shuts down, orphaning the updater process.
 8. The updater creates a backup of the current installation directory in `$INSTALL_DIR/tmp/rollback`.
-   a. If backing up fails for some reason, the updater starts the collector again and exits.
+   * If backing up fails for some reason, the updater starts the collector again and exits.
 9. The updater installs new artifacts, copying the new files into the the installation directory.
-   a. If installation fails for some reason, a rollback is initiated.
+   * If installation fails for some reason, a rollback is initiated.
 10. The updater updates the service configuration.
 11. The updater starts the collector again, monitoring for collector to be healthy.
-    a. If the collector is determined to be healthy, the updater exits
-    b. If the collector is determined unhealthy or doesn't report healthy within 10 seconds, a rollback is initiated. 
+    * If the collector is determined to be healthy, the updater exits
+    * If the collector is determined unhealthy or doesn't report healthy within 10 seconds, a rollback is initiated. 
 12. Upon exit, the updater removes the tmp directory.
 
 ## Collector Status Monitoring
