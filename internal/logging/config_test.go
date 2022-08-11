@@ -27,14 +27,15 @@ func TestNewLoggerConfig(t *testing.T) {
 	t.Setenv("MYVAR", "/some/path")
 
 	cases := []struct {
-		name       string
-		configPath string
-		expect     *LoggerConfig
+		name        string
+		configPath  string
+		expect      *LoggerConfig
+		expectedErr string
 	}{
 		{
-			"file config",
-			"testdata/info.yaml",
-			&LoggerConfig{
+			name:       "file config",
+			configPath: filepath.Join("testdata", "info.yaml"),
+			expect: &LoggerConfig{
 				Output: fileOutput,
 				Level:  zapcore.InfoLevel,
 				File: &lumberjack.Logger{
@@ -46,17 +47,17 @@ func TestNewLoggerConfig(t *testing.T) {
 			},
 		},
 		{
-			"stdout config",
-			"testdata/stdout.yaml",
-			&LoggerConfig{
+			name:       "stdout config",
+			configPath: filepath.Join("testdata", "stdout.yaml"),
+			expect: &LoggerConfig{
 				Output: stdOutput,
 				Level:  zapcore.DebugLevel,
 			},
 		},
 		{
-			"config with environment variables in filename",
-			"testdata/expand-env.yaml",
-			&LoggerConfig{
+			name:       "config with environment variables in filename",
+			configPath: filepath.Join("testdata", "expand-env.yaml"),
+			expect: &LoggerConfig{
 				Output: fileOutput,
 				Level:  zapcore.InfoLevel,
 				File: &lumberjack.Logger{
@@ -68,25 +69,34 @@ func TestNewLoggerConfig(t *testing.T) {
 			},
 		},
 		{
-			"config does not exist",
-			"testdata/does-not-exist.yaml",
-			&LoggerConfig{
-				Output: stdOutput,
-				Level:  zapcore.InfoLevel,
-			},
+			name:        "config does not exist",
+			configPath:  filepath.Join("testdata", "does-not-exist.yaml"),
+			expectedErr: "failed to read config",
+		},
+		{
+			name:        "config exists but is not valid yaml",
+			configPath:  filepath.Join("testdata", "not-yaml.txt"),
+			expectedErr: "failed to unmarshal config",
 		},
 	}
 
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
 			conf, err := NewLoggerConfig(tc.configPath)
-			require.NoError(t, err)
-			require.Equal(t, tc.expect, conf)
+			if tc.expectedErr != "" {
+				require.Error(t, err)
+				require.ErrorContains(t, err, tc.expectedErr)
+				return
+			} else {
+				require.NoError(t, err)
+				require.Equal(t, tc.expect, conf)
+			}
 
 			opts, err := conf.Options()
 			require.NoError(t, err)
 			require.NotNil(t, opts)
 			require.Len(t, opts, 1)
+
 		})
 	}
 }

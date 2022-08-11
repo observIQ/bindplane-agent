@@ -58,7 +58,7 @@ func NewLoggerConfig(configPath string) (*LoggerConfig, error) {
 			}
 			return defaultConf, nil
 		} else if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to stat config: %w", err)
 		}
 
 		// The default config exists; We'll use the default config path
@@ -74,11 +74,11 @@ func NewLoggerConfig(configPath string) (*LoggerConfig, error) {
 
 	confBytes, err := os.ReadFile(cleanPath)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to read config: %w", err)
 	}
 
 	if err := yaml.Unmarshal(confBytes, conf); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to unmarshal config: %w", err)
 	}
 
 	if conf.File != nil {
