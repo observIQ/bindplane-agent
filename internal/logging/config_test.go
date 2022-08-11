@@ -15,6 +15,7 @@
 package logging
 
 import (
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -74,14 +75,6 @@ func TestNewLoggerConfig(t *testing.T) {
 				},
 			},
 		},
-		{
-			"config does not exist",
-			"testdata/does-not-exist.yaml",
-			&LoggerConfig{
-				Output: stdOutput,
-				Level:  zapcore.InfoLevel,
-			},
-		},
 	}
 
 	for _, tc := range cases {
@@ -91,8 +84,28 @@ func TestNewLoggerConfig(t *testing.T) {
 			require.Equal(t, tc.expect, conf)
 
 			opts, err := conf.Options()
+			require.NoError(t, err)
 			require.NotNil(t, opts)
 			require.Len(t, opts, 1)
 		})
 	}
+}
+
+func TestNewLoggerConfigExistingFile(t *testing.T) {
+	tempDir := t.TempDir()
+
+	loggingYaml := filepath.Join(tempDir, "dne-logging.yaml")
+
+	require.NoFileExists(t, loggingYaml)
+
+	conf, err := NewLoggerConfig(loggingYaml)
+	require.NoError(t, err)
+	require.Equal(t, defaultConfig(), conf)
+
+	require.FileExists(t, loggingYaml)
+
+	// Calling again with the existing config should give the same result
+	conf, err = NewLoggerConfig(loggingYaml)
+	require.NoError(t, err)
+	require.Equal(t, defaultConfig(), conf)
 }

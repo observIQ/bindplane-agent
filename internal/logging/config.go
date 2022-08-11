@@ -46,30 +46,34 @@ type LoggerConfig struct {
 // If configPath is not set, stdout logging will be enabled, and a default
 // logging.yaml will be written to logging.yaml
 func NewLoggerConfig(configPath string) (*LoggerConfig, error) {
-	conf := &LoggerConfig{
-		Output: stdOutput,
-		Level:  zapcore.InfoLevel,
-	}
-
+	// No logger path, we'll return the default configuration
 	if configPath == "" {
-		return conf, nil
+		return defaultConfig(), nil
 	}
 
 	cleanPath := filepath.Clean(configPath)
 
-	// If the file doesn't exist, we just return the default config.
+	// If the file doesn't exist, we will create the config with the default parameters.
 	if _, err := os.Stat(cleanPath); errors.Is(err, os.ErrNotExist) {
-		return conf, nil
+		defaultConf := defaultConfig()
+		if err := writeConfig(defaultConf, cleanPath); err != nil {
+			return nil, fmt.Errorf("failed to write default configuration: %w", err)
+		}
+		return defaultConf, nil
 	} else if err != nil {
 		return nil, err
 	}
+
+	// conf will start as the default config; any unspecified values in the config
+	// will default to the values in the default config.
+	conf := defaultConfig()
 
 	confBytes, err := os.ReadFile(cleanPath)
 	if err != nil {
 		return nil, err
 	}
 
-	if err := yaml.Unmarshal(confBytes, &conf); err != nil {
+	if err := yaml.Unmarshal(confBytes, conf); err != nil {
 		return nil, err
 	}
 
@@ -114,19 +118,22 @@ func newEncoder() zapcore.Encoder {
 	return zapcore.NewJSONEncoder(encoderConfig)
 }
 
-func writeDefaultConfig(outLocation string) error {
-	defaultConfig := LoggerConfig{
+// defaultConfig returns a new instance of the default logging configuration
+func defaultConfig() *LoggerConfig {
+	return &LoggerConfig{
 		Output: stdOutput,
 		Level:  zap.InfoLevel,
 	}
+}
 
-	defaultConfigBytes, err := yaml.Marshal(defaultConfig)
+// writeConfig writes the given configuration to the specified location.
+func writeConfig(config *LoggerConfig, outLocation string) error {
+	configBytes, err := yaml.Marshal(config)
 	if err != nil {
 		return fmt.Errorf("failed to marshal: %w", err)
 	}
 
-	err = os.WriteFile(outLocation, defaultConfigBytes, 0600)
-	if err != nil {
+	if err = os.WriteFile(outLocation, configBytes, 0600); err != nil {
 		return fmt.Errorf("failed to write config file: %w", err)
 	}
 
