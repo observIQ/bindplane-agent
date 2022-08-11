@@ -12,18 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Package opamp contains configurations and protocol implementations to handle OpAmp communication.
 package opamp
 
-import "context"
-
-// Client implements a connection with OpAmp enabled server
-//
-//go:generate mockery --name Client --filename mock_client.go --structname MockClient
-type Client interface {
-
-	// Connect initiates a connection to the OpAmp server based on the supplied configuration
-	Connect(ctx context.Context) error
-
-	// Disconnect disconnects from the server
-	Disconnect(ctx context.Context) error
-}
+// generate directives for interfaces in third-party packages:
+//go:generate mockery --srcpkg github.com/open-telemetry/opamp-go/client/types --name PackagesStateProvider --filename mock_packages_state_provider.go --structname MockPackagesStateProvider
+//go:generate mockery --srcpkg github.com/open-telemetry/opamp-go/client --name OpAMPClient --filename mock_opamp_client.go --structname MockOpAMPClient

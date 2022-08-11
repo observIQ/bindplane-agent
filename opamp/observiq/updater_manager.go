@@ -28,6 +28,8 @@ const updaterDir = "latest"
 const defaultShutdownWaitTimeout = 30 * time.Second
 
 // updaterManager handles working with the Updater binary
+//
+//go:generate mockery --name updaterManager --filename mock_updater_manager.go --structname MockUpdaterManager --output ../mocks
 type updaterManager interface {
 	// StartAndMonitorUpdater starts the Updater binary and monitors it for failure
 	StartAndMonitorUpdater() error

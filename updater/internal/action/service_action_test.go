@@ -23,7 +23,7 @@ import (
 )
 
 func TestServiceStartAction(t *testing.T) {
-	svc := mocks.NewService(t)
+	svc := mocks.NewMockService(t)
 	ssa := NewServiceStartAction(svc)
 
 	svc.On("Stop").Once().Return(nil)
@@ -33,7 +33,7 @@ func TestServiceStartAction(t *testing.T) {
 }
 
 func TestServiceStopAction(t *testing.T) {
-	svc := mocks.NewService(t)
+	svc := mocks.NewMockService(t)
 	ssa := NewServiceStopAction(svc)
 
 	svc.On("Start").Once().Return(nil)
@@ -43,7 +43,7 @@ func TestServiceStopAction(t *testing.T) {
 }
 
 func TestServiceUpdateAction(t *testing.T) {
-	svc := mocks.NewService(t)
+	svc := mocks.NewMockService(t)
 	sua := NewServiceUpdateAction(zaptest.NewLogger(t), "./testdata")
 	sua.backupSvc = svc
 

@@ -27,6 +27,8 @@ import (
 )
 
 // Collector is an interface for running the open telemetry collector.
+//
+//go:generate mockery --name Collector --filename mock_collector.go --structname MockCollector
 type Collector interface {
 	Run(context.Context) error
 	Stop()

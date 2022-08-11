@@ -28,7 +28,7 @@ import (
 
 func TestWindowsServiceHandler(t *testing.T) {
 	t.Run("Normal start/stop", func(t *testing.T) {
-		rSvc := &mocks.RunnableService{}
+		rSvc := &mocks.MockRunnableService{}
 
 		rSvc.On("Start", mock.Anything).Return(nil)
 		rSvc.On("Error").Return((<-chan error)(make(chan error)))
@@ -102,7 +102,7 @@ func TestWindowsServiceHandler(t *testing.T) {
 	})
 
 	t.Run("Start fails", func(t *testing.T) {
-		rSvc := &mocks.RunnableService{}
+		rSvc := &mocks.MockRunnableService{}
 
 		startError := errors.New("Failed to start service")
 
@@ -141,7 +141,7 @@ func TestWindowsServiceHandler(t *testing.T) {
 	})
 
 	t.Run("Unexpected service error", func(t *testing.T) {
-		rSvc := &mocks.RunnableService{}
+		rSvc := &mocks.MockRunnableService{}
 
 		svcErr := errors.New("service unexpectedly failed")
 		errChan := make(chan error, 1)
@@ -203,7 +203,7 @@ func TestWindowsServiceHandler(t *testing.T) {
 	})
 
 	t.Run("Shutdown error", func(t *testing.T) {
-		rSvc := &mocks.RunnableService{}
+		rSvc := &mocks.MockRunnableService{}
 		stopError := errors.New("Failed to start service")
 
 		rSvc.On("Start", mock.Anything).Return(nil)
@@ -278,7 +278,7 @@ func TestWindowsServiceHandler(t *testing.T) {
 	})
 
 	t.Run("Shutdown error after unexpected error", func(t *testing.T) {
-		rSvc := &mocks.RunnableService{}
+		rSvc := &mocks.MockRunnableService{}
 		stopError := errors.New("Failed to start service")
 		svcErr := errors.New("service unexpectedly failed")
 		errChan := make(chan error, 1)
@@ -340,7 +340,7 @@ func TestWindowsServiceHandler(t *testing.T) {
 	})
 
 	t.Run("Unhandled command", func(t *testing.T) {
-		rSvc := &mocks.RunnableService{}
+		rSvc := &mocks.MockRunnableService{}
 
 		rSvc.On("Start", mock.Anything).Return(nil)
 		rSvc.On("Error").Return((<-chan error)(make(chan error)))
@@ -414,7 +414,7 @@ func TestWindowsServiceHandler(t *testing.T) {
 	})
 
 	t.Run("Unhandled command with shutdown error", func(t *testing.T) {
-		rSvc := &mocks.RunnableService{}
+		rSvc := &mocks.MockRunnableService{}
 
 		stopError := errors.New("Failed to start service")
 		rSvc.On("Start", mock.Anything).Return(nil)
@@ -489,7 +489,7 @@ func TestWindowsServiceHandler(t *testing.T) {
 	})
 
 	t.Run("No service name", func(t *testing.T) {
-		rSvc := &mocks.RunnableService{}
+		rSvc := &mocks.MockRunnableService{}
 
 		svcHandler := newWindowsServiceHandler(zap.NewNop(), rSvc)
 

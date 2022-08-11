@@ -34,7 +34,7 @@ func TestRollbackerBackup(t *testing.T) {
 		outDir := t.TempDir()
 		installDir := filepath.Join("testdata", "rollbacker")
 
-		svc := service_mocks.NewService(t)
+		svc := service_mocks.NewMockService(t)
 		svc.On("Backup").Return(nil)
 
 		rb := &filesystemRollbacker{
@@ -63,7 +63,7 @@ func TestRollbackerBackup(t *testing.T) {
 		outDir := t.TempDir()
 		installDir := filepath.Join("testdata", "rollbacker")
 
-		svc := service_mocks.NewService(t)
+		svc := service_mocks.NewMockService(t)
 		svc.On("Backup").Return(fmt.Errorf("invalid permissions"))
 
 		rb := &filesystemRollbacker{
@@ -82,7 +82,7 @@ func TestRollbackerBackup(t *testing.T) {
 		installDir := filepath.Join("testdata", "rollbacker")
 		leftoverFile := filepath.Join(outDir, "leftover-file.txt")
 
-		svc := service_mocks.NewService(t)
+		svc := service_mocks.NewMockService(t)
 		svc.On("Backup").Return(nil)
 
 		err := os.MkdirAll(outDir, 0750)
@@ -118,7 +118,7 @@ func TestRollbackerRollback(t *testing.T) {
 
 		for i := 0; i < 10; i++ {
 			actionNum := i
-			action := action_mocks.NewRollbackableAction(t)
+			action := action_mocks.NewMockRollbackableAction(t)
 			action.On("Rollback").Run(func(args mock.Arguments) {
 				// Rollback should be done in reverse order; So action 0
 				// should be done last (10th action, seq == 9), while
@@ -143,7 +143,7 @@ func TestRollbackerRollback(t *testing.T) {
 
 		for i := 0; i < 10; i++ {
 			actionNum := i
-			action := action_mocks.NewRollbackableAction(t)
+			action := action_mocks.NewMockRollbackableAction(t)
 
 			call := action.On("Rollback").Run(func(args mock.Arguments) {
 				// Rollback should be done in reverse order; So action 0

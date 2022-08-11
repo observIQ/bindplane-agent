@@ -20,6 +20,8 @@ import (
 )
 
 // DownloadableFileManager handles DownloadableFile's from a PackagesAvailable message
+//
+//go:generate mockery --name DownloadableFileManager --filename mock_downloadable_file_manager.go --structname MockDownloadableFileManager
 type DownloadableFileManager interface {
 	// FetchAndExtractArchive fetches the archive at the specified URL.
 	// It then checks to see if it matches the expected sha256 sum of the file.

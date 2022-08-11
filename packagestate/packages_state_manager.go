@@ -32,6 +32,8 @@ const CollectorPackageName = "observiq-otel-collector"
 const DefaultFileName = "package_statuses.json"
 
 // StateManager tracks Package states
+//
+//go:generate mockery --name StateManager --filename mock_state_manager.go --structname MockStateManager
 type StateManager interface {
 	// LoadStatuses retrieves the previously saved PackagesStatuses.
 	// If none were saved returns error

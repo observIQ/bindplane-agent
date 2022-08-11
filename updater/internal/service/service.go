@@ -23,7 +23,7 @@ import (
 
 // Service represents a controllable service
 //
-//go:generate mockery --name Service --filename service.go
+//go:generate mockery --name Service --filename mock_service.go --structname MockService
 type Service interface {
 	// Start the service
 	Start() error

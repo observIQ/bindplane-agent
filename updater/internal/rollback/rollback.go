@@ -32,7 +32,7 @@ import (
 
 // Rollbacker is an interface that performs rollback/backup actions.
 //
-//go:generate mockery --name Rollbacker --filename rollbacker.go
+//go:generate mockery --name Rollbacker --filename mock_rollbacker.go --structname MockRollbacker
 type Rollbacker interface {
 	// AppendAction saves the action so that it can be rolled back later.
 	AppendAction(action action.RollbackableAction)

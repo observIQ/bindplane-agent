@@ -17,7 +17,7 @@ package action
 
 // RollbackableAction is an interface to represents an install action that may be rolled back.
 //
-//go:generate mockery --name RollbackableAction --filename rollbackable_action.go
+//go:generate mockery --name RollbackableAction --filename mock_rollbackable_action.go --structname MockRollbackableAction
 type RollbackableAction interface {
 	Rollback() error
 }
