@@ -11,7 +11,7 @@ Because the updater interacts with the service manager, and may edit privileged 
 3. The collector unpacks tarball into `$INSTALL_DIR/tmp/latest`.
 4. The collector copies the newest updater binary from `$INSTALL_DIR/tmp/latest` to the working directory.
 5. The collector starts the updater in as a separate process in a new process group.
-  * If the updater fails to stop the collector within 30 minutes, 
+  * If the updater fails to stop the collector within 30 seconds, the collector will kill the updater and abort the update. 
 
 6. The updater starts, then shuts down the collector through the service manager.
 7. The collector shuts down, orphaning the updater process.
