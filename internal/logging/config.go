@@ -27,6 +27,8 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+const defaultConfigPath = "./logging.yaml"
+
 const (
 	// fileOutput is an output option for logging to a file.
 	fileOutput string = "file"
@@ -46,23 +48,25 @@ type LoggerConfig struct {
 // If configPath is not set, stdout logging will be enabled, and a default
 // logging.yaml will be written to logging.yaml
 func NewLoggerConfig(configPath string) (*LoggerConfig, error) {
-	// No logger path, we'll return the default configuration
+	// No logger path specified, we'll assume the default path.
 	if configPath == "" {
-		return defaultConfig(), nil
+		// If the file doesn't exist, we will create the config with the default parameters.
+		if _, err := os.Stat(defaultConfigPath); errors.Is(err, os.ErrNotExist) {
+			defaultConf := defaultConfig()
+			if err := writeConfig(defaultConf, defaultConfigPath); err != nil {
+				return nil, fmt.Errorf("failed to write default configuration: %w", err)
+			}
+			return defaultConf, nil
+		} else if err != nil {
+			return nil, err
+		}
+
+		// The default config exists; We'll use the default config path
+		// to read from.
+		configPath = defaultConfigPath
 	}
 
 	cleanPath := filepath.Clean(configPath)
-
-	// If the file doesn't exist, we will create the config with the default parameters.
-	if _, err := os.Stat(cleanPath); errors.Is(err, os.ErrNotExist) {
-		defaultConf := defaultConfig()
-		if err := writeConfig(defaultConf, cleanPath); err != nil {
-			return nil, fmt.Errorf("failed to write default configuration: %w", err)
-		}
-		return defaultConf, nil
-	} else if err != nil {
-		return nil, err
-	}
 
 	// conf will start as the default config; any unspecified values in the config
 	// will default to the values in the default config.

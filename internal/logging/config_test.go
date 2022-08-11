@@ -32,14 +32,6 @@ func TestNewLoggerConfig(t *testing.T) {
 		expect     *LoggerConfig
 	}{
 		{
-			"no-config",
-			"",
-			&LoggerConfig{
-				Output: stdOutput,
-				Level:  zapcore.InfoLevel,
-			},
-		},
-		{
 			"file config",
 			"testdata/info.yaml",
 			&LoggerConfig{
@@ -75,6 +67,14 @@ func TestNewLoggerConfig(t *testing.T) {
 				},
 			},
 		},
+		{
+			"config does not exist",
+			"testdata/does-not-exist.yaml",
+			&LoggerConfig{
+				Output: stdOutput,
+				Level:  zapcore.InfoLevel,
+			},
+		},
 	}
 
 	for _, tc := range cases {
@@ -91,21 +91,66 @@ func TestNewLoggerConfig(t *testing.T) {
 	}
 }
 
-func TestNewLoggerConfigExistingFile(t *testing.T) {
-	tempDir := t.TempDir()
+func TestNewLoggerConfigNotSpecified(t *testing.T) {
+	t.Run("config does not exist in default location", func(t *testing.T) {
+		tempDir := t.TempDir()
+		chDir(t, tempDir)
 
-	loggingYaml := filepath.Join(tempDir, "dne-logging.yaml")
+		require.NoFileExists(t, defaultConfigPath)
 
-	require.NoFileExists(t, loggingYaml)
+		conf, err := NewLoggerConfig("")
+		require.NoError(t, err)
+		require.Equal(t, defaultConfig(), conf)
 
-	conf, err := NewLoggerConfig(loggingYaml)
+		require.FileExists(t, defaultConfigPath)
+
+		// Calling again with the existing config should give the same result
+		conf, err = NewLoggerConfig("")
+		require.NoError(t, err)
+		require.Equal(t, defaultConfig(), conf)
+	})
+
+	t.Run("config exists in the default location", func(t *testing.T) {
+		tempDir := t.TempDir()
+
+		testYaml, err := filepath.Abs(filepath.Join("testdata", "info.yaml"))
+		require.NoError(t, err)
+
+		testYamlBytes, err := os.ReadFile(testYaml)
+		require.NoError(t, err)
+
+		chDir(t, tempDir)
+
+		err = os.WriteFile(defaultConfigPath, testYamlBytes, 0600)
+		require.NoError(t, err)
+
+		conf, err := NewLoggerConfig("")
+		require.NoError(t, err)
+		require.Equal(t, &LoggerConfig{
+			Output: fileOutput,
+			Level:  zapcore.InfoLevel,
+			File: &lumberjack.Logger{
+				Filename:   "log/collector.log",
+				MaxBackups: 5,
+				MaxSize:    1,
+				MaxAge:     7,
+			},
+		}, conf)
+	})
+
+}
+
+func chDir(t *testing.T, dir string) {
+	t.Helper()
+
+	oldWd, err := os.Getwd()
 	require.NoError(t, err)
-	require.Equal(t, defaultConfig(), conf)
 
-	require.FileExists(t, loggingYaml)
-
-	// Calling again with the existing config should give the same result
-	conf, err = NewLoggerConfig(loggingYaml)
+	err = os.Chdir(dir)
 	require.NoError(t, err)
-	require.Equal(t, defaultConfig(), conf)
+
+	t.Cleanup(func() {
+		err = os.Chdir(oldWd)
+		require.NoError(t, err)
+	})
 }
