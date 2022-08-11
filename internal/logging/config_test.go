@@ -87,10 +87,10 @@ func TestNewLoggerConfig(t *testing.T) {
 				require.Error(t, err)
 				require.ErrorContains(t, err, tc.expectedErr)
 				return
-			} else {
-				require.NoError(t, err)
-				require.Equal(t, tc.expect, conf)
 			}
+
+			require.NoError(t, err)
+			require.Equal(t, tc.expect, conf)
 
 			opts, err := conf.Options()
 			require.NoError(t, err)
