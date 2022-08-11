@@ -39,11 +39,12 @@ const (
 type LoggerConfig struct {
 	Output string             `yaml:"output"`
 	Level  zapcore.Level      `yaml:"level"`
-	File   *lumberjack.Logger `yaml:"file"`
+	File   *lumberjack.Logger `yaml:"file,omitempty"`
 }
 
-// NewLoggerConfig returns a logger config. If configPath is not
-// set, stdout logging will be enabled.
+// NewLoggerConfig returns a logger config.
+// If configPath is not set, stdout logging will be enabled, and a default
+// logging.yaml will be written to logging.yaml
 func NewLoggerConfig(configPath string) (*LoggerConfig, error) {
 	conf := &LoggerConfig{
 		Output: stdOutput,
@@ -111,4 +112,23 @@ func newEncoder() zapcore.Encoder {
 	encoderConfig := zap.NewProductionEncoderConfig()
 	encoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
 	return zapcore.NewJSONEncoder(encoderConfig)
+}
+
+func writeDefaultConfig(outLocation string) error {
+	defaultConfig := LoggerConfig{
+		Output: stdOutput,
+		Level:  zap.InfoLevel,
+	}
+
+	defaultConfigBytes, err := yaml.Marshal(defaultConfig)
+	if err != nil {
+		return fmt.Errorf("failed to marshal: %w", err)
+	}
+
+	err = os.WriteFile(outLocation, defaultConfigBytes, 0600)
+	if err != nil {
+		return fmt.Errorf("failed to write config file: %w", err)
+	}
+
+	return nil
 }
