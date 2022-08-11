@@ -46,7 +46,6 @@ After rollback is complete, the updater process exits.
 ## Debugging
 In the event of update failure, you may look in the following places for more information:
 
-The collector produces logs in the log directory (by default, `$INSTALL_DIR/log/updater.log`).
-The updater produces logs in the collector's log directory, and is always set to log at a debug level (`$INSTALL_DIR/log/updater.log`).
-
-Also, if the update was initiated through the BindPlane OP UI, an error message should be displayed in the UI.
+* The collector produces logs in the log directory (by default, `$INSTALL_DIR/log/updater.log`).
+* The updater produces logs in the collector's log directory, and is always set to log at a debug level (`$INSTALL_DIR/log/updater.log`).
+* If the update was initiated through the BindPlane OP UI, an error message should be displayed in the UI.
