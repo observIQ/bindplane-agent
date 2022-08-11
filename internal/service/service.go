@@ -28,6 +28,8 @@ const (
 )
 
 // RunnableService may be run as a service.
+//
+//go:generate mockery --name RunnableService --filename mock_runnable_service.go --structname MockRunnableService
 type RunnableService interface {
 	// Start asynchronously starts the underlying service. The service may not necessarily be "ready"
 	// once this returns, but could be asynchronously starting up.

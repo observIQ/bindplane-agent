@@ -28,7 +28,7 @@ import (
 
 func TestRunServiceInteractive(t *testing.T) {
 	t.Run("Normal start/stop", func(t *testing.T) {
-		svc := &mocks.RunnableService{}
+		svc := &mocks.MockRunnableService{}
 
 		ctx, cancel := context.WithCancel(context.Background())
 
@@ -56,7 +56,7 @@ func TestRunServiceInteractive(t *testing.T) {
 	})
 
 	t.Run("Start fails", func(t *testing.T) {
-		svc := &mocks.RunnableService{}
+		svc := &mocks.MockRunnableService{}
 
 		startErr := errors.New("failed to start")
 
@@ -83,7 +83,7 @@ func TestRunServiceInteractive(t *testing.T) {
 	})
 
 	t.Run("Service errors", func(t *testing.T) {
-		svc := &mocks.RunnableService{}
+		svc := &mocks.MockRunnableService{}
 
 		svcErr := errors.New("service unexpectedly failed")
 		errChan := make(chan error, 1)
@@ -114,7 +114,7 @@ func TestRunServiceInteractive(t *testing.T) {
 	})
 
 	t.Run("Stop errors", func(t *testing.T) {
-		svc := &mocks.RunnableService{}
+		svc := &mocks.MockRunnableService{}
 
 		stopErr := errors.New("Stop failed")
 
@@ -145,7 +145,7 @@ func TestRunServiceInteractive(t *testing.T) {
 	})
 
 	t.Run("Stop errors after error returned", func(t *testing.T) {
-		svc := &mocks.RunnableService{}
+		svc := &mocks.MockRunnableService{}
 
 		stopErr := errors.New("Stop failed")
 		svcErr := errors.New("service unexpectedly failed")

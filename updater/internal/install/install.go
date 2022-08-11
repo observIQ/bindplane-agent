@@ -32,7 +32,7 @@ import (
 
 // Installer is an interface that performs an Install of a new collector.
 //
-//go:generate mockery --name Installer --filename installer.go
+//go:generate mockery --name Installer --filename mock_installer.go --structname MockInstaller
 type Installer interface {
 	// Install installs new artifacts over the old ones.
 	Install(rollback.Rollbacker) error

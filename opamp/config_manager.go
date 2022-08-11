@@ -29,6 +29,8 @@ const (
 )
 
 // ConfigManager handles remote configuration of local configs
+//
+//go:generate mockery --name ConfigManager --filename mock_config_manager.go --structname MockConfigManager
 type ConfigManager interface {
 	// AddConfig adds a config to be tracked by the config manager with it's corresponding validator function.
 	AddConfig(configName string, reloader *ManagedConfig)

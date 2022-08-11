@@ -60,9 +60,9 @@ func TestUpdaterUpdate(t *testing.T) {
 	t.Run("Update is successful", func(t *testing.T) {
 		installDir := t.TempDir()
 
-		installer := install_mocks.NewInstaller(t)
-		svc := service_mocks.NewService(t)
-		rollbacker := rollback_mocks.NewRollbacker(t)
+		installer := install_mocks.NewMockInstaller(t)
+		svc := service_mocks.NewMockService(t)
+		rollbacker := rollback_mocks.NewMockRollbacker(t)
 		monitor := state_mocks.NewMockMonitor(t)
 
 		updater := &Updater{
@@ -87,9 +87,9 @@ func TestUpdaterUpdate(t *testing.T) {
 	t.Run("Service stop fails", func(t *testing.T) {
 		installDir := t.TempDir()
 
-		installer := install_mocks.NewInstaller(t)
-		svc := service_mocks.NewService(t)
-		rollbacker := rollback_mocks.NewRollbacker(t)
+		installer := install_mocks.NewMockInstaller(t)
+		svc := service_mocks.NewMockService(t)
+		rollbacker := rollback_mocks.NewMockRollbacker(t)
 		monitor := state_mocks.NewMockMonitor(t)
 
 		updater := &Updater{
@@ -110,9 +110,9 @@ func TestUpdaterUpdate(t *testing.T) {
 	t.Run("Backup fails", func(t *testing.T) {
 		installDir := t.TempDir()
 
-		installer := install_mocks.NewInstaller(t)
-		svc := service_mocks.NewService(t)
-		rollbacker := rollback_mocks.NewRollbacker(t)
+		installer := install_mocks.NewMockInstaller(t)
+		svc := service_mocks.NewMockService(t)
+		rollbacker := rollback_mocks.NewMockRollbacker(t)
 		monitor := state_mocks.NewMockMonitor(t)
 
 		updater := &Updater{
@@ -139,9 +139,9 @@ func TestUpdaterUpdate(t *testing.T) {
 	t.Run("Backup fails, set state fails", func(t *testing.T) {
 		installDir := t.TempDir()
 
-		installer := install_mocks.NewInstaller(t)
-		svc := service_mocks.NewService(t)
-		rollbacker := rollback_mocks.NewRollbacker(t)
+		installer := install_mocks.NewMockInstaller(t)
+		svc := service_mocks.NewMockService(t)
+		rollbacker := rollback_mocks.NewMockRollbacker(t)
 		monitor := state_mocks.NewMockMonitor(t)
 
 		updater := &Updater{
@@ -168,9 +168,9 @@ func TestUpdaterUpdate(t *testing.T) {
 	t.Run("Install fails", func(t *testing.T) {
 		installDir := t.TempDir()
 
-		installer := install_mocks.NewInstaller(t)
-		svc := service_mocks.NewService(t)
-		rollbacker := rollback_mocks.NewRollbacker(t)
+		installer := install_mocks.NewMockInstaller(t)
+		svc := service_mocks.NewMockService(t)
+		rollbacker := rollback_mocks.NewMockRollbacker(t)
 		monitor := state_mocks.NewMockMonitor(t)
 
 		updater := &Updater{
@@ -198,9 +198,9 @@ func TestUpdaterUpdate(t *testing.T) {
 	t.Run("Install fails, set state fails", func(t *testing.T) {
 		installDir := t.TempDir()
 
-		installer := install_mocks.NewInstaller(t)
-		svc := service_mocks.NewService(t)
-		rollbacker := rollback_mocks.NewRollbacker(t)
+		installer := install_mocks.NewMockInstaller(t)
+		svc := service_mocks.NewMockService(t)
+		rollbacker := rollback_mocks.NewMockRollbacker(t)
 		monitor := state_mocks.NewMockMonitor(t)
 
 		updater := &Updater{
@@ -228,9 +228,9 @@ func TestUpdaterUpdate(t *testing.T) {
 	t.Run("Monitor for success fails to monitor", func(t *testing.T) {
 		installDir := t.TempDir()
 
-		installer := install_mocks.NewInstaller(t)
-		svc := service_mocks.NewService(t)
-		rollbacker := rollback_mocks.NewRollbacker(t)
+		installer := install_mocks.NewMockInstaller(t)
+		svc := service_mocks.NewMockService(t)
+		rollbacker := rollback_mocks.NewMockRollbacker(t)
 		monitor := state_mocks.NewMockMonitor(t)
 
 		updater := &Updater{
@@ -259,9 +259,9 @@ func TestUpdaterUpdate(t *testing.T) {
 	t.Run("Monitor for success fails to monitor, set state fails", func(t *testing.T) {
 		installDir := t.TempDir()
 
-		installer := install_mocks.NewInstaller(t)
-		svc := service_mocks.NewService(t)
-		rollbacker := rollback_mocks.NewRollbacker(t)
+		installer := install_mocks.NewMockInstaller(t)
+		svc := service_mocks.NewMockService(t)
+		rollbacker := rollback_mocks.NewMockRollbacker(t)
 		monitor := state_mocks.NewMockMonitor(t)
 
 		updater := &Updater{
@@ -290,9 +290,9 @@ func TestUpdaterUpdate(t *testing.T) {
 	t.Run("Monitor for success finds error in package statuses", func(t *testing.T) {
 		installDir := t.TempDir()
 
-		installer := install_mocks.NewInstaller(t)
-		svc := service_mocks.NewService(t)
-		rollbacker := rollback_mocks.NewRollbacker(t)
+		installer := install_mocks.NewMockInstaller(t)
+		svc := service_mocks.NewMockService(t)
+		rollbacker := rollback_mocks.NewMockRollbacker(t)
 		monitor := state_mocks.NewMockMonitor(t)
 
 		updater := &Updater{

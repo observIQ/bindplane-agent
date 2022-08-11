@@ -33,6 +33,8 @@ var (
 )
 
 // Monitor allows checking and setting state of active install
+//
+//go:generate mockery --name Monitor --filename mock_monitor.go --structname MockMonitor
 type Monitor interface {
 	// SetState sets the state for the package.
 	// If passed in statusErr is not nil it will record the error as the message
