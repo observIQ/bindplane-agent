@@ -20,7 +20,6 @@ import (
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/awscloudwatchlogsexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/awsemfexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/awskinesisexporter"
-	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/awsprometheusremotewriteexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/awsxrayexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/azuremonitorexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/carbonexporter"
@@ -54,7 +53,6 @@ var defaultExporters = []component.ExporterFactory{
 	awscloudwatchlogsexporter.NewFactory(),
 	awsemfexporter.NewFactory(),
 	awskinesisexporter.NewFactory(),
-	awsprometheusremotewriteexporter.NewFactory(),
 	awsxrayexporter.NewFactory(),
 	azuremonitorexporter.NewFactory(),
 	carbonexporter.NewFactory(),
