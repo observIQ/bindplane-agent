@@ -101,21 +101,21 @@ func TestNewLoggerConfig(t *testing.T) {
 	}
 }
 
-func TestNewLoggerConfigNotSpecified(t *testing.T) {
+func TestNewLoggerConfigDefaultPath(t *testing.T) {
 	t.Run("config does not exist in default location", func(t *testing.T) {
 		tempDir := t.TempDir()
 		chDir(t, tempDir)
 
-		require.NoFileExists(t, defaultConfigPath)
+		require.NoFileExists(t, DefaultConfigPath)
 
-		conf, err := NewLoggerConfig("")
+		conf, err := NewLoggerConfig(DefaultConfigPath)
 		require.NoError(t, err)
 		require.Equal(t, defaultConfig(), conf)
 
-		require.FileExists(t, defaultConfigPath)
+		require.FileExists(t, DefaultConfigPath)
 
 		// Calling again with the existing config should give the same result
-		conf, err = NewLoggerConfig("")
+		conf, err = NewLoggerConfig(DefaultConfigPath)
 		require.NoError(t, err)
 		require.Equal(t, defaultConfig(), conf)
 	})
@@ -131,10 +131,10 @@ func TestNewLoggerConfigNotSpecified(t *testing.T) {
 
 		chDir(t, tempDir)
 
-		err = os.WriteFile(defaultConfigPath, testYamlBytes, 0600)
+		err = os.WriteFile(DefaultConfigPath, testYamlBytes, 0600)
 		require.NoError(t, err)
 
-		conf, err := NewLoggerConfig("")
+		conf, err := NewLoggerConfig(DefaultConfigPath)
 		require.NoError(t, err)
 		require.Equal(t, &LoggerConfig{
 			Output: fileOutput,
