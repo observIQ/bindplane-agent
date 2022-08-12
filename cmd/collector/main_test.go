@@ -31,8 +31,7 @@ import (
 func TestGetDefaultCollectorConfigPathENV(t *testing.T) {
 	fakeConfigPath := "./fake/path/config.yaml"
 
-	os.Setenv(configPathENV, fakeConfigPath)
-	defer os.Unsetenv(configPathENV)
+	t.Setenv(configPathENV, fakeConfigPath)
 
 	expected := []string{fakeConfigPath}
 	actual := getDefaultCollectorConfigPaths()
