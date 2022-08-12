@@ -27,7 +27,6 @@ do
     (
         echo "Updating deps in $local_mod"
         cd "$local_mod" || exit 1
-        go mod tidy -compat=1.18
         OTEL_MODULES=$(go list -m -f '{{if not (or .Indirect .Main)}}{{.Path}}{{end}}' all |
             grep -E -e '(?:^github.com/open-telemetry/opentelemetry-collector-contrib)|(?:^go.opentelemetry.io/collector)')
 
@@ -36,7 +35,5 @@ do
             echo "$local_mod: $mod@$TARGET_VERSION"
             go mod edit -require "$mod@$TARGET_VERSION"
         done
-
-        go mod tidy -compat=1.18
     )
 done
