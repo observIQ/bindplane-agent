@@ -36,18 +36,19 @@ import (
 
 const (
 	// env variable name constants
-	endpointENV   = "OPAMP_ENDPOINT"
-	agentIDENV    = "OPAMP_AGENT_ID"
-	secretkeyENV  = "OPAMP_SECRET_KEY" //#nosec G101
-	labelsENV     = "OPAMP_LABELS"
-	agentNameENV  = "OPAMP_AGENT_NAME"
-	configPathENV = "CONFIG_YAML_PATH"
+	endpointENV    = "OPAMP_ENDPOINT"
+	agentIDENV     = "OPAMP_AGENT_ID"
+	secretkeyENV   = "OPAMP_SECRET_KEY" //#nosec G101
+	labelsENV      = "OPAMP_LABELS"
+	agentNameENV   = "OPAMP_AGENT_NAME"
+	configPathENV  = "CONFIG_YAML_PATH"
+	loggingPathENV = "LOGGING_YAML_PATH"
 )
 
 func main() {
 	collectorConfigPaths := pflag.StringSlice("config", getDefaultCollectorConfigPaths(), "the collector config path")
 	managerConfigPath := pflag.String("manager", "./manager.yaml", "The configuration for remote management")
-	loggingConfigPath := pflag.String("logging", "./logging.yaml", "the collector logging config path")
+	loggingConfigPath := pflag.String("logging", getDefaultLoggingConfigPath(), "the collector logging config path")
 
 	_ = pflag.String("log-level", "", "not implemented") // TEMP(jsirianni): Required for OTEL k8s operator
 	var showVersion = pflag.BoolP("version", "v", false, "prints the version of the collector")
@@ -104,6 +105,14 @@ func getDefaultCollectorConfigPaths() []string {
 		return []string{cp}
 	}
 	return []string{"./config.yaml"}
+}
+
+func getDefaultLoggingConfigPath() string {
+	lp, ok := os.LookupEnv(loggingPathENV)
+	if ok {
+		return lp
+	}
+	return "./logging.yaml"
 }
 
 func logOptions(loggingConfigPath *string) ([]zap.Option, error) {

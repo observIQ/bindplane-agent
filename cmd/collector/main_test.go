@@ -46,6 +46,24 @@ func TestGetDefaultCollectorConfigPathNone(t *testing.T) {
 	require.Equal(t, expected, actual)
 }
 
+func TestGetDefaultLoggingConfigPathENV(t *testing.T) {
+	fakeLoggingPath := "./fake/path/logging.yaml"
+
+	t.Setenv(loggingPathENV, fakeLoggingPath)
+
+	expected := fakeLoggingPath
+	actual := getDefaultLoggingConfigPath()
+
+	require.Equal(t, expected, actual)
+}
+
+func TestGetDefaultLoggingConfigPathNone(t *testing.T) {
+	expected := "./logging.yaml"
+	actual := getDefaultLoggingConfigPath()
+
+	require.Equal(t, expected, actual)
+}
+
 func TestCheckManagerNoConfig(t *testing.T) {
 	manager := "./manager.yaml"
 	err := checkManagerConfig(&manager)
