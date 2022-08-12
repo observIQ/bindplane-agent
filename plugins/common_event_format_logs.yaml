@@ -20,7 +20,7 @@ parameters:
     default: UTC
   - name: start_at
     type: string
-    description: Start reading file from 'beginning' or 'end'
+    description: At startup, where to start reading logs from the file (`beginning` or `end`)
     supported:
       - beginning
       - end
