@@ -977,8 +977,8 @@ github.com/open-telemetry/opentelemetry-collector-contrib/exporter/f5cloudexport
 github.com/open-telemetry/opentelemetry-collector-contrib/exporter/f5cloudexporter v0.58.0/go.mod h1:PGG74z3bLBJ2VejhXhWB5Ad9CEmC3gvtNTvmkAB7UhI=
 github.com/open-telemetry/opentelemetry-collector-contrib/exporter/fileexporter v0.58.0 h1:5xWQzReUN5+VIOYlMYJviLBFgSpLO2oMf2Wi/agRTws=
 github.com/open-telemetry/opentelemetry-collector-contrib/exporter/fileexporter v0.58.0/go.mod h1:ii4xZNQY+JfNnypUudyOreppe52bgrAId/ogGCU+zPk=
-github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlecloudexporter v0.57.2 h1:0bamzkgcbjGfp8R7t7K+xsioh+ehSNbqj6WkyCr9/JE=
-github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlecloudexporter v0.57.2/go.mod h1:YaW5N6YCJPf90JJ72YH6x6HM8dsHqeCMOpdn0BHJRAk=
+github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlecloudexporter v0.58.0 h1:e8+4NKm4OWYeItXSZyZJ9AT0wZrk//1Lj2MaopbyyoQ=
+github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlecloudexporter v0.58.0/go.mod h1:/5Ew362JpfeOL3LIy6/DhV1a7V0QLGi5ITzfm56Sn7I=
 github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlecloudpubsubexporter v0.58.0 h1:YFGqxv4iQsKFhD78q0qAd9r8fhL/LjEDHnycGG7sHlM=
 github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlecloudpubsubexporter v0.58.0/go.mod h1:w3ZE8eWc84ZEAkNxDiIxWBoFuypkhTN4KXIVLdTj9IU=
 github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlemanagedprometheusexporter v0.58.0 h1:GDIAOu0JvGJJUfgkvbfiBS5GrGk/YOFMDY263NqlpRM=
