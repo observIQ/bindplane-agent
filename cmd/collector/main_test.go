@@ -29,10 +29,12 @@ import (
 )
 
 func TestGetDefaultCollectorConfigPathENV(t *testing.T) {
-	os.Setenv(configPathENV, "./fake/path/config.yaml")
+	fakeConfigPath := "./fake/path/config.yaml"
+
+	os.Setenv(configPathENV, fakeConfigPath)
 	defer os.Unsetenv(configPathENV)
 
-	expected := []string{"./fake/path/config.yaml"}
+	expected := []string{fakeConfigPath}
 	actual := getDefaultCollectorConfigPaths()
 
 	require.Equal(t, expected, actual)
