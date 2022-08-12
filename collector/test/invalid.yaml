@@ -1,6 +1,6 @@
 receivers:
   filelog:
-    include: 5
+    invalid_opt:
 
 exporters:
   nop:

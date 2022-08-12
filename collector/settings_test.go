@@ -16,7 +16,6 @@ package collector
 
 import (
 	"context"
-	"reflect"
 	"testing"
 
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/filelogreceiver"
@@ -36,7 +35,7 @@ func TestNewSettings(t *testing.T) {
 	require.NoError(t, err)
 	receivcfg := provider.Receivers[config.NewComponentID("filelog")]
 	config := receivcfg.(*filelogreceiver.FileLogConfig)
-	actualConfVal := reflect.ValueOf(config.Input["include"]).Index(0).Interface().(string)
+	actualConfVal := config.Finder.Include[0]
 	require.Equal(t, "./test.log", actualConfVal)
 
 	require.NoError(t, err)
