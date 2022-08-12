@@ -28,6 +28,23 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+func TestGetDefaultCollectorConfigPathENV(t *testing.T) {
+	os.Setenv(configPathENV, "./fake/path/config.yaml")
+	defer os.Unsetenv(configPathENV)
+
+	expected := []string{"./fake/path/config.yaml"}
+	actual := getDefaultCollectorConfigPaths()
+
+	require.Equal(t, expected, actual)
+}
+
+func TestGetDefaultCollectorConfigPathNone(t *testing.T) {
+	expected := []string{"./config.yaml"}
+	actual := getDefaultCollectorConfigPaths()
+
+	require.Equal(t, expected, actual)
+}
+
 func TestCheckManagerNoConfig(t *testing.T) {
 	manager := "./manager.yaml"
 	err := checkManagerConfig(&manager)

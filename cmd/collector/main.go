@@ -36,15 +36,16 @@ import (
 
 const (
 	// env variable name constants
-	endpointENV  = "OPAMP_ENDPOINT"
-	agentIDENV   = "OPAMP_AGENT_ID"
-	secretkeyENV = "OPAMP_SECRET_KEY" //#nosec G101
-	labelsENV    = "OPAMP_LABELS"
-	agentNameENV = "OPAMP_AGENT_NAME"
+	endpointENV   = "OPAMP_ENDPOINT"
+	agentIDENV    = "OPAMP_AGENT_ID"
+	secretkeyENV  = "OPAMP_SECRET_KEY" //#nosec G101
+	labelsENV     = "OPAMP_LABELS"
+	agentNameENV  = "OPAMP_AGENT_NAME"
+	configPathENV = "CONFIG_YAML_PATH"
 )
 
 func main() {
-	collectorConfigPaths := pflag.StringSlice("config", []string{"./config.yaml"}, "the collector config path")
+	collectorConfigPaths := pflag.StringSlice("config", getDefaultCollectorConfigPaths(), "the collector config path")
 	managerConfigPath := pflag.String("manager", "./manager.yaml", "The configuration for remote management")
 	loggingConfigPath := pflag.String("logging", "./logging.yaml", "the collector logging config path")
 
@@ -95,6 +96,15 @@ func main() {
 		logger.Fatal("RunService returned error", zap.Error(err))
 	}
 
+}
+
+func getDefaultCollectorConfigPaths() []string {
+	_, ok := os.LookupEnv(configPathENV)
+	if ok {
+		return []string{configPathENV}
+	} else {
+		return []string{"./config.yaml"}
+	}
 }
 
 func logOptions(loggingConfigPath *string) ([]zap.Option, error) {
