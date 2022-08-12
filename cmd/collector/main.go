@@ -102,9 +102,8 @@ func getDefaultCollectorConfigPaths() []string {
 	cp, ok := os.LookupEnv(configPathENV)
 	if ok {
 		return []string{cp}
-	} else {
-		return []string{"./config.yaml"}
 	}
+	return []string{"./config.yaml"}
 }
 
 func logOptions(loggingConfigPath *string) ([]zap.Option, error) {
