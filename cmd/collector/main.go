@@ -99,9 +99,9 @@ func main() {
 }
 
 func getDefaultCollectorConfigPaths() []string {
-	_, ok := os.LookupEnv(configPathENV)
+	cp, ok := os.LookupEnv(configPathENV)
 	if ok {
-		return []string{configPathENV}
+		return []string{cp}
 	} else {
 		return []string{"./config.yaml"}
 	}
