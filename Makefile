@@ -171,8 +171,8 @@ add-license:
 # Usage: make update-otel OTEL_VERSION=vx.x.x
 .PHONY: update-otel
 update-otel:
-	./buildscripts/update-otel.sh "$(OTEL_VERSION)"
-	./buildscripts/update-docs.sh "$(OTEL_VERSION)"
+	./scripts/update-otel.sh "$(OTEL_VERSION)"
+	./scripts/update-docs.sh "$(OTEL_VERSION)"
 	$(MAKE) tidy
 
 # Downloads and setups dependencies that are packaged with binary
