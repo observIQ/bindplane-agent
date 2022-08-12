@@ -52,7 +52,7 @@ func createTracesProcessor(
 	nextConsumer consumer.Traces,
 ) (component.TracesProcessor, error) {
 	oCfg := cfg.(*Config)
-	tmp := newThroughputMeasurementProcessor(set.Logger, oCfg)
+	tmp := newThroughputMeasurementProcessor(set.Logger, oCfg, cfg.ID().String())
 
 	return processorhelper.NewTracesProcessor(cfg, nextConsumer, tmp.processTraces, processorhelper.WithCapabilities(consumerCapabilities))
 }
@@ -64,7 +64,7 @@ func createLogsProcessor(
 	nextConsumer consumer.Logs,
 ) (component.LogsProcessor, error) {
 	oCfg := cfg.(*Config)
-	tmp := newThroughputMeasurementProcessor(set.Logger, oCfg)
+	tmp := newThroughputMeasurementProcessor(set.Logger, oCfg, cfg.ID().String())
 
 	return processorhelper.NewLogsProcessor(cfg, nextConsumer, tmp.processLogs, processorhelper.WithCapabilities(consumerCapabilities))
 }
@@ -76,7 +76,7 @@ func createMetricsProcessor(
 	nextConsumer consumer.Metrics,
 ) (component.MetricsProcessor, error) {
 	oCfg := cfg.(*Config)
-	tmp := newThroughputMeasurementProcessor(set.Logger, oCfg)
+	tmp := newThroughputMeasurementProcessor(set.Logger, oCfg, cfg.ID().String())
 
 	return processorhelper.NewMetricsProcessor(cfg, nextConsumer, tmp.processMetrics, processorhelper.WithCapabilities(consumerCapabilities))
 }

@@ -6,6 +6,7 @@ import (
 	"math/big"
 
 	"go.opencensus.io/stats"
+	"go.opencensus.io/tag"
 	"go.opentelemetry.io/collector/pdata/plog"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.opentelemetry.io/collector/pdata/ptrace"
@@ -18,13 +19,15 @@ type throughputMeasurementProcessor struct {
 	logger        *zap.Logger
 	enabled       bool
 	samplingRatio *big.Int
+	mutators      []tag.Mutator
 }
 
-func newThroughputMeasurementProcessor(logger *zap.Logger, cfg *Config) *throughputMeasurementProcessor {
+func newThroughputMeasurementProcessor(logger *zap.Logger, cfg *Config, processorID string) *throughputMeasurementProcessor {
 	return &throughputMeasurementProcessor{
 		logger:        logger,
 		enabled:       cfg.Enabled,
 		samplingRatio: big.NewInt(int64(cfg.SamplingRatio * 1000)),
+		mutators:      []tag.Mutator{tag.Upsert(processorTagKey, processorID, tag.WithTTL(tag.TTLNoPropagation))},
 	}
 }
 
@@ -36,7 +39,11 @@ func (tmp *throughputMeasurementProcessor) processTraces(ctx context.Context, td
 		}
 
 		if i.Cmp(tmp.samplingRatio) <= 0 {
-			stats.Record(ctx, traceDataSize.M(int64(td.Size())))
+			stats.RecordWithTags(
+				ctx,
+				tmp.mutators,
+				traceDataSize.M(int64(td.Size())),
+			)
 		}
 	}
 
@@ -51,7 +58,11 @@ func (tmp *throughputMeasurementProcessor) processLogs(ctx context.Context, ld p
 		}
 
 		if i.Cmp(tmp.samplingRatio) <= 0 {
-			stats.Record(ctx, logDataSize.M(int64(ld.Size())))
+			stats.RecordWithTags(
+				ctx,
+				tmp.mutators,
+				logDataSize.M(int64(ld.Size())),
+			)
 		}
 	}
 
@@ -66,7 +77,11 @@ func (tmp *throughputMeasurementProcessor) processMetrics(ctx context.Context, m
 		}
 
 		if i.Cmp(tmp.samplingRatio) <= 0 {
-			stats.Record(ctx, metricDataSize.M(int64(md.Size())))
+			stats.RecordWithTags(
+				ctx,
+				tmp.mutators,
+				metricDataSize.M(int64(md.Size())),
+			)
 		}
 	}
 
