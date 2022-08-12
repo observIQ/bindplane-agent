@@ -42,12 +42,13 @@ const (
 	labelsENV      = "OPAMP_LABELS"
 	agentNameENV   = "OPAMP_AGENT_NAME"
 	configPathENV  = "CONFIG_YAML_PATH"
+	managerPathENV = "MANAGER_YAML_PATH"
 	loggingPathENV = "LOGGING_YAML_PATH"
 )
 
 func main() {
 	collectorConfigPaths := pflag.StringSlice("config", getDefaultCollectorConfigPaths(), "the collector config path")
-	managerConfigPath := pflag.String("manager", "./manager.yaml", "The configuration for remote management")
+	managerConfigPath := pflag.String("manager", getDefaultManagerConfigPath(), "The configuration for remote management")
 	loggingConfigPath := pflag.String("logging", getDefaultLoggingConfigPath(), "the collector logging config path")
 
 	_ = pflag.String("log-level", "", "not implemented") // TEMP(jsirianni): Required for OTEL k8s operator
@@ -105,6 +106,14 @@ func getDefaultCollectorConfigPaths() []string {
 		return []string{cp}
 	}
 	return []string{"./config.yaml"}
+}
+
+func getDefaultManagerConfigPath() string {
+	mp, ok := os.LookupEnv(managerPathENV)
+	if ok {
+		return mp
+	}
+	return "./manager.yaml"
 }
 
 func getDefaultLoggingConfigPath() string {
