@@ -8,6 +8,7 @@ require (
 	github.com/observiq/observiq-otel-collector/exporter/googlecloudexporter v1.7.0
 	github.com/observiq/observiq-otel-collector/packagestate v1.7.0
 	github.com/observiq/observiq-otel-collector/processor/resourceattributetransposerprocessor v1.7.0
+	github.com/observiq/observiq-otel-collector/processor/throughputmeasurementprocessor v0.0.0-00010101000000-000000000000
 	github.com/observiq/observiq-otel-collector/receiver/pluginreceiver v1.7.0
 	github.com/open-telemetry/opamp-go v0.2.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/alibabacloudlogserviceexporter v0.58.0
@@ -474,3 +475,7 @@ replace github.com/observiq/observiq-otel-collector/receiver/pluginreceiver => .
 replace github.com/observiq/observiq-otel-collector/exporter/googlecloudexporter => ./exporter/googlecloudexporter
 
 replace github.com/observiq/observiq-otel-collector/packagestate => ./packagestate
+
+replace go.opentelemetry.io/collector/pdata v0.58.0 => ../opentelemetry-collector/pdata
+
+replace github.com/observiq/observiq-otel-collector/processor/throughputmeasurementprocessor => ./processor/throughputmeasurementprocessor
