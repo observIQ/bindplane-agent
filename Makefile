@@ -130,15 +130,6 @@ fmt:
 tidy:
 	$(MAKE) for-all CMD="go mod tidy -compat=1.17"
 
-# update-otel attempts to update otel dependencies in go.mods,
-# and update the otel versions in the docs.
-# Currently, does not handle operations-collector updates.
-# Usage: make update-otel OTEL_VERSION=vx.x.x
-.PHONY: update-otel
-update-otel:
-	./buildscripts/update-otel.sh "$(OTEL_VERSION)"
-	./buildscripts/update-docs.sh "$(OTEL_VERSION)"
-	$(MAKE) tidy
 
 .PHONY: gosec
 gosec:
@@ -174,6 +165,16 @@ add-license:
 		else \
 			echo "Add License finished successfully"; \
 		fi
+
+# update-otel attempts to update otel dependencies in go.mods,
+# and update the otel versions in the docs.
+# Currently, does not handle operations-collector updates.
+# Usage: make update-otel OTEL_VERSION=vx.x.x
+.PHONY: update-otel
+update-otel:
+	./buildscripts/update-otel.sh "$(OTEL_VERSION)"
+	./buildscripts/update-docs.sh "$(OTEL_VERSION)"
+	$(MAKE) tidy
 
 # Downloads and setups dependencies that are packaged with binary
 .PHONY: release-prep
