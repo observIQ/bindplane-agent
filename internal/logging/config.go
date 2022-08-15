@@ -27,6 +27,9 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+// DefaultConfigPath is the relative path to the default logging.yaml
+const DefaultConfigPath = "./logging.yaml"
+
 const (
 	// fileOutput is an output option for logging to a file.
 	fileOutput string = "file"
@@ -39,37 +42,41 @@ const (
 type LoggerConfig struct {
 	Output string             `yaml:"output"`
 	Level  zapcore.Level      `yaml:"level"`
-	File   *lumberjack.Logger `yaml:"file"`
+	File   *lumberjack.Logger `yaml:"file,omitempty"`
 }
 
-// NewLoggerConfig returns a logger config. If configPath is not
-// set, stdout logging will be enabled.
+// NewLoggerConfig returns a logger config.
+// If configPath is not set, stdout logging will be enabled, and a default
+// configuration will be written to ./logging.yaml
 func NewLoggerConfig(configPath string) (*LoggerConfig, error) {
-	conf := &LoggerConfig{
-		Output: stdOutput,
-		Level:  zapcore.InfoLevel,
-	}
-
-	if configPath == "" {
-		return conf, nil
+	// No logger path specified, we'll assume the default path.
+	if configPath == DefaultConfigPath {
+		// If the file doesn't exist, we will create the config with the default parameters.
+		if _, err := os.Stat(DefaultConfigPath); errors.Is(err, os.ErrNotExist) {
+			defaultConf := defaultConfig()
+			if err := writeConfig(defaultConf, DefaultConfigPath); err != nil {
+				return nil, fmt.Errorf("failed to write default configuration: %w", err)
+			}
+			return defaultConf, nil
+		} else if err != nil {
+			return nil, fmt.Errorf("failed to stat config: %w", err)
+		}
+		// The config already exists; We should continue and read it like any other config.
 	}
 
 	cleanPath := filepath.Clean(configPath)
 
-	// If the file doesn't exist, we just return the default config.
-	if _, err := os.Stat(cleanPath); errors.Is(err, os.ErrNotExist) {
-		return conf, nil
-	} else if err != nil {
-		return nil, err
-	}
+	// conf will start as the default config; any unspecified values in the config
+	// will default to the values in the default config.
+	conf := defaultConfig()
 
 	confBytes, err := os.ReadFile(cleanPath)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to read config: %w", err)
 	}
 
-	if err := yaml.Unmarshal(confBytes, &conf); err != nil {
-		return nil, err
+	if err := yaml.Unmarshal(confBytes, conf); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal config: %w", err)
 	}
 
 	if conf.File != nil {
@@ -111,4 +118,26 @@ func newEncoder() zapcore.Encoder {
 	encoderConfig := zap.NewProductionEncoderConfig()
 	encoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
 	return zapcore.NewJSONEncoder(encoderConfig)
+}
+
+// defaultConfig returns a new instance of the default logging configuration
+func defaultConfig() *LoggerConfig {
+	return &LoggerConfig{
+		Output: stdOutput,
+		Level:  zap.InfoLevel,
+	}
+}
+
+// writeConfig writes the given configuration to the specified location.
+func writeConfig(config *LoggerConfig, outLocation string) error {
+	configBytes, err := yaml.Marshal(config)
+	if err != nil {
+		return fmt.Errorf("failed to marshal: %w", err)
+	}
+
+	if err = os.WriteFile(outLocation, configBytes, 0600); err != nil {
+		return fmt.Errorf("failed to write config file: %w", err)
+	}
+
+	return nil
 }

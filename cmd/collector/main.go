@@ -121,7 +121,7 @@ func getDefaultLoggingConfigPath() string {
 	if ok {
 		return lp
 	}
-	return "./logging.yaml"
+	return logging.DefaultConfigPath
 }
 
 func logOptions(loggingConfigPath *string) ([]zap.Option, error) {
