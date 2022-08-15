@@ -75,20 +75,15 @@ func TestCheckManagerNoConfig(t *testing.T) {
 }
 
 func TestCheckManagerConfigNoFile(t *testing.T) {
-	os.Setenv(endpointENV, "0.0.0.0")
-	defer os.Unsetenv(endpointENV)
+	t.Setenv(endpointENV, "0.0.0.0")
 
-	os.Setenv(agentNameENV, "agent name")
-	defer os.Unsetenv(agentNameENV)
+	t.Setenv(agentNameENV, "agent name")
 
-	os.Setenv(agentIDENV, "agent ID")
-	defer os.Unsetenv(agentIDENV)
+	t.Setenv(agentIDENV, "agent ID")
 
-	os.Setenv(secretkeyENV, "secretKey")
-	defer os.Unsetenv(secretkeyENV)
+	t.Setenv(secretkeyENV, "secretKey")
 
-	os.Setenv(labelsENV, "this is a label")
-	defer os.Unsetenv(labelsENV)
+	t.Setenv(labelsENV, "this is a label")
 
 	tmpdir := t.TempDir()
 	manager := filepath.Join(tmpdir, "manager.yaml")

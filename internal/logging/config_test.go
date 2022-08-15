@@ -15,7 +15,6 @@
 package logging
 
 import (
-	"os"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -24,7 +23,7 @@ import (
 )
 
 func TestNewLoggerConfig(t *testing.T) {
-	os.Setenv("MYVAR", "/some/path")
+	t.Setenv("MYVAR", "/some/path")
 
 	cases := []struct {
 		name       string
