@@ -15,6 +15,7 @@
 package logging
 
 import (
+	"os"
 	"path/filepath"
 	"testing"
 
