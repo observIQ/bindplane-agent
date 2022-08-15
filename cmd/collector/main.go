@@ -146,7 +146,7 @@ func checkManagerConfig(configPath *string) error {
 	case errors.Is(statErr, os.ErrNotExist):
 		var ok bool
 
-		// manager.ymal file does *not* exist, create file using env variables
+		// manager.yaml file does *not* exist, create file using env variables
 		newConfig := &opamp.Config{}
 
 		// Endpoint is only required env
