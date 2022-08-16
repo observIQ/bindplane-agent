@@ -5,10 +5,10 @@ go 1.18
 require (
 	github.com/GoogleCloudPlatform/opentelemetry-operations-collector v0.0.3-0.20220804181753-b3246a402440
 	github.com/google/uuid v1.3.0
-	github.com/observiq/observiq-otel-collector/exporter/googlecloudexporter v1.6.0
-	github.com/observiq/observiq-otel-collector/packagestate v1.6.0
-	github.com/observiq/observiq-otel-collector/processor/resourceattributetransposerprocessor v1.6.0
-	github.com/observiq/observiq-otel-collector/receiver/pluginreceiver v1.6.0
+	github.com/observiq/observiq-otel-collector/exporter/googlecloudexporter v1.7.0
+	github.com/observiq/observiq-otel-collector/packagestate v1.7.0
+	github.com/observiq/observiq-otel-collector/processor/resourceattributetransposerprocessor v1.7.0
+	github.com/observiq/observiq-otel-collector/receiver/pluginreceiver v1.7.0
 	github.com/open-telemetry/opamp-go v0.2.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/alibabacloudlogserviceexporter v0.58.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/awscloudwatchlogsexporter v0.58.0
