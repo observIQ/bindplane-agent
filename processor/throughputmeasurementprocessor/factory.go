@@ -23,6 +23,7 @@ var (
 
 var once sync.Once
 
+// NewFactory creates a new ProcessorFactory with default configuration
 func NewFactory() component.ProcessorFactory {
 	once.Do(func() {
 		_ = view.Register(MetricViews()...)
