@@ -476,6 +476,4 @@ replace github.com/observiq/observiq-otel-collector/exporter/googlecloudexporter
 
 replace github.com/observiq/observiq-otel-collector/packagestate => ./packagestate
 
-replace go.opentelemetry.io/collector/pdata v0.58.0 => ../opentelemetry-collector/pdata
-
 replace github.com/observiq/observiq-otel-collector/processor/throughputmeasurementprocessor => ./processor/throughputmeasurementprocessor

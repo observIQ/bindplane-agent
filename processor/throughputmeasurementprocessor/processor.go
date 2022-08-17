@@ -20,6 +20,9 @@ type throughputMeasurementProcessor struct {
 	enabled       bool
 	samplingRatio *big.Int
 	mutators      []tag.Mutator
+	tracesSizer   ptrace.Sizer
+	metricsSizer  pmetric.Sizer
+	logsSizer     plog.Sizer
 }
 
 func newThroughputMeasurementProcessor(logger *zap.Logger, cfg *Config, processorID string) *throughputMeasurementProcessor {
@@ -28,6 +31,9 @@ func newThroughputMeasurementProcessor(logger *zap.Logger, cfg *Config, processo
 		enabled:       cfg.Enabled,
 		samplingRatio: big.NewInt(int64(cfg.SamplingRatio * 1000)),
 		mutators:      []tag.Mutator{tag.Upsert(processorTagKey, processorID, tag.WithTTL(tag.TTLNoPropagation))},
+		tracesSizer:   ptrace.NewProtoMarshaler().(ptrace.Sizer),
+		metricsSizer:  pmetric.NewProtoMarshaler().(pmetric.Sizer),
+		logsSizer:     plog.NewProtoMarshaler().(plog.Sizer),
 	}
 }
 
@@ -42,7 +48,7 @@ func (tmp *throughputMeasurementProcessor) processTraces(ctx context.Context, td
 			stats.RecordWithTags(
 				ctx,
 				tmp.mutators,
-				traceDataSize.M(int64(td.Size())),
+				traceDataSize.M(int64(tmp.tracesSizer.TracesSize(td))),
 			)
 		}
 	}
@@ -61,7 +67,8 @@ func (tmp *throughputMeasurementProcessor) processLogs(ctx context.Context, ld p
 			stats.RecordWithTags(
 				ctx,
 				tmp.mutators,
-				logDataSize.M(int64(ld.Size())),
+				// logDataSize.M(int64(tmp.logsSizer.LogsSize(ld))),
+				logDataSize.M(int64(tmp.logsSizer.LogsSize(ld))),
 			)
 		}
 	}
@@ -80,7 +87,7 @@ func (tmp *throughputMeasurementProcessor) processMetrics(ctx context.Context, m
 			stats.RecordWithTags(
 				ctx,
 				tmp.mutators,
-				metricDataSize.M(int64(md.Size())),
+				metricDataSize.M(int64(tmp.metricsSizer.MetricsSize(md))),
 			)
 		}
 	}
