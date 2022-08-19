@@ -1,4 +1,4 @@
-version: 0.2.0
+version: 0.2.1
 title: IIS
 description: Log parser for IIS
 parameters:
@@ -77,6 +77,7 @@ template: |
       - type: csv_parser
         header: '{{ .w3c_header }}'
         delimiter: " "
+        lazy_quotes: true
         severity: 
           parse_from: 'attributes["sc-status"]'
           if: 'attributes["sc-status"] != nil'

@@ -1,4 +1,4 @@
-version: 0.0.1
+version: 0.0.2
 title: W3C
 description: Log Parser for W3C
 parameters:
@@ -88,24 +88,8 @@ template: |
         - type: filter
           expr: 'body matches "^#"'
 
-        - type: router
-          default: csv_parser
-          routes:
-            - output: quote_handler_parser
-              expr: body matches '.*".*".*' and not (body matches "^#")
-
-        - id: quote_handler_parser
-          type: regex_parser
-          parse_from: body
-          regex: '(?P<message1>[^"]*)(?P<first_quote>[\"])(?P<message2>[^"]*)(?P<second_quote>[\"])(?P<message3>.*)'
-
-        - id: quote_handler_restructurer
-          type: add
-          field: body
-          value: 'EXPR(attributes.message1 + attributes.message2 + attributes.message3)'
-          output: csv_parser
-
         - type: csv_parser
+          lazy_quotes: true
           delimiter: '{{ .delimiter }}'
           header: '{{ .header }}'
           
