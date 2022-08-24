@@ -464,6 +464,7 @@ install_package()
   # Move files to install dir
   for f in $FILES
   do
+    rm -rf "$INSTALL_DIR/$f"
     cp "$TMP_DIR/artifacts/$f" "$INSTALL_DIR/$f" || error_exit "$LINENO" "Failed to copy artifact $f to install dir"
   done
   decrease_indent
