@@ -50,6 +50,9 @@ RUN adduser \
     --uid 10005 \
     otel
 
+RUN echo "output: stdout\nlevel: info\n" > /etc/otel/logging.yaml
+ENV LOGGING_YAML_PATH=/etc/otel/logging.yaml
+
 USER otel
 
 # User should mount /etc/otel/config.yaml at runtime using docker volumes / k8s configmap
