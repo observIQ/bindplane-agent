@@ -13,6 +13,7 @@ import (
 	"go.uber.org/zap"
 )
 
+// upperBound is the upper bound to the sampling generator
 var upperBound = big.NewInt(1000)
 
 type throughputMeasurementProcessor struct {
@@ -67,7 +68,6 @@ func (tmp *throughputMeasurementProcessor) processLogs(ctx context.Context, ld p
 			stats.RecordWithTags(
 				ctx,
 				tmp.mutators,
-				// logDataSize.M(int64(tmp.logsSizer.LogsSize(ld))),
 				logDataSize.M(int64(tmp.logsSizer.LogsSize(ld))),
 			)
 		}

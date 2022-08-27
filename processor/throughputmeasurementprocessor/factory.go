@@ -42,7 +42,7 @@ func createDefaultConfig() config.Processor {
 	return &Config{
 		ProcessorSettings: config.NewProcessorSettings(config.NewComponentID(typeStr)),
 		Enabled:           true,
-		SamplingRatio:     1.0,
+		SamplingRatio:     0.5,
 	}
 }
 

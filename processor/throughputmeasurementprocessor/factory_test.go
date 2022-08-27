@@ -14,7 +14,7 @@ func TestNewFactory(t *testing.T) {
 	expectedCfg := &Config{
 		ProcessorSettings: config.NewProcessorSettings(config.NewComponentID(typeStr)),
 		Enabled:           true,
-		SamplingRatio:     1.0,
+		SamplingRatio:     0.5,
 	}
 
 	cfg, ok := factory.CreateDefaultConfig().(*Config)
