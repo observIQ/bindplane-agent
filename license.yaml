@@ -31,3 +31,4 @@ exceptions:
     - path: "./packagestate"
     - path: "../packagestate"
     - path: "./opamp/observiq/testdata/latest"
+    - path: "./processor/throughputmeasurementprocessor"
