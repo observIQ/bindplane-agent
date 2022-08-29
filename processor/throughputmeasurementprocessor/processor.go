@@ -50,6 +50,7 @@ func newThroughputMeasurementProcessor(logger *zap.Logger, cfg *Config, processo
 
 func (tmp *throughputMeasurementProcessor) processTraces(ctx context.Context, td ptrace.Traces) (ptrace.Traces, error) {
 	if tmp.enabled {
+		//#nosec G404 -- randomly generated number is not used for security purposes. It's ok if it's weak
 		if rand.Float64() <= tmp.samplingCutOffRatio {
 			err := stats.RecordWithTags(
 				ctx,
@@ -68,6 +69,7 @@ func (tmp *throughputMeasurementProcessor) processTraces(ctx context.Context, td
 
 func (tmp *throughputMeasurementProcessor) processLogs(ctx context.Context, ld plog.Logs) (plog.Logs, error) {
 	if tmp.enabled {
+		//#nosec G404 -- randomly generated number is not used for security purposes. It's ok if it's weak
 		if rand.Float64() <= tmp.samplingCutOffRatio {
 			err := stats.RecordWithTags(
 				ctx,
@@ -86,6 +88,7 @@ func (tmp *throughputMeasurementProcessor) processLogs(ctx context.Context, ld p
 
 func (tmp *throughputMeasurementProcessor) processMetrics(ctx context.Context, md pmetric.Metrics) (pmetric.Metrics, error) {
 	if tmp.enabled {
+		//#nosec G404 -- randomly generated number is not used for security purposes. It's ok if it's weak
 		if rand.Float64() <= tmp.samplingCutOffRatio {
 			err := stats.RecordWithTags(
 				ctx,
