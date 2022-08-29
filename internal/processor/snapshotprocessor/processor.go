@@ -11,6 +11,10 @@ import (
 	"go.uber.org/zap"
 )
 
+// getSnapshotReporter is function for retrieving the SnapshotReporter.
+// Meant to be overridden for tests.
+var getSnapshotReporter func() (*report.SnapshotReporter, error) = report.GetSnapshotReporter
+
 type snapshotProcessor struct {
 	logger           *zap.Logger
 	enabled          bool
@@ -19,7 +23,7 @@ type snapshotProcessor struct {
 }
 
 func newSnapshotProcessor(logger *zap.Logger, cfg *Config, processorID string) (*snapshotProcessor, error) {
-	reporter, err := report.GetSnapshotReporter()
+	reporter, err := getSnapshotReporter()
 	if err != nil {
 		return nil, fmt.Errorf("error retrieving SnapshotReporter: %w", err)
 	}

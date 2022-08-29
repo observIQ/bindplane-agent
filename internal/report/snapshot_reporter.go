@@ -3,6 +3,7 @@ package report
 
 import (
 	"context"
+	"net/http"
 
 	"go.opentelemetry.io/collector/pdata/plog"
 	"go.opentelemetry.io/collector/pdata/pmetric"
@@ -10,13 +11,37 @@ import (
 )
 
 // snapShotType is the reporterType for the snapshot reporter
-var snapShotType ReporterType = "snapshot"
+var snapShotType ReporterKind = "snapshot"
+
+// snapshotConfig specifies what snapshots to collect
+type snapshotConfig struct {
+	// Count is the minimum payload size
+	Count int `yaml:"count"`
+
+	// Endpoint is where to send the snapshots
+	Endpoint *endpointConfig `yaml:"endpoint"`
+
+	// Processors describes the components to report snapshots for
+	Processors []processorConfig `yaml:"processors"`
+}
+
+// endpointConfig is the configuration of a specific endpoint and full headers to include
+type endpointConfig struct {
+	URL     string      `yaml:"url"`
+	Headers http.Header `yaml:"headers"`
+}
+
+// processorConfig is the configuration of which processors to report snapshots for
+type processorConfig struct {
+	ComponentID   string   `yaml:"component_id"`
+	PipelineTypes []string `yaml:"pipeline_types"`
+}
 
 var _ Reporter = (*SnapshotReporter)(nil)
 
 // SnapshotReporter tracks and reports snapshots
 type SnapshotReporter struct {
-	enabled bool
+	client Client
 
 	// minPayloadSize is the minimum number of items to be in a payload
 	minPayloadSize int
@@ -28,11 +53,10 @@ type SnapshotReporter struct {
 }
 
 // NewSnapshotReporter creates a new SnapshotReporter with the associated client
-func NewSnapshotReporter(minPayloadSize int, enabled bool) *SnapshotReporter {
+func NewSnapshotReporter(client Client) *SnapshotReporter {
 	return &SnapshotReporter{
-		// TODO fill out
-		enabled:        enabled,
-		minPayloadSize: minPayloadSize,
+		client:         client,
+		minPayloadSize: 100,
 		logBuffers:     make(map[string][]plog.Logs),
 		metricBuffers:  make(map[string][]pmetric.Metrics),
 		traceBuffers:   make(map[string][]ptrace.Traces),
@@ -40,35 +64,25 @@ func NewSnapshotReporter(minPayloadSize int, enabled bool) *SnapshotReporter {
 }
 
 // Type returns type of the reporter
-func (s *SnapshotReporter) Type() ReporterType {
+func (s *SnapshotReporter) Type() ReporterKind {
 	return snapShotType
 }
 
+// ApplyConfig applies the new configuration
+func (s *SnapshotReporter) ApplyConfig(cfg any) error {
+	// TODO apply config
+	return nil
+}
+
 // Start kicks off reporting snapshots via the client
-func (s *SnapshotReporter) Start(_ Client) error {
+func (s *SnapshotReporter) Start() error {
 	// TODO send data
 	return nil
 }
 
-// Stop stops reporting snapshots and clears all buffers
+// Stop does nothing as there is no long running process
 func (s *SnapshotReporter) Stop(context.Context) error {
-	for k := range s.logBuffers {
-		delete(s.logBuffers, k)
-	}
-	for k := range s.traceBuffers {
-		delete(s.logBuffers, k)
-	}
-	for k := range s.metricBuffers {
-		delete(s.logBuffers, k)
-	}
-
-	// TODO
 	return nil
-}
-
-// IsEnabled implements Reporter
-func (s *SnapshotReporter) IsEnabled() bool {
-	return s.enabled
 }
 
 // ReportLogs reports logs to be sent to platform

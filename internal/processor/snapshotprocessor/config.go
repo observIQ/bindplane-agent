@@ -11,6 +11,7 @@ type Config struct {
 	Enabled bool `mapstructure:"enabled"`
 }
 
+// Validate validates the processor configuration
 func (cfg Config) Validate() error {
 	return nil
 }
