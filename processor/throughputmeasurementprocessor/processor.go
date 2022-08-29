@@ -16,8 +16,7 @@ package throughputmeasurementprocessor
 
 import (
 	"context"
-	"crypto/rand"
-	"math/big"
+	"math/rand"
 
 	"go.opencensus.io/stats"
 	"go.opencensus.io/tag"
@@ -27,39 +26,31 @@ import (
 	"go.uber.org/zap"
 )
 
-// upperBound is the upper bound to the sampling generator
-var upperBound = big.NewInt(1000)
-
 type throughputMeasurementProcessor struct {
-	logger        *zap.Logger
-	enabled       bool
-	samplingRatio *big.Int
-	mutators      []tag.Mutator
-	tracesSizer   ptrace.Sizer
-	metricsSizer  pmetric.Sizer
-	logsSizer     plog.Sizer
+	logger              *zap.Logger
+	enabled             bool
+	samplingCutOffRatio float64
+	mutators            []tag.Mutator
+	tracesSizer         ptrace.Sizer
+	metricsSizer        pmetric.Sizer
+	logsSizer           plog.Sizer
 }
 
 func newThroughputMeasurementProcessor(logger *zap.Logger, cfg *Config, processorID string) *throughputMeasurementProcessor {
 	return &throughputMeasurementProcessor{
-		logger:        logger,
-		enabled:       cfg.Enabled,
-		samplingRatio: big.NewInt(int64(cfg.SamplingRatio * 1000)),
-		mutators:      []tag.Mutator{tag.Upsert(processorTagKey, processorID, tag.WithTTL(tag.TTLNoPropagation))},
-		tracesSizer:   ptrace.NewProtoMarshaler().(ptrace.Sizer),
-		metricsSizer:  pmetric.NewProtoMarshaler().(pmetric.Sizer),
-		logsSizer:     plog.NewProtoMarshaler().(plog.Sizer),
+		logger:              logger,
+		enabled:             cfg.Enabled,
+		samplingCutOffRatio: cfg.SamplingRatio,
+		mutators:            []tag.Mutator{tag.Upsert(processorTagKey, processorID, tag.WithTTL(tag.TTLNoPropagation))},
+		tracesSizer:         ptrace.NewProtoMarshaler().(ptrace.Sizer),
+		metricsSizer:        pmetric.NewProtoMarshaler().(pmetric.Sizer),
+		logsSizer:           plog.NewProtoMarshaler().(plog.Sizer),
 	}
 }
 
 func (tmp *throughputMeasurementProcessor) processTraces(ctx context.Context, td ptrace.Traces) (ptrace.Traces, error) {
 	if tmp.enabled {
-		i, err := rand.Int(rand.Reader, upperBound)
-		if err != nil {
-			return td, err
-		}
-
-		if i.Cmp(tmp.samplingRatio) <= 0 {
+		if rand.Float64() <= tmp.samplingCutOffRatio {
 			err := stats.RecordWithTags(
 				ctx,
 				tmp.mutators,
@@ -77,12 +68,7 @@ func (tmp *throughputMeasurementProcessor) processTraces(ctx context.Context, td
 
 func (tmp *throughputMeasurementProcessor) processLogs(ctx context.Context, ld plog.Logs) (plog.Logs, error) {
 	if tmp.enabled {
-		i, err := rand.Int(rand.Reader, upperBound)
-		if err != nil {
-			return ld, err
-		}
-
-		if i.Cmp(tmp.samplingRatio) <= 0 {
+		if rand.Float64() <= tmp.samplingCutOffRatio {
 			err := stats.RecordWithTags(
 				ctx,
 				tmp.mutators,
@@ -100,12 +86,7 @@ func (tmp *throughputMeasurementProcessor) processLogs(ctx context.Context, ld p
 
 func (tmp *throughputMeasurementProcessor) processMetrics(ctx context.Context, md pmetric.Metrics) (pmetric.Metrics, error) {
 	if tmp.enabled {
-		i, err := rand.Int(rand.Reader, upperBound)
-		if err != nil {
-			return md, err
-		}
-
-		if i.Cmp(tmp.samplingRatio) <= 0 {
+		if rand.Float64() <= tmp.samplingCutOffRatio {
 			err := stats.RecordWithTags(
 				ctx,
 				tmp.mutators,
