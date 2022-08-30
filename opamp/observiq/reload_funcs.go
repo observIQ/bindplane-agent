@@ -142,6 +142,17 @@ func collectorReload(client *Client, collectorConfigPath string) opamp.ReloadFun
 	}
 }
 
+func reportReload(client *Client) opamp.ReloadFunc {
+	return func(contents []byte) (bool, error) {
+		if err := client.reportManager.ResetConfig(contents); err != nil {
+			client.logger.Error("Failure in applying report config", zap.Error(err))
+			return false, fmt.Errorf("failed to apply report config: %w", err)
+		}
+
+		return true, nil
+	}
+}
+
 func loggerReload(client *Client, loggerConfigPath string) opamp.ReloadFunc {
 	return func(contents []byte) (bool, error) {
 		rollbackFunc, cleanupFunc, err := prepRollback(loggerConfigPath)

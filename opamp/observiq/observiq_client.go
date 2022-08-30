@@ -25,6 +25,7 @@ import (
 	"sync"
 
 	"github.com/observiq/observiq-otel-collector/collector"
+	"github.com/observiq/observiq-otel-collector/internal/report"
 	"github.com/observiq/observiq-otel-collector/internal/version"
 	"github.com/observiq/observiq-otel-collector/opamp"
 	"github.com/observiq/observiq-otel-collector/packagestate"
@@ -54,6 +55,7 @@ type Client struct {
 	updaterManager          updaterManager
 	mutex                   sync.Mutex
 	updatingPackage         bool
+	reportManager           *report.Manager
 
 	// To signal if we are disconnecting already and not take any actions on connection failures
 	disconnecting bool
@@ -83,6 +85,9 @@ func NewClient(args *NewClientArgs) (opamp.Client, error) {
 		return nil, fmt.Errorf("failed to create updaterManager: %w", err)
 	}
 
+	reportManager := report.GetManager()
+	reportManager.SetClient(report.NewAgentClient(args.Config.AgentID, args.Config.SecretKey))
+
 	observiqClient := &Client{
 		logger:                  clientLogger,
 		ident:                   newIdentity(clientLogger, args.Config),
@@ -92,6 +97,7 @@ func NewClient(args *NewClientArgs) (opamp.Client, error) {
 		currentConfig:           args.Config,
 		packagesStateProvider:   newPackagesStateProvider(clientLogger, packagestate.DefaultFileName),
 		updaterManager:          updaterManger,
+		reportManager:           reportManager,
 	}
 
 	// Parse URL to determin scheme
@@ -135,6 +141,12 @@ func (c *Client) addManagedConfigs(args *NewClientArgs) error {
 		return fmt.Errorf("failed to create logger managed config: %w", err)
 	}
 	c.configManager.AddConfig(LoggingConfigName, loggerManagedConfig)
+
+	reportManagedConfig, err := opamp.NewManagedConfig("report.yaml", reportReload(c))
+	if err != nil {
+		return fmt.Errorf("failed to create report managed config: %w", err)
+	}
+	c.configManager.AddConfig(ReportConfigName, reportManagedConfig)
 
 	return nil
 }
@@ -209,6 +221,12 @@ func (c *Client) Connect(ctx context.Context) error {
 func (c *Client) Disconnect(ctx context.Context) error {
 	c.safeSetDisconnecting(true)
 	c.collector.Stop()
+
+	// This is a recoverable error so only log it
+	if err := c.reportManager.Shutdown(ctx); err != nil {
+		c.logger.Error("failed to shutdown reportManager", zap.Error(err))
+	}
+
 	return c.opampClient.Stop(ctx)
 }
 

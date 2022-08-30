@@ -87,9 +87,19 @@ func (s *SnapshotReporter) Report(cfg any) error {
 	if err != nil {
 		return fmt.Errorf("failed to construct snapshot request: %w", err)
 	}
+	// Add content headers
+	req.Header.Add("Content-Type", "application/protobuf")
+	req.Header.Add("Content-Encoding", "gzip")
 
 	// Add Component-ID header
 	req.Header.Add("Component-ID", ssCfg.Processor)
+
+	// Add headers from config
+	for k, values := range ssCfg.Endpoint.Headers {
+		for _, value := range values {
+			req.Header.Add(k, value)
+		}
+	}
 
 	// Send request
 	resp, err := s.client.Do(req)
