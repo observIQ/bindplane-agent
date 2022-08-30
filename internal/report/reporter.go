@@ -10,12 +10,8 @@ type Reporter interface {
 	// Type returns the type of this reporter
 	Type() ReporterKind
 
-	// ApplyConfig applies a new configuration for the reporter
-	ApplyConfig(any) error
-
-	// Start kicks off the reporter.
-	// If this starts a goroutine it should be terminated by calling Stop
-	Start() error
+	// Report starts reporting with the passed in configuration.
+	Report(config any) error
 
 	// Stop stops the reporter
 	Stop(context.Context) error

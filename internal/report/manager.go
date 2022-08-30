@@ -20,7 +20,7 @@ var (
 type Manager struct {
 	client    Client
 	reporters map[ReporterKind]Reporter
-	// TODO lock
+	mutex     sync.Mutex
 }
 
 // SetClient sets the client of the manager to the passed in client
@@ -42,6 +42,10 @@ func (m *Manager) ResetConfig(configData []byte) error {
 	if err := yaml.Unmarshal(configData, cfg); err != nil {
 		return fmt.Errorf("failed to unmarshal config: %w", err)
 	}
+
+	// Lock so we don't have multiple configs being processed at concurrently
+	m.mutex.Lock()
+	defer m.mutex.Unlock()
 
 	// Iterate through all reporter configs and marshal
 	for kind, rawCfg := range cfg {
@@ -78,13 +82,8 @@ func (m *Manager) reconfigureReporter(kind ReporterKind, cfg any) error {
 	}
 
 	// Apply the new config
-	if err := reporter.ApplyConfig(cfg); err != nil {
-		return fmt.Errorf("reporter %s failed to reconfigure: %w", kind, err)
-	}
-
-	// Start the reporter back with newly applied configuration
-	if err := reporter.Start(); err != nil {
-		return fmt.Errorf("reporter %s failed to start: %w", kind, err)
+	if err := reporter.Report(cfg); err != nil {
+		return fmt.Errorf("reporter %s failed to report with new config: %w", kind, err)
 	}
 
 	return nil
@@ -121,12 +120,17 @@ func GetManager() *Manager {
 
 // GetSnapshotReporter returns the
 func GetSnapshotReporter() *SnapshotReporter {
-	reporter, ok := GetManager().reporters[snapShotType]
+	currentManager := GetManager()
+
+	// Look if we have a snapshot reporter if not create one
+	currentManager.mutex.Lock()
+	reporter, ok := currentManager.reporters[snapShotType]
 	if !ok {
 		// Create new snapshot reporter
-		reporter = NewSnapshotReporter(GetManager().client)
-		GetManager().reporters[snapShotType] = reporter
+		reporter = NewSnapshotReporter(currentManager.client)
+		currentManager.reporters[snapShotType] = reporter
 	}
+	currentManager.mutex.Unlock()
 
 	// should be safe as we only set the reporter in this function
 	snapshotReporter := reporter.(*SnapshotReporter)

@@ -2,7 +2,6 @@ package snapshotprocessor
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/observiq/observiq-otel-collector/internal/report"
 	"go.opentelemetry.io/collector/pdata/plog"
@@ -13,7 +12,7 @@ import (
 
 // getSnapshotReporter is function for retrieving the SnapshotReporter.
 // Meant to be overridden for tests.
-var getSnapshotReporter func() (*report.SnapshotReporter, error) = report.GetSnapshotReporter
+var getSnapshotReporter func() *report.SnapshotReporter = report.GetSnapshotReporter
 
 type snapshotProcessor struct {
 	logger           *zap.Logger
@@ -23,22 +22,17 @@ type snapshotProcessor struct {
 }
 
 func newSnapshotProcessor(logger *zap.Logger, cfg *Config, processorID string) (*snapshotProcessor, error) {
-	reporter, err := getSnapshotReporter()
-	if err != nil {
-		return nil, fmt.Errorf("error retrieving SnapshotReporter: %w", err)
-	}
-
 	return &snapshotProcessor{
 		logger:           logger,
 		enabled:          cfg.Enabled,
-		snapShotReporter: reporter,
+		snapShotReporter: getSnapshotReporter(),
 		processorID:      processorID,
 	}, nil
 }
 
 func (sp *snapshotProcessor) processTraces(_ context.Context, td ptrace.Traces) (ptrace.Traces, error) {
 	if sp.enabled {
-		sp.snapShotReporter.ReportTraces(sp.processorID, td)
+		sp.snapShotReporter.SaveTraces(sp.processorID, td.Clone())
 	}
 
 	return td, nil
@@ -46,7 +40,7 @@ func (sp *snapshotProcessor) processTraces(_ context.Context, td ptrace.Traces) 
 
 func (sp *snapshotProcessor) processLogs(_ context.Context, ld plog.Logs) (plog.Logs, error) {
 	if sp.enabled {
-		sp.snapShotReporter.ReportLogs(sp.processorID, ld)
+		sp.snapShotReporter.SaveLogs(sp.processorID, ld.Clone())
 	}
 
 	return ld, nil
@@ -54,7 +48,7 @@ func (sp *snapshotProcessor) processLogs(_ context.Context, ld plog.Logs) (plog.
 
 func (sp *snapshotProcessor) processMetrics(_ context.Context, md pmetric.Metrics) (pmetric.Metrics, error) {
 	if sp.enabled {
-		sp.snapShotReporter.ReportMetrics(sp.processorID, md)
+		sp.snapShotReporter.SaveMetrics(sp.processorID, md.Clone())
 	}
 
 	return md, nil

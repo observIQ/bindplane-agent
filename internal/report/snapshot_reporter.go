@@ -1,8 +1,12 @@
-// Package report contains reporters for collecting specific information about the collector
+// Package report contains reporters for collecting specific information about the collector-
 package report
 
 import (
+	"bytes"
+	"compress/gzip"
 	"context"
+	"errors"
+	"fmt"
 	"net/http"
 
 	"go.opentelemetry.io/collector/pdata/plog"
@@ -15,26 +19,20 @@ var snapShotType ReporterKind = "snapshot"
 
 // snapshotConfig specifies what snapshots to collect
 type snapshotConfig struct {
-	// Count is the minimum payload size
-	Count int `yaml:"count"`
-
 	// Endpoint is where to send the snapshots
 	Endpoint *endpointConfig `yaml:"endpoint"`
 
-	// Processors describes the components to report snapshots for
-	Processors []processorConfig `yaml:"processors"`
+	// Processor is the full ComponentID of the snapshot processor
+	Processor string `yaml:"processor"`
+
+	// PipelineType will be "logs", "metrics", or "traces"
+	PipelineType string `yaml:"pipeline_type"`
 }
 
 // endpointConfig is the configuration of a specific endpoint and full headers to include
 type endpointConfig struct {
 	URL     string      `yaml:"url"`
 	Headers http.Header `yaml:"headers"`
-}
-
-// processorConfig is the configuration of which processors to report snapshots for
-type processorConfig struct {
-	ComponentID   string   `yaml:"component_id"`
-	PipelineTypes []string `yaml:"pipeline_types"`
 }
 
 var _ Reporter = (*SnapshotReporter)(nil)
@@ -68,15 +66,41 @@ func (s *SnapshotReporter) Type() ReporterKind {
 	return snapShotType
 }
 
-// ApplyConfig applies the new configuration
-func (s *SnapshotReporter) ApplyConfig(cfg any) error {
-	// TODO apply config
-	return nil
-}
+// Report applies the new configuration and reports snapshots specified in it
+func (s *SnapshotReporter) Report(cfg any) error {
+	ssCfg, ok := cfg.(*snapshotConfig)
+	if !ok {
+		return errors.New("invalid config type")
+	}
 
-// Start kicks off reporting snapshots via the client
-func (s *SnapshotReporter) Start() error {
-	// TODO send data
+	// Gather payload
+	payload, err := s.prepRequestPayload(ssCfg.Processor, ssCfg.PipelineType)
+
+	// Compress
+	compressedPayload, err := compress(payload)
+	if err != nil {
+		return fmt.Errorf("failed to compress payload: %w", err)
+	}
+
+	// Prep request
+	req, err := http.NewRequest(http.MethodPost, ssCfg.Endpoint.URL, bytes.NewReader(compressedPayload))
+	if err != nil {
+		return fmt.Errorf("failed to construct snapshot request: %w", err)
+	}
+
+	// Add Component-ID header
+	req.Header.Add("Component-ID", ssCfg.Processor)
+
+	// Send request
+	resp, err := s.client.Do(req)
+	if err != nil {
+		return fmt.Errorf("snapshot request failed: %w", err)
+	}
+
+	if resp.StatusCode > 299 {
+		return fmt.Errorf("Non 200 response for snapshot report: %d", resp.StatusCode)
+	}
+
 	return nil
 }
 
@@ -85,8 +109,8 @@ func (s *SnapshotReporter) Stop(context.Context) error {
 	return nil
 }
 
-// ReportLogs reports logs to be sent to platform
-func (s *SnapshotReporter) ReportLogs(componentID string, ld plog.Logs) {
+// SaveLogs saves off logs in a snapshot to be reported later
+func (s *SnapshotReporter) SaveLogs(componentID string, ld plog.Logs) {
 	componentLogs, ok := s.logBuffers[componentID]
 	if !ok {
 		componentLogs = make([]plog.Logs, 0)
@@ -102,8 +126,8 @@ func (s *SnapshotReporter) ReportLogs(componentID string, ld plog.Logs) {
 	s.logBuffers[componentID] = componentLogs
 }
 
-// ReportTraces reports traces to be sent to platform
-func (s *SnapshotReporter) ReportTraces(componentID string, td ptrace.Traces) {
+// SaveTraces saves off traces in a snapshot to be reported later
+func (s *SnapshotReporter) SaveTraces(componentID string, td ptrace.Traces) {
 	componentTraces, ok := s.traceBuffers[componentID]
 	if !ok {
 		componentTraces = make([]ptrace.Traces, 0)
@@ -119,8 +143,8 @@ func (s *SnapshotReporter) ReportTraces(componentID string, td ptrace.Traces) {
 	s.traceBuffers[componentID] = componentTraces
 }
 
-// ReportMetrics reports metrics to be sent to platform
-func (s *SnapshotReporter) ReportMetrics(componentID string, md pmetric.Metrics) {
+// SaveMetrics saves off metrics in a snapshot to be reported later
+func (s *SnapshotReporter) SaveMetrics(componentID string, md pmetric.Metrics) {
 	componentMetrics, ok := s.metricBuffers[componentID]
 	if !ok {
 		componentMetrics = make([]pmetric.Metrics, 0)
@@ -153,4 +177,79 @@ func insertPayload[T plog.Logs | pmetric.Metrics | ptrace.Traces](buffer []T, pa
 	}
 
 	return buffer
+}
+
+// prepRequestPayload based on the pipelineType will return a marshaled proto of the OTLP data types for the componentID
+func (s *SnapshotReporter) prepRequestPayload(componentID, pipelineType string) (payload []byte, err error) {
+	switch pipelineType {
+	case "logs":
+		logsMarshler := plog.NewProtoMarshaler()
+
+		payloadLogs := plog.NewLogs()
+		logs := s.logBuffers[componentID]
+		if len(logs) > 0 {
+			// Copy logs to a single payload
+			for _, ld := range logs {
+				ld.ResourceLogs().CopyTo(payloadLogs.ResourceLogs())
+			}
+		}
+
+		payload, err = logsMarshler.MarshalLogs(payloadLogs)
+		if err != nil {
+			return nil, fmt.Errorf("failed to construct payload: %w", err)
+		}
+	case "metrics":
+		metricsMarshler := pmetric.NewProtoMarshaler()
+
+		payloadMetrics := pmetric.NewMetrics()
+		metrics := s.metricBuffers[componentID]
+		if len(metrics) > 0 {
+			for _, md := range metrics {
+				md.ResourceMetrics().CopyTo(payloadMetrics.ResourceMetrics())
+			}
+		}
+
+		payload, err = metricsMarshler.MarshalMetrics(payloadMetrics)
+		if err != nil {
+			return nil, fmt.Errorf("failed to construct payload: %w", err)
+		}
+	case "traces":
+		tracesMarshler := ptrace.NewProtoMarshaler()
+
+		payloadTraces := ptrace.NewTraces()
+		traces := s.traceBuffers[componentID]
+		if len(traces) > 0 {
+			for _, td := range traces {
+				td.ResourceSpans().CopyTo(payloadTraces.ResourceSpans())
+			}
+		}
+
+		payload, err = tracesMarshler.MarshalTraces(payloadTraces)
+		if err != nil {
+			return nil, fmt.Errorf("failed to construct payload: %w", err)
+		}
+	}
+
+	// Case where there is no snapshot data for requested component and pipeline
+	if payload == nil {
+		payload = make([]byte, 0)
+	}
+
+	return
+}
+
+// compress gzip compresses the data
+func compress(data []byte) ([]byte, error) {
+	var b bytes.Buffer
+	w := gzip.NewWriter(&b)
+	_, err := w.Write(data)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := w.Close(); err != nil {
+		return nil, err
+	}
+
+	return b.Bytes(), nil
 }
