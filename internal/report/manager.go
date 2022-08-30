@@ -70,7 +70,7 @@ func (m *Manager) ResetConfig(configData []byte) error {
 				return fmt.Errorf("failed to unmarshal Snapshot config: %w", err)
 			}
 
-			if err := m.reconfigureReporter(kind, ssCfg); err != nil {
+			if err := m.reconfigureReporter(kind, &ssCfg); err != nil {
 				return err
 			}
 		default:
