@@ -23,9 +23,6 @@ func newLogBuffer(idealSize int) *logBuffer {
 }
 
 func (l *logBuffer) Len() int {
-	l.mutex.Lock()
-	defer l.mutex.Unlock()
-
 	size := 0
 	for _, ld := range l.buffer {
 		size += ld.LogRecordCount()
@@ -95,9 +92,6 @@ func newMetricBuffer(idealSize int) *metricBuffer {
 }
 
 func (l *metricBuffer) Len() int {
-	l.mutex.Lock()
-	defer l.mutex.Unlock()
-
 	size := 0
 	for _, md := range l.buffer {
 		size += md.DataPointCount()
@@ -167,9 +161,6 @@ func newTraceBuffer(idealSize int) *traceBuffer {
 }
 
 func (l *traceBuffer) Len() int {
-	l.mutex.Lock()
-	defer l.mutex.Unlock()
-
 	size := 0
 	for _, td := range l.buffer {
 		size += td.SpanCount()
