@@ -67,8 +67,11 @@ func (l *logBuffer) ConstructPayload() ([]byte, error) {
 
 	payloadLogs := plog.NewLogs()
 	for _, ld := range l.buffer {
-		ld.ResourceLogs().CopyTo(payloadLogs.ResourceLogs())
+		ld.ResourceLogs().MoveAndAppendTo(payloadLogs.ResourceLogs())
 	}
+
+	// update the buffer to retain the current logs which were moved to the new payload
+	l.buffer = []plog.Logs{payloadLogs}
 
 	payload, err := logsMarshaler.MarshalLogs(payloadLogs)
 	if err != nil {
@@ -136,8 +139,11 @@ func (l *metricBuffer) ConstructPayload() ([]byte, error) {
 
 	payloadMetrics := pmetric.NewMetrics()
 	for _, md := range l.buffer {
-		md.ResourceMetrics().CopyTo(payloadMetrics.ResourceMetrics())
+		md.ResourceMetrics().MoveAndAppendTo(payloadMetrics.ResourceMetrics())
 	}
+
+	// update the buffer to retain the current metrics which were moved to the new payload
+	l.buffer = []pmetric.Metrics{payloadMetrics}
 
 	payload, err := metricMarshaler.MarshalMetrics(payloadMetrics)
 	if err != nil {
@@ -205,8 +211,11 @@ func (l *traceBuffer) ConstructPayload() ([]byte, error) {
 
 	payloadTraces := ptrace.NewTraces()
 	for _, md := range l.buffer {
-		md.ResourceSpans().CopyTo(payloadTraces.ResourceSpans())
+		md.ResourceSpans().MoveAndAppendTo(payloadTraces.ResourceSpans())
 	}
+
+	// update the buffer to retain the current traces which were moved to the new payload
+	l.buffer = []ptrace.Traces{payloadTraces}
 
 	payload, err := traceMarshaler.MarshalTraces(payloadTraces)
 	if err != nil {
