@@ -1,4 +1,18 @@
-package report
+// Copyright  observIQ, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package snapshot
 
 import (
 	"fmt"
@@ -9,20 +23,23 @@ import (
 	"go.opentelemetry.io/collector/pdata/ptrace"
 )
 
-type logBuffer struct {
+// LogBuffer is a buffer for plog.Logs
+type LogBuffer struct {
 	mutex     sync.Mutex
 	buffer    []plog.Logs
 	idealSize int
 }
 
-func newLogBuffer(idealSize int) *logBuffer {
-	return &logBuffer{
+// NewLogBuffer creates a logBuffer with the ideal size set
+func NewLogBuffer(idealSize int) *LogBuffer {
+	return &LogBuffer{
 		buffer:    make([]plog.Logs, 0),
 		idealSize: idealSize,
 	}
 }
 
-func (l *logBuffer) Len() int {
+// len counts the number of log records in all Log payloads in buffer
+func (l *LogBuffer) len() int {
 	size := 0
 	for _, ld := range l.buffer {
 		size += ld.LogRecordCount()
@@ -31,12 +48,13 @@ func (l *logBuffer) Len() int {
 	return size
 }
 
-func (l *logBuffer) Add(ld plog.Logs) {
+// Add adds the new log payload and adjust buffer to keep ideal size
+func (l *LogBuffer) Add(ld plog.Logs) {
 	l.mutex.Lock()
 	defer l.mutex.Unlock()
 
 	logSize := ld.LogRecordCount()
-	bufferSize := l.Len()
+	bufferSize := l.len()
 	switch {
 	// The number of logs is more than idealSize so reset this to just this log set
 	case logSize > l.idealSize:
@@ -60,7 +78,8 @@ func (l *logBuffer) Add(ld plog.Logs) {
 	}
 }
 
-func (l *logBuffer) ConstructPayload() ([]byte, error) {
+// ConstructPayload condenses the buffer and serializes to protobuf
+func (l *LogBuffer) ConstructPayload() ([]byte, error) {
 	l.mutex.Lock()
 	defer l.mutex.Unlock()
 	logsMarshaler := plog.NewProtoMarshaler()
@@ -81,20 +100,23 @@ func (l *logBuffer) ConstructPayload() ([]byte, error) {
 	return payload, nil
 }
 
-type metricBuffer struct {
+// MetricBuffer is a buffer for pmetric.Metrics
+type MetricBuffer struct {
 	mutex     sync.Mutex
 	buffer    []pmetric.Metrics
 	idealSize int
 }
 
-func newMetricBuffer(idealSize int) *metricBuffer {
-	return &metricBuffer{
+// NewMetricBuffer creates a metricBuffer with the ideal size set
+func NewMetricBuffer(idealSize int) *MetricBuffer {
+	return &MetricBuffer{
 		buffer:    make([]pmetric.Metrics, 0),
 		idealSize: idealSize,
 	}
 }
 
-func (l *metricBuffer) Len() int {
+// len counts the number of data points in all Metric payloads in buffer
+func (l *MetricBuffer) len() int {
 	size := 0
 	for _, md := range l.buffer {
 		size += md.DataPointCount()
@@ -103,12 +125,13 @@ func (l *metricBuffer) Len() int {
 	return size
 }
 
-func (l *metricBuffer) Add(md pmetric.Metrics) {
+// Add adds the new metric payload and adjust buffer to keep ideal size
+func (l *MetricBuffer) Add(md pmetric.Metrics) {
 	l.mutex.Lock()
 	defer l.mutex.Unlock()
 
 	metricSize := md.DataPointCount()
-	bufferSize := l.Len()
+	bufferSize := l.len()
 	switch {
 	// The number of metrics is more than idealSize so reset this to just this metric set
 	case metricSize > l.idealSize:
@@ -132,7 +155,8 @@ func (l *metricBuffer) Add(md pmetric.Metrics) {
 	}
 }
 
-func (l *metricBuffer) ConstructPayload() ([]byte, error) {
+// ConstructPayload condenses the buffer and serializes to protobuf
+func (l *MetricBuffer) ConstructPayload() ([]byte, error) {
 	l.mutex.Lock()
 	defer l.mutex.Unlock()
 	metricMarshaler := pmetric.NewProtoMarshaler()
@@ -153,20 +177,23 @@ func (l *metricBuffer) ConstructPayload() ([]byte, error) {
 	return payload, nil
 }
 
-type traceBuffer struct {
+// TraceBuffer is a buffer for ptrace.Traces
+type TraceBuffer struct {
 	mutex     sync.Mutex
 	buffer    []ptrace.Traces
 	idealSize int
 }
 
-func newTraceBuffer(idealSize int) *traceBuffer {
-	return &traceBuffer{
+// NewTraceBuffer creates a traceBuffer with the ideal size set
+func NewTraceBuffer(idealSize int) *TraceBuffer {
+	return &TraceBuffer{
 		buffer:    make([]ptrace.Traces, 0),
 		idealSize: idealSize,
 	}
 }
 
-func (l *traceBuffer) Len() int {
+// len counts the number of spans in all Traces payloads in buffer
+func (l *TraceBuffer) len() int {
 	size := 0
 	for _, td := range l.buffer {
 		size += td.SpanCount()
@@ -175,12 +202,13 @@ func (l *traceBuffer) Len() int {
 	return size
 }
 
-func (l *traceBuffer) Add(td ptrace.Traces) {
+// Add adds the new trace payload and adjust buffer to keep ideal size
+func (l *TraceBuffer) Add(td ptrace.Traces) {
 	l.mutex.Lock()
 	defer l.mutex.Unlock()
 
 	traceSize := td.SpanCount()
-	bufferSize := l.Len()
+	bufferSize := l.len()
 	switch {
 	// The number of traces is more than idealSize so reset this to just this trace set
 	case traceSize > l.idealSize:
@@ -204,7 +232,8 @@ func (l *traceBuffer) Add(td ptrace.Traces) {
 	}
 }
 
-func (l *traceBuffer) ConstructPayload() ([]byte, error) {
+// ConstructPayload condenses the buffer and serializes to protobuf
+func (l *TraceBuffer) ConstructPayload() ([]byte, error) {
 	l.mutex.Lock()
 	defer l.mutex.Unlock()
 	traceMarshaler := ptrace.NewProtoMarshaler()

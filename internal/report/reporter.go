@@ -20,6 +20,8 @@ import "context"
 type ReporterKind string
 
 // Reporter represents a a structure to collector and report specific structures
+//
+//go:generate mockery --name Reporter --filename mock_reporter.go --structname MockReporter
 type Reporter interface {
 	// Type returns the type of this reporter
 	Type() ReporterKind

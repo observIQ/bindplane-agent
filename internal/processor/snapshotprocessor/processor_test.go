@@ -14,8 +14,174 @@
 
 package snapshotprocessor
 
-import "testing"
+import (
+	"context"
+	"testing"
+
+	"github.com/observiq/observiq-otel-collector/internal/report"
+	"github.com/observiq/observiq-otel-collector/internal/report/snapshot/mocks"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+	"go.opentelemetry.io/collector/pdata/plog"
+	"go.opentelemetry.io/collector/pdata/pmetric"
+	"go.opentelemetry.io/collector/pdata/ptrace"
+	"go.uber.org/zap"
+)
 
 func Test_newShapshotProcessor(t *testing.T) {
+	reporter := &report.SnapshotReporter{}
+	unsetFunc := overwriteSnapshotSet(t, reporter)
+	defer unsetFunc()
 
+	logger := zap.NewNop()
+	cfg := &Config{
+		Enabled: false,
+	}
+
+	processorID := "snapshotprocessor/one"
+
+	expected := &snapshotProcessor{
+		logger:      logger,
+		enabled:     cfg.Enabled,
+		snapShotter: reporter,
+		processorID: processorID,
+	}
+
+	actual := newSnapshotProcessor(logger, cfg, processorID)
+	assert.Equal(t, expected, actual)
+}
+
+func Test_processTraces(t *testing.T) {
+	testCases := []struct {
+		desc       string
+		enabled    bool
+		setupMocks func(*mocks.MockSnapshotter)
+	}{
+		{
+			desc:       "disabled",
+			enabled:    false,
+			setupMocks: func(m *mocks.MockSnapshotter) {},
+		},
+		{
+			desc:    "enabled",
+			enabled: true,
+			setupMocks: func(m *mocks.MockSnapshotter) {
+				m.On("SaveTraces", mock.Anything, mock.Anything).Return()
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.desc, func(t *testing.T) {
+			mockSnapshotter := mocks.NewMockSnapshotter(t)
+
+			tc.setupMocks(mockSnapshotter)
+
+			sp := &snapshotProcessor{
+				logger:      zap.NewNop(),
+				enabled:     tc.enabled,
+				snapShotter: mockSnapshotter,
+				processorID: typeStr,
+			}
+
+			td := ptrace.NewTraces()
+			sp.processTraces(context.Background(), td)
+		})
+	}
+}
+
+func Test_processLogs(t *testing.T) {
+	testCases := []struct {
+		desc       string
+		enabled    bool
+		setupMocks func(*mocks.MockSnapshotter)
+	}{
+		{
+			desc:       "disabled",
+			enabled:    false,
+			setupMocks: func(m *mocks.MockSnapshotter) {},
+		},
+		{
+			desc:    "enabled",
+			enabled: true,
+			setupMocks: func(m *mocks.MockSnapshotter) {
+				m.On("SaveLogs", mock.Anything, mock.Anything).Return()
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.desc, func(t *testing.T) {
+			mockSnapshotter := mocks.NewMockSnapshotter(t)
+
+			tc.setupMocks(mockSnapshotter)
+
+			sp := &snapshotProcessor{
+				logger:      zap.NewNop(),
+				enabled:     tc.enabled,
+				snapShotter: mockSnapshotter,
+				processorID: typeStr,
+			}
+
+			ld := plog.NewLogs()
+			sp.processLogs(context.Background(), ld)
+		})
+	}
+}
+
+func Test_processMetrics(t *testing.T) {
+	testCases := []struct {
+		desc       string
+		enabled    bool
+		setupMocks func(*mocks.MockSnapshotter)
+	}{
+		{
+			desc:       "disabled",
+			enabled:    false,
+			setupMocks: func(m *mocks.MockSnapshotter) {},
+		},
+		{
+			desc:    "enabled",
+			enabled: true,
+			setupMocks: func(m *mocks.MockSnapshotter) {
+				m.On("SaveMetrics", mock.Anything, mock.Anything).Return()
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.desc, func(t *testing.T) {
+			mockSnapshotter := mocks.NewMockSnapshotter(t)
+
+			tc.setupMocks(mockSnapshotter)
+
+			sp := &snapshotProcessor{
+				logger:      zap.NewNop(),
+				enabled:     tc.enabled,
+				snapShotter: mockSnapshotter,
+				processorID: typeStr,
+			}
+
+			md := pmetric.NewMetrics()
+			sp.processMetrics(context.Background(), md)
+		})
+	}
+}
+
+func overwriteSnapshotSet(t *testing.T, reporterToSet *report.SnapshotReporter) (unsetFunc func()) {
+	t.Helper()
+	// Save original function
+	oldFunc := getSnapshotReporter
+
+	// Create new function returning new reporter
+	getSnapshotReporter = func() *report.SnapshotReporter {
+		return reporterToSet
+	}
+
+	// Create a function to return to the original state
+	unsetFunc = func() {
+		getSnapshotReporter = oldFunc
+	}
+
+	return
 }

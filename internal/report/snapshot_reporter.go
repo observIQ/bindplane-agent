@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/observiq/observiq-otel-collector/internal/report/snapshot"
 	"go.opentelemetry.io/collector/pdata/plog"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.opentelemetry.io/collector/pdata/ptrace"
@@ -50,6 +51,7 @@ type endpointConfig struct {
 }
 
 var _ Reporter = (*SnapshotReporter)(nil)
+var _ snapshot.Snapshotter = (*SnapshotReporter)(nil)
 
 // SnapshotReporter tracks and reports snapshots
 type SnapshotReporter struct {
@@ -59,9 +61,9 @@ type SnapshotReporter struct {
 	minPayloadSize int
 
 	// Buffers
-	logBuffers    map[string]*logBuffer
-	metricBuffers map[string]*metricBuffer
-	traceBuffers  map[string]*traceBuffer
+	logBuffers    map[string]*snapshot.LogBuffer
+	metricBuffers map[string]*snapshot.MetricBuffer
+	traceBuffers  map[string]*snapshot.TraceBuffer
 }
 
 // NewSnapshotReporter creates a new SnapshotReporter with the associated client
@@ -69,9 +71,9 @@ func NewSnapshotReporter(client Client) *SnapshotReporter {
 	return &SnapshotReporter{
 		client:         client,
 		minPayloadSize: 100,
-		logBuffers:     make(map[string]*logBuffer),
-		metricBuffers:  make(map[string]*metricBuffer),
-		traceBuffers:   make(map[string]*traceBuffer),
+		logBuffers:     make(map[string]*snapshot.LogBuffer),
+		metricBuffers:  make(map[string]*snapshot.MetricBuffer),
+		traceBuffers:   make(map[string]*snapshot.TraceBuffer),
 	}
 }
 
@@ -137,7 +139,7 @@ func (s *SnapshotReporter) Stop(context.Context) error {
 func (s *SnapshotReporter) SaveLogs(componentID string, ld plog.Logs) {
 	buffer, ok := s.logBuffers[componentID]
 	if !ok {
-		buffer = newLogBuffer(s.minPayloadSize)
+		buffer = snapshot.NewLogBuffer(s.minPayloadSize)
 	}
 
 	buffer.Add(ld)
@@ -148,7 +150,7 @@ func (s *SnapshotReporter) SaveLogs(componentID string, ld plog.Logs) {
 func (s *SnapshotReporter) SaveTraces(componentID string, td ptrace.Traces) {
 	buffer, ok := s.traceBuffers[componentID]
 	if !ok {
-		buffer = newTraceBuffer(s.minPayloadSize)
+		buffer = snapshot.NewTraceBuffer(s.minPayloadSize)
 	}
 
 	buffer.Add(td)
@@ -159,7 +161,7 @@ func (s *SnapshotReporter) SaveTraces(componentID string, td ptrace.Traces) {
 func (s *SnapshotReporter) SaveMetrics(componentID string, md pmetric.Metrics) {
 	buffer, ok := s.metricBuffers[componentID]
 	if !ok {
-		buffer = newMetricBuffer(s.minPayloadSize)
+		buffer = snapshot.NewMetricBuffer(s.minPayloadSize)
 	}
 
 	buffer.Add(md)

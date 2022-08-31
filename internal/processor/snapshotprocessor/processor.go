@@ -18,6 +18,7 @@ import (
 	"context"
 
 	"github.com/observiq/observiq-otel-collector/internal/report"
+	"github.com/observiq/observiq-otel-collector/internal/report/snapshot"
 	"go.opentelemetry.io/collector/pdata/plog"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.opentelemetry.io/collector/pdata/ptrace"
@@ -29,24 +30,25 @@ import (
 var getSnapshotReporter func() *report.SnapshotReporter = report.GetSnapshotReporter
 
 type snapshotProcessor struct {
-	logger           *zap.Logger
-	enabled          bool
-	snapShotReporter *report.SnapshotReporter
-	processorID      string
+	logger      *zap.Logger
+	enabled     bool
+	snapShotter snapshot.Snapshotter
+	processorID string
 }
 
-func newSnapshotProcessor(logger *zap.Logger, cfg *Config, processorID string) (*snapshotProcessor, error) {
+// newSnapshotProcessor creates a new snapshot processor
+func newSnapshotProcessor(logger *zap.Logger, cfg *Config, processorID string) *snapshotProcessor {
 	return &snapshotProcessor{
-		logger:           logger,
-		enabled:          cfg.Enabled,
-		snapShotReporter: getSnapshotReporter(),
-		processorID:      processorID,
-	}, nil
+		logger:      logger,
+		enabled:     cfg.Enabled,
+		snapShotter: getSnapshotReporter(),
+		processorID: processorID,
+	}
 }
 
 func (sp *snapshotProcessor) processTraces(_ context.Context, td ptrace.Traces) (ptrace.Traces, error) {
 	if sp.enabled {
-		sp.snapShotReporter.SaveTraces(sp.processorID, td.Clone())
+		sp.snapShotter.SaveTraces(sp.processorID, td.Clone())
 	}
 
 	return td, nil
@@ -54,7 +56,7 @@ func (sp *snapshotProcessor) processTraces(_ context.Context, td ptrace.Traces) 
 
 func (sp *snapshotProcessor) processLogs(_ context.Context, ld plog.Logs) (plog.Logs, error) {
 	if sp.enabled {
-		sp.snapShotReporter.SaveLogs(sp.processorID, ld.Clone())
+		sp.snapShotter.SaveLogs(sp.processorID, ld.Clone())
 	}
 
 	return ld, nil
@@ -62,7 +64,7 @@ func (sp *snapshotProcessor) processLogs(_ context.Context, ld plog.Logs) (plog.
 
 func (sp *snapshotProcessor) processMetrics(_ context.Context, md pmetric.Metrics) (pmetric.Metrics, error) {
 	if sp.enabled {
-		sp.snapShotReporter.SaveMetrics(sp.processorID, md.Clone())
+		sp.snapShotter.SaveMetrics(sp.processorID, md.Clone())
 	}
 
 	return md, nil
