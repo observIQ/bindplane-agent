@@ -146,7 +146,7 @@ func TestApplyConfigChanges(t *testing.T) {
 				assert.NoError(t, err)
 
 				manager := NewAgentConfigManager(zap.NewNop())
-				mangedConfig, err := opamp.NewManagedConfig(configPath, opamp.NoopReloadFunc)
+				mangedConfig, err := opamp.NewManagedConfig(configPath, opamp.NoopReloadFunc, true)
 				assert.NoError(t, err)
 				manager.AddConfig(ManagerConfigName, mangedConfig)
 
@@ -185,7 +185,7 @@ func TestApplyConfigChanges(t *testing.T) {
 				assert.NoError(t, err)
 
 				manager := NewAgentConfigManager(zap.NewNop())
-				mangedConfig, err := opamp.NewManagedConfig(configPath, opamp.NoopReloadFunc)
+				mangedConfig, err := opamp.NewManagedConfig(configPath, opamp.NoopReloadFunc, true)
 				assert.NoError(t, err)
 				manager.AddConfig(ManagerConfigName, mangedConfig)
 
@@ -232,7 +232,7 @@ func TestApplyConfigChanges(t *testing.T) {
 				assert.NoError(t, err)
 
 				manager := NewAgentConfigManager(zap.NewNop())
-				mangedConfig, err := opamp.NewManagedConfig(configPath, opamp.NoopReloadFunc)
+				mangedConfig, err := opamp.NewManagedConfig(configPath, opamp.NoopReloadFunc, true)
 				assert.NoError(t, err)
 				manager.AddConfig(ManagerConfigName, mangedConfig)
 
@@ -289,7 +289,7 @@ func TestApplyConfigChanges(t *testing.T) {
 
 				manager := NewAgentConfigManager(zap.NewNop())
 
-				mangedConfig, err := opamp.NewManagedConfig(configPath, opamp.NoopReloadFunc)
+				mangedConfig, err := opamp.NewManagedConfig(configPath, opamp.NoopReloadFunc, true)
 				assert.NoError(t, err)
 				manager.AddConfig(ManagerConfigName, mangedConfig)
 
@@ -337,7 +337,7 @@ func TestApplyConfigChanges(t *testing.T) {
 				assert.NoError(t, err)
 
 				manager := NewAgentConfigManager(zap.NewNop())
-				mangedConfig, err := opamp.NewManagedConfig(configPath, opamp.NoopReloadFunc)
+				mangedConfig, err := opamp.NewManagedConfig(configPath, opamp.NoopReloadFunc, true)
 				assert.NoError(t, err)
 				manager.AddConfig(ManagerConfigName, mangedConfig)
 
@@ -403,7 +403,7 @@ func TestApplyConfigChanges(t *testing.T) {
 					err = os.WriteFile(configPath, data, 0600)
 					assert.NoError(t, err)
 					return true, err
-				})
+				}, true)
 				assert.NoError(t, err)
 				manager.AddConfig(LoggingConfigName, mangedConfig)
 
@@ -455,7 +455,7 @@ func TestApplyConfigChanges(t *testing.T) {
 				manager := NewAgentConfigManager(zap.NewNop())
 				mangedConfig, err := opamp.NewManagedConfig(configPath, func(data []byte) (changed bool, err error) {
 					return false, expectedError
-				})
+				}, true)
 				assert.NoError(t, err)
 				manager.AddConfig(LoggingConfigName, mangedConfig)
 

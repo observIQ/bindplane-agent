@@ -124,25 +124,25 @@ func NewClient(args *NewClientArgs) (opamp.Client, error) {
 
 func (c *Client) addManagedConfigs(args *NewClientArgs) error {
 	// Add configs to config manager
-	managerManagedConfig, err := opamp.NewManagedConfig(args.ManagerConfigPath, managerReload(c, args.ManagerConfigPath))
+	managerManagedConfig, err := opamp.NewManagedConfig(args.ManagerConfigPath, managerReload(c, args.ManagerConfigPath), true)
 	if err != nil {
 		return fmt.Errorf("failed to create manager managed config: %w", err)
 	}
 	c.configManager.AddConfig(ManagerConfigName, managerManagedConfig)
 
-	collectorManagedConfig, err := opamp.NewManagedConfig(args.CollectorConfigPath, collectorReload(c, args.CollectorConfigPath))
+	collectorManagedConfig, err := opamp.NewManagedConfig(args.CollectorConfigPath, collectorReload(c, args.CollectorConfigPath), true)
 	if err != nil {
 		return fmt.Errorf("failed to create collector managed config: %w", err)
 	}
 	c.configManager.AddConfig(CollectorConfigName, collectorManagedConfig)
 
-	loggerManagedConfig, err := opamp.NewManagedConfig(args.LoggerConfigPath, loggerReload(c, args.LoggerConfigPath))
+	loggerManagedConfig, err := opamp.NewManagedConfig(args.LoggerConfigPath, loggerReload(c, args.LoggerConfigPath), true)
 	if err != nil {
 		return fmt.Errorf("failed to create logger managed config: %w", err)
 	}
 	c.configManager.AddConfig(LoggingConfigName, loggerManagedConfig)
 
-	reportManagedConfig, err := opamp.NewManagedConfig("report.yaml", reportReload(c))
+	reportManagedConfig, err := opamp.NewManagedConfig("report.yaml", reportReload(c), false)
 	if err != nil {
 		return fmt.Errorf("failed to create report managed config: %w", err)
 	}

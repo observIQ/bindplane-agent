@@ -84,7 +84,7 @@ func TestNewManagedConfig(t *testing.T) {
 		{
 			desc: "Missing config file",
 			testFunc: func(t *testing.T) {
-				managedConfig, err := NewManagedConfig("./path.yml", NoopReloadFunc)
+				managedConfig, err := NewManagedConfig("./path.yml", NoopReloadFunc, true)
 				assert.Error(t, err)
 				assert.Nil(t, managedConfig)
 			},
@@ -103,7 +103,7 @@ func TestNewManagedConfig(t *testing.T) {
 					currentConfigHash: []byte{0xb9, 0x4d, 0x27, 0xb9, 0x93, 0x4d, 0x3e, 0x8, 0xa5, 0x2e, 0x52, 0xd7, 0xda, 0x7d, 0xab, 0xfa, 0xc4, 0x84, 0xef, 0xe3, 0x7a, 0x53, 0x80, 0xee, 0x90, 0x88, 0xf7, 0xac, 0xe2, 0xef, 0xcd, 0xe9},
 				}
 
-				managedConfig, err := NewManagedConfig(cfgPath, NoopReloadFunc)
+				managedConfig, err := NewManagedConfig(cfgPath, NoopReloadFunc, true)
 				assert.NoError(t, err)
 				assert.Equal(t, expected.ConfigPath, managedConfig.ConfigPath)
 				assert.Equal(t, expected.currentConfigHash, managedConfig.currentConfigHash)

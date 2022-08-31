@@ -209,7 +209,7 @@ func (a *AgentConfigManager) trackNewConfig(configName string, contents []byte) 
 		return fmt.Errorf("failed to write new config file %s: %w", configName, err)
 	}
 
-	managedConfig, err := opamp.NewManagedConfig(filepath.Join(".", configName), opamp.NoopReloadFunc)
+	managedConfig, err := opamp.NewManagedConfig(filepath.Join(".", configName), opamp.NoopReloadFunc, false)
 	if err != nil {
 		return err
 	}

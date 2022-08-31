@@ -138,10 +138,10 @@ func (s *SnapshotReporter) SaveLogs(componentID string, ld plog.Logs) {
 	buffer, ok := s.logBuffers[componentID]
 	if !ok {
 		buffer = newLogBuffer(s.minPayloadSize)
-		s.logBuffers[componentID] = buffer
 	}
 
 	buffer.Add(ld)
+	s.logBuffers[componentID] = buffer
 }
 
 // SaveTraces saves off traces in a snapshot to be reported later
@@ -149,10 +149,10 @@ func (s *SnapshotReporter) SaveTraces(componentID string, td ptrace.Traces) {
 	buffer, ok := s.traceBuffers[componentID]
 	if !ok {
 		buffer = newTraceBuffer(s.minPayloadSize)
-		s.traceBuffers[componentID] = buffer
 	}
 
 	buffer.Add(td)
+	s.traceBuffers[componentID] = buffer
 }
 
 // SaveMetrics saves off metrics in a snapshot to be reported later
@@ -160,10 +160,10 @@ func (s *SnapshotReporter) SaveMetrics(componentID string, md pmetric.Metrics) {
 	buffer, ok := s.metricBuffers[componentID]
 	if !ok {
 		buffer = newMetricBuffer(s.minPayloadSize)
-		s.metricBuffers[componentID] = buffer
 	}
 
 	buffer.Add(md)
+	s.metricBuffers[componentID] = buffer
 }
 
 // prepRequestPayload based on the pipelineType will return a marshaled proto of the OTLP data types for the componentID

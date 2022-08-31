@@ -31,7 +31,7 @@ func NoopReloadFunc([]byte) (bool, error) {
 }
 
 // NewManagedConfig creates a new Managed config and computes its hash
-func NewManagedConfig(configPath string, reload ReloadFunc) (*ManagedConfig, error) {
+func NewManagedConfig(configPath string, reload ReloadFunc, required bool) (*ManagedConfig, error) {
 	managedConfig := &ManagedConfig{
 		ConfigPath: configPath,
 		Reload:     reload,
@@ -54,6 +54,10 @@ type ManagedConfig struct {
 
 	// currentConfigHash is the hash of the config currently being used
 	currentConfigHash []byte
+
+	// required signals if this config is required for operation
+	// If false no error will be returned if this file is not found when computing hashes
+	required bool
 }
 
 // GetCurrentConfigHash retrieves the current config hash
@@ -66,7 +70,13 @@ func (m *ManagedConfig) ComputeConfigHash() error {
 	cleanPath := filepath.Clean(m.ConfigPath)
 	contents, err := os.ReadFile(cleanPath)
 	if err != nil {
-		return err
+		// If file is not required and we couldn't read it return an error
+		if m.required {
+			return err
+		}
+
+		// File not required set contents to empty slice so a hash can still be computed
+		contents = []byte{}
 	}
 
 	m.currentConfigHash = ComputeHash(contents)
