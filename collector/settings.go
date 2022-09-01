@@ -39,9 +39,11 @@ func NewSettings(configPaths []string, version string, loggingOpts []zap.Option)
 
 	fmp := fileprovider.New()
 	configProviderSettings := service.ConfigProviderSettings{
-		Locations:     configPaths,
-		MapProviders:  map[string]confmap.Provider{fmp.Scheme(): fmp},
-		MapConverters: []confmap.Converter{expandconverter.New()},
+		ResolverSettings: confmap.ResolverSettings{
+			URIs:       configPaths,
+			Providers:  map[string]confmap.Provider{fmp.Scheme(): fmp},
+			Converters: []confmap.Converter{expandconverter.New()},
+		},
 	}
 	provider, err := service.NewConfigProvider(configProviderSettings)
 	if err != nil {
