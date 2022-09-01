@@ -1,4 +1,4 @@
-version: 0.0.2
+version: 0.0.3
 title: W3C
 description: Log Parser for W3C
 parameters:
@@ -89,7 +89,7 @@ template: |
           expr: 'body matches "^#"'
 
         - type: csv_parser
-          lazy_quotes: true
+          ignore_quotes: true
           delimiter: '{{ .delimiter }}'
           header: '{{ .header }}'
           
