@@ -43,6 +43,14 @@ parameters:
     description: Adds the specified 'Type' as a label to each log message
     type: string
     default: "file"
+  - name: include_file_name
+    description: Whether to add the file name as the attribute log.file.name.
+    type: bool
+    default: true
+  - name: include_file_path
+    description: Whether to add the file path as the attribute log.file.path.
+    type: bool
+    default: false
   - name: start_at
     description: At startup, where to start reading logs from the file (`beginning` or `end`)
     type: string
@@ -65,6 +73,8 @@ template: |
       multiline:
         line_start_pattern: '{{ .multiline_line_start_pattern }}'
       encoding: {{ .encoding }}
+      include_file_name: {{ .include_file_name }}
+      include_file_path: {{ .include_file_path }}
       operators:
         {{ if (eq .parse_format "json")}}
         - type: json_parser
