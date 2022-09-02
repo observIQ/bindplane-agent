@@ -105,9 +105,9 @@ func (m *Manager) reconfigureReporter(kind ReporterKind, cfg any) error {
 
 // Shutdown shuts down and cleans up all managed reporters
 func (m *Manager) Shutdown(ctx context.Context) error {
-	for _, kind := range m.reporters {
-		if err := kind.Stop(ctx); err != nil {
-			return fmt.Errorf("failed to shutdown reporter %s: %w", kind.Type(), err)
+	for _, reporter := range m.reporters {
+		if err := reporter.Stop(ctx); err != nil {
+			return fmt.Errorf("failed to shutdown reporter %s: %w", reporter.Type(), err)
 		}
 	}
 

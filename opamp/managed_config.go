@@ -35,6 +35,7 @@ func NewManagedConfig(configPath string, reload ReloadFunc, required bool) (*Man
 	managedConfig := &ManagedConfig{
 		ConfigPath: configPath,
 		Reload:     reload,
+		required:   required,
 	}
 
 	if err := managedConfig.ComputeConfigHash(); err != nil {
