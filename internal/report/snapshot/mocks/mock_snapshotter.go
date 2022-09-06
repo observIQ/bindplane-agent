@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Package mocks contains mocks for snapshot interfaces
 package mocks
 
 import (
