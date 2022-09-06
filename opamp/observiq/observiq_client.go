@@ -86,7 +86,10 @@ func NewClient(args *NewClientArgs) (opamp.Client, error) {
 	}
 
 	reportManager := report.GetManager()
-	reportManager.SetClient(report.NewAgentClient(args.Config.AgentID, args.Config.SecretKey))
+	if err := reportManager.SetClient(report.NewAgentClient(args.Config.AgentID, args.Config.SecretKey)); err != nil {
+		// Error should never happen as we only error if a nil client is sent
+		return nil, fmt.Errorf("failed to set client on report manager: %w", err)
+	}
 
 	observiqClient := &Client{
 		logger:                  clientLogger,

@@ -24,6 +24,7 @@ import (
 	"github.com/observiq/observiq-otel-collector/internal/report/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 )
 
 func TestManagerSetClient(t *testing.T) {
@@ -193,4 +194,35 @@ func TestManagerShutdown(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestGetManager(t *testing.T) {
+	manager = nil
+
+	// Verify we create a manager
+	m := GetManager()
+	require.NotNil(t, manager)
+	require.Equal(t, m, manager)
+
+	// Verify we return the same object again
+	m2 := GetManager()
+	require.Equal(t, manager, m2)
+}
+
+func TestGetSnapshotReporter(t *testing.T) {
+	m := GetManager()
+
+	// Ensure we don't have a snapshot reporter
+	delete(m.reporters, snapShotKind)
+
+	// Verify we create a new one
+	sReporter := GetSnapshotReporter()
+
+	managerSReporter, ok := m.reporters[snapShotKind]
+	require.True(t, ok)
+	require.Equal(t, sReporter, managerSReporter)
+
+	// Verify we return the same object twice
+	sReporter2 := GetSnapshotReporter()
+	require.Equal(t, managerSReporter, sReporter2)
 }

@@ -41,6 +41,7 @@ func (_m *MockSnapshotter) SaveTraces(componentID string, td ptrace.Traces) {
 	_m.Called(componentID, td)
 }
 
+// NewMockSnapshotterT mock testing interface
 type NewMockSnapshotterT interface {
 	mock.TestingT
 	Cleanup(func())
