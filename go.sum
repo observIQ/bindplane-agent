@@ -1116,8 +1116,8 @@ github.com/open-telemetry/opentelemetry-collector-contrib/processor/spanprocesso
 github.com/open-telemetry/opentelemetry-collector-contrib/processor/spanprocessor v0.59.0/go.mod h1:vz0KB77FVPZbpdzJM3YrYtVtydmhAHpuraRtW9wbwYY=
 github.com/open-telemetry/opentelemetry-collector-contrib/processor/tailsamplingprocessor v0.59.0 h1:7DSeiwwpL2i5d7v1mCCEgDY3l7RJX0eVVgdfp7sCaUA=
 github.com/open-telemetry/opentelemetry-collector-contrib/processor/tailsamplingprocessor v0.59.0/go.mod h1:kSDoWNzWhdtIEcpKRwwdZYZWkmBfOamFtbPe20eBPRg=
-github.com/open-telemetry/opentelemetry-collector-contrib/processor/transformprocessor v0.59.1-0.20220906183641-4281e841024d h1:7PGTS9Q0oD3W2EZegoPqn9b7/FPtIPSFO6ackwBtGhk=
-github.com/open-telemetry/opentelemetry-collector-contrib/processor/transformprocessor v0.59.1-0.20220906183641-4281e841024d/go.mod h1:JnMJ5uICwCkl5Kjiie5K37uxjhfLl24HXdOMwizKknk=
+github.com/open-telemetry/opentelemetry-collector-contrib/processor/transformprocessor v0.59.1-0.20220906184950-aa1c1f330ec9 h1:RQKChGBEuKfjjsA25b9pfV40OvhWDjCeFqmuR9a+dsA=
+github.com/open-telemetry/opentelemetry-collector-contrib/processor/transformprocessor v0.59.1-0.20220906184950-aa1c1f330ec9/go.mod h1:JnMJ5uICwCkl5Kjiie5K37uxjhfLl24HXdOMwizKknk=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/activedirectorydsreceiver v0.59.0 h1:7U3SYlOgOrHzmenx/VpN+MHZRRTUNjjq0e0xKhUqK1w=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/activedirectorydsreceiver v0.59.0/go.mod h1:l5fl9bEiXtImPS6Z8b4iOkZbAL5zvFW9GautY+52IvQ=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/aerospikereceiver v0.59.0 h1:DrvYcL91Y4EkfbetGPN6ayKjfx2izzsuTL9OuU21OyA=
