@@ -5,7 +5,7 @@ go 1.18
 require (
 	github.com/open-telemetry/opamp-go v0.2.0
 	github.com/stretchr/testify v1.8.0
-	go.uber.org/zap v1.22.0
+	go.uber.org/zap v1.23.0
 )
 
 require (
