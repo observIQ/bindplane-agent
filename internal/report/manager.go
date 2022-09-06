@@ -33,7 +33,7 @@ var (
 // Manager represents a structure that manages all of the different reporters
 type Manager struct {
 	client    Client
-	reporters map[ReporterKind]Reporter
+	reporters map[string]Reporter
 	mutex     sync.Mutex
 }
 
@@ -51,7 +51,7 @@ func (m *Manager) SetClient(client Client) error {
 // ResetConfig resets the current config
 func (m *Manager) ResetConfig(configData []byte) error {
 	// Create a basic map so we can unmarshal on reporter specific configs
-	cfg := make(map[ReporterKind]any)
+	cfg := make(map[string]any)
 
 	if err := yaml.Unmarshal(configData, cfg); err != nil {
 		return fmt.Errorf("failed to unmarshal config: %w", err)
@@ -64,40 +64,43 @@ func (m *Manager) ResetConfig(configData []byte) error {
 	// Iterate through all reporter configs and marshal
 	for kind, rawCfg := range cfg {
 		switch kind {
-		case snapShotType:
+		case snapShotKind:
 			var ssCfg snapshotConfig
 			if err := unmarshalReporterConfig(rawCfg, &ssCfg); err != nil {
 				return fmt.Errorf("failed to unmarshal Snapshot config: %w", err)
 			}
 
-			if err := m.reconfigureReporter(kind, &ssCfg); err != nil {
+			// Verify we have a snapshot reporter initialized
+			reporter, ok := m.reporters[kind]
+			if !ok {
+				reporter = NewSnapshotReporter(m.client)
+				m.reporters[kind] = reporter
+			}
+
+			// Reconfigure reporter
+			if err := m.reconfigureReporter(reporter, &ssCfg); err != nil {
 				return err
 			}
 		default:
-			return fmt.Errorf("unrecognized reporter type %s", kind)
+			return fmt.Errorf("unrecognized reporter kind %s", kind)
 		}
 	}
 
 	return nil
 }
 
-func (m *Manager) reconfigureReporter(kind ReporterKind, cfg any) error {
-	reporter, ok := m.reporters[kind]
-	if !ok {
-		return errNoActiveReporter
-	}
-
+func (m *Manager) reconfigureReporter(reporter Reporter, cfg any) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	// Stop the reporter
 	if err := reporter.Stop(ctx); err != nil {
-		return fmt.Errorf("reporter %s failed to stop: %w", kind, err)
+		return fmt.Errorf("reporter %s failed to stop: %w", reporter.Kind(), err)
 	}
 
 	// Apply the new config
 	if err := reporter.Report(cfg); err != nil {
-		return fmt.Errorf("reporter %s failed to report with new config: %w", kind, err)
+		return fmt.Errorf("reporter %s failed to report with new config: %w", reporter.Kind(), err)
 	}
 
 	return nil
@@ -107,7 +110,7 @@ func (m *Manager) reconfigureReporter(kind ReporterKind, cfg any) error {
 func (m *Manager) Shutdown(ctx context.Context) error {
 	for _, reporter := range m.reporters {
 		if err := reporter.Stop(ctx); err != nil {
-			return fmt.Errorf("failed to shutdown reporter %s: %w", reporter.Type(), err)
+			return fmt.Errorf("failed to shutdown reporter %s: %w", reporter.Kind(), err)
 		}
 	}
 
@@ -125,7 +128,7 @@ func GetManager() *Manager {
 	managerOnce.Do(func() {
 		manager = &Manager{
 			client:    http.DefaultClient,
-			reporters: make(map[ReporterKind]Reporter),
+			reporters: make(map[string]Reporter),
 		}
 	})
 
@@ -138,11 +141,11 @@ func GetSnapshotReporter() *SnapshotReporter {
 
 	// Look if we have a snapshot reporter if not create one
 	currentManager.mutex.Lock()
-	reporter, ok := currentManager.reporters[snapShotType]
+	reporter, ok := currentManager.reporters[snapShotKind]
 	if !ok {
 		// Create new snapshot reporter
 		reporter = NewSnapshotReporter(currentManager.client)
-		currentManager.reporters[snapShotType] = reporter
+		currentManager.reporters[snapShotKind] = reporter
 	}
 	currentManager.mutex.Unlock()
 

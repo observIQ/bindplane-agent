@@ -16,15 +16,12 @@ package report
 
 import "context"
 
-// ReporterKind represents the set of reporters available
-type ReporterKind string
-
 // Reporter represents a a structure to collector and report specific structures
 //
 //go:generate mockery --name Reporter --filename mock_reporter.go --structname MockReporter
 type Reporter interface {
-	// Type returns the type of this reporter
-	Type() ReporterKind
+	// Kind returns the kind of this reporter
+	Kind() string
 
 	// Report starts reporting with the passed in configuration.
 	Report(config any) error

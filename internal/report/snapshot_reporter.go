@@ -29,8 +29,8 @@ import (
 	"go.opentelemetry.io/collector/pdata/ptrace"
 )
 
-// snapShotType is the reporterType for the snapshot reporter
-var snapShotType ReporterKind = "snapshot"
+// snapShotKind is the kind for the snapshot reporter
+var snapShotKind = "snapshot"
 
 // snapshotConfig specifies what snapshots to collect
 type snapshotConfig struct {
@@ -77,9 +77,9 @@ func NewSnapshotReporter(client Client) *SnapshotReporter {
 	}
 }
 
-// Type returns type of the reporter
-func (s *SnapshotReporter) Type() ReporterKind {
-	return snapShotType
+// Kind returns kind of the reporter
+func (s *SnapshotReporter) Kind() string {
+	return snapShotKind
 }
 
 // Report applies the new configuration and reports snapshots specified in it

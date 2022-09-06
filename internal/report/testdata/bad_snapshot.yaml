@@ -1,0 +1,4 @@
+snapshot:
+  endpoint: "bad"
+  processor: "snapshot"
+  pipeline_type: logs
