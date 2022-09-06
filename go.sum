@@ -1066,8 +1066,8 @@ github.com/open-telemetry/opentelemetry-collector-contrib/pkg/resourcetotelemetr
 github.com/open-telemetry/opentelemetry-collector-contrib/pkg/resourcetotelemetry v0.59.0/go.mod h1:OBHCK29nLn16OUrnIf+7F3sA+LnIPZ2dUYr6CtLJxEU=
 github.com/open-telemetry/opentelemetry-collector-contrib/pkg/stanza v0.59.0 h1:ctZkiE/pLk6F16GtQjuKrzDO4dYY6KIolDMP67FrFHw=
 github.com/open-telemetry/opentelemetry-collector-contrib/pkg/stanza v0.59.0/go.mod h1:DZnbVTIDiIq3Mqyp1Pa2ycLDvy673R9IeEi3QRj2lr0=
-github.com/open-telemetry/opentelemetry-collector-contrib/pkg/telemetryquerylanguage v0.59.0 h1:uVQmiE4MY3KfXNkxzCJYnqHEsTWufbaufRmbdfwB/lE=
-github.com/open-telemetry/opentelemetry-collector-contrib/pkg/telemetryquerylanguage v0.59.0/go.mod h1:Z1WlPedBZ9JjN7BW330sdszqMBnxmBtD+Db4OkTI88k=
+github.com/open-telemetry/opentelemetry-collector-contrib/pkg/telemetryquerylanguage v0.59.1-0.20220906184950-aa1c1f330ec9 h1:9T5ir35iiNyc2I0rGEoCzjSPFnznvmyoXXzLpVadG80=
+github.com/open-telemetry/opentelemetry-collector-contrib/pkg/telemetryquerylanguage v0.59.1-0.20220906184950-aa1c1f330ec9/go.mod h1:Ik72N0d4FcOb6d3epDkBTJp3GFHLeo6b65BfQsxep8I=
 github.com/open-telemetry/opentelemetry-collector-contrib/pkg/translator/jaeger v0.59.0 h1:+DOhvw+RKnc5QwP5h0y+W55hCvsTsccHVvF3vm1ZViI=
 github.com/open-telemetry/opentelemetry-collector-contrib/pkg/translator/jaeger v0.59.0/go.mod h1:hWJ/9y+vs86TyeTPjW1V9xicDVKWrqx+3iXT2UWKGWw=
 github.com/open-telemetry/opentelemetry-collector-contrib/pkg/translator/opencensus v0.59.0 h1:/XBLDr44f+jOy0H5pOjxQu0kemccNsZuhC0ZLM85itw=
