@@ -124,7 +124,7 @@ func (s *SnapshotReporter) Report(cfg any) error {
 	}
 
 	if resp.StatusCode > 299 {
-		return fmt.Errorf("Non 200 response for snapshot report: %d", resp.StatusCode)
+		return fmt.Errorf("non-200 response for snapshot report: %d", resp.StatusCode)
 	}
 
 	return nil

@@ -61,7 +61,7 @@ func TestLogBufferAdd(t *testing.T) {
 				// Add to log buffer
 				logBuffer.Add(toAdd)
 
-				assert.Equal(t, 3, logBuffer.len())
+				assert.Equal(t, 3, logBuffer.Len())
 			},
 		},
 		{
@@ -85,7 +85,7 @@ func TestLogBufferAdd(t *testing.T) {
 				// Add to log buffer
 				logBuffer.Add(toAdd)
 
-				assert.Equal(t, 4, logBuffer.len())
+				assert.Equal(t, 4, logBuffer.Len())
 			},
 		},
 		{
@@ -113,7 +113,7 @@ func TestLogBufferAdd(t *testing.T) {
 				// Add to log buffer
 				logBuffer.Add(toAdd)
 
-				assert.Equal(t, 4, logBuffer.len())
+				assert.Equal(t, 4, logBuffer.Len())
 			},
 		},
 		{
@@ -139,7 +139,7 @@ func TestLogBufferAdd(t *testing.T) {
 				// Add to log buffer
 				logBuffer.Add(toAdd)
 
-				assert.Equal(t, 5, logBuffer.len())
+				assert.Equal(t, 5, logBuffer.Len())
 			},
 		},
 	}
@@ -214,7 +214,7 @@ func TestMetricBufferAdd(t *testing.T) {
 				// Add to log buffer
 				metricBuffer.Add(toAdd)
 
-				assert.Equal(t, 3, metricBuffer.len())
+				assert.Equal(t, 3, metricBuffer.Len())
 			},
 		},
 		{
@@ -243,7 +243,7 @@ func TestMetricBufferAdd(t *testing.T) {
 				// Add to log buffer
 				metricBuffer.Add(toAdd)
 
-				assert.Equal(t, 4, metricBuffer.len())
+				assert.Equal(t, 4, metricBuffer.Len())
 			},
 		},
 		{
@@ -277,7 +277,7 @@ func TestMetricBufferAdd(t *testing.T) {
 				// Add to log buffer
 				metricBuffer.Add(toAdd)
 
-				assert.Equal(t, 4, metricBuffer.len())
+				assert.Equal(t, 4, metricBuffer.Len())
 			},
 		},
 		{
@@ -306,7 +306,7 @@ func TestMetricBufferAdd(t *testing.T) {
 				// Add to log buffer
 				metricBuffer.Add(toAdd)
 
-				assert.Equal(t, 5, metricBuffer.len())
+				assert.Equal(t, 5, metricBuffer.Len())
 			},
 		},
 	}
@@ -383,7 +383,7 @@ func TestTraceBufferAdd(t *testing.T) {
 				// Add to log buffer
 				traceBuffer.Add(toAdd)
 
-				assert.Equal(t, 3, traceBuffer.len())
+				assert.Equal(t, 3, traceBuffer.Len())
 			},
 		},
 		{
@@ -407,7 +407,7 @@ func TestTraceBufferAdd(t *testing.T) {
 				// Add to log buffer
 				traceBuffer.Add(toAdd)
 
-				assert.Equal(t, 4, traceBuffer.len())
+				assert.Equal(t, 4, traceBuffer.Len())
 			},
 		},
 		{
@@ -435,7 +435,7 @@ func TestTraceBufferAdd(t *testing.T) {
 				// Add to log buffer
 				traceBuffer.Add(toAdd)
 
-				assert.Equal(t, 4, traceBuffer.len())
+				assert.Equal(t, 4, traceBuffer.Len())
 			},
 		},
 		{
@@ -461,7 +461,7 @@ func TestTraceBufferAdd(t *testing.T) {
 				// Add to log buffer
 				traceBuffer.Add(toAdd)
 
-				assert.Equal(t, 5, traceBuffer.len())
+				assert.Equal(t, 5, traceBuffer.Len())
 			},
 		},
 	}

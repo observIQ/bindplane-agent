@@ -38,8 +38,8 @@ func NewLogBuffer(idealSize int) *LogBuffer {
 	}
 }
 
-// len counts the number of log records in all Log payloads in buffer
-func (l *LogBuffer) len() int {
+// Len counts the number of log records in all Log payloads in buffer
+func (l *LogBuffer) Len() int {
 	size := 0
 	for _, ld := range l.buffer {
 		size += ld.LogRecordCount()
@@ -54,7 +54,7 @@ func (l *LogBuffer) Add(ld plog.Logs) {
 	defer l.mutex.Unlock()
 
 	logSize := ld.LogRecordCount()
-	bufferSize := l.len()
+	bufferSize := l.Len()
 	switch {
 	// The number of logs is more than idealSize so reset this to just this log set
 	case logSize > l.idealSize:
@@ -115,8 +115,8 @@ func NewMetricBuffer(idealSize int) *MetricBuffer {
 	}
 }
 
-// len counts the number of data points in all Metric payloads in buffer
-func (l *MetricBuffer) len() int {
+// Len counts the number of data points in all Metric payloads in buffer
+func (l *MetricBuffer) Len() int {
 	size := 0
 	for _, md := range l.buffer {
 		size += md.DataPointCount()
@@ -131,7 +131,7 @@ func (l *MetricBuffer) Add(md pmetric.Metrics) {
 	defer l.mutex.Unlock()
 
 	metricSize := md.DataPointCount()
-	bufferSize := l.len()
+	bufferSize := l.Len()
 	switch {
 	// The number of metrics is more than idealSize so reset this to just this metric set
 	case metricSize > l.idealSize:
@@ -192,8 +192,8 @@ func NewTraceBuffer(idealSize int) *TraceBuffer {
 	}
 }
 
-// len counts the number of spans in all Traces payloads in buffer
-func (l *TraceBuffer) len() int {
+// Len counts the number of spans in all Traces payloads in buffer
+func (l *TraceBuffer) Len() int {
 	size := 0
 	for _, td := range l.buffer {
 		size += td.SpanCount()
@@ -208,7 +208,7 @@ func (l *TraceBuffer) Add(td ptrace.Traces) {
 	defer l.mutex.Unlock()
 
 	traceSize := td.SpanCount()
-	bufferSize := l.len()
+	bufferSize := l.Len()
 	switch {
 	// The number of traces is more than idealSize so reset this to just this trace set
 	case traceSize > l.idealSize:
