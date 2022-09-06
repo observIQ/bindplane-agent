@@ -23,6 +23,5 @@ import (
 //go:generate mockery --name Client --filename mock_client.go --structname MockClient
 type Client interface {
 	// Do makes the specified request and return the body contents.
-	// An error will be returned if an error occurred or non-200 code was returned
 	Do(req *http.Request) (*http.Response, error)
 }

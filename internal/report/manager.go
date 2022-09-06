@@ -25,11 +25,6 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-var (
-	// errNoActiveReporter is the error returned when getting a specific reporter and it isn't initialized
-	errNoActiveReporter = errors.New("no currently active reporter")
-)
-
 // Manager represents a structure that manages all of the different reporters
 type Manager struct {
 	client    Client
@@ -57,11 +52,11 @@ func (m *Manager) ResetConfig(configData []byte) error {
 		return fmt.Errorf("failed to unmarshal config: %w", err)
 	}
 
-	// Lock so we don't have multiple configs being processed at concurrently
+	// Lock so we don't have multiple configs being processed concurrently
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
 
-	// Iterate through all reporter configs and marshal
+	// Iterate through all reporter configs and process
 	for kind, rawCfg := range cfg {
 		switch kind {
 		case snapShotKind:
@@ -90,6 +85,7 @@ func (m *Manager) ResetConfig(configData []byte) error {
 }
 
 func (m *Manager) reconfigureReporter(reporter Reporter, cfg any) error {
+	// We don't want to get stuck stopping the reporter so give it 5 seconds
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -135,7 +131,7 @@ func GetManager() *Manager {
 	return manager
 }
 
-// GetSnapshotReporter returns the
+// GetSnapshotReporter returns the global SnapshotReporter
 func GetSnapshotReporter() *SnapshotReporter {
 	currentManager := GetManager()
 
