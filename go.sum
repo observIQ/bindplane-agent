@@ -1116,8 +1116,8 @@ github.com/open-telemetry/opentelemetry-collector-contrib/processor/spanprocesso
 github.com/open-telemetry/opentelemetry-collector-contrib/processor/spanprocessor v0.59.0/go.mod h1:vz0KB77FVPZbpdzJM3YrYtVtydmhAHpuraRtW9wbwYY=
 github.com/open-telemetry/opentelemetry-collector-contrib/processor/tailsamplingprocessor v0.59.0 h1:7DSeiwwpL2i5d7v1mCCEgDY3l7RJX0eVVgdfp7sCaUA=
 github.com/open-telemetry/opentelemetry-collector-contrib/processor/tailsamplingprocessor v0.59.0/go.mod h1:kSDoWNzWhdtIEcpKRwwdZYZWkmBfOamFtbPe20eBPRg=
-github.com/open-telemetry/opentelemetry-collector-contrib/processor/transformprocessor v0.59.0 h1:V/4kkttja+EOsfZhS35AYbdBpyBsET8B2ExKQ0eF/GM=
-github.com/open-telemetry/opentelemetry-collector-contrib/processor/transformprocessor v0.59.0/go.mod h1:ca6WFweyts0gGNS3dNSK5rZ1PkCpBmQMponxl/eLcCI=
+github.com/open-telemetry/opentelemetry-collector-contrib/processor/transformprocessor v0.59.1-0.20220906183641-4281e841024d h1:7PGTS9Q0oD3W2EZegoPqn9b7/FPtIPSFO6ackwBtGhk=
+github.com/open-telemetry/opentelemetry-collector-contrib/processor/transformprocessor v0.59.1-0.20220906183641-4281e841024d/go.mod h1:JnMJ5uICwCkl5Kjiie5K37uxjhfLl24HXdOMwizKknk=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/activedirectorydsreceiver v0.59.0 h1:7U3SYlOgOrHzmenx/VpN+MHZRRTUNjjq0e0xKhUqK1w=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/activedirectorydsreceiver v0.59.0/go.mod h1:l5fl9bEiXtImPS6Z8b4iOkZbAL5zvFW9GautY+52IvQ=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/aerospikereceiver v0.59.0 h1:DrvYcL91Y4EkfbetGPN6ayKjfx2izzsuTL9OuU21OyA=
@@ -1630,8 +1630,8 @@ golang.org/x/exp v0.0.0-20191227195350-da58074b4299/go.mod h1:2RIsYlXP63K8oxa1u0
 golang.org/x/exp v0.0.0-20200119233911-0405dc783f0a/go.mod h1:2RIsYlXP63K8oxa1u096TMicItID8zy7Y6sNkU49FU4=
 golang.org/x/exp v0.0.0-20200207192155-f17229e696bd/go.mod h1:J/WKrq2StrnmMY6+EHIKF9dgMWnmCNThgcyBT1FY9mM=
 golang.org/x/exp v0.0.0-20200224162631-6cc2880d07d6/go.mod h1:3jZMyOhIsHpP37uCMkUooju7aAi5cS1Q23tOzKc+0MU=
-golang.org/x/exp v0.0.0-20220713135740-79cabaa25d75 h1:x03zeu7B2B11ySp+daztnwM5oBJ/8wGUSqrwcw9L0RA=
-golang.org/x/exp v0.0.0-20220713135740-79cabaa25d75/go.mod h1:Kr81I6Kryrl9sr8s2FK3vxD90NdsKWRuOIl2O4CvYbA=
+golang.org/x/exp v0.0.0-20220722155223-a9213eeb770e h1:+WEEuIdZHnUeJJmEUjyYC2gfUMj69yZXw17EnHg/otA=
+golang.org/x/exp v0.0.0-20220722155223-a9213eeb770e/go.mod h1:Kr81I6Kryrl9sr8s2FK3vxD90NdsKWRuOIl2O4CvYbA=
 golang.org/x/image v0.0.0-20190227222117-0694c2d4d067/go.mod h1:kZ7UVZpmo3dzQBMxlp+ypCbDeSB+sBbTgSJuh5dn5js=
 golang.org/x/image v0.0.0-20190802002840-cff245a6509b/go.mod h1:FeLwcggjj3mMvU+oOTbSwawSJRM1uh48EjtB4UJZlP0=
 golang.org/x/lint v0.0.0-20181026193005-c67002cb31c3/go.mod h1:UVdnD1Gm6xHRNCYTkRU2/jEulfH38KcIWyp/GAMgvoE=
