@@ -26,4 +26,4 @@ Below is a list of supported processors with links to their documentation pages.
 | Span Processor                          | [spanprocessor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.59.0/processor/spanprocessor/README.md) |
 | Tail Sampling Processor                 | [tailsamplingprocessor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.59.0/processor/tailsamplingprocessor/README.md) |
 | Throughput Measurement Processor        | [throughputmeasurementprocessor](../processor/throughputmeasurementprocessor/README.md) |
-| Transform Processor                     | [transformprocessor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.59.0/processor/transformprocessor/README.md) |
+| Transform Processor                     | [transformprocessor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/aa1c1f330ec9a2a785b6c7ea1cacb0eae23e86e7/processor/transformprocessor/README.md) |
