@@ -58,7 +58,7 @@ require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/processor/spanmetricsprocessor v0.59.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/processor/spanprocessor v0.59.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/processor/tailsamplingprocessor v0.59.0
-	github.com/open-telemetry/opentelemetry-collector-contrib/processor/transformprocessor v0.59.1-0.20220906183641-4281e841024d
+	github.com/open-telemetry/opentelemetry-collector-contrib/processor/transformprocessor v0.59.1-0.20220906184950-aa1c1f330ec9
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/activedirectorydsreceiver v0.59.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/aerospikereceiver v0.59.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/apachereceiver v0.59.0
