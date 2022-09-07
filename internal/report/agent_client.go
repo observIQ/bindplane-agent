@@ -20,7 +20,7 @@ import (
 
 var _ Client = (*AgentClient)(nil)
 
-// AgentClient is a basic client that inject agent specific information in request headers
+// AgentClient is a basic client that injects agent specific information in request headers
 type AgentClient struct {
 	agentID   string
 	secretKey *string
