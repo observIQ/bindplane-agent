@@ -129,6 +129,13 @@ func (s *SnapshotReporter) Report(cfg any) error {
 	return nil
 }
 
+// Reset clears all buffers
+func (s *SnapshotReporter) Reset() {
+	s.logBuffers = make(map[string]*snapshot.LogBuffer)
+	s.metricBuffers = make(map[string]*snapshot.MetricBuffer)
+	s.traceBuffers = make(map[string]*snapshot.TraceBuffer)
+}
+
 // SaveLogs saves off logs in a snapshot to be reported later
 func (s *SnapshotReporter) SaveLogs(componentID string, ld plog.Logs) {
 	buffer, ok := s.logBuffers[componentID]

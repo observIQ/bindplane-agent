@@ -21,6 +21,7 @@ import (
 	"path/filepath"
 
 	"github.com/observiq/observiq-otel-collector/internal/logging"
+	"github.com/observiq/observiq-otel-collector/internal/report"
 	"github.com/observiq/observiq-otel-collector/opamp"
 	"go.uber.org/zap"
 	"gopkg.in/yaml.v3"
@@ -137,6 +138,9 @@ func collectorReload(client *Client, collectorConfigPath string) opamp.ReloadFun
 
 			return false, fmt.Errorf("collector failed to restart: %w", err)
 		}
+
+		// Reset Snapshot Reporter
+		report.GetSnapshotReporter().Reset()
 
 		return true, nil
 	}

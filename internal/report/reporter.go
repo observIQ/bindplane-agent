@@ -23,4 +23,8 @@ type Reporter interface {
 
 	// Report starts reporting with the passed in configuration.
 	Report(config any) error
+
+	// Reset will reset any state kept by the reporter
+	// Meant to be used when the collector is reconfigured while running
+	Reset()
 }

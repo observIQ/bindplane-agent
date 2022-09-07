@@ -20,6 +20,7 @@ import (
 	"testing"
 
 	"github.com/observiq/observiq-otel-collector/internal/report/mocks"
+	"github.com/observiq/observiq-otel-collector/internal/report/snapshot"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -44,6 +45,20 @@ func TestSnapshotReporterKind(t *testing.T) {
 	reporter := NewSnapshotReporter(nil)
 	kind := reporter.Kind()
 	require.Equal(t, snapShotKind, kind)
+}
+
+func TestSnapshotReporterReset(t *testing.T) {
+	reporter := NewSnapshotReporter(nil)
+	componentID := "snapshot"
+	reporter.logBuffers[componentID] = snapshot.NewLogBuffer(reporter.minPayloadSize)
+	reporter.traceBuffers[componentID] = snapshot.NewTraceBuffer(reporter.minPayloadSize)
+	reporter.metricBuffers[componentID] = snapshot.NewMetricBuffer(reporter.minPayloadSize)
+
+	reporter.Reset()
+
+	require.Len(t, reporter.logBuffers, 0)
+	require.Len(t, reporter.traceBuffers, 0)
+	require.Len(t, reporter.metricBuffers, 0)
 }
 
 func TestSnapshotReporterSaveLogs(t *testing.T) {
