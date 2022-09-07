@@ -37,11 +37,6 @@ func (_m *MockReporter) Report(config interface{}) error {
 	return r0
 }
 
-// Reset provides a mock function with given fields:
-func (_m *MockReporter) Reset() {
-	_m.Called()
-}
-
 type NewMockReporterT interface {
 	mock.TestingT
 	Cleanup(func())
