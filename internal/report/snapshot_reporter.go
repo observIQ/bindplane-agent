@@ -18,7 +18,6 @@ package report
 import (
 	"bytes"
 	"compress/gzip"
-	"context"
 	"errors"
 	"fmt"
 	"net/http"
@@ -127,11 +126,6 @@ func (s *SnapshotReporter) Report(cfg any) error {
 		return fmt.Errorf("non-200 response for snapshot report: %d", resp.StatusCode)
 	}
 
-	return nil
-}
-
-// Stop does nothing as there is no long running process
-func (s *SnapshotReporter) Stop(context.Context) error {
 	return nil
 }
 

@@ -224,12 +224,6 @@ func (c *Client) Connect(ctx context.Context) error {
 func (c *Client) Disconnect(ctx context.Context) error {
 	c.safeSetDisconnecting(true)
 	c.collector.Stop()
-
-	// This is a recoverable error so only log it
-	if err := c.reportManager.Shutdown(ctx); err != nil {
-		c.logger.Error("failed to shutdown reportManager", zap.Error(err))
-	}
-
 	return c.opampClient.Stop(ctx)
 }
 

@@ -15,12 +15,10 @@
 package report
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"net/http"
 	"sync"
-	"time"
 
 	"gopkg.in/yaml.v3"
 )
@@ -85,29 +83,9 @@ func (m *Manager) ResetConfig(configData []byte) error {
 }
 
 func (m *Manager) reconfigureReporter(reporter Reporter, cfg any) error {
-	// We don't want to get stuck stopping the reporter so give it 5 seconds
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	// Stop the reporter
-	if err := reporter.Stop(ctx); err != nil {
-		return fmt.Errorf("reporter %s failed to stop: %w", reporter.Kind(), err)
-	}
-
 	// Apply the new config
 	if err := reporter.Report(cfg); err != nil {
 		return fmt.Errorf("reporter %s failed to report with new config: %w", reporter.Kind(), err)
-	}
-
-	return nil
-}
-
-// Shutdown shuts down and cleans up all managed reporters
-func (m *Manager) Shutdown(ctx context.Context) error {
-	for _, reporter := range m.reporters {
-		if err := reporter.Stop(ctx); err != nil {
-			return fmt.Errorf("failed to shutdown reporter %s: %w", reporter.Kind(), err)
-		}
 	}
 
 	return nil

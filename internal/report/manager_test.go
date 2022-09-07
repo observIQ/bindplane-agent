@@ -15,7 +15,6 @@
 package report
 
 import (
-	"context"
 	"errors"
 	"net/http"
 	"os"
@@ -85,24 +84,10 @@ func TestManagerResetConfig(t *testing.T) {
 			expectedErr:   errors.New("failed to unmarshal Snapshot config"),
 		},
 		{
-			desc:       "Valid config, reporter fails to stop",
-			configPath: "./testdata/valid.yaml",
-			mockSetupFunc: func(t *testing.T, m *Manager) {
-				mockSnapshotReporter := mocks.NewMockReporter(t)
-				mockSnapshotReporter.On("Stop", mock.Anything).Return(errors.New("bad"))
-				mockSnapshotReporter.On("Kind").Return(snapShotKind)
-
-				m.reporters[snapShotKind] = mockSnapshotReporter
-
-			},
-			expectedErr: errors.New("failed to stop"),
-		},
-		{
 			desc:       "Valid config, reporter fails to Report",
 			configPath: "./testdata/valid.yaml",
 			mockSetupFunc: func(t *testing.T, m *Manager) {
 				mockSnapshotReporter := mocks.NewMockReporter(t)
-				mockSnapshotReporter.On("Stop", mock.Anything).Return(nil)
 				mockSnapshotReporter.On("Report", mock.Anything).Return(errors.New("bad"))
 				mockSnapshotReporter.On("Kind").Return(snapShotKind)
 
@@ -116,7 +101,6 @@ func TestManagerResetConfig(t *testing.T) {
 			configPath: "./testdata/valid.yaml",
 			mockSetupFunc: func(t *testing.T, m *Manager) {
 				mockSnapshotReporter := mocks.NewMockReporter(t)
-				mockSnapshotReporter.On("Stop", mock.Anything).Return(nil)
 				mockSnapshotReporter.On("Report", mock.Anything).Return(nil)
 
 				m.reporters[snapShotKind] = mockSnapshotReporter
@@ -139,54 +123,6 @@ func TestManagerResetConfig(t *testing.T) {
 			assert.NoError(t, err)
 
 			err = m.ResetConfig(configData)
-			if tc.expectedErr != nil {
-				assert.ErrorContains(t, err, tc.expectedErr.Error())
-			} else {
-				assert.NoError(t, err)
-			}
-		})
-	}
-}
-
-func TestManagerShutdown(t *testing.T) {
-	testCases := []struct {
-		desc          string
-		mockSetupFunc func(*testing.T, *Manager)
-		expectedErr   error
-	}{
-		{
-			desc: "Reporter errors",
-			mockSetupFunc: func(t *testing.T, m *Manager) {
-				mockSnapshotReporter := mocks.NewMockReporter(t)
-				mockSnapshotReporter.On("Stop", mock.Anything).Return(errors.New("bad"))
-				mockSnapshotReporter.On("Kind").Return(snapShotKind)
-
-				m.reporters[snapShotKind] = mockSnapshotReporter
-			},
-			expectedErr: errors.New("bad"),
-		},
-		{
-			desc: "No errors",
-			mockSetupFunc: func(t *testing.T, m *Manager) {
-				mockSnapshotReporter := mocks.NewMockReporter(t)
-				mockSnapshotReporter.On("Stop", mock.Anything).Return(nil)
-
-				m.reporters[snapShotKind] = mockSnapshotReporter
-			},
-			expectedErr: nil,
-		},
-	}
-
-	for _, tc := range testCases {
-		t.Run(tc.desc, func(t *testing.T) {
-			m := &Manager{
-				client:    http.DefaultClient,
-				reporters: make(map[string]Reporter),
-			}
-
-			tc.mockSetupFunc(t, m)
-
-			err := m.Shutdown(context.Background())
 			if tc.expectedErr != nil {
 				assert.ErrorContains(t, err, tc.expectedErr.Error())
 			} else {

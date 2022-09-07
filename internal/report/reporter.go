@@ -14,8 +14,6 @@
 
 package report
 
-import "context"
-
 // Reporter represents a a structure to collector and report specific structures
 //
 //go:generate mockery --name Reporter --filename mock_reporter.go --structname MockReporter
@@ -25,7 +23,4 @@ type Reporter interface {
 
 	// Report starts reporting with the passed in configuration.
 	Report(config any) error
-
-	// Stop stops the reporter
-	Stop(context.Context) error
 }

@@ -15,7 +15,6 @@
 package report
 
 import (
-	"context"
 	"errors"
 	"net/http"
 	"testing"
@@ -45,12 +44,6 @@ func TestSnapshotReporterKind(t *testing.T) {
 	reporter := NewSnapshotReporter(nil)
 	kind := reporter.Kind()
 	require.Equal(t, snapShotKind, kind)
-}
-
-func TestSnapshotReporterStop(t *testing.T) {
-	reporter := NewSnapshotReporter(nil)
-	err := reporter.Stop(context.Background())
-	require.NoError(t, err)
 }
 
 func TestSnapshotReporterSaveLogs(t *testing.T) {
