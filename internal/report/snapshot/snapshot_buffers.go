@@ -69,10 +69,17 @@ func (l *LogBuffer) Add(ld plog.Logs) {
 	case logSize+bufferSize >= l.idealSize:
 		l.buffer = append(l.buffer, ld)
 
-		// If removing the oldest item does not put us under the ideal size then it's ok to do so
-		oldest := l.buffer[0]
-		newBufferSize := logSize + bufferSize
-		if newBufferSize-oldest.LogRecordCount() >= l.idealSize {
+		// Remove items from the buffer until we find one that if we remove it will put us under the ideal size
+		for {
+			newBufferSize := l.Len()
+			oldest := l.buffer[0]
+
+			// If removing this one will put us under ideal size then break
+			if newBufferSize-oldest.LogRecordCount() < l.idealSize {
+				break
+			}
+
+			// Remove the oldest
 			l.buffer = l.buffer[1:]
 		}
 	}
@@ -146,10 +153,17 @@ func (l *MetricBuffer) Add(md pmetric.Metrics) {
 	case metricSize+bufferSize >= l.idealSize:
 		l.buffer = append(l.buffer, md)
 
-		// If removing the oldest item does not put us under the ideal size then it's ok to do so
-		oldest := l.buffer[0]
-		newBufferSize := metricSize + bufferSize
-		if newBufferSize-oldest.DataPointCount() >= l.idealSize {
+		// Remove items from the buffer until we find one that if we remove it will put us under the ideal size
+		for {
+			newBufferSize := l.Len()
+			oldest := l.buffer[0]
+
+			// If removing this one will put us under ideal size then break
+			if newBufferSize-oldest.DataPointCount() < l.idealSize {
+				break
+			}
+
+			// Remove the oldest
 			l.buffer = l.buffer[1:]
 		}
 	}
@@ -223,10 +237,17 @@ func (l *TraceBuffer) Add(td ptrace.Traces) {
 	case traceSize+bufferSize >= l.idealSize:
 		l.buffer = append(l.buffer, td)
 
-		// If removing the oldest item does not put us under the ideal size then it's ok to do so
-		oldest := l.buffer[0]
-		newBufferSize := traceSize + bufferSize
-		if newBufferSize-oldest.SpanCount() >= l.idealSize {
+		// Remove items from the buffer until we find one that if we remove it will put us under the ideal size
+		for {
+			newBufferSize := l.Len()
+			oldest := l.buffer[0]
+
+			// If removing this one will put us under ideal size then break
+			if newBufferSize-oldest.SpanCount() < l.idealSize {
+				break
+			}
+
+			// Remove the oldest
 			l.buffer = l.buffer[1:]
 		}
 	}
