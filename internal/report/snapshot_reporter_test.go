@@ -35,7 +35,7 @@ func TestNewSnapshotReporter(t *testing.T) {
 	reporter := NewSnapshotReporter(client)
 
 	require.Equal(t, client, reporter.client)
-	require.Equal(t, 100, reporter.minPayloadSize)
+	require.Equal(t, 100, reporter.idealPayloadSize)
 	require.NotNil(t, reporter.logBuffers)
 	require.NotNil(t, reporter.metricBuffers)
 	require.NotNil(t, reporter.traceBuffers)
@@ -50,9 +50,9 @@ func TestSnapshotReporterKind(t *testing.T) {
 func TestSnapshotReporterReset(t *testing.T) {
 	reporter := NewSnapshotReporter(nil)
 	componentID := "snapshot"
-	reporter.logBuffers[componentID] = snapshot.NewLogBuffer(reporter.minPayloadSize)
-	reporter.traceBuffers[componentID] = snapshot.NewTraceBuffer(reporter.minPayloadSize)
-	reporter.metricBuffers[componentID] = snapshot.NewMetricBuffer(reporter.minPayloadSize)
+	reporter.logBuffers[componentID] = snapshot.NewLogBuffer(reporter.idealPayloadSize)
+	reporter.traceBuffers[componentID] = snapshot.NewTraceBuffer(reporter.idealPayloadSize)
+	reporter.metricBuffers[componentID] = snapshot.NewMetricBuffer(reporter.idealPayloadSize)
 
 	reporter.Reset()
 

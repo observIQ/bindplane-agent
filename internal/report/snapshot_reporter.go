@@ -56,8 +56,8 @@ var _ snapshot.Snapshotter = (*SnapshotReporter)(nil)
 type SnapshotReporter struct {
 	client Client
 
-	// minPayloadSize is the minimum number of items to be in a payload
-	minPayloadSize int
+	// idealPayloadSize is the desired number of items to be in a payload when a snapshot is reported
+	idealPayloadSize int
 
 	// Buffers
 	logBuffers    map[string]*snapshot.LogBuffer
@@ -68,11 +68,11 @@ type SnapshotReporter struct {
 // NewSnapshotReporter creates a new SnapshotReporter with the associated client
 func NewSnapshotReporter(client Client) *SnapshotReporter {
 	return &SnapshotReporter{
-		client:         client,
-		minPayloadSize: 100,
-		logBuffers:     make(map[string]*snapshot.LogBuffer),
-		metricBuffers:  make(map[string]*snapshot.MetricBuffer),
-		traceBuffers:   make(map[string]*snapshot.TraceBuffer),
+		client:           client,
+		idealPayloadSize: 100,
+		logBuffers:       make(map[string]*snapshot.LogBuffer),
+		metricBuffers:    make(map[string]*snapshot.MetricBuffer),
+		traceBuffers:     make(map[string]*snapshot.TraceBuffer),
 	}
 }
 
@@ -140,7 +140,7 @@ func (s *SnapshotReporter) Reset() {
 func (s *SnapshotReporter) SaveLogs(componentID string, ld plog.Logs) {
 	buffer, ok := s.logBuffers[componentID]
 	if !ok {
-		buffer = snapshot.NewLogBuffer(s.minPayloadSize)
+		buffer = snapshot.NewLogBuffer(s.idealPayloadSize)
 	}
 
 	buffer.Add(ld)
@@ -151,7 +151,7 @@ func (s *SnapshotReporter) SaveLogs(componentID string, ld plog.Logs) {
 func (s *SnapshotReporter) SaveTraces(componentID string, td ptrace.Traces) {
 	buffer, ok := s.traceBuffers[componentID]
 	if !ok {
-		buffer = snapshot.NewTraceBuffer(s.minPayloadSize)
+		buffer = snapshot.NewTraceBuffer(s.idealPayloadSize)
 	}
 
 	buffer.Add(td)
@@ -162,7 +162,7 @@ func (s *SnapshotReporter) SaveTraces(componentID string, td ptrace.Traces) {
 func (s *SnapshotReporter) SaveMetrics(componentID string, md pmetric.Metrics) {
 	buffer, ok := s.metricBuffers[componentID]
 	if !ok {
-		buffer = snapshot.NewMetricBuffer(s.minPayloadSize)
+		buffer = snapshot.NewMetricBuffer(s.idealPayloadSize)
 	}
 
 	buffer.Add(md)
