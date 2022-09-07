@@ -26,6 +26,7 @@ import (
 	"time"
 
 	colmocks "github.com/observiq/observiq-otel-collector/collector/mocks"
+	"github.com/observiq/observiq-otel-collector/internal/report"
 	"github.com/observiq/observiq-otel-collector/internal/version"
 	"github.com/observiq/observiq-otel-collector/opamp"
 	"github.com/observiq/observiq-otel-collector/opamp/mocks"
@@ -128,6 +129,7 @@ func TestNewClient(t *testing.T) {
 				assert.Equal(t, testLogger.Named("opamp"), observiqClient.logger)
 				assert.Equal(t, mockCollector, observiqClient.collector)
 				assert.NotNil(t, observiqClient.ident)
+				assert.Equal(t, report.GetManager(), observiqClient.reportManager)
 				assert.Equal(t, observiqClient.currentConfig, tc.config)
 				assert.False(t, observiqClient.safeGetDisconnecting())
 				assert.False(t, observiqClient.safeGetUpdatingPackage())
@@ -459,8 +461,9 @@ func TestClientDisconnect(t *testing.T) {
 	mockCollector.On("Stop").Return()
 
 	c := &Client{
-		opampClient: mockOpAmpClient,
-		collector:   mockCollector,
+		opampClient:   mockOpAmpClient,
+		collector:     mockCollector,
+		reportManager: report.GetManager(),
 	}
 
 	c.Disconnect(ctx)

@@ -25,6 +25,7 @@ import (
 	"sync"
 
 	"github.com/observiq/observiq-otel-collector/collector"
+	"github.com/observiq/observiq-otel-collector/internal/report"
 	"github.com/observiq/observiq-otel-collector/internal/version"
 	"github.com/observiq/observiq-otel-collector/opamp"
 	"github.com/observiq/observiq-otel-collector/packagestate"
@@ -54,6 +55,7 @@ type Client struct {
 	updaterManager          updaterManager
 	mutex                   sync.Mutex
 	updatingPackage         bool
+	reportManager           *report.Manager
 
 	// To signal if we are disconnecting already and not take any actions on connection failures
 	disconnecting bool
@@ -83,6 +85,12 @@ func NewClient(args *NewClientArgs) (opamp.Client, error) {
 		return nil, fmt.Errorf("failed to create updaterManager: %w", err)
 	}
 
+	reportManager := report.GetManager()
+	if err := reportManager.SetClient(report.NewAgentClient(args.Config.AgentID, args.Config.SecretKey)); err != nil {
+		// Error should never happen as we only error if a nil client is sent
+		return nil, fmt.Errorf("failed to set client on report manager: %w", err)
+	}
+
 	observiqClient := &Client{
 		logger:                  clientLogger,
 		ident:                   newIdentity(clientLogger, args.Config),
@@ -92,6 +100,7 @@ func NewClient(args *NewClientArgs) (opamp.Client, error) {
 		currentConfig:           args.Config,
 		packagesStateProvider:   newPackagesStateProvider(clientLogger, packagestate.DefaultFileName),
 		updaterManager:          updaterManger,
+		reportManager:           reportManager,
 	}
 
 	// Parse URL to determin scheme
@@ -118,23 +127,29 @@ func NewClient(args *NewClientArgs) (opamp.Client, error) {
 
 func (c *Client) addManagedConfigs(args *NewClientArgs) error {
 	// Add configs to config manager
-	managerManagedConfig, err := opamp.NewManagedConfig(args.ManagerConfigPath, managerReload(c, args.ManagerConfigPath))
+	managerManagedConfig, err := opamp.NewManagedConfig(args.ManagerConfigPath, managerReload(c, args.ManagerConfigPath), true)
 	if err != nil {
 		return fmt.Errorf("failed to create manager managed config: %w", err)
 	}
 	c.configManager.AddConfig(ManagerConfigName, managerManagedConfig)
 
-	collectorManagedConfig, err := opamp.NewManagedConfig(args.CollectorConfigPath, collectorReload(c, args.CollectorConfigPath))
+	collectorManagedConfig, err := opamp.NewManagedConfig(args.CollectorConfigPath, collectorReload(c, args.CollectorConfigPath), true)
 	if err != nil {
 		return fmt.Errorf("failed to create collector managed config: %w", err)
 	}
 	c.configManager.AddConfig(CollectorConfigName, collectorManagedConfig)
 
-	loggerManagedConfig, err := opamp.NewManagedConfig(args.LoggerConfigPath, loggerReload(c, args.LoggerConfigPath))
+	loggerManagedConfig, err := opamp.NewManagedConfig(args.LoggerConfigPath, loggerReload(c, args.LoggerConfigPath), true)
 	if err != nil {
 		return fmt.Errorf("failed to create logger managed config: %w", err)
 	}
 	c.configManager.AddConfig(LoggingConfigName, loggerManagedConfig)
+
+	reportManagedConfig, err := opamp.NewManagedConfig("report.yaml", reportReload(c), false)
+	if err != nil {
+		return fmt.Errorf("failed to create report managed config: %w", err)
+	}
+	c.configManager.AddConfig(ReportConfigName, reportManagedConfig)
 
 	return nil
 }

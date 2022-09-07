@@ -123,6 +123,46 @@ func TestComposeEffectiveConfig(t *testing.T) {
 
 			},
 		},
+		{
+			desc: "Multi Config Files, report.yaml is skipped",
+			testFunc: func(*testing.T) {
+				tmpDir := t.TempDir()
+				configOne := "one.yaml"
+				configOnePath := filepath.Join(tmpDir, configOne)
+				configOneContents := []byte(`key: value`)
+
+				configTwo := ReportConfigName
+
+				err := os.WriteFile(configOnePath, configOneContents, 0600)
+				assert.NoError(t, err)
+
+				manager := NewAgentConfigManager(zap.NewNop())
+				manager.AddConfig(configOne, &opamp.ManagedConfig{
+					ConfigPath: configOnePath,
+					Reload:     opamp.NoopReloadFunc,
+				})
+				manager.AddConfig(configTwo, &opamp.ManagedConfig{
+					ConfigPath: "report.yaml",
+					Reload:     opamp.NoopReloadFunc,
+				})
+
+				expected := &protobufs.EffectiveConfig{
+					ConfigMap: &protobufs.AgentConfigMap{
+						ConfigMap: map[string]*protobufs.AgentConfigFile{
+							configOne: {
+								Body:        configOneContents,
+								ContentType: opamp.YAMLContentType,
+							},
+						},
+					},
+				}
+
+				effCfg, err := manager.ComposeEffectiveConfig()
+				assert.NoError(t, err)
+				assert.Equal(t, expected, effCfg)
+
+			},
+		},
 	}
 
 	for _, tc := range testCases {
@@ -146,7 +186,7 @@ func TestApplyConfigChanges(t *testing.T) {
 				assert.NoError(t, err)
 
 				manager := NewAgentConfigManager(zap.NewNop())
-				mangedConfig, err := opamp.NewManagedConfig(configPath, opamp.NoopReloadFunc)
+				mangedConfig, err := opamp.NewManagedConfig(configPath, opamp.NoopReloadFunc, true)
 				assert.NoError(t, err)
 				manager.AddConfig(ManagerConfigName, mangedConfig)
 
@@ -185,7 +225,7 @@ func TestApplyConfigChanges(t *testing.T) {
 				assert.NoError(t, err)
 
 				manager := NewAgentConfigManager(zap.NewNop())
-				mangedConfig, err := opamp.NewManagedConfig(configPath, opamp.NoopReloadFunc)
+				mangedConfig, err := opamp.NewManagedConfig(configPath, opamp.NoopReloadFunc, true)
 				assert.NoError(t, err)
 				manager.AddConfig(ManagerConfigName, mangedConfig)
 
@@ -232,7 +272,7 @@ func TestApplyConfigChanges(t *testing.T) {
 				assert.NoError(t, err)
 
 				manager := NewAgentConfigManager(zap.NewNop())
-				mangedConfig, err := opamp.NewManagedConfig(configPath, opamp.NoopReloadFunc)
+				mangedConfig, err := opamp.NewManagedConfig(configPath, opamp.NoopReloadFunc, true)
 				assert.NoError(t, err)
 				manager.AddConfig(ManagerConfigName, mangedConfig)
 
@@ -289,7 +329,7 @@ func TestApplyConfigChanges(t *testing.T) {
 
 				manager := NewAgentConfigManager(zap.NewNop())
 
-				mangedConfig, err := opamp.NewManagedConfig(configPath, opamp.NoopReloadFunc)
+				mangedConfig, err := opamp.NewManagedConfig(configPath, opamp.NoopReloadFunc, true)
 				assert.NoError(t, err)
 				manager.AddConfig(ManagerConfigName, mangedConfig)
 
@@ -337,7 +377,7 @@ func TestApplyConfigChanges(t *testing.T) {
 				assert.NoError(t, err)
 
 				manager := NewAgentConfigManager(zap.NewNop())
-				mangedConfig, err := opamp.NewManagedConfig(configPath, opamp.NoopReloadFunc)
+				mangedConfig, err := opamp.NewManagedConfig(configPath, opamp.NoopReloadFunc, true)
 				assert.NoError(t, err)
 				manager.AddConfig(ManagerConfigName, mangedConfig)
 
@@ -387,6 +427,42 @@ func TestApplyConfigChanges(t *testing.T) {
 			},
 		},
 		{
+			desc: "Remote config is report.yaml",
+			testFunc: func(*testing.T) {
+				newFileContents := []byte(`logger: value`)
+
+				manager := NewAgentConfigManager(zap.NewNop())
+				mangedConfig, err := opamp.NewManagedConfig("report.yml", opamp.NoopReloadFunc, false)
+				assert.NoError(t, err)
+				manager.AddConfig(ReportConfigName, mangedConfig)
+
+				remoteConfig := &protobufs.AgentRemoteConfig{
+					Config: &protobufs.AgentConfigMap{
+						ConfigMap: map[string]*protobufs.AgentConfigFile{
+							ReportConfigName: {
+								Body:        newFileContents,
+								ContentType: opamp.YAMLContentType,
+							},
+						},
+					},
+				}
+
+				expectedEffCfg := &protobufs.EffectiveConfig{
+					ConfigMap: &protobufs.AgentConfigMap{
+						ConfigMap: map[string]*protobufs.AgentConfigFile{},
+					},
+				}
+				changed, err := manager.ApplyConfigChanges(remoteConfig)
+				assert.NoError(t, err)
+				assert.False(t, changed)
+
+				// Verify effective config is as expected
+				effCfg, err := manager.ComposeEffectiveConfig()
+				assert.NoError(t, err)
+				assert.Equal(t, expectedEffCfg, effCfg)
+			},
+		},
+		{
 			desc: "Remote config contains changes to file",
 			testFunc: func(*testing.T) {
 				tmpDir := t.TempDir()
@@ -403,7 +479,7 @@ func TestApplyConfigChanges(t *testing.T) {
 					err = os.WriteFile(configPath, data, 0600)
 					assert.NoError(t, err)
 					return true, err
-				})
+				}, true)
 				assert.NoError(t, err)
 				manager.AddConfig(LoggingConfigName, mangedConfig)
 
@@ -455,7 +531,7 @@ func TestApplyConfigChanges(t *testing.T) {
 				manager := NewAgentConfigManager(zap.NewNop())
 				mangedConfig, err := opamp.NewManagedConfig(configPath, func(data []byte) (changed bool, err error) {
 					return false, expectedError
-				})
+				}, true)
 				assert.NoError(t, err)
 				manager.AddConfig(LoggingConfigName, mangedConfig)
 

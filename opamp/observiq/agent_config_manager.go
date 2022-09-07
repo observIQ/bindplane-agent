@@ -32,6 +32,8 @@ const (
 	ManagerConfigName = "manager.yaml"
 	// LoggingConfigName is the key of the logging config in OpAmp
 	LoggingConfigName = "logging.yaml"
+	// ReportConfigName is the key of the report config in OpAmp
+	ReportConfigName = "report.yaml"
 )
 
 // acceptableConfigs is a lookup of configs that are able to be written/updated
@@ -39,6 +41,7 @@ var acceptableConfigs = map[string]struct{}{
 	CollectorConfigName: {},
 	ManagerConfigName:   {},
 	LoggingConfigName:   {},
+	ReportConfigName:    {},
 }
 
 // Enforce interface
@@ -69,6 +72,11 @@ func (a *AgentConfigManager) ComposeEffectiveConfig() (*protobufs.EffectiveConfi
 	contentMap := make(map[string]*protobufs.AgentConfigFile, len(a.configMap))
 
 	for configName, managedConfig := range a.configMap {
+		// Report config is in memory and should not be considered part of the effective config
+		if configName == ReportConfigName {
+			continue
+		}
+
 		// Read in config file
 		cleanPath := filepath.Clean(managedConfig.ConfigPath)
 		configContents, err := os.ReadFile(cleanPath)
@@ -119,13 +127,21 @@ func (a *AgentConfigManager) ApplyConfigChanges(remoteConfig *protobufs.AgentRem
 			continue
 		}
 
-		// Update the config file
-		configChanged, err := a.updateExistingConfig(configName, managedConfig, remoteContents.GetBody())
+		var configChanged bool
+		var err error
+		switch configName {
+		// Special case for report config as it's an in memory only config and we always want to apply it
+		case ReportConfigName:
+			configChanged, err = managedConfig.Reload(remoteContents.GetBody())
+		default:
+			// Update the config file
+			configChanged, err = a.updateExistingConfig(configName, managedConfig, remoteContents.GetBody())
+		}
+
 		if err != nil {
 			returnErr = err
 			return
 		}
-
 		changed = changed || configChanged
 	}
 
@@ -193,7 +209,7 @@ func (a *AgentConfigManager) trackNewConfig(configName string, contents []byte) 
 		return fmt.Errorf("failed to write new config file %s: %w", configName, err)
 	}
 
-	managedConfig, err := opamp.NewManagedConfig(filepath.Join(".", configName), opamp.NoopReloadFunc)
+	managedConfig, err := opamp.NewManagedConfig(filepath.Join(".", configName), opamp.NoopReloadFunc, false)
 	if err != nil {
 		return err
 	}
