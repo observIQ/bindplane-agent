@@ -74,7 +74,7 @@ template: |
           type: json_parser
           parse_to: body
           timestamp:
-            parse_from: body.t.$date
+            parse_from: body.t.$$date
             #2020-11-03T14:24:07.436-05:00
             layout: '%Y-%m-%dT%H:%M:%S.%f%j'
           severity:
