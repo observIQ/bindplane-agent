@@ -39,10 +39,6 @@ parameters:
     description: Timezone to use when parsing the timestamp.
     type: timezone
     default: UTC
-  - name: retain_raw_logs
-    description: When enabled will preserve the original log message on the body in a `raw_log` key
-    type: bool
-    default: false
 template: |
   receivers:
     {{ if .enable_access_log }}

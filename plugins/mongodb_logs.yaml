@@ -1,4 +1,4 @@
-version: 0.0.1
+version: 0.1.0
 title: MongoDB
 description: Log parser for MongoDB
 parameters:
@@ -15,6 +15,10 @@ parameters:
       - beginning
       - end
     default: end
+  - name: retain_raw_logs
+    description: When enabled will preserve the original log message on the body in a `raw_log` key
+    type: bool
+    default: false
 template: |
   receivers:
     filelog:
@@ -28,6 +32,12 @@ template: |
         {{end}}
       start_at: {{ .start_at }}
       operators:
+        {{ if .retain_raw_logs }}
+        - id: save_raw_log
+          type: copy
+          from: body
+          to: attributes.raw_log
+        {{ end }}
         - type: router
           default: legacy_parser
           routes:
@@ -37,12 +47,13 @@ template: |
         - id: legacy_parser
           type: regex_parser
           regex: '^(?P<timestamp>\S+)\s+(?P<severity>\w+)\s+(?P<component>[\w-]+)\s+\[(?P<context>\S+)\]\s+(?P<message>.*)$'
+          parse_to: body
           timestamp:
-            parse_from: attributes.timestamp
+            parse_from: body.timestamp
             #2019-02-06T09:22:43.967-0500
             layout: '%Y-%m-%dT%H:%M:%S.%f%z'
           severity:
-            parse_from: attributes.severity
+            parse_from: body.severity
             mapping:
               fatal: F
               error: E
@@ -61,13 +72,13 @@ template: |
         # {"t":{"$date":"2022-04-26T16:15:44.876+00:00"},"s":"I",  "c":"INDEX",    "id":20345,   "ctx":"LogicalSessionCacheRefresh","msg":"Index build: done building","attr":{"buildUUID":null,"namespace":"config.system.sessions","index":"lsidTTLIndex","commitTimestamp":null}}
         - id: 4_4_parser
           type: json_parser
-          parse_from: body
+          parse_to: body
           timestamp:
-            parse_from: attributes.t.$date
+            parse_from: body.t.$date
             #2020-11-03T14:24:07.436-05:00
             layout: '%Y-%m-%dT%H:%M:%S.%f%j'
           severity:
-            parse_from: attributes.s
+            parse_from: body.s
             mapping:
               fatal: F
               error: E
@@ -88,22 +99,22 @@ template: |
 
         # - id: remove_t
         #   type: remove
-        #   field: attributes.t
+        #   field: body.t
 
         - id: move_component
           type: move
-          from: attributes.c
-          to: attributes.component
+          from: body.c
+          to: body.component
 
         - id: move_context
           type: move
-          from: attributes.ctx
-          to: attributes.context
+          from: body.ctx
+          to: body.context
 
         - id: move_message
           type: move
-          from: attributes.msg
-          to: attributes.message
+          from: body.msg
+          to: body.message
 
         # When message is 'WiredTiger message', data.attr.message
         # always exists, and should be promoted to message
@@ -111,25 +122,32 @@ template: |
           type: router
           default: add_log_type
           routes:
-            - expr: 'attributes.message == "WiredTiger message"'
+            - expr: 'body.message == "WiredTiger message"'
               output: move_wiredtiger_type
 
         - id: move_wiredtiger_type
           type: move
-          from: attributes.message
-          to: attributes.message_type
+          from: body.message
+          to: body.message_type
           output: move_wiredtiger_msg
 
         - id: move_wiredtiger_msg
           type: move
-          from: attributes.attr.message
-          to: attributes.message
+          from: body.attr.message
+          to: body.message
           output: add_log_type
           
         - id: add_log_type
           type: add
           field: 'attributes.log_type'
           value: 'mongodb'
+        
+        {{ if .retain_raw_logs }}
+        - id: move_raw_log
+          type: move
+          from: attributes.raw_log
+          to: body.raw_log
+        {{ end }}
 
   service:
     pipelines:
