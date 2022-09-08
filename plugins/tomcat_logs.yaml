@@ -1,4 +1,4 @@
-version: 0.1.0
+version: 0.2.0
 title: Apache Tomcat
 description: Log parser for Apache Tomcat
 parameters:
@@ -9,8 +9,12 @@ parameters:
   - name: access_log_path
     description: Path to access log file
     type: "[]string"
-    default: 
-    - "/usr/local/tomcat/logs/localhost_access_log.*.txt"
+    default:
+      - "/usr/local/tomcat/logs/localhost_access_log.*.txt"
+  - name: access_retain_raw_logs
+    description: When enabled will preserve the original log message on the body in a `raw_log` key
+    type: bool
+    default: false
   - name: enable_catalina_log
     description: Enable to collect Apache Tomcat catalina logs
     type: bool
@@ -18,19 +22,27 @@ parameters:
   - name: catalina_log_path
     description: Path to catalina log file
     type: "[]string"
-    default: 
-    - "/usr/local/tomcat/logs/catalina.out"
+    default:
+      - "/usr/local/tomcat/logs/catalina.out"
+  - name: catalina_retain_raw_logs
+    description: When enabled will preserve the original log message on the body in a `raw_log` key
+    type: bool
+    default: false
   - name: start_at
     description: At startup, where to start reading logs from the file (`beginning` or `end`)
     type: string
     supported:
-     - beginning
-     - end
+      - beginning
+      - end
     default: end
   - name: timezone
-    description: Timezone to use when parsing the timestam.
+    description: Timezone to use when parsing the timestamp.
     type: timezone
     default: UTC
+  - name: retain_raw_logs
+    description: When enabled will preserve the original log message on the body in a `raw_log` key
+    type: bool
+    default: false
 template: |
   receivers:
     {{ if .enable_access_log }}
@@ -43,19 +55,32 @@ template: |
       attributes:
         log_type: tomcat.access
       operators:
+        {{ if .access_retain_raw_logs }}
+        - id: save_raw_log
+          type: copy
+          from: body
+          to: attributes.raw_log
+        {{ end }}
         - type: regex_parser
           regex: '(?P<remote_host>[^\s]+) - (?P<remote_user>[^\s]+) \[(?P<timestamp>[^\]]+)\] "(?P<method>[A-Z]+) (?P<path>[^\s]+)[^"]+" (?P<status>\d+) (?P<bytes_sent>[^\s]+)'
+          parse_to: body
           timestamp:
-            parse_from: attributes.timestamp
+            parse_from: body.timestamp
             location: {{ .timezone }}
             layout: '%d/%b/%Y:%H:%M:%S %z'
           severity:
-            parse_from: attributes.status
+            parse_from: body.status
             mapping:
               info: 2xx
               info2: 3xx
               warn: 4xx
               error: 5xx
+        {{ if .access_retain_raw_logs }}
+        - id: move_raw_log
+          type: move
+          from: attributes.raw_log
+          to: body.raw_log
+        {{ end }}
     {{ end }}
 
     {{ if .enable_catalina_log }}
@@ -70,14 +95,21 @@ template: |
       attributes:
         log_type: tomcat.catalina
       operators:
+        {{ if .catalina_retain_raw_logs }}
+        - id: save_raw_log
+          type: copy
+          from: body
+          to: attributes.raw_log
+        {{ end }}
         - type: regex_parser
           regex: '(?P<timestamp>[0-9]{2}-[A-Za-z]{3}-[0-9]{4} [0-9]{2}:[0-9]{2}:[0-9]{2}.[0-9]{3})\s(?P<tomcat_severity>[A-Z]*)\s\[(?P<thread>[\w-]*)\]\s(?P<tc_source>[^ ]*)\s(?P<message>[\s\S]+)'
+          parse_to: body
           timestamp:
-            parse_from: attributes.timestamp
+            parse_from: body.timestamp
             location: {{ .timezone }}
             layout: '%d-%b-%Y %H:%M:%S.%L'
           severity:
-            parse_from: attributes.tomcat_severity
+            parse_from: body.tomcat_severity
             mapping:
               info: config
               fatal2: severe
@@ -85,6 +117,12 @@ template: |
                 - fine
                 - finer
                 - finest
+        {{ if .catalina_retain_raw_logs }}
+        - id: move_raw_log
+          type: move
+          from: attributes.raw_log
+          to: body.raw_log
+        {{ end }}
     {{ end }}
 
   service:
