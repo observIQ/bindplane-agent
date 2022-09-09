@@ -16,7 +16,10 @@ parameters:
     description: Timezone to use when parsing the timestamp
     type: timezone
     default: UTC
-
+  - name: retain_raw_logs
+    description: When enabled will preserve the original log message on the body in a `raw_log` key
+    type: bool
+    default: false
 template: |
   receivers:
     journald:
@@ -35,11 +38,18 @@ template: |
           - type: move
             from: body.MESSAGE
             to: body
+          {{ if .retain_raw_logs }}
+          - id: save_raw_log
+            type: copy
+            from: body
+            to: attributes.raw_log
+          {{ end }}
           # Parse kubelet klog formatted message
           - type: regex_parser
             regex: '(?P<severity>\w)(?P<timestamp>\d{4} \d{2}:\d{2}:\d{2}.\d+)\s+(?P<pid>\d+)\s+(?P<src>[^:]*):(?P<src_line>[^\]]*)\] (?P<message>.*)'
+            parse_to: body
             severity:
-              parse_from: attributes.severity
+              parse_from: body.severity
               mapping:
                 debug: d
                 info: i
@@ -47,18 +57,18 @@ template: |
                 error: e
                 fatal: c
             timestamp:
-              parse_from: attributes.timestamp
+              parse_from: body.timestamp
               layout: '%m%d %H:%M:%S.%s'
               location: {{ .timezone }}
-          # Replace raw klog body with the message field extracted
-          # by regex parser. The severity and timestamp have been
-          # promoted to the entry and are no longer useful in the body.
-          - type: move
-            from: attributes.message
-            to: body
           - type: add
             field: attributes.log_type
             value: kubelet
+          {{ if .retain_raw_logs }}
+          - id: move_raw_log
+            type: move
+            from: attributes.raw_log
+            to: body.raw_log
+          {{ end }}
   service:
     pipelines:
       logs:
