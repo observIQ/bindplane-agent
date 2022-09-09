@@ -1,4 +1,4 @@
-version: 0.0.1
+version: 0.1.0
 title: Kubernetes Container Logs
 description: Log parser for Kubernetes Container logs. This plugin is meant to be used with the OpenTelemetry Operator for Kubernetes (https://github.com/open-telemetry/opentelemetry-operator).
 parameters:
