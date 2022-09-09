@@ -16,7 +16,7 @@ parameters:
       - "/var/log/containers/*.log"
   - name: journald_path
     type: string
-    description:
+    description: The path to read journald container logs from
     default: /var/log/journal
   - name: exclude_file_log_path
     type: "[]string"
