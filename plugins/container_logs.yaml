@@ -2,11 +2,22 @@ version: 0.0.1
 title: Kubernetes Container Logs
 description: Log parser for Kubernetes Container logs. This plugin is meant to be used with the OpenTelemetry Operator for Kubernetes (https://github.com/open-telemetry/opentelemetry-operator).
 parameters:
+  - name: log_source
+    description: Where to read container logs from
+    type: string
+    supported:
+      - file
+      - journald
+    default: file
   - name: log_paths
     type: "[]string"
     description: A list of file glob patterns that match the file paths to be read
     default:
       - "/var/log/containers/*.log"
+  - name: journald_path
+    type: string
+    description:
+    default: /var/log/journal
   - name: exclude_file_log_path
     type: "[]string"
     description: A list of file glob patterns to exclude from reading
@@ -23,6 +34,7 @@ parameters:
 
 template: |
   receivers:
+    {{ if eq .log_source "file" }}
     filelog:
         include:
           {{ range $fp := .log_paths }}
@@ -111,8 +123,56 @@ template: |
           - type: move
             from: attributes.container
             to: resource["k8s.container.name"]
+    {{ end }}
+
+    {{ if eq .log_source "journald" }}
+    journald:
+      directory: {{ .journald_path }}
+      operators:
+        - type: router
+          routes:
+            - expr: 'body._COMM == "dockerd-current" and body.CONTAINER_NAME != nil'
+              output: filter
+
+        - type: filter
+          expr: 'body.CONTAINER_NAME matches "otc-container"'
+          drop_ratio: 1.0
+
+        - type: regex_parser
+          regex: '^k8s_(?P<container>[-a-z0-9_]+)_(?P<pod>[-a-z0-9\.]+)_(?P<namespace>[-a-z0-9]+)_[-a-z0-9]+_\d+'
+          parse_from: body.CONTAINER_NAME
+
+        - type: move
+          from: attributes.container
+          to: resource["k8s.container.name"]
+
+        - type: move
+          from: attributes.pod
+          to: resource["k8s.pod.name"]
+
+        - type: move
+          from: attributes.namespace
+          to: resource["k8s.namespace.name"]
+
+        - type: move
+          from: body._HOSTNAME
+          to: resource["k8s.node.name"]
+
+        - type: move
+          from: body.MESSAGE
+          to: body
+
+        - type: add
+          field: attributes.log_type
+          value: container
+    {{ end }}
 
   service:
     pipelines:
       logs:
-        receivers: [filelog]
+        receivers:
+          {{ if eq .log_source "file" }}
+          - filelog
+          {{ else if eq .log_source "journald" }}
+          - journald
+          {{ end }}
