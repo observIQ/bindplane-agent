@@ -24,6 +24,10 @@ parameters:
     default:
       # Excludes logs for the collector
       - "/var/log/containers/observiq-*-collector-*"
+  - name: body_json_parsing
+    type: bool
+    description: If the application log is detected as json, parse the values into the log entry's body.
+    default: true
   - name: start_at
     description: At startup, where to start reading logs from the file (`beginning` or `end`)
     type: string
@@ -44,7 +48,7 @@ template: |
         attributes:
           log_type: "k8s.container_logs"
         exclude:
-          {{ range $fp := .exclude_log_paths }}
+          {{ range $fp := .exclude_file_log_path }}
             - '{{ $fp }}'
           {{end}}
         poll_interval: 500ms
@@ -105,6 +109,15 @@ template: |
             id: log-to-body
             from: attributes.log
             to: body
+
+          # Parse body as json if the body appears to be json
+          {{ if .body_json_parsing }}
+          - type: json_parser
+            if: body matches "^{.*}\\s*$"
+            parse_from: body
+            parse_to: body
+          {{ end }}
+
           # Detect pod, namespace, and container names from the file name.
           - type: regex_parser
             regex: '^(?P<pod>[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*)_(?P<namespace>[^_]+)_(?P<container>.+)-'
@@ -161,6 +174,14 @@ template: |
         - type: move
           from: body.MESSAGE
           to: body
+
+        # Parse body as json if the body appears to be json
+        {{ if .body_json_parsing }}
+        - type: json_parser
+          if: body matches "^{.*}\\s*$"
+          parse_from: body
+          parse_to: body
+        {{ end }}
 
         - type: add
           field: attributes.log_type
