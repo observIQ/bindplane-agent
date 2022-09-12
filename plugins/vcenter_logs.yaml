@@ -1,4 +1,4 @@
-version: 0.0.1
+version: 0.1.0
 title: VMware vCenter
 description: Log parser for VMware vCenter
 parameters:
@@ -27,7 +27,10 @@ parameters:
     description: Path to the key file to use for TLS
     type: string
     default: "/opt/key"
-
+  - name: retain_raw_logs
+    description: When enabled will preserve the original log message on the body in a `raw_log` key
+    type: bool
+    default: false
 template: |
   receivers:
     tcplog:
@@ -42,8 +45,14 @@ template: |
         key_file: {{ .key_file }}
       {{ end }}
       operators:
+        {{ if .retain_raw_logs }}
+        - id: save_raw_log
+          type: copy
+          from: body
+          to: attributes.raw_log
+        {{ end }}
         # vcenter will (sometimes) prepend an id to the messages, check
-        # for the id and drop it if it exsits
+        # for the id and drop it if it exists
         # example: '257 <14>1. . . '
         - id: prefix_router
           type: router
@@ -69,9 +78,16 @@ template: |
         - id: vcenter_parser
           type: syslog_parser
           protocol: rfc5424
+          parse_to: body
+        
+        {{ if .retain_raw_logs }}
+        - id: move_raw_log
+          type: move
+          from: attributes.raw_log
+          to: body.raw_log
+        {{ end }}
 
   service:
     pipelines:
       logs:
         receivers: [tcplog]
-
