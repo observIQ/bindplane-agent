@@ -1,4 +1,4 @@
-version: 0.0.1
+version: 0.1.0
 title: Aerospike
 description: Log parser for Aerospike
 parameters:
@@ -29,48 +29,56 @@ template: |
           to: resource["host.name"]
         - type: move
           from: body.__CURSOR
-          to: attributes.journald_cursor
+          to: body.journald_cursor
         - type: move
           from: body._PID
-          to: attributes.pid
+          to: body.pid
         - type: move
           from: body.PRIORITY
-          to: attributes.priority
+          to: body.priority
         - type: move
           from: body.SYSLOG_FACILITY
-          to: attributes.facility
+          to: body.facility
         - type: move
           from: body._SYSTEMD_UNIT
-          to: attributes.systemd_unit
-
-        # Replce raw journald message with aerospike log body.
+          to: body.systemd_unit
         - type: move
           from: body.MESSAGE
-          to: body
-
+          to: body.message
+        
         # Parse Aerospike's log and update the entry's Timestamp and Severity
         # fields with the values from the Aerospike log.
         - type: regex_parser
           regex: '^(?P<timestamp>[a-zA-z]+ \d{2} \d{4} \d{2}:\d{2}:\d{2} [A-Z]+): (?P<severity>[A-Z]*( [A-Z]*)?) \((?P<context>[^\)]*)\): \((?P<source_file>[^:]*):(?P<source_location>[^:]*)\)\s*({(?P<namespace>[^}]*)} )?.*'
+          parse_from: body.message
+          parse_to: body
           timestamp:
-            parse_from: attributes.timestamp
+            parse_from: body.timestamp
             layout: '%b %d %Y %H:%M:%S %Z'
           severity:
-            parse_from: attributes.severity
+            parse_from: body.severity
             mapping:
               info: detail
               error2: 'failed assertion'
 
-        # Timestamp and severity have been promoted to the entry
-        - type: remove
-          field: attributes.timestamp
-        - type: remove
-          field: attributes.severity
+        # Only retain certain relevant fields
+        - type: retain
+          fields:
+          - body.journald_cursor
+          - body.pid
+          - body.priority
+          - body.facility
+          - body.systemd_unit
+          - body.context
+          - body.source_file
+          - body.source_location
+          - body.namespace
+          - body.message
 
         # Aerospike logs the configuration at startup. This is not something we should
         # capture.
         - type: filter
-          expr: 'attributes.context == "config"'
+          expr: 'body.context == "config"'
 
         - type: add
           field: attributes.log_type
