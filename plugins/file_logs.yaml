@@ -1,4 +1,4 @@
-version: 0.1.0
+version: 0.2.0
 title: File
 description: Log parser for generic files
 parameters:
@@ -58,6 +58,10 @@ parameters:
       - beginning
       - end
     default: end
+  - name: retain_raw_logs
+    description: When enabled will preserve the original log message on the body in a `raw_log` key
+    type: bool
+    default: false
 template: |
   receivers:
     filelog:
@@ -76,20 +80,34 @@ template: |
       include_file_name: {{ .include_file_name }}
       include_file_path: {{ .include_file_path }}
       operators:
+        {{ if .retain_raw_logs }}
+        - id: save_raw_log
+          type: copy
+          from: body
+          to: attributes.raw_log
+        {{ end }}
         {{ if (eq .parse_format "json")}}
         - type: json_parser
+          parse_to: body
         {{ end }}
 
         {{ if (eq .parse_format "regex")}}
         - type: regex_parser
           regex: {{ .regex_pattern }}
+          parse_to: body
         {{ end }}
 
         - id: add_type
           type: add
           field: attributes.log_type
           value: {{ .log_type }}
-    
+
+        {{ if .retain_raw_logs }}
+        - id: move_raw_log
+          type: move
+          from: attributes.raw_log
+          to: body.raw_log
+        {{ end }}
   service:
     pipelines:
       logs:
