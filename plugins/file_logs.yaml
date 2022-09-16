@@ -88,12 +88,13 @@ template: |
         {{ end }}
         {{ if (eq .parse_format "json")}}
         - type: json_parser
-          parse_from: body.message
+          parse_to: body
         {{ end }}
 
         {{ if (eq .parse_format "regex")}}
         - type: regex_parser
           regex: {{ .regex_pattern }}
+          parse_to: body
         {{ end }}
 
         - id: add_type
