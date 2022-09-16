@@ -97,7 +97,7 @@ template: |
 
         - id: add_type
           type: add
-          field: body.log_type
+          field: attributes.log_type
           value: {{ .log_type }}
 
         {{ if .retain_raw_logs }}
