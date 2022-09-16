@@ -44,11 +44,11 @@ parameters:
     type: string
     default: "file"
   - name: include_file_name
-    description: Whether to add the file name as the attribute log.file.name.
+    description: Whether to add the file name as the body log.file.name.
     type: bool
     default: true
   - name: include_file_path
-    description: Whether to add the file path as the attribute log.file.path.
+    description: Whether to add the file path as the body log.file.path.
     type: bool
     default: false
   - name: start_at
@@ -97,7 +97,7 @@ template: |
 
         - id: add_type
           type: add
-          field: attributes.log_type
+          field: body.log_type
           value: {{ .log_type }}
 
         {{ if .retain_raw_logs }}
