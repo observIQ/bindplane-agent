@@ -1,4 +1,4 @@
-version: 0.1.0
+version: 0.2.0
 title: Syslog
 description: Log receiver for Syslog
 parameters:
@@ -49,7 +49,7 @@ parameters:
     default: "1.2"
   # Max message size for TCP only
   - name: max_log_size
-    description: Maximum number of bytes for a single TCP message. Only applicable when connection_type is TCP 
+    description: Maximum number of bytes for a single TCP message. Only applicable when connection_type is TCP
     type: string
     default: "1024kib"
   - name: data_flow
@@ -59,46 +59,112 @@ parameters:
       - high
       - low
     default: high
+  - name: retain_raw_logs
+    description: When enabled will preserve the original log message on the body in a `raw_log` key
+    type: bool
+    default: false
 template: |
-    receivers:
-      syslog:
-        {{ if eq .connection_type "tcp" }}
-        tcp:
-          max_log_size: '{{ .max_log_size }}'
-          listen_address: '{{ .listen_address }}'
-          {{ if .enable_tls }}
-          tls:
-            {{ if .tls_certificate_path }}cert_file: '{{ .tls_certificate_path }}'{{ end }}
-            {{ if .tls_private_key_path }}key_file: '{{ .tls_private_key_path }}'{{ end }}
-            {{ if .tls_ca_path }}ca_file: '{{ .tls_ca_path }}'{{ end }}
-            min_version: '{{ .tls_min_version }}'
-          {{ end }}
+  receivers:
+    syslog:
+      {{ if eq .connection_type "tcp" }}
+      tcp:
+        max_log_size: '{{ .max_log_size }}'
+        listen_address: '{{ .listen_address }}'
+        {{ if .enable_tls }}
+        tls:
+          {{ if .tls_certificate_path }}cert_file: '{{ .tls_certificate_path }}'{{ end }}
+          {{ if .tls_private_key_path }}key_file: '{{ .tls_private_key_path }}'{{ end }}
+          {{ if .tls_ca_path }}ca_file: '{{ .tls_ca_path }}'{{ end }}
+          min_version: '{{ .tls_min_version }}'
         {{ end }}
-        {{ if eq .connection_type "udp" }}
-        udp:
-          listen_address: '{{ .listen_address }}'
+      {{ end }}
+      {{ if eq .connection_type "udp" }}
+      udp:
+        listen_address: '{{ .listen_address }}'
+      {{ end }}
+      protocol: {{ .protocol }}
+      location: '{{ .timezone }}'
+      operators:
+        {{ if .retain_raw_logs }}
+        - id: move_raw_log
+          type: move
+          from: body
+          to: body.raw_log
         {{ end }}
-        protocol: {{ .protocol }}
-        location: '{{ .timezone }}'
         {{ if eq .data_flow "low" }}
-        operators:
-          # Filter entries with debug severity (7); There is no actual severity field left by the syslog parser,
-          # so we must calculate the severity from the priority
-          - type: filter
-            expr: 'attributes.priority != nil && attributes.priority % 8 == 7'
-          - type: retain
-            fields:
-              - attributes.hostname
-              - attributes.appname
-              - attributes.msg_id
-              - attributes.message
-              - attributes.structured_data
-              - attributes.version
+        # Filter entries with debug severity (7); There is no actual severity field left by the syslog parser,
+        # so we must calculate the severity from the priority
+        - type: filter
+          expr: 'attributes.priority != nil && attributes.priority % 8 == 7'
+        - type: retain
+          fields:
+            - attributes.hostname
+            - attributes.appname
+            - attributes.msg_id
+            - attributes.message
+            - attributes.structured_data
+            - attributes.version
         {{ end }}
 
+        # Move all retained attributes to the body
+        - id: move_appname
+          type: move
+          if: "attributes.appname != nil"
+          from: attributes.appname
+          to: body.appname
+        - id: move_facility
+          type: move
+          if: "attributes.facility != nil"
+          from: attributes.facility
+          to: body.facility
+        - id: move_hostname
+          type: move
+          if: "attributes.hostname != nil"
+          from: attributes.hostname
+          to: body.hostname
+        - id: move_message
+          type: move
+          if: "attributes.message != nil"
+          from: attributes.message
+          to: body.message
+        - id: move_msg_id
+          type: move
+          if: "attributes.msg_id != nil"
+          from: attributes.msg_id
+          to: body.msg_id
+        - id: move_priority
+          type: move
+          if: "attributes.priority != nil"
+          from: attributes.priority
+          to: body.priority
+        - id: move_proc_id
+          type: move
+          if: "attributes.proc_id != nil"
+          from: attributes.proc_id
+          to: body.proc_id
+        - id: move_severity
+          type: move
+          if: "attributes.severity != nil"
+          from: attributes.severity
+          to: body.severity
+        - id: move_structured_data
+          type: move
+          if: "attributes.structured_data != nil"
+          from: attributes.structured_data
+          to: body.structured_data
+        - id: move_timestamp
+          type: move
+          if: "attributes.timestamp != nil"
+          from: attributes.timestamp
+          to: body.timestamp
+        - id: move_version
+          type: move
+          if: "attributes.version != nil"
+          from: attributes.version
+          to: body.version
 
-    service:
-      pipelines:
-        logs:
-          receivers:
-            - syslog
+  service:
+    pipelines:
+      logs:
+        receivers:
+          - syslog
