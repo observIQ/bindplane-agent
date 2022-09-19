@@ -1,11 +1,11 @@
-version: 0.2.2
+version: 0.3.0
 title: IIS
 description: Log parser for IIS
 parameters:
   - name: file_path
     description: Specify a single path or multiple paths to read one or many files. You may also use a wildcard (*) to read multiple files within a directory
     type: "[]string"
-    default: 
+    default:
       - "C:/inetpub/logs/LogFiles/W3SVC*/**/*.log"
   - name: log_format
     description: "The format of the IIS logs. For more information on the various log formats, see: https://docs.microsoft.com/en-us/previous-versions/iis/6.0-sdk/ms525807%28v=vs.90%29"
@@ -38,7 +38,7 @@ parameters:
   - name: include_file_name_resolved
     description: Enable to include file name resolved in logs
     type: bool
-    default: false 
+    default: false
   - name: include_file_path_resolved
     description: Enable to include file path resolved in logs
     type: bool
@@ -50,6 +50,10 @@ parameters:
       - beginning
       - end
     default: end
+  - name: retain_raw_logs
+    description: When enabled will preserve the original log message on the body in a `raw_log` key
+    type: bool
+    default: false
 template: |
   receivers:
     # W3C format
@@ -74,13 +78,21 @@ template: |
       - type: filter
         expr: 'body matches "^#"'
 
+      {{ if .retain_raw_logs }}
+      - id: save_raw_log
+        type: copy
+        from: body
+        to: attributes.raw_log
+      {{ end }}
+
       - type: csv_parser
         header: '{{ .w3c_header }}'
+        parse_to: body
         delimiter: " "
         ignore_quotes: true
         severity: 
-          parse_from: 'attributes["sc-status"]'
-          if: 'attributes["sc-status"] != nil'
+          parse_from: 'body["sc-status"]'
+          if: 'body["sc-status"] != nil'
           mapping:
             info: 2xx
             info2: 3xx
@@ -91,29 +103,29 @@ template: |
       - type: router
         routes:
         - output: add_timestamp
-          expr: 'attributes.date != nil and attributes.time != nil'
+          expr: 'body.date != nil and body.time != nil'
         default: add_log_type
 
       # Combines data + time fields into timestamp field
       - id: add_timestamp
         type: add
-        field: attributes.timestamp
-        value: EXPR(attributes.date + " " + attributes.time)
+        field: body.timestamp
+        value: EXPR(body.date + " " + body.time)
 
       # Remove date field
       - id: remove_date
         type: remove
-        field: attributes.date
+        field: body.date
 
       # Remove time field
       - id: remove_time
         type: remove
-        field: attributes.time
+        field: body.time
 
       - id: time_parser
         type: time_parser
-        if: 'attributes.timestamp != nil'
-        parse_from: attributes.timestamp
+        if: 'body.timestamp != nil'
+        parse_from: body.timestamp
         layout: '%Y-%m-%d %H:%M:%S'
         location: {{.timezone}}
 
@@ -121,6 +133,14 @@ template: |
         type: add
         field: 'attributes.log_type'
         value: 'microsoft_iis'
+
+      {{ if .retain_raw_logs }}
+      - id: move_raw_log
+        type: move
+        from: attributes.raw_log
+        to: body.raw_log
+      {{ end }}
+
     {{end}}
     # IIS format
     {{if eq .log_format "iis"}}
@@ -141,10 +161,17 @@ template: |
       include_file_path_resolved: {{ .include_file_path_resolved }}
       start_at: {{ .start_at }}
       operators: 
+      {{ if .retain_raw_logs }}
+      - id: save_raw_log
+        type: copy
+        from: body
+        to: attributes.raw_log
+      {{ end }}
       - type: regex_parser
         regex: '^(?P<c_ip>[^,]+), (?P<cs_username>[^,]+), (?P<date>[^,]+), (?P<time>[^,]+), (?P<s_sitename>[^,]+), (?P<s_computername>[^,]+), (?P<s_ip>[^,]+), (?P<time_taken>[^,]+), (?P<cs_bytes>[^,]+), (?P<sc_bytes>[^,]+), (?P<sc_status>[^,]+), (?P<sc_win32_status>[^,]+), (?P<cs_method>[^,]+), (?P<cs_uri_stem>[^,]+), (?P<cs_uri_query>[^,]+),$'
+        parse_to: body
         severity:
-          parse_from: 'attributes["sc_status"]'
+          parse_from: 'body["sc_status"]'
           mapping:
             info: 2xx
             info2: 3xx
@@ -153,26 +180,26 @@ template: |
 
       - id: add_timestamp
         type: add
-        if: 'attributes.date != nil and attributes.time != nil'
-        field: attributes.timestamp
-        value: EXPR(attributes.date + " " + attributes.time)
+        if: 'body.date != nil and body.time != nil'
+        field: body.timestamp
+        value: EXPR(body.date + " " + body.time)
 
       # Remove date field
       - id: remove_date
         type: remove
-        if: 'attributes.date != nil'
-        field: attributes.date
+        if: 'body.date != nil'
+        field: body.date
 
       # Remove time field
       - id: remove_time
         type: remove
-        if: 'attributes.time != nil'
-        field: attributes.time
+        if: 'body.time != nil'
+        field: body.time
 
       - id: time_parser
         type: time_parser
-        if: 'attributes.timestamp != nil'
-        parse_from: attributes.timestamp
+        if: 'body.timestamp != nil'
+        parse_from: body.timestamp
         layout: '%q/%g/%Y %H:%M:%S'
         location: {{.timezone}}
 
@@ -180,6 +207,13 @@ template: |
         type: add
         field: 'attributes.log_type'
         value: 'microsoft_iis'
+      
+      {{ if .retain_raw_logs }}
+      - id: move_raw_log
+        type: move
+        from: attributes.raw_log
+        to: body.raw_log
+      {{ end }}
     {{end}}
 
     # NCSA format
@@ -201,27 +235,41 @@ template: |
       include_file_path_resolved: {{ .include_file_path_resolved }}
       start_at: {{ .start_at }}
       operators: 
+      {{ if .retain_raw_logs }}
+      - id: save_raw_log
+        type: copy
+        from: body
+        to: attributes.raw_log
+      {{ end }}
       - type: regex_parser
         # Note: The second, uncaptured group here is "Remote log name". This value is always "-" in IIS, so we don't include it
         regex: '^(?P<c_ip>[^\s]+) (?:[^\s]+) (?P<cs_username>[^\s]+) \[(?P<timestamp>[^]]+)\] "(?P<cs_method>[^\s]+) (?P<cs_uri_stem>[^\s?]+)(?:\?(?P<cs_uri_query>[^\s]+))? (?P<cs_version>[^\s]+)" (?P<sc_status>[^\s]+) (?P<sc_bytes>[^\s]+)$'
+        parse_to: body
         severity:
-          parse_from: 'attributes["sc_status"]'
+          parse_from: 'body["sc_status"]'
           mapping:
             info: 2xx
             info2: 3xx
             warn: 4xx
             error: 5xx
         timestamp:
-          parse_from: attributes.timestamp
+          parse_from: body.timestamp
           layout: '%d/%b/%Y:%H:%M:%S %z'
       
       - id: add_log_type
         type: add
         field: 'attributes.log_type'
         value: 'microsoft_iis'
+
+      {{ if .retain_raw_logs }}
+      - id: move_raw_log
+        type: move
+        from: attributes.raw_log
+        to: body.raw_log
+      {{ end }}
     {{end}}
   service:
     pipelines:
       logs:
         receivers:
-          - filelog 
+          - filelog
