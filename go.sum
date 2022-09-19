@@ -117,8 +117,8 @@ github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
 github.com/DATA-DOG/go-sqlmock v1.3.3/go.mod h1:f/Ixk793poVmq4qj/V1dPUg2JEAKC73Q5eFN3EC/SaM=
 github.com/DataDog/datadog-go v3.2.0+incompatible/go.mod h1:LButxg5PwREeZtORoXG3tL4fMGNddJ+vMq1mwgfaqoQ=
-github.com/GoogleCloudPlatform/opentelemetry-operations-collector v0.0.3-0.20220901134050-211ac2901838 h1:KG7j1XwKQw8Lnm0KPe5wZWyIOn08t2zx16eOIZ/o6Ek=
-github.com/GoogleCloudPlatform/opentelemetry-operations-collector v0.0.3-0.20220901134050-211ac2901838/go.mod h1:6jgOV4UNUbolpg0uYnE5sYZO4dvjRmVNbOeRyRrezC0=
+github.com/GoogleCloudPlatform/opentelemetry-operations-collector v0.0.3-0.20220916145219-4e0913d7c254 h1:6P+seCudJiKJ24fznIDPSD25aamKNh3bgzoYkrxMfzE=
+github.com/GoogleCloudPlatform/opentelemetry-operations-collector v0.0.3-0.20220916145219-4e0913d7c254/go.mod h1:PQHg1Ro+UU+cF0O8qu45elKtbrm1jdloc5iUDkCBBqc=
 github.com/GoogleCloudPlatform/opentelemetry-operations-go/detectors/gcp v0.32.7 h1:wgsxZeJX/qU+9xMFmaeIqZGBpk1SpewgcCJsP1MqdVg=
 github.com/GoogleCloudPlatform/opentelemetry-operations-go/detectors/gcp v0.32.7/go.mod h1:s7Gpwj0tk7XnVCm4BQEmx/mbS36SuTCY/vMB2SNxe8o=
 github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector v0.32.7 h1:CZ4MnSkSI46MYVIEuf/SrNjJPscvkDhJ5swMcUE9NtM=
@@ -1097,8 +1097,8 @@ github.com/open-telemetry/opentelemetry-collector-contrib/pkg/resourcetotelemetr
 github.com/open-telemetry/opentelemetry-collector-contrib/pkg/resourcetotelemetry v0.60.0/go.mod h1:s01aZZ3YqrNbe78Ff/3OLY2s08VjrlHCZOIxceLLzQc=
 github.com/open-telemetry/opentelemetry-collector-contrib/pkg/stanza v0.60.0 h1:FDXqFZPdpHwL/T55lwkMVH859qaHG/Oj8M2T4TIBhaQ=
 github.com/open-telemetry/opentelemetry-collector-contrib/pkg/stanza v0.60.0/go.mod h1:QdiGYvCDIIIDZ89rH6/6kQmSuiBTFhmyPIaWujBieXk=
-github.com/open-telemetry/opentelemetry-collector-contrib/pkg/telemetryquerylanguage v0.59.1-0.20220906184950-aa1c1f330ec9 h1:9T5ir35iiNyc2I0rGEoCzjSPFnznvmyoXXzLpVadG80=
-github.com/open-telemetry/opentelemetry-collector-contrib/pkg/telemetryquerylanguage v0.59.1-0.20220906184950-aa1c1f330ec9/go.mod h1:Ik72N0d4FcOb6d3epDkBTJp3GFHLeo6b65BfQsxep8I=
+github.com/open-telemetry/opentelemetry-collector-contrib/pkg/telemetryquerylanguage v0.60.0 h1:6gcy7YMqN7PuMX1P1+8d4VujdChiizELdIhdx6emUf8=
+github.com/open-telemetry/opentelemetry-collector-contrib/pkg/telemetryquerylanguage v0.60.0/go.mod h1:gHDHGdCaxwZsucu5NzIdvmV/cLHz4RMyIQ5rWR44+mI=
 github.com/open-telemetry/opentelemetry-collector-contrib/pkg/translator/jaeger v0.60.0 h1:feBvT8nabr8Vwei77KM5EhqMTK3Mg7Y2jnpD5hClOz4=
 github.com/open-telemetry/opentelemetry-collector-contrib/pkg/translator/jaeger v0.60.0/go.mod h1:OY9IjYAKm7WoKB8MZi2IsOqkaKIEIBXRvrckfmREuvw=
 github.com/open-telemetry/opentelemetry-collector-contrib/pkg/translator/opencensus v0.60.0 h1:HCHE2kMo7K9eLVVYfR59I3CtDaqp0WYiHlyWRDQvG+M=
@@ -1147,8 +1147,8 @@ github.com/open-telemetry/opentelemetry-collector-contrib/processor/spanprocesso
 github.com/open-telemetry/opentelemetry-collector-contrib/processor/spanprocessor v0.60.0/go.mod h1:n0gzLlc3RFjXRjoPP4WjQaysIR/9dAYwvwUyR5/tRww=
 github.com/open-telemetry/opentelemetry-collector-contrib/processor/tailsamplingprocessor v0.60.0 h1:yextR0FEKECXUbFQiSH77XXH9czaMF8Z+y++yQxQpPg=
 github.com/open-telemetry/opentelemetry-collector-contrib/processor/tailsamplingprocessor v0.60.0/go.mod h1:TkD5gMRGQDQhqKzAb5nVOiXEl8MF2jEjGaYG1wm1jHI=
-github.com/open-telemetry/opentelemetry-collector-contrib/processor/transformprocessor v0.59.1-0.20220906184950-aa1c1f330ec9 h1:RQKChGBEuKfjjsA25b9pfV40OvhWDjCeFqmuR9a+dsA=
-github.com/open-telemetry/opentelemetry-collector-contrib/processor/transformprocessor v0.59.1-0.20220906184950-aa1c1f330ec9/go.mod h1:JnMJ5uICwCkl5Kjiie5K37uxjhfLl24HXdOMwizKknk=
+github.com/open-telemetry/opentelemetry-collector-contrib/processor/transformprocessor v0.60.0 h1:REUzTZx+OYzbPW2x1SE99+4Bi6NEH41UV8JZ37TlDtg=
+github.com/open-telemetry/opentelemetry-collector-contrib/processor/transformprocessor v0.60.0/go.mod h1:ocRgMOlpiF8CSjSd40LZLc+VkpnfNmuL4wyJwlQCGIk=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/activedirectorydsreceiver v0.60.0 h1:aIlONSiiqzvqhuACYiRTVRA2mXXom+DSg29CEw8UofI=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/activedirectorydsreceiver v0.60.0/go.mod h1:iNN8s/aL7726AugPbAzz4lbZggNJIXqm+w6ADBxXxQY=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/aerospikereceiver v0.60.0 h1:/W+xkGDw692kXh+C8fhJVD84px/N23Z10BIMfGV5lF8=
@@ -1913,8 +1913,8 @@ golang.org/x/sys v0.0.0-20220624220833-87e55d714810/go.mod h1:oPkhp1MJrh7nUepCBc
 golang.org/x/sys v0.0.0-20220708085239-5a0f0661e09d/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/sys v0.0.0-20220722155257-8c9f86f7a55f/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/sys v0.0.0-20220728004956-3c1f35247d10/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
-golang.org/x/sys v0.0.0-20220808155132-1c4a2a72c664 h1:v1W7bwXHsnLLloWYTVEdvGvA7BHMeBYsPcF0GLDxIRs=
-golang.org/x/sys v0.0.0-20220808155132-1c4a2a72c664/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
+golang.org/x/sys v0.0.0-20220811171246-fbc7d0a398ab h1:2QkjZIsXupsJbJIdSjjUOgWK3aEtzyuh2mPt3l/CkeU=
+golang.org/x/sys v0.0.0-20220811171246-fbc7d0a398ab/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/term v0.0.0-20201117132131-f5c789dd3221/go.mod h1:Nr5EML6q2oocZ2LXRh80K7BxOlk5/8JxuGnuhpl+muw=
 golang.org/x/term v0.0.0-20201126162022-7de9c90e9dd1/go.mod h1:bj7SfCRtBDWHUb9snDiAeCFNEtKQo2Wmx5Cou7ajbmo=
 golang.org/x/term v0.0.0-20210220032956-6a3ed077a48d/go.mod h1:bj7SfCRtBDWHUb9snDiAeCFNEtKQo2Wmx5Cou7ajbmo=
