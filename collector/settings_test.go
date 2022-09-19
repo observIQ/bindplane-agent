@@ -35,7 +35,7 @@ func TestNewSettings(t *testing.T) {
 	require.NoError(t, err)
 	receivcfg := provider.Receivers[config.NewComponentID("filelog")]
 	config := receivcfg.(*filelogreceiver.FileLogConfig)
-	actualConfVal := config.Finder.Include[0]
+	actualConfVal := config.InputConfig.Finder.Include[0]
 	require.Equal(t, "./test.log", actualConfVal)
 
 	require.NoError(t, err)
