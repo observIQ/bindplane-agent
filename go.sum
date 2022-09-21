@@ -1213,8 +1213,8 @@ github.com/open-telemetry/opentelemetry-collector-contrib/receiver/kubeletstatsr
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/kubeletstatsreceiver v0.60.0/go.mod h1:GkkjtnJOREKZLRcwPmvJANrZj+wJe8IagipbQDXw+VQ=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/memcachedreceiver v0.60.0 h1:SSVS8sIACgcm5yErTBeXp5H6mPCwm+B1nJNyBVZMvpg=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/memcachedreceiver v0.60.0/go.mod h1:UWxtbgwqbUNlmSevNPpBIRPvAoArFW5NQTRgqyInUhU=
-github.com/open-telemetry/opentelemetry-collector-contrib/receiver/mongodbatlasreceiver v0.60.0 h1:2DzuzH3uUzizJsY4gCE+L9OweoXRL2nDHSAyyWPxuqY=
-github.com/open-telemetry/opentelemetry-collector-contrib/receiver/mongodbatlasreceiver v0.60.0/go.mod h1:AZfxmlPCsov4LlQJYvivTogrOkb+cAx9tU+gsqZ0Mt4=
+github.com/open-telemetry/opentelemetry-collector-contrib/receiver/mongodbatlasreceiver v0.60.1-0.20220921185933-5da63139851a h1:znBiVwhDJrEEwn808WG9MDOilU8gWzYskQZoUECw59s=
+github.com/open-telemetry/opentelemetry-collector-contrib/receiver/mongodbatlasreceiver v0.60.1-0.20220921185933-5da63139851a/go.mod h1:2G6Sj/fFvw10GgRlD2F47RpMQNm8iPdDDo3z6tJ4Dxc=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/mongodbreceiver v0.60.0 h1:seGdTe2KcIy+MPyBzt7+FJcisFtfYjr+qLhPIFsoDQg=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/mongodbreceiver v0.60.0/go.mod h1:CmDjyGPg12G7A6U5LnVP8x4C5qFFzzg+D1+tr7lAg+4=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/mysqlreceiver v0.60.0 h1:N9RG6Z+A4aonWYXa4x9oKYhWJukxSAcGczt+ME5GrVU=

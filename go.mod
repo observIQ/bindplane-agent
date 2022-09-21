@@ -91,7 +91,7 @@ require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/kafkareceiver v0.60.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/kubeletstatsreceiver v0.60.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/memcachedreceiver v0.60.0
-	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/mongodbatlasreceiver v0.60.0
+	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/mongodbatlasreceiver v0.60.1-0.20220921185933-5da63139851a
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/mongodbreceiver v0.60.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/mysqlreceiver v0.60.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/nginxreceiver v0.60.0

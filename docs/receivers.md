@@ -39,7 +39,7 @@ Below is a list of supported receivers with links to their documentation pages.
 | Microsoft IIS Receiver                      | [iisreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.60.0/receiver/iisreceiver/README.md) |
 | Microsoft SQL Server Receiver               | [sqlserverreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.60.0/receiver/sqlserverreceiver/README.md) |
 | MongoDB Receiver                            | [mongodbreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.60.0/receiver/mongodbreceiver/README.md) |
-| MongoDB Atlas Receiver                      | [mongodbatlasreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.60.0/receiver/mongodbatlasreceiver/README.md) |
+| MongoDB Atlas Receiver                      | [mongodbatlasreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/5da63139851a3cbcc329f8c517a2fe02c5b2b30b/receiver/mongodbatlasreceiver/README.md) |
 | MySQL Receiver                              | [mysqlreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.60.0/receiver/mysqlreceiver/README.md) |
 | NGINX Receiver                              | [nginxreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.60.0/receiver/nginxreceiver/README.md) |
 | OpenCensus Receiver                         | [opencensusreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.60.0/receiver/opencensusreceiver/README.md) |
