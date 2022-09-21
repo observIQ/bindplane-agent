@@ -104,7 +104,7 @@ func TestSnapshotReporterSaveMetrics(t *testing.T) {
 	rm := toAdd.ResourceMetrics().AppendEmpty()
 	sm := rm.ScopeMetrics().AppendEmpty()
 	metric := sm.Metrics().AppendEmpty()
-	metric.SetDataType(pmetric.MetricDataTypeGauge)
+	metric.SetEmptyGauge()
 	metric.Gauge().DataPoints().AppendEmpty()
 
 	reporter.SaveMetrics(componentID, toAdd)
@@ -417,7 +417,7 @@ func TestSnapshotReporterReport(t *testing.T) {
 				rm := toAdd.ResourceMetrics().AppendEmpty()
 				sm := rm.ScopeMetrics().AppendEmpty()
 				metric := sm.Metrics().AppendEmpty()
-				metric.SetDataType(pmetric.MetricDataTypeGauge)
+				metric.SetEmptyGauge()
 				metric.Gauge().DataPoints().AppendEmpty()
 				reporter.SaveMetrics(cfg.Processor, toAdd)
 
