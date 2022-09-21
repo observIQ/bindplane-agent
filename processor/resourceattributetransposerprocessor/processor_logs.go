@@ -65,7 +65,7 @@ func (p logsProcessor) ConsumeLogs(ctx context.Context, md plog.Logs) error {
 				logs := scopeLog.LogRecords()
 				for k := 0; k < logs.Len(); k++ {
 					log := logs.At(k)
-					log.Attributes().Insert(op.To, resourceValue)
+					resourceValue.CopyTo(log.Attributes().PutEmpty(op.To))
 				}
 			}
 		}
