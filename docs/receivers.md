@@ -24,7 +24,7 @@ Below is a list of supported receivers with links to their documentation pages.
 | Fluentd Forward Receiver                    | [fluentforwardreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.60.0/receiver/fluentforwardreceiver/README.md) |
 | Google Cloud Pub/Sub Receiver               | [googlecloudpubsubreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.60.0/receiver/googlecloudpubsubreceiver/README.md) |
 | Google Cloud Spanner Receiver               | [googlecloudspannerreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.60.0/receiver/googlecloudspannerreceiver/README.md) |
-| Host Metrics Receiver                       | [hostmetricsreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.60.0/receiver/hostmetricsreceiver/README.md) |
+| Host Metrics Receiver                       | [hostmetricsreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/8b183beccbf7ef11776ea676a98881cf1e28b876/receiver/hostmetricsreceiver/README.md) |
 | InfluxDB Receiver                           | [influxdbreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.60.0/receiver/influxdbreceiver/README.md) |
 | Jaeger Receiver                             | [jaegerreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.60.0/receiver/jaegerreceiver/README.md) |
 | JMX Receiver                                | [jmxreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.60.0/receiver/jmxreceiver/README.md) |
@@ -59,7 +59,7 @@ Below is a list of supported receivers with links to their documentation pages.
 | Syslog Receiver                             | [syslogreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.60.0/receiver/syslogreceiver/README.md) |
 | TCP Log Receiver                            | [tcplogreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.60.0/receiver/tcplogreceiver/README.md) |
 | UDP Log Receiver                            | [udplogreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.60.0/receiver/udplogreceiver/README.md) |
-| Varnish Cache Receiver                      | [varnishreceiver](https://github.com/GoogleCloudPlatform/opentelemetry-operations-collector/blob/4e0913d7c254cfcfb1dba157ea0a03afebf2b8d4/receiver/varnishreceiver/README.md) |
+| Varnish Cache Receiver                      | [varnishreceiver](https://github.com/observIQ/opentelemetry-operations-collector/blob/b63246e42ab9fb5edbe31becb1940fd0a3416e86/receiver/varnishreceiver/README.md) |
 | vCenter Receiver                            | [vcenterreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.60.0/receiver/vcenterreceiver/README.md) |
 | Windows Event Log Receiver                  | [windowseventlogreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.60.0/receiver/windowseventlogreceiver/README.md) |
 | Windows Performance Counters Receiver       | [windowsperfcountersreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.60.0/receiver/windowsperfcountersreceiver/README.md) |
