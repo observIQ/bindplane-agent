@@ -199,8 +199,8 @@ func ensureIdentity(configPath string) error {
 		return fmt.Errorf("unable to interpret config file: %w", err)
 	}
 
-	// if they already have an AgentID, don't generate it
-	if candidateConfig.AgentID != "" {
+	// If the AgentID is not a ULID (legacy ID or empty) then we need to generate a ULID as the AgentID.
+	if _, err := ulid.Parse(candidateConfig.AgentID); err == nil {
 		return nil
 	}
 
