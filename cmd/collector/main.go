@@ -23,12 +23,12 @@ import (
 	"path/filepath"
 	_ "time/tzdata"
 
-	"github.com/google/uuid"
 	"github.com/observiq/observiq-otel-collector/collector"
 	"github.com/observiq/observiq-otel-collector/internal/logging"
 	"github.com/observiq/observiq-otel-collector/internal/service"
 	"github.com/observiq/observiq-otel-collector/internal/version"
 	"github.com/observiq/observiq-otel-collector/opamp"
+	"github.com/oklog/ulid/v2"
 	"github.com/spf13/pflag"
 	"go.uber.org/zap"
 	"gopkg.in/yaml.v3"
@@ -158,7 +158,7 @@ func checkManagerConfig(configPath *string) error {
 
 		newConfig.AgentID, ok = os.LookupEnv(agentIDENV)
 		if !ok {
-			newConfig.AgentID = uuid.New().String()
+			newConfig.AgentID = ulid.Make().String()
 		}
 
 		if sk, ok := os.LookupEnv(secretkeyENV); ok {
@@ -204,7 +204,7 @@ func ensureIdentity(configPath string) error {
 		return nil
 	}
 
-	candidateConfig.AgentID = uuid.NewString()
+	candidateConfig.AgentID = ulid.Make().String()
 	newBytes, err := yaml.Marshal(candidateConfig)
 	if err != nil {
 		return fmt.Errorf("failed to marshal sanitized config: %w", err)

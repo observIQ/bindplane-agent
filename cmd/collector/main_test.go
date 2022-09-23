@@ -22,8 +22,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/google/uuid"
 	"github.com/observiq/observiq-otel-collector/opamp"
+	"github.com/oklog/ulid/v2"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v3"
 )
@@ -137,16 +137,16 @@ func TestManagerConfigNoAgentIDWillSet(t *testing.T) {
 	var config opamp.Config
 	require.NoError(t, yaml.Unmarshal(cfgBytes, &config))
 	require.NotEmpty(t, config.AgentID)
-	uuidv4, err := uuid.Parse(config.AgentID)
+	ulidID, err := ulid.Parse(config.AgentID)
 	require.NoError(t, err)
-	require.NotEmpty(t, uuidv4)
+	require.NotEmpty(t, ulidID)
 }
 
 func TestManagerConfigWillNotOverwriteCurrentAgentID(t *testing.T) {
 	tmpDir := t.TempDir()
 	manager := filepath.Join(tmpDir, "manager.yaml")
 
-	id := uuid.NewString()
+	id := ulid.Make().String()
 	data := []byte(fmt.Sprintf(`
 ---
 agent_id: %s
