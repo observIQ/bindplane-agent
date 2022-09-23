@@ -23,7 +23,7 @@ DOWNLOAD_BASE="https://github.com/observiq/observiq-otel-collector/releases"
 COLLECTOR_USER="observiq-otel-collector"
 TMP_DIR=${TMPDIR:-"/tmp"} # Allow this to be overriden by cannonical TMPDIR env var
 MANAGEMENT_YML_PATH="/opt/observiq-otel-collector/manager.yaml"
-PREREQS="curl printf systemctl sed uname cut uuidgen"
+PREREQS="curl printf systemctl sed uname cut"
 SCRIPT_NAME="$0"
 INDENT_WIDTH='  '
 indent=""
@@ -606,7 +606,6 @@ create_manager_yml()
     command printf 'endpoint: "%s"\n' "$OPAMP_ENDPOINT" > "$manager_yml_path"
     [ -n "$OPAMP_LABELS" ] && command printf 'labels: "%s"\n' "$OPAMP_LABELS" >> "$manager_yml_path"
     [ -n "$OPAMP_SECRET_KEY" ] && command printf 'secret_key: "%s"\n' "$OPAMP_SECRET_KEY" >> "$manager_yml_path"
-    command printf 'agent_id: "%s"\n' "$(uuidgen -r)" >> "$manager_yml_path"
   fi
 }
 
