@@ -20,6 +20,7 @@ import (
 	gcp "github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlecloudexporter"
 	"go.opentelemetry.io/collector/config"
 	"go.opentelemetry.io/collector/processor/batchprocessor"
+	semconv "go.opentelemetry.io/collector/semconv/v1.9.0"
 	"go.uber.org/multierr"
 	"google.golang.org/api/option"
 )
@@ -37,6 +38,10 @@ type Config struct {
 	AppendHost              bool                   `mapstructure:"append_host"`
 	GCPConfig               *gcp.Config            `mapstructure:",squash"`
 	BatchConfig             *batchprocessor.Config `mapstructure:"batch"`
+	// Log specific options
+	MoveAttrsToBody bool     `mapstructure:"move_attrs_to_body"`
+	KeepAttrs       []string `mapstructure:"keep_attrs"`
+	RetainRawLog    bool     `mapstructure:"keep_raw_log"`
 }
 
 // Validate validates the config
@@ -75,6 +80,25 @@ func createDefaultConfig() config.Exporter {
 		GCPConfig:        createDefaultGCPConfig(),
 		BatchConfig:      createDefaultBatchConfig(),
 		AppendHost:       true,
+		MoveAttrsToBody:  true,
+		RetainRawLog:     false,
+		KeepAttrs: []string{
+			// For TCP/UDP receivers
+			semconv.AttributeNetHostIP,
+			semconv.AttributeNetHostPort,
+			semconv.AttributeNetHostName,
+			semconv.AttributeNetPeerIP,
+			semconv.AttributeNetPeerPort,
+			semconv.AttributeNetPeerName,
+			semconv.AttributeNetTransport,
+			// for filelog receiver
+			"log.file.name",
+			"log.file.path",
+			"log.file.name_resolved",
+			"log.file.path_resolved",
+			// for our plugins, included with our distro.
+			"log_type",
+		},
 	}
 }
 

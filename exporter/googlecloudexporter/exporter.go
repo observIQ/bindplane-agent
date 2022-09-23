@@ -34,6 +34,10 @@ var hostname = getHostname()
 type exporter struct {
 	appendHost bool
 
+	moveAttrsToBody bool
+	retainRawLog    bool
+	keepAttrs       map[string]struct{}
+
 	metricsProcessors []component.MetricsProcessor
 	metricsExporter   component.MetricsExporter
 	metricsConsumer   consumer.Metrics
@@ -77,6 +81,10 @@ func (e *exporter) ConsumeTraces(ctx context.Context, td ptrace.Traces) error {
 func (e *exporter) ConsumeLogs(ctx context.Context, ld plog.Logs) error {
 	if e.appendHost {
 		e.appendLogHost(&ld)
+	}
+
+	if e.moveAttrsToBody {
+		logAttrsToBody(ld, e.keepAttrs, e.retainRawLog)
 	}
 
 	if e.logsConsumer == nil {

@@ -129,10 +129,13 @@ func createLogsExporter(ctx context.Context, set component.ExporterCreateSetting
 	}
 
 	return &exporter{
-		appendHost:     exporterConfig.AppendHost,
-		logsProcessors: processors,
-		logsExporter:   gcpExporter,
-		logsConsumer:   consumer,
+		appendHost:      exporterConfig.AppendHost,
+		logsProcessors:  processors,
+		logsExporter:    gcpExporter,
+		logsConsumer:    consumer,
+		moveAttrsToBody: exporterConfig.MoveAttrsToBody,
+		retainRawLog:    exporterConfig.RetainRawLog,
+		keepAttrs:       makeStringSet(exporterConfig.KeepAttrs),
 	}, nil
 }
 
@@ -178,4 +181,13 @@ func createTracesExporter(ctx context.Context, set component.ExporterCreateSetti
 		tracesExporter:   gcpExporter,
 		tracesConsumer:   consumer,
 	}, nil
+}
+
+func makeStringSet(s []string) map[string]struct{} {
+	m := make(map[string]struct{}, len(s))
+	for _, k := range s {
+		m[k] = struct{}{}
+	}
+
+	return m
 }
