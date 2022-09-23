@@ -24,6 +24,5 @@ if(![string]::IsNullOrEmpty($secret_key)) {
 if(![string]::IsNullOrEmpty($labels)) {
     $yaml+="labels: `"$labels`"{0}" -f [environment]::NewLine
 }
-$yaml+="agent_id: `"{0}`"" -f [guid]::NewGuid()
 
 Set-Content -Path "${install_dir}manager.yaml" -Value $yaml

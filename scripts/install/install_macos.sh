@@ -20,7 +20,7 @@ SERVICE_NAME="com.observiq.collector"
 DOWNLOAD_BASE="https://github.com/observiq/observiq-otel-collector/releases"
 
 # Script Constants
-PREREQS="printf sed uname uuidgen tr find grep"
+PREREQS="printf sed uname tr find grep"
 TMP_DIR="${TMPDIR:-"/tmp/"}observiq-otel-collector" # Allow this to be overriden by cannonical TMPDIR env var
 INSTALL_DIR="/opt/observiq-otel-collector"
 MANAGEMENT_YML_PATH="$INSTALL_DIR/manager.yaml"
@@ -526,7 +526,6 @@ create_manager_yml()
     command printf 'endpoint: "%s"\n' "$OPAMP_ENDPOINT" > "$manager_yml_path"
     [ -n "$OPAMP_LABELS" ] && command printf 'labels: "%s"\n' "$OPAMP_LABELS" >> "$manager_yml_path"
     [ -n "$OPAMP_SECRET_KEY" ] && command printf 'secret_key: "%s"\n' "$OPAMP_SECRET_KEY" >> "$manager_yml_path"
-    command printf 'agent_id: "%s"\n' "$(uuidgen | tr "[:upper:]" "[:lower:]")" >> "$manager_yml_path"
     succeeded
   fi
 }
