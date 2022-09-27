@@ -4,6 +4,7 @@ go 1.18
 
 require (
 	github.com/GoogleCloudPlatform/opentelemetry-operations-collector v0.0.3-0.20220916145219-4e0913d7c254
+	github.com/google/uuid v1.3.0
 	github.com/observiq/observiq-otel-collector/exporter/googlecloudexporter v1.9.0
 	github.com/observiq/observiq-otel-collector/packagestate v1.9.0
 	github.com/observiq/observiq-otel-collector/processor/resourceattributetransposerprocessor v1.9.0
@@ -249,7 +250,6 @@ require (
 	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/gofuzz v1.2.0 // indirect
-	github.com/google/uuid v1.3.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.1.0 // indirect
 	github.com/googleapis/gax-go/v2 v2.4.0 // indirect
 	github.com/gophercloud/gophercloud v0.25.0 // indirect

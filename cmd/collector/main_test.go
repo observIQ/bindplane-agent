@@ -22,6 +22,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/google/uuid"
 	"github.com/observiq/observiq-otel-collector/opamp"
 	"github.com/oklog/ulid/v2"
 	"github.com/stretchr/testify/require"
@@ -142,6 +143,7 @@ func TestManagerConfigNoAgentIDWillSet(t *testing.T) {
 	require.NotEmpty(t, ulidID)
 }
 
+// TestManagerConfigWillNotOverwriteCurrentAgentID tests that if the agent ID is a ULID it will not overwrite it
 func TestManagerConfigWillNotOverwriteCurrentAgentID(t *testing.T) {
 	tmpDir := t.TempDir()
 	manager := filepath.Join(tmpDir, "manager.yaml")
@@ -161,6 +163,30 @@ agent_id: %s
 	var config opamp.Config
 	require.NoError(t, yaml.Unmarshal(cfgBytes, &config))
 	require.Equal(t, config.AgentID, id)
+}
+
+// TestManagerConfigWillUpdateLegacyAgentID tests that if the agent ID is a Legacy ID (UUID format) it will overwrite with a new ULID
+func TestManagerConfigWillUpdateLegacyAgentID(t *testing.T) {
+	tmpDir := t.TempDir()
+	manager := filepath.Join(tmpDir, "manager.yaml")
+
+	legacyID := uuid.NewString()
+	data := []byte(fmt.Sprintf(`
+---
+agent_id: %s
+`, legacyID))
+	require.NoError(t, os.WriteFile(manager, data, 0600))
+	err := checkManagerConfig(&manager)
+	require.NoError(t, err)
+
+	cfgBytes, err := ioutil.ReadFile(manager)
+	require.NoError(t, err)
+
+	var config opamp.Config
+	require.NoError(t, yaml.Unmarshal(cfgBytes, &config))
+	_, err = ulid.Parse(config.AgentID)
+	require.NoError(t, err)
+	require.NotEqual(t, config.AgentID, legacyID)
 }
 
 func TestManagerConfigWillErrorOnInvalidOpAmpConfig(t *testing.T) {
