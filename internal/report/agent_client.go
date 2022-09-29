@@ -15,6 +15,7 @@
 package report
 
 import (
+	"crypto/tls"
 	"net/http"
 )
 
@@ -29,11 +30,15 @@ type AgentClient struct {
 }
 
 // NewAgentClient creates a new AgentClient
-func NewAgentClient(agentID string, secretKey *string) *AgentClient {
+func NewAgentClient(agentID string, secretKey *string, tlsConfig *tls.Config) *AgentClient {
 	return &AgentClient{
 		agentID:   agentID,
 		secretKey: secretKey,
-		client:    http.DefaultClient,
+		client: &http.Client{
+			Transport: &http.Transport{
+				TLSClientConfig: tlsConfig,
+			},
+		},
 	}
 }
 
