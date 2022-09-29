@@ -500,4 +500,4 @@ replace github.com/observiq/observiq-otel-collector/processor/throughputmeasurem
 
 // The following replaces are temporary fo the 1.9.0 release, should be able to be removed when we upgrade to otel 0.61.0:
 
-replace github.com/GoogleCloudPlatform/opentelemetry-operations-collector v0.0.3-0.20220916145219-4e0913d7c254 => github.com/observIQ/opentelemetry-operations-collector v0.0.3-0.20220921160945-b63246e42ab9
+replace github.com/GoogleCloudPlatform/opentelemetry-operations-collector v0.0.3-0.20220916145219-4e0913d7c254 => github.com/observIQ/opentelemetry-operations-collector v0.0.3-0.20220929143032-bac5dd221ff6

@@ -1293,8 +1293,8 @@ github.com/nwaples/rardecode v1.1.0/go.mod h1:5DzqNKiOdpKKBH87u8VlvAnPZMXcGRhxWk
 github.com/nxadm/tail v1.4.4/go.mod h1:kenIhsEOeOJmVchQTgglprH7qJGnHDVpk1VPCcaMI8A=
 github.com/nxadm/tail v1.4.8 h1:nPr65rt6Y5JFSKQO7qToXr7pePgD6Gwiw05lkbyAQTE=
 github.com/nxadm/tail v1.4.8/go.mod h1:+ncqLTQzXmGhMZNUePPaPqPvBxHAIsmXswZKocGu+AU=
-github.com/observIQ/opentelemetry-operations-collector v0.0.3-0.20220921160945-b63246e42ab9 h1:yzqp0Y2g15GGhuqik3ULN4gNkrnuwbjvH9UdF7axIQg=
-github.com/observIQ/opentelemetry-operations-collector v0.0.3-0.20220921160945-b63246e42ab9/go.mod h1:PQHg1Ro+UU+cF0O8qu45elKtbrm1jdloc5iUDkCBBqc=
+github.com/observIQ/opentelemetry-operations-collector v0.0.3-0.20220929143032-bac5dd221ff6 h1:JMAM2iong2oUSXlWE4beEvzR/BuFa0dOaAyyOZsTA7A=
+github.com/observIQ/opentelemetry-operations-collector v0.0.3-0.20220929143032-bac5dd221ff6/go.mod h1:SXdKvdesYq92Gv/q6kO2KsB3AqEEOtz8hFASebKM1sw=
 github.com/observiq/ctimefmt v1.0.0 h1:r7vTJ+Slkrt9fZ67mkf+mA6zAdR5nGIJRMTzkUyvilk=
 github.com/observiq/ctimefmt v1.0.0/go.mod h1:mxi62//WbSpG/roCO1c6MqZ7zQTvjVtYheqHN3eOjvc=
 github.com/observiq/nanojack v0.0.0-20201106172433-343928847ebc h1:49ewVBwLcy+eYqI4R0ICilCI4dPjddpFXWv3liXzUxM=
