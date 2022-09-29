@@ -27,7 +27,7 @@ func TestNewAgentClient(t *testing.T) {
 	agentID := "agent_id"
 	secretKey := "secret_key"
 
-	client := NewAgentClient(agentID, &secretKey)
+	client := NewAgentClient(agentID, &secretKey, nil)
 
 	require.Equal(t, agentID, client.agentID)
 	require.Equal(t, &secretKey, client.secretKey)
@@ -69,7 +69,7 @@ func TestAgentClientDo(t *testing.T) {
 			defer s.Close()
 
 			// Create Client
-			client := NewAgentClient(tc.agentID, tc.secretKey)
+			client := NewAgentClient(tc.agentID, tc.secretKey, nil)
 
 			// Format small noop request
 			req, err := http.NewRequest(http.MethodGet, s.URL, http.NoBody)

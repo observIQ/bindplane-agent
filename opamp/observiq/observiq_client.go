@@ -85,8 +85,14 @@ func NewClient(args *NewClientArgs) (opamp.Client, error) {
 		return nil, fmt.Errorf("failed to create updaterManager: %w", err)
 	}
 
+	// Propagate TLS config to repoteManager agent
+	tlsCfg, err := args.Config.ToTLS()
+	if err != nil {
+		return nil, fmt.Errorf("failed creating TLS config: %w", err)
+	}
+
 	reportManager := report.GetManager()
-	if err := reportManager.SetClient(report.NewAgentClient(args.Config.AgentID, args.Config.SecretKey)); err != nil {
+	if err := reportManager.SetClient(report.NewAgentClient(args.Config.AgentID, args.Config.SecretKey, tlsCfg)); err != nil {
 		// Error should never happen as we only error if a nil client is sent
 		return nil, fmt.Errorf("failed to set client on report manager: %w", err)
 	}
