@@ -16,6 +16,11 @@ override:
   - path: "github.com/hashicorp/cronexpr"
     versions: "v1.1.1"
     licenses: ["Apache-2.0"] # repo allows to choose between Apache-2.0 and GPL v3 https://github.com/hashicorp/cronexpr#license
+  - path: "github.com/weaveworks/common"
+    licenses: ["Apache-2.0"] # Actual license is Apache-2.0, there is a single script that we don't use under LGPL-3.0 https://github.com/weaveworks/common/blob/master/LICENSE
+  - path: "github.com/grafana/loki"
+    versions: "v1.6.2"
+    licenses: ["Apache-2.0"] # Actual packages used in the Loki exporter are Apache-2.0 https://github.com/grafana/loki/blob/main/pkg/logproto/LICENSE_APACHE2
 
 exceptions:
   licenseNotPermitted:
