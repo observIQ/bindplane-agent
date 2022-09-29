@@ -41,6 +41,7 @@ import (
 
 func TestNewClient(t *testing.T) {
 	secretKey := "136bdd08-2074-40b7-ac1c-6706ac24c4f2"
+	badCAFile := "bad"
 	testCases := []struct {
 		desc        string
 		config      opamp.Config
@@ -61,6 +62,17 @@ func TestNewClient(t *testing.T) {
 				AgentID:  "b24181a8-bc16-4ec1-b3af-ca6f7b669af8",
 			},
 			expectedErr: errors.New("net/url: invalid control character in URL"),
+		},
+		{
+			desc: "Bad TLS Config",
+			config: opamp.Config{
+				Endpoint: "ws://localhost:1234",
+				AgentID:  "b24181a8-bc16-4ec1-b3af-ca6f7b669af8",
+				TLS: &opamp.TLSConfig{
+					CAFile: &badCAFile,
+				},
+			},
+			expectedErr: errors.New("failed creating TLS config"),
 		},
 		{
 			desc: "Valid Config",
