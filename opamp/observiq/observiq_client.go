@@ -85,7 +85,7 @@ func NewClient(args *NewClientArgs) (opamp.Client, error) {
 		return nil, fmt.Errorf("failed to create updaterManager: %w", err)
 	}
 
-	// Propagate TLS config to repoteManager agent
+	// Propagate TLS config to reportManager agent
 	tlsCfg, err := args.Config.ToTLS()
 	if err != nil {
 		return nil, fmt.Errorf("failed creating TLS config: %w", err)
