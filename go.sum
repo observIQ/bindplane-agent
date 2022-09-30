@@ -126,6 +126,8 @@ github.com/DataDog/datadog-go v3.2.0+incompatible/go.mod h1:LButxg5PwREeZtORoXG3
 github.com/DataDog/zstd v1.3.6-0.20190409195224-796139022798/go.mod h1:1jcaCB/ufaK+sKp1NBhlGmpz41jOoPQ35bpF36t7BBo=
 github.com/DataDog/zstd v1.4.4/go.mod h1:1jcaCB/ufaK+sKp1NBhlGmpz41jOoPQ35bpF36t7BBo=
 github.com/Djarvur/go-err113 v0.0.0-20210108212216-aea10b59be24/go.mod h1:4UJr5HIiMZrwgkSPdsjy2uOQExX/WEILpIrO9UPGuXs=
+github.com/GoogleCloudPlatform/opentelemetry-operations-collector v0.0.3-0.20220930133424-42befa2fc86a h1:d9lpoMRPZg7RgOKLcnevUapuQA2OwZ5u3nh6FmaUNS0=
+github.com/GoogleCloudPlatform/opentelemetry-operations-collector v0.0.3-0.20220930133424-42befa2fc86a/go.mod h1:SXdKvdesYq92Gv/q6kO2KsB3AqEEOtz8hFASebKM1sw=
 github.com/GoogleCloudPlatform/opentelemetry-operations-go/detectors/gcp v0.32.8 h1:XV1a1MCXc63vOb2EH+Utbypl1Hmr2mqRLSKx82F2Mh4=
 github.com/GoogleCloudPlatform/opentelemetry-operations-go/detectors/gcp v0.32.8/go.mod h1:s7Gpwj0tk7XnVCm4BQEmx/mbS36SuTCY/vMB2SNxe8o=
 github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector v0.32.8 h1:FtmhPiykEaphXerr83TP1OVH/JIcaN+9fu+Ov1eHkvU=
@@ -1309,8 +1311,6 @@ github.com/nwaples/rardecode v1.1.0/go.mod h1:5DzqNKiOdpKKBH87u8VlvAnPZMXcGRhxWk
 github.com/nxadm/tail v1.4.4/go.mod h1:kenIhsEOeOJmVchQTgglprH7qJGnHDVpk1VPCcaMI8A=
 github.com/nxadm/tail v1.4.8 h1:nPr65rt6Y5JFSKQO7qToXr7pePgD6Gwiw05lkbyAQTE=
 github.com/nxadm/tail v1.4.8/go.mod h1:+ncqLTQzXmGhMZNUePPaPqPvBxHAIsmXswZKocGu+AU=
-github.com/observIQ/opentelemetry-operations-collector v0.0.3-0.20220929143032-bac5dd221ff6 h1:JMAM2iong2oUSXlWE4beEvzR/BuFa0dOaAyyOZsTA7A=
-github.com/observIQ/opentelemetry-operations-collector v0.0.3-0.20220929143032-bac5dd221ff6/go.mod h1:SXdKvdesYq92Gv/q6kO2KsB3AqEEOtz8hFASebKM1sw=
 github.com/observiq/ctimefmt v1.0.0 h1:r7vTJ+Slkrt9fZ67mkf+mA6zAdR5nGIJRMTzkUyvilk=
 github.com/observiq/ctimefmt v1.0.0/go.mod h1:mxi62//WbSpG/roCO1c6MqZ7zQTvjVtYheqHN3eOjvc=
 github.com/observiq/nanojack v0.0.0-20201106172433-343928847ebc h1:49ewVBwLcy+eYqI4R0ICilCI4dPjddpFXWv3liXzUxM=
