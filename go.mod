@@ -3,7 +3,7 @@ module github.com/observiq/observiq-otel-collector
 go 1.18
 
 require (
-	github.com/GoogleCloudPlatform/opentelemetry-operations-collector v0.0.3-0.20220916145219-4e0913d7c254
+	github.com/GoogleCloudPlatform/opentelemetry-operations-collector v0.0.3-0.20220930133424-42befa2fc86a
 	github.com/google/uuid v1.3.0
 	github.com/mholt/archiver/v3 v3.5.1
 	github.com/observiq/observiq-otel-collector/exporter/googlecloudexporter v1.9.0
@@ -519,6 +519,3 @@ replace github.com/observiq/observiq-otel-collector/processor/throughputmeasurem
 // some dependencies attempt to bring something like v1.8.2-0.20220303173753-edfe657b5405, which is older than v0.38.0
 // at the time of this inclusion, v0.38.0 was the latest version available (also tagged as v2.38.0)
 replace github.com/prometheus/prometheus => github.com/prometheus/prometheus v0.38.0
-
-// The following replaces are temporary fo the 1.9.1 release, should be able to be removed when operations-collector is updated to otel 0.61.0:
-replace github.com/GoogleCloudPlatform/opentelemetry-operations-collector v0.0.3-0.20220916145219-4e0913d7c254 => github.com/observIQ/opentelemetry-operations-collector v0.0.3-0.20220929143032-bac5dd221ff6
