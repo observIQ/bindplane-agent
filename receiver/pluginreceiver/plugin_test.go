@@ -186,7 +186,7 @@ service:
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			result, err := tc.plugin.Render(tc.values)
+			result, err := tc.plugin.Render(tc.values, config.NewComponentID(config.LogsDataType))
 			switch tc.expectedErr {
 			case nil:
 				require.NoError(t, err)

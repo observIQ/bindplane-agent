@@ -30,6 +30,7 @@ parameters:
 template: |
   receivers:
     filelog:
+      storage: file_storage
       include:
           # {{ range $fp := .file_path }}
              - '{{ $fp }}'
@@ -59,8 +60,11 @@ template: |
                 warn: w
                 error: e
                 fatal: f
-
+  extensions:
+    file_storage:
+      directory: /tmp/storage 
   service:
+    extensions: [file_storage]
     pipelines:
           logs:
             receivers: [filelog]

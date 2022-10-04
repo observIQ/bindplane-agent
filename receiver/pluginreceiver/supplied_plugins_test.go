@@ -22,6 +22,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"go.opentelemetry.io/collector/config"
 )
 
 const pluginDirPath = "../../plugins"
@@ -43,7 +44,10 @@ func TestValidateSuppliedPlugins(t *testing.T) {
 			plugin, err := LoadPlugin(fullFilePath)
 			assert.NoError(t, err, "Failed to load file %s", entryName)
 
-			_, err = plugin.Render(map[string]any{})
+			cfg, err := config.NewComponentIDFromString("test")
+			require.NoError(t, err)
+
+			_, err = plugin.Render(map[string]any{}, cfg)
 			assert.NoError(t, err, "Failed to render config for plugin %s", entryName)
 		})
 	}

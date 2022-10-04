@@ -19,8 +19,12 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"text/template"
 
+	"github.com/mitchellh/mapstructure"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/extension/storage/filestorage"
+	"go.opentelemetry.io/collector/config"
 	"gopkg.in/yaml.v2"
 )
 
@@ -50,7 +54,7 @@ func LoadPlugin(path string) (*Plugin, error) {
 }
 
 // Render renders the plugin's template as a config
-func (p *Plugin) Render(values map[string]any) (*RenderedConfig, error) {
+func (p *Plugin) Render(values map[string]any, id config.ComponentID) (*RenderedConfig, error) {
 	template, err := template.New(p.Title).Parse(p.Template)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create plugin template: %w", err)
@@ -66,6 +70,11 @@ func (p *Plugin) Render(values map[string]any) (*RenderedConfig, error) {
 	renderedCfg, err := NewRenderedConfig(writer.Bytes())
 	if err != nil {
 		return nil, fmt.Errorf("failed to create rendered config: %w", err)
+	}
+
+	err = CheckExtensions(renderedCfg.Extensions, id.String())
+	if err != nil {
+		return nil, fmt.Errorf("failed to create unique storage id: %w", err)
 	}
 
 	return renderedCfg, nil
@@ -89,6 +98,32 @@ func (p *Plugin) ApplyDefaults(values map[string]any) map[string]any {
 	}
 
 	return result
+}
+
+// CheckExtensions checks to see if there exists any filestorage extensions
+// within the plugin config. If one exists, make a unique storage extension
+// directory based on the receiver component ID.
+func CheckExtensions(values map[string]any, id string) error {
+	for i, ext := range values {
+		if i == "file_storage" {
+			var cfg filestorage.Config
+			err := mapstructure.Decode(ext, &cfg)
+			if err != nil {
+				return err
+			}
+
+			name := strings.Replace(id, "/", "_", -1)
+			cfg.Directory = filepath.Join(cfg.Directory, name)
+			values[i] = map[string]any{"directory": cfg.Directory}
+			if _, err := os.Stat(cfg.Directory); os.IsNotExist(err) {
+				err = os.Mkdir(cfg.Directory, 0750)
+				if err != nil {
+					return err
+				}
+			}
+		}
+	}
+	return nil
 }
 
 // CheckParameters checks the supplied values against the defined parameters of the plugin
