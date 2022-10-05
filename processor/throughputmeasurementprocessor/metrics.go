@@ -28,9 +28,9 @@ var (
 	logDataSize     = stats.Int64("log_data_size", "Size of the log package passed to the processor", stats.UnitBytes)
 	metricDataSize  = stats.Int64("metric_data_size", "Size of the metric package passed to the processor", stats.UnitBytes)
 	traceDataSize   = stats.Int64("trace_data_size", "Size of the trace package passed to the processor", stats.UnitBytes)
-	logCount        = stats.Int64("log_count", "Count of the number log records passed to the processor", stats.UnitNone)
-	metricCount     = stats.Int64("metric_count", "Count of the number metric data points passed to the processor", stats.UnitNone)
-	traceCount      = stats.Int64("trace_count", "Count of the number trace spans passed to the processor", stats.UnitNone)
+	logCount        = stats.Int64("log_count", "Count of the number log records passed to the processor", stats. UnitDimensionless)
+	metricCount     = stats.Int64("metric_count", "Count of the number metric data points passed to the processor", stats. UnitDimensionless)
+	traceCount      = stats.Int64("trace_count", "Count of the number trace spans passed to the processor", stats. UnitDimensionless)
 )
 
 func metricViews() []*view.View {
