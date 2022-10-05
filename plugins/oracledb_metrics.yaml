@@ -7,26 +7,25 @@ parameters:
     type: string
     default: localhost:1521
   - name: username
-    description: Username to run metric queries with
+    description: Database user to run metric queries with
     type: string
     required: true
   - name: password
     description: Password for user
     type: string
-    required: true
+  - name: sid
+    description: Site Identifier. One of sid or service_name must be specified both can be.
+    type: string
+  - name: service_name
+    description: OracleDB Service Name. One of sid or service_name must be specified both can be.
+    type: string
+  - name: wallet
+    description: OracleDB Wallet file location (must be URL encoded)
+    type: string
   - name: scrape_interval
     description: Time in between every scrape request
     type: string
     default: 60s
-  - name: sid
-    description: Site Identifier. sid or service_name must be specified both can be.
-    type: string
-  - name: service_name
-    description: OracleDB Service Name. sid or service_name must be specified both can be.
-    type: string
-  - name: wallet
-    description: OracleDB Wallet file location
-    type: string
 template: |
   # construct datasource endpoint based on config
   {{$datasource := "oracle://"}}
