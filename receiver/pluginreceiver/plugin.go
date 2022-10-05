@@ -72,7 +72,7 @@ func (p *Plugin) Render(values map[string]any, id config.ComponentID) (*Rendered
 		return nil, fmt.Errorf("failed to create rendered config: %w", err)
 	}
 
-	err = CheckExtensions(renderedCfg.Extensions, id.String())
+	err = checkExtensions(renderedCfg.Extensions, id.String())
 	if err != nil {
 		return nil, fmt.Errorf("failed to create unique storage id: %w", err)
 	}
@@ -100,27 +100,24 @@ func (p *Plugin) ApplyDefaults(values map[string]any) map[string]any {
 	return result
 }
 
-// CheckExtensions checks to see if there exists any filestorage extensions
-// within the plugin config. If one exists, make a unique storage extension
-// directory based on the receiver component ID.
-func CheckExtensions(values map[string]any, id string) error {
+func checkExtensions(values map[string]any, id string) error {
 	for i, ext := range values {
-		if i == "file_storage" {
+		c, _ := config.NewComponentIDFromString(i)
+		if c.Type() == "file_storage" {
 			var cfg filestorage.Config
 			err := mapstructure.Decode(ext, &cfg)
 			if err != nil {
 				return err
 			}
 
-			name := strings.Replace(id, "/", "_", -1)
+			name := strings.ReplaceAll(id, "/", "_")
 			cfg.Directory = filepath.Join(cfg.Directory, name)
 			values[i] = map[string]any{"directory": cfg.Directory}
-			if _, err := os.Stat(cfg.Directory); os.IsNotExist(err) {
-				err = os.Mkdir(cfg.Directory, 0750)
-				if err != nil {
-					return err
-				}
+			err = os.MkdirAll(cfg.Directory, 0750)
+			if err != nil {
+				return err
 			}
+
 		}
 	}
 	return nil
