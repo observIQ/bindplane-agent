@@ -14,10 +14,10 @@ parameters:
     description: Password for user
     type: string
   - name: sid
-    description: Site Identifier. One of sid or service_name must be specified both can be.
+    description: Site Identifier. One or both of sid or service_name must be specified.
     type: string
   - name: service_name
-    description: OracleDB Service Name. One of sid or service_name must be specified both can be.
+    description: OracleDB Service Name. One or both of sid or service_name must be specified.
     type: string
   - name: wallet
     description: OracleDB Wallet file location (must be URL encoded)
@@ -37,8 +37,8 @@ template: |
   {{ if .service_name }}
     {{ $datasource = printf "%s/%s" $datasource .service_name }}
   {{end}}
-        {{ if and .sid .wallet }}
-    {{ $datasource = printf "%s?SID%%3D%s&WALLET%3D%s" $datasource .sid .wallet}}
+  {{ if and .sid .wallet }}
+    {{ $datasource = printf "%s?SID%%3D%s&WALLET%%3D%s" $datasource .sid .wallet}}
   {{end}}
   {{ if and .sid (not .wallet) }}
     {{ $datasource = printf "%s?SID%%3D%s" $datasource .sid}}
