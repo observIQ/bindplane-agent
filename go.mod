@@ -522,3 +522,6 @@ replace github.com/prometheus/prometheus => github.com/prometheus/prometheus v0.
 
 // The following replaces are temporary fo the 1.9.1 release, should be able to be removed when operations-collector is updated to otel 0.61.0:
 replace github.com/GoogleCloudPlatform/opentelemetry-operations-collector v0.0.3-0.20220916145219-4e0913d7c254 => github.com/observIQ/opentelemetry-operations-collector v0.0.3-0.20220929143032-bac5dd221ff6
+
+// Temporary for hotfix
+replace go.opentelemetry.io/collector v0.61.0 => github.com/observiq/opentelemetry-collector v0.8.1-0.20221006171355-afecf69f7a71

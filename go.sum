@@ -1314,6 +1314,8 @@ github.com/observIQ/opentelemetry-operations-collector v0.0.3-0.20220929143032-b
 github.com/observiq/ctimefmt v1.0.0 h1:r7vTJ+Slkrt9fZ67mkf+mA6zAdR5nGIJRMTzkUyvilk=
 github.com/observiq/ctimefmt v1.0.0/go.mod h1:mxi62//WbSpG/roCO1c6MqZ7zQTvjVtYheqHN3eOjvc=
 github.com/observiq/nanojack v0.0.0-20201106172433-343928847ebc h1:49ewVBwLcy+eYqI4R0ICilCI4dPjddpFXWv3liXzUxM=
+github.com/observiq/opentelemetry-collector v0.8.1-0.20221006171355-afecf69f7a71 h1:VfRjSe/UkCew4ceO/9wEwvCcdexR5w3G64tfHO1M6xk=
+github.com/observiq/opentelemetry-collector v0.8.1-0.20221006171355-afecf69f7a71/go.mod h1:515eomlUIwLEXTBwLAEEtl2HPreJy5xtv//LYMk/SZE=
 github.com/oklog/oklog v0.3.2/go.mod h1:FCV+B7mhrz4o+ueLpx+KqkyXRGMWOYEvfiXtdGtbWGs=
 github.com/oklog/run v1.0.0/go.mod h1:dlhp/R75TPv97u0XWUtDeV/lRKWPKSdTuV0TZvrmrQA=
 github.com/oklog/run v1.1.0/go.mod h1:sVPdnTZT1zYwAJeCMu2Th4T21pA3FPOQRfWjQlk7DVU=
@@ -2097,8 +2099,6 @@ go.opencensus.io v0.23.0/go.mod h1:XItmlyltB5F7CS4xOC1DcqMoFqwtC6OG2xF7mCv7P7E=
 go.opentelemetry.io/collector v0.52.0/go.mod h1:a9GvaOhyc0nVOUzqvdv5mxyWghCSso/WRO2GgRl4I1g=
 go.opentelemetry.io/collector v0.54.0/go.mod h1:FgNzyfb4sAGb5cqusB5znETJ8Pz4OQUBGbOeGIZ2rlQ=
 go.opentelemetry.io/collector v0.57.2/go.mod h1:9TwWyMRhbFNzaaGLtm/6poWNDJw+etvQMS6Fy+8/8Xs=
-go.opentelemetry.io/collector v0.61.0 h1:lvuhmlskup6Z3AfQKZwuRk43jRClB+1FkwjGXRoxhfs=
-go.opentelemetry.io/collector v0.61.0/go.mod h1:515eomlUIwLEXTBwLAEEtl2HPreJy5xtv//LYMk/SZE=
 go.opentelemetry.io/collector/model v0.49.0/go.mod h1:nOYQv9KoFPs6ihJwOi24qB209EOhS9HkwhGj54YiEAw=
 go.opentelemetry.io/collector/pdata v0.49.0/go.mod h1:YwmKuiFhNgtmhRdpi8Q8FAWPa0AwJTCSlssSsAtuRcY=
 go.opentelemetry.io/collector/pdata v0.52.0/go.mod h1:GJUTfTv8mlYpHRjcmHXVbvJr48EW/q/P/HuBvpXAE58=
