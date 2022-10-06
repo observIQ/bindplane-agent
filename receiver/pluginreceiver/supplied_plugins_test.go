@@ -33,6 +33,9 @@ func TestValidateSuppliedPlugins(t *testing.T) {
 	entries, err := os.ReadDir(pluginDirPath)
 	require.NoError(t, err)
 
+	tmp := t.TempDir()
+	t.Setenv("OIQ_OTEL_COLLECTOR_HOME", tmp)
+
 	for _, entry := range entries {
 		entryName := entry.Name()
 		t.Run(fmt.Sprintf("Loading %s", entry.Name()), func(t *testing.T) {
