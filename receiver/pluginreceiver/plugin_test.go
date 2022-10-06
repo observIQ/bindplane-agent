@@ -495,8 +495,8 @@ func TestCheckParameters(t *testing.T) {
 	}
 }
 
-func TestCheckExtensions(t *testing.T) {
-	tmpDir := "/tmp/dir"
+func Test_checkExtensions(t *testing.T) {
+	tmpDir := t.TempDir()
 	testCases := []struct {
 		name        string
 		extenstions map[string]any
