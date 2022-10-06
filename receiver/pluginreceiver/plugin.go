@@ -54,7 +54,7 @@ func LoadPlugin(path string) (*Plugin, error) {
 }
 
 // Render renders the plugin's template as a config
-func (p *Plugin) Render(values map[string]any, id config.ComponentID) (*RenderedConfig, error) {
+func (p *Plugin) Render(values map[string]any, pluginID config.ComponentID) (*RenderedConfig, error) {
 	template, err := template.New(p.Title).Parse(p.Template)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create plugin template: %w", err)
@@ -72,7 +72,7 @@ func (p *Plugin) Render(values map[string]any, id config.ComponentID) (*Rendered
 		return nil, fmt.Errorf("failed to create rendered config: %w", err)
 	}
 
-	err = checkExtensions(renderedCfg.Extensions, id.String())
+	err = checkExtensions(renderedCfg.Extensions, pluginID.String())
 	if err != nil {
 		return nil, fmt.Errorf("failed to create unique storage id: %w", err)
 	}
@@ -100,8 +100,8 @@ func (p *Plugin) ApplyDefaults(values map[string]any) map[string]any {
 	return result
 }
 
-func checkExtensions(values map[string]any, id string) error {
-	for i, ext := range values {
+func checkExtensions(extensions map[string]any, pluginID string) error {
+	for i, ext := range extensions {
 		c, _ := config.NewComponentIDFromString(i)
 		if c.Type() == "file_storage" {
 			var cfg filestorage.Config
@@ -110,9 +110,9 @@ func checkExtensions(values map[string]any, id string) error {
 				return err
 			}
 
-			name := strings.ReplaceAll(id, "/", "_")
+			name := strings.ReplaceAll(pluginID, "/", "_")
 			cfg.Directory = filepath.Join(cfg.Directory, name)
-			values[i] = map[string]any{"directory": cfg.Directory}
+			extensions[i] = map[string]any{"directory": cfg.Directory}
 			err = os.MkdirAll(cfg.Directory, 0750)
 			if err != nil {
 				return err
