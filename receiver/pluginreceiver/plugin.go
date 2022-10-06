@@ -113,7 +113,13 @@ func checkExtensions(extensions map[string]any, pluginID string) error {
 			name := strings.ReplaceAll(pluginID, "/", "_")
 			cfg.Directory = filepath.Join(cfg.Directory, name)
 			extensions[i] = map[string]any{"directory": cfg.Directory}
-			err = os.MkdirAll(cfg.Directory, 0750)
+			err = os.MkdirAll(os.Expand(cfg.Directory, func(s string) string {
+				// Allow escaping with $$
+				if s == "$" {
+					return "$"
+				}
+				return os.Getenv(s)
+			}), 0750)
 			if err != nil {
 				return err
 			}

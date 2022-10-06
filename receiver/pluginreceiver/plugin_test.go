@@ -513,11 +513,6 @@ func Test_checkExtensions(t *testing.T) {
 			extenstions: map[string]any{"file_storage": "hello"},
 			expectedErr: errors.New("'' expected a map, got 'string'"),
 		},
-		{
-			name:        "Invalid Extensions Directory",
-			extenstions: map[string]any{"file_storage": map[string]any{"directory": "/invalid/directory"}},
-			expectedErr: errors.New(""),
-		},
 	}
 
 	for _, tc := range testCases {
