@@ -201,6 +201,7 @@ dockers:
       - "--platform=linux/amd64"
     extra_files:
       - plugins
+      - config/example.yaml
   - goos: linux
     goarch: arm64
     ids:
@@ -220,6 +221,7 @@ dockers:
       - "--platform=linux/arm64"
     extra_files:
       - plugins
+      - config/example.yaml
 
 docker_manifests:
   - name_template: "observiq/observiq-otel-collector:latest"

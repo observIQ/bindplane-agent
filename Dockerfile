@@ -35,6 +35,16 @@ FROM openjdk:8u312-slim-buster as openjdk
 FROM gcr.io/observiq-container-images/stanza-base:v1.2.2
 WORKDIR /
 
+RUN adduser \
+    --disabled-password \
+    --gecos "" \
+    --no-create-home \
+    --uid 10005 \
+    otel
+
+RUN mkdir /etc/otel && chown otel:otel /etc/otel
+ENV OIQ_OTEL_COLLECTOR_HOME=/etc/otel
+
 COPY --from=openjdk /usr/local/openjdk-8 /usr/local/openjdk-8
 ENV JAVA_HOME=/usr/local/openjdk-8
 ENV PATH=$PATH:/usr/local/openjdk-8/bin
@@ -43,18 +53,18 @@ COPY observiq-otel-collector /collector/observiq-otel-collector
 COPY --from=jmxjar /opentelemetry-java-contrib-jmx-metrics.jar /opt/opentelemetry-java-contrib-jmx-metrics.jar
 COPY plugins /etc/otel/plugins
 
-RUN adduser \
-    --disabled-password \
-    --gecos "" \
-    --no-create-home \
-    --uid 10005 \
-    otel
-
 RUN echo "output: stdout\nlevel: info\n" > /etc/otel/logging.yaml
 ENV LOGGING_YAML_PATH=/etc/otel/logging.yaml
 
-USER otel
+# Default config allows the collector to run without an injected config, which is required
+# when connecting to an OpAMP platform.
+COPY config/example.yaml /etc/otel/config.yaml
+RUN chown otel:otel /etc/otel/config.yaml
 
-# User should mount /etc/otel/config.yaml at runtime using docker volumes / k8s configmap
+USER otel
+WORKDIR /etc/otel
+
+# User should mount /etc/otel/config.yaml at runtime using docker volumes / k8s configmap unless
+# connecting to an OpAMP platform.
 ENTRYPOINT [ "/collector/observiq-otel-collector" ]
 CMD ["--config", "/etc/otel/config.yaml"]
