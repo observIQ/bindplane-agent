@@ -647,6 +647,7 @@ template: |
     metricstransform:
       transforms:
         - include: .*
+          match_type: regexp
           action: update
           operations:
             - action: update_label
