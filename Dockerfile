@@ -58,7 +58,7 @@ ENV LOGGING_YAML_PATH=/etc/otel/logging.yaml
 
 # Default config allows the collector to run without an injected config, which is required
 # when connecting to an OpAMP platform.
-RUN echo "receivers:\n  hostmetrics:\n    collection_interval: 1h\n    scrapers:\n      load:\nexporters:\n  logging:\nservice:\n  pipelines:\n    metrics:\n      receivers: [hostmetrics]\n      exporters: [logging]" > /etc/otel/config.yaml
+COPY config/example.yaml /etc/otel/config.yaml
 RUN chown otel:otel /etc/otel/config.yaml
 
 USER otel
