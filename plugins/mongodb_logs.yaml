@@ -19,9 +19,17 @@ parameters:
     description: When enabled will preserve the original log message on the body in a `raw_log` key
     type: bool
     default: false
+  - name: offset_storage_dir
+    description: The directory that the offset storage file will be created
+    type: string
+    default: $OIQ_OTEL_COLLECTOR_HOME/storage
 template: |
+  extensions:
+    file_storage:
+      directory: {{ .offset_storage_dir }}
   receivers:
     filelog:
+      storage: file_storage
       include:
         {{ range $fp := .log_paths }}
         - '{{ $fp }}'
@@ -150,6 +158,7 @@ template: |
         {{ end }}
 
   service:
+    extensions: [file_storage]
     pipelines:
       logs:
         receivers:

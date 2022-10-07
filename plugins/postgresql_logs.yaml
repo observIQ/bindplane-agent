@@ -27,9 +27,17 @@ parameters:
       - beginning
       - end
     default: end
+  - name: offset_storage_dir
+    description: The directory that the offset storage file will be created
+    type: string
+    default: $OIQ_OTEL_COLLECTOR_HOME/storage
 template: |
+  extensions:
+    file_storage:
+      directory: {{ .offset_storage_dir }}
   receivers:
     filelog:
+      storage: file_storage
       include:
         {{ range $fp := .postgresql_log_path }}
         - '{{ $fp }}'
@@ -191,6 +199,7 @@ template: |
           expr: 'body == ""'
 
   service:
+    extensions: [file_storage]
     pipelines:
       logs:
         receivers: [filelog]

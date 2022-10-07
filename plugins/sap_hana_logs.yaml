@@ -26,10 +26,17 @@ parameters:
     description: Timezone to use when parsing the timestamp
     type: timezone
     default: UTC
-
+  - name: offset_storage_dir
+    description: The directory that the offset storage file will be created
+    type: string
+    default: $OIQ_OTEL_COLLECTOR_HOME/storage
 template: |
+  extensions:
+    file_storage:
+      directory:  {{ .offset_storage_dir }}
   receivers:
     filelog:
+      storage: file_storage
       include:
           # {{ range $fp := .file_path }}
              - '{{ $fp }}'
@@ -61,6 +68,7 @@ template: |
                 fatal: f
 
   service:
+    extensions: [file_storage]
     pipelines:
           logs:
             receivers: [filelog]
