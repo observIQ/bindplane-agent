@@ -643,7 +643,38 @@ template: |
                     )
                   )
                   GROUP BY DATABASE_ID, GLOBAL_NAME, INST_ID
+  processors:
+    metricstransform:
+      transforms:
+        - include: .*
+          action: update
+          operations:
+            - action: update_label
+              label: 'DATABASE_ID'
+              new_label: 'database_id'
+            - action: update_label
+              label: 'GLOBAL_NAME'
+              new_label: 'global_name'
+            - action: update_label
+              label: 'INSTANCE_ID'
+              new_label: 'instance_id'
+            - action: update_label
+              label: 'TABLESPACE_NAME'
+              new_label: 'tablespace_name'
+            - action: update_label
+              label: 'CONTENTS'
+              new_label: 'contents'
+            - action: update_label
+              label: 'STATUS'
+              new_label: 'status'
+            - action: update_label
+              label: 'PROGRAM'
+              new_label: 'program'
+            - action: update_label
+              label: 'WAIT_CLASS'
+              new_label: 'wait_class'
   service:
     pipelines:
       metrics/oracledb:
         receivers: [sqlquery/oracledb]
+        processors: [metricstransform]
