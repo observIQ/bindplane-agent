@@ -90,10 +90,11 @@ template: |
         parse_to: body
         delimiter: " "
         ignore_quotes: true
-        severity: 
-          parse_from: 'body["sc-status"]'
-          if: 'body["sc-status"] != nil'
-          mapping:
+
+      - type: severity_parser
+        if: 'body["sc-status"] != nil'
+        parse_from: 'body["sc-status"]'
+        mapping:
             info: 2xx
             info2: 3xx
             warn: 4xx
