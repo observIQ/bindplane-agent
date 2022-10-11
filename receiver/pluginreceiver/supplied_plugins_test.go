@@ -90,6 +90,10 @@ func TestValidateSuppliedPlugins(t *testing.T) {
 					if runtime.GOOS != "linux" {
 						return
 					}
+				case syslogreceiver.NewFactory().Type():
+					if runtime.GOOS == "windows" {
+						return
+					}
 				}
 			}
 
@@ -144,6 +148,7 @@ func loadUsedPluginFactories(t *testing.T, host *MockHost) {
 	host.On("GetFactory", component.KindReceiver, prometheusreceiver.NewFactory().Type()).Return(prometheusreceiver.NewFactory())
 	host.On("GetFactory", component.KindReceiver, sqlqueryreceiver.NewFactory().Type()).Return(sqlqueryreceiver.NewFactory())
 	host.On("GetFactory", component.KindReceiver, journaldreceiver.NewFactory().Type()).Return(journaldreceiver.NewFactory())
+	host.On("GetFactory", component.KindReceiver, windowseventlogreceiver.NewFactory().Type()).Return(windowseventlogreceiver.NewFactory())
 
 	// Extensions
 	host.On("GetFactory", component.KindExtension, filestorage.NewFactory().Type()).Return(filestorage.NewFactory())
