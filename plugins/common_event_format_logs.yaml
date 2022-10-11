@@ -50,7 +50,6 @@ template: |
         - type: csv_parser
           parse_from: attributes.cef_headers
           header: 'version|device_vendor|device_product|device_version|signature_id|name|severity|extensions'
-          header_delimiter: "|"
           delimiter: "|"
 
         - type: regex_parser
