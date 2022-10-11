@@ -35,6 +35,21 @@ parameters:
       - beginning
       - end
     default: end
+  - name: runtime_log_driver
+    description: |
+      The container runtime's log driver used to write container logs to disk.
+      Valid options include `auto`, `docker-json-file` and `containerd-cri`.
+      When set to `auto`, the format will be detected using regex. Format detection
+      is convenient but comes with the cost of performing a regex match against every
+      log entry read by the filelog receiver.
+    type: "[]string"
+    supported:
+      - auto
+      # https://docs.docker.com/config/containers/logging/json-file/
+      - docker-json-file
+      # This format is not well documented: https://github.com/kubernetes/kubernetes/blob/master/pkg/kubelet/kuberuntime/logs/logs.go#L125-L169
+      - containerd-cri
+
 
 template: |
   receivers:
@@ -53,26 +68,29 @@ template: |
           {{end}}
         poll_interval: 500ms
         operators:
-          # Support docker and containerd runtimes, which have different
-          # logging formats.
+          {{ if eq .runtime_log_driver "auto" }}
           - type: router
             routes:
               - expr: 'body matches "^[^{]"'
-                output: containerd_parser
-            default: docker_parser
+                output: containerd_cri_parser
+            default: docker_json_file_parser
+          {{ end }}
 
+          {{ if or (eq .runtime_log_driver "docker-json-file") (eq eq .runtime_log_driver "auto") }}
           # The raw message looks like this:
           # {"log":"I0618 14:30:29.641678       1 logs.go:59] http: TLS handshake error from 192.168.49.2:56222: EOF\n","stream":"stderr","time":"2022-06-18T14:30:29.641732743Z"}
           - type: json_parser
-            id: docker_parser
+            id: docker_json_file_parser
             timestamp:
               parse_from: attributes.time
               layout: '%Y-%m-%dT%H:%M:%S.%sZ'
             output: log-to-body
+          {{ end }}
 
+          {{ if or (eq .runtime_log_driver "containerd-cri") (eq eq .runtime_log_driver "auto") }}
           # The raw message looks like this:
           # 2022-06-18T16:52:59.639114537Z stdout F {"message":"registered Stackdriver tracing","severity":"info","timestamp":"2022-06-18T16:52:59.639034532Z"}
-          - id: containerd_parser
+          - id: containerd_cri_parser
             type: regex_parser
             regex: '^(?P<time>[^\s]+) (?P<stream>\w+) (?P<partial>\w)?(?P<log>.*)'
           - type: recombine
@@ -101,6 +119,7 @@ template: |
             parse_from: attributes.time
             layout: '%Y-%m-%dT%H:%M:%S.%sZ'
             output: log-to-body
+          {{ end }}
 
           # The raw body does not contain anything useful considering timestamp has been promotoed to
           # the log entries timestamp, therefore we move attributes.log (the actual container log message)
