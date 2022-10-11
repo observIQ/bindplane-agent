@@ -49,6 +49,7 @@ parameters:
       - docker-json-file
       # This format is not well documented: https://github.com/kubernetes/kubernetes/blob/master/pkg/kubelet/kuberuntime/logs/logs.go#L125-L169
       - containerd-cri
+    default: auto
 
 
 template: |
