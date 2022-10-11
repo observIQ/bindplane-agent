@@ -1,4 +1,4 @@
-version: 0.3.0
+version: 0.3.1
 title: IIS
 description: Log parser for IIS
 parameters:
@@ -90,10 +90,11 @@ template: |
         parse_to: body
         delimiter: " "
         ignore_quotes: true
-        severity: 
-          parse_from: 'body["sc-status"]'
-          if: 'body["sc-status"] != nil'
-          mapping:
+
+      - type: severity_parser
+        if: 'body["sc-status"] != nil'
+        parse_from: 'body["sc-status"]'
+        mapping:
             info: 2xx
             info2: 3xx
             warn: 4xx
