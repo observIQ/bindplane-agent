@@ -76,7 +76,7 @@ template: |
             default: docker_json_file_parser
           {{ end }}
 
-          {{ if or (eq .runtime_log_driver "docker-json-file") (eq eq .runtime_log_driver "auto") }}
+          {{ if or (eq .runtime_log_driver "docker-json-file") (eq .runtime_log_driver "auto") }}
           # The raw message looks like this:
           # {"log":"I0618 14:30:29.641678       1 logs.go:59] http: TLS handshake error from 192.168.49.2:56222: EOF\n","stream":"stderr","time":"2022-06-18T14:30:29.641732743Z"}
           - type: json_parser
@@ -87,7 +87,7 @@ template: |
             output: log-to-body
           {{ end }}
 
-          {{ if or (eq .runtime_log_driver "containerd-cri") (eq eq .runtime_log_driver "auto") }}
+          {{ if or (eq .runtime_log_driver "containerd-cri") (eq .runtime_log_driver "auto") }}
           # The raw message looks like this:
           # 2022-06-18T16:52:59.639114537Z stdout F {"message":"registered Stackdriver tracing","severity":"info","timestamp":"2022-06-18T16:52:59.639034532Z"}
           - id: containerd_cri_parser
