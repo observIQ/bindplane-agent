@@ -57,7 +57,7 @@ template: |
           # logging formats.
           - type: router
             routes:
-              - expr: 'body matches "^[^\\s]+ \\w+ .*"'
+              - expr: 'body matches "^[^{]"'
                 output: containerd_parser
             default: docker_parser
 
