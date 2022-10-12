@@ -1,4 +1,4 @@
-version: 0.0.1
+version: 0.0.2
 title: Apache Hadoop
 description: Log parser for Apache Hadoop
 parameters:
@@ -76,7 +76,7 @@ template: |
               output: regex_parser  
             - attributes:
                 log_type: hadoop
-              expr: true
+              expr: 'true'
               output: regex_parser          
 
         - type: regex_parser
