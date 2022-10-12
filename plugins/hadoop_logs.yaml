@@ -76,7 +76,7 @@ template: |
               output: regex_parser  
             - attributes:
                 log_type: hadoop
-              expr: true
+              expr: 'true'
               output: regex_parser          
 
         - type: regex_parser
