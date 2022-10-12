@@ -1,0 +1,11 @@
+# {{ .Title }} Plugin
+
+{{ .Description }}
+
+## Configuration Parameters
+
+| Name | Description| Type | Required | Default | Supported Values |
+|:--- |:--- |:--- |:--- |:--- |:--- |
+{{ range .Parameters }}
+| {{ .Name }} | {{ .Description }} | {{ .Type }} | {{ .Required }} | {{ .Default }} | {{ range $val := .Supported }} {{ $val }}, {{end}} |
+{{end}}
