@@ -17,8 +17,8 @@ require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/udplogreceiver v0.62.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/windowseventlogreceiver v0.62.0
 	github.com/stretchr/testify v1.8.0
-	go.opentelemetry.io/collector v0.62.0
-	go.opentelemetry.io/collector/pdata v0.62.0
+	go.opentelemetry.io/collector v0.62.1
+	go.opentelemetry.io/collector/pdata v0.62.1
 	go.uber.org/zap v1.23.0
 	gopkg.in/yaml.v2 v2.4.0
 )
@@ -180,7 +180,7 @@ require (
 	github.com/yusufpapurcu/wmi v1.2.2 // indirect
 	go.etcd.io/bbolt v1.3.6 // indirect
 	go.opencensus.io v0.23.0 // indirect
-	go.opentelemetry.io/collector/semconv v0.62.0 // indirect
+	go.opentelemetry.io/collector/semconv v0.62.1 // indirect
 	go.opentelemetry.io/contrib/propagators/b3 v1.11.0 // indirect
 	go.opentelemetry.io/otel v1.11.0 // indirect
 	go.opentelemetry.io/otel/exporters/prometheus v0.32.3 // indirect
@@ -221,6 +221,3 @@ require (
 	sigs.k8s.io/structured-merge-diff/v4 v4.2.3 // indirect
 	sigs.k8s.io/yaml v1.3.0 // indirect
 )
-
-// Temporary until OTEL collector fixes no newline bug in the resolver. Should be able to remove this by v0.63.0
-replace go.opentelemetry.io/collector v0.62.0 => github.com/observiq/opentelemetry-collector v0.8.1-0.20221013193438-66cc03c6a11c
