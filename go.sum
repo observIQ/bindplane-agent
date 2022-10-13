@@ -1578,6 +1578,8 @@ github.com/open-telemetry/opentelemetry-collector-contrib/receiver/aerospikerece
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/aerospikereceiver v0.62.0/go.mod h1:BgrN751a112ZnKAQAiLfF7q7FWRAsSVRRXKGdmKH9rw=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/apachereceiver v0.62.0 h1:HHQ5OdoY5X6/FqaWS2TxbstyaQ3dMrxujaGIl149kis=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/apachereceiver v0.62.0/go.mod h1:GZ7RUzj4ZAYrcokrSR3rbV8vFvl/dkaHepqcJPges8M=
+github.com/open-telemetry/opentelemetry-collector-contrib/receiver/awscloudwatchreceiver v0.62.0 h1:FmCR9e6PTvtW6+uSA4xmpxY700kY+YcDBnQavwGkt0E=
+github.com/open-telemetry/opentelemetry-collector-contrib/receiver/awscloudwatchreceiver v0.62.0/go.mod h1:ze2FjcawwKcNqZgcQYWzTE9xwDYxkT3q2E+gqHulysw=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/awscontainerinsightreceiver v0.62.0 h1:gDFurRY3LQ5Nng8tBo4p9KLWkngn/+hCAgWFt0/6Hl4=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/awscontainerinsightreceiver v0.62.0/go.mod h1:iNoYLlrvzZY4Hu8CTbJEkkCZoFEMdWcU/j39Cucai7s=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/awsecscontainermetricsreceiver v0.62.0 h1:pkjWmn9UCSiHOjAffY2OPYbsi1fuPJLfaB/EXRNRMHM=

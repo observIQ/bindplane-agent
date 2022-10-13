@@ -20,6 +20,7 @@ import (
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/activedirectorydsreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/aerospikereceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/apachereceiver"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/awscloudwatchreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/awscontainerinsightreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/awsecscontainermetricsreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/awsfirehosereceiver"
@@ -84,6 +85,7 @@ var defaultReceivers = []component.ReceiverFactory{
 	activedirectorydsreceiver.NewFactory(),
 	aerospikereceiver.NewFactory(),
 	apachereceiver.NewFactory(),
+	awscloudwatchreceiver.NewFactory(),
 	awscontainerinsightreceiver.NewFactory(),
 	awsecscontainermetricsreceiver.NewFactory(),
 	awsfirehosereceiver.NewFactory(),
