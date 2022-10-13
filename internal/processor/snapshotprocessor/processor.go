@@ -48,7 +48,9 @@ func newSnapshotProcessor(logger *zap.Logger, cfg *Config, processorID string) *
 
 func (sp *snapshotProcessor) processTraces(_ context.Context, td ptrace.Traces) (ptrace.Traces, error) {
 	if sp.enabled {
-		sp.snapShotter.SaveTraces(sp.processorID, td.Clone())
+		newTraces := ptrace.NewTraces()
+		td.CopyTo(newTraces)
+		sp.snapShotter.SaveTraces(sp.processorID, newTraces)
 	}
 
 	return td, nil
@@ -56,7 +58,9 @@ func (sp *snapshotProcessor) processTraces(_ context.Context, td ptrace.Traces) 
 
 func (sp *snapshotProcessor) processLogs(_ context.Context, ld plog.Logs) (plog.Logs, error) {
 	if sp.enabled {
-		sp.snapShotter.SaveLogs(sp.processorID, ld.Clone())
+		newLogs := plog.NewLogs()
+		ld.CopyTo(newLogs)
+		sp.snapShotter.SaveLogs(sp.processorID, newLogs)
 	}
 
 	return ld, nil
@@ -64,7 +68,9 @@ func (sp *snapshotProcessor) processLogs(_ context.Context, ld plog.Logs) (plog.
 
 func (sp *snapshotProcessor) processMetrics(_ context.Context, md pmetric.Metrics) (pmetric.Metrics, error) {
 	if sp.enabled {
-		sp.snapShotter.SaveMetrics(sp.processorID, md.Clone())
+		newMetrics := pmetric.NewMetrics()
+		md.CopyTo(newMetrics)
+		sp.snapShotter.SaveMetrics(sp.processorID, newMetrics)
 	}
 
 	return md, nil
