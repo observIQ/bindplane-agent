@@ -181,13 +181,13 @@ require (
 	go.etcd.io/bbolt v1.3.6 // indirect
 	go.opencensus.io v0.23.0 // indirect
 	go.opentelemetry.io/collector/semconv v0.62.0 // indirect
-	go.opentelemetry.io/contrib/propagators/b3 v1.10.0 // indirect
-	go.opentelemetry.io/otel v1.10.0 // indirect
-	go.opentelemetry.io/otel/exporters/prometheus v0.32.1 // indirect
-	go.opentelemetry.io/otel/metric v0.32.1 // indirect
-	go.opentelemetry.io/otel/sdk v1.10.0 // indirect
-	go.opentelemetry.io/otel/sdk/metric v0.32.1 // indirect
-	go.opentelemetry.io/otel/trace v1.10.0 // indirect
+	go.opentelemetry.io/contrib/propagators/b3 v1.11.0 // indirect
+	go.opentelemetry.io/otel v1.11.0 // indirect
+	go.opentelemetry.io/otel/exporters/prometheus v0.32.3 // indirect
+	go.opentelemetry.io/otel/metric v0.32.3 // indirect
+	go.opentelemetry.io/otel/sdk v1.11.0 // indirect
+	go.opentelemetry.io/otel/sdk/metric v0.32.3 // indirect
+	go.opentelemetry.io/otel/trace v1.11.0 // indirect
 	go.uber.org/atomic v1.10.0 // indirect
 	go.uber.org/goleak v1.2.0 // indirect
 	go.uber.org/multierr v1.8.0 // indirect
@@ -221,3 +221,6 @@ require (
 	sigs.k8s.io/structured-merge-diff/v4 v4.2.3 // indirect
 	sigs.k8s.io/yaml v1.3.0 // indirect
 )
+
+// Temporary until OTEL collector fixes no newline bug in the resolver. Should be able to remove this by v0.63.0
+replace go.opentelemetry.io/collector v0.62.0 => github.com/observiq/opentelemetry-collector v0.8.1-0.20221013193438-66cc03c6a11c
