@@ -189,11 +189,6 @@ release-prep:
 	@jq ".files[] | select(.service != null)" windows/wix.json >> release_deps/windows_service.json
 	@cp service/observiq-otel-collector.service release_deps/observiq-otel-collector.service
 
-# Build, sign, and release
-.PHONY: release
-release:
-	goreleaser release --parallelism 4 --rm-dist
-
 # Build and sign, skip release and ignore dirty git tree
 .PHONY: release-test
 release-test:
