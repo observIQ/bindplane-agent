@@ -1,0 +1,55 @@
+// Copyright  observIQ, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package logsummaryprocessor
+
+import (
+	"context"
+	"fmt"
+
+	"go.opentelemetry.io/collector/component"
+	"go.opentelemetry.io/collector/config"
+	"go.opentelemetry.io/collector/consumer"
+)
+
+const (
+	typeStr   = "logsummary"
+	stability = component.StabilityLevelStable
+)
+
+// NewFactory returns a new factory for the resourceattributetransposer processor.
+func NewFactory() component.ProcessorFactory {
+	return component.NewProcessorFactory(
+		typeStr,
+		createDefaultConfig,
+		component.WithLogsProcessor(createLogsProcessor, stability),
+	)
+}
+
+// createDefaultConfig returns the default config for the resourceattributetransposer processor.
+func createDefaultConfig() config.Processor {
+	return &Config{
+		ProcessorSettings: config.NewProcessorSettings(config.NewComponentID(typeStr)),
+	}
+}
+
+// createLogsProcessor creates a logs processor.
+func createLogsProcessor(_ context.Context, params component.ProcessorCreateSettings, cfg config.Processor, _ consumer.Logs) (component.LogsProcessor, error) {
+	processorCfg, ok := cfg.(*Config)
+	if !ok {
+		return nil, fmt.Errorf("config was not of correct type for the processor: %+v", cfg)
+	}
+
+	return newProcessor(params.Logger, processorCfg), nil
+}
