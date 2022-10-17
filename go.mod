@@ -362,6 +362,7 @@ require (
 	github.com/nginxinc/nginx-prometheus-exporter v0.8.1-0.20201110005315-f5a5f8086c19 // indirect
 	github.com/nwaples/rardecode v1.1.0 // indirect
 	github.com/observiq/ctimefmt v1.0.0 // indirect
+	github.com/observiq/observiq-otel-collector/processor/logsummaryprocessor v0.0.0-00010101000000-000000000000 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlecloudexporter v0.62.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/internal/aws/awsutil v0.62.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/internal/aws/containerinsight v0.62.0 // indirect
@@ -530,6 +531,8 @@ replace github.com/observiq/observiq-otel-collector/processor/resourceattributet
 replace github.com/observiq/observiq-otel-collector/receiver/pluginreceiver => ./receiver/pluginreceiver
 
 replace github.com/observiq/observiq-otel-collector/exporter/googlecloudexporter => ./exporter/googlecloudexporter
+
+replace github.com/observiq/observiq-otel-collector/processor/logsummaryprocessor => ./processor/logsummaryprocessor
 
 replace github.com/observiq/observiq-otel-collector/packagestate => ./packagestate
 

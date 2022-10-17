@@ -28,10 +28,9 @@ import (
 )
 
 type processor struct {
-	interval time.Duration
-	cancel   context.CancelFunc
-	summary  *summary
-	mux      sync.Mutex
+	cancel  context.CancelFunc
+	summary *summary
+	mux     sync.Mutex
 
 	logger   *zap.Logger
 	config   *Config
@@ -81,7 +80,7 @@ func (p *processor) Shutdown(_ context.Context) error {
 
 // handleMetrics handles sending metrics on the configured interval.
 func (p *processor) handleMetrics(ctx context.Context) {
-	ticker := time.NewTicker(p.interval)
+	ticker := time.NewTicker(p.config.Interval)
 	defer ticker.Stop()
 
 	for {

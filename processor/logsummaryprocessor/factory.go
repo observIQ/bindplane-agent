@@ -17,6 +17,7 @@ package logsummaryprocessor
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/config"
@@ -41,6 +42,7 @@ func NewFactory() component.ProcessorFactory {
 func createDefaultConfig() config.Processor {
 	return &Config{
 		ProcessorSettings: config.NewProcessorSettings(config.NewComponentID(typeStr)),
+		Interval:          time.Minute,
 	}
 }
 
