@@ -1578,8 +1578,8 @@ github.com/open-telemetry/opentelemetry-collector-contrib/receiver/aerospikerece
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/aerospikereceiver v0.62.0/go.mod h1:BgrN751a112ZnKAQAiLfF7q7FWRAsSVRRXKGdmKH9rw=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/apachereceiver v0.62.0 h1:HHQ5OdoY5X6/FqaWS2TxbstyaQ3dMrxujaGIl149kis=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/apachereceiver v0.62.0/go.mod h1:GZ7RUzj4ZAYrcokrSR3rbV8vFvl/dkaHepqcJPges8M=
-github.com/open-telemetry/opentelemetry-collector-contrib/receiver/awscloudwatchreceiver v0.62.0 h1:FmCR9e6PTvtW6+uSA4xmpxY700kY+YcDBnQavwGkt0E=
-github.com/open-telemetry/opentelemetry-collector-contrib/receiver/awscloudwatchreceiver v0.62.0/go.mod h1:ze2FjcawwKcNqZgcQYWzTE9xwDYxkT3q2E+gqHulysw=
+github.com/open-telemetry/opentelemetry-collector-contrib/receiver/awscloudwatchreceiver v0.62.1-0.20221018144113-e2f8e76098a2 h1:J8ub5KV+Lo695KRyf7A7fKf+qjs2OZD8Hii1XPBFID4=
+github.com/open-telemetry/opentelemetry-collector-contrib/receiver/awscloudwatchreceiver v0.62.1-0.20221018144113-e2f8e76098a2/go.mod h1:MtxykwF6JlbgWG7IDBwPR1B3XOIWNVExZg1dDp95sa4=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/awscontainerinsightreceiver v0.62.0 h1:gDFurRY3LQ5Nng8tBo4p9KLWkngn/+hCAgWFt0/6Hl4=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/awscontainerinsightreceiver v0.62.0/go.mod h1:iNoYLlrvzZY4Hu8CTbJEkkCZoFEMdWcU/j39Cucai7s=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/awsecscontainermetricsreceiver v0.62.0 h1:pkjWmn9UCSiHOjAffY2OPYbsi1fuPJLfaB/EXRNRMHM=
@@ -2955,8 +2955,8 @@ google.golang.org/grpc v1.46.0/go.mod h1:vN9eftEi1UMyUsIF80+uQXhHjbXYbm0uXoFCACu
 google.golang.org/grpc v1.46.2/go.mod h1:vN9eftEi1UMyUsIF80+uQXhHjbXYbm0uXoFCACuMGWk=
 google.golang.org/grpc v1.47.0/go.mod h1:vN9eftEi1UMyUsIF80+uQXhHjbXYbm0uXoFCACuMGWk=
 google.golang.org/grpc v1.48.0/go.mod h1:vN9eftEi1UMyUsIF80+uQXhHjbXYbm0uXoFCACuMGWk=
-google.golang.org/grpc v1.50.0 h1:fPVVDxY9w++VjTZsYvXWqEf9Rqar/e+9zYfxKK+W+YU=
-google.golang.org/grpc v1.50.0/go.mod h1:ZgQEeidpAuNRZ8iRrlBKXZQP1ghovWIVhdJRyCDK+GI=
+google.golang.org/grpc v1.50.1 h1:DS/BukOZWp8s6p4Dt/tOaJaTQyPyOoCcrjroHuCeLzY=
+google.golang.org/grpc v1.50.1/go.mod h1:ZgQEeidpAuNRZ8iRrlBKXZQP1ghovWIVhdJRyCDK+GI=
 google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.1.0/go.mod h1:6Kw0yEErY5E/yWrBtf03jp27GLLJujG4z/JK95pnjjw=
 google.golang.org/protobuf v0.0.0-20200109180630-ec00e32a8dfd/go.mod h1:DFci5gLYBciE7Vtevhsrf46CRTquxDuWsQurQQe4oz8=
 google.golang.org/protobuf v0.0.0-20200221191635-4d8936d0db64/go.mod h1:kwYJMbMJ01Woi6D6+Kah6886xMZcty6N08ah7+eCXa0=

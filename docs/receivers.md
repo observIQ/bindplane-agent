@@ -10,7 +10,7 @@ Below is a list of supported receivers with links to their documentation pages.
 | Apache Flink Metrics Receiver               | [flinkmetricsreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.62.0/receiver/flinkmetricsreceiver/README.md) |
 | Apache Web Server Receiver                  | [apachereceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.62.0/receiver/apachereceiver/README.md) |
 | Apache ZooKeeper Receiver                   | [zookeeperreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.62.0/receiver/zookeeperreceiver/README.md) |
-| AWS CloudWatch Receiver                     | [awscloudwatchreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.62.0/receiver/awscloudwatchreceiver/README.md) |
+| AWS CloudWatch Receiver                     | [awscloudwatchreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/e2f8e76098a2e48b0181dc954bea21176c38368f/receiver/awscloudwatchreceiver/README.md) |
 | AWS CloudWatch Container Insights Receiver  | [awscontainerinsightreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.62.0/receiver/awscontainerinsightreceiver/README.md) |
 | AWS ECS Container Metrics Receiver          | [awsecscontainermetricsreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.62.0/receiver/awsecscontainermetricsreceiver/README.md) |
 | AWS Kinesis Data Firehose Receiver          | [awsfirehosereceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.62.0/receiver/awsfirehosereceiver/README.md) |
