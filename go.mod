@@ -308,7 +308,7 @@ require (
 	github.com/hetznercloud/hcloud-go v1.35.2 // indirect
 	github.com/iancoleman/strcase v0.2.0 // indirect
 	github.com/imdario/mergo v0.3.12 // indirect
-	github.com/inconshreveable/mousetrap v1.0.0 // indirect
+	github.com/inconshreveable/mousetrap v1.0.1 // indirect
 	github.com/influxdata/go-syslog/v3 v3.0.1-0.20210608084020-ac565dc76ba6 // indirect
 	github.com/influxdata/influxdb-observability/common v0.2.28 // indirect
 	github.com/influxdata/influxdb-observability/influx2otel v0.2.28 // indirect
@@ -440,7 +440,7 @@ require (
 	github.com/soheilhy/cmux v0.1.5 // indirect
 	github.com/spf13/afero v1.8.2 // indirect
 	github.com/spf13/cast v1.5.0 // indirect
-	github.com/spf13/cobra v1.5.0 // indirect
+	github.com/spf13/cobra v1.6.0 // indirect
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/viper v1.13.0 // indirect
 	github.com/stretchr/objx v0.4.0 // indirect
@@ -479,10 +479,10 @@ require (
 	go.mongodb.org/mongo-driver v1.10.3 // indirect
 	go.opencensus.io v0.23.0 // indirect
 	go.opentelemetry.io/collector/semconv v0.62.1 // indirect
-	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.36.1 // indirect
-	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.36.1 // indirect
+	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.36.3 // indirect
+	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.36.3 // indirect
 	go.opentelemetry.io/contrib/propagators/b3 v1.11.0 // indirect
-	go.opentelemetry.io/contrib/zpages v0.36.1 // indirect
+	go.opentelemetry.io/contrib/zpages v0.36.3 // indirect
 	go.opentelemetry.io/otel v1.11.0 // indirect
 	go.opentelemetry.io/otel/exporters/prometheus v0.32.3 // indirect
 	go.opentelemetry.io/otel/metric v0.32.3 // indirect
@@ -538,3 +538,5 @@ replace github.com/observiq/observiq-otel-collector/processor/throughputmeasurem
 // some dependencies attempt to bring something like v1.8.2-0.20220303173753-edfe657b5405, which is older than v0.38.0
 // at the time of this inclusion, v0.38.0 was the latest version available (also tagged as v2.38.0)
 replace github.com/prometheus/prometheus => github.com/prometheus/prometheus v0.38.0
+
+replace go.opentelemetry.io/collector v0.62.1 => github.com/observIQ/opentelemetry-collector v0.8.1-0.20221019003716-b69664f75273
