@@ -6,8 +6,8 @@ require (
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector v0.34.1
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlecloudexporter v0.62.0
 	github.com/stretchr/testify v1.8.0
-	go.opentelemetry.io/collector v0.62.0
-	go.opentelemetry.io/collector/pdata v0.62.0
+	go.opentelemetry.io/collector v0.62.1
+	go.opentelemetry.io/collector/pdata v0.62.1
 	go.uber.org/multierr v1.8.0
 )
 
@@ -66,6 +66,6 @@ require (
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.11.3 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/prometheus/prometheus v0.38.0 // indirect
-	go.opentelemetry.io/collector/semconv v0.62.0 // indirect
+	go.opentelemetry.io/collector/semconv v0.62.1 // indirect
 	golang.org/x/sys v0.0.0-20220919091848-fb04ddd9f9c8 // indirect
 )
