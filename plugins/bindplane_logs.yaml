@@ -1,6 +1,6 @@
 version: 0.1.0
 title: BindPlane OP Logs
-description: Log parser for BindPlane OP observability pipeline.
+description: Log parser for BindPlane Observability Pipeline.
 parameters:
   - name: log_paths
     type: "[]string"
