@@ -34,7 +34,7 @@ func TestConfigValidate(t *testing.T) {
 			expectedErr: nil,
 		},
 		{
-			desc: "Bad sampling ratio",
+			desc: "Bad drop ratio",
 			cfg: Config{
 				DropRatio: 2.0,
 			},

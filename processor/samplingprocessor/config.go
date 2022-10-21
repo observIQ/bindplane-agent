@@ -33,7 +33,7 @@ type Config struct {
 
 // Validate validates the processor configuration
 func (cfg Config) Validate() error {
-	// Validate sampling ration
+	// Validate drop ration
 	if cfg.DropRatio < 0.0 || cfg.DropRatio > 1.0 {
 		return errInvalidDropRatio
 	}

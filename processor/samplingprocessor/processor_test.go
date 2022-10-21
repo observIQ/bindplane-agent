@@ -68,29 +68,29 @@ func Test_processLogs(t *testing.T) {
 	ld.ResourceLogs().AppendEmpty().ScopeLogs().AppendEmpty().LogRecords().AppendEmpty()
 
 	testCases := []struct {
-		desc          string
-		samplingRatio float64
-		input         plog.Logs
-		expected      plog.Logs
+		desc      string
+		dropRatio float64
+		input     plog.Logs
+		expected  plog.Logs
 	}{
 		{
-			desc:          "Always Drop",
-			samplingRatio: 1.0,
-			input:         ld,
-			expected:      plog.NewLogs(),
+			desc:      "Always Drop",
+			dropRatio: 1.0,
+			input:     ld,
+			expected:  plog.NewLogs(),
 		},
 		{
-			desc:          "Never Drop",
-			samplingRatio: 0.0,
-			input:         ld,
-			expected:      ld,
+			desc:      "Never Drop",
+			dropRatio: 0.0,
+			input:     ld,
+			expected:  ld,
 		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.desc, func(t *testing.T) {
 			cfg := &Config{
-				DropRatio: tc.samplingRatio,
+				DropRatio: tc.dropRatio,
 			}
 
 			processor := newThroughputMeasurementProcessor(zap.NewNop(), cfg)
@@ -108,29 +108,29 @@ func Test_processMetrics(t *testing.T) {
 	metric.Gauge().DataPoints().AppendEmpty()
 
 	testCases := []struct {
-		desc          string
-		samplingRatio float64
-		input         pmetric.Metrics
-		expected      pmetric.Metrics
+		desc      string
+		dropRatio float64
+		input     pmetric.Metrics
+		expected  pmetric.Metrics
 	}{
 		{
-			desc:          "Always Drop",
-			samplingRatio: 1.0,
-			input:         md,
-			expected:      pmetric.NewMetrics(),
+			desc:      "Always Drop",
+			dropRatio: 1.0,
+			input:     md,
+			expected:  pmetric.NewMetrics(),
 		},
 		{
-			desc:          "Never Drop",
-			samplingRatio: 0.0,
-			input:         md,
-			expected:      md,
+			desc:      "Never Drop",
+			dropRatio: 0.0,
+			input:     md,
+			expected:  md,
 		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.desc, func(t *testing.T) {
 			cfg := &Config{
-				DropRatio: tc.samplingRatio,
+				DropRatio: tc.dropRatio,
 			}
 
 			processor := newThroughputMeasurementProcessor(zap.NewNop(), cfg)

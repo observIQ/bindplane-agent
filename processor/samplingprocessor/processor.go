@@ -36,7 +36,7 @@ func newThroughputMeasurementProcessor(logger *zap.Logger, cfg *Config) *through
 	}
 }
 
-func (tmp *throughputMeasurementProcessor) processTraces(ctx context.Context, td ptrace.Traces) (ptrace.Traces, error) {
+func (tmp *throughputMeasurementProcessor) processTraces(_ context.Context, td ptrace.Traces) (ptrace.Traces, error) {
 	//#nosec G404 -- randomly generated number is not used for security purposes. It's ok if it's weak
 	if rand.Float64() <= tmp.dropCutOffRatio {
 		return ptrace.NewTraces(), nil
@@ -45,7 +45,7 @@ func (tmp *throughputMeasurementProcessor) processTraces(ctx context.Context, td
 	return td, nil
 }
 
-func (tmp *throughputMeasurementProcessor) processLogs(ctx context.Context, ld plog.Logs) (plog.Logs, error) {
+func (tmp *throughputMeasurementProcessor) processLogs(_ context.Context, ld plog.Logs) (plog.Logs, error) {
 	//#nosec G404 -- randomly generated number is not used for security purposes. It's ok if it's weak
 	if rand.Float64() <= tmp.dropCutOffRatio {
 		return plog.NewLogs(), nil
@@ -54,7 +54,7 @@ func (tmp *throughputMeasurementProcessor) processLogs(ctx context.Context, ld p
 	return ld, nil
 }
 
-func (tmp *throughputMeasurementProcessor) processMetrics(ctx context.Context, md pmetric.Metrics) (pmetric.Metrics, error) {
+func (tmp *throughputMeasurementProcessor) processMetrics(_ context.Context, md pmetric.Metrics) (pmetric.Metrics, error) {
 	//#nosec G404 -- randomly generated number is not used for security purposes. It's ok if it's weak
 	if rand.Float64() <= tmp.dropCutOffRatio {
 		return pmetric.NewMetrics(), nil
