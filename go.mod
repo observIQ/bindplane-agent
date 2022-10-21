@@ -9,6 +9,7 @@ require (
 	github.com/observiq/observiq-otel-collector/exporter/googlecloudexporter v1.10.1
 	github.com/observiq/observiq-otel-collector/packagestate v1.10.1
 	github.com/observiq/observiq-otel-collector/processor/resourceattributetransposerprocessor v1.10.1
+	github.com/observiq/observiq-otel-collector/processor/samplingprocessor v1.10.1
 	github.com/observiq/observiq-otel-collector/processor/throughputmeasurementprocessor v1.10.1
 	github.com/observiq/observiq-otel-collector/receiver/pluginreceiver v1.10.1
 	github.com/oklog/ulid/v2 v2.1.0
@@ -534,6 +535,8 @@ replace github.com/observiq/observiq-otel-collector/exporter/googlecloudexporter
 replace github.com/observiq/observiq-otel-collector/packagestate => ./packagestate
 
 replace github.com/observiq/observiq-otel-collector/processor/throughputmeasurementprocessor => ./processor/throughputmeasurementprocessor
+
+replace github.com/observiq/observiq-otel-collector/processor/samplingprocessor => ./processor/samplingprocessor
 
 // some dependencies attempt to bring something like v1.8.2-0.20220303173753-edfe657b5405, which is older than v0.38.0
 // at the time of this inclusion, v0.38.0 was the latest version available (also tagged as v2.38.0)
