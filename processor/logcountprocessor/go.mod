@@ -1,4 +1,4 @@
-module github.com/observiq/observiq-otel-collector/processor/logsummaryprocessor
+module github.com/observiq/observiq-otel-collector/processor/logcountprocessor
 
 go 1.18
 
@@ -9,6 +9,7 @@ require (
 )
 
 require (
+	github.com/antonmedv/expr v1.9.0
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect

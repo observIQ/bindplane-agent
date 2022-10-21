@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package logsummaryprocessor provides a processor that summarizes logs as metrics.
-package logsummaryprocessor
+// Package logcountprocessor provides a processor that counts logs as metrics.
+package logcountprocessor
 
 import (
 	"time"
@@ -21,9 +21,31 @@ import (
 	"go.opentelemetry.io/collector/config"
 )
 
+const (
+	defaultMetricName = "log.count"
+	defaultMetricUnit = "{logs}"
+	defaultInterval   = time.Minute
+	defaultMatch      = "true"
+)
+
 // Config is the configuration for the resourceattributetransposer
 type Config struct {
 	config.ProcessorSettings `mapstructure:",squash"`
 	Exporter                 config.ComponentID `mapstructure:"exporter"`
+	MetricName               string             `mapstructure:"metric_name"`
+	MetricUnit               string             `mapstructure:"metric_unit"`
 	Interval                 time.Duration      `mapstructure:"interval"`
+	Match                    string             `mapstructure:"match"`
+	Attributes               map[string]string  `mapstructure:"attributes"`
+}
+
+// createDefaultConfig returns the default config for the resourceattributetransposer processor.
+func createDefaultConfig() config.Processor {
+	return &Config{
+		ProcessorSettings: config.NewProcessorSettings(config.NewComponentID(typeStr)),
+		MetricName:        defaultMetricName,
+		MetricUnit:        defaultMetricUnit,
+		Interval:          defaultInterval,
+		Match:             defaultMatch,
+	}
 }

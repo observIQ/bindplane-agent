@@ -26,3 +26,4 @@ release_deps
 collector.yaml
 manager.yaml
 logging.yaml
+config.yaml

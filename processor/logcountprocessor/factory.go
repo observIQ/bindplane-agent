@@ -12,12 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package logsummaryprocessor
+package logcountprocessor
 
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/config"
@@ -25,7 +24,7 @@ import (
 )
 
 const (
-	typeStr   = "logsummary"
+	typeStr   = "logcount"
 	stability = component.StabilityLevelStable
 )
 
@@ -38,20 +37,12 @@ func NewFactory() component.ProcessorFactory {
 	)
 }
 
-// createDefaultConfig returns the default config for the resourceattributetransposer processor.
-func createDefaultConfig() config.Processor {
-	return &Config{
-		ProcessorSettings: config.NewProcessorSettings(config.NewComponentID(typeStr)),
-		Interval:          time.Minute,
-	}
-}
-
 // createLogsProcessor creates a logs processor.
-func createLogsProcessor(_ context.Context, params component.ProcessorCreateSettings, cfg config.Processor, _ consumer.Logs) (component.LogsProcessor, error) {
+func createLogsProcessor(_ context.Context, params component.ProcessorCreateSettings, cfg config.Processor, consumer consumer.Logs) (component.LogsProcessor, error) {
 	processorCfg, ok := cfg.(*Config)
 	if !ok {
 		return nil, fmt.Errorf("config was not of correct type for the processor: %+v", cfg)
 	}
 
-	return newProcessor(params.Logger, processorCfg), nil
+	return newProcessor(processorCfg, consumer, params.Logger), nil
 }
