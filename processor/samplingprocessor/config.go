@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package samplingprocessor provides a processor
+// Package samplingprocessor provides a processor that samples pdata base level objects.
 package samplingprocessor
 
 import (
