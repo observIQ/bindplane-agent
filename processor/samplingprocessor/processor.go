@@ -24,41 +24,73 @@ import (
 	"go.uber.org/zap"
 )
 
-type throughputMeasurementProcessor struct {
+type samplingProcessor struct {
 	logger          *zap.Logger
 	dropCutOffRatio float64
 }
 
-func newThroughputMeasurementProcessor(logger *zap.Logger, cfg *Config) *throughputMeasurementProcessor {
-	return &throughputMeasurementProcessor{
+func newSamplingProcessor(logger *zap.Logger, cfg *Config) *samplingProcessor {
+	return &samplingProcessor{
 		logger:          logger,
 		dropCutOffRatio: cfg.DropRatio,
 	}
 }
 
-func (tmp *throughputMeasurementProcessor) processTraces(_ context.Context, td ptrace.Traces) (ptrace.Traces, error) {
+func (sp *samplingProcessor) sampleFunc() bool {
 	//#nosec G404 -- randomly generated number is not used for security purposes. It's ok if it's weak
-	if rand.Float64() <= tmp.dropCutOffRatio {
+	return rand.Float64() <= sp.dropCutOffRatio
+}
+
+func (sp *samplingProcessor) processTraces(_ context.Context, td ptrace.Traces) (ptrace.Traces, error) {
+	switch {
+	case sp.dropCutOffRatio == 1.0: // Drop everything
 		return ptrace.NewTraces(), nil
+	case sp.dropCutOffRatio == 0.0: // Drop nothing
+		return td, nil
+	default: // Drop based on ratio
+		for i := 0; i < td.ResourceSpans().Len(); i++ {
+			for j := 0; j < td.ResourceSpans().At(i).ScopeSpans().Len(); j++ {
+				td.ResourceSpans().At(i).ScopeSpans().At(j).Spans().RemoveIf(func(_ ptrace.Span) bool {
+					return sp.sampleFunc()
+				})
+			}
+		}
+		return td, nil
 	}
-
-	return td, nil
 }
 
-func (tmp *throughputMeasurementProcessor) processLogs(_ context.Context, ld plog.Logs) (plog.Logs, error) {
-	//#nosec G404 -- randomly generated number is not used for security purposes. It's ok if it's weak
-	if rand.Float64() <= tmp.dropCutOffRatio {
+func (sp *samplingProcessor) processLogs(_ context.Context, ld plog.Logs) (plog.Logs, error) {
+	switch {
+	case sp.dropCutOffRatio == 1.0: // Drop everything
 		return plog.NewLogs(), nil
+	case sp.dropCutOffRatio == 0.0: // Drop nothing
+		return ld, nil
+	default: // Drop based on ratio
+		for i := 0; i < ld.ResourceLogs().Len(); i++ {
+			for j := 0; j < ld.ResourceLogs().At(i).ScopeLogs().Len(); j++ {
+				ld.ResourceLogs().At(i).ScopeLogs().At(j).LogRecords().RemoveIf(func(_ plog.LogRecord) bool {
+					return sp.sampleFunc()
+				})
+			}
+		}
+		return ld, nil
 	}
-
-	return ld, nil
 }
 
-func (tmp *throughputMeasurementProcessor) processMetrics(_ context.Context, md pmetric.Metrics) (pmetric.Metrics, error) {
-	//#nosec G404 -- randomly generated number is not used for security purposes. It's ok if it's weak
-	if rand.Float64() <= tmp.dropCutOffRatio {
+func (sp *samplingProcessor) processMetrics(_ context.Context, md pmetric.Metrics) (pmetric.Metrics, error) {
+	switch {
+	case sp.dropCutOffRatio == 1.0: // Drop everything
 		return pmetric.NewMetrics(), nil
+	case sp.dropCutOffRatio == 0.0: // Drop nothing
+		return md, nil
+	default: // Drop based on ratio
+		for i := 0; i < md.ResourceMetrics().Len(); i++ {
+			for j := 0; j < md.ResourceMetrics().At(i).ScopeMetrics().Len(); j++ {
+				md.ResourceMetrics().At(i).ScopeMetrics().At(j).Metrics().RemoveIf(func(_ pmetric.Metric) bool {
+					return sp.sampleFunc()
+				})
+			}
+		}
+		return md, nil
 	}
-
-	return md, nil
 }

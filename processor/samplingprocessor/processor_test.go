@@ -55,7 +55,7 @@ func Test_processTraces(t *testing.T) {
 				DropRatio: tc.dropRatio,
 			}
 
-			processor := newThroughputMeasurementProcessor(zap.NewNop(), cfg)
+			processor := newSamplingProcessor(zap.NewNop(), cfg)
 			actual, err := processor.processTraces(context.Background(), tc.input)
 			require.NoError(t, err)
 			require.Equal(t, tc.expected, actual)
@@ -93,7 +93,7 @@ func Test_processLogs(t *testing.T) {
 				DropRatio: tc.dropRatio,
 			}
 
-			processor := newThroughputMeasurementProcessor(zap.NewNop(), cfg)
+			processor := newSamplingProcessor(zap.NewNop(), cfg)
 			actual, err := processor.processLogs(context.Background(), tc.input)
 			require.NoError(t, err)
 			require.Equal(t, tc.expected, actual)
@@ -133,7 +133,7 @@ func Test_processMetrics(t *testing.T) {
 				DropRatio: tc.dropRatio,
 			}
 
-			processor := newThroughputMeasurementProcessor(zap.NewNop(), cfg)
+			processor := newSamplingProcessor(zap.NewNop(), cfg)
 			actual, err := processor.processMetrics(context.Background(), tc.input)
 			require.NoError(t, err)
 			require.Equal(t, tc.expected, actual)

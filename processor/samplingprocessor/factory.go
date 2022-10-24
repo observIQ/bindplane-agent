@@ -31,7 +31,7 @@ const (
 )
 
 var (
-	consumerCapabilities = consumer.Capabilities{MutatesData: false}
+	consumerCapabilities = consumer.Capabilities{MutatesData: true}
 )
 
 var once sync.Once
@@ -61,9 +61,9 @@ func createTracesProcessor(
 	nextConsumer consumer.Traces,
 ) (component.TracesProcessor, error) {
 	oCfg := cfg.(*Config)
-	tmp := newThroughputMeasurementProcessor(set.Logger, oCfg)
+	sp := newSamplingProcessor(set.Logger, oCfg)
 
-	return processorhelper.NewTracesProcessor(ctx, set, cfg, nextConsumer, tmp.processTraces, processorhelper.WithCapabilities(consumerCapabilities))
+	return processorhelper.NewTracesProcessor(ctx, set, cfg, nextConsumer, sp.processTraces, processorhelper.WithCapabilities(consumerCapabilities))
 }
 
 func createLogsProcessor(
@@ -73,7 +73,7 @@ func createLogsProcessor(
 	nextConsumer consumer.Logs,
 ) (component.LogsProcessor, error) {
 	oCfg := cfg.(*Config)
-	tmp := newThroughputMeasurementProcessor(set.Logger, oCfg)
+	tmp := newSamplingProcessor(set.Logger, oCfg)
 
 	return processorhelper.NewLogsProcessor(ctx, set, cfg, nextConsumer, tmp.processLogs, processorhelper.WithCapabilities(consumerCapabilities))
 }
@@ -85,7 +85,7 @@ func createMetricsProcessor(
 	nextConsumer consumer.Metrics,
 ) (component.MetricsProcessor, error) {
 	oCfg := cfg.(*Config)
-	tmp := newThroughputMeasurementProcessor(set.Logger, oCfg)
+	tmp := newSamplingProcessor(set.Logger, oCfg)
 
 	return processorhelper.NewMetricsProcessor(ctx, set, cfg, nextConsumer, tmp.processMetrics, processorhelper.WithCapabilities(consumerCapabilities))
 }
