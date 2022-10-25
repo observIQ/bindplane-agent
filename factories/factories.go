@@ -16,6 +16,7 @@
 package factories
 
 import (
+	"github.com/observiq/observiq-otel-collector/internal/receiver/throughputwrapper"
 	"go.opentelemetry.io/collector/component"
 	"go.uber.org/multierr"
 )
@@ -30,7 +31,7 @@ func DefaultFactories() (component.Factories, error) {
 func combineFactories(receivers []component.ReceiverFactory, processors []component.ProcessorFactory, exporters []component.ExporterFactory, extensions []component.ExtensionFactory) (component.Factories, error) {
 	var errs []error
 
-	receiverMap, err := component.MakeReceiverFactoryMap(receivers...)
+	receiverMap, err := component.MakeReceiverFactoryMap(wrapReceivers(receivers)...)
 	if err != nil {
 		errs = append(errs, err)
 	}
@@ -56,4 +57,14 @@ func combineFactories(receivers []component.ReceiverFactory, processors []compon
 		Exporters:  exporterMap,
 		Extensions: extensionMap,
 	}, multierr.Combine(errs...)
+}
+
+func wrapReceivers(receivers []component.ReceiverFactory) []component.ReceiverFactory {
+	wrappedReceivers := make([]component.ReceiverFactory, len(defaultReceivers))
+
+	for i, recv := range receivers {
+		wrappedReceivers[i] = throughputwrapper.WrapReceiverFactory(recv)
+	}
+
+	return wrappedReceivers
 }
