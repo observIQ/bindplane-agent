@@ -42,6 +42,7 @@ func newMetricConsumer(logger *zap.Logger, componentID string, baseConsumer cons
 	}
 }
 
+// ConsumeMetrics measures the pmetric.Metrics size before passing it onto the baseConsumer
 func (m *metricConsumer) ConsumeMetrics(ctx context.Context, md pmetric.Metrics) error {
 	if err := stats.RecordWithTags(
 		ctx,
@@ -54,6 +55,7 @@ func (m *metricConsumer) ConsumeMetrics(ctx context.Context, md pmetric.Metrics)
 	return m.baseConsumer.ConsumeMetrics(ctx, md)
 }
 
+// Capabilities returns the baseConsumer's capabilities
 func (m *metricConsumer) Capabilities() consumer.Capabilities {
 	return m.baseConsumer.Capabilities()
 }

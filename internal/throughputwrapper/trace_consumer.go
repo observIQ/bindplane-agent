@@ -42,6 +42,7 @@ func newTraceConsumer(logger *zap.Logger, componentID string, baseConsumer consu
 	}
 }
 
+// ConsumeTraces measures the ptrace.Traces size before passing it onto the baseConsumer
 func (t *traceConsumer) ConsumeTraces(ctx context.Context, td ptrace.Traces) error {
 	if err := stats.RecordWithTags(
 		ctx,
@@ -53,6 +54,7 @@ func (t *traceConsumer) ConsumeTraces(ctx context.Context, td ptrace.Traces) err
 	return t.baseConsumer.ConsumeTraces(ctx, td)
 }
 
+// Capabilities returns the baseConsumer's capabilities
 func (t *traceConsumer) Capabilities() consumer.Capabilities {
 	return t.baseConsumer.Capabilities()
 }

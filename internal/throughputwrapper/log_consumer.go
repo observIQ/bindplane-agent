@@ -42,6 +42,7 @@ func newLogConsumer(logger *zap.Logger, componentID string, baseConsumer consume
 	}
 }
 
+// ConsumeLogs measures the plog.Logs size before passing it onto the baseConsumer
 func (l *logConsumer) ConsumeLogs(ctx context.Context, ld plog.Logs) error {
 	if err := stats.RecordWithTags(
 		ctx,
@@ -53,6 +54,7 @@ func (l *logConsumer) ConsumeLogs(ctx context.Context, ld plog.Logs) error {
 	return l.baseConsumer.ConsumeLogs(ctx, ld)
 }
 
+// Capabilities returns the baseConsumer's capabilities
 func (l *logConsumer) Capabilities() consumer.Capabilities {
 	return l.baseConsumer.Capabilities()
 }
