@@ -20,39 +20,39 @@ import (
 	"go.opencensus.io/stats"
 	"go.opencensus.io/tag"
 	"go.opentelemetry.io/collector/consumer"
-	"go.opentelemetry.io/collector/pdata/plog"
+	"go.opentelemetry.io/collector/pdata/ptrace"
 	"go.uber.org/zap"
 )
 
-var _ consumer.Logs = (*logConsumer)(nil)
+var _ consumer.Traces = (*traceConsumer)(nil)
 
-type logConsumer struct {
+type traceConsumer struct {
 	logger       *zap.Logger
 	mutators     []tag.Mutator
-	logsSizer    plog.MarshalSizer
-	baseConsumer consumer.Logs
+	tracesSizer  ptrace.MarshalSizer
+	baseConsumer consumer.Traces
 }
 
-func newLogConsumer(logger *zap.Logger, componentID string, baseConsumer consumer.Logs) *logConsumer {
-	return &logConsumer{
+func newTraceConsumer(logger *zap.Logger, componentID string, baseConsumer consumer.Traces) *traceConsumer {
+	return &traceConsumer{
 		logger:       logger,
-		mutators:     []tag.Mutator{tag.Upsert(receiverTagKey, componentID, tag.WithTTL(tag.TTLNoPropagation))},
-		logsSizer:    plog.NewProtoMarshaler(),
+		mutators:     []tag.Mutator{tag.Upsert(componentTagKey, componentID, tag.WithTTL(tag.TTLNoPropagation))},
+		tracesSizer:  ptrace.NewProtoMarshaler(),
 		baseConsumer: baseConsumer,
 	}
 }
 
-func (l *logConsumer) ConsumeLogs(ctx context.Context, ld plog.Logs) error {
+func (t *traceConsumer) ConsumeTraces(ctx context.Context, td ptrace.Traces) error {
 	if err := stats.RecordWithTags(
 		ctx,
-		l.mutators,
-		logThroughputSize.M(int64(l.logsSizer.LogsSize(ld))),
+		t.mutators,
+		traceThroughputSize.M(int64(t.tracesSizer.TracesSize(td))),
 	); err != nil {
-		l.logger.Warn("Error while measuring receiver log throughput", zap.Error(err))
+		t.logger.Warn("Error while measuring receiver trace throughput", zap.Error(err))
 	}
-	return l.baseConsumer.ConsumeLogs(ctx, ld)
+	return t.baseConsumer.ConsumeTraces(ctx, td)
 }
 
-func (l *logConsumer) Capabilities() consumer.Capabilities {
-	return l.baseConsumer.Capabilities()
+func (t *traceConsumer) Capabilities() consumer.Capabilities {
+	return t.baseConsumer.Capabilities()
 }

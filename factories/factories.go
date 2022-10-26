@@ -16,7 +16,7 @@
 package factories
 
 import (
-	"github.com/observiq/observiq-otel-collector/internal/receiver/throughputwrapper"
+	"github.com/observiq/observiq-otel-collector/internal/throughputwrapper"
 	"go.opentelemetry.io/collector/component"
 	"go.uber.org/multierr"
 )

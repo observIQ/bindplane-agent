@@ -20,40 +20,39 @@ import (
 	"go.opencensus.io/stats"
 	"go.opencensus.io/tag"
 	"go.opentelemetry.io/collector/consumer"
-	"go.opentelemetry.io/collector/pdata/pmetric"
+	"go.opentelemetry.io/collector/pdata/plog"
 	"go.uber.org/zap"
 )
 
-var _ consumer.Metrics = (*metricConsumer)(nil)
+var _ consumer.Logs = (*logConsumer)(nil)
 
-type metricConsumer struct {
+type logConsumer struct {
 	logger       *zap.Logger
 	mutators     []tag.Mutator
-	metricsSizer pmetric.MarshalSizer
-	baseConsumer consumer.Metrics
+	logsSizer    plog.MarshalSizer
+	baseConsumer consumer.Logs
 }
 
-func newMetricConsumer(logger *zap.Logger, componentID string, baseConsumer consumer.Metrics) *metricConsumer {
-	return &metricConsumer{
+func newLogConsumer(logger *zap.Logger, componentID string, baseConsumer consumer.Logs) *logConsumer {
+	return &logConsumer{
 		logger:       logger,
-		mutators:     []tag.Mutator{tag.Upsert(receiverTagKey, componentID, tag.WithTTL(tag.TTLNoPropagation))},
-		metricsSizer: pmetric.NewProtoMarshaler(),
+		mutators:     []tag.Mutator{tag.Upsert(componentTagKey, componentID, tag.WithTTL(tag.TTLNoPropagation))},
+		logsSizer:    plog.NewProtoMarshaler(),
 		baseConsumer: baseConsumer,
 	}
 }
 
-func (m *metricConsumer) ConsumeMetrics(ctx context.Context, md pmetric.Metrics) error {
+func (l *logConsumer) ConsumeLogs(ctx context.Context, ld plog.Logs) error {
 	if err := stats.RecordWithTags(
 		ctx,
-		m.mutators,
-		metricThroughputSize.M(int64(m.metricsSizer.MetricsSize(md))),
+		l.mutators,
+		logThroughputSize.M(int64(l.logsSizer.LogsSize(ld))),
 	); err != nil {
-		m.logger.Warn("Error while measuring receiver metric throughput", zap.Error(err))
+		l.logger.Warn("Error while measuring receiver log throughput", zap.Error(err))
 	}
-
-	return m.baseConsumer.ConsumeMetrics(ctx, md)
+	return l.baseConsumer.ConsumeLogs(ctx, ld)
 }
 
-func (m *metricConsumer) Capabilities() consumer.Capabilities {
-	return m.baseConsumer.Capabilities()
+func (l *logConsumer) Capabilities() consumer.Capabilities {
+	return l.baseConsumer.Capabilities()
 }

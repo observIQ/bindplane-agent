@@ -22,9 +22,9 @@ import (
 
 func TestMetricViews(t *testing.T) {
 	expectedViewNames := []string{
-		"receiver/log_throughput_size",
-		"receiver/metric_throughput_size",
-		"receiver/trace_throughput_size",
+		"component/log_throughput_size",
+		"component/metric_throughput_size",
+		"component/trace_throughput_size",
 	}
 
 	views := metricViews()

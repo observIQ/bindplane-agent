@@ -20,39 +20,40 @@ import (
 	"go.opencensus.io/stats"
 	"go.opencensus.io/tag"
 	"go.opentelemetry.io/collector/consumer"
-	"go.opentelemetry.io/collector/pdata/ptrace"
+	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.uber.org/zap"
 )
 
-var _ consumer.Traces = (*traceConsumer)(nil)
+var _ consumer.Metrics = (*metricConsumer)(nil)
 
-type traceConsumer struct {
+type metricConsumer struct {
 	logger       *zap.Logger
 	mutators     []tag.Mutator
-	tracesSizer  ptrace.MarshalSizer
-	baseConsumer consumer.Traces
+	metricsSizer pmetric.MarshalSizer
+	baseConsumer consumer.Metrics
 }
 
-func newTraceConsumer(logger *zap.Logger, componentID string, baseConsumer consumer.Traces) *traceConsumer {
-	return &traceConsumer{
+func newMetricConsumer(logger *zap.Logger, componentID string, baseConsumer consumer.Metrics) *metricConsumer {
+	return &metricConsumer{
 		logger:       logger,
-		mutators:     []tag.Mutator{tag.Upsert(receiverTagKey, componentID, tag.WithTTL(tag.TTLNoPropagation))},
-		tracesSizer:  ptrace.NewProtoMarshaler(),
+		mutators:     []tag.Mutator{tag.Upsert(componentTagKey, componentID, tag.WithTTL(tag.TTLNoPropagation))},
+		metricsSizer: pmetric.NewProtoMarshaler(),
 		baseConsumer: baseConsumer,
 	}
 }
 
-func (t *traceConsumer) ConsumeTraces(ctx context.Context, td ptrace.Traces) error {
+func (m *metricConsumer) ConsumeMetrics(ctx context.Context, md pmetric.Metrics) error {
 	if err := stats.RecordWithTags(
 		ctx,
-		t.mutators,
-		traceThroughputSize.M(int64(t.tracesSizer.TracesSize(td))),
+		m.mutators,
+		metricThroughputSize.M(int64(m.metricsSizer.MetricsSize(md))),
 	); err != nil {
-		t.logger.Warn("Error while measuring receiver trace throughput", zap.Error(err))
+		m.logger.Warn("Error while measuring receiver metric throughput", zap.Error(err))
 	}
-	return t.baseConsumer.ConsumeTraces(ctx, td)
+
+	return m.baseConsumer.ConsumeMetrics(ctx, md)
 }
 
-func (t *traceConsumer) Capabilities() consumer.Capabilities {
-	return t.baseConsumer.Capabilities()
+func (m *metricConsumer) Capabilities() consumer.Capabilities {
+	return m.baseConsumer.Capabilities()
 }
