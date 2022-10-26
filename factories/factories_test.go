@@ -85,7 +85,9 @@ func TestCombineFactories(t *testing.T) {
 			assert.NoError(t, err)
 
 			for _, receiver := range tc.receivers {
-				assert.Equal(t, factories.Receivers[receiver.Type()], receiver)
+				// Due to wrapping of receivers we can't compare them like we can other components.
+				// We compare actual type and the default config against expected to ensure a match
+				assertReceiverFactory(t, factories.Receivers[receiver.Type()], receiver)
 			}
 
 			for _, processor := range tc.processors {
@@ -107,8 +109,10 @@ func TestDefaultFactories(t *testing.T) {
 	factories, err := DefaultFactories()
 	assert.NoError(t, err)
 
-	for _, receiver := range defaultReceivers {
-		assert.Equal(t, factories.Receivers[receiver.Type()], receiver)
+	for _, receiver := range wrapReceivers(defaultReceivers) {
+		// Due to wrapping of receivers we can't compare them like we can other components.
+		// We compare actual type and the default config against expected to ensure a match
+		assertReceiverFactory(t, factories.Receivers[receiver.Type()], receiver)
 	}
 
 	for _, processor := range defaultProcessors {
@@ -122,4 +126,10 @@ func TestDefaultFactories(t *testing.T) {
 	for _, extension := range defaultExtensions {
 		assert.Equal(t, factories.Extensions[extension.Type()], extension)
 	}
+}
+
+func assertReceiverFactory(t *testing.T, actual, expected component.ReceiverFactory) {
+	t.Helper()
+	assert.Equal(t, actual.Type(), expected.Type())
+	assert.Equal(t, actual.CreateDefaultConfig(), expected.CreateDefaultConfig())
 }
