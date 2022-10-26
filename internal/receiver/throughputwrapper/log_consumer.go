@@ -33,7 +33,7 @@ type logConsumer struct {
 	baseConsumer consumer.Logs
 }
 
-func newLogConsumer(logger *zap.Logger, componentID string, baseConsumer consumer.Logs) consumer.Logs {
+func newLogConsumer(logger *zap.Logger, componentID string, baseConsumer consumer.Logs) *logConsumer {
 	return &logConsumer{
 		logger:       logger,
 		mutators:     []tag.Mutator{tag.Upsert(receiverTagKey, componentID, tag.WithTTL(tag.TTLNoPropagation))},

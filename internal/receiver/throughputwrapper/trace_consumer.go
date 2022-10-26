@@ -33,7 +33,7 @@ type traceConsumer struct {
 	baseConsumer consumer.Traces
 }
 
-func newTraceConsumer(logger *zap.Logger, componentID string, baseConsumer consumer.Traces) consumer.Traces {
+func newTraceConsumer(logger *zap.Logger, componentID string, baseConsumer consumer.Traces) *traceConsumer {
 	return &traceConsumer{
 		logger:       logger,
 		mutators:     []tag.Mutator{tag.Upsert(receiverTagKey, componentID, tag.WithTTL(tag.TTLNoPropagation))},

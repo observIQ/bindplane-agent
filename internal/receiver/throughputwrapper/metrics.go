@@ -18,16 +18,15 @@ import (
 	"go.opencensus.io/stats"
 	"go.opencensus.io/stats/view"
 	"go.opencensus.io/tag"
-	"go.opentelemetry.io/collector/obsreport"
 )
 
 const tagReceiverKey = "receiver"
 
 var (
 	receiverTagKey       = tag.MustNewKey(tagReceiverKey)
-	logThroughputSize    = stats.Int64("log_throughput_size", "Size of the log package passed to the processor", stats.UnitBytes)
-	metricThroughputSize = stats.Int64("metric_throughput_size", "Size of the metric package passed to the processor", stats.UnitBytes)
-	traceThroughputSize  = stats.Int64("trace_throughput_size", "Size of the trace package passed to the processor", stats.UnitBytes)
+	logThroughputSize    = stats.Int64("log_throughput_size", "Size of the log package emitted from the receiver", stats.UnitBytes)
+	metricThroughputSize = stats.Int64("metric_throughput_size", "Size of the metric package emitted from the receiver", stats.UnitBytes)
+	traceThroughputSize  = stats.Int64("trace_throughput_size", "Size of the trace package emitted from the receiver", stats.UnitBytes)
 )
 
 func metricViews() []*view.View {
@@ -35,21 +34,21 @@ func metricViews() []*view.View {
 
 	return []*view.View{
 		{
-			Name:        obsreport.BuildProcessorCustomMetricName(string("billing"), logThroughputSize.Name()),
+			Name:        tagReceiverKey + "/" + logThroughputSize.Name(),
 			Description: logThroughputSize.Description(),
 			Measure:     logThroughputSize,
 			TagKeys:     receiverTagKeys,
 			Aggregation: view.Sum(),
 		},
 		{
-			Name:        obsreport.BuildProcessorCustomMetricName(string("billing"), metricThroughputSize.Name()),
+			Name:        tagReceiverKey + "/" + metricThroughputSize.Name(),
 			Description: metricThroughputSize.Description(),
 			Measure:     metricThroughputSize,
 			TagKeys:     receiverTagKeys,
 			Aggregation: view.Sum(),
 		},
 		{
-			Name:        obsreport.BuildProcessorCustomMetricName(string("billing"), traceThroughputSize.Name()),
+			Name:        tagReceiverKey + "/" + traceThroughputSize.Name(),
 			Description: traceThroughputSize.Description(),
 			Measure:     traceThroughputSize,
 			TagKeys:     receiverTagKeys,

@@ -33,7 +33,7 @@ type metricConsumer struct {
 	baseConsumer consumer.Metrics
 }
 
-func newMetricConsumer(logger *zap.Logger, componentID string, baseConsumer consumer.Metrics) consumer.Metrics {
+func newMetricConsumer(logger *zap.Logger, componentID string, baseConsumer consumer.Metrics) *metricConsumer {
 	return &metricConsumer{
 		logger:       logger,
 		mutators:     []tag.Mutator{tag.Upsert(receiverTagKey, componentID, tag.WithTTL(tag.TTLNoPropagation))},
