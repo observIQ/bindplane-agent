@@ -218,4 +218,4 @@ generate:
 
 .PHONY: create-plugin-docs
 create-plugin-docs:
-	cd cmd/plugindocgen; go run *.go
+	cd cmd/plugindocgen; go run .

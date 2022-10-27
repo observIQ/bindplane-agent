@@ -1,3 +1,18 @@
+// Copyright  observIQ, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+// Package main provides entry point for the plugin docu generator
 package main
 
 import (
@@ -123,11 +138,15 @@ func (g PluginDocGenerator) generatePluginDoc(pluginFile fs.DirEntry) {
 	}
 
 	// Create readme file for this plugin
-	pluginReadmeFile, err := os.Create(pluginReadmePath)
+	pluginReadmeFile, err := os.Create(filepath.Clean(pluginReadmePath))
+	defer func() {
+		if err := pluginReadmeFile.Close(); err != nil {
+			log.Fatalln("Failed to close plugin doc file", pluginReadmeName, ":", err)
+		}
+	}()
 	if err != nil {
 		log.Fatalln("Failed to create plugin doc file", pluginReadmeName, ":", err)
 	}
-	defer pluginReadmeFile.Close()
 
 	// Get extra details file path related to this plugin
 	pluginExtraDetailsName := strings.TrimSuffix(pluginFileName, filepath.Ext(pluginFileName)) + ".yaml"
@@ -141,7 +160,7 @@ func (g PluginDocGenerator) generatePluginDoc(pluginFile fs.DirEntry) {
 	if _, err := os.Stat(pluginExtraDetailsPath); errors.Is(err, os.ErrNotExist) {
 		extraDetails = ExtraDetails{}
 	} else {
-		detailsBytes, err := ioutil.ReadFile(pluginExtraDetailsPath)
+		detailsBytes, err := ioutil.ReadFile(filepath.Clean(pluginExtraDetailsPath))
 		if err != nil {
 			extraDetails = ExtraDetails{}
 		} else if err = yaml.Unmarshal(detailsBytes, &extraDetails); err != nil {
