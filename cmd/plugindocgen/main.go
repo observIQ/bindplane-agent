@@ -1,34 +1,17 @@
 package main
 
 import (
-	"log"
-	"os"
-	"path/filepath"
-
-	"github.com/observiq/observiq-otel-collector/receiver/pluginreceiver"
 	"github.com/spf13/pflag"
 )
 
 func main() {
-	pluginDir := pflag.String("plugins", "./plugins", "The directory containing plugins")
+	// Parse flags
+	pluginDir := pflag.String("plugins", "../../plugins", "The directory containing plugins")
+	pluginExtraDetailsDir := pflag.String("extra_details", "./extra_details", "The directory containing extra details for plugin documentation")
+	pluginDocsDir := pflag.String("docs", "../../docs/plugins", "The directory containing plugin documentation")
 	pflag.Parse()
 
-	entries, err := os.ReadDir(*pluginDir)
-	if err != nil {
-		log.Fatalln("Failed to read plugin directory", err)
-	}
+	generator := newPluginDocGenerator(*pluginDir, *pluginExtraDetailsDir, *pluginDocsDir)
 
-	for _, entry := range entries {
-		entryName := entry.Name()
-		fullFilePath, err := filepath.Abs(filepath.Join(*pluginDir, entryName))
-		if err != nil {
-			log.Fatalln("Failed to determine path of plugin file", entryName, ":", err)
-		}
-
-		plugin, err := pluginreceiver.LoadPlugin(fullFilePath)
-		if err != nil {
-			log.Fatalln("Failed to load plugin", entryName, ":", err)
-		}
-
-	}
+	generator.GeneratePluginDocs()
 }

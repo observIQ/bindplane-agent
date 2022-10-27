@@ -1,6 +1,6 @@
-# OracleDB Metrics
+# OracleDB Metrics Plugin
 
-Metrics receiver for Oracle Databases.
+Metrics receiver for OracleDB
 
 ## Supported Versions
 
@@ -13,27 +13,27 @@ Metrics receiver for Oracle Databases.
 
 | Name | Description | Type | Default | Required | Values |
 |:-- |:-- |:-- |:-- |:-- |:-- |
-| endpoint | Address to scrape metrics from | string | localhost:1521 | false |  |
+| endpoint | Address to scrape metrics from | string | `localhost:1521` | false |  |
 | username | Database user to run metric queries with | string |  | true |  |
 | password | Password for user | string |  | false |  |
 | sid | Site Identifier. One or both of sid or service_name must be specified. | string |  | false |  |
 | service_name | OracleDB Service Name. One or both of sid or service_name must be specified. | string |  | false |  |
 | wallet | OracleDB Wallet file location (must be URL encoded) | string |  | false |  |
-| scrape_interval | Time in between every scrape request | string | 60s | false |  |
+| scrape_interval | Time in between every scrape request | string | `60s` | false |  |
 
 ## Example Config:
 
-Below is an example of basic config using `sid` and user/pass.
+Below is an example of a basic conifg
 
 ```yaml
 receivers:
   plugin:
     path: ./plugins/oracledb_metrics.yaml
     parameters:
-        endpoint: oracle_db:1521
-        username: otel
-        password: otel_pass
-        sid: ORCLC
+      endpoint: localhost:1521
+      username: $USERNAME
+      scrape_interval: 60s 
+      sid: $SID
 ```
 
 ## Least Privileged User

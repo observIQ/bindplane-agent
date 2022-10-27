@@ -1,11 +1,52 @@
-# {{ .Title }} Plugin
+# {{ .Plugin.Title }} Plugin
 
-{{ .Description }}
+{{ .Plugin.Description }}
+{{- if .ExtraDetails.Top }}
 
+{{ .ExtraDetails.Top -}}
+{{ else }}
+{{ end }}
 ## Configuration Parameters
 
-| Name | Description| Type | Required | Default | Supported Values |
-|:--- |:--- |:--- |:--- |:--- |:--- |
-{{ range .Parameters }}
-| {{ .Name }} | {{ .Description }} | {{ .Type }} | {{ .Required }} | {{ .Default }} | {{ range $val := .Supported }} {{ $val }}, {{end}} |
-{{end}}
+| Name | Description | Type | Default | Required | Values |
+|:-- |:-- |:-- |:-- |:-- |:-- |
+{{- range .Plugin.Parameters }}
+  {{- $first := true }}
+| {{ .Name }} | {{ .Description }} | {{ .Type }} | {{ if and (IsNotNil .Default) (IsNotNil .Default) -}}
+      `{{ .Default }}`
+    {{- end }} | {{ .Required }} | {{ range $val := .Supported -}}
+    {{- if $first -}}
+      {{- $first = false -}}
+    {{- else -}}
+      , {{ end }}`
+    {{- $val }}`
+  {{- end }} |
+{{- end }}
+
+## Example Config:
+
+Below is an example of a basic conifg
+
+```yaml
+receivers:
+  plugin:
+    path: {{ .PluginDir }}
+    parameters:
+    {{- range .Plugin.Parameters -}}
+      {{- if and (IsNotNil .Default) (IsNotWhiteSpaceString .Default) }}
+      {{ .Name }}: {{ .Default }}
+      {{- else -}}
+        {{- if .Required }}
+      {{ .Name }}: {{ if IsTypeArray .Type -}} [ {{- end -}} $ {{- .Name | ToUpper }}{{ if IsTypeArray .Type -}} ] {{- end }}
+        {{- end -}}
+      {{- end -}}
+    {{- end -}}
+    {{- if .ExtraDetails.CustomExampleParams }} 
+      {{ .ExtraDetails.CustomExampleParams -}} 
+    {{- end }}
+```
+{{- if .ExtraDetails.Bottom }}
+
+{{ .ExtraDetails.Bottom -}}
+{{ else }}
+{{ end -}}
