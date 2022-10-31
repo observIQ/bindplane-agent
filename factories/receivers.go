@@ -64,6 +64,7 @@ import (
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/saphanareceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/sapmreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/simpleprometheusreceiver"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/snmpreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/splunkhecreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/sqlqueryreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/sqlserverreceiver"
@@ -132,6 +133,7 @@ var defaultReceivers = []component.ReceiverFactory{
 	saphanareceiver.NewFactory(),
 	sapmreceiver.NewFactory(),
 	simpleprometheusreceiver.NewFactory(),
+	snmpreceiver.NewFactory(),
 	splunkhecreceiver.NewFactory(),
 	sqlqueryreceiver.NewFactory(),
 	sqlserverreceiver.NewFactory(),
