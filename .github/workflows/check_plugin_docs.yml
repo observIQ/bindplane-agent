@@ -1,10 +1,9 @@
 name: check_plugin_docs
 on:
-  workflow_dispatch:
-  # pull_request:
+  pull_request:
 
 jobs:
-  check-fmt:
+  check-plugin-docs:
     runs-on: "ubuntu-20.04"
     steps:
       - name: Checkout Sources
