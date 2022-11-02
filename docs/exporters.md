@@ -21,12 +21,12 @@ Below is a list of supported exports with links to their documentation pages.
 | Jaeger gRPC Exporter                                              | [jaegerexporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.63.0/exporter/jaegerexporter/README.md) |
 | Kafka Exporter                                                    | [kafkaexporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.63.0/exporter/kafkaexporter/README.md) |
 | Load-Balancing (Trace ID Aware) Exporter                          | [loadbalancingexporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.63.0/exporter/loadbalancingexporter/README.md) |
-| Logging Exporter                                                  | [loggingexporter](https://github.com/open-telemetry/opentelemetry-collector/blob/v0.63.0/exporter/loggingexporter/README.md) |
+| Logging Exporter                                                  | [loggingexporter](https://github.com/open-telemetry/opentelemetry-collector/blob/v0.63.1/exporter/loggingexporter/README.md) |
 | Loki Exporter                                                     | [lokiexporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.63.0/exporter/lokiexporter/README.md) |
 | Logz.io Exporter                                                  | [logzioexporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.63.0/exporter/logzioexporter/README.md) |
 | OpenCensus gRPC Exporter                                          | [opencensusexporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.63.0/exporter/opencensusexporter/README.md) |
-| OTLP gRPC Exporter                                                | [otlpexporter](https://github.com/open-telemetry/opentelemetry-collector/blob/v0.63.0/exporter/otlpexporter/README.md) |
-| OTLP HTTP Exporter                                                | [otlphttpexporter](https://github.com/open-telemetry/opentelemetry-collector/blob/v0.63.0/exporter/otlphttpexporter/README.md) |
+| OTLP gRPC Exporter                                                | [otlpexporter](https://github.com/open-telemetry/opentelemetry-collector/blob/v0.63.1/exporter/otlpexporter/README.md) |
+| OTLP HTTP Exporter                                                | [otlphttpexporter](https://github.com/open-telemetry/opentelemetry-collector/blob/v0.63.1/exporter/otlphttpexporter/README.md) |
 | Prometheus Exporter                                               | [prometheusexporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.63.0/exporter/prometheusexporter/README.md) |
 | Prometheus Remote Write Exporter                                  | [prometheusremotewriteexporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.63.0/exporter/prometheusremotewriteexporter/README.md) |
 | SAPM Exporter                                                     | [sapmexporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.63.0/exporter/sapmexporter/README.md) |

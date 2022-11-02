@@ -46,9 +46,9 @@ require (
 	github.com/yusufpapurcu/wmi v1.2.2 // indirect
 	go.etcd.io/bbolt v1.3.6 // indirect
 	go.opencensus.io v0.23.0 // indirect
-	go.opentelemetry.io/collector v0.63.0 // indirect
-	go.opentelemetry.io/collector/pdata v0.63.0 // indirect
-	go.opentelemetry.io/collector/semconv v0.63.0 // indirect
+	go.opentelemetry.io/collector v0.63.1 // indirect
+	go.opentelemetry.io/collector/pdata v0.63.1 // indirect
+	go.opentelemetry.io/collector/semconv v0.63.1 // indirect
 	go.opentelemetry.io/contrib/propagators/b3 v1.11.1 // indirect
 	go.opentelemetry.io/otel v1.11.1 // indirect
 	go.opentelemetry.io/otel/exporters/prometheus v0.33.0 // indirect
