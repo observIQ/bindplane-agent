@@ -108,9 +108,11 @@ func (c *collector) Run(ctx context.Context) error {
 		err := svc.Run(ctx)
 		c.sendStatus(false, err)
 
-		if err != nil {
-			startupErr <- err
-		}
+		// The error may be nil;
+		// We want to signal even in this case, because otherwise waitForStartup could keep waiting
+		// for the collector startup, even though the collector will never start up.
+		// This can occur if an asynchronous error occurs quickly after collector startup.
+		startupErr <- err
 	}()
 
 	// A race condition exists in the OT collector where the shutdown channel
@@ -156,6 +158,11 @@ func (c *collector) waitForStartup(ctx context.Context, startupErr chan error) e
 			c.svc.Shutdown()
 			return ctx.Err()
 		case err := <-startupErr:
+			if err == nil {
+				// We want to report an error here, even if the error is nil, because we did not observe
+				// the collector actually start.
+				return fmt.Errorf("collector failed to start, and no error was returned")
+			}
 			return err
 		}
 	}
