@@ -21,6 +21,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"sync"
 
 	"github.com/observiq/observiq-otel-collector/internal/report/snapshot"
 	"go.opentelemetry.io/collector/pdata/plog"
@@ -63,6 +64,11 @@ type SnapshotReporter struct {
 	logBuffers    map[string]*snapshot.LogBuffer
 	metricBuffers map[string]*snapshot.MetricBuffer
 	traceBuffers  map[string]*snapshot.TraceBuffer
+
+	// Buffer Locks
+	logLock    sync.Mutex
+	metricLock sync.Mutex
+	traceLock  sync.Mutex
 }
 
 // NewSnapshotReporter creates a new SnapshotReporter with the associated client
@@ -131,6 +137,13 @@ func (s *SnapshotReporter) Report(cfg any) error {
 
 // Reset clears all buffers
 func (s *SnapshotReporter) Reset() {
+	s.logLock.Lock()
+	s.metricLock.Lock()
+	s.traceLock.Lock()
+	defer s.logLock.Unlock()
+	defer s.metricLock.Unlock()
+	defer s.traceLock.Unlock()
+
 	s.logBuffers = make(map[string]*snapshot.LogBuffer)
 	s.metricBuffers = make(map[string]*snapshot.MetricBuffer)
 	s.traceBuffers = make(map[string]*snapshot.TraceBuffer)
@@ -138,33 +151,39 @@ func (s *SnapshotReporter) Reset() {
 
 // SaveLogs saves off logs in a snapshot to be reported later
 func (s *SnapshotReporter) SaveLogs(componentID string, ld plog.Logs) {
+	s.logLock.Lock()
 	buffer, ok := s.logBuffers[componentID]
 	if !ok {
 		buffer = snapshot.NewLogBuffer(s.idealPayloadSize)
 		s.logBuffers[componentID] = buffer
 	}
+	s.logLock.Unlock()
 
 	buffer.Add(ld)
 }
 
 // SaveTraces saves off traces in a snapshot to be reported later
 func (s *SnapshotReporter) SaveTraces(componentID string, td ptrace.Traces) {
+	s.traceLock.Lock()
 	buffer, ok := s.traceBuffers[componentID]
 	if !ok {
 		buffer = snapshot.NewTraceBuffer(s.idealPayloadSize)
 		s.traceBuffers[componentID] = buffer
 	}
+	s.traceLock.Unlock()
 
 	buffer.Add(td)
 }
 
 // SaveMetrics saves off metrics in a snapshot to be reported later
 func (s *SnapshotReporter) SaveMetrics(componentID string, md pmetric.Metrics) {
+	s.metricLock.Lock()
 	buffer, ok := s.metricBuffers[componentID]
 	if !ok {
 		buffer = snapshot.NewMetricBuffer(s.idealPayloadSize)
 		s.metricBuffers[componentID] = buffer
 	}
+	s.metricLock.Unlock()
 
 	buffer.Add(md)
 }
@@ -173,21 +192,27 @@ func (s *SnapshotReporter) SaveMetrics(componentID string, md pmetric.Metrics) {
 func (s *SnapshotReporter) prepRequestPayload(componentID, pipelineType string) (payload []byte, err error) {
 	switch pipelineType {
 	case "logs":
+		s.logLock.Lock()
 		buffer, ok := s.logBuffers[componentID]
+		s.logLock.Unlock()
 		if !ok {
 			return []byte{}, nil
 		}
 
 		payload, err = buffer.ConstructPayload()
 	case "metrics":
+		s.metricLock.Lock()
 		buffer, ok := s.metricBuffers[componentID]
+		s.metricLock.Unlock()
 		if !ok {
 			return []byte{}, nil
 		}
 
 		payload, err = buffer.ConstructPayload()
 	case "traces":
+		s.traceLock.Lock()
 		buffer, ok := s.traceBuffers[componentID]
+		s.traceLock.Unlock()
 		if !ok {
 			return []byte{}, nil
 		}
