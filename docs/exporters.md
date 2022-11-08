@@ -11,6 +11,7 @@ Below is a list of supported exports with links to their documentation pages.
 | AWS X-Ray Tracing Exporter                                        | [awsxrayexporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.63.0/exporter/awsxrayexporter/README.md) |
 | Azure Monitor Exporter                                            | [azuremonitorexporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.63.0/exporter/azuremonitorexporter/README.md) |
 | Carbon Exporter                                                   | [carbonexporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.63.0/exporter/carbonexporter/README.md) |
+| Dynatrace Exporter                                                | [dynatraceexporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.63.0/exporter/dynatraceexporter/README.md) |
 | Elasticsearch Exporter                                            | [elasticsearchexporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.63.0/exporter/elasticsearchexporter/README.md) |
 | F5 Cloud Exporter                                                 | [f5cloudexporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.63.0/exporter/f5cloudexporter/README.md) |
 | File Exporter                                                     | [fileexporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.63.0/exporter/fileexporter/README.md) |

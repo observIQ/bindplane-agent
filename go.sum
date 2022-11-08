@@ -460,6 +460,8 @@ github.com/dsnet/golib v0.0.0-20171103203638-1ea166775780/go.mod h1:Lj+Z9rebOhdf
 github.com/dustin/go-humanize v0.0.0-20171111073723-bb3d318650d4/go.mod h1:HtrtbFcZ19U5GC7JDqmcUSB87Iq5E25KnS6fMYU6eOk=
 github.com/dustin/go-humanize v1.0.0 h1:VSnTsYCnlFHaM2/igO1h6X3HA71jcobQuxemgkq4zYo=
 github.com/dustin/go-humanize v1.0.0/go.mod h1:HtrtbFcZ19U5GC7JDqmcUSB87Iq5E25KnS6fMYU6eOk=
+github.com/dynatrace-oss/dynatrace-metric-utils-go v0.5.0 h1:wHGPJSXvwKQVf/XfhjUPyrhpcPKWNy8F3ikH+eiwoBg=
+github.com/dynatrace-oss/dynatrace-metric-utils-go v0.5.0/go.mod h1:PseHFo8Leko7J4A/TfZ6kkHdkzKBLUta6hRZR/OEbbc=
 github.com/eapache/go-resiliency v1.1.0/go.mod h1:kFI+JgMyC7bLPUVY133qvEBtVayf5mFgVsvEsIPBvNs=
 github.com/eapache/go-resiliency v1.2.0/go.mod h1:kFI+JgMyC7bLPUVY133qvEBtVayf5mFgVsvEsIPBvNs=
 github.com/eapache/go-resiliency v1.3.0 h1:RRL0nge+cWGlxXbUzJ7yMcq6w2XBEr19dCN6HECGaT0=
@@ -1429,6 +1431,8 @@ github.com/open-telemetry/opentelemetry-collector-contrib/exporter/azuremonitore
 github.com/open-telemetry/opentelemetry-collector-contrib/exporter/azuremonitorexporter v0.63.0/go.mod h1:8QqjafPijXrEoEmx/8DgdZsCqVuZ+mU91tWKTFMYssg=
 github.com/open-telemetry/opentelemetry-collector-contrib/exporter/carbonexporter v0.63.0 h1:SzjPTo0bRUOuk3BY0N2vvwsTtEUFoaop979NHO+O4LQ=
 github.com/open-telemetry/opentelemetry-collector-contrib/exporter/carbonexporter v0.63.0/go.mod h1:59fynvjq4T6IUW051o88J8jJ9+HFTxO5hvW5mjVq2ro=
+github.com/open-telemetry/opentelemetry-collector-contrib/exporter/dynatraceexporter v0.63.0 h1:1GTr+skiXe2DYdhXjrjFCdnOJAB9HMadlXFAA7Q6tfc=
+github.com/open-telemetry/opentelemetry-collector-contrib/exporter/dynatraceexporter v0.63.0/go.mod h1:ViNEqEd9RqfLAGzUXAwdwRDSNbOmqBj3eRoFbH7O1vE=
 github.com/open-telemetry/opentelemetry-collector-contrib/exporter/elasticsearchexporter v0.63.0 h1:BzmNPKgd8t7NmC2jgHw/Cqnz4Kxgypftz0VTgEVUSWM=
 github.com/open-telemetry/opentelemetry-collector-contrib/exporter/elasticsearchexporter v0.63.0/go.mod h1:g+vfziqrpkFxKo5e8QG+xXEJD0h8uHF2KkZfSRDplFI=
 github.com/open-telemetry/opentelemetry-collector-contrib/exporter/f5cloudexporter v0.63.0 h1:DMnKoUq+l0gJEsT/6RGLxueL8xqj6pKAE0oBjVnNpH4=
