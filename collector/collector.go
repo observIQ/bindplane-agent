@@ -92,7 +92,7 @@ func (c *collector) Run(ctx context.Context) error {
 	svc, err := service.New(*settings)
 	if err != nil {
 		err := fmt.Errorf("failed to create service: %w", err)
-		c.sendStatus(false, err)
+		c.sendStatus(false, false, err)
 		return err
 	}
 
@@ -105,8 +105,26 @@ func (c *collector) Run(ctx context.Context) error {
 
 	go func() {
 		defer wg.Done()
+
+		// Catch panic
+		defer func() {
+			if r := recover(); r != nil {
+				var panicErr error
+				switch v := r.(type) {
+				case error:
+					panicErr = fmt.Errorf("collector panicked with error: %w", v)
+				case string:
+					panicErr = fmt.Errorf("collector panicked with error: %s", v)
+				default:
+					panicErr = fmt.Errorf("collector panicked with error: %v", v)
+				}
+
+				c.sendStatus(false, true, panicErr)
+			}
+		}()
+
 		err := svc.Run(ctx)
-		c.sendStatus(false, err)
+		c.sendStatus(false, false, err)
 
 		// The error may be nil;
 		// We want to signal even in this case, because otherwise waitForStartup could keep waiting
@@ -148,7 +166,7 @@ func (c *collector) waitForStartup(ctx context.Context, startupErr chan error) e
 
 	for {
 		if c.svc.GetState() == service.Running {
-			c.sendStatus(true, nil)
+			c.sendStatus(true, false, nil)
 			return nil
 		}
 
@@ -174,15 +192,16 @@ func (c *collector) Status() <-chan *Status {
 }
 
 // sendStatus will set the status of the collector
-func (c *collector) sendStatus(running bool, err error) {
+func (c *collector) sendStatus(running, panicked bool, err error) {
 	select {
-	case c.statusChan <- &Status{running, err}:
+	case c.statusChan <- &Status{running, panicked, err}:
 	default:
 	}
 }
 
 // Status is the status of a collector.
 type Status struct {
-	Running bool
-	Err     error
+	Running  bool
+	Panicked bool
+	Err      error
 }

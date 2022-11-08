@@ -60,6 +60,11 @@ type Client struct {
 	// To signal if we are disconnecting already and not take any actions on connection failures
 	disconnecting bool
 
+	// Used to monitor collector status
+	collectorMntrCtx    context.Context
+	collectorMntrCancel context.CancelFunc
+	collectorMntrWg     sync.WaitGroup
+
 	currentConfig opamp.Config
 }
 
@@ -217,6 +222,9 @@ func (c *Client) Connect(ctx context.Context) error {
 		return fmt.Errorf("collector failed to start: %w", err)
 	}
 
+	// Now that collector has successfully started kick off monitoring
+	c.startCollectorMonitoring(ctx)
+
 	err = c.opampClient.Start(ctx, settings)
 	if err != nil {
 		// Set package status file for error (for Updater to pick up), but do not force send to Server
@@ -228,6 +236,10 @@ func (c *Client) Connect(ctx context.Context) error {
 
 // Disconnect disconnects from the server
 func (c *Client) Disconnect(ctx context.Context) error {
+	// Ensure we're no longer monitoring the collector as we shutdown to avoid error messages due to shutdown
+	c.collectorMntrCancel()
+	c.collectorMntrWg.Done()
+
 	c.safeSetDisconnecting(true)
 	c.collector.Stop()
 	return c.opampClient.Stop(ctx)
@@ -614,6 +626,33 @@ func (c *Client) getVerifiedPackageStatuses() (*protobufs.PackageStatuses, error
 	}
 
 	return lastPackageStatuses, nil
+}
+
+func (c *Client) startCollectorMonitoring(ctx context.Context) {
+	c.collectorMntrCtx, c.collectorMntrCancel = context.WithCancel(ctx)
+	c.collectorMntrWg.Add(1)
+	go c.monitorCollectorStatus()
+}
+
+// monitorCollectorStatus monitors the status of the collector after startup
+func (c *Client) monitorCollectorStatus() {
+	defer c.collectorMntrWg.Done()
+	statusChan := c.collector.Status()
+	select {
+	case status := <-statusChan:
+		switch {
+		case status.Panicked:
+			// Currently we can't recover from this so we should log a message and exit with an error code.
+			// No need to cleanup on shutdown as if no state is left over that would prevent a new process from starting.
+			c.logger.Fatal("Collector encountered unrecoverable error", zap.Error(status.Err))
+		case status.Err != nil:
+			c.logger.Error("Collector unexpected stopped running", zap.Error(status.Err))
+		case !status.Running:
+			c.logger.Error("Collector unexpected stopped running")
+		}
+	case <-c.collectorMntrCtx.Done():
+		return
+	}
 }
 
 func (c *Client) safeSetUpdatingPackage(value bool) {

@@ -15,11 +15,14 @@
 package observiq
 
 import (
+	"context"
 	"errors"
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 
+	"github.com/observiq/observiq-otel-collector/collector"
 	colmocks "github.com/observiq/observiq-otel-collector/collector/mocks"
 	"github.com/observiq/observiq-otel-collector/opamp"
 	"github.com/observiq/observiq-otel-collector/opamp/mocks"
@@ -204,7 +207,9 @@ func Test_collectorReload(t *testing.T) {
 				collectorFilePath := filepath.Join(tmpDir, CollectorConfigName)
 
 				expectedErr := errors.New("oops")
+				statusChannel := make(chan *collector.Status)
 				mockCollector := colmocks.NewMockCollector(t)
+				mockCollector.On("Status").Return((<-chan *collector.Status)(statusChannel))
 				mockCollector.On("Restart", mock.Anything).Return(expectedErr).Once()
 				mockCollector.On("Restart", mock.Anything).Return(nil).Once()
 
@@ -218,6 +223,9 @@ func Test_collectorReload(t *testing.T) {
 					collector: mockCollector,
 				}
 
+				// Setup Context to mock out already running collector monitor
+				client.collectorMntrCtx, client.collectorMntrCancel = context.WithCancel(context.Background())
+
 				reloadFunc := collectorReload(client, collectorFilePath)
 
 				changed, err := reloadFunc([]byte("valid: config"))
@@ -228,6 +236,13 @@ func Test_collectorReload(t *testing.T) {
 				data, err := os.ReadFile(collectorFilePath)
 				assert.NoError(t, err)
 				assert.Equal(t, currContents, data)
+
+				// Cleanup
+				client.collectorMntrCancel()
+				assert.Eventually(t, func() bool {
+					client.collectorMntrWg.Wait()
+					return true
+				}, 2*time.Second, 100*time.Millisecond)
 			},
 		},
 		{
@@ -238,6 +253,8 @@ func Test_collectorReload(t *testing.T) {
 				collectorFilePath := filepath.Join(tmpDir, CollectorConfigName)
 
 				mockCollector := colmocks.NewMockCollector(t)
+				statusChannel := make(chan *collector.Status)
+				mockCollector.On("Status").Return((<-chan *collector.Status)(statusChannel))
 				mockCollector.On("Restart", mock.Anything).Return(nil)
 
 				currContents := []byte("current: config")
@@ -250,6 +267,9 @@ func Test_collectorReload(t *testing.T) {
 					collector: mockCollector,
 				}
 
+				// Setup Context to mock out already running collector monitor
+				client.collectorMntrCtx, client.collectorMntrCancel = context.WithCancel(context.Background())
+
 				reloadFunc := collectorReload(client, collectorFilePath)
 
 				newContents := []byte("valid: config")
@@ -257,10 +277,17 @@ func Test_collectorReload(t *testing.T) {
 				assert.NoError(t, err)
 				assert.True(t, changed)
 
-				// Verify config rolledback
+				// Verify new config set
 				data, err := os.ReadFile(collectorFilePath)
 				assert.NoError(t, err)
 				assert.Equal(t, newContents, data)
+
+				// Cleanup
+				client.collectorMntrCancel()
+				assert.Eventually(t, func() bool {
+					client.collectorMntrWg.Wait()
+					return true
+				}, 2*time.Second, 100*time.Millisecond)
 			},
 		},
 	}
