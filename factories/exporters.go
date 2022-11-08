@@ -23,6 +23,7 @@ import (
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/awsxrayexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/azuremonitorexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/carbonexporter"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/dynatraceexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/elasticsearchexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/f5cloudexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/fileexporter"
@@ -57,6 +58,7 @@ var defaultExporters = []component.ExporterFactory{
 	azuremonitorexporter.NewFactory(),
 	carbonexporter.NewFactory(),
 	componenttest.NewNopExporterFactory(),
+	dynatraceexporter.NewFactory(),
 	elasticsearchexporter.NewFactory(),
 	f5cloudexporter.NewFactory(),
 	fileexporter.NewFactory(),
