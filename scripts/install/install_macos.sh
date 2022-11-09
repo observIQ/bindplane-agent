@@ -593,7 +593,7 @@ uninstall()
   # but if a new install occurs, the default config will still be used.
   succeeded
 
-  info "Removing any existing logging files"
+  info "Removing any existing log files"
   rm -rf "/var/log/observiq_collector.err" || error_exit "$LINENO" "Failed to remove /var/log/observiq_collector.err"
   succeeded
 
