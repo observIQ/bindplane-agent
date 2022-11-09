@@ -593,9 +593,14 @@ uninstall()
   # but if a new install occurs, the default config will still be used.
   succeeded
 
+  info "Removing any existing logging files"
+  rm -rf "/var/log/observiq_collector.err" || error_exit "$LINENO" "Failed to remove /var/log/observiq_collector.err"
+  succeeded
+
   info "Removing opentelemetry-java-contrib-jmx-metrics.jar from /opt..."
   rm -f "/opt/opentelemetry-java-contrib-jmx-metrics.jar" || error_exit "$LINENO" "Failed to remove /opt/opentelemetry-java-contrib-jmx-metrics.jar"
   succeeded
+
 
   decrease_indent
   banner "$(fg_green Uninstallation Complete!)"

@@ -27,5 +27,7 @@
     <string>[INSTALLDIR]</string>
     <key>ExitTimeOut</key>
     <integer>20</integer>
+    <key>StandardErrorPath</key>
+    <string>/var/log/observiq_collector.err</string>
 </dict>
 </plist>
