@@ -54,6 +54,8 @@ After installing, systems with systemd installed will have the `observiq-otel-co
 
 Logs from the collector will appear in `/opt/observiq-otel-collector/log`. You may run `sudo tail -F /opt/observiq-otel-collector/log/collector.log` to view them.
 
+Stdout and stderr for the collector process are recorded via journald. You man run `sudo journalctl -u observiq-otel-collector.service` to view them.
+
 **Configuration**
 
 The config file for the collector can be found at `/opt/observiq-otel-collector/config.yaml`. When changing the configuration,the collector service must be restarted in order for config changes to take effect.
