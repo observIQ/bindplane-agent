@@ -594,7 +594,7 @@ uninstall()
   succeeded
 
   info "Removing any existing log files"
-  rm -rf "/var/log/observiq_collector.err" || error_exit "$LINENO" "Failed to remove /var/log/observiq_collector.err"
+  rm -f "/var/log/observiq_collector.err" || error_exit "$LINENO" "Failed to remove /var/log/observiq_collector.err"
   succeeded
 
   info "Removing opentelemetry-java-contrib-jmx-metrics.jar from /opt..."
