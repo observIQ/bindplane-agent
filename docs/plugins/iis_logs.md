@@ -17,6 +17,7 @@ Log parser for IIS
 | include_file_path_resolved | Enable to include file path resolved in logs | bool | `false` | false |  |
 | start_at | At startup, where to start reading logs from the file (`beginning` or `end`) | string | `end` | false | `beginning`, `end` |
 | retain_raw_logs | When enabled will preserve the original log message on the body in a `raw_log` key | bool | `false` | false |  |
+| parse_to | Where to parse structured log parts | string | `body` | false | `body`, `attributes` |
 
 ## Example Config:
 
@@ -38,4 +39,5 @@ receivers:
       include_file_path_resolved: false
       start_at: end
       retain_raw_logs: false
+      parse_to: body
 ```
