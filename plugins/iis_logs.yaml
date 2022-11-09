@@ -51,7 +51,7 @@ parameters:
       - end
     default: end
   - name: retain_raw_logs
-    description: When enabled will preserve the original log message on the body in a `raw_log` key
+    description: When enabled will preserve the original log message in a `raw_log` key. This will either be in the `body` or `attributes` depending on how `parse_to` is configured.
     type: bool
     default: false
   - name: parse_to
