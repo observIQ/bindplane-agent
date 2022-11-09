@@ -601,7 +601,6 @@ uninstall()
   rm -f "/opt/opentelemetry-java-contrib-jmx-metrics.jar" || error_exit "$LINENO" "Failed to remove /opt/opentelemetry-java-contrib-jmx-metrics.jar"
   succeeded
 
-
   decrease_indent
   banner "$(fg_green Uninstallation Complete!)"
 }
