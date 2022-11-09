@@ -30,6 +30,12 @@ After changing the configuration file run `sudo launchctl unload /Library/Launch
 
 For more information on configuring the collector, see the [OpenTelemetry docs](https://opentelemetry.io/docs/collector/configuration/).
 
+**Logging**
+
+Logs from the collector will appear in `/opt/observiq-otel-collector/log`. You may run `sudo tail -F /opt/observiq-otel-collector/log/collector.log` to view them.
+
+Stderr for the collector process can be found at `/var/log/observiq_collector.err`.
+
 ## Collector Services Commands
 
 The collector uses `launchctl` to control the collector lifecycle using the following commands.
