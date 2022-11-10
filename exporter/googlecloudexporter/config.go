@@ -18,7 +18,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
 
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector"
