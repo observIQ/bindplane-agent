@@ -110,7 +110,7 @@ func (c *Config) updateProjectFromJSON(jsonBytes []byte) error {
 }
 
 func (c *Config) updateProjectFromFile(fileName string) error {
-	jsonBytes, err := ioutil.ReadFile(fileName)
+	jsonBytes, err := os.ReadFile(fileName)
 	if err != nil {
 		return fmt.Errorf("failed to read file: %w", err)
 	}
