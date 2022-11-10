@@ -19,6 +19,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector"
 	gcp "github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlecloudexporter"
@@ -109,7 +110,7 @@ func (c *Config) updateProjectFromJSON(jsonBytes []byte) error {
 }
 
 func (c *Config) updateProjectFromFile(fileName string) error {
-	jsonBytes, err := os.ReadFile(fileName)
+	jsonBytes, err := os.ReadFile(filepath.Clean(fileName))
 	if err != nil {
 		return fmt.Errorf("failed to read file: %w", err)
 	}
