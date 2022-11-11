@@ -32,8 +32,15 @@ FROM openjdk:8u312-slim-buster as openjdk
 
 # Final Stage
 #
-FROM gcr.io/observiq-container-images/stanza-base:v1.2.2
+FROM ubuntu:22.04
 WORKDIR /
+
+RUN apt-get update && \
+    apt-get install -y \
+        --no-install-recommends \
+        systemd tzdata ca-certificates && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 RUN adduser \
     --disabled-password \
