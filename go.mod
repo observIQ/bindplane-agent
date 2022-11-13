@@ -8,6 +8,7 @@ require (
 	github.com/mholt/archiver/v3 v3.5.1
 	github.com/observiq/observiq-otel-collector/exporter/googlecloudexporter v1.12.0
 	github.com/observiq/observiq-otel-collector/packagestate v1.12.0
+	github.com/observiq/observiq-otel-collector/processor/maskprocessor v1.12.0
 	github.com/observiq/observiq-otel-collector/processor/resourceattributetransposerprocessor v1.12.0
 	github.com/observiq/observiq-otel-collector/processor/samplingprocessor v1.12.0
 	github.com/observiq/observiq-otel-collector/processor/throughputmeasurementprocessor v1.12.0
@@ -514,13 +515,13 @@ require (
 	go.opentelemetry.io/otel/trace v1.11.1 // indirect
 	go.uber.org/atomic v1.10.0 // indirect
 	go.uber.org/goleak v1.2.0 // indirect
-	golang.org/x/crypto v0.1.0 // indirect
+	golang.org/x/crypto v0.2.0 // indirect
 	golang.org/x/exp v0.0.0-20221019170559-20944726eadf // indirect
 	golang.org/x/mod v0.6.0 // indirect
-	golang.org/x/net v0.1.0 // indirect
+	golang.org/x/net v0.2.0 // indirect
 	golang.org/x/oauth2 v0.1.0 // indirect
 	golang.org/x/sync v0.1.0 // indirect
-	golang.org/x/term v0.1.0 // indirect
+	golang.org/x/term v0.2.0 // indirect
 	golang.org/x/text v0.4.0 // indirect
 	golang.org/x/time v0.0.0-20220922220347-f3bd1da661af // indirect
 	golang.org/x/tools v0.2.0 // indirect
@@ -559,6 +560,8 @@ replace github.com/observiq/observiq-otel-collector/packagestate => ./packagesta
 replace github.com/observiq/observiq-otel-collector/processor/throughputmeasurementprocessor => ./processor/throughputmeasurementprocessor
 
 replace github.com/observiq/observiq-otel-collector/processor/samplingprocessor => ./processor/samplingprocessor
+
+replace github.com/observiq/observiq-otel-collector/processor/maskprocessor => ./processor/maskprocessor
 
 // some dependencies attempt to bring something like v1.8.2-0.20220303173753-edfe657b5405, which is older than v0.38.0
 // at the time of this inclusion, v0.38.0 was the latest version available (also tagged as v2.38.0)
