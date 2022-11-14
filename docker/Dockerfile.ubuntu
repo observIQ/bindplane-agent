@@ -45,8 +45,10 @@ RUN apt-get update && \
 RUN adduser \
     --disabled-password \
     --gecos "" \
+    --home /etc/otel \
     --no-create-home \
     --uid 10005 \
+    --shell /sbin/nologin \
     otel
 
 RUN mkdir /etc/otel && chown otel:otel /etc/otel

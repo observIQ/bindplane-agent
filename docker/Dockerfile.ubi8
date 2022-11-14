@@ -43,6 +43,7 @@ RUN dnf install -y \
 RUN groupadd --gid 10005 otel && \
     adduser \
     --system \
+    --home /etc/otel \
     --no-create-home \
     --uid 10005 \
     --gid otel \
