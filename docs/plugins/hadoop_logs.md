@@ -16,7 +16,7 @@ Log parser for Apache Hadoop
 
 ## Example Config:
 
-Below is an example of a basic conifg
+Below is an example of a basic config
 
 ```yaml
 receivers:
