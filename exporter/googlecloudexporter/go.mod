@@ -6,8 +6,9 @@ require (
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector v0.34.1
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlecloudexporter v0.63.0
 	github.com/stretchr/testify v1.8.1
-	go.opentelemetry.io/collector v0.63.1
-	go.opentelemetry.io/collector/pdata v0.63.1
+	go.opentelemetry.io/collector v0.64.1
+	go.opentelemetry.io/collector/pdata v0.64.1
+	go.opentelemetry.io/collector/processor/batchprocessor v0.64.1
 	go.uber.org/multierr v1.8.0
 )
 
@@ -40,13 +41,13 @@ require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/translator/opencensus v0.63.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/stretchr/objx v0.5.0 // indirect
-	go.opencensus.io v0.23.0 // indirect
+	go.opencensus.io v0.24.0 // indirect
 	go.opentelemetry.io/otel v1.11.1
 	go.opentelemetry.io/otel/metric v0.33.0 // indirect
 	go.opentelemetry.io/otel/sdk v1.11.1 // indirect
 	go.opentelemetry.io/otel/trace v1.11.1 // indirect
 	go.uber.org/atomic v1.10.0 // indirect
-	go.uber.org/zap v1.23.0 // indirect
+	go.uber.org/zap v1.23.0
 	golang.org/x/net v0.0.0-20221014081412-f15817d10f9b // indirect
 	golang.org/x/oauth2 v0.0.0-20221014153046-6fdb5e3db783 // indirect
 	golang.org/x/sync v0.1.0 // indirect
@@ -66,6 +67,6 @@ require (
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.12.0 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/prometheus/prometheus v0.38.0 // indirect
-	go.opentelemetry.io/collector/semconv v0.63.1 // indirect
+	go.opentelemetry.io/collector/semconv v0.64.1 // indirect
 	golang.org/x/sys v0.0.0-20220919091848-fb04ddd9f9c8 // indirect
 )
