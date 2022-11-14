@@ -118,18 +118,18 @@ template: |
 
         - id: move_component
           type: move
-          from: body.c
-          to: body.component
+          from: {{ .parse_to }}.c
+          to: {{ .parse_to }}.component
 
         - id: move_context
           type: move
-          from: body.ctx
-          to: body.context
+          from: {{ .parse_to }}.ctx
+          to: {{ .parse_to }}.context
 
         - id: move_message
           type: move
-          from: body.msg
-          to: body.message
+          from: {{ .parse_to }}.msg
+          to: {{ .parse_to }}.message
 
         # When message is 'WiredTiger message', data.attr.message
         # always exists, and should be promoted to message
@@ -137,19 +137,19 @@ template: |
           type: router
           default: add_log_type
           routes:
-            - expr: 'body.message == "WiredTiger message"'
+            - expr: '{{ .parse_to }}.message == "WiredTiger message"'
               output: move_wiredtiger_type
 
         - id: move_wiredtiger_type
           type: move
-          from: body.message
-          to: body.message_type
+          from: {{ .parse_to }}.message
+          to: {{ .parse_to }}.message_type
           output: move_wiredtiger_msg
 
         - id: move_wiredtiger_msg
           type: move
-          from: body.attr.message
-          to: body.message
+          from: {{ .parse_to }}.attr.message
+          to: {{ .parse_to }}.message
           output: add_log_type
           
         - id: add_log_type
