@@ -1,4 +1,4 @@
-version: 0.2.0
+version: 0.3.0
 title: File
 description: Log parser for generic files
 parameters:
@@ -59,9 +59,16 @@ parameters:
       - end
     default: end
   - name: retain_raw_logs
-    description: When enabled will preserve the original log message on the body in a `raw_log` key
+    description: When enabled will preserve the original log message in a `raw_log` key. This will either be in the `body` or `attributes` depending on how `parse_to` is configured.
     type: bool
     default: false
+  - name: parse_to
+    description: Where to parse structured log parts
+    type: string
+    supported:
+      - body
+      - attributes
+    default: body
   - name: offset_storage_dir
     description: The directory that the offset storage file will be created
     type: string
@@ -97,13 +104,13 @@ template: |
         {{ end }}
         {{ if (eq .parse_format "json")}}
         - type: json_parser
-          parse_to: body
+          parse_to: {{ .parse_to }}
         {{ end }}
 
         {{ if (eq .parse_format "regex")}}
         - type: regex_parser
           regex: {{ .regex_pattern }}
-          parse_to: body
+          parse_to: {{ .parse_to }}
         {{ end }}
 
         - id: add_type
@@ -111,7 +118,7 @@ template: |
           field: attributes.log_type
           value: {{ .log_type }}
 
-        {{ if .retain_raw_logs }}
+        {{ if and .retain_raw_logs (eq .parse_to "body")}}
         - id: move_raw_log
           type: move
           from: attributes.raw_log
