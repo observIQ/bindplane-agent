@@ -23,7 +23,7 @@ The following config is an example configuration of the mask processor using def
 receivers:
     otlp:
         protocols:
-            grpc::
+            grpc:
 processors:
     mask:
 exporters:

@@ -57,10 +57,8 @@ func (cfg Config) Validate() error {
 		return errNoRules
 	}
 
-	for key, value := range cfg.Rules {
-		if _, err := regexp.Compile(value); err != nil {
-			return fmt.Errorf("rule '%s' does not compile as valid regex", key)
-		}
+	if _, err := cfg.CompileRules(); err != nil {
+		return err
 	}
 
 	return nil

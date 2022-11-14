@@ -31,6 +31,7 @@ const (
 
 var (
 	consumerCapabilities = consumer.Capabilities{MutatesData: true}
+	errInvalidConfigType = errors.New("config is not of type maskprocessor.Config")
 	defaultRules         = map[string]string{
 		"email":       `\b[a-z0-9._%\+\-—|]+@[a-z0-9.\-—|]+\.[a-z|]{2,6}\b`,
 		"ssn":         `\b\d{3}[- ]\d{2}[- ]\d{4}\b`,
@@ -67,7 +68,7 @@ func createTracesProcessor(
 ) (component.TracesProcessor, error) {
 	maskCfg, ok := cfg.(*Config)
 	if !ok {
-		return nil, errors.New("config is not of type maskprocessor.Config")
+		return nil, errInvalidConfigType
 	}
 
 	processor := newProcessor(set.Logger, maskCfg)
@@ -90,7 +91,7 @@ func createLogsProcessor(
 ) (component.LogsProcessor, error) {
 	maskCfg, ok := cfg.(*Config)
 	if !ok {
-		return nil, errors.New("config is not of type maskprocessor.Config")
+		return nil, errInvalidConfigType
 	}
 
 	processor := newProcessor(set.Logger, maskCfg)
@@ -113,7 +114,7 @@ func createMetricsProcessor(
 ) (component.MetricsProcessor, error) {
 	maskCfg, ok := cfg.(*Config)
 	if !ok {
-		return nil, errors.New("config is not of type maskprocessor.Config")
+		return nil, errInvalidConfigType
 	}
 
 	processor := newProcessor(set.Logger, maskCfg)

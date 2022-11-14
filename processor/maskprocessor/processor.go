@@ -35,9 +35,11 @@ const (
 
 // processor is the processor used to mask data.
 type processor struct {
-	logger *zap.Logger
-	cfg    *Config
-	rules  map[string]*regexp.Regexp
+	logger           *zap.Logger
+	cfg              *Config
+	rules            map[string]*regexp.Regexp
+	maskResourceFunc func(k string, v pcommon.Value) bool
+	maskAttrsFunc    func(k string, v pcommon.Value) bool
 }
 
 // newProcessor creates a new mask processor.
@@ -56,6 +58,8 @@ func (p *processor) start(context.Context, component.Host) error {
 	}
 
 	p.rules = rules
+	p.maskResourceFunc = p.createMaskFunc(resourceField)
+	p.maskAttrsFunc = p.createMaskFunc(attributesField)
 	return nil
 }
 
@@ -63,14 +67,12 @@ func (p *processor) start(context.Context, component.Host) error {
 func (p *processor) processLogs(_ context.Context, ld plog.Logs) (plog.Logs, error) {
 	for i := 0; i < ld.ResourceLogs().Len(); i++ {
 		resource := ld.ResourceLogs().At(i)
-		resourceMaskFunc := p.createMaskFunc(resourceField)
-		resource.Resource().Attributes().Range(resourceMaskFunc)
+		resource.Resource().Attributes().Range(p.maskResourceFunc)
 		for j := 0; j < resource.ScopeLogs().Len(); j++ {
 			scope := resource.ScopeLogs().At(j)
 			for k := 0; k < scope.LogRecords().Len(); k++ {
 				logs := scope.LogRecords().At(k)
-				attrMaskFunc := p.createMaskFunc(attributesField)
-				logs.Attributes().Range(attrMaskFunc)
+				logs.Attributes().Range(p.maskAttrsFunc)
 				p.maskValue(bodyField, logs.Body())
 			}
 		}
@@ -83,14 +85,12 @@ func (p *processor) processLogs(_ context.Context, ld plog.Logs) (plog.Logs, err
 func (p *processor) processTraces(_ context.Context, td ptrace.Traces) (ptrace.Traces, error) {
 	for i := 0; i < td.ResourceSpans().Len(); i++ {
 		resource := td.ResourceSpans().At(i)
-		resourceMaskFunc := p.createMaskFunc(resourceField)
-		resource.Resource().Attributes().Range(resourceMaskFunc)
+		resource.Resource().Attributes().Range(p.maskResourceFunc)
 		for j := 0; j < resource.ScopeSpans().Len(); j++ {
 			scope := resource.ScopeSpans().At(j)
 			for k := 0; k < scope.Spans().Len(); k++ {
 				spans := scope.Spans().At(k)
-				attrMaskFunc := p.createMaskFunc(attributesField)
-				spans.Attributes().Range(attrMaskFunc)
+				spans.Attributes().Range(p.maskAttrsFunc)
 			}
 		}
 	}
@@ -102,8 +102,7 @@ func (p *processor) processTraces(_ context.Context, td ptrace.Traces) (ptrace.T
 func (p *processor) processMetrics(_ context.Context, md pmetric.Metrics) (pmetric.Metrics, error) {
 	for i := 0; i < md.ResourceMetrics().Len(); i++ {
 		resource := md.ResourceMetrics().At(i)
-		resourceMaskFunc := p.createMaskFunc(resourceField)
-		resource.Resource().Attributes().Range(resourceMaskFunc)
+		resource.Resource().Attributes().Range(p.maskResourceFunc)
 		for j := 0; j < resource.ScopeMetrics().Len(); j++ {
 			scope := resource.ScopeMetrics().At(j)
 			for k := 0; k < scope.Metrics().Len(); k++ {
@@ -126,24 +125,21 @@ func (p *processor) processMetrics(_ context.Context, md pmetric.Metrics) (pmetr
 // processSum masks a sum metric.
 func (p *processor) processSum(sum pmetric.Sum) {
 	for i := 0; i < sum.DataPoints().Len(); i++ {
-		maskFunc := p.createMaskFunc(attributesField)
-		sum.DataPoints().At(i).Attributes().Range(maskFunc)
+		sum.DataPoints().At(i).Attributes().Range(p.maskAttrsFunc)
 	}
 }
 
 // processGauge masks a gauge metric.
 func (p *processor) processGauge(gauge pmetric.Gauge) {
 	for i := 0; i < gauge.DataPoints().Len(); i++ {
-		maskFunc := p.createMaskFunc(attributesField)
-		gauge.DataPoints().At(i).Attributes().Range(maskFunc)
+		gauge.DataPoints().At(i).Attributes().Range(p.maskAttrsFunc)
 	}
 }
 
 // processSummary masks a summary metrics.
 func (p *processor) processSummary(summary pmetric.Summary) {
 	for i := 0; i < summary.DataPoints().Len(); i++ {
-		maskFunc := p.createMaskFunc(attributesField)
-		summary.DataPoints().At(i).Attributes().Range(maskFunc)
+		summary.DataPoints().At(i).Attributes().Range(p.maskAttrsFunc)
 	}
 }
 
