@@ -1,4 +1,4 @@
-version: 0.1.0
+version: 0.2.0
 title: MongoDB
 description: Log parser for MongoDB
 parameters:
@@ -16,9 +16,16 @@ parameters:
       - end
     default: end
   - name: retain_raw_logs
-    description: When enabled will preserve the original log message on the body in a `raw_log` key
+    description: When enabled will preserve the original log message in a `raw_log` key. This will either be in the `body` or `attributes` depending on how `parse_to` is configured.
     type: bool
     default: false
+  - name: parse_to
+    description: Where to parse structured log parts
+    type: string
+    supported:
+      - body
+      - attributes
+    default: body
   - name: offset_storage_dir
     description: The directory that the offset storage file will be created
     type: string
@@ -55,13 +62,13 @@ template: |
         - id: legacy_parser
           type: regex_parser
           regex: '^(?P<timestamp>\S+)\s+(?P<severity>\w+)\s+(?P<component>[\w-]+)\s+\[(?P<context>\S+)\]\s+(?P<message>.*)$'
-          parse_to: body
+          parse_to: {{ .parse_to }}
           timestamp:
-            parse_from: body.timestamp
+            parse_from: {{ .parse_to }}.timestamp
             #2019-02-06T09:22:43.967-0500
             layout: '%Y-%m-%dT%H:%M:%S.%f%z'
           severity:
-            parse_from: body.severity
+            parse_from: {{ .parse_to }}.severity
             mapping:
               fatal: F
               error: E
@@ -80,13 +87,13 @@ template: |
         # {"t":{"$date":"2022-04-26T16:15:44.876+00:00"},"s":"I",  "c":"INDEX",    "id":20345,   "ctx":"LogicalSessionCacheRefresh","msg":"Index build: done building","attr":{"buildUUID":null,"namespace":"config.system.sessions","index":"lsidTTLIndex","commitTimestamp":null}}
         - id: 4_4_parser
           type: json_parser
-          parse_to: body
+          parse_to: {{ .parse_to }}
           timestamp:
-            parse_from: body.t.$$date
+            parse_from: {{ .parse_to }}.t.$$date
             #2020-11-03T14:24:07.436-05:00
             layout: '%Y-%m-%dT%H:%M:%S.%f%j'
           severity:
-            parse_from: body.s
+            parse_from: {{ .parse_to }}.s
             mapping:
               fatal: F
               error: E
@@ -150,7 +157,7 @@ template: |
           field: 'attributes.log_type'
           value: 'mongodb'
         
-        {{ if .retain_raw_logs }}
+        {{ if and .retain_raw_logs (eq .parse_to "body")}}
         - id: move_raw_log
           type: move
           from: attributes.raw_log
