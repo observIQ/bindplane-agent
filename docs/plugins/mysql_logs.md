@@ -29,7 +29,7 @@ To enable slow query logging run the following with an admin user:
 
 ## Example Config:
 
-Below is an example of a basic conifg
+Below is an example of a basic config
 
 ```yaml
 receivers:
