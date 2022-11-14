@@ -36,10 +36,10 @@ template: |
       attributes:
         log_type: apache_combined
       operators:
-        {{ if and .retain_raw_logs (eq .parse_to "body")}}
+        {{ if .retain_raw_logs }}
         - id: save_raw_log
           type: copy
-          from: { .parse_to }}.
+          from: body
           to: attributes.raw_log
         {{ end }}
         - type: regex_parser
@@ -60,7 +60,7 @@ template: |
         - id: move_raw_log
           type: move
           from: attributes.raw_log
-          to: {{ .parse_to }}.raw_log
+          to: body.raw_log
         {{ end }}
 
 
