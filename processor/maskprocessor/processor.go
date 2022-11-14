@@ -18,7 +18,6 @@ import (
 	"context"
 	"fmt"
 	"regexp"
-	"strings"
 
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/pdata/pcommon"
@@ -151,7 +150,7 @@ func (p *processor) processSummary(summary pmetric.Summary) {
 // maskValue masks a pcommon.Value.
 func (p *processor) maskValue(field string, value pcommon.Value) {
 	for _, excludeField := range p.cfg.Exclude {
-		if strings.Contains(field, excludeField) {
+		if field == excludeField {
 			return
 		}
 	}

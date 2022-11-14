@@ -33,7 +33,7 @@ type Config struct {
 	Rules map[string]string `mapstructure:"rules"`
 
 	// Exclude is a list of fields to exclude when masking.
-	Exclude []string `mapstructure:"rules"`
+	Exclude []string `mapstructure:"exclude"`
 }
 
 // CompileRules compiles the rules defined in the config.
