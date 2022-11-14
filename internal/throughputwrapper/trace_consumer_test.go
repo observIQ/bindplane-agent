@@ -33,7 +33,7 @@ func Test_newTraceConsumer(t *testing.T) {
 	require.Equal(t, nopLogger, tConsumer.logger)
 	require.Equal(t, baseConsumer, tConsumer.baseConsumer)
 	require.Len(t, tConsumer.mutators, 1)
-	require.Equal(t, ptrace.NewProtoMarshaler(), tConsumer.tracesSizer)
+	require.Equal(t, &ptrace.ProtoMarshaler{}, tConsumer.tracesSizer)
 }
 
 func Test_traceConsumer_ConsumeTraces(t *testing.T) {
