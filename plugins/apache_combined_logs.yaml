@@ -1,4 +1,4 @@
-version: 0.1.0
+version: 0.2.0
 title: Apache Combined
 description: Log parser for Apache combined format
 parameters:
@@ -15,9 +15,16 @@ parameters:
       - end
     default: end
   - name: retain_raw_logs
-    description: When enabled will preserve the original log message on the body in a `raw_log` key
+    description: When enabled will preserve the original log message in a `raw_log` key. This will either be in the `body` or `attributes` depending on how `parse_to` is configured.
     type: bool
     default: false
+  - name: parse_to
+    description: Where to parse structured log parts
+    type: string
+    supported:
+      - body
+      - attributes
+    default: body
 template: |
   receivers:
     filelog:
@@ -29,31 +36,31 @@ template: |
       attributes:
         log_type: apache_combined
       operators:
-        {{ if .retain_raw_logs }}
+        {{ if and .retain_raw_logs (eq .parse_to "body")}}
         - id: save_raw_log
           type: copy
-          from: body
+          from: { .parse_to }}.
           to: attributes.raw_log
         {{ end }}
         - type: regex_parser
           regex: '^(?P<remote_addr>[^ ]*) (?P<remote_host>[^ ]*) (?P<remote_user>[^ ]*) \[(?P<time>[^\]]*)\] "(?P<method>\S+) +(?P<path>[^ ]*)( (?P<protocol>[^/]*)/(?P<protocol_version>[^\"]*)|[^\"]*)?" (?P<status>[^ ]*) (?P<body_bytes_sent>[^ ]*) "(?P<http_referer>[^\"]*)" "(?P<http_user_agent>[^\"]*)'
-          parse_to: body
+          parse_to: {{ .parse_to }}
           timestamp:
-            parse_from: body.time
+            parse_from: {{ .parse_to }}.time
             layout: '%d/%b/%Y:%H:%M:%S %z'
           severity:
-            parse_from: body.status
+            parse_from: {{ .parse_to }}.status
             preset: none
             mapping:
               info: 2xx
               info2: 3xx
               warn: 4xx
               error: 5xx
-        {{ if .retain_raw_logs }}
+        {{ if and .retain_raw_logs (eq .parse_to "body")}}
         - id: move_raw_log
           type: move
           from: attributes.raw_log
-          to: body.raw_log
+          to: {{ .parse_to }}.raw_log
         {{ end }}
 
 
