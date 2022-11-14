@@ -29,7 +29,7 @@ ErrorLogFormat "{\"time\":\"%{cu}t\",\"module\":\"%-m\",\"client\":\"%-a\",\"htt
 
 ## Example Config:
 
-Below is an example of a basic conifg
+Below is an example of a basic config
 
 ```yaml
 receivers:
