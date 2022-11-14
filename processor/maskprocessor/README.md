@@ -22,8 +22,8 @@ The following config is an example configuration of the mask processor using def
 ```yaml
 receivers:
     otlp:
-    protocols:
-        grpc::
+        protocols:
+            grpc::
 processors:
     mask:
 exporters:

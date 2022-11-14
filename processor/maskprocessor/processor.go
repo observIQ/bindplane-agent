@@ -176,7 +176,9 @@ func (p *processor) maskString(value pcommon.Value) {
 		strValue = rule.ReplaceAllString(strValue, mask)
 	}
 
-	value.SetStr(strValue)
+	if strValue != value.Str() {
+		value.SetStr(strValue)
+	}
 }
 
 // createMaskFunc creates a func for ranging through a pcommon.Map and masking its values.
