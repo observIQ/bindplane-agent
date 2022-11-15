@@ -124,6 +124,12 @@ func collectorReload(client *Client, collectorConfigPath string) opamp.ReloadFun
 			return false, err
 		}
 
+		// Stop collector monitoring as we are going to restart it
+		client.stopCollectorMonitoring()
+
+		// Setup new monitoring after collector has been restarted
+		defer client.startCollectorMonitoring(context.Background())
+
 		// Reload collector
 		if err := client.collector.Restart(context.Background()); err != nil {
 			// Rollback file
