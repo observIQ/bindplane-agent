@@ -9,7 +9,8 @@ Log parser for Kubelet journald logs
 | journald_directory | Directory containing journal files to read entries from | string |  | false |  |
 | start_at | At startup, where to start reading logs from the file (`beginning` or `end`) | string | `end` | false | `beginning`, `end` |
 | timezone | Timezone to use when parsing the timestamp | timezone | `UTC` | false |  |
-| retain_raw_logs | When enabled will preserve the original log message on the body in a `raw_log` key | bool | `false` | false |  |
+| retain_raw_logs | When enabled will preserve the original log message in a `raw_log` key. This will either be in the `body` or `attributes` depending on how `parse_to` is configured. | bool | `false` | false |  |
+| parse_to | Where to parse structured log parts | string | `body` | false | `body`, `attributes` |
 
 ## Example Config:
 
@@ -23,4 +24,5 @@ receivers:
       start_at: end
       timezone: UTC
       retain_raw_logs: false
+      parse_to: body
 ```
