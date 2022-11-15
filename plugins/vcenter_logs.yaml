@@ -79,7 +79,7 @@ template: |
         - id: move_syslog_message
           type: move
           from: attributes.syslog_message
-          to: {{ .parse_to }}
+          to: body
           output: vcenter_parser
 
         - id: vcenter_parser
@@ -87,53 +87,53 @@ template: |
           protocol: rfc5424
 
         {{ if eq .parse_to "body" }}
-          # Move syslog fields to body
-          # We do this rather than parsing to body in the syslog_parser as it handles timestamp and severity parsing
-          - id: move_priority
-            if: "attributes.priority != nil"
-            type: move
-            from: attributes.priority
-            to: body.priority
-          - id: move_facility
-            if: "attributes.facility != nil"
-            type: move
-            from: attributes.facility
-            to: body.facility
-          - id: move_hostname
-            if: "attributes.hostname != nil"
-            type: move
-            from: attributes.hostname
-            to: body.hostname
-          - id: move_appname
-            if: "attributes.appname != nil"
-            type: move
-            from: attributes.appname
-            to: body.appname
-          - id: move_proc_id
-            if: "attributes.proc_id != nil"
-            type: move
-            from: attributes.proc_id
-            to: body.proc_id
-          - id: move_msg_id
-            if: "attributes.msg_id != nil"
-            type: move
-            from: attributes.msg_id
-            to: body.msg_id
-          - id: move_message
-            if: "attributes.message != nil"
-            type: move
-            from: attributes.message
-            to: body.message
-          - id: move_structured_data
-            if: "attributes.structured_data != nil"
-            type: move
-            from: attributes.structured_data
-            to: body.structured_data
-          - id: move_version
-            if: "attributes.version != nil"
-            type: move
-            from: attributes.version
-            to: body.version
+        # Move syslog fields to body
+        # We do this rather than parsing to body in the syslog_parser as it handles timestamp and severity parsing
+        - id: move_priority
+          if: "attributes.priority != nil"
+          type: move
+          from: attributes.priority
+          to: body.priority
+        - id: move_facility
+          if: "attributes.facility != nil"
+          type: move
+          from: attributes.facility
+          to: body.facility
+        - id: move_hostname
+          if: "attributes.hostname != nil"
+          type: move
+          from: attributes.hostname
+          to: body.hostname
+        - id: move_appname
+          if: "attributes.appname != nil"
+          type: move
+          from: attributes.appname
+          to: body.appname
+        - id: move_proc_id
+          if: "attributes.proc_id != nil"
+          type: move
+          from: attributes.proc_id
+          to: body.proc_id
+        - id: move_msg_id
+          if: "attributes.msg_id != nil"
+          type: move
+          from: attributes.msg_id
+          to: body.msg_id
+        - id: move_message
+          if: "attributes.message != nil"
+          type: move
+          from: attributes.message
+          to: body.message
+        - id: move_structured_data
+          if: "attributes.structured_data != nil"
+          type: move
+          from: attributes.structured_data
+          to: body.structured_data
+        - id: move_version
+          if: "attributes.version != nil"
+          type: move
+          from: attributes.version
+          to: body.version
         {{ end }}
 
         {{ if and .retain_raw_logs (eq .parse_to "body")}}
