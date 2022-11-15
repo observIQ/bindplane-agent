@@ -17,7 +17,8 @@ Log receiver for Syslog
 | tls_min_version | Minimum version of TLS to use, client will negotiate highest possible | string | `1.2` | false | `1.0`, `1.1`, `1.2`, `1.3` |
 | max_log_size | Maximum number of bytes for a single TCP message. Only applicable when connection_type is TCP | string | `1024kib` | false |  |
 | data_flow | High mode keeps all entries, low mode filters out log entries with a debug severity of (7) | string | `high` | false | `high`, `low` |
-| retain_raw_logs | When enabled will preserve the original log message on the body in a `raw_log` key | bool | `false` | false |  |
+| retain_raw_logs | When enabled will preserve the original log message in a `raw_log` key. This will either be in the `body` or `attributes` depending on how `parse_to` is configured. | bool | `false` | false |  |
+| parse_to | Where to parse structured log parts | string | `body` | false | `body`, `attributes` |
 
 ## Example Config:
 
@@ -37,4 +38,5 @@ receivers:
       max_log_size: 1024kib
       data_flow: high
       retain_raw_logs: false
+      parse_to: body
 ```
