@@ -121,9 +121,6 @@ func TestCollectorRestart(t *testing.T) {
 	require.NoError(t, err)
 
 	status = <-collector.Status()
-	require.False(t, status.Running)
-
-	status = <-collector.Status()
 	require.True(t, status.Running)
 
 	collector.Stop()

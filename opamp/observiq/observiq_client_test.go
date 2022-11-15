@@ -25,6 +25,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/observiq/observiq-otel-collector/collector"
 	colmocks "github.com/observiq/observiq-otel-collector/collector/mocks"
 	"github.com/observiq/observiq-otel-collector/internal/report"
 	"github.com/observiq/observiq-otel-collector/internal/version"
@@ -337,8 +338,10 @@ func TestClientConnect(t *testing.T) {
 					assert.Equal(t, protobufs.PackageStatus_InstallFailed, status.Packages[packagestate.CollectorPackageName].Status)
 				})
 
+				statusChannel := make(chan *collector.Status)
 				mockCollector := colmocks.NewMockCollector(t)
 				mockCollector.On("Run", mock.Anything).Return(nil)
+				mockCollector.On("Status").Return((<-chan *collector.Status)(statusChannel))
 
 				c := &Client{
 					opampClient:   mockOpAmpClient,
@@ -355,6 +358,13 @@ func TestClientConnect(t *testing.T) {
 
 				err := c.Connect(context.Background())
 				assert.ErrorIs(t, err, expectedErr)
+
+				// Cleanup
+				c.collectorMntrCancel()
+				assert.Eventually(t, func() bool {
+					c.collectorMntrWg.Wait()
+					return true
+				}, 2*time.Second, 100*time.Millisecond)
 			},
 		},
 		{
@@ -363,8 +373,10 @@ func TestClientConnect(t *testing.T) {
 				mockOpAmpClient := mocks.NewMockOpAMPClient(t)
 				mockOpAmpClient.On("SetAgentDescription", mock.Anything).Return(nil)
 
+				statusChannel := make(chan *collector.Status)
 				mockCollector := colmocks.NewMockCollector(t)
 				mockCollector.On("Run", mock.Anything).Return(nil)
+				mockCollector.On("Status").Return((<-chan *collector.Status)(statusChannel))
 
 				mockPackagesStateProvider := mocks.NewMockPackagesStateProvider(t)
 
@@ -417,6 +429,13 @@ func TestClientConnect(t *testing.T) {
 
 				err := c.Connect(context.Background())
 				assert.NoError(t, err)
+
+				// Cleanup
+				c.collectorMntrCancel()
+				assert.Eventually(t, func() bool {
+					c.collectorMntrWg.Wait()
+					return true
+				}, 2*time.Second, 100*time.Millisecond)
 			},
 		},
 		{
@@ -470,15 +489,28 @@ func TestClientDisconnect(t *testing.T) {
 	mockOpAmpClient := new(mocks.MockOpAMPClient)
 	mockOpAmpClient.On("Stop", ctx).Return(nil)
 	mockCollector := colmocks.NewMockCollector(t)
+	statusChan := make(chan *collector.Status)
+	mockCollector.On("Status").Return((<-chan *collector.Status)(statusChan))
 	mockCollector.On("Stop").Return()
 
 	c := &Client{
 		opampClient:   mockOpAmpClient,
 		collector:     mockCollector,
 		reportManager: report.GetManager(),
+		logger:        zap.NewNop(),
 	}
 
-	c.Disconnect(ctx)
+	// Start collector monitoring to ensure this is shut down properly
+	c.startCollectorMonitoring(ctx)
+
+	var err error
+	waitFunc := func() bool {
+		err = c.Disconnect(ctx)
+		return true
+	}
+
+	require.Eventually(t, waitFunc, time.Second*2, time.Millisecond*100)
+	assert.NoError(t, err)
 	assert.True(t, c.safeGetDisconnecting())
 	mockOpAmpClient.AssertExpectations(t)
 }

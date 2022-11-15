@@ -1,4 +1,4 @@
-version: 0.2.0
+version: 0.3.0
 title: Syslog
 description: Log receiver for Syslog
 parameters:
@@ -60,9 +60,16 @@ parameters:
       - low
     default: high
   - name: retain_raw_logs
-    description: When enabled will preserve the original log message on the body in a `raw_log` key
+    description: When enabled will preserve the original log message in a `raw_log` key. This will either be in the `body` or `attributes` depending on how `parse_to` is configured.
     type: bool
     default: false
+  - name: parse_to
+    description: Where to parse structured log parts
+    type: string
+    supported:
+      - body
+      - attributes
+    default: body
 template: |
   receivers:
     syslog:
@@ -89,7 +96,7 @@ template: |
         - id: move_raw_log
           type: move
           from: body
-          to: body.raw_log
+          to: {{ .parse_to }}.raw_log
         {{ end }}
         {{ if eq .data_flow "low" }}
         # Filter entries with debug severity (7); There is no actual severity field left by the syslog parser,
@@ -106,62 +113,64 @@ template: |
             - attributes.version
         {{ end }}
 
-        # Move all retained attributes to the body
-        - id: move_appname
-          type: move
-          if: "attributes.appname != nil"
-          from: attributes.appname
-          to: body.appname
-        - id: move_facility
-          type: move
-          if: "attributes.facility != nil"
-          from: attributes.facility
-          to: body.facility
-        - id: move_hostname
-          type: move
-          if: "attributes.hostname != nil"
-          from: attributes.hostname
-          to: body.hostname
-        - id: move_message
-          type: move
-          if: "attributes.message != nil"
-          from: attributes.message
-          to: body.message
-        - id: move_msg_id
-          type: move
-          if: "attributes.msg_id != nil"
-          from: attributes.msg_id
-          to: body.msg_id
-        - id: move_priority
-          type: move
-          if: "attributes.priority != nil"
-          from: attributes.priority
-          to: body.priority
-        - id: move_proc_id
-          type: move
-          if: "attributes.proc_id != nil"
-          from: attributes.proc_id
-          to: body.proc_id
-        - id: move_severity
-          type: move
-          if: "attributes.severity != nil"
-          from: attributes.severity
-          to: body.severity
-        - id: move_structured_data
-          type: move
-          if: "attributes.structured_data != nil"
-          from: attributes.structured_data
-          to: body.structured_data
-        - id: move_timestamp
-          type: move
-          if: "attributes.timestamp != nil"
-          from: attributes.timestamp
-          to: body.timestamp
-        - id: move_version
-          type: move
-          if: "attributes.version != nil"
-          from: attributes.version
-          to: body.version
+        {{ if eq .parse_to "body" }}
+          # Move all retained attributes to the body
+          - id: move_appname
+            type: move
+            if: "attributes.appname != nil"
+            from: attributes.appname
+            to: body.appname
+          - id: move_facility
+            type: move
+            if: "attributes.facility != nil"
+            from: attributes.facility
+            to: body.facility
+          - id: move_hostname
+            type: move
+            if: "attributes.hostname != nil"
+            from: attributes.hostname
+            to: body.hostname
+          - id: move_message
+            type: move
+            if: "attributes.message != nil"
+            from: attributes.message
+            to: body.message
+          - id: move_msg_id
+            type: move
+            if: "attributes.msg_id != nil"
+            from: attributes.msg_id
+            to: body.msg_id
+          - id: move_priority
+            type: move
+            if: "attributes.priority != nil"
+            from: attributes.priority
+            to: body.priority
+          - id: move_proc_id
+            type: move
+            if: "attributes.proc_id != nil"
+            from: attributes.proc_id
+            to: body.proc_id
+          - id: move_severity
+            type: move
+            if: "attributes.severity != nil"
+            from: attributes.severity
+            to: body.severity
+          - id: move_structured_data
+            type: move
+            if: "attributes.structured_data != nil"
+            from: attributes.structured_data
+            to: body.structured_data
+          - id: move_timestamp
+            type: move
+            if: "attributes.timestamp != nil"
+            from: attributes.timestamp
+            to: body.timestamp
+          - id: move_version
+            type: move
+            if: "attributes.version != nil"
+            from: attributes.version
+            to: body.version
+        {{end}}
 
   service:
     pipelines:

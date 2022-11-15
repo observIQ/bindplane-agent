@@ -62,6 +62,7 @@ func (s StandaloneCollectorService) monitorStatus() {
 	for {
 		select {
 		case status := <-statusChan:
+			// This will catch panics and errors
 			if status.Err != nil {
 				s.errChan <- status.Err
 			} else if !status.Running {
