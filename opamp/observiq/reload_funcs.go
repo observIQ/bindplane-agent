@@ -125,7 +125,7 @@ func collectorReload(client *Client, collectorConfigPath string) opamp.ReloadFun
 		}
 
 		// Stop collector monitoring as we are going to restart it
-		client.collectorMntrCancel()
+		client.stopCollectorMonitoring()
 
 		// Setup new monitoring after collector has been restarted
 		defer client.startCollectorMonitoring(context.Background())

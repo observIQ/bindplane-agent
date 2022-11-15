@@ -153,9 +153,12 @@ func (c *collector) Stop() {
 	c.svc = nil
 }
 
-// Restart will restart the collector.
+// Restart will restart the collector. It will also reset the status channel.
+// After calling restart call Status() to get a handle to the new channel.
 func (c *collector) Restart(ctx context.Context) error {
 	c.Stop()
+	// Reset status channel so it's not polluted by the collector shutting down and restarting
+	c.statusChan = make(chan *Status, 10)
 	return c.Run(ctx)
 }
 

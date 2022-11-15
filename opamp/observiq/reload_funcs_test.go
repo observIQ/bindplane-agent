@@ -221,6 +221,7 @@ func Test_collectorReload(t *testing.T) {
 
 				client := &Client{
 					collector: mockCollector,
+					logger:    zap.NewNop(),
 				}
 
 				// Setup Context to mock out already running collector monitor
@@ -238,9 +239,8 @@ func Test_collectorReload(t *testing.T) {
 				assert.Equal(t, currContents, data)
 
 				// Cleanup
-				client.collectorMntrCancel()
 				assert.Eventually(t, func() bool {
-					client.collectorMntrWg.Wait()
+					client.stopCollectorMonitoring()
 					return true
 				}, 2*time.Second, 100*time.Millisecond)
 			},
@@ -265,6 +265,7 @@ func Test_collectorReload(t *testing.T) {
 
 				client := &Client{
 					collector: mockCollector,
+					logger:    zap.NewNop(),
 				}
 
 				// Setup Context to mock out already running collector monitor
@@ -283,9 +284,8 @@ func Test_collectorReload(t *testing.T) {
 				assert.Equal(t, newContents, data)
 
 				// Cleanup
-				client.collectorMntrCancel()
 				assert.Eventually(t, func() bool {
-					client.collectorMntrWg.Wait()
+					client.stopCollectorMonitoring()
 					return true
 				}, 2*time.Second, 100*time.Millisecond)
 			},

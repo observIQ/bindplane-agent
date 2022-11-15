@@ -237,8 +237,7 @@ func (c *Client) Connect(ctx context.Context) error {
 // Disconnect disconnects from the server
 func (c *Client) Disconnect(ctx context.Context) error {
 	// Ensure we're no longer monitoring the collector as we shutdown to avoid error messages due to shutdown
-	c.collectorMntrCancel()
-	c.collectorMntrWg.Done()
+	c.stopCollectorMonitoring()
 
 	c.safeSetDisconnecting(true)
 	c.collector.Stop()
@@ -628,6 +627,13 @@ func (c *Client) getVerifiedPackageStatuses() (*protobufs.PackageStatuses, error
 	return lastPackageStatuses, nil
 }
 
+// stopCollectorMonitoring stops monitoring the collector
+func (c *Client) stopCollectorMonitoring() {
+	c.collectorMntrCancel()
+	c.collectorMntrWg.Wait()
+}
+
+// startCollectorMonitoring starts a separate goroutine to monitor the collectors status
 func (c *Client) startCollectorMonitoring(ctx context.Context) {
 	c.collectorMntrCtx, c.collectorMntrCancel = context.WithCancel(ctx)
 	c.collectorMntrWg.Add(1)
@@ -646,11 +652,12 @@ func (c *Client) monitorCollectorStatus() {
 			// No need to cleanup on shutdown as if no state is left over that would prevent a new process from starting.
 			c.logger.Fatal("Collector encountered unrecoverable error", zap.Error(status.Err))
 		case status.Err != nil:
-			c.logger.Error("Collector unexpected stopped running", zap.Error(status.Err))
+			c.logger.Error("Collector unexpectedly stopped running", zap.Error(status.Err))
 		case !status.Running:
-			c.logger.Error("Collector unexpected stopped running")
+			c.logger.Error("Collector unexpectedly stopped running")
 		}
 	case <-c.collectorMntrCtx.Done():
+		c.logger.Debug("collector monitor context closed")
 		return
 	}
 }

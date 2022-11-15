@@ -497,10 +497,10 @@ func TestClientDisconnect(t *testing.T) {
 		opampClient:   mockOpAmpClient,
 		collector:     mockCollector,
 		reportManager: report.GetManager(),
+		logger:        zap.NewNop(),
 	}
 
 	// Start collector monitoring to ensure this is shut down properly
-	c.collectorMntrWg.Add(1)
 	c.startCollectorMonitoring(ctx)
 
 	var err error
