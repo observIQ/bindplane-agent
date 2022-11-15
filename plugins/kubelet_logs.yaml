@@ -1,4 +1,4 @@
-version: 0.2.0
+version: 0.3.0
 title: Kubernetes Kubelet
 description: Log parser for Kubelet journald logs
 parameters:
@@ -17,9 +17,16 @@ parameters:
     type: timezone
     default: UTC
   - name: retain_raw_logs
-    description: When enabled will preserve the original log message on the body in a `raw_log` key
+    description: When enabled will preserve the original log message in a `raw_log` key. This will either be in the `body` or `attributes` depending on how `parse_to` is configured.
     type: bool
     default: false
+  - name: parse_to
+    description: Where to parse structured log parts
+    type: string
+    supported:
+      - body
+      - attributes
+    default: body
 template: |
   receivers:
     journald:
@@ -47,9 +54,9 @@ template: |
           # Parse kubelet klog formatted message
           - type: regex_parser
             regex: '(?P<severity>\w)(?P<timestamp>\d{4} \d{2}:\d{2}:\d{2}.\d+)\s+(?P<pid>\d+)\s+(?P<src>[^:]*):(?P<src_line>[^\]]*)\] (?P<message>.*)'
-            parse_to: body
+            parse_to: {{ .parse_to }}
             severity:
-              parse_from: body.severity
+              parse_from: {{ .parse_to }}.severity
               mapping:
                 debug: d
                 info: i
@@ -57,13 +64,13 @@ template: |
                 error: e
                 fatal: c
             timestamp:
-              parse_from: body.timestamp
+              parse_from: {{ .parse_to }}.timestamp
               layout: '%m%d %H:%M:%S.%s'
               location: {{ .timezone }}
           - type: add
             field: attributes.log_type
             value: kubelet
-          {{ if .retain_raw_logs }}
+          {{ if and .retain_raw_logs (eq .parse_to "body")}}
           - id: move_raw_log
             type: move
             from: attributes.raw_log
