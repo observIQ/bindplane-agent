@@ -12,7 +12,8 @@ Log parser for VMware vCenter
 | enable_tls | Enable TLS for the vCenter listener | bool | `false` | false |  |
 | certificate_file | Path to the x509 PEM certificate or certificate chain to use for TLS | string | `/opt/cert` | false |  |
 | key_file | Path to the key file to use for TLS | string | `/opt/key` | false |  |
-| retain_raw_logs | When enabled will preserve the original log message on the body in a `raw_log` key | bool | `false` | false |  |
+| retain_raw_logs | When enabled will preserve the original log message in a `raw_log` key. This will either be in the `body` or `attributes` depending on how `parse_to` is configured. | bool | `false` | false |  |
+| parse_to | Where to parse structured log parts | string | `body` | false | `body`, `attributes` |
 
 ## Example Config:
 
@@ -30,4 +31,5 @@ receivers:
       certificate_file: /opt/cert
       key_file: /opt/key
       retain_raw_logs: false
+      parse_to: body
 ```

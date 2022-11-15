@@ -1,4 +1,4 @@
-version: 0.1.0
+version: 0.2.0
 title: VMware vCenter
 description: Log parser for VMware vCenter
 parameters:
@@ -28,9 +28,16 @@ parameters:
     type: string
     default: "/opt/key"
   - name: retain_raw_logs
-    description: When enabled will preserve the original log message on the body in a `raw_log` key
+    description: When enabled will preserve the original log message in a `raw_log` key. This will either be in the `body` or `attributes` depending on how `parse_to` is configured.
     type: bool
     default: false
+  - name: parse_to
+    description: Where to parse structured log parts
+    type: string
+    supported:
+      - body
+      - attributes
+    default: body
 template: |
   receivers:
     tcplog:
@@ -79,6 +86,7 @@ template: |
           type: syslog_parser
           protocol: rfc5424
 
+        {{ if eq .parse_to "body" }}
         # Move syslog fields to body
         # We do this rather than parsing to body in the syslog_parser as it handles timestamp and severity parsing
         - id: move_priority
@@ -126,8 +134,9 @@ template: |
           type: move
           from: attributes.version
           to: body.version
+        {{ end }}
 
-        {{ if .retain_raw_logs }}
+        {{ if and .retain_raw_logs (eq .parse_to "body")}}
         - id: move_raw_log
           type: move
           from: attributes.raw_log
