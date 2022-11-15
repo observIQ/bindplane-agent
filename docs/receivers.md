@@ -15,6 +15,7 @@ Below is a list of supported receivers with links to their documentation pages.
 | AWS ECS Container Metrics Receiver          | [awsecscontainermetricsreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.63.0/receiver/awsecscontainermetricsreceiver/README.md) |
 | AWS Kinesis Data Firehose Receiver          | [awsfirehosereceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.63.0/receiver/awsfirehosereceiver/README.md) |
 | AWS X-Ray Receiver                          | [awsxrayreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.63.0/receiver/awsxrayreceiver/README.md) |
+| Azure Event Hub Receiver                    | [azureeventhubreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.63.0/receiver/azureeventhubreceiver/README.md) |
 | Carbon Receiver                             | [carbonreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.63.0/receiver/carbonreceiver/README.md) |
 | Cloud Foundry Receiver                      | [cloudfoundryreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.63.0/receiver/cloudfoundryreceiver/README.md) |
 | collectd write_http Plugin JSON Receiver    | [collectdreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.63.0/receiver/collectdreceiver/README.md) |
