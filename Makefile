@@ -4,7 +4,7 @@ ALLDOC := $(shell find . \( -name "*.md" -o -name "*.yaml" \) \
 ALL_MODULES := $(shell find . -type f -name "go.mod" -exec dirname {} \; | sort )
 
 # All source code files
-ALL_SRC := $(shell find . -name '*.go' -o -name '*.sh' -o -name 'Dockerfile' -type f | sort)
+ALL_SRC := $(shell find . -name '*.go' -o -name '*.sh' -o -name 'Dockerfile*' -type f | sort)
 
 OUTDIR=./dist
 GOOS ?= $(shell go env GOOS)
