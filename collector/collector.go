@@ -120,6 +120,9 @@ func (c *collector) Run(ctx context.Context) error {
 				}
 
 				c.sendStatus(false, true, panicErr)
+
+				// Send error to startup channel so it doesn't wait for a timeout if a panic occurs.
+				startupErr <- panicErr
 			}
 		}()
 
