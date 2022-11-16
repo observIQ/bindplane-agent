@@ -16,7 +16,10 @@
 package factories
 
 import (
+	"fmt"
+
 	"github.com/observiq/observiq-otel-collector/internal/throughputwrapper"
+	"github.com/observiq/observiq-otel-collector/processor/throughputmeasurementprocessor"
 	"go.opentelemetry.io/collector/component"
 	"go.uber.org/multierr"
 )
@@ -30,6 +33,11 @@ func DefaultFactories() (component.Factories, error) {
 // Any errors encountered will also be combined into a single error.
 func combineFactories(receivers []component.ReceiverFactory, processors []component.ProcessorFactory, exporters []component.ExporterFactory, extensions []component.ExtensionFactory) (component.Factories, error) {
 	var errs []error
+
+	// Register component telemetry
+	if err := registerComponentTelemetry(); err != nil {
+		errs = append(errs, err)
+	}
 
 	receiverMap, err := component.MakeReceiverFactoryMap(wrapReceivers(receivers)...)
 	if err != nil {
@@ -67,4 +75,16 @@ func wrapReceivers(receivers []component.ReceiverFactory) []component.ReceiverFa
 	}
 
 	return wrappedReceivers
+}
+
+func registerComponentTelemetry() error {
+	if err := throughputmeasurementprocessor.RegisterMetricViews(); err != nil {
+		return fmt.Errorf("failed to register throughput measurement processor telemetry: %w", err)
+	}
+
+	if err := throughputwrapper.RegisterMetricViews(); err != nil {
+		return fmt.Errorf("failed to register throughput wrapper telemetry: %w", err)
+	}
+
+	return nil
 }
