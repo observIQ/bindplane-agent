@@ -114,62 +114,62 @@ template: |
         {{ end }}
 
         {{ if eq .parse_to "body" }}
-          # Move all retained attributes to the body
-          - id: move_appname
-            type: move
-            if: "attributes.appname != nil"
-            from: attributes.appname
-            to: body.appname
-          - id: move_facility
-            type: move
-            if: "attributes.facility != nil"
-            from: attributes.facility
-            to: body.facility
-          - id: move_hostname
-            type: move
-            if: "attributes.hostname != nil"
-            from: attributes.hostname
-            to: body.hostname
-          - id: move_message
-            type: move
-            if: "attributes.message != nil"
-            from: attributes.message
-            to: body.message
-          - id: move_msg_id
-            type: move
-            if: "attributes.msg_id != nil"
-            from: attributes.msg_id
-            to: body.msg_id
-          - id: move_priority
-            type: move
-            if: "attributes.priority != nil"
-            from: attributes.priority
-            to: body.priority
-          - id: move_proc_id
-            type: move
-            if: "attributes.proc_id != nil"
-            from: attributes.proc_id
-            to: body.proc_id
-          - id: move_severity
-            type: move
-            if: "attributes.severity != nil"
-            from: attributes.severity
-            to: body.severity
-          - id: move_structured_data
-            type: move
-            if: "attributes.structured_data != nil"
-            from: attributes.structured_data
-            to: body.structured_data
-          - id: move_timestamp
-            type: move
-            if: "attributes.timestamp != nil"
-            from: attributes.timestamp
-            to: body.timestamp
-          - id: move_version
-            type: move
-            if: "attributes.version != nil"
-            from: attributes.version
-            to: body.version
+        # Move all retained attributes to the body
+        - id: move_appname
+          type: move
+          if: "attributes.appname != nil"
+          from: attributes.appname
+          to: body.appname
+        - id: move_facility
+          type: move
+          if: "attributes.facility != nil"
+          from: attributes.facility
+          to: body.facility
+        - id: move_hostname
+          type: move
+          if: "attributes.hostname != nil"
+          from: attributes.hostname
+          to: body.hostname
+        - id: move_message
+          type: move
+          if: "attributes.message != nil"
+          from: attributes.message
+          to: body.message
+        - id: move_msg_id
+          type: move
+          if: "attributes.msg_id != nil"
+          from: attributes.msg_id
+          to: body.msg_id
+        - id: move_priority
+          type: move
+          if: "attributes.priority != nil"
+          from: attributes.priority
+          to: body.priority
+        - id: move_proc_id
+          type: move
+          if: "attributes.proc_id != nil"
+          from: attributes.proc_id
+          to: body.proc_id
+        - id: move_severity
+          type: move
+          if: "attributes.severity != nil"
+          from: attributes.severity
+          to: body.severity
+        - id: move_structured_data
+          type: move
+          if: "attributes.structured_data != nil"
+          from: attributes.structured_data
+          to: body.structured_data
+        - id: move_timestamp
+          type: move
+          if: "attributes.timestamp != nil"
+          from: attributes.timestamp
+          to: body.timestamp
+        - id: move_version
+          type: move
+          if: "attributes.version != nil"
+          from: attributes.version
+          to: body.version
         {{end}}
 
   service:
