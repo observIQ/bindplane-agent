@@ -159,8 +159,8 @@ github.com/DataDog/datadog-go v3.2.0+incompatible/go.mod h1:LButxg5PwREeZtORoXG3
 github.com/DataDog/zstd v1.3.6-0.20190409195224-796139022798/go.mod h1:1jcaCB/ufaK+sKp1NBhlGmpz41jOoPQ35bpF36t7BBo=
 github.com/DataDog/zstd v1.4.4/go.mod h1:1jcaCB/ufaK+sKp1NBhlGmpz41jOoPQ35bpF36t7BBo=
 github.com/Djarvur/go-err113 v0.0.0-20210108212216-aea10b59be24/go.mod h1:4UJr5HIiMZrwgkSPdsjy2uOQExX/WEILpIrO9UPGuXs=
-github.com/GoogleCloudPlatform/opentelemetry-operations-collector v0.0.3-0.20221031165311-00fd8504329d h1:o9wUm8ccqjz4pa/oHgirgaA7N09AcpptuISAhtrWHHs=
-github.com/GoogleCloudPlatform/opentelemetry-operations-collector v0.0.3-0.20221031165311-00fd8504329d/go.mod h1:uy+8q58XDUfG4WUEU3Xob5pjV0v28C5j/77FoX3pBb0=
+github.com/GoogleCloudPlatform/opentelemetry-operations-collector v0.0.3-0.20221116134319-f37963c6bd8e h1:d6govkp1AGadmr0VI6NLYXfeHAuwo6tWoj3QL3vly+M=
+github.com/GoogleCloudPlatform/opentelemetry-operations-collector v0.0.3-0.20221116134319-f37963c6bd8e/go.mod h1:z+CkEQFK2c81glC1/GNCKEC/p8kythcHU3K2yrxkRUg=
 github.com/GoogleCloudPlatform/opentelemetry-operations-go/detectors/gcp v0.34.1 h1:gcHr5iIamTMH+TOqvcIrkZ9zpDOKVkc2du/VYGJkYfM=
 github.com/GoogleCloudPlatform/opentelemetry-operations-go/detectors/gcp v0.34.1/go.mod h1:8jbDwk101z1YJ201wir2t/3O5Sxn55M37IDVwnQA1rg=
 github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector v0.34.1 h1:qXN4o1+RWbfLZanP6zFCzzfiKwgstKzobaXkQRAxeAk=

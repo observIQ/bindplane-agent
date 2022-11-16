@@ -5,7 +5,7 @@ Below is a list of supported receivers with links to their documentation pages.
 | Name                                        | GitHub README |
 | ------------------------------------------- | ------------- |
 | Active Directory Domain Services Receiver   | [activedirectorydsreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.64.0/receiver/activedirectorydsreceiver/README.md) |
-| Aerospike Receiver   | [aerospikereceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.64.0/receiver/aerospikereceiver/README.md) |
+| Aerospike Receiver                          | [aerospikereceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.64.0/receiver/aerospikereceiver/README.md) |
 | Apache CouchDB Receiver                     | [couchdbreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.64.0/receiver/couchdbreceiver/README.md) |
 | Apache Flink Metrics Receiver               | [flinkmetricsreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.64.0/receiver/flinkmetricsreceiver/README.md) |
 | Apache Web Server Receiver                  | [apachereceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.64.0/receiver/apachereceiver/README.md) |
@@ -63,7 +63,7 @@ Below is a list of supported receivers with links to their documentation pages.
 | Syslog Receiver                             | [syslogreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.64.0/receiver/syslogreceiver/README.md) |
 | TCP Log Receiver                            | [tcplogreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.64.0/receiver/tcplogreceiver/README.md) |
 | UDP Log Receiver                            | [udplogreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.64.0/receiver/udplogreceiver/README.md) |
-| Varnish Cache Receiver                      | [varnishreceiver](https://github.com/GoogleCloudPlatform/opentelemetry-operations-collector/blob/00fd8504329d6824ae9b251a95c86165ea24a477/receiver/varnishreceiver/README.md) |
+| Varnish Cache Receiver                      | [varnishreceiver](https://github.com/GoogleCloudPlatform/opentelemetry-operations-collector/blob/f37963c6bd8e985c775937c95dfc440a5285d166/receiver/varnishreceiver/README.md) |
 | vCenter Receiver                            | [vcenterreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.64.0/receiver/vcenterreceiver/README.md) |
 | Windows Event Log Receiver                  | [windowseventlogreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.64.0/receiver/windowseventlogreceiver/README.md) |
 | Windows Performance Counters Receiver       | [windowsperfcountersreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.64.0/receiver/windowsperfcountersreceiver/README.md) |
