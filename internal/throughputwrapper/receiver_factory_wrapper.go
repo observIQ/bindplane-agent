@@ -17,21 +17,21 @@ package throughputwrapper
 
 import (
 	"context"
-	"sync"
 
 	"go.opencensus.io/stats/view"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/consumer"
 )
 
-var once sync.Once
+// RegisterMetricViews unregisters old metric views if they exist and registers new ones
+func RegisterMetricViews() error {
+	views := metricViews()
+	view.Unregister(views...)
+	return view.Register(views...)
+}
 
 // WrapReceiverFactory creates a wrapper factory that around the passed in factory. Injecting consumers to measure output from the passed in receiver.
 func WrapReceiverFactory(receiverFactory component.ReceiverFactory) component.ReceiverFactory {
-	once.Do(func() {
-		_ = view.Register(metricViews()...)
-	})
-
 	opts := make([]component.ReceiverFactoryOption, 0, 3)
 
 	// Wrap the metric receiver creation func
