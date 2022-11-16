@@ -20,7 +20,7 @@ import (
 
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/filelogreceiver"
 	"github.com/stretchr/testify/require"
-	"go.opentelemetry.io/collector/config"
+	"go.opentelemetry.io/collector/component"
 	"go.uber.org/zap"
 )
 
@@ -33,7 +33,7 @@ func TestNewSettings(t *testing.T) {
 	// Make sure environment variable replacement is working
 	provider, err := settings.ConfigProvider.Get(context.Background(), settings.Factories)
 	require.NoError(t, err)
-	receivcfg := provider.Receivers[config.NewComponentID("filelog")]
+	receivcfg := provider.Receivers[component.NewID("filelog")]
 	config := receivcfg.(*filelogreceiver.FileLogConfig)
 	actualConfVal := config.InputConfig.Finder.Include[0]
 	require.Equal(t, "./test.log", actualConfVal)

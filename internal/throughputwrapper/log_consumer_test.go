@@ -33,7 +33,7 @@ func Test_newLogConsumer(t *testing.T) {
 	require.Equal(t, nopLogger, lConsumer.logger)
 	require.Equal(t, baseConsumer, lConsumer.baseConsumer)
 	require.Len(t, lConsumer.mutators, 1)
-	require.Equal(t, plog.NewProtoMarshaler(), lConsumer.logsSizer)
+	require.Equal(t, &plog.ProtoMarshaler{}, lConsumer.logsSizer)
 }
 
 func Test_logConsumer_ConsumeLogs(t *testing.T) {

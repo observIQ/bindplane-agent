@@ -33,7 +33,7 @@ func Test_newMetricConsumer(t *testing.T) {
 	require.Equal(t, nopLogger, mConsumer.logger)
 	require.Equal(t, baseConsumer, mConsumer.baseConsumer)
 	require.Len(t, mConsumer.mutators, 1)
-	require.Equal(t, pmetric.NewProtoMarshaler(), mConsumer.metricsSizer)
+	require.Equal(t, &pmetric.ProtoMarshaler{}, mConsumer.metricsSizer)
 }
 
 func Test_metricConsumer_ConsumeMetrics(t *testing.T) {
