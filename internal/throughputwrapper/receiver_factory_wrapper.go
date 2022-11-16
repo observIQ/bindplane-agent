@@ -21,7 +21,6 @@ import (
 
 	"go.opencensus.io/stats/view"
 	"go.opentelemetry.io/collector/component"
-	"go.opentelemetry.io/collector/config"
 	"go.opentelemetry.io/collector/consumer"
 )
 
@@ -60,7 +59,7 @@ func WrapReceiverFactory(receiverFactory component.ReceiverFactory) component.Re
 func wrapCreateMetricsReceiverFunc(createMetricsReceiverFunc component.CreateMetricsReceiverFunc) component.CreateMetricsReceiverFunc {
 	return func(ctx context.Context,
 		set component.ReceiverCreateSettings,
-		rConf config.Receiver,
+		rConf component.ReceiverConfig,
 		nextConsumer consumer.Metrics,
 	) (component.MetricsReceiver, error) {
 		wrappedConsumer := newMetricConsumer(set.Logger, rConf.ID().String(), nextConsumer)
@@ -71,7 +70,7 @@ func wrapCreateMetricsReceiverFunc(createMetricsReceiverFunc component.CreateMet
 func wrapCreateLogReceiverFunc(createLogsReceiverFunc component.CreateLogsReceiverFunc) component.CreateLogsReceiverFunc {
 	return func(ctx context.Context,
 		set component.ReceiverCreateSettings,
-		rConf config.Receiver,
+		rConf component.ReceiverConfig,
 		nextConsumer consumer.Logs,
 	) (component.LogsReceiver, error) {
 		wrappedConsumer := newLogConsumer(set.Logger, rConf.ID().String(), nextConsumer)
@@ -82,7 +81,7 @@ func wrapCreateLogReceiverFunc(createLogsReceiverFunc component.CreateLogsReceiv
 func wrapCreateTraceReceiverFunc(createTracesReceiverFunc component.CreateTracesReceiverFunc) component.CreateTracesReceiverFunc {
 	return func(ctx context.Context,
 		set component.ReceiverCreateSettings,
-		rConf config.Receiver,
+		rConf component.ReceiverConfig,
 		nextConsumer consumer.Traces,
 	) (component.TracesReceiver, error) {
 		wrappedConsumer := newTraceConsumer(set.Logger, rConf.ID().String(), nextConsumer)

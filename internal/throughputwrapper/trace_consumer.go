@@ -37,7 +37,7 @@ func newTraceConsumer(logger *zap.Logger, componentID string, baseConsumer consu
 	return &traceConsumer{
 		logger:       logger,
 		mutators:     []tag.Mutator{tag.Upsert(componentTagKey, componentID, tag.WithTTL(tag.TTLNoPropagation))},
-		tracesSizer:  ptrace.NewProtoMarshaler(),
+		tracesSizer:  &ptrace.ProtoMarshaler{},
 		baseConsumer: baseConsumer,
 	}
 }

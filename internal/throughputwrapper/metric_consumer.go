@@ -37,7 +37,7 @@ func newMetricConsumer(logger *zap.Logger, componentID string, baseConsumer cons
 	return &metricConsumer{
 		logger:       logger,
 		mutators:     []tag.Mutator{tag.Upsert(componentTagKey, componentID, tag.WithTTL(tag.TTLNoPropagation))},
-		metricsSizer: pmetric.NewProtoMarshaler(),
+		metricsSizer: &pmetric.ProtoMarshaler{},
 		baseConsumer: baseConsumer,
 	}
 }

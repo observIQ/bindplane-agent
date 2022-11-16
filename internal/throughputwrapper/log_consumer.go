@@ -37,7 +37,7 @@ func newLogConsumer(logger *zap.Logger, componentID string, baseConsumer consume
 	return &logConsumer{
 		logger:       logger,
 		mutators:     []tag.Mutator{tag.Upsert(componentTagKey, componentID, tag.WithTTL(tag.TTLNoPropagation))},
-		logsSizer:    plog.NewProtoMarshaler(),
+		logsSizer:    &plog.ProtoMarshaler{},
 		baseConsumer: baseConsumer,
 	}
 }
