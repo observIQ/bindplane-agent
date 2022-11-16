@@ -81,7 +81,17 @@ func main() {
 	if err := checkManagerConfig(managerConfigPath); err == nil {
 		logger.Info("Starting In Managed Mode")
 
-		runnableService, err = service.NewManagedCollectorService(col, logger, *managerConfigPath, (*collectorConfigPaths)[0], *loggingConfigPath)
+		collectorConfigPath := (*collectorConfigPaths)[0]
+
+		// Check for existing rollback files for collector config.
+		// If any exist it's likely the case that the collector crashed during reconfigure.
+		logger.Debug("Checking for existing rollback files")
+		if err := checkForCollectorRollbackConfig(collectorConfigPath); err != nil {
+			// Log an error rather than exit as we should still have a config to run with
+			logger.Error("Error occurred while checking for collector config rollbacks", zap.Error(err))
+		}
+
+		runnableService, err = service.NewManagedCollectorService(col, logger, *managerConfigPath, collectorConfigPath, *loggingConfigPath)
 		if err != nil {
 			logger.Fatal("Failed to initiate managed mode", zap.Error(err))
 		}
@@ -213,5 +223,34 @@ func ensureIdentity(configPath string) error {
 	if err = os.WriteFile(filepath.Clean(configPath), newBytes, 0600); err != nil {
 		return fmt.Errorf("failed to rewrite manager config with identifying fields: %w", err)
 	}
+	return nil
+}
+
+func checkForCollectorRollbackConfig(configPath string) error {
+	cleanPath := filepath.Clean(configPath)
+	rollbackFileName := fmt.Sprintf("%s.rollback", cleanPath)
+
+	// Check to see if rollback file exists
+	_, err := os.Stat(rollbackFileName)
+
+	// No rollback file just return
+	if errors.Is(err, os.ErrNotExist) {
+		return nil
+	}
+
+	// Copy rollback file and delete original
+	contents, err := os.ReadFile(rollbackFileName)
+	if err != nil {
+		return fmt.Errorf("error while reading in collector rollback file: %w", err)
+	}
+
+	if err := os.WriteFile(cleanPath, contents, 0600); err != nil {
+		return fmt.Errorf("error while writing rollback contents onto config: %w", err)
+	}
+
+	if err := os.Remove(rollbackFileName); err != nil {
+		return fmt.Errorf("error while cleaning up rollback file: %w", err)
+	}
+
 	return nil
 }
