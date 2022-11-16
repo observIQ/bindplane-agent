@@ -32,14 +32,22 @@ FROM openjdk:8u312-slim-buster as openjdk
 
 # Final Stage
 #
-FROM gcr.io/observiq-container-images/stanza-base:v1.2.2
+FROM registry.access.redhat.com/ubi8:8.7
 WORKDIR /
 
-RUN adduser \
-    --disabled-password \
-    --gecos "" \
+RUN dnf install -y \
+        systemd tzdata ca-certificates && \
+  	dnf clean all && \
+  	rm -rf /var/cache/yum
+
+RUN groupadd --gid 10005 otel && \
+    adduser \
+    --system \
+    --home /etc/otel \
     --no-create-home \
     --uid 10005 \
+    --gid otel \
+    --shell /sbin/nologin \
     otel
 
 RUN mkdir /etc/otel && chown otel:otel /etc/otel
