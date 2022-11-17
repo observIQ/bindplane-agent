@@ -18,6 +18,7 @@ package service
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"os/signal"
@@ -170,13 +171,13 @@ func checkIsService() (bool, error) {
 // instead of it being dropped by Windows services.
 // Most output should go through the zap logger instead of to stderr.
 func redirectStderr() error {
-	wd, err := os.Getwd()
-	if err != nil {
-		return fmt.Errorf("failed to get working dir: %w", err)
+	homeDir, ok := os.LookupEnv("OIQ_OTEL_COLLECTOR_HOME")
+	if !ok {
+		return errors.New("OIQ_OTEL_COLLECTOR_HOME environment variable not set")
 	}
 
-	path := filepath.Join(wd, "log", "observiq_collector.err")
-	f, err := os.OpenFile(path, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0660)
+	path := filepath.Join(homeDir, "log", "observiq_collector.err")
+	f, err := os.OpenFile(filepath.Clean(path), os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0660)
 	if err != nil {
 		return fmt.Errorf("failed to open file: %w", err)
 	}
