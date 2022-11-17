@@ -57,7 +57,6 @@ func RunService(logger *zap.Logger, rSvc RunnableService) error {
 
 		// Redirect stderr to file, so we can see panic information
 		if err := redirectStderr(); err != nil {
-			// This error is not fatal, so we'll just log this.
 			logger.Error("Failed to redirect stderr", zap.Error(err))
 		}
 
