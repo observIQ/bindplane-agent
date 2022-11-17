@@ -226,6 +226,8 @@ func ensureIdentity(configPath string) error {
 	return nil
 }
 
+// checkForCollectorRollbackConfig checks for collector configs with a .rollback extension.
+// If one exists it'll overwrite the current config and clean up the rollback file.
 func checkForCollectorRollbackConfig(configPath string) error {
 	cleanPath := filepath.Clean(configPath)
 	rollbackFileName := fmt.Sprintf("%s.rollback", cleanPath)
@@ -239,6 +241,7 @@ func checkForCollectorRollbackConfig(configPath string) error {
 	}
 
 	// Copy rollback file and delete original
+	//#nosec G304 -- Orignal file path is cleaned at beginning of function
 	contents, err := os.ReadFile(rollbackFileName)
 	if err != nil {
 		return fmt.Errorf("error while reading in collector rollback file: %w", err)
