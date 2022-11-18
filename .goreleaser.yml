@@ -203,6 +203,7 @@ dockers:
     extra_files:
       - plugins
       - config/example.yaml
+      - config/logging.stdout.yaml
   - id: ubuntu-arm64
     goos: linux
     goarch: arm64
@@ -224,6 +225,7 @@ dockers:
     extra_files:
       - plugins
       - config/example.yaml
+      - config/logging.stdout.yaml
 
   - id: ubi8-amd64
     goos: linux
@@ -243,6 +245,7 @@ dockers:
     extra_files:
       - plugins
       - config/example.yaml
+      - config/logging.stdout.yaml
   - id: ubi8-arm64
     goos: linux
     goarch: arm64
@@ -261,6 +264,7 @@ dockers:
     extra_files:
       - plugins
       - config/example.yaml
+      - config/logging.stdout.yaml
 
 docker_manifests:
   - name_template: "observiq/observiq-otel-collector:latest"

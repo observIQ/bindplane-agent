@@ -61,13 +61,15 @@ COPY observiq-otel-collector /collector/observiq-otel-collector
 COPY --from=jmxjar /opentelemetry-java-contrib-jmx-metrics.jar /opt/opentelemetry-java-contrib-jmx-metrics.jar
 COPY plugins /etc/otel/plugins
 
-RUN echo "output: stdout\nlevel: info\n" > /etc/otel/logging.yaml
-ENV LOGGING_YAML_PATH=/etc/otel/logging.yaml
+COPY config/logging.stdout.yaml /etc/otel/logging.yaml
 
 # Default config allows the collector to run without an injected config, which is required
 # when connecting to an OpAMP platform.
 COPY config/example.yaml /etc/otel/config.yaml
-RUN chown otel:otel /etc/otel/config.yaml
+
+RUN chown otel:otel \
+    /etc/otel/config.yaml \
+    /etc/otel/logging.yaml
 
 USER otel
 WORKDIR /etc/otel
