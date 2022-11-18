@@ -245,7 +245,7 @@ dockers:
     extra_files:
       - plugins
       - config/example.yaml
-    - config/logging.stdout.yaml
+      - config/logging.stdout.yaml
   - id: ubi8-arm64
     goos: linux
     goarch: arm64
