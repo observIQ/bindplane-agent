@@ -20,6 +20,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"runtime"
 	"testing"
 
 	"github.com/google/uuid"
@@ -234,5 +235,111 @@ func TestManagerConfigCheckFileModes(t *testing.T) {
 				require.NoError(t, err)
 			}
 		})
+	}
+}
+
+func Test_checkForCollectorRollbackConfig(t *testing.T) {
+	testCases := []struct {
+		desc     string
+		testFunc func(*testing.T)
+	}{
+		{
+			desc: "No Rollback file",
+			testFunc: func(t *testing.T) {
+				originalContents := []byte("origin config contents")
+				tmpDir := t.TempDir()
+				configPath := filepath.Join(tmpDir, "collector.yaml")
+				err := os.WriteFile(configPath, originalContents, 0600)
+				require.NoError(t, err)
+
+				err = checkForCollectorRollbackConfig(configPath)
+				require.NoError(t, err)
+
+				currentConfigContents, err := os.ReadFile(configPath)
+				require.NoError(t, err)
+				require.Equal(t, originalContents, currentConfigContents)
+			},
+		},
+		{
+			desc: "Can't read rollback file",
+			testFunc: func(t *testing.T) {
+				// Skip windows test case as file permissions don't work the same on windows
+				if runtime.GOOS == "windows" {
+					t.Log("Skipping test case on windows")
+					return
+				}
+
+				originalContents := []byte("origin config contents")
+				tmpDir := t.TempDir()
+				configPath := filepath.Join(tmpDir, "collector.yaml")
+				err := os.WriteFile(configPath, originalContents, 0600)
+				require.NoError(t, err)
+
+				rollbackPath := fmt.Sprintf("%s.rollback", configPath)
+				rollbackFile, err := os.OpenFile(rollbackPath, os.O_CREATE|os.O_RDWR, 0220)
+				require.NoError(t, err)
+				require.NoError(t, rollbackFile.Close())
+
+				err = checkForCollectorRollbackConfig(configPath)
+				require.ErrorContains(t, err, "error while reading in collector rollback file")
+
+				currentConfigContents, err := os.ReadFile(configPath)
+				require.NoError(t, err)
+				require.Equal(t, originalContents, currentConfigContents)
+			},
+		},
+		{
+			desc: "Can't write rollback contents to config",
+			testFunc: func(t *testing.T) {
+				// Skip windows test case as file permissions don't work the same on windows
+				if runtime.GOOS == "windows" {
+					t.Log("Skipping test case on windows")
+					return
+				}
+
+				originalContents := []byte("origin config contents")
+				tmpDir := t.TempDir()
+				configPath := filepath.Join(tmpDir, "collector.yaml")
+				err := os.WriteFile(configPath, originalContents, 0400)
+				require.NoError(t, err)
+
+				rollbackPath := fmt.Sprintf("%s.rollback", configPath)
+				err = os.WriteFile(rollbackPath, []byte("rollback"), 0600)
+				require.NoError(t, err)
+
+				err = checkForCollectorRollbackConfig(configPath)
+				require.ErrorContains(t, err, "error while writing rollback contents onto config")
+
+				currentConfigContents, err := os.ReadFile(configPath)
+				require.NoError(t, err)
+				require.Equal(t, originalContents, currentConfigContents)
+			},
+		},
+		{
+			desc: "Successful Rollback copy",
+			testFunc: func(t *testing.T) {
+				originalContents := []byte("origin config contents")
+				rollbackContents := []byte("rollback contents")
+				tmpDir := t.TempDir()
+				configPath := filepath.Join(tmpDir, "collector.yaml")
+				err := os.WriteFile(configPath, originalContents, 0600)
+				require.NoError(t, err)
+
+				rollbackPath := fmt.Sprintf("%s.rollback", configPath)
+				err = os.WriteFile(rollbackPath, rollbackContents, 0600)
+				require.NoError(t, err)
+
+				err = checkForCollectorRollbackConfig(configPath)
+				require.NoError(t, err)
+
+				currentConfigContents, err := os.ReadFile(configPath)
+				require.NoError(t, err)
+				require.Equal(t, rollbackContents, currentConfigContents)
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.desc, tc.testFunc)
 	}
 }
