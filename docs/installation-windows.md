@@ -31,6 +31,12 @@ By default, the config file for the collector can be found at `C:\Program Files\
 
 For more information on configuring the collector, see the [OpenTelemetry docs](https://opentelemetry.io/docs/collector/configuration/).
 
+**Logging**
+
+Logs from the collector will appear in `<install_dir>/log` (`C:\Program Files\observIQ OpenTelemetry Collector\log` by default). 
+
+Stderr for the collector process can be found at `<install_dir>/log/observiq_collector.err` (`C:\Program Files\observIQ OpenTelemetry Collector\log\observiq_collector.err` by default).
+
 ## Restarting the Collector
 Restarting the collector may be done through the services dialog.
 To access the services dialog, press Win + R, enter `services.msc` into the Run dialog, and press enter.
