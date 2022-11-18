@@ -58,6 +58,9 @@ COPY --from=openjdk /usr/local/openjdk-8 /usr/local/openjdk-8
 ENV JAVA_HOME=/usr/local/openjdk-8
 ENV PATH=$PATH:/usr/local/openjdk-8/bin
 
+RUN mkdir /licenses
+COPY LICENSE /licenses/observiq-otel-collector.license
+
 COPY observiq-otel-collector /collector/observiq-otel-collector
 COPY --from=jmxjar /opentelemetry-java-contrib-jmx-metrics.jar /opt/opentelemetry-java-contrib-jmx-metrics.jar
 COPY plugins /etc/otel/plugins
