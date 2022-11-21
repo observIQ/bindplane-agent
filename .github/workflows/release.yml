@@ -85,7 +85,7 @@ jobs:
         run: C:/cinc-project/cinc-auditor/bin/cinc-auditor.bat exec uninstall.rb
         working-directory: C:/build/test
       - name: "Upload MSI"
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: observiq-otel-collector.msi
           path: C:/build/observiq-otel-collector.msi
