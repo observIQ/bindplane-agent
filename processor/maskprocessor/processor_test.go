@@ -18,6 +18,10 @@ var testMap = map[string]interface{}{
 	"embedded": map[string]interface{}{
 		"mask": "this is sensitive",
 	},
+	"slice": []interface{}{
+		"this is sensitive",
+		int64(1),
+	},
 }
 
 var expectedMap = map[string]interface{}{
@@ -26,6 +30,10 @@ var expectedMap = map[string]interface{}{
 	"unrelated": "this is unrelated",
 	"embedded": map[string]interface{}{
 		"mask": "this is [masked_field]",
+	},
+	"slice": []interface{}{
+		"this is [masked_field]",
+		int64(1),
 	},
 }
 

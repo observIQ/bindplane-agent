@@ -157,6 +157,14 @@ func (p *processor) maskValue(field string, value pcommon.Value) {
 		value.Map().Range(maskFunc)
 	case pcommon.ValueTypeStr:
 		p.maskString(value)
+	case pcommon.ValueTypeSlice:
+		// Search for strings in a slice and apply mask
+		for i := 0; i < value.Slice().Len(); i++ {
+			sliceVal := value.Slice().At(i)
+			if sliceVal.Type() == pcommon.ValueTypeStr {
+				p.maskString(sliceVal)
+			}
+		}
 	}
 }
 
