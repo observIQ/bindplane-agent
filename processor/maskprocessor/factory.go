@@ -82,7 +82,7 @@ func createTracesProcessor(
 		processorhelper.WithStart(processor.start))
 }
 
-// createTracesProcessor creates a mask processor for logs.
+// createLogsProcessor creates a mask processor for logs.
 func createLogsProcessor(
 	ctx context.Context,
 	set component.ProcessorCreateSettings,
@@ -105,7 +105,7 @@ func createLogsProcessor(
 		processorhelper.WithStart(processor.start))
 }
 
-// createTracesProcessor creates a mask processor for metrics.
+// createMetricsProcessor creates a mask processor for metrics.
 func createMetricsProcessor(
 	ctx context.Context,
 	set component.ProcessorCreateSettings,

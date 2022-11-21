@@ -11,6 +11,8 @@ This processor is used to detect and mask sensitive data.
 2. If a field matches a defined regex rule, the matching value is replaced with `[masked_value]`, where `value` is the name of the  rule. For instance, a rule that masks email addresses would result in `[masked_email]`.
 3. If a field is to be excluded from masking, it can be specified in the processor's `exclude` field. By default, the processor will mask all fields.
 
+**Note**: Only attributes that are strings will be considered for masking. For example the phone number as a string `"8881234"` can be masked but as an integer `8881234` will not be.
+
 ## Configuration
 | Field       | Default | Description |
 | ---         | ---     | ---         |
@@ -43,7 +45,7 @@ The following configuration adds a custom rule to mask any word greater than 10 
 processors:
     mask:
         rules:
-            long_word: "\w{10,}"
+            long_word: '\w{10,}'
 ```
 ### Exclude specific fields
 The following configuration excludes the resource attribute `ip` from masking. In this scenario, the user wants to avoid masking this value, because it's only related to infrastructure, rather than pii.
@@ -52,7 +54,7 @@ processors:
     mask:
         exclude: [resource.ip]
         rules:
-            ip: "(?:[0-9]{1,3}\.){3}[0-9]{1,3}"
+            ip: '(?:[0-9]{1,3}\.){3}[0-9]{1,3}'
 ```
 
 ### Exclude all values
@@ -62,7 +64,7 @@ processors:
     mask:
         exclude: [resource, attributes]
         rules:
-            ip: "(?:[0-9]{1,3}\.){3}[0-9]{1,3}"
+            ip: '(?:[0-9]{1,3}\.){3}[0-9]{1,3}'
 ```
 
 ## Common Rules
