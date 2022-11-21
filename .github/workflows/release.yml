@@ -112,12 +112,12 @@ jobs:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
       - name: Login to DockerHub
-        uses: docker/login-action@v2
+        uses: docker/login-action@3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Retrieve Windows MSI Installer
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: observiq-otel-collector.msi
           path: observiq-otel-collector.msi
