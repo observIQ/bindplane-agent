@@ -13,6 +13,7 @@ Below is a list of supported processors with links to their documentation pages.
 | Group by Trace Processor                | [groupbytraceprocessor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.64.0/processor/groupbytraceprocessor/README.md) |
 | Kubernetes Attributes Processor         | [k8sattributesprocessor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.64.0/processor/k8sattributesprocessor/README.md) |
 | Logs Transform Processor                | [logstransform](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.64.0/processor/logstransformprocessor/README.md) |
+| Mask Processor                          | [maskprocessor](../processor/maskprocessor/README.md) |
 | Memory Limiter Processor                | [memorylimiterprocessor](https://github.com/open-telemetry/opentelemetry-collector/blob/v0.64.1/processor/memorylimiterprocessor/README.md) |
 | Metrics Generation Processor            | [metricsgenerationprocessor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.64.0/processor/metricsgenerationprocessor/README.md) |
 | Metrics Transform Processor             | [metricstransformprocessor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.64.0/processor/metricstransformprocessor/README.md) |
