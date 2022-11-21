@@ -116,6 +116,8 @@ func (p *processor) processMetrics(_ context.Context, md pmetric.Metrics) (pmetr
 					p.processSummary(metrics.Summary())
 				case pmetric.MetricTypeHistogram:
 					p.processHistogram(metrics.Histogram())
+				case pmetric.MetricTypeExponentialHistogram:
+					p.processExponentialHistogram(metrics.ExponentialHistogram())
 				}
 			}
 		}
@@ -147,6 +149,13 @@ func (p *processor) processSummary(summary pmetric.Summary) {
 
 // processHistogram masks a histogram metric.
 func (p *processor) processHistogram(histogram pmetric.Histogram) {
+	for i := 0; i < histogram.DataPoints().Len(); i++ {
+		histogram.DataPoints().At(i).Attributes().Range(p.maskAttrsFunc)
+	}
+}
+
+// processExponentialHistogram masks a histogram metric.
+func (p *processor) processExponentialHistogram(histogram pmetric.ExponentialHistogram) {
 	for i := 0; i < histogram.DataPoints().Len(); i++ {
 		histogram.DataPoints().At(i).Attributes().Range(p.maskAttrsFunc)
 	}
