@@ -21,7 +21,7 @@ jobs:
       # Load caches based on OS
       - name: Linux Cache Go Modules
         if: matrix.os == 'ubuntu-20.04'
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: |
             ~/.cache/go-build
@@ -31,7 +31,7 @@ jobs:
             ${{ runner.os }}-go-
       - name: MacOS Cache Go Modules
         if: matrix.os == 'macos-11'
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: |
             ~/Library/Caches/go-build
@@ -41,10 +41,10 @@ jobs:
             ${{ runner.os }}-go-
       - name: Windows Cache Go Modules
         if: matrix.os == 'windows-2019'
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: |
-            %LocalAppData%\go-build
+            ~\AppData\Local\go-build
             ~/go/pkg/mod
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
