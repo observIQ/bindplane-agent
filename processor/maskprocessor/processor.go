@@ -114,6 +114,8 @@ func (p *processor) processMetrics(_ context.Context, md pmetric.Metrics) (pmetr
 					p.processGauge(metrics.Gauge())
 				case pmetric.MetricTypeSummary:
 					p.processSummary(metrics.Summary())
+				case pmetric.MetricTypeHistogram:
+					p.processHistogram(metrics.Histogram())
 				}
 			}
 		}
@@ -136,10 +138,17 @@ func (p *processor) processGauge(gauge pmetric.Gauge) {
 	}
 }
 
-// processSummary masks a summary metrics.
+// processSummary masks a summary metric.
 func (p *processor) processSummary(summary pmetric.Summary) {
 	for i := 0; i < summary.DataPoints().Len(); i++ {
 		summary.DataPoints().At(i).Attributes().Range(p.maskAttrsFunc)
+	}
+}
+
+// processHistogram masks a histogram metric.
+func (p *processor) processHistogram(histogram pmetric.Histogram) {
+	for i := 0; i < histogram.DataPoints().Len(); i++ {
+		histogram.DataPoints().At(i).Attributes().Range(p.maskAttrsFunc)
 	}
 }
 

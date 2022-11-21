@@ -72,6 +72,8 @@ func TestProcessMetrics(t *testing.T) {
 	sum.DataPoints().AppendEmpty().Attributes().FromRaw(testMap)
 	summary := resource.ScopeMetrics().AppendEmpty().Metrics().AppendEmpty().SetEmptySummary()
 	summary.DataPoints().AppendEmpty().Attributes().FromRaw(testMap)
+	histogram := resource.ScopeMetrics().AppendEmpty().Metrics().AppendEmpty().SetEmptyHistogram()
+	histogram.DataPoints().AppendEmpty().Attributes().FromRaw(testMap)
 
 	cfg := &Config{
 		Rules:   map[string]string{"field": "sensitive"},
@@ -96,6 +98,9 @@ func TestProcessMetrics(t *testing.T) {
 
 	summaryAttrs := scope.At(2).Metrics().At(0).Summary().DataPoints().At(0).Attributes().AsRaw()
 	require.Equal(t, expectedMap, summaryAttrs)
+
+	histogramAttrs := scope.At(3).Metrics().At(0).Histogram().DataPoints().At(0).Attributes().AsRaw()
+	require.Equal(t, expectedMap, histogramAttrs)
 }
 
 func TestProcessLogs(t *testing.T) {
