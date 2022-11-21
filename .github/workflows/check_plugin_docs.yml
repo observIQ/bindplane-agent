@@ -7,9 +7,9 @@ jobs:
     runs-on: "ubuntu-20.04"
     steps:
       - name: Checkout Sources
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Setup Go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v3
         with:
           go-version: "1.18"
           check-latest: true
@@ -20,7 +20,7 @@ jobs:
         id: verify-changed-files
         with:
           files: |
-             docs/plugins
+            docs/plugins
       - name: Verify No Plugin Doc Changes
         if: steps.verify-changed-files.outputs.files_changed == 'true'
         run: exit 1
