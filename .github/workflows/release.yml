@@ -62,11 +62,8 @@ jobs:
           curl -f -L -o wix310-binaries.zip http://wixtoolset.org/downloads/v3.10.3.3007/wix310-binaries.zip
           unzip wix310-binaries.zip
         working-directory: C:/build
-      - name: Get Tag From Environment
-        id: get-tag
-        run: printf '::set-output name=tag::%s' "$(printf '%s' "${{ github.ref }}" | sed 's/refs\/tags\///')"
       - name: "Build MSI from Tagged Release"
-        run: go-msi.exe make -m observiq-otel-collector.msi --version ${{ steps.get-tag.outputs.tag }} --arch amd64
+        run: go-msi.exe make -m observiq-otel-collector.msi --version $GITHUB_REF_NAME --arch amd64
         working-directory: C:/build
       - name: Install MSI
         run: msiexec.exe /qn /i observiq-otel-collector.msi
@@ -139,16 +136,13 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.ORG_GORELEASER_GITHUB_TOKEN }}
           COSIGN_PWD: ${{ secrets.ORG_COSIGN_PWD }}
       # Trigger installation tests in otel-collector-installer-testing
-      - name: Get Tag From Environment
-        id: get-tag
-        run: printf '::set-output name=tag::%s' "$(printf '%s' "${{ github.ref }}" | sed 's/refs\/tags\///')"
       - name: Trigger Installation Testing
         uses: peter-evans/repository-dispatch@v2
         with:
           token: ${{ secrets.ORG_GORELEASER_GITHUB_TOKEN }}
           repository: observIQ/otel-collector-installer-testing
           event-type: upstream_prerelease
-          client-payload: '{ "version": "${{ steps.get-tag.outputs.tag }}" }'
+          client-payload: '{ "version": "$GITHUB_REF_NAME" }'
       # Trigger amplify repo
       - name: Update Amplify Version
         uses: peter-evans/repository-dispatch@v2
@@ -156,4 +150,4 @@ jobs:
           token: ${{ secrets.ORG_GORELEASER_GITHUB_TOKEN }}
           repository: observIQ/amplify
           event-type: update_collector_version
-          client-payload: '{ "version": "${{ steps.get-tag.outputs.tag }}" }'
+          client-payload: '{ "version": "$GITHUB_REF_NAME" }'
