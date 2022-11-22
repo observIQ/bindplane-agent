@@ -1,4 +1,4 @@
-version: 0.0.1
+version: 0.1.0
 title: Apache HBase
 description: Log parser for Apache HBase
 parameters:
@@ -9,8 +9,8 @@ parameters:
   - name: master_log_path
     description: The absolute path to the HBase master logs
     type: "[]string"
-    default: 
-    - "/usr/local/hbase*/logs/hbase*-master-*.log"
+    default:
+      - "/usr/local/hbase*/logs/hbase*-master-*.log"
   - name: enable_region_log
     description: Enable to collect HBase region logs
     type: bool
@@ -18,8 +18,8 @@ parameters:
   - name: region_log_path
     description: The absolute path to the HBase region logs
     type: "[]string"
-    default: 
-    - "/usr/local/hbase*/logs/hbase*-regionserver-*.log"
+    default:
+      - "/usr/local/hbase*/logs/hbase*-regionserver-*.log"
   - name: enable_zookeeper_log
     description: Enable to collect HBase zookeeper logs
     type: bool
@@ -27,8 +27,12 @@ parameters:
   - name: zookeeper_log_path
     description: The absolute path to the HBase zookeeper logs
     type: "[]string"
-    default: 
-    - "/usr/local/hbase*/logs/hbase*-zookeeper-*.log"
+    default:
+      - "/usr/local/hbase*/logs/hbase*-zookeeper-*.log"
+  - name: timezone
+    description: Timezone to use when parsing the timestamp
+    type: timezone
+    default: UTC
   - name: start_at
     description: At startup, where to start reading logs from the file (`beginning` or `end`)
     type: string
@@ -56,6 +60,7 @@ template: |
           timestamp:
             parse_from: attributes.timestamp
             layout: '%Y-%m-%d %H:%M:%S'
+            location: {{ .timezone }}
           severity:
             parse_from: attributes.hbase_severity
         - type: regex_parser
@@ -84,6 +89,7 @@ template: |
           timestamp:
             parse_from: attributes.timestamp
             layout: '%Y-%m-%d %H:%M:%S'
+            location: {{ .timezone }}
           severity:
             parse_from: attributes.hbase_severity
         - type: regex_parser
@@ -112,6 +118,7 @@ template: |
           timestamp:
             parse_from: attributes.timestamp
             layout: '%Y-%m-%d %H:%M:%S'
+            location: {{ .timezone }}
           severity:
             parse_from: attributes.hbase_severity
         - type: regex_parser
