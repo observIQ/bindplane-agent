@@ -1,12 +1,16 @@
-version: 0.0.1
+version: 0.1.0
 title: Apache Zookeeper
 description: Log parser for Apache Zookeeper
 parameters:
   - name: file_path
     description: The absolute path to the Zookeeper logs
     type: "[]string"
-    default: 
+    default:
       - "/home/kafka/kafka/logs/zookeeper.log"
+  - name: timezone
+    description: Timezone to use when parsing the timestamp
+    type: timezone
+    default: UTC
   - name: start_at
     description: At startup, where to start reading logs from the file (`beginning` or `end`)
     type: string
@@ -44,6 +48,7 @@ template: |
           timestamp:
             parse_from: attributes.timestamp
             layout: '%Y-%m-%d %H:%M:%S'
+            location: {{ .timezone }}
           severity:
             parse_from: attributes.zookeeper_severity
             mapping:
@@ -60,6 +65,7 @@ template: |
           timestamp:
             parse_from: attributes.timestamp
             layout: '%Y-%m-%d %H:%M:%S'
+            location: {{ .timezone }}
           severity:
             parse_from: attributes.zookeeper_severity
             mapping:
