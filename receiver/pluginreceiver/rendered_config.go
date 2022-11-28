@@ -18,7 +18,6 @@ import (
 	"fmt"
 
 	"go.opentelemetry.io/collector/component"
-	"go.opentelemetry.io/collector/config"
 	"go.opentelemetry.io/collector/confmap"
 	"go.opentelemetry.io/collector/confmap/converter/expandconverter"
 	"go.opentelemetry.io/collector/confmap/provider/yamlprovider"
@@ -196,6 +195,7 @@ func (r *RenderedConfig) getExtensionFactories(host component.Host) (map[compone
 
 // parseComponentType parses a component type from a string
 func parseComponentType(value string) component.Type {
-	componentID, _ := config.NewComponentIDFromString(value)
-	return componentID.Type()
+	id := component.ID{}
+	id.UnmarshalText([]byte(value))
+	return id.Type()
 }
