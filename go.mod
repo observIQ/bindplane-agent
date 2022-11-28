@@ -571,3 +571,7 @@ replace github.com/observiq/observiq-otel-collector/processor/maskprocessor => .
 // some dependencies attempt to bring something like v1.8.2-0.20220303173753-edfe657b5405, which is older than v0.38.0
 // at the time of this inclusion, v0.38.0 was the latest version available (also tagged as v2.38.0)
 replace github.com/prometheus/prometheus => github.com/prometheus/prometheus v0.38.0
+
+// Does not build with windows and only used in configschema executable
+// Relevant issue https://github.com/mattn/go-ieproxy/issues/45
+replace github.com/mattn/go-ieproxy v0.0.9 => github.com/mattn/go-ieproxy v0.0.1
