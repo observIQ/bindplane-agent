@@ -1,4 +1,4 @@
-version: 0.0.1
+version: 0.1.0
 title: OracleDB Metrics
 description: Metrics receiver for OracleDB
 parameters:
