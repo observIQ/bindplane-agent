@@ -1,4 +1,4 @@
-version: 0.0.1
+version: 0.1.0
 title: OracleDB Metrics
 description: Metrics receiver for OracleDB
 parameters:
@@ -38,13 +38,13 @@ template: |
     {{ $datasource = printf "%s/%s" $datasource .service_name }}
   {{end}}
   {{ if and .sid .wallet }}
-    {{ $datasource = printf "%s?SID%%3D%s&WALLET%%3D%s" $datasource .sid .wallet}}
+    {{ $datasource = printf "%s?SID=%s&WALLET=%s" $datasource .sid .wallet}}
   {{end}}
   {{ if and .sid (not .wallet) }}
-    {{ $datasource = printf "%s?SID%%3D%s" $datasource .sid}}
+    {{ $datasource = printf "%s?SID=%s" $datasource .sid}}
   {{end}}
   {{ if and (not .sid) .wallet }}
-    {{ $datasource = printf "%s?WALLET%%3D%s" $datasource .wallet}}
+    {{ $datasource = printf "%s?WALLET=%s" $datasource .wallet}}
   {{end}}
 
   receivers:
