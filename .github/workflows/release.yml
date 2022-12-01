@@ -63,7 +63,7 @@ jobs:
           unzip wix310-binaries.zip
         working-directory: C:/build
       - name: "Build MSI from Tagged Release"
-        run: go-msi.exe make -m observiq-otel-collector.msi --version $GITHUB_REF_NAME --arch amd64
+        run: go-msi.exe make -m observiq-otel-collector.msi --version ${GITHUB_REF_NAME} --arch amd64
         working-directory: C:/build
       - name: Install MSI
         run: msiexec.exe /qn /i observiq-otel-collector.msi
