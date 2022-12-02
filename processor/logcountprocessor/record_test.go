@@ -22,10 +22,10 @@ import (
 )
 
 func TestConvertToRecords(t *testing.T) {
-	testResource := map[string]interface{}{
+	testResource := map[string]any{
 		"resource": "attributes",
 	}
-	testAttrs := map[string]interface{}{
+	testAttrs := map[string]any{
 		"attributes": "attributes",
 	}
 	testBody := "body"
@@ -44,7 +44,7 @@ func TestConvertToRecords(t *testing.T) {
 
 	records := convertToRecords(logs)
 	require.Len(t, records, 1)
-	require.Equal(t, map[string]interface{}{
+	require.Equal(t, map[string]any{
 		resourceField:   testResource,
 		attributesField: testAttrs,
 		bodyField:       testBody,

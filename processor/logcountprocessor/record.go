@@ -31,7 +31,7 @@ const (
 )
 
 // Record is the simplified representation of a log record.
-type Record = map[string]interface{}
+type Record = map[string]any
 
 // convertToRecords converts plog.Logs to a slice of records.
 func convertToRecords(logs plog.Logs) []Record {
@@ -53,7 +53,7 @@ func convertToRecords(logs plog.Logs) []Record {
 }
 
 // convertToRecord converts a log record to a simplified representation.
-func convertToRecord(log plog.LogRecord, resource map[string]interface{}) Record {
+func convertToRecord(log plog.LogRecord, resource map[string]any) Record {
 	return Record{
 		resourceField:   resource,
 		attributesField: log.Attributes().AsRaw(),

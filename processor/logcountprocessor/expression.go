@@ -27,7 +27,7 @@ type Expression struct {
 }
 
 // Match checks if an expression matches the supplied environment.
-func (e *Expression) Match(env map[string]interface{}) (bool, error) {
+func (e *Expression) Match(env map[string]any) (bool, error) {
 	matches, err := e.Evaluate(env)
 	if err != nil {
 		return false, err
@@ -42,7 +42,7 @@ func (e *Expression) Match(env map[string]interface{}) (bool, error) {
 }
 
 // Evaluate evaluates an expression against the supplied environment.
-func (e *Expression) Evaluate(env map[string]interface{}) (interface{}, error) {
+func (e *Expression) Evaluate(env map[string]any) (any, error) {
 	return vm.Run(e.Program, env)
 }
 

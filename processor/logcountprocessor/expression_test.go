@@ -25,44 +25,44 @@ func TestExpressionMatch(t *testing.T) {
 	var testCases = []struct {
 		name        string
 		expr        string
-		env         map[string]interface{}
+		env         map[string]any
 		expected    bool
 		expectedErr error
 	}{
 		{
 			name:     "simple true",
 			expr:     "true",
-			env:      map[string]interface{}{},
+			env:      map[string]any{},
 			expected: true,
 		},
 		{
 			name:     "simple false",
 			expr:     "false",
-			env:      map[string]interface{}{},
+			env:      map[string]any{},
 			expected: false,
 		},
 		{
 			name:     "true with env",
 			expr:     `foo == "bar"`,
-			env:      map[string]interface{}{"foo": "bar"},
+			env:      map[string]any{"foo": "bar"},
 			expected: true,
 		},
 		{
 			name:     "false with env",
 			expr:     `foo == "bar"`,
-			env:      map[string]interface{}{"foo": "baz"},
+			env:      map[string]any{"foo": "baz"},
 			expected: false,
 		},
 		{
 			name:        "invalid expression",
 			expr:        `foo`,
-			env:         map[string]interface{}{"foo": "bar"},
+			env:         map[string]any{"foo": "bar"},
 			expectedErr: errors.New("expression did not return a boolean"),
 		},
 		{
 			name:        "invalid env",
 			expr:        `foo + "bar"`,
-			env:         map[string]interface{}{"foo": 1},
+			env:         map[string]any{"foo": 1},
 			expectedErr: errors.New("invalid operation: int + string"),
 		},
 	}

@@ -29,7 +29,7 @@ func NewLogCounter() *LogCounter {
 }
 
 // Add increments the counter with the supplied dimensions.
-func (l *LogCounter) Add(resource, attributes map[string]interface{}) {
+func (l *LogCounter) Add(resource, attributes map[string]any) {
 	key := getDimensionKey(resource)
 	if _, ok := l.resources[key]; !ok {
 		l.resources[key] = NewResourceCounter(resource)
@@ -45,12 +45,12 @@ func (l *LogCounter) Reset() {
 
 // ResourceCounter dimensions the counter by resource.
 type ResourceCounter struct {
-	values     map[string]interface{}
+	values     map[string]any
 	attributes map[string]*AttributeCounter
 }
 
 // NewResourceCounter creates a new ResourceCounter.
-func NewResourceCounter(values map[string]interface{}) *ResourceCounter {
+func NewResourceCounter(values map[string]any) *ResourceCounter {
 	return &ResourceCounter{
 		values:     values,
 		attributes: map[string]*AttributeCounter{},
@@ -58,7 +58,7 @@ func NewResourceCounter(values map[string]interface{}) *ResourceCounter {
 }
 
 // Add increments the counter with the supplied dimensions.
-func (r *ResourceCounter) Add(attributes map[string]interface{}) {
+func (r *ResourceCounter) Add(attributes map[string]any) {
 	key := getDimensionKey(attributes)
 	if _, ok := r.attributes[key]; !ok {
 		r.attributes[key] = NewAttributeCounter(attributes)
@@ -69,12 +69,12 @@ func (r *ResourceCounter) Add(attributes map[string]interface{}) {
 
 // AttributeCounter dimensions the counter by attributes.
 type AttributeCounter struct {
-	values map[string]interface{}
+	values map[string]any
 	count  int
 }
 
 // NewAttributeCounter creates a new AttributeCounter.
-func NewAttributeCounter(values map[string]interface{}) *AttributeCounter {
+func NewAttributeCounter(values map[string]any) *AttributeCounter {
 	return &AttributeCounter{
 		values: values,
 	}
@@ -86,7 +86,7 @@ func (a *AttributeCounter) Add() {
 }
 
 // getDimensionKey returns a unique key for the dimension.
-func getDimensionKey(dimension map[string]interface{}) string {
+func getDimensionKey(dimension map[string]any) string {
 	dimensionJSON, _ := json.Marshal(dimension)
 	return string(dimensionJSON)
 }

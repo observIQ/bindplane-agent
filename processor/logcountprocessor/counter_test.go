@@ -22,10 +22,10 @@ import (
 
 func TestLogCounter(t *testing.T) {
 	counter := NewLogCounter()
-	resourceMap1 := map[string]interface{}{"resource1": "value1"}
-	resourceMap2 := map[string]interface{}{"resource2": "value2"}
-	attrMap1 := map[string]interface{}{"attr1": "value1"}
-	attrMap2 := map[string]interface{}{"attr2": "value2"}
+	resourceMap1 := map[string]any{"resource1": "value1"}
+	resourceMap2 := map[string]any{"resource2": "value2"}
+	attrMap1 := map[string]any{"attr1": "value1"}
+	attrMap2 := map[string]any{"attr2": "value2"}
 
 	for i := 0; i < 10; i++ {
 		counter.Add(resourceMap1, attrMap1)

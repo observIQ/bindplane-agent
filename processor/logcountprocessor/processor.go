@@ -128,8 +128,8 @@ func (p *processor) matchRecord(record Record) bool {
 }
 
 // extractAttributes extracts attributes from the record.
-func (p *processor) extractAttributes(record Record) map[string]interface{} {
-	attrs := map[string]interface{}{}
+func (p *processor) extractAttributes(record Record) map[string]any {
+	attrs := map[string]any{}
 	for key, expression := range p.attrExprs {
 		value, err := expression.Evaluate(record)
 		if err != nil {
@@ -142,8 +142,8 @@ func (p *processor) extractAttributes(record Record) map[string]interface{} {
 }
 
 // extractResource extracts the resource from the record.
-func (p *processor) extractResource(record Record) map[string]interface{} {
-	value, ok := record[resourceField].(map[string]interface{})
+func (p *processor) extractResource(record Record) map[string]any {
+	value, ok := record[resourceField].(map[string]any)
 	if !ok {
 		return nil
 	}
@@ -156,7 +156,7 @@ func (p *processor) createMetrics() pmetric.Metrics {
 	metrics := pmetric.NewMetrics()
 	for _, resource := range p.counter.resources {
 		resourceMetrics := metrics.ResourceMetrics().AppendEmpty()
-		resourceMetrics.Resource().Attributes().FromRaw(resource.values)
+		_ = resourceMetrics.Resource().Attributes().FromRaw(resource.values)
 		scopeMetrics := resourceMetrics.ScopeMetrics().AppendEmpty()
 		scopeMetrics.Scope().SetName(typeStr)
 		for _, attributes := range resource.attributes {
@@ -168,7 +168,7 @@ func (p *processor) createMetrics() pmetric.Metrics {
 			gauge := metrics.Gauge().DataPoints().AppendEmpty()
 			gauge.SetTimestamp(pcommon.NewTimestampFromTime(time.Now()))
 			gauge.SetIntValue(int64(attributes.count))
-			gauge.Attributes().FromRaw(attributes.values)
+			_ = gauge.Attributes().FromRaw(attributes.values)
 		}
 	}
 

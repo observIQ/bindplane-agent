@@ -65,9 +65,9 @@ func TestConsumeLogs(t *testing.T) {
 
 	logs := plog.NewLogs()
 	resourceLogs := logs.ResourceLogs().AppendEmpty()
-	resourceLogs.Resource().Attributes().FromRaw(map[string]interface{}{"service.name": "test2"})
+	resourceLogs.Resource().Attributes().FromRaw(map[string]any{"service.name": "test2"})
 	logRecord := resourceLogs.ScopeLogs().AppendEmpty().LogRecords().AppendEmpty()
-	logRecord.Body().SetEmptyMap().FromRaw(map[string]interface{}{"message": "test1"})
+	logRecord.Body().SetEmptyMap().FromRaw(map[string]any{"message": "test1"})
 
 	go func() {
 		processor.ConsumeLogs(context.Background(), logs)
@@ -80,7 +80,7 @@ func TestConsumeLogs(t *testing.T) {
 	require.Equal(t, 1, consumedMetrics.ResourceMetrics().Len())
 
 	resourceMetrics := consumedMetrics.ResourceMetrics().At(0)
-	require.Equal(t, map[string]interface{}{"service.name": "test2"}, resourceMetrics.Resource().Attributes().AsRaw())
+	require.Equal(t, map[string]any{"service.name": "test2"}, resourceMetrics.Resource().Attributes().AsRaw())
 
 	metricRecords := resourceMetrics.ScopeMetrics().At(0).Metrics()
 	require.Equal(t, 1, metricRecords.Len())
@@ -90,7 +90,7 @@ func TestConsumeLogs(t *testing.T) {
 
 	metric := dataPoints.At(0)
 	require.Equal(t, int64(1), metric.IntValue())
-	require.Equal(t, map[string]interface{}{"dimension1": "test1", "dimension2": "test2"}, metric.Attributes().AsRaw())
+	require.Equal(t, map[string]any{"dimension1": "test1", "dimension2": "test2"}, metric.Attributes().AsRaw())
 }
 
 func TestConsumeLogsWithoutReceiver(t *testing.T) {
@@ -138,7 +138,7 @@ func TestFailedExtractAttributes(t *testing.T) {
 
 	logCountProcessor := p.(*processor)
 	attributes := logCountProcessor.extractAttributes(Record{bodyField: "message"})
-	require.Equal(t, map[string]interface{}{"dimension1": "message"}, attributes)
+	require.Equal(t, map[string]any{"dimension1": "message"}, attributes)
 	require.Contains(t, logger.buffer.String(), "Failed to evaluate attribute expression")
 	require.Contains(t, logger.buffer.String(), "cannot fetch service.name")
 }

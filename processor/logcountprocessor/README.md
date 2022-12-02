@@ -59,7 +59,7 @@ In order to access embedded values, use JSON dot notation. For example, `body.ex
 
 However, if a key already possesses a literal dot, users will need to use bracket notation to access that field. For example, when the field `service.name` exists on the log's resource, users will need to use `resource["service.name"]` to access this value.
 
-For more information about syntax and available operators, see the [Expression Language Defintion](https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md).
+For more information about syntax and available operators, see the [Expression Language Definition](https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md).
 
 ## How To
 ### Match specific logs
@@ -81,7 +81,7 @@ processors:
 ```
 
 ### Use multiple processors
-The following configuration uses multiple log count processors to send to different metric pipelines with different exporters. Each processor will only send metrics to the cooresponding receiver with the same name and id. For example, `logcount/info` will create metrics for info level logs and send them only to the `logcount/info` receiver.
+The following configuration uses multiple log count processors to send to different metric pipelines with different exporters. Each processor will only send metrics to the corresponding receiver with the same name and id. For example, `logcount/info` will create metrics for info level logs and send them only to the `logcount/info` receiver.
 ```yaml
 receivers:
     filelog:
