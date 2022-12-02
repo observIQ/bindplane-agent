@@ -17,6 +17,7 @@ package factories
 import (
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-collector/processor/normalizesumsprocessor"
 	"github.com/observiq/observiq-otel-collector/internal/processor/snapshotprocessor"
+	"github.com/observiq/observiq-otel-collector/processor/logcountprocessor"
 	"github.com/observiq/observiq-otel-collector/processor/maskprocessor"
 	"github.com/observiq/observiq-otel-collector/processor/resourceattributetransposerprocessor"
 	"github.com/observiq/observiq-otel-collector/processor/samplingprocessor"
@@ -55,6 +56,7 @@ var defaultProcessors = []component.ProcessorFactory{
 	groupbyattrsprocessor.NewFactory(),
 	groupbytraceprocessor.NewFactory(),
 	k8sattributesprocessor.NewFactory(),
+	logcountprocessor.NewProcessorFactory(),
 	logstransformprocessor.NewFactory(),
 	maskprocessor.NewFactory(),
 	memorylimiterprocessor.NewFactory(),

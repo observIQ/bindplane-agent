@@ -44,3 +44,4 @@ exceptions:
     - path: "./opamp/observiq/testdata/latest"
     - path: "./processor/throughputmeasurementprocessor"
     - path: "./processor/maskprocessor"
+    - path: "./processor/logcountprocessor"

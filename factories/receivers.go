@@ -16,6 +16,7 @@ package factories
 
 import (
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-collector/receiver/varnishreceiver"
+	"github.com/observiq/observiq-otel-collector/processor/logcountprocessor"
 	"github.com/observiq/observiq-otel-collector/receiver/pluginreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/activedirectorydsreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/aerospikereceiver"
@@ -118,6 +119,7 @@ var defaultReceivers = []component.ReceiverFactory{
 	kafkametricsreceiver.NewFactory(),
 	kafkareceiver.NewFactory(),
 	kubeletstatsreceiver.NewFactory(),
+	logcountprocessor.NewReceiverFactory(),
 	memcachedreceiver.NewFactory(),
 	mongodbatlasreceiver.NewFactory(),
 	mongodbreceiver.NewFactory(),
