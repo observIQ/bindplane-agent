@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Package routereceiver provides a receiver that receives telemetry from other components.
 package routereceiver
 
 import (
