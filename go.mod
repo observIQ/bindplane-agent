@@ -8,11 +8,13 @@ require (
 	github.com/mholt/archiver/v3 v3.5.1
 	github.com/observiq/observiq-otel-collector/exporter/googlecloudexporter v1.13.0
 	github.com/observiq/observiq-otel-collector/packagestate v1.13.0
+	github.com/observiq/observiq-otel-collector/processor/logcountprocessor v1.13.0
 	github.com/observiq/observiq-otel-collector/processor/maskprocessor v1.13.0
 	github.com/observiq/observiq-otel-collector/processor/resourceattributetransposerprocessor v1.13.0
 	github.com/observiq/observiq-otel-collector/processor/samplingprocessor v1.13.0
 	github.com/observiq/observiq-otel-collector/processor/throughputmeasurementprocessor v1.13.0
 	github.com/observiq/observiq-otel-collector/receiver/pluginreceiver v1.13.0
+	github.com/observiq/observiq-otel-collector/receiver/routereceiver v1.13.0
 	github.com/oklog/ulid/v2 v2.1.0
 	github.com/open-telemetry/opamp-go v0.2.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/alibabacloudlogserviceexporter v0.66.0
@@ -560,6 +562,8 @@ replace github.com/observiq/observiq-otel-collector/processor/resourceattributet
 
 replace github.com/observiq/observiq-otel-collector/receiver/pluginreceiver => ./receiver/pluginreceiver
 
+replace github.com/observiq/observiq-otel-collector/receiver/routereceiver => ./receiver/routereceiver
+
 replace github.com/observiq/observiq-otel-collector/exporter/googlecloudexporter => ./exporter/googlecloudexporter
 
 replace github.com/observiq/observiq-otel-collector/packagestate => ./packagestate
@@ -569,6 +573,8 @@ replace github.com/observiq/observiq-otel-collector/processor/throughputmeasurem
 replace github.com/observiq/observiq-otel-collector/processor/samplingprocessor => ./processor/samplingprocessor
 
 replace github.com/observiq/observiq-otel-collector/processor/maskprocessor => ./processor/maskprocessor
+
+replace github.com/observiq/observiq-otel-collector/processor/logcountprocessor => ./processor/logcountprocessor
 
 // some dependencies attempt to bring something like v1.8.2-0.20220303173753-edfe657b5405, which is older than v0.38.0
 // at the time of this inclusion, v0.38.0 was the latest version available (also tagged as v2.38.0)
