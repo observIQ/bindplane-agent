@@ -11,9 +11,9 @@ This processor samples incoming OTLP objects and drops those objects based on a 
 ## How it works
 
 1. The user configures the processor in their pipeline with a `drop_ratio` that is the desired.
-2. A number will be randomly generated for each piece of incoming telemetry data.
-3. If the generated number is greater than the `drop_ratio` then the telemetry data is dropped.
-4. If the generated number is less than or equal to the `drop_ratio`, then the telemetry data makes it further in the pipeline.
+2. A number between 0 and 1 will be randomly generated for each piece incoming telemetry data.
+3. If the generated number is less than or equal to the `drop_ratio`, then the telemetry data is dropped.
+4. If the generated number is greater than the `drop_ratio`, then the telemetry data makes it further in the pipeline.
 
 ## Configuration
 
