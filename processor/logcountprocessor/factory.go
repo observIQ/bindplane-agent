@@ -27,7 +27,7 @@ const (
 	typeStr = "logcount"
 
 	// stability is the current state of the receiver and processor.
-	stability = component.StabilityLevelStable
+	stability = component.StabilityLevelAlpha
 )
 
 // NewProcessorFactory creates a new factory for the processor.

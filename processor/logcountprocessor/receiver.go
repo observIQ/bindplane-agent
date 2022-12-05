@@ -16,7 +16,7 @@ package logcountprocessor
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	"sync"
 
 	"go.opentelemetry.io/collector/component"
@@ -32,10 +32,10 @@ var (
 	receiverMux sync.RWMutex
 
 	// errConsumerNotSet is an error returned when a consumer is not set.
-	errConsumerNotSet = fmt.Errorf("consumer not set")
+	errConsumerNotSet = errors.New("consumer not set")
 
 	// errReceiverNotSet is an error returned when a receiver is not set.
-	errReceiverNotSet = fmt.Errorf("receiver not set")
+	errReceiverNotSet = errors.New("receiver not set")
 )
 
 // receiver is the struct that receives log based metrics.

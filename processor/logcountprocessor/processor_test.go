@@ -146,7 +146,7 @@ func TestFailedExtractAttributes(t *testing.T) {
 func TestFailedExtractResource(t *testing.T) {
 	processor := &processor{}
 	resource := processor.extractResource(Record{})
-	require.Nil(t, resource)
+	require.Empty(t, resource)
 }
 
 type LogConsumer struct {

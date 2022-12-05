@@ -52,10 +52,10 @@ func newProcessor(config *ProcessorConfig, consumer consumer.Logs, matchExpr *Ex
 }
 
 // Start starts the processor.
-func (p *processor) Start(_ context.Context, _ component.Host) error {
-	ctx, cancel := context.WithCancel(context.Background())
+func (p *processor) Start(ctx context.Context, _ component.Host) error {
+	processorCtx, cancel := context.WithCancel(ctx)
 	p.cancel = cancel
-	go p.handleMetricInterval(ctx)
+	go p.handleMetricInterval(processorCtx)
 
 	return nil
 }
@@ -145,7 +145,7 @@ func (p *processor) extractAttributes(record Record) map[string]any {
 func (p *processor) extractResource(record Record) map[string]any {
 	value, ok := record[resourceField].(map[string]any)
 	if !ok {
-		return nil
+		return map[string]any{}
 	}
 
 	return value

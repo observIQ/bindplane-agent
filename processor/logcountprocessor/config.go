@@ -60,7 +60,7 @@ func (c *ProcessorConfig) createMatchExpr() (*Expression, error) {
 
 // createAttrExprs returns the attribute expressions defined by the config.
 func (c *ProcessorConfig) createAttrExprs() (map[string]*Expression, error) {
-	attrExprs := map[string]*Expression{}
+	attrExprs := make(map[string]*Expression, len(c.Attributes))
 	for key, attr := range c.Attributes {
 		expr, err := NewExpression(attr, expr.AllowUndefinedVariables())
 		if err != nil {
