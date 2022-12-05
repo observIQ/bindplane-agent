@@ -5,30 +5,32 @@ This processor is used to convert the number of logs received during an interval
 - Logs
 
 ## How It Works
-1. The user configures the processor in their logs pipeline and then a matching receiver with the same name in their metrics pipeline. This will bridge the two different telemetry pipelines.
-2. If any incoming logs match the `match` expression, they are counted and dimensioned by their `attributes`. Regardless of match, all logs are sent to the next component in the pipeline.
-3. After each configured interval, the observed log counts are converted to a gauge metric. This metric is sent to the matching receiver and the counter is reset.
+1. The user configures the log count processor in their logs pipeline and a route receiver in their desired metrics pipeline.
+2. If any incoming logs match the `match` expression, they are counted and dimensioned by their `attributes`. Regardless of match, all logs are sent to the next component in the logs pipeline.
+3. After each configured interval, the observed log counts are converted into gauge metrics. These metrics are sent to the configured route receiver.
 
 
 ## Configuration
 | Field        | Type     | Default | Description |
 | ---          | ---      | ---     | ---         |
 | match        | string   | `true`  | A boolean [expression](https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md) used to match which logs to count. By default, all logs are counted. |
+| route        | string   | ` `      | The name of the [route receiver](../../receiver/routereceiver/README.md) to send metrics to. |
 | interval     | duration | `1m`    | The interval at which metrics are created. The counter will reset after each interval. |
 | metric_name  | string   | `log.count` | The name of the metric created. |
 | metric_unit  | string   | `{logs}`    | The unit of the metric created. |
 | attributes   | map      | `{}`        | The mapped attributes of the metric created. Each key is an attribute name. Each value is an [expression](https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md) that extracts data from the log. |
 
 ### Example Config
-The following config is an example configuration of the log count processor using default values. In this example, logs are collected from a file, sent to the processor to be counted, and then consumed by the logging exporter. After each minute, the log counts are converted to metrics and sent to the matching receiver in the metrics pipeline, which then forwards to the Google Cloud exporter.
+The following config is an example configuration of the log count processor using default values. In this example, logs are collected from a file, sent to the processor to be counted, and then consumed by the logging exporter. After each minute, the log counts are converted to metrics and sent to the route receiver in the metrics pipeline, which then forwards to the Google Cloud exporter.
 ```yaml
 receivers:
     filelog:
         include: [./example/apache.log]
-    logcount:
+    route/example:
 processors:
     batch:
     logcount:
+        route: example
 exporters:
     googlecloud:
     logging:
@@ -40,7 +42,7 @@ service:
             processors: [batch, logcount]
             exporters: [logging]
         metrics:
-            receivers: [logcount]
+            receivers: [route/example]
             processors: [batch]
             exporters: [googlecloud]
 ```
@@ -78,39 +80,4 @@ processors:
         attributes:
             status_code: body.status
             endpoint: body.endpoint
-```
-
-### Use multiple processors
-The following configuration uses multiple log count processors to send to different metric pipelines with different exporters. Each processor will only send metrics to the corresponding receiver with the same name and id. For example, `logcount/info` will create metrics for info level logs and send them only to the `logcount/info` receiver.
-```yaml
-receivers:
-    filelog:
-        include: [./example/apache.log]
-    logcount/info:
-    logcount/error:
-processors:
-    batch:
-    logcount/info:
-        match: severity contains "INFO"
-    logcount/error:
-        match: severity contains "ERROR"
-exporters:
-    googlecloud/info:
-    googlecloud/error:
-    logging:
-
-service:
-    pipelines:
-        logs:
-            receivers: [filelog]
-            processors: [batch, logcount/info, logcount/error]
-            exporters: [logging]
-        metrics/info:
-            receivers: [logcount/info]
-            processors: [batch]
-            exporters: [googlecloud/info]
-        metrics/error:
-            receivers: [logcount/error]
-            processors: [batch]
-            exporters: [googlecloud/error]
 ```

@@ -38,9 +38,10 @@ const (
 	defaultMatch = "true"
 )
 
-// ProcessorConfig is the config of the processor.
-type ProcessorConfig struct {
+// Config is the config of the processor.
+type Config struct {
 	config.ProcessorSettings `mapstructure:",squash"`
+	Route                    string            `mapstructure:"route"`
 	MetricName               string            `mapstructure:"metric_name"`
 	MetricUnit               string            `mapstructure:"metric_unit"`
 	Interval                 time.Duration     `mapstructure:"interval"`
@@ -49,7 +50,7 @@ type ProcessorConfig struct {
 }
 
 // createMatchExpr returns the match expression defined by the config.
-func (c *ProcessorConfig) createMatchExpr() (*Expression, error) {
+func (c *Config) createMatchExpr() (*Expression, error) {
 	matchExpr, err := NewExpression(c.Match, expr.AsBool(), expr.AllowUndefinedVariables())
 	if err != nil {
 		return nil, fmt.Errorf("failed to create match expression: %w", err)
@@ -59,7 +60,7 @@ func (c *ProcessorConfig) createMatchExpr() (*Expression, error) {
 }
 
 // createAttrExprs returns the attribute expressions defined by the config.
-func (c *ProcessorConfig) createAttrExprs() (map[string]*Expression, error) {
+func (c *Config) createAttrExprs() (map[string]*Expression, error) {
 	attrExprs := make(map[string]*Expression, len(c.Attributes))
 	for key, attr := range c.Attributes {
 		expr, err := NewExpression(attr, expr.AllowUndefinedVariables())
@@ -72,25 +73,13 @@ func (c *ProcessorConfig) createAttrExprs() (map[string]*Expression, error) {
 	return attrExprs, nil
 }
 
-// createDefaultProcessorConfig returns the default config for the processor.
-func createDefaultProcessorConfig() component.ProcessorConfig {
-	return &ProcessorConfig{
+// createDefaultConfig returns the default config for the processor.
+func createDefaultConfig() component.ProcessorConfig {
+	return &Config{
 		ProcessorSettings: config.NewProcessorSettings(component.NewID(typeStr)),
 		MetricName:        defaultMetricName,
 		MetricUnit:        defaultMetricUnit,
 		Interval:          defaultInterval,
 		Match:             defaultMatch,
-	}
-}
-
-// ReceiverConfig is the config of the receiver.
-type ReceiverConfig struct {
-	config.ReceiverSettings `mapstructure:",squash"`
-}
-
-// createDefaultReceiverConfig returns the default config for the receiver.
-func createDefaultReceiverConfig() component.ReceiverConfig {
-	return &ReceiverConfig{
-		ReceiverSettings: config.NewReceiverSettings(component.NewID(typeStr)),
 	}
 }

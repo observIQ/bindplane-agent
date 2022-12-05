@@ -22,7 +22,7 @@ import (
 )
 
 func TestCreateDefaultProcessorConfig(t *testing.T) {
-	cfg := createDefaultProcessorConfig().(*ProcessorConfig)
+	cfg := createDefaultConfig().(*Config)
 	require.Equal(t, defaultInterval, cfg.Interval)
 	require.Equal(t, defaultMatch, cfg.Match)
 	require.Equal(t, defaultMetricName, cfg.MetricName)
@@ -30,13 +30,8 @@ func TestCreateDefaultProcessorConfig(t *testing.T) {
 	require.Equal(t, component.NewID(typeStr), cfg.ProcessorSettings.ID())
 }
 
-func TestCreateDefaultReceiverConfig(t *testing.T) {
-	cfg := createDefaultReceiverConfig().(*ReceiverConfig)
-	require.Equal(t, component.NewID(typeStr), cfg.ReceiverSettings.ID())
-}
-
 func TestCreateMatchExpr(t *testing.T) {
-	cfg := createDefaultProcessorConfig().(*ProcessorConfig)
+	cfg := createDefaultConfig().(*Config)
 	cfg.Match = "true"
 	expr, err := cfg.createMatchExpr()
 	require.NoError(t, err)
@@ -49,7 +44,7 @@ func TestCreateMatchExpr(t *testing.T) {
 }
 
 func TestCreateAttrExprs(t *testing.T) {
-	cfg := createDefaultProcessorConfig().(*ProcessorConfig)
+	cfg := createDefaultConfig().(*Config)
 	cfg.Attributes = map[string]string{"a": "true"}
 	expr, err := cfg.createAttrExprs()
 	require.NoError(t, err)

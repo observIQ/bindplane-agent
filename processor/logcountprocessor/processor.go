@@ -19,6 +19,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/observiq/observiq-otel-collector/receiver/routereceiver"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/consumer"
 	"go.opentelemetry.io/collector/pdata/pcommon"
@@ -29,7 +30,7 @@ import (
 
 // processor is a processor that counts logs.
 type processor struct {
-	config    *ProcessorConfig
+	config    *Config
 	matchExpr *Expression
 	attrExprs map[string]*Expression
 	counter   *LogCounter
@@ -40,7 +41,7 @@ type processor struct {
 }
 
 // newProcessor returns a new processor.
-func newProcessor(config *ProcessorConfig, consumer consumer.Logs, matchExpr *Expression, attrExprs map[string]*Expression, logger *zap.Logger) *processor {
+func newProcessor(config *Config, consumer consumer.Logs, matchExpr *Expression, attrExprs map[string]*Expression, logger *zap.Logger) *processor {
 	return &processor{
 		config:    config,
 		matchExpr: matchExpr,
@@ -111,7 +112,7 @@ func (p *processor) sendMetrics(ctx context.Context) {
 	metrics := p.createMetrics()
 	p.counter.Reset()
 
-	if err := sendMetrics(ctx, p.config.ID(), metrics); err != nil {
+	if err := routereceiver.RouteMetrics(ctx, p.config.Route, metrics); err != nil {
 		p.logger.Error("Failed to send metrics", zap.Error(err))
 	}
 }

@@ -56,7 +56,7 @@ var defaultProcessors = []component.ProcessorFactory{
 	groupbyattrsprocessor.NewFactory(),
 	groupbytraceprocessor.NewFactory(),
 	k8sattributesprocessor.NewFactory(),
-	logcountprocessor.NewProcessorFactory(),
+	logcountprocessor.NewFactory(),
 	logstransformprocessor.NewFactory(),
 	maskprocessor.NewFactory(),
 	memorylimiterprocessor.NewFactory(),

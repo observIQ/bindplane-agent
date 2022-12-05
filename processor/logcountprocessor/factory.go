@@ -26,22 +26,22 @@ const (
 	// typeStr is the value of the "type" key in configuration.
 	typeStr = "logcount"
 
-	// stability is the current state of the receiver and processor.
+	// stability is the current state of the processor.
 	stability = component.StabilityLevelAlpha
 )
 
-// NewProcessorFactory creates a new factory for the processor.
-func NewProcessorFactory() component.ProcessorFactory {
+// NewFactory creates a new factory for the processor.
+func NewFactory() component.ProcessorFactory {
 	return component.NewProcessorFactory(
 		typeStr,
-		createDefaultProcessorConfig,
+		createDefaultConfig,
 		component.WithLogsProcessor(createLogsProcessor, stability),
 	)
 }
 
 // createLogsProcessor creates a log processor.
 func createLogsProcessor(_ context.Context, params component.ProcessorCreateSettings, cfg component.ProcessorConfig, consumer consumer.Logs) (component.LogsProcessor, error) {
-	processorCfg, ok := cfg.(*ProcessorConfig)
+	processorCfg, ok := cfg.(*Config)
 	if !ok {
 		return nil, fmt.Errorf("invalid config type: %+v", cfg)
 	}
@@ -57,18 +57,4 @@ func createLogsProcessor(_ context.Context, params component.ProcessorCreateSett
 	}
 
 	return newProcessor(processorCfg, consumer, matchExpr, attrExprs, params.Logger), nil
-}
-
-// NewReceiverFactory creates a new factory for the receiver.
-func NewReceiverFactory() component.ReceiverFactory {
-	return component.NewReceiverFactory(
-		typeStr,
-		createDefaultReceiverConfig,
-		component.WithMetricsReceiver(createMetricsReceiver, stability),
-	)
-}
-
-// createMetricsReceiver creates a metric receiver.
-func createMetricsReceiver(_ context.Context, _ component.ReceiverCreateSettings, cfg component.ReceiverConfig, consumer consumer.Metrics) (component.MetricsReceiver, error) {
-	return newReceiver(cfg.ID(), consumer), nil
 }

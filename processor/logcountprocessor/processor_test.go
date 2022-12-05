@@ -19,6 +19,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/observiq/observiq-otel-collector/receiver/routereceiver"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/consumer"
@@ -38,7 +39,7 @@ func TestConsumeLogs(t *testing.T) {
 	logConsumer := &LogConsumer{logChan: make(chan plog.Logs, 1)}
 	metricConsumer := &MetricConsumer{metricChan: make(chan pmetric.Metrics, 1)}
 
-	processorCfg := createDefaultProcessorConfig().(*ProcessorConfig)
+	processorCfg := createDefaultConfig().(*Config)
 	processorCfg.Interval = time.Millisecond * 100
 	processorCfg.Match = `body.message == "test1" and resource["service.name"] == "test2"`
 	processorCfg.Attributes = map[string]string{
@@ -46,13 +47,13 @@ func TestConsumeLogs(t *testing.T) {
 		"dimension2": `resource["service.name"]`,
 	}
 
-	processorFactory := NewProcessorFactory()
+	processorFactory := NewFactory()
 	processorSettings := component.ProcessorCreateSettings{TelemetrySettings: component.TelemetrySettings{Logger: zap.NewNop()}}
 	processor, err := processorFactory.CreateLogsProcessor(context.Background(), processorSettings, processorCfg, logConsumer)
 	require.NoError(t, err)
 
-	receiverFactory := NewReceiverFactory()
-	receiver, err := receiverFactory.CreateMetricsReceiver(context.Background(), component.ReceiverCreateSettings{}, createDefaultReceiverConfig(), metricConsumer)
+	receiverFactory := routereceiver.NewFactory()
+	receiver, err := receiverFactory.CreateMetricsReceiver(context.Background(), component.ReceiverCreateSettings{}, receiverFactory.CreateDefaultConfig(), metricConsumer)
 	require.NoError(t, err)
 
 	err = processor.Start(context.Background(), nil)
@@ -95,8 +96,8 @@ func TestConsumeLogs(t *testing.T) {
 
 func TestConsumeLogsWithoutReceiver(t *testing.T) {
 	logger := NewTestLogger()
-	processorCfg := createDefaultProcessorConfig().(*ProcessorConfig)
-	processorFactory := NewProcessorFactory()
+	processorCfg := createDefaultConfig().(*Config)
+	processorFactory := NewFactory()
 	processorSettings := component.ProcessorCreateSettings{TelemetrySettings: component.TelemetrySettings{Logger: logger.Logger}}
 	p, err := processorFactory.CreateLogsProcessor(context.Background(), processorSettings, processorCfg, &LogConsumer{})
 	require.NoError(t, err)
@@ -104,15 +105,15 @@ func TestConsumeLogsWithoutReceiver(t *testing.T) {
 	logCountProcessor := p.(*processor)
 	logCountProcessor.sendMetrics(context.Background())
 	require.Contains(t, logger.buffer.String(), "Failed to send metrics")
-	require.Contains(t, logger.buffer.String(), "receiver not set")
+	require.Contains(t, logger.buffer.String(), "route not defined")
 }
 
 func TestFailedMatchRecord(t *testing.T) {
 	logger := NewTestLogger()
 
-	processorCfg := createDefaultProcessorConfig().(*ProcessorConfig)
+	processorCfg := createDefaultConfig().(*Config)
 	processorCfg.Match = `body.message == "test1"`
-	processorFactory := NewProcessorFactory()
+	processorFactory := NewFactory()
 	processorSettings := component.ProcessorCreateSettings{TelemetrySettings: component.TelemetrySettings{Logger: logger.Logger}}
 	p, err := processorFactory.CreateLogsProcessor(context.Background(), processorSettings, processorCfg, &LogConsumer{})
 	require.NoError(t, err)
@@ -126,12 +127,12 @@ func TestFailedMatchRecord(t *testing.T) {
 func TestFailedExtractAttributes(t *testing.T) {
 	logger := NewTestLogger()
 
-	processorCfg := createDefaultProcessorConfig().(*ProcessorConfig)
+	processorCfg := createDefaultConfig().(*Config)
 	processorCfg.Attributes = map[string]string{
 		"dimension1": `body`,
 		"dimension2": `resource["service.name"]`,
 	}
-	processorFactory := NewProcessorFactory()
+	processorFactory := NewFactory()
 	processorSettings := component.ProcessorCreateSettings{TelemetrySettings: component.TelemetrySettings{Logger: logger.Logger}}
 	p, err := processorFactory.CreateLogsProcessor(context.Background(), processorSettings, processorCfg, &LogConsumer{})
 	require.NoError(t, err)
