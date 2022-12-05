@@ -45,9 +45,10 @@ func TestConvertToRecords(t *testing.T) {
 	records := convertToRecords(logs)
 	require.Len(t, records, 1)
 	require.Equal(t, map[string]any{
-		resourceField:   testResource,
-		attributesField: testAttrs,
-		bodyField:       testBody,
-		severityField:   testSeverity,
+		resourceField:       testResource,
+		attributesField:     testAttrs,
+		bodyField:           testBody,
+		severityTextField:   testSeverity,
+		severityNumberField: "Unspecified",
 	}, records[0])
 }

@@ -103,6 +103,7 @@ func TestConsumeLogsWithoutReceiver(t *testing.T) {
 	require.NoError(t, err)
 
 	logCountProcessor := p.(*processor)
+	logCountProcessor.counter.Add(map[string]any{"resource": "test1"}, map[string]any{"attribute": "test2"})
 	logCountProcessor.sendMetrics(context.Background())
 	require.Contains(t, logger.buffer.String(), "Failed to send metrics")
 	require.Contains(t, logger.buffer.String(), "route not defined")

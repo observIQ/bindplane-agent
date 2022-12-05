@@ -50,12 +50,13 @@ service:
 ## Expression Language
 In order to match or extract values from logs, the following `keys` are reserved and can be used to traverse the logs data model.
 
-| Key          | Description |
-| ---          | ---   |
-| `body`       | Used to access the body of the log. |
-| `attributes` | Used to access the attributes of the log. |
-| `resource`   | Used to access the resource of the log. |
-| `severity`   | Used to access the severity text of the log. |
+| Key               | Description |
+| ---               | ---   |
+| `body`            | Used to access the body of the log. |
+| `attributes`      | Used to access the attributes of the log. |
+| `resource`        | Used to access the resource of the log. |
+| `severity_text`   | Used to access the severity text of the log. |
+| `severity_number` | Used to access the severity number of the log. |
 
 In order to access embedded values, use JSON dot notation. For example, `body.example.field` can be used to access a field two levels deep on the log body. 
 

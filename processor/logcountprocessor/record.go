@@ -26,8 +26,11 @@ const (
 	// attributesField is the name of the field containing the log attributes.
 	attributesField = "attributes"
 
-	// severityField is the name of the field containing the log severity.
-	severityField = "severity"
+	// severityTextField is the name of the field containing the log severity text.
+	severityTextField = "severity_text"
+
+	// severityNumberField is the name of the field containing the log severity number.
+	severityNumberField = "severity_number"
 )
 
 // Record is the simplified representation of a log record.
@@ -55,9 +58,10 @@ func convertToRecords(logs plog.Logs) []Record {
 // convertToRecord converts a log record to a simplified representation.
 func convertToRecord(log plog.LogRecord, resource map[string]any) Record {
 	return Record{
-		resourceField:   resource,
-		attributesField: log.Attributes().AsRaw(),
-		bodyField:       log.Body().AsRaw(),
-		severityField:   log.SeverityText(),
+		resourceField:       resource,
+		attributesField:     log.Attributes().AsRaw(),
+		bodyField:           log.Body().AsRaw(),
+		severityTextField:   log.SeverityText(),
+		severityNumberField: log.SeverityNumber().String(),
 	}
 }

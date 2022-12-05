@@ -37,6 +37,7 @@ type processor struct {
 	consumer  consumer.Logs
 	logger    *zap.Logger
 	cancel    context.CancelFunc
+	wg        sync.WaitGroup
 	mux       sync.Mutex
 }
 
@@ -53,10 +54,12 @@ func newProcessor(config *Config, consumer consumer.Logs, matchExpr *Expression,
 }
 
 // Start starts the processor.
-func (p *processor) Start(ctx context.Context, _ component.Host) error {
-	processorCtx, cancel := context.WithCancel(ctx)
+func (p *processor) Start(_ context.Context, _ component.Host) error {
+	ctx, cancel := context.WithCancel(context.Background())
 	p.cancel = cancel
-	go p.handleMetricInterval(processorCtx)
+
+	p.wg.Add(1)
+	go p.handleMetricInterval(ctx)
 
 	return nil
 }
@@ -69,6 +72,7 @@ func (p *processor) Capabilities() consumer.Capabilities {
 // Shutdown stops the processor.
 func (p *processor) Shutdown(_ context.Context) error {
 	p.cancel()
+	p.wg.Wait()
 	return nil
 }
 
@@ -97,6 +101,7 @@ func (p *processor) handleMetricInterval(ctx context.Context) {
 	for {
 		select {
 		case <-ctx.Done():
+			p.wg.Done()
 			return
 		case <-ticker.C:
 			p.sendMetrics(ctx)
@@ -110,6 +115,10 @@ func (p *processor) sendMetrics(ctx context.Context) {
 	defer p.mux.Unlock()
 
 	metrics := p.createMetrics()
+	if metrics.ResourceMetrics().Len() == 0 {
+		return
+	}
+
 	p.counter.Reset()
 
 	if err := routereceiver.RouteMetrics(ctx, p.config.Route, metrics); err != nil {
