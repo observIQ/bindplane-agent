@@ -29,7 +29,6 @@ func TestConvertToRecords(t *testing.T) {
 		"attributes": "attributes",
 	}
 	testBody := "body"
-	testSeverity := "info"
 
 	logs := plog.NewLogs()
 	resourceLogs := logs.ResourceLogs().AppendEmpty()
@@ -39,7 +38,7 @@ func TestConvertToRecords(t *testing.T) {
 	logRecords := scopeLogs.LogRecords()
 	log1 := logRecords.AppendEmpty()
 	log1.Body().SetStr(testBody)
-	log1.SetSeverityText(testSeverity)
+	log1.SetSeverityText("info")
 	log1.Attributes().FromRaw(testAttrs)
 
 	records := convertToRecords(logs)
@@ -48,7 +47,7 @@ func TestConvertToRecords(t *testing.T) {
 		resourceField:       testResource,
 		attributesField:     testAttrs,
 		bodyField:           testBody,
-		severityTextField:   testSeverity,
-		severityNumberField: "Unspecified",
+		severityEnumField:   "Unspecified",
+		severityNumberField: int32(0),
 	}, records[0])
 }

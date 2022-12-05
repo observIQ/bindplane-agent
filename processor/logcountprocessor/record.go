@@ -26,8 +26,8 @@ const (
 	// attributesField is the name of the field containing the log attributes.
 	attributesField = "attributes"
 
-	// severityTextField is the name of the field containing the log severity text.
-	severityTextField = "severity_text"
+	// severityEnumField is the name of the field containing the log severity enum.
+	severityEnumField = "severity_enum"
 
 	// severityNumberField is the name of the field containing the log severity number.
 	severityNumberField = "severity_number"
@@ -61,7 +61,7 @@ func convertToRecord(log plog.LogRecord, resource map[string]any) Record {
 		resourceField:       resource,
 		attributesField:     log.Attributes().AsRaw(),
 		bodyField:           log.Body().AsRaw(),
-		severityTextField:   log.SeverityText(),
-		severityNumberField: log.SeverityNumber().String(),
+		severityEnumField:   log.SeverityNumber().String(),
+		severityNumberField: int32(log.SeverityNumber()),
 	}
 }
