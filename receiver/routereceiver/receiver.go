@@ -49,7 +49,6 @@ var (
 // receiver is a struct that receives routed telemetry.
 type receiver struct {
 	name           string
-	stopOnce       sync.Once
 	metricConsumer consumer.Metrics
 	logConsumer    consumer.Logs
 	traceConsumer  consumer.Traces
@@ -62,9 +61,7 @@ func (r *receiver) Start(_ context.Context, _ component.Host) error {
 
 // Shutdown stops the receiver.
 func (r *receiver) Shutdown(_ context.Context) error {
-	r.stopOnce.Do(func() {
-		removeRoute(r.name)
-	})
+	removeRoute(r.name)
 	return nil
 }
 
