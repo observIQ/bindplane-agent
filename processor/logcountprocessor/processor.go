@@ -157,7 +157,11 @@ func (p *processor) createMetrics() pmetric.Metrics {
 	metrics := pmetric.NewMetrics()
 	for _, resource := range p.counter.resources {
 		resourceMetrics := metrics.ResourceMetrics().AppendEmpty()
-		_ = resourceMetrics.Resource().Attributes().FromRaw(resource.values)
+		err := resourceMetrics.Resource().Attributes().FromRaw(resource.values)
+		if err != nil {
+			p.logger.Error("Failed to set resource attributes", zap.Error(err))
+		}
+
 		scopeMetrics := resourceMetrics.ScopeMetrics().AppendEmpty()
 		scopeMetrics.Scope().SetName(typeStr)
 		for _, attributes := range resource.attributes {
@@ -169,7 +173,11 @@ func (p *processor) createMetrics() pmetric.Metrics {
 			gauge := metrics.Gauge().DataPoints().AppendEmpty()
 			gauge.SetTimestamp(pcommon.NewTimestampFromTime(time.Now()))
 			gauge.SetIntValue(int64(attributes.count))
-			_ = gauge.Attributes().FromRaw(attributes.values)
+			err = gauge.Attributes().FromRaw(attributes.values)
+			if err != nil {
+				p.logger.Error("Failed to set metric attributes", zap.Error(err))
+			}
+
 		}
 	}
 
