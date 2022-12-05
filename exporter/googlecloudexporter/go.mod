@@ -3,7 +3,7 @@ module github.com/observiq/observiq-otel-collector/exporter/googlecloudexporter
 go 1.18
 
 require (
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector v0.34.1
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector v0.34.2
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlecloudexporter v0.66.0
 	github.com/stretchr/testify v1.8.1
 	go.opentelemetry.io/collector v0.66.0
@@ -16,11 +16,11 @@ require (
 
 require (
 	cloud.google.com/go/compute v1.12.1 // indirect
-	cloud.google.com/go/logging v1.4.2 // indirect
+	cloud.google.com/go/logging v1.5.0 // indirect
 	cloud.google.com/go/monitoring v1.8.0 // indirect
 	cloud.google.com/go/trace v1.3.0 // indirect
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.14 // indirect
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.10.1 // indirect
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.10.2 // indirect
 	github.com/aws/aws-sdk-go v1.44.142 // indirect
 	github.com/cenkalti/backoff/v4 v4.2.0 // indirect
 	github.com/census-instrumentation/opencensus-proto v0.4.1 // indirect
@@ -66,7 +66,7 @@ require (
 	cloud.google.com/go v0.105.0 // indirect
 	cloud.google.com/go/compute/metadata v0.2.1 // indirect
 	cloud.google.com/go/longrunning v0.1.1 // indirect
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.34.1 // indirect
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.34.2 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.2.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.13.0 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
