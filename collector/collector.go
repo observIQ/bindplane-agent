@@ -19,6 +19,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"runtime/debug"
 	"sync"
 	"time"
 
@@ -110,13 +111,14 @@ func (c *collector) Run(ctx context.Context) error {
 		defer func() {
 			if r := recover(); r != nil {
 				var panicErr error
+				panicStack := string(debug.Stack())
 				switch v := r.(type) {
 				case error:
-					panicErr = fmt.Errorf("collector panicked with error: %w", v)
+					panicErr = fmt.Errorf("collector panicked with error: %w. Panic stacktrace: %s", v, panicStack)
 				case string:
-					panicErr = fmt.Errorf("collector panicked with error: %s", v)
+					panicErr = fmt.Errorf("collector panicked with error: %s. Panic stacktrace: %s", v, panicStack)
 				default:
-					panicErr = fmt.Errorf("collector panicked with error: %v", v)
+					panicErr = fmt.Errorf("collector panicked with error: %v. Panic stacktrace: %s", v, panicStack)
 				}
 
 				c.sendStatus(false, true, panicErr)
