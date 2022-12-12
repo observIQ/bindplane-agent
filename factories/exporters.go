@@ -43,14 +43,14 @@ import (
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/signalfxexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/splunkhecexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/zipkinexporter"
-	"go.opentelemetry.io/collector/component"
-	"go.opentelemetry.io/collector/component/componenttest"
+	"go.opentelemetry.io/collector/exporter"
+	"go.opentelemetry.io/collector/exporter/exportertest"
 	"go.opentelemetry.io/collector/exporter/loggingexporter"
 	"go.opentelemetry.io/collector/exporter/otlpexporter"
 	"go.opentelemetry.io/collector/exporter/otlphttpexporter"
 )
 
-var defaultExporters = []component.ExporterFactory{
+var defaultExporters = []exporter.Factory{
 	alibabacloudlogserviceexporter.NewFactory(),
 	awscloudwatchlogsexporter.NewFactory(),
 	awsemfexporter.NewFactory(),
@@ -58,10 +58,10 @@ var defaultExporters = []component.ExporterFactory{
 	awsxrayexporter.NewFactory(),
 	azuremonitorexporter.NewFactory(),
 	carbonexporter.NewFactory(),
-	componenttest.NewNopExporterFactory(),
 	coralogixexporter.NewFactory(),
 	dynatraceexporter.NewFactory(),
 	elasticsearchexporter.NewFactory(),
+	exportertest.NewNopFactory(),
 	f5cloudexporter.NewFactory(),
 	fileexporter.NewFactory(),
 	googlecloudexporter.NewFactory(),

@@ -79,12 +79,12 @@ import (
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/windowsperfcountersreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/zipkinreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/zookeeperreceiver"
-	"go.opentelemetry.io/collector/component"
-	"go.opentelemetry.io/collector/component/componenttest"
+	"go.opentelemetry.io/collector/receiver"
 	"go.opentelemetry.io/collector/receiver/otlpreceiver"
+	"go.opentelemetry.io/collector/receiver/receivertest"
 )
 
-var defaultReceivers = []component.ReceiverFactory{
+var defaultReceivers = []receiver.Factory{
 	activedirectorydsreceiver.NewFactory(),
 	aerospikereceiver.NewFactory(),
 	apachereceiver.NewFactory(),
@@ -98,7 +98,6 @@ var defaultReceivers = []component.ReceiverFactory{
 	carbonreceiver.NewFactory(),
 	cloudfoundryreceiver.NewFactory(),
 	collectdreceiver.NewFactory(),
-	componenttest.NewNopReceiverFactory(),
 	couchdbreceiver.NewFactory(),
 	dockerstatsreceiver.NewFactory(),
 	dotnetdiagnosticsreceiver.NewFactory(),
@@ -131,6 +130,7 @@ var defaultReceivers = []component.ReceiverFactory{
 	postgresqlreceiver.NewFactory(),
 	prometheusreceiver.NewFactory(),
 	rabbitmqreceiver.NewFactory(),
+	receivertest.NewNopFactory(),
 	redisreceiver.NewFactory(),
 	riakreceiver.NewFactory(),
 	routereceiver.NewFactory(),

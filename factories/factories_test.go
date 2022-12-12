@@ -23,16 +23,19 @@ import (
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/tcplogreceiver"
 	"github.com/stretchr/testify/assert"
 	"go.opentelemetry.io/collector/component"
+	"go.opentelemetry.io/collector/exporter"
 	"go.opentelemetry.io/collector/exporter/loggingexporter"
+	"go.opentelemetry.io/collector/extension"
+	"go.opentelemetry.io/collector/receiver"
 )
 
 func TestCombineFactories(t *testing.T) {
 	testCases := []struct {
 		name          string
-		receivers     []component.ReceiverFactory
+		receivers     []receiver.Factory
 		processors    []component.ProcessorFactory
-		exporters     []component.ExporterFactory
-		extensions    []component.ExtensionFactory
+		exporters     []exporter.Factory
+		extensions    []extension.Factory
 		expectedError error
 	}{
 		{
@@ -44,7 +47,7 @@ func TestCombineFactories(t *testing.T) {
 		},
 		{
 			name: "With single error",
-			receivers: []component.ReceiverFactory{
+			receivers: []receiver.Factory{
 				tcplogreceiver.NewFactory(),
 				tcplogreceiver.NewFactory(),
 			},
@@ -52,7 +55,7 @@ func TestCombineFactories(t *testing.T) {
 		},
 		{
 			name: "With multiple errors",
-			receivers: []component.ReceiverFactory{
+			receivers: []receiver.Factory{
 				tcplogreceiver.NewFactory(),
 				tcplogreceiver.NewFactory(),
 			},
@@ -60,11 +63,11 @@ func TestCombineFactories(t *testing.T) {
 				attributesprocessor.NewFactory(),
 				attributesprocessor.NewFactory(),
 			},
-			exporters: []component.ExporterFactory{
+			exporters: []exporter.Factory{
 				loggingexporter.NewFactory(),
 				loggingexporter.NewFactory(),
 			},
-			extensions: []component.ExtensionFactory{
+			extensions: []extension.Factory{
 				bearertokenauthextension.NewFactory(),
 				bearertokenauthextension.NewFactory(),
 			},
@@ -128,7 +131,7 @@ func TestDefaultFactories(t *testing.T) {
 	}
 }
 
-func assertReceiverFactory(t *testing.T, actual, expected component.ReceiverFactory) {
+func assertReceiverFactory(t *testing.T, actual, expected receiver.Factory) {
 	t.Helper()
 	assert.Equal(t, actual.Type(), expected.Type())
 	assert.Equal(t, actual.CreateDefaultConfig(), expected.CreateDefaultConfig())
