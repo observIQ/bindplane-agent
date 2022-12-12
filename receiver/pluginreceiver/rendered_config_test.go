@@ -150,14 +150,14 @@ type MockHost struct {
 }
 
 // GetExporters provides a mock function with given fields:
-func (_m *MockHost) GetExporters() map[component.Type]map[component.ID]component.Exporter {
+func (_m *MockHost) GetExporters() map[component.Type]map[component.ID]component.Component {
 	ret := _m.Called()
-	var r0 map[component.Type]map[component.ID]component.Exporter
-	if rf, ok := ret.Get(0).(func() map[component.Type]map[component.ID]component.Exporter); ok {
+	var r0 map[component.Type]map[component.ID]component.Component
+	if rf, ok := ret.Get(0).(func() map[component.Type]map[component.ID]component.Component); ok {
 		r0 = rf()
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(map[component.Type]map[component.ID]component.Exporter)
+			r0 = ret.Get(0).(map[component.Type]map[component.ID]component.Component)
 		}
 	}
 	return r0

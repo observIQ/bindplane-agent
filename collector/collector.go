@@ -23,6 +23,7 @@ import (
 	"sync"
 	"time"
 
+	"go.opentelemetry.io/collector/otelcol"
 	"go.opentelemetry.io/collector/service"
 	"go.uber.org/zap"
 )
@@ -173,7 +174,7 @@ func (c *collector) waitForStartup(ctx context.Context, startupErr chan error) e
 	defer ticker.Stop()
 
 	for {
-		if c.svc.GetState() == service.Running {
+		if c.svc.GetState() == otelcol.StateRunning {
 			c.sendStatus(true, false, nil)
 			return nil
 		}
