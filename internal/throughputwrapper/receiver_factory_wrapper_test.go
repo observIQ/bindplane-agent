@@ -18,11 +18,11 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"go.opentelemetry.io/collector/component/componenttest"
+	"go.opentelemetry.io/collector/receiver/receivertest"
 )
 
 func TestWrapReceiverFactory(t *testing.T) {
-	receiverFactory := componenttest.NewNopReceiverFactory()
+	receiverFactory := receivertest.NewNopFactory()
 
 	wrappedFactory := WrapReceiverFactory(receiverFactory)
 

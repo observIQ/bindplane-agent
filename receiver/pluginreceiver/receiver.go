@@ -20,6 +20,7 @@ import (
 	"time"
 
 	"go.opentelemetry.io/collector/component"
+	"go.opentelemetry.io/collector/exporter"
 	"go.opentelemetry.io/collector/otelcol"
 	"go.uber.org/zap"
 )
@@ -29,7 +30,7 @@ import (
 type Receiver struct {
 	plugin         *Plugin
 	renderedCfg    *RenderedConfig
-	emitterFactory component.ExporterFactory
+	emitterFactory exporter.Factory
 	logger         *zap.Logger
 	createService  createServiceFunc
 	service        Service
