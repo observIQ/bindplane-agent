@@ -12,10 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package logcountprocessor provides a processor that counts logs as metrics.
-package logcountprocessor
+// Package metricextractprocessor provides a processor that extracts metrics from logs.
+package metricextractprocessor
 
 import (
+	"errors"
 	"time"
 
 	"go.opentelemetry.io/collector/component"
@@ -24,36 +25,74 @@ import (
 
 const (
 	// defaultMetricName is the default metric name.
-	defaultMetricName = "log.count"
+	defaultMetricName = "extracted.metric"
 
 	// defaultMetricUnit is the default metric unit.
-	defaultMetricUnit = "{logs}"
+	defaultMetricUnit = "{units}"
 
 	// defaultInterval is the default metric interval.
 	defaultInterval = time.Minute
 
 	// defaultMatch is the default match expression.
 	defaultMatch = "true"
+
+	// defaultMetricType is the default metric type.
+	defaultMetricType = gaugeDoubleType
+
+	// gaugeDoubleType is the gauge double metric type.
+	gaugeDoubleType = "gauge_double"
+
+	// gaugeIntType is the gauge int metric type.
+	gaugeIntType = "gauge_int"
+
+	// counterDoubleType is the counter float metric type.
+	counterDoubleType = "counter_double"
+
+	// counterIntType is the counter int metric type.
+	counterIntType = "counter_int"
+)
+
+var (
+	// errExtractMissing is the error message for a missing extract expression.
+	errExtractMissing = errors.New("extract expression is required")
+
+	// errMetricTypeInvalid is the error message for an invalid metric type.
+	errMetricTypeInvalid = errors.New("invalid metric type")
 )
 
 // Config is the config of the processor.
 type Config struct {
 	config.ProcessorSettings `mapstructure:",squash"`
 	Route                    string            `mapstructure:"route"`
+	Match                    string            `mapstructure:"match"`
+	Extract                  string            `mapstructure:"extract"`
 	MetricName               string            `mapstructure:"metric_name"`
 	MetricUnit               string            `mapstructure:"metric_unit"`
-	Interval                 time.Duration     `mapstructure:"interval"`
-	Match                    string            `mapstructure:"match"`
+	MetricType               string            `mapstructure:"metric_type"`
 	Attributes               map[string]string `mapstructure:"attributes"`
 }
 
+// Validate validates the config.
+func (c Config) Validate() error {
+	if c.Extract == "" {
+		return errExtractMissing
+	}
+
+	switch c.MetricType {
+	case gaugeDoubleType, gaugeIntType, counterDoubleType, counterIntType:
+		return nil
+	default:
+		return errMetricTypeInvalid
+	}
+}
+
 // createDefaultConfig returns the default config for the processor.
-func createDefaultConfig() component.Config {
+func createDefaultConfig() component.ProcessorConfig {
 	return &Config{
 		ProcessorSettings: config.NewProcessorSettings(component.NewID(typeStr)),
 		MetricName:        defaultMetricName,
 		MetricUnit:        defaultMetricUnit,
-		Interval:          defaultInterval,
+		MetricType:        defaultMetricType,
 		Match:             defaultMatch,
 	}
 }

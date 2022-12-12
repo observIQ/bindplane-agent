@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package logcountprocessor
+package metricextractprocessor
 
 import (
 	"testing"
@@ -23,9 +23,56 @@ import (
 
 func TestCreateDefaultProcessorConfig(t *testing.T) {
 	cfg := createDefaultConfig().(*Config)
-	require.Equal(t, defaultInterval, cfg.Interval)
 	require.Equal(t, defaultMatch, cfg.Match)
 	require.Equal(t, defaultMetricName, cfg.MetricName)
 	require.Equal(t, defaultMetricUnit, cfg.MetricUnit)
 	require.Equal(t, component.NewID(typeStr), cfg.ProcessorSettings.ID())
+}
+
+func TestConfigValidate(t *testing.T) {
+	var testCases = []struct {
+		name     string
+		config   *Config
+		expected error
+	}{
+		{
+			name: "valid config",
+			config: &Config{
+				Match:      "true",
+				Extract:    "message",
+				MetricName: "metric",
+				MetricUnit: "unit",
+				MetricType: gaugeDoubleType,
+			},
+			expected: nil,
+		},
+		{
+			name: "invalid metric type",
+			config: &Config{
+				Match:      "true",
+				Extract:    "message",
+				MetricName: "metric",
+				MetricUnit: "unit",
+				MetricType: "invalid",
+			},
+			expected: errMetricTypeInvalid,
+		},
+		{
+			name: "missing extract",
+			config: &Config{
+				Match:      "true",
+				MetricName: "metric",
+				MetricUnit: "unit",
+				MetricType: gaugeDoubleType,
+			},
+			expected: errExtractMissing,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			err := tc.config.Validate()
+			require.Equal(t, tc.expected, err)
+		})
+	}
 }

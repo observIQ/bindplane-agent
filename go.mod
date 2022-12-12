@@ -10,6 +10,7 @@ require (
 	github.com/observiq/observiq-otel-collector/packagestate v1.13.0
 	github.com/observiq/observiq-otel-collector/processor/logcountprocessor v1.13.0
 	github.com/observiq/observiq-otel-collector/processor/maskprocessor v1.13.0
+	github.com/observiq/observiq-otel-collector/processor/metricextractprocessor v1.13.0
 	github.com/observiq/observiq-otel-collector/processor/resourceattributetransposerprocessor v1.13.0
 	github.com/observiq/observiq-otel-collector/processor/samplingprocessor v1.13.0
 	github.com/observiq/observiq-otel-collector/processor/throughputmeasurementprocessor v1.13.0
@@ -557,6 +558,10 @@ replace github.com/observiq/observiq-otel-collector/processor/samplingprocessor 
 replace github.com/observiq/observiq-otel-collector/processor/maskprocessor => ./processor/maskprocessor
 
 replace github.com/observiq/observiq-otel-collector/processor/logcountprocessor => ./processor/logcountprocessor
+
+replace github.com/observiq/observiq-otel-collector/processor/metricextractprocessor => ./processor/metricextractprocessor
+
+replace github.com/observiq/observiq-otel-collector/internal/expr => ./internal/expr
 
 // some dependencies attempt to bring something like v1.8.2-0.20220303173753-edfe657b5405, which is older than v0.38.0
 // at the time of this inclusion, v0.38.0 was the latest version available (also tagged as v2.38.0)

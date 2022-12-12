@@ -46,3 +46,5 @@ exceptions:
     - path: "./processor/throughputmeasurementprocessor"
     - path: "./processor/maskprocessor"
     - path: "./processor/logcountprocessor"
+    - path: "./processor/metricextractprocessor"
+    - path: "./internal/expr"
