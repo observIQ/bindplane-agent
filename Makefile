@@ -204,6 +204,32 @@ for-all:
 	 	$${CMD} ); \
 	done
 
+# Release a new version of the collector. This will also tag all submodules
+.PHONY: release
+release:
+	@if [ -z "$(version)" ]; then \
+		echo "version was not set"; \
+		exit 1; \
+	fi
+
+	@if ! [[ "$(version)" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$$ ]]; then \
+		echo "version $(version) is invalid semver"; \
+		exit 1; \
+	fi	
+
+	@git tag $(version)
+	@git push --tags
+
+	@set -e; for dir in $(ALL_MODULES); do \
+	  if [ $${dir} == \. ]; then \
+	  	continue; \
+	  else \
+	    echo "$${dir}" | sed -e "s+^./++" -e 's+$$+/$(version)+' | awk '{print $1}' | git tag $$(cat)  ; \
+	  fi; \
+	done
+
+	@git push --tags
+
 .PHONY: clean
 clean:
 	rm -rf $(OUTDIR)
