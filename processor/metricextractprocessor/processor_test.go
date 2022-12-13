@@ -29,19 +29,19 @@ import (
 )
 
 func TestProcessorStart(t *testing.T) {
-	processor := &processor{}
+	processor := &extractProcessor{}
 	err := processor.Start(context.Background(), nil)
 	require.NoError(t, err)
 }
 
 func TestProcessorShutdown(t *testing.T) {
-	processor := &processor{}
+	processor := &extractProcessor{}
 	err := processor.Shutdown(context.Background())
 	require.NoError(t, err)
 }
 
 func TestProcessorCapabilities(t *testing.T) {
-	processor := &processor{}
+	processor := &extractProcessor{}
 	require.Equal(t, consumer.Capabilities{MutatesData: false}, processor.Capabilities())
 }
 
@@ -330,7 +330,7 @@ func TestProcessorExtractMetrics(t *testing.T) {
 			p, err := factory.CreateLogsProcessor(context.Background(), component.ProcessorCreateSettings{TelemetrySettings: component.TelemetrySettings{Logger: zap.NewNop()}}, tc.cfg, nil)
 			require.NoError(t, err)
 
-			processor := p.(*processor)
+			processor := p.(*extractProcessor)
 			metrics := processor.extractMetrics(tc.logs)
 			require.Equal(t, tc.metrics, metrics)
 		})
