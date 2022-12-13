@@ -172,13 +172,13 @@ func (s *sapNetweaverScraper) recordSapnetweaverIcmAvailabilityDataPoint(now pco
 		return
 	}
 
-	stateColorCode, err := stateColorToInt(metricName, models.StateColor(val))
+	stateColorCode, err := stateColorToInt(models.StateColor(val))
 	if err != nil {
 		errs.AddPartial(1, fmt.Errorf(collectMetricError, metricName, err))
 		return
 	}
 
-	stateColorAttribute, err := stateColorToAttribute(metricName, models.StateColor(val))
+	stateColorAttribute, err := stateColorToAttribute(models.StateColor(val))
 	if err != nil {
 		errs.AddPartial(1, fmt.Errorf(collectMetricError, metricName, err))
 		return
@@ -244,7 +244,7 @@ func parseResponse(metricName string, alertTreeResponse map[string]string) (stri
 	return val, nil
 }
 
-func stateColorToInt(metricName string, statecolor models.StateColor) (int64, error) {
+func stateColorToInt(statecolor models.StateColor) (int64, error) {
 	switch statecolor {
 	case models.StateColorGray:
 		return int64(models.StateColorCodeGray), nil
@@ -259,7 +259,7 @@ func stateColorToInt(metricName string, statecolor models.StateColor) (int64, er
 	}
 }
 
-func stateColorToAttribute(metricName string, statecolor models.StateColor) (metadata.AttributeControlState, error) {
+func stateColorToAttribute(statecolor models.StateColor) (metadata.AttributeControlState, error) {
 	switch statecolor {
 	case models.StateColorGray:
 		return metadata.AttributeControlStateGrey, nil

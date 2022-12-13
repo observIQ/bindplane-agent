@@ -480,11 +480,11 @@ func TestStateColor(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.desc, func(t *testing.T) {
-			actualColorInt, err := stateColorToInt("", tc.stateColor)
+			actualColorInt, err := stateColorToInt(tc.stateColor)
 			require.NoError(t, err)
 			require.EqualValues(t, tc.expectedColorInt, actualColorInt)
 
-			actualColorMetadata, err := stateColorToAttribute("", tc.stateColor)
+			actualColorMetadata, err := stateColorToAttribute(tc.stateColor)
 			require.NoError(t, err)
 			require.EqualValues(t, tc.expectedColorMetadata, actualColorMetadata)
 		})
