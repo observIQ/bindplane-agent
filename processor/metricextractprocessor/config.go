@@ -17,7 +17,9 @@ package metricextractprocessor
 
 import (
 	"errors"
+	"fmt"
 
+	"github.com/observiq/observiq-otel-collector/internal/expr"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/config"
 )
@@ -72,6 +74,21 @@ type Config struct {
 func (c Config) Validate() error {
 	if c.Extract == "" {
 		return errExtractMissing
+	}
+
+	_, err := expr.CreateBoolExpression(c.Match)
+	if err != nil {
+		return fmt.Errorf("invalid match: %w", err)
+	}
+
+	_, err = expr.CreateExpression(c.Extract)
+	if err != nil {
+		return fmt.Errorf("invalid extract: %w", err)
+	}
+
+	_, err = expr.CreateExpressionMap(c.Attributes)
+	if err != nil {
+		return fmt.Errorf("invalid attributes: %w", err)
 	}
 
 	switch c.MetricType {

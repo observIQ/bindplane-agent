@@ -119,15 +119,17 @@ func (e *extractProcessor) extractDataPoints(records []expr.Record) pmetric.Numb
 	dataPoints := pmetric.NewNumberDataPointSlice()
 
 	for _, record := range records {
-		if e.match.MatchRecord(record) {
-			dataPoint, err := e.extractDataPoint(record)
-			if err != nil {
-				e.logger.Error("Failed to extract data point", zap.Error(err))
-				continue
-			}
-
-			dataPoint.CopyTo(dataPoints.AppendEmpty())
+		if !e.match.MatchRecord(record) {
+			continue
 		}
+
+		dataPoint, err := e.extractDataPoint(record)
+		if err != nil {
+			e.logger.Error("Failed to extract data point", zap.Error(err))
+			continue
+		}
+
+		dataPoint.CopyTo(dataPoints.AppendEmpty())
 	}
 
 	return dataPoints

@@ -31,9 +31,9 @@ func TestCreateDefaultProcessorConfig(t *testing.T) {
 
 func TestConfigValidate(t *testing.T) {
 	var testCases = []struct {
-		name     string
-		config   *Config
-		expected error
+		name        string
+		config      *Config
+		expectedErr string
 	}{
 		{
 			name: "valid config",
@@ -44,7 +44,6 @@ func TestConfigValidate(t *testing.T) {
 				MetricUnit: "unit",
 				MetricType: gaugeDoubleType,
 			},
-			expected: nil,
 		},
 		{
 			name: "invalid metric type",
@@ -55,7 +54,7 @@ func TestConfigValidate(t *testing.T) {
 				MetricUnit: "unit",
 				MetricType: "invalid",
 			},
-			expected: errMetricTypeInvalid,
+			expectedErr: errMetricTypeInvalid.Error(),
 		},
 		{
 			name: "missing extract",
@@ -65,14 +64,55 @@ func TestConfigValidate(t *testing.T) {
 				MetricUnit: "unit",
 				MetricType: gaugeDoubleType,
 			},
-			expected: errExtractMissing,
+			expectedErr: errExtractMissing.Error(),
+		},
+		{
+			name: "invalid match",
+			config: &Config{
+				Match:      "invalid",
+				Extract:    "message",
+				MetricName: "metric",
+				MetricUnit: "unit",
+				MetricType: gaugeDoubleType,
+			},
+			expectedErr: "invalid match",
+		},
+		{
+			name: "invalid extract",
+			config: &Config{
+				Match:      "true",
+				Extract:    "++",
+				MetricName: "metric",
+				MetricUnit: "unit",
+				MetricType: gaugeDoubleType,
+			},
+			expectedErr: "invalid extract",
+		},
+		{
+			name: "invalid attribute",
+			config: &Config{
+				Match:      "true",
+				Extract:    "message",
+				MetricName: "metric",
+				MetricUnit: "unit",
+				MetricType: gaugeDoubleType,
+				Attributes: map[string]string{
+					"invalid": "++",
+				},
+			},
+			expectedErr: "invalid attributes",
 		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			err := tc.config.Validate()
-			require.Equal(t, tc.expected, err)
+			if tc.expectedErr == "" {
+				require.NoError(t, err)
+				return
+			}
+
+			require.Contains(t, err.Error(), tc.expectedErr)
 		})
 	}
 }
