@@ -198,18 +198,18 @@ func TestScraperScrape(t *testing.T) {
 	}
 }
 
-func TestScraperScrapeUnderscoreResponse(t *testing.T) {
-	alertTreeResponseData := loadAPIResponseData(t, "api-responses", "underscore-alert-tree.xml")
+func TestScraperScrapeHyphenResponse(t *testing.T) {
+	alertTreeResponseData := loadAPIResponseData(t, "api-responses", "hyphen-alert-tree.xml")
 	var alertTreeResponse *models.GetAlertTreeResponse
 	err := xml.Unmarshal(alertTreeResponseData, &alertTreeResponse)
 	require.NoError(t, err)
 
-	enqGetLockTableResponseData := loadAPIResponseData(t, "api-responses", "underscore-lock-table.xml")
+	enqGetLockTableResponseData := loadAPIResponseData(t, "api-responses", "empty-lock-table.xml")
 	var enqGetLockTableResponse *models.EnqGetLockTableResponse
 	err = xml.Unmarshal(enqGetLockTableResponseData, &enqGetLockTableResponse)
 	require.NoError(t, err)
 
-	getCurrentInstanceResponseData := loadAPIResponseData(t, "api-responses", "underscore-current-instance.xml")
+	getCurrentInstanceResponseData := loadAPIResponseData(t, "api-responses", "empty-current-instance.xml")
 	var getCurrentInstanceResponse *models.GetInstancePropertiesResponse
 	err = xml.Unmarshal(getCurrentInstanceResponseData, &getCurrentInstanceResponse)
 	require.NoError(t, err)
@@ -234,18 +234,18 @@ func TestScraperScrapeUnderscoreResponse(t *testing.T) {
 
 	actualMetrics, err := scraper.scrape(context.Background())
 	require.EqualError(t, multierr.Combine(
-		errors.New("failed to collect metric CPU_Utilization: value Empty _"),
-		errors.New("failed to collect metric Memory Overhead: value Empty _"),
-		errors.New("failed to collect metric Memory Swapped Out: value Empty _"),
-		errors.New("failed to collect metric CurrentHttpSessions: value Empty _"),
-		errors.New("failed to collect metric CurrentSecuritySessions: value Empty _"),
-		errors.New("failed to collect metric Total Number of Work Processes: value Empty _"),
-		errors.New("failed to collect metric Web Sessions: value Empty _"),
-		errors.New("failed to collect metric Browser Sessions: value Empty _"),
-		errors.New("failed to collect metric EJB Sessions: value Empty _"),
-		errors.New("failed to collect metric ICM: invalid STATECOLOR value"),
-		errors.New("failed to collect metric HostspoolListUsed: value Empty _"),
-		errors.New("failed to collect metric Shortdumps Frequency: value Empty _"),
+		errors.New("failed to collect metric CPU_Utilization: '-' value found"),
+		errors.New("failed to collect metric Memory Overhead: '-' value found"),
+		errors.New("failed to collect metric Memory Swapped Out: '-' value found"),
+		errors.New("failed to collect metric CurrentHttpSessions: '-' value found"),
+		errors.New("failed to collect metric CurrentSecuritySessions: '-' value found"),
+		errors.New("failed to collect metric Total Number of Work Processes: '-' value found"),
+		errors.New("failed to collect metric Web Sessions: '-' value found"),
+		errors.New("failed to collect metric Browser Sessions: '-' value found"),
+		errors.New("failed to collect metric EJB Sessions: '-' value found"),
+		errors.New("failed to collect metric ICM: invalid control state color value"),
+		errors.New("failed to collect metric HostspoolListUsed: '-' value found"),
+		errors.New("failed to collect metric Shortdumps Frequency: '-' value found"),
 	), err.Error())
 
 	require.Error(t, err)
@@ -264,12 +264,12 @@ func TestScraperScrapeUnknownResponse(t *testing.T) {
 	err := xml.Unmarshal(alertTreeResponseData, &alertTreeResponse)
 	require.NoError(t, err)
 
-	enqGetLockTableResponseData := loadAPIResponseData(t, "api-responses", "underscore-lock-table.xml")
+	enqGetLockTableResponseData := loadAPIResponseData(t, "api-responses", "empty-lock-table.xml")
 	var enqGetLockTableResponse *models.EnqGetLockTableResponse
 	err = xml.Unmarshal(enqGetLockTableResponseData, &enqGetLockTableResponse)
 	require.NoError(t, err)
 
-	getCurrentInstanceResponseData := loadAPIResponseData(t, "api-responses", "underscore-current-instance.xml")
+	getCurrentInstanceResponseData := loadAPIResponseData(t, "api-responses", "empty-current-instance.xml")
 	var getCurrentInstanceResponse *models.GetInstancePropertiesResponse
 	err = xml.Unmarshal(getCurrentInstanceResponseData, &getCurrentInstanceResponse)
 	require.NoError(t, err)
@@ -303,7 +303,7 @@ func TestScraperScrapeUnknownResponse(t *testing.T) {
 		errors.New("failed to parse int64 for SapnetweaverSessionsWebCount, value was $: strconv.ParseInt: parsing \"$\": invalid syntax"),
 		errors.New("failed to parse int64 for SapnetweaverSessionsBrowserCount, value was $: strconv.ParseInt: parsing \"$\": invalid syntax"),
 		errors.New("failed to parse int64 for SapnetweaverSessionsEjbCount, value was $: strconv.ParseInt: parsing \"$\": invalid syntax"),
-		errors.New("failed to collect metric ICM: invalid STATECOLOR value"),
+		errors.New("failed to collect metric ICM: invalid control state color value"),
 		errors.New("failed to parse int64 for SapnetweaverHostSpoolListUsed, value was $: strconv.ParseInt: parsing \"$\": invalid syntax"),
 		errors.New("failed to parse int64 for SapnetweaverShortDumpsRate, value was $: strconv.ParseInt: parsing \"$\": invalid syntax"),
 	), err.Error())
@@ -413,9 +413,9 @@ func TestParseResponseTypes(t *testing.T) {
 			expectedValue: "40",
 		},
 		{
-			desc:          "underscore case",
-			rawValue:      "_ %",
-			expectedValue: "_",
+			desc:          "hypen case",
+			rawValue:      "- %",
+			expectedValue: "-",
 		},
 		{
 			desc:          "empty case",

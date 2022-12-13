@@ -35,8 +35,8 @@ const (
 
 var (
 	errValueNotFound     = errors.New("value not found")
-	errValueEmpty        = errors.New("value Empty _")
-	errInvalidStateColor = errors.New("invalid STATECOLOR value")
+	errValueHyphen       = errors.New("'-' value found")
+	errInvalidStateColor = errors.New("invalid control state color value")
 )
 
 func (s *sapNetweaverScraper) recordSapnetweaverHostMemoryVirtualOverheadDataPoint(now pcommon.Timestamp, alertTreeResponse map[string]string, errs *scrapererror.ScrapeErrors) {
@@ -238,8 +238,8 @@ func parseResponse(metricName string, alertTreeResponse map[string]string) (stri
 		return "", fmt.Errorf(collectMetricError, metricName, errValueNotFound)
 	}
 
-	if strings.Contains(val, "_") {
-		return "", fmt.Errorf(collectMetricError, metricName, errValueEmpty)
+	if strings.Contains(val, "-") {
+		return "", fmt.Errorf(collectMetricError, metricName, errValueHyphen)
 	}
 	return val, nil
 }
