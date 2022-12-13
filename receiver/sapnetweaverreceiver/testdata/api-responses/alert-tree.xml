@@ -29,7 +29,6 @@
    <ActualValue>SAPControl-GREEN</ActualValue>
    <description>5 %</description>
   </item>
-  <!-- FAKE DATA -->
   <item>
    <name>Memory Overhead</name>
    <ActualValue>SAPControl-GREEN</ActualValue>
@@ -60,6 +59,5 @@
    <ActualValue>SAPControl-GRAY</ActualValue>
    <description>11</description>
   </item>
-  <!-- FAKE DATA -->
  </tree>
 </GetAlertTreeResponse>

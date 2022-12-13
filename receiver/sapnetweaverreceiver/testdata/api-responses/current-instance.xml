@@ -1,22 +1,12 @@
 <GetInstancePropertiesResponse xmlns="urn:SAPControl">
  <properties>
-   <property>SAPSYSTEM</property>
-   <propertytype>Attribute</propertytype>
-   <value>00</value>
-  </item>
-  <item>
-   <property>SAPSYSTEMNAME</property>
-   <propertytype>Attribute</propertytype>
-   <value>EPP</value>
-  </item>
   <item>
    <property>SAPLOCALHOST</property>
-   <propertytype>Attribute</propertytype>
-   <value>sap-app-1</value>
+   <value>sap-app</value>
   </item>
   <item>
    <property>INSTANCE_NAME</property>
-   <propertytype>Attribute</propertytype>
-   <value>D00</value>
+   <value>sap-inst</value>
   </item>
  </properties>
+</GetInstancePropertiesResponse>

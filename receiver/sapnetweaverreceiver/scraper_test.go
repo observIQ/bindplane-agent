@@ -100,17 +100,16 @@ func TestScraperScrape(t *testing.T) {
 	err = xml.Unmarshal(enqGetLockTableResponseData, &enqGetLockTableResponse)
 	require.NoError(t, err)
 
+	getCurrentInstanceResponseData := loadAPIResponseData(t, "api-responses", "current-instance.xml")
+	var getCurrentInstanceResponse *models.GetInstancePropertiesResponse
+	err = xml.Unmarshal(getCurrentInstanceResponseData, &getCurrentInstanceResponse)
+	require.NoError(t, err)
+
 	mockService := mocks.MockWebService{}
 	mockService.On("EnqGetStatistic").Return(nil, nil)
 	mockService.On("GetAlertTree").Return(alertTreeResponse, nil)
 	mockService.On("EnqGetLockTable").Return(enqGetLockTableResponse, nil)
-	mockService.On("GetInstanceProperties").Return(
-		&models.GetInstancePropertiesResponse{
-			Properties: []*models.InstanceProperty{
-				{Property: "SAPLOCALHOST", Value: "sap-app"},
-				{Property: "INSTANCE_NAME", Value: "sap-inst"},
-			},
-		}, nil)
+	mockService.On("GetInstanceProperties").Return(getCurrentInstanceResponse, nil)
 
 	cfg := createDefaultConfig().(*Config)
 	cfg.Endpoint = defaultEndpoint
