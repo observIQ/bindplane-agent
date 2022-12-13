@@ -19,12 +19,11 @@ import (
 	"fmt"
 
 	"go.opentelemetry.io/collector/component"
-	"go.uber.org/zap"
 
 	"github.com/hooklift/gowsdl/soap"
 )
 
-func newSoapClient(cfg *Config, host component.Host, settings component.TelemetrySettings, logger *zap.Logger) (*soap.Client, error) {
+func newSoapClient(cfg *Config, host component.Host, settings component.TelemetrySettings) (*soap.Client, error) {
 	httpClient, err := cfg.ToClient(host, settings)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create HTTP Client: %w", err)

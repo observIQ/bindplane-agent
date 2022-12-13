@@ -55,7 +55,7 @@ func newSapNetweaverScraper(
 }
 
 func (s *sapNetweaverScraper) start(_ context.Context, host component.Host) error {
-	soapClient, err := newSoapClient(s.cfg, host, s.settings, s.settings.Logger)
+	soapClient, err := newSoapClient(s.cfg, host, s.settings)
 	if err != nil {
 		return fmt.Errorf("failed to create client: %w", err)
 	}
@@ -105,7 +105,7 @@ func (s *sapNetweaverScraper) collectMetrics(ctx context.Context, errs *scrapere
 	s.collectEnqGetLockTable(ctx, now, errs)
 }
 
-func (s *sapNetweaverScraper) collectAlertTree(ctx context.Context, now pcommon.Timestamp, errs *scrapererror.ScrapeErrors) {
+func (s *sapNetweaverScraper) collectAlertTree(_ context.Context, now pcommon.Timestamp, errs *scrapererror.ScrapeErrors) {
 	alertTreeResponse := map[string]string{}
 	alertTree, err := s.service.GetAlertTree()
 	if err != nil {
@@ -136,7 +136,7 @@ func (s *sapNetweaverScraper) collectAlertTree(ctx context.Context, now pcommon.
 	s.mb.EmitForResource(metadata.WithSapnetweaverInstance(s.instance), metadata.WithSapnetweaverNode(s.hostname))
 }
 
-func (s *sapNetweaverScraper) collectEnqGetLockTable(ctx context.Context, now pcommon.Timestamp, errs *scrapererror.ScrapeErrors) {
+func (s *sapNetweaverScraper) collectEnqGetLockTable(_ context.Context, now pcommon.Timestamp, errs *scrapererror.ScrapeErrors) {
 	lockTable, err := s.service.EnqGetLockTable()
 	if err != nil {
 		errs.AddPartial(1, fmt.Errorf("failed to collect Enq Lock Table metrics: %w", err))

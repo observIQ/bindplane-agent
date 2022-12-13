@@ -28,7 +28,6 @@ import (
 	"go.opentelemetry.io/collector/config/confighttp"
 	"go.opentelemetry.io/collector/config/configtls"
 	"go.uber.org/multierr"
-	"go.uber.org/zap"
 
 	"github.com/observiq/observiq-otel-collector/receiver/sapnetweaverreceiver/internal/mocks"
 	"github.com/observiq/observiq-otel-collector/receiver/sapnetweaverreceiver/internal/models"
@@ -118,7 +117,7 @@ func TestScraperScrape(t *testing.T) {
 	cfg.Username = "root"
 	cfg.Password = "password"
 
-	testClient, err := newSoapClient(cfg, componenttest.NewNopHost(), componenttest.NewNopTelemetrySettings(), zap.NewNop())
+	testClient, err := newSoapClient(cfg, componenttest.NewNopHost(), componenttest.NewNopTelemetrySettings())
 	require.NoError(t, err)
 
 	scraper := newSapNetweaverScraper(componenttest.NewNopReceiverCreateSettings(), createDefaultConfig().(*Config))
@@ -210,7 +209,7 @@ func TestScraperScrapeAPIError(t *testing.T) {
 	cfg.Username = "root"
 	cfg.Password = "password"
 
-	testClient, err := newSoapClient(cfg, componenttest.NewNopHost(), componenttest.NewNopTelemetrySettings(), zap.NewNop())
+	testClient, err := newSoapClient(cfg, componenttest.NewNopHost(), componenttest.NewNopTelemetrySettings())
 	require.NoError(t, err)
 
 	scraper := newSapNetweaverScraper(componenttest.NewNopReceiverCreateSettings(), createDefaultConfig().(*Config))
@@ -243,7 +242,7 @@ func TestScraperScrapeEmptyXML(t *testing.T) {
 	cfg.Username = "root"
 	cfg.Password = "password"
 
-	testClient, err := newSoapClient(cfg, componenttest.NewNopHost(), componenttest.NewNopTelemetrySettings(), zap.NewNop())
+	testClient, err := newSoapClient(cfg, componenttest.NewNopHost(), componenttest.NewNopTelemetrySettings())
 	require.NoError(t, err)
 
 	scraper := newSapNetweaverScraper(componenttest.NewNopReceiverCreateSettings(), createDefaultConfig().(*Config))
