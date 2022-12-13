@@ -18,6 +18,7 @@ import (
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-collector/receiver/varnishreceiver"
 	"github.com/observiq/observiq-otel-collector/receiver/pluginreceiver"
 	"github.com/observiq/observiq-otel-collector/receiver/routereceiver"
+	"github.com/observiq/observiq-otel-collector/receiver/sapnetweaverreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/activedirectorydsreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/aerospikereceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/apachereceiver"
@@ -136,6 +137,7 @@ var defaultReceivers = []receiver.Factory{
 	routereceiver.NewFactory(),
 	saphanareceiver.NewFactory(),
 	sapmreceiver.NewFactory(),
+	sapnetweaverreceiver.NewFactory(),
 	simpleprometheusreceiver.NewFactory(),
 	snmpreceiver.NewFactory(),
 	splunkhecreceiver.NewFactory(),

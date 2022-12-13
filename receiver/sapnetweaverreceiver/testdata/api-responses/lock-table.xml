@@ -1,0 +1,18 @@
+<EnqGetLockTableResponse xmlns="urn:SAPControl">
+ <lock>
+  <!-- FAKE DATA -->
+  <item>
+   <lock_name>fake name</lock_name>
+   <object>fake object</object>
+  </item>
+  <item>
+   <lock_name>fake name</lock_name>
+   <object>fake object</object>
+  </item>
+  <item>
+   <lock_name>fake name</lock_name>
+   <object>fake object</object>
+  </item>
+  <!-- FAKE DATA -->
+ </lock>
+</EnqGetLockTableResponse>
