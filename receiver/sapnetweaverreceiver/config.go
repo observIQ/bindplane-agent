@@ -30,7 +30,7 @@ import (
 // Errors for missing required config parameters.
 const (
 	ErrNoUsername      = "invalid config: missing username"
-	ErrNoPassword      = "invalid config: missing password"
+	ErrNoPwd           = "invalid config: missing password"
 	ErrInvalidHostname = "invalid config: invalid hostname"
 	ErrInvalidEndpoint = "invalid config: invalid endpoint"
 )
@@ -63,7 +63,7 @@ func (cfg *Config) Validate() error {
 	}
 
 	if cfg.Password == "" {
-		errs = multierr.Append(errs, errors.New(ErrNoPassword))
+		errs = multierr.Append(errs, errors.New(ErrNoPwd))
 	}
 
 	u, err := url.Parse(cfg.Endpoint)

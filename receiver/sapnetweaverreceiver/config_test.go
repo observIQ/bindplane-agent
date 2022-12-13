@@ -39,13 +39,13 @@ func TestValidate(t *testing.T) {
 			desc:        "Missing username and password and invalid hostname",
 			endpoint:    "localhost:50013",
 			errExpected: true,
-			errText:     multierr.Combine(errors.New(ErrNoUsername), errors.New(ErrNoPassword), errors.New(ErrInvalidHostname)).Error(),
+			errText:     multierr.Combine(errors.New(ErrNoUsername), errors.New(ErrNoPwd), errors.New(ErrInvalidHostname)).Error(),
 		},
 		{
 			desc:        "Missing username and password",
 			endpoint:    "http://localhost:50013",
 			errExpected: true,
-			errText:     multierr.Combine(errors.New(ErrNoUsername), errors.New(ErrNoPassword)).Error(),
+			errText:     multierr.Combine(errors.New(ErrNoUsername), errors.New(ErrNoPwd)).Error(),
 		},
 		{
 			desc:        "Missing username and invalid hostname, no protocol",
@@ -59,7 +59,7 @@ func TestValidate(t *testing.T) {
 			endpoint:    "localhost:50013",
 			username:    "root",
 			errExpected: true,
-			errText:     multierr.Combine(errors.New(ErrNoPassword), errors.New(ErrInvalidHostname)).Error(),
+			errText:     multierr.Combine(errors.New(ErrNoPwd), errors.New(ErrInvalidHostname)).Error(),
 		},
 		{
 			desc:        "Missing username",
@@ -73,7 +73,7 @@ func TestValidate(t *testing.T) {
 			endpoint:    "http://localhost:50013",
 			username:    "root",
 			errExpected: true,
-			errText:     multierr.Combine(errors.New(ErrNoPassword)).Error(),
+			errText:     multierr.Combine(errors.New(ErrNoPwd)).Error(),
 		},
 		{
 			desc:        "custom_host",

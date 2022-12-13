@@ -81,7 +81,11 @@ func (s *sapNetweaverScraper) recordSapnetweaverSessionsHTTPCountDataPoint(now p
 		return
 	}
 
-	s.mb.RecordSapnetweaverSessionsHTTPCountDataPoint(now, val)
+	err = s.mb.RecordSapnetweaverSessionsHTTPCountDataPoint(now, val)
+	if err != nil {
+		errs.AddPartial(1, err)
+		return
+	}
 }
 
 func (s *sapNetweaverScraper) recordCurrentSecuritySessions(now pcommon.Timestamp, alertTreeResponse map[string]string, errs *scrapererror.ScrapeErrors) {
@@ -92,7 +96,11 @@ func (s *sapNetweaverScraper) recordCurrentSecuritySessions(now pcommon.Timestam
 		return
 	}
 
-	s.mb.RecordSapnetweaverSessionsSecurityCountDataPoint(now, val)
+	err = s.mb.RecordSapnetweaverSessionsSecurityCountDataPoint(now, val)
+	if err != nil {
+		errs.AddPartial(1, err)
+		return
+	}
 }
 
 func (s *sapNetweaverScraper) recordSapnetweaverWorkProcessesActiveCount(now pcommon.Timestamp, alertTreeResponse map[string]string, errs *scrapererror.ScrapeErrors) {
@@ -103,7 +111,11 @@ func (s *sapNetweaverScraper) recordSapnetweaverWorkProcessesActiveCount(now pco
 		return
 	}
 
-	s.mb.RecordSapnetweaverWorkProcessesActiveCountDataPoint(now, val)
+	err = s.mb.RecordSapnetweaverWorkProcessesActiveCountDataPoint(now, val)
+	if err != nil {
+		errs.AddPartial(1, err)
+		return
+	}
 }
 
 func (s *sapNetweaverScraper) recordSapnetweaverSessionsWebCountDataPoint(now pcommon.Timestamp, alertTreeResponse map[string]string, errs *scrapererror.ScrapeErrors) {
@@ -114,7 +126,11 @@ func (s *sapNetweaverScraper) recordSapnetweaverSessionsWebCountDataPoint(now pc
 		return
 	}
 
-	s.mb.RecordSapnetweaverSessionsWebCountDataPoint(now, val)
+	err = s.mb.RecordSapnetweaverSessionsWebCountDataPoint(now, val)
+	if err != nil {
+		errs.AddPartial(1, err)
+		return
+	}
 }
 
 func (s *sapNetweaverScraper) recordSapnetweaverSessionsBrowserCountDataPoint(now pcommon.Timestamp, alertTreeResponse map[string]string, errs *scrapererror.ScrapeErrors) {
@@ -125,7 +141,11 @@ func (s *sapNetweaverScraper) recordSapnetweaverSessionsBrowserCountDataPoint(no
 		return
 	}
 
-	s.mb.RecordSapnetweaverSessionsBrowserCountDataPoint(now, val)
+	err = s.mb.RecordSapnetweaverSessionsBrowserCountDataPoint(now, val)
+	if err != nil {
+		errs.AddPartial(1, err)
+		return
+	}
 }
 
 func (s *sapNetweaverScraper) recordSapnetweaverSessionsEjbCountDataPoint(now pcommon.Timestamp, alertTreeResponse map[string]string, errs *scrapererror.ScrapeErrors) {
@@ -136,7 +156,11 @@ func (s *sapNetweaverScraper) recordSapnetweaverSessionsEjbCountDataPoint(now pc
 		return
 	}
 
-	s.mb.RecordSapnetweaverSessionsEjbCountDataPoint(now, val)
+	err = s.mb.RecordSapnetweaverSessionsEjbCountDataPoint(now, val)
+	if err != nil {
+		errs.AddPartial(1, err)
+		return
+	}
 }
 
 func (s *sapNetweaverScraper) recordSapnetweaverIcmAvailabilityDataPoint(now pcommon.Timestamp, alertTreeResponse map[string]string, errs *scrapererror.ScrapeErrors) {
@@ -170,7 +194,11 @@ func (s *sapNetweaverScraper) recordSapnetweaverHostCPUUtilizationDataPoint(now 
 		return
 	}
 
-	s.mb.RecordSapnetweaverHostCPUUtilizationDataPoint(now, val)
+	err = s.mb.RecordSapnetweaverHostCPUUtilizationDataPoint(now, val)
+	if err != nil {
+		errs.AddPartial(1, err)
+		return
+	}
 }
 
 func (s *sapNetweaverScraper) recordSapnetweaverHostSpoolListUsedDataPoint(now pcommon.Timestamp, alertTreeResponse map[string]string, errs *scrapererror.ScrapeErrors) {
@@ -181,7 +209,11 @@ func (s *sapNetweaverScraper) recordSapnetweaverHostSpoolListUsedDataPoint(now p
 		return
 	}
 
-	s.mb.RecordSapnetweaverHostSpoolListUsedDataPoint(now, val)
+	err = s.mb.RecordSapnetweaverHostSpoolListUsedDataPoint(now, val)
+	if err != nil {
+		errs.AddPartial(1, err)
+		return
+	}
 }
 
 func (s *sapNetweaverScraper) recordSapnetweaverShortDumpsCountDataPoint(now pcommon.Timestamp, alertTreeResponse map[string]string, errs *scrapererror.ScrapeErrors) {
@@ -192,7 +224,11 @@ func (s *sapNetweaverScraper) recordSapnetweaverShortDumpsCountDataPoint(now pco
 		return
 	}
 
-	s.mb.RecordSapnetweaverShortDumpsRateDataPoint(now, val)
+	err = s.mb.RecordSapnetweaverShortDumpsRateDataPoint(now, val)
+	if err != nil {
+		errs.AddPartial(1, err)
+		return
+	}
 }
 
 func parseResponse(metricName string, alertTreeResponse map[string]string) (string, error) {
