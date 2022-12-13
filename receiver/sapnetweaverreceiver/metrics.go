@@ -34,8 +34,9 @@ const (
 )
 
 var (
-	errValueNotFound = errors.New("value not found")
-	errValueEmpty    = errors.New("value Empty -")
+	errValueNotFound     = errors.New("value not found")
+	errValueEmpty        = errors.New("value Empty _")
+	errInvalidStateColor = errors.New("invalid STATECOLOR value")
 )
 
 func (s *sapNetweaverScraper) recordSapnetweaverHostMemoryVirtualOverheadDataPoint(now pcommon.Timestamp, alertTreeResponse map[string]string, errs *scrapererror.ScrapeErrors) {
@@ -48,7 +49,7 @@ func (s *sapNetweaverScraper) recordSapnetweaverHostMemoryVirtualOverheadDataPoi
 
 	mbytes, err := strconv.ParseInt(val, 10, 64)
 	if err != nil {
-		errs.AddPartial(1, fmt.Errorf("failed to parse int64 for SapnetweaverHostMemoryVirtualOverhead, value was %v: %w", mbytes, err))
+		errs.AddPartial(1, fmt.Errorf("failed to parse int64 for SapnetweaverHostMemoryVirtualOverhead, value was %v: %w", val, err))
 		return
 	}
 
@@ -66,7 +67,7 @@ func (s *sapNetweaverScraper) recordSapnetweaverHostMemoryVirtualSwapDataPoint(n
 	MBToBytes := 1000000
 	mbytes, err := strconv.ParseInt(val, 10, 64)
 	if err != nil {
-		errs.AddPartial(1, fmt.Errorf("failed to parse int64 for SapnetweaverHostMemoryVirtualSwap, value was %v: %w", mbytes, err))
+		errs.AddPartial(1, fmt.Errorf("failed to parse int64 for SapnetweaverHostMemoryVirtualSwap, value was %v: %w", val, err))
 		return
 	}
 
@@ -171,13 +172,13 @@ func (s *sapNetweaverScraper) recordSapnetweaverIcmAvailabilityDataPoint(now pco
 		return
 	}
 
-	stateColorCode, err := stateColorToInt(models.StateColor(val))
+	stateColorCode, err := stateColorToInt(metricName, models.StateColor(val))
 	if err != nil {
 		errs.AddPartial(1, fmt.Errorf(collectMetricError, metricName, err))
 		return
 	}
 
-	stateColorAttribute, err := stateColorToAttribute(models.StateColor(val))
+	stateColorAttribute, err := stateColorToAttribute(metricName, models.StateColor(val))
 	if err != nil {
 		errs.AddPartial(1, fmt.Errorf(collectMetricError, metricName, err))
 		return
@@ -237,13 +238,13 @@ func parseResponse(metricName string, alertTreeResponse map[string]string) (stri
 		return "", fmt.Errorf(collectMetricError, metricName, errValueNotFound)
 	}
 
-	if strings.Contains(val, "-") {
+	if strings.Contains(val, "_") {
 		return "", fmt.Errorf(collectMetricError, metricName, errValueEmpty)
 	}
 	return val, nil
 }
 
-func stateColorToInt(statecolor models.StateColor) (int64, error) {
+func stateColorToInt(metricName string, statecolor models.StateColor) (int64, error) {
 	switch statecolor {
 	case models.StateColorGray:
 		return int64(models.StateColorCodeGray), nil
@@ -254,11 +255,11 @@ func stateColorToInt(statecolor models.StateColor) (int64, error) {
 	case models.StateColorRed:
 		return int64(models.StateColorCodeRed), nil
 	default:
-		return -1, errors.New("Invalid STATECOLOR value")
+		return -1, errInvalidStateColor
 	}
 }
 
-func stateColorToAttribute(statecolor models.StateColor) (metadata.AttributeControlState, error) {
+func stateColorToAttribute(metricName string, statecolor models.StateColor) (metadata.AttributeControlState, error) {
 	switch statecolor {
 	case models.StateColorGray:
 		return metadata.AttributeControlStateGrey, nil
@@ -269,6 +270,6 @@ func stateColorToAttribute(statecolor models.StateColor) (metadata.AttributeCont
 	case models.StateColorRed:
 		return metadata.AttributeControlStateRed, nil
 	default:
-		return -1, errors.New("Invalid STATECOLOR value")
+		return -1, errInvalidStateColor
 	}
 }
