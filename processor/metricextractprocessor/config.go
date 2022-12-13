@@ -17,7 +17,6 @@ package metricextractprocessor
 
 import (
 	"errors"
-	"time"
 
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/config"
@@ -29,9 +28,6 @@ const (
 
 	// defaultMetricUnit is the default metric unit.
 	defaultMetricUnit = "{units}"
-
-	// defaultInterval is the default metric interval.
-	defaultInterval = time.Minute
 
 	// defaultMatch is the default match expression.
 	defaultMatch = "true"

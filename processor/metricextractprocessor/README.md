@@ -71,7 +71,7 @@ For more information about syntax and available operators, see the [Expression L
 
 ## How To
 ### Match specific logs
-The following configuration adds a match expression that will count only logs with a 4xx status code. In this example, incoming logs are expected to have a `status` attribute.
+The following configuration adds a match expression that will extract metrics only for logs with a 4xx status code. In this example, incoming logs are expected to have a `status` attribute.
 ```yaml
 processors:
     metricextract:
@@ -81,7 +81,7 @@ processors:
 ```
 
 ### Extract metric attributes
-The following configuration extracts the status and endpoint values from the body of a log. These values are used as metric attributes. For each unique combination observed, a unique metric count is created.
+The following configuration extracts the status and endpoint values from the body of a log. These values are used as metric attributes.
 ```yaml
 processors:
     metricextract:
