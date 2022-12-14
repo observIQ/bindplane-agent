@@ -18,6 +18,7 @@ import (
 	"context"
 	"encoding/xml"
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -126,8 +127,8 @@ func TestScraperScrape(t *testing.T) {
 
 	actualMetrics, err := scraper.scrape(context.Background())
 	require.NoError(t, err)
-	require.Equal(t, 2, actualMetrics.ResourceMetrics().Len())
-	require.Equal(t, 13, actualMetrics.DataPointCount())
+	require.Equal(t, 1, actualMetrics.ResourceMetrics().Len())
+	require.Equal(t, 16, actualMetrics.DataPointCount())
 	require.Equal(t, 13, actualMetrics.MetricCount())
 
 	require.EqualValues(t, "sap-app", scraper.hostname)
@@ -151,8 +152,21 @@ func TestScraperScrape(t *testing.T) {
 				require.Equal(t, int64(2), dps.At(0).IntValue())
 			case "sapnetweaver.icm_availability":
 				dps := m.Sum().DataPoints()
-				require.Equal(t, 1, dps.Len())
-				require.Equal(t, int64(2), dps.At(0).IntValue())
+				require.Equal(t, 4, dps.Len())
+				attributeMappings := map[string]int64{}
+				for j := 0; j < dps.Len(); j++ {
+					dp := dps.At(j)
+					method := dp.Attributes().AsRaw()
+					label := fmt.Sprintf("%s method:%s", m.Name(), method)
+					attributeMappings[label] = dp.IntValue()
+				}
+				require.Equal(t, map[string]int64{
+					"sapnetweaver.icm_availability method:map[state:green]":  int64(1),
+					"sapnetweaver.icm_availability method:map[state:grey]":   int64(0),
+					"sapnetweaver.icm_availability method:map[state:red]":    int64(0),
+					"sapnetweaver.icm_availability method:map[state:yellow]": int64(0),
+				},
+					attributeMappings)
 			case "sapnetweaver.host.spool_list.used":
 				dps := m.Sum().DataPoints()
 				require.Equal(t, 1, dps.Len())

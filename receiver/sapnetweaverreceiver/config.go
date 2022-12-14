@@ -68,7 +68,7 @@ func (cfg *Config) Validate() error {
 
 	u, err := url.Parse(cfg.Endpoint)
 	if err != nil {
-		errs = multierr.Append(errs, errors.New(ErrInvalidEndpoint))
+		errs = multierr.Append(errs, errors.Wrap(err, ErrInvalidEndpoint))
 	}
 
 	if u.Hostname() == "" {

@@ -103,6 +103,7 @@ func (s *sapNetweaverScraper) collectMetrics(ctx context.Context, errs *scrapere
 	now := pcommon.NewTimestampFromTime(time.Now())
 	s.collectAlertTree(ctx, now, errs)
 	s.collectEnqGetLockTable(ctx, now, errs)
+	s.mb.EmitForResource(metadata.WithSapnetweaverInstance(s.instance), metadata.WithSapnetweaverNode(s.hostname))
 }
 
 func (s *sapNetweaverScraper) collectAlertTree(_ context.Context, now pcommon.Timestamp, errs *scrapererror.ScrapeErrors) {
@@ -133,7 +134,6 @@ func (s *sapNetweaverScraper) collectAlertTree(_ context.Context, now pcommon.Ti
 	s.recordSapnetweaverIcmAvailabilityDataPoint(now, alertTreeResponse, errs)
 	s.recordSapnetweaverHostSpoolListUsedDataPoint(now, alertTreeResponse, errs)
 	s.recordSapnetweaverShortDumpsCountDataPoint(now, alertTreeResponse, errs)
-	s.mb.EmitForResource(metadata.WithSapnetweaverInstance(s.instance), metadata.WithSapnetweaverNode(s.hostname))
 }
 
 func (s *sapNetweaverScraper) collectEnqGetLockTable(_ context.Context, now pcommon.Timestamp, errs *scrapererror.ScrapeErrors) {
@@ -144,5 +144,4 @@ func (s *sapNetweaverScraper) collectEnqGetLockTable(_ context.Context, now pcom
 	}
 
 	s.mb.RecordSapnetweaverLocksEnqueueCountDataPoint(now, int64(len(lockTable.EnqLock)))
-	s.mb.EmitForResource(metadata.WithSapnetweaverInstance(s.instance), metadata.WithSapnetweaverNode(s.hostname))
 }

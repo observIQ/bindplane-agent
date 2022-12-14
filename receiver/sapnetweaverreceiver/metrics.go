@@ -64,7 +64,6 @@ func (s *sapNetweaverScraper) recordSapnetweaverHostMemoryVirtualSwapDataPoint(n
 		return
 	}
 
-	MBToBytes := 1000000
 	mbytes, err := strconv.ParseInt(val, 10, 64)
 	if err != nil {
 		errs.AddPartial(1, fmt.Errorf("failed to parse int64 for SapnetweaverHostMemoryVirtualSwap, value was %v: %w", val, err))
@@ -172,19 +171,30 @@ func (s *sapNetweaverScraper) recordSapnetweaverIcmAvailabilityDataPoint(now pco
 		return
 	}
 
-	stateColorCode, err := stateColorToInt(models.StateColor(val))
-	if err != nil {
-		errs.AddPartial(1, fmt.Errorf(collectMetricError, metricName, err))
-		return
+	switch models.StateColor(val) {
+	case models.StateColorGray:
+		s.mb.RecordSapnetweaverIcmAvailabilityDataPoint(now, 1, metadata.AttributeControlStateGrey)
+		s.mb.RecordSapnetweaverIcmAvailabilityDataPoint(now, 0, metadata.AttributeControlStateGreen)
+		s.mb.RecordSapnetweaverIcmAvailabilityDataPoint(now, 0, metadata.AttributeControlStateYellow)
+		s.mb.RecordSapnetweaverIcmAvailabilityDataPoint(now, 0, metadata.AttributeControlStateRed)
+	case models.StateColorGreen:
+		s.mb.RecordSapnetweaverIcmAvailabilityDataPoint(now, 0, metadata.AttributeControlStateGrey)
+		s.mb.RecordSapnetweaverIcmAvailabilityDataPoint(now, 1, metadata.AttributeControlStateGreen)
+		s.mb.RecordSapnetweaverIcmAvailabilityDataPoint(now, 0, metadata.AttributeControlStateYellow)
+		s.mb.RecordSapnetweaverIcmAvailabilityDataPoint(now, 0, metadata.AttributeControlStateRed)
+	case models.StateColorYellow:
+		s.mb.RecordSapnetweaverIcmAvailabilityDataPoint(now, 0, metadata.AttributeControlStateGrey)
+		s.mb.RecordSapnetweaverIcmAvailabilityDataPoint(now, 0, metadata.AttributeControlStateGreen)
+		s.mb.RecordSapnetweaverIcmAvailabilityDataPoint(now, 1, metadata.AttributeControlStateYellow)
+		s.mb.RecordSapnetweaverIcmAvailabilityDataPoint(now, 0, metadata.AttributeControlStateRed)
+	case models.StateColorRed:
+		s.mb.RecordSapnetweaverIcmAvailabilityDataPoint(now, 0, metadata.AttributeControlStateGrey)
+		s.mb.RecordSapnetweaverIcmAvailabilityDataPoint(now, 0, metadata.AttributeControlStateGreen)
+		s.mb.RecordSapnetweaverIcmAvailabilityDataPoint(now, 0, metadata.AttributeControlStateYellow)
+		s.mb.RecordSapnetweaverIcmAvailabilityDataPoint(now, 1, metadata.AttributeControlStateRed)
+	default:
+		errs.AddPartial(1, fmt.Errorf(collectMetricError, metricName, errInvalidStateColor))
 	}
-
-	stateColorAttribute, err := stateColorToAttribute(models.StateColor(val))
-	if err != nil {
-		errs.AddPartial(1, fmt.Errorf(collectMetricError, metricName, err))
-		return
-	}
-
-	s.mb.RecordSapnetweaverIcmAvailabilityDataPoint(now, stateColorCode, stateColorAttribute)
 }
 
 func (s *sapNetweaverScraper) recordSapnetweaverHostCPUUtilizationDataPoint(now pcommon.Timestamp, alertTreeResponse map[string]string, errs *scrapererror.ScrapeErrors) {
