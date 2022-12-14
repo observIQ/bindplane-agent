@@ -2,4 +2,4 @@ sapnetweaver:
   username: root
   password: password
   endpoint: http://localhost:50013
-  collection_interval: 10s
+  collection_interval: 60s

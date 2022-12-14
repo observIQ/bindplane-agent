@@ -128,7 +128,7 @@ func TestLoadConfig(t *testing.T) {
 	expected.Endpoint = "http://localhost:50013"
 	expected.Password = "password"
 	expected.Username = "root"
-	expected.CollectionInterval = 10 * time.Second
+	expected.CollectionInterval = 60 * time.Second
 
 	require.Equal(t, expected, cfg)
 }

@@ -19,11 +19,11 @@ More information on how to setup a SAP NetWeaver Stack for each operating system
 ## Configuration
 | Field               | Type               | Default                                                                                   | Description                                                                                                                                                  |
 |---------------------|--------------------|-------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| metrics             | map             | (default: see `DefaultMetricsSettings` [here](./internal/metadata/generated_metrics.go) | Allows enabling and disabling specific metrics from being collected in this receiver.                                                                        |
+| metrics             | map             | (default: see `DefaultMetricsSettings` [here](./internal/metadata/generated_metrics.go) | Allows enabling and disabling [specific metrics](./documentation.md#metrics) from being collected in this receiver.                                                                        |
 | endpoint            | string             | `http://localhost:50013`                                                                  | The name of the metric created.                                                                                                                              |
 | username            | string             | `(no default)`                                                                            | Specifies the username used to authenticate using basic auth.                                                                                                |
 | password            | string             | `(no default)`                                                                            | Specifies the password used to authenticate using basic auth.                                                                                                |
-| collection_interval | duration | `10s`                                                                           | This receiver collects metrics on an interval. This value must be a string readable by Golang's [time.ParseDuration](https://pkg.go.dev/time#ParseDuration). |
+| collection_interval | duration | `60s`                                                                           | This receiver collects metrics on an interval. This value must be a string readable by Golang's [time.ParseDuration](https://pkg.go.dev/time#ParseDuration). |
 
 ### Example Configuration
 ```yaml
@@ -33,12 +33,11 @@ receivers:
     endpoint: http://localhost:50013
     username: root
     password: password
-    collection_interval: 10s
+    collection_interval: 60s
 processors:
     batch:
 exporters:
     googlecloud:
-    logging:
 
 service:
     pipelines:
