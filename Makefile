@@ -88,6 +88,7 @@ install-tools:
 	go install github.com/securego/gosec/v2/cmd/gosec@v2.12.0
 	go install github.com/uw-labs/lichen@v0.1.7
 	go install github.com/vektra/mockery/v2@v2.14.0
+	go install github.com/open-telemetry/opentelemetry-collector-contrib/cmd/mdatagen@latest
 
 .PHONY: lint
 lint:
@@ -132,7 +133,7 @@ tidy:
 
 .PHONY: gosec
 gosec:
-	gosec -exclude-dir updater  ./...
+	gosec -exclude-dir=updater -exclude-dir=receiver/sapnetweaverreceiver  ./...
 # exclude the testdata dir; it contains a go program for testing.
 	cd updater; gosec -exclude-dir internal/service/testdata ./...
 

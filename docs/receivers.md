@@ -56,6 +56,7 @@ Below is a list of supported receivers with links to their documentation pages.
 | Riak Receiver                               | [riakreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.67.0/receiver/riakreceiver/README.md) |
 | Route Receiver                              | [routereceiver](../receiver/routereceiver/README.md) |
 | SAP Hana Receiver                           | [saphanamreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.67.0/receiver/saphanareceiver) |
+| SAP Netweaver Receiver                      | [sapnetweaverreceiver](../receiver/sapnetweaverreceiver/README.md) |
 | SAPM Receiver                               | [sapmreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.67.0/receiver/sapmreceiver/README.md) |
 | SNMP Receiver                               | [snmpreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.67.0/receiver/snmpreceiver/README.md) |
 | Splunk HEC Receiver                         | [splunkhecreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.67.0/receiver/splunkhecreceiver/README.md) |

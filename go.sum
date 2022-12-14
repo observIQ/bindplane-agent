@@ -1073,6 +1073,8 @@ github.com/hetznercloud/hcloud-go v1.35.3/go.mod h1:mepQwR6va27S3UQthaEPGS86jtzS
 github.com/hexops/gotextdiff v1.0.3 h1:gitA9+qJrrTCsiCl7+kh75nPqQt1cx4ZkudSTLoUqJM=
 github.com/hjson/hjson-go/v4 v4.0.0 h1:wlm6IYYqHjOdXH1gHev4VoXCaW20HdQAGCxdOEEg2cs=
 github.com/hjson/hjson-go/v4 v4.0.0/go.mod h1:KaYt3bTw3zhBjYqnXkYywcYctk0A2nxeEFTse3rH13E=
+github.com/hooklift/gowsdl v0.5.0 h1:DE8RevqhGPLchumV/V7OwbCzfJ8lcozFg1uWC/ESCBQ=
+github.com/hooklift/gowsdl v0.5.0/go.mod h1:9kRc402w9Ci/Mek5a1DNgTmU14yPY8fMumxNVvxhis4=
 github.com/hpcloud/tail v1.0.0/go.mod h1:ab1qPbhIpdTxEkNHXyeSf5vhxWSCs/tWer42PpOxQnU=
 github.com/hudl/fargo v1.3.0/go.mod h1:y3CKSmjA+wD2gak7sUSXTAoopbhU08POFhmITJgmKTg=
 github.com/hudl/fargo v1.4.0/go.mod h1:9Ai6uvFy5fQNq6VPKtg+Ceq1+eTY4nKUlR2JElEOcDo=

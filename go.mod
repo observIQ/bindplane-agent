@@ -16,6 +16,7 @@ require (
 	github.com/observiq/observiq-otel-collector/processor/throughputmeasurementprocessor v1.14.0
 	github.com/observiq/observiq-otel-collector/receiver/pluginreceiver v1.14.0
 	github.com/observiq/observiq-otel-collector/receiver/routereceiver v1.14.0
+	github.com/observiq/observiq-otel-collector/receiver/sapnetweaverreceiver v0.0.0-00010101000000-000000000000
 	github.com/oklog/ulid/v2 v2.1.0
 	github.com/open-telemetry/opamp-go v0.2.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/alibabacloudlogserviceexporter v0.67.0
@@ -155,6 +156,7 @@ require (
 
 require (
 	github.com/bmatcuk/doublestar/v4 v4.4.0 // indirect
+	github.com/hooklift/gowsdl v0.5.0 // indirect
 	github.com/observiq/observiq-otel-collector/internal/expr v1.14.0 // indirect
 	github.com/ovh/go-ovh v1.3.0 // indirect
 	github.com/relvacode/iso8601 v1.1.0 // indirect
@@ -547,6 +549,8 @@ replace github.com/observiq/observiq-otel-collector/processor/resourceattributet
 replace github.com/observiq/observiq-otel-collector/receiver/pluginreceiver => ./receiver/pluginreceiver
 
 replace github.com/observiq/observiq-otel-collector/receiver/routereceiver => ./receiver/routereceiver
+
+replace github.com/observiq/observiq-otel-collector/receiver/sapnetweaverreceiver => ./receiver/sapnetweaverreceiver
 
 replace github.com/observiq/observiq-otel-collector/exporter/googlecloudexporter => ./exporter/googlecloudexporter
 
