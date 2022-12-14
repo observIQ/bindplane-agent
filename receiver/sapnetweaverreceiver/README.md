@@ -17,12 +17,13 @@ This receiver collects metrics from SAP Netweaver instance based on the [SAPCont
 More information on how to setup a SAP NetWeaver Stack for each operating system and version can be found [here](https://help.sap.com/docs/SAP_NETWEAVER/9e41ead9f54e44c1ae1a1094b0f80712/576f5c1808de4d1abecbd6e503c9ba42.html?language=en-US).
 
 ## Configuration
-The following settings are optional:
-- `metrics` (default: see `DefaultMetricsSettings` [here](./internal/metadata/generated_metrics.go): Allows enabling and disabling specific metrics from being collected in this receiver.
-- `endpoint` (default = `http://localhost:50013`): The default URL for SAP Netweaver.
-- `username` (no default): Specifies the username used to authenticate using basic auth.
-- `password` (no default): Specifies the password used to authenticate using basic auth.
-- `collection_interval` (default = `10s`): This receiver collects metrics on an interval. This value must be a string readable by Golang's [time.ParseDuration](https://pkg.go.dev/time#ParseDuration).
+| Field               | Type               | Default                                                                                   | Description                                                                                                                                                  |
+|---------------------|--------------------|-------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| metrics             | string             | `(default: see `DefaultMetricsSettings` [here](./internal/metadata/generated_metrics.go)` | Allows enabling and disabling specific metrics from being collected in this receiver.                                                                        |
+| endpoint            | string             | `http://localhost:50013`                                                                  | The name of the metric created.                                                                                                                              |
+| username            | string             | `(no default)`                                                                            | Specifies the username used to authenticate using basic auth.                                                                                                |
+| password            | string             | `(no default)`                                                                            | Specifies the password used to authenticate using basic auth.                                                                                                |
+| collection_interval | time.ParseDuration | `default = 10s`                                                                           | This receiver collects metrics on an interval. This value must be a string readable by Golang's [time.ParseDuration](https://pkg.go.dev/time#ParseDuration). |
 
 ### Example Configuration
 ```yaml
@@ -33,6 +34,17 @@ receivers:
     username: root
     password: password
     collection_interval: 10s
+processors:
+    batch:
+exporters:
+    googlecloud:
+    logging:
+
+service:
+        metrics:
+            receivers: [sapnetweaver]
+            processors: [batch]
+            exporters: [googlecloud]
 ```
 
 The full list of settings exposed for this receiver are documented [here](./config.go) with detailed sample configurations [here](./testdata/config.yaml).

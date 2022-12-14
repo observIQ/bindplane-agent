@@ -253,33 +253,3 @@ func parseResponse(metricName string, alertTreeResponse map[string]string) (stri
 	}
 	return val, nil
 }
-
-func stateColorToInt(statecolor models.StateColor) (int64, error) {
-	switch statecolor {
-	case models.StateColorGray:
-		return int64(models.StateColorCodeGray), nil
-	case models.StateColorGreen:
-		return int64(models.StateColorCodeGreen), nil
-	case models.StateColorYellow:
-		return int64(models.StateColorCodeYellow), nil
-	case models.StateColorRed:
-		return int64(models.StateColorCodeRed), nil
-	default:
-		return -1, errInvalidStateColor
-	}
-}
-
-func stateColorToAttribute(statecolor models.StateColor) (metadata.AttributeControlState, error) {
-	switch statecolor {
-	case models.StateColorGray:
-		return metadata.AttributeControlStateGrey, nil
-	case models.StateColorGreen:
-		return metadata.AttributeControlStateGreen, nil
-	case models.StateColorYellow:
-		return metadata.AttributeControlStateYellow, nil
-	case models.StateColorRed:
-		return metadata.AttributeControlStateRed, nil
-	default:
-		return -1, errInvalidStateColor
-	}
-}

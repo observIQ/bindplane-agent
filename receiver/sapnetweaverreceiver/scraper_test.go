@@ -30,7 +30,6 @@ import (
 	"go.opentelemetry.io/collector/config/configtls"
 	"go.uber.org/multierr"
 
-	"github.com/observiq/observiq-otel-collector/receiver/sapnetweaverreceiver/internal/metadata"
 	"github.com/observiq/observiq-otel-collector/receiver/sapnetweaverreceiver/internal/mocks"
 	"github.com/observiq/observiq-otel-collector/receiver/sapnetweaverreceiver/internal/models"
 )
@@ -458,49 +457,4 @@ func loadAPIResponseData(t *testing.T, folder, fileName string) []byte {
 	require.NoError(t, err)
 
 	return data
-}
-
-func TestStateColor(t *testing.T) {
-	testCases := []struct {
-		desc                  string
-		stateColor            models.StateColor
-		expectedColorInt      int64
-		expectedColorMetadata metadata.AttributeControlState
-	}{
-		{
-			desc:                  "valid gray color code",
-			stateColor:            models.StateColorGray,
-			expectedColorInt:      1,
-			expectedColorMetadata: metadata.AttributeControlStateGrey,
-		},
-		{
-			desc:                  "valid green color code",
-			stateColor:            models.StateColorGreen,
-			expectedColorInt:      2,
-			expectedColorMetadata: metadata.AttributeControlStateGreen,
-		},
-		{
-			desc:                  "valid yellow color code",
-			stateColor:            models.StateColorYellow,
-			expectedColorInt:      3,
-			expectedColorMetadata: metadata.AttributeControlStateYellow,
-		},
-		{
-			desc:                  "valid red color code",
-			stateColor:            models.StateColorRed,
-			expectedColorInt:      4,
-			expectedColorMetadata: metadata.AttributeControlStateRed,
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.desc, func(t *testing.T) {
-			actualColorInt, err := stateColorToInt(tc.stateColor)
-			require.NoError(t, err)
-			require.EqualValues(t, tc.expectedColorInt, actualColorInt)
-
-			actualColorMetadata, err := stateColorToAttribute(tc.stateColor)
-			require.NoError(t, err)
-			require.EqualValues(t, tc.expectedColorMetadata, actualColorMetadata)
-		})
-	}
 }
