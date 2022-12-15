@@ -28,7 +28,10 @@ type alternateProcessor struct {
 	logsTracker  *RollingAverage
 	logsSizer    plog.Sizer
 
-	tracesSizer ptrace.Sizer
+	tracesConsumer *consumer.Traces
+	tracesRate     *Rate
+	tracesTracker  *RollingAverage
+	tracesSizer    ptrace.Sizer
 }
 
 type alternateProcessorOption interface {
@@ -53,6 +56,12 @@ func withLogsConsumer(c consumer.Logs) alternateProcessorOption {
 func withMetricsConsumer(c consumer.Metrics) alternateProcessorOption {
 	return alternateProcessorOptionFunc(func(ap *alternateProcessor) {
 		ap.metricsConsumer = &c
+	})
+}
+
+func withTracesProcessor(c consumer.Traces) alternateProcessorOption {
+	return alternateProcessorOptionFunc(func(ap *alternateProcessor) {
+		ap.tracesConsumer = &c
 	})
 }
 
@@ -163,6 +172,34 @@ func (ap *alternateProcessor) ConsumeMetrics(ctx context.Context, pm pmetric.Met
 	return err
 }
 
+func (ap *alternateProcessor) ConsumeTraces(ctx context.Context, pt ptrace.Traces) error {
+	byteSize := float64(ap.tracesSizer.TracesSize(pt))
+	ap.tracesTracker.AddBytes(byteSize)
+	currentRate := ap.tracesTracker.NormalizedRateValue()
+
+	if currentRate <= ap.tracesRate.Value {
+		if ap.tracesConsumer == nil {
+			return component.ErrNilNextConsumer
+		}
+		tc := *ap.tracesConsumer
+		return tc.ConsumeTraces(ctx, pt)
+	}
+
+	// otherwise route to the alternate pipeline
+	ap.logger.Info(
+		"exceeded limit for metrics, sending metrics to alternate route",
+		zap.Float64("currentRate", currentRate),
+		zap.Float64("configuredRate", ap.metricsRate.Value),
+		zap.String("route", ap.cfg.Metrics.Route),
+	)
+
+	err := routereceiver.RouteTraces(ctx, ap.cfg.Traces.Route, pt)
+	if err != nil {
+		ap.logger.Error("failed to send metrics to alternate route", zap.Error(err))
+	}
+	return err
+}
+
 func (ap *alternateProcessor) setupLogsTracker() error {
 	if !ap.cfg.Logs.Enabled {
 		return nil
@@ -197,5 +234,22 @@ func (ap *alternateProcessor) setupMetricsTracker() error {
 	}
 
 	ap.metricsTracker = mt
+	return nil
+}
+
+func (ap *alternateProcessor) setuptracesTracker() error {
+	if !ap.cfg.Traces.Enabled {
+		return nil
+	}
+	rate, err := ParseRate(ap.cfg.Traces.Rate)
+	if err != nil {
+		return err
+	}
+	ap.tracesRate = rate
+	tt, err := NewRollingAverage(5, rate.Time.Value)
+	if err != nil {
+		return err
+	}
+	ap.tracesTracker = tt
 	return nil
 }
