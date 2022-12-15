@@ -29,6 +29,8 @@ type Config struct {
 
 	// DropRatio is the ratio of payloads that are dropped. Values between 0.0 and 1.0 are valid.
 	DropRatio float64 `mapstructure:"drop_ratio"`
+	// RetainErrorSpans dictates whether to retain all spans with errors, regardless of sampling
+	RetainErrorSpans bool `mapstructure:"retain_error_spans"`
 }
 
 // Validate validates the processor configuration

@@ -26,36 +26,47 @@ import (
 )
 
 func Test_processTraces(t *testing.T) {
-	td := ptrace.NewTraces()
-	td.ResourceSpans().AppendEmpty().ScopeSpans().AppendEmpty().Spans().AppendEmpty()
+	blankTrace := ptrace.NewTraces()
+	blankTrace.ResourceSpans().AppendEmpty().ScopeSpans().AppendEmpty().Spans().AppendEmpty()
+
+	traceWithError := ptrace.NewTraces()
+	spanWithError := traceWithError.ResourceSpans().AppendEmpty().ScopeSpans().AppendEmpty().Spans().AppendEmpty()
+	errorStatus := ptrace.NewStatus()
+	errorStatus.SetCode(ptrace.StatusCodeError)
+	errorStatus.CopyTo(spanWithError.Status())
 
 	testCases := []struct {
-		desc      string
-		dropRatio float64
-		input     ptrace.Traces
-		expected  ptrace.Traces
+		desc     string
+		cfg      Config
+		input    ptrace.Traces
+		expected ptrace.Traces
 	}{
 		{
-			desc:      "Always Drop",
-			dropRatio: 1.0,
-			input:     td,
-			expected:  ptrace.NewTraces(),
+			desc:     "Always Drop",
+			cfg:      Config{DropRatio: 1.0},
+			input:    blankTrace,
+			expected: ptrace.NewTraces(),
 		},
 		{
-			desc:      "Never Drop",
-			dropRatio: 0.0,
-			input:     td,
-			expected:  td,
+			desc:     "Never Drop",
+			cfg:      Config{DropRatio: 0.0},
+			input:    blankTrace,
+			expected: blankTrace,
+		},
+		{
+			desc: "retaining spans with errors",
+			cfg: Config{
+				DropRatio:        1.0,
+				RetainErrorSpans: true,
+			},
+			input:    traceWithError,
+			expected: traceWithError,
 		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.desc, func(t *testing.T) {
-			cfg := &Config{
-				DropRatio: tc.dropRatio,
-			}
-
-			processor := newSamplingProcessor(zap.NewNop(), cfg)
+			processor := newSamplingProcessor(zap.NewNop(), &tc.cfg)
 			actual, err := processor.processTraces(context.Background(), tc.input)
 			require.NoError(t, err)
 			require.Equal(t, tc.expected, actual)

@@ -25,14 +25,16 @@ import (
 )
 
 type samplingProcessor struct {
-	logger          *zap.Logger
-	dropCutOffRatio float64
+	logger           *zap.Logger
+	dropCutOffRatio  float64
+	retainErrorSpans bool
 }
 
 func newSamplingProcessor(logger *zap.Logger, cfg *Config) *samplingProcessor {
 	return &samplingProcessor{
-		logger:          logger,
-		dropCutOffRatio: cfg.DropRatio,
+		logger:           logger,
+		dropCutOffRatio:  cfg.DropRatio,
+		retainErrorSpans: cfg.RetainErrorSpans,
 	}
 }
 
@@ -41,17 +43,25 @@ func (sp *samplingProcessor) sampleFunc() bool {
 	return rand.Float64() <= sp.dropCutOffRatio
 }
 
+// sampleTraceFunc determines whether to drop a span based on configuration
+func (sp *samplingProcessor) sampleTraceFunc(span ptrace.Span) bool {
+	if sp.retainErrorSpans && span.Status().Code() == ptrace.StatusCodeError {
+		return false
+	}
+	return sp.sampleFunc()
+}
+
 func (sp *samplingProcessor) processTraces(_ context.Context, td ptrace.Traces) (ptrace.Traces, error) {
 	switch {
-	case sp.dropCutOffRatio == 1.0: // Drop everything
+	case sp.dropCutOffRatio == 1.0 && !sp.retainErrorSpans: // Drop everything
 		return ptrace.NewTraces(), nil
 	case sp.dropCutOffRatio == 0.0: // Drop nothing
 		return td, nil
 	default: // Drop based on ratio
 		for i := 0; i < td.ResourceSpans().Len(); i++ {
 			for j := 0; j < td.ResourceSpans().At(i).ScopeSpans().Len(); j++ {
-				td.ResourceSpans().At(i).ScopeSpans().At(j).Spans().RemoveIf(func(_ ptrace.Span) bool {
-					return sp.sampleFunc()
+				td.ResourceSpans().At(i).ScopeSpans().At(j).Spans().RemoveIf(func(span ptrace.Span) bool {
+					return sp.sampleTraceFunc(span)
 				})
 			}
 		}
@@ -68,7 +78,7 @@ func (sp *samplingProcessor) processLogs(_ context.Context, ld plog.Logs) (plog.
 	default: // Drop based on ratio
 		for i := 0; i < ld.ResourceLogs().Len(); i++ {
 			for j := 0; j < ld.ResourceLogs().At(i).ScopeLogs().Len(); j++ {
-				ld.ResourceLogs().At(i).ScopeLogs().At(j).LogRecords().RemoveIf(func(_ plog.LogRecord) bool {
+				ld.ResourceLogs().At(i).ScopeLogs().At(j).LogRecords().RemoveIf(func(lr plog.LogRecord) bool {
 					return sp.sampleFunc()
 				})
 			}
