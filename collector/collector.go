@@ -19,9 +19,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"runtime/debug"
 	"sync"
 	"time"
 
+	"go.opentelemetry.io/collector/otelcol"
 	"go.opentelemetry.io/collector/service"
 	"go.uber.org/zap"
 )
@@ -110,13 +112,14 @@ func (c *collector) Run(ctx context.Context) error {
 		defer func() {
 			if r := recover(); r != nil {
 				var panicErr error
+				panicStack := string(debug.Stack())
 				switch v := r.(type) {
 				case error:
-					panicErr = fmt.Errorf("collector panicked with error: %w", v)
+					panicErr = fmt.Errorf("collector panicked with error: %w. Panic stacktrace: %s", v, panicStack)
 				case string:
-					panicErr = fmt.Errorf("collector panicked with error: %s", v)
+					panicErr = fmt.Errorf("collector panicked with error: %s. Panic stacktrace: %s", v, panicStack)
 				default:
-					panicErr = fmt.Errorf("collector panicked with error: %v", v)
+					panicErr = fmt.Errorf("collector panicked with error: %v. Panic stacktrace: %s", v, panicStack)
 				}
 
 				c.sendStatus(false, true, panicErr)
@@ -171,7 +174,7 @@ func (c *collector) waitForStartup(ctx context.Context, startupErr chan error) e
 	defer ticker.Stop()
 
 	for {
-		if c.svc.GetState() == service.Running {
+		if c.svc.GetState() == otelcol.StateRunning {
 			c.sendStatus(true, false, nil)
 			return nil
 		}

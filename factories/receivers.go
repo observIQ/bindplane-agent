@@ -17,6 +17,8 @@ package factories
 import (
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-collector/receiver/varnishreceiver"
 	"github.com/observiq/observiq-otel-collector/receiver/pluginreceiver"
+	"github.com/observiq/observiq-otel-collector/receiver/routereceiver"
+	"github.com/observiq/observiq-otel-collector/receiver/sapnetweaverreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/activedirectorydsreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/aerospikereceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/apachereceiver"
@@ -78,12 +80,12 @@ import (
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/windowsperfcountersreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/zipkinreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/zookeeperreceiver"
-	"go.opentelemetry.io/collector/component"
-	"go.opentelemetry.io/collector/component/componenttest"
+	"go.opentelemetry.io/collector/receiver"
 	"go.opentelemetry.io/collector/receiver/otlpreceiver"
+	"go.opentelemetry.io/collector/receiver/receivertest"
 )
 
-var defaultReceivers = []component.ReceiverFactory{
+var defaultReceivers = []receiver.Factory{
 	activedirectorydsreceiver.NewFactory(),
 	aerospikereceiver.NewFactory(),
 	apachereceiver.NewFactory(),
@@ -97,7 +99,6 @@ var defaultReceivers = []component.ReceiverFactory{
 	carbonreceiver.NewFactory(),
 	cloudfoundryreceiver.NewFactory(),
 	collectdreceiver.NewFactory(),
-	componenttest.NewNopReceiverFactory(),
 	couchdbreceiver.NewFactory(),
 	dockerstatsreceiver.NewFactory(),
 	dotnetdiagnosticsreceiver.NewFactory(),
@@ -130,10 +131,13 @@ var defaultReceivers = []component.ReceiverFactory{
 	postgresqlreceiver.NewFactory(),
 	prometheusreceiver.NewFactory(),
 	rabbitmqreceiver.NewFactory(),
+	receivertest.NewNopFactory(),
 	redisreceiver.NewFactory(),
 	riakreceiver.NewFactory(),
+	routereceiver.NewFactory(),
 	saphanareceiver.NewFactory(),
 	sapmreceiver.NewFactory(),
+	sapnetweaverreceiver.NewFactory(),
 	simpleprometheusreceiver.NewFactory(),
 	snmpreceiver.NewFactory(),
 	splunkhecreceiver.NewFactory(),

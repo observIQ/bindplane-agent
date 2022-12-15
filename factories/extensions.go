@@ -20,19 +20,19 @@ import (
 	"github.com/open-telemetry/opentelemetry-collector-contrib/extension/oidcauthextension"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/extension/pprofextension"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/extension/storage/filestorage"
-	"go.opentelemetry.io/collector/component"
-	"go.opentelemetry.io/collector/component/componenttest"
+	"go.opentelemetry.io/collector/extension"
 	"go.opentelemetry.io/collector/extension/ballastextension"
+	"go.opentelemetry.io/collector/extension/extensiontest"
 	"go.opentelemetry.io/collector/extension/zpagesextension"
 )
 
-var defaultExtensions = []component.ExtensionFactory{
+var defaultExtensions = []extension.Factory{
+	ballastextension.NewFactory(),
 	bearertokenauthextension.NewFactory(),
+	extensiontest.NewNopFactory(),
+	filestorage.NewFactory(),
 	healthcheckextension.NewFactory(),
 	oidcauthextension.NewFactory(),
 	pprofextension.NewFactory(),
 	zpagesextension.NewFactory(),
-	filestorage.NewFactory(),
-	ballastextension.NewFactory(),
-	componenttest.NewNopExtensionFactory(),
 }

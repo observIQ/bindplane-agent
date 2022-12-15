@@ -21,6 +21,7 @@ import (
 	"go.opencensus.io/stats/view"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/consumer"
+	"go.opentelemetry.io/collector/receiver"
 )
 
 // RegisterMetricViews unregisters old metric views if they exist and registers new ones
@@ -31,21 +32,21 @@ func RegisterMetricViews() error {
 }
 
 // WrapReceiverFactory creates a wrapper factory that around the passed in factory. Injecting consumers to measure output from the passed in receiver.
-func WrapReceiverFactory(receiverFactory component.ReceiverFactory) component.ReceiverFactory {
-	opts := make([]component.ReceiverFactoryOption, 0, 3)
+func WrapReceiverFactory(receiverFactory receiver.Factory) receiver.Factory {
+	opts := make([]receiver.FactoryOption, 0, 3)
 
 	// Wrap the metric receiver creation func
-	opts = append(opts, component.WithMetricsReceiver(
+	opts = append(opts, receiver.WithMetrics(
 		wrapCreateMetricsReceiverFunc(receiverFactory.CreateMetricsReceiver), receiverFactory.MetricsReceiverStability()),
 	)
 
 	// Wrap the log receiver creation func
-	opts = append(opts, component.WithLogsReceiver(
+	opts = append(opts, receiver.WithLogs(
 		wrapCreateLogReceiverFunc(receiverFactory.CreateLogsReceiver), receiverFactory.LogsReceiverStability()),
 	)
 
 	// Wrap the trace receiver creation func
-	opts = append(opts, component.WithTracesReceiver(
+	opts = append(opts, receiver.WithTraces(
 		wrapCreateTraceReceiverFunc(receiverFactory.CreateTracesReceiver), receiverFactory.TracesReceiverStability()),
 	)
 
@@ -58,10 +59,10 @@ func WrapReceiverFactory(receiverFactory component.ReceiverFactory) component.Re
 
 func wrapCreateMetricsReceiverFunc(createMetricsReceiverFunc component.CreateMetricsReceiverFunc) component.CreateMetricsReceiverFunc {
 	return func(ctx context.Context,
-		set component.ReceiverCreateSettings,
-		rConf component.ReceiverConfig,
+		set receiver.CreateSettings,
+		rConf component.Config,
 		nextConsumer consumer.Metrics,
-	) (component.MetricsReceiver, error) {
+	) (receiver.Metrics, error) {
 		wrappedConsumer := newMetricConsumer(set.Logger, rConf.ID().String(), nextConsumer)
 		return createMetricsReceiverFunc(ctx, set, rConf, wrappedConsumer)
 	}
@@ -69,10 +70,10 @@ func wrapCreateMetricsReceiverFunc(createMetricsReceiverFunc component.CreateMet
 
 func wrapCreateLogReceiverFunc(createLogsReceiverFunc component.CreateLogsReceiverFunc) component.CreateLogsReceiverFunc {
 	return func(ctx context.Context,
-		set component.ReceiverCreateSettings,
-		rConf component.ReceiverConfig,
+		set receiver.CreateSettings,
+		rConf component.Config,
 		nextConsumer consumer.Logs,
-	) (component.LogsReceiver, error) {
+	) (receiver.Logs, error) {
 		wrappedConsumer := newLogConsumer(set.Logger, rConf.ID().String(), nextConsumer)
 		return createLogsReceiverFunc(ctx, set, rConf, wrappedConsumer)
 	}
@@ -80,10 +81,10 @@ func wrapCreateLogReceiverFunc(createLogsReceiverFunc component.CreateLogsReceiv
 
 func wrapCreateTraceReceiverFunc(createTracesReceiverFunc component.CreateTracesReceiverFunc) component.CreateTracesReceiverFunc {
 	return func(ctx context.Context,
-		set component.ReceiverCreateSettings,
-		rConf component.ReceiverConfig,
+		set receiver.CreateSettings,
+		rConf component.Config,
 		nextConsumer consumer.Traces,
-	) (component.TracesReceiver, error) {
+	) (receiver.Traces, error) {
 		wrappedConsumer := newTraceConsumer(set.Logger, rConf.ID().String(), nextConsumer)
 
 		return createTracesReceiverFunc(ctx, set, rConf, wrappedConsumer)

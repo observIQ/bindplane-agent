@@ -1,7 +1,7 @@
 # Releasing
 Releases are managed through GitHub releases. The steps to create a release are as follows:
 
-1. Create a new tag (not release)
+1. Run `make version={VERSION} release` where `{VERSION}` is the version to release. This will create a tag and push it to GitHub.
 
 2. The CD job will run for the tagged commit. Goreleaser will handle the following without user intervention:
   - Build the binaries

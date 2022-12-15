@@ -20,6 +20,7 @@ import (
 	"github.com/observiq/observiq-otel-collector/processor/alternateprocessor"
 	"github.com/observiq/observiq-otel-collector/processor/logcountprocessor"
 	"github.com/observiq/observiq-otel-collector/processor/maskprocessor"
+	"github.com/observiq/observiq-otel-collector/processor/metricextractprocessor"
 	"github.com/observiq/observiq-otel-collector/processor/resourceattributetransposerprocessor"
 	"github.com/observiq/observiq-otel-collector/processor/samplingprocessor"
 	"github.com/observiq/observiq-otel-collector/processor/throughputmeasurementprocessor"
@@ -58,9 +59,11 @@ var defaultProcessors = []component.ProcessorFactory{
 	groupbyattrsprocessor.NewFactory(),
 	groupbytraceprocessor.NewFactory(),
 	k8sattributesprocessor.NewFactory(),
+	logcountprocessor.NewFactory(),
 	logstransformprocessor.NewFactory(),
 	maskprocessor.NewFactory(),
 	memorylimiterprocessor.NewFactory(),
+	metricextractprocessor.NewFactory(),
 	metricsgenerationprocessor.NewFactory(),
 	metricstransformprocessor.NewFactory(),
 	normalizesumsprocessor.NewFactory(),

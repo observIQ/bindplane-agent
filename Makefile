@@ -88,6 +88,7 @@ install-tools:
 	go install github.com/securego/gosec/v2/cmd/gosec@v2.12.0
 	go install github.com/uw-labs/lichen@v0.1.7
 	go install github.com/vektra/mockery/v2@v2.14.0
+	go install github.com/open-telemetry/opentelemetry-collector-contrib/cmd/mdatagen@latest
 
 .PHONY: lint
 lint:
@@ -132,7 +133,7 @@ tidy:
 
 .PHONY: gosec
 gosec:
-	gosec -exclude-dir updater  ./...
+	gosec -exclude-dir=updater -exclude-dir=receiver/sapnetweaverreceiver  ./...
 # exclude the testdata dir; it contains a go program for testing.
 	cd updater; gosec -exclude-dir internal/service/testdata ./...
 
@@ -203,6 +204,34 @@ for-all:
 	  	echo "running $${CMD} in $${dir}" && \
 	 	$${CMD} ); \
 	done
+
+# Release a new version of the collector. This will also tag all submodules
+.PHONY: release
+release:
+	@if [ -z "$(version)" ]; then \
+		echo "version was not set"; \
+		exit 1; \
+	fi
+
+	@if ! [[ "$(version)" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$$ ]]; then \
+		echo "version $(version) is invalid semver"; \
+		exit 1; \
+	fi	
+
+	@git tag $(version)
+	@git push --tags
+
+	@set -e; for dir in $(ALL_MODULES); do \
+	  if [ $${dir} == \. ]; then \
+	  	continue; \
+	  elif [[ $${dir} =~ ^\./internal ]]; then \
+	  	continue; \
+	  else \
+	    echo "$${dir}" | sed -e "s+^./++" -e 's+$$+/$(version)+' | awk '{print $1}' | git tag $$(cat)  ; \
+	  fi; \
+	done
+
+	@git push --tags
 
 .PHONY: clean
 clean:
