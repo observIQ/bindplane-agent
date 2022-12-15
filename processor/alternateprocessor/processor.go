@@ -2,7 +2,6 @@ package alternateprocessor
 
 import (
 	"context"
-	"sync"
 
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/consumer"
@@ -18,14 +17,15 @@ import (
 type alternateProcessor struct {
 	cfg    *Config
 	logger *zap.Logger
-	mux    *sync.Mutex
 
-	metricsTracker  *RateTracker
+	metricsTracker  *RollingAverage
+	metricsRate     *Rate
 	metricsConsumer *consumer.Metrics
 	metricsSizer    pmetric.Sizer
 
 	logsConsumer *consumer.Logs
-	logsTracker  *RateTracker
+	logsRate     *Rate
+	logsTracker  *RollingAverage
 	logsSizer    plog.Sizer
 
 	tracesSizer ptrace.Sizer
@@ -59,14 +59,14 @@ func withMetricsConsumer(c consumer.Metrics) alternateProcessorOption {
 func newProcessor(
 	cfg *Config,
 	logger *zap.Logger,
-	options ...alternateProcessorOption) (*alternateProcessor, error) {
+	options ...alternateProcessorOption,
+) (*alternateProcessor, error) {
 	ap := &alternateProcessor{
 		cfg:          cfg,
 		logger:       logger,
 		logsSizer:    &plog.ProtoMarshaler{},
 		metricsSizer: &pmetric.ProtoMarshaler{},
 		tracesSizer:  &ptrace.ProtoMarshaler{},
-		mux:          &sync.Mutex{},
 	}
 
 	for _, o := range options {
@@ -105,13 +105,13 @@ func (ap *alternateProcessor) Shutdown(_ context.Context) error {
 }
 
 func (ap *alternateProcessor) ConsumeLogs(ctx context.Context, pl plog.Logs) error {
-	byteSize := int64(ap.logsSizer.LogsSize(pl))
-	ap.logsTracker.Add(byteSize)
+	byteSize := float64(ap.logsSizer.LogsSize(pl))
+	ap.logsTracker.AddBytes(byteSize)
 
-	currentRate := ap.logsTracker.GetRate()
+	currentRate := ap.logsTracker.NormalizedRateValue()
 
 	// normal case route to the original pipeline
-	if currentRate <= ap.cfg.Logs.Limit {
+	if currentRate <= ap.logsRate.Value {
 		if ap.logsConsumer == nil {
 			return component.ErrNilNextConsumer
 		}
@@ -123,7 +123,7 @@ func (ap *alternateProcessor) ConsumeLogs(ctx context.Context, pl plog.Logs) err
 	ap.logger.Info(
 		"exceeded limit for logs, sending logs to alternate route",
 		zap.Float64("currentRate", currentRate),
-		zap.Float64("configuredRate", ap.cfg.Logs.Limit),
+		zap.Float64("configuredRate", ap.logsRate.Value),
 		zap.String("route", ap.cfg.Logs.Route),
 	)
 
@@ -135,13 +135,12 @@ func (ap *alternateProcessor) ConsumeLogs(ctx context.Context, pl plog.Logs) err
 }
 
 func (ap *alternateProcessor) ConsumeMetrics(ctx context.Context, pm pmetric.Metrics) error {
-	byteSize := int64(ap.metricsSizer.MetricsSize(pm))
-	ap.metricsTracker.Add(byteSize)
-
-	currentRate := ap.logsTracker.GetRate()
+	byteSize := float64(ap.metricsSizer.MetricsSize(pm))
+	ap.metricsTracker.AddBytes(byteSize)
+	currentRate := ap.metricsTracker.NormalizedRateValue()
 
 	// normal case route to the original pipeline
-	if currentRate <= ap.cfg.Logs.Limit {
+	if currentRate <= ap.metricsRate.Value {
 		if ap.metricsConsumer == nil {
 			return component.ErrNilNextConsumer
 		}
@@ -151,39 +150,52 @@ func (ap *alternateProcessor) ConsumeMetrics(ctx context.Context, pm pmetric.Met
 
 	// otherwise route to the alternate pipeline
 	ap.logger.Info(
-		"exceeded limit for logs, sending logs to alternate route",
+		"exceeded limit for metrics, sending metrics to alternate route",
 		zap.Float64("currentRate", currentRate),
-		zap.Float64("configuredRate", ap.cfg.Logs.Limit),
-		zap.String("route", ap.cfg.Logs.Route),
+		zap.Float64("configuredRate", ap.metricsRate.Value),
+		zap.String("route", ap.cfg.Metrics.Route),
 	)
 
 	err := routereceiver.RouteMetrics(ctx, ap.cfg.Metrics.Route, pm)
 	if err != nil {
-		ap.logger.Error("failed to send logs to alternate route", zap.Error(err))
+		ap.logger.Error("failed to send metrics to alternate route", zap.Error(err))
 	}
 	return err
 }
 
 func (ap *alternateProcessor) setupLogsTracker() error {
-	if ap.cfg.Logs == nil {
+	if !ap.cfg.Logs.Enabled {
 		return nil
 	}
-	lt, err := ap.cfg.Logs.Rate.Build()
+	rate, err := ParseRate(ap.cfg.Logs.Rate)
 	if err != nil {
 		return err
 	}
+	ap.logsRate = rate
+	lt, err := NewRollingAverage(5, rate.Time.Value)
+	if err != nil {
+		return err
+	}
+
 	ap.logsTracker = lt
 	return nil
 }
 
 func (ap *alternateProcessor) setupMetricsTracker() error {
-	if ap.cfg.Metrics == nil {
+	if !ap.cfg.Metrics.Enabled {
 		return nil
 	}
-	mt, err := ap.cfg.Metrics.Rate.Build()
+
+	rate, err := ParseRate(ap.cfg.Metrics.Rate)
 	if err != nil {
 		return err
 	}
+	ap.metricsRate = rate
+	mt, err := NewRollingAverage(5, rate.Time.Value)
+	if err != nil {
+		return err
+	}
+
 	ap.metricsTracker = mt
 	return nil
 }

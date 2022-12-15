@@ -3,6 +3,7 @@ package alternateprocessor
 import (
 	"errors"
 	"fmt"
+	"time"
 
 	"go.opentelemetry.io/collector/config"
 	"go.uber.org/multierr"
@@ -17,13 +18,18 @@ type Config struct {
 }
 
 type AlternateRoute struct {
-	Rate  *RateTrackerConfig `mapstructure:"rate"`
-	Limit float64            `mapstructure:"limit"`
-	Route string             `mapstructure:"route"`
+	Enabled             bool          `mapstructure:"enabled"`
+	Rate                string        `mapstructure:"rate"`
+	AggregationInterval time.Duration `mapstructure:"aggregation_interval"`
+	Route               string        `mapstructure:"route"`
 }
 
 var (
 	errNoRate = errors.New("no rate configuration was specified")
+)
+
+const (
+	defaultAggregationInterval = 10 * time.Second
 )
 
 // Validate returns whether or not the configuration for the alternate processor is valid
@@ -42,12 +48,17 @@ func (c Config) Validate() error {
 }
 
 func (ar *AlternateRoute) validate(telemetryType string) error {
-	if ar.Rate == nil {
+	if ar.Rate == "" {
 		return fmt.Errorf("no rate was specified for telemetry type %s: %w", telemetryType, errNoRate)
 	}
-	_, err := ar.Rate.Build()
+
+	r, err := ParseRate(ar.Rate)
 	if err != nil {
-		return fmt.Errorf("there was an error parsing the rate for %s: %w", telemetryType, err)
+		return fmt.Errorf("not a valid rate: %w", err)
+	}
+
+	if !r.Measure.IsSizeCount() {
+		return errors.New("this processor only supports a size throughput rate")
 	}
 
 	return nil

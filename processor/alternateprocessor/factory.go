@@ -33,6 +33,18 @@ func NewFactory() component.ProcessorFactory {
 func createDefaultConfig() component.Config {
 	return &Config{
 		ProcessorSettings: config.NewProcessorSettings(component.NewID(typeStr)),
+		Logs: &AlternateRoute{
+			Enabled:             false,
+			AggregationInterval: defaultAggregationInterval,
+		},
+		Metrics: &AlternateRoute{
+			Enabled:             false,
+			AggregationInterval: defaultAggregationInterval,
+		},
+		Traces: &AlternateRoute{
+			Enabled:             false,
+			AggregationInterval: defaultAggregationInterval,
+		},
 	}
 }
 
