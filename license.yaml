@@ -47,4 +47,5 @@ exceptions:
     - path: "./processor/maskprocessor"
     - path: "./processor/logcountprocessor"
     - path: "./processor/metricextractprocessor"
+    - path: "./processor/logdeduplicationprocessor"
     - path: "./expr"
