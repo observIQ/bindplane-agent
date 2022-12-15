@@ -190,13 +190,13 @@ func (ap *alternateProcessor) ConsumeTraces(ctx context.Context, pt ptrace.Trace
 	ap.logger.Info(
 		"exceeded data limit for traces, sending traces to alternate route",
 		zap.Float64("currentRate", currentRate),
-		zap.Float64("configuredRate", ap.metricsRate.Value),
-		zap.String("route", ap.cfg.Metrics.Route),
+		zap.Float64("configuredRate", ap.tracesRate.Value),
+		zap.String("route", ap.cfg.Traces.Route),
 	)
 
 	err := routereceiver.RouteTraces(ctx, ap.cfg.Traces.Route, pt)
 	if err != nil {
-		ap.logger.Error("failed to send metrics to alternate route", zap.Error(err))
+		ap.logger.Error("failed to send traces to alternate route", zap.Error(err))
 	}
 	return err
 }
