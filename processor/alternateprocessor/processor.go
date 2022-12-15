@@ -85,8 +85,9 @@ func newProcessor(
 	var errs error
 	errs = multierr.Append(errs, ap.setupLogsTracker())
 	errs = multierr.Append(errs, ap.setupMetricsTracker())
+	errs = multierr.Append(errs, ap.setuptracesTracker())
 
-	return ap, nil
+	return ap, errs
 }
 
 func (ap *alternateProcessor) Start(_ context.Context, _ component.Host) error {
@@ -114,6 +115,10 @@ func (ap *alternateProcessor) Shutdown(_ context.Context) error {
 }
 
 func (ap *alternateProcessor) ConsumeLogs(ctx context.Context, pl plog.Logs) error {
+	if !ap.cfg.Logs.Enabled {
+		return ap.normalConsumeLogs(ctx, pl)
+	}
+
 	byteSize := float64(ap.logsSizer.LogsSize(pl))
 	ap.logsTracker.AddBytes(byteSize)
 
@@ -121,16 +126,12 @@ func (ap *alternateProcessor) ConsumeLogs(ctx context.Context, pl plog.Logs) err
 
 	// normal case route to the original pipeline
 	if currentRate <= ap.logsRate.Value {
-		if ap.logsConsumer == nil {
-			return component.ErrNilNextConsumer
-		}
-		lc := *ap.logsConsumer
-		return lc.ConsumeLogs(ctx, pl)
+		return ap.normalConsumeLogs(ctx, pl)
 	}
 
 	// otherwise route to the alternate pipeline
 	ap.logger.Info(
-		"exceeded limit for logs, sending logs to alternate route",
+		"exceeded data limit for logs, sending logs to alternate route",
 		zap.Float64("currentRate", currentRate),
 		zap.Float64("configuredRate", ap.logsRate.Value),
 		zap.String("route", ap.cfg.Logs.Route),
@@ -144,22 +145,22 @@ func (ap *alternateProcessor) ConsumeLogs(ctx context.Context, pl plog.Logs) err
 }
 
 func (ap *alternateProcessor) ConsumeMetrics(ctx context.Context, pm pmetric.Metrics) error {
+	if !ap.cfg.Metrics.Enabled {
+		return ap.normalConsumeMetrics(ctx, pm)
+	}
+
 	byteSize := float64(ap.metricsSizer.MetricsSize(pm))
 	ap.metricsTracker.AddBytes(byteSize)
 	currentRate := ap.metricsTracker.NormalizedRateValue()
 
 	// normal case route to the original pipeline
 	if currentRate <= ap.metricsRate.Value {
-		if ap.metricsConsumer == nil {
-			return component.ErrNilNextConsumer
-		}
-		mc := *ap.metricsConsumer
-		return mc.ConsumeMetrics(ctx, pm)
+		return ap.normalConsumeMetrics(ctx, pm)
 	}
 
 	// otherwise route to the alternate pipeline
 	ap.logger.Info(
-		"exceeded limit for metrics, sending metrics to alternate route",
+		"exceeded data limit for metrics, sending metrics to alternate route",
 		zap.Float64("currentRate", currentRate),
 		zap.Float64("configuredRate", ap.metricsRate.Value),
 		zap.String("route", ap.cfg.Metrics.Route),
@@ -173,21 +174,21 @@ func (ap *alternateProcessor) ConsumeMetrics(ctx context.Context, pm pmetric.Met
 }
 
 func (ap *alternateProcessor) ConsumeTraces(ctx context.Context, pt ptrace.Traces) error {
+	if !ap.cfg.Traces.Enabled {
+		ap.normalConsumeTraces(ctx, pt)
+	}
+
 	byteSize := float64(ap.tracesSizer.TracesSize(pt))
 	ap.tracesTracker.AddBytes(byteSize)
 	currentRate := ap.tracesTracker.NormalizedRateValue()
 
 	if currentRate <= ap.tracesRate.Value {
-		if ap.tracesConsumer == nil {
-			return component.ErrNilNextConsumer
-		}
-		tc := *ap.tracesConsumer
-		return tc.ConsumeTraces(ctx, pt)
+		ap.normalConsumeTraces(ctx, pt)
 	}
 
 	// otherwise route to the alternate pipeline
 	ap.logger.Info(
-		"exceeded limit for metrics, sending metrics to alternate route",
+		"exceeded data limit for traces, sending traces to alternate route",
 		zap.Float64("currentRate", currentRate),
 		zap.Float64("configuredRate", ap.metricsRate.Value),
 		zap.String("route", ap.cfg.Metrics.Route),
@@ -209,7 +210,9 @@ func (ap *alternateProcessor) setupLogsTracker() error {
 		return err
 	}
 	ap.logsRate = rate
-	lt, err := NewRollingAverage(5, rate.Time.Value)
+
+	numBuckets := int(ap.cfg.Logs.AggregationInterval / rate.Time.Value)
+	lt, err := NewRollingAverage(numBuckets, ap.cfg.Logs.AggregationInterval)
 	if err != nil {
 		return err
 	}
@@ -228,7 +231,9 @@ func (ap *alternateProcessor) setupMetricsTracker() error {
 		return err
 	}
 	ap.metricsRate = rate
-	mt, err := NewRollingAverage(5, rate.Time.Value)
+
+	numBuckets := int(ap.cfg.Metrics.AggregationInterval / rate.Time.Value)
+	mt, err := NewRollingAverage(int(numBuckets), ap.cfg.Metrics.AggregationInterval)
 	if err != nil {
 		return err
 	}
@@ -246,10 +251,36 @@ func (ap *alternateProcessor) setuptracesTracker() error {
 		return err
 	}
 	ap.tracesRate = rate
-	tt, err := NewRollingAverage(5, rate.Time.Value)
+
+	numBuckets := int(ap.cfg.Traces.AggregationInterval / rate.Time.Value)
+	tt, err := NewRollingAverage(int(numBuckets), ap.cfg.Traces.AggregationInterval)
 	if err != nil {
 		return err
 	}
 	ap.tracesTracker = tt
 	return nil
+}
+
+func (ap *alternateProcessor) normalConsumeLogs(ctx context.Context, pl plog.Logs) error {
+	if ap.logsConsumer == nil {
+		return component.ErrNilNextConsumer
+	}
+	lc := *ap.logsConsumer
+	return lc.ConsumeLogs(ctx, pl)
+}
+
+func (ap *alternateProcessor) normalConsumeMetrics(ctx context.Context, pm pmetric.Metrics) error {
+	if ap.metricsConsumer == nil {
+		return component.ErrNilNextConsumer
+	}
+	mc := *ap.metricsConsumer
+	return mc.ConsumeMetrics(ctx, pm)
+}
+
+func (ap *alternateProcessor) normalConsumeTraces(ctx context.Context, pt ptrace.Traces) error {
+	if ap.tracesConsumer == nil {
+		return component.ErrNilNextConsumer
+	}
+	tc := *ap.tracesConsumer
+	return tc.ConsumeTraces(ctx, pt)
 }
