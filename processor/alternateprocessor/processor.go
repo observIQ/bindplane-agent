@@ -233,7 +233,7 @@ func (ap *alternateProcessor) setupMetricsTracker() error {
 	ap.metricsRate = rate
 
 	numBuckets := int(ap.cfg.Metrics.AggregationInterval / rate.Time.Value)
-	mt, err := NewRollingAverage(int(numBuckets), ap.cfg.Metrics.AggregationInterval)
+	mt, err := NewRollingAverage(numBuckets, ap.cfg.Metrics.AggregationInterval)
 	if err != nil {
 		return err
 	}
@@ -253,7 +253,7 @@ func (ap *alternateProcessor) setuptracesTracker() error {
 	ap.tracesRate = rate
 
 	numBuckets := int(ap.cfg.Traces.AggregationInterval / rate.Time.Value)
-	tt, err := NewRollingAverage(int(numBuckets), ap.cfg.Traces.AggregationInterval)
+	tt, err := NewRollingAverage(numBuckets, ap.cfg.Traces.AggregationInterval)
 	if err != nil {
 		return err
 	}

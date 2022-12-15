@@ -84,7 +84,7 @@ func (m *MeasureUnit) IsTotalCount() bool {
 // IsSizeCount returns true if the measure is a size count
 func (m *MeasureUnit) IsSizeCount() bool {
 	switch m.Name {
-	case "b", "bytes", "kib", "kb", "k", "mib", "mb", "m", "gib", "gb", "g", "tib", "tb", "t", "pib", "pb":
+	case "b", "by", "bytes", "kib", "kb", "k", "mib", "miby", "mb", "mby", "m", "gib", "gb", "g", "tib", "tb", "t", "pib", "pb":
 		return true
 	default:
 		return false
