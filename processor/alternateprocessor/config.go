@@ -17,6 +17,7 @@ type Config struct {
 	Traces                   *AlternateRoute `mapstructure:"traces"`
 }
 
+// AlternateRoute is a name for a config that specifies the next route
 type AlternateRoute struct {
 	Enabled             bool          `mapstructure:"enabled"`
 	Rate                string        `mapstructure:"rate"`

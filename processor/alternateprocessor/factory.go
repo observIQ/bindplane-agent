@@ -27,6 +27,7 @@ func NewFactory() component.ProcessorFactory {
 		createDefaultConfig,
 		component.WithLogsProcessor(apf.createLogsProcessor, component.StabilityLevelAlpha),
 		component.WithMetricsProcessor(apf.createMetricsProcessor, component.StabilityLevelAlpha),
+		component.WithTracesProcessor(apf.createTraceProcessor, component.StabilityLevelAlpha),
 	)
 }
 
@@ -48,7 +49,7 @@ func createDefaultConfig() component.Config {
 	}
 }
 
-func (apf *alternateProcessorFactory) createLogsProcessor(ctx context.Context, params component.ProcessorCreateSettings, cfg component.Config, consumer consumer.Logs) (component.LogsProcessor, error) {
+func (apf *alternateProcessorFactory) createLogsProcessor(_ context.Context, params component.ProcessorCreateSettings, cfg component.Config, consumer consumer.Logs) (component.LogsProcessor, error) {
 	pConf, ok := cfg.(*Config)
 	if !ok {
 		return nil, errInvalidConfig
@@ -64,10 +65,10 @@ func (apf *alternateProcessorFactory) createMetricsProcessor(_ context.Context, 
 	return newProcessor(pConf, params.Logger, withMetricsConsumer(consumer))
 }
 
-func (apf *alternateProcessorFactory) createTraceProcessor(ctx context.Context, params component.ProcessorCreateSettings, cfg component.Config, consumer consumer.Traces) (component.TracesProcessor, error) {
+func (apf *alternateProcessorFactory) createTraceProcessor(_ context.Context, params component.ProcessorCreateSettings, cfg component.Config, consumer consumer.Traces) (component.TracesProcessor, error) {
 	pConf, ok := cfg.(*Config)
 	if !ok {
 		return nil, errInvalidConfig
 	}
-	return newProcessor(pConf, params.Logger, withTracesProcessor(consumer))
+	return newProcessor(pConf, params.Logger, withTracesConsumer(consumer))
 }

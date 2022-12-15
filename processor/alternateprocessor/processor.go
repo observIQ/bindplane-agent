@@ -59,7 +59,7 @@ func withMetricsConsumer(c consumer.Metrics) alternateProcessorOption {
 	})
 }
 
-func withTracesProcessor(c consumer.Traces) alternateProcessorOption {
+func withTracesConsumer(c consumer.Traces) alternateProcessorOption {
 	return alternateProcessorOptionFunc(func(ap *alternateProcessor) {
 		ap.tracesConsumer = &c
 	})
