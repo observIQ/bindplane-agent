@@ -167,8 +167,6 @@ github.com/GoogleCloudPlatform/opentelemetry-operations-collector v0.0.3-0.20221
 github.com/GoogleCloudPlatform/opentelemetry-operations-collector v0.0.3-0.20221212182416-9bfb379327ff/go.mod h1:iISQXYggD3+tDNgNX+uaf7YcZ8Hl4S+NoHoWSQfApdw=
 github.com/GoogleCloudPlatform/opentelemetry-operations-go/detectors/gcp v0.34.3-0.20221202192616-0186b89ba914 h1:6O6K3r/yzVRpISZuceCF11JekUpIXX467R36db1UtlE=
 github.com/GoogleCloudPlatform/opentelemetry-operations-go/detectors/gcp v0.34.3-0.20221202192616-0186b89ba914/go.mod h1:HpmGbYLf1fsWiqVA0Z2oKh7qi7BroCgOl2NqB2N/TG4=
-github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector v0.34.3-0.20221202192616-0186b89ba914 h1:iLwx7gQWuAaYJs6W32i4zdK+QaMuBavtqq+OGW1PktI=
-github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector v0.34.3-0.20221202192616-0186b89ba914/go.mod h1:Ak7usPCI+GqelKZTtbE7Sk4+ci2jjnkfl4X04YH7/ZY=
 github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/googlemanagedprometheus v0.34.3-0.20221202192616-0186b89ba914 h1:h0CdVDxEefsgv2QQikwKGSKY875o5caWnNbpb7GjwXc=
 github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/googlemanagedprometheus v0.34.3-0.20221202192616-0186b89ba914/go.mod h1:NW+a69oLVqYvWZ98nlUPI/TqsOA/YRdOokzQVGNOxc4=
 github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.10.2 h1:mZ/DetsTFTLmOQq1B9l1ADBpJAYErGULD1C4oNLXjhI=
@@ -1415,6 +1413,8 @@ github.com/nxadm/tail v1.4.8/go.mod h1:+ncqLTQzXmGhMZNUePPaPqPvBxHAIsmXswZKocGu+
 github.com/observiq/ctimefmt v1.0.0 h1:r7vTJ+Slkrt9fZ67mkf+mA6zAdR5nGIJRMTzkUyvilk=
 github.com/observiq/ctimefmt v1.0.0/go.mod h1:mxi62//WbSpG/roCO1c6MqZ7zQTvjVtYheqHN3eOjvc=
 github.com/observiq/nanojack v0.0.0-20201106172433-343928847ebc h1:49ewVBwLcy+eYqI4R0ICilCI4dPjddpFXWv3liXzUxM=
+github.com/observiq/opentelemetry-operations-go/exporter/collector v0.26.1-0.20221215164112-d92100d9c728 h1:FAoP0XFEBDTUOpV2Jof0MeITIJWKR4XenCLk/bOFReg=
+github.com/observiq/opentelemetry-operations-go/exporter/collector v0.26.1-0.20221215164112-d92100d9c728/go.mod h1:Ak7usPCI+GqelKZTtbE7Sk4+ci2jjnkfl4X04YH7/ZY=
 github.com/oklog/oklog v0.3.2/go.mod h1:FCV+B7mhrz4o+ueLpx+KqkyXRGMWOYEvfiXtdGtbWGs=
 github.com/oklog/run v1.0.0/go.mod h1:dlhp/R75TPv97u0XWUtDeV/lRKWPKSdTuV0TZvrmrQA=
 github.com/oklog/run v1.1.0/go.mod h1:sVPdnTZT1zYwAJeCMu2Th4T21pA3FPOQRfWjQlk7DVU=
