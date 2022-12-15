@@ -61,7 +61,7 @@ func (p *routerProcessor) Start(_ context.Context, _ component.Host) error {
 
 // Capabilities returns the consumer's capabilities.
 func (p *routerProcessor) Capabilities() consumer.Capabilities {
-	return consumer.Capabilities{MutatesData: false}
+	return consumer.Capabilities{MutatesData: true}
 }
 
 // Shutdown stops the processor.

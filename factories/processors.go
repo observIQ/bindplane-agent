@@ -21,6 +21,7 @@ import (
 	"github.com/observiq/observiq-otel-collector/processor/maskprocessor"
 	"github.com/observiq/observiq-otel-collector/processor/metricextractprocessor"
 	"github.com/observiq/observiq-otel-collector/processor/resourceattributetransposerprocessor"
+	"github.com/observiq/observiq-otel-collector/processor/routerprocessor"
 	"github.com/observiq/observiq-otel-collector/processor/samplingprocessor"
 	"github.com/observiq/observiq-otel-collector/processor/throughputmeasurementprocessor"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/attributesprocessor"
@@ -69,6 +70,7 @@ var defaultProcessors = []component.ProcessorFactory{
 	resourceattributetransposerprocessor.NewFactory(),
 	resourcedetectionprocessor.NewFactory(),
 	resourceprocessor.NewFactory(),
+	routerprocessor.NewFactory(),
 	routingprocessor.NewFactory(),
 	samplingprocessor.NewFactory(),
 	snapshotprocessor.NewFactory(),

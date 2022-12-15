@@ -12,6 +12,7 @@ require (
 	github.com/observiq/observiq-otel-collector/processor/maskprocessor v1.14.0
 	github.com/observiq/observiq-otel-collector/processor/metricextractprocessor v1.14.0
 	github.com/observiq/observiq-otel-collector/processor/resourceattributetransposerprocessor v1.14.0
+	github.com/observiq/observiq-otel-collector/processor/routerprocessor v1.14.0
 	github.com/observiq/observiq-otel-collector/processor/samplingprocessor v1.14.0
 	github.com/observiq/observiq-otel-collector/processor/throughputmeasurementprocessor v1.14.0
 	github.com/observiq/observiq-otel-collector/receiver/pluginreceiver v1.14.0
@@ -563,6 +564,8 @@ replace github.com/observiq/observiq-otel-collector/processor/samplingprocessor 
 replace github.com/observiq/observiq-otel-collector/processor/maskprocessor => ./processor/maskprocessor
 
 replace github.com/observiq/observiq-otel-collector/processor/logcountprocessor => ./processor/logcountprocessor
+
+replace github.com/observiq/observiq-otel-collector/processor/routerprocessor => ./processor/routerprocessor
 
 replace github.com/observiq/observiq-otel-collector/processor/metricextractprocessor => ./processor/metricextractprocessor
 
