@@ -36,13 +36,13 @@ receivers:
 processors:
   router:
     routes:
-      - match: 'severity_enum == "debug"'
+      - match: severity_enum == "Debug"
         route: debug
-      - match: 'severity_enum == "info"'
+      - match: severity_enum == "Info"
         route: info
-      - match: 'severity_enum == "warn"'
+      - match: severity_enum == "Warn"
         route: warn
-      - match: 'severity_enum == "error"'
+      - match: severity_enum == "Error"
         route: error
 
 exporters:
@@ -101,13 +101,13 @@ The following configuration adds a match expression that will route on severity.
 processors:
   router:
     routes:
-      - match: 'severity_enum == "debug"'
+      - match: severity_enum == "Debug"
         route: debug
-      - match: 'severity_enum == "info"'
+      - match: severity_enum == "Info"
         route: info
-      - match: 'severity_enum == "warn"'
+      - match: severity_enum == "Warn"
         route: warn
-      - match: 'severity_enum == "error"'
+      - match: severity_enum == "Error"
         route: error
 ```
 
