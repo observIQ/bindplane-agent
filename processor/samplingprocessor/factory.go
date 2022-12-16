@@ -16,8 +16,10 @@ package samplingprocessor
 
 import (
 	"context"
+	"fmt"
 	"sync"
 
+	"github.com/observiq/observiq-otel-collector/internal/expr"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/config"
 	"go.opentelemetry.io/collector/consumer"
@@ -61,9 +63,14 @@ func createTracesProcessor(
 	nextConsumer consumer.Traces,
 ) (component.TracesProcessor, error) {
 	oCfg := cfg.(*Config)
-	sp := newSamplingProcessor(set.Logger, oCfg)
 
-	return processorhelper.NewTracesProcessor(ctx, set, cfg, nextConsumer, sp.processTraces, processorhelper.WithCapabilities(consumerCapabilities))
+	if oCfg.Match != "" {
+		return nil, fmt.Errorf("matches not supported for traces")
+	}
+
+	tmp := newSamplingProcessor(set.Logger, oCfg, nil)
+
+	return processorhelper.NewTracesProcessor(ctx, set, cfg, nextConsumer, tmp.processTraces, processorhelper.WithCapabilities(consumerCapabilities))
 }
 
 func createLogsProcessor(
@@ -73,7 +80,17 @@ func createLogsProcessor(
 	nextConsumer consumer.Logs,
 ) (component.LogsProcessor, error) {
 	oCfg := cfg.(*Config)
-	tmp := newSamplingProcessor(set.Logger, oCfg)
+
+	var match *expr.Expression
+	var err error
+	if oCfg.Match != "" {
+		match, err = expr.CreateBoolExpression(oCfg.Match)
+		if err != nil {
+			return nil, fmt.Errorf("invalid match expression: %w", err)
+		}
+	}
+
+	tmp := newSamplingProcessor(set.Logger, oCfg, match)
 
 	return processorhelper.NewLogsProcessor(ctx, set, cfg, nextConsumer, tmp.processLogs, processorhelper.WithCapabilities(consumerCapabilities))
 }
@@ -85,7 +102,16 @@ func createMetricsProcessor(
 	nextConsumer consumer.Metrics,
 ) (component.MetricsProcessor, error) {
 	oCfg := cfg.(*Config)
-	tmp := newSamplingProcessor(set.Logger, oCfg)
+
+	var match *expr.Expression
+	var err error
+	if oCfg.Match != "" {
+		match, err = expr.CreateBoolExpression(oCfg.Match)
+		if err != nil {
+			return nil, fmt.Errorf("invalid match expression: %w", err)
+		}
+	}
+	tmp := newSamplingProcessor(set.Logger, oCfg, match)
 
 	return processorhelper.NewMetricsProcessor(ctx, set, cfg, nextConsumer, tmp.processMetrics, processorhelper.WithCapabilities(consumerCapabilities))
 }

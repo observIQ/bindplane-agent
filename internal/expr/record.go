@@ -14,26 +14,49 @@
 
 package expr
 
-import "go.opentelemetry.io/collector/pdata/plog"
+import (
+	"go.opentelemetry.io/collector/pdata/plog"
+	"go.opentelemetry.io/collector/pdata/pmetric"
+	"go.opentelemetry.io/collector/pdata/ptrace"
+)
 
+// General Fields
 const (
-	// BodyField is the name of the field containing the log body.
-	BodyField = "body"
-
 	// ResourceField is the name of the field containing the resource attributes.
 	ResourceField = "resource"
 
-	// AttributesField is the name of the field containing the log attributes.
+	// AttributesField is the name of the field containing the telemetry attributes.
 	AttributesField = "attributes"
+
+	// TimestampField is the name of the field containing the telemetry timestamp.
+	TimestampField = "timestamp"
+)
+
+// Log Specific Fields
+const (
+	// BodyField is the name of the field containing the log body.
+	BodyField = "body"
 
 	// SeverityEnumField is the name of the field containing the log severity enum.
 	SeverityEnumField = "severity_enum"
 
 	// SeverityNumberField is the name of the field containing the log severity number.
 	SeverityNumberField = "severity_number"
+)
 
-	// TimestampField is the name of the field containing the log timestamp.
-	TimestampField = "timestamp"
+// Metric Specific Fields
+const (
+	// MetricNameField is the name of the field containing the metric name.
+	MetricNameField = "name"
+)
+
+// Trace Specific Fields
+const (
+	// MetricNameField is the name of the field containing the metric name.
+	TraceStartTimeField = "start_time"
+
+	// MetricNameField is the name of the field containing the metric name.
+	TraceEndTimeField = "end_time"
 )
 
 // Record is the simplified representation of a log record.
@@ -50,7 +73,7 @@ func ConvertToRecords(logs plog.Logs) []Record {
 			logs := resourceLogs.ScopeLogs().At(j).LogRecords()
 			for k := 0; k < logs.Len(); k++ {
 				log := logs.At(k)
-				records = append(records, ConvertToRecord(log, resource))
+				records = append(records, ConvertLogToRecord(log, resource))
 			}
 		}
 	}
@@ -58,8 +81,8 @@ func ConvertToRecords(logs plog.Logs) []Record {
 	return records
 }
 
-// ConvertToRecord converts a log record to a simplified representation.
-func ConvertToRecord(log plog.LogRecord, resource map[string]any) Record {
+// ConvertLogToRecord converts a log record to a simplified representation.
+func ConvertLogToRecord(log plog.LogRecord, resource map[string]any) Record {
 	return Record{
 		ResourceField:       resource,
 		AttributesField:     log.Attributes().AsRaw(),
@@ -67,6 +90,25 @@ func ConvertToRecord(log plog.LogRecord, resource map[string]any) Record {
 		SeverityEnumField:   log.SeverityNumber().String(),
 		SeverityNumberField: int32(log.SeverityNumber()),
 		TimestampField:      log.Timestamp().AsTime(),
+	}
+}
+
+// ConvertMetricToRecord converts a log record to a simplified representation.
+func ConvertMetricToRecord(metric pmetric.Metric, resource map[string]any) Record {
+	return Record{
+		ResourceField:   resource,
+		MetricNameField: metric.Name(),
+	}
+}
+
+// ConvertTraceToRecord converts a log record to a simplified representation.
+func ConvertTraceToRecord(span ptrace.Span, resource map[string]any) Record {
+	return Record{
+		ResourceField:       resource,
+		AttributesField:     span.Attributes().AsRaw(),
+		TraceStartTimeField: span.StartTimestamp().AsTime(),
+		TraceEndTimeField:   span.EndTimestamp().AsTime(),
+		"":                  span.TraceState(),
 	}
 }
 
@@ -91,7 +133,7 @@ func ConvertToResourceGroups(logs plog.Logs) []ResourceGroup {
 			logs := resourceLogs.ScopeLogs().At(j).LogRecords()
 			for k := 0; k < logs.Len(); k++ {
 				log := logs.At(k)
-				group.Records = append(group.Records, ConvertToRecord(log, resource))
+				group.Records = append(group.Records, ConvertLogToRecord(log, resource))
 			}
 		}
 		groups = append(groups, group)

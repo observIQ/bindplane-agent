@@ -31,6 +31,8 @@ type Config struct {
 	DropRatio float64 `mapstructure:"drop_ratio"`
 	// RetainErrorSpans dictates whether to retain all spans with errors, regardless of sampling
 	RetainErrorSpans bool `mapstructure:"retain_error_spans"`
+
+	Match string `mapstructure:"match"`
 }
 
 // Validate validates the processor configuration

@@ -66,7 +66,7 @@ func Test_processTraces(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.desc, func(t *testing.T) {
-			processor := newSamplingProcessor(zap.NewNop(), &tc.cfg)
+			processor := newSamplingProcessor(zap.NewNop(), &tc.cfg, nil)
 			actual, err := processor.processTraces(context.Background(), tc.input)
 			require.NoError(t, err)
 			require.Equal(t, tc.expected, actual)
@@ -104,7 +104,7 @@ func Test_processLogs(t *testing.T) {
 				DropRatio: tc.dropRatio,
 			}
 
-			processor := newSamplingProcessor(zap.NewNop(), cfg)
+			processor := newSamplingProcessor(zap.NewNop(), cfg, nil)
 			actual, err := processor.processLogs(context.Background(), tc.input)
 			require.NoError(t, err)
 			require.Equal(t, tc.expected, actual)
@@ -115,6 +115,7 @@ func Test_processLogs(t *testing.T) {
 func Test_processMetrics(t *testing.T) {
 	md := pmetric.NewMetrics()
 	metric := md.ResourceMetrics().AppendEmpty().ScopeMetrics().AppendEmpty().Metrics().AppendEmpty()
+	md.ResourceMetrics().AppendEmpty()
 	metric.SetEmptyGauge()
 	metric.Gauge().DataPoints().AppendEmpty()
 
@@ -144,10 +145,17 @@ func Test_processMetrics(t *testing.T) {
 				DropRatio: tc.dropRatio,
 			}
 
-			processor := newSamplingProcessor(zap.NewNop(), cfg)
+			processor := newSamplingProcessor(zap.NewNop(), cfg, nil)
 			actual, err := processor.processMetrics(context.Background(), tc.input)
 			require.NoError(t, err)
 			require.Equal(t, tc.expected, actual)
 		})
 	}
+}
+
+func addTestGaugeMetric(metric *pmetric.Metric, name string, value float64) {
+	metric.SetName(name)
+	metric.SetEmptyGauge()
+
+	metric.Gauge().DataPoints().AppendEmpty().SetDoubleValue(value)
 }

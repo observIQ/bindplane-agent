@@ -18,6 +18,7 @@ import (
 	"context"
 	"math/rand"
 
+	"github.com/observiq/observiq-otel-collector/internal/expr"
 	"go.opentelemetry.io/collector/pdata/plog"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.opentelemetry.io/collector/pdata/ptrace"
@@ -28,13 +29,15 @@ type samplingProcessor struct {
 	logger           *zap.Logger
 	dropCutOffRatio  float64
 	retainErrorSpans bool
+	match            *expr.Expression
 }
 
-func newSamplingProcessor(logger *zap.Logger, cfg *Config) *samplingProcessor {
+func newSamplingProcessor(logger *zap.Logger, cfg *Config, match *expr.Expression) *samplingProcessor {
 	return &samplingProcessor{
 		logger:           logger,
 		dropCutOffRatio:  cfg.DropRatio,
 		retainErrorSpans: cfg.RetainErrorSpans,
+		match:            match,
 	}
 }
 
@@ -78,7 +81,12 @@ func (sp *samplingProcessor) processLogs(_ context.Context, ld plog.Logs) (plog.
 	default: // Drop based on ratio
 		for i := 0; i < ld.ResourceLogs().Len(); i++ {
 			for j := 0; j < ld.ResourceLogs().At(i).ScopeLogs().Len(); j++ {
-				ld.ResourceLogs().At(i).ScopeLogs().At(j).LogRecords().RemoveIf(func(lr plog.LogRecord) bool {
+				ld.ResourceLogs().At(i).ScopeLogs().At(j).LogRecords().RemoveIf(func(record plog.LogRecord) bool {
+					resourceAttrs := ld.ResourceLogs().At(i).Resource().Attributes().AsRaw()
+					if sp.match != nil && sp.match.MatchRecord(expr.ConvertLogToRecord(record, resourceAttrs)) {
+						return false
+					}
+
 					return sp.sampleFunc()
 				})
 			}
@@ -96,7 +104,11 @@ func (sp *samplingProcessor) processMetrics(_ context.Context, md pmetric.Metric
 	default: // Drop based on ratio
 		for i := 0; i < md.ResourceMetrics().Len(); i++ {
 			for j := 0; j < md.ResourceMetrics().At(i).ScopeMetrics().Len(); j++ {
-				md.ResourceMetrics().At(i).ScopeMetrics().At(j).Metrics().RemoveIf(func(_ pmetric.Metric) bool {
+				md.ResourceMetrics().At(i).ScopeMetrics().At(j).Metrics().RemoveIf(func(metric pmetric.Metric) bool {
+					resourceAttrs := md.ResourceMetrics().At(i).Resource().Attributes().AsRaw()
+					if sp.match != nil && sp.match.MatchRecord(expr.ConvertMetricToRecord(metric, resourceAttrs)) {
+						return false
+					}
 					return sp.sampleFunc()
 				})
 			}
