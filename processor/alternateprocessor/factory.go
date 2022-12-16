@@ -37,14 +37,17 @@ func createDefaultConfig() component.Config {
 		Logs: &AlternateRoute{
 			Enabled:             false,
 			AggregationInterval: defaultAggregationInterval,
+			LogMessage:          true,
 		},
 		Metrics: &AlternateRoute{
 			Enabled:             false,
 			AggregationInterval: defaultAggregationInterval,
+			LogMessage:          true,
 		},
 		Traces: &AlternateRoute{
 			Enabled:             false,
 			AggregationInterval: defaultAggregationInterval,
+			LogMessage:          true,
 		},
 	}
 }

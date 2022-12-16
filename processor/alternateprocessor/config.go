@@ -23,6 +23,7 @@ type AlternateRoute struct {
 	Rate                string        `mapstructure:"rate"`
 	AggregationInterval time.Duration `mapstructure:"aggregation_interval"`
 	Route               string        `mapstructure:"route"`
+	LogMessage          bool          `mapstructure:"log_message"`
 }
 
 var (

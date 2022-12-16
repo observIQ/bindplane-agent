@@ -129,13 +129,16 @@ func (ap *alternateProcessor) ConsumeLogs(ctx context.Context, pl plog.Logs) err
 		return ap.normalConsumeLogs(ctx, pl)
 	}
 
-	// otherwise route to the alternate pipeline
-	ap.logger.Info(
-		"exceeded data limit for logs, sending logs to alternate route",
-		zap.Float64("currentRate", currentRate),
-		zap.Float64("configuredRate", ap.logsRate.Value),
-		zap.String("route", ap.cfg.Logs.Route),
-	)
+	if ap.cfg.Logs.LogMessage {
+		// otherwise route to the alternate pipeline
+		ap.logger.Info(
+			"exceeded data limit for logs, sending logs to alternate route",
+			zap.Float64("currentRateBytes", currentRate),
+			zap.Float64("configuredRateBytes", ap.logsRate.NormalizedValue()),
+			zap.String("configuredRate", ap.logsRate.String()),
+			zap.String("route", ap.cfg.Logs.Route),
+		)
+	}
 
 	err := routereceiver.RouteLogs(ctx, ap.cfg.Logs.Route, pl)
 	if err != nil {
@@ -158,11 +161,17 @@ func (ap *alternateProcessor) ConsumeMetrics(ctx context.Context, pm pmetric.Met
 		return ap.normalConsumeMetrics(ctx, pm)
 	}
 
+	// if route is empty drop the data
+	if ap.cfg.Metrics.Route == "" {
+		return nil
+	}
+
 	// otherwise route to the alternate pipeline
 	ap.logger.Info(
 		"exceeded data limit for metrics, sending metrics to alternate route",
-		zap.Float64("currentRate", currentRate),
-		zap.Float64("configuredRate", ap.metricsRate.Value),
+		zap.Float64("currentRateBytes", currentRate),
+		zap.Float64("configuredRateBytes", ap.metricsRate.NormalizedValue()),
+		zap.String("configuredRate", ap.metricsRate.String()),
 		zap.String("route", ap.cfg.Metrics.Route),
 	)
 
@@ -175,7 +184,7 @@ func (ap *alternateProcessor) ConsumeMetrics(ctx context.Context, pm pmetric.Met
 
 func (ap *alternateProcessor) ConsumeTraces(ctx context.Context, pt ptrace.Traces) error {
 	if !ap.cfg.Traces.Enabled {
-		ap.normalConsumeTraces(ctx, pt)
+		return ap.normalConsumeTraces(ctx, pt)
 	}
 
 	byteSize := float64(ap.tracesSizer.TracesSize(pt))
@@ -183,17 +192,28 @@ func (ap *alternateProcessor) ConsumeTraces(ctx context.Context, pt ptrace.Trace
 	currentRate := ap.tracesTracker.NormalizedRateValue()
 
 	if currentRate <= ap.tracesRate.Value {
-		ap.normalConsumeTraces(ctx, pt)
+		return ap.normalConsumeTraces(ctx, pt)
 	}
 
-	// otherwise route to the alternate pipeline
-	ap.logger.Info(
-		"exceeded data limit for traces, sending traces to alternate route",
-		zap.Float64("currentRate", currentRate),
-		zap.Float64("configuredRate", ap.tracesRate.Value),
-		zap.String("route", ap.cfg.Traces.Route),
-	)
+	if ap.cfg.Traces.Route == "" && ap.cfg.Traces.LogMessage {
+		ap.logger.Info("exceeded data limit for traces, sending traces to alternate dropping data",
+			zap.Float64("currentRateBytes", currentRate),
+			zap.String("configuredRate", ap.tracesRate.String()),
+			zap.Float64("configuredRateBytes", ap.tracesRate.NormalizedValue()),
+		)
+		return nil
+	}
 
+	if ap.cfg.Traces.LogMessage {
+		// otherwise route to the alternate pipeline
+		ap.logger.Info(
+			"exceeded data limit for traces, sending traces to alternate route",
+			zap.Float64("currentRateBytes", currentRate),
+			zap.Float64("configuredRateBytes", ap.tracesRate.NormalizedValue()),
+			zap.String("configuredRate", ap.metricsRate.String()),
+			zap.String("route", ap.cfg.Traces.Route),
+		)
+	}
 	err := routereceiver.RouteTraces(ctx, ap.cfg.Traces.Route, pt)
 	if err != nil {
 		ap.logger.Error("failed to send traces to alternate route", zap.Error(err))

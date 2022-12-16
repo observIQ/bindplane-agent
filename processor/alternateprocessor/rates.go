@@ -26,7 +26,7 @@ func (r *Rate) NormalizedValue() float64 {
 
 // String returns the string representation of a rate
 func (r *Rate) String() string {
-	return fmt.Sprintf("%f%s/%s", r.Value, r.Measure.Name, r.Time.Name)
+	return fmt.Sprintf("%f %s/%s", r.Value, r.Measure.Name, r.Time.Name)
 }
 
 // NewRate creates a new rate
