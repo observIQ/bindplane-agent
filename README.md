@@ -5,8 +5,8 @@ While the `main` branch is stable, it is still under development and documentati
 
 <center>
 
-[![Action Status](https://github.com/observIQ/observiq-otel-collector/workflows/Build/badge.svg)](https://github.com/observIQ/observiq-otel-collector/actions)
-[![Action Test Status](https://github.com/observIQ/observiq-otel-collector/workflows/Tests/badge.svg)](https://github.com/observIQ/observiq-otel-collector/actions)
+[![Action Status](https://github.com/observIQ/observiq-otel-collector/workflows/Build/badge.svg?branch=main)](https://github.com/observIQ/observiq-otel-collector/actions)
+[![Action Test Status](https://github.com/observIQ/observiq-otel-collector/workflows/Tests/badge.svg?branch=main)](https://github.com/observIQ/observiq-otel-collector/actions)
 [![Go Report Card](https://goreportcard.com/badge/github.com/observIQ/observiq-otel-collector)](https://goreportcard.com/report/github.com/observIQ/observiq-otel-collector)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Gosec](https://github.com/observIQ/observiq-otel-collector/actions/workflows/gosec.yml/badge.svg)](https://github.com/observIQ/observiq-otel-collector/actions/workflows/gosec.yml)
