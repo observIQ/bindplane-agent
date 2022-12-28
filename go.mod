@@ -571,5 +571,7 @@ replace github.com/observiq/observiq-otel-collector/internal/expr => ./internal/
 // Relevant issue https://github.com/mattn/go-ieproxy/issues/45
 replace github.com/mattn/go-ieproxy v0.0.9 => github.com/mattn/go-ieproxy v0.0.1
 
+// replace github.com/open-telemetry/opentelemetry-collector-contrib/pkg/stanza v0.67.0 => github.com/observiq/opentelemetry-collector-contrib/pkg/stanza v0.0.0-20221228204657-a7bbdcb314a1
+
 // This is a fork of the official opentelemetry-operations-go exporter that removes the credential autodiscovery logic that conflicts with our own custom logic
 replace github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector v0.34.3-0.20221202192616-0186b89ba914 => github.com/observiq/opentelemetry-operations-go/exporter/collector v0.26.1-0.20221215164112-d92100d9c728
