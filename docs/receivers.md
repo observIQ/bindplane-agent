@@ -45,7 +45,7 @@ Below is a list of supported receivers with links to their documentation pages.
 | MySQL Receiver                              | [mysqlreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.67.0/receiver/mysqlreceiver/README.md) |
 | NGINX Receiver                              | [nginxreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.67.0/receiver/nginxreceiver/README.md) |
 | OpenCensus Receiver                         | [opencensusreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.67.0/receiver/opencensusreceiver/README.md) |
-| OTLP Receiver                               | [otlpreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.67.0/receiver/otlpreceiver/README.md) |
+| OTLP Receiver                               | [otlpreceiver](https://github.com/open-telemetry/opentelemetry-collector/blob/v0.67.0/receiver/otlpreceiver/README.md) |
 | Plugin Receiver                             | [pluginreceiver](../receiver/pluginreceiver/README.md) |
 | Podman Stats Receiver                       | [podmanreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.67.0/receiver/podmanreceiver/README.md) |
 | PostgreSQL Receiver                         | [postgresqlreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.67.0/receiver/postgresqlreceiver/README.md) |
