@@ -5,7 +5,7 @@ Below is a list of supported processors with links to their documentation pages.
 | Name                                    | GitHub README |
 | --------------------------------------- | ------------- |
 | Attributes Processor                    | [attributesprocessor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.67.0/processor/attributesprocessor/README.md) |
-| Batch Processor                         | [batchprocessor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.67.0/processor/batchprocessor/README.md) |
+| Batch Processor                         | [batchprocessor](https://github.com/open-telemetry/opentelemetry-collector/blob/v0.67.0/processor/batchprocessor/README.md) |
 | Cumulative to Delta Processor           | [cumulativetodeltaprocessor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.67.0/processor/cumulativetodeltaprocessor/README.md) |
 | Delta to Rate Processor                 | [deltatorateprocessor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.67.0/processor/deltatorateprocessor/README.md) |
 | Filter Processor                        | [filterprocessor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.67.0/processor/filterprocessor/README.md) |
@@ -15,7 +15,7 @@ Below is a list of supported processors with links to their documentation pages.
 | Log Count Processor                          | [logcountprocessor](../processor/logcountprocessor/README.md) |
 | Logs Transform Processor                | [logstransform](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.67.0/processor/logstransformprocessor/README.md) |
 | Mask Processor                          | [maskprocessor](../processor/maskprocessor/README.md) |
-| Memory Limiter Processor                | [memorylimiterprocessor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.67.0/processor/memorylimiterprocessor/README.md) |
+| Memory Limiter Processor                | [memorylimiterprocessor](https://github.com/open-telemetry/opentelemetry-collector/blob/v0.67.0/processor/memorylimiterprocessor/README.md) |
 | Metric Extract Processor                | [metricextract](../processor/metricextractprocessor/README.md) |
 | Metrics Generation Processor            | [metricsgenerationprocessor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.67.0/processor/metricsgenerationprocessor/README.md) |
 | Metrics Transform Processor             | [metricstransformprocessor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.67.0/processor/metricstransformprocessor/README.md) |

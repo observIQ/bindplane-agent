@@ -1,6 +1,6 @@
 # Exporters
 
-Below is a list of supported exports with links to their documentation pages.
+Below is a list of supported exporters with links to their documentation pages.
 
 | Name                                                              | GitHub README |
 | ----------------------------------------                          | ------------- |
@@ -27,8 +27,8 @@ Below is a list of supported exports with links to their documentation pages.
 | Loki Exporter                                                     | [lokiexporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.67.0/exporter/lokiexporter/README.md) |
 | Logz.io Exporter                                                  | [logzioexporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.67.0/exporter/logzioexporter/README.md) |
 | OpenCensus gRPC Exporter                                          | [opencensusexporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.67.0/exporter/opencensusexporter/README.md) |
-| OTLP gRPC Exporter                                                | [otlpexporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.67.0/exporter/otlpexporter/README.md) |
-| OTLP HTTP Exporter                                                | [otlphttpexporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.67.0/exporter/otlphttpexporter/README.md) |
+| OTLP gRPC Exporter                                                | [otlpexporter](https://github.com/open-telemetry/opentelemetry-collector/blob/v0.67.0/exporter/otlpexporter/README.md) |
+| OTLP HTTP Exporter                                                | [otlphttpexporter](https://github.com/open-telemetry/opentelemetry-collector/blob/v0.67.0/exporter/otlphttpexporter/README.md) |
 | Prometheus Exporter                                               | [prometheusexporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.67.0/exporter/prometheusexporter/README.md) |
 | Prometheus Remote Write Exporter                                  | [prometheusremotewriteexporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.67.0/exporter/prometheusremotewriteexporter/README.md) |
 | SAPM Exporter                                                     | [sapmexporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.67.0/exporter/sapmexporter/README.md) |
