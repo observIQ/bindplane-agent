@@ -3,7 +3,6 @@ module github.com/observiq/observiq-otel-collector
 go 1.18
 
 require (
-	github.com/GoogleCloudPlatform/opentelemetry-operations-collector v0.0.3-0.20221212182416-9bfb379327ff
 	github.com/google/uuid v1.3.0
 	github.com/mholt/archiver/v3 v3.5.1
 	github.com/observiq/observiq-otel-collector/exporter/googlecloudexporter v1.14.1
