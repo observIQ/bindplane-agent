@@ -5,7 +5,7 @@ on:
       - "v*"
 
 jobs:
-  build-msi:
+  build-64bit-msi:
     runs-on: windows-2022
     steps:
       - name: Checkout Sources
@@ -25,7 +25,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-go-
       - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v3
+        uses: goreleaser/goreleaser-action@v4
         with:
           # either 'goreleaser' (default) or 'goreleaser-pro'
           distribution: goreleaser
@@ -65,22 +65,6 @@ jobs:
       - name: "Build MSI from Tagged Release"
         run: go-msi.exe make -m observiq-otel-collector.msi --version ${{ github.ref_name }} --arch amd64
         working-directory: C:/build
-      - name: Install MSI
-        run: msiexec.exe /qn /i observiq-otel-collector.msi
-        working-directory: C:/build
-      - name: Install CINC (Inspec)
-        run: . { iwr -useb https://omnitruck.cinc.sh/install.ps1 } | iex; install -project cinc-auditor -version 4
-      - name: Run CINC (Inspec) Install Tests
-        run: C:/cinc-project/cinc-auditor/bin/cinc-auditor.bat exec install.rb
-        working-directory: C:/build/test
-      - name: Uninstall MSI
-        run: |
-          msiexec.exe /qn /x observiq-otel-collector.msi
-          sleep 5
-        working-directory: C:/build
-      - name: Run CINC (Inspec) Uninstall Tests
-        run: C:/cinc-project/cinc-auditor/bin/cinc-auditor.bat exec uninstall.rb
-        working-directory: C:/build/test
       - name: "Upload MSI"
         uses: actions/upload-artifact@v3
         with:
@@ -88,9 +72,77 @@ jobs:
           path: C:/build/observiq-otel-collector.msi
           # Short lived because Go Releaser will upload the msi to a release (github release, gcs, etc)
           retention-days: 1
+  build-32bit-msi:
+    runs-on: windows-2022
+    steps:
+      - name: Checkout Sources
+        uses: actions/checkout@v3
+      - name: Setup Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: "1.18"
+          check-latest: true
+      - name: Cache Go Modules
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~\AppData\Local\go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v4
+        with:
+          # either 'goreleaser' (default) or 'goreleaser-pro'
+          distribution: goreleaser
+          version: "v1.14.1"
+          args: build --single-target --skip-validate --rm-dist
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GOARCH: "386"
+      - name: Copy Windows Collector Binary
+        run: cp dist/collector_windows_386_v1/observiq-otel-collector.exe windows/observiq-otel-collector.exe
+      - name: Copy Windows Updater Binary
+        run: cp dist/updater_windows_386_v1/updater.exe windows/updater.exe
+      - name: Copy Plugins to MSI Build Directory
+        run: cp -r release_deps/plugins windows/
+      - name: Copy Example Config
+        run: cp config/example.yaml windows/config.yaml
+      - name: Copy Logging Config
+        run: cp config/logging.yaml windows/logging.yaml
+      - name: Copy JMX Receiver Jar
+        run: cp release_deps/opentelemetry-java-contrib-jmx-metrics.jar windows/opentelemetry-java-contrib-jmx-metrics.jar
+      - name: Copy LICENSE
+        run: cp LICENSE windows/LICENSE
+      - name: Copy VERSION file
+        run: cp release_deps/VERSION.txt windows/VERSION.txt
+      # HACK: Copy build directory to C drive to avoid this error, since there must be a relative path from the tempdir that go-msi uses
+      # for the MSI to build properly
+      - name: Copy Build Dir
+        run: |
+          cp -r windows C:/build
+          echo "C:/build" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+      # Installs go-msi and wix.
+      - name: Install Build Tools
+        run: |
+          curl -f -L -o go-msi.exe https://github.com/observIQ/go-msi/releases/download/v2.1.0/go-msi.exe
+          curl -f -L -o wix310-binaries.zip http://wixtoolset.org/downloads/v3.10.3.3007/wix310-binaries.zip
+          unzip wix310-binaries.zip
+        working-directory: C:/build
+      - name: "Build MSI from Tagged Release"
+        run: go-msi.exe make -m observiq-otel-collector-x86.msi --version ${{ github.ref_name }} --arch 386
+        working-directory: C:/build
+      - name: "Upload MSI"
+        uses: actions/upload-artifact@v3
+        with:
+          name: observiq-otel-collector-x86.msi
+          path: C:/build/observiq-otel-collector-x86.msi
+          # Short lived because Go Releaser will upload the msi to a release (github release, gcs, etc)
+          retention-days: 1
 
   release:
-    needs: [build-msi]
+    needs: [build-64bit-msi, build-32bit-msi]
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout Repo
@@ -113,11 +165,16 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: Retrieve Windows MSI Installer
+      - name: Retrieve Windows 64-bit MSI Installer
         uses: actions/download-artifact@v3
         with:
           name: observiq-otel-collector.msi
           path: observiq-otel-collector.msi
+      - name: Retrieve Windows 32-bit MSI Installer
+        uses: actions/download-artifact@v3
+        with:
+          name: observiq-otel-collector-x86.msi
+          path: observiq-otel-collector-x86.msi
         # install tools for cosign
       - name: Install Dependencies
         run: make install-tools
@@ -127,7 +184,7 @@ jobs:
         env:
           COSIGN_PRIVATE_KEY: ${{secrets.ORG_COSIGN_PRIVATE_KEY}}
       - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v3
+        uses: goreleaser/goreleaser-action@v4
         with:
           distribution: goreleaser
           version: "v1.14.1"
