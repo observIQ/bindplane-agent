@@ -157,7 +157,7 @@ require (
 	github.com/Azure/azure-amqp-common-go/v4 v4.0.0 // indirect
 	github.com/bmatcuk/doublestar/v4 v4.4.0 // indirect
 	github.com/hooklift/gowsdl v0.5.0 // indirect
-	github.com/observiq/observiq-otel-collector/internal/expr v1.15.1 // indirect
+	github.com/observiq/observiq-otel-collector/internal/expr v1.15.0 // indirect
 	github.com/ovh/go-ovh v1.3.0 // indirect
 	github.com/relvacode/iso8601 v1.1.0 // indirect
 	github.com/signalfx/signalfx-agent/pkg/apm v0.0.0-20220920175102-539ae8d8ba8e // indirect
