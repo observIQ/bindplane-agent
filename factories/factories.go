@@ -42,7 +42,7 @@ func combineFactories(receivers []receiver.Factory, processors []component.Proce
 		errs = append(errs, err)
 	}
 
-	receiverMap, err := component.MakeReceiverFactoryMap(wrapReceivers(receivers)...)
+	receiverMap, err := receiver.MakeFactoryMap(wrapReceivers(receivers)...)
 	if err != nil {
 		errs = append(errs, err)
 	}
@@ -52,12 +52,12 @@ func combineFactories(receivers []receiver.Factory, processors []component.Proce
 		errs = append(errs, err)
 	}
 
-	exporterMap, err := component.MakeExporterFactoryMap(exporters...)
+	exporterMap, err := exporter.MakeFactoryMap(exporters...)
 	if err != nil {
 		errs = append(errs, err)
 	}
 
-	extensionMap, err := component.MakeExtensionFactoryMap(extensions...)
+	extensionMap, err := extension.MakeFactoryMap(extensions...)
 	if err != nil {
 		errs = append(errs, err)
 	}
