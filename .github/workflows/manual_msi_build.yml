@@ -105,9 +105,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GOARCH: "386"
       - name: Copy Windows Collector Binary
-        run: cp dist/collector_windows_386_v1/observiq-otel-collector.exe windows/observiq-otel-collector.exe
+        run: cp dist/collector_windows_386/observiq-otel-collector.exe windows/observiq-otel-collector.exe
       - name: Copy Windows Updater Binary
-        run: cp dist/updater_windows_386_v1/updater.exe windows/updater.exe
+        run: cp dist/updater_windows_386/updater.exe windows/updater.exe
       - name: Copy Plugins to MSI Build Directory
         run: cp -r release_deps/plugins windows/
       - name: Copy Example Config
