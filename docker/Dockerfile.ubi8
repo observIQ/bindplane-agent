@@ -53,7 +53,8 @@ RUN groupadd --gid 10005 otel && \
 RUN mkdir \
     /etc/otel \
     /etc/otel/storage \
-    && chown -R otel:otel /etc/otel
+    && chown -R otel:otel /etc/otel \
+    && chmod 0750 /etc/otel/storage
 ENV OIQ_OTEL_COLLECTOR_HOME=/etc/otel
 ENV OIQ_OTEL_COLLECTOR_STORAGE=/etc/otel/storage
 
