@@ -50,8 +50,12 @@ RUN groupadd --gid 10005 otel && \
     --shell /sbin/nologin \
     otel
 
-RUN mkdir /etc/otel && chown otel:otel /etc/otel
+RUN mkdir \
+    /etc/otel \
+    /etc/otel/storage \
+    && chown -R otel:otel /etc/otel
 ENV OIQ_OTEL_COLLECTOR_HOME=/etc/otel
+ENV OIQ_OTEL_COLLECTOR_STORAGE=/etc/otel/storage
 
 COPY --from=openjdk /usr/local/openjdk-8 /usr/local/openjdk-8
 ENV JAVA_HOME=/usr/local/openjdk-8
@@ -70,12 +74,9 @@ COPY config/logging.stdout.yaml /etc/otel/logging.yaml
 # when connecting to an OpAMP platform.
 COPY config/example.yaml /etc/otel/config.yaml
 
-RUN mkdir /etc/otel/storage
-
 RUN chown otel:otel \
     /etc/otel/config.yaml \
-    /etc/otel/logging.yaml \
-    /etc/otel/storage
+    /etc/otel/logging.yaml
 
 USER otel
 WORKDIR /etc/otel
