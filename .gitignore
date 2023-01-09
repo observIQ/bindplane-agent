@@ -23,6 +23,6 @@ release_deps
 /tmp
 
 # OpAmp Files
-collector.yaml
-manager.yaml
-logging.yaml
+collector*.yaml
+manager*.yaml
+logging*.yaml
