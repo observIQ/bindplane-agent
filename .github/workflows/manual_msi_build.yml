@@ -32,7 +32,7 @@ jobs:
         with:
           # either 'goreleaser' (default) or 'goreleaser-pro'
           distribution: goreleaser
-          version: "v1.10.3"
+          version: "v1.14.1"
           args: build --single-target --skip-validate --rm-dist --snapshot
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

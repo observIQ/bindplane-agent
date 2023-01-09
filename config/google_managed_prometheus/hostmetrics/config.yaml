@@ -17,7 +17,6 @@ receivers:
       #process:
       #  mute_process_name_error: true
 
-
 processors:
   # Resourcedetection is used to add a unique (host.name)
   # to the metric resource(s), allowing users to filter
@@ -27,11 +26,9 @@ processors:
     system:
       hostname_sources: ["os"]
 
-  normalizesums:
-
   batch:
 
-exporters: 
+exporters:
   # The prometheus exporter exposes a TCP port on the collector, that is then scraped
   # by your Google Prometheus server.
   prometheus:
@@ -46,10 +43,9 @@ service:
   pipelines:
     metrics:
       receivers:
-      - hostmetrics
+        - hostmetrics
       processors:
-      - resourcedetection
-      - normalizesums
-      - batch
+        - resourcedetection
+        - batch
       exporters:
-      - prometheus
+        - prometheus

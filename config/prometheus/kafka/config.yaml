@@ -15,8 +15,6 @@ processors:
     system:
       hostname_sources: ["os"]
 
-  normalizesums:
-
   batch:
 
 exporters:
@@ -29,10 +27,9 @@ service:
   pipelines:
     metrics:
       receivers:
-      - kafkametrics
+        - kafkametrics
       processors:
-      - resourcedetection
-      - normalizesums
-      - batch
+        - resourcedetection
+        - batch
       exporters:
-      - prometheus
+        - prometheus

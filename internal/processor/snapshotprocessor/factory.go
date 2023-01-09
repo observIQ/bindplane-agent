@@ -56,7 +56,7 @@ func createTracesProcessor(
 	nextConsumer consumer.Traces,
 ) (component.TracesProcessor, error) {
 	oCfg := cfg.(*Config)
-	sp := newSnapshotProcessor(set.Logger, oCfg, cfg.ID().String())
+	sp := newSnapshotProcessor(set.Logger, oCfg, set.ID.String())
 	return processorhelper.NewTracesProcessor(ctx, set, cfg, nextConsumer, sp.processTraces, processorhelper.WithCapabilities(consumerCapabilities))
 }
 
@@ -67,7 +67,7 @@ func createLogsProcessor(
 	nextConsumer consumer.Logs,
 ) (component.LogsProcessor, error) {
 	oCfg := cfg.(*Config)
-	sp := newSnapshotProcessor(set.Logger, oCfg, cfg.ID().String())
+	sp := newSnapshotProcessor(set.Logger, oCfg, set.ID.String())
 	return processorhelper.NewLogsProcessor(ctx, set, cfg, nextConsumer, sp.processLogs, processorhelper.WithCapabilities(consumerCapabilities))
 }
 
@@ -78,6 +78,6 @@ func createMetricsProcessor(
 	nextConsumer consumer.Metrics,
 ) (component.MetricsProcessor, error) {
 	oCfg := cfg.(*Config)
-	sp := newSnapshotProcessor(set.Logger, oCfg, cfg.ID().String())
+	sp := newSnapshotProcessor(set.Logger, oCfg, set.ID.String())
 	return processorhelper.NewMetricsProcessor(ctx, set, cfg, nextConsumer, sp.processMetrics, processorhelper.WithCapabilities(consumerCapabilities))
 }

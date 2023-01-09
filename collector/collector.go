@@ -24,7 +24,6 @@ import (
 	"time"
 
 	"go.opentelemetry.io/collector/otelcol"
-	"go.opentelemetry.io/collector/service"
 	"go.uber.org/zap"
 )
 
@@ -46,7 +45,7 @@ type collector struct {
 	version     string
 	loggingOpts []zap.Option
 	mux         sync.Mutex
-	svc         *service.Collector
+	svc         *otelcol.Collector
 	statusChan  chan *Status
 	wg          *sync.WaitGroup
 }
@@ -91,7 +90,7 @@ func (c *collector) Run(ctx context.Context) error {
 
 	// The OT collector only supports calling run once during the lifetime
 	// of a service. We must make a new instance each time we run the collector.
-	svc, err := service.New(*settings)
+	svc, err := otelcol.NewCollector(*settings)
 	if err != nil {
 		err := fmt.Errorf("failed to create service: %w", err)
 		c.sendStatus(false, false, err)

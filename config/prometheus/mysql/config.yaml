@@ -13,8 +13,6 @@ processors:
 
   batch:
 
-  normalizesums:
-
 exporters:
   prometheus:
     endpoint: "localhost:9000"
@@ -25,10 +23,9 @@ service:
   pipelines:
     metrics:
       receivers:
-      - mysql
+        - mysql
       processors:
-      - resourcedetection
-      - normalizesums
-      - batch
+        - resourcedetection
+        - batch
       exporters:
-      - prometheus
+        - prometheus

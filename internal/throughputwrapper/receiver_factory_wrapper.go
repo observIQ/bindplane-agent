@@ -50,42 +50,42 @@ func WrapReceiverFactory(receiverFactory receiver.Factory) receiver.Factory {
 		wrapCreateTraceReceiverFunc(receiverFactory.CreateTracesReceiver), receiverFactory.TracesReceiverStability()),
 	)
 
-	return component.NewReceiverFactory(
+	return receiver.NewFactory(
 		receiverFactory.Type(),
 		receiverFactory.CreateDefaultConfig,
 		opts...,
 	)
 }
 
-func wrapCreateMetricsReceiverFunc(createMetricsReceiverFunc component.CreateMetricsReceiverFunc) component.CreateMetricsReceiverFunc {
+func wrapCreateMetricsReceiverFunc(createMetricsReceiverFunc receiver.CreateMetricsFunc) receiver.CreateMetricsFunc {
 	return func(ctx context.Context,
 		set receiver.CreateSettings,
 		rConf component.Config,
 		nextConsumer consumer.Metrics,
 	) (receiver.Metrics, error) {
-		wrappedConsumer := newMetricConsumer(set.Logger, rConf.ID().String(), nextConsumer)
+		wrappedConsumer := newMetricConsumer(set.Logger, set.ID.String(), nextConsumer)
 		return createMetricsReceiverFunc(ctx, set, rConf, wrappedConsumer)
 	}
 }
 
-func wrapCreateLogReceiverFunc(createLogsReceiverFunc component.CreateLogsReceiverFunc) component.CreateLogsReceiverFunc {
+func wrapCreateLogReceiverFunc(createLogsReceiverFunc receiver.CreateLogsFunc) receiver.CreateLogsFunc {
 	return func(ctx context.Context,
 		set receiver.CreateSettings,
 		rConf component.Config,
 		nextConsumer consumer.Logs,
 	) (receiver.Logs, error) {
-		wrappedConsumer := newLogConsumer(set.Logger, rConf.ID().String(), nextConsumer)
+		wrappedConsumer := newLogConsumer(set.Logger, set.ID.String(), nextConsumer)
 		return createLogsReceiverFunc(ctx, set, rConf, wrappedConsumer)
 	}
 }
 
-func wrapCreateTraceReceiverFunc(createTracesReceiverFunc component.CreateTracesReceiverFunc) component.CreateTracesReceiverFunc {
+func wrapCreateTraceReceiverFunc(createTracesReceiverFunc receiver.CreateTracesFunc) receiver.CreateTracesFunc {
 	return func(ctx context.Context,
 		set receiver.CreateSettings,
 		rConf component.Config,
 		nextConsumer consumer.Traces,
 	) (receiver.Traces, error) {
-		wrappedConsumer := newTraceConsumer(set.Logger, rConf.ID().String(), nextConsumer)
+		wrappedConsumer := newTraceConsumer(set.Logger, set.ID.String(), nextConsumer)
 
 		return createTracesReceiverFunc(ctx, set, rConf, wrappedConsumer)
 	}
