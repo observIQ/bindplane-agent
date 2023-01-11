@@ -3,7 +3,7 @@ module github.com/observiq/observiq-otel-collector/plugindocgen
 go 1.18
 
 require (
-	github.com/observiq/observiq-otel-collector/receiver/pluginreceiver v1.15.0
+	github.com/observiq/observiq-otel-collector/receiver/pluginreceiver v1.16.0
 	github.com/spf13/pflag v1.0.5
 	gopkg.in/yaml.v3 v3.0.1
 )
