@@ -40,16 +40,16 @@ import (
 	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/spanprocessor"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/tailsamplingprocessor"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/transformprocessor"
-	"go.opentelemetry.io/collector/component"
-	"go.opentelemetry.io/collector/component/componenttest"
+	"go.opentelemetry.io/collector/processor"
 	"go.opentelemetry.io/collector/processor/batchprocessor"
 	"go.opentelemetry.io/collector/processor/memorylimiterprocessor"
+	"go.opentelemetry.io/collector/processor/processortest"
 )
 
-var defaultProcessors = []component.ProcessorFactory{
+var defaultProcessors = []processor.Factory{
 	attributesprocessor.NewFactory(),
 	batchprocessor.NewFactory(),
-	componenttest.NewNopProcessorFactory(),
+	processortest.NewNopFactory(),
 	cumulativetodeltaprocessor.NewFactory(),
 	deltatorateprocessor.NewFactory(),
 	filterprocessor.NewFactory(),
