@@ -20,21 +20,22 @@ import (
 
 	"github.com/observiq/observiq-otel-collector/internal/throughputwrapper"
 	"github.com/observiq/observiq-otel-collector/processor/throughputmeasurementprocessor"
-	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/exporter"
 	"go.opentelemetry.io/collector/extension"
+	"go.opentelemetry.io/collector/otelcol"
+	"go.opentelemetry.io/collector/processor"
 	"go.opentelemetry.io/collector/receiver"
 	"go.uber.org/multierr"
 )
 
 // DefaultFactories returns the default factories used by the observIQ Distro for OpenTelemetry Collector
-func DefaultFactories() (component.Factories, error) {
+func DefaultFactories() (otelcol.Factories, error) {
 	return combineFactories(defaultReceivers, defaultProcessors, defaultExporters, defaultExtensions)
 }
 
 // combineFactories combines the supplied factories into a single Factories struct.
 // Any errors encountered will also be combined into a single error.
-func combineFactories(receivers []receiver.Factory, processors []component.ProcessorFactory, exporters []exporter.Factory, extensions []extension.Factory) (component.Factories, error) {
+func combineFactories(receivers []receiver.Factory, processors []processor.Factory, exporters []exporter.Factory, extensions []extension.Factory) (otelcol.Factories, error) {
 	var errs []error
 
 	// Register component telemetry
@@ -47,7 +48,7 @@ func combineFactories(receivers []receiver.Factory, processors []component.Proce
 		errs = append(errs, err)
 	}
 
-	processorMap, err := component.MakeProcessorFactoryMap(processors...)
+	processorMap, err := processor.MakeFactoryMap(processors...)
 	if err != nil {
 		errs = append(errs, err)
 	}
@@ -62,7 +63,7 @@ func combineFactories(receivers []receiver.Factory, processors []component.Proce
 		errs = append(errs, err)
 	}
 
-	return component.Factories{
+	return otelcol.Factories{
 		Receivers:  receiverMap,
 		Processors: processorMap,
 		Exporters:  exporterMap,

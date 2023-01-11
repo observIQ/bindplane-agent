@@ -22,10 +22,10 @@ import (
 	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/attributesprocessor"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/tcplogreceiver"
 	"github.com/stretchr/testify/assert"
-	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/exporter"
 	"go.opentelemetry.io/collector/exporter/loggingexporter"
 	"go.opentelemetry.io/collector/extension"
+	"go.opentelemetry.io/collector/processor"
 	"go.opentelemetry.io/collector/receiver"
 )
 
@@ -33,7 +33,7 @@ func TestCombineFactories(t *testing.T) {
 	testCases := []struct {
 		name          string
 		receivers     []receiver.Factory
-		processors    []component.ProcessorFactory
+		processors    []processor.Factory
 		exporters     []exporter.Factory
 		extensions    []extension.Factory
 		expectedError error
@@ -59,7 +59,7 @@ func TestCombineFactories(t *testing.T) {
 				tcplogreceiver.NewFactory(),
 				tcplogreceiver.NewFactory(),
 			},
-			processors: []component.ProcessorFactory{
+			processors: []processor.Factory{
 				attributesprocessor.NewFactory(),
 				attributesprocessor.NewFactory(),
 			},
