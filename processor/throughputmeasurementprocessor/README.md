@@ -21,7 +21,7 @@ Counters:
 | Field               | Type   | Default | Description                                                                                                                                                               |
 |---------------------|--------|---------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `enabled`           | bool   | `true`  | When `true` signals that measurements are being taken of data passing through this processor. If false this processor acts as a no-op.                                    |
-| `sampling_ration`   | float  | `0.5`   | The ratio of data payloads that are sampled. Values between `0.0` and `1.0`. Values closer to `1.0` mean any individual payload is more likely to have its size measured. |
+| `sampling_ratio`   | float  | `0.5`   | The ratio of data payloads that are sampled. Values between `0.0` and `1.0`. Values closer to `1.0` mean any individual payload is more likely to have its size measured. |
 
 
 ### Example configuration
