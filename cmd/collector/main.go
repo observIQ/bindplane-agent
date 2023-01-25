@@ -75,6 +75,11 @@ func main() {
 
 	var runnableService service.RunnableService
 
+	// Set feature flags
+	if err := collector.SetFeatureFlags(); err != nil {
+		log.Fatalf("Failed to set feature flags: %v", err)
+	}
+
 	col := collector.New(*collectorConfigPaths, version.Version(), logOpts)
 
 	// See if manager config file exists. If so run in remote managed mode otherwise standalone mode

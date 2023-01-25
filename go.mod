@@ -177,7 +177,7 @@ require (
 	github.com/gsterjov/go-libsecret v0.0.0-20161001094733-a6f4afe4910c // indirect
 	github.com/mtibben/percent v0.2.1 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/internal/filter v0.70.0 // indirect; indi70.0
-	go.opentelemetry.io/collector/featuregate v0.70.0 // indirect; indir7ct
+	go.opentelemetry.io/collector/featuregate v0.70.0 // indir7ct
 )
 
 require (
