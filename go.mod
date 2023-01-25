@@ -142,6 +142,7 @@ require (
 	go.opentelemetry.io/collector/exporter/otlphttpexporter v0.70.0
 	go.opentelemetry.io/collector/extension/ballastextension v0.70.0
 	go.opentelemetry.io/collector/extension/zpagesextension v0.70.0
+	go.opentelemetry.io/collector/featuregate v0.70.0
 	go.opentelemetry.io/collector/pdata v1.0.0-rc4
 	go.opentelemetry.io/collector/processor/batchprocessor v0.70.0
 	go.opentelemetry.io/collector/processor/memorylimiterprocessor v0.70.0
@@ -176,8 +177,7 @@ require (
 	github.com/godbus/dbus v0.0.0-20190726142602-4481cbc300e2 // indirect
 	github.com/gsterjov/go-libsecret v0.0.0-20161001094733-a6f4afe4910c // indirect
 	github.com/mtibben/percent v0.2.1 // indirect
-	github.com/open-telemetry/opentelemetry-collector-contrib/internal/filter v0.70.0 // indirect; indi70.0
-	go.opentelemetry.io/collector/featuregate v0.70.0 // indir7ct
+	github.com/open-telemetry/opentelemetry-collector-contrib/internal/filter v0.70.0 // indirect
 )
 
 require (
