@@ -42,7 +42,8 @@
          <Publish Dialog="InstallDirDlg" Control="Next" Event="SetTargetPath" Value="[WIXUI_INSTALLDIR]" Order="1">1</Publish>
          <Publish Dialog="InstallDirDlg" Control="Next" Event="DoAction" Value="WixUIValidatePath" Order="2">NOT WIXUI_DONTVALIDATEPATH</Publish>
          <Publish Dialog="InstallDirDlg" Control="Next" Event="SpawnDialog" Value="InvalidDirDlg" Order="3"><![CDATA[NOT WIXUI_DONTVALIDATEPATH AND WIXUI_INSTALLDIR_VALID<>"1"]]></Publish>
-         <Publish Dialog="InstallDirDlg" Control="Next" Event="NewDialog" Value="ConfigureManagementDlg" Order="4">WIXUI_DONTVALIDATEPATH OR WIXUI_INSTALLDIR_VALID="1"</Publish>
+         <Publish Dialog="InstallDirDlg" Control="Next" Event="NewDialog" Value="ConfigureManagementDlg" Order="4">WINMAJORVERSION and (WIXUI_DONTVALIDATEPATH OR WIXUI_INSTALLDIR_VALID="1")</Publish>
+         <Publish Dialog="InstallDirDlg" Control="Next" Event="NewDialog" Value="VerifyReadyDlg" Order="4">(NOT WINMAJORVERSION) and (WIXUI_DONTVALIDATEPATH OR WIXUI_INSTALLDIR_VALID="1")</Publish>
 
          <Publish Dialog="InstallDirDlg" Control="ChangeFolder" Property="_BrowseProperty" Value="[WIXUI_INSTALLDIR]" Order="1">1</Publish>
          <Publish Dialog="InstallDirDlg" Control="ChangeFolder" Event="SpawnDialog" Value="BrowseDlg" Order="2">1</Publish>
@@ -51,7 +52,8 @@
          <Publish Dialog="ConfigureManagementDlg" Control="Next" Event="NewDialog" Value="VerifyReadyDlg" Order="2">NOT ENABLEMANAGEMENT OR OPAMPENDPOINT</Publish>
          <Publish Dialog="ConfigureManagementDlg" Control="Back" Event="NewDialog" Value="InstallDirDlg">1</Publish>
 
-         <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="ConfigureManagementDlg">NOT Installed AND NOT WIX_UPGRADE_DETECTED</Publish>
+         <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="ConfigureManagementDlg">WINMAJORVERSION AND NOT Installed AND NOT WIX_UPGRADE_DETECTED</Publish>
+         <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="InstallDirDlg">NOT WINMAJORVERSION AND NOT Installed AND NOT WIX_UPGRADE_DETECTED</Publish>
          <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="MaintenanceTypeDlg">Installed AND NOT WIX_UPGRADE_DETECTED</Publish>
          <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg">WIX_UPGRADE_DETECTED</Publish>
 
