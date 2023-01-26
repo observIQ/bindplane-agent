@@ -49,6 +49,11 @@
       <Condition Message="{{$c.Message}}"><![CDATA[{{$c.Condition}}]]></Condition>
       {{end}}
       
+      <!-- Check to see if the CurrentMajorVersionNumber registry key exists. It won't on systems earlier than Windows 10-->
+      <Property Id="WINMAJORVERSION">
+          <RegistrySearch Id="MajorVersionNumberExists" Type="raw"
+            Root="HKLM" Key="SOFTWARE\Microsoft\Windows NT\CurrentVersion" Name="CurrentMajorVersionNumber" />
+      </Property>
 
       <!-- Load previous install directory (if it exists); This will populate the install dir with the current install dir
            for upgrades. -->
@@ -222,20 +227,23 @@
          </Custom>
          {{end}}
 
+        <!-- The below custom actions should be skipped if WINMAJORVERSION is not set. 
+            This indicates the targert system is older than Windows 10 and the installation may hang on these steps -->
+
         <!-- Schedule the action that creates the manager.yaml file on initial install -->
         <Custom Action="CustomExecCreateManagerYaml_set" After="InstallInitialize" >
-            <![CDATA[NOT Installed AND NOT REMOVE AND ENABLEMANAGEMENT AND NOT WIX_UPGRADE_DETECTED]]>
+            <![CDATA[WINMAJORVERSION AND NOT Installed AND NOT REMOVE AND ENABLEMANAGEMENT AND NOT WIX_UPGRADE_DETECTED]]>
         </Custom>
         <Custom Action="CustomExecCreateManagerYaml" After="InstallFiles" >
-            <![CDATA[NOT Installed AND NOT REMOVE AND ENABLEMANAGEMENT AND NOT WIX_UPGRADE_DETECTED]]>
+            <![CDATA[WINMAJORVERSION AND NOT Installed AND NOT REMOVE AND ENABLEMANAGEMENT AND NOT WIX_UPGRADE_DETECTED]]>
         </Custom>
         
         <!-- Schedule the action that removes the manager.yaml file on final uninstall -->
         <Custom Action="CustomExecRemoveManagerYaml_set" After="InstallInitialize" >
-            <![CDATA[REMOVE="ALL" and not UPGRADINGPRODUCTCODE]]>
+            <![CDATA[WINMAJORVERSION and REMOVE="ALL" and not UPGRADINGPRODUCTCODE]]>
         </Custom>
         <Custom Action="CustomExecRemoveManagerYaml" Before="RemoveFiles" >
-            <![CDATA[REMOVE="ALL" and not UPGRADINGPRODUCTCODE]]>
+            <![CDATA[WINMAJORVERSION and REMOVE="ALL" and not UPGRADINGPRODUCTCODE]]>
         </Custom>
       </InstallExecuteSequence>
 
