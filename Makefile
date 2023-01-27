@@ -50,7 +50,7 @@ build-linux: build-linux-amd64 build-linux-arm64 build-linux-arm
 build-darwin: build-darwin-amd64 build-darwin-arm64
 
 .PHONY: build-windows
-build-windows: build-windows-amd64
+build-windows: build-windows-amd64 build-windows-x86
 
 .PHONY: build-linux-amd64
 build-linux-amd64:
@@ -75,6 +75,10 @@ build-darwin-arm64:
 .PHONY: build-windows-amd64
 build-windows-amd64:
 	GOOS=windows GOARCH=amd64 $(MAKE) build-binaries -j2
+
+.PHONY: build-windows-x86
+build-windows-x86:
+	GOOS=windows GOARCH=386 $(MAKE) build-binaries -j2
 
 # tool-related commands
 .PHONY: install-tools

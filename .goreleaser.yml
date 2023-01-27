@@ -20,11 +20,16 @@ builds:
       - amd64
       - arm64
       - arm
+      - "386"
     ignore:
       - goos: windows
         goarch: arm
       - goos: windows
         goarch: arm64
+      - goos: linux
+        goarch: "386"
+      - goos: darwin
+        goarch: "386"
     ldflags:
       - -s -w
       - -X github.com/observiq/observiq-otel-collector/internal/version.version=v{{ .Version }}
@@ -46,11 +51,16 @@ builds:
       - amd64
       - arm64
       - arm
+      - "386"
     ignore:
       - goos: windows
         goarch: arm
       - goos: windows
         goarch: arm64
+      - goos: linux
+        goarch: "386"
+      - goos: darwin
+        goarch: "386"
     ldflags:
       - -s -w
       - -X github.com/observiq/observiq-otel-collector/updater/internal/version.version=v{{ .Version }}
