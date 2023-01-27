@@ -221,8 +221,9 @@
          </Custom>
          {{end}}
 
-        <!-- The below custom actions should be skipped if VersionNT is set as it's only available on versions of 32bit Windows pre. 
-            This indicates the targert system is older than Windows 10 and the installation may hang on these steps -->
+        <!-- The below custom actions should be skipped if VersionNT (32 bit systems) or VersionNT64 (64 bit systems) is >= 603.
+            This should filter out older versions of Windows where some custom actions get stuck. 
+            Link to windows versions for reference https://learn.microsoft.com/en-us/windows/win32/msi/operating-system-property-values-->
 
         <!-- Schedule the action that creates the manager.yaml file on initial install -->
         <Custom Action="CustomExecCreateManagerYaml_set" After="InstallInitialize" >
