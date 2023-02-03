@@ -78,7 +78,6 @@ metrics:
       monotonic: false
       aggregation: cumulative
       value_type: int
-      input_type: string
     attributes: []
     enabled: true
   sapnetweaver.memory.free:
@@ -88,7 +87,6 @@ metrics:
       monotonic: false
       aggregation: cumulative
       value_type: int
-      input_type: string
     attributes: []
     enabled: true
   sapnetweaver.session.count:

@@ -1558,23 +1558,13 @@ func (mb *MetricsBuilder) RecordSapnetweaverJobAbortedDataPoint(ts pcommon.Times
 }
 
 // RecordSapnetweaverMemoryConfiguredDataPoint adds a data point to sapnetweaver.memory.configured metric.
-func (mb *MetricsBuilder) RecordSapnetweaverMemoryConfiguredDataPoint(ts pcommon.Timestamp, inputVal string) error {
-	val, err := strconv.ParseInt(inputVal, 10, 64)
-	if err != nil {
-		return fmt.Errorf("failed to parse int64 for SapnetweaverMemoryConfigured, value was %s: %w", inputVal, err)
-	}
+func (mb *MetricsBuilder) RecordSapnetweaverMemoryConfiguredDataPoint(ts pcommon.Timestamp, val int64) {
 	mb.metricSapnetweaverMemoryConfigured.recordDataPoint(mb.startTime, ts, val)
-	return nil
 }
 
 // RecordSapnetweaverMemoryFreeDataPoint adds a data point to sapnetweaver.memory.free metric.
-func (mb *MetricsBuilder) RecordSapnetweaverMemoryFreeDataPoint(ts pcommon.Timestamp, inputVal string) error {
-	val, err := strconv.ParseInt(inputVal, 10, 64)
-	if err != nil {
-		return fmt.Errorf("failed to parse int64 for SapnetweaverMemoryFree, value was %s: %w", inputVal, err)
-	}
+func (mb *MetricsBuilder) RecordSapnetweaverMemoryFreeDataPoint(ts pcommon.Timestamp, val int64) {
 	mb.metricSapnetweaverMemoryFree.recordDataPoint(mb.startTime, ts, val)
-	return nil
 }
 
 // RecordSapnetweaverMemoryUsageDataPoint adds a data point to sapnetweaver.memory.usage metric.

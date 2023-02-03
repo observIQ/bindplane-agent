@@ -17,6 +17,7 @@ package sapnetweaverreceiver // import "github.com/observiq/observiq-otel-collec
 import (
 	"errors"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"go.opentelemetry.io/collector/pdata/pcommon"
@@ -108,11 +109,13 @@ func (s *sapNetweaverScraper) recordSapnetweaverMemoryConfiguredDataPoint(now pc
 		return
 	}
 
-	err = s.mb.RecordSapnetweaverMemoryConfiguredDataPoint(now, val)
+	mbytes, err := strconv.ParseInt(val, 10, 64)
 	if err != nil {
-		errs.AddPartial(1, err)
+		errs.AddPartial(1, fmt.Errorf("failed to parse int64 for SapnetweaverMemoryConfigured, value was %v: %w", val, err))
 		return
 	}
+
+	s.mb.RecordSapnetweaverMemoryConfiguredDataPoint(now, mbytes*int64(MBToBytes))
 }
 
 func (s *sapNetweaverScraper) recordSapnetweaverMemoryFreeDataPoint(now pcommon.Timestamp, alertTreeResponse map[string]string, errs *scrapererror.ScrapeErrors) {
@@ -123,11 +126,13 @@ func (s *sapNetweaverScraper) recordSapnetweaverMemoryFreeDataPoint(now pcommon.
 		return
 	}
 
-	err = s.mb.RecordSapnetweaverMemoryFreeDataPoint(now, val)
+	mbytes, err := strconv.ParseInt(val, 10, 64)
 	if err != nil {
-		errs.AddPartial(1, err)
+		errs.AddPartial(1, fmt.Errorf("failed to parse int64 for SapnetweaverMemoryFree, value was %v: %w", val, err))
 		return
 	}
+
+	s.mb.RecordSapnetweaverMemoryFreeDataPoint(now, mbytes*int64(MBToBytes))
 }
 
 func (s *sapNetweaverScraper) recordSapnetweaverSessionCountDataPoint(now pcommon.Timestamp, alertTreeResponse map[string]string, errs *scrapererror.ScrapeErrors) {

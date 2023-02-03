@@ -183,11 +183,11 @@ func TestScraperScrape(t *testing.T) {
 			case "sapnetweaver.memory.configured":
 				dps := m.Sum().DataPoints()
 				require.Equal(t, 1, dps.Len())
-				require.Equal(t, int64(8), dps.At(0).IntValue())
+				require.Equal(t, int64(8)*MBToBytes, dps.At(0).IntValue())
 			case "sapnetweaver.memory.free":
 				dps := m.Sum().DataPoints()
 				require.Equal(t, 1, dps.Len())
-				require.Equal(t, int64(9), dps.At(0).IntValue())
+				require.Equal(t, int64(9)*MBToBytes, dps.At(0).IntValue())
 			case "sapnetweaver.session.count":
 				dps := m.Sum().DataPoints()
 				require.Equal(t, 1, dps.Len())

@@ -96,11 +96,11 @@ func TestMetricsBuilder(t *testing.T) {
 
 			defaultMetricsCount++
 			allMetricsCount++
-			mb.RecordSapnetweaverMemoryConfiguredDataPoint(ts, "1")
+			mb.RecordSapnetweaverMemoryConfiguredDataPoint(ts, 1)
 
 			defaultMetricsCount++
 			allMetricsCount++
-			mb.RecordSapnetweaverMemoryFreeDataPoint(ts, "1")
+			mb.RecordSapnetweaverMemoryFreeDataPoint(ts, 1)
 
 			defaultMetricsCount++
 			allMetricsCount++
