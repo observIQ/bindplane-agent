@@ -1,12 +1,12 @@
 default:
 all_metrics:
-  sapnetweaver.abap.update.errors:
+  sapnetweaver.abap.update.error.count:
     enabled: true
   sapnetweaver.cache.evictions:
     enabled: true
   sapnetweaver.cache.hits:
     enabled: true
-  sapnetweaver.connection.errors:
+  sapnetweaver.connection.error.count:
     enabled: true
   sapnetweaver.host.cpu.utilization:
     enabled: true
@@ -20,7 +20,7 @@ all_metrics:
     enabled: true
   sapnetweaver.memory.free:
     enabled: true
-  sapnetweaver.memory.usage:
+  sapnetweaver.memory.swap_space.utilization:
     enabled: true
   sapnetweaver.queue.count:
     enabled: true
@@ -43,13 +43,13 @@ all_metrics:
   sapnetweaver.work_processes.count:
     enabled: true
 no_metrics:
-  sapnetweaver.abap.update.errors:
+  sapnetweaver.abap.update.error.count:
     enabled: false
   sapnetweaver.cache.evictions:
     enabled: false
   sapnetweaver.cache.hits:
     enabled: false
-  sapnetweaver.connection.errors:
+  sapnetweaver.connection.error.count:
     enabled: false
   sapnetweaver.host.cpu.utilization:
     enabled: false
@@ -63,7 +63,7 @@ no_metrics:
     enabled: false
   sapnetweaver.memory.free:
     enabled: false
-  sapnetweaver.memory.usage:
+  sapnetweaver.memory.swap_space.utilization:
     enabled: false
   sapnetweaver.queue.count:
     enabled: false

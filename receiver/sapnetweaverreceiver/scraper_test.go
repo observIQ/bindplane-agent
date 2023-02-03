@@ -176,7 +176,7 @@ func TestScraperScrape(t *testing.T) {
 				dps := m.Gauge().DataPoints()
 				require.Equal(t, 1, dps.Len())
 				require.Equal(t, int64(6), dps.At(0).IntValue())
-			case "sapnetweaver.memory.usage":
+			case "sapnetweaver.memory.swap_space.utilization":
 				dps := m.Gauge().DataPoints()
 				require.Equal(t, 1, dps.Len())
 				require.Equal(t, int64(7), dps.At(0).IntValue())
@@ -204,7 +204,7 @@ func TestScraperScrape(t *testing.T) {
 				dps := m.Sum().DataPoints()
 				require.Equal(t, 1, dps.Len())
 				require.Equal(t, int64(13), dps.At(0).IntValue())
-			case "sapnetweaver.abap.update.errors":
+			case "sapnetweaver.abap.update.error.count":
 				dps := m.Sum().DataPoints()
 				require.Equal(t, 4, dps.Len())
 				attributeMappings := map[string]int64{}
@@ -215,10 +215,10 @@ func TestScraperScrape(t *testing.T) {
 					attributeMappings[label] = dp.IntValue()
 				}
 				require.Equal(t, map[string]int64{
-					"sapnetweaver.abap.update.errors method:map[control_state:green]":  int64(1),
-					"sapnetweaver.abap.update.errors method:map[control_state:grey]":   int64(0),
-					"sapnetweaver.abap.update.errors method:map[control_state:red]":    int64(0),
-					"sapnetweaver.abap.update.errors method:map[control_state:yellow]": int64(0),
+					"sapnetweaver.abap.update.error.count method:map[control_state:green]":  int64(1),
+					"sapnetweaver.abap.update.error.count method:map[control_state:grey]":   int64(0),
+					"sapnetweaver.abap.update.error.count method:map[control_state:red]":    int64(0),
+					"sapnetweaver.abap.update.error.count method:map[control_state:yellow]": int64(0),
 				},
 					attributeMappings)
 			case "sapnetweaver.response.duration":
@@ -246,7 +246,7 @@ func TestScraperScrape(t *testing.T) {
 				dps := m.Sum().DataPoints()
 				require.Equal(t, 1, dps.Len())
 				require.Equal(t, int64(20), dps.At(0).IntValue())
-			case "sapnetweaver.connection.errors":
+			case "sapnetweaver.connection.error.count":
 				dps := m.Sum().DataPoints()
 				require.Equal(t, 1, dps.Len())
 				require.Equal(t, int64(21), dps.At(0).IntValue())
@@ -361,7 +361,7 @@ func TestScraperScrapeUnknownResponse(t *testing.T) {
 		errors.New("failed to parse int64 for SapnetweaverHostCPUUtilization, value was $: strconv.ParseInt: parsing \"$\": invalid syntax"),
 		errors.New("failed to parse int64 for SapnetweaverSystemAvailability, value was $: strconv.ParseInt: parsing \"$\": invalid syntax"),
 		errors.New("failed to parse int64 for SapnetweaverSystemUtilization, value was $: strconv.ParseInt: parsing \"$\": invalid syntax"),
-		errors.New("failed to parse int64 for SapnetweaverMemoryUsage, value was $: strconv.ParseInt: parsing \"$\": invalid syntax"),
+		errors.New("failed to parse int64 for SapnetweaverMemorySwapSpaceUtilization, value was $: strconv.ParseInt: parsing \"$\": invalid syntax"),
 		errors.New("failed to parse int64 for SapnetweaverMemoryConfigured, value was $: strconv.ParseInt: parsing \"$\": invalid syntax"),
 		errors.New("failed to parse int64 for SapnetweaverMemoryFree, value was $: strconv.ParseInt: parsing \"$\": invalid syntax"),
 		errors.New("failed to parse int64 for SapnetweaverSessionCount, value was $: strconv.ParseInt: parsing \"$\": invalid syntax"),
@@ -374,7 +374,7 @@ func TestScraperScrapeUnknownResponse(t *testing.T) {
 		errors.New("failed to parse int64 for SapnetweaverResponseDuration, value was $: strconv.ParseInt: parsing \"$\": invalid syntax"),
 		errors.New("failed to parse int64 for SapnetweaverRequestCount, value was $: strconv.ParseInt: parsing \"$\": invalid syntax"),
 		errors.New("failed to parse int64 for SapnetweaverRequestTimeoutCount, value was $: strconv.ParseInt: parsing \"$\": invalid syntax"),
-		errors.New("failed to parse int64 for SapnetweaverConnectionErrors, value was $: strconv.ParseInt: parsing \"$\": invalid syntax"),
+		errors.New("failed to parse int64 for SapnetweaverConnectionErrorCount, value was $: strconv.ParseInt: parsing \"$\": invalid syntax"),
 		errors.New("failed to parse int64 for SapnetweaverCacheEvictions, value was $: strconv.ParseInt: parsing \"$\": invalid syntax"),
 		errors.New("failed to parse int64 for SapnetweaverCacheHits, value was $: strconv.ParseInt: parsing \"$\": invalid syntax"),
 		errors.New("failed to parse int64 for SapnetweaverHostSpoolListUsed, value was $: strconv.ParseInt: parsing \"$\": invalid syntax"),

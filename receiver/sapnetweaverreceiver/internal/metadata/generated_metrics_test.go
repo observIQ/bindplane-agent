@@ -64,7 +64,7 @@ func TestMetricsBuilder(t *testing.T) {
 
 			defaultMetricsCount++
 			allMetricsCount++
-			mb.RecordSapnetweaverAbapUpdateErrorsDataPoint(ts, 1, AttributeControlState(1))
+			mb.RecordSapnetweaverAbapUpdateErrorCountDataPoint(ts, 1, AttributeControlState(1))
 
 			defaultMetricsCount++
 			allMetricsCount++
@@ -76,7 +76,7 @@ func TestMetricsBuilder(t *testing.T) {
 
 			defaultMetricsCount++
 			allMetricsCount++
-			mb.RecordSapnetweaverConnectionErrorsDataPoint(ts, "1")
+			mb.RecordSapnetweaverConnectionErrorCountDataPoint(ts, "1")
 
 			defaultMetricsCount++
 			allMetricsCount++
@@ -104,7 +104,7 @@ func TestMetricsBuilder(t *testing.T) {
 
 			defaultMetricsCount++
 			allMetricsCount++
-			mb.RecordSapnetweaverMemoryUsageDataPoint(ts, "1")
+			mb.RecordSapnetweaverMemorySwapSpaceUtilizationDataPoint(ts, "1")
 
 			defaultMetricsCount++
 			allMetricsCount++
@@ -185,9 +185,9 @@ func TestMetricsBuilder(t *testing.T) {
 			validatedMetrics := make(map[string]bool)
 			for i := 0; i < ms.Len(); i++ {
 				switch ms.At(i).Name() {
-				case "sapnetweaver.abap.update.errors":
-					assert.False(t, validatedMetrics["sapnetweaver.abap.update.errors"], "Found a duplicate in the metrics slice: sapnetweaver.abap.update.errors")
-					validatedMetrics["sapnetweaver.abap.update.errors"] = true
+				case "sapnetweaver.abap.update.error.count":
+					assert.False(t, validatedMetrics["sapnetweaver.abap.update.error.count"], "Found a duplicate in the metrics slice: sapnetweaver.abap.update.error.count")
+					validatedMetrics["sapnetweaver.abap.update.error.count"] = true
 					assert.Equal(t, pmetric.MetricTypeSum, ms.At(i).Type())
 					assert.Equal(t, 1, ms.At(i).Sum().DataPoints().Len())
 					assert.Equal(t, "The amount of ABAP errors in update.", ms.At(i).Description())
@@ -208,7 +208,7 @@ func TestMetricsBuilder(t *testing.T) {
 					assert.Equal(t, pmetric.MetricTypeSum, ms.At(i).Type())
 					assert.Equal(t, 1, ms.At(i).Sum().DataPoints().Len())
 					assert.Equal(t, "The number of evicted entries.", ms.At(i).Description())
-					assert.Equal(t, "{entr}", ms.At(i).Unit())
+					assert.Equal(t, "{entries}", ms.At(i).Unit())
 					assert.Equal(t, false, ms.At(i).Sum().IsMonotonic())
 					assert.Equal(t, pmetric.AggregationTemporalityCumulative, ms.At(i).Sum().AggregationTemporality())
 					dp := ms.At(i).Sum().DataPoints().At(0)
@@ -228,9 +228,9 @@ func TestMetricsBuilder(t *testing.T) {
 					assert.Equal(t, ts, dp.Timestamp())
 					assert.Equal(t, pmetric.NumberDataPointValueTypeInt, dp.ValueType())
 					assert.Equal(t, int64(1), dp.IntValue())
-				case "sapnetweaver.connection.errors":
-					assert.False(t, validatedMetrics["sapnetweaver.connection.errors"], "Found a duplicate in the metrics slice: sapnetweaver.connection.errors")
-					validatedMetrics["sapnetweaver.connection.errors"] = true
+				case "sapnetweaver.connection.error.count":
+					assert.False(t, validatedMetrics["sapnetweaver.connection.error.count"], "Found a duplicate in the metrics slice: sapnetweaver.connection.error.count")
+					validatedMetrics["sapnetweaver.connection.error.count"] = true
 					assert.Equal(t, pmetric.MetricTypeSum, ms.At(i).Type())
 					assert.Equal(t, 1, ms.At(i).Sum().DataPoints().Len())
 					assert.Equal(t, "The amount of connection errors.", ms.At(i).Description())
@@ -327,12 +327,12 @@ func TestMetricsBuilder(t *testing.T) {
 					assert.Equal(t, ts, dp.Timestamp())
 					assert.Equal(t, pmetric.NumberDataPointValueTypeInt, dp.ValueType())
 					assert.Equal(t, int64(1), dp.IntValue())
-				case "sapnetweaver.memory.usage":
-					assert.False(t, validatedMetrics["sapnetweaver.memory.usage"], "Found a duplicate in the metrics slice: sapnetweaver.memory.usage")
-					validatedMetrics["sapnetweaver.memory.usage"] = true
+				case "sapnetweaver.memory.swap_space.utilization":
+					assert.False(t, validatedMetrics["sapnetweaver.memory.swap_space.utilization"], "Found a duplicate in the metrics slice: sapnetweaver.memory.swap_space.utilization")
+					validatedMetrics["sapnetweaver.memory.swap_space.utilization"] = true
 					assert.Equal(t, pmetric.MetricTypeGauge, ms.At(i).Type())
 					assert.Equal(t, 1, ms.At(i).Gauge().DataPoints().Len())
-					assert.Equal(t, "The memory usage percentage.", ms.At(i).Description())
+					assert.Equal(t, "The swap space utilization percentage.", ms.At(i).Description())
 					assert.Equal(t, "%", ms.At(i).Unit())
 					dp := ms.At(i).Gauge().DataPoints().At(0)
 					assert.Equal(t, start, dp.StartTimestamp())
@@ -345,7 +345,7 @@ func TestMetricsBuilder(t *testing.T) {
 					assert.Equal(t, pmetric.MetricTypeSum, ms.At(i).Type())
 					assert.Equal(t, 1, ms.At(i).Sum().DataPoints().Len())
 					assert.Equal(t, "The queue length.", ms.At(i).Description())
-					assert.Equal(t, "{entr}", ms.At(i).Unit())
+					assert.Equal(t, "{entries}", ms.At(i).Unit())
 					assert.Equal(t, false, ms.At(i).Sum().IsMonotonic())
 					assert.Equal(t, pmetric.AggregationTemporalityCumulative, ms.At(i).Sum().AggregationTemporality())
 					dp := ms.At(i).Sum().DataPoints().At(0)
@@ -359,7 +359,7 @@ func TestMetricsBuilder(t *testing.T) {
 					assert.Equal(t, pmetric.MetricTypeSum, ms.At(i).Type())
 					assert.Equal(t, 1, ms.At(i).Sum().DataPoints().Len())
 					assert.Equal(t, "The peak queue length.", ms.At(i).Description())
-					assert.Equal(t, "{entr}", ms.At(i).Unit())
+					assert.Equal(t, "{entries}", ms.At(i).Unit())
 					assert.Equal(t, false, ms.At(i).Sum().IsMonotonic())
 					assert.Equal(t, pmetric.AggregationTemporalityCumulative, ms.At(i).Sum().AggregationTemporality())
 					dp := ms.At(i).Sum().DataPoints().At(0)

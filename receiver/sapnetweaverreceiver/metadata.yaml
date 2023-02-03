@@ -63,8 +63,8 @@ metrics:
       input_type: string
     attributes: []
     enabled: true
-  sapnetweaver.memory.usage:
-    description: The memory usage percentage.
+  sapnetweaver.memory.swap_space.utilization:
+    description: The swap space utilization percentage.
     unit: "%"
     gauge:
       value_type: int
@@ -100,7 +100,7 @@ metrics:
     enabled: true
   sapnetweaver.queue.count:
     description: The queue length.
-    unit: "{entr}"
+    unit: "{entries}"
     sum:
       monotonic: false
       aggregation: cumulative
@@ -109,7 +109,7 @@ metrics:
     attributes: []
     enabled: true
   sapnetweaver.queue_peak.count:
-    unit: "{entr}"
+    unit: "{entries}"
     description: The peak queue length.
     sum:
       monotonic: false
@@ -127,7 +127,7 @@ metrics:
       input_type: string
     attributes: []
     enabled: true
-  sapnetweaver.abap.update.errors:
+  sapnetweaver.abap.update.error.count:
     description: The amount of ABAP errors in update.
     sum:
       monotonic: false
@@ -163,7 +163,7 @@ metrics:
       input_type: string
     attributes: []
     enabled: true
-  sapnetweaver.connection.errors:
+  sapnetweaver.connection.error.count:
     description: The amount of connection errors.
     sum:
       monotonic: false
@@ -182,7 +182,7 @@ metrics:
     enabled: true
   sapnetweaver.cache.evictions:
     description: The number of evicted entries.
-    unit: "{entr}"
+    unit: "{entries}"
     sum:
       monotonic: false
       aggregation: cumulative

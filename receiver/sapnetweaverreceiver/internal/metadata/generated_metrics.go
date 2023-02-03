@@ -35,32 +35,32 @@ func (ms *MetricSettings) Unmarshal(parser *confmap.Conf) error {
 
 // MetricsSettings provides settings for sapnetweaverreceiver metrics.
 type MetricsSettings struct {
-	SapnetweaverAbapUpdateErrors    MetricSettings `mapstructure:"sapnetweaver.abap.update.errors"`
-	SapnetweaverCacheEvictions      MetricSettings `mapstructure:"sapnetweaver.cache.evictions"`
-	SapnetweaverCacheHits           MetricSettings `mapstructure:"sapnetweaver.cache.hits"`
-	SapnetweaverConnectionErrors    MetricSettings `mapstructure:"sapnetweaver.connection.errors"`
-	SapnetweaverHostCPUUtilization  MetricSettings `mapstructure:"sapnetweaver.host.cpu.utilization"`
-	SapnetweaverHostSpoolListUsed   MetricSettings `mapstructure:"sapnetweaver.host.spool_list.used"`
-	SapnetweaverIcmAvailability     MetricSettings `mapstructure:"sapnetweaver.icm_availability"`
-	SapnetweaverJobAborted          MetricSettings `mapstructure:"sapnetweaver.job.aborted"`
-	SapnetweaverMemoryConfigured    MetricSettings `mapstructure:"sapnetweaver.memory.configured"`
-	SapnetweaverMemoryFree          MetricSettings `mapstructure:"sapnetweaver.memory.free"`
-	SapnetweaverMemoryUsage         MetricSettings `mapstructure:"sapnetweaver.memory.usage"`
-	SapnetweaverQueueCount          MetricSettings `mapstructure:"sapnetweaver.queue.count"`
-	SapnetweaverQueuePeakCount      MetricSettings `mapstructure:"sapnetweaver.queue_peak.count"`
-	SapnetweaverRequestCount        MetricSettings `mapstructure:"sapnetweaver.request.count"`
-	SapnetweaverRequestTimeoutCount MetricSettings `mapstructure:"sapnetweaver.request.timeout.count"`
-	SapnetweaverResponseDuration    MetricSettings `mapstructure:"sapnetweaver.response.duration"`
-	SapnetweaverSessionCount        MetricSettings `mapstructure:"sapnetweaver.session.count"`
-	SapnetweaverShortDumpsRate      MetricSettings `mapstructure:"sapnetweaver.short_dumps.rate"`
-	SapnetweaverSystemAvailability  MetricSettings `mapstructure:"sapnetweaver.system.availability"`
-	SapnetweaverSystemUtilization   MetricSettings `mapstructure:"sapnetweaver.system.utilization"`
-	SapnetweaverWorkProcessesCount  MetricSettings `mapstructure:"sapnetweaver.work_processes.count"`
+	SapnetweaverAbapUpdateErrorCount       MetricSettings `mapstructure:"sapnetweaver.abap.update.error.count"`
+	SapnetweaverCacheEvictions             MetricSettings `mapstructure:"sapnetweaver.cache.evictions"`
+	SapnetweaverCacheHits                  MetricSettings `mapstructure:"sapnetweaver.cache.hits"`
+	SapnetweaverConnectionErrorCount       MetricSettings `mapstructure:"sapnetweaver.connection.error.count"`
+	SapnetweaverHostCPUUtilization         MetricSettings `mapstructure:"sapnetweaver.host.cpu.utilization"`
+	SapnetweaverHostSpoolListUsed          MetricSettings `mapstructure:"sapnetweaver.host.spool_list.used"`
+	SapnetweaverIcmAvailability            MetricSettings `mapstructure:"sapnetweaver.icm_availability"`
+	SapnetweaverJobAborted                 MetricSettings `mapstructure:"sapnetweaver.job.aborted"`
+	SapnetweaverMemoryConfigured           MetricSettings `mapstructure:"sapnetweaver.memory.configured"`
+	SapnetweaverMemoryFree                 MetricSettings `mapstructure:"sapnetweaver.memory.free"`
+	SapnetweaverMemorySwapSpaceUtilization MetricSettings `mapstructure:"sapnetweaver.memory.swap_space.utilization"`
+	SapnetweaverQueueCount                 MetricSettings `mapstructure:"sapnetweaver.queue.count"`
+	SapnetweaverQueuePeakCount             MetricSettings `mapstructure:"sapnetweaver.queue_peak.count"`
+	SapnetweaverRequestCount               MetricSettings `mapstructure:"sapnetweaver.request.count"`
+	SapnetweaverRequestTimeoutCount        MetricSettings `mapstructure:"sapnetweaver.request.timeout.count"`
+	SapnetweaverResponseDuration           MetricSettings `mapstructure:"sapnetweaver.response.duration"`
+	SapnetweaverSessionCount               MetricSettings `mapstructure:"sapnetweaver.session.count"`
+	SapnetweaverShortDumpsRate             MetricSettings `mapstructure:"sapnetweaver.short_dumps.rate"`
+	SapnetweaverSystemAvailability         MetricSettings `mapstructure:"sapnetweaver.system.availability"`
+	SapnetweaverSystemUtilization          MetricSettings `mapstructure:"sapnetweaver.system.utilization"`
+	SapnetweaverWorkProcessesCount         MetricSettings `mapstructure:"sapnetweaver.work_processes.count"`
 }
 
 func DefaultMetricsSettings() MetricsSettings {
 	return MetricsSettings{
-		SapnetweaverAbapUpdateErrors: MetricSettings{
+		SapnetweaverAbapUpdateErrorCount: MetricSettings{
 			Enabled: true,
 		},
 		SapnetweaverCacheEvictions: MetricSettings{
@@ -69,7 +69,7 @@ func DefaultMetricsSettings() MetricsSettings {
 		SapnetweaverCacheHits: MetricSettings{
 			Enabled: true,
 		},
-		SapnetweaverConnectionErrors: MetricSettings{
+		SapnetweaverConnectionErrorCount: MetricSettings{
 			Enabled: true,
 		},
 		SapnetweaverHostCPUUtilization: MetricSettings{
@@ -90,7 +90,7 @@ func DefaultMetricsSettings() MetricsSettings {
 		SapnetweaverMemoryFree: MetricSettings{
 			Enabled: true,
 		},
-		SapnetweaverMemoryUsage: MetricSettings{
+		SapnetweaverMemorySwapSpaceUtilization: MetricSettings{
 			Enabled: true,
 		},
 		SapnetweaverQueueCount: MetricSettings{
@@ -230,15 +230,15 @@ var MapAttributeResponseType = map[string]AttributeResponseType{
 	"http":        AttributeResponseTypeHttp,
 }
 
-type metricSapnetweaverAbapUpdateErrors struct {
+type metricSapnetweaverAbapUpdateErrorCount struct {
 	data     pmetric.Metric // data buffer for generated metric.
 	settings MetricSettings // metric settings provided by user.
 	capacity int            // max observed number of data points added to the metric.
 }
 
-// init fills sapnetweaver.abap.update.errors metric with initial data.
-func (m *metricSapnetweaverAbapUpdateErrors) init() {
-	m.data.SetName("sapnetweaver.abap.update.errors")
+// init fills sapnetweaver.abap.update.error.count metric with initial data.
+func (m *metricSapnetweaverAbapUpdateErrorCount) init() {
+	m.data.SetName("sapnetweaver.abap.update.error.count")
 	m.data.SetDescription("The amount of ABAP errors in update.")
 	m.data.SetUnit("")
 	m.data.SetEmptySum()
@@ -247,7 +247,7 @@ func (m *metricSapnetweaverAbapUpdateErrors) init() {
 	m.data.Sum().DataPoints().EnsureCapacity(m.capacity)
 }
 
-func (m *metricSapnetweaverAbapUpdateErrors) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val int64, controlStateAttributeValue string) {
+func (m *metricSapnetweaverAbapUpdateErrorCount) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val int64, controlStateAttributeValue string) {
 	if !m.settings.Enabled {
 		return
 	}
@@ -259,14 +259,14 @@ func (m *metricSapnetweaverAbapUpdateErrors) recordDataPoint(start pcommon.Times
 }
 
 // updateCapacity saves max length of data point slices that will be used for the slice capacity.
-func (m *metricSapnetweaverAbapUpdateErrors) updateCapacity() {
+func (m *metricSapnetweaverAbapUpdateErrorCount) updateCapacity() {
 	if m.data.Sum().DataPoints().Len() > m.capacity {
 		m.capacity = m.data.Sum().DataPoints().Len()
 	}
 }
 
 // emit appends recorded metric data to a metrics slice and prepares it for recording another set of data points.
-func (m *metricSapnetweaverAbapUpdateErrors) emit(metrics pmetric.MetricSlice) {
+func (m *metricSapnetweaverAbapUpdateErrorCount) emit(metrics pmetric.MetricSlice) {
 	if m.settings.Enabled && m.data.Sum().DataPoints().Len() > 0 {
 		m.updateCapacity()
 		m.data.MoveTo(metrics.AppendEmpty())
@@ -274,8 +274,8 @@ func (m *metricSapnetweaverAbapUpdateErrors) emit(metrics pmetric.MetricSlice) {
 	}
 }
 
-func newMetricSapnetweaverAbapUpdateErrors(settings MetricSettings) metricSapnetweaverAbapUpdateErrors {
-	m := metricSapnetweaverAbapUpdateErrors{settings: settings}
+func newMetricSapnetweaverAbapUpdateErrorCount(settings MetricSettings) metricSapnetweaverAbapUpdateErrorCount {
+	m := metricSapnetweaverAbapUpdateErrorCount{settings: settings}
 	if settings.Enabled {
 		m.data = pmetric.NewMetric()
 		m.init()
@@ -293,7 +293,7 @@ type metricSapnetweaverCacheEvictions struct {
 func (m *metricSapnetweaverCacheEvictions) init() {
 	m.data.SetName("sapnetweaver.cache.evictions")
 	m.data.SetDescription("The number of evicted entries.")
-	m.data.SetUnit("{entr}")
+	m.data.SetUnit("{entries}")
 	m.data.SetEmptySum()
 	m.data.Sum().SetIsMonotonic(false)
 	m.data.Sum().SetAggregationTemporality(pmetric.AggregationTemporalityCumulative)
@@ -383,15 +383,15 @@ func newMetricSapnetweaverCacheHits(settings MetricSettings) metricSapnetweaverC
 	return m
 }
 
-type metricSapnetweaverConnectionErrors struct {
+type metricSapnetweaverConnectionErrorCount struct {
 	data     pmetric.Metric // data buffer for generated metric.
 	settings MetricSettings // metric settings provided by user.
 	capacity int            // max observed number of data points added to the metric.
 }
 
-// init fills sapnetweaver.connection.errors metric with initial data.
-func (m *metricSapnetweaverConnectionErrors) init() {
-	m.data.SetName("sapnetweaver.connection.errors")
+// init fills sapnetweaver.connection.error.count metric with initial data.
+func (m *metricSapnetweaverConnectionErrorCount) init() {
+	m.data.SetName("sapnetweaver.connection.error.count")
 	m.data.SetDescription("The amount of connection errors.")
 	m.data.SetUnit("")
 	m.data.SetEmptySum()
@@ -399,7 +399,7 @@ func (m *metricSapnetweaverConnectionErrors) init() {
 	m.data.Sum().SetAggregationTemporality(pmetric.AggregationTemporalityCumulative)
 }
 
-func (m *metricSapnetweaverConnectionErrors) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val int64) {
+func (m *metricSapnetweaverConnectionErrorCount) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val int64) {
 	if !m.settings.Enabled {
 		return
 	}
@@ -410,14 +410,14 @@ func (m *metricSapnetweaverConnectionErrors) recordDataPoint(start pcommon.Times
 }
 
 // updateCapacity saves max length of data point slices that will be used for the slice capacity.
-func (m *metricSapnetweaverConnectionErrors) updateCapacity() {
+func (m *metricSapnetweaverConnectionErrorCount) updateCapacity() {
 	if m.data.Sum().DataPoints().Len() > m.capacity {
 		m.capacity = m.data.Sum().DataPoints().Len()
 	}
 }
 
 // emit appends recorded metric data to a metrics slice and prepares it for recording another set of data points.
-func (m *metricSapnetweaverConnectionErrors) emit(metrics pmetric.MetricSlice) {
+func (m *metricSapnetweaverConnectionErrorCount) emit(metrics pmetric.MetricSlice) {
 	if m.settings.Enabled && m.data.Sum().DataPoints().Len() > 0 {
 		m.updateCapacity()
 		m.data.MoveTo(metrics.AppendEmpty())
@@ -425,8 +425,8 @@ func (m *metricSapnetweaverConnectionErrors) emit(metrics pmetric.MetricSlice) {
 	}
 }
 
-func newMetricSapnetweaverConnectionErrors(settings MetricSettings) metricSapnetweaverConnectionErrors {
-	m := metricSapnetweaverConnectionErrors{settings: settings}
+func newMetricSapnetweaverConnectionErrorCount(settings MetricSettings) metricSapnetweaverConnectionErrorCount {
+	m := metricSapnetweaverConnectionErrorCount{settings: settings}
 	if settings.Enabled {
 		m.data = pmetric.NewMetric()
 		m.init()
@@ -740,21 +740,21 @@ func newMetricSapnetweaverMemoryFree(settings MetricSettings) metricSapnetweaver
 	return m
 }
 
-type metricSapnetweaverMemoryUsage struct {
+type metricSapnetweaverMemorySwapSpaceUtilization struct {
 	data     pmetric.Metric // data buffer for generated metric.
 	settings MetricSettings // metric settings provided by user.
 	capacity int            // max observed number of data points added to the metric.
 }
 
-// init fills sapnetweaver.memory.usage metric with initial data.
-func (m *metricSapnetweaverMemoryUsage) init() {
-	m.data.SetName("sapnetweaver.memory.usage")
-	m.data.SetDescription("The memory usage percentage.")
+// init fills sapnetweaver.memory.swap_space.utilization metric with initial data.
+func (m *metricSapnetweaverMemorySwapSpaceUtilization) init() {
+	m.data.SetName("sapnetweaver.memory.swap_space.utilization")
+	m.data.SetDescription("The swap space utilization percentage.")
 	m.data.SetUnit("%")
 	m.data.SetEmptyGauge()
 }
 
-func (m *metricSapnetweaverMemoryUsage) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val int64) {
+func (m *metricSapnetweaverMemorySwapSpaceUtilization) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val int64) {
 	if !m.settings.Enabled {
 		return
 	}
@@ -765,14 +765,14 @@ func (m *metricSapnetweaverMemoryUsage) recordDataPoint(start pcommon.Timestamp,
 }
 
 // updateCapacity saves max length of data point slices that will be used for the slice capacity.
-func (m *metricSapnetweaverMemoryUsage) updateCapacity() {
+func (m *metricSapnetweaverMemorySwapSpaceUtilization) updateCapacity() {
 	if m.data.Gauge().DataPoints().Len() > m.capacity {
 		m.capacity = m.data.Gauge().DataPoints().Len()
 	}
 }
 
 // emit appends recorded metric data to a metrics slice and prepares it for recording another set of data points.
-func (m *metricSapnetweaverMemoryUsage) emit(metrics pmetric.MetricSlice) {
+func (m *metricSapnetweaverMemorySwapSpaceUtilization) emit(metrics pmetric.MetricSlice) {
 	if m.settings.Enabled && m.data.Gauge().DataPoints().Len() > 0 {
 		m.updateCapacity()
 		m.data.MoveTo(metrics.AppendEmpty())
@@ -780,8 +780,8 @@ func (m *metricSapnetweaverMemoryUsage) emit(metrics pmetric.MetricSlice) {
 	}
 }
 
-func newMetricSapnetweaverMemoryUsage(settings MetricSettings) metricSapnetweaverMemoryUsage {
-	m := metricSapnetweaverMemoryUsage{settings: settings}
+func newMetricSapnetweaverMemorySwapSpaceUtilization(settings MetricSettings) metricSapnetweaverMemorySwapSpaceUtilization {
+	m := metricSapnetweaverMemorySwapSpaceUtilization{settings: settings}
 	if settings.Enabled {
 		m.data = pmetric.NewMetric()
 		m.init()
@@ -799,7 +799,7 @@ type metricSapnetweaverQueueCount struct {
 func (m *metricSapnetweaverQueueCount) init() {
 	m.data.SetName("sapnetweaver.queue.count")
 	m.data.SetDescription("The queue length.")
-	m.data.SetUnit("{entr}")
+	m.data.SetUnit("{entries}")
 	m.data.SetEmptySum()
 	m.data.Sum().SetIsMonotonic(false)
 	m.data.Sum().SetAggregationTemporality(pmetric.AggregationTemporalityCumulative)
@@ -850,7 +850,7 @@ type metricSapnetweaverQueuePeakCount struct {
 func (m *metricSapnetweaverQueuePeakCount) init() {
 	m.data.SetName("sapnetweaver.queue_peak.count")
 	m.data.SetDescription("The peak queue length.")
-	m.data.SetUnit("{entr}")
+	m.data.SetUnit("{entries}")
 	m.data.SetEmptySum()
 	m.data.Sum().SetIsMonotonic(false)
 	m.data.Sum().SetAggregationTemporality(pmetric.AggregationTemporalityCumulative)
@@ -1300,33 +1300,33 @@ func newMetricSapnetweaverWorkProcessesCount(settings MetricSettings) metricSapn
 // MetricsBuilder provides an interface for scrapers to report metrics while taking care of all the transformations
 // required to produce metric representation defined in metadata and user settings.
 type MetricsBuilder struct {
-	startTime                             pcommon.Timestamp   // start time that will be applied to all recorded data points.
-	metricsCapacity                       int                 // maximum observed number of metrics per resource.
-	resourceCapacity                      int                 // maximum observed number of resource attributes.
-	metricsBuffer                         pmetric.Metrics     // accumulates metrics data before emitting.
-	buildInfo                             component.BuildInfo // contains version information
-	resourceAttributesSettings            ResourceAttributesSettings
-	metricSapnetweaverAbapUpdateErrors    metricSapnetweaverAbapUpdateErrors
-	metricSapnetweaverCacheEvictions      metricSapnetweaverCacheEvictions
-	metricSapnetweaverCacheHits           metricSapnetweaverCacheHits
-	metricSapnetweaverConnectionErrors    metricSapnetweaverConnectionErrors
-	metricSapnetweaverHostCPUUtilization  metricSapnetweaverHostCPUUtilization
-	metricSapnetweaverHostSpoolListUsed   metricSapnetweaverHostSpoolListUsed
-	metricSapnetweaverIcmAvailability     metricSapnetweaverIcmAvailability
-	metricSapnetweaverJobAborted          metricSapnetweaverJobAborted
-	metricSapnetweaverMemoryConfigured    metricSapnetweaverMemoryConfigured
-	metricSapnetweaverMemoryFree          metricSapnetweaverMemoryFree
-	metricSapnetweaverMemoryUsage         metricSapnetweaverMemoryUsage
-	metricSapnetweaverQueueCount          metricSapnetweaverQueueCount
-	metricSapnetweaverQueuePeakCount      metricSapnetweaverQueuePeakCount
-	metricSapnetweaverRequestCount        metricSapnetweaverRequestCount
-	metricSapnetweaverRequestTimeoutCount metricSapnetweaverRequestTimeoutCount
-	metricSapnetweaverResponseDuration    metricSapnetweaverResponseDuration
-	metricSapnetweaverSessionCount        metricSapnetweaverSessionCount
-	metricSapnetweaverShortDumpsRate      metricSapnetweaverShortDumpsRate
-	metricSapnetweaverSystemAvailability  metricSapnetweaverSystemAvailability
-	metricSapnetweaverSystemUtilization   metricSapnetweaverSystemUtilization
-	metricSapnetweaverWorkProcessesCount  metricSapnetweaverWorkProcessesCount
+	startTime                                    pcommon.Timestamp   // start time that will be applied to all recorded data points.
+	metricsCapacity                              int                 // maximum observed number of metrics per resource.
+	resourceCapacity                             int                 // maximum observed number of resource attributes.
+	metricsBuffer                                pmetric.Metrics     // accumulates metrics data before emitting.
+	buildInfo                                    component.BuildInfo // contains version information
+	resourceAttributesSettings                   ResourceAttributesSettings
+	metricSapnetweaverAbapUpdateErrorCount       metricSapnetweaverAbapUpdateErrorCount
+	metricSapnetweaverCacheEvictions             metricSapnetweaverCacheEvictions
+	metricSapnetweaverCacheHits                  metricSapnetweaverCacheHits
+	metricSapnetweaverConnectionErrorCount       metricSapnetweaverConnectionErrorCount
+	metricSapnetweaverHostCPUUtilization         metricSapnetweaverHostCPUUtilization
+	metricSapnetweaverHostSpoolListUsed          metricSapnetweaverHostSpoolListUsed
+	metricSapnetweaverIcmAvailability            metricSapnetweaverIcmAvailability
+	metricSapnetweaverJobAborted                 metricSapnetweaverJobAborted
+	metricSapnetweaverMemoryConfigured           metricSapnetweaverMemoryConfigured
+	metricSapnetweaverMemoryFree                 metricSapnetweaverMemoryFree
+	metricSapnetweaverMemorySwapSpaceUtilization metricSapnetweaverMemorySwapSpaceUtilization
+	metricSapnetweaverQueueCount                 metricSapnetweaverQueueCount
+	metricSapnetweaverQueuePeakCount             metricSapnetweaverQueuePeakCount
+	metricSapnetweaverRequestCount               metricSapnetweaverRequestCount
+	metricSapnetweaverRequestTimeoutCount        metricSapnetweaverRequestTimeoutCount
+	metricSapnetweaverResponseDuration           metricSapnetweaverResponseDuration
+	metricSapnetweaverSessionCount               metricSapnetweaverSessionCount
+	metricSapnetweaverShortDumpsRate             metricSapnetweaverShortDumpsRate
+	metricSapnetweaverSystemAvailability         metricSapnetweaverSystemAvailability
+	metricSapnetweaverSystemUtilization          metricSapnetweaverSystemUtilization
+	metricSapnetweaverWorkProcessesCount         metricSapnetweaverWorkProcessesCount
 }
 
 // metricBuilderOption applies changes to default metrics builder.
@@ -1351,31 +1351,31 @@ func NewMetricsBuilder(ms MetricsSettings, settings receiver.CreateSettings, opt
 		settings.Logger.Warn("[WARNING] Please set `enabled` field explicitly for `sapnetweaver.work_processes.count`: This metric will be disabled by default soon.")
 	}
 	mb := &MetricsBuilder{
-		startTime:                             pcommon.NewTimestampFromTime(time.Now()),
-		metricsBuffer:                         pmetric.NewMetrics(),
-		buildInfo:                             settings.BuildInfo,
-		resourceAttributesSettings:            DefaultResourceAttributesSettings(),
-		metricSapnetweaverAbapUpdateErrors:    newMetricSapnetweaverAbapUpdateErrors(ms.SapnetweaverAbapUpdateErrors),
-		metricSapnetweaverCacheEvictions:      newMetricSapnetweaverCacheEvictions(ms.SapnetweaverCacheEvictions),
-		metricSapnetweaverCacheHits:           newMetricSapnetweaverCacheHits(ms.SapnetweaverCacheHits),
-		metricSapnetweaverConnectionErrors:    newMetricSapnetweaverConnectionErrors(ms.SapnetweaverConnectionErrors),
-		metricSapnetweaverHostCPUUtilization:  newMetricSapnetweaverHostCPUUtilization(ms.SapnetweaverHostCPUUtilization),
-		metricSapnetweaverHostSpoolListUsed:   newMetricSapnetweaverHostSpoolListUsed(ms.SapnetweaverHostSpoolListUsed),
-		metricSapnetweaverIcmAvailability:     newMetricSapnetweaverIcmAvailability(ms.SapnetweaverIcmAvailability),
-		metricSapnetweaverJobAborted:          newMetricSapnetweaverJobAborted(ms.SapnetweaverJobAborted),
-		metricSapnetweaverMemoryConfigured:    newMetricSapnetweaverMemoryConfigured(ms.SapnetweaverMemoryConfigured),
-		metricSapnetweaverMemoryFree:          newMetricSapnetweaverMemoryFree(ms.SapnetweaverMemoryFree),
-		metricSapnetweaverMemoryUsage:         newMetricSapnetweaverMemoryUsage(ms.SapnetweaverMemoryUsage),
-		metricSapnetweaverQueueCount:          newMetricSapnetweaverQueueCount(ms.SapnetweaverQueueCount),
-		metricSapnetweaverQueuePeakCount:      newMetricSapnetweaverQueuePeakCount(ms.SapnetweaverQueuePeakCount),
-		metricSapnetweaverRequestCount:        newMetricSapnetweaverRequestCount(ms.SapnetweaverRequestCount),
-		metricSapnetweaverRequestTimeoutCount: newMetricSapnetweaverRequestTimeoutCount(ms.SapnetweaverRequestTimeoutCount),
-		metricSapnetweaverResponseDuration:    newMetricSapnetweaverResponseDuration(ms.SapnetweaverResponseDuration),
-		metricSapnetweaverSessionCount:        newMetricSapnetweaverSessionCount(ms.SapnetweaverSessionCount),
-		metricSapnetweaverShortDumpsRate:      newMetricSapnetweaverShortDumpsRate(ms.SapnetweaverShortDumpsRate),
-		metricSapnetweaverSystemAvailability:  newMetricSapnetweaverSystemAvailability(ms.SapnetweaverSystemAvailability),
-		metricSapnetweaverSystemUtilization:   newMetricSapnetweaverSystemUtilization(ms.SapnetweaverSystemUtilization),
-		metricSapnetweaverWorkProcessesCount:  newMetricSapnetweaverWorkProcessesCount(ms.SapnetweaverWorkProcessesCount),
+		startTime:                                    pcommon.NewTimestampFromTime(time.Now()),
+		metricsBuffer:                                pmetric.NewMetrics(),
+		buildInfo:                                    settings.BuildInfo,
+		resourceAttributesSettings:                   DefaultResourceAttributesSettings(),
+		metricSapnetweaverAbapUpdateErrorCount:       newMetricSapnetweaverAbapUpdateErrorCount(ms.SapnetweaverAbapUpdateErrorCount),
+		metricSapnetweaverCacheEvictions:             newMetricSapnetweaverCacheEvictions(ms.SapnetweaverCacheEvictions),
+		metricSapnetweaverCacheHits:                  newMetricSapnetweaverCacheHits(ms.SapnetweaverCacheHits),
+		metricSapnetweaverConnectionErrorCount:       newMetricSapnetweaverConnectionErrorCount(ms.SapnetweaverConnectionErrorCount),
+		metricSapnetweaverHostCPUUtilization:         newMetricSapnetweaverHostCPUUtilization(ms.SapnetweaverHostCPUUtilization),
+		metricSapnetweaverHostSpoolListUsed:          newMetricSapnetweaverHostSpoolListUsed(ms.SapnetweaverHostSpoolListUsed),
+		metricSapnetweaverIcmAvailability:            newMetricSapnetweaverIcmAvailability(ms.SapnetweaverIcmAvailability),
+		metricSapnetweaverJobAborted:                 newMetricSapnetweaverJobAborted(ms.SapnetweaverJobAborted),
+		metricSapnetweaverMemoryConfigured:           newMetricSapnetweaverMemoryConfigured(ms.SapnetweaverMemoryConfigured),
+		metricSapnetweaverMemoryFree:                 newMetricSapnetweaverMemoryFree(ms.SapnetweaverMemoryFree),
+		metricSapnetweaverMemorySwapSpaceUtilization: newMetricSapnetweaverMemorySwapSpaceUtilization(ms.SapnetweaverMemorySwapSpaceUtilization),
+		metricSapnetweaverQueueCount:                 newMetricSapnetweaverQueueCount(ms.SapnetweaverQueueCount),
+		metricSapnetweaverQueuePeakCount:             newMetricSapnetweaverQueuePeakCount(ms.SapnetweaverQueuePeakCount),
+		metricSapnetweaverRequestCount:               newMetricSapnetweaverRequestCount(ms.SapnetweaverRequestCount),
+		metricSapnetweaverRequestTimeoutCount:        newMetricSapnetweaverRequestTimeoutCount(ms.SapnetweaverRequestTimeoutCount),
+		metricSapnetweaverResponseDuration:           newMetricSapnetweaverResponseDuration(ms.SapnetweaverResponseDuration),
+		metricSapnetweaverSessionCount:               newMetricSapnetweaverSessionCount(ms.SapnetweaverSessionCount),
+		metricSapnetweaverShortDumpsRate:             newMetricSapnetweaverShortDumpsRate(ms.SapnetweaverShortDumpsRate),
+		metricSapnetweaverSystemAvailability:         newMetricSapnetweaverSystemAvailability(ms.SapnetweaverSystemAvailability),
+		metricSapnetweaverSystemUtilization:          newMetricSapnetweaverSystemUtilization(ms.SapnetweaverSystemUtilization),
+		metricSapnetweaverWorkProcessesCount:         newMetricSapnetweaverWorkProcessesCount(ms.SapnetweaverWorkProcessesCount),
 	}
 	for _, op := range options {
 		op(mb)
@@ -1446,17 +1446,17 @@ func (mb *MetricsBuilder) EmitForResource(rmo ...ResourceMetricsOption) {
 	ils.Scope().SetName("otelcol/sapnetweaverreceiver")
 	ils.Scope().SetVersion(mb.buildInfo.Version)
 	ils.Metrics().EnsureCapacity(mb.metricsCapacity)
-	mb.metricSapnetweaverAbapUpdateErrors.emit(ils.Metrics())
+	mb.metricSapnetweaverAbapUpdateErrorCount.emit(ils.Metrics())
 	mb.metricSapnetweaverCacheEvictions.emit(ils.Metrics())
 	mb.metricSapnetweaverCacheHits.emit(ils.Metrics())
-	mb.metricSapnetweaverConnectionErrors.emit(ils.Metrics())
+	mb.metricSapnetweaverConnectionErrorCount.emit(ils.Metrics())
 	mb.metricSapnetweaverHostCPUUtilization.emit(ils.Metrics())
 	mb.metricSapnetweaverHostSpoolListUsed.emit(ils.Metrics())
 	mb.metricSapnetweaverIcmAvailability.emit(ils.Metrics())
 	mb.metricSapnetweaverJobAborted.emit(ils.Metrics())
 	mb.metricSapnetweaverMemoryConfigured.emit(ils.Metrics())
 	mb.metricSapnetweaverMemoryFree.emit(ils.Metrics())
-	mb.metricSapnetweaverMemoryUsage.emit(ils.Metrics())
+	mb.metricSapnetweaverMemorySwapSpaceUtilization.emit(ils.Metrics())
 	mb.metricSapnetweaverQueueCount.emit(ils.Metrics())
 	mb.metricSapnetweaverQueuePeakCount.emit(ils.Metrics())
 	mb.metricSapnetweaverRequestCount.emit(ils.Metrics())
@@ -1487,9 +1487,9 @@ func (mb *MetricsBuilder) Emit(rmo ...ResourceMetricsOption) pmetric.Metrics {
 	return metrics
 }
 
-// RecordSapnetweaverAbapUpdateErrorsDataPoint adds a data point to sapnetweaver.abap.update.errors metric.
-func (mb *MetricsBuilder) RecordSapnetweaverAbapUpdateErrorsDataPoint(ts pcommon.Timestamp, val int64, controlStateAttributeValue AttributeControlState) {
-	mb.metricSapnetweaverAbapUpdateErrors.recordDataPoint(mb.startTime, ts, val, controlStateAttributeValue.String())
+// RecordSapnetweaverAbapUpdateErrorCountDataPoint adds a data point to sapnetweaver.abap.update.error.count metric.
+func (mb *MetricsBuilder) RecordSapnetweaverAbapUpdateErrorCountDataPoint(ts pcommon.Timestamp, val int64, controlStateAttributeValue AttributeControlState) {
+	mb.metricSapnetweaverAbapUpdateErrorCount.recordDataPoint(mb.startTime, ts, val, controlStateAttributeValue.String())
 }
 
 // RecordSapnetweaverCacheEvictionsDataPoint adds a data point to sapnetweaver.cache.evictions metric.
@@ -1512,13 +1512,13 @@ func (mb *MetricsBuilder) RecordSapnetweaverCacheHitsDataPoint(ts pcommon.Timest
 	return nil
 }
 
-// RecordSapnetweaverConnectionErrorsDataPoint adds a data point to sapnetweaver.connection.errors metric.
-func (mb *MetricsBuilder) RecordSapnetweaverConnectionErrorsDataPoint(ts pcommon.Timestamp, inputVal string) error {
+// RecordSapnetweaverConnectionErrorCountDataPoint adds a data point to sapnetweaver.connection.error.count metric.
+func (mb *MetricsBuilder) RecordSapnetweaverConnectionErrorCountDataPoint(ts pcommon.Timestamp, inputVal string) error {
 	val, err := strconv.ParseInt(inputVal, 10, 64)
 	if err != nil {
-		return fmt.Errorf("failed to parse int64 for SapnetweaverConnectionErrors, value was %s: %w", inputVal, err)
+		return fmt.Errorf("failed to parse int64 for SapnetweaverConnectionErrorCount, value was %s: %w", inputVal, err)
 	}
-	mb.metricSapnetweaverConnectionErrors.recordDataPoint(mb.startTime, ts, val)
+	mb.metricSapnetweaverConnectionErrorCount.recordDataPoint(mb.startTime, ts, val)
 	return nil
 }
 
@@ -1567,13 +1567,13 @@ func (mb *MetricsBuilder) RecordSapnetweaverMemoryFreeDataPoint(ts pcommon.Times
 	mb.metricSapnetweaverMemoryFree.recordDataPoint(mb.startTime, ts, val)
 }
 
-// RecordSapnetweaverMemoryUsageDataPoint adds a data point to sapnetweaver.memory.usage metric.
-func (mb *MetricsBuilder) RecordSapnetweaverMemoryUsageDataPoint(ts pcommon.Timestamp, inputVal string) error {
+// RecordSapnetweaverMemorySwapSpaceUtilizationDataPoint adds a data point to sapnetweaver.memory.swap_space.utilization metric.
+func (mb *MetricsBuilder) RecordSapnetweaverMemorySwapSpaceUtilizationDataPoint(ts pcommon.Timestamp, inputVal string) error {
 	val, err := strconv.ParseInt(inputVal, 10, 64)
 	if err != nil {
-		return fmt.Errorf("failed to parse int64 for SapnetweaverMemoryUsage, value was %s: %w", inputVal, err)
+		return fmt.Errorf("failed to parse int64 for SapnetweaverMemorySwapSpaceUtilization, value was %s: %w", inputVal, err)
 	}
-	mb.metricSapnetweaverMemoryUsage.recordDataPoint(mb.startTime, ts, val)
+	mb.metricSapnetweaverMemorySwapSpaceUtilization.recordDataPoint(mb.startTime, ts, val)
 	return nil
 }
 

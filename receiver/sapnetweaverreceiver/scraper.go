@@ -118,10 +118,7 @@ func (s *sapNetweaverScraper) collectAlertTree(_ context.Context, now pcommon.Ti
 	for _, node := range alertTree.AlertNode {
 		value := strings.Split(node.Description, " ")
 		alertTreeResponse[node.Name] = value[0]
-		if node.Name == "ICM" {
-			alertTreeResponse[node.Name] = string(node.ActualValue)
-		}
-		if node.Name == "AbapErrorInUpdate" {
+		if node.Name == "ICM" || node.Name == "AbapErrorInUpdate" {
 			alertTreeResponse[node.Name] = string(node.ActualValue)
 		}
 
@@ -140,18 +137,18 @@ func (s *sapNetweaverScraper) collectAlertTree(_ context.Context, now pcommon.Ti
 	s.recordSapnetweaverHostCPUUtilizationDataPoint(now, alertTreeResponse, errs)
 	s.recordSapnetweaverSystemAvailabilityDataPoint(now, alertTreeResponse, errs)
 	s.recordSapnetweaverSystemUtilizationDataPoint(now, alertTreeResponse, errs)
-	s.recordSapnetweaverMemoryUsageDataPoint(now, alertTreeResponse, errs)
+	s.recordSapnetweaverMemorySwapSpaceUtilizationDataPoint(now, alertTreeResponse, errs)
 	s.recordSapnetweaverMemoryConfiguredDataPoint(now, alertTreeResponse, errs)
 	s.recordSapnetweaverMemoryFreeDataPoint(now, alertTreeResponse, errs)
 	s.recordSapnetweaverSessionCountDataPoint(now, alertTreeResponse, errs)
 	s.recordSapnetweaverQueueCountDataPoint(now, alertTreeResponse, errs)
 	s.recordSapnetweaverQueuePeakCountDataPoint(now, alertTreeResponse, errs)
 	s.recordSapnetweaverJobAbortedDataPoint(now, alertTreeResponse, errs)
-	s.recordSapnetweaverAbapUpdateErrorsDataPoint(now, alertTreeResponse, errs)
+	s.recordSapnetweaverAbapUpdateErrorCountDataPoint(now, alertTreeResponse, errs)
 	s.RecordSapnetweaverResponseDurationDataPoint(now, alertTreeResponse, errs)
 	s.recordSapnetweaverRequestCountDataPoint(now, alertTreeResponse, errs)
 	s.recordSapnetweaverRequestTimeoutCountDataPoint(now, alertTreeResponse, errs)
-	s.recordSapnetweaverConnectionErrorsDataPoint(now, alertTreeResponse, errs)
+	s.recordSapnetweaverConnectionErrorCountDataPoint(now, alertTreeResponse, errs)
 	s.recordSapnetweaverCacheEvictionsDataPoint(now, alertTreeResponse, errs)
 	s.recordSapnetweaverCacheHitsDataPoint(now, alertTreeResponse, errs)
 	s.recordSapnetweaverIcmAvailabilityDataPoint(now, alertTreeResponse, errs)

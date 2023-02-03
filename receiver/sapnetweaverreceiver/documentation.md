@@ -12,7 +12,7 @@ metrics:
     enabled: false
 ```
 
-### sapnetweaver.abap.update.errors
+### sapnetweaver.abap.update.error.count
 
 The amount of ABAP errors in update.
 
@@ -32,7 +32,7 @@ The number of evicted entries.
 
 | Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
 | ---- | ----------- | ---------- | ----------------------- | --------- |
-| {entr} | Sum | Int | Cumulative | false |
+| {entries} | Sum | Int | Cumulative | false |
 
 ### sapnetweaver.cache.hits
 
@@ -42,7 +42,7 @@ The cache hit percentage.
 | ---- | ----------- | ---------- |
 | % | Gauge | Int |
 
-### sapnetweaver.connection.errors
+### sapnetweaver.connection.error.count
 
 The amount of connection errors.
 
@@ -104,9 +104,9 @@ The amount of free memory.
 | ---- | ----------- | ---------- | ----------------------- | --------- |
 | By | Sum | Int | Cumulative | false |
 
-### sapnetweaver.memory.usage
+### sapnetweaver.memory.swap_space.utilization
 
-The memory usage percentage.
+The swap space utilization percentage.
 
 | Unit | Metric Type | Value Type |
 | ---- | ----------- | ---------- |
@@ -118,7 +118,7 @@ The queue length.
 
 | Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
 | ---- | ----------- | ---------- | ----------------------- | --------- |
-| {entr} | Sum | Int | Cumulative | false |
+| {entries} | Sum | Int | Cumulative | false |
 
 ### sapnetweaver.queue_peak.count
 
@@ -126,7 +126,7 @@ The peak queue length.
 
 | Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
 | ---- | ----------- | ---------- | ----------------------- | --------- |
-| {entr} | Sum | Int | Cumulative | false |
+| {entries} | Sum | Int | Cumulative | false |
 
 ### sapnetweaver.request.count
 

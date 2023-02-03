@@ -85,7 +85,7 @@ func (s *sapNetweaverScraper) recordSapnetweaverSystemUtilizationDataPoint(now p
 	}
 }
 
-func (s *sapNetweaverScraper) recordSapnetweaverMemoryUsageDataPoint(now pcommon.Timestamp, alertTreeResponse map[string]string, errs *scrapererror.ScrapeErrors) {
+func (s *sapNetweaverScraper) recordSapnetweaverMemorySwapSpaceUtilizationDataPoint(now pcommon.Timestamp, alertTreeResponse map[string]string, errs *scrapererror.ScrapeErrors) {
 	// used this name for Percentage_Used which has a parent ID referencing Swap_Space
 	metricName := "Swap_Space_Percentage_Used"
 	val, err := parseResponse(metricName, "", alertTreeResponse)
@@ -94,7 +94,7 @@ func (s *sapNetweaverScraper) recordSapnetweaverMemoryUsageDataPoint(now pcommon
 		return
 	}
 
-	err = s.mb.RecordSapnetweaverMemoryUsageDataPoint(now, val)
+	err = s.mb.RecordSapnetweaverMemorySwapSpaceUtilizationDataPoint(now, val)
 	if err != nil {
 		errs.AddPartial(1, err)
 		return
@@ -195,7 +195,7 @@ func (s *sapNetweaverScraper) recordSapnetweaverJobAbortedDataPoint(now pcommon.
 	}
 }
 
-func (s *sapNetweaverScraper) recordSapnetweaverAbapUpdateErrorsDataPoint(now pcommon.Timestamp, alertTreeResponse map[string]string, errs *scrapererror.ScrapeErrors) {
+func (s *sapNetweaverScraper) recordSapnetweaverAbapUpdateErrorCountDataPoint(now pcommon.Timestamp, alertTreeResponse map[string]string, errs *scrapererror.ScrapeErrors) {
 	metricName := "AbapErrorInUpdate"
 	val, ok := alertTreeResponse[metricName]
 	if !ok {
@@ -205,25 +205,25 @@ func (s *sapNetweaverScraper) recordSapnetweaverAbapUpdateErrorsDataPoint(now pc
 
 	switch models.StateColor(val) {
 	case models.StateColorGray:
-		s.mb.RecordSapnetweaverAbapUpdateErrorsDataPoint(now, 1, metadata.AttributeControlStateGrey)
-		s.mb.RecordSapnetweaverAbapUpdateErrorsDataPoint(now, 0, metadata.AttributeControlStateGreen)
-		s.mb.RecordSapnetweaverAbapUpdateErrorsDataPoint(now, 0, metadata.AttributeControlStateYellow)
-		s.mb.RecordSapnetweaverAbapUpdateErrorsDataPoint(now, 0, metadata.AttributeControlStateRed)
+		s.mb.RecordSapnetweaverAbapUpdateErrorCountDataPoint(now, 1, metadata.AttributeControlStateGrey)
+		s.mb.RecordSapnetweaverAbapUpdateErrorCountDataPoint(now, 0, metadata.AttributeControlStateGreen)
+		s.mb.RecordSapnetweaverAbapUpdateErrorCountDataPoint(now, 0, metadata.AttributeControlStateYellow)
+		s.mb.RecordSapnetweaverAbapUpdateErrorCountDataPoint(now, 0, metadata.AttributeControlStateRed)
 	case models.StateColorGreen:
-		s.mb.RecordSapnetweaverAbapUpdateErrorsDataPoint(now, 0, metadata.AttributeControlStateGrey)
-		s.mb.RecordSapnetweaverAbapUpdateErrorsDataPoint(now, 1, metadata.AttributeControlStateGreen)
-		s.mb.RecordSapnetweaverAbapUpdateErrorsDataPoint(now, 0, metadata.AttributeControlStateYellow)
-		s.mb.RecordSapnetweaverAbapUpdateErrorsDataPoint(now, 0, metadata.AttributeControlStateRed)
+		s.mb.RecordSapnetweaverAbapUpdateErrorCountDataPoint(now, 0, metadata.AttributeControlStateGrey)
+		s.mb.RecordSapnetweaverAbapUpdateErrorCountDataPoint(now, 1, metadata.AttributeControlStateGreen)
+		s.mb.RecordSapnetweaverAbapUpdateErrorCountDataPoint(now, 0, metadata.AttributeControlStateYellow)
+		s.mb.RecordSapnetweaverAbapUpdateErrorCountDataPoint(now, 0, metadata.AttributeControlStateRed)
 	case models.StateColorYellow:
-		s.mb.RecordSapnetweaverAbapUpdateErrorsDataPoint(now, 0, metadata.AttributeControlStateGrey)
-		s.mb.RecordSapnetweaverAbapUpdateErrorsDataPoint(now, 0, metadata.AttributeControlStateGreen)
-		s.mb.RecordSapnetweaverAbapUpdateErrorsDataPoint(now, 1, metadata.AttributeControlStateYellow)
-		s.mb.RecordSapnetweaverAbapUpdateErrorsDataPoint(now, 0, metadata.AttributeControlStateRed)
+		s.mb.RecordSapnetweaverAbapUpdateErrorCountDataPoint(now, 0, metadata.AttributeControlStateGrey)
+		s.mb.RecordSapnetweaverAbapUpdateErrorCountDataPoint(now, 0, metadata.AttributeControlStateGreen)
+		s.mb.RecordSapnetweaverAbapUpdateErrorCountDataPoint(now, 1, metadata.AttributeControlStateYellow)
+		s.mb.RecordSapnetweaverAbapUpdateErrorCountDataPoint(now, 0, metadata.AttributeControlStateRed)
 	case models.StateColorRed:
-		s.mb.RecordSapnetweaverAbapUpdateErrorsDataPoint(now, 0, metadata.AttributeControlStateGrey)
-		s.mb.RecordSapnetweaverAbapUpdateErrorsDataPoint(now, 0, metadata.AttributeControlStateGreen)
-		s.mb.RecordSapnetweaverAbapUpdateErrorsDataPoint(now, 0, metadata.AttributeControlStateYellow)
-		s.mb.RecordSapnetweaverAbapUpdateErrorsDataPoint(now, 1, metadata.AttributeControlStateRed)
+		s.mb.RecordSapnetweaverAbapUpdateErrorCountDataPoint(now, 0, metadata.AttributeControlStateGrey)
+		s.mb.RecordSapnetweaverAbapUpdateErrorCountDataPoint(now, 0, metadata.AttributeControlStateGreen)
+		s.mb.RecordSapnetweaverAbapUpdateErrorCountDataPoint(now, 0, metadata.AttributeControlStateYellow)
+		s.mb.RecordSapnetweaverAbapUpdateErrorCountDataPoint(now, 1, metadata.AttributeControlStateRed)
 	default:
 		errs.AddPartial(1, fmt.Errorf(collectMetricError, metricName, errInvalidStateColor))
 	}
@@ -326,7 +326,7 @@ func (s *sapNetweaverScraper) recordSapnetweaverRequestTimeoutCountDataPoint(now
 	}
 }
 
-func (s *sapNetweaverScraper) recordSapnetweaverConnectionErrorsDataPoint(now pcommon.Timestamp, alertTreeResponse map[string]string, errs *scrapererror.ScrapeErrors) {
+func (s *sapNetweaverScraper) recordSapnetweaverConnectionErrorCountDataPoint(now pcommon.Timestamp, alertTreeResponse map[string]string, errs *scrapererror.ScrapeErrors) {
 	metricName := "StatNoOfConnectionErrors"
 	val, err := parseResponse(metricName, "", alertTreeResponse)
 	if err != nil {
@@ -334,7 +334,7 @@ func (s *sapNetweaverScraper) recordSapnetweaverConnectionErrorsDataPoint(now pc
 		return
 	}
 
-	err = s.mb.RecordSapnetweaverConnectionErrorsDataPoint(now, val)
+	err = s.mb.RecordSapnetweaverConnectionErrorCountDataPoint(now, val)
 	if err != nil {
 		errs.AddPartial(1, err)
 		return
