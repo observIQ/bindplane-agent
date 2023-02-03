@@ -121,8 +121,8 @@ func TestScraperScrape(t *testing.T) {
 	actualMetrics, err := scraper.scrape(context.Background())
 	require.NoError(t, err)
 	require.Equal(t, 1, actualMetrics.ResourceMetrics().Len())
-	require.Equal(t, 29, actualMetrics.DataPointCount())
-	require.Equal(t, 20, actualMetrics.MetricCount())
+	require.Equal(t, 30, actualMetrics.DataPointCount())
+	require.Equal(t, 21, actualMetrics.MetricCount())
 
 	require.EqualValues(t, "sap-app", scraper.hostname)
 	require.EqualValues(t, "sap-inst", scraper.instance)
@@ -250,6 +250,10 @@ func TestScraperScrape(t *testing.T) {
 				dps := m.Sum().DataPoints()
 				require.Equal(t, 1, dps.Len())
 				require.Equal(t, int64(21), dps.At(0).IntValue())
+			case "sapnetweaver.cache.hits":
+				dps := m.Gauge().DataPoints()
+				require.Equal(t, 1, dps.Len())
+				require.Equal(t, int64(22), dps.At(0).IntValue())
 			case "sapnetweaver.cache.evictions":
 				dps := m.Sum().DataPoints()
 				require.Equal(t, 1, dps.Len())
@@ -309,6 +313,7 @@ func TestScraperScrapeHyphenResponse(t *testing.T) {
 		errors.New("failed to collect metric StatNoOfTimeouts: '-' value found"),
 		errors.New("failed to collect metric StatNoOfConnectionErrors: '-' value found"),
 		errors.New("failed to collect metric EvictedEntries: '-' value found"),
+		errors.New("failed to collect metric CacheHits: '-' value found"),
 		errors.New("failed to collect metric HostspoolListUsed: '-' value found"),
 		errors.New("failed to collect metric Shortdumps Frequency: '-' value found"),
 	), err.Error())
@@ -371,6 +376,7 @@ func TestScraperScrapeUnknownResponse(t *testing.T) {
 		errors.New("failed to parse int64 for SapnetweaverRequestTimeoutCount, value was $: strconv.ParseInt: parsing \"$\": invalid syntax"),
 		errors.New("failed to parse int64 for SapnetweaverConnectionErrors, value was $: strconv.ParseInt: parsing \"$\": invalid syntax"),
 		errors.New("failed to parse int64 for SapnetweaverCacheEvictions, value was $: strconv.ParseInt: parsing \"$\": invalid syntax"),
+		errors.New("failed to parse int64 for SapnetweaverCacheHits, value was $: strconv.ParseInt: parsing \"$\": invalid syntax"),
 		errors.New("failed to parse int64 for SapnetweaverHostSpoolListUsed, value was $: strconv.ParseInt: parsing \"$\": invalid syntax"),
 		errors.New("failed to parse int64 for SapnetweaverShortDumpsRate, value was $: strconv.ParseInt: parsing \"$\": invalid syntax"),
 	), err.Error())
@@ -459,6 +465,7 @@ func TestScraperScrapeEmptyXML(t *testing.T) {
 		errors.New("failed to collect metric StatNoOfTimeouts: value not found"),
 		errors.New("failed to collect metric StatNoOfConnectionErrors: value not found"),
 		errors.New("failed to collect metric EvictedEntries: value not found"),
+		errors.New("failed to collect metric CacheHits: value not found"),
 		errors.New("failed to collect metric ICM: value not found"),
 		errors.New("failed to collect metric HostspoolListUsed: value not found"),
 		errors.New("failed to collect metric Shortdumps Frequency: value not found"),

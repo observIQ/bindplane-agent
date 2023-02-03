@@ -153,6 +153,7 @@ func (s *sapNetweaverScraper) collectAlertTree(_ context.Context, now pcommon.Ti
 	s.recordSapnetweaverRequestTimeoutCountDataPoint(now, alertTreeResponse, errs)
 	s.recordSapnetweaverConnectionErrorsDataPoint(now, alertTreeResponse, errs)
 	s.recordSapnetweaverCacheEvictionsDataPoint(now, alertTreeResponse, errs)
+	s.recordSapnetweaverCacheHitsDataPoint(now, alertTreeResponse, errs)
 	s.recordSapnetweaverIcmAvailabilityDataPoint(now, alertTreeResponse, errs)
 	s.recordSapnetweaverHostSpoolListUsedDataPoint(now, alertTreeResponse, errs)
 	s.recordSapnetweaverShortDumpsCountDataPoint(now, alertTreeResponse, errs)

@@ -121,12 +121,12 @@
   <item>
    <name>CacheHits</name>
    <ActualValue>SAPControl-GREEN</ActualValue>
-   <description>22</description>
+   <description>22 perc</description>
   </item>
   <item>
    <name>EvictedEntries</name>
    <ActualValue>SAPControl-GREEN</ActualValue>
-   <description>23</description>
+   <description>23 entr</description>
   </item>
  </tree>
 </GetAlertTreeResponse>
