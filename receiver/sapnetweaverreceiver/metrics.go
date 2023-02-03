@@ -85,7 +85,8 @@ func (s *sapNetweaverScraper) recordSapnetweaverSystemUtilizationDataPoint(now p
 }
 
 func (s *sapNetweaverScraper) recordSapnetweaverMemoryUsageDataPoint(now pcommon.Timestamp, alertTreeResponse map[string]string, errs *scrapererror.ScrapeErrors) {
-	metricName := "Percentage_Used"
+	// used this name for Percentage_Used which has a parent ID referencing Swap_Space
+	metricName := "Swap_Space_Percentage_Used"
 	val, err := parseResponse(metricName, "", alertTreeResponse)
 	if err != nil {
 		errs.AddPartial(1, err)

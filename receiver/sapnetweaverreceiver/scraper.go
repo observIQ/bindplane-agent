@@ -114,6 +114,7 @@ func (s *sapNetweaverScraper) collectAlertTree(_ context.Context, now pcommon.Ti
 		return
 	}
 
+	toggleSwapSpaceFlag := false
 	for _, node := range alertTree.AlertNode {
 		value := strings.Split(node.Description, " ")
 		alertTreeResponse[node.Name] = value[0]
@@ -122,6 +123,16 @@ func (s *sapNetweaverScraper) collectAlertTree(_ context.Context, now pcommon.Ti
 		}
 		if node.Name == "AbapErrorInUpdate" {
 			alertTreeResponse[node.Name] = string(node.ActualValue)
+		}
+
+		// There are multiple "Percentage_Used" fields with no unique column identifiers.
+		// The wanted "Percentage_Used" comes ~2 rows after the Swap_Space.
+		if node.Name == "Swap_Space" {
+			toggleSwapSpaceFlag = true
+		}
+		if toggleSwapSpaceFlag && node.Name == "Percentage_Used" {
+			alertTreeResponse["Swap_Space_Percentage_Used"] = value[0]
+			toggleSwapSpaceFlag = false
 		}
 	}
 

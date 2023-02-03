@@ -37,6 +37,16 @@
   <item>
    <name>Percentage_Used</name>
    <ActualValue>SAPControl-GREEN</ActualValue>
+   <description>100 %</description>
+  </item>
+  <item>
+   <name>Swap_Space</name>
+   <ActualValue>SAPControl-GREEN</ActualValue>
+   <description>7 %</description>
+  </item>
+  <item>
+   <name>Percentage_Used</name>
+   <ActualValue>SAPControl-GREEN</ActualValue>
    <description>7 %</description>
   </item>
   <item>
