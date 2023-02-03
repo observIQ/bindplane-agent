@@ -35,18 +35,6 @@ const (
 	StateColorCodeRed    StateColorCode = 4
 )
 
-// EnqGetLockTableResponse is an xml response struct
-type EnqGetLockTableResponse struct {
-	XMLName xml.Name   `xml:"urn:SAPControl EnqGetLockTableResponse"`
-	EnqLock []*EnqLock `xml:"lock>item,omitempty" json:"lock>item,omitempty"`
-}
-
-// EnqLock is an xml response struct
-type EnqLock struct {
-	LockName string `xml:"lock_name,omitempty" json:"lock_name,omitempty"`
-	Object   string `xml:"object,omitempty" json:"object,omitempty"`
-}
-
 // GetAlertTreeResponse is an xml response struct
 type GetAlertTreeResponse struct {
 	XMLName   xml.Name     `xml:"urn:SAPControl GetAlertTreeResponse"`
@@ -55,9 +43,10 @@ type GetAlertTreeResponse struct {
 
 // AlertNode is an xml response struct
 type AlertNode struct {
-	Name        string     `xml:"name,omitempty" json:"name,omitempty"`
-	ActualValue StateColor `xml:"ActualValue,omitempty" json:"ActualValue,omitempty"`
-	Description string     `xml:"description,omitempty" json:"description,omitempty"`
+	Name          string     `xml:"name,omitempty" json:"name,omitempty"`
+	ActualValue   StateColor `xml:"ActualValue,omitempty" json:"ActualValue,omitempty"`
+	Description   string     `xml:"description,omitempty" json:"description,omitempty"`
+	AlDescription string     `xml:"AlDescription,omitempty" json:"AlDescription,omitempty"`
 }
 
 // GetInstancePropertiesResponse is an xml response struct

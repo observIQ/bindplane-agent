@@ -23,7 +23,6 @@ import (
 type webService interface {
 	GetInstanceProperties() (*models.GetInstancePropertiesResponse, error)
 	GetAlertTree() (*models.GetAlertTreeResponse, error)
-	EnqGetLockTable() (*models.EnqGetLockTableResponse, error)
 }
 
 type netweaverWebService struct {
@@ -34,17 +33,6 @@ func newWebService(client *soap.Client) webService {
 	return &netweaverWebService{
 		client: client,
 	}
-}
-
-func (s *netweaverWebService) EnqGetLockTable() (*models.EnqGetLockTableResponse, error) {
-	request := &models.EnqGetLockTable{}
-	response := &models.EnqGetLockTableResponse{}
-	err := s.client.Call("''", request, response)
-	if err != nil {
-		return nil, err
-	}
-
-	return response, nil
 }
 
 func (s *netweaverWebService) GetAlertTree() (*models.GetAlertTreeResponse, error) {

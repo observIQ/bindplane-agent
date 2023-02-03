@@ -49,7 +49,7 @@ func newSapNetweaverScraper(
 	a := &sapNetweaverScraper{
 		settings: settings.TelemetrySettings,
 		cfg:      cfg,
-		mb:       metadata.NewMetricsBuilder(cfg.Metrics, settings.BuildInfo),
+		mb:       metadata.NewMetricsBuilder(cfg.Metrics, settings),
 	}
 
 	return a
@@ -103,7 +103,6 @@ func (s *sapNetweaverScraper) scrape(ctx context.Context) (pmetric.Metrics, erro
 func (s *sapNetweaverScraper) collectMetrics(ctx context.Context, errs *scrapererror.ScrapeErrors) {
 	now := pcommon.NewTimestampFromTime(time.Now())
 	s.collectAlertTree(ctx, now, errs)
-	s.collectEnqGetLockTable(ctx, now, errs)
 	s.mb.EmitForResource(metadata.WithSapnetweaverInstance(s.instance), metadata.WithSapnetweaverNode(s.hostname))
 }
 
@@ -121,28 +120,29 @@ func (s *sapNetweaverScraper) collectAlertTree(_ context.Context, now pcommon.Ti
 		if node.Name == "ICM" {
 			alertTreeResponse[node.Name] = string(node.ActualValue)
 		}
+		if node.Name == "AbapErrorInUpdate" {
+			alertTreeResponse[node.Name] = string(node.ActualValue)
+		}
 	}
 
-	s.recordSapnetweaverHostCPUUtilizationDataPoint(now, alertTreeResponse, errs)
-	s.recordSapnetweaverHostMemoryVirtualOverheadDataPoint(now, alertTreeResponse, errs)
-	s.recordSapnetweaverHostMemoryVirtualSwapDataPoint(now, alertTreeResponse, errs)
-	s.recordSapnetweaverSessionsHTTPCountDataPoint(now, alertTreeResponse, errs)
-	s.recordCurrentSecuritySessions(now, alertTreeResponse, errs)
 	s.recordSapnetweaverWorkProcessesActiveCount(now, alertTreeResponse, errs)
-	s.recordSapnetweaverSessionsWebCountDataPoint(now, alertTreeResponse, errs)
-	s.recordSapnetweaverSessionsBrowserCountDataPoint(now, alertTreeResponse, errs)
-	s.recordSapnetweaverSessionsEjbCountDataPoint(now, alertTreeResponse, errs)
+	s.recordSapnetweaverHostCPUUtilizationDataPoint(now, alertTreeResponse, errs)
+	s.recordSapnetweaverSystemAvailabilityDataPoint(now, alertTreeResponse, errs)
+	s.recordSapnetweaverSystemUtilizationDataPoint(now, alertTreeResponse, errs)
+	s.recordSapnetweaverMemoryUsageDataPoint(now, alertTreeResponse, errs)
+	s.recordSapnetweaverMemoryConfiguredDataPoint(now, alertTreeResponse, errs)
+	s.recordSapnetweaverMemoryFreeDataPoint(now, alertTreeResponse, errs)
+	s.recordSapnetweaverSessionCountDataPoint(now, alertTreeResponse, errs)
+	s.recordSapnetweaverQueueCountDataPoint(now, alertTreeResponse, errs)
+	s.recordSapnetweaverQueuePeakCountDataPoint(now, alertTreeResponse, errs)
+	s.recordSapnetweaverJobAbortedDataPoint(now, alertTreeResponse, errs)
+	s.recordSapnetweaverAbapUpdateErrorsDataPoint(now, alertTreeResponse, errs)
+	s.RecordSapnetweaverResponseDurationDataPoint(now, alertTreeResponse, errs)
+	s.recordSapnetweaverRequestCountDataPoint(now, alertTreeResponse, errs)
+	s.recordSapnetweaverRequestTimeoutCountDataPoint(now, alertTreeResponse, errs)
+	s.recordSapnetweaverConnectionErrorsDataPoint(now, alertTreeResponse, errs)
+	s.recordSapnetweaverCacheEvictionsDataPoint(now, alertTreeResponse, errs)
 	s.recordSapnetweaverIcmAvailabilityDataPoint(now, alertTreeResponse, errs)
 	s.recordSapnetweaverHostSpoolListUsedDataPoint(now, alertTreeResponse, errs)
 	s.recordSapnetweaverShortDumpsCountDataPoint(now, alertTreeResponse, errs)
-}
-
-func (s *sapNetweaverScraper) collectEnqGetLockTable(_ context.Context, now pcommon.Timestamp, errs *scrapererror.ScrapeErrors) {
-	lockTable, err := s.service.EnqGetLockTable()
-	if err != nil {
-		errs.AddPartial(1, fmt.Errorf("failed to collect Enq Lock Table metrics: %w", err))
-		return
-	}
-
-	s.mb.RecordSapnetweaverLocksEnqueueCountDataPoint(now, int64(len(lockTable.EnqLock)))
 }
