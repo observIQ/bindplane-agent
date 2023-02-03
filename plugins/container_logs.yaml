@@ -53,7 +53,7 @@ parameters:
   - name: offset_storage_dir
     description: The directory that the offset storage file will be created
     type: string
-    default: $OIQ_OTEL_COLLECTOR_STORAGE
+    default: $OIQ_OTEL_COLLECTOR_HOME/storage
 
 template: |
   extensions:

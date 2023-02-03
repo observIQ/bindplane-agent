@@ -18,8 +18,7 @@ When set to `auto`, the format will be detected using regex. Format detection
 is convenient but comes with the cost of performing a regex match against every
 log entry read by the filelog receiver.
  | string | `auto` | false | `auto`, `docker-json-file`, `containerd-cri` |
-| offset_storage_dir | The directory that the offset storage file will be created | string | `$OIQ_OTEL_COLLECTOR_STORAGE` | false |  |
-
+| offset_storage_dir | The directory that the offset storage file will be created | string | `$OIQ_OTEL_COLLECTOR_HOME/storage` | false |  |
 
 ## Example Config:
 
@@ -37,4 +36,5 @@ receivers:
       body_json_parsing: true
       start_at: end
       log_driver: auto
+      offset_storage_dir: $OIQ_OTEL_COLLECTOR_HOME/storage
 ```
