@@ -48,6 +48,79 @@ metrics:
       input_type: string
     attributes: []
     enabled: true
+  sapnetweaver.host.memory.virtual.overhead:
+    description: Virtualization System Memory Overhead.
+    unit: "bytes"
+    gauge:
+      value_type: int
+    attributes: []
+    enabled: true
+  sapnetweaver.host.memory.virtual.swap:
+    description: Virtualization System Swap Memory.
+    unit: "bytes"
+    gauge:
+      value_type: int
+    attributes: []
+    enabled: true
+  sapnetweaver.sessions.http.count:
+    description: The number of HTTP Sessions.
+    unit: "{sessions}"
+    sum:
+      monotonic: false
+      aggregation: cumulative
+      value_type: int
+      input_type: string
+    attributes: []
+    enabled: true
+  sapnetweaver.sessions.security.count:
+    description: The number of Security Sessions.
+    unit: "{sessions}"
+    sum:
+      monotonic: false
+      aggregation: cumulative
+      value_type: int
+      input_type: string
+    attributes: []
+    enabled: true
+  sapnetweaver.sessions.web.count:
+    description: The number of Web Sessions.
+    unit: "{sessions}"
+    sum:
+      monotonic: false
+      aggregation: cumulative
+      value_type: int
+      input_type: string
+    attributes: []
+    enabled: true
+  sapnetweaver.sessions.browser.count:
+    description: The number of Browser Sessions.
+    unit: "{sessions}"
+    sum:
+      monotonic: false
+      aggregation: cumulative
+      value_type: int
+      input_type: string
+    attributes: []
+    enabled: true
+  sapnetweaver.sessions.ejb.count:
+    description: The number of EJB Sessions.
+    unit: "{sessions}"
+    sum:
+      monotonic: false
+      aggregation: cumulative
+      value_type: int
+      input_type: string
+    attributes: []
+    enabled: true
+  sapnetweaver.locks.enqueue.count:
+    description: Count of Enqueued Locks.
+    unit: "{locks}"
+    sum:
+      monotonic: false
+      aggregation: cumulative
+      value_type: int
+    attributes: []
+    enabled: true
   sapnetweaver.system.availability:
     description: The system availability percentage.
     unit: "%"

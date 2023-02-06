@@ -10,11 +10,17 @@ all_metrics:
     enabled: true
   sapnetweaver.host.cpu.utilization:
     enabled: true
+  sapnetweaver.host.memory.virtual.overhead:
+    enabled: true
+  sapnetweaver.host.memory.virtual.swap:
+    enabled: true
   sapnetweaver.host.spool_list.used:
     enabled: true
   sapnetweaver.icm_availability:
     enabled: true
   sapnetweaver.job.aborted:
+    enabled: true
+  sapnetweaver.locks.enqueue.count:
     enabled: true
   sapnetweaver.memory.configured:
     enabled: true
@@ -33,6 +39,16 @@ all_metrics:
   sapnetweaver.response.duration:
     enabled: true
   sapnetweaver.session.count:
+    enabled: true
+  sapnetweaver.sessions.browser.count:
+    enabled: true
+  sapnetweaver.sessions.ejb.count:
+    enabled: true
+  sapnetweaver.sessions.http.count:
+    enabled: true
+  sapnetweaver.sessions.security.count:
+    enabled: true
+  sapnetweaver.sessions.web.count:
     enabled: true
   sapnetweaver.short_dumps.rate:
     enabled: true
@@ -53,11 +69,17 @@ no_metrics:
     enabled: false
   sapnetweaver.host.cpu.utilization:
     enabled: false
+  sapnetweaver.host.memory.virtual.overhead:
+    enabled: false
+  sapnetweaver.host.memory.virtual.swap:
+    enabled: false
   sapnetweaver.host.spool_list.used:
     enabled: false
   sapnetweaver.icm_availability:
     enabled: false
   sapnetweaver.job.aborted:
+    enabled: false
+  sapnetweaver.locks.enqueue.count:
     enabled: false
   sapnetweaver.memory.configured:
     enabled: false
@@ -76,6 +98,16 @@ no_metrics:
   sapnetweaver.response.duration:
     enabled: false
   sapnetweaver.session.count:
+    enabled: false
+  sapnetweaver.sessions.browser.count:
+    enabled: false
+  sapnetweaver.sessions.ejb.count:
+    enabled: false
+  sapnetweaver.sessions.http.count:
+    enabled: false
+  sapnetweaver.sessions.security.count:
+    enabled: false
+  sapnetweaver.sessions.web.count:
     enabled: false
   sapnetweaver.short_dumps.rate:
     enabled: false

@@ -229,7 +229,7 @@ func (s *sapNetweaverScraper) recordSapnetweaverAbapUpdateErrorCountDataPoint(no
 	}
 }
 
-func (s *sapNetweaverScraper) RecordSapnetweaverResponseDurationDataPoint(now pcommon.Timestamp, alertTreeResponse map[string]string, errs *scrapererror.ScrapeErrors) {
+func (s *sapNetweaverScraper) recordSapnetweaverResponseDurationDataPoint(now pcommon.Timestamp, alertTreeResponse map[string]string, errs *scrapererror.ScrapeErrors) {
 	s.recordSapnetweaverResponseDurationDataPointDialog(now, alertTreeResponse, errs)
 	s.recordSapnetweaverResponseDurationDataPointDialogRFC(now, alertTreeResponse, errs)
 	s.recordSapnetweaverResponseDurationDataPointTransaction(now, alertTreeResponse, errs)
@@ -444,6 +444,115 @@ func (s *sapNetweaverScraper) recordSapnetweaverShortDumpsCountDataPoint(now pco
 	}
 
 	err = s.mb.RecordSapnetweaverShortDumpsRateDataPoint(now, val)
+	if err != nil {
+		errs.AddPartial(1, err)
+		return
+	}
+}
+
+func (s *sapNetweaverScraper) recordSapnetweaverHostMemoryVirtualOverheadDataPoint(now pcommon.Timestamp, alertTreeResponse map[string]string, errs *scrapererror.ScrapeErrors) {
+	metricName := "Memory Overhead"
+	val, err := parseResponse(metricName, "", alertTreeResponse)
+	if err != nil {
+		errs.AddPartial(1, err)
+		return
+	}
+
+	mbytes, err := strconv.ParseInt(val, 10, 64)
+	if err != nil {
+		errs.AddPartial(1, fmt.Errorf("failed to parse int64 for SapnetweaverHostMemoryVirtualOverhead, value was %v: %w", val, err))
+		return
+	}
+
+	s.mb.RecordSapnetweaverHostMemoryVirtualOverheadDataPoint(now, mbytes*int64(MBToBytes))
+}
+
+func (s *sapNetweaverScraper) recordSapnetweaverHostMemoryVirtualSwapDataPoint(now pcommon.Timestamp, alertTreeResponse map[string]string, errs *scrapererror.ScrapeErrors) {
+	metricName := "Memory Swapped Out"
+	val, err := parseResponse(metricName, "", alertTreeResponse)
+	if err != nil {
+		errs.AddPartial(1, err)
+		return
+	}
+
+	mbytes, err := strconv.ParseInt(val, 10, 64)
+	if err != nil {
+		errs.AddPartial(1, fmt.Errorf("failed to parse int64 for SapnetweaverHostMemoryVirtualSwap, value was %v: %w", val, err))
+		return
+	}
+
+	s.mb.RecordSapnetweaverHostMemoryVirtualSwapDataPoint(now, mbytes*int64(MBToBytes))
+}
+
+func (s *sapNetweaverScraper) recordSapnetweaverSessionsHTTPCountDataPoint(now pcommon.Timestamp, alertTreeResponse map[string]string, errs *scrapererror.ScrapeErrors) {
+	metricName := "CurrentHttpSessions"
+	val, err := parseResponse(metricName, "", alertTreeResponse)
+	if err != nil {
+		errs.AddPartial(1, err)
+		return
+	}
+
+	err = s.mb.RecordSapnetweaverSessionsHTTPCountDataPoint(now, val)
+	if err != nil {
+		errs.AddPartial(1, err)
+		return
+	}
+}
+
+func (s *sapNetweaverScraper) recordCurrentSecuritySessions(now pcommon.Timestamp, alertTreeResponse map[string]string, errs *scrapererror.ScrapeErrors) {
+	metricName := "CurrentSecuritySessions"
+	val, err := parseResponse(metricName, "", alertTreeResponse)
+	if err != nil {
+		errs.AddPartial(1, err)
+		return
+	}
+
+	err = s.mb.RecordSapnetweaverSessionsSecurityCountDataPoint(now, val)
+	if err != nil {
+		errs.AddPartial(1, err)
+		return
+	}
+}
+
+func (s *sapNetweaverScraper) recordSapnetweaverSessionsWebCountDataPoint(now pcommon.Timestamp, alertTreeResponse map[string]string, errs *scrapererror.ScrapeErrors) {
+	metricName := "Web Sessions"
+	val, err := parseResponse(metricName, "", alertTreeResponse)
+	if err != nil {
+		errs.AddPartial(1, err)
+		return
+	}
+
+	err = s.mb.RecordSapnetweaverSessionsWebCountDataPoint(now, val)
+	if err != nil {
+		errs.AddPartial(1, err)
+		return
+	}
+}
+
+func (s *sapNetweaverScraper) recordSapnetweaverSessionsBrowserCountDataPoint(now pcommon.Timestamp, alertTreeResponse map[string]string, errs *scrapererror.ScrapeErrors) {
+	metricName := "Browser Sessions"
+	val, err := parseResponse(metricName, "", alertTreeResponse)
+	if err != nil {
+		errs.AddPartial(1, err)
+		return
+	}
+
+	err = s.mb.RecordSapnetweaverSessionsBrowserCountDataPoint(now, val)
+	if err != nil {
+		errs.AddPartial(1, err)
+		return
+	}
+}
+
+func (s *sapNetweaverScraper) recordSapnetweaverSessionsEjbCountDataPoint(now pcommon.Timestamp, alertTreeResponse map[string]string, errs *scrapererror.ScrapeErrors) {
+	metricName := "EJB Sessions"
+	val, err := parseResponse(metricName, "", alertTreeResponse)
+	if err != nil {
+		errs.AddPartial(1, err)
+		return
+	}
+
+	err = s.mb.RecordSapnetweaverSessionsEjbCountDataPoint(now, val)
 	if err != nil {
 		errs.AddPartial(1, err)
 		return

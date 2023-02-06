@@ -40,9 +40,12 @@ type MetricsSettings struct {
 	SapnetweaverCacheHits                  MetricSettings `mapstructure:"sapnetweaver.cache.hits"`
 	SapnetweaverConnectionErrorCount       MetricSettings `mapstructure:"sapnetweaver.connection.error.count"`
 	SapnetweaverHostCPUUtilization         MetricSettings `mapstructure:"sapnetweaver.host.cpu.utilization"`
+	SapnetweaverHostMemoryVirtualOverhead  MetricSettings `mapstructure:"sapnetweaver.host.memory.virtual.overhead"`
+	SapnetweaverHostMemoryVirtualSwap      MetricSettings `mapstructure:"sapnetweaver.host.memory.virtual.swap"`
 	SapnetweaverHostSpoolListUsed          MetricSettings `mapstructure:"sapnetweaver.host.spool_list.used"`
 	SapnetweaverIcmAvailability            MetricSettings `mapstructure:"sapnetweaver.icm_availability"`
 	SapnetweaverJobAborted                 MetricSettings `mapstructure:"sapnetweaver.job.aborted"`
+	SapnetweaverLocksEnqueueCount          MetricSettings `mapstructure:"sapnetweaver.locks.enqueue.count"`
 	SapnetweaverMemoryConfigured           MetricSettings `mapstructure:"sapnetweaver.memory.configured"`
 	SapnetweaverMemoryFree                 MetricSettings `mapstructure:"sapnetweaver.memory.free"`
 	SapnetweaverMemorySwapSpaceUtilization MetricSettings `mapstructure:"sapnetweaver.memory.swap_space.utilization"`
@@ -52,6 +55,11 @@ type MetricsSettings struct {
 	SapnetweaverRequestTimeoutCount        MetricSettings `mapstructure:"sapnetweaver.request.timeout.count"`
 	SapnetweaverResponseDuration           MetricSettings `mapstructure:"sapnetweaver.response.duration"`
 	SapnetweaverSessionCount               MetricSettings `mapstructure:"sapnetweaver.session.count"`
+	SapnetweaverSessionsBrowserCount       MetricSettings `mapstructure:"sapnetweaver.sessions.browser.count"`
+	SapnetweaverSessionsEjbCount           MetricSettings `mapstructure:"sapnetweaver.sessions.ejb.count"`
+	SapnetweaverSessionsHTTPCount          MetricSettings `mapstructure:"sapnetweaver.sessions.http.count"`
+	SapnetweaverSessionsSecurityCount      MetricSettings `mapstructure:"sapnetweaver.sessions.security.count"`
+	SapnetweaverSessionsWebCount           MetricSettings `mapstructure:"sapnetweaver.sessions.web.count"`
 	SapnetweaverShortDumpsRate             MetricSettings `mapstructure:"sapnetweaver.short_dumps.rate"`
 	SapnetweaverSystemAvailability         MetricSettings `mapstructure:"sapnetweaver.system.availability"`
 	SapnetweaverSystemUtilization          MetricSettings `mapstructure:"sapnetweaver.system.utilization"`
@@ -75,6 +83,12 @@ func DefaultMetricsSettings() MetricsSettings {
 		SapnetweaverHostCPUUtilization: MetricSettings{
 			Enabled: true,
 		},
+		SapnetweaverHostMemoryVirtualOverhead: MetricSettings{
+			Enabled: true,
+		},
+		SapnetweaverHostMemoryVirtualSwap: MetricSettings{
+			Enabled: true,
+		},
 		SapnetweaverHostSpoolListUsed: MetricSettings{
 			Enabled: true,
 		},
@@ -82,6 +96,9 @@ func DefaultMetricsSettings() MetricsSettings {
 			Enabled: true,
 		},
 		SapnetweaverJobAborted: MetricSettings{
+			Enabled: true,
+		},
+		SapnetweaverLocksEnqueueCount: MetricSettings{
 			Enabled: true,
 		},
 		SapnetweaverMemoryConfigured: MetricSettings{
@@ -109,6 +126,21 @@ func DefaultMetricsSettings() MetricsSettings {
 			Enabled: true,
 		},
 		SapnetweaverSessionCount: MetricSettings{
+			Enabled: true,
+		},
+		SapnetweaverSessionsBrowserCount: MetricSettings{
+			Enabled: true,
+		},
+		SapnetweaverSessionsEjbCount: MetricSettings{
+			Enabled: true,
+		},
+		SapnetweaverSessionsHTTPCount: MetricSettings{
+			Enabled: true,
+		},
+		SapnetweaverSessionsSecurityCount: MetricSettings{
+			Enabled: true,
+		},
+		SapnetweaverSessionsWebCount: MetricSettings{
 			Enabled: true,
 		},
 		SapnetweaverShortDumpsRate: MetricSettings{
@@ -483,6 +515,104 @@ func newMetricSapnetweaverHostCPUUtilization(settings MetricSettings) metricSapn
 	return m
 }
 
+type metricSapnetweaverHostMemoryVirtualOverhead struct {
+	data     pmetric.Metric // data buffer for generated metric.
+	settings MetricSettings // metric settings provided by user.
+	capacity int            // max observed number of data points added to the metric.
+}
+
+// init fills sapnetweaver.host.memory.virtual.overhead metric with initial data.
+func (m *metricSapnetweaverHostMemoryVirtualOverhead) init() {
+	m.data.SetName("sapnetweaver.host.memory.virtual.overhead")
+	m.data.SetDescription("Virtualization System Memory Overhead.")
+	m.data.SetUnit("bytes")
+	m.data.SetEmptyGauge()
+}
+
+func (m *metricSapnetweaverHostMemoryVirtualOverhead) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val int64) {
+	if !m.settings.Enabled {
+		return
+	}
+	dp := m.data.Gauge().DataPoints().AppendEmpty()
+	dp.SetStartTimestamp(start)
+	dp.SetTimestamp(ts)
+	dp.SetIntValue(val)
+}
+
+// updateCapacity saves max length of data point slices that will be used for the slice capacity.
+func (m *metricSapnetweaverHostMemoryVirtualOverhead) updateCapacity() {
+	if m.data.Gauge().DataPoints().Len() > m.capacity {
+		m.capacity = m.data.Gauge().DataPoints().Len()
+	}
+}
+
+// emit appends recorded metric data to a metrics slice and prepares it for recording another set of data points.
+func (m *metricSapnetweaverHostMemoryVirtualOverhead) emit(metrics pmetric.MetricSlice) {
+	if m.settings.Enabled && m.data.Gauge().DataPoints().Len() > 0 {
+		m.updateCapacity()
+		m.data.MoveTo(metrics.AppendEmpty())
+		m.init()
+	}
+}
+
+func newMetricSapnetweaverHostMemoryVirtualOverhead(settings MetricSettings) metricSapnetweaverHostMemoryVirtualOverhead {
+	m := metricSapnetweaverHostMemoryVirtualOverhead{settings: settings}
+	if settings.Enabled {
+		m.data = pmetric.NewMetric()
+		m.init()
+	}
+	return m
+}
+
+type metricSapnetweaverHostMemoryVirtualSwap struct {
+	data     pmetric.Metric // data buffer for generated metric.
+	settings MetricSettings // metric settings provided by user.
+	capacity int            // max observed number of data points added to the metric.
+}
+
+// init fills sapnetweaver.host.memory.virtual.swap metric with initial data.
+func (m *metricSapnetweaverHostMemoryVirtualSwap) init() {
+	m.data.SetName("sapnetweaver.host.memory.virtual.swap")
+	m.data.SetDescription("Virtualization System Swap Memory.")
+	m.data.SetUnit("bytes")
+	m.data.SetEmptyGauge()
+}
+
+func (m *metricSapnetweaverHostMemoryVirtualSwap) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val int64) {
+	if !m.settings.Enabled {
+		return
+	}
+	dp := m.data.Gauge().DataPoints().AppendEmpty()
+	dp.SetStartTimestamp(start)
+	dp.SetTimestamp(ts)
+	dp.SetIntValue(val)
+}
+
+// updateCapacity saves max length of data point slices that will be used for the slice capacity.
+func (m *metricSapnetweaverHostMemoryVirtualSwap) updateCapacity() {
+	if m.data.Gauge().DataPoints().Len() > m.capacity {
+		m.capacity = m.data.Gauge().DataPoints().Len()
+	}
+}
+
+// emit appends recorded metric data to a metrics slice and prepares it for recording another set of data points.
+func (m *metricSapnetweaverHostMemoryVirtualSwap) emit(metrics pmetric.MetricSlice) {
+	if m.settings.Enabled && m.data.Gauge().DataPoints().Len() > 0 {
+		m.updateCapacity()
+		m.data.MoveTo(metrics.AppendEmpty())
+		m.init()
+	}
+}
+
+func newMetricSapnetweaverHostMemoryVirtualSwap(settings MetricSettings) metricSapnetweaverHostMemoryVirtualSwap {
+	m := metricSapnetweaverHostMemoryVirtualSwap{settings: settings}
+	if settings.Enabled {
+		m.data = pmetric.NewMetric()
+		m.init()
+	}
+	return m
+}
+
 type metricSapnetweaverHostSpoolListUsed struct {
 	data     pmetric.Metric // data buffer for generated metric.
 	settings MetricSettings // metric settings provided by user.
@@ -631,6 +761,57 @@ func (m *metricSapnetweaverJobAborted) emit(metrics pmetric.MetricSlice) {
 
 func newMetricSapnetweaverJobAborted(settings MetricSettings) metricSapnetweaverJobAborted {
 	m := metricSapnetweaverJobAborted{settings: settings}
+	if settings.Enabled {
+		m.data = pmetric.NewMetric()
+		m.init()
+	}
+	return m
+}
+
+type metricSapnetweaverLocksEnqueueCount struct {
+	data     pmetric.Metric // data buffer for generated metric.
+	settings MetricSettings // metric settings provided by user.
+	capacity int            // max observed number of data points added to the metric.
+}
+
+// init fills sapnetweaver.locks.enqueue.count metric with initial data.
+func (m *metricSapnetweaverLocksEnqueueCount) init() {
+	m.data.SetName("sapnetweaver.locks.enqueue.count")
+	m.data.SetDescription("Count of Enqueued Locks.")
+	m.data.SetUnit("{locks}")
+	m.data.SetEmptySum()
+	m.data.Sum().SetIsMonotonic(false)
+	m.data.Sum().SetAggregationTemporality(pmetric.AggregationTemporalityCumulative)
+}
+
+func (m *metricSapnetweaverLocksEnqueueCount) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val int64) {
+	if !m.settings.Enabled {
+		return
+	}
+	dp := m.data.Sum().DataPoints().AppendEmpty()
+	dp.SetStartTimestamp(start)
+	dp.SetTimestamp(ts)
+	dp.SetIntValue(val)
+}
+
+// updateCapacity saves max length of data point slices that will be used for the slice capacity.
+func (m *metricSapnetweaverLocksEnqueueCount) updateCapacity() {
+	if m.data.Sum().DataPoints().Len() > m.capacity {
+		m.capacity = m.data.Sum().DataPoints().Len()
+	}
+}
+
+// emit appends recorded metric data to a metrics slice and prepares it for recording another set of data points.
+func (m *metricSapnetweaverLocksEnqueueCount) emit(metrics pmetric.MetricSlice) {
+	if m.settings.Enabled && m.data.Sum().DataPoints().Len() > 0 {
+		m.updateCapacity()
+		m.data.MoveTo(metrics.AppendEmpty())
+		m.init()
+	}
+}
+
+func newMetricSapnetweaverLocksEnqueueCount(settings MetricSettings) metricSapnetweaverLocksEnqueueCount {
+	m := metricSapnetweaverLocksEnqueueCount{settings: settings}
 	if settings.Enabled {
 		m.data = pmetric.NewMetric()
 		m.init()
@@ -1097,6 +1278,261 @@ func newMetricSapnetweaverSessionCount(settings MetricSettings) metricSapnetweav
 	return m
 }
 
+type metricSapnetweaverSessionsBrowserCount struct {
+	data     pmetric.Metric // data buffer for generated metric.
+	settings MetricSettings // metric settings provided by user.
+	capacity int            // max observed number of data points added to the metric.
+}
+
+// init fills sapnetweaver.sessions.browser.count metric with initial data.
+func (m *metricSapnetweaverSessionsBrowserCount) init() {
+	m.data.SetName("sapnetweaver.sessions.browser.count")
+	m.data.SetDescription("The number of Browser Sessions.")
+	m.data.SetUnit("{sessions}")
+	m.data.SetEmptySum()
+	m.data.Sum().SetIsMonotonic(false)
+	m.data.Sum().SetAggregationTemporality(pmetric.AggregationTemporalityCumulative)
+}
+
+func (m *metricSapnetweaverSessionsBrowserCount) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val int64) {
+	if !m.settings.Enabled {
+		return
+	}
+	dp := m.data.Sum().DataPoints().AppendEmpty()
+	dp.SetStartTimestamp(start)
+	dp.SetTimestamp(ts)
+	dp.SetIntValue(val)
+}
+
+// updateCapacity saves max length of data point slices that will be used for the slice capacity.
+func (m *metricSapnetweaverSessionsBrowserCount) updateCapacity() {
+	if m.data.Sum().DataPoints().Len() > m.capacity {
+		m.capacity = m.data.Sum().DataPoints().Len()
+	}
+}
+
+// emit appends recorded metric data to a metrics slice and prepares it for recording another set of data points.
+func (m *metricSapnetweaverSessionsBrowserCount) emit(metrics pmetric.MetricSlice) {
+	if m.settings.Enabled && m.data.Sum().DataPoints().Len() > 0 {
+		m.updateCapacity()
+		m.data.MoveTo(metrics.AppendEmpty())
+		m.init()
+	}
+}
+
+func newMetricSapnetweaverSessionsBrowserCount(settings MetricSettings) metricSapnetweaverSessionsBrowserCount {
+	m := metricSapnetweaverSessionsBrowserCount{settings: settings}
+	if settings.Enabled {
+		m.data = pmetric.NewMetric()
+		m.init()
+	}
+	return m
+}
+
+type metricSapnetweaverSessionsEjbCount struct {
+	data     pmetric.Metric // data buffer for generated metric.
+	settings MetricSettings // metric settings provided by user.
+	capacity int            // max observed number of data points added to the metric.
+}
+
+// init fills sapnetweaver.sessions.ejb.count metric with initial data.
+func (m *metricSapnetweaverSessionsEjbCount) init() {
+	m.data.SetName("sapnetweaver.sessions.ejb.count")
+	m.data.SetDescription("The number of EJB Sessions.")
+	m.data.SetUnit("{sessions}")
+	m.data.SetEmptySum()
+	m.data.Sum().SetIsMonotonic(false)
+	m.data.Sum().SetAggregationTemporality(pmetric.AggregationTemporalityCumulative)
+}
+
+func (m *metricSapnetweaverSessionsEjbCount) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val int64) {
+	if !m.settings.Enabled {
+		return
+	}
+	dp := m.data.Sum().DataPoints().AppendEmpty()
+	dp.SetStartTimestamp(start)
+	dp.SetTimestamp(ts)
+	dp.SetIntValue(val)
+}
+
+// updateCapacity saves max length of data point slices that will be used for the slice capacity.
+func (m *metricSapnetweaverSessionsEjbCount) updateCapacity() {
+	if m.data.Sum().DataPoints().Len() > m.capacity {
+		m.capacity = m.data.Sum().DataPoints().Len()
+	}
+}
+
+// emit appends recorded metric data to a metrics slice and prepares it for recording another set of data points.
+func (m *metricSapnetweaverSessionsEjbCount) emit(metrics pmetric.MetricSlice) {
+	if m.settings.Enabled && m.data.Sum().DataPoints().Len() > 0 {
+		m.updateCapacity()
+		m.data.MoveTo(metrics.AppendEmpty())
+		m.init()
+	}
+}
+
+func newMetricSapnetweaverSessionsEjbCount(settings MetricSettings) metricSapnetweaverSessionsEjbCount {
+	m := metricSapnetweaverSessionsEjbCount{settings: settings}
+	if settings.Enabled {
+		m.data = pmetric.NewMetric()
+		m.init()
+	}
+	return m
+}
+
+type metricSapnetweaverSessionsHTTPCount struct {
+	data     pmetric.Metric // data buffer for generated metric.
+	settings MetricSettings // metric settings provided by user.
+	capacity int            // max observed number of data points added to the metric.
+}
+
+// init fills sapnetweaver.sessions.http.count metric with initial data.
+func (m *metricSapnetweaverSessionsHTTPCount) init() {
+	m.data.SetName("sapnetweaver.sessions.http.count")
+	m.data.SetDescription("The number of HTTP Sessions.")
+	m.data.SetUnit("{sessions}")
+	m.data.SetEmptySum()
+	m.data.Sum().SetIsMonotonic(false)
+	m.data.Sum().SetAggregationTemporality(pmetric.AggregationTemporalityCumulative)
+}
+
+func (m *metricSapnetweaverSessionsHTTPCount) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val int64) {
+	if !m.settings.Enabled {
+		return
+	}
+	dp := m.data.Sum().DataPoints().AppendEmpty()
+	dp.SetStartTimestamp(start)
+	dp.SetTimestamp(ts)
+	dp.SetIntValue(val)
+}
+
+// updateCapacity saves max length of data point slices that will be used for the slice capacity.
+func (m *metricSapnetweaverSessionsHTTPCount) updateCapacity() {
+	if m.data.Sum().DataPoints().Len() > m.capacity {
+		m.capacity = m.data.Sum().DataPoints().Len()
+	}
+}
+
+// emit appends recorded metric data to a metrics slice and prepares it for recording another set of data points.
+func (m *metricSapnetweaverSessionsHTTPCount) emit(metrics pmetric.MetricSlice) {
+	if m.settings.Enabled && m.data.Sum().DataPoints().Len() > 0 {
+		m.updateCapacity()
+		m.data.MoveTo(metrics.AppendEmpty())
+		m.init()
+	}
+}
+
+func newMetricSapnetweaverSessionsHTTPCount(settings MetricSettings) metricSapnetweaverSessionsHTTPCount {
+	m := metricSapnetweaverSessionsHTTPCount{settings: settings}
+	if settings.Enabled {
+		m.data = pmetric.NewMetric()
+		m.init()
+	}
+	return m
+}
+
+type metricSapnetweaverSessionsSecurityCount struct {
+	data     pmetric.Metric // data buffer for generated metric.
+	settings MetricSettings // metric settings provided by user.
+	capacity int            // max observed number of data points added to the metric.
+}
+
+// init fills sapnetweaver.sessions.security.count metric with initial data.
+func (m *metricSapnetweaverSessionsSecurityCount) init() {
+	m.data.SetName("sapnetweaver.sessions.security.count")
+	m.data.SetDescription("The number of Security Sessions.")
+	m.data.SetUnit("{sessions}")
+	m.data.SetEmptySum()
+	m.data.Sum().SetIsMonotonic(false)
+	m.data.Sum().SetAggregationTemporality(pmetric.AggregationTemporalityCumulative)
+}
+
+func (m *metricSapnetweaverSessionsSecurityCount) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val int64) {
+	if !m.settings.Enabled {
+		return
+	}
+	dp := m.data.Sum().DataPoints().AppendEmpty()
+	dp.SetStartTimestamp(start)
+	dp.SetTimestamp(ts)
+	dp.SetIntValue(val)
+}
+
+// updateCapacity saves max length of data point slices that will be used for the slice capacity.
+func (m *metricSapnetweaverSessionsSecurityCount) updateCapacity() {
+	if m.data.Sum().DataPoints().Len() > m.capacity {
+		m.capacity = m.data.Sum().DataPoints().Len()
+	}
+}
+
+// emit appends recorded metric data to a metrics slice and prepares it for recording another set of data points.
+func (m *metricSapnetweaverSessionsSecurityCount) emit(metrics pmetric.MetricSlice) {
+	if m.settings.Enabled && m.data.Sum().DataPoints().Len() > 0 {
+		m.updateCapacity()
+		m.data.MoveTo(metrics.AppendEmpty())
+		m.init()
+	}
+}
+
+func newMetricSapnetweaverSessionsSecurityCount(settings MetricSettings) metricSapnetweaverSessionsSecurityCount {
+	m := metricSapnetweaverSessionsSecurityCount{settings: settings}
+	if settings.Enabled {
+		m.data = pmetric.NewMetric()
+		m.init()
+	}
+	return m
+}
+
+type metricSapnetweaverSessionsWebCount struct {
+	data     pmetric.Metric // data buffer for generated metric.
+	settings MetricSettings // metric settings provided by user.
+	capacity int            // max observed number of data points added to the metric.
+}
+
+// init fills sapnetweaver.sessions.web.count metric with initial data.
+func (m *metricSapnetweaverSessionsWebCount) init() {
+	m.data.SetName("sapnetweaver.sessions.web.count")
+	m.data.SetDescription("The number of Web Sessions.")
+	m.data.SetUnit("{sessions}")
+	m.data.SetEmptySum()
+	m.data.Sum().SetIsMonotonic(false)
+	m.data.Sum().SetAggregationTemporality(pmetric.AggregationTemporalityCumulative)
+}
+
+func (m *metricSapnetweaverSessionsWebCount) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val int64) {
+	if !m.settings.Enabled {
+		return
+	}
+	dp := m.data.Sum().DataPoints().AppendEmpty()
+	dp.SetStartTimestamp(start)
+	dp.SetTimestamp(ts)
+	dp.SetIntValue(val)
+}
+
+// updateCapacity saves max length of data point slices that will be used for the slice capacity.
+func (m *metricSapnetweaverSessionsWebCount) updateCapacity() {
+	if m.data.Sum().DataPoints().Len() > m.capacity {
+		m.capacity = m.data.Sum().DataPoints().Len()
+	}
+}
+
+// emit appends recorded metric data to a metrics slice and prepares it for recording another set of data points.
+func (m *metricSapnetweaverSessionsWebCount) emit(metrics pmetric.MetricSlice) {
+	if m.settings.Enabled && m.data.Sum().DataPoints().Len() > 0 {
+		m.updateCapacity()
+		m.data.MoveTo(metrics.AppendEmpty())
+		m.init()
+	}
+}
+
+func newMetricSapnetweaverSessionsWebCount(settings MetricSettings) metricSapnetweaverSessionsWebCount {
+	m := metricSapnetweaverSessionsWebCount{settings: settings}
+	if settings.Enabled {
+		m.data = pmetric.NewMetric()
+		m.init()
+	}
+	return m
+}
+
 type metricSapnetweaverShortDumpsRate struct {
 	data     pmetric.Metric // data buffer for generated metric.
 	settings MetricSettings // metric settings provided by user.
@@ -1311,9 +1747,12 @@ type MetricsBuilder struct {
 	metricSapnetweaverCacheHits                  metricSapnetweaverCacheHits
 	metricSapnetweaverConnectionErrorCount       metricSapnetweaverConnectionErrorCount
 	metricSapnetweaverHostCPUUtilization         metricSapnetweaverHostCPUUtilization
+	metricSapnetweaverHostMemoryVirtualOverhead  metricSapnetweaverHostMemoryVirtualOverhead
+	metricSapnetweaverHostMemoryVirtualSwap      metricSapnetweaverHostMemoryVirtualSwap
 	metricSapnetweaverHostSpoolListUsed          metricSapnetweaverHostSpoolListUsed
 	metricSapnetweaverIcmAvailability            metricSapnetweaverIcmAvailability
 	metricSapnetweaverJobAborted                 metricSapnetweaverJobAborted
+	metricSapnetweaverLocksEnqueueCount          metricSapnetweaverLocksEnqueueCount
 	metricSapnetweaverMemoryConfigured           metricSapnetweaverMemoryConfigured
 	metricSapnetweaverMemoryFree                 metricSapnetweaverMemoryFree
 	metricSapnetweaverMemorySwapSpaceUtilization metricSapnetweaverMemorySwapSpaceUtilization
@@ -1323,6 +1762,11 @@ type MetricsBuilder struct {
 	metricSapnetweaverRequestTimeoutCount        metricSapnetweaverRequestTimeoutCount
 	metricSapnetweaverResponseDuration           metricSapnetweaverResponseDuration
 	metricSapnetweaverSessionCount               metricSapnetweaverSessionCount
+	metricSapnetweaverSessionsBrowserCount       metricSapnetweaverSessionsBrowserCount
+	metricSapnetweaverSessionsEjbCount           metricSapnetweaverSessionsEjbCount
+	metricSapnetweaverSessionsHTTPCount          metricSapnetweaverSessionsHTTPCount
+	metricSapnetweaverSessionsSecurityCount      metricSapnetweaverSessionsSecurityCount
+	metricSapnetweaverSessionsWebCount           metricSapnetweaverSessionsWebCount
 	metricSapnetweaverShortDumpsRate             metricSapnetweaverShortDumpsRate
 	metricSapnetweaverSystemAvailability         metricSapnetweaverSystemAvailability
 	metricSapnetweaverSystemUtilization          metricSapnetweaverSystemUtilization
@@ -1360,9 +1804,12 @@ func NewMetricsBuilder(ms MetricsSettings, settings receiver.CreateSettings, opt
 		metricSapnetweaverCacheHits:                  newMetricSapnetweaverCacheHits(ms.SapnetweaverCacheHits),
 		metricSapnetweaverConnectionErrorCount:       newMetricSapnetweaverConnectionErrorCount(ms.SapnetweaverConnectionErrorCount),
 		metricSapnetweaverHostCPUUtilization:         newMetricSapnetweaverHostCPUUtilization(ms.SapnetweaverHostCPUUtilization),
+		metricSapnetweaverHostMemoryVirtualOverhead:  newMetricSapnetweaverHostMemoryVirtualOverhead(ms.SapnetweaverHostMemoryVirtualOverhead),
+		metricSapnetweaverHostMemoryVirtualSwap:      newMetricSapnetweaverHostMemoryVirtualSwap(ms.SapnetweaverHostMemoryVirtualSwap),
 		metricSapnetweaverHostSpoolListUsed:          newMetricSapnetweaverHostSpoolListUsed(ms.SapnetweaverHostSpoolListUsed),
 		metricSapnetweaverIcmAvailability:            newMetricSapnetweaverIcmAvailability(ms.SapnetweaverIcmAvailability),
 		metricSapnetweaverJobAborted:                 newMetricSapnetweaverJobAborted(ms.SapnetweaverJobAborted),
+		metricSapnetweaverLocksEnqueueCount:          newMetricSapnetweaverLocksEnqueueCount(ms.SapnetweaverLocksEnqueueCount),
 		metricSapnetweaverMemoryConfigured:           newMetricSapnetweaverMemoryConfigured(ms.SapnetweaverMemoryConfigured),
 		metricSapnetweaverMemoryFree:                 newMetricSapnetweaverMemoryFree(ms.SapnetweaverMemoryFree),
 		metricSapnetweaverMemorySwapSpaceUtilization: newMetricSapnetweaverMemorySwapSpaceUtilization(ms.SapnetweaverMemorySwapSpaceUtilization),
@@ -1372,6 +1819,11 @@ func NewMetricsBuilder(ms MetricsSettings, settings receiver.CreateSettings, opt
 		metricSapnetweaverRequestTimeoutCount:        newMetricSapnetweaverRequestTimeoutCount(ms.SapnetweaverRequestTimeoutCount),
 		metricSapnetweaverResponseDuration:           newMetricSapnetweaverResponseDuration(ms.SapnetweaverResponseDuration),
 		metricSapnetweaverSessionCount:               newMetricSapnetweaverSessionCount(ms.SapnetweaverSessionCount),
+		metricSapnetweaverSessionsBrowserCount:       newMetricSapnetweaverSessionsBrowserCount(ms.SapnetweaverSessionsBrowserCount),
+		metricSapnetweaverSessionsEjbCount:           newMetricSapnetweaverSessionsEjbCount(ms.SapnetweaverSessionsEjbCount),
+		metricSapnetweaverSessionsHTTPCount:          newMetricSapnetweaverSessionsHTTPCount(ms.SapnetweaverSessionsHTTPCount),
+		metricSapnetweaverSessionsSecurityCount:      newMetricSapnetweaverSessionsSecurityCount(ms.SapnetweaverSessionsSecurityCount),
+		metricSapnetweaverSessionsWebCount:           newMetricSapnetweaverSessionsWebCount(ms.SapnetweaverSessionsWebCount),
 		metricSapnetweaverShortDumpsRate:             newMetricSapnetweaverShortDumpsRate(ms.SapnetweaverShortDumpsRate),
 		metricSapnetweaverSystemAvailability:         newMetricSapnetweaverSystemAvailability(ms.SapnetweaverSystemAvailability),
 		metricSapnetweaverSystemUtilization:          newMetricSapnetweaverSystemUtilization(ms.SapnetweaverSystemUtilization),
@@ -1451,9 +1903,12 @@ func (mb *MetricsBuilder) EmitForResource(rmo ...ResourceMetricsOption) {
 	mb.metricSapnetweaverCacheHits.emit(ils.Metrics())
 	mb.metricSapnetweaverConnectionErrorCount.emit(ils.Metrics())
 	mb.metricSapnetweaverHostCPUUtilization.emit(ils.Metrics())
+	mb.metricSapnetweaverHostMemoryVirtualOverhead.emit(ils.Metrics())
+	mb.metricSapnetweaverHostMemoryVirtualSwap.emit(ils.Metrics())
 	mb.metricSapnetweaverHostSpoolListUsed.emit(ils.Metrics())
 	mb.metricSapnetweaverIcmAvailability.emit(ils.Metrics())
 	mb.metricSapnetweaverJobAborted.emit(ils.Metrics())
+	mb.metricSapnetweaverLocksEnqueueCount.emit(ils.Metrics())
 	mb.metricSapnetweaverMemoryConfigured.emit(ils.Metrics())
 	mb.metricSapnetweaverMemoryFree.emit(ils.Metrics())
 	mb.metricSapnetweaverMemorySwapSpaceUtilization.emit(ils.Metrics())
@@ -1463,6 +1918,11 @@ func (mb *MetricsBuilder) EmitForResource(rmo ...ResourceMetricsOption) {
 	mb.metricSapnetweaverRequestTimeoutCount.emit(ils.Metrics())
 	mb.metricSapnetweaverResponseDuration.emit(ils.Metrics())
 	mb.metricSapnetweaverSessionCount.emit(ils.Metrics())
+	mb.metricSapnetweaverSessionsBrowserCount.emit(ils.Metrics())
+	mb.metricSapnetweaverSessionsEjbCount.emit(ils.Metrics())
+	mb.metricSapnetweaverSessionsHTTPCount.emit(ils.Metrics())
+	mb.metricSapnetweaverSessionsSecurityCount.emit(ils.Metrics())
+	mb.metricSapnetweaverSessionsWebCount.emit(ils.Metrics())
 	mb.metricSapnetweaverShortDumpsRate.emit(ils.Metrics())
 	mb.metricSapnetweaverSystemAvailability.emit(ils.Metrics())
 	mb.metricSapnetweaverSystemUtilization.emit(ils.Metrics())
@@ -1532,6 +1992,16 @@ func (mb *MetricsBuilder) RecordSapnetweaverHostCPUUtilizationDataPoint(ts pcomm
 	return nil
 }
 
+// RecordSapnetweaverHostMemoryVirtualOverheadDataPoint adds a data point to sapnetweaver.host.memory.virtual.overhead metric.
+func (mb *MetricsBuilder) RecordSapnetweaverHostMemoryVirtualOverheadDataPoint(ts pcommon.Timestamp, val int64) {
+	mb.metricSapnetweaverHostMemoryVirtualOverhead.recordDataPoint(mb.startTime, ts, val)
+}
+
+// RecordSapnetweaverHostMemoryVirtualSwapDataPoint adds a data point to sapnetweaver.host.memory.virtual.swap metric.
+func (mb *MetricsBuilder) RecordSapnetweaverHostMemoryVirtualSwapDataPoint(ts pcommon.Timestamp, val int64) {
+	mb.metricSapnetweaverHostMemoryVirtualSwap.recordDataPoint(mb.startTime, ts, val)
+}
+
 // RecordSapnetweaverHostSpoolListUsedDataPoint adds a data point to sapnetweaver.host.spool_list.used metric.
 func (mb *MetricsBuilder) RecordSapnetweaverHostSpoolListUsedDataPoint(ts pcommon.Timestamp, inputVal string) error {
 	val, err := strconv.ParseInt(inputVal, 10, 64)
@@ -1555,6 +2025,11 @@ func (mb *MetricsBuilder) RecordSapnetweaverJobAbortedDataPoint(ts pcommon.Times
 	}
 	mb.metricSapnetweaverJobAborted.recordDataPoint(mb.startTime, ts, val)
 	return nil
+}
+
+// RecordSapnetweaverLocksEnqueueCountDataPoint adds a data point to sapnetweaver.locks.enqueue.count metric.
+func (mb *MetricsBuilder) RecordSapnetweaverLocksEnqueueCountDataPoint(ts pcommon.Timestamp, val int64) {
+	mb.metricSapnetweaverLocksEnqueueCount.recordDataPoint(mb.startTime, ts, val)
 }
 
 // RecordSapnetweaverMemoryConfiguredDataPoint adds a data point to sapnetweaver.memory.configured metric.
@@ -1634,6 +2109,56 @@ func (mb *MetricsBuilder) RecordSapnetweaverSessionCountDataPoint(ts pcommon.Tim
 		return fmt.Errorf("failed to parse int64 for SapnetweaverSessionCount, value was %s: %w", inputVal, err)
 	}
 	mb.metricSapnetweaverSessionCount.recordDataPoint(mb.startTime, ts, val)
+	return nil
+}
+
+// RecordSapnetweaverSessionsBrowserCountDataPoint adds a data point to sapnetweaver.sessions.browser.count metric.
+func (mb *MetricsBuilder) RecordSapnetweaverSessionsBrowserCountDataPoint(ts pcommon.Timestamp, inputVal string) error {
+	val, err := strconv.ParseInt(inputVal, 10, 64)
+	if err != nil {
+		return fmt.Errorf("failed to parse int64 for SapnetweaverSessionsBrowserCount, value was %s: %w", inputVal, err)
+	}
+	mb.metricSapnetweaverSessionsBrowserCount.recordDataPoint(mb.startTime, ts, val)
+	return nil
+}
+
+// RecordSapnetweaverSessionsEjbCountDataPoint adds a data point to sapnetweaver.sessions.ejb.count metric.
+func (mb *MetricsBuilder) RecordSapnetweaverSessionsEjbCountDataPoint(ts pcommon.Timestamp, inputVal string) error {
+	val, err := strconv.ParseInt(inputVal, 10, 64)
+	if err != nil {
+		return fmt.Errorf("failed to parse int64 for SapnetweaverSessionsEjbCount, value was %s: %w", inputVal, err)
+	}
+	mb.metricSapnetweaverSessionsEjbCount.recordDataPoint(mb.startTime, ts, val)
+	return nil
+}
+
+// RecordSapnetweaverSessionsHTTPCountDataPoint adds a data point to sapnetweaver.sessions.http.count metric.
+func (mb *MetricsBuilder) RecordSapnetweaverSessionsHTTPCountDataPoint(ts pcommon.Timestamp, inputVal string) error {
+	val, err := strconv.ParseInt(inputVal, 10, 64)
+	if err != nil {
+		return fmt.Errorf("failed to parse int64 for SapnetweaverSessionsHTTPCount, value was %s: %w", inputVal, err)
+	}
+	mb.metricSapnetweaverSessionsHTTPCount.recordDataPoint(mb.startTime, ts, val)
+	return nil
+}
+
+// RecordSapnetweaverSessionsSecurityCountDataPoint adds a data point to sapnetweaver.sessions.security.count metric.
+func (mb *MetricsBuilder) RecordSapnetweaverSessionsSecurityCountDataPoint(ts pcommon.Timestamp, inputVal string) error {
+	val, err := strconv.ParseInt(inputVal, 10, 64)
+	if err != nil {
+		return fmt.Errorf("failed to parse int64 for SapnetweaverSessionsSecurityCount, value was %s: %w", inputVal, err)
+	}
+	mb.metricSapnetweaverSessionsSecurityCount.recordDataPoint(mb.startTime, ts, val)
+	return nil
+}
+
+// RecordSapnetweaverSessionsWebCountDataPoint adds a data point to sapnetweaver.sessions.web.count metric.
+func (mb *MetricsBuilder) RecordSapnetweaverSessionsWebCountDataPoint(ts pcommon.Timestamp, inputVal string) error {
+	val, err := strconv.ParseInt(inputVal, 10, 64)
+	if err != nil {
+		return fmt.Errorf("failed to parse int64 for SapnetweaverSessionsWebCount, value was %s: %w", inputVal, err)
+	}
+	mb.metricSapnetweaverSessionsWebCount.recordDataPoint(mb.startTime, ts, val)
 	return nil
 }
 

@@ -58,6 +58,22 @@ The CPU utilization percentage.
 | ---- | ----------- | ---------- |
 | % | Gauge | Int |
 
+### sapnetweaver.host.memory.virtual.overhead
+
+Virtualization System Memory Overhead.
+
+| Unit | Metric Type | Value Type |
+| ---- | ----------- | ---------- |
+| bytes | Gauge | Int |
+
+### sapnetweaver.host.memory.virtual.swap
+
+Virtualization System Swap Memory.
+
+| Unit | Metric Type | Value Type |
+| ---- | ----------- | ---------- |
+| bytes | Gauge | Int |
+
 ### sapnetweaver.host.spool_list.used
 
 Host Spool List Used.
@@ -87,6 +103,14 @@ The amount of aborted jobs.
 | Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
 | ---- | ----------- | ---------- | ----------------------- | --------- |
 |  | Sum | Int | Cumulative | false |
+
+### sapnetweaver.locks.enqueue.count
+
+Count of Enqueued Locks.
+
+| Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
+| ---- | ----------- | ---------- | ----------------------- | --------- |
+| {locks} | Sum | Int | Cumulative | false |
 
 ### sapnetweaver.memory.configured
 
@@ -165,6 +189,46 @@ The amount of of sessions created.
 | Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
 | ---- | ----------- | ---------- | ----------------------- | --------- |
 |  | Sum | Int | Cumulative | false |
+
+### sapnetweaver.sessions.browser.count
+
+The number of Browser Sessions.
+
+| Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
+| ---- | ----------- | ---------- | ----------------------- | --------- |
+| {sessions} | Sum | Int | Cumulative | false |
+
+### sapnetweaver.sessions.ejb.count
+
+The number of EJB Sessions.
+
+| Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
+| ---- | ----------- | ---------- | ----------------------- | --------- |
+| {sessions} | Sum | Int | Cumulative | false |
+
+### sapnetweaver.sessions.http.count
+
+The number of HTTP Sessions.
+
+| Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
+| ---- | ----------- | ---------- | ----------------------- | --------- |
+| {sessions} | Sum | Int | Cumulative | false |
+
+### sapnetweaver.sessions.security.count
+
+The number of Security Sessions.
+
+| Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
+| ---- | ----------- | ---------- | ----------------------- | --------- |
+| {sessions} | Sum | Int | Cumulative | false |
+
+### sapnetweaver.sessions.web.count
+
+The number of Web Sessions.
+
+| Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
+| ---- | ----------- | ---------- | ----------------------- | --------- |
+| {sessions} | Sum | Int | Cumulative | false |
 
 ### sapnetweaver.short_dumps.rate
 

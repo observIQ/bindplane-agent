@@ -97,6 +97,11 @@ func TestScraperScrape(t *testing.T) {
 	err := xml.Unmarshal(alertTreeResponseData, &alertTreeResponse)
 	require.NoError(t, err)
 
+	enqGetLockTableResponseData := loadAPIResponseData(t, "api-responses", "lock-table.xml")
+	var enqGetLockTableResponse *models.EnqGetLockTableResponse
+	err = xml.Unmarshal(enqGetLockTableResponseData, &enqGetLockTableResponse)
+	require.NoError(t, err)
+
 	getCurrentInstanceResponseData := loadAPIResponseData(t, "api-responses", "current-instance.xml")
 	var getCurrentInstanceResponse *models.GetInstancePropertiesResponse
 	err = xml.Unmarshal(getCurrentInstanceResponseData, &getCurrentInstanceResponse)
@@ -104,6 +109,7 @@ func TestScraperScrape(t *testing.T) {
 
 	mockService := mocks.MockWebService{}
 	mockService.On("GetAlertTree").Return(alertTreeResponse, nil)
+	mockService.On("EnqGetLockTable").Return(enqGetLockTableResponse, nil)
 	mockService.On("GetInstanceProperties").Return(getCurrentInstanceResponse, nil)
 
 	cfg := createDefaultConfig().(*Config)
@@ -121,8 +127,8 @@ func TestScraperScrape(t *testing.T) {
 	actualMetrics, err := scraper.scrape(context.Background())
 	require.NoError(t, err)
 	require.Equal(t, 1, actualMetrics.ResourceMetrics().Len())
-	require.Equal(t, 30, actualMetrics.DataPointCount())
-	require.Equal(t, 21, actualMetrics.MetricCount())
+	require.Equal(t, 38, actualMetrics.DataPointCount())
+	require.Equal(t, 29, actualMetrics.MetricCount())
 
 	require.EqualValues(t, "sap-app", scraper.hostname)
 	require.EqualValues(t, "sap-inst", scraper.instance)
@@ -258,7 +264,40 @@ func TestScraperScrape(t *testing.T) {
 				dps := m.Sum().DataPoints()
 				require.Equal(t, 1, dps.Len())
 				require.Equal(t, int64(23), dps.At(0).IntValue())
+			case "sapnetweaver.host.memory.virtual.swap":
+				dps := m.Gauge().DataPoints()
+				require.Equal(t, 1, dps.Len())
+				require.Equal(t, int64(24)*MBToBytes, dps.At(0).IntValue())
+			case "sapnetweaver.host.memory.virtual.overhead":
+				dps := m.Gauge().DataPoints()
+				require.Equal(t, 1, dps.Len())
+				require.Equal(t, int64(25)*MBToBytes, dps.At(0).IntValue())
+			case "sapnetweaver.sessions.http.count":
+				dps := m.Sum().DataPoints()
+				require.Equal(t, 1, dps.Len())
+				require.Equal(t, int64(26), dps.At(0).IntValue())
+			case "sapnetweaver.sessions.security.count":
+				dps := m.Sum().DataPoints()
+				require.Equal(t, 1, dps.Len())
+				require.Equal(t, int64(27), dps.At(0).IntValue())
+			case "sapnetweaver.sessions.web.count":
+				dps := m.Sum().DataPoints()
+				require.Equal(t, 1, dps.Len())
+				require.Equal(t, int64(28), dps.At(0).IntValue())
+			case "sapnetweaver.sessions.browser.count":
+				dps := m.Sum().DataPoints()
+				require.Equal(t, 1, dps.Len())
+				require.Equal(t, int64(29), dps.At(0).IntValue())
+			case "sapnetweaver.sessions.ejb.count":
+				dps := m.Sum().DataPoints()
+				require.Equal(t, 1, dps.Len())
+				require.Equal(t, int64(30), dps.At(0).IntValue())
+			case "sapnetweaver.locks.enqueue.count":
+				dps := m.Sum().DataPoints()
+				require.Equal(t, 1, dps.Len())
+				require.Equal(t, int64(3), dps.At(0).IntValue())
 			default:
+				panic("unexpected metric: " + m.Name())
 				t.FailNow()
 			}
 		}
@@ -271,6 +310,11 @@ func TestScraperScrapeHyphenResponse(t *testing.T) {
 	err := xml.Unmarshal(alertTreeResponseData, &alertTreeResponse)
 	require.NoError(t, err)
 
+	enqGetLockTableResponseData := loadAPIResponseData(t, "api-responses", "empty-lock-table.xml")
+	var enqGetLockTableResponse *models.EnqGetLockTableResponse
+	err = xml.Unmarshal(enqGetLockTableResponseData, &enqGetLockTableResponse)
+	require.NoError(t, err)
+
 	getCurrentInstanceResponseData := loadAPIResponseData(t, "api-responses", "empty-current-instance.xml")
 	var getCurrentInstanceResponse *models.GetInstancePropertiesResponse
 	err = xml.Unmarshal(getCurrentInstanceResponseData, &getCurrentInstanceResponse)
@@ -278,6 +322,7 @@ func TestScraperScrapeHyphenResponse(t *testing.T) {
 
 	mockService := mocks.MockWebService{}
 	mockService.On("GetAlertTree").Return(alertTreeResponse, nil)
+	mockService.On("EnqGetLockTable").Return(enqGetLockTableResponse, nil)
 	mockService.On("GetInstanceProperties").Return(getCurrentInstanceResponse, nil)
 
 	cfg := createDefaultConfig().(*Config)
@@ -316,12 +361,19 @@ func TestScraperScrapeHyphenResponse(t *testing.T) {
 		errors.New("failed to collect metric CacheHits: '-' value found"),
 		errors.New("failed to collect metric HostspoolListUsed: '-' value found"),
 		errors.New("failed to collect metric Shortdumps Frequency: '-' value found"),
+		errors.New("failed to collect metric Memory Overhead: '-' value found"),
+		errors.New("failed to collect metric Memory Swapped Out: '-' value found"),
+		errors.New("failed to collect metric CurrentHttpSessions: '-' value found"),
+		errors.New("failed to collect metric CurrentSecuritySessions: '-' value found"),
+		errors.New("failed to collect metric Web Sessions: '-' value found"),
+		errors.New("failed to collect metric Browser Sessions: '-' value found"),
+		errors.New("failed to collect metric EJB Sessions: '-' value found"),
 	), err.Error())
 
 	require.Error(t, err)
 	require.Equal(t, 1, actualMetrics.ResourceMetrics().Len())
-	require.Equal(t, 8, actualMetrics.DataPointCount())
-	require.Equal(t, 2, actualMetrics.MetricCount())
+	require.Equal(t, 9, actualMetrics.DataPointCount())
+	require.Equal(t, 3, actualMetrics.MetricCount())
 
 	require.EqualValues(t, "", scraper.hostname)
 	require.EqualValues(t, "", scraper.instance)
@@ -334,6 +386,11 @@ func TestScraperScrapeUnknownResponse(t *testing.T) {
 	err := xml.Unmarshal(alertTreeResponseData, &alertTreeResponse)
 	require.NoError(t, err)
 
+	enqGetLockTableResponseData := loadAPIResponseData(t, "api-responses", "empty-lock-table.xml")
+	var enqGetLockTableResponse *models.EnqGetLockTableResponse
+	err = xml.Unmarshal(enqGetLockTableResponseData, &enqGetLockTableResponse)
+	require.NoError(t, err)
+
 	getCurrentInstanceResponseData := loadAPIResponseData(t, "api-responses", "empty-current-instance.xml")
 	var getCurrentInstanceResponse *models.GetInstancePropertiesResponse
 	err = xml.Unmarshal(getCurrentInstanceResponseData, &getCurrentInstanceResponse)
@@ -341,6 +398,7 @@ func TestScraperScrapeUnknownResponse(t *testing.T) {
 
 	mockService := mocks.MockWebService{}
 	mockService.On("GetAlertTree").Return(alertTreeResponse, nil)
+	mockService.On("EnqGetLockTable").Return(enqGetLockTableResponse, nil)
 	mockService.On("GetInstanceProperties").Return(getCurrentInstanceResponse, nil)
 
 	cfg := createDefaultConfig().(*Config)
@@ -379,12 +437,19 @@ func TestScraperScrapeUnknownResponse(t *testing.T) {
 		errors.New("failed to parse int64 for SapnetweaverCacheHits, value was $: strconv.ParseInt: parsing \"$\": invalid syntax"),
 		errors.New("failed to parse int64 for SapnetweaverHostSpoolListUsed, value was $: strconv.ParseInt: parsing \"$\": invalid syntax"),
 		errors.New("failed to parse int64 for SapnetweaverShortDumpsRate, value was $: strconv.ParseInt: parsing \"$\": invalid syntax"),
+		errors.New("failed to parse int64 for SapnetweaverHostMemoryVirtualOverhead, value was $: strconv.ParseInt: parsing \"$\": invalid syntax"),
+		errors.New("failed to parse int64 for SapnetweaverHostMemoryVirtualSwap, value was $: strconv.ParseInt: parsing \"$\": invalid syntax"),
+		errors.New("failed to parse int64 for SapnetweaverSessionsHTTPCount, value was $: strconv.ParseInt: parsing \"$\": invalid syntax"),
+		errors.New("failed to parse int64 for SapnetweaverSessionsSecurityCount, value was $: strconv.ParseInt: parsing \"$\": invalid syntax"),
+		errors.New("failed to parse int64 for SapnetweaverSessionsWebCount, value was $: strconv.ParseInt: parsing \"$\": invalid syntax"),
+		errors.New("failed to parse int64 for SapnetweaverSessionsBrowserCount, value was $: strconv.ParseInt: parsing \"$\": invalid syntax"),
+		errors.New("failed to parse int64 for SapnetweaverSessionsEjbCount, value was $: strconv.ParseInt: parsing \"$\": invalid syntax"),
 	), err.Error())
 
 	require.Error(t, err)
 	require.Equal(t, 1, actualMetrics.ResourceMetrics().Len())
-	require.Equal(t, 8, actualMetrics.DataPointCount())
-	require.Equal(t, 2, actualMetrics.MetricCount())
+	require.Equal(t, 9, actualMetrics.DataPointCount())
+	require.Equal(t, 3, actualMetrics.MetricCount())
 
 	require.EqualValues(t, "", scraper.hostname)
 	require.EqualValues(t, "", scraper.instance)
@@ -393,6 +458,7 @@ func TestScraperScrapeUnknownResponse(t *testing.T) {
 func TestScraperScrapeAPIError(t *testing.T) {
 	mockService := mocks.MockWebService{}
 	mockService.On("GetAlertTree").Return(nil, errors.New("unexpected error"))
+	mockService.On("EnqGetLockTable").Return(nil, errors.New("unexpected error"))
 	mockService.On("GetInstanceProperties").Return(nil, errors.New("unexpected error"))
 
 	cfg := createDefaultConfig().(*Config)
@@ -417,12 +483,14 @@ func TestScraperScrapeAPIError(t *testing.T) {
 	require.EqualError(t, multierr.Combine(
 		errors.New("failed to get current instance details: unexpected error"),
 		errors.New("failed to collect Alert Tree metrics: unexpected error"),
+		errors.New("failed to collect Enq Lock Table metrics: unexpected error"),
 	), err.Error())
 }
 
 func TestScraperScrapeEmptyXML(t *testing.T) {
 	mockService := mocks.MockWebService{}
 	mockService.On("GetAlertTree").Return(&models.GetAlertTreeResponse{}, nil)
+	mockService.On("EnqGetLockTable").Return(&models.EnqGetLockTableResponse{}, nil)
 	mockService.On("GetInstanceProperties").Return(&models.GetInstancePropertiesResponse{}, nil)
 
 	cfg := createDefaultConfig().(*Config)
@@ -440,9 +508,9 @@ func TestScraperScrapeEmptyXML(t *testing.T) {
 	actualMetrics, err := scraper.scrape(context.Background())
 	require.NotNil(t, err)
 
-	require.Equal(t, 0, actualMetrics.ResourceMetrics().Len())
-	require.Equal(t, 0, actualMetrics.DataPointCount())
-	require.Equal(t, 0, actualMetrics.MetricCount())
+	require.Equal(t, 1, actualMetrics.ResourceMetrics().Len())
+	require.Equal(t, 1, actualMetrics.DataPointCount())
+	require.Equal(t, 1, actualMetrics.MetricCount())
 
 	require.EqualError(t, multierr.Combine(
 		errors.New("failed to collect metric Total Number of Work Processes: value not found"),
@@ -469,6 +537,13 @@ func TestScraperScrapeEmptyXML(t *testing.T) {
 		errors.New("failed to collect metric ICM: value not found"),
 		errors.New("failed to collect metric HostspoolListUsed: value not found"),
 		errors.New("failed to collect metric Shortdumps Frequency: value not found"),
+		errors.New("failed to collect metric Memory Overhead: value not found"),
+		errors.New("failed to collect metric Memory Swapped Out: value not found"),
+		errors.New("failed to collect metric CurrentHttpSessions: value not found"),
+		errors.New("failed to collect metric CurrentSecuritySessions: value not found"),
+		errors.New("failed to collect metric Web Sessions: value not found"),
+		errors.New("failed to collect metric Browser Sessions: value not found"),
+		errors.New("failed to collect metric EJB Sessions: value not found"),
 	), err.Error())
 }
 
