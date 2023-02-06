@@ -42,7 +42,7 @@ type MetricsSettings struct {
 	SapnetweaverHostCPUUtilization         MetricSettings `mapstructure:"sapnetweaver.host.cpu.utilization"`
 	SapnetweaverHostMemoryVirtualOverhead  MetricSettings `mapstructure:"sapnetweaver.host.memory.virtual.overhead"`
 	SapnetweaverHostMemoryVirtualSwap      MetricSettings `mapstructure:"sapnetweaver.host.memory.virtual.swap"`
-	SapnetweaverHostSpoolListUsed          MetricSettings `mapstructure:"sapnetweaver.host.spool_list.used"`
+	SapnetweaverHostSpoolListUtilization   MetricSettings `mapstructure:"sapnetweaver.host.spool_list.utilization"`
 	SapnetweaverIcmAvailability            MetricSettings `mapstructure:"sapnetweaver.icm_availability"`
 	SapnetweaverJobAborted                 MetricSettings `mapstructure:"sapnetweaver.job.aborted"`
 	SapnetweaverLocksEnqueueCount          MetricSettings `mapstructure:"sapnetweaver.locks.enqueue.count"`
@@ -89,7 +89,7 @@ func DefaultMetricsSettings() MetricsSettings {
 		SapnetweaverHostMemoryVirtualSwap: MetricSettings{
 			Enabled: true,
 		},
-		SapnetweaverHostSpoolListUsed: MetricSettings{
+		SapnetweaverHostSpoolListUtilization: MetricSettings{
 			Enabled: true,
 		},
 		SapnetweaverIcmAvailability: MetricSettings{
@@ -613,50 +613,48 @@ func newMetricSapnetweaverHostMemoryVirtualSwap(settings MetricSettings) metricS
 	return m
 }
 
-type metricSapnetweaverHostSpoolListUsed struct {
+type metricSapnetweaverHostSpoolListUtilization struct {
 	data     pmetric.Metric // data buffer for generated metric.
 	settings MetricSettings // metric settings provided by user.
 	capacity int            // max observed number of data points added to the metric.
 }
 
-// init fills sapnetweaver.host.spool_list.used metric with initial data.
-func (m *metricSapnetweaverHostSpoolListUsed) init() {
-	m.data.SetName("sapnetweaver.host.spool_list.used")
-	m.data.SetDescription("Host Spool List Used.")
-	m.data.SetUnit("")
-	m.data.SetEmptySum()
-	m.data.Sum().SetIsMonotonic(false)
-	m.data.Sum().SetAggregationTemporality(pmetric.AggregationTemporalityCumulative)
+// init fills sapnetweaver.host.spool_list.utilization metric with initial data.
+func (m *metricSapnetweaverHostSpoolListUtilization) init() {
+	m.data.SetName("sapnetweaver.host.spool_list.utilization")
+	m.data.SetDescription("The host spool list used percentage.")
+	m.data.SetUnit("%")
+	m.data.SetEmptyGauge()
 }
 
-func (m *metricSapnetweaverHostSpoolListUsed) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val int64) {
+func (m *metricSapnetweaverHostSpoolListUtilization) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val int64) {
 	if !m.settings.Enabled {
 		return
 	}
-	dp := m.data.Sum().DataPoints().AppendEmpty()
+	dp := m.data.Gauge().DataPoints().AppendEmpty()
 	dp.SetStartTimestamp(start)
 	dp.SetTimestamp(ts)
 	dp.SetIntValue(val)
 }
 
 // updateCapacity saves max length of data point slices that will be used for the slice capacity.
-func (m *metricSapnetweaverHostSpoolListUsed) updateCapacity() {
-	if m.data.Sum().DataPoints().Len() > m.capacity {
-		m.capacity = m.data.Sum().DataPoints().Len()
+func (m *metricSapnetweaverHostSpoolListUtilization) updateCapacity() {
+	if m.data.Gauge().DataPoints().Len() > m.capacity {
+		m.capacity = m.data.Gauge().DataPoints().Len()
 	}
 }
 
 // emit appends recorded metric data to a metrics slice and prepares it for recording another set of data points.
-func (m *metricSapnetweaverHostSpoolListUsed) emit(metrics pmetric.MetricSlice) {
-	if m.settings.Enabled && m.data.Sum().DataPoints().Len() > 0 {
+func (m *metricSapnetweaverHostSpoolListUtilization) emit(metrics pmetric.MetricSlice) {
+	if m.settings.Enabled && m.data.Gauge().DataPoints().Len() > 0 {
 		m.updateCapacity()
 		m.data.MoveTo(metrics.AppendEmpty())
 		m.init()
 	}
 }
 
-func newMetricSapnetweaverHostSpoolListUsed(settings MetricSettings) metricSapnetweaverHostSpoolListUsed {
-	m := metricSapnetweaverHostSpoolListUsed{settings: settings}
+func newMetricSapnetweaverHostSpoolListUtilization(settings MetricSettings) metricSapnetweaverHostSpoolListUtilization {
+	m := metricSapnetweaverHostSpoolListUtilization{settings: settings}
 	if settings.Enabled {
 		m.data = pmetric.NewMetric()
 		m.init()
@@ -1749,7 +1747,7 @@ type MetricsBuilder struct {
 	metricSapnetweaverHostCPUUtilization         metricSapnetweaverHostCPUUtilization
 	metricSapnetweaverHostMemoryVirtualOverhead  metricSapnetweaverHostMemoryVirtualOverhead
 	metricSapnetweaverHostMemoryVirtualSwap      metricSapnetweaverHostMemoryVirtualSwap
-	metricSapnetweaverHostSpoolListUsed          metricSapnetweaverHostSpoolListUsed
+	metricSapnetweaverHostSpoolListUtilization   metricSapnetweaverHostSpoolListUtilization
 	metricSapnetweaverIcmAvailability            metricSapnetweaverIcmAvailability
 	metricSapnetweaverJobAborted                 metricSapnetweaverJobAborted
 	metricSapnetweaverLocksEnqueueCount          metricSapnetweaverLocksEnqueueCount
@@ -1806,7 +1804,7 @@ func NewMetricsBuilder(ms MetricsSettings, settings receiver.CreateSettings, opt
 		metricSapnetweaverHostCPUUtilization:         newMetricSapnetweaverHostCPUUtilization(ms.SapnetweaverHostCPUUtilization),
 		metricSapnetweaverHostMemoryVirtualOverhead:  newMetricSapnetweaverHostMemoryVirtualOverhead(ms.SapnetweaverHostMemoryVirtualOverhead),
 		metricSapnetweaverHostMemoryVirtualSwap:      newMetricSapnetweaverHostMemoryVirtualSwap(ms.SapnetweaverHostMemoryVirtualSwap),
-		metricSapnetweaverHostSpoolListUsed:          newMetricSapnetweaverHostSpoolListUsed(ms.SapnetweaverHostSpoolListUsed),
+		metricSapnetweaverHostSpoolListUtilization:   newMetricSapnetweaverHostSpoolListUtilization(ms.SapnetweaverHostSpoolListUtilization),
 		metricSapnetweaverIcmAvailability:            newMetricSapnetweaverIcmAvailability(ms.SapnetweaverIcmAvailability),
 		metricSapnetweaverJobAborted:                 newMetricSapnetweaverJobAborted(ms.SapnetweaverJobAborted),
 		metricSapnetweaverLocksEnqueueCount:          newMetricSapnetweaverLocksEnqueueCount(ms.SapnetweaverLocksEnqueueCount),
@@ -1905,7 +1903,7 @@ func (mb *MetricsBuilder) EmitForResource(rmo ...ResourceMetricsOption) {
 	mb.metricSapnetweaverHostCPUUtilization.emit(ils.Metrics())
 	mb.metricSapnetweaverHostMemoryVirtualOverhead.emit(ils.Metrics())
 	mb.metricSapnetweaverHostMemoryVirtualSwap.emit(ils.Metrics())
-	mb.metricSapnetweaverHostSpoolListUsed.emit(ils.Metrics())
+	mb.metricSapnetweaverHostSpoolListUtilization.emit(ils.Metrics())
 	mb.metricSapnetweaverIcmAvailability.emit(ils.Metrics())
 	mb.metricSapnetweaverJobAborted.emit(ils.Metrics())
 	mb.metricSapnetweaverLocksEnqueueCount.emit(ils.Metrics())
@@ -2002,13 +2000,13 @@ func (mb *MetricsBuilder) RecordSapnetweaverHostMemoryVirtualSwapDataPoint(ts pc
 	mb.metricSapnetweaverHostMemoryVirtualSwap.recordDataPoint(mb.startTime, ts, val)
 }
 
-// RecordSapnetweaverHostSpoolListUsedDataPoint adds a data point to sapnetweaver.host.spool_list.used metric.
-func (mb *MetricsBuilder) RecordSapnetweaverHostSpoolListUsedDataPoint(ts pcommon.Timestamp, inputVal string) error {
+// RecordSapnetweaverHostSpoolListUtilizationDataPoint adds a data point to sapnetweaver.host.spool_list.utilization metric.
+func (mb *MetricsBuilder) RecordSapnetweaverHostSpoolListUtilizationDataPoint(ts pcommon.Timestamp, inputVal string) error {
 	val, err := strconv.ParseInt(inputVal, 10, 64)
 	if err != nil {
-		return fmt.Errorf("failed to parse int64 for SapnetweaverHostSpoolListUsed, value was %s: %w", inputVal, err)
+		return fmt.Errorf("failed to parse int64 for SapnetweaverHostSpoolListUtilization, value was %s: %w", inputVal, err)
 	}
-	mb.metricSapnetweaverHostSpoolListUsed.recordDataPoint(mb.startTime, ts, val)
+	mb.metricSapnetweaverHostSpoolListUtilization.recordDataPoint(mb.startTime, ts, val)
 	return nil
 }
 

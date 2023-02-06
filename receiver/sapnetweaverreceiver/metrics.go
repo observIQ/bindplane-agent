@@ -420,7 +420,7 @@ func (s *sapNetweaverScraper) recordSapnetweaverHostCPUUtilizationDataPoint(now 
 	}
 }
 
-func (s *sapNetweaverScraper) recordSapnetweaverHostSpoolListUsedDataPoint(now pcommon.Timestamp, alertTreeResponse map[string]string, errs *scrapererror.ScrapeErrors) {
+func (s *sapNetweaverScraper) recordSapnetweaverHostSpoolListUtilizationDataPoint(now pcommon.Timestamp, alertTreeResponse map[string]string, errs *scrapererror.ScrapeErrors) {
 	metricName := "HostspoolListUsed"
 	val, err := parseResponse(metricName, "", alertTreeResponse)
 	if err != nil {
@@ -428,7 +428,7 @@ func (s *sapNetweaverScraper) recordSapnetweaverHostSpoolListUsedDataPoint(now p
 		return
 	}
 
-	err = s.mb.RecordSapnetweaverHostSpoolListUsedDataPoint(now, val)
+	err = s.mb.RecordSapnetweaverHostSpoolListUtilizationDataPoint(now, val)
 	if err != nil {
 		errs.AddPartial(1, err)
 		return

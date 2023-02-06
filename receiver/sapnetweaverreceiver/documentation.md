@@ -74,13 +74,13 @@ Virtualization System Swap Memory.
 | ---- | ----------- | ---------- |
 | bytes | Gauge | Int |
 
-### sapnetweaver.host.spool_list.used
+### sapnetweaver.host.spool_list.utilization
 
-Host Spool List Used.
+The host spool list used percentage.
 
-| Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
-| ---- | ----------- | ---------- | ----------------------- | --------- |
-|  | Sum | Int | Cumulative | false |
+| Unit | Metric Type | Value Type |
+| ---- | ----------- | ---------- |
+| % | Gauge | Int |
 
 ### sapnetweaver.icm_availability
 

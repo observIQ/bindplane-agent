@@ -17,7 +17,7 @@
   <item>
    <name>HostspoolListUsed</name>
    <ActualValue>SAPControl-GRAY</ActualValue>
-   <description>$</description>
+   <description>$ %</description>
   </item>
   <item>
    <name>CPU_Utilization</name>

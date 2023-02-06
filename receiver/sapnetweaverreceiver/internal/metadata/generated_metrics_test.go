@@ -92,7 +92,7 @@ func TestMetricsBuilder(t *testing.T) {
 
 			defaultMetricsCount++
 			allMetricsCount++
-			mb.RecordSapnetweaverHostSpoolListUsedDataPoint(ts, "1")
+			mb.RecordSapnetweaverHostSpoolListUtilizationDataPoint(ts, "1")
 
 			defaultMetricsCount++
 			allMetricsCount++
@@ -310,16 +310,14 @@ func TestMetricsBuilder(t *testing.T) {
 					assert.Equal(t, ts, dp.Timestamp())
 					assert.Equal(t, pmetric.NumberDataPointValueTypeInt, dp.ValueType())
 					assert.Equal(t, int64(1), dp.IntValue())
-				case "sapnetweaver.host.spool_list.used":
-					assert.False(t, validatedMetrics["sapnetweaver.host.spool_list.used"], "Found a duplicate in the metrics slice: sapnetweaver.host.spool_list.used")
-					validatedMetrics["sapnetweaver.host.spool_list.used"] = true
-					assert.Equal(t, pmetric.MetricTypeSum, ms.At(i).Type())
-					assert.Equal(t, 1, ms.At(i).Sum().DataPoints().Len())
-					assert.Equal(t, "Host Spool List Used.", ms.At(i).Description())
-					assert.Equal(t, "", ms.At(i).Unit())
-					assert.Equal(t, false, ms.At(i).Sum().IsMonotonic())
-					assert.Equal(t, pmetric.AggregationTemporalityCumulative, ms.At(i).Sum().AggregationTemporality())
-					dp := ms.At(i).Sum().DataPoints().At(0)
+				case "sapnetweaver.host.spool_list.utilization":
+					assert.False(t, validatedMetrics["sapnetweaver.host.spool_list.utilization"], "Found a duplicate in the metrics slice: sapnetweaver.host.spool_list.utilization")
+					validatedMetrics["sapnetweaver.host.spool_list.utilization"] = true
+					assert.Equal(t, pmetric.MetricTypeGauge, ms.At(i).Type())
+					assert.Equal(t, 1, ms.At(i).Gauge().DataPoints().Len())
+					assert.Equal(t, "The host spool list used percentage.", ms.At(i).Description())
+					assert.Equal(t, "%", ms.At(i).Unit())
+					dp := ms.At(i).Gauge().DataPoints().At(0)
 					assert.Equal(t, start, dp.StartTimestamp())
 					assert.Equal(t, ts, dp.Timestamp())
 					assert.Equal(t, pmetric.NumberDataPointValueTypeInt, dp.ValueType())

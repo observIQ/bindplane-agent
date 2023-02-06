@@ -14,7 +14,7 @@ all_metrics:
     enabled: true
   sapnetweaver.host.memory.virtual.swap:
     enabled: true
-  sapnetweaver.host.spool_list.used:
+  sapnetweaver.host.spool_list.utilization:
     enabled: true
   sapnetweaver.icm_availability:
     enabled: true
@@ -73,7 +73,7 @@ no_metrics:
     enabled: false
   sapnetweaver.host.memory.virtual.swap:
     enabled: false
-  sapnetweaver.host.spool_list.used:
+  sapnetweaver.host.spool_list.utilization:
     enabled: false
   sapnetweaver.icm_availability:
     enabled: false

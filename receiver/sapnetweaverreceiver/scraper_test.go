@@ -166,8 +166,8 @@ func TestScraperScrape(t *testing.T) {
 					"sapnetweaver.icm_availability method:map[state:yellow]": int64(0),
 				},
 					attributeMappings)
-			case "sapnetweaver.host.spool_list.used":
-				dps := m.Sum().DataPoints()
+			case "sapnetweaver.host.spool_list.utilization":
+				dps := m.Gauge().DataPoints()
 				require.Equal(t, 1, dps.Len())
 				require.Equal(t, int64(3), dps.At(0).IntValue())
 			case "sapnetweaver.host.cpu.utilization":
@@ -435,7 +435,7 @@ func TestScraperScrapeUnknownResponse(t *testing.T) {
 		errors.New("failed to parse int64 for SapnetweaverConnectionErrorCount, value was $: strconv.ParseInt: parsing \"$\": invalid syntax"),
 		errors.New("failed to parse int64 for SapnetweaverCacheEvictions, value was $: strconv.ParseInt: parsing \"$\": invalid syntax"),
 		errors.New("failed to parse int64 for SapnetweaverCacheHits, value was $: strconv.ParseInt: parsing \"$\": invalid syntax"),
-		errors.New("failed to parse int64 for SapnetweaverHostSpoolListUsed, value was $: strconv.ParseInt: parsing \"$\": invalid syntax"),
+		errors.New("failed to parse int64 for SapnetweaverHostSpoolListUtilization, value was $: strconv.ParseInt: parsing \"$\": invalid syntax"),
 		errors.New("failed to parse int64 for SapnetweaverShortDumpsRate, value was $: strconv.ParseInt: parsing \"$\": invalid syntax"),
 		errors.New("failed to parse int64 for SapnetweaverHostMemoryVirtualOverhead, value was $: strconv.ParseInt: parsing \"$\": invalid syntax"),
 		errors.New("failed to parse int64 for SapnetweaverHostMemoryVirtualSwap, value was $: strconv.ParseInt: parsing \"$\": invalid syntax"),
