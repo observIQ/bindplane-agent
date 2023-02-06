@@ -154,10 +154,10 @@ func TestScraperScrape(t *testing.T) {
 					attributeMappings[label] = dp.IntValue()
 				}
 				require.Equal(t, map[string]int64{
-					"sapnetweaver.icm_availability method:map[control_state:green]":  int64(1),
-					"sapnetweaver.icm_availability method:map[control_state:grey]":   int64(0),
-					"sapnetweaver.icm_availability method:map[control_state:red]":    int64(0),
-					"sapnetweaver.icm_availability method:map[control_state:yellow]": int64(0),
+					"sapnetweaver.icm_availability method:map[state:green]":  int64(1),
+					"sapnetweaver.icm_availability method:map[state:grey]":   int64(0),
+					"sapnetweaver.icm_availability method:map[state:red]":    int64(0),
+					"sapnetweaver.icm_availability method:map[state:yellow]": int64(0),
 				},
 					attributeMappings)
 			case "sapnetweaver.host.spool_list.used":
@@ -215,10 +215,10 @@ func TestScraperScrape(t *testing.T) {
 					attributeMappings[label] = dp.IntValue()
 				}
 				require.Equal(t, map[string]int64{
-					"sapnetweaver.abap.update.error.count method:map[control_state:green]":  int64(1),
-					"sapnetweaver.abap.update.error.count method:map[control_state:grey]":   int64(0),
-					"sapnetweaver.abap.update.error.count method:map[control_state:red]":    int64(0),
-					"sapnetweaver.abap.update.error.count method:map[control_state:yellow]": int64(0),
+					"sapnetweaver.abap.update.error.count method:map[state:green]":  int64(1),
+					"sapnetweaver.abap.update.error.count method:map[state:grey]":   int64(0),
+					"sapnetweaver.abap.update.error.count method:map[state:red]":    int64(0),
+					"sapnetweaver.abap.update.error.count method:map[state:yellow]": int64(0),
 				},
 					attributeMappings)
 			case "sapnetweaver.response.duration":

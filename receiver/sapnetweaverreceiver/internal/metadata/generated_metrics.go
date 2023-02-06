@@ -255,7 +255,7 @@ func (m *metricSapnetweaverAbapUpdateErrorCount) recordDataPoint(start pcommon.T
 	dp.SetStartTimestamp(start)
 	dp.SetTimestamp(ts)
 	dp.SetIntValue(val)
-	dp.Attributes().PutStr("control_state", controlStateAttributeValue)
+	dp.Attributes().PutStr("state", controlStateAttributeValue)
 }
 
 // updateCapacity saves max length of data point slices that will be used for the slice capacity.
@@ -559,7 +559,7 @@ func (m *metricSapnetweaverIcmAvailability) recordDataPoint(start pcommon.Timest
 	dp.SetStartTimestamp(start)
 	dp.SetTimestamp(ts)
 	dp.SetIntValue(val)
-	dp.Attributes().PutStr("control_state", controlStateAttributeValue)
+	dp.Attributes().PutStr("state", controlStateAttributeValue)
 }
 
 // updateCapacity saves max length of data point slices that will be used for the slice capacity.

@@ -19,6 +19,7 @@ attributes:
     - http
   control_state:
     type: string
+    name_override: "state"
     description: The control state color
     enum:
     - grey

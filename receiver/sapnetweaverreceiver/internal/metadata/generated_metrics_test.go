@@ -199,7 +199,7 @@ func TestMetricsBuilder(t *testing.T) {
 					assert.Equal(t, ts, dp.Timestamp())
 					assert.Equal(t, pmetric.NumberDataPointValueTypeInt, dp.ValueType())
 					assert.Equal(t, int64(1), dp.IntValue())
-					attrVal, ok := dp.Attributes().Get("control_state")
+					attrVal, ok := dp.Attributes().Get("state")
 					assert.True(t, ok)
 					assert.Equal(t, "grey", attrVal.Str())
 				case "sapnetweaver.cache.evictions":
@@ -282,7 +282,7 @@ func TestMetricsBuilder(t *testing.T) {
 					assert.Equal(t, ts, dp.Timestamp())
 					assert.Equal(t, pmetric.NumberDataPointValueTypeInt, dp.ValueType())
 					assert.Equal(t, int64(1), dp.IntValue())
-					attrVal, ok := dp.Attributes().Get("control_state")
+					attrVal, ok := dp.Attributes().Get("state")
 					assert.True(t, ok)
 					assert.Equal(t, "grey", attrVal.Str())
 				case "sapnetweaver.job.aborted":

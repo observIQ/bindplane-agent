@@ -24,7 +24,7 @@ The amount of ABAP errors in update.
 
 | Name | Description | Values |
 | ---- | ----------- | ------ |
-| control_state | The control state color | Str: ``grey``, ``green``, ``yellow``, ``red`` |
+| state | The control state color | Str: ``grey``, ``green``, ``yellow``, ``red`` |
 
 ### sapnetweaver.cache.evictions
 
@@ -78,7 +78,7 @@ ICM Availability (color value from alert tree).
 
 | Name | Description | Values |
 | ---- | ----------- | ------ |
-| control_state | The control state color | Str: ``grey``, ``green``, ``yellow``, ``red`` |
+| state | The control state color | Str: ``grey``, ``green``, ``yellow``, ``red`` |
 
 ### sapnetweaver.job.aborted
 
