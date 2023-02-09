@@ -138,4 +138,4 @@ service:
       exporters: [googlecloud]
 ```
 
-This configuration will emit a "system.cpu.utilization.max", "system.cpu.utilization.avg", "system.cpu.utilization.min" metrics every minute, and sends them to Google Cloud Monitoring.
+This configuration will emit a "system.cpu.utilization.max", "system.cpu.utilization.avg", "system.cpu.utilization.min" metric every minute, and sends them to Google Cloud Monitoring.
