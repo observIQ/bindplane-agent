@@ -74,6 +74,11 @@ func (cfg Config) Validate() error {
 		errs = multierr.Append(errs, errors.New("aggregation interval must be positive"))
 	}
 
+	// don't check aggregations if using defaults
+	if cfg.Aggregations == nil {
+		return errs
+	}
+
 	if len(cfg.Aggregations) == 0 {
 		errs = multierr.Append(errs, errors.New("at least one aggregation must be specified"))
 	}
@@ -83,4 +88,27 @@ func (cfg Config) Validate() error {
 	}
 
 	return errs
+}
+
+// AggregationConfigs gets the default aggregation configs if none were specified, otherwise the specified aggregation configs
+func (cfg Config) AggregationConfigs() []AggregateConfig {
+	if cfg.Aggregations == nil {
+		// fallback to defaults
+		return []AggregateConfig{
+			{
+				Type:       aggregate.AggregationTypeMin,
+				MetricName: "$0.min",
+			},
+			{
+				Type:       aggregate.AggregationTypeMax,
+				MetricName: "$0.max",
+			},
+			{
+				Type:       aggregate.AggregationTypeAvg,
+				MetricName: "$0.avg",
+			},
+		}
+	}
+
+	return cfg.Aggregations
 }

@@ -15,13 +15,61 @@
 package aggregationprocessor
 
 import (
+	"path/filepath"
 	"testing"
 	"time"
 
+	"github.com/google/go-cmp/cmp"
 	"github.com/observiq/observiq-otel-collector/processor/aggregationprocessor/internal/aggregate"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/component/componenttest"
+	"go.opentelemetry.io/collector/confmap/confmaptest"
 )
+
+func TestLoadConfig(t *testing.T) {
+	cm, err := confmaptest.LoadConf(filepath.Join("testdata", "config.yaml"))
+	require.NoError(t, err)
+
+	testCases := []struct {
+		id       component.ID
+		expected component.Config
+	}{
+		{
+			id:       component.NewIDWithName(typeStr, "defaults"),
+			expected: createDefaultConfig(),
+		},
+		{
+			id: component.NewIDWithName(typeStr, ""),
+			expected: &Config{
+				Interval: 3 * time.Minute,
+				Include:  `^test\.thing$$`,
+				Aggregations: []AggregateConfig{
+					{
+						Type: aggregate.AggregationTypeLast,
+					},
+				},
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.id.String(), func(t *testing.T) {
+			factory := NewFactory()
+			cfg := factory.CreateDefaultConfig()
+
+			sub, err := cm.Sub(tc.id.String())
+			require.NoError(t, err)
+			require.NoError(t, component.UnmarshalConfig(sub, cfg))
+
+			assert.NoError(t, component.ValidateConfig(cfg))
+			if diff := cmp.Diff(tc.expected, cfg); diff != "" {
+				t.Errorf("Config mismatch (-expected +actual):\n%s", diff)
+			}
+		})
+	}
+}
 
 func TestConfig_Validate(t *testing.T) {
 	testCases := []struct {
@@ -61,6 +109,13 @@ func TestConfig_Validate(t *testing.T) {
 				Aggregations: []AggregateConfig{},
 			},
 			expectedErr: "at least one aggregation must be specified",
+		},
+		{
+			name: "Config with default aggregations",
+			input: Config{
+				Interval: 5 * time.Second,
+				Include:  "^.*$",
+			},
 		},
 		{
 			name: "Config with invalid regex",

@@ -64,7 +64,7 @@ func newAggregationProcessor(logger *zap.Logger, cfg *Config, consumer consumer.
 		flushInterval:          cfg.Interval,
 		aggregationPeriodStart: pcommon.NewTimestampFromTime(time.Now()),
 		aggregationMap:         make(map[uint64]*resourceMetadata),
-		aggregationConfs:       cfg.Aggregations,
+		aggregationConfs:       cfg.AggregationConfigs(),
 		nextConsumer:           consumer,
 	}, nil
 }

@@ -19,7 +19,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/observiq/observiq-otel-collector/processor/aggregationprocessor/internal/aggregate"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/consumer"
 	"go.opentelemetry.io/collector/processor"
@@ -44,20 +43,6 @@ func createDefaultConfig() component.Config {
 	return &Config{
 		Interval: 1 * time.Minute,
 		Include:  "^.*$",
-		Aggregations: []AggregateConfig{
-			{
-				Type:       aggregate.AggregationTypeMin,
-				MetricName: "$0.min",
-			},
-			{
-				Type:       aggregate.AggregationTypeMax,
-				MetricName: "$0.max",
-			},
-			{
-				Type:       aggregate.AggregationTypeAvg,
-				MetricName: "$0.avg",
-			},
-		},
 	}
 }
 
