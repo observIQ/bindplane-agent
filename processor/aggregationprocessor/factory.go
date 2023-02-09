@@ -46,15 +46,15 @@ func createDefaultConfig() component.Config {
 		Include:  "^.*$",
 		Aggregations: []AggregateConfig{
 			{
-				Type:       aggregate.AggregateTypeMin,
+				Type:       aggregate.AggregationTypeMin,
 				MetricName: "$0.min",
 			},
 			{
-				Type:       aggregate.AggregateTypeMax,
+				Type:       aggregate.AggregationTypeMax,
 				MetricName: "$0.max",
 			},
 			{
-				Type:       aggregate.AggregateTypeAvg,
+				Type:       aggregate.AggregationTypeAvg,
 				MetricName: "$0.avg",
 			},
 		},
@@ -62,7 +62,7 @@ func createDefaultConfig() component.Config {
 }
 
 func createMetricsProcessor(
-	ctx context.Context,
+	_ context.Context,
 	set processor.CreateSettings,
 	cfg component.Config,
 	nextConsumer consumer.Metrics,

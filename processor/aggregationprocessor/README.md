@@ -54,7 +54,7 @@ This processor aggregates metrics over a configurable interval, allowing for met
 In this example, the throughput of log-based metrics is limited, by aggregating them using the "last" aggregation. The last datapoint received from the log will be emitted every minute at a maximum.
 
 ```yaml
-recievers:
+receivers:
   filelog:
     include:
     - $HOME/example.log

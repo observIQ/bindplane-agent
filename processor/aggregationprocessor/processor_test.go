@@ -101,15 +101,15 @@ func TestAggregationProcessor(t *testing.T) {
 				Include:  `^test\..*$`,
 				Aggregations: []AggregateConfig{
 					{
-						Type:       aggregate.AggregateTypeMin,
+						Type:       aggregate.AggregationTypeMin,
 						MetricName: "$0.min",
 					},
 					{
-						Type:       aggregate.AggregateTypeMax,
+						Type:       aggregate.AggregationTypeMax,
 						MetricName: "$0.max",
 					},
 					{
-						Type:       aggregate.AggregateTypeAvg,
+						Type:       aggregate.AggregationTypeAvg,
 						MetricName: "$0.avg",
 					},
 				},
@@ -170,15 +170,15 @@ func TestAggregationProcessorMultipleMetrics(t *testing.T) {
 		Include:  `^test\..*$`,
 		Aggregations: []AggregateConfig{
 			{
-				Type:       aggregate.AggregateTypeMin,
+				Type:       aggregate.AggregationTypeMin,
 				MetricName: "$0.min",
 			},
 			{
-				Type:       aggregate.AggregateTypeMax,
+				Type:       aggregate.AggregationTypeMax,
 				MetricName: "$0.max",
 			},
 			{
-				Type:       aggregate.AggregateTypeAvg,
+				Type:       aggregate.AggregationTypeAvg,
 				MetricName: "$0.avg",
 			},
 		},
@@ -245,15 +245,15 @@ func TestAggregationProcessor_Flush(t *testing.T) {
 		Include:  `^test\..*$`,
 		Aggregations: []AggregateConfig{
 			{
-				Type:       aggregate.AggregateTypeMin,
+				Type:       aggregate.AggregationTypeMin,
 				MetricName: "$0.min",
 			},
 			{
-				Type:       aggregate.AggregateTypeMax,
+				Type:       aggregate.AggregationTypeMax,
 				MetricName: "$0.max",
 			},
 			{
-				Type:       aggregate.AggregateTypeAvg,
+				Type:       aggregate.AggregationTypeAvg,
 				MetricName: "$0.avg",
 			},
 		},

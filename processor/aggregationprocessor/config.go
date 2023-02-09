@@ -38,11 +38,12 @@ type Config struct {
 // AggregateConfig is a config that
 type AggregateConfig struct {
 	// Type of aggregation
-	Type aggregate.AggregateType `mapstructure:"type"`
+	Type aggregate.AggregationType `mapstructure:"type"`
 	// MetricName is the name for the re-emitted metric. Defaults to `$0` (this is what is matched by the regex)
 	MetricName string `mapstructure:"metric_name"`
 }
 
+// Validate validate the config, returning an error explaining why it isn't if the config is invalid.
 func (a AggregateConfig) Validate() error {
 	var errs error
 

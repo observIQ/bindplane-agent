@@ -22,19 +22,19 @@ func TestConfig_Validate(t *testing.T) {
 				Include:  "^.*$",
 				Aggregations: []AggregateConfig{
 					{
-						Type: aggregate.AggregateTypeAvg,
+						Type: aggregate.AggregationTypeAvg,
 					},
 					{
-						Type: aggregate.AggregateTypeMin,
+						Type: aggregate.AggregationTypeMin,
 					},
 					{
-						Type: aggregate.AggregateTypeMax,
+						Type: aggregate.AggregationTypeMax,
 					},
 					{
-						Type: aggregate.AggregateTypeLast,
+						Type: aggregate.AggregationTypeLast,
 					},
 					{
-						Type: aggregate.AggregateTypeFirst,
+						Type: aggregate.AggregationTypeFirst,
 					},
 				},
 			},
@@ -55,7 +55,7 @@ func TestConfig_Validate(t *testing.T) {
 				Include:  "^(",
 				Aggregations: []AggregateConfig{
 					{
-						Type: aggregate.AggregateTypeAvg,
+						Type: aggregate.AggregationTypeAvg,
 					},
 				},
 			},
@@ -68,7 +68,7 @@ func TestConfig_Validate(t *testing.T) {
 				Include:  "^.*$",
 				Aggregations: []AggregateConfig{
 					{
-						Type: aggregate.AggregateTypeAvg,
+						Type: aggregate.AggregationTypeAvg,
 					},
 				},
 			},
@@ -81,7 +81,7 @@ func TestConfig_Validate(t *testing.T) {
 				Include:  "^.*$",
 				Aggregations: []AggregateConfig{
 					{
-						Type: aggregate.AggregateType("invalid"),
+						Type: aggregate.AggregationType("invalid"),
 					},
 				},
 			},
@@ -104,7 +104,7 @@ func TestConfig_Validate(t *testing.T) {
 func TestAggregateConfig_MetricNameString(t *testing.T) {
 	t.Run("metric name is not specified", func(t *testing.T) {
 		metricName := AggregateConfig{
-			Type:       aggregate.AggregateTypeAvg,
+			Type:       aggregate.AggregationTypeAvg,
 			MetricName: "",
 		}.MetricNameString()
 		require.Equal(t, "$0", metricName)
@@ -112,7 +112,7 @@ func TestAggregateConfig_MetricNameString(t *testing.T) {
 
 	t.Run("metric name is specified", func(t *testing.T) {
 		metricName := AggregateConfig{
-			Type:       aggregate.AggregateTypeAvg,
+			Type:       aggregate.AggregationTypeAvg,
 			MetricName: "test.metric",
 		}.MetricNameString()
 		require.Equal(t, "test.metric", metricName)
@@ -120,5 +120,5 @@ func TestAggregateConfig_MetricNameString(t *testing.T) {
 }
 
 func TestValidStruct(t *testing.T) {
-	componenttest.CheckConfigStruct(&Config{})
+	require.NoError(t, componenttest.CheckConfigStruct(&Config{}))
 }

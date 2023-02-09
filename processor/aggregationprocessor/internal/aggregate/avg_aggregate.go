@@ -41,7 +41,7 @@ func (m *avgAggregate) AddDatapoint(ndp pmetric.NumberDataPoint) {
 		m.totalDouble += f
 	}
 
-	m.count += 1
+	m.count++
 }
 
 func (m *avgAggregate) SetDatapointValue(dp pmetric.NumberDataPoint) {

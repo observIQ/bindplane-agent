@@ -10,12 +10,12 @@ import (
 )
 
 func TestAggregateTypesValid(t *testing.T) {
-	types := []AggregateType{
-		AggregateTypeMin,
-		AggregateTypeAvg,
-		AggregateTypeMax,
-		AggregateTypeFirst,
-		AggregateTypeLast,
+	types := []AggregationType{
+		AggregationTypeMin,
+		AggregationTypeAvg,
+		AggregationTypeMax,
+		AggregationTypeFirst,
+		AggregationTypeLast,
 	}
 
 	for _, aggType := range types {
@@ -26,12 +26,12 @@ func TestAggregateTypesValid(t *testing.T) {
 }
 
 func TestAggregateTypesNew(t *testing.T) {
-	types := []AggregateType{
-		AggregateTypeMin,
-		AggregateTypeAvg,
-		AggregateTypeMax,
-		AggregateTypeFirst,
-		AggregateTypeLast,
+	types := []AggregationType{
+		AggregationTypeMin,
+		AggregationTypeAvg,
+		AggregationTypeMax,
+		AggregationTypeFirst,
+		AggregationTypeLast,
 	}
 
 	for _, aggType := range types {
@@ -48,17 +48,17 @@ func TestAggregateTypesNew(t *testing.T) {
 func TestAggregateTypeNewInvalidType(t *testing.T) {
 	dp := pmetric.NewNumberDataPoint()
 	dp.SetDoubleValue(2.0)
-	_, err := AggregateType("invalid").New(dp)
+	_, err := AggregationType("invalid").New(dp)
 	require.ErrorContains(t, err, "invalid aggregation type:")
 }
 
 func TestAggregateTypesNewEmptyDatapoint(t *testing.T) {
-	types := []AggregateType{
-		AggregateTypeMin,
-		AggregateTypeAvg,
-		AggregateTypeMax,
-		AggregateTypeFirst,
-		AggregateTypeLast,
+	types := []AggregationType{
+		AggregationTypeMin,
+		AggregationTypeAvg,
+		AggregationTypeMax,
+		AggregationTypeFirst,
+		AggregationTypeLast,
 	}
 
 	for _, aggType := range types {
@@ -73,56 +73,56 @@ func TestAggregateTypesNewEmptyDatapoint(t *testing.T) {
 func TestAggregatesFloat(t *testing.T) {
 	testCases := []struct {
 		name       string
-		aggType    AggregateType
+		aggType    AggregationType
 		values     []float64
 		timestamps []int64
 		finalValue float64
 	}{
 		{
 			name:       "min",
-			aggType:    AggregateTypeMin,
+			aggType:    AggregationTypeMin,
 			values:     []float64{45, 1, 99, 3},
 			timestamps: []int64{0, 0, 0, 0},
 			finalValue: 1,
 		},
 		{
 			name:       "max",
-			aggType:    AggregateTypeMax,
+			aggType:    AggregationTypeMax,
 			values:     []float64{45, 1, 99, 3},
 			timestamps: []int64{0, 0, 0, 0},
 			finalValue: 99,
 		},
 		{
 			name:       "avg",
-			aggType:    AggregateTypeAvg,
+			aggType:    AggregationTypeAvg,
 			values:     []float64{45, 0, 99, 3},
 			timestamps: []int64{0, 0, 0, 0},
 			finalValue: 36.75,
 		},
 		{
 			name:       "first (unset timestamp)",
-			aggType:    AggregateTypeFirst,
+			aggType:    AggregationTypeFirst,
 			values:     []float64{45, 1, 99, 3},
 			timestamps: []int64{0, 0, 0, 0},
 			finalValue: 45,
 		},
 		{
 			name:       "last (unset timestamp)",
-			aggType:    AggregateTypeLast,
+			aggType:    AggregationTypeLast,
 			values:     []float64{45, 1, 99, 3},
 			timestamps: []int64{0, 0, 0, 0},
 			finalValue: 3,
 		},
 		{
 			name:       "first (set timestamp)",
-			aggType:    AggregateTypeFirst,
+			aggType:    AggregationTypeFirst,
 			values:     []float64{45, 1, 99, 3},
 			timestamps: []int64{10, 2, 3, 11},
 			finalValue: 99,
 		},
 		{
 			name:       "last (set timestamp)",
-			aggType:    AggregateTypeLast,
+			aggType:    AggregationTypeLast,
 			values:     []float64{45, 1, 99, 3},
 			timestamps: []int64{10, 3, 89, 11},
 			finalValue: 99,
@@ -154,56 +154,56 @@ func TestAggregatesFloat(t *testing.T) {
 func TestAggregatesInt(t *testing.T) {
 	testCases := []struct {
 		name       string
-		aggType    AggregateType
+		aggType    AggregationType
 		values     []int64
 		timestamps []int64
 		finalValue int64
 	}{
 		{
 			name:       "min",
-			aggType:    AggregateTypeMin,
+			aggType:    AggregationTypeMin,
 			values:     []int64{45, 1, 99, 3},
 			timestamps: []int64{0, 0, 0, 0},
 			finalValue: 1,
 		},
 		{
 			name:       "max",
-			aggType:    AggregateTypeMax,
+			aggType:    AggregationTypeMax,
 			values:     []int64{45, 1, 99, 3},
 			timestamps: []int64{0, 0, 0, 0},
 			finalValue: 99,
 		},
 		{
 			name:       "avg",
-			aggType:    AggregateTypeAvg,
+			aggType:    AggregationTypeAvg,
 			values:     []int64{45, 0, 99, 3},
 			timestamps: []int64{0, 0, 0, 0},
 			finalValue: 36,
 		},
 		{
 			name:       "first (unset timestamp)",
-			aggType:    AggregateTypeFirst,
+			aggType:    AggregationTypeFirst,
 			values:     []int64{45, 1, 99, 3},
 			timestamps: []int64{0, 0, 0, 0},
 			finalValue: 45,
 		},
 		{
 			name:       "last (unset timestamp)",
-			aggType:    AggregateTypeLast,
+			aggType:    AggregationTypeLast,
 			values:     []int64{45, 1, 99, 3},
 			timestamps: []int64{0, 0, 0, 0},
 			finalValue: 3,
 		},
 		{
 			name:       "first (set timestamp)",
-			aggType:    AggregateTypeFirst,
+			aggType:    AggregationTypeFirst,
 			values:     []int64{45, 1, 99, 3},
 			timestamps: []int64{10, 2, 3, 11},
 			finalValue: 99,
 		},
 		{
 			name:       "last (set timestamp)",
-			aggType:    AggregateTypeLast,
+			aggType:    AggregationTypeLast,
 			values:     []int64{45, 1, 99, 3},
 			timestamps: []int64{10, 3, 89, 11},
 			finalValue: 99,
