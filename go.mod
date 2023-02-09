@@ -558,11 +558,11 @@ replace github.com/observiq/observiq-otel-collector/exporter/googlecloudexporter
 
 replace github.com/observiq/observiq-otel-collector/packagestate => ./packagestate
 
+replace github.com/observiq/observiq-otel-collector/processor/aggregationprocessor => ./processor/aggregationprocessor
+
 replace github.com/observiq/observiq-otel-collector/processor/throughputmeasurementprocessor => ./processor/throughputmeasurementprocessor
 
 replace github.com/observiq/observiq-otel-collector/processor/samplingprocessor => ./processor/samplingprocessor
-
-replace github.com/observiq/observiq-otel-collector/processor/aggregationprocessor => ./processor/aggregationprocessor
 
 replace github.com/observiq/observiq-otel-collector/processor/maskprocessor => ./processor/maskprocessor
 
