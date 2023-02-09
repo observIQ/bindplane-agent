@@ -147,8 +147,6 @@ github.com/DataDog/zstd v1.4.4/go.mod h1:1jcaCB/ufaK+sKp1NBhlGmpz41jOoPQ35bpF36t
 github.com/Djarvur/go-err113 v0.0.0-20210108212216-aea10b59be24/go.mod h1:4UJr5HIiMZrwgkSPdsjy2uOQExX/WEILpIrO9UPGuXs=
 github.com/GoogleCloudPlatform/opentelemetry-operations-go/detectors/gcp v1.11.1 h1:NZtPMMPJ/IlRTTjtC3jl34km75WqT9RdwvYPcGRCXZ8=
 github.com/GoogleCloudPlatform/opentelemetry-operations-go/detectors/gcp v1.11.1/go.mod h1:HpmGbYLf1fsWiqVA0Z2oKh7qi7BroCgOl2NqB2N/TG4=
-github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector v0.35.1 h1:36qXJYfZs8f/bSamKmk+XcebcNPyRyL4FFGtEYgmRGM=
-github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector v0.35.1/go.mod h1:ekD9ntzDFtO5WPOSen2s8iGnJpqxbZu0cA7Jkh6bgmY=
 github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/googlemanagedprometheus v0.35.1 h1:3eZfllSgwOVXFhYcMixcnWRmpsoUbQ2RXJVZ2gbAaSU=
 github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/googlemanagedprometheus v0.35.1/go.mod h1:PNxl7KZT+VRkGuh4cXfgn0bYM9FZ7664qdQ1QdAvCdA=
 github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.11.1 h1:O7dTg9ukLjzIOOLpC8RBaD1EqWD3jqicwhpju6C8meg=
@@ -1392,6 +1390,8 @@ github.com/nwaples/rardecode v1.1.0/go.mod h1:5DzqNKiOdpKKBH87u8VlvAnPZMXcGRhxWk
 github.com/nxadm/tail v1.4.4/go.mod h1:kenIhsEOeOJmVchQTgglprH7qJGnHDVpk1VPCcaMI8A=
 github.com/nxadm/tail v1.4.8 h1:nPr65rt6Y5JFSKQO7qToXr7pePgD6Gwiw05lkbyAQTE=
 github.com/nxadm/tail v1.4.8/go.mod h1:+ncqLTQzXmGhMZNUePPaPqPvBxHAIsmXswZKocGu+AU=
+github.com/observIQ/opentelemetry-operations-go/exporter/collector v0.26.1-0.20230209194119-44351a011294 h1:N7iNT6Mp8kcniIa7VmldXcHFa2hM4zot2rIpJCrX4is=
+github.com/observIQ/opentelemetry-operations-go/exporter/collector v0.26.1-0.20230209194119-44351a011294/go.mod h1:ekD9ntzDFtO5WPOSen2s8iGnJpqxbZu0cA7Jkh6bgmY=
 github.com/observiq/ctimefmt v1.0.0 h1:r7vTJ+Slkrt9fZ67mkf+mA6zAdR5nGIJRMTzkUyvilk=
 github.com/observiq/ctimefmt v1.0.0/go.mod h1:mxi62//WbSpG/roCO1c6MqZ7zQTvjVtYheqHN3eOjvc=
 github.com/observiq/nanojack v0.0.0-20201106172433-343928847ebc h1:49ewVBwLcy+eYqI4R0ICilCI4dPjddpFXWv3liXzUxM=
