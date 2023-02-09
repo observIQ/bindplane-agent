@@ -8,10 +8,10 @@ This processor aggregates metrics over a configurable interval, allowing for met
 - Metrics
 
 ## How it works
-1. The user configures the resource attribute transposer processor in the desired metrics pipeline.
+1. The user configures the aggregation processor in the desired metrics pipeline.
 2. Every metric that flows through the pipeline is matched against the provided `include` regex.
-3. If the metric name does not match, the metric passes through the processor.
-4. If the metric is not a gauge or cumulative sum, the metric passes through the processor.
+3. If the metric name does not match the `include` regex, the metric passes through the processor.
+4. If the metric matches, but is not a gauge or cumulative sum, the metric passes through the processor.
 5. If the metric name does match, and the metric is a gauge or cumulative sum, the metric is added to an aggregate based on its attributes. The metric does not continue down the pipeline.
 6. After the configured `interval` has passed, all aggregate metrics are emitted. Aggregate metrics are emitted with a name based on the configured `metric_name` for the aggregation.
 7. All aggregations are cleared, and will not be emitted on the next interval, unless another matching metric enters the pipeline.
