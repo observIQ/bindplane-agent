@@ -5,17 +5,17 @@ go 1.18
 require (
 	github.com/google/uuid v1.3.0
 	github.com/mholt/archiver/v3 v3.5.1
-	github.com/observiq/observiq-otel-collector/exporter/googlecloudexporter v1.17.0
-	github.com/observiq/observiq-otel-collector/packagestate v1.17.0
-	github.com/observiq/observiq-otel-collector/processor/logcountprocessor v1.17.0
-	github.com/observiq/observiq-otel-collector/processor/maskprocessor v1.17.0
-	github.com/observiq/observiq-otel-collector/processor/metricextractprocessor v1.17.0
-	github.com/observiq/observiq-otel-collector/processor/resourceattributetransposerprocessor v1.17.0
-	github.com/observiq/observiq-otel-collector/processor/samplingprocessor v1.17.0
-	github.com/observiq/observiq-otel-collector/processor/throughputmeasurementprocessor v1.17.0
-	github.com/observiq/observiq-otel-collector/receiver/pluginreceiver v1.17.0
-	github.com/observiq/observiq-otel-collector/receiver/routereceiver v1.17.0
-	github.com/observiq/observiq-otel-collector/receiver/sapnetweaverreceiver v1.17.0
+	github.com/observiq/observiq-otel-collector/exporter/googlecloudexporter v1.18.0
+	github.com/observiq/observiq-otel-collector/packagestate v1.18.0
+	github.com/observiq/observiq-otel-collector/processor/logcountprocessor v1.18.0
+	github.com/observiq/observiq-otel-collector/processor/maskprocessor v1.18.0
+	github.com/observiq/observiq-otel-collector/processor/metricextractprocessor v1.18.0
+	github.com/observiq/observiq-otel-collector/processor/resourceattributetransposerprocessor v1.18.0
+	github.com/observiq/observiq-otel-collector/processor/samplingprocessor v1.18.0
+	github.com/observiq/observiq-otel-collector/processor/throughputmeasurementprocessor v1.18.0
+	github.com/observiq/observiq-otel-collector/receiver/pluginreceiver v1.18.0
+	github.com/observiq/observiq-otel-collector/receiver/routereceiver v1.18.0
+	github.com/observiq/observiq-otel-collector/receiver/sapnetweaverreceiver v1.18.0
 	github.com/oklog/ulid/v2 v2.1.0
 	github.com/open-telemetry/opamp-go v0.2.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/alibabacloudlogserviceexporter v0.71.0
@@ -160,7 +160,7 @@ require (
 	github.com/Azure/azure-amqp-common-go/v4 v4.0.0 // indirect
 	github.com/bmatcuk/doublestar/v4 v4.6.0 // indirect
 	github.com/hooklift/gowsdl v0.5.0 // indirect
-	github.com/observiq/observiq-otel-collector/internal/expr v1.17.0 // indirect
+	github.com/observiq/observiq-otel-collector/internal/expr v1.18.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatautil v0.71.0 // indirect; indir1ct
 	github.com/ovh/go-ovh v1.3.0 // indirect
 	github.com/relvacode/iso8601 v1.3.0 // indirect
