@@ -2,7 +2,7 @@
 This processor aggregates metrics over a configurable interval, allowing for metrics to be sampled at a higher rate, or to reduce the volume of metric data from push-based sources.
 
 ## Minimum collector versions
-- Introduced: [v1.18.0](https://github.com/observIQ/observiq-otel-collector/releases/tag/v1.18.0)
+- Introduced: [v1.19.0](https://github.com/observIQ/observiq-otel-collector/releases/tag/v1.18.0)
 
 ## Supported pipelines
 - Metrics
