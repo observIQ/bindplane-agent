@@ -7,6 +7,7 @@ require (
 	github.com/mholt/archiver/v3 v3.5.1
 	github.com/observiq/observiq-otel-collector/exporter/googlecloudexporter v1.18.0
 	github.com/observiq/observiq-otel-collector/packagestate v1.18.0
+	github.com/observiq/observiq-otel-collector/processor/aggregationprocessor v1.18.0
 	github.com/observiq/observiq-otel-collector/processor/logcountprocessor v1.18.0
 	github.com/observiq/observiq-otel-collector/processor/maskprocessor v1.18.0
 	github.com/observiq/observiq-otel-collector/processor/metricextractprocessor v1.18.0
@@ -560,6 +561,8 @@ replace github.com/observiq/observiq-otel-collector/packagestate => ./packagesta
 replace github.com/observiq/observiq-otel-collector/processor/throughputmeasurementprocessor => ./processor/throughputmeasurementprocessor
 
 replace github.com/observiq/observiq-otel-collector/processor/samplingprocessor => ./processor/samplingprocessor
+
+replace github.com/observiq/observiq-otel-collector/processor/aggregationprocessor => ./processor/aggregationprocessor
 
 replace github.com/observiq/observiq-otel-collector/processor/maskprocessor => ./processor/maskprocessor
 

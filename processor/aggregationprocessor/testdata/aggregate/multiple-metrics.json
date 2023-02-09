@@ -1,0 +1,149 @@
+{
+    "resourceMetrics": [
+        {
+            "resource": {
+                "attributes": [
+                    {
+                        "key": "key1",
+                        "value": {
+                            "stringValue": "value1"
+                        }
+                    },
+                    {
+                        "key": "key2",
+                        "value": {
+                            "stringValue": "value2"
+                        }
+                    }
+                ]
+            },
+            "scopeMetrics": [
+                {
+                    "metrics": [
+                        {
+                            "gauge": {
+                                "dataPoints": [
+                                    {
+                                        "asDouble": 200,
+                                        "attributes": [
+                                            {
+                                                "key": "host",
+                                                "value": {
+                                                    "stringValue": "MyCoffeePot"
+                                                }
+                                            }
+                                        ],
+                                        "startTimeUnixNano": "1675866140681000000",
+                                        "timeUnixNano": "1675866200681000000"
+                                    }
+                                ]
+                            },
+                            "name": "test.water_volume.min"
+                        },
+                        {
+                            "gauge": {
+                                "dataPoints": [
+                                    {
+                                        "asDouble": 100,
+                                        "attributes": [
+                                            {
+                                                "key": "host",
+                                                "value": {
+                                                    "stringValue": "MyToaster"
+                                                }
+                                            }
+                                        ],
+                                        "startTimeUnixNano": "1675866140681000000",
+                                        "timeUnixNano": "1675866200681000000"
+                                    }
+                                ]
+                            },
+                            "name": "test.temperature.min"
+                        },
+                        {
+                            "gauge": {
+                                "dataPoints": [
+                                    {
+                                        "asDouble": 200,
+                                        "attributes": [
+                                            {
+                                                "key": "host",
+                                                "value": {
+                                                    "stringValue": "MyCoffeePot"
+                                                }
+                                            }
+                                        ],
+                                        "startTimeUnixNano": "1675866140681000000",
+                                        "timeUnixNano": "1675866200681000000"
+                                    }
+                                ]
+                            },
+                            "name": "test.water_volume.max"
+                        },
+                        {
+                            "gauge": {
+                                "dataPoints": [
+                                    {
+                                        "asDouble": 100,
+                                        "attributes": [
+                                            {
+                                                "key": "host",
+                                                "value": {
+                                                    "stringValue": "MyToaster"
+                                                }
+                                            }
+                                        ],
+                                        "startTimeUnixNano": "1675866140681000000",
+                                        "timeUnixNano": "1675866200681000000"
+                                    }
+                                ]
+                            },
+                            "name": "test.temperature.max"
+                        },
+                        {
+                            "gauge": {
+                                "dataPoints": [
+                                    {
+                                        "asDouble": 200,
+                                        "attributes": [
+                                            {
+                                                "key": "host",
+                                                "value": {
+                                                    "stringValue": "MyCoffeePot"
+                                                }
+                                            }
+                                        ],
+                                        "startTimeUnixNano": "1675866140681000000",
+                                        "timeUnixNano": "1675866200681000000"
+                                    }
+                                ]
+                            },
+                            "name": "test.water_volume.avg"
+                        },
+                        {
+                            "gauge": {
+                                "dataPoints": [
+                                    {
+                                        "asDouble": 100,
+                                        "attributes": [
+                                            {
+                                                "key": "host",
+                                                "value": {
+                                                    "stringValue": "MyToaster"
+                                                }
+                                            }
+                                        ],
+                                        "startTimeUnixNano": "1675866140681000000",
+                                        "timeUnixNano": "1675866200681000000"
+                                    }
+                                ]
+                            },
+                            "name": "test.temperature.avg"
+                        }
+                    ],
+                    "scope": {}
+                }
+            ]
+        }
+    ]
+}

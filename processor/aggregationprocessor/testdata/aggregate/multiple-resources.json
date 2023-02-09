@@ -1,0 +1,162 @@
+{
+    "resourceMetrics": [
+        {
+            "resource": {
+                "attributes": [
+                    {
+                        "key": "region",
+                        "value": {
+                            "stringValue": "us-east"
+                        }
+                    }
+                ]
+            },
+            "scopeMetrics": [
+                {
+                    "metrics": [
+                        {
+                            "gauge": {
+                                "dataPoints": [
+                                    {
+                                        "asDouble": 200,
+                                        "attributes": [
+                                            {
+                                                "key": "host",
+                                                "value": {
+                                                    "stringValue": "MyCoffeePot"
+                                                }
+                                            }
+                                        ],
+                                        "startTimeUnixNano": "1675866140681000000",
+                                        "timeUnixNano": "1675866200681000000"
+                                    }
+                                ]
+                            },
+                            "name": "test.water_volume.min"
+                        },
+                        {
+                            "gauge": {
+                                "dataPoints": [
+                                    {
+                                        "asDouble": 200,
+                                        "attributes": [
+                                            {
+                                                "key": "host",
+                                                "value": {
+                                                    "stringValue": "MyCoffeePot"
+                                                }
+                                            }
+                                        ],
+                                        "startTimeUnixNano": "1675866140681000000",
+                                        "timeUnixNano": "1675866200681000000"
+                                    }
+                                ]
+                            },
+                            "name": "test.water_volume.max"
+                        },
+                        {
+                            "gauge": {
+                                "dataPoints": [
+                                    {
+                                        "asDouble": 200,
+                                        "attributes": [
+                                            {
+                                                "key": "host",
+                                                "value": {
+                                                    "stringValue": "MyCoffeePot"
+                                                }
+                                            }
+                                        ],
+                                        "startTimeUnixNano": "1675866140681000000",
+                                        "timeUnixNano": "1675866200681000000"
+                                    }
+                                ]
+                            },
+                            "name": "test.water_volume.avg"
+                        }
+                    ],
+                    "scope": {}
+                }
+            ]
+        },
+        {
+            "resource": {
+                "attributes": [
+                    {
+                        "key": "region",
+                        "value": {
+                            "stringValue": "us-west"
+                        }
+                    }
+                ]
+            },
+            "scopeMetrics": [
+                {
+                    "metrics": [
+                        {
+                            "gauge": {
+                                "dataPoints": [
+                                    {
+                                        "asDouble": 500,
+                                        "attributes": [
+                                            {
+                                                "key": "host",
+                                                "value": {
+                                                    "stringValue": "MyCoffeePot"
+                                                }
+                                            }
+                                        ],
+                                        "startTimeUnixNano": "1675866140681000000",
+                                        "timeUnixNano": "1675866200681000000"
+                                    }
+                                ]
+                            },
+                            "name": "test.water_volume.min"
+                        },
+                        {
+                            "gauge": {
+                                "dataPoints": [
+                                    {
+                                        "asDouble": 500,
+                                        "attributes": [
+                                            {
+                                                "key": "host",
+                                                "value": {
+                                                    "stringValue": "MyCoffeePot"
+                                                }
+                                            }
+                                        ],
+                                        "startTimeUnixNano": "1675866140681000000",
+                                        "timeUnixNano": "1675866200681000000"
+                                    }
+                                ]
+                            },
+                            "name": "test.water_volume.max"
+                        },
+                        {
+                            "gauge": {
+                                "dataPoints": [
+                                    {
+                                        "asDouble": 500,
+                                        "attributes": [
+                                            {
+                                                "key": "host",
+                                                "value": {
+                                                    "stringValue": "MyCoffeePot"
+                                                }
+                                            }
+                                        ],
+                                        "startTimeUnixNano": "1675866140681000000",
+                                        "timeUnixNano": "1675866200681000000"
+                                    }
+                                ]
+                            },
+                            "name": "test.water_volume.avg"
+                        }
+                    ],
+                    "scope": {}
+                }
+            ]
+        }
+    ]
+}
