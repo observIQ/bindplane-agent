@@ -27,7 +27,7 @@ import (
 
 // getSnapshotReporter is function for retrieving the SnapshotReporter.
 // Meant to be overridden for tests.
-var getSnapshotReporter = report.GetSnapshotReporter
+var getSnapshotReporter func() *report.SnapshotReporter = report.GetSnapshotReporter
 
 type snapshotProcessor struct {
 	logger      *zap.Logger
