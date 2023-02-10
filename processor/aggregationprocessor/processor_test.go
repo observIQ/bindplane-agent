@@ -346,6 +346,7 @@ func readMetrics(t *testing.T, path string) pmetric.Metrics {
 
 // 	b, err = json.MarshalIndent(metricMap, "", "    ")
 // 	require.NoError(t, err)
+// 	b = append(b, '\n')
 
 // 	require.NoError(t, os.WriteFile(path, b, 0666))
 // }

@@ -38,7 +38,8 @@
                                     }
                                 ]
                             },
-                            "name": "test.water_volume.min"
+                            "name": "test.water_volume.min",
+                            "unit": "cm3"
                         },
                         {
                             "gauge": {
@@ -58,7 +59,8 @@
                                     }
                                 ]
                             },
-                            "name": "test.temperature.min"
+                            "name": "test.temperature.min",
+                            "unit": "centigrade"
                         },
                         {
                             "gauge": {
@@ -78,7 +80,8 @@
                                     }
                                 ]
                             },
-                            "name": "test.water_volume.max"
+                            "name": "test.water_volume.max",
+                            "unit": "cm3"
                         },
                         {
                             "gauge": {
@@ -98,7 +101,8 @@
                                     }
                                 ]
                             },
-                            "name": "test.temperature.max"
+                            "name": "test.temperature.max",
+                            "unit": "centigrade"
                         },
                         {
                             "gauge": {
@@ -118,7 +122,8 @@
                                     }
                                 ]
                             },
-                            "name": "test.water_volume.avg"
+                            "name": "test.water_volume.avg",
+                            "unit": "cm3"
                         },
                         {
                             "gauge": {
@@ -138,7 +143,8 @@
                                     }
                                 ]
                             },
-                            "name": "test.temperature.avg"
+                            "name": "test.temperature.avg",
+                            "unit": "centigrade"
                         }
                     ],
                     "scope": {}

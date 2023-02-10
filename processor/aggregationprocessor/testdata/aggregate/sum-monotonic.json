@@ -46,7 +46,8 @@
                                     }
                                 ],
                                 "isMonotonic": true
-                            }
+                            },
+                            "unit": "testunit"
                         },
                         {
                             "name": "test.metric.max",
@@ -74,7 +75,8 @@
                                     }
                                 ],
                                 "isMonotonic": true
-                            }
+                            },
+                            "unit": "testunit"
                         },
                         {
                             "name": "test.metric.avg",
@@ -102,7 +104,8 @@
                                     }
                                 ],
                                 "isMonotonic": true
-                            }
+                            },
+                            "unit": "testunit"
                         }
                     ],
                     "scope": {}

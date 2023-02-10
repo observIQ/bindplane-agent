@@ -273,7 +273,7 @@ func (sp *aggregationProcessor) addAggregateMetric(now pcommon.Timestamp, ms pme
 
 	m.SetName(newMetricName)
 	m.SetDescription(ma.desc)
-	m.SetUnit(m.Unit())
+	m.SetUnit(ma.unit)
 
 	var dps pmetric.NumberDataPointSlice
 	switch ma.metricType {

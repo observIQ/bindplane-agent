@@ -45,7 +45,8 @@
                                         "timeUnixNano": "1675866200681000000"
                                     }
                                 ]
-                            }
+                            },
+                            "unit": "testunit"
                         },
                         {
                             "name": "test.metric.max",
@@ -72,7 +73,8 @@
                                         "timeUnixNano": "1675866200681000000"
                                     }
                                 ]
-                            }
+                            },
+                            "unit": "testunit"
                         },
                         {
                             "name": "test.metric.avg",
@@ -99,7 +101,8 @@
                                         "timeUnixNano": "1675866200681000000"
                                     }
                                 ]
-                            }
+                            },
+                            "unit": "testunit"
                         }
                     ],
                     "scope": {}
