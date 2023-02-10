@@ -48,6 +48,7 @@ import (
 )
 
 var defaultProcessors = []processor.Factory{
+	aggregationprocessor.NewFactory(),
 	attributesprocessor.NewFactory(),
 	batchprocessor.NewFactory(),
 	processortest.NewNopFactory(),
@@ -73,7 +74,6 @@ var defaultProcessors = []processor.Factory{
 	snapshotprocessor.NewFactory(),
 	spanmetricsprocessor.NewFactory(),
 	spanprocessor.NewFactory(),
-	aggregationprocessor.NewFactory(),
 	throughputmeasurementprocessor.NewFactory(),
 	tailsamplingprocessor.NewFactory(),
 	transformprocessor.NewFactory(),
