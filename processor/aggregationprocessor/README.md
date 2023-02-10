@@ -17,34 +17,13 @@ This processor aggregates metrics over a configurable interval, allowing for met
 7. All aggregations are cleared, and will not be emitted on the next interval, unless another matching metric enters the pipeline.
 
 ## Configuration
-| Field               | Type   | Default | Description                                                            |
-|---------------------|--------|---------|------------------------------------------------------------------------|
-| `interval` | duration | `1m` | The interval on which to emit aggregate metrics. |
-| `include` | regex | `"^.*$"` | A regex that specifies which metrics to consider for aggregation. The default regex matches all metrics. |
-| `aggregations` | []map | | A list of aggregations to perform on each metric.|
-
-
-<table>
-<tr><th>Field</th><th>Type</th><th>Default</th><th>Description</th></tr>
-
-<tr><td><pre>interval</pre></td><td>duration</td><td><pre>1m</pre></td><td>The interval on which to emit aggregate metrics. </td></tr>
-
-<tr><td><pre>include</pre></td><td>regular expression</td><td><pre>"^.*$"</pre></td><td>A regex that specifies which metrics to consider for aggregation. The default regex matches all metrics. </td></tr>
-
-<tr><td><pre>aggregations</pre></td><td>[]map</td><td><pre>
-- type: min
-  metric_name: "$$0.min"
-- type: max
-  metric_name: "$$0.max"
-- type: avg
-  metric_name: "$$0.avg"
-</pre></td><td>A list of aggregations to perform on each metric. By default, min, max, and average aggregate metrics are emitted every `interval`.</td></tr>
-
-<tr><td><pre>aggregations[].type</pre></td><td>aggregate type</td><td></td><td> The type of the aggregation. Valid values are: `min`, `max`, `avg`, `first`, `last`.</td></tr>
-
-<tr><td><pre>aggregations[].metric_name</pre></td><td>string</td><td><pre>"$$0"</pre></td><td>The name of the metric emitted for this aggregation. By default, the portion of the name matched by the `include` regex is used.</td></tr>
-</table>
-
+| Field                        | Type           | Default  | Description                                                                                                                      |
+|------------------------------|----------------|----------|----------------------------------------------------------------------------------------------------------------------------------|
+| `interval`                   | duration       | `1m`     | The interval on which to emit aggregate metrics.                                                                                 |
+| `include`                    | regex          | `"^.*$"` | A regex that specifies which metrics to consider for aggregation. The default regex matches all metrics.                         |
+| `aggregations`               | []map          | `[{type: min, metric_name: "$$0.min"}, {type: max, metric_name: "$$0.max"}, {type: avg, metric_name: "$$0.avg"}]`| A list of aggregations to perform on each metric.                                                                                |
+| `aggregations[].type`        | aggregate type |          | The type of the aggregation. Valid values are: `min`, `max`, `avg`, `first`, `last`.                                             |
+| `aggregations[].metric_name` | string         |          | The name of the metric emitted for this aggregation. By default, the portion of the name matched by the `include` regex is used. |                                                        |
 
 ### Example configuration
 
