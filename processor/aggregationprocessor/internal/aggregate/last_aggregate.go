@@ -15,7 +15,7 @@
 package aggregate
 
 import (
-	"fmt"
+	"errors"
 	"time"
 
 	"go.opentelemetry.io/collector/pdata/pmetric"
@@ -44,7 +44,7 @@ func newLastAggregate(initialVal pmetric.NumberDataPoint) (Aggregate, error) {
 		}, nil
 	}
 
-	return nil, fmt.Errorf("cannot create last aggregation from empty datapoint")
+	return nil, errors.New("cannot create last aggregation from empty datapoint")
 }
 
 func (m *lastAggregation) AddDatapoint(ndp pmetric.NumberDataPoint) {

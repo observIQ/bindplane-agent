@@ -15,7 +15,7 @@
 package aggregate
 
 import (
-	"fmt"
+	"errors"
 
 	"go.opentelemetry.io/collector/pdata/pmetric"
 )
@@ -40,7 +40,7 @@ func newMaxAggregate(initialVal pmetric.NumberDataPoint) (Aggregate, error) {
 		}, nil
 	}
 
-	return nil, fmt.Errorf("cannot create max aggregation from empty datapoint")
+	return nil, errors.New("cannot create max aggregation from empty datapoint")
 }
 
 func (m *maxAggregation) AddDatapoint(ndp pmetric.NumberDataPoint) {

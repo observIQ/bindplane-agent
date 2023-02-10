@@ -15,7 +15,7 @@
 package aggregate
 
 import (
-	"fmt"
+	"errors"
 
 	"go.opentelemetry.io/collector/pdata/pmetric"
 )
@@ -40,7 +40,7 @@ func newMinAggregate(initialVal pmetric.NumberDataPoint) (Aggregate, error) {
 		}, nil
 	}
 
-	return nil, fmt.Errorf("cannot create min aggregation from empty datapoint")
+	return nil, errors.New("cannot create min aggregation from empty datapoint")
 }
 
 func (m *minAggregation) AddDatapoint(ndp pmetric.NumberDataPoint) {

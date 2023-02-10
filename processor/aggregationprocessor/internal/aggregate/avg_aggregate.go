@@ -15,7 +15,7 @@
 package aggregate
 
 import (
-	"fmt"
+	"errors"
 
 	"go.opentelemetry.io/collector/pdata/pmetric"
 )
@@ -43,7 +43,7 @@ func newAvgAggregate(initialVal pmetric.NumberDataPoint) (Aggregate, error) {
 		}, nil
 	}
 
-	return nil, fmt.Errorf("cannot create avg aggregation from empty datapoint")
+	return nil, errors.New("cannot create avg aggregation from empty datapoint")
 }
 
 func (m *avgAggregate) AddDatapoint(ndp pmetric.NumberDataPoint) {
