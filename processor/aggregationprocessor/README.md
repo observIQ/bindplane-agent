@@ -23,7 +23,7 @@ This processor aggregates metrics over a configurable interval, allowing for met
 | `include`                    | regex          | `"^.*$"` | A regex that specifies which metrics to consider for aggregation. The default regex matches all metrics.                         |
 | `aggregations`               | []map          | `[{type: min, metric_name: "$$0.min"}, {type: max, metric_name: "$$0.max"}, {type: avg, metric_name: "$$0.avg"}]`| A list of aggregations to perform on each metric.                                                                                |
 | `aggregations[].type`        | aggregate type |          | The type of the aggregation. Valid values are: `min`, `max`, `avg`, `first`, `last`.                                             |
-| `aggregations[].metric_name` | string         |          | The name of the metric emitted for this aggregation. By default, the portion of the name matched by the `include` regex is used. |                                                        |
+| `aggregations[].metric_name` | string         | `"$$0"` | The name of the metric emitted for this aggregation. By default, the portion of the name matched by the `include` regex is used. |                                                        |
 
 ### Example configuration
 
