@@ -44,13 +44,11 @@ type AggregateConfig struct {
 
 // Validate validate the config, returning an error explaining why it isn't if the config is invalid.
 func (a AggregateConfig) Validate() error {
-	var errs error
-
 	if !a.Type.Valid() {
 		return fmt.Errorf("invalid aggregate type for `type`: %s", a.Type)
 	}
 
-	return errs
+	return nil
 }
 
 // MetricNameString returns the configured name for the emitted metric, or "$0" if none was specified.
