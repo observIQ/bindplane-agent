@@ -34,7 +34,7 @@ type Config struct {
 	Aggregations []AggregateConfig `mapstructure:"aggregations"`
 }
 
-// AggregateConfig is a config that
+// AggregateConfig is a config that specifies which aggregations to perform for each incoming metric
 type AggregateConfig struct {
 	// Type of aggregation
 	Type aggregate.AggregationType `mapstructure:"type"`
