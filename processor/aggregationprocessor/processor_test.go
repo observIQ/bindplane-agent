@@ -247,6 +247,21 @@ func TestAggregationProcessor_StartShutdown(t *testing.T) {
 		require.NoError(t, err)
 		require.NoError(t, p.Shutdown(context.Background()))
 	})
+
+	t.Run("shutdown, context times out", func(t *testing.T) {
+		p, err := newAggregationProcessor(zaptest.NewLogger(t), &Config{
+			Interval:     10 * time.Second,
+			Include:      `^test\..*$`,
+			Aggregations: []AggregateConfig{},
+		}, &consumertest.MetricsSink{})
+		require.NoError(t, err)
+
+		p.wg.Add(1)
+		cancelledContext, cancel := context.WithCancel(context.Background())
+		cancel()
+
+		require.ErrorIs(t, p.Shutdown(cancelledContext), context.Canceled)
+	})
 }
 
 func TestAggregationProcessor_Flush(t *testing.T) {

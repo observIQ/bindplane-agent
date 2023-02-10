@@ -34,8 +34,8 @@ import (
 
 type aggregationProcessor struct {
 	logger   *zap.Logger
-	mux      *sync.Mutex
-	wg       *sync.WaitGroup
+	mux      sync.Mutex
+	wg       sync.WaitGroup
 	doneChan chan struct{}
 	//for mocking in test
 	now func() time.Time
@@ -56,8 +56,8 @@ func newAggregationProcessor(logger *zap.Logger, cfg *Config, consumer consumer.
 	}
 	return &aggregationProcessor{
 		logger:                 logger,
-		mux:                    &sync.Mutex{},
-		wg:                     &sync.WaitGroup{},
+		mux:                    sync.Mutex{},
+		wg:                     sync.WaitGroup{},
 		doneChan:               make(chan struct{}),
 		now:                    time.Now,
 		includeRegex:           regex,
@@ -117,11 +117,9 @@ func (sp *aggregationProcessor) aggregateMetrics(md pmetric.Metrics) {
 				dps := datapointsFromMetric(m)
 				// We remove datapoints that we aggregate here, so we use RemoveIf to iterate the datapoints
 				dps.RemoveIf(func(dp pmetric.NumberDataPoint) bool {
-					switch dp.ValueType() {
-					case pmetric.NumberDataPointValueTypeInt:
-					case pmetric.NumberDataPointValueTypeDouble:
-					default:
-						// ignore empty datapoints
+					if dp.ValueType() != pmetric.NumberDataPointValueTypeDouble &&
+						dp.ValueType() != pmetric.NumberDataPointValueTypeInt {
+						// Ignore values that are not Double or Int (e.g. are empty)
 						return false
 					}
 
@@ -310,10 +308,23 @@ func (sp *aggregationProcessor) Capabilities() consumer.Capabilities {
 	return consumer.Capabilities{MutatesData: true}
 }
 
-func (sp *aggregationProcessor) Shutdown(_ context.Context) error {
+func (sp *aggregationProcessor) Shutdown(ctx context.Context) error {
 	close(sp.doneChan)
 
-	sp.wg.Wait()
+	waitDoneChan := make(chan struct{})
+	// wait in a goroutine so that we can select on context cancellation as well
+	go func() {
+		sp.wg.Wait()
+		close(waitDoneChan)
+	}()
+
+	select {
+	case <-ctx.Done():
+		sp.logger.Error("Context timed out while waiting for graceful shutdown.", zap.Error(ctx.Err()))
+		return ctx.Err()
+	case <-waitDoneChan: // OK
+	}
+
 	return nil
 }
 
