@@ -22,7 +22,6 @@ import (
 	"time"
 
 	"github.com/observiq/observiq-otel-collector/processor/aggregationprocessor/internal/aggregate"
-	"go.uber.org/multierr"
 )
 
 // Config is the configuration for the processor
@@ -48,7 +47,7 @@ func (a AggregateConfig) Validate() error {
 	var errs error
 
 	if !a.Type.Valid() {
-		errs = multierr.Append(errs, fmt.Errorf("invalid aggregate type for `type`: %s", a.Type))
+		return fmt.Errorf("invalid aggregate type for `type`: %s", a.Type)
 	}
 
 	return errs
@@ -65,29 +64,30 @@ func (a AggregateConfig) MetricNameString() string {
 
 // Validate validates the processor configuration
 func (cfg Config) Validate() error {
-	var errs error
 	if _, err := regexp.Compile(cfg.Include); err != nil {
-		errs = multierr.Append(errs, fmt.Errorf("`include` regex must be valid: %w", err))
+		return fmt.Errorf("`include` regex must be valid: %w", err)
 	}
 
 	if cfg.Interval <= 0 {
-		errs = multierr.Append(errs, errors.New("aggregation interval must be positive"))
+		return errors.New("aggregation interval must be positive")
 	}
 
 	// don't check aggregations if using defaults
 	if cfg.Aggregations == nil {
-		return errs
+		return nil
 	}
 
 	if len(cfg.Aggregations) == 0 {
-		errs = multierr.Append(errs, errors.New("at least one aggregation must be specified"))
+		return errors.New("at least one aggregation must be specified")
 	}
 
 	for _, a := range cfg.Aggregations {
-		errs = multierr.Append(errs, a.Validate())
+		if err := a.Validate(); err != nil {
+			return err
+		}
 	}
 
-	return errs
+	return nil
 }
 
 // AggregationConfigs gets the default aggregation configs if none were specified, otherwise the specified aggregation configs
