@@ -47,7 +47,7 @@ func TestLoadConfig(t *testing.T) {
 				Include:  `^test\.thing$$`,
 				Aggregations: []AggregateConfig{
 					{
-						Type: aggregate.AggregationTypeLast,
+						Type: aggregate.LastType,
 					},
 				},
 			},
@@ -84,19 +84,19 @@ func TestConfig_Validate(t *testing.T) {
 				Include:  "^.*$",
 				Aggregations: []AggregateConfig{
 					{
-						Type: aggregate.AggregationTypeAvg,
+						Type: aggregate.AvgType,
 					},
 					{
-						Type: aggregate.AggregationTypeMin,
+						Type: aggregate.MinType,
 					},
 					{
-						Type: aggregate.AggregationTypeMax,
+						Type: aggregate.MaxType,
 					},
 					{
-						Type: aggregate.AggregationTypeLast,
+						Type: aggregate.LastType,
 					},
 					{
-						Type: aggregate.AggregationTypeFirst,
+						Type: aggregate.FirstType,
 					},
 				},
 			},
@@ -124,7 +124,7 @@ func TestConfig_Validate(t *testing.T) {
 				Include:  "^(",
 				Aggregations: []AggregateConfig{
 					{
-						Type: aggregate.AggregationTypeAvg,
+						Type: aggregate.AvgType,
 					},
 				},
 			},
@@ -137,7 +137,7 @@ func TestConfig_Validate(t *testing.T) {
 				Include:  "^.*$",
 				Aggregations: []AggregateConfig{
 					{
-						Type: aggregate.AggregationTypeAvg,
+						Type: aggregate.AvgType,
 					},
 				},
 			},
@@ -173,7 +173,7 @@ func TestConfig_Validate(t *testing.T) {
 func TestAggregateConfig_MetricNameString(t *testing.T) {
 	t.Run("metric name is not specified", func(t *testing.T) {
 		metricName := AggregateConfig{
-			Type:       aggregate.AggregationTypeAvg,
+			Type:       aggregate.AvgType,
 			MetricName: "",
 		}.MetricNameString()
 		require.Equal(t, "$0", metricName)
@@ -181,7 +181,7 @@ func TestAggregateConfig_MetricNameString(t *testing.T) {
 
 	t.Run("metric name is specified", func(t *testing.T) {
 		metricName := AggregateConfig{
-			Type:       aggregate.AggregationTypeAvg,
+			Type:       aggregate.AvgType,
 			MetricName: "test.metric",
 		}.MetricNameString()
 		require.Equal(t, "test.metric", metricName)

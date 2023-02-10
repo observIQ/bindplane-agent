@@ -96,15 +96,15 @@ func (cfg Config) AggregationConfigs() []AggregateConfig {
 		// fallback to defaults
 		return []AggregateConfig{
 			{
-				Type:       aggregate.AggregationTypeMin,
+				Type:       aggregate.MinType,
 				MetricName: "$0.min",
 			},
 			{
-				Type:       aggregate.AggregationTypeMax,
+				Type:       aggregate.MaxType,
 				MetricName: "$0.max",
 			},
 			{
-				Type:       aggregate.AggregationTypeAvg,
+				Type:       aggregate.AvgType,
 				MetricName: "$0.avg",
 			},
 		}

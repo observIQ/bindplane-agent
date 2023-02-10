@@ -32,21 +32,21 @@ type AggregationType string
 
 // Types of aggregates
 const (
-	AggregationTypeMin   AggregationType = "min"
-	AggregationTypeMax   AggregationType = "max"
-	AggregationTypeFirst AggregationType = "first"
-	AggregationTypeLast  AggregationType = "last"
-	AggregationTypeAvg   AggregationType = "avg"
+	MinType   AggregationType = "min"
+	MaxType   AggregationType = "max"
+	FirstType AggregationType = "first"
+	LastType  AggregationType = "last"
+	AvgType   AggregationType = "avg"
 )
 
 type aggregateConstructor func(pmetric.NumberDataPoint) (Aggregate, error)
 
 var aggregateConstructors = map[AggregationType]aggregateConstructor{
-	AggregationTypeMin:   newMinAggregate,
-	AggregationTypeMax:   newMaxAggregate,
-	AggregationTypeFirst: newFirstAggregate,
-	AggregationTypeLast:  newLastAggregate,
-	AggregationTypeAvg:   newAvgAggregate,
+	MinType:   newMinAggregate,
+	MaxType:   newMaxAggregate,
+	FirstType: newFirstAggregate,
+	LastType:  newLastAggregate,
+	AvgType:   newAvgAggregate,
 }
 
 // New creates a new aggregate of the given type, using the initial datapoint
