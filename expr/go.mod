@@ -1,4 +1,4 @@
-module github.com/observiq/observiq-otel-collector/internal/expr
+module github.com/observiq/observiq-otel-collector/expr
 
 go 1.18
 

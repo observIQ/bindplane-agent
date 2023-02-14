@@ -155,13 +155,15 @@ require (
 	gopkg.in/yaml.v3 v3.0.1
 )
 
-require github.com/grafana/loki/pkg/push v0.0.0-20230127072203-4e8cc8d71928 // indirect
+require (
+	github.com/grafana/loki/pkg/push v0.0.0-20230127072203-4e8cc8d71928 // indirect
+	github.com/observiq/observiq-otel-collector/expr v1.18.0 // indirect
+)
 
 require (
 	github.com/Azure/azure-amqp-common-go/v4 v4.0.0 // indirect
 	github.com/bmatcuk/doublestar/v4 v4.6.0 // indirect
 	github.com/hooklift/gowsdl v0.5.0 // indirect
-	github.com/observiq/observiq-otel-collector/internal/expr v1.18.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatautil v0.71.0 // indirect; indir1ct
 	github.com/ovh/go-ovh v1.3.0 // indirect
 	github.com/relvacode/iso8601 v1.3.0 // indirect
@@ -570,7 +572,7 @@ replace github.com/observiq/observiq-otel-collector/processor/logcountprocessor 
 
 replace github.com/observiq/observiq-otel-collector/processor/metricextractprocessor => ./processor/metricextractprocessor
 
-replace github.com/observiq/observiq-otel-collector/internal/expr => ./internal/expr
+replace github.com/observiq/observiq-otel-collector/expr => ./expr
 
 // Does not build with windows and only used in configschema executable
 // Relevant issue https://github.com/mattn/go-ieproxy/issues/45

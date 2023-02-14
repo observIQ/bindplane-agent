@@ -109,7 +109,7 @@ updates:
       prefix: "deps"
       include: "scope"
   - package-ecosystem: "gomod"
-    directory: "/internal/expr"
+    directory: "/expr"
     schedule:
       interval: "weekly"
     ignore:
