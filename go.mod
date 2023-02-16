@@ -9,6 +9,7 @@ require (
 	github.com/observiq/observiq-otel-collector/packagestate v1.18.0
 	github.com/observiq/observiq-otel-collector/processor/aggregationprocessor v1.18.0
 	github.com/observiq/observiq-otel-collector/processor/logcountprocessor v1.18.0
+	github.com/observiq/observiq-otel-collector/processor/logdeduplicationprocessor v1.18.0
 	github.com/observiq/observiq-otel-collector/processor/maskprocessor v1.18.0
 	github.com/observiq/observiq-otel-collector/processor/metricextractprocessor v1.18.0
 	github.com/observiq/observiq-otel-collector/processor/resourceattributetransposerprocessor v1.18.0
@@ -164,7 +165,6 @@ require (
 	github.com/Azure/azure-amqp-common-go/v4 v4.0.0 // indirect
 	github.com/bmatcuk/doublestar/v4 v4.6.0 // indirect
 	github.com/hooklift/gowsdl v0.5.0 // indirect
-	github.com/observiq/observiq-otel-collector/processor/logdeduplicationprocessor v0.0.0-00010101000000-000000000000
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatautil v0.71.0 // indirect; indir1ct
 	github.com/ovh/go-ovh v1.3.0 // indirect
 	github.com/relvacode/iso8601 v1.3.0 // indirect
