@@ -156,7 +156,6 @@ func (a *logCounter) Increment() {
 }
 
 // getLogKey creates a unique md5 hash for the log record to use as a map key
-// md5 hashes are 16 bytes per the constant set in the package https://pkg.go.dev/crypto/md5#pkg-constants.
 func getLogKey(logRecord plog.LogRecord) [8]byte {
 	hasher := fnv.New64()
 	attrHash := pdatautil.MapHash(logRecord.Attributes())
