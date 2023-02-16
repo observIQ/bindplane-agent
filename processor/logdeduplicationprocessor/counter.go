@@ -156,13 +156,14 @@ func (a *logCounter) Increment() {
 }
 
 // getLogKey creates a unique md5 hash for the log record to use as a map key
+/* #nosec G104 -- According to Hash interface write can never return an error */
 func getLogKey(logRecord plog.LogRecord) [8]byte {
 	hasher := fnv.New64()
 	attrHash := pdatautil.MapHash(logRecord.Attributes())
+
 	hasher.Write(attrHash[:])
 	bodyHash := pdatautil.ValueHash(logRecord.Body())
 	hasher.Write(bodyHash[:])
-
 	hasher.Write([]byte(logRecord.SeverityNumber().String()))
 	hasher.Write([]byte(logRecord.SeverityText()))
 	hash := hasher.Sum(nil)
