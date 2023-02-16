@@ -69,10 +69,22 @@ func (p *logDedupProcessor) Capabilities() consumer.Capabilities {
 }
 
 // Shutdown stops the processor.
-func (p *logDedupProcessor) Shutdown(_ context.Context) error {
+func (p *logDedupProcessor) Shutdown(ctx context.Context) error {
+
 	p.cancel()
-	p.wg.Wait()
-	return nil
+
+	doneChan := make(chan struct{})
+	go func() {
+		defer close(doneChan)
+		p.wg.Wait()
+	}()
+
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	case <-doneChan:
+		return nil
+	}
 }
 
 // ConsumeLogs processes the logs.
@@ -88,7 +100,7 @@ func (p *logDedupProcessor) ConsumeLogs(_ context.Context, pl plog.Logs) error {
 			logs := scope.LogRecords()
 			for k := 0; k < logs.Len(); k++ {
 				logRecord := logs.At(k)
-				p.aggregator.Add(resourceAttrs, &logRecord)
+				p.aggregator.Add(resourceAttrs, logRecord)
 			}
 		}
 	}

@@ -15,8 +15,7 @@
 package logdeduplicationprocessor
 
 import (
-	//#nosec G501 we don't need a cryptographically secure hash here
-	"crypto/md5"
+	"hash/fnv"
 	"time"
 
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatautil"
@@ -92,7 +91,7 @@ func (l *logAggregator) Export() plog.Logs {
 }
 
 // Add adds the logRecord to the resource aggregator that is identified by the resource attributes
-func (l *logAggregator) Add(resourceAttrs pcommon.Map, logRecord *plog.LogRecord) {
+func (l *logAggregator) Add(resourceAttrs pcommon.Map, logRecord plog.LogRecord) {
 	key := pdatautil.MapHash(resourceAttrs)
 	resourceCounter, ok := l.resources[key]
 	if !ok {
@@ -111,19 +110,19 @@ func (l *logAggregator) Reset() {
 // resourceAggregator dimensions the counter by resource.
 type resourceAggregator struct {
 	attributes  pcommon.Map
-	logCounters map[[16]byte]*logCounter
+	logCounters map[[8]byte]*logCounter
 }
 
 // newResourceAggregator creates a new ResourceCounter.
 func newResourceAggregator(attributes pcommon.Map) *resourceAggregator {
 	return &resourceAggregator{
 		attributes:  attributes,
-		logCounters: make(map[[16]byte]*logCounter),
+		logCounters: make(map[[8]byte]*logCounter),
 	}
 }
 
 // Add increments the counter that the logRecord matches.
-func (r *resourceAggregator) Add(logRecord *plog.LogRecord) {
+func (r *resourceAggregator) Add(logRecord plog.LogRecord) {
 	key := getLogKey(logRecord)
 	lc, ok := r.logCounters[key]
 	if !ok {
@@ -136,14 +135,14 @@ func (r *resourceAggregator) Add(logRecord *plog.LogRecord) {
 
 // logCounter is a counter for a log record.
 type logCounter struct {
-	logRecord              *plog.LogRecord
+	logRecord              plog.LogRecord
 	firstObservedTimestamp time.Time
 	lastObservedTimestamp  time.Time
 	count                  int64
 }
 
 // newLogCounter creates a new AttributeCounter.
-func newLogCounter(logRecord *plog.LogRecord) *logCounter {
+func newLogCounter(logRecord plog.LogRecord) *logCounter {
 	return &logCounter{
 		logRecord: logRecord,
 		count:     0,
@@ -158,9 +157,8 @@ func (a *logCounter) Increment() {
 
 // getLogKey creates a unique md5 hash for the log record to use as a map key
 // md5 hashes are 16 bytes per the constant set in the package https://pkg.go.dev/crypto/md5#pkg-constants.
-func getLogKey(logRecord *plog.LogRecord) [16]byte {
-	//#nosec G401 we do not a a strong cryptographic hash here
-	hasher := md5.New()
+func getLogKey(logRecord plog.LogRecord) [8]byte {
+	hasher := fnv.New64()
 	attrHash := pdatautil.MapHash(logRecord.Attributes())
 	hasher.Write(attrHash[:])
 	bodyHash := pdatautil.ValueHash(logRecord.Body())
@@ -171,7 +169,7 @@ func getLogKey(logRecord *plog.LogRecord) [16]byte {
 	hash := hasher.Sum(nil)
 
 	// convert from slice to fixed size array to use as key
-	var key [16]byte
+	var key [8]byte
 	copy(key[:], hash)
 	return key
 }

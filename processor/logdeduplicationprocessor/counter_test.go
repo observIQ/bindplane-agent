@@ -51,10 +51,10 @@ func Test_logAggregatorAdd(t *testing.T) {
 	resourceAttrs.PutStr("one", "two")
 
 	expectedResourceKey := pdatautil.MapHash(resourceAttrs)
-	expectedLogKey := getLogKey(&logRecord)
+	expectedLogKey := getLogKey(logRecord)
 
 	// Add logRecord
-	aggregator.Add(resourceAttrs, &logRecord)
+	aggregator.Add(resourceAttrs, logRecord)
 
 	// Check resourceCounter was set
 	resourceCounter, ok := aggregator.resources[expectedResourceKey]
@@ -66,7 +66,7 @@ func Test_logAggregatorAdd(t *testing.T) {
 	require.True(t, ok)
 
 	// Check fields on logCounter
-	require.Equal(t, &logRecord, lc.logRecord)
+	require.Equal(t, logRecord, lc.logRecord)
 	require.Equal(t, int64(1), lc.count)
 	require.Equal(t, firstExpectedTimestamp, lc.firstObservedTimestamp)
 	require.Equal(t, firstExpectedTimestamp, lc.lastObservedTimestamp)
@@ -77,7 +77,7 @@ func Test_logAggregatorAdd(t *testing.T) {
 		return secondExpectedTimestamp
 	}
 
-	aggregator.Add(resourceAttrs, &logRecord)
+	aggregator.Add(resourceAttrs, logRecord)
 	require.Equal(t, int64(2), lc.count)
 	require.Equal(t, secondExpectedTimestamp, lc.lastObservedTimestamp)
 }
@@ -124,7 +124,7 @@ func Test_logAggregatorExport(t *testing.T) {
 	logRecord := generateTestLogRecord(t, "body string")
 
 	// Add logRecord
-	aggregator.Add(resourceAttrs, &logRecord)
+	aggregator.Add(resourceAttrs, logRecord)
 
 	exportedLogs := aggregator.Export()
 	require.Equal(t, 1, exportedLogs.LogRecordCount())
@@ -180,8 +180,8 @@ func Test_newResourceAggregator(t *testing.T) {
 
 func Test_newLogCounter(t *testing.T) {
 	logRecord := plog.NewLogRecord()
-	lc := newLogCounter(&logRecord)
-	require.Equal(t, &logRecord, lc.logRecord)
+	lc := newLogCounter(logRecord)
+	require.Equal(t, logRecord, lc.logRecord)
 	require.Equal(t, int64(0), lc.count)
 }
 
@@ -200,8 +200,8 @@ func Test_getLogKey(t *testing.T) {
 
 				logRecord2 := generateTestLogRecord(t, "Body of the log")
 
-				key1 := getLogKey(&logRecord1)
-				key2 := getLogKey(&logRecord2)
+				key1 := getLogKey(logRecord1)
+				key2 := getLogKey(logRecord2)
 
 				require.Equal(t, key1, key2)
 			},
@@ -213,8 +213,8 @@ func Test_getLogKey(t *testing.T) {
 
 				logRecord2 := generateTestLogRecord(t, "A different Body of the log")
 
-				key1 := getLogKey(&logRecord1)
-				key2 := getLogKey(&logRecord2)
+				key1 := getLogKey(logRecord1)
+				key2 := getLogKey(logRecord2)
 
 				require.NotEqual(t, key1, key2)
 			},
