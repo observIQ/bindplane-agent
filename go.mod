@@ -9,6 +9,7 @@ require (
 	github.com/observiq/observiq-otel-collector/packagestate v1.18.0
 	github.com/observiq/observiq-otel-collector/processor/aggregationprocessor v1.18.0
 	github.com/observiq/observiq-otel-collector/processor/logcountprocessor v1.18.0
+	github.com/observiq/observiq-otel-collector/processor/logdeduplicationprocessor v1.18.0
 	github.com/observiq/observiq-otel-collector/processor/maskprocessor v1.18.0
 	github.com/observiq/observiq-otel-collector/processor/metricextractprocessor v1.18.0
 	github.com/observiq/observiq-otel-collector/processor/resourceattributetransposerprocessor v1.18.0
@@ -571,6 +572,8 @@ replace github.com/observiq/observiq-otel-collector/processor/maskprocessor => .
 replace github.com/observiq/observiq-otel-collector/processor/logcountprocessor => ./processor/logcountprocessor
 
 replace github.com/observiq/observiq-otel-collector/processor/metricextractprocessor => ./processor/metricextractprocessor
+
+replace github.com/observiq/observiq-otel-collector/processor/logdeduplicationprocessor => ./processor/logdeduplicationprocessor
 
 replace github.com/observiq/observiq-otel-collector/expr => ./expr
 

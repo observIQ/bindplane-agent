@@ -1,6 +1,6 @@
 # Timezone
 
-Below is a list of possible values for the `timezone` plugin parameter:
+Below is a list of acceptable values for `timezone` parameters:
 
 - "UTC"
 - "Africa/Abidjan"
