@@ -17,6 +17,7 @@ package logdeduplicationprocessor
 
 import (
 	"errors"
+	"fmt"
 	"time"
 
 	"go.opentelemetry.io/collector/component"
@@ -38,7 +39,6 @@ const (
 var (
 	errInvalidLogCountAttribute = errors.New("log_count_attribute must be set")
 	errInvalidInterval          = errors.New("interval must be greater than 0")
-	errInvalidTimezone          = errors.New("timezone is invalid")
 )
 
 // Config is the config of the processor.
@@ -69,7 +69,7 @@ func (c Config) Validate() error {
 
 	_, err := time.LoadLocation(c.Timezone)
 	if err != nil {
-		return errInvalidTimezone
+		return fmt.Errorf("timezone is invalid: %w", err)
 	}
 
 	return nil

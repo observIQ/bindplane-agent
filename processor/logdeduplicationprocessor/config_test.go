@@ -15,6 +15,7 @@
 package logdeduplicationprocessor
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -58,7 +59,7 @@ func TestValidateConfig(t *testing.T) {
 				Interval:          defaultInterval,
 				Timezone:          "not a timezone",
 			},
-			expectedErr: errInvalidTimezone,
+			expectedErr: errors.New("timezone is invalid"),
 		},
 		{
 			desc: "valid config",
@@ -74,7 +75,11 @@ func TestValidateConfig(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.desc, func(t *testing.T) {
 			err := tc.cfg.Validate()
-			require.Equal(t, tc.expectedErr, err)
+			if tc.expectedErr != nil {
+				require.ErrorContains(t, err, tc.expectedErr.Error())
+			} else {
+				require.NoError(t, err)
+			}
 		})
 	}
 }
