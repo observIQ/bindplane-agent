@@ -25,7 +25,7 @@ import (
 
 const (
 	// typeStr is the value of the "type" key in configuration.
-	typeStr = "logdeduplication"
+	typeStr = "logdedup"
 
 	// stability is the current state of the processor.
 	stability = component.StabilityLevelAlpha

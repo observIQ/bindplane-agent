@@ -30,7 +30,7 @@ receivers:
     filelog:
         include: [./example/*.log]
 processors:
-    logdeduplication:
+    logdedup:
         interval: 60s
         log_count_attribute: dedup_count
         timezone: 'America/Los_Angeles'
@@ -41,6 +41,6 @@ service:
     pipelines:
         logs:
             receivers: [filelog]
-            processors: [logdeduplication]
+            processors: [logdedup]
             exporters: [googlecloud]
 ```
