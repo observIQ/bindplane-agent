@@ -72,7 +72,7 @@ func (cfg Config) Validate() error {
 // AggregationTypes gets the default aggregation configs if none were specified, otherwise the specified aggregation configs
 func (cfg Config) AggregationTypes() []aggregate.AggregationType {
 	if cfg.Aggregations == nil {
-		// fallback to AggregationType
+		// fallback to default
 		return []aggregate.AggregationType{
 			aggregate.MinType,
 			aggregate.MaxType,
