@@ -18,12 +18,9 @@ package aggregationprocessor
 import (
 	"errors"
 	"fmt"
-	"reflect"
 	"regexp"
 	"time"
 
-	"github.com/antonmedv/expr"
-	col_expr "github.com/observiq/observiq-otel-collector/expr"
 	"github.com/observiq/observiq-otel-collector/processor/aggregationprocessor/internal/aggregate"
 )
 
@@ -36,62 +33,7 @@ type Config struct {
 	// Otherwise, the metric is passed through.
 	Include string `mapstructure:"include"`
 	// List of aggregations for the metric
-	Aggregations []AggregateConfig `mapstructure:"aggregations"`
-}
-
-// AggregateConfig is a config that specifies which aggregations to perform for each incoming metric
-type AggregateConfig struct {
-	// Type of aggregation
-	Type aggregate.AggregationType `mapstructure:"type"`
-	// MetricNameExpr is an expression that gives a name for the metric. Defaults to `metric_name` (this is the original metric's name)
-	MetricNameExprStr string `mapstructure:"metric_name_expression"`
-	// Cached metric name expression
-	metricNameExpr *col_expr.Expression
-}
-
-// Validate validate the config, returning an error explaining why it isn't if the config is invalid.
-func (a AggregateConfig) Validate() error {
-	if !a.Type.Valid() {
-		return fmt.Errorf("invalid aggregate type for `type`: %s", a.Type)
-	}
-
-	_, err := a.MetricNameExpression()
-	if err != nil {
-		return fmt.Errorf("failed to parse metric_name_expression: %w", err)
-	}
-
-	return nil
-}
-
-// MetricNameExpression returns a compiled expression for the given input
-func (a AggregateConfig) MetricNameExpression() (*col_expr.Expression, error) {
-	if a.metricNameExpr != nil {
-		return a.metricNameExpr, nil
-	}
-
-	opts := []expr.Option{
-		expr.AsKind(reflect.String),
-		expr.Optimize(true),
-		expr.Env(map[string]any{
-			metricNameKey: "",
-		}),
-	}
-
-	var e *col_expr.Expression
-	var err error
-
-	if a.MetricNameExprStr != "" {
-		e, err = col_expr.CreateExpression(a.MetricNameExprStr, opts...)
-	} else {
-		e, err = col_expr.CreateExpression(metricNameKey, opts...)
-	}
-
-	if err != nil {
-		return nil, err
-	}
-
-	a.metricNameExpr = e
-	return e, nil
+	Aggregations []aggregate.AggregationType `mapstructure:"aggregations"`
 }
 
 // Validate validates the processor configuration
@@ -113,32 +55,28 @@ func (cfg Config) Validate() error {
 		return errors.New("at least one aggregation must be specified")
 	}
 
+	seenTypes := map[aggregate.AggregationType]struct{}{}
 	for _, a := range cfg.Aggregations {
-		if err := a.Validate(); err != nil {
-			return err
+		if !a.Valid() {
+			return fmt.Errorf("invalid aggregate type for `type`: %s", a)
 		}
+		if _, seen := seenTypes[a]; seen {
+			return fmt.Errorf("each aggregation type can only be specified once (%s specified more than once)", a)
+		}
+		seenTypes[a] = struct{}{}
 	}
 
 	return nil
 }
 
-// AggregationConfigs gets the default aggregation configs if none were specified, otherwise the specified aggregation configs
-func (cfg Config) AggregationConfigs() []AggregateConfig {
+// AggregationTypes gets the default aggregation configs if none were specified, otherwise the specified aggregation configs
+func (cfg Config) AggregationTypes() []aggregate.AggregationType {
 	if cfg.Aggregations == nil {
-		// fallback to defaults
-		return []AggregateConfig{
-			{
-				Type:              aggregate.MinType,
-				MetricNameExprStr: `metricNameKey + ".min"`,
-			},
-			{
-				Type:              aggregate.MaxType,
-				MetricNameExprStr: `metricNameKey + ".max"`,
-			},
-			{
-				Type:              aggregate.AvgType,
-				MetricNameExprStr: `metricNameKey + ".avg"`,
-			},
+		// fallback to AggregationType
+		return []aggregate.AggregationType{
+			aggregate.MinType,
+			aggregate.MaxType,
+			aggregate.AvgType,
 		}
 	}
 

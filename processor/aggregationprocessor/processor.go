@@ -43,7 +43,7 @@ type aggregationProcessor struct {
 	includeRegex           *regexp.Regexp
 	flushInterval          time.Duration
 	aggregationPeriodStart pcommon.Timestamp
-	aggregationConfs       []AggregateConfig
+	aggregationTypes       []aggregate.AggregationType
 	// map resource hash to resourceAggregation
 	aggregationMap map[uint64]*resourceMetadata
 	nextConsumer   consumer.Metrics
@@ -64,7 +64,7 @@ func newAggregationProcessor(logger *zap.Logger, cfg *Config, consumer consumer.
 		flushInterval:          cfg.Interval,
 		aggregationPeriodStart: pcommon.NewTimestampFromTime(time.Now()),
 		aggregationMap:         make(map[uint64]*resourceMetadata),
-		aggregationConfs:       cfg.AggregationConfigs(),
+		aggregationTypes:       cfg.AggregationTypes(),
 		nextConsumer:           consumer,
 	}, nil
 }
@@ -198,17 +198,17 @@ func (sp *aggregationProcessor) aggregateDatapoint(ma *metricMetadata, dp pmetri
 
 // createAggregates creates all aggregates for this datapoint based on the configuration of this processor
 // The returned error here is a multierr, and may be a partial err, so the resultant map may be used even if an error is returned.
-func (sp *aggregationProcessor) createAggregates(initialVal pmetric.NumberDataPoint) (map[AggregateConfig]aggregate.Aggregate, error) {
+func (sp *aggregationProcessor) createAggregates(initialVal pmetric.NumberDataPoint) (map[aggregate.AggregationType]aggregate.Aggregate, error) {
 	var errs error
-	aggs := make(map[AggregateConfig]aggregate.Aggregate, len(sp.aggregationConfs))
-	for _, conf := range sp.aggregationConfs {
-		agg, err := conf.Type.New(initialVal)
+	aggs := make(map[aggregate.AggregationType]aggregate.Aggregate, len(sp.aggregationTypes))
+	for _, aggType := range sp.aggregationTypes {
+		agg, err := aggType.New(initialVal)
 		if err != nil {
 			errs = multierr.Append(errs, fmt.Errorf("failed to create aggregation: %w", err))
 			continue
 		}
 
-		aggs[conf] = agg
+		aggs[aggType] = agg
 	}
 
 	return aggs, errs
@@ -244,7 +244,7 @@ func (sp *aggregationProcessor) flush() {
 		ra.resource.CopyTo(rm.Resource().Attributes())
 		sm := rm.ScopeMetrics().AppendEmpty()
 
-		for _, aggConf := range sp.aggregationConfs {
+		for _, aggConf := range sp.aggregationTypes {
 			for _, ma := range ra.metrics {
 				sp.addAggregateMetric(now, sm.Metrics(), ma, aggConf)
 			}
@@ -264,30 +264,10 @@ func (sp *aggregationProcessor) flush() {
 	sp.aggregationPeriodStart = now
 }
 
-func (sp *aggregationProcessor) addAggregateMetric(now pcommon.Timestamp, ms pmetric.MetricSlice, ma *metricMetadata, aggConf AggregateConfig) {
+func (sp *aggregationProcessor) addAggregateMetric(now pcommon.Timestamp, ms pmetric.MetricSlice, ma *metricMetadata, aggType aggregate.AggregationType) {
 	m := ms.AppendEmpty()
 
-	expr, err := aggConf.MetricNameExpression()
-	if err != nil {
-		sp.logger.Error("Failed to get metric name expression, ignoring aggregation", zap.String("expr", aggConf.MetricNameExprStr), zap.Error(err))
-		return
-	}
-
-	newMetricName, err := expr.Evaluate(map[string]any{
-		metricNameKey: ma.name,
-	})
-	if err != nil {
-		sp.logger.Error("Failed to evaluate metric name expression, ignoring aggregation", zap.String("expr", aggConf.MetricNameExprStr), zap.Error(err))
-		return
-	}
-
-	newMetricNameStr, ok := newMetricName.(string)
-	if !ok {
-		sp.logger.Error("Metric name expression did not return a string, ignoring aggregation", zap.String("expr", aggConf.MetricNameExprStr), zap.Error(err))
-		return
-	}
-
-	m.SetName(newMetricNameStr)
+	m.SetName(fmt.Sprintf("%s.%s", ma.name, aggType))
 	m.SetDescription(ma.desc)
 	m.SetUnit(ma.unit)
 
@@ -304,7 +284,7 @@ func (sp *aggregationProcessor) addAggregateMetric(now pcommon.Timestamp, ms pme
 	}
 
 	for _, dpa := range ma.datapoints {
-		agg, ok := dpa.aggregates[aggConf]
+		agg, ok := dpa.aggregates[aggType]
 		if !ok {
 			// aggregation must have failed to be created, so we can't emit this as a metric
 			continue

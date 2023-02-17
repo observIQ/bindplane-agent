@@ -44,10 +44,8 @@ func TestLoadConfig(t *testing.T) {
 			expected: &Config{
 				Interval: 3 * time.Minute,
 				Include:  `^test\.thing$$`,
-				Aggregations: []AggregateConfig{
-					{
-						Type: aggregate.LastType,
-					},
+				Aggregations: []aggregate.AggregationType{
+					aggregate.LastType,
 				},
 			},
 		},
@@ -79,22 +77,12 @@ func TestConfig_Validate(t *testing.T) {
 			input: Config{
 				Interval: 5 * time.Second,
 				Include:  "^.*$",
-				Aggregations: []AggregateConfig{
-					{
-						Type: aggregate.AvgType,
-					},
-					{
-						Type: aggregate.MinType,
-					},
-					{
-						Type: aggregate.MaxType,
-					},
-					{
-						Type: aggregate.LastType,
-					},
-					{
-						Type: aggregate.FirstType,
-					},
+				Aggregations: []aggregate.AggregationType{
+					aggregate.AvgType,
+					aggregate.MinType,
+					aggregate.MaxType,
+					aggregate.LastType,
+					aggregate.FirstType,
 				},
 			},
 		},
@@ -103,7 +91,7 @@ func TestConfig_Validate(t *testing.T) {
 			input: Config{
 				Interval:     5 * time.Second,
 				Include:      "^.*$",
-				Aggregations: []AggregateConfig{},
+				Aggregations: []aggregate.AggregationType{},
 			},
 			expectedErr: "at least one aggregation must be specified",
 		},
@@ -119,10 +107,8 @@ func TestConfig_Validate(t *testing.T) {
 			input: Config{
 				Interval: 5 * time.Second,
 				Include:  "^(",
-				Aggregations: []AggregateConfig{
-					{
-						Type: aggregate.AvgType,
-					},
+				Aggregations: []aggregate.AggregationType{
+					aggregate.AvgType,
 				},
 			},
 			expectedErr: "`include` regex must be valid",
@@ -132,10 +118,8 @@ func TestConfig_Validate(t *testing.T) {
 			input: Config{
 				Interval: -5 * time.Second,
 				Include:  "^.*$",
-				Aggregations: []AggregateConfig{
-					{
-						Type: aggregate.AvgType,
-					},
+				Aggregations: []aggregate.AggregationType{
+					aggregate.AvgType,
 				},
 			},
 			expectedErr: "aggregation interval must be positive",
@@ -145,41 +129,23 @@ func TestConfig_Validate(t *testing.T) {
 			input: Config{
 				Interval: 5 * time.Second,
 				Include:  "^.*$",
-				Aggregations: []AggregateConfig{
-					{
-						Type: aggregate.AggregationType("invalid"),
-					},
+				Aggregations: []aggregate.AggregationType{
+					aggregate.AggregationType("invalid"),
 				},
 			},
 			expectedErr: "invalid aggregate type for `type`: invalid",
 		},
 		{
-			name: "Config with invalid expression",
+			name: "Config with duplicate aggregations",
 			input: Config{
 				Interval: 5 * time.Second,
 				Include:  "^.*$",
-				Aggregations: []AggregateConfig{
-					{
-						Type:              aggregate.AvgType,
-						MetricNameExprStr: "undefined_var",
-					},
+				Aggregations: []aggregate.AggregationType{
+					aggregate.AvgType,
+					aggregate.AvgType,
 				},
 			},
-			expectedErr: "failed to parse metric_name_expression",
-		},
-		{
-			name: "Config with invalid expression (returns int)",
-			input: Config{
-				Interval: 5 * time.Second,
-				Include:  "^.*$",
-				Aggregations: []AggregateConfig{
-					{
-						Type:              aggregate.AvgType,
-						MetricNameExprStr: "1",
-					},
-				},
-			},
-			expectedErr: "failed to parse metric_name_expression",
+			expectedErr: "each aggregation type can only be specified once (avg specified more than once)",
 		},
 	}
 
@@ -193,50 +159,6 @@ func TestConfig_Validate(t *testing.T) {
 			}
 		})
 	}
-}
-
-func TestAggregateConfig_MetricNameString(t *testing.T) {
-	t.Run("metric name is not specified", func(t *testing.T) {
-		metricNameExpr, err := AggregateConfig{
-			Type:              aggregate.AvgType,
-			MetricNameExprStr: "",
-		}.MetricNameExpression()
-		require.NoError(t, err)
-
-		strVal, err := metricNameExpr.Evaluate(map[string]any{
-			metricNameKey: "my.metric.name",
-		})
-
-		require.Equal(t, "my.metric.name", strVal)
-	})
-
-	t.Run("metric name is constant", func(t *testing.T) {
-		metricNameExpr, err := AggregateConfig{
-			Type:              aggregate.AvgType,
-			MetricNameExprStr: `"test.metric"`,
-		}.MetricNameExpression()
-		require.NoError(t, err)
-
-		strVal, err := metricNameExpr.Evaluate(map[string]any{
-			metricNameKey: `"my.metric.name"`,
-		})
-
-		require.Equal(t, "test.metric", strVal)
-	})
-
-	t.Run("metric name is suffixed metric name", func(t *testing.T) {
-		metricNameExpr, err := AggregateConfig{
-			Type:              aggregate.AvgType,
-			MetricNameExprStr: `metric_name + ".avg"`,
-		}.MetricNameExpression()
-		require.NoError(t, err)
-
-		strVal, err := metricNameExpr.Evaluate(map[string]any{
-			metricNameKey: "my.metric.name",
-		})
-
-		require.Equal(t, "my.metric.name.avg", strVal)
-	})
 }
 
 func TestValidStruct(t *testing.T) {
