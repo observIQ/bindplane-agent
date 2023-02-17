@@ -27,6 +27,8 @@ import (
 	"github.com/observiq/observiq-otel-collector/processor/aggregationprocessor/internal/aggregate"
 )
 
+const metricNameKey = "metric_name"
+
 // Config is the configuration for the processor
 type Config struct {
 	Interval time.Duration `mapstructure:"interval"`
@@ -60,8 +62,6 @@ func (a AggregateConfig) Validate() error {
 
 	return nil
 }
-
-const metricNameKey = "metric_name"
 
 // MetricNameExpression returns a compiled expression for the given input
 func (a AggregateConfig) MetricNameExpression() (*col_expr.Expression, error) {
