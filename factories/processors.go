@@ -49,7 +49,6 @@ import (
 )
 
 var defaultProcessors = []processor.Factory{
-	metricstatsprocessor.NewFactory(),
 	attributesprocessor.NewFactory(),
 	batchprocessor.NewFactory(),
 	processortest.NewNopFactory(),
@@ -66,6 +65,7 @@ var defaultProcessors = []processor.Factory{
 	memorylimiterprocessor.NewFactory(),
 	metricextractprocessor.NewFactory(),
 	metricsgenerationprocessor.NewFactory(),
+	metricstatsprocessor.NewFactory(),
 	metricstransformprocessor.NewFactory(),
 	probabilisticsamplerprocessor.NewFactory(),
 	resourceattributetransposerprocessor.NewFactory(),
