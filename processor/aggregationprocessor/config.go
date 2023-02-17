@@ -76,11 +76,22 @@ func (a AggregateConfig) MetricNameExpression() (*col_expr.Expression, error) {
 			metricNameKey: "",
 		}),
 	}
+
+	var e *col_expr.Expression
+	var err error
+
 	if a.MetricNameExprStr != "" {
-		return col_expr.CreateExpression(a.MetricNameExprStr, opts...)
+		e, err = col_expr.CreateExpression(a.MetricNameExprStr, opts...)
+	} else {
+		e, err = col_expr.CreateExpression(metricNameKey, opts...)
 	}
 
-	return col_expr.CreateExpression(metricNameKey, opts...)
+	if err != nil {
+		return nil, err
+	}
+
+	a.metricNameExpr = e
+	return e, nil
 }
 
 // Validate validates the processor configuration
