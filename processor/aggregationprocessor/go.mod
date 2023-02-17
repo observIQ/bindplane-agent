@@ -3,9 +3,6 @@ module github.com/observiq/observiq-otel-collector/processor/aggregationprocesso
 go 1.18
 
 require (
-	github.com/antonmedv/expr v1.12.0
-	github.com/google/go-cmp v0.5.9
-	github.com/observiq/observiq-otel-collector/expr v1.18.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest v0.70.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatautil v0.70.0
 	github.com/stretchr/testify v1.8.1
@@ -45,5 +42,3 @@ require (
 	google.golang.org/protobuf v1.28.1 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
-
-replace github.com/observiq/observiq-otel-collector/expr => ../../expr
