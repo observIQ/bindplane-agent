@@ -22,6 +22,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/observiq/observiq-otel-collector/expr"
 	"github.com/observiq/observiq-otel-collector/processor/aggregationprocessor/internal/aggregate"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatautil"
 	"go.opentelemetry.io/collector/component"
@@ -40,10 +41,11 @@ type aggregationProcessor struct {
 	//for mocking in test
 	now func() time.Time
 
-	includeRegex           *regexp.Regexp
-	flushInterval          time.Duration
-	aggregationPeriodStart pcommon.Timestamp
-	aggregationConfs       []AggregateConfig
+	includeRegex              *regexp.Regexp
+	flushInterval             time.Duration
+	aggregationPeriodStart    pcommon.Timestamp
+	aggregationConfs          []AggregateConfig
+	aggregationMetricNameExpr *expr.Expression
 	// map resource hash to resourceAggregation
 	aggregationMap map[uint64]*resourceMetadata
 	nextConsumer   consumer.Metrics
@@ -267,11 +269,27 @@ func (sp *aggregationProcessor) flush() {
 func (sp *aggregationProcessor) addAggregateMetric(now pcommon.Timestamp, ms pmetric.MetricSlice, ma *metricMetadata, aggConf AggregateConfig) {
 	m := ms.AppendEmpty()
 
-	// Expand new metric name using match from includeRegex.
-	matchIndices := sp.includeRegex.FindSubmatchIndex([]byte(ma.name))
-	newMetricName := string(sp.includeRegex.ExpandString(nil, aggConf.MetricNameString(), ma.name, matchIndices))
+	expr, err := aggConf.MetricNameExpression()
+	if err != nil {
+		sp.logger.Error("Failed to get metric name expression, ignoring aggregation", zap.String("expr", aggConf.MetricNameExprStr), zap.Error(err))
+		return
+	}
 
-	m.SetName(newMetricName)
+	newMetricName, err := expr.Evaluate(map[string]any{
+		metricNameKey: ma.name,
+	})
+	if err != nil {
+		sp.logger.Error("Failed to evaluate metric name expression, ignoring aggregation", zap.String("expr", aggConf.MetricNameExprStr), zap.Error(err))
+		return
+	}
+
+	newMetricNameStr, ok := newMetricName.(string)
+	if !ok {
+		sp.logger.Error("Metric name expression did not return a string, ignoring aggregation", zap.String("expr", aggConf.MetricNameExprStr), zap.Error(err))
+		return
+	}
+
+	m.SetName(newMetricNameStr)
 	m.SetDescription(ma.desc)
 	m.SetUnit(ma.unit)
 

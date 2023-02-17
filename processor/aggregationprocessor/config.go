@@ -18,9 +18,12 @@ package aggregationprocessor
 import (
 	"errors"
 	"fmt"
+	"reflect"
 	"regexp"
 	"time"
 
+	"github.com/antonmedv/expr"
+	col_expr "github.com/observiq/observiq-otel-collector/expr"
 	"github.com/observiq/observiq-otel-collector/processor/aggregationprocessor/internal/aggregate"
 )
 
@@ -38,8 +41,10 @@ type Config struct {
 type AggregateConfig struct {
 	// Type of aggregation
 	Type aggregate.AggregationType `mapstructure:"type"`
-	// MetricName is the name for the re-emitted metric. Defaults to `$0` (this is what is matched by the regex)
-	MetricName string `mapstructure:"metric_name"`
+	// MetricNameExpr is an expression that gives a name for the metric. Defaults to `metric_name` (this is the original metric's name)
+	MetricNameExprStr string `mapstructure:"metric_name_expression"`
+	// Cached metric name expression
+	metricNameExpr *col_expr.Expression
 }
 
 // Validate validate the config, returning an error explaining why it isn't if the config is invalid.
@@ -48,16 +53,34 @@ func (a AggregateConfig) Validate() error {
 		return fmt.Errorf("invalid aggregate type for `type`: %s", a.Type)
 	}
 
+	_, err := a.MetricNameExpression()
+	if err != nil {
+		return fmt.Errorf("failed to parse metric_name_expression: %w", err)
+	}
+
 	return nil
 }
 
-// MetricNameString returns the configured name for the emitted metric, or "$0" if none was specified.
-func (a AggregateConfig) MetricNameString() string {
-	if a.MetricName != "" {
-		return a.MetricName
+const metricNameKey = "metric_name"
+
+// MetricNameExpression returns a compiled expression for the given input
+func (a AggregateConfig) MetricNameExpression() (*col_expr.Expression, error) {
+	if a.metricNameExpr != nil {
+		return a.metricNameExpr, nil
 	}
 
-	return "$0"
+	opts := []expr.Option{
+		expr.AsKind(reflect.String),
+		expr.Optimize(true),
+		expr.Env(map[string]any{
+			metricNameKey: "",
+		}),
+	}
+	if a.MetricNameExprStr != "" {
+		return col_expr.CreateExpression(a.MetricNameExprStr, opts...)
+	}
+
+	return col_expr.CreateExpression(metricNameKey, opts...)
 }
 
 // Validate validates the processor configuration
@@ -94,16 +117,16 @@ func (cfg Config) AggregationConfigs() []AggregateConfig {
 		// fallback to defaults
 		return []AggregateConfig{
 			{
-				Type:       aggregate.MinType,
-				MetricName: "$0.min",
+				Type:              aggregate.MinType,
+				MetricNameExprStr: `metricNameKey + ".min"`,
 			},
 			{
-				Type:       aggregate.MaxType,
-				MetricName: "$0.max",
+				Type:              aggregate.MaxType,
+				MetricNameExprStr: `metricNameKey + ".max"`,
 			},
 			{
-				Type:       aggregate.AvgType,
-				MetricName: "$0.avg",
+				Type:              aggregate.AvgType,
+				MetricNameExprStr: `metricNameKey + ".avg"`,
 			},
 		}
 	}

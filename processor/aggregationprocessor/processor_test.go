@@ -115,16 +115,16 @@ func TestAggregationProcessor(t *testing.T) {
 				Include:  `^test\..*$`,
 				Aggregations: []AggregateConfig{
 					{
-						Type:       aggregate.MinType,
-						MetricName: "$0.min",
+						Type:              aggregate.MinType,
+						MetricNameExprStr: `metric_name + ".min"`,
 					},
 					{
-						Type:       aggregate.MaxType,
-						MetricName: "$0.max",
+						Type:              aggregate.MaxType,
+						MetricNameExprStr: `metric_name + ".max"`,
 					},
 					{
-						Type:       aggregate.AvgType,
-						MetricName: "$0.avg",
+						Type:              aggregate.AvgType,
+						MetricNameExprStr: `metric_name + ".avg"`,
 					},
 				},
 			}, consumer)
@@ -184,16 +184,16 @@ func TestAggregationProcessorMultipleMetrics(t *testing.T) {
 		Include:  `^test\..*$`,
 		Aggregations: []AggregateConfig{
 			{
-				Type:       aggregate.MinType,
-				MetricName: "$0.min",
+				Type:              aggregate.MinType,
+				MetricNameExprStr: `metric_name + ".min"`,
 			},
 			{
-				Type:       aggregate.MaxType,
-				MetricName: "$0.max",
+				Type:              aggregate.MaxType,
+				MetricNameExprStr: `metric_name + ".max"`,
 			},
 			{
-				Type:       aggregate.AvgType,
-				MetricName: "$0.avg",
+				Type:              aggregate.AvgType,
+				MetricNameExprStr: `metric_name + ".avg"`,
 			},
 		},
 	}, consumer)
@@ -274,16 +274,16 @@ func TestAggregationProcessor_Flush(t *testing.T) {
 		Include:  `^test\..*$`,
 		Aggregations: []AggregateConfig{
 			{
-				Type:       aggregate.MinType,
-				MetricName: "$0.min",
+				Type:              aggregate.MinType,
+				MetricNameExprStr: `metric_name + ".min"`,
 			},
 			{
-				Type:       aggregate.MaxType,
-				MetricName: "$0.max",
+				Type:              aggregate.MaxType,
+				MetricNameExprStr: `metric_name + ".max"`,
 			},
 			{
-				Type:       aggregate.AvgType,
-				MetricName: "$0.avg",
+				Type:              aggregate.AvgType,
+				MetricNameExprStr: `metric_name + ".avg"`,
 			},
 		},
 	}, consumer)
@@ -316,8 +316,6 @@ func TestAggregationProcessor_Flush(t *testing.T) {
 
 	require.NoError(t, p.Shutdown(context.Background()))
 }
-
-// TODO: Two separate metric payloads with the same datapoint attributes, but different values
 
 func readMetrics(t *testing.T, path string) pmetric.Metrics {
 	t.Helper()

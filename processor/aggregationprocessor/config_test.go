@@ -19,7 +19,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/google/go-cmp/cmp"
 	"github.com/observiq/observiq-otel-collector/processor/aggregationprocessor/internal/aggregate"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -64,9 +63,7 @@ func TestLoadConfig(t *testing.T) {
 			require.NoError(t, component.UnmarshalConfig(sub, cfg))
 
 			assert.NoError(t, component.ValidateConfig(cfg))
-			if diff := cmp.Diff(tc.expected, cfg); diff != "" {
-				t.Errorf("Config mismatch (-expected +actual):\n%s", diff)
-			}
+			require.Equal(t, tc.expected, cfg)
 		})
 	}
 }
@@ -156,6 +153,34 @@ func TestConfig_Validate(t *testing.T) {
 			},
 			expectedErr: "invalid aggregate type for `type`: invalid",
 		},
+		{
+			name: "Config with invalid expression",
+			input: Config{
+				Interval: 5 * time.Second,
+				Include:  "^.*$",
+				Aggregations: []AggregateConfig{
+					{
+						Type:              aggregate.AvgType,
+						MetricNameExprStr: "undefined_var",
+					},
+				},
+			},
+			expectedErr: "failed to parse metric_name_expression",
+		},
+		{
+			name: "Config with invalid expression (returns int)",
+			input: Config{
+				Interval: 5 * time.Second,
+				Include:  "^.*$",
+				Aggregations: []AggregateConfig{
+					{
+						Type:              aggregate.AvgType,
+						MetricNameExprStr: "1",
+					},
+				},
+			},
+			expectedErr: "failed to parse metric_name_expression",
+		},
 	}
 
 	for _, tc := range testCases {
@@ -172,19 +197,45 @@ func TestConfig_Validate(t *testing.T) {
 
 func TestAggregateConfig_MetricNameString(t *testing.T) {
 	t.Run("metric name is not specified", func(t *testing.T) {
-		metricName := AggregateConfig{
-			Type:       aggregate.AvgType,
-			MetricName: "",
-		}.MetricNameString()
-		require.Equal(t, "$0", metricName)
+		metricNameExpr, err := AggregateConfig{
+			Type:              aggregate.AvgType,
+			MetricNameExprStr: "",
+		}.MetricNameExpression()
+		require.NoError(t, err)
+
+		strVal, err := metricNameExpr.Evaluate(map[string]any{
+			metricNameKey: "my.metric.name",
+		})
+
+		require.Equal(t, "my.metric.name", strVal)
 	})
 
-	t.Run("metric name is specified", func(t *testing.T) {
-		metricName := AggregateConfig{
-			Type:       aggregate.AvgType,
-			MetricName: "test.metric",
-		}.MetricNameString()
-		require.Equal(t, "test.metric", metricName)
+	t.Run("metric name is constant", func(t *testing.T) {
+		metricNameExpr, err := AggregateConfig{
+			Type:              aggregate.AvgType,
+			MetricNameExprStr: `"test.metric"`,
+		}.MetricNameExpression()
+		require.NoError(t, err)
+
+		strVal, err := metricNameExpr.Evaluate(map[string]any{
+			metricNameKey: `"my.metric.name"`,
+		})
+
+		require.Equal(t, "test.metric", strVal)
+	})
+
+	t.Run("metric name is suffixed metric name", func(t *testing.T) {
+		metricNameExpr, err := AggregateConfig{
+			Type:              aggregate.AvgType,
+			MetricNameExprStr: `metric_name + ".avg"`,
+		}.MetricNameExpression()
+		require.NoError(t, err)
+
+		strVal, err := metricNameExpr.Evaluate(map[string]any{
+			metricNameKey: "my.metric.name",
+		})
+
+		require.Equal(t, "my.metric.name.avg", strVal)
 	})
 }
 
