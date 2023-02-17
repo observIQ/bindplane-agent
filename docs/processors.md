@@ -4,7 +4,7 @@ Below is a list of supported processors with links to their documentation pages.
 
 | Name                                    | GitHub README |
 | --------------------------------------- | ------------- |
-| Aggregation Processor                   | [metricstatsprocessor](../processor/metricstatsprocessor/README.md) |
+| Metric Stats Processor                  | [metricstatsprocessor](../processor/metricstatsprocessor/README.md) |
 | Attributes Processor                    | [attributesprocessor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.71.0/processor/attributesprocessor/README.md) |
 | Batch Processor                         | [batchprocessor](https://github.com/open-telemetry/opentelemetry-collector/blob/v0.71.0/processor/batchprocessor/README.md) |
 | Cumulative to Delta Processor           | [cumulativetodeltaprocessor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.71.0/processor/cumulativetodeltaprocessor/README.md) |
