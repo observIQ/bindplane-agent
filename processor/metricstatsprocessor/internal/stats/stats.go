@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package aggregate implements structs that are used to aggregate datapoints.
-package aggregate
+// Package stats implements structs that are used to calculate statistics from datapoints.
+package stats
 
 import (
 	"fmt"
@@ -21,37 +21,37 @@ import (
 	"go.opentelemetry.io/collector/pdata/pmetric"
 )
 
-// Aggregate is an interface represents an aggregate of datapoints
-type Aggregate interface {
+// Statistic is an interface represents an aggregate of datapoints
+type Statistic interface {
 	AddDatapoint(f pmetric.NumberDataPoint)
 	SetDatapointValue(pmetric.NumberDataPoint)
 }
 
-// AggregationType represents a type of aggregate
-type AggregationType string
+// StatType represents a type of statistic to calculate
+type StatType string
 
 // Types of aggregates
 const (
-	MinType   AggregationType = "min"
-	MaxType   AggregationType = "max"
-	FirstType AggregationType = "first"
-	LastType  AggregationType = "last"
-	AvgType   AggregationType = "avg"
+	MinType   StatType = "min"
+	MaxType   StatType = "max"
+	FirstType StatType = "first"
+	LastType  StatType = "last"
+	AvgType   StatType = "avg"
 )
 
-type aggregateConstructor func(pmetric.NumberDataPoint) (Aggregate, error)
+type statConstructor func(pmetric.NumberDataPoint) (Statistic, error)
 
-var aggregateConstructors = map[AggregationType]aggregateConstructor{
-	MinType:   newMinAggregate,
-	MaxType:   newMaxAggregate,
-	FirstType: newFirstAggregate,
-	LastType:  newLastAggregate,
-	AvgType:   newAvgAggregate,
+var statConstructors = map[StatType]statConstructor{
+	MinType:   newMinStatistic,
+	MaxType:   newMaxStatistic,
+	FirstType: newFirstStatistic,
+	LastType:  newLastStatistic,
+	AvgType:   newAvgStatistic,
 }
 
 // New creates a new aggregate of the given type, using the initial datapoint
-func (a AggregationType) New(initialVal pmetric.NumberDataPoint) (Aggregate, error) {
-	constructor, ok := aggregateConstructors[a]
+func (a StatType) New(initialVal pmetric.NumberDataPoint) (Statistic, error) {
+	constructor, ok := statConstructors[a]
 	if !ok {
 		return nil, fmt.Errorf("invalid aggregation type: %s", a)
 	}
@@ -59,7 +59,7 @@ func (a AggregationType) New(initialVal pmetric.NumberDataPoint) (Aggregate, err
 }
 
 // Valid returns true if this Type is a valid aggregate type, false otherwise
-func (a AggregationType) Valid() bool {
-	_, ok := aggregateConstructors[a]
+func (a StatType) Valid() bool {
+	_, ok := statConstructors[a]
 	return ok
 }

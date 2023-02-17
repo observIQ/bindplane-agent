@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package aggregationprocessor
+package metricstatsprocessor
 
 import (
-	"github.com/observiq/observiq-otel-collector/processor/aggregationprocessor/internal/aggregate"
+	"github.com/observiq/observiq-otel-collector/processor/metricstatsprocessor/internal/stats"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 )
@@ -39,5 +39,5 @@ type metricMetadata struct {
 
 type datapointMetadata struct {
 	attributes pcommon.Map
-	aggregates map[aggregate.AggregationType]aggregate.Aggregate
+	statistics map[stats.StatType]stats.Statistic
 }

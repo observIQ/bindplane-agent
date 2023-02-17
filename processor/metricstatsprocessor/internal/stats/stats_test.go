@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package aggregate
+package stats
 
 import (
 	"fmt"
@@ -24,7 +24,7 @@ import (
 )
 
 func TestAggregateTypesValid(t *testing.T) {
-	types := []AggregationType{
+	types := []StatType{
 		MinType,
 		AvgType,
 		MaxType,
@@ -40,7 +40,7 @@ func TestAggregateTypesValid(t *testing.T) {
 }
 
 func TestAggregateTypesNew(t *testing.T) {
-	types := []AggregationType{
+	types := []StatType{
 		MinType,
 		AvgType,
 		MaxType,
@@ -48,11 +48,11 @@ func TestAggregateTypesNew(t *testing.T) {
 		LastType,
 	}
 
-	for _, aggType := range types {
-		t.Run(string(aggType), func(t *testing.T) {
+	for _, statType := range types {
+		t.Run(string(statType), func(t *testing.T) {
 			dp := pmetric.NewNumberDataPoint()
 			dp.SetDoubleValue(2.0)
-			a, err := aggType.New(dp)
+			a, err := statType.New(dp)
 			require.NoError(t, err)
 			require.NotNil(t, a)
 		})
@@ -62,12 +62,12 @@ func TestAggregateTypesNew(t *testing.T) {
 func TestAggregateTypeNewInvalidType(t *testing.T) {
 	dp := pmetric.NewNumberDataPoint()
 	dp.SetDoubleValue(2.0)
-	_, err := AggregationType("invalid").New(dp)
+	_, err := StatType("invalid").New(dp)
 	require.ErrorContains(t, err, "invalid aggregation type:")
 }
 
 func TestAggregateTypesNewEmptyDatapoint(t *testing.T) {
-	types := []AggregationType{
+	types := []StatType{
 		MinType,
 		AvgType,
 		MaxType,
@@ -87,56 +87,56 @@ func TestAggregateTypesNewEmptyDatapoint(t *testing.T) {
 func TestAggregatesFloat(t *testing.T) {
 	testCases := []struct {
 		name       string
-		aggType    AggregationType
+		statType   StatType
 		values     []float64
 		timestamps []int64
 		finalValue float64
 	}{
 		{
 			name:       "min",
-			aggType:    MinType,
+			statType:   MinType,
 			values:     []float64{45, 1, 99, 3},
 			timestamps: []int64{0, 0, 0, 0},
 			finalValue: 1,
 		},
 		{
 			name:       "max",
-			aggType:    MaxType,
+			statType:   MaxType,
 			values:     []float64{45, 1, 99, 3},
 			timestamps: []int64{0, 0, 0, 0},
 			finalValue: 99,
 		},
 		{
 			name:       "avg",
-			aggType:    AvgType,
+			statType:   AvgType,
 			values:     []float64{45, 0, 99, 3},
 			timestamps: []int64{0, 0, 0, 0},
 			finalValue: 36.75,
 		},
 		{
 			name:       "first (unset timestamp)",
-			aggType:    FirstType,
+			statType:   FirstType,
 			values:     []float64{45, 1, 99, 3},
 			timestamps: []int64{0, 0, 0, 0},
 			finalValue: 45,
 		},
 		{
 			name:       "last (unset timestamp)",
-			aggType:    LastType,
+			statType:   LastType,
 			values:     []float64{45, 1, 99, 3},
 			timestamps: []int64{0, 0, 0, 0},
 			finalValue: 3,
 		},
 		{
 			name:       "first (set timestamp)",
-			aggType:    FirstType,
+			statType:   FirstType,
 			values:     []float64{45, 1, 99, 3},
 			timestamps: []int64{10, 2, 3, 11},
 			finalValue: 99,
 		},
 		{
 			name:       "last (set timestamp)",
-			aggType:    LastType,
+			statType:   LastType,
 			values:     []float64{45, 1, 99, 3},
 			timestamps: []int64{10, 3, 89, 11},
 			finalValue: 99,
@@ -148,7 +148,7 @@ func TestAggregatesFloat(t *testing.T) {
 			initialVal := pmetric.NewNumberDataPoint()
 			initialVal.SetDoubleValue(tc.values[0])
 			initialVal.SetTimestamp(pcommon.Timestamp(tc.timestamps[0]))
-			agg, err := tc.aggType.New(initialVal)
+			agg, err := tc.statType.New(initialVal)
 			require.NoError(t, err)
 
 			for i, v := range tc.values[1:] {
@@ -168,7 +168,7 @@ func TestAggregatesFloat(t *testing.T) {
 func TestAggregatesInt(t *testing.T) {
 	testCases := []struct {
 		name       string
-		aggType    AggregationType
+		aggType    StatType
 		values     []int64
 		timestamps []int64
 		finalValue int64

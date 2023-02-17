@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package aggregationprocessor
+package metricstatsprocessor
 
 import (
 	"context"
@@ -21,7 +21,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/observiq/observiq-otel-collector/processor/aggregationprocessor/internal/aggregate"
+	"github.com/observiq/observiq-otel-collector/processor/metricstatsprocessor/internal/stats"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest/pmetrictest"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/component/componenttest"
@@ -110,18 +110,18 @@ func TestAggregationProcessor(t *testing.T) {
 		aggPeriodStart := pcommon.NewTimestampFromTime(now.Add(-1 * time.Minute))
 		t.Run(tc.name, func(t *testing.T) {
 			consumer := &consumertest.MetricsSink{}
-			p, err := newAggregationProcessor(zaptest.NewLogger(t), &Config{
+			p, err := newStatsProcessor(zaptest.NewLogger(t), &Config{
 				Interval: 0,
 				Include:  `^test\..*$`,
-				Aggregations: []aggregate.AggregationType{
-					aggregate.MinType,
-					aggregate.MaxType,
-					aggregate.AvgType,
+				Stats: []stats.StatType{
+					stats.MinType,
+					stats.MaxType,
+					stats.AvgType,
 				},
 			}, consumer)
 			require.NoError(t, err)
 
-			p.aggregationPeriodStart = aggPeriodStart
+			p.calcPeriodStart = aggPeriodStart
 			p.now = func() time.Time {
 				return now
 			}
@@ -170,18 +170,18 @@ func TestAggregationProcessorMultipleMetrics(t *testing.T) {
 	now := time.UnixMilli(processorStartUnixMilli)
 	aggPeriodStart := pcommon.NewTimestampFromTime(now.Add(-1 * time.Minute))
 	consumer := &consumertest.MetricsSink{}
-	p, err := newAggregationProcessor(zaptest.NewLogger(t), &Config{
+	p, err := newStatsProcessor(zaptest.NewLogger(t), &Config{
 		Interval: 0,
 		Include:  `^test\..*$`,
-		Aggregations: []aggregate.AggregationType{
-			aggregate.MinType,
-			aggregate.MaxType,
-			aggregate.AvgType,
+		Stats: []stats.StatType{
+			stats.MinType,
+			stats.MaxType,
+			stats.AvgType,
 		},
 	}, consumer)
 	require.NoError(t, err)
 
-	p.aggregationPeriodStart = aggPeriodStart
+	p.calcPeriodStart = aggPeriodStart
 	p.now = func() time.Time {
 		return now
 	}
@@ -210,10 +210,10 @@ func TestAggregationProcessorMultipleMetrics(t *testing.T) {
 
 func TestAggregationProcessor_StartShutdown(t *testing.T) {
 	t.Run("start then stop", func(t *testing.T) {
-		p, err := newAggregationProcessor(zaptest.NewLogger(t), &Config{
-			Interval:     10 * time.Second,
-			Include:      `^test\..*$`,
-			Aggregations: []aggregate.AggregationType{},
+		p, err := newStatsProcessor(zaptest.NewLogger(t), &Config{
+			Interval: 10 * time.Second,
+			Include:  `^test\..*$`,
+			Stats:    []stats.StatType{},
 		}, &consumertest.MetricsSink{})
 		require.NoError(t, err)
 		require.NoError(t, p.Start(context.Background(), componenttest.NewNopHost()))
@@ -221,20 +221,20 @@ func TestAggregationProcessor_StartShutdown(t *testing.T) {
 	})
 
 	t.Run("shutdown without start", func(t *testing.T) {
-		p, err := newAggregationProcessor(zaptest.NewLogger(t), &Config{
-			Interval:     10 * time.Second,
-			Include:      `^test\..*$`,
-			Aggregations: []aggregate.AggregationType{},
+		p, err := newStatsProcessor(zaptest.NewLogger(t), &Config{
+			Interval: 10 * time.Second,
+			Include:  `^test\..*$`,
+			Stats:    []stats.StatType{},
 		}, &consumertest.MetricsSink{})
 		require.NoError(t, err)
 		require.NoError(t, p.Shutdown(context.Background()))
 	})
 
 	t.Run("shutdown, context times out", func(t *testing.T) {
-		p, err := newAggregationProcessor(zaptest.NewLogger(t), &Config{
-			Interval:     10 * time.Second,
-			Include:      `^test\..*$`,
-			Aggregations: []aggregate.AggregationType{},
+		p, err := newStatsProcessor(zaptest.NewLogger(t), &Config{
+			Interval: 10 * time.Second,
+			Include:  `^test\..*$`,
+			Stats:    []stats.StatType{},
 		}, &consumertest.MetricsSink{})
 		require.NoError(t, err)
 
@@ -251,18 +251,18 @@ func TestAggregationProcessor_Flush(t *testing.T) {
 	aggPeriodStart := pcommon.NewTimestampFromTime(now.Add(-1 * time.Minute))
 
 	consumer := &consumertest.MetricsSink{}
-	p, err := newAggregationProcessor(zaptest.NewLogger(t), &Config{
+	p, err := newStatsProcessor(zaptest.NewLogger(t), &Config{
 		Interval: 500 * time.Millisecond,
 		Include:  `^test\..*$`,
-		Aggregations: []aggregate.AggregationType{
-			aggregate.MinType,
-			aggregate.MaxType,
-			aggregate.AvgType,
+		Stats: []stats.StatType{
+			stats.MinType,
+			stats.MaxType,
+			stats.AvgType,
 		},
 	}, consumer)
 	require.NoError(t, err)
 
-	p.aggregationPeriodStart = aggPeriodStart
+	p.calcPeriodStart = aggPeriodStart
 	p.now = func() time.Time {
 		return now
 	}

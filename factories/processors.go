@@ -16,11 +16,11 @@ package factories
 
 import (
 	"github.com/observiq/observiq-otel-collector/internal/processor/snapshotprocessor"
-	"github.com/observiq/observiq-otel-collector/processor/aggregationprocessor"
 	"github.com/observiq/observiq-otel-collector/processor/logcountprocessor"
 	"github.com/observiq/observiq-otel-collector/processor/logdeduplicationprocessor"
 	"github.com/observiq/observiq-otel-collector/processor/maskprocessor"
 	"github.com/observiq/observiq-otel-collector/processor/metricextractprocessor"
+	"github.com/observiq/observiq-otel-collector/processor/metricstatsprocessor"
 	"github.com/observiq/observiq-otel-collector/processor/resourceattributetransposerprocessor"
 	"github.com/observiq/observiq-otel-collector/processor/samplingprocessor"
 	"github.com/observiq/observiq-otel-collector/processor/throughputmeasurementprocessor"
@@ -49,7 +49,7 @@ import (
 )
 
 var defaultProcessors = []processor.Factory{
-	aggregationprocessor.NewFactory(),
+	metricstatsprocessor.NewFactory(),
 	attributesprocessor.NewFactory(),
 	batchprocessor.NewFactory(),
 	processortest.NewNopFactory(),

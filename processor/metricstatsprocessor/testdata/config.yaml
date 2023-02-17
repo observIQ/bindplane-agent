@@ -1,6 +1,6 @@
-aggregation:
+metricstats:
   interval: 3m
   include: '^test\.thing$$'
-  aggregations: [last]
+  stats: [last]
 
-aggregation/defaults:
+metricstats/defaults:

@@ -1,5 +1,5 @@
-# Aggregation Processor
-This processor aggregates metrics over a configurable interval, allowing for metrics to be sampled at a higher rate, or to reduce the volume of metric data from push-based sources.
+# Metric Stats Processor
+This processor calculates statistics from metrics over a configurable interval, allowing for metrics to be sampled at a higher rate, or to reduce the volume of metric data from push-based sources.
 
 ## Minimum collector versions
 - Introduced: [v1.19.0](https://github.com/observIQ/observiq-otel-collector/releases/tag/v1.19.0)
@@ -8,20 +8,20 @@ This processor aggregates metrics over a configurable interval, allowing for met
 - Metrics
 
 ## How it works
-1. The user configures the aggregation processor in the desired metrics pipeline.
+1. The user configures the metricstats processor in the desired metrics pipeline.
 2. Every metric that flows through the pipeline is matched against the provided `include` regex.
 3. If the metric name does not match the `include` regex, the metric passes through the processor.
 4. If the metric matches, but is not a gauge or cumulative sum, the metric passes through the processor.
-5. If the metric name does match, and the metric is a gauge or cumulative sum, the metric is added to an aggregate based on its attributes. The metric does not continue down the pipeline.
-6. After the configured `interval` has passed, all aggregate metrics are emitted. Aggregate metrics are emitted with "${metric_name}.${aggregation}" e.g. if you take the average of the metric `system.cpu.utilization`, the aggregated metric would be `system.cpu.utilization.avg`.
-7. All aggregations are cleared, and will not be emitted on the next interval, unless another matching metric enters the pipeline.
+5. If the metric name does match, and the metric is a gauge or cumulative sum, the metric is added to a statistic based on its attributes. The metric does not continue down the pipeline.
+6. After the configured `interval` has passed, all calculated metrics are emitted. Calculated metrics are emitted with "${metric_name}.${aggregation}" e.g. if you take the average of the metric `system.cpu.utilization`, the aggregated metric would be `system.cpu.utilization.avg`.
+7. All calculations are cleared, and will not be emitted on the next interval, unless another matching metric enters the pipeline.
 
 ## Configuration
-| Field          | Type     | Default                | Description                                                                                              |
-|----------------|----------|------------------------|----------------------------------------------------------------------------------------------------------|
-| `interval`     | duration | `1m`                   | The interval on which to emit aggregate metrics.                                                         |
-| `include`      | regexp   | `".*"`                 | A regex that specifies which metrics to consider for aggregation. The default regex matches all metrics. |
-| `aggregations` | []string | `["min", "max, "avg"]` | A list of aggregations to perform on each. Valid values are: `min`, `max`, `avg`, `first`, `last`.       |
+| Field      | Type     | Default                | Description                                                                                               |
+|------------|----------|------------------------|-----------------------------------------------------------------------------------------------------------|
+| `interval` | duration | `1m`                   | The interval on which to emit aggregate metrics.                                                          |
+| `include`  | regexp   | `".*"`                 | A regex that specifies which metrics to consider for aggregation. The default regex matches all metrics.  |
+| `stats`    | []string | `["min", "max, "avg"]` | A list of statistics to calculate on each metric. Valid values are: `min`, `max`, `avg`, `first`, `last`. |
 
 ### Example configuration
 
@@ -45,10 +45,10 @@ receivers:
   route/extract:
 
 processors:
-  aggregation:
+  metricstats:
     interval: 1m
     include: '^.*$$'
-    aggregations: ["last"]
+    stats: ["last"]
   metricextract:
     route: extract
     extract: attributes.number
@@ -68,7 +68,7 @@ service:
       exporters: [nop]
     metrics:
       receivers: [route/extract]
-      processors: [aggregation]
+      processors: [metricstats]
       exporters: [googlecloud]
 ```
 
@@ -91,10 +91,10 @@ receivers:
             enabled: true
 
 processors:
-  aggregation:
+  metricstats:
     interval: 1m
     include: '^.*$$'
-    aggregations: ["avg", "min", "max"]
+    stats: ["avg", "min", "max"]
 
 exporters:
   googlecloud:
@@ -104,7 +104,7 @@ service:
   pipelines:
     metrics:
       receivers: [hostmetrics]
-      processors: [aggregation]
+      processors: [metricstats]
       exporters: [googlecloud]
 ```
 

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package aggregationprocessor
+package metricstatsprocessor
 
 import (
 	"context"
@@ -22,7 +22,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/observiq/observiq-otel-collector/processor/aggregationprocessor/internal/aggregate"
+	"github.com/observiq/observiq-otel-collector/processor/metricstatsprocessor/internal/stats"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatautil"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/consumer"
@@ -32,7 +32,7 @@ import (
 	"go.uber.org/zap"
 )
 
-type aggregationProcessor struct {
+type metricstatsProcessor struct {
 	logger   *zap.Logger
 	mux      sync.Mutex
 	wg       sync.WaitGroup
@@ -40,42 +40,42 @@ type aggregationProcessor struct {
 	//for mocking in test
 	now func() time.Time
 
-	includeRegex           *regexp.Regexp
-	flushInterval          time.Duration
-	aggregationPeriodStart pcommon.Timestamp
-	aggregationTypes       []aggregate.AggregationType
+	includeRegex    *regexp.Regexp
+	flushInterval   time.Duration
+	calcPeriodStart pcommon.Timestamp
+	statTypes       []stats.StatType
 	// map resource hash to resourceAggregation
-	aggregationMap map[uint64]*resourceMetadata
-	nextConsumer   consumer.Metrics
+	statMap      map[uint64]*resourceMetadata
+	nextConsumer consumer.Metrics
 }
 
-func newAggregationProcessor(logger *zap.Logger, cfg *Config, consumer consumer.Metrics) (*aggregationProcessor, error) {
+func newStatsProcessor(logger *zap.Logger, cfg *Config, consumer consumer.Metrics) (*metricstatsProcessor, error) {
 	regex, err := regexp.Compile(cfg.Include)
 	if err != nil {
 		return nil, fmt.Errorf("failed to compile include regex: %w", err)
 	}
-	return &aggregationProcessor{
-		logger:                 logger,
-		mux:                    sync.Mutex{},
-		wg:                     sync.WaitGroup{},
-		doneChan:               make(chan struct{}),
-		now:                    time.Now,
-		includeRegex:           regex,
-		flushInterval:          cfg.Interval,
-		aggregationPeriodStart: pcommon.NewTimestampFromTime(time.Now()),
-		aggregationMap:         make(map[uint64]*resourceMetadata),
-		aggregationTypes:       cfg.AggregationTypes(),
-		nextConsumer:           consumer,
+	return &metricstatsProcessor{
+		logger:          logger,
+		mux:             sync.Mutex{},
+		wg:              sync.WaitGroup{},
+		doneChan:        make(chan struct{}),
+		now:             time.Now,
+		includeRegex:    regex,
+		flushInterval:   cfg.Interval,
+		calcPeriodStart: pcommon.NewTimestampFromTime(time.Now()),
+		statMap:         make(map[uint64]*resourceMetadata),
+		statTypes:       cfg.StatTypes(),
+		nextConsumer:    consumer,
 	}, nil
 }
 
-func (sp *aggregationProcessor) Start(_ context.Context, _ component.Host) error {
+func (sp *metricstatsProcessor) Start(_ context.Context, _ component.Host) error {
 	sp.wg.Add(1)
 	go sp.flushLoop()
 	return nil
 }
 
-func (sp *aggregationProcessor) ConsumeMetrics(ctx context.Context, md pmetric.Metrics) error {
+func (sp *metricstatsProcessor) ConsumeMetrics(ctx context.Context, md pmetric.Metrics) error {
 	sp.aggregateMetrics(md)
 	if md.ResourceMetrics().Len() != 0 {
 		// Forward metrics we didn't consume
@@ -87,7 +87,7 @@ func (sp *aggregationProcessor) ConsumeMetrics(ctx context.Context, md pmetric.M
 
 // Add metrics that we care about to our aggregation.
 // The incoming pmetric.Metrics is modified, such that aggregated metrics are removed.
-func (sp *aggregationProcessor) aggregateMetrics(md pmetric.Metrics) {
+func (sp *metricstatsProcessor) aggregateMetrics(md pmetric.Metrics) {
 	sp.mux.Lock()
 	defer sp.mux.Unlock()
 
@@ -112,7 +112,7 @@ func (sp *aggregationProcessor) aggregateMetrics(md pmetric.Metrics) {
 					continue
 				}
 
-				ma := sp.metricAggregation(m, resKey, resAttrs)
+				ma := sp.metricMetadata(m, resKey, resAttrs)
 
 				dps := datapointsFromMetric(m)
 				// We remove datapoints that we aggregate here, so we use RemoveIf to iterate the datapoints
@@ -123,7 +123,7 @@ func (sp *aggregationProcessor) aggregateMetrics(md pmetric.Metrics) {
 						return false
 					}
 
-					sp.aggregateDatapoint(ma, dp)
+					sp.addDatapointToStats(ma, dp)
 					return true
 				})
 			}
@@ -138,16 +138,16 @@ func (sp *aggregationProcessor) aggregateMetrics(md pmetric.Metrics) {
 	removeEmptyResourceMetrics(rms)
 }
 
-// metricAggregation gets the metricAggregation for the given metric & resource, creating it if it doesn't exist.
-func (sp *aggregationProcessor) metricAggregation(m pmetric.Metric, resKey uint64, resAttrs pcommon.Map) *metricMetadata {
-	rma, ok := sp.aggregationMap[resKey]
+// metricMetadata gets the metricMetadata for the given metric & resource, creating it if it doesn't exist.
+func (sp *metricstatsProcessor) metricMetadata(m pmetric.Metric, resKey uint64, resAttrs pcommon.Map) *metricMetadata {
+	rma, ok := sp.statMap[resKey]
 	if !ok {
 		// Track the resource information for this resource if we haven't already
 		rma = &resourceMetadata{
 			resource: resAttrs,
 			metrics:  make(map[string]*metricMetadata),
 		}
-		sp.aggregationMap[resKey] = rma
+		sp.statMap[resKey] = rma
 	}
 
 	ma, ok := rma.metrics[m.Name()]
@@ -167,14 +167,14 @@ func (sp *aggregationProcessor) metricAggregation(m pmetric.Metric, resKey uint6
 	return ma
 }
 
-// aggregateDatapoint either adds the datapoint to an existing aggregate (if one exists for the NumberDataPoint's attributes),
-// or creates a new aggregate for the datapoint.
-func (sp *aggregationProcessor) aggregateDatapoint(ma *metricMetadata, dp pmetric.NumberDataPoint) {
+// addDatapointToStats either adds the datapoint to all existing statistics (if one exists for the NumberDataPoint's attributes),
+// or creates a new set of statistics for the datapoint.
+func (sp *metricstatsProcessor) addDatapointToStats(ma *metricMetadata, dp pmetric.NumberDataPoint) {
 	attributeKey := mapKey(dp.Attributes())
 	dpa, ok := ma.datapoints[attributeKey]
 	if !ok {
 		// Create the aggregations for this datapoint if we haven't already for this set of attributes.
-		aggs, err := sp.createAggregates(dp)
+		statistics, err := sp.createStatistics(dp)
 		if err != nil {
 			sp.logger.Error("Failed to create some aggregates.", zap.Error(err), zap.String("metric", ma.name))
 			// We continue here even if some aggregates failed to be created
@@ -182,40 +182,40 @@ func (sp *aggregationProcessor) aggregateDatapoint(ma *metricMetadata, dp pmetri
 
 		dpa = &datapointMetadata{
 			attributes: dp.Attributes(),
-			aggregates: aggs,
+			statistics: statistics,
 		}
 		ma.datapoints[attributeKey] = dpa
 
-		// we don't need to call AddDatapoint, since the aggregates are initialized with the first datapoint.
+		// we don't need to call AddDatapoint, since the statistics are initialized with the first datapoint.
 		return
 	}
 
-	// Add datapoints to existing aggregates
-	for _, agg := range dpa.aggregates {
+	// Add datapoints to existing statistics
+	for _, agg := range dpa.statistics {
 		agg.AddDatapoint(dp)
 	}
 }
 
-// createAggregates creates all aggregates for this datapoint based on the configuration of this processor
+// createStatistics creates all statistics for this datapoint based on the configuration of this processor
 // The returned error here is a multierr, and may be a partial err, so the resultant map may be used even if an error is returned.
-func (sp *aggregationProcessor) createAggregates(initialVal pmetric.NumberDataPoint) (map[aggregate.AggregationType]aggregate.Aggregate, error) {
+func (sp *metricstatsProcessor) createStatistics(initialVal pmetric.NumberDataPoint) (map[stats.StatType]stats.Statistic, error) {
 	var errs error
-	aggs := make(map[aggregate.AggregationType]aggregate.Aggregate, len(sp.aggregationTypes))
-	for _, aggType := range sp.aggregationTypes {
-		agg, err := aggType.New(initialVal)
+	statistics := make(map[stats.StatType]stats.Statistic, len(sp.statTypes))
+	for _, statType := range sp.statTypes {
+		agg, err := statType.New(initialVal)
 		if err != nil {
 			errs = multierr.Append(errs, fmt.Errorf("failed to create aggregation: %w", err))
 			continue
 		}
 
-		aggs[aggType] = agg
+		statistics[statType] = agg
 	}
 
-	return aggs, errs
+	return statistics, errs
 }
 
 // flushLoop is a goroutine that flushes all aggregates every sp.flushInterval.
-func (sp *aggregationProcessor) flushLoop() {
+func (sp *metricstatsProcessor) flushLoop() {
 	defer sp.wg.Done()
 
 	t := time.NewTicker(sp.flushInterval)
@@ -232,21 +232,21 @@ func (sp *aggregationProcessor) flushLoop() {
 }
 
 // flush flushes all aggregations to the next component in the collector pipeline.
-func (sp *aggregationProcessor) flush() {
+func (sp *metricstatsProcessor) flush() {
 	sp.mux.Lock()
 	defer sp.mux.Unlock()
 
 	now := pcommon.NewTimestampFromTime(sp.now())
 	metrics := pmetric.NewMetrics()
 
-	for _, ra := range sp.aggregationMap {
+	for _, ra := range sp.statMap {
 		rm := metrics.ResourceMetrics().AppendEmpty()
 		ra.resource.CopyTo(rm.Resource().Attributes())
 		sm := rm.ScopeMetrics().AppendEmpty()
 
-		for _, aggConf := range sp.aggregationTypes {
+		for _, statType := range sp.statTypes {
 			for _, ma := range ra.metrics {
-				sp.addAggregateMetric(now, sm.Metrics(), ma, aggConf)
+				sp.addAggregateMetric(now, sm.Metrics(), ma, statType)
 			}
 		}
 	}
@@ -258,13 +258,13 @@ func (sp *aggregationProcessor) flush() {
 	}
 
 	// Reset aggregation map
-	sp.aggregationMap = make(map[uint64]*resourceMetadata)
+	sp.statMap = make(map[uint64]*resourceMetadata)
 
 	// Aggregation period will start from when we started flush.
-	sp.aggregationPeriodStart = now
+	sp.calcPeriodStart = now
 }
 
-func (sp *aggregationProcessor) addAggregateMetric(now pcommon.Timestamp, ms pmetric.MetricSlice, ma *metricMetadata, aggType aggregate.AggregationType) {
+func (sp *metricstatsProcessor) addAggregateMetric(now pcommon.Timestamp, ms pmetric.MetricSlice, ma *metricMetadata, aggType stats.StatType) {
 	m := ms.AppendEmpty()
 
 	m.SetName(fmt.Sprintf("%s.%s", ma.name, aggType))
@@ -284,7 +284,7 @@ func (sp *aggregationProcessor) addAggregateMetric(now pcommon.Timestamp, ms pme
 	}
 
 	for _, dpa := range ma.datapoints {
-		agg, ok := dpa.aggregates[aggType]
+		agg, ok := dpa.statistics[aggType]
 		if !ok {
 			// aggregation must have failed to be created, so we can't emit this as a metric
 			continue
@@ -294,17 +294,17 @@ func (sp *aggregationProcessor) addAggregateMetric(now pcommon.Timestamp, ms pme
 		dp := dps.AppendEmpty()
 		agg.SetDatapointValue(dp)
 		dpa.attributes.CopyTo(dp.Attributes())
-		dp.SetStartTimestamp(sp.aggregationPeriodStart)
+		dp.SetStartTimestamp(sp.calcPeriodStart)
 		dp.SetTimestamp(now)
 	}
 }
 
-func (sp *aggregationProcessor) Capabilities() consumer.Capabilities {
+func (sp *metricstatsProcessor) Capabilities() consumer.Capabilities {
 	// Data is mutate, since we remove Metric payloads if they are aggregated
 	return consumer.Capabilities{MutatesData: true}
 }
 
-func (sp *aggregationProcessor) Shutdown(ctx context.Context) error {
+func (sp *metricstatsProcessor) Shutdown(ctx context.Context) error {
 	close(sp.doneChan)
 
 	waitDoneChan := make(chan struct{})

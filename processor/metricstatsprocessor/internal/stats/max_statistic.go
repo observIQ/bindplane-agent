@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package aggregate
+package stats
 
 import (
 	"errors"
@@ -20,48 +20,47 @@ import (
 	"go.opentelemetry.io/collector/pdata/pmetric"
 )
 
-type avgAggregate struct {
-	totalInt    int64
-	totalDouble float64
-	isInt       bool
-	count       int64
+type maxStatistic struct {
+	maxDouble float64
+	maxInt    int64
+	isInt     bool
 }
 
-func newAvgAggregate(initialVal pmetric.NumberDataPoint) (Aggregate, error) {
+func newMaxStatistic(initialVal pmetric.NumberDataPoint) (Statistic, error) {
 	switch initialVal.ValueType() {
 	case pmetric.NumberDataPointValueTypeInt:
-		return &avgAggregate{
-			totalInt: initialVal.IntValue(),
-			isInt:    true,
-			count:    1,
+		return &maxStatistic{
+			maxInt: initialVal.IntValue(),
+			isInt:  true,
 		}, nil
 	case pmetric.NumberDataPointValueTypeDouble:
-		return &avgAggregate{
-			totalDouble: initialVal.DoubleValue(),
-			isInt:       false,
-			count:       1,
+		return &maxStatistic{
+			maxDouble: initialVal.DoubleValue(),
+			isInt:     false,
 		}, nil
 	}
 
-	return nil, errors.New("cannot create avg aggregation from empty datapoint")
+	return nil, errors.New("cannot create max aggregation from empty datapoint")
 }
 
-func (m *avgAggregate) AddDatapoint(ndp pmetric.NumberDataPoint) {
+func (m *maxStatistic) AddDatapoint(ndp pmetric.NumberDataPoint) {
 	if m.isInt {
 		i := getDatapointValueInt(ndp)
-		m.totalInt += i
+		if i > m.maxInt {
+			m.maxInt = i
+		}
 	} else {
 		f := getDatapointValueDouble(ndp)
-		m.totalDouble += f
+		if f > m.maxDouble {
+			m.maxDouble = f
+		}
 	}
-
-	m.count++
 }
 
-func (m *avgAggregate) SetDatapointValue(dp pmetric.NumberDataPoint) {
+func (m *maxStatistic) SetDatapointValue(dp pmetric.NumberDataPoint) {
 	if m.isInt {
-		dp.SetIntValue(m.totalInt / m.count)
+		dp.SetIntValue(m.maxInt)
 	} else {
-		dp.SetDoubleValue(m.totalDouble / float64(m.count))
+		dp.SetDoubleValue(m.maxDouble)
 	}
 }

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package aggregate
+package stats
 
 import (
 	"errors"
@@ -20,47 +20,48 @@ import (
 	"go.opentelemetry.io/collector/pdata/pmetric"
 )
 
-type minAggregation struct {
-	minDouble float64
-	minInt    int64
-	isInt     bool
+type avgStatistic struct {
+	totalInt    int64
+	totalDouble float64
+	isInt       bool
+	count       int64
 }
 
-func newMinAggregate(initialVal pmetric.NumberDataPoint) (Aggregate, error) {
+func newAvgStatistic(initialVal pmetric.NumberDataPoint) (Statistic, error) {
 	switch initialVal.ValueType() {
 	case pmetric.NumberDataPointValueTypeInt:
-		return &minAggregation{
-			minInt: initialVal.IntValue(),
-			isInt:  true,
+		return &avgStatistic{
+			totalInt: initialVal.IntValue(),
+			isInt:    true,
+			count:    1,
 		}, nil
 	case pmetric.NumberDataPointValueTypeDouble:
-		return &minAggregation{
-			minDouble: initialVal.DoubleValue(),
-			isInt:     false,
+		return &avgStatistic{
+			totalDouble: initialVal.DoubleValue(),
+			isInt:       false,
+			count:       1,
 		}, nil
 	}
 
-	return nil, errors.New("cannot create min aggregation from empty datapoint")
+	return nil, errors.New("cannot create avg aggregation from empty datapoint")
 }
 
-func (m *minAggregation) AddDatapoint(ndp pmetric.NumberDataPoint) {
+func (m *avgStatistic) AddDatapoint(ndp pmetric.NumberDataPoint) {
 	if m.isInt {
 		i := getDatapointValueInt(ndp)
-		if i < m.minInt {
-			m.minInt = i
-		}
+		m.totalInt += i
 	} else {
 		f := getDatapointValueDouble(ndp)
-		if f < m.minDouble {
-			m.minDouble = f
-		}
+		m.totalDouble += f
 	}
+
+	m.count++
 }
 
-func (m *minAggregation) SetDatapointValue(dp pmetric.NumberDataPoint) {
+func (m *avgStatistic) SetDatapointValue(dp pmetric.NumberDataPoint) {
 	if m.isInt {
-		dp.SetIntValue(m.minInt)
+		dp.SetIntValue(m.totalInt / m.count)
 	} else {
-		dp.SetDoubleValue(m.minDouble)
+		dp.SetDoubleValue(m.totalDouble / float64(m.count))
 	}
 }
