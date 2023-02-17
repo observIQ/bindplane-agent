@@ -22,7 +22,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/observiq/observiq-otel-collector/expr"
 	"github.com/observiq/observiq-otel-collector/processor/aggregationprocessor/internal/aggregate"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatautil"
 	"go.opentelemetry.io/collector/component"
@@ -41,11 +40,10 @@ type aggregationProcessor struct {
 	//for mocking in test
 	now func() time.Time
 
-	includeRegex              *regexp.Regexp
-	flushInterval             time.Duration
-	aggregationPeriodStart    pcommon.Timestamp
-	aggregationConfs          []AggregateConfig
-	aggregationMetricNameExpr *expr.Expression
+	includeRegex           *regexp.Regexp
+	flushInterval          time.Duration
+	aggregationPeriodStart pcommon.Timestamp
+	aggregationConfs       []AggregateConfig
 	// map resource hash to resourceAggregation
 	aggregationMap map[uint64]*resourceMetadata
 	nextConsumer   consumer.Metrics
