@@ -25,7 +25,7 @@ import (
 )
 
 const (
-	typeStr = "aggregation"
+	typeStr = "metricsstats"
 
 	stability = component.StabilityLevelAlpha
 )
