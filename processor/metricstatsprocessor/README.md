@@ -13,14 +13,14 @@ This processor calculates statistics from metrics over a configurable interval, 
 3. If the metric name does not match the `include` regex, the metric passes through the processor.
 4. If the metric matches, but is not a gauge or cumulative sum, the metric passes through the processor.
 5. If the metric name does match, and the metric is a gauge or cumulative sum, the metric is added to a statistic based on its attributes. The metric does not continue down the pipeline.
-6. After the configured `interval` has passed, all calculated metrics are emitted. Calculated metrics are emitted with "${metric_name}.${aggregation}" e.g. if you take the average of the metric `system.cpu.utilization`, the aggregated metric would be `system.cpu.utilization.avg`.
+6. After the configured `interval` has passed, all calculated metrics are emitted. Calculated metrics are emitted with a name of "${metric_name}.${statistic_type}" e.g. if you take the average of the metric `system.cpu.utilization`, the calculated metric would be `system.cpu.utilization.avg`.
 7. All calculations are cleared, and will not be emitted on the next interval, unless another matching metric enters the pipeline.
 
 ## Configuration
 | Field      | Type     | Default                | Description                                                                                               |
 |------------|----------|------------------------|-----------------------------------------------------------------------------------------------------------|
-| `interval` | duration | `1m`                   | The interval on which to emit aggregate metrics.                                                          |
-| `include`  | regexp   | `".*"`                 | A regex that specifies which metrics to consider for aggregation. The default regex matches all metrics.  |
+| `interval` | duration | `1m`                   | The interval on which to emit calculated metrics.                                                         |
+| `include`  | regexp   | `".*"`                 | A regex that specifies which metrics to consider for calculation. The default regex matches all metrics.  |
 | `stats`    | []string | `["min", "max, "avg"]` | A list of statistics to calculate on each metric. Valid values are: `min`, `max`, `avg`, `first`, `last`. |
 
 ### Example configuration
@@ -28,7 +28,7 @@ This processor calculates statistics from metrics over a configurable interval, 
 
 #### Reduce volume of log-based metrics
 
-In this example, the throughput of log-based metrics is limited, by aggregating them using the "last" aggregation. The last datapoint received from the log will be emitted every minute at a maximum.
+In this example, the throughput of log-based metrics is limited, by calculating the "last" statistic. The last datapoint received from the log will be emitted every minute at a maximum.
 
 ```yaml
 receivers:
@@ -72,11 +72,11 @@ service:
       exporters: [googlecloud]
 ```
 
-This configuration extracts metrics from a log file, and passes them through the aggregation processor. The aggregation processor will hold the last data point it receives, then emit it after a one minute interval as `log.count.last`, sending the metric to Google Cloud Monitoring. This limits the throughput to 1 metric per minute.
+This configuration extracts metrics from a log file, and passes them through the metricstats processor. The metricstats processor will hold the last data point it receives, then emit it after a one minute interval as `log.count.last`, sending the metric to Google Cloud Monitoring. This limits the throughput to 1 metric per minute.
 
 #### Sample CPU utilization at a higher rate
 
-In this example, we sample CPU utilization once per second, but only emit aggregate metrics every minute. This allows for a higher effective sample rate of the CPU utilization.
+In this example, we sample CPU utilization once per second, but only emit calculated metrics every minute. This allows for a higher effective sample rate of the CPU utilization.
 
 ```yaml
 receivers:

@@ -43,7 +43,7 @@ func newAvgStatistic(initialVal pmetric.NumberDataPoint) (Statistic, error) {
 		}, nil
 	}
 
-	return nil, errors.New("cannot create avg aggregation from empty datapoint")
+	return nil, errors.New("cannot create avg statistic from empty datapoint")
 }
 
 func (m *avgStatistic) AddDatapoint(ndp pmetric.NumberDataPoint) {

@@ -44,7 +44,7 @@ func newFirstStatistic(initialVal pmetric.NumberDataPoint) (Statistic, error) {
 		}, nil
 	}
 
-	return nil, errors.New("cannot create first aggregation from empty datapoint")
+	return nil, errors.New("cannot create first statistic from empty datapoint")
 }
 
 func (m *firstStatistic) AddDatapoint(ndp pmetric.NumberDataPoint) {

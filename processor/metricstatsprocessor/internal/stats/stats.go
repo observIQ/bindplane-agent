@@ -21,7 +21,7 @@ import (
 	"go.opentelemetry.io/collector/pdata/pmetric"
 )
 
-// Statistic is an interface represents an aggregate of datapoints
+// Statistic is an interface represents a running calculation of datapoints
 type Statistic interface {
 	AddDatapoint(f pmetric.NumberDataPoint)
 	SetDatapointValue(pmetric.NumberDataPoint)
@@ -30,7 +30,7 @@ type Statistic interface {
 // StatType represents a type of statistic to calculate
 type StatType string
 
-// Types of aggregates
+// Types of statistics
 const (
 	MinType   StatType = "min"
 	MaxType   StatType = "max"
@@ -49,16 +49,16 @@ var statConstructors = map[StatType]statConstructor{
 	AvgType:   newAvgStatistic,
 }
 
-// New creates a new aggregate of the given type, using the initial datapoint
+// New creates a new statistic of the given type, using the initial datapoint
 func (a StatType) New(initialVal pmetric.NumberDataPoint) (Statistic, error) {
 	constructor, ok := statConstructors[a]
 	if !ok {
-		return nil, fmt.Errorf("invalid aggregation type: %s", a)
+		return nil, fmt.Errorf("invalid statistic type: %s", a)
 	}
 	return constructor(initialVal)
 }
 
-// Valid returns true if this Type is a valid aggregate type, false otherwise
+// Valid returns true if this Type is a valid statistic type, false otherwise
 func (a StatType) Valid() bool {
 	_, ok := statConstructors[a]
 	return ok

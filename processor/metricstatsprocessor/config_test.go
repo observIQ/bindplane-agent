@@ -73,7 +73,7 @@ func TestConfig_Validate(t *testing.T) {
 		expectedErr string
 	}{
 		{
-			name: "Config with all aggregations",
+			name: "Config with all stat types",
 			input: Config{
 				Interval: 5 * time.Second,
 				Include:  "^.*$",
@@ -87,7 +87,7 @@ func TestConfig_Validate(t *testing.T) {
 			},
 		},
 		{
-			name: "Config with no aggregations",
+			name: "Config with no stat types",
 			input: Config{
 				Interval: 5 * time.Second,
 				Include:  "^.*$",
@@ -96,7 +96,7 @@ func TestConfig_Validate(t *testing.T) {
 			expectedErr: "at least one statistic must be specified in `stats`",
 		},
 		{
-			name: "Config with default aggregations",
+			name: "Config with default stat types",
 			input: Config{
 				Interval: 5 * time.Second,
 				Include:  "^.*$",
@@ -125,7 +125,7 @@ func TestConfig_Validate(t *testing.T) {
 			expectedErr: "interval must be positive",
 		},
 		{
-			name: "Config with invalid aggregation type",
+			name: "Config with invalid stat type",
 			input: Config{
 				Interval: 5 * time.Second,
 				Include:  "^.*$",
@@ -136,7 +136,7 @@ func TestConfig_Validate(t *testing.T) {
 			expectedErr: "invalid statistic type for `type`: invalid",
 		},
 		{
-			name: "Config with duplicate aggregations",
+			name: "Config with duplicate stat types",
 			input: Config{
 				Interval: 5 * time.Second,
 				Include:  "^.*$",

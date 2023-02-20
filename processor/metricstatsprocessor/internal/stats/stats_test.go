@@ -23,7 +23,7 @@ import (
 	"go.opentelemetry.io/collector/pdata/pmetric"
 )
 
-func TestAggregateTypesValid(t *testing.T) {
+func TestStatTypesValid(t *testing.T) {
 	types := []StatType{
 		MinType,
 		AvgType,
@@ -34,12 +34,12 @@ func TestAggregateTypesValid(t *testing.T) {
 
 	for _, statType := range types {
 		t.Run(string(statType), func(t *testing.T) {
-			require.True(t, statType.Valid(), "Invalid aggregation type %s", statType)
+			require.True(t, statType.Valid(), "Invalid statistic type %s", statType)
 		})
 	}
 }
 
-func TestAggregateTypesNew(t *testing.T) {
+func TestStatTypesNew(t *testing.T) {
 	types := []StatType{
 		MinType,
 		AvgType,
@@ -59,14 +59,14 @@ func TestAggregateTypesNew(t *testing.T) {
 	}
 }
 
-func TestAggregateTypeNewInvalidType(t *testing.T) {
+func TestStatTypeNewInvalidType(t *testing.T) {
 	dp := pmetric.NewNumberDataPoint()
 	dp.SetDoubleValue(2.0)
 	_, err := StatType("invalid").New(dp)
-	require.ErrorContains(t, err, "invalid aggregation type:")
+	require.ErrorContains(t, err, "invalid statistic type:")
 }
 
-func TestAggregateTypesNewEmptyDatapoint(t *testing.T) {
+func TestStatTypesNewEmptyDatapoint(t *testing.T) {
 	types := []StatType{
 		MinType,
 		AvgType,
@@ -79,12 +79,12 @@ func TestAggregateTypesNewEmptyDatapoint(t *testing.T) {
 		t.Run(string(statType), func(t *testing.T) {
 			dp := pmetric.NewNumberDataPoint()
 			_, err := statType.New(dp)
-			require.ErrorContains(t, err, fmt.Sprintf("cannot create %s aggregation from empty datapoint", statType))
+			require.ErrorContains(t, err, fmt.Sprintf("cannot create %s statistic from empty datapoint", statType))
 		})
 	}
 }
 
-func TestAggregatesFloat(t *testing.T) {
+func TestStatisticsFloat(t *testing.T) {
 	testCases := []struct {
 		name       string
 		statType   StatType
@@ -148,24 +148,24 @@ func TestAggregatesFloat(t *testing.T) {
 			initialVal := pmetric.NewNumberDataPoint()
 			initialVal.SetDoubleValue(tc.values[0])
 			initialVal.SetTimestamp(pcommon.Timestamp(tc.timestamps[0]))
-			agg, err := tc.statType.New(initialVal)
+			stat, err := tc.statType.New(initialVal)
 			require.NoError(t, err)
 
 			for i, v := range tc.values[1:] {
 				dp := pmetric.NewNumberDataPoint()
 				dp.SetTimestamp(pcommon.Timestamp(tc.timestamps[i+1]))
 				dp.SetDoubleValue(v)
-				agg.AddDatapoint(dp)
+				stat.AddDatapoint(dp)
 			}
 			finalDp := pmetric.NewNumberDataPoint()
-			agg.SetDatapointValue(finalDp)
+			stat.SetDatapointValue(finalDp)
 
 			require.Equal(t, tc.finalValue, finalDp.DoubleValue())
 		})
 	}
 }
 
-func TestAggregatesInt(t *testing.T) {
+func TestStatisticsInt(t *testing.T) {
 	testCases := []struct {
 		name       string
 		statType   StatType
@@ -229,17 +229,17 @@ func TestAggregatesInt(t *testing.T) {
 			initialVal := pmetric.NewNumberDataPoint()
 			initialVal.SetIntValue(tc.values[0])
 			initialVal.SetTimestamp(pcommon.Timestamp(tc.timestamps[0]))
-			agg, err := tc.statType.New(initialVal)
+			stat, err := tc.statType.New(initialVal)
 			require.NoError(t, err)
 
 			for i, v := range tc.values[1:] {
 				dp := pmetric.NewNumberDataPoint()
 				dp.SetTimestamp(pcommon.Timestamp(tc.timestamps[i+1]))
 				dp.SetIntValue(v)
-				agg.AddDatapoint(dp)
+				stat.AddDatapoint(dp)
 			}
 			finalDp := pmetric.NewNumberDataPoint()
-			agg.SetDatapointValue(finalDp)
+			stat.SetDatapointValue(finalDp)
 
 			require.Equal(t, tc.finalValue, finalDp.IntValue())
 		})

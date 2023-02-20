@@ -30,7 +30,7 @@ type Config struct {
 	// Include is a regex that must match the metric name for it to be sampled.
 	// Otherwise, the metric is passed through.
 	Include string `mapstructure:"include"`
-	// List of aggregations for the metric
+	// List of stats to calculate for each metric
 	Stats []stats.StatType `mapstructure:"stats"`
 }
 
@@ -44,7 +44,7 @@ func (cfg Config) Validate() error {
 		return errors.New("interval must be positive")
 	}
 
-	// don't check aggregations if using defaults
+	// don't check stats if using defaults
 	if cfg.Stats == nil {
 		return nil
 	}
@@ -67,7 +67,7 @@ func (cfg Config) Validate() error {
 	return nil
 }
 
-// StatTypes gets the default aggregation configs if none were specified, otherwise the specified aggregation configs
+// StatTypes gets the default stats to calculate if none were specified, otherwise the configured stat types
 func (cfg Config) StatTypes() []stats.StatType {
 	if cfg.Stats == nil {
 		// fallback to default

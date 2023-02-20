@@ -40,7 +40,7 @@ func newMinStatistic(initialVal pmetric.NumberDataPoint) (Statistic, error) {
 		}, nil
 	}
 
-	return nil, errors.New("cannot create min aggregation from empty datapoint")
+	return nil, errors.New("cannot create min statistic from empty datapoint")
 }
 
 func (m *minStatistic) AddDatapoint(ndp pmetric.NumberDataPoint) {

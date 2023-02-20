@@ -40,7 +40,7 @@ func newMaxStatistic(initialVal pmetric.NumberDataPoint) (Statistic, error) {
 		}, nil
 	}
 
-	return nil, errors.New("cannot create max aggregation from empty datapoint")
+	return nil, errors.New("cannot create max statistic from empty datapoint")
 }
 
 func (m *maxStatistic) AddDatapoint(ndp pmetric.NumberDataPoint) {

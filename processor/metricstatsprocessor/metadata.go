@@ -22,7 +22,7 @@ import (
 
 type resourceMetadata struct {
 	resource pcommon.Map
-	// metric name -> metric aggregation
+	// metric name -> metric metadata
 	metrics map[string]*metricMetadata
 }
 
@@ -33,7 +33,7 @@ type metricMetadata struct {
 	metricType pmetric.MetricType
 	// Only relevant to sum metrics
 	monotonic bool
-	// Map of attributes hash to datapointAggregation
+	// Map of attributes hash to datapointMetadata
 	datapoints map[uint64]*datapointMetadata
 }
 
