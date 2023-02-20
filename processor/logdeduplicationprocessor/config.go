@@ -35,19 +35,18 @@ const (
 	// defaultTimezone is the default timezone
 	defaultTimezone = "UTC"
 
-	// bodyField is the name of the body field for matching
+	// bodyField is the name of the body field
 	bodyField = "body"
 
-	// attributeField is the name of the attribute field for matching
+	// attributeField is the name of the attribute field
 	attributeField = "attributes"
 )
-
-var defaultMatchFields = []string{bodyField, attributeField}
 
 // Config errors
 var (
 	errInvalidLogCountAttribute = errors.New("log_count_attribute must be set")
 	errInvalidInterval          = errors.New("interval must be greater than 0")
+	errCannotExcludeBody        = errors.New("cannot exclude the entire body")
 )
 
 // Config is the config of the processor.
@@ -55,7 +54,7 @@ type Config struct {
 	LogCountAttribute string        `mapstructure:"log_count_attribute"`
 	Interval          time.Duration `mapstructure:"interval"`
 	Timezone          string        `mapstructure:"timezone"`
-	MatchFields       []string      `mapstructure:"match_fields"`
+	ExcludeFields     []string      `mapstructure:"exclude_fields"`
 }
 
 // createDefaultConfig returns the default config for the processor.
@@ -64,7 +63,7 @@ func createDefaultConfig() component.Config {
 		LogCountAttribute: defaultLogCountAttribute,
 		Interval:          defaultInterval,
 		Timezone:          defaultTimezone,
-		MatchFields:       defaultMatchFields,
+		ExcludeFields:     []string{},
 	}
 }
 
@@ -83,16 +82,31 @@ func (c Config) Validate() error {
 		return fmt.Errorf("timezone is invalid: %w", err)
 	}
 
-	return c.validateMatchFields()
+	return c.validateExcludeFields()
 }
 
-// validateMatchFields validates that all the match fields start with either `body` or `attributes`
-func (c Config) validateMatchFields() error {
-	for _, field := range c.MatchFields {
+// validateExcludeFields validates that all the exclude fields
+func (c Config) validateExcludeFields() error {
+	knownExcludeFields := make(map[string]struct{})
+
+	for _, field := range c.ExcludeFields {
+		// Special check to make sure the entire body is not excluded
+		if field == bodyField {
+			return errCannotExcludeBody
+		}
+
+		// Split and ensure the field starts with `body` or `attributes`
 		parts := strings.Split(field, fieldDelimiter)
 		if parts[0] != bodyField && parts[0] != attributeField {
-			return fmt.Errorf("a match_field must start with %s or %s", bodyField, attributeField)
+			return fmt.Errorf("an excludefield must start with %s or %s", bodyField, attributeField)
 		}
+
+		// If a field is valid make sure we haven't already seen it
+		if _, ok := knownExcludeFields[field]; ok {
+			return fmt.Errorf("duplicate exclude_field %s", field)
+		}
+
+		knownExcludeFields[field] = struct{}{}
 	}
 
 	return nil
