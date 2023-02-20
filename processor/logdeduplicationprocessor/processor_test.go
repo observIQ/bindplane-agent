@@ -85,6 +85,29 @@ func Test_newProcessor(t *testing.T) {
 	}
 }
 
+func TestProcessorShutdownCtxError(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+
+	logsSink := &consumertest.LogsSink{}
+	logger := zap.NewNop()
+	cfg := &Config{
+		LogCountAttribute: defaultLogCountAttribute,
+		Interval:          1 * time.Second,
+		Timezone:          defaultTimezone,
+	}
+
+	// Create a processor
+	p, err := newProcessor(cfg, logsSink, logger)
+	require.NoError(t, err)
+
+	err = p.Start(context.Background(), componenttest.NewNopHost())
+	require.NoError(t, err)
+
+	err = p.Shutdown(ctx)
+	require.ErrorIs(t, err, context.Canceled)
+}
+
 func TestProcessorCapabilities(t *testing.T) {
 	p := &logDedupProcessor{}
 	require.Equal(t, consumer.Capabilities{MutatesData: true}, p.Capabilities())
