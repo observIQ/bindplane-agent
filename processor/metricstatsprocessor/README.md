@@ -13,7 +13,7 @@ This processor calculates statistics from metrics over a configurable interval, 
 3. If the metric name does not match the `include` regex, the metric passes through the processor.
 4. If the metric matches, but is not a gauge or cumulative sum, the metric passes through the processor.
 5. If the metric name does match, and the metric is a gauge or cumulative sum, the metric is added to a statistic based on its attributes. The metric does not continue down the pipeline.
-6. After the configured `interval` has passed, all calculated metrics are emitted. Calculated metrics are emitted with a name of "${metric_name}.${statistic_type}" e.g. if you take the average of the metric `system.cpu.utilization`, the calculated metric would be `system.cpu.utilization.avg`.
+6. After the configured `interval` has passed, all calculated metrics are emitted. Calculated metrics are emitted with a name of `${metric_name}.${statistic_type}` e.g. if you take the average of the metric `system.cpu.utilization`, the calculated metric would be `system.cpu.utilization.avg`.
 7. All calculations are cleared, and will not be emitted on the next interval, unless another matching metric enters the pipeline.
 
 ## Configuration
