@@ -76,7 +76,7 @@ func (sp *metricstatsProcessor) Start(_ context.Context, _ component.Host) error
 }
 
 func (sp *metricstatsProcessor) ConsumeMetrics(ctx context.Context, md pmetric.Metrics) error {
-	sp.aggregateMetrics(md)
+	sp.addMetricsToCalculations(md)
 	if md.ResourceMetrics().Len() != 0 {
 		// Forward metrics we didn't consume
 		return sp.nextConsumer.ConsumeMetrics(ctx, md)
@@ -87,7 +87,7 @@ func (sp *metricstatsProcessor) ConsumeMetrics(ctx context.Context, md pmetric.M
 
 // Add metrics that we care about to our aggregation.
 // The incoming pmetric.Metrics is modified, such that aggregated metrics are removed.
-func (sp *metricstatsProcessor) aggregateMetrics(md pmetric.Metrics) {
+func (sp *metricstatsProcessor) addMetricsToCalculations(md pmetric.Metrics) {
 	sp.mux.Lock()
 	defer sp.mux.Unlock()
 
@@ -103,7 +103,7 @@ func (sp *metricstatsProcessor) aggregateMetrics(md pmetric.Metrics) {
 			ms := sm.Metrics()
 			for k := 0; k < ms.Len(); k++ {
 				m := ms.At(k)
-				if !canAggregateMetric(m) {
+				if !canAddMetricToStats(m) {
 					continue
 				}
 
@@ -246,7 +246,7 @@ func (sp *metricstatsProcessor) flush() {
 
 		for _, statType := range sp.statTypes {
 			for _, ma := range ra.metrics {
-				sp.addAggregateMetric(now, sm.Metrics(), ma, statType)
+				sp.addCalculatedMetric(now, sm.Metrics(), ma, statType)
 			}
 		}
 	}
@@ -264,10 +264,10 @@ func (sp *metricstatsProcessor) flush() {
 	sp.calcPeriodStart = now
 }
 
-func (sp *metricstatsProcessor) addAggregateMetric(now pcommon.Timestamp, ms pmetric.MetricSlice, ma *metricMetadata, aggType stats.StatType) {
+func (sp *metricstatsProcessor) addCalculatedMetric(now pcommon.Timestamp, ms pmetric.MetricSlice, ma *metricMetadata, statType stats.StatType) {
 	m := ms.AppendEmpty()
 
-	m.SetName(fmt.Sprintf("%s.%s", ma.name, aggType))
+	m.SetName(fmt.Sprintf("%s.%s", ma.name, statType))
 	m.SetDescription(ma.desc)
 	m.SetUnit(ma.unit)
 
@@ -284,7 +284,7 @@ func (sp *metricstatsProcessor) addAggregateMetric(now pcommon.Timestamp, ms pme
 	}
 
 	for _, dpa := range ma.datapoints {
-		agg, ok := dpa.statistics[aggType]
+		agg, ok := dpa.statistics[statType]
 		if !ok {
 			// aggregation must have failed to be created, so we can't emit this as a metric
 			continue
@@ -324,7 +324,7 @@ func (sp *metricstatsProcessor) Shutdown(ctx context.Context) error {
 	return nil
 }
 
-func canAggregateMetric(m pmetric.Metric) bool {
+func canAddMetricToStats(m pmetric.Metric) bool {
 	switch m.Type() {
 	case pmetric.MetricTypeGauge:
 		return true
