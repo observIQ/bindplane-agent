@@ -17,6 +17,7 @@ package logdeduplicationprocessor
 import (
 	"context"
 	"errors"
+	"fmt"
 	"testing"
 	"time"
 
@@ -78,6 +79,7 @@ func Test_newProcessor(t *testing.T) {
 				require.NoError(t, err)
 				require.Equal(t, tc.expected.emitInterval, actual.emitInterval)
 				require.NotNil(t, actual.aggregator)
+				require.NotNil(t, actual.remover)
 				require.Equal(t, tc.expected.consumer, actual.consumer)
 				require.Equal(t, tc.expected.logger, actual.logger)
 			}
@@ -120,6 +122,9 @@ func TestProcessorConsume(t *testing.T) {
 		LogCountAttribute: defaultLogCountAttribute,
 		Interval:          1 * time.Second,
 		Timezone:          defaultTimezone,
+		ExcludeFields: []string{
+			fmt.Sprintf("%s.remove_me", attributeField),
+		},
 	}
 
 	// Create a processor
@@ -133,8 +138,9 @@ func TestProcessorConsume(t *testing.T) {
 	logRecord1 := generateTestLogRecord(t, "Body of the log")
 	logRecord2 := generateTestLogRecord(t, "Body of the log")
 
-	//Differ by timestamp
+	//Differ by timestamp and attribute to be removed
 	logRecord1.SetTimestamp(pcommon.NewTimestampFromTime(time.Now().Add(time.Minute)))
+	logRecord2.Attributes().PutBool("remove_me", false)
 
 	logs := plog.NewLogs()
 	rl := logs.ResourceLogs().AppendEmpty()
