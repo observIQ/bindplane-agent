@@ -89,7 +89,7 @@ func (c Config) Validate() error {
 // validateMatchFields validates that all the match fields start with either `body` or `attributes`
 func (c Config) validateMatchFields() error {
 	for _, field := range c.MatchFields {
-		parts := strings.Split(field, ".")
+		parts := strings.Split(field, fieldDelimiter)
 		if parts[0] != bodyField && parts[0] != attributeField {
 			return fmt.Errorf("a match_field must start with %s or %s", bodyField, attributeField)
 		}
