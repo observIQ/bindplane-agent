@@ -26,6 +26,7 @@ func TestCreateDefaultProcessorConfig(t *testing.T) {
 	require.Equal(t, defaultInterval, cfg.Interval)
 	require.Equal(t, defaultLogCountAttribute, cfg.LogCountAttribute)
 	require.Equal(t, defaultTimezone, cfg.Timezone)
+	require.Equal(t, defaultMatchFields, cfg.MatchFields)
 }
 
 func TestValidateConfig(t *testing.T) {
@@ -40,6 +41,7 @@ func TestValidateConfig(t *testing.T) {
 				LogCountAttribute: "",
 				Interval:          defaultInterval,
 				Timezone:          defaultTimezone,
+				MatchFields:       defaultMatchFields,
 			},
 			expectedErr: errInvalidLogCountAttribute,
 		},
@@ -49,6 +51,7 @@ func TestValidateConfig(t *testing.T) {
 				LogCountAttribute: defaultLogCountAttribute,
 				Interval:          -1,
 				Timezone:          defaultTimezone,
+				MatchFields:       defaultMatchFields,
 			},
 			expectedErr: errInvalidInterval,
 		},
@@ -58,8 +61,19 @@ func TestValidateConfig(t *testing.T) {
 				LogCountAttribute: defaultLogCountAttribute,
 				Interval:          defaultInterval,
 				Timezone:          "not a timezone",
+				MatchFields:       defaultMatchFields,
 			},
 			expectedErr: errors.New("timezone is invalid"),
+		},
+		{
+			desc: "invalid match fields config",
+			cfg: &Config{
+				LogCountAttribute: defaultLogCountAttribute,
+				Interval:          defaultInterval,
+				Timezone:          defaultTimezone,
+				MatchFields:       []string{"not.field"},
+			},
+			expectedErr: errors.New("a match_field must start with"),
 		},
 		{
 			desc: "valid config",
@@ -67,6 +81,7 @@ func TestValidateConfig(t *testing.T) {
 				LogCountAttribute: defaultLogCountAttribute,
 				Interval:          defaultInterval,
 				Timezone:          defaultTimezone,
+				MatchFields:       defaultMatchFields,
 			},
 			expectedErr: nil,
 		},

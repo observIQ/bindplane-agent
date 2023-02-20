@@ -18,6 +18,7 @@ package logdeduplicationprocessor
 import (
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"go.opentelemetry.io/collector/component"
@@ -33,7 +34,15 @@ const (
 
 	// defaultTimezone is the default timezone
 	defaultTimezone = "UTC"
+
+	// bodyField is the name of the body field for matching
+	bodyField = "body"
+
+	// attributeField is the name of the attribute field for matching
+	attributeField = "attributes"
 )
+
+var defaultMatchFields = []string{bodyField, attributeField}
 
 // Config errors
 var (
@@ -46,6 +55,7 @@ type Config struct {
 	LogCountAttribute string        `mapstructure:"log_count_attribute"`
 	Interval          time.Duration `mapstructure:"interval"`
 	Timezone          string        `mapstructure:"timezone"`
+	MatchFields       []string      `mapstructure:"match_fields"`
 }
 
 // createDefaultConfig returns the default config for the processor.
@@ -54,6 +64,7 @@ func createDefaultConfig() component.Config {
 		LogCountAttribute: defaultLogCountAttribute,
 		Interval:          defaultInterval,
 		Timezone:          defaultTimezone,
+		MatchFields:       defaultMatchFields,
 	}
 }
 
@@ -70,6 +81,18 @@ func (c Config) Validate() error {
 	_, err := time.LoadLocation(c.Timezone)
 	if err != nil {
 		return fmt.Errorf("timezone is invalid: %w", err)
+	}
+
+	return c.validateMatchFields()
+}
+
+// validateMatchFields validates that all the match fields start with either `body` or `attributes`
+func (c Config) validateMatchFields() error {
+	for _, field := range c.MatchFields {
+		parts := strings.Split(field, ".")
+		if parts[0] != bodyField && parts[0] != attributeField {
+			return fmt.Errorf("a match_field must start with %s or %s", bodyField, attributeField)
+		}
 	}
 
 	return nil
