@@ -1,3 +1,17 @@
+// Copyright  observIQ, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package logdeduplicationprocessor
 
 import (
@@ -27,7 +41,7 @@ type field struct {
 }
 
 // newFieldRemover creates a new field remover based on the pased in field keys
-func newFieldRemover(fieldKeys []string) (*fieldRemover, error) {
+func newFieldRemover(fieldKeys []string) *fieldRemover {
 	fe := &fieldRemover{
 		fields: make([]*field, 0, len(fieldKeys)),
 	}
@@ -38,7 +52,7 @@ func newFieldRemover(fieldKeys []string) (*fieldRemover, error) {
 		})
 	}
 
-	return fe, nil
+	return fe
 }
 
 // RemoveFields removes any body or attribute fields that match in the log record
@@ -102,8 +116,8 @@ func splitField(fieldKey string) []string {
 	keyParts := strings.Split(escapedKey, fieldDelimiter)
 
 	// Replace the temporarily escaped delimiters with the actual delimiter.
-	for _, part := range keyParts {
-		part = strings.ReplaceAll(part, fieldEscapeKeyReplacement, fieldDelimiter)
+	for i := range keyParts {
+		keyParts[i] = strings.ReplaceAll(keyParts[i], fieldEscapeKeyReplacement, fieldDelimiter)
 	}
 
 	return keyParts
