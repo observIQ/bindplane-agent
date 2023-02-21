@@ -30,17 +30,17 @@ const (
 	fieldEscapeKeyReplacement = "{TEMP_REPLACE}"
 )
 
-// fieldRemover handles removes match fields from log records
+// fieldRemover handles removing excluded fields from log records
 type fieldRemover struct {
 	fields []*field
 }
 
-// field represents a field and it's compount key to match on
+// field represents a field and it's compound key to match on
 type field struct {
 	keyParts []string
 }
 
-// newFieldRemover creates a new field remover based on the pased in field keys
+// newFieldRemover creates a new field remover based on the passed in field keys
 func newFieldRemover(fieldKeys []string) *fieldRemover {
 	fe := &fieldRemover{
 		fields: make([]*field, 0, len(fieldKeys)),
@@ -64,7 +64,6 @@ func (fe *fieldRemover) RemoveFields(logRecord plog.LogRecord) {
 
 // removeField removes the field from the log record if it exists
 func (f *field) removeField(logRecord plog.LogRecord) {
-	// Get first key part
 	firstPart, remainingParts := f.keyParts[0], f.keyParts[1:]
 
 	switch firstPart {
@@ -85,9 +84,8 @@ func (f *field) removeField(logRecord plog.LogRecord) {
 	}
 }
 
-// removeFieldFromMap recruses through the map and removes the field if it's found.
+// removeFieldFromMap recurses through the map and removes the field if it's found.
 func removeFieldFromMap(valueMap pcommon.Map, keyParts []string) {
-	// Get the next part of the key
 	nextKeyPart, remainingParts := keyParts[0], keyParts[1:]
 
 	// Look for the value associated with the next key part.
@@ -110,7 +108,7 @@ func removeFieldFromMap(valueMap pcommon.Map, keyParts []string) {
 }
 
 // splitField splits a field key into its parts.
-// It replaces escaped delimiters with the full delimter after splitting.
+// It replaces escaped delimiters with the full delimiter after splitting.
 func splitField(fieldKey string) []string {
 	escapedKey := strings.ReplaceAll(fieldKey, fmt.Sprintf("\\%s", fieldDelimiter), fieldEscapeKeyReplacement)
 	keyParts := strings.Split(escapedKey, fieldDelimiter)
