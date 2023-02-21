@@ -24,7 +24,7 @@ import (
 	"go.opentelemetry.io/collector/pdata/plog"
 )
 
-func Test_newFieldRevmoer(t *testing.T) {
+func Test_newFieldRemover(t *testing.T) {
 	fieldKeys := []string{
 		"single_field",
 		"compound.field.one",
