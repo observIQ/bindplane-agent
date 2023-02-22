@@ -35,7 +35,7 @@ func (ms *MetricSettings) Unmarshal(parser *confmap.Conf) error {
 
 // MetricsSettings provides settings for sapnetweaverreceiver metrics.
 type MetricsSettings struct {
-	SapnetweaverAbapUpdateErrorCount       MetricSettings `mapstructure:"sapnetweaver.abap.update.error.count"`
+	SapnetweaverAbapUpdateStatus           MetricSettings `mapstructure:"sapnetweaver.abap.update.status"`
 	SapnetweaverCacheEvictions             MetricSettings `mapstructure:"sapnetweaver.cache.evictions"`
 	SapnetweaverCacheHits                  MetricSettings `mapstructure:"sapnetweaver.cache.hits"`
 	SapnetweaverCertificateValidity        MetricSettings `mapstructure:"sapnetweaver.certificate.validity"`
@@ -78,7 +78,7 @@ type MetricsSettings struct {
 
 func DefaultMetricsSettings() MetricsSettings {
 	return MetricsSettings{
-		SapnetweaverAbapUpdateErrorCount: MetricSettings{
+		SapnetweaverAbapUpdateStatus: MetricSettings{
 			Enabled: true,
 		},
 		SapnetweaverCacheEvictions: MetricSettings{
@@ -302,16 +302,16 @@ var MapAttributeResponseType = map[string]AttributeResponseType{
 	"http":        AttributeResponseTypeHttp,
 }
 
-type metricSapnetweaverAbapUpdateErrorCount struct {
+type metricSapnetweaverAbapUpdateStatus struct {
 	data     pmetric.Metric // data buffer for generated metric.
 	settings MetricSettings // metric settings provided by user.
 	capacity int            // max observed number of data points added to the metric.
 }
 
-// init fills sapnetweaver.abap.update.error.count metric with initial data.
-func (m *metricSapnetweaverAbapUpdateErrorCount) init() {
-	m.data.SetName("sapnetweaver.abap.update.error.count")
-	m.data.SetDescription("The amount of ABAP errors in update.")
+// init fills sapnetweaver.abap.update.status metric with initial data.
+func (m *metricSapnetweaverAbapUpdateStatus) init() {
+	m.data.SetName("sapnetweaver.abap.update.status")
+	m.data.SetDescription("The status of the ABAP update process.")
 	m.data.SetUnit("")
 	m.data.SetEmptySum()
 	m.data.Sum().SetIsMonotonic(false)
@@ -319,7 +319,7 @@ func (m *metricSapnetweaverAbapUpdateErrorCount) init() {
 	m.data.Sum().DataPoints().EnsureCapacity(m.capacity)
 }
 
-func (m *metricSapnetweaverAbapUpdateErrorCount) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val int64, controlStateAttributeValue string) {
+func (m *metricSapnetweaverAbapUpdateStatus) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val int64, controlStateAttributeValue string) {
 	if !m.settings.Enabled {
 		return
 	}
@@ -331,14 +331,14 @@ func (m *metricSapnetweaverAbapUpdateErrorCount) recordDataPoint(start pcommon.T
 }
 
 // updateCapacity saves max length of data point slices that will be used for the slice capacity.
-func (m *metricSapnetweaverAbapUpdateErrorCount) updateCapacity() {
+func (m *metricSapnetweaverAbapUpdateStatus) updateCapacity() {
 	if m.data.Sum().DataPoints().Len() > m.capacity {
 		m.capacity = m.data.Sum().DataPoints().Len()
 	}
 }
 
 // emit appends recorded metric data to a metrics slice and prepares it for recording another set of data points.
-func (m *metricSapnetweaverAbapUpdateErrorCount) emit(metrics pmetric.MetricSlice) {
+func (m *metricSapnetweaverAbapUpdateStatus) emit(metrics pmetric.MetricSlice) {
 	if m.settings.Enabled && m.data.Sum().DataPoints().Len() > 0 {
 		m.updateCapacity()
 		m.data.MoveTo(metrics.AppendEmpty())
@@ -346,8 +346,8 @@ func (m *metricSapnetweaverAbapUpdateErrorCount) emit(metrics pmetric.MetricSlic
 	}
 }
 
-func newMetricSapnetweaverAbapUpdateErrorCount(settings MetricSettings) metricSapnetweaverAbapUpdateErrorCount {
-	m := metricSapnetweaverAbapUpdateErrorCount{settings: settings}
+func newMetricSapnetweaverAbapUpdateStatus(settings MetricSettings) metricSapnetweaverAbapUpdateStatus {
+	m := metricSapnetweaverAbapUpdateStatus{settings: settings}
 	if settings.Enabled {
 		m.data = pmetric.NewMetric()
 		m.init()
@@ -521,7 +521,7 @@ type metricSapnetweaverConnectionErrorCount struct {
 func (m *metricSapnetweaverConnectionErrorCount) init() {
 	m.data.SetName("sapnetweaver.connection.error.count")
 	m.data.SetDescription("The amount of connection errors.")
-	m.data.SetUnit("")
+	m.data.SetUnit("{connections}")
 	m.data.SetEmptySum()
 	m.data.Sum().SetIsMonotonic(false)
 	m.data.Sum().SetAggregationTemporality(pmetric.AggregationTemporalityCumulative)
@@ -721,7 +721,7 @@ type metricSapnetweaverHostMemoryVirtualOverhead struct {
 func (m *metricSapnetweaverHostMemoryVirtualOverhead) init() {
 	m.data.SetName("sapnetweaver.host.memory.virtual.overhead")
 	m.data.SetDescription("Virtualization System Memory Overhead.")
-	m.data.SetUnit("bytes")
+	m.data.SetUnit("By")
 	m.data.SetEmptyGauge()
 }
 
@@ -770,7 +770,7 @@ type metricSapnetweaverHostMemoryVirtualSwap struct {
 func (m *metricSapnetweaverHostMemoryVirtualSwap) init() {
 	m.data.SetName("sapnetweaver.host.memory.virtual.swap")
 	m.data.SetDescription("Virtualization System Swap Memory.")
-	m.data.SetUnit("bytes")
+	m.data.SetUnit("By")
 	m.data.SetEmptyGauge()
 }
 
@@ -1072,7 +1072,7 @@ type metricSapnetweaverLocksEnqueueLockTime struct {
 func (m *metricSapnetweaverLocksEnqueueLockTime) init() {
 	m.data.SetName("sapnetweaver.locks.enqueue.lock_time")
 	m.data.SetDescription("The enqueued locks time.")
-	m.data.SetUnit("")
+	m.data.SetUnit("ms")
 	m.data.SetEmptySum()
 	m.data.Sum().SetIsMonotonic(false)
 	m.data.Sum().SetAggregationTemporality(pmetric.AggregationTemporalityCumulative)
@@ -1123,7 +1123,7 @@ type metricSapnetweaverLocksEnqueueLockWaitTime struct {
 func (m *metricSapnetweaverLocksEnqueueLockWaitTime) init() {
 	m.data.SetName("sapnetweaver.locks.enqueue.lock_wait_time")
 	m.data.SetDescription("The enqueued locks wait time.")
-	m.data.SetUnit("")
+	m.data.SetUnit("ms")
 	m.data.SetEmptySum()
 	m.data.Sum().SetIsMonotonic(false)
 	m.data.Sum().SetAggregationTemporality(pmetric.AggregationTemporalityCumulative)
@@ -1590,7 +1590,7 @@ type metricSapnetweaverRequestCount struct {
 func (m *metricSapnetweaverRequestCount) init() {
 	m.data.SetName("sapnetweaver.request.count")
 	m.data.SetDescription("The amount of requests made.")
-	m.data.SetUnit("")
+	m.data.SetUnit("{requests}")
 	m.data.SetEmptySum()
 	m.data.Sum().SetIsMonotonic(false)
 	m.data.Sum().SetAggregationTemporality(pmetric.AggregationTemporalityCumulative)
@@ -1641,7 +1641,7 @@ type metricSapnetweaverRequestTimeoutCount struct {
 func (m *metricSapnetweaverRequestTimeoutCount) init() {
 	m.data.SetName("sapnetweaver.request.timeout.count")
 	m.data.SetDescription("The amount of timed out requests.")
-	m.data.SetUnit("")
+	m.data.SetUnit("{timeouts}")
 	m.data.SetEmptySum()
 	m.data.Sum().SetIsMonotonic(false)
 	m.data.Sum().SetAggregationTemporality(pmetric.AggregationTemporalityCumulative)
@@ -1745,7 +1745,7 @@ type metricSapnetweaverSessionCount struct {
 func (m *metricSapnetweaverSessionCount) init() {
 	m.data.SetName("sapnetweaver.session.count")
 	m.data.SetDescription("The amount of of sessions created.")
-	m.data.SetUnit("")
+	m.data.SetUnit("{sessions}")
 	m.data.SetEmptySum()
 	m.data.Sum().SetIsMonotonic(false)
 	m.data.Sum().SetAggregationTemporality(pmetric.AggregationTemporalityCumulative)
@@ -2051,7 +2051,7 @@ type metricSapnetweaverShortDumpsRate struct {
 func (m *metricSapnetweaverShortDumpsRate) init() {
 	m.data.SetName("sapnetweaver.short_dumps.rate")
 	m.data.SetDescription("The rate of Short Dumps.")
-	m.data.SetUnit("{dumps/min}")
+	m.data.SetUnit("{dumps}/min")
 	m.data.SetEmptySum()
 	m.data.Sum().SetIsMonotonic(false)
 	m.data.Sum().SetAggregationTemporality(pmetric.AggregationTemporalityCumulative)
@@ -2209,7 +2209,7 @@ type metricSapnetweaverWorkProcessActiveCount struct {
 func (m *metricSapnetweaverWorkProcessActiveCount) init() {
 	m.data.SetName("sapnetweaver.work_process.active.count")
 	m.data.SetDescription("The number of free ABAP work processes in the system.")
-	m.data.SetUnit("")
+	m.data.SetUnit("{work_processes}")
 	m.data.SetEmptySum()
 	m.data.Sum().SetIsMonotonic(false)
 	m.data.Sum().SetAggregationTemporality(pmetric.AggregationTemporalityCumulative)
@@ -2263,8 +2263,8 @@ type metricSapnetweaverWorkProcessJobAbortedCount struct {
 // init fills sapnetweaver.work_process.job.aborted.count metric with initial data.
 func (m *metricSapnetweaverWorkProcessJobAbortedCount) init() {
 	m.data.SetName("sapnetweaver.work_process.job.aborted.count")
-	m.data.SetDescription("The individual aborted jobs on an application server; A separate red alert is generated for each of these jobs.")
-	m.data.SetUnit("")
+	m.data.SetDescription("The individual aborted jobs on an application server.")
+	m.data.SetUnit("{aborted jobs}")
 	m.data.SetEmptySum()
 	m.data.Sum().SetIsMonotonic(false)
 	m.data.Sum().SetAggregationTemporality(pmetric.AggregationTemporalityCumulative)
@@ -2314,7 +2314,7 @@ type MetricsBuilder struct {
 	metricsBuffer                                pmetric.Metrics     // accumulates metrics data before emitting.
 	buildInfo                                    component.BuildInfo // contains version information
 	resourceAttributesSettings                   ResourceAttributesSettings
-	metricSapnetweaverAbapUpdateErrorCount       metricSapnetweaverAbapUpdateErrorCount
+	metricSapnetweaverAbapUpdateStatus           metricSapnetweaverAbapUpdateStatus
 	metricSapnetweaverCacheEvictions             metricSapnetweaverCacheEvictions
 	metricSapnetweaverCacheHits                  metricSapnetweaverCacheHits
 	metricSapnetweaverCertificateValidity        metricSapnetweaverCertificateValidity
@@ -2378,7 +2378,7 @@ func NewMetricsBuilder(ms MetricsSettings, settings receiver.CreateSettings, opt
 		metricsBuffer:                                pmetric.NewMetrics(),
 		buildInfo:                                    settings.BuildInfo,
 		resourceAttributesSettings:                   DefaultResourceAttributesSettings(),
-		metricSapnetweaverAbapUpdateErrorCount:       newMetricSapnetweaverAbapUpdateErrorCount(ms.SapnetweaverAbapUpdateErrorCount),
+		metricSapnetweaverAbapUpdateStatus:           newMetricSapnetweaverAbapUpdateStatus(ms.SapnetweaverAbapUpdateStatus),
 		metricSapnetweaverCacheEvictions:             newMetricSapnetweaverCacheEvictions(ms.SapnetweaverCacheEvictions),
 		metricSapnetweaverCacheHits:                  newMetricSapnetweaverCacheHits(ms.SapnetweaverCacheHits),
 		metricSapnetweaverCertificateValidity:        newMetricSapnetweaverCertificateValidity(ms.SapnetweaverCertificateValidity),
@@ -2487,7 +2487,7 @@ func (mb *MetricsBuilder) EmitForResource(rmo ...ResourceMetricsOption) {
 	ils.Scope().SetName("otelcol/sapnetweaverreceiver")
 	ils.Scope().SetVersion(mb.buildInfo.Version)
 	ils.Metrics().EnsureCapacity(mb.metricsCapacity)
-	mb.metricSapnetweaverAbapUpdateErrorCount.emit(ils.Metrics())
+	mb.metricSapnetweaverAbapUpdateStatus.emit(ils.Metrics())
 	mb.metricSapnetweaverCacheEvictions.emit(ils.Metrics())
 	mb.metricSapnetweaverCacheHits.emit(ils.Metrics())
 	mb.metricSapnetweaverCertificateValidity.emit(ils.Metrics())
@@ -2546,9 +2546,9 @@ func (mb *MetricsBuilder) Emit(rmo ...ResourceMetricsOption) pmetric.Metrics {
 	return metrics
 }
 
-// RecordSapnetweaverAbapUpdateErrorCountDataPoint adds a data point to sapnetweaver.abap.update.error.count metric.
-func (mb *MetricsBuilder) RecordSapnetweaverAbapUpdateErrorCountDataPoint(ts pcommon.Timestamp, val int64, controlStateAttributeValue AttributeControlState) {
-	mb.metricSapnetweaverAbapUpdateErrorCount.recordDataPoint(mb.startTime, ts, val, controlStateAttributeValue.String())
+// RecordSapnetweaverAbapUpdateStatusDataPoint adds a data point to sapnetweaver.abap.update.status metric.
+func (mb *MetricsBuilder) RecordSapnetweaverAbapUpdateStatusDataPoint(ts pcommon.Timestamp, val int64, controlStateAttributeValue AttributeControlState) {
+	mb.metricSapnetweaverAbapUpdateStatus.recordDataPoint(mb.startTime, ts, val, controlStateAttributeValue.String())
 }
 
 // RecordSapnetweaverCacheEvictionsDataPoint adds a data point to sapnetweaver.cache.evictions metric.

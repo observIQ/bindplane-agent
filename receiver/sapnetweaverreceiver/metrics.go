@@ -453,7 +453,7 @@ func (s *sapNetweaverScraper) recordSapnetweaverSessionCountDataPoint(now pcommo
 	}
 }
 
-func (s *sapNetweaverScraper) recordSapnetweaverAbapUpdateErrorCountDataPoint(now pcommon.Timestamp, alertTreeResponse map[string]string, errs *scrapererror.ScrapeErrors) {
+func (s *sapNetweaverScraper) recordSapnetweaverAbapUpdateStatusDataPoint(now pcommon.Timestamp, alertTreeResponse map[string]string, errs *scrapererror.ScrapeErrors) {
 	metricName := "AbapErrorInUpdate"
 	val, ok := alertTreeResponse[metricName]
 	if !ok {
@@ -471,10 +471,10 @@ func (s *sapNetweaverScraper) recordSapnetweaverAbapUpdateErrorCountDataPoint(no
 	case models.StateColorRed:
 		red = 1
 	}
-	s.mb.RecordSapnetweaverAbapUpdateErrorCountDataPoint(now, gray, metadata.AttributeControlStateGray)
-	s.mb.RecordSapnetweaverAbapUpdateErrorCountDataPoint(now, green, metadata.AttributeControlStateGreen)
-	s.mb.RecordSapnetweaverAbapUpdateErrorCountDataPoint(now, yellow, metadata.AttributeControlStateYellow)
-	s.mb.RecordSapnetweaverAbapUpdateErrorCountDataPoint(now, red, metadata.AttributeControlStateRed)
+	s.mb.RecordSapnetweaverAbapUpdateStatusDataPoint(now, gray, metadata.AttributeControlStateGray)
+	s.mb.RecordSapnetweaverAbapUpdateStatusDataPoint(now, green, metadata.AttributeControlStateGreen)
+	s.mb.RecordSapnetweaverAbapUpdateStatusDataPoint(now, yellow, metadata.AttributeControlStateYellow)
+	s.mb.RecordSapnetweaverAbapUpdateStatusDataPoint(now, red, metadata.AttributeControlStateRed)
 }
 
 func (s *sapNetweaverScraper) recordSapnetweaverResponseDurationDataPoint(now pcommon.Timestamp, alertTreeResponse map[string]string, errs *scrapererror.ScrapeErrors) {

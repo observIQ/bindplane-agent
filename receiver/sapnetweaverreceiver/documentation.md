@@ -12,9 +12,9 @@ metrics:
     enabled: false
 ```
 
-### sapnetweaver.abap.update.error.count
+### sapnetweaver.abap.update.status
 
-The amount of ABAP errors in update.
+The status of the ABAP update process.
 
 Collected from SAPControl Web Service Interface > GetAlertTree > R3Services > Update > Update > AbapErrorInUpdate.
 
@@ -75,7 +75,7 @@ Collected from SAPControl Web Service Interface > GetAlertTree > R3Services > IC
 
 | Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
 | ---- | ----------- | ---------- | ----------------------- | --------- |
-|  | Sum | Int | Cumulative | false |
+| {connections} | Sum | Int | Cumulative | false |
 
 ### sapnetweaver.cpu.system.utilization
 
@@ -115,7 +115,7 @@ Collected from SAPControl Web Service Interface > GetAlertTree > Filesystems > M
 
 | Unit | Metric Type | Value Type |
 | ---- | ----------- | ---------- |
-| bytes | Gauge | Int |
+| By | Gauge | Int |
 
 ### sapnetweaver.host.memory.virtual.swap
 
@@ -125,7 +125,7 @@ Collected from SAPControl Web Service Interface > GetAlertTree > FileSystems > M
 
 | Unit | Metric Type | Value Type |
 | ---- | ----------- | ---------- |
-| bytes | Gauge | Int |
+| By | Gauge | Int |
 
 ### sapnetweaver.host.spool_list.utilization
 
@@ -185,7 +185,7 @@ Collected from SAPControl Web Service Interface > EnqGetStatistic.
 
 | Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
 | ---- | ----------- | ---------- | ----------------------- | --------- |
-|  | Sum | Int | Cumulative | false |
+| ms | Sum | Int | Cumulative | false |
 
 ### sapnetweaver.locks.enqueue.lock_wait_time
 
@@ -195,7 +195,7 @@ Collected from SAPControl Web Service Interface > EnqGetStatistic.
 
 | Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
 | ---- | ----------- | ---------- | ----------------------- | --------- |
-|  | Sum | Int | Cumulative | false |
+| ms | Sum | Int | Cumulative | false |
 
 ### sapnetweaver.locks.enqueue.max.count
 
@@ -311,7 +311,7 @@ Collected from SAPControl Web Service Interface > GetAlertTree > R3Services > IC
 
 | Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
 | ---- | ----------- | ---------- | ----------------------- | --------- |
-|  | Sum | Int | Cumulative | false |
+| {requests} | Sum | Int | Cumulative | false |
 
 ### sapnetweaver.request.timeout.count
 
@@ -321,7 +321,7 @@ Collected from SAPControl Web Service Interface > GetAlertTree > R3Services > IC
 
 | Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
 | ---- | ----------- | ---------- | ----------------------- | --------- |
-|  | Sum | Int | Cumulative | false |
+| {timeouts} | Sum | Int | Cumulative | false |
 
 ### sapnetweaver.response.duration
 
@@ -345,7 +345,7 @@ Collected from SAPControl Web Service Interface > GetAlertTree > R3ServiceS > IT
 
 | Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
 | ---- | ----------- | ---------- | ----------------------- | --------- |
-|  | Sum | Int | Cumulative | false |
+| {sessions} | Sum | Int | Cumulative | false |
 
 ### sapnetweaver.sessions.browser.count
 
@@ -405,7 +405,7 @@ Collected from SAPControl Web Service Interface > GetAlertTree > R3Abap > Shortd
 
 | Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
 | ---- | ----------- | ---------- | ----------------------- | --------- |
-| {dumps/min} | Sum | Int | Cumulative | false |
+| {dumps}/min | Sum | Int | Cumulative | false |
 
 ### sapnetweaver.spool.request.error.count
 
@@ -444,7 +444,7 @@ Collected from SAPControl Web Service Interface > ABAPGetSystemWPTable.
 
 | Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
 | ---- | ----------- | ---------- | ----------------------- | --------- |
-|  | Sum | Int | Cumulative | false |
+| {work_processes} | Sum | Int | Cumulative | false |
 
 #### Attributes
 
@@ -456,13 +456,13 @@ Collected from SAPControl Web Service Interface > ABAPGetSystemWPTable.
 
 ### sapnetweaver.work_process.job.aborted.count
 
-The individual aborted jobs on an application server; A separate red alert is generated for each of these jobs.
+The individual aborted jobs on an application server.
 
 Collected from SAPControl Web Service Interface > GetAlertTree > R3Services > Background > AbortedJobs.
 
 | Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
 | ---- | ----------- | ---------- | ----------------------- | --------- |
-|  | Sum | Int | Cumulative | false |
+| {aborted jobs} | Sum | Int | Cumulative | false |
 
 ## Resource Attributes
 

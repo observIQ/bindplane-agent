@@ -205,7 +205,7 @@ func (s *sapNetweaverScraper) collectGetAlertTree(_ context.Context, now pcommon
 	s.recordSapnetweaverMemoryConfiguredDataPoint(now, alertTreeResponse, errs)
 	s.recordSapnetweaverMemoryFreeDataPoint(now, alertTreeResponse, errs)
 	s.recordSapnetweaverSessionCountDataPoint(now, alertTreeResponse, errs)
-	s.recordSapnetweaverAbapUpdateErrorCountDataPoint(now, alertTreeResponse, errs)
+	s.recordSapnetweaverAbapUpdateStatusDataPoint(now, alertTreeResponse, errs)
 	s.recordSapnetweaverResponseDurationDataPoint(now, alertTreeResponse, errs)
 	s.recordSapnetweaverRequestCountDataPoint(now, alertTreeResponse, errs)
 	s.recordSapnetweaverRequestTimeoutCountDataPoint(now, alertTreeResponse, errs)

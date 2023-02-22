@@ -1,6 +1,6 @@
 default:
 all_metrics:
-  sapnetweaver.abap.update.error.count:
+  sapnetweaver.abap.update.status:
     enabled: true
   sapnetweaver.cache.evictions:
     enabled: true
@@ -79,7 +79,7 @@ all_metrics:
   sapnetweaver.work_process.job.aborted.count:
     enabled: true
 no_metrics:
-  sapnetweaver.abap.update.error.count:
+  sapnetweaver.abap.update.status:
     enabled: false
   sapnetweaver.cache.evictions:
     enabled: false
