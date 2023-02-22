@@ -35,9 +35,8 @@ const (
 )
 
 var (
-	errValueNotFound     = errors.New("value not found")
-	errValueHyphen       = errors.New("'-' value found")
-	errInvalidStateColor = errors.New("invalid control state color value")
+	errValueNotFound = errors.New("value not found")
+	errValueHyphen   = errors.New("'-' value found")
 )
 
 func (s *sapNetweaverScraper) recordSapnetweaverSystemInstanceAvailabilityDataPoint(now pcommon.Timestamp, systemInstanceListResponse *models.GetSystemInstanceListResponse, errs *scrapererror.ScrapeErrors) {

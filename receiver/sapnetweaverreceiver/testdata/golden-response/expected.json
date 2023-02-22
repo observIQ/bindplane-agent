@@ -4037,7 +4037,7 @@
                            }
                         ]
                      },
-                     "unit": "{aborted jobs}"
+                     "unit": "{aborted_jobs}"
                   }
                ],
                "scope": {

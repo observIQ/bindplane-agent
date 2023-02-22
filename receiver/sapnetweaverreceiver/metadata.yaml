@@ -393,7 +393,7 @@ metrics:
   sapnetweaver.work_process.job.aborted.count:
     description: The individual aborted jobs on an application server.
     extended_documentation: Collected from SAPControl Web Service Interface > GetAlertTree > R3Services > Background > AbortedJobs.
-    unit: "{aborted jobs}"
+    unit: "{aborted_jobs}"
     sum:
       monotonic: false
       aggregation: cumulative

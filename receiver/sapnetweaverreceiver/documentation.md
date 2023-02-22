@@ -462,7 +462,7 @@ Collected from SAPControl Web Service Interface > GetAlertTree > R3Services > Ba
 
 | Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
 | ---- | ----------- | ---------- | ----------------------- | --------- |
-| {aborted jobs} | Sum | Int | Cumulative | false |
+| {aborted_jobs} | Sum | Int | Cumulative | false |
 
 ## Resource Attributes
 

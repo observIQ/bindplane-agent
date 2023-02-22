@@ -2264,7 +2264,7 @@ type metricSapnetweaverWorkProcessJobAbortedCount struct {
 func (m *metricSapnetweaverWorkProcessJobAbortedCount) init() {
 	m.data.SetName("sapnetweaver.work_process.job.aborted.count")
 	m.data.SetDescription("The individual aborted jobs on an application server.")
-	m.data.SetUnit("{aborted jobs}")
+	m.data.SetUnit("{aborted_jobs}")
 	m.data.SetEmptySum()
 	m.data.Sum().SetIsMonotonic(false)
 	m.data.Sum().SetAggregationTemporality(pmetric.AggregationTemporalityCumulative)
