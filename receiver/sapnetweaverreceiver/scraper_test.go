@@ -16,7 +16,6 @@ package sapnetweaverreceiver // import "github.com/observiq/observiq-otel-collec
 
 import (
 	"context"
-	"encoding/json"
 	"encoding/xml"
 	"errors"
 	"os"
@@ -337,36 +336,4 @@ func ReadMetrics(filePath string) (pmetric.Metrics, error) {
 	}
 	unmarshaller := &pmetric.JSONUnmarshaler{}
 	return unmarshaller.UnmarshalMetrics(expectedFileBytes)
-}
-
-// WriteMetrics writes a pmetric.Metrics to the specified file
-func WriteMetrics(t *testing.T, filePath string, metrics pmetric.Metrics) error {
-	if err := writeMetrics(filePath, metrics); err != nil {
-		return err
-	}
-	t.Logf("Golden file successfully written to %s.", filePath)
-	t.Log("NOTE: The WriteMetrics call must be removed in order to pass the test.")
-	t.Fail()
-	return nil
-}
-
-func writeMetrics(filePath string, metrics pmetric.Metrics) error {
-	unmarshaler := &pmetric.JSONMarshaler{}
-	fileBytes, err := unmarshaler.MarshalMetrics(metrics)
-	if err != nil {
-		return err
-	}
-	var jsonVal map[string]interface{}
-	if err = json.Unmarshal(fileBytes, &jsonVal); err != nil {
-		return err
-	}
-	b, err := json.MarshalIndent(jsonVal, "", "   ")
-	if err != nil {
-		return err
-	}
-	b = append(b, []byte("\n")...)
-	if err := os.WriteFile(filePath, b, 0600); err != nil {
-		return err
-	}
-	return nil
 }
