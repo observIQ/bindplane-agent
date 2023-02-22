@@ -239,7 +239,7 @@ type AttributeControlState int
 
 const (
 	_ AttributeControlState = iota
-	AttributeControlStateGrey
+	AttributeControlStateGray
 	AttributeControlStateGreen
 	AttributeControlStateYellow
 	AttributeControlStateRed
@@ -248,8 +248,8 @@ const (
 // String returns the string representation of the AttributeControlState.
 func (av AttributeControlState) String() string {
 	switch av {
-	case AttributeControlStateGrey:
-		return "grey"
+	case AttributeControlStateGray:
+		return "gray"
 	case AttributeControlStateGreen:
 		return "green"
 	case AttributeControlStateYellow:
@@ -262,7 +262,7 @@ func (av AttributeControlState) String() string {
 
 // MapAttributeControlState is a helper map of string to AttributeControlState attribute value.
 var MapAttributeControlState = map[string]AttributeControlState{
-	"grey":   AttributeControlStateGrey,
+	"gray":   AttributeControlStateGray,
 	"green":  AttributeControlStateGreen,
 	"yellow": AttributeControlStateYellow,
 	"red":    AttributeControlStateRed,

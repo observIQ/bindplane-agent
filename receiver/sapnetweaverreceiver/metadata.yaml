@@ -37,7 +37,7 @@ attributes:
     name_override: "state"
     description: The control state color.
     enum:
-    - grey
+    - gray
     - green
     - yellow
     - red

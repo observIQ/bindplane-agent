@@ -51,30 +51,22 @@ func (s *sapNetweaverScraper) recordSapnetweaverSystemInstanceAvailabilityDataPo
 	for _, response := range systemInstanceListResponse.Instance.Item {
 		featureList := strings.Split(response.Features, "|")
 		for _, feature := range featureList {
+			var gray, green, yellow, red int64
 			switch models.StateColor(response.Dispstatus) {
 			case models.StateColorGray:
-				s.mb.RecordSapnetweaverSystemInstanceAvailabilityDataPoint(now, 1, response.Hostname, int64(response.InstanceNr), feature, metadata.AttributeControlStateGrey)
-				s.mb.RecordSapnetweaverSystemInstanceAvailabilityDataPoint(now, 0, response.Hostname, int64(response.InstanceNr), feature, metadata.AttributeControlStateGreen)
-				s.mb.RecordSapnetweaverSystemInstanceAvailabilityDataPoint(now, 0, response.Hostname, int64(response.InstanceNr), feature, metadata.AttributeControlStateYellow)
-				s.mb.RecordSapnetweaverSystemInstanceAvailabilityDataPoint(now, 0, response.Hostname, int64(response.InstanceNr), feature, metadata.AttributeControlStateRed)
+				gray = 1
 			case models.StateColorGreen:
-				s.mb.RecordSapnetweaverSystemInstanceAvailabilityDataPoint(now, 0, response.Hostname, int64(response.InstanceNr), feature, metadata.AttributeControlStateGrey)
-				s.mb.RecordSapnetweaverSystemInstanceAvailabilityDataPoint(now, 1, response.Hostname, int64(response.InstanceNr), feature, metadata.AttributeControlStateGreen)
-				s.mb.RecordSapnetweaverSystemInstanceAvailabilityDataPoint(now, 0, response.Hostname, int64(response.InstanceNr), feature, metadata.AttributeControlStateYellow)
-				s.mb.RecordSapnetweaverSystemInstanceAvailabilityDataPoint(now, 0, response.Hostname, int64(response.InstanceNr), feature, metadata.AttributeControlStateRed)
+				green = 1
 			case models.StateColorYellow:
-				s.mb.RecordSapnetweaverSystemInstanceAvailabilityDataPoint(now, 0, response.Hostname, int64(response.InstanceNr), feature, metadata.AttributeControlStateGrey)
-				s.mb.RecordSapnetweaverSystemInstanceAvailabilityDataPoint(now, 0, response.Hostname, int64(response.InstanceNr), feature, metadata.AttributeControlStateGreen)
-				s.mb.RecordSapnetweaverSystemInstanceAvailabilityDataPoint(now, 1, response.Hostname, int64(response.InstanceNr), feature, metadata.AttributeControlStateYellow)
-				s.mb.RecordSapnetweaverSystemInstanceAvailabilityDataPoint(now, 0, response.Hostname, int64(response.InstanceNr), feature, metadata.AttributeControlStateRed)
+				yellow = 1
 			case models.StateColorRed:
-				s.mb.RecordSapnetweaverSystemInstanceAvailabilityDataPoint(now, 0, response.Hostname, int64(response.InstanceNr), feature, metadata.AttributeControlStateGrey)
-				s.mb.RecordSapnetweaverSystemInstanceAvailabilityDataPoint(now, 0, response.Hostname, int64(response.InstanceNr), feature, metadata.AttributeControlStateGreen)
-				s.mb.RecordSapnetweaverSystemInstanceAvailabilityDataPoint(now, 0, response.Hostname, int64(response.InstanceNr), feature, metadata.AttributeControlStateYellow)
-				s.mb.RecordSapnetweaverSystemInstanceAvailabilityDataPoint(now, 1, response.Hostname, int64(response.InstanceNr), feature, metadata.AttributeControlStateRed)
-			default:
-				errs.AddPartial(1, fmt.Errorf("invalid control state color value for %s: %s", metricName, response.Dispstatus))
+				red = 1
 			}
+
+			s.mb.RecordSapnetweaverSystemInstanceAvailabilityDataPoint(now, gray, response.Hostname, int64(response.InstanceNr), feature, metadata.AttributeControlStateGray)
+			s.mb.RecordSapnetweaverSystemInstanceAvailabilityDataPoint(now, green, response.Hostname, int64(response.InstanceNr), feature, metadata.AttributeControlStateGreen)
+			s.mb.RecordSapnetweaverSystemInstanceAvailabilityDataPoint(now, yellow, response.Hostname, int64(response.InstanceNr), feature, metadata.AttributeControlStateYellow)
+			s.mb.RecordSapnetweaverSystemInstanceAvailabilityDataPoint(now, red, response.Hostname, int64(response.InstanceNr), feature, metadata.AttributeControlStateRed)
 		}
 	}
 }
@@ -88,30 +80,21 @@ func (s *sapNetweaverScraper) recordSapnetweaverProcessAvailabilityDataPoint(now
 	}
 
 	for _, response := range processListResponse.Process.Item {
+		var gray, green, yellow, red int64
 		switch models.StateColor(*response.Dispstatus) {
 		case models.StateColorGray:
-			s.mb.RecordSapnetweaverProcessAvailabilityDataPoint(now, 1, response.Name, response.Description, metadata.AttributeControlStateGrey)
-			s.mb.RecordSapnetweaverProcessAvailabilityDataPoint(now, 0, response.Name, response.Description, metadata.AttributeControlStateGreen)
-			s.mb.RecordSapnetweaverProcessAvailabilityDataPoint(now, 0, response.Name, response.Description, metadata.AttributeControlStateYellow)
-			s.mb.RecordSapnetweaverProcessAvailabilityDataPoint(now, 0, response.Name, response.Description, metadata.AttributeControlStateRed)
+			gray = 1
 		case models.StateColorGreen:
-			s.mb.RecordSapnetweaverProcessAvailabilityDataPoint(now, 0, response.Name, response.Description, metadata.AttributeControlStateGrey)
-			s.mb.RecordSapnetweaverProcessAvailabilityDataPoint(now, 1, response.Name, response.Description, metadata.AttributeControlStateGreen)
-			s.mb.RecordSapnetweaverProcessAvailabilityDataPoint(now, 0, response.Name, response.Description, metadata.AttributeControlStateYellow)
-			s.mb.RecordSapnetweaverProcessAvailabilityDataPoint(now, 0, response.Name, response.Description, metadata.AttributeControlStateRed)
+			green = 1
 		case models.StateColorYellow:
-			s.mb.RecordSapnetweaverProcessAvailabilityDataPoint(now, 0, response.Name, response.Description, metadata.AttributeControlStateGrey)
-			s.mb.RecordSapnetweaverProcessAvailabilityDataPoint(now, 0, response.Name, response.Description, metadata.AttributeControlStateGreen)
-			s.mb.RecordSapnetweaverProcessAvailabilityDataPoint(now, 1, response.Name, response.Description, metadata.AttributeControlStateYellow)
-			s.mb.RecordSapnetweaverProcessAvailabilityDataPoint(now, 0, response.Name, response.Description, metadata.AttributeControlStateRed)
+			yellow = 1
 		case models.StateColorRed:
-			s.mb.RecordSapnetweaverProcessAvailabilityDataPoint(now, 0, response.Name, response.Description, metadata.AttributeControlStateGrey)
-			s.mb.RecordSapnetweaverProcessAvailabilityDataPoint(now, 0, response.Name, response.Description, metadata.AttributeControlStateGreen)
-			s.mb.RecordSapnetweaverProcessAvailabilityDataPoint(now, 0, response.Name, response.Description, metadata.AttributeControlStateYellow)
-			s.mb.RecordSapnetweaverProcessAvailabilityDataPoint(now, 1, response.Name, response.Description, metadata.AttributeControlStateRed)
-		default:
-			errs.AddPartial(1, fmt.Errorf(collectMetricError, metricName, errInvalidStateColor))
+			red = 1
 		}
+		s.mb.RecordSapnetweaverProcessAvailabilityDataPoint(now, gray, response.Name, response.Description, metadata.AttributeControlStateGray)
+		s.mb.RecordSapnetweaverProcessAvailabilityDataPoint(now, green, response.Name, response.Description, metadata.AttributeControlStateGreen)
+		s.mb.RecordSapnetweaverProcessAvailabilityDataPoint(now, yellow, response.Name, response.Description, metadata.AttributeControlStateYellow)
+		s.mb.RecordSapnetweaverProcessAvailabilityDataPoint(now, red, response.Name, response.Description, metadata.AttributeControlStateRed)
 	}
 }
 
@@ -477,31 +460,21 @@ func (s *sapNetweaverScraper) recordSapnetweaverAbapUpdateErrorCountDataPoint(no
 		errs.AddPartial(1, fmt.Errorf(collectMetricError, metricName, errValueNotFound))
 		return
 	}
-
-	switch models.StateColor(val) {
+	var gray, green, yellow, red int64
+	switch models.StateColor(models.StateColor(val)) {
 	case models.StateColorGray:
-		s.mb.RecordSapnetweaverAbapUpdateErrorCountDataPoint(now, 1, metadata.AttributeControlStateGrey)
-		s.mb.RecordSapnetweaverAbapUpdateErrorCountDataPoint(now, 0, metadata.AttributeControlStateGreen)
-		s.mb.RecordSapnetweaverAbapUpdateErrorCountDataPoint(now, 0, metadata.AttributeControlStateYellow)
-		s.mb.RecordSapnetweaverAbapUpdateErrorCountDataPoint(now, 0, metadata.AttributeControlStateRed)
+		gray = 1
 	case models.StateColorGreen:
-		s.mb.RecordSapnetweaverAbapUpdateErrorCountDataPoint(now, 0, metadata.AttributeControlStateGrey)
-		s.mb.RecordSapnetweaverAbapUpdateErrorCountDataPoint(now, 1, metadata.AttributeControlStateGreen)
-		s.mb.RecordSapnetweaverAbapUpdateErrorCountDataPoint(now, 0, metadata.AttributeControlStateYellow)
-		s.mb.RecordSapnetweaverAbapUpdateErrorCountDataPoint(now, 0, metadata.AttributeControlStateRed)
+		green = 1
 	case models.StateColorYellow:
-		s.mb.RecordSapnetweaverAbapUpdateErrorCountDataPoint(now, 0, metadata.AttributeControlStateGrey)
-		s.mb.RecordSapnetweaverAbapUpdateErrorCountDataPoint(now, 0, metadata.AttributeControlStateGreen)
-		s.mb.RecordSapnetweaverAbapUpdateErrorCountDataPoint(now, 1, metadata.AttributeControlStateYellow)
-		s.mb.RecordSapnetweaverAbapUpdateErrorCountDataPoint(now, 0, metadata.AttributeControlStateRed)
+		yellow = 1
 	case models.StateColorRed:
-		s.mb.RecordSapnetweaverAbapUpdateErrorCountDataPoint(now, 0, metadata.AttributeControlStateGrey)
-		s.mb.RecordSapnetweaverAbapUpdateErrorCountDataPoint(now, 0, metadata.AttributeControlStateGreen)
-		s.mb.RecordSapnetweaverAbapUpdateErrorCountDataPoint(now, 0, metadata.AttributeControlStateYellow)
-		s.mb.RecordSapnetweaverAbapUpdateErrorCountDataPoint(now, 1, metadata.AttributeControlStateRed)
-	default:
-		errs.AddPartial(1, fmt.Errorf(collectMetricError, metricName, errInvalidStateColor))
+		red = 1
 	}
+	s.mb.RecordSapnetweaverAbapUpdateErrorCountDataPoint(now, gray, metadata.AttributeControlStateGray)
+	s.mb.RecordSapnetweaverAbapUpdateErrorCountDataPoint(now, green, metadata.AttributeControlStateGreen)
+	s.mb.RecordSapnetweaverAbapUpdateErrorCountDataPoint(now, yellow, metadata.AttributeControlStateYellow)
+	s.mb.RecordSapnetweaverAbapUpdateErrorCountDataPoint(now, red, metadata.AttributeControlStateRed)
 }
 
 func (s *sapNetweaverScraper) recordSapnetweaverResponseDurationDataPoint(now pcommon.Timestamp, alertTreeResponse map[string]string, errs *scrapererror.ScrapeErrors) {

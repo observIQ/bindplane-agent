@@ -26,7 +26,7 @@ Collected from SAPControl Web Service Interface > GetAlertTree > R3Services > Up
 
 | Name | Description | Values |
 | ---- | ----------- | ------ |
-| state | The control state color. | Str: ``grey``, ``green``, ``yellow``, ``red`` |
+| state | The control state color. | Str: ``gray``, ``green``, ``yellow``, ``red`` |
 
 ### sapnetweaver.cache.evictions
 
@@ -253,7 +253,7 @@ Collected from SAPControl Web Service Interface > GetProcessList.
 | ---- | ----------- | ------ |
 | process_name | The name value from GetProcessList. | Any Str |
 | process_description | The description value from GetProcessList. | Any Str |
-| state | The control state color. | Str: ``grey``, ``green``, ``yellow``, ``red`` |
+| state | The control state color. | Str: ``gray``, ``green``, ``yellow``, ``red`` |
 
 ### sapnetweaver.queue.count
 
@@ -434,7 +434,7 @@ Collected from SAPControl Web Service Interface > GetSystemInstanceList.
 | hostname | The SAP hostname. | Any Str |
 | instance_number | The instance number | Any Int |
 | feature | The service availability. | Any Str |
-| state | The control state color. | Str: ``grey``, ``green``, ``yellow``, ``red`` |
+| state | The control state color. | Str: ``gray``, ``green``, ``yellow``, ``red`` |
 
 ### sapnetweaver.work_process.active.count
 

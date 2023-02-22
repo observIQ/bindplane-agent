@@ -269,7 +269,7 @@ func TestMetricsBuilder(t *testing.T) {
 					assert.Equal(t, int64(1), dp.IntValue())
 					attrVal, ok := dp.Attributes().Get("state")
 					assert.True(t, ok)
-					assert.Equal(t, "grey", attrVal.Str())
+					assert.Equal(t, "gray", attrVal.Str())
 				case "sapnetweaver.cache.evictions":
 					assert.False(t, validatedMetrics["sapnetweaver.cache.evictions"], "Found a duplicate in the metrics slice: sapnetweaver.cache.evictions")
 					validatedMetrics["sapnetweaver.cache.evictions"] = true
@@ -570,7 +570,7 @@ func TestMetricsBuilder(t *testing.T) {
 					assert.EqualValues(t, "attr-val", attrVal.Str())
 					attrVal, ok = dp.Attributes().Get("state")
 					assert.True(t, ok)
-					assert.Equal(t, "grey", attrVal.Str())
+					assert.Equal(t, "gray", attrVal.Str())
 				case "sapnetweaver.queue.count":
 					assert.False(t, validatedMetrics["sapnetweaver.queue.count"], "Found a duplicate in the metrics slice: sapnetweaver.queue.count")
 					validatedMetrics["sapnetweaver.queue.count"] = true
@@ -804,7 +804,7 @@ func TestMetricsBuilder(t *testing.T) {
 					assert.EqualValues(t, "attr-val", attrVal.Str())
 					attrVal, ok = dp.Attributes().Get("state")
 					assert.True(t, ok)
-					assert.Equal(t, "grey", attrVal.Str())
+					assert.Equal(t, "gray", attrVal.Str())
 				case "sapnetweaver.work_process.active.count":
 					assert.False(t, validatedMetrics["sapnetweaver.work_process.active.count"], "Found a duplicate in the metrics slice: sapnetweaver.work_process.active.count")
 					validatedMetrics["sapnetweaver.work_process.active.count"] = true

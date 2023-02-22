@@ -35,7 +35,7 @@ type EnqGetStatistic struct {
 // GetSystemInstanceList is an xml request struct used to return a response struct
 type GetSystemInstanceList struct {
 	XMLName xml.Name `xml:"urn:SAPControl GetSystemInstanceList"`
-	Timeout int32    `xml:"timeout,omitempty" json:"timeout,omitempty"`
+	Timeout int32    `xml:"timeout" json:"timeout"`
 }
 
 // GetProcessList is an xml request struct used to return a response struct
@@ -51,7 +51,7 @@ type GetQueueStatistic struct {
 // ABAPGetSystemWPTable is an xml request struct used to return a response struct
 type ABAPGetSystemWPTable struct {
 	XMLName    xml.Name `xml:"urn:SAPControl ABAPGetSystemWPTable"`
-	Activeonly bool     `xml:"activeonly,omitempty" json:"activeonly,omitempty"`
+	Activeonly bool     `xml:"activeonly" json:"activeonly"`
 }
 
 // GetRequestLogFile is an xml request struct used to return a response struct
@@ -62,8 +62,8 @@ type GetRequestLogFile struct {
 // OSExecute is an xml request struct used to return a response struct
 type OSExecute struct {
 	XMLName      xml.Name `xml:"urn:SAPControl OSExecute"`
-	Command      string   `xml:"command,omitempty" json:"command,omitempty"`
-	Async        int32    `xml:"async,omitempty" json:"async,omitempty"`
-	Timeout      int32    `xml:"timeout,omitempty" json:"timeout,omitempty"`
-	Protocolfile string   `xml:"protocolfile,omitempty" json:"protocolfile,omitempty"`
+	Command      string   `xml:"command" json:"command"`
+	Async        int32    `xml:"async" json:"async"`
+	Timeout      int32    `xml:"timeout" json:"timeout"`
+	Protocolfile string   `xml:"protocolfile" json:"protocolfile"`
 }
