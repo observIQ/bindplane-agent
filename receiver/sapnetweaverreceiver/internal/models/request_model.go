@@ -27,7 +27,43 @@ type GetAlertTree struct {
 	XMLName xml.Name `xml:"urn:SAPControl GetAlertTree"`
 }
 
-// EnqGetLockTable is an xml request struct used to return a response struct
-type EnqGetLockTable struct {
-	XMLName xml.Name `xml:"urn:SAPControl EnqGetLockTable"`
+// EnqGetStatistic is an xml request struct used to return a response struct
+type EnqGetStatistic struct {
+	XMLName xml.Name `xml:"urn:SAPControl EnqGetStatistic"`
+}
+
+// GetSystemInstanceList is an xml request struct used to return a response struct
+type GetSystemInstanceList struct {
+	XMLName xml.Name `xml:"urn:SAPControl GetSystemInstanceList"`
+	Timeout int32    `xml:"timeout,omitempty" json:"timeout,omitempty"`
+}
+
+// GetProcessList is an xml request struct used to return a response struct
+type GetProcessList struct {
+	XMLName xml.Name `xml:"urn:SAPControl GetProcessList"`
+}
+
+// GetQueueStatistic is an xml request struct used to return a response struct
+type GetQueueStatistic struct {
+	XMLName xml.Name `xml:"urn:SAPControl GetQueueStatistic"`
+}
+
+// ABAPGetSystemWPTable is an xml request struct used to return a response struct
+type ABAPGetSystemWPTable struct {
+	XMLName    xml.Name `xml:"urn:SAPControl ABAPGetSystemWPTable"`
+	Activeonly bool     `xml:"activeonly,omitempty" json:"activeonly,omitempty"`
+}
+
+// GetRequestLogFile is an xml request struct used to return a response struct
+type GetRequestLogFile struct {
+	XMLName xml.Name `xml:"urn:SAPControl GetRequestLogFile"`
+}
+
+// OSExecute is an xml request struct used to return a response struct
+type OSExecute struct {
+	XMLName      xml.Name `xml:"urn:SAPControl OSExecute"`
+	Command      string   `xml:"command,omitempty" json:"command,omitempty"`
+	Async        int32    `xml:"async,omitempty" json:"async,omitempty"`
+	Timeout      int32    `xml:"timeout,omitempty" json:"timeout,omitempty"`
+	Protocolfile string   `xml:"protocolfile,omitempty" json:"protocolfile,omitempty"`
 }

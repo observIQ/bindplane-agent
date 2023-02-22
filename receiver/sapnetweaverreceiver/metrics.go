@@ -40,37 +40,128 @@ var (
 	errInvalidStateColor = errors.New("invalid control state color value")
 )
 
-func (s *sapNetweaverScraper) recordSapnetweaverWorkProcessesActiveCount(now pcommon.Timestamp, alertTreeResponse map[string]string, errs *scrapererror.ScrapeErrors) {
-	metricName := "Total Number of Work Processes"
+func (s *sapNetweaverScraper) recordSapnetweaverSystemInstanceAvailabilityDataPoint(now pcommon.Timestamp, systemInstanceListResponse *models.GetSystemInstanceListResponse, errs *scrapererror.ScrapeErrors) {
+	metricName := "Service Availability"
+	if systemInstanceListResponse.Instance == nil {
+		err := formatErrorMsg(metricName, "", errValueNotFound)
+		errs.AddPartial(1, err)
+		return
+	}
+
+	for _, response := range systemInstanceListResponse.Instance.Item {
+		featureList := strings.Split(response.Features, "|")
+		for _, feature := range featureList {
+			switch models.StateColor(response.Dispstatus) {
+			case models.StateColorGray:
+				s.mb.RecordSapnetweaverSystemInstanceAvailabilityDataPoint(now, 1, response.Hostname, int64(response.InstanceNr), feature, metadata.AttributeControlStateGrey)
+				s.mb.RecordSapnetweaverSystemInstanceAvailabilityDataPoint(now, 0, response.Hostname, int64(response.InstanceNr), feature, metadata.AttributeControlStateGreen)
+				s.mb.RecordSapnetweaverSystemInstanceAvailabilityDataPoint(now, 0, response.Hostname, int64(response.InstanceNr), feature, metadata.AttributeControlStateYellow)
+				s.mb.RecordSapnetweaverSystemInstanceAvailabilityDataPoint(now, 0, response.Hostname, int64(response.InstanceNr), feature, metadata.AttributeControlStateRed)
+			case models.StateColorGreen:
+				s.mb.RecordSapnetweaverSystemInstanceAvailabilityDataPoint(now, 0, response.Hostname, int64(response.InstanceNr), feature, metadata.AttributeControlStateGrey)
+				s.mb.RecordSapnetweaverSystemInstanceAvailabilityDataPoint(now, 1, response.Hostname, int64(response.InstanceNr), feature, metadata.AttributeControlStateGreen)
+				s.mb.RecordSapnetweaverSystemInstanceAvailabilityDataPoint(now, 0, response.Hostname, int64(response.InstanceNr), feature, metadata.AttributeControlStateYellow)
+				s.mb.RecordSapnetweaverSystemInstanceAvailabilityDataPoint(now, 0, response.Hostname, int64(response.InstanceNr), feature, metadata.AttributeControlStateRed)
+			case models.StateColorYellow:
+				s.mb.RecordSapnetweaverSystemInstanceAvailabilityDataPoint(now, 0, response.Hostname, int64(response.InstanceNr), feature, metadata.AttributeControlStateGrey)
+				s.mb.RecordSapnetweaverSystemInstanceAvailabilityDataPoint(now, 0, response.Hostname, int64(response.InstanceNr), feature, metadata.AttributeControlStateGreen)
+				s.mb.RecordSapnetweaverSystemInstanceAvailabilityDataPoint(now, 1, response.Hostname, int64(response.InstanceNr), feature, metadata.AttributeControlStateYellow)
+				s.mb.RecordSapnetweaverSystemInstanceAvailabilityDataPoint(now, 0, response.Hostname, int64(response.InstanceNr), feature, metadata.AttributeControlStateRed)
+			case models.StateColorRed:
+				s.mb.RecordSapnetweaverSystemInstanceAvailabilityDataPoint(now, 0, response.Hostname, int64(response.InstanceNr), feature, metadata.AttributeControlStateGrey)
+				s.mb.RecordSapnetweaverSystemInstanceAvailabilityDataPoint(now, 0, response.Hostname, int64(response.InstanceNr), feature, metadata.AttributeControlStateGreen)
+				s.mb.RecordSapnetweaverSystemInstanceAvailabilityDataPoint(now, 0, response.Hostname, int64(response.InstanceNr), feature, metadata.AttributeControlStateYellow)
+				s.mb.RecordSapnetweaverSystemInstanceAvailabilityDataPoint(now, 1, response.Hostname, int64(response.InstanceNr), feature, metadata.AttributeControlStateRed)
+			default:
+				errs.AddPartial(1, fmt.Errorf("invalid control state color value for %s: %s", metricName, response.Dispstatus))
+			}
+		}
+	}
+}
+
+func (s *sapNetweaverScraper) recordSapnetweaverProcessAvailabilityDataPoint(now pcommon.Timestamp, processListResponse *models.GetProcessListResponse, errs *scrapererror.ScrapeErrors) {
+	metricName := "Process Availability"
+	if processListResponse.Process == nil {
+		err := formatErrorMsg(metricName, "", errValueNotFound)
+		errs.AddPartial(1, err)
+		return
+	}
+
+	for _, response := range processListResponse.Process.Item {
+		switch models.StateColor(*response.Dispstatus) {
+		case models.StateColorGray:
+			s.mb.RecordSapnetweaverProcessAvailabilityDataPoint(now, 1, response.Name, response.Description, metadata.AttributeControlStateGrey)
+			s.mb.RecordSapnetweaverProcessAvailabilityDataPoint(now, 0, response.Name, response.Description, metadata.AttributeControlStateGreen)
+			s.mb.RecordSapnetweaverProcessAvailabilityDataPoint(now, 0, response.Name, response.Description, metadata.AttributeControlStateYellow)
+			s.mb.RecordSapnetweaverProcessAvailabilityDataPoint(now, 0, response.Name, response.Description, metadata.AttributeControlStateRed)
+		case models.StateColorGreen:
+			s.mb.RecordSapnetweaverProcessAvailabilityDataPoint(now, 0, response.Name, response.Description, metadata.AttributeControlStateGrey)
+			s.mb.RecordSapnetweaverProcessAvailabilityDataPoint(now, 1, response.Name, response.Description, metadata.AttributeControlStateGreen)
+			s.mb.RecordSapnetweaverProcessAvailabilityDataPoint(now, 0, response.Name, response.Description, metadata.AttributeControlStateYellow)
+			s.mb.RecordSapnetweaverProcessAvailabilityDataPoint(now, 0, response.Name, response.Description, metadata.AttributeControlStateRed)
+		case models.StateColorYellow:
+			s.mb.RecordSapnetweaverProcessAvailabilityDataPoint(now, 0, response.Name, response.Description, metadata.AttributeControlStateGrey)
+			s.mb.RecordSapnetweaverProcessAvailabilityDataPoint(now, 0, response.Name, response.Description, metadata.AttributeControlStateGreen)
+			s.mb.RecordSapnetweaverProcessAvailabilityDataPoint(now, 1, response.Name, response.Description, metadata.AttributeControlStateYellow)
+			s.mb.RecordSapnetweaverProcessAvailabilityDataPoint(now, 0, response.Name, response.Description, metadata.AttributeControlStateRed)
+		case models.StateColorRed:
+			s.mb.RecordSapnetweaverProcessAvailabilityDataPoint(now, 0, response.Name, response.Description, metadata.AttributeControlStateGrey)
+			s.mb.RecordSapnetweaverProcessAvailabilityDataPoint(now, 0, response.Name, response.Description, metadata.AttributeControlStateGreen)
+			s.mb.RecordSapnetweaverProcessAvailabilityDataPoint(now, 0, response.Name, response.Description, metadata.AttributeControlStateYellow)
+			s.mb.RecordSapnetweaverProcessAvailabilityDataPoint(now, 1, response.Name, response.Description, metadata.AttributeControlStateRed)
+		default:
+			errs.AddPartial(1, fmt.Errorf(collectMetricError, metricName, errInvalidStateColor))
+		}
+	}
+}
+
+func (s *sapNetweaverScraper) recordSapnetweaverWorkProcessJobAbortedCountDataPoint(now pcommon.Timestamp, alertTreeResponse map[string]string, errs *scrapererror.ScrapeErrors) {
+	metricName := "AbortedJobs"
 	val, err := parseResponse(metricName, "", alertTreeResponse)
 	if err != nil {
 		errs.AddPartial(1, err)
 		return
 	}
 
-	err = s.mb.RecordSapnetweaverWorkProcessesCountDataPoint(now, val)
+	err = s.mb.RecordSapnetweaverWorkProcessJobAbortedCountDataPoint(now, val)
 	if err != nil {
 		errs.AddPartial(1, err)
 		return
 	}
 }
 
-func (s *sapNetweaverScraper) recordSapnetweaverSystemAvailabilityDataPoint(now pcommon.Timestamp, alertTreeResponse map[string]string, errs *scrapererror.ScrapeErrors) {
-	metricName := "Availability"
+// recordSapnetweaverDatabaseDialogRequestTimeDataPoint records the database dialog request time
+func (s *sapNetweaverScraper) recordSapnetweaverDatabaseDialogRequestTimeDataPoint(now pcommon.Timestamp, alertTreeResponse map[string]string, errs *scrapererror.ScrapeErrors) {
+	metricName := "DBRequestTime"
 	val, err := parseResponse(metricName, "", alertTreeResponse)
 	if err != nil {
 		errs.AddPartial(1, err)
 		return
 	}
 
-	err = s.mb.RecordSapnetweaverSystemAvailabilityDataPoint(now, val)
+	err = s.mb.RecordSapnetweaverDatabaseDialogRequestTimeDataPoint(now, val)
 	if err != nil {
 		errs.AddPartial(1, err)
 		return
 	}
 }
 
-func (s *sapNetweaverScraper) recordSapnetweaverSystemUtilizationDataPoint(now pcommon.Timestamp, alertTreeResponse map[string]string, errs *scrapererror.ScrapeErrors) {
+func (s *sapNetweaverScraper) recordSapnetweaverCPUUtilizationDataPoint(now pcommon.Timestamp, alertTreeResponse map[string]string, errs *scrapererror.ScrapeErrors) {
+	metricName := "CPU_Utilization"
+	val, err := parseResponse(metricName, "", alertTreeResponse)
+	if err != nil {
+		errs.AddPartial(1, err)
+		return
+	}
+
+	err = s.mb.RecordSapnetweaverCPUUtilizationDataPoint(now, val)
+	if err != nil {
+		errs.AddPartial(1, err)
+		return
+	}
+}
+
+func (s *sapNetweaverScraper) recordSapnetweaverCPUSystemUtilizationDataPoint(now pcommon.Timestamp, alertTreeResponse map[string]string, errs *scrapererror.ScrapeErrors) {
 	metricName := "System Utilization"
 	val, err := parseResponse(metricName, "", alertTreeResponse)
 	if err != nil {
@@ -78,7 +169,7 @@ func (s *sapNetweaverScraper) recordSapnetweaverSystemUtilizationDataPoint(now p
 		return
 	}
 
-	err = s.mb.RecordSapnetweaverSystemUtilizationDataPoint(now, val)
+	err = s.mb.RecordSapnetweaverCPUSystemUtilizationDataPoint(now, val)
 	if err != nil {
 		errs.AddPartial(1, err)
 		return
@@ -99,6 +190,23 @@ func (s *sapNetweaverScraper) recordSapnetweaverMemorySwapSpaceUtilizationDataPo
 		errs.AddPartial(1, err)
 		return
 	}
+}
+
+func (s *sapNetweaverScraper) recordSapnetweaverHostMemoryVirtualSwapDataPoint(now pcommon.Timestamp, alertTreeResponse map[string]string, errs *scrapererror.ScrapeErrors) {
+	metricName := "Memory Swapped Out"
+	val, err := parseResponse(metricName, "", alertTreeResponse)
+	if err != nil {
+		errs.AddPartial(1, err)
+		return
+	}
+
+	mbytes, err := strconv.ParseInt(val, 10, 64)
+	if err != nil {
+		errs.AddPartial(1, fmt.Errorf("failed to parse int64 for SapnetweaverHostMemoryVirtualSwap, value was %v: %w", val, err))
+		return
+	}
+
+	s.mb.RecordSapnetweaverHostMemoryVirtualSwapDataPoint(now, mbytes*int64(MBToBytes))
 }
 
 func (s *sapNetweaverScraper) recordSapnetweaverMemoryConfiguredDataPoint(now pcommon.Timestamp, alertTreeResponse map[string]string, errs *scrapererror.ScrapeErrors) {
@@ -135,6 +243,218 @@ func (s *sapNetweaverScraper) recordSapnetweaverMemoryFreeDataPoint(now pcommon.
 	s.mb.RecordSapnetweaverMemoryFreeDataPoint(now, mbytes*int64(MBToBytes))
 }
 
+func (s *sapNetweaverScraper) recordSapnetweaverHostMemoryVirtualOverheadDataPoint(now pcommon.Timestamp, alertTreeResponse map[string]string, errs *scrapererror.ScrapeErrors) {
+	metricName := "Memory Overhead"
+	val, err := parseResponse(metricName, "", alertTreeResponse)
+	if err != nil {
+		errs.AddPartial(1, err)
+		return
+	}
+
+	mbytes, err := strconv.ParseInt(val, 10, 64)
+	if err != nil {
+		errs.AddPartial(1, fmt.Errorf("failed to parse int64 for SapnetweaverHostMemoryVirtualOverhead, value was %v: %w", val, err))
+		return
+	}
+
+	s.mb.RecordSapnetweaverHostMemoryVirtualOverheadDataPoint(now, mbytes*int64(MBToBytes))
+}
+
+// recordSapnetweaverWorkProcessActiveCountDataPoint
+func (s *sapNetweaverScraper) recordSapnetweaverWorkProcessActiveCountDataPoint(now pcommon.Timestamp, systemWPTableResponse *models.ABAPGetSystemWPTableResponse, errs *scrapererror.ScrapeErrors) {
+	metricName := "Active Work Processes"
+	if systemWPTableResponse.Workprocess == nil {
+		err := formatErrorMsg(metricName, "", errValueNotFound)
+		errs.AddPartial(1, err)
+		return
+	}
+
+	if len(systemWPTableResponse.Workprocess.Item) == 1 {
+		s.mb.RecordSapnetweaverWorkProcessActiveCountDataPoint(now, 1, systemWPTableResponse.Workprocess.Item[0].Instance, systemWPTableResponse.Workprocess.Item[0].Typ, systemWPTableResponse.Workprocess.Item[0].Status)
+	}
+	// We want to count the number of times the instance, type, and status are the same.
+	// Since the values are sorted, we can iterate through the list and compare the current value to the next value.
+	similarityCount := 1
+	for i, j := 0, 1; j < len(systemWPTableResponse.Workprocess.Item); i, j = i+1, j+1 {
+		if systemWPTableResponse.Workprocess.Item[i].Instance == systemWPTableResponse.Workprocess.Item[j].Instance &&
+			systemWPTableResponse.Workprocess.Item[i].Typ == systemWPTableResponse.Workprocess.Item[j].Typ &&
+			systemWPTableResponse.Workprocess.Item[i].Status == systemWPTableResponse.Workprocess.Item[j].Status {
+			similarityCount++
+		} else {
+			s.mb.RecordSapnetweaverWorkProcessActiveCountDataPoint(now, int64(similarityCount), systemWPTableResponse.Workprocess.Item[i].Instance, systemWPTableResponse.Workprocess.Item[i].Typ, systemWPTableResponse.Workprocess.Item[i].Status)
+			similarityCount = 1
+		}
+	}
+
+	// Record the last value
+	if systemWPTableResponse.Workprocess.Item[len(systemWPTableResponse.Workprocess.Item)-2].Instance == systemWPTableResponse.Workprocess.Item[len(systemWPTableResponse.Workprocess.Item)-1].Instance &&
+		systemWPTableResponse.Workprocess.Item[len(systemWPTableResponse.Workprocess.Item)-2].Typ == systemWPTableResponse.Workprocess.Item[len(systemWPTableResponse.Workprocess.Item)-1].Typ &&
+		systemWPTableResponse.Workprocess.Item[len(systemWPTableResponse.Workprocess.Item)-2].Status == systemWPTableResponse.Workprocess.Item[len(systemWPTableResponse.Workprocess.Item)-1].Status {
+		similarityCount++
+	} else {
+		similarityCount = 1
+	}
+
+	s.mb.RecordSapnetweaverWorkProcessActiveCountDataPoint(now, int64(similarityCount), systemWPTableResponse.Workprocess.Item[len(systemWPTableResponse.Workprocess.Item)-1].Instance, systemWPTableResponse.Workprocess.Item[len(systemWPTableResponse.Workprocess.Item)-1].Typ, systemWPTableResponse.Workprocess.Item[len(systemWPTableResponse.Workprocess.Item)-1].Status)
+}
+
+// recordSapnetweaverQueueCountDataPoint
+func (s *sapNetweaverScraper) recordSapnetweaverQueueDataPoints(now pcommon.Timestamp, queueStatistic *models.GetQueueStatisticResponse, errs *scrapererror.ScrapeErrors) {
+	if queueStatistic.Queue == nil {
+		err := formatErrorMsg("Queue count, peak and max", "", errValueNotFound)
+		errs.AddPartial(1, err)
+		return
+	}
+	for _, queue := range queueStatistic.Queue.Item {
+		s.mb.RecordSapnetweaverQueueCountDataPoint(now, int64(queue.Now), queue.Typ)
+		s.mb.RecordSapnetweaverQueuePeakCountDataPoint(now, int64(queue.High), queue.Typ)
+		s.mb.RecordSapnetweaverQueueMaxCountDataPoint(now, int64(queue.Max), queue.Typ)
+	}
+}
+
+func (s *sapNetweaverScraper) recordSapnetweaverSpoolRequestErrorCountDataPoint(now pcommon.Timestamp, alertTreeResponse map[string]string, errs *scrapererror.ScrapeErrors) {
+	metricName := "ErrorsInWpSPO"
+	val, err := parseResponse(metricName, "", alertTreeResponse)
+	if err != nil {
+		errs.AddPartial(1, err)
+		return
+	}
+
+	err = s.mb.RecordSapnetweaverSpoolRequestErrorCountDataPoint(now, val)
+	if err != nil {
+		errs.AddPartial(1, err)
+		return
+	}
+}
+
+func (s *sapNetweaverScraper) recordSapnetweaverLocksDataPoints(now pcommon.Timestamp, enqStatisticsResponse *models.EnqGetStatisticResponse, errs *scrapererror.ScrapeErrors) {
+	if enqStatisticsResponse.LocksNow != nil {
+		s.mb.RecordSapnetweaverLocksEnqueueCurrentCountDataPoint(now, int64(*enqStatisticsResponse.LocksNow))
+	} else {
+		metricName := "LocksNow"
+		err := formatErrorMsg(metricName, "", errValueNotFound)
+		errs.AddPartial(1, err)
+	}
+	if enqStatisticsResponse.LocksHigh != nil {
+		s.mb.RecordSapnetweaverLocksEnqueueHighCountDataPoint(now, int64(*enqStatisticsResponse.LocksHigh))
+	} else {
+		metricName := "LocksHigh"
+		err := formatErrorMsg(metricName, "", errValueNotFound)
+		errs.AddPartial(1, err)
+	}
+	if enqStatisticsResponse.LocksMax != nil {
+		s.mb.RecordSapnetweaverLocksEnqueueMaxCountDataPoint(now, int64(*enqStatisticsResponse.LocksMax))
+	} else {
+		metricName := "LocksMax"
+		err := formatErrorMsg(metricName, "", errValueNotFound)
+		errs.AddPartial(1, err)
+	}
+	if enqStatisticsResponse.LockTime != nil {
+		s.mb.RecordSapnetweaverLocksEnqueueLockTimeDataPoint(now, int64(*enqStatisticsResponse.LockTime))
+	} else {
+		metricName := "LockTime"
+		err := formatErrorMsg(metricName, "", errValueNotFound)
+		errs.AddPartial(1, err)
+	}
+	if enqStatisticsResponse.LockWaitTime != nil {
+		s.mb.RecordSapnetweaverLocksEnqueueLockWaitTimeDataPoint(now, int64(*enqStatisticsResponse.LockWaitTime))
+	} else {
+		metricName := "LockWaitTime"
+		err := formatErrorMsg(metricName, "", errValueNotFound)
+		errs.AddPartial(1, err)
+	}
+}
+
+func (s *sapNetweaverScraper) recordSapnetweaverShortDumpsCountDataPoint(now pcommon.Timestamp, alertTreeResponse map[string]string, errs *scrapererror.ScrapeErrors) {
+	metricName := "Shortdumps Frequency"
+	val, err := parseResponse(metricName, "", alertTreeResponse)
+	if err != nil {
+		errs.AddPartial(1, err)
+		return
+	}
+
+	err = s.mb.RecordSapnetweaverShortDumpsRateDataPoint(now, val)
+	if err != nil {
+		errs.AddPartial(1, err)
+		return
+	}
+}
+
+func (s *sapNetweaverScraper) recordSapnetweaverSessionsHTTPCountDataPoint(now pcommon.Timestamp, alertTreeResponse map[string]string, errs *scrapererror.ScrapeErrors) {
+	metricName := "CurrentHttpSessions"
+	val, err := parseResponse(metricName, "", alertTreeResponse)
+	if err != nil {
+		errs.AddPartial(1, err)
+		return
+	}
+
+	err = s.mb.RecordSapnetweaverSessionsHTTPCountDataPoint(now, val)
+	if err != nil {
+		errs.AddPartial(1, err)
+		return
+	}
+}
+
+func (s *sapNetweaverScraper) recordCurrentSecuritySessions(now pcommon.Timestamp, alertTreeResponse map[string]string, errs *scrapererror.ScrapeErrors) {
+	metricName := "CurrentSecuritySessions"
+	val, err := parseResponse(metricName, "", alertTreeResponse)
+	if err != nil {
+		errs.AddPartial(1, err)
+		return
+	}
+
+	err = s.mb.RecordSapnetweaverSessionsSecurityCountDataPoint(now, val)
+	if err != nil {
+		errs.AddPartial(1, err)
+		return
+	}
+}
+
+func (s *sapNetweaverScraper) recordSapnetweaverSessionsBrowserCountDataPoint(now pcommon.Timestamp, alertTreeResponse map[string]string, errs *scrapererror.ScrapeErrors) {
+	metricName := "Browser Sessions"
+	val, err := parseResponse(metricName, "", alertTreeResponse)
+	if err != nil {
+		errs.AddPartial(1, err)
+		return
+	}
+
+	err = s.mb.RecordSapnetweaverSessionsBrowserCountDataPoint(now, val)
+	if err != nil {
+		errs.AddPartial(1, err)
+		return
+	}
+}
+
+func (s *sapNetweaverScraper) recordSapnetweaverSessionsWebCountDataPoint(now pcommon.Timestamp, alertTreeResponse map[string]string, errs *scrapererror.ScrapeErrors) {
+	metricName := "Web Sessions"
+	val, err := parseResponse(metricName, "", alertTreeResponse)
+	if err != nil {
+		errs.AddPartial(1, err)
+		return
+	}
+
+	err = s.mb.RecordSapnetweaverSessionsWebCountDataPoint(now, val)
+	if err != nil {
+		errs.AddPartial(1, err)
+		return
+	}
+}
+
+func (s *sapNetweaverScraper) recordSapnetweaverSessionsEjbCountDataPoint(now pcommon.Timestamp, alertTreeResponse map[string]string, errs *scrapererror.ScrapeErrors) {
+	metricName := "EJB Sessions"
+	val, err := parseResponse(metricName, "", alertTreeResponse)
+	if err != nil {
+		errs.AddPartial(1, err)
+		return
+	}
+
+	err = s.mb.RecordSapnetweaverSessionsEjbCountDataPoint(now, val)
+	if err != nil {
+		errs.AddPartial(1, err)
+		return
+	}
+}
+
 func (s *sapNetweaverScraper) recordSapnetweaverSessionCountDataPoint(now pcommon.Timestamp, alertTreeResponse map[string]string, errs *scrapererror.ScrapeErrors) {
 	metricName := "Number of Sessions"
 	val, err := parseResponse(metricName, "", alertTreeResponse)
@@ -144,51 +464,6 @@ func (s *sapNetweaverScraper) recordSapnetweaverSessionCountDataPoint(now pcommo
 	}
 
 	err = s.mb.RecordSapnetweaverSessionCountDataPoint(now, val)
-	if err != nil {
-		errs.AddPartial(1, err)
-		return
-	}
-}
-
-func (s *sapNetweaverScraper) recordSapnetweaverQueueCountDataPoint(now pcommon.Timestamp, alertTreeResponse map[string]string, errs *scrapererror.ScrapeErrors) {
-	metricName := "QueueLen"
-	val, err := parseResponse(metricName, "", alertTreeResponse)
-	if err != nil {
-		errs.AddPartial(1, err)
-		return
-	}
-
-	err = s.mb.RecordSapnetweaverQueueCountDataPoint(now, val)
-	if err != nil {
-		errs.AddPartial(1, err)
-		return
-	}
-}
-
-func (s *sapNetweaverScraper) recordSapnetweaverQueuePeakCountDataPoint(now pcommon.Timestamp, alertTreeResponse map[string]string, errs *scrapererror.ScrapeErrors) {
-	metricName := "PeakQueueLen"
-	val, err := parseResponse(metricName, "", alertTreeResponse)
-	if err != nil {
-		errs.AddPartial(1, err)
-		return
-	}
-
-	err = s.mb.RecordSapnetweaverQueuePeakCountDataPoint(now, val)
-	if err != nil {
-		errs.AddPartial(1, err)
-		return
-	}
-}
-
-func (s *sapNetweaverScraper) recordSapnetweaverJobAbortedDataPoint(now pcommon.Timestamp, alertTreeResponse map[string]string, errs *scrapererror.ScrapeErrors) {
-	metricName := "AbortedJobs"
-	val, err := parseResponse(metricName, "", alertTreeResponse)
-	if err != nil {
-		errs.AddPartial(1, err)
-		return
-	}
-
-	err = s.mb.RecordSapnetweaverJobAbortedDataPoint(now, val)
 	if err != nil {
 		errs.AddPartial(1, err)
 		return
@@ -371,55 +646,6 @@ func (s *sapNetweaverScraper) recordSapnetweaverCacheEvictionsDataPoint(now pcom
 	}
 }
 
-func (s *sapNetweaverScraper) recordSapnetweaverIcmAvailabilityDataPoint(now pcommon.Timestamp, alertTreeResponse map[string]string, errs *scrapererror.ScrapeErrors) {
-	metricName := "ICM"
-	val, ok := alertTreeResponse[metricName]
-	if !ok {
-		errs.AddPartial(1, fmt.Errorf(collectMetricError, metricName, errValueNotFound))
-		return
-	}
-
-	switch models.StateColor(val) {
-	case models.StateColorGray:
-		s.mb.RecordSapnetweaverIcmAvailabilityDataPoint(now, 1, metadata.AttributeControlStateGrey)
-		s.mb.RecordSapnetweaverIcmAvailabilityDataPoint(now, 0, metadata.AttributeControlStateGreen)
-		s.mb.RecordSapnetweaverIcmAvailabilityDataPoint(now, 0, metadata.AttributeControlStateYellow)
-		s.mb.RecordSapnetweaverIcmAvailabilityDataPoint(now, 0, metadata.AttributeControlStateRed)
-	case models.StateColorGreen:
-		s.mb.RecordSapnetweaverIcmAvailabilityDataPoint(now, 0, metadata.AttributeControlStateGrey)
-		s.mb.RecordSapnetweaverIcmAvailabilityDataPoint(now, 1, metadata.AttributeControlStateGreen)
-		s.mb.RecordSapnetweaverIcmAvailabilityDataPoint(now, 0, metadata.AttributeControlStateYellow)
-		s.mb.RecordSapnetweaverIcmAvailabilityDataPoint(now, 0, metadata.AttributeControlStateRed)
-	case models.StateColorYellow:
-		s.mb.RecordSapnetweaverIcmAvailabilityDataPoint(now, 0, metadata.AttributeControlStateGrey)
-		s.mb.RecordSapnetweaverIcmAvailabilityDataPoint(now, 0, metadata.AttributeControlStateGreen)
-		s.mb.RecordSapnetweaverIcmAvailabilityDataPoint(now, 1, metadata.AttributeControlStateYellow)
-		s.mb.RecordSapnetweaverIcmAvailabilityDataPoint(now, 0, metadata.AttributeControlStateRed)
-	case models.StateColorRed:
-		s.mb.RecordSapnetweaverIcmAvailabilityDataPoint(now, 0, metadata.AttributeControlStateGrey)
-		s.mb.RecordSapnetweaverIcmAvailabilityDataPoint(now, 0, metadata.AttributeControlStateGreen)
-		s.mb.RecordSapnetweaverIcmAvailabilityDataPoint(now, 0, metadata.AttributeControlStateYellow)
-		s.mb.RecordSapnetweaverIcmAvailabilityDataPoint(now, 1, metadata.AttributeControlStateRed)
-	default:
-		errs.AddPartial(1, fmt.Errorf(collectMetricError, metricName, errInvalidStateColor))
-	}
-}
-
-func (s *sapNetweaverScraper) recordSapnetweaverHostCPUUtilizationDataPoint(now pcommon.Timestamp, alertTreeResponse map[string]string, errs *scrapererror.ScrapeErrors) {
-	metricName := "CPU_Utilization"
-	val, err := parseResponse(metricName, "", alertTreeResponse)
-	if err != nil {
-		errs.AddPartial(1, err)
-		return
-	}
-
-	err = s.mb.RecordSapnetweaverHostCPUUtilizationDataPoint(now, val)
-	if err != nil {
-		errs.AddPartial(1, err)
-		return
-	}
-}
-
 func (s *sapNetweaverScraper) recordSapnetweaverHostSpoolListUtilizationDataPoint(now pcommon.Timestamp, alertTreeResponse map[string]string, errs *scrapererror.ScrapeErrors) {
 	metricName := "HostspoolListUsed"
 	val, err := parseResponse(metricName, "", alertTreeResponse)
@@ -429,130 +655,6 @@ func (s *sapNetweaverScraper) recordSapnetweaverHostSpoolListUtilizationDataPoin
 	}
 
 	err = s.mb.RecordSapnetweaverHostSpoolListUtilizationDataPoint(now, val)
-	if err != nil {
-		errs.AddPartial(1, err)
-		return
-	}
-}
-
-func (s *sapNetweaverScraper) recordSapnetweaverShortDumpsCountDataPoint(now pcommon.Timestamp, alertTreeResponse map[string]string, errs *scrapererror.ScrapeErrors) {
-	metricName := "Shortdumps Frequency"
-	val, err := parseResponse(metricName, "", alertTreeResponse)
-	if err != nil {
-		errs.AddPartial(1, err)
-		return
-	}
-
-	err = s.mb.RecordSapnetweaverShortDumpsRateDataPoint(now, val)
-	if err != nil {
-		errs.AddPartial(1, err)
-		return
-	}
-}
-
-func (s *sapNetweaverScraper) recordSapnetweaverHostMemoryVirtualOverheadDataPoint(now pcommon.Timestamp, alertTreeResponse map[string]string, errs *scrapererror.ScrapeErrors) {
-	metricName := "Memory Overhead"
-	val, err := parseResponse(metricName, "", alertTreeResponse)
-	if err != nil {
-		errs.AddPartial(1, err)
-		return
-	}
-
-	mbytes, err := strconv.ParseInt(val, 10, 64)
-	if err != nil {
-		errs.AddPartial(1, fmt.Errorf("failed to parse int64 for SapnetweaverHostMemoryVirtualOverhead, value was %v: %w", val, err))
-		return
-	}
-
-	s.mb.RecordSapnetweaverHostMemoryVirtualOverheadDataPoint(now, mbytes*int64(MBToBytes))
-}
-
-func (s *sapNetweaverScraper) recordSapnetweaverHostMemoryVirtualSwapDataPoint(now pcommon.Timestamp, alertTreeResponse map[string]string, errs *scrapererror.ScrapeErrors) {
-	metricName := "Memory Swapped Out"
-	val, err := parseResponse(metricName, "", alertTreeResponse)
-	if err != nil {
-		errs.AddPartial(1, err)
-		return
-	}
-
-	mbytes, err := strconv.ParseInt(val, 10, 64)
-	if err != nil {
-		errs.AddPartial(1, fmt.Errorf("failed to parse int64 for SapnetweaverHostMemoryVirtualSwap, value was %v: %w", val, err))
-		return
-	}
-
-	s.mb.RecordSapnetweaverHostMemoryVirtualSwapDataPoint(now, mbytes*int64(MBToBytes))
-}
-
-func (s *sapNetweaverScraper) recordSapnetweaverSessionsHTTPCountDataPoint(now pcommon.Timestamp, alertTreeResponse map[string]string, errs *scrapererror.ScrapeErrors) {
-	metricName := "CurrentHttpSessions"
-	val, err := parseResponse(metricName, "", alertTreeResponse)
-	if err != nil {
-		errs.AddPartial(1, err)
-		return
-	}
-
-	err = s.mb.RecordSapnetweaverSessionsHTTPCountDataPoint(now, val)
-	if err != nil {
-		errs.AddPartial(1, err)
-		return
-	}
-}
-
-func (s *sapNetweaverScraper) recordCurrentSecuritySessions(now pcommon.Timestamp, alertTreeResponse map[string]string, errs *scrapererror.ScrapeErrors) {
-	metricName := "CurrentSecuritySessions"
-	val, err := parseResponse(metricName, "", alertTreeResponse)
-	if err != nil {
-		errs.AddPartial(1, err)
-		return
-	}
-
-	err = s.mb.RecordSapnetweaverSessionsSecurityCountDataPoint(now, val)
-	if err != nil {
-		errs.AddPartial(1, err)
-		return
-	}
-}
-
-func (s *sapNetweaverScraper) recordSapnetweaverSessionsWebCountDataPoint(now pcommon.Timestamp, alertTreeResponse map[string]string, errs *scrapererror.ScrapeErrors) {
-	metricName := "Web Sessions"
-	val, err := parseResponse(metricName, "", alertTreeResponse)
-	if err != nil {
-		errs.AddPartial(1, err)
-		return
-	}
-
-	err = s.mb.RecordSapnetweaverSessionsWebCountDataPoint(now, val)
-	if err != nil {
-		errs.AddPartial(1, err)
-		return
-	}
-}
-
-func (s *sapNetweaverScraper) recordSapnetweaverSessionsBrowserCountDataPoint(now pcommon.Timestamp, alertTreeResponse map[string]string, errs *scrapererror.ScrapeErrors) {
-	metricName := "Browser Sessions"
-	val, err := parseResponse(metricName, "", alertTreeResponse)
-	if err != nil {
-		errs.AddPartial(1, err)
-		return
-	}
-
-	err = s.mb.RecordSapnetweaverSessionsBrowserCountDataPoint(now, val)
-	if err != nil {
-		errs.AddPartial(1, err)
-		return
-	}
-}
-
-func (s *sapNetweaverScraper) recordSapnetweaverSessionsEjbCountDataPoint(now pcommon.Timestamp, alertTreeResponse map[string]string, errs *scrapererror.ScrapeErrors) {
-	metricName := "EJB Sessions"
-	val, err := parseResponse(metricName, "", alertTreeResponse)
-	if err != nil {
-		errs.AddPartial(1, err)
-		return
-	}
-
-	err = s.mb.RecordSapnetweaverSessionsEjbCountDataPoint(now, val)
 	if err != nil {
 		errs.AddPartial(1, err)
 		return
