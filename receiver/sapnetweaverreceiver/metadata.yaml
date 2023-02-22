@@ -231,7 +231,7 @@ metrics:
       enabled: true
 # 22: User Sessions by Session Type: NOT IMPLEMENTED YET
 # 23: Service Availability: Redundant if we know ICM is running.
-# 24: SAP Workload: Bussiness Transaction Analysis: WILL NOT IMPLEMENT
+# 24: SAP Workload: Business Transaction Analysis: WILL NOT IMPLEMENT
 # 25: Enqueue Locks - long running application locks(longer than 1 day)
   sapnetweaver.locks.enqueue.current.count:
     description: The current number of enqueued locks.
