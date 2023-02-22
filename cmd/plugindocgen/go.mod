@@ -1,6 +1,6 @@
 module github.com/observiq/observiq-otel-collector/plugindocgen
 
-go 1.18
+go 1.19
 
 require (
 	github.com/observiq/observiq-otel-collector/receiver/pluginreceiver v1.19.0
