@@ -18,9 +18,5 @@ import "go.opentelemetry.io/collector/featuregate"
 
 // SetFeatureFlags sets hardcoded collector feature flags
 func SetFeatureFlags() error {
-	var featuregateMap = map[string]bool{
-		"filelog.allowFileDeletion": true, // Enables delete after read functionality for the filelog receiver
-	}
-
-	return featuregate.GlobalRegistry().Apply(featuregateMap)
+	return featuregate.GlobalRegistry().Set("filelog.allowFileDeletion", true)
 }
