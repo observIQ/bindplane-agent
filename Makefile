@@ -89,7 +89,7 @@ install-tools:
 	go install github.com/client9/misspell/cmd/misspell@v0.3.4
 	go install github.com/sigstore/cosign/cmd/cosign@v1.10.1
 	go install github.com/goreleaser/goreleaser@v1.14.1
-	go install github.com/securego/gosec/v2/cmd/gosec@v2.12.0
+	go install github.com/securego/gosec/v2/cmd/gosec@v2.15.0
 	go install github.com/uw-labs/lichen@v0.1.7
 	go install github.com/vektra/mockery/v2@v2.14.0
 	go install github.com/open-telemetry/opentelemetry-collector-contrib/cmd/mdatagen@latest
@@ -133,7 +133,7 @@ fmt:
 
 .PHONY: tidy
 tidy:
-	$(MAKE) for-all CMD="go mod tidy -compat=1.18"
+	$(MAKE) for-all CMD="go mod tidy -compat=1.19"
 
 .PHONY: gosec
 gosec:

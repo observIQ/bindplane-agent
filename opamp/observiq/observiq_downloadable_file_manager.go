@@ -89,7 +89,11 @@ func (m DownloadableFileManager) downloadFile(downloadURL string, outPath string
 	if err != nil {
 		return fmt.Errorf("could not GET url: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			m.logger.Warn("Failed to close response body while downloading file", zap.String("URL", downloadURL), zap.Error(err))
+		}
+	}()
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		return fmt.Errorf("got non-200 status code (%d)", resp.StatusCode)

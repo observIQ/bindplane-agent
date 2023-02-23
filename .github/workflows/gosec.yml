@@ -23,9 +23,9 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v3
         with:
-          go-version: "1.18"
+          go-version: "1.19"
           check-latest: true
-      - name: Install Goec
-        run: go install github.com/securego/gosec/v2/cmd/gosec@v2.12.0
+      - name: Install Tools
+        run: make install-tools
       - name: Run Gosec Security Scanner
         run: make gosec
