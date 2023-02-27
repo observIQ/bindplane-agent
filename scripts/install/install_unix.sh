@@ -173,6 +173,9 @@ Usage:
       If not provided, this will default to observIQ Distro for OpenTelemetry Collector\'s GitHub releases.
       Example: '-l http://my.domain.org/observiq-otel-collector' will download from there.
 
+  $(fg_yellow '-f, --file')
+      Install Collector from a local file instead of downloading from a URL.
+
   $(fg_yellow '-x, --proxy')
       Defines the proxy server to be used for communication by the install script.
       Example: $(fg_blue -x) $(fg_magenta http\(s\)://server-ip:port/).
@@ -274,9 +277,16 @@ setup_installation()
     # Installation variables
     set_os_arch
     set_package_type
-    set_download_urls
-    set_proxy
-    set_file_name
+
+    # if package_path is not set then download the package
+    if [ -z "$package_path" ]; then
+      set_download_urls
+      set_proxy
+      set_file_name
+    else
+      out_file_path="$package_path"
+    fi
+
     set_opamp_endpoint
     set_opamp_labels
     set_opamp_secret_key
@@ -347,13 +357,29 @@ set_os_arch()
 # Set the package type before install
 set_package_type()
 {
-  if command -v dpkg > /dev/null 2>&1; then
-      package_type="deb"
-  elif command -v rpm > /dev/null 2>&1; then
-      package_type="rpm"
+  # if package_path is set get the file extension otherwise looks what's avabile on the system
+  if [ -n "$package_path" ]; then
+    case "$package_path" in
+      *.deb)
+        package_type="deb"
+        ;;
+      *.rpm)
+        package_type="rpm"
+        ;;
+      *)
+        error_exit "$LINENO" "Unsupported package type: $package_path"
+        ;;
+    esac
   else
-      error_exit "$LINENO" "Could not find dpkg or rpm on the system"
+    if command -v dpkg > /dev/null 2>&1; then
+        package_type="deb"
+    elif command -v rpm > /dev/null 2>&1; then
+        package_type="rpm"
+    else
+        error_exit "$LINENO" "Could not find dpkg or rpm on the system"
+    fi
   fi
+
 }
 
 # This will set the urls to use when downloading the collector and its plugins.
@@ -528,21 +554,24 @@ install_package()
   banner "Installing observIQ Distro for OpenTelemetry Collector"
   increase_indent
 
-  proxy_args=""
-  if [ -n "$proxy" ]; then
-    proxy_args="-x $proxy"
-    if [ -n "$proxy_user" ]; then
-      proxy_args="$proxy_args -U $proxy_user:$proxy_password"
+  # if the user didn't specify a local file then download the package
+  if [ -z "$package_path" ]; then
+    proxy_args=""
+    if [ -n "$proxy" ]; then
+      proxy_args="-x $proxy"
+      if [ -n "$proxy_user" ]; then
+        proxy_args="$proxy_args -U $proxy_user:$proxy_password"
+      fi
     fi
+
+    if [ -n "$proxy" ]; then
+      info "Downloading package using proxy..."
+    fi 
+
+    info "Downloading package..."
+    eval curl -L "$proxy_args" "$collector_download_url" -o "$out_file_path" --progress-bar --fail || error_exit "$LINENO" "Failed to download package"
+    succeeded
   fi
-
-  if [ -n "$proxy" ]; then
-    info "Downloading package using proxy..."
-  fi 
-
-  info "Downloading package..."
-  eval curl -L "$proxy_args" "$collector_download_url" -o "$out_file_path" --progress-bar --fail || error_exit "$LINENO" "Failed to download package"
-  succeeded
 
   info "Installing package..."
   unpack_package || error_exit "$LINENO" "Failed to extract package"
@@ -694,6 +723,8 @@ main()
           version=$2 ; shift 2 ;;
         -l|--url)
           url=$2 ; shift 2 ;;
+        -f|--file)
+          package_path=$2 ; shift 2 ;;
         -x|--proxy)
           proxy=$2 ; shift 2 ;;
         -U|--proxy-user)
