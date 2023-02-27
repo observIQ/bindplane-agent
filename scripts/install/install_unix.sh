@@ -357,7 +357,7 @@ set_os_arch()
 # Set the package type before install
 set_package_type()
 {
-  # if package_path is set get the file extension otherwise looks what's avabile on the system
+  # if package_path is set get the file extension otherwise look at what's available on the system
   if [ -n "$package_path" ]; then
     case "$package_path" in
       *.deb)
