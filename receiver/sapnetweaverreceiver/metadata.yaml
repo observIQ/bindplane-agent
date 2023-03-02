@@ -165,7 +165,7 @@ metrics:
       value_type: int
     attributes: []
     enabled: true
-# 10: ICM logs - cumulative count of errors: NOT IMPLEMENTED YET/ NOT SURE IF WE WILL IMPLEMENT
+# 10: ICM logs - cumulative count of errors
 # 11: Active Work Processes
   sapnetweaver.work_process.active.count:
     description: The number of free ABAP work processes in the system.

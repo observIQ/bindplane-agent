@@ -386,6 +386,20 @@ func (s *sapNetweaverScraper) recordSapnetweaverLocksDataPoints(now pcommon.Time
 		err := formatErrorMsg(metricName, "", errValueNotFound)
 		errs.AddPartial(1, err)
 	}
+	if enqStatisticsResponse.DequeueErrors != nil {
+		s.mb.RecordSapnetweaverLocksDequeueErrorsCountDataPoint(now, int64(*enqStatisticsResponse.DequeueErrors))
+	} else {
+		metricName := "DequeueErrors"
+		err := formatErrorMsg(metricName, "", errValueNotFound)
+		errs.AddPartial(1, err)
+	}
+	if enqStatisticsResponse.EnqueueErrors != nil {
+		s.mb.RecordSapnetweaverLocksEnqueueErrorsCountDataPoint(now, int64(*enqStatisticsResponse.EnqueueErrors))
+	} else {
+		metricName := "EnqueueErrors"
+		err := formatErrorMsg(metricName, "", errValueNotFound)
+		errs.AddPartial(1, err)
+	}
 	if enqStatisticsResponse.LockTime != nil {
 		s.mb.RecordSapnetweaverLocksEnqueueLockTimeDataPoint(now, int64(*enqStatisticsResponse.LockTime))
 	} else {

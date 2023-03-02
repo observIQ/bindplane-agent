@@ -190,9 +190,6 @@ func TestScraperScrapeEmpty(t *testing.T) {
 	mockService.On("DpmonExecute", "echo q | /usr/sap/EPP/D00/exe/dpmon pf=/sapmnt/EPP/profile/EPP_D00_sap-app-1 c").Return("", nil)
 	mockService.On("DpmonExecute", "echo q | /usr/sap/EPP/D00/exe/dpmon pf=/sapmnt/EPP/profile/EPP_D00_sap-app-1 v").Return("", nil)
 
-	// 	mockService.On("DpmonExecute", mock.Anything).Return(rfcConnections, nil) // mock match by arguments
-	// 	mockService.On("DpmonExecute", mock.Anything).Return(sessionsTable, nil)
-
 	cfg := createDefaultConfig().(*Config)
 	cfg.Endpoint = defaultEndpoint
 	cfg.Username = "root"
@@ -242,6 +239,8 @@ func TestScraperScrapeEmpty(t *testing.T) {
 		errors.New("failed to collect metric LocksNow: value not found"),
 		errors.New("failed to collect metric LocksHigh: value not found"),
 		errors.New("failed to collect metric LocksMax: value not found"),
+		errors.New("failed to collect metric DequeueErrors: value not found"),
+		errors.New("failed to collect metric EnqueueErrors: value not found"),
 		errors.New("failed to collect metric LockTime: value not found"),
 		errors.New("failed to collect metric LockWaitTime: value not found"),
 		errors.New("failed to collect metric Queue count, peak and max: value not found"),
