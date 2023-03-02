@@ -311,7 +311,7 @@ func parseRfcConnectionsTable(rfcTable string) map[string]int64 {
 
 // recordSapnetweaverAbapSessionCountDataPoint
 func (s *sapNetweaverScraper) recordSapnetweaverAbapSessionCountDataPoint(now pcommon.Timestamp, sessionTable string) {
-	sessionsTable := parseRfcConnectionsTable(sessionTable)
+	sessionsTable := parseSessionTable(sessionTable)
 	for sessionType, count := range sessionsTable {
 		s.mb.RecordSapnetweaverAbapSessionCountDataPoint(now, count, sessionType)
 	}
@@ -324,7 +324,7 @@ func parseSessionTable(sessionTable string) map[string]int64 {
 		// select content between | and |, but not the header with  --- header fields, i.e. type
 		if strings.Contains(line, "|") && !strings.Contains(line, "-") && !strings.Contains(line, "Type") {
 			fields := strings.Split(line, "|")
-			if len(fields) >= 1 {
+			if len(fields) >= 2 {
 				// add string type to map count
 				typeField := strings.TrimSpace(fields[1])
 				sessionTypes[typeField]++

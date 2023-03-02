@@ -148,6 +148,7 @@ func TestScraperScrape(t *testing.T) {
 	mockService.On("FindFile", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return([]string{"/usr/sap/EPP/D00/sec/SAPSSLA.pse"}, nil)
 	mockService.On("OSExecute", mock.Anything).Return(certFileResponse, nil)
 	mockService.On("FindFile", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return([]string{"/usr/sap/EPP/D00/exe/dpmon"}, nil)
+	mockService.On("FindFile", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return([]string{"/sapmnt/EPP/profile"}, nil)
 	mockService.On("DpmonExecute", mock.Anything).Return(rfcConnections, nil)
 	mockService.On("DpmonExecute", mock.Anything).Return(sessionsTable, nil)
 
@@ -165,7 +166,6 @@ func TestScraperScrape(t *testing.T) {
 
 	actualMetrics, err := scraper.scrape(context.Background())
 	require.NoError(t, err)
-
 	expected, err := ReadMetrics(filepath.Join("testdata", "golden-response", "expected.json"))
 	require.NoError(t, err)
 
