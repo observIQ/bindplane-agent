@@ -145,27 +145,29 @@ func TestScraperScrape(t *testing.T) {
 	mockService.On("GetQueueStatistic").Return(queueStatisticResponse, nil)
 	mockService.On("GetSystemInstanceList").Return(systemInstanceListResponse, nil)
 	mockService.On("GetInstanceProperties").Return(InstancePropertiesResponse, nil)
-	mockService.On("FindFile", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return([]string{"/usr/sap/EPP/D00/sec/SAPSSLA.pse"}, nil)
+	mockService.On("FindFile", "-L", "/usr/sap", "-name", "*.pse").Return([]string{"/usr/sap/EPP/D00/sec/SAPSSLA.pse"}, nil)
 	mockService.On("OSExecute", mock.Anything).Return(certFileResponse, nil)
-	mockService.On("FindFile", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return([]string{"/usr/sap/EPP/D00/exe/dpmon"}, nil)
-	mockService.On("FindFile", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return([]string{"/sapmnt/EPP/profile"}, nil)
-	mockService.On("DpmonExecute", mock.Anything).Return(rfcConnections, nil)
-	mockService.On("DpmonExecute", mock.Anything).Return(sessionsTable, nil)
+	mockService.On("FindFile", "-L", "/usr/sap", "-name", "*.pse").Return([]string{""}, nil)
+	mockService.On("FindFile", "-L", "/usr/sap", "-name", "dpmon", "-path", "*/exe/dpmon").Return([]string{"/usr/sap/EPP/D00/exe/dpmon"}, nil)
+	mockService.On("DpmonExecute", "echo q | /usr/sap/EPP/D00/exe/dpmon pf=/sapmnt/EPP/profile/EPP_D00_sap-app-1 c").Return(rfcConnections, nil)
+	mockService.On("DpmonExecute", "echo q | /usr/sap/EPP/D00/exe/dpmon pf=/sapmnt/EPP/profile/EPP_D00_sap-app-1 v").Return(sessionsTable, nil)
 
 	cfg := createDefaultConfig().(*Config)
 	cfg.Endpoint = defaultEndpoint
 	cfg.Username = "root"
 	cfg.Password = "password"
+	cfg.Profile = "/sapmnt/EPP/profile/EPP_D00_sap-app-1"
 
 	testClient, err := newSoapClient(cfg, componenttest.NewNopHost(), componenttest.NewNopTelemetrySettings())
 	require.NoError(t, err)
 
-	scraper := newSapNetweaverScraper(receivertest.NewNopCreateSettings(), createDefaultConfig().(*Config))
+	scraper := newSapNetweaverScraper(receivertest.NewNopCreateSettings(), cfg)
 	scraper.service = &mockService
 	scraper.client = testClient
 
 	actualMetrics, err := scraper.scrape(context.Background())
 	require.NoError(t, err)
+
 	expected, err := ReadMetrics(filepath.Join("testdata", "golden-response", "expected.json"))
 	require.NoError(t, err)
 
@@ -183,18 +185,24 @@ func TestScraperScrapeEmpty(t *testing.T) {
 	mockService.On("GetQueueStatistic").Return(&models.GetQueueStatisticResponse{}, nil)
 	mockService.On("GetSystemInstanceList").Return(&models.GetSystemInstanceListResponse{}, nil)
 	mockService.On("GetInstanceProperties").Return(&models.GetInstancePropertiesResponse{}, nil)
-	mockService.On("FindFile", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return([]string{""}, nil)
-	mockService.On("FindFile", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return([]string{}, nil)
+	mockService.On("FindFile", "-L", "/usr/sap", "-name", "*.pse").Return([]string{""}, nil)
+	mockService.On("FindFile", "-L", "/usr/sap", "-name", "dpmon", "-path", "*/exe/dpmon").Return([]string{"/usr/sap/EPP/D00/exe/dpmon"}, nil)
+	mockService.On("DpmonExecute", "echo q | /usr/sap/EPP/D00/exe/dpmon pf=/sapmnt/EPP/profile/EPP_D00_sap-app-1 c").Return("", nil)
+	mockService.On("DpmonExecute", "echo q | /usr/sap/EPP/D00/exe/dpmon pf=/sapmnt/EPP/profile/EPP_D00_sap-app-1 v").Return("", nil)
+
+	// 	mockService.On("DpmonExecute", mock.Anything).Return(rfcConnections, nil) // mock match by arguments
+	// 	mockService.On("DpmonExecute", mock.Anything).Return(sessionsTable, nil)
 
 	cfg := createDefaultConfig().(*Config)
 	cfg.Endpoint = defaultEndpoint
 	cfg.Username = "root"
 	cfg.Password = "password"
+	cfg.Profile = "/sapmnt/EPP/profile/EPP_D00_sap-app-1"
 
 	testClient, err := newSoapClient(cfg, componenttest.NewNopHost(), componenttest.NewNopTelemetrySettings())
 	require.NoError(t, err)
 
-	scraper := newSapNetweaverScraper(receivertest.NewNopCreateSettings(), createDefaultConfig().(*Config))
+	scraper := newSapNetweaverScraper(receivertest.NewNopCreateSettings(), cfg)
 	scraper.service = &mockService
 	scraper.client = testClient
 
@@ -257,18 +265,19 @@ func TestScraperScrapeAPIError(t *testing.T) {
 	mockService.On("GetQueueStatistic").Return(nil, errors.New("unexpected error"))
 	mockService.On("GetSystemInstanceList").Return(nil, errors.New("unexpected error"))
 	mockService.On("GetInstanceProperties").Return(nil, errors.New("unexpected error"))
-	mockService.On("FindFile", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return([]string{}, errors.New("unexpected error"))
-	mockService.On("FindFile", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return([]string{}, errors.New("unexpected error"))
+	mockService.On("FindFile", "-L", "/usr/sap", "-name", "*.pse").Return([]string{}, errors.New("unexpected error"))
+	mockService.On("FindFile", "-L", "/usr/sap", "-name", "dpmon", "-path", "*/exe/dpmon").Return([]string{}, errors.New("unexpected error"))
 
 	cfg := createDefaultConfig().(*Config)
 	cfg.Endpoint = defaultEndpoint
 	cfg.Username = "root"
 	cfg.Password = "password"
+	cfg.Profile = "/sapmnt/EPP/profile/EPP_D00_sap-app-1"
 
 	testClient, err := newSoapClient(cfg, componenttest.NewNopHost(), componenttest.NewNopTelemetrySettings())
 	require.NoError(t, err)
 
-	scraper := newSapNetweaverScraper(receivertest.NewNopCreateSettings(), createDefaultConfig().(*Config))
+	scraper := newSapNetweaverScraper(receivertest.NewNopCreateSettings(), cfg)
 	scraper.service = &mockService
 	scraper.client = testClient
 

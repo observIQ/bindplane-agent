@@ -275,36 +275,28 @@ func (s *sapNetweaverScraper) collectCertificateValidity(_ context.Context, now 
 
 // collectDpmonMetrics collects dpmon metrics.
 func (s *sapNetweaverScraper) collectDpmonMetrics(_ context.Context, now pcommon.Timestamp, errs *scrapererror.ScrapeErrors) {
+	if s.cfg.Profile == "" {
+		return
+	}
+
 	dpmonExeArgs := []string{"-L", "/usr/sap", "-name", "dpmon", "-path", "*/exe/dpmon"}
 	dpmonExePaths, err := s.service.FindFile(dpmonExeArgs...)
-	if err != nil {
+	if err != nil || len(dpmonExePaths) == 0 {
 		errs.AddPartial(1, fmt.Errorf("failed find dpmon executable: %w", err))
 		return
 	}
 
-	profilePathArgs := []string{"-L", "/sapmnt/", "-name", "profile"}
-	profilePaths, err := s.service.FindFile(profilePathArgs...)
+	rfcConnectionsCommand := fmt.Sprintf("echo q | %s pf=%s c", dpmonExePaths[0], s.cfg.Profile)
+	resp, err := s.service.DpmonExecute(rfcConnectionsCommand)
 	if err != nil {
-		errs.AddPartial(1, fmt.Errorf("failed to find execute find command to locate profile paths: %w", err))
-		return
+		errs.AddPartial(1, fmt.Errorf("failed to execute dpmon command to collect rfc connections metrics: %w", err))
 	}
+	s.recordSapnetweaverAbapRfcCountDataPoint(now, resp)
 
-	for _, dpmonExePath := range dpmonExePaths {
-		for _, profilePath := range profilePaths {
-			rfcConnectionsCommand := fmt.Sprintf("echo q | %s pf=%s c", dpmonExePath, profilePath)
-			sessionTableCommand := fmt.Sprintf("echo q | %s pf=%s v", dpmonExePath, profilePath)
-
-			resp, err := s.service.DpmonExecute(rfcConnectionsCommand)
-			if err != nil {
-				continue
-			}
-			s.recordSapnetweaverAbapRfcCountDataPoint(now, resp)
-
-			resp, err = s.service.DpmonExecute(sessionTableCommand)
-			if err != nil {
-				continue
-			}
-			s.recordSapnetweaverAbapSessionCountDataPoint(now, resp)
-		}
+	sessionTableCommand := fmt.Sprintf("echo q | %s pf=%s v", dpmonExePaths[0], s.cfg.Profile)
+	resp, err = s.service.DpmonExecute(sessionTableCommand)
+	if err != nil {
+		errs.AddPartial(1, fmt.Errorf("failed to execute dpmon to collect session table metrics: %w", err))
 	}
+	s.recordSapnetweaverAbapSessionCountDataPoint(now, resp)
 }

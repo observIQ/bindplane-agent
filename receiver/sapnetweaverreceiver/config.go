@@ -53,6 +53,7 @@ type Config struct {
 	// Endpoint string `mapstructure:"endpoint"`
 	Username string `mapstructure:"username"`
 	Password string `mapstructure:"password"`
+	Profile  string `mapstructure:"profile,omitempty"`
 }
 
 // Validate validates the configuration by checking for missing or invalid fields
