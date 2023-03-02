@@ -26,8 +26,6 @@ all_metrics:
     enabled: true
   sapnetweaver.host.spool_list.utilization:
     enabled: true
-  sapnetweaver.icm.error.count:
-    enabled: true
   sapnetweaver.locks.dequeue.errors.count:
     enabled: true
   sapnetweaver.locks.enqueue.current.count:
@@ -110,8 +108,6 @@ no_metrics:
   sapnetweaver.host.memory.virtual.swap:
     enabled: false
   sapnetweaver.host.spool_list.utilization:
-    enabled: false
-  sapnetweaver.icm.error.count:
     enabled: false
   sapnetweaver.locks.dequeue.errors.count:
     enabled: false

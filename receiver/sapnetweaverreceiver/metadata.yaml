@@ -4,12 +4,15 @@ resource_attributes:
   sapnetweaver.instance:
     type: string
     description: The SAP Netweaver instance.
+    enabled: true
   sapnetweaver.node:
     type: string
     description: The SAP Netweaver node.
+    enabled: true
   sapnetweaver.SID:
     type: string
-    description: The SID.
+    description: The SAP Netweaver SID.
+    enabled: true
 
 attributes:
   certificate_path:
@@ -56,9 +59,6 @@ attributes:
   instance:
     type: string
     description: The SAP instance name.
-  filepath:
-    type: string
-    description: The SAP filepath.
   session_type:
     type: string
     description: The ABAP Session type.

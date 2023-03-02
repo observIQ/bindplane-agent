@@ -112,10 +112,6 @@ func TestMetricsBuilder(t *testing.T) {
 
 			defaultMetricsCount++
 			allMetricsCount++
-			mb.RecordSapnetweaverIcmErrorCountDataPoint(ts, 1, "attr-val")
-
-			defaultMetricsCount++
-			allMetricsCount++
 			mb.RecordSapnetweaverLocksDequeueErrorsCountDataPoint(ts, 1)
 
 			defaultMetricsCount++
@@ -454,23 +450,6 @@ func TestMetricsBuilder(t *testing.T) {
 					assert.Equal(t, ts, dp.Timestamp())
 					assert.Equal(t, pmetric.NumberDataPointValueTypeInt, dp.ValueType())
 					assert.Equal(t, int64(1), dp.IntValue())
-				case "sapnetweaver.icm.error.count":
-					assert.False(t, validatedMetrics["sapnetweaver.icm.error.count"], "Found a duplicate in the metrics slice: sapnetweaver.icm.error.count")
-					validatedMetrics["sapnetweaver.icm.error.count"] = true
-					assert.Equal(t, pmetric.MetricTypeSum, ms.At(i).Type())
-					assert.Equal(t, 1, ms.At(i).Sum().DataPoints().Len())
-					assert.Equal(t, "The amount of errors from */dev_icm file.", ms.At(i).Description())
-					assert.Equal(t, "", ms.At(i).Unit())
-					assert.Equal(t, false, ms.At(i).Sum().IsMonotonic())
-					assert.Equal(t, pmetric.AggregationTemporalityCumulative, ms.At(i).Sum().AggregationTemporality())
-					dp := ms.At(i).Sum().DataPoints().At(0)
-					assert.Equal(t, start, dp.StartTimestamp())
-					assert.Equal(t, ts, dp.Timestamp())
-					assert.Equal(t, pmetric.NumberDataPointValueTypeInt, dp.ValueType())
-					assert.Equal(t, int64(1), dp.IntValue())
-					attrVal, ok := dp.Attributes().Get("filepath")
-					assert.True(t, ok)
-					assert.EqualValues(t, "attr-val", attrVal.Str())
 				case "sapnetweaver.locks.dequeue.errors.count":
 					assert.False(t, validatedMetrics["sapnetweaver.locks.dequeue.errors.count"], "Found a duplicate in the metrics slice: sapnetweaver.locks.dequeue.errors.count")
 					validatedMetrics["sapnetweaver.locks.dequeue.errors.count"] = true

@@ -16,7 +16,7 @@ metrics:
 
 The number of ABAP RFC connections by session type.
 
-Collected from executable dpmon -pf=/sapmnt/<SID>/profile v (RFC Connections option)
+Collected from executable dpmon -pf=/sapmnt/<SID>/profile c (RFC Connections option)
 
 | Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
 | ---- | ----------- | ---------- | ----------------------- | --------- |
@@ -165,22 +165,6 @@ Collected from SAPControl Web Service Interface > GetAlertTree > R3Services > Sp
 | Unit | Metric Type | Value Type |
 | ---- | ----------- | ---------- |
 | % | Gauge | Int |
-
-### sapnetweaver.icm.error.count
-
-The amount of errors from */dev_icm file.
-
-Collected from SAPControl Web Service Interface > ReadLogFile(filename=*/dev_icm).
-
-| Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
-| ---- | ----------- | ---------- | ----------------------- | --------- |
-|  | Sum | Int | Cumulative | false |
-
-#### Attributes
-
-| Name | Description | Values |
-| ---- | ----------- | ------ |
-| filepath | The SAP filepath. | Any Str |
 
 ### sapnetweaver.locks.dequeue.errors.count
 
@@ -513,6 +497,6 @@ Collected from SAPControl Web Service Interface > GetAlertTree > R3Services > Ba
 
 | Name | Description | Values | Enabled |
 | ---- | ----------- | ------ | ------- |
-| sapnetweaver.SID | The SID. | Any Str | false |
-| sapnetweaver.instance | The SAP Netweaver instance. | Any Str | false |
-| sapnetweaver.node | The SAP Netweaver node. | Any Str | false |
+| sapnetweaver.SID | The SAP Netweaver SID. | Any Str | true |
+| sapnetweaver.instance | The SAP Netweaver instance. | Any Str | true |
+| sapnetweaver.node | The SAP Netweaver node. | Any Str | true |
