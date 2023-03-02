@@ -1,5 +1,9 @@
 default:
 all_metrics:
+  sapnetweaver.abap.rfc.count:
+    enabled: true
+  sapnetweaver.abap.session.count:
+    enabled: true
   sapnetweaver.abap.update.status:
     enabled: true
   sapnetweaver.cache.evictions:
@@ -21,6 +25,8 @@ all_metrics:
   sapnetweaver.host.memory.virtual.swap:
     enabled: true
   sapnetweaver.host.spool_list.utilization:
+    enabled: true
+  sapnetweaver.icm.error.count:
     enabled: true
   sapnetweaver.locks.dequeue.errors.count:
     enabled: true
@@ -79,6 +85,10 @@ all_metrics:
   sapnetweaver.work_process.job.aborted.count:
     enabled: true
 no_metrics:
+  sapnetweaver.abap.rfc.count:
+    enabled: false
+  sapnetweaver.abap.session.count:
+    enabled: false
   sapnetweaver.abap.update.status:
     enabled: false
   sapnetweaver.cache.evictions:
@@ -100,6 +110,8 @@ no_metrics:
   sapnetweaver.host.memory.virtual.swap:
     enabled: false
   sapnetweaver.host.spool_list.utilization:
+    enabled: false
+  sapnetweaver.icm.error.count:
     enabled: false
   sapnetweaver.locks.dequeue.errors.count:
     enabled: false

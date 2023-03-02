@@ -35,6 +35,27 @@ func (_m *MockWebService) ABAPGetSystemWPTable() (*models.ABAPGetSystemWPTableRe
 	return r0, r1
 }
 
+// DpmonExecute provides a mock function with given fields: paths
+func (_m *MockWebService) DpmonExecute(paths string) (string, error) {
+	ret := _m.Called(paths)
+
+	var r0 string
+	if rf, ok := ret.Get(0).(func(string) string); ok {
+		r0 = rf(paths)
+	} else {
+		r0 = ret.Get(0).(string)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(paths)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // EnqGetStatistic provides a mock function with given fields:
 func (_m *MockWebService) EnqGetStatistic() (*models.EnqGetStatisticResponse, error) {
 	ret := _m.Called()
@@ -51,6 +72,35 @@ func (_m *MockWebService) EnqGetStatistic() (*models.EnqGetStatisticResponse, er
 	var r1 error
 	if rf, ok := ret.Get(1).(func() error); ok {
 		r1 = rf()
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// FindFile provides a mock function with given fields: args
+func (_m *MockWebService) FindFile(args ...string) ([]string, error) {
+	_va := make([]interface{}, len(args))
+	for _i := range args {
+		_va[_i] = args[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 []string
+	if rf, ok := ret.Get(0).(func(...string) []string); ok {
+		r0 = rf(args...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]string)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(...string) error); ok {
+		r1 = rf(args...)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -166,6 +216,29 @@ func (_m *MockWebService) GetSystemInstanceList() (*models.GetSystemInstanceList
 	var r1 error
 	if rf, ok := ret.Get(1).(func() error); ok {
 		r1 = rf()
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// OSExecute provides a mock function with given fields: command
+func (_m *MockWebService) OSExecute(command string) (*models.OSExecuteResponse, error) {
+	ret := _m.Called(command)
+
+	var r0 *models.OSExecuteResponse
+	if rf, ok := ret.Get(0).(func(string) *models.OSExecuteResponse); ok {
+		r0 = rf(command)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*models.OSExecuteResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(command)
 	} else {
 		r1 = ret.Error(1)
 	}

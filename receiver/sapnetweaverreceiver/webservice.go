@@ -15,6 +15,10 @@
 package sapnetweaverreceiver // import "github.com/observiq/observiq-otel-collector/receiver/sapnetweaverreceiver"
 
 import (
+	"bytes"
+	"os/exec"
+	"strings"
+
 	"github.com/hooklift/gowsdl/soap"
 
 	"github.com/observiq/observiq-otel-collector/receiver/sapnetweaverreceiver/internal/models"
@@ -28,6 +32,9 @@ type webService interface {
 	GetProcessList() (*models.GetProcessListResponse, error)
 	EnqGetStatistic() (*models.EnqGetStatisticResponse, error)
 	ABAPGetSystemWPTable() (*models.ABAPGetSystemWPTableResponse, error)
+	OSExecute(command string) (*models.OSExecuteResponse, error)
+	FindFile(args ...string) ([]string, error)
+	DpmonExecute(paths string) (string, error)
 }
 
 type netweaverWebService struct {
@@ -114,13 +121,37 @@ func (s *netweaverWebService) ABAPGetSystemWPTable() (*models.ABAPGetSystemWPTab
 	return response, nil
 }
 
-func (s *netweaverWebService) GetRequestLogFile() (*models.GetRequestLogFileResponse, error) {
-	request := &models.GetRequestLogFile{}
-	response := &models.GetRequestLogFileResponse{}
+func (s *netweaverWebService) OSExecute(command string) (*models.OSExecuteResponse, error) {
+	request := &models.OSExecute{
+		Command: command,
+	}
+	response := &models.OSExecuteResponse{}
 	err := s.client.Call("''", request, response)
 	if err != nil {
 		return nil, err
 	}
 
 	return response, nil
+}
+
+func (s *netweaverWebService) FindFile(args ...string) ([]string, error) {
+	resp, err := exec.Command("/usr/bin/find", args...).Output()
+	if err != nil {
+		return []string{}, err
+	}
+	// remove last new line
+	return strings.Split(string(strings.TrimRight(string(resp), "\n")), "\n"), nil
+}
+
+func (s *netweaverWebService) DpmonExecute(paths string) (string, error) {
+	cmd := exec.Command("bash", "-c", paths)
+
+	var output bytes.Buffer
+	cmd.Stdout = &output
+
+	if err := cmd.Run(); err != nil {
+		return "", err
+	}
+
+	return output.String(), nil
 }

@@ -39,6 +39,7 @@ type sapNetweaverScraper struct {
 	service  webService
 	instance string
 	hostname string
+	SID      string
 	mb       *metadata.MetricsBuilder
 }
 
@@ -79,6 +80,8 @@ func (s *sapNetweaverScraper) GetCurrentInstance() error {
 			s.instance = prop.Value
 		case "SAPLOCALHOST":
 			s.hostname = prop.Value
+		case "SAPSYSTEMNAME":
+			s.SID = prop.Value
 		}
 	}
 
@@ -108,8 +111,10 @@ func (s *sapNetweaverScraper) collectMetrics(ctx context.Context, errs *scrapere
 	s.collectGetQueueStatistic(ctx, now, errs)
 	s.collectGetProcessList(ctx, now, errs)
 	s.collectGetSystemInstanceList(ctx, now, errs)
+	s.collectCertificateValidity(ctx, now, errs)
+	s.collectDpmonMetrics(ctx, now, errs)
 
-	s.mb.EmitForResource(metadata.WithSapnetweaverInstance(s.instance), metadata.WithSapnetweaverNode(s.hostname))
+	s.mb.EmitForResource(metadata.WithSapnetweaverInstance(s.instance), metadata.WithSapnetweaverNode(s.hostname), metadata.WithSapnetweaverSID(s.SID))
 }
 
 // collectABAPGetSystemWPTable collects metrics from the ABAPGetSystemWPTable method
@@ -222,4 +227,84 @@ func (s *sapNetweaverScraper) collectGetAlertTree(_ context.Context, now pcommon
 	s.recordSapnetweaverSessionsWebCountDataPoint(now, alertTreeResponse, errs)
 	s.recordSapnetweaverSessionsBrowserCountDataPoint(now, alertTreeResponse, errs)
 	s.recordSapnetweaverSessionsEjbCountDataPoint(now, alertTreeResponse, errs)
+}
+
+// collectCertificateValidity collects certificate final validity date.
+func (s *sapNetweaverScraper) collectCertificateValidity(_ context.Context, now pcommon.Timestamp, errs *scrapererror.ScrapeErrors) {
+	args := []string{"-L", "/usr/sap", "-name", "*.pse"}
+	certFilesPaths, err := s.service.FindFile(args...)
+	if err != nil {
+		errs.AddPartial(1, fmt.Errorf("failed to find certificate files: %w", err))
+		return
+	}
+
+	for _, certFilePath := range certFilesPaths {
+		if certFilePath == "" {
+			continue
+		}
+
+		command := fmt.Sprintf("/usr/sap/hostctrl/exe/sapgenpse get_my_name -p %s -n validity", certFilePath)
+		resp, err := s.service.OSExecute(command)
+		if err != nil {
+			errs.AddPartial(1, fmt.Errorf("failed to execute certificate executable: %w", err))
+			continue
+		}
+
+		for _, line := range resp.Lines.Item {
+			if strings.Contains(line, "NotAfter") {
+				// extract last part of line, which is the date contained within the parentheses
+				lineParts := strings.Split(line, " ")
+				if len(lineParts) < 1 {
+					continue
+				}
+
+				dateSection := lineParts[len(lineParts)-1]
+				date := strings.Trim(dateSection, "()")
+				t, err := time.Parse("060102150405Z", date)
+				if err != nil {
+					errs.AddPartial(1, fmt.Errorf("failed to parse validity date: %w", err))
+					continue
+				}
+
+				timeDifference := t.Unix() - now.AsTime().Unix()
+				s.mb.RecordSapnetweaverCertificateValidityDataPoint(now, timeDifference, certFilePath)
+			}
+		}
+	}
+}
+
+// collectDpmonMetrics collects dpmon metrics.
+func (s *sapNetweaverScraper) collectDpmonMetrics(_ context.Context, now pcommon.Timestamp, errs *scrapererror.ScrapeErrors) {
+	dpmonExeArgs := []string{"-L", "/usr/sap", "-name", "dpmon", "-path", "*/exe/dpmon"}
+	dpmonExePaths, err := s.service.FindFile(dpmonExeArgs...)
+	if err != nil {
+		errs.AddPartial(1, fmt.Errorf("failed find dpmon executable: %w", err))
+		return
+	}
+
+	profilePathArgs := []string{"-L", "/sapmnt/", "-name", "profile"}
+	profilePaths, err := s.service.FindFile(profilePathArgs...)
+	if err != nil {
+		errs.AddPartial(1, fmt.Errorf("failed to find execute find command to locate profile paths: %w", err))
+		return
+	}
+
+	for _, dpmonExePath := range dpmonExePaths {
+		for _, profilePath := range profilePaths {
+			rfcConnectionsCommand := fmt.Sprintf("echo q | %s pf=%s c", dpmonExePath, profilePath)
+			sessionTableCommand := fmt.Sprintf("echo q | %s pf=%s v", dpmonExePath, profilePath)
+
+			resp, err := s.service.DpmonExecute(rfcConnectionsCommand)
+			if err != nil {
+				continue
+			}
+			s.recordSapnetweaverAbapRfcCountDataPoint(now, resp)
+
+			resp, err = s.service.DpmonExecute(sessionTableCommand)
+			if err != nil {
+				continue
+			}
+			s.recordSapnetweaverAbapSessionCountDataPoint(now, resp)
+		}
+	}
 }

@@ -160,12 +160,6 @@ type SystemWorkProcess struct {
 	Table    string `xml:"Table" json:"Table"`
 }
 
-// GetRequestLogFileResponse is an xml response struct
-type GetRequestLogFileResponse struct {
-	XMLName xml.Name  `xml:"urn:SAPControl GetRequestLogFileResponse"`
-	Content []*string `xml:"content" json:"content"`
-}
-
 // OSExecuteResponse is an xml response struct
 type OSExecuteResponse struct {
 	XMLName  xml.Name       `xml:"urn:SAPControl OSExecuteResponse"`

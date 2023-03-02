@@ -7,17 +7,14 @@ resource_attributes:
   sapnetweaver.node:
     type: string
     description: The SAP Netweaver node.
+  sapnetweaver.SID:
+    type: string
+    description: The SID.
 
 attributes:
-  certificate_name:
+  certificate_path:
     type: string
-    description: The SAP Certificate name.
-  validity_date:
-    type: string
-    description: The date which the validity expires.
-  SID:
-    type: string
-    description: The SAP SID name.
+    description: The SAP Certificate file path location.
   process_name:
     type: string
     description: The name value from GetProcessList.
@@ -59,6 +56,12 @@ attributes:
   instance:
     type: string
     description: The SAP instance name.
+  filepath:
+    type: string
+    description: The SAP filepath.
+  session_type:
+    type: string
+    description: The ABAP Session type.
 
 
 metrics:
@@ -176,16 +179,26 @@ metrics:
     enabled: true
 # 12 & 13: MTLS Certificate validity & Certificates - validity - count of active, expired, expiring in 1 week
   sapnetweaver.certificate.validity:
-    description: The SAP certificate validity date; 0 means expired, 1 means active.
+    description: The number of seconds until the SAP certificate expires.
     extended_documentation: "Collected using sapgenpse get_my_name -p /usr/sap/<SID>/<INST>/*.pse -n validity."
+    unit: "s"
     sum:
       monotonic: false
       aggregation: cumulative
       value_type: int
-      input_type: string
-    attributes: [certificate_name, validity_date, SID, instance]
+    attributes: [certificate_path]
     enabled: true
 # 14: Count of sessions by type RFC: NOT IMPLEMENTED YET
+  sapnetweaver.abap.rfc.count:
+    description: The number of ABAP RFC connections by session type.
+    extended_documentation: "Collected from executable dpmon -pf=/sapmnt/<SID>/profile c (RFC Connections option)"
+    unit: "{connections}"
+    sum:
+      monotonic: false
+      aggregation: cumulative
+      value_type: int
+    attributes: [session_type]
+    enabled: true
 # 15: Current and Peak utilization of ABAP Queues
   sapnetweaver.queue.count:
     description: The queue length.
@@ -231,6 +244,16 @@ metrics:
       attributes: []
       enabled: true
 # 22: User Sessions by Session Type: NOT IMPLEMENTED YET
+  sapnetweaver.abap.session.count:
+    description: The number of ABAP sessions by session type.
+    extended_documentation: "Collected from executable dpmon -pf=/sapmnt/<SID>/profile v (session table option)"
+    unit: "{sessions}"
+    sum:
+      monotonic: false
+      aggregation: cumulative
+      value_type: int
+    attributes: [session_type]
+    enabled: true
 # 23: Service Availability: Redundant if we know ICM is running.
 # 24: SAP Workload: Business Transaction Analysis: WILL NOT IMPLEMENT
 # 25: Enqueue Locks - long running application locks(longer than 1 day)
