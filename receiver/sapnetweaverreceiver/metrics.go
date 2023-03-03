@@ -296,7 +296,7 @@ func parseRfcConnectionsTable(rfcTable string) map[string]int64 {
 
 	for _, line := range strings.Split(rfcTable, "\n") {
 		// select content between | and |, but not the header with  --- header fields, i.e. type
-		if strings.Contains(line, "|") && !strings.Contains(line, "-") && !strings.Contains(line, "type") {
+		if strings.Contains(line, "|") && !strings.Contains(line, "---") && !strings.Contains(line, "type") {
 			fields := strings.Split(line, "|")
 			if len(fields) >= 3 {
 				// add string type to map count
@@ -322,7 +322,7 @@ func parseSessionTable(sessionTable string) map[string]int64 {
 
 	for _, line := range strings.Split(sessionTable, "\n") {
 		// select content between | and |, but not the header with  --- header fields, i.e. type
-		if strings.Contains(line, "|") && !strings.Contains(line, "-") && !strings.Contains(line, "Type") {
+		if strings.Contains(line, "|") && !strings.Contains(line, "---") && !strings.Contains(line, "Type") {
 			fields := strings.Split(line, "|")
 			if len(fields) >= 2 {
 				// add string type to map count

@@ -266,8 +266,8 @@ func (s *sapNetweaverScraper) collectCertificateValidity(_ context.Context, now 
 					continue
 				}
 
-				timeDifference := t.Unix() - now.AsTime().Unix()
-				s.mb.RecordSapnetweaverCertificateValidityDataPoint(now, timeDifference, certFilePath)
+				timeDifference := t.Sub(now.AsTime()).Seconds()
+				s.mb.RecordSapnetweaverCertificateValidityDataPoint(now, int64(timeDifference), certFilePath)
 			}
 		}
 	}

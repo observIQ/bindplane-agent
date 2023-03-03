@@ -16,6 +16,7 @@ package sapnetweaverreceiver // import "github.com/observiq/observiq-otel-collec
 
 import (
 	"bytes"
+	"fmt"
 	"os/exec"
 	"strings"
 
@@ -135,12 +136,14 @@ func (s *netweaverWebService) OSExecute(command string) (*models.OSExecuteRespon
 }
 
 func (s *netweaverWebService) FindFile(args ...string) ([]string, error) {
-	resp, err := exec.Command("/usr/bin/find", args...).Output()
+	cmd := fmt.Sprintf("/usr/bin/find %s", strings.Join(args, " "))
+	resp, err := s.OSExecute(cmd)
 	if err != nil {
 		return []string{}, err
 	}
-	// remove last new line
-	return strings.Split(string(strings.TrimRight(string(resp), "\n")), "\n"), nil
+
+	values := []string{}
+	return append(values, resp.Lines.Item...), nil
 }
 
 func (s *netweaverWebService) DpmonExecute(paths string) (string, error) {
