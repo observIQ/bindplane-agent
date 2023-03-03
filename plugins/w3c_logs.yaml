@@ -1,4 +1,4 @@
-version: 0.0.3
+version: 0.1.0
 title: W3C
 description: Log Parser for W3C
 parameters:
@@ -51,14 +51,20 @@ parameters:
     description: Same as include_file_path, however, if file path is a symlink, the underlying file's path will be set as a label
     type: bool
     default: false
+  - name: detect_headers
+    description: "If enabled, the header option is ignored, and headers are detected from the log file."
+    type: "bool"
+    default: true
   - name: header
     description: The W3C header which specifies the field names
     type: "string"
-    required: true 
   - name: delimiter
     description: Delimiter character used between fields (Defaults to a tab character)
     type: string
     default: "\t"
+  - name: header_delimiter
+    description: Delimiter character used between header fields (Defaults to a tab character)
+    type: string
   - name: offset_storage_dir
     description: The directory that the offset storage file will be created
     type: string
@@ -89,6 +95,14 @@ template: |
       {{ if .encoding }}
       encoding: '{{ .encoding }}'
       {{ end }}
+      {{ if .detect_headers }}
+      header:
+        pattern: "^#"
+        metadata_operators:
+          - type: regex_parser
+            regex: "^#Fields: (?P<header_fields>.*)$"
+            if: 'body startsWith "#Fields: "'
+      {{ end }}
       attributes:
         log_type: {{ .log_type }}
       operators:
@@ -98,7 +112,19 @@ template: |
         - type: csv_parser
           ignore_quotes: true
           delimiter: '{{ .delimiter }}'
+          {{ if .header_delimiter }} 
+          header_delimiter: '{{ .header_delimiter }}'
+          {{ end }}
+          {{ if .detect_headers }}
+          header_attribute: 'header_fields'
+          {{ else }}
           header: '{{ .header }}'
+          {{ end }}
+
+        {{ if .detect_headers }}
+        - type: remove
+          field: "attributes.header_fields"
+        {{ end }}
           
   service:
     extensions: [file_storage]
