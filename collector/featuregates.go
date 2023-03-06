@@ -14,9 +14,19 @@
 
 package collector
 
-import "go.opentelemetry.io/collector/featuregate"
+import (
+	"fmt"
+
+	"go.opentelemetry.io/collector/featuregate"
+)
 
 // SetFeatureFlags sets hardcoded collector feature flags
 func SetFeatureFlags() error {
-	return featuregate.GlobalRegistry().Set("filelog.allowFileDeletion", true)
+	if err := featuregate.GlobalRegistry().Set("filelog.allowFileDeletion", true); err != nil {
+		return fmt.Errorf("failed to enable filelog.allowFileDeletion: %w", err)
+	}
+	if err := featuregate.GlobalRegistry().Set("filelog.allowHeaderMetadataParsing", true); err != nil {
+		return fmt.Errorf("failed to enable filelog.allowHeaderMetadataParsing: %w", err)
+	}
+	return nil
 }
