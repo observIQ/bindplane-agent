@@ -26,7 +26,7 @@ func SetFeatureFlags() error {
 		return fmt.Errorf("failed to enable filelog.allowFileDeletion: %w", err)
 	}
 	if err := featuregate.GlobalRegistry().Set("filelog.allowHeaderMetadataParsing", true); err != nil {
-		return fmt.Errorf("failed to enable filelog.allowFileDeletion: %w", err)
+		return fmt.Errorf("failed to enable filelog.allowHeaderMetadataParsing: %w", err)
 	}
 	return nil
 }
