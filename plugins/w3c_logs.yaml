@@ -1,4 +1,4 @@
-version: 0.0.3
+version: 0.1.0
 title: W3C
 description: Log Parser for W3C
 parameters:
@@ -25,12 +25,12 @@ parameters:
     type: string
     default: w3c
   - name: start_at
-    description: At startup, where to start reading logs from the file.
+    description: At startup, where to start reading logs from the file. Must be set to "beginning" if 'header' is not specified.
     type: string
     supported:
       - beginning
       - end
-    default: end
+    default: beginning
   - name: max_concurrent_files
     description: Max number of W3C files that will be open during a polling cycle
     type: int
@@ -52,13 +52,15 @@ parameters:
     type: bool
     default: false
   - name: header
-    description: The W3C header which specifies the field names
+    description: The W3C header which specifies the field names. Field names will be auto detected if unspecified.
     type: "string"
-    required: true 
   - name: delimiter
     description: Delimiter character used between fields (Defaults to a tab character)
     type: string
     default: "\t"
+  - name: header_delimiter
+    description: Delimiter character used between header fields (Defaults to the value of 'delimiter')
+    type: string
   - name: offset_storage_dir
     description: The directory that the offset storage file will be created
     type: string
@@ -89,6 +91,14 @@ template: |
       {{ if .encoding }}
       encoding: '{{ .encoding }}'
       {{ end }}
+      {{ if not .header }}
+      header:
+        pattern: "^#"
+        metadata_operators:
+          - type: regex_parser
+            regex: "^#Fields: (?P<header_fields>.*)$"
+            if: 'body startsWith "#Fields: "'
+      {{ end }}
       attributes:
         log_type: {{ .log_type }}
       operators:
@@ -98,7 +108,19 @@ template: |
         - type: csv_parser
           ignore_quotes: true
           delimiter: '{{ .delimiter }}'
+          {{ if .header_delimiter }} 
+          header_delimiter: '{{ .header_delimiter }}'
+          {{ end }}
+          {{ if .header }}
           header: '{{ .header }}'
+          {{ else }}
+          header_attribute: 'header_fields'
+          {{ end }}
+
+        {{ if not .header }}
+        - type: remove
+          field: "attributes.header_fields"
+        {{ end }}
           
   service:
     extensions: [file_storage]
