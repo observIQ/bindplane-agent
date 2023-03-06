@@ -25,7 +25,7 @@ parameters:
     type: string
     default: w3c
   - name: start_at
-    description: At startup, where to start reading logs from the file. Must be set to "beginning" if 'headers' is not specified.
+    description: At startup, where to start reading logs from the file. Must be set to "beginning" if 'header' is not specified.
     type: string
     supported:
       - beginning

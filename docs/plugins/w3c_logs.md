@@ -10,7 +10,7 @@ Log Parser for W3C
 | exclude_file_log_path | Specify a single path or multiple paths to exclude one or many files from being read. You may also use a wildcard (*) to exclude multiple files from being read within a directory. | []string | `[]` | false |  |
 | encoding | Specify the encoding of the file(s) being read. In most cases, you can leave the default option selected. | string | `utf-8` | false | `utf-8`, `utf-16le`, `utf-16be`, `ascii`, `big5` |
 | log_type | Adds the specified 'Type' as a label to each log message. | string | `w3c` | false |  |
-| start_at | At startup, where to start reading logs from the file. Must be set to "beginning" if 'headers' is not specified. | string | `beginning` | false | `beginning`, `end` |
+| start_at | At startup, where to start reading logs from the file. Must be set to "beginning" if 'header' is not specified. | string | `beginning` | false | `beginning`, `end` |
 | max_concurrent_files | Max number of W3C files that will be open during a polling cycle | int | `512` | false |  |
 | include_file_name | Include File Name as a label | bool | `true` | false |  |
 | include_file_path | Include File Path as a label | bool | `false` | false |  |
