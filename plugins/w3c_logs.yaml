@@ -59,7 +59,7 @@ parameters:
     type: string
     default: "\t"
   - name: header_delimiter
-    description: Delimiter character used between header fields (Defaults to a tab character)
+    description: Delimiter character used between header fields (Defaults to the value of 'delimiter')
     type: string
   - name: offset_storage_dir
     description: The directory that the offset storage file will be created

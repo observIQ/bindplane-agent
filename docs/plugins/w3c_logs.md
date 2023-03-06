@@ -18,7 +18,7 @@ Log Parser for W3C
 | include_file_path_resolved | Same as include_file_path, however, if file path is a symlink, the underlying file's path will be set as a label | bool | `false` | false |  |
 | header | The W3C header which specifies the field names. Field names will be auto detected if unspecified. | string |  | false |  |
 | delimiter | Delimiter character used between fields (Defaults to a tab character) | string | `	` | false |  |
-| header_delimiter | Delimiter character used between header fields (Defaults to a tab character) | string |  | false |  |
+| header_delimiter | Delimiter character used between header fields (Defaults to the value of 'delimiter') | string |  | false |  |
 | offset_storage_dir | The directory that the offset storage file will be created | string | `$OIQ_OTEL_COLLECTOR_HOME/storage` | false |  |
 
 ## Example Config:
