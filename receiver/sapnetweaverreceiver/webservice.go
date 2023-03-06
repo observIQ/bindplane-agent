@@ -158,5 +158,5 @@ func (s *netweaverWebService) CertExecute(command string) ([]string, error) {
 }
 
 func processFile(output string) []string {
-	return strings.Split(string(strings.TrimRight(output, "\n")), "\n")
+	return strings.Split(string(output), "\n")
 }

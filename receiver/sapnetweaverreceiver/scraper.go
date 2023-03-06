@@ -18,6 +18,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"regexp"
 	"strings"
 	"time"
 
@@ -252,15 +253,15 @@ func (s *sapNetweaverScraper) collectCertificateValidity(_ context.Context, now 
 
 		for _, line := range certs {
 			if strings.Contains(line, "NotAfter") {
-				// extract last part of line, which is the date contained within the parentheses
-				lineParts := strings.Split(line, " ")
-				if len(lineParts) < 1 {
+				// extracts timestamp within the parenthesis like: NotAfter : Thu Dec 31 19:00:01 2037 (380101000001Z)
+				re := regexp.MustCompile(`\((.*?)\)`)
+				dateMatch := re.FindStringSubmatch(line)
+				if dateMatch == nil {
+					errs.AddPartial(1, fmt.Errorf("failed to parse validity date: %w", err))
 					continue
 				}
 
-				dateSection := lineParts[len(lineParts)-1]
-				date := strings.Trim(dateSection, "()")
-				t, err := time.Parse("060102150405Z", date)
+				t, err := time.Parse("060102150405Z", dateMatch[1])
 				if err != nil {
 					errs.AddPartial(1, fmt.Errorf("failed to parse validity date: %w", err))
 					continue
