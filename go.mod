@@ -133,21 +133,23 @@ require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/zookeeperreceiver v0.72.0
 	github.com/shirou/gopsutil/v3 v3.23.1
 	github.com/spf13/pflag v1.0.5
-	github.com/stretchr/testify v1.8.1
+	github.com/stretchr/testify v1.8.2
 	go.opencensus.io v0.24.0
-	go.opentelemetry.io/collector v0.72.0
-	go.opentelemetry.io/collector/component v0.72.0
-	go.opentelemetry.io/collector/confmap v0.72.0
-	go.opentelemetry.io/collector/consumer v0.72.0
+	go.opentelemetry.io/collector v0.72.1-0.20230303235035-7318c14f1a2b
+	go.opentelemetry.io/collector/component v0.72.1-0.20230303235035-7318c14f1a2b
+	go.opentelemetry.io/collector/confmap v0.72.1-0.20230303235035-7318c14f1a2b
+	go.opentelemetry.io/collector/consumer v0.72.1-0.20230303235035-7318c14f1a2b
+	go.opentelemetry.io/collector/exporter v0.0.0-20230303211526-ec5d71fec2da
 	go.opentelemetry.io/collector/exporter/loggingexporter v0.72.0
 	go.opentelemetry.io/collector/exporter/otlpexporter v0.72.0
 	go.opentelemetry.io/collector/exporter/otlphttpexporter v0.72.0
 	go.opentelemetry.io/collector/extension/ballastextension v0.72.0
 	go.opentelemetry.io/collector/extension/zpagesextension v0.72.0
-	go.opentelemetry.io/collector/featuregate v0.72.0
-	go.opentelemetry.io/collector/pdata v1.0.0-rc6
+	go.opentelemetry.io/collector/featuregate v0.72.1-0.20230303235035-7318c14f1a2b
+	go.opentelemetry.io/collector/pdata v1.0.0-rc6.0.20230303235035-7318c14f1a2b
 	go.opentelemetry.io/collector/processor/batchprocessor v0.72.0
 	go.opentelemetry.io/collector/processor/memorylimiterprocessor v0.72.0
+	go.opentelemetry.io/collector/receiver v0.0.0-20230302200458-4071a47d0ee3
 	go.opentelemetry.io/collector/receiver/otlpreceiver v0.72.0
 	go.uber.org/multierr v1.9.0
 	go.uber.org/zap v1.24.0
@@ -230,7 +232,7 @@ require (
 	github.com/alecthomas/units v0.0.0-20211218093645-b94a6e3cc137 // indirect
 	github.com/aliyun/aliyun-log-go-sdk v0.1.43 // indirect
 	github.com/andybalholm/brotli v1.0.1 // indirect
-	github.com/antonmedv/expr v1.12.0 // indirect
+	github.com/antonmedv/expr v1.12.1 // indirect
 	github.com/apache/arrow/go/arrow v0.0.0-20211112161151-bc219186db40 // indirect
 	github.com/apache/thrift v0.18.0 // indirect
 	github.com/armon/go-metrics v0.4.0 // indirect
@@ -371,7 +373,7 @@ require (
 	github.com/jpillora/backoff v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/karrick/godirwalk v1.17.0 // indirect
-	github.com/klauspost/compress v1.15.15 // indirect
+	github.com/klauspost/compress v1.16.0 // indirect
 	github.com/klauspost/pgzip v1.2.5 // indirect
 	github.com/knadh/koanf v1.5.0 // indirect
 	github.com/kolo/xmlrpc v0.0.0-20220921171641-a4b6fa1dd06b // indirect
@@ -581,3 +583,7 @@ replace github.com/observiq/observiq-otel-collector/expr => ./expr
 // Does not build with windows and only used in configschema executable
 // Relevant issue https://github.com/mattn/go-ieproxy/issues/45
 replace github.com/mattn/go-ieproxy v0.0.9 => github.com/mattn/go-ieproxy v0.0.1
+
+// Pulls in automatic header parsing from OTel.
+// Should be removed for OTel v0.73.0+
+replace github.com/open-telemetry/opentelemetry-collector-contrib/pkg/stanza v0.72.0 => github.com/open-telemetry/opentelemetry-collector-contrib/pkg/stanza v0.72.1-0.20230306143518-d4352eab1f68
