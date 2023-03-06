@@ -127,8 +127,7 @@ func (s *netweaverWebService) FindFile(args ...string) ([]string, error) {
 		return []string{}, err
 	}
 
-	// remove last new line
-	return strings.Split(string(strings.TrimRight(string(resp), "\n")), "\n"), nil
+	return processFile(string(resp)), nil
 }
 
 func (s *netweaverWebService) DpmonExecute(paths string) (string, error) {
@@ -155,6 +154,9 @@ func (s *netweaverWebService) CertExecute(command string) ([]string, error) {
 		return []string{}, err
 	}
 
-	// remove last new line
-	return strings.Split(string(strings.TrimRight(output.String(), "\n")), "\n"), nil
+	return processFile(output.String()), nil
+}
+
+func processFile(output string) []string {
+	return strings.Split(string(strings.TrimRight(output, "\n")), "\n")
 }

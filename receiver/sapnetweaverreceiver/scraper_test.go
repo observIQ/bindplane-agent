@@ -128,8 +128,8 @@ func TestScraperScrape(t *testing.T) {
 	err = xml.Unmarshal(InstancePropertiesData, &InstancePropertiesResponse)
 	require.NoError(t, err)
 
-	certificate1 := strings.Split(strings.TrimRight(string(loadAPIResponseData(t, "api-responses", "certificate1.txt")), "\n"), "\n")
-	certificate2 := strings.Split(strings.TrimRight(string(loadAPIResponseData(t, "api-responses", "certificate2.txt")), "\n"), "\n")
+	certificate1 := processFile(string(loadAPIResponseData(t, "api-responses", "certificate1.txt")))
+	certificate2 := processFile(string(loadAPIResponseData(t, "api-responses", "certificate2.txt")))
 	rfcConnections := string(loadAPIResponseData(t, "api-responses", "dpmon-c-rfc-connections.txt"))
 	sessionsTable := string(loadAPIResponseData(t, "api-responses", "dpmon-v-sessions-table.txt"))
 
