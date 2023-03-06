@@ -25,12 +25,12 @@ parameters:
     type: string
     default: w3c
   - name: start_at
-    description: At startup, where to start reading logs from the file.
+    description: At startup, where to start reading logs from the file. Must be set to "beginning" if 'headers' is not specified.
     type: string
     supported:
       - beginning
       - end
-    default: end
+    default: beginning
   - name: max_concurrent_files
     description: Max number of W3C files that will be open during a polling cycle
     type: int
@@ -51,12 +51,8 @@ parameters:
     description: Same as include_file_path, however, if file path is a symlink, the underlying file's path will be set as a label
     type: bool
     default: false
-  - name: detect_headers
-    description: "If enabled, the header option is ignored, and headers are detected from the log file."
-    type: "bool"
-    default: true
   - name: header
-    description: The W3C header which specifies the field names
+    description: The W3C header which specifies the field names. Field names will be auto detected if unspecified.
     type: "string"
   - name: delimiter
     description: Delimiter character used between fields (Defaults to a tab character)
@@ -95,7 +91,7 @@ template: |
       {{ if .encoding }}
       encoding: '{{ .encoding }}'
       {{ end }}
-      {{ if .detect_headers }}
+      {{ if not .header }}
       header:
         pattern: "^#"
         metadata_operators:
@@ -115,13 +111,13 @@ template: |
           {{ if .header_delimiter }} 
           header_delimiter: '{{ .header_delimiter }}'
           {{ end }}
-          {{ if .detect_headers }}
-          header_attribute: 'header_fields'
-          {{ else }}
+          {{ if .header }}
           header: '{{ .header }}'
+          {{ else }}
+          header_attribute: 'header_fields'
           {{ end }}
 
-        {{ if .detect_headers }}
+        {{ if not .header }}
         - type: remove
           field: "attributes.header_fields"
         {{ end }}
