@@ -16,7 +16,6 @@ package sapnetweaverreceiver // import "github.com/observiq/observiq-otel-collec
 
 import (
 	"bytes"
-	"fmt"
 	"os/exec"
 	"strings"
 
@@ -33,9 +32,9 @@ type webService interface {
 	GetProcessList() (*models.GetProcessListResponse, error)
 	EnqGetStatistic() (*models.EnqGetStatisticResponse, error)
 	ABAPGetSystemWPTable() (*models.ABAPGetSystemWPTableResponse, error)
-	OSExecute(command string) (*models.OSExecuteResponse, error)
 	FindFile(args ...string) ([]string, error)
 	DpmonExecute(paths string) (string, error)
+	CertExecute(command string) ([]string, error)
 }
 
 type netweaverWebService struct {
@@ -122,28 +121,14 @@ func (s *netweaverWebService) ABAPGetSystemWPTable() (*models.ABAPGetSystemWPTab
 	return response, nil
 }
 
-func (s *netweaverWebService) OSExecute(command string) (*models.OSExecuteResponse, error) {
-	request := &models.OSExecute{
-		Command: command,
-	}
-	response := &models.OSExecuteResponse{}
-	err := s.client.Call("''", request, response)
-	if err != nil {
-		return nil, err
-	}
-
-	return response, nil
-}
-
 func (s *netweaverWebService) FindFile(args ...string) ([]string, error) {
-	cmd := fmt.Sprintf("/usr/bin/find %s", strings.Join(args, " "))
-	resp, err := s.OSExecute(cmd)
+	resp, err := exec.Command("/usr/bin/find", args...).Output()
 	if err != nil {
 		return []string{}, err
 	}
 
-	values := []string{}
-	return append(values, resp.Lines.Item...), nil
+	// remove last new line
+	return strings.Split(string(strings.TrimRight(string(resp), "\n")), "\n"), nil
 }
 
 func (s *netweaverWebService) DpmonExecute(paths string) (string, error) {
@@ -157,4 +142,19 @@ func (s *netweaverWebService) DpmonExecute(paths string) (string, error) {
 	}
 
 	return output.String(), nil
+}
+
+func (s *netweaverWebService) CertExecute(command string) ([]string, error) {
+	cmd := exec.Command("bash", "-c", command)
+
+	var output bytes.Buffer
+	cmd.Stdout = &output
+	cmd.Stderr = &output
+
+	if err := cmd.Run(); err != nil {
+		return []string{}, err
+	}
+
+	// remove last new line
+	return strings.Split(string(strings.TrimRight(output.String(), "\n")), "\n"), nil
 }

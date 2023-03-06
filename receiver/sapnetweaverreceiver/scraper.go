@@ -244,13 +244,13 @@ func (s *sapNetweaverScraper) collectCertificateValidity(_ context.Context, now 
 		}
 
 		command := fmt.Sprintf("/usr/sap/hostctrl/exe/sapgenpse get_my_name -p %s -n validity", certFilePath)
-		resp, err := s.service.OSExecute(command)
+		certs, err := s.service.CertExecute(command)
 		if err != nil {
-			errs.AddPartial(1, fmt.Errorf("failed to execute certificate executable: %w", err))
+			errs.AddPartial(1, fmt.Errorf("failed to execute certificate at: %s, error: %w", certFilePath, err))
 			continue
 		}
 
-		for _, line := range resp.Lines.Item {
+		for _, line := range certs {
 			if strings.Contains(line, "NotAfter") {
 				// extract last part of line, which is the date contained within the parentheses
 				lineParts := strings.Split(line, " ")

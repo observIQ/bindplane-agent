@@ -24,7 +24,6 @@ import (
 	"testing"
 
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest/pmetrictest"
-	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/component/componenttest"
 	"go.opentelemetry.io/collector/config/confighttp"
@@ -129,11 +128,8 @@ func TestScraperScrape(t *testing.T) {
 	err = xml.Unmarshal(InstancePropertiesData, &InstancePropertiesResponse)
 	require.NoError(t, err)
 
-	certFileData := loadAPIResponseData(t, "api-responses", "OSExecuteCertResponse.xml")
-	var certFileResponse *models.OSExecuteResponse
-	err = xml.Unmarshal(certFileData, &certFileResponse)
-	require.NoError(t, err)
-
+	certificate1 := strings.Split(strings.TrimRight(string(loadAPIResponseData(t, "api-responses", "certificate1.txt")), "\n"), "\n")
+	certificate2 := strings.Split(strings.TrimRight(string(loadAPIResponseData(t, "api-responses", "certificate2.txt")), "\n"), "\n")
 	rfcConnections := string(loadAPIResponseData(t, "api-responses", "dpmon-c-rfc-connections.txt"))
 	sessionsTable := string(loadAPIResponseData(t, "api-responses", "dpmon-v-sessions-table.txt"))
 
@@ -145,8 +141,9 @@ func TestScraperScrape(t *testing.T) {
 	mockService.On("GetQueueStatistic").Return(queueStatisticResponse, nil)
 	mockService.On("GetSystemInstanceList").Return(systemInstanceListResponse, nil)
 	mockService.On("GetInstanceProperties").Return(InstancePropertiesResponse, nil)
-	mockService.On("FindFile", "-L", "/usr/sap", "-name", "*.pse").Return([]string{"/usr/sap/EPP/D00/sec/SAPSSLA.pse"}, nil)
-	mockService.On("OSExecute", mock.Anything).Return(certFileResponse, nil)
+	mockService.On("FindFile", "-L", "/usr/sap", "-name", "*.pse").Return([]string{"/usr/sap/EPP/D00/sec/SAPSSLA.pse", "/usr/sap/EPP/D00/sec/SAPSSLC.pse"}, nil)
+	mockService.On("CertExecute", "/usr/sap/hostctrl/exe/sapgenpse get_my_name -p /usr/sap/EPP/D00/sec/SAPSSLA.pse -n validity").Return(certificate1, nil)
+	mockService.On("CertExecute", "/usr/sap/hostctrl/exe/sapgenpse get_my_name -p /usr/sap/EPP/D00/sec/SAPSSLC.pse -n validity").Return(certificate2, nil)
 	mockService.On("FindFile", "-L", "/usr/sap", "-name", "*.pse").Return([]string{""}, nil)
 	mockService.On("FindFile", "-L", "/usr/sap", "-name", "dpmon", "-path", "*/exe/dpmon").Return([]string{"/usr/sap/EPP/D00/exe/dpmon"}, nil)
 	mockService.On("DpmonExecute", "echo q | /usr/sap/EPP/D00/exe/dpmon pf=/sapmnt/EPP/profile/EPP_D00_sap-app-1 c").Return(rfcConnections, nil)
