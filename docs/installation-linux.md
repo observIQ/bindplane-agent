@@ -24,6 +24,13 @@ sudo sh -c "$(curl -fsSlL https://github.com/observiq/observiq-otel-collector/re
 
 To read more about the generated connection configuration file see [OpAMP docs](./opamp.md).
 
+### Installation from local package
+
+To install the collector from a local package use the `-f` with the path to the package.
+
+```sh
+sudo sh -c "$(curl -fsSlL https://github.com/observiq/observiq-otel-collector/releases/latest/download/install_unix.sh)" install_unix.sh -f <path_to_package>
+```
 
 ### RPM Installation
 First download the RPM package for your architecture from the [releases page](https://github.com/observIQ/observiq-otel-collector/releases/latest).
