@@ -51,7 +51,7 @@ func newSapNetweaverScraper(
 	a := &sapNetweaverScraper{
 		settings: settings.TelemetrySettings,
 		cfg:      cfg,
-		mb:       metadata.NewMetricsBuilder(cfg.Metrics, settings),
+		mb:       metadata.NewMetricsBuilder(cfg.MetricsBuilderConfig, settings),
 	}
 
 	return a

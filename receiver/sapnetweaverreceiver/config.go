@@ -48,8 +48,7 @@ type Config struct {
 	configtls.TLSClientSetting              `mapstructure:"tls,omitempty"`
 	confighttp.HTTPClientSettings           `mapstructure:"tls,omitempty,squash"`
 	// Metrics defines which metrics to enable for the scraper
-	Metrics metadata.MetricsSettings `mapstructure:"metrics"`
-
+	MetricsBuilderConfig metadata.MetricsBuilderConfig `mapstructure:",squash"`
 	// Endpoint string `mapstructure:"endpoint"`
 	Username string `mapstructure:"username"`
 	Password string `mapstructure:"password"`

@@ -209,20 +209,6 @@ func DefaultMetricsSettings() MetricsSettings {
 // ResourceAttributeSettings provides common settings for a particular metric.
 type ResourceAttributeSettings struct {
 	Enabled bool `mapstructure:"enabled"`
-
-	enabledProvidedByUser bool
-}
-
-func (ras *ResourceAttributeSettings) Unmarshal(parser *confmap.Conf) error {
-	if parser == nil {
-		return nil
-	}
-	err := parser.Unmarshal(ras, confmap.WithErrorUnused())
-	if err != nil {
-		return err
-	}
-	ras.enabledProvidedByUser = parser.IsSet("enabled")
-	return nil
 }
 
 // ResourceAttributesSettings provides settings for sapnetweaverreceiver metrics.
@@ -2420,6 +2406,12 @@ func newMetricSapnetweaverWorkProcessJobAbortedCount(settings MetricSettings) me
 	return m
 }
 
+// MetricsBuilderConfig is a structural subset of an otherwise 1-1 copy of metadata.yaml
+type MetricsBuilderConfig struct {
+	Metrics            MetricsSettings            `mapstructure:"metrics"`
+	ResourceAttributes ResourceAttributesSettings `mapstructure:"resource_attributes"`
+}
+
 // MetricsBuilder provides an interface for scrapers to report metrics while taking care of all the transformations
 // required to produce metric representation defined in metadata and user settings.
 type MetricsBuilder struct {
@@ -2482,60 +2474,67 @@ func WithStartTime(startTime pcommon.Timestamp) metricBuilderOption {
 	}
 }
 
-// WithResourceAttributesSettings sets ResourceAttributeSettings on the metrics builder.
-func WithResourceAttributesSettings(ras ResourceAttributesSettings) metricBuilderOption {
-	return func(mb *MetricsBuilder) {
-		mb.resourceAttributesSettings = ras
+func DefaultMetricsBuilderConfig() MetricsBuilderConfig {
+	return MetricsBuilderConfig{
+		Metrics:            DefaultMetricsSettings(),
+		ResourceAttributes: DefaultResourceAttributesSettings(),
 	}
 }
 
-func NewMetricsBuilder(ms MetricsSettings, settings receiver.CreateSettings, options ...metricBuilderOption) *MetricsBuilder {
+func NewMetricsBuilderConfig(ms MetricsSettings, ras ResourceAttributesSettings) MetricsBuilderConfig {
+	return MetricsBuilderConfig{
+		Metrics:            ms,
+		ResourceAttributes: ras,
+	}
+}
+
+func NewMetricsBuilder(mbc MetricsBuilderConfig, settings receiver.CreateSettings, options ...metricBuilderOption) *MetricsBuilder {
 	mb := &MetricsBuilder{
 		startTime:                                    pcommon.NewTimestampFromTime(time.Now()),
 		metricsBuffer:                                pmetric.NewMetrics(),
 		buildInfo:                                    settings.BuildInfo,
-		resourceAttributesSettings:                   DefaultResourceAttributesSettings(),
-		metricSapnetweaverAbapRfcCount:               newMetricSapnetweaverAbapRfcCount(ms.SapnetweaverAbapRfcCount),
-		metricSapnetweaverAbapSessionCount:           newMetricSapnetweaverAbapSessionCount(ms.SapnetweaverAbapSessionCount),
-		metricSapnetweaverAbapUpdateStatus:           newMetricSapnetweaverAbapUpdateStatus(ms.SapnetweaverAbapUpdateStatus),
-		metricSapnetweaverCacheEvictions:             newMetricSapnetweaverCacheEvictions(ms.SapnetweaverCacheEvictions),
-		metricSapnetweaverCacheHits:                  newMetricSapnetweaverCacheHits(ms.SapnetweaverCacheHits),
-		metricSapnetweaverCertificateValidity:        newMetricSapnetweaverCertificateValidity(ms.SapnetweaverCertificateValidity),
-		metricSapnetweaverConnectionErrorCount:       newMetricSapnetweaverConnectionErrorCount(ms.SapnetweaverConnectionErrorCount),
-		metricSapnetweaverCPUSystemUtilization:       newMetricSapnetweaverCPUSystemUtilization(ms.SapnetweaverCPUSystemUtilization),
-		metricSapnetweaverCPUUtilization:             newMetricSapnetweaverCPUUtilization(ms.SapnetweaverCPUUtilization),
-		metricSapnetweaverDatabaseDialogRequestTime:  newMetricSapnetweaverDatabaseDialogRequestTime(ms.SapnetweaverDatabaseDialogRequestTime),
-		metricSapnetweaverHostMemoryVirtualOverhead:  newMetricSapnetweaverHostMemoryVirtualOverhead(ms.SapnetweaverHostMemoryVirtualOverhead),
-		metricSapnetweaverHostMemoryVirtualSwap:      newMetricSapnetweaverHostMemoryVirtualSwap(ms.SapnetweaverHostMemoryVirtualSwap),
-		metricSapnetweaverHostSpoolListUtilization:   newMetricSapnetweaverHostSpoolListUtilization(ms.SapnetweaverHostSpoolListUtilization),
-		metricSapnetweaverLocksDequeueErrorsCount:    newMetricSapnetweaverLocksDequeueErrorsCount(ms.SapnetweaverLocksDequeueErrorsCount),
-		metricSapnetweaverLocksEnqueueCurrentCount:   newMetricSapnetweaverLocksEnqueueCurrentCount(ms.SapnetweaverLocksEnqueueCurrentCount),
-		metricSapnetweaverLocksEnqueueErrorsCount:    newMetricSapnetweaverLocksEnqueueErrorsCount(ms.SapnetweaverLocksEnqueueErrorsCount),
-		metricSapnetweaverLocksEnqueueHighCount:      newMetricSapnetweaverLocksEnqueueHighCount(ms.SapnetweaverLocksEnqueueHighCount),
-		metricSapnetweaverLocksEnqueueLockTime:       newMetricSapnetweaverLocksEnqueueLockTime(ms.SapnetweaverLocksEnqueueLockTime),
-		metricSapnetweaverLocksEnqueueLockWaitTime:   newMetricSapnetweaverLocksEnqueueLockWaitTime(ms.SapnetweaverLocksEnqueueLockWaitTime),
-		metricSapnetweaverLocksEnqueueMaxCount:       newMetricSapnetweaverLocksEnqueueMaxCount(ms.SapnetweaverLocksEnqueueMaxCount),
-		metricSapnetweaverMemoryConfigured:           newMetricSapnetweaverMemoryConfigured(ms.SapnetweaverMemoryConfigured),
-		metricSapnetweaverMemoryFree:                 newMetricSapnetweaverMemoryFree(ms.SapnetweaverMemoryFree),
-		metricSapnetweaverMemorySwapSpaceUtilization: newMetricSapnetweaverMemorySwapSpaceUtilization(ms.SapnetweaverMemorySwapSpaceUtilization),
-		metricSapnetweaverProcessAvailability:        newMetricSapnetweaverProcessAvailability(ms.SapnetweaverProcessAvailability),
-		metricSapnetweaverQueueCount:                 newMetricSapnetweaverQueueCount(ms.SapnetweaverQueueCount),
-		metricSapnetweaverQueueMaxCount:              newMetricSapnetweaverQueueMaxCount(ms.SapnetweaverQueueMaxCount),
-		metricSapnetweaverQueuePeakCount:             newMetricSapnetweaverQueuePeakCount(ms.SapnetweaverQueuePeakCount),
-		metricSapnetweaverRequestCount:               newMetricSapnetweaverRequestCount(ms.SapnetweaverRequestCount),
-		metricSapnetweaverRequestTimeoutCount:        newMetricSapnetweaverRequestTimeoutCount(ms.SapnetweaverRequestTimeoutCount),
-		metricSapnetweaverResponseDuration:           newMetricSapnetweaverResponseDuration(ms.SapnetweaverResponseDuration),
-		metricSapnetweaverSessionCount:               newMetricSapnetweaverSessionCount(ms.SapnetweaverSessionCount),
-		metricSapnetweaverSessionsBrowserCount:       newMetricSapnetweaverSessionsBrowserCount(ms.SapnetweaverSessionsBrowserCount),
-		metricSapnetweaverSessionsEjbCount:           newMetricSapnetweaverSessionsEjbCount(ms.SapnetweaverSessionsEjbCount),
-		metricSapnetweaverSessionsHTTPCount:          newMetricSapnetweaverSessionsHTTPCount(ms.SapnetweaverSessionsHTTPCount),
-		metricSapnetweaverSessionsSecurityCount:      newMetricSapnetweaverSessionsSecurityCount(ms.SapnetweaverSessionsSecurityCount),
-		metricSapnetweaverSessionsWebCount:           newMetricSapnetweaverSessionsWebCount(ms.SapnetweaverSessionsWebCount),
-		metricSapnetweaverShortDumpsRate:             newMetricSapnetweaverShortDumpsRate(ms.SapnetweaverShortDumpsRate),
-		metricSapnetweaverSpoolRequestErrorCount:     newMetricSapnetweaverSpoolRequestErrorCount(ms.SapnetweaverSpoolRequestErrorCount),
-		metricSapnetweaverSystemInstanceAvailability: newMetricSapnetweaverSystemInstanceAvailability(ms.SapnetweaverSystemInstanceAvailability),
-		metricSapnetweaverWorkProcessActiveCount:     newMetricSapnetweaverWorkProcessActiveCount(ms.SapnetweaverWorkProcessActiveCount),
-		metricSapnetweaverWorkProcessJobAbortedCount: newMetricSapnetweaverWorkProcessJobAbortedCount(ms.SapnetweaverWorkProcessJobAbortedCount),
+		resourceAttributesSettings:                   mbc.ResourceAttributes,
+		metricSapnetweaverAbapRfcCount:               newMetricSapnetweaverAbapRfcCount(mbc.Metrics.SapnetweaverAbapRfcCount),
+		metricSapnetweaverAbapSessionCount:           newMetricSapnetweaverAbapSessionCount(mbc.Metrics.SapnetweaverAbapSessionCount),
+		metricSapnetweaverAbapUpdateStatus:           newMetricSapnetweaverAbapUpdateStatus(mbc.Metrics.SapnetweaverAbapUpdateStatus),
+		metricSapnetweaverCacheEvictions:             newMetricSapnetweaverCacheEvictions(mbc.Metrics.SapnetweaverCacheEvictions),
+		metricSapnetweaverCacheHits:                  newMetricSapnetweaverCacheHits(mbc.Metrics.SapnetweaverCacheHits),
+		metricSapnetweaverCertificateValidity:        newMetricSapnetweaverCertificateValidity(mbc.Metrics.SapnetweaverCertificateValidity),
+		metricSapnetweaverConnectionErrorCount:       newMetricSapnetweaverConnectionErrorCount(mbc.Metrics.SapnetweaverConnectionErrorCount),
+		metricSapnetweaverCPUSystemUtilization:       newMetricSapnetweaverCPUSystemUtilization(mbc.Metrics.SapnetweaverCPUSystemUtilization),
+		metricSapnetweaverCPUUtilization:             newMetricSapnetweaverCPUUtilization(mbc.Metrics.SapnetweaverCPUUtilization),
+		metricSapnetweaverDatabaseDialogRequestTime:  newMetricSapnetweaverDatabaseDialogRequestTime(mbc.Metrics.SapnetweaverDatabaseDialogRequestTime),
+		metricSapnetweaverHostMemoryVirtualOverhead:  newMetricSapnetweaverHostMemoryVirtualOverhead(mbc.Metrics.SapnetweaverHostMemoryVirtualOverhead),
+		metricSapnetweaverHostMemoryVirtualSwap:      newMetricSapnetweaverHostMemoryVirtualSwap(mbc.Metrics.SapnetweaverHostMemoryVirtualSwap),
+		metricSapnetweaverHostSpoolListUtilization:   newMetricSapnetweaverHostSpoolListUtilization(mbc.Metrics.SapnetweaverHostSpoolListUtilization),
+		metricSapnetweaverLocksDequeueErrorsCount:    newMetricSapnetweaverLocksDequeueErrorsCount(mbc.Metrics.SapnetweaverLocksDequeueErrorsCount),
+		metricSapnetweaverLocksEnqueueCurrentCount:   newMetricSapnetweaverLocksEnqueueCurrentCount(mbc.Metrics.SapnetweaverLocksEnqueueCurrentCount),
+		metricSapnetweaverLocksEnqueueErrorsCount:    newMetricSapnetweaverLocksEnqueueErrorsCount(mbc.Metrics.SapnetweaverLocksEnqueueErrorsCount),
+		metricSapnetweaverLocksEnqueueHighCount:      newMetricSapnetweaverLocksEnqueueHighCount(mbc.Metrics.SapnetweaverLocksEnqueueHighCount),
+		metricSapnetweaverLocksEnqueueLockTime:       newMetricSapnetweaverLocksEnqueueLockTime(mbc.Metrics.SapnetweaverLocksEnqueueLockTime),
+		metricSapnetweaverLocksEnqueueLockWaitTime:   newMetricSapnetweaverLocksEnqueueLockWaitTime(mbc.Metrics.SapnetweaverLocksEnqueueLockWaitTime),
+		metricSapnetweaverLocksEnqueueMaxCount:       newMetricSapnetweaverLocksEnqueueMaxCount(mbc.Metrics.SapnetweaverLocksEnqueueMaxCount),
+		metricSapnetweaverMemoryConfigured:           newMetricSapnetweaverMemoryConfigured(mbc.Metrics.SapnetweaverMemoryConfigured),
+		metricSapnetweaverMemoryFree:                 newMetricSapnetweaverMemoryFree(mbc.Metrics.SapnetweaverMemoryFree),
+		metricSapnetweaverMemorySwapSpaceUtilization: newMetricSapnetweaverMemorySwapSpaceUtilization(mbc.Metrics.SapnetweaverMemorySwapSpaceUtilization),
+		metricSapnetweaverProcessAvailability:        newMetricSapnetweaverProcessAvailability(mbc.Metrics.SapnetweaverProcessAvailability),
+		metricSapnetweaverQueueCount:                 newMetricSapnetweaverQueueCount(mbc.Metrics.SapnetweaverQueueCount),
+		metricSapnetweaverQueueMaxCount:              newMetricSapnetweaverQueueMaxCount(mbc.Metrics.SapnetweaverQueueMaxCount),
+		metricSapnetweaverQueuePeakCount:             newMetricSapnetweaverQueuePeakCount(mbc.Metrics.SapnetweaverQueuePeakCount),
+		metricSapnetweaverRequestCount:               newMetricSapnetweaverRequestCount(mbc.Metrics.SapnetweaverRequestCount),
+		metricSapnetweaverRequestTimeoutCount:        newMetricSapnetweaverRequestTimeoutCount(mbc.Metrics.SapnetweaverRequestTimeoutCount),
+		metricSapnetweaverResponseDuration:           newMetricSapnetweaverResponseDuration(mbc.Metrics.SapnetweaverResponseDuration),
+		metricSapnetweaverSessionCount:               newMetricSapnetweaverSessionCount(mbc.Metrics.SapnetweaverSessionCount),
+		metricSapnetweaverSessionsBrowserCount:       newMetricSapnetweaverSessionsBrowserCount(mbc.Metrics.SapnetweaverSessionsBrowserCount),
+		metricSapnetweaverSessionsEjbCount:           newMetricSapnetweaverSessionsEjbCount(mbc.Metrics.SapnetweaverSessionsEjbCount),
+		metricSapnetweaverSessionsHTTPCount:          newMetricSapnetweaverSessionsHTTPCount(mbc.Metrics.SapnetweaverSessionsHTTPCount),
+		metricSapnetweaverSessionsSecurityCount:      newMetricSapnetweaverSessionsSecurityCount(mbc.Metrics.SapnetweaverSessionsSecurityCount),
+		metricSapnetweaverSessionsWebCount:           newMetricSapnetweaverSessionsWebCount(mbc.Metrics.SapnetweaverSessionsWebCount),
+		metricSapnetweaverShortDumpsRate:             newMetricSapnetweaverShortDumpsRate(mbc.Metrics.SapnetweaverShortDumpsRate),
+		metricSapnetweaverSpoolRequestErrorCount:     newMetricSapnetweaverSpoolRequestErrorCount(mbc.Metrics.SapnetweaverSpoolRequestErrorCount),
+		metricSapnetweaverSystemInstanceAvailability: newMetricSapnetweaverSystemInstanceAvailability(mbc.Metrics.SapnetweaverSystemInstanceAvailability),
+		metricSapnetweaverWorkProcessActiveCount:     newMetricSapnetweaverWorkProcessActiveCount(mbc.Metrics.SapnetweaverWorkProcessActiveCount),
+		metricSapnetweaverWorkProcessJobAbortedCount: newMetricSapnetweaverWorkProcessJobAbortedCount(mbc.Metrics.SapnetweaverWorkProcessJobAbortedCount),
 	}
 	for _, op := range options {
 		op(mb)
