@@ -243,7 +243,3 @@ require (
 	sigs.k8s.io/structured-merge-diff/v4 v4.2.3 // indirect
 	sigs.k8s.io/yaml v1.3.0 // indirect
 )
-
-// Pulls in automatic header parsing from OTel (required for supplied_plugins_test.go).
-// Should be removed for OTel v0.73.0+
-replace github.com/open-telemetry/opentelemetry-collector-contrib/pkg/stanza v0.72.0 => github.com/open-telemetry/opentelemetry-collector-contrib/pkg/stanza v0.72.1-0.20230306143518-d4352eab1f68
