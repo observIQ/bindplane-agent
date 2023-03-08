@@ -239,6 +239,9 @@ func (s *sapNetweaverScraper) collectCertificateValidity(_ context.Context, now 
 		return
 	}
 
+	// extracts timestamp within the parenthesis like: NotAfter : Thu Dec 31 19:00:01 2037 (380101000001Z)
+	extractDateRegex := regexp.MustCompile(`\((.*?)\)`)
+
 	for _, certFilePath := range certFilesPaths {
 		if certFilePath == "" {
 			continue
@@ -253,9 +256,7 @@ func (s *sapNetweaverScraper) collectCertificateValidity(_ context.Context, now 
 
 		for _, line := range certs {
 			if strings.Contains(line, "NotAfter") {
-				// extracts timestamp within the parenthesis like: NotAfter : Thu Dec 31 19:00:01 2037 (380101000001Z)
-				re := regexp.MustCompile(`\((.*?)\)`)
-				dateMatch := re.FindStringSubmatch(line)
+				dateMatch := extractDateRegex.FindStringSubmatch(line)
 				if dateMatch == nil {
 					errs.AddPartial(1, fmt.Errorf("failed to parse validity date: %w", err))
 					continue
