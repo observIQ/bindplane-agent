@@ -86,4 +86,3 @@ WORKDIR /etc/otel
 # User should mount /etc/otel/config.yaml at runtime using docker volumes / k8s configmap unless
 # connecting to an OpAMP platform.
 ENTRYPOINT [ "/collector/observiq-otel-collector" ]
-CMD ["--config", "/etc/otel/config.yaml"]
