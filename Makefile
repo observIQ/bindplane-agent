@@ -197,7 +197,7 @@ release-prep:
 # Build and sign, skip release and ignore dirty git tree
 .PHONY: release-test
 release-test:
-	GORELEASER_CURRENT_TAG=$(shell git tag | grep -E -i '^v[0-9]+\.[0-9]+\.[0-9]+' | sort -r --version-sort | head -n1) goreleaser release --parallelism 4 --skip-validate --skip-publish --skip-sign --rm-dist --snapshot
+	GORELEASER_CURRENT_TAG=$(shell git tag | grep -E -i '^v[0-9]+\.[0-9]+\.[0-9]+' | sort -r --version-sort | head -n1) goreleaser release --parallelism 4 --skip-validate --skip-publish --skip-sign --clean --snapshot
 
 .PHONY: for-all
 for-all:
