@@ -1630,6 +1630,8 @@ github.com/open-telemetry/opentelemetry-collector-contrib/receiver/bigipreceiver
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/bigipreceiver v0.73.0/go.mod h1:/pmdR2cnkFsaNHReQQQeVLlCP3ALZzHcH+3wHmpKBYo=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/carbonreceiver v0.73.0 h1:E9mT/UjFBaPOOJaJUorQEmXTk7Ezyunowsg3ZwlAe1o=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/carbonreceiver v0.73.0/go.mod h1:xi1edznspA837wOB88AZNC2eRE1TVGKQ16PceRFvTys=
+github.com/open-telemetry/opentelemetry-collector-contrib/receiver/cloudflarereceiver v0.0.0-20230313204356-4f27accf111d h1:jmbJCOvMU+7ym0q6ZnbjZzeMc26uuL3hve7e2keS+Ns=
+github.com/open-telemetry/opentelemetry-collector-contrib/receiver/cloudflarereceiver v0.0.0-20230313204356-4f27accf111d/go.mod h1:LT/6Vjgk6V/yiWPU/aB72ejcIuRPtN2g3qIPIZBBccQ=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/cloudfoundryreceiver v0.73.0 h1:O7pLsbF9sRHRtY7Q0RD44SaLXCQkDuAqKW+RO06OLkM=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/cloudfoundryreceiver v0.73.0/go.mod h1:CNvWdh4L2baZSjaKqicafPtoqP55Z+wBOcvBTiQVy3o=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/collectdreceiver v0.73.0 h1:PrLVqQwhBH8CQrlaKuvllD1UeZ4gi8WUpeu2+lcDM3A=

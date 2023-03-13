@@ -17,6 +17,7 @@ Below is a list of supported receivers with links to their documentation pages.
 | AWS X-Ray Receiver                          | [awsxrayreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.73.0/receiver/awsxrayreceiver/README.md) |
 | Azure Event Hub Receiver                    | [azureeventhubreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.73.0/receiver/azureeventhubreceiver/README.md) |
 | Carbon Receiver                             | [carbonreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.73.0/receiver/carbonreceiver/README.md) |
+| Cloudflare Receiver                         | [cloudflarereceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.73.0/receiver/cloudflarereceiver/README.md) |
 | Cloud Foundry Receiver                      | [cloudfoundryreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.73.0/receiver/cloudfoundryreceiver/README.md) |
 | collectd write_http Plugin JSON Receiver    | [collectdreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.73.0/receiver/collectdreceiver/README.md) |
 | Docker Stats Receiver                       | [dockerstatsreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.73.0/receiver/dockerstatsreceiver/README.md) |
