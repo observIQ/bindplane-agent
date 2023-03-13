@@ -176,7 +176,7 @@ Usage:
 
   $(fg_yellow '-b, --base-url')
       Defines the base of the download URL as '{base_url}/v{version}/observiq-otel-collector-v{version}-darwin-{os_arch}.tar.gz'.
-      If not provided, this will default to 'https://github.com/observiq/observiq-otel-collector/releases'.
+      If not provided, this will default to '$DOWNLOAD_BASE'.
       Example: '-b http://my.domain.org/observiq-otel-collector/binaries' will be used as the base of the download URL.
    
   $(fg_yellow '-e, --endpoint')
