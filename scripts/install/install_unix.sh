@@ -17,7 +17,7 @@ set -e
 
 # Collector Constants
 PACKAGE_NAME="observiq-otel-collector"
-DOWNLOAD_BASE="https://github.com/observiq/observiq-otel-collector/releases"
+DOWNLOAD_BASE="https://github.com/observiq/observiq-otel-collector/releases/download"
 
 # Script Constants
 COLLECTOR_USER="observiq-otel-collector"
@@ -172,6 +172,11 @@ Usage:
       Defines the URL that the components will be downloaded from.
       If not provided, this will default to observIQ Distro for OpenTelemetry Collector\'s GitHub releases.
       Example: '-l http://my.domain.org/observiq-otel-collector' will download from there.
+
+  $(fg_yellow '-b, --base-url')
+      Defines the base of the download URL as '{base_url}/v{version}/{PACKAGE_NAME}_v{version}_linux_{os_arch}.{package_type}'.
+      If not provided, this will default to '$DOWNLOAD_BASE'.
+      Example: '-b http://my.domain.org/observiq-otel-collector/binaries' will be used as the base of the download URL.
 
   $(fg_yellow '-f, --file')
       Install Collector from a local file instead of downloading from a URL.
@@ -401,8 +406,11 @@ set_download_urls()
       error_exit "$LINENO" "Could not determine version to install"
     fi
 
-    url=$DOWNLOAD_BASE
-    collector_download_url="$url/download/v$version/${PACKAGE_NAME}_v${version}_linux_${os_arch}.${package_type}"
+    if [ -z "$base_url" ] ; then
+      base_url=$DOWNLOAD_BASE
+    fi
+
+    collector_download_url="$base_url/v$version/${PACKAGE_NAME}_v${version}_linux_${os_arch}.${package_type}"
   else
     collector_download_url="$url"
   fi
@@ -737,6 +745,8 @@ main()
           opamp_labels=$2 ; shift 2 ;;
         -s|--secret-key)
           opamp_secret_key=$2 ; shift 2 ;;
+        -b|--base-url)
+          base_url=$2 ; shift 2 ;;
         -r|--uninstall)
           uninstall
           exit 0
