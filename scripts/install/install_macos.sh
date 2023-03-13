@@ -17,7 +17,7 @@ set -e
 
 # Collector Constants
 SERVICE_NAME="com.observiq.collector"
-DOWNLOAD_BASE="https://github.com/observiq/observiq-otel-collector/releases"
+DOWNLOAD_BASE="https://github.com/observiq/observiq-otel-collector/releases/download"
 
 # Script Constants
 PREREQS="printf sed uname tr find grep"
@@ -175,7 +175,7 @@ Usage:
       Example: '-l http://my.domain.org/observiq-otel-collector' will download from there.
 
   $(fg_yellow '-b, --base-url')
-      Defines the base of the download URL as '{base_url}/download/v{version}/observiq-otel-collector-v{version}-darwin-{os_arch}.tar.gz'.
+      Defines the base of the download URL as '{base_url}/v{version}/observiq-otel-collector-v{version}-darwin-{os_arch}.tar.gz'.
       If not provided, this will default to 'https://github.com/observiq/observiq-otel-collector/releases'.
       Example: '-b http://my.domain.org/observiq-otel-collector/binaries' will be used as the base of the download URL.
    
@@ -382,7 +382,7 @@ set_download_urls()
       base_url=$DOWNLOAD_BASE
     fi
 
-    collector_download_url="$base_url/download/v$version/observiq-otel-collector-v${version}-darwin-${os_arch}.tar.gz"
+    collector_download_url="$base_url/v$version/observiq-otel-collector-v${version}-darwin-${os_arch}.tar.gz"
   else
     collector_download_url="$url"
   fi
