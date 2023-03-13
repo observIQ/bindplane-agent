@@ -180,6 +180,25 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.ORG_GORELEASER_GITHUB_TOKEN }}
           COSIGN_PWD: ${{ secrets.ORG_COSIGN_PWD }}
+      # Create artifact bundle and upload to release
+      - name: Create artifact archive
+        run : |
+          mkdir artifacts
+          cp ./scripts/install/*.sh ./artifacts
+          cp ./observiq-otel-collector.msi/observiq-otel-collector.msi ./artifacts
+          cp ./observiq-otel-collector-x86.msi/observiq-otel-collector-x86.msi ./artifacts
+          cp ./dist/*tar.gz ./artifacts
+          cp ./dist/*zip ./artifacts
+          cp ./dist/*.rpm ./artifacts
+          cp ./dist/*.deb ./artifacts
+          cp ./dist/*SHA256SUMS ./artifacts
+          tar -czvf observiq-otel-collector-${{ github.ref_name }}-artifacts.tar.gz -C ./artifacts .
+      - name: Upload artifact bundle to release
+        uses: AButler/upload-release-assets@v2.0
+        with:
+          repo-token: ${{ secrets.ORG_GORELEASER_GITHUB_TOKEN }}
+          files: 'observiq-otel-collector-${{ github.ref_name }}-artifacts.tar.gz'
+          release-tag: ${{ github.ref_name }}
       # Trigger installation tests in otel-collector-installer-testing
       - name: Trigger Installation Testing
         uses: peter-evans/repository-dispatch@v2
