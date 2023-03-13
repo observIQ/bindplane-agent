@@ -173,6 +173,11 @@ Usage:
       Defines the URL that the components will be downloaded from.
       If not provided, this will default to observIQ Distro for OpenTelemetry Collector\'s GitHub releases.
       Example: '-l http://my.domain.org/observiq-otel-collector' will download from there.
+
+  $(fg_yellow '-b, --base-url')
+      Defines the base of the download URL as '{base_url}/download/v{version}/observiq-otel-collector-v{version}-darwin-{os_arch}.tar.gz'.
+      If not provided, this will default to 'https://github.com/observiq/observiq-otel-collector/releases'.
+      Example: '-b http://my.domain.org/observiq-otel-collector/binaries' will be used as the base of the download URL.
    
   $(fg_yellow '-e, --endpoint')
       Defines the endpoint of an OpAMP compatible management server for this collector install.
@@ -373,8 +378,11 @@ set_download_urls()
       error_exit "$LINENO" "Could not determine version to install"
     fi
 
-    url=$DOWNLOAD_BASE
-    collector_download_url="$url/download/v$version/observiq-otel-collector-v${version}-darwin-${os_arch}.tar.gz"
+    if [ -z "$base_url" ] ; then
+      base_url=$DOWNLOAD_BASE
+    fi
+
+    collector_download_url="$base_url/download/v$version/observiq-otel-collector-v${version}-darwin-${os_arch}.tar.gz"
   else
     collector_download_url="$url"
   fi
@@ -641,6 +649,8 @@ main()
           opamp_labels=$2 ; shift 2 ;;
         -s|--secret-key)
           opamp_secret_key=$2 ; shift 2 ;;
+        -b|--base-url)
+          base_url=$2 ; shift 2 ;;
       --)
         shift; break ;;
       *)
