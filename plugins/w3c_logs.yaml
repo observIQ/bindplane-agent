@@ -38,6 +38,7 @@ parameters:
   - name: timestamp_layout
     description: Optional timestamp layout which will parse a timestamp field
     type: string
+    default: '%Y-%m-%d %H:%M:%S'
   - name: timestamp_parse_from
     description: Field to parse the timestamp from, required if 'timestamp_layout' is set
     type: string
@@ -49,14 +50,10 @@ parameters:
       - gotime
       - epoch
     default: strptime
-  - name: timestamp_location
-    description: The geographic location (timezone) to use when parsing a timestamp that does not include a timezone. The available locations depend on the local IANA Time Zone database.
-    type: string
+  - name: timezone
+    description: Timezone to use when parsing the timestamp
+    type: timezone
     default: UTC
-  - name: parse_from
-    description: Where to parse the data from
-    type: string
-    default: body
   - name: parse_to
     description: Where the data will parse to
     type: string
@@ -64,14 +61,6 @@ parameters:
       - attributes
       - body
     default: body
-  - name: lazy_quotes
-    description: If true, a quote may appear in an unquoted field and a non-doubled quote may appear in a quoted field. Cannot be true if 'ignore_quotes' is true.
-    type: bool
-    default: false
-  - name: ignore_quotes
-    description: If true, all quotes are ignored, and fields are simply split on the delimiter. Cannot be true if 'lazy_quotes' is true.
-    type: bool
-    default: false
   - name: delete_after_read
     description: Will delete static log files once they are completely read. When set, 'start_at' must be set to beginning.
     type: bool
@@ -148,18 +137,7 @@ template: |
           expr: 'body matches "^#"'
         - type: csv_parser
           ignore_quotes: true
-          parse_from: '{{ .parse_from }}'
-          parse_to: {{ .parse_to }}
-          lazy_quotes: {{ .lazy_quotes }}
-          ignore_quotes: {{ .ignore_quotes }}
           delimiter: '{{ .delimiter }}'
-          {{ if .timestamp_layout }}
-          timestamp:
-            parse_from: {{ .timestamp_parse_from }}
-            layout: '{{ .timestamp_layout }}'
-            layout_type: {{ .timestamp_layout_type }}
-            location: {{ .timestamp_location }}
-          {{ end }}
 
           {{ if .header_delimiter }} 
           header_delimiter: '{{ .header_delimiter }}'
@@ -174,6 +152,41 @@ template: |
         - type: remove
           field: "attributes.header_fields"
         {{ end }}
+
+        # If both date & time field exists, parse the timestamp
+        - type: router
+          routes:
+          - output: add_timestamp
+            expr: '{{ .parse_to }}.date != nil and {{ .parse_to }}.time != nil'
+          default: time_parser
+
+        # Combines data + time fields into timestamp field
+        - id: add_timestamp
+          type: add
+          field: {{ .parse_to }}.timestamp
+          value: EXPR({{ .parse_to }}.date + " " + {{ .parse_to }}.time)
+
+        # Remove date field
+        - id: remove_date
+          type: remove
+          field: {{ .parse_to }}.date
+
+        # Remove time field
+        - id: remove_time
+          type: remove
+          field: {{ .parse_to }}.time
+
+        - id: time_parser
+          type: time_parser
+          if: '{{ .parse_to }}.timestamp != nil or {{ .timestamp_parse_from }} != nil'
+          {{ if .timestamp_parse_from }}
+          parse_from: {{ .timestamp_parse_from }}
+          {{ else }}
+          parse_from: {{ .parse_to }}.timestamp
+          {{ end }}
+          layout: '{{ .timestamp_layout }}'
+          layout_type: {{ .timestamp_layout_type }}
+          location: {{.timezone}}
           
   service:
     extensions: [file_storage]

@@ -12,14 +12,11 @@ Log Parser for W3C
 | log_type | Adds the specified 'Type' as a label to each log message. | string | `w3c` | false |  |
 | start_at | At startup, where to start reading logs from the file. Must be set to "beginning" if 'header' is not specified or if 'delete_after_read' is being used. | string | `beginning` | false | `beginning`, `end` |
 | max_concurrent_files | Max number of W3C files that will be open during a polling cycle | int | `512` | false |  |
-| timestamp_layout | Optional timestamp layout which will parse a timestamp field | string |  | false |  |
+| timestamp_layout | Optional timestamp layout which will parse a timestamp field | string | `%Y-%m-%d %H:%M:%S` | false |  |
 | timestamp_parse_from | Field to parse the timestamp from, required if 'timestamp_layout' is set | string |  | false |  |
 | timestamp_layout_type | Optional timestamp layout type for parsing the timestamp, suggested if 'timestamp_layout' is set | string | `strptime` | false | `strptime`, `gotime`, `epoch` |
-| timestamp_location | The geographic location (timezone) to use when parsing a timestamp that does not include a timezone. The available locations depend on the local IANA Time Zone database. | string | `UTC` | false |  |
-| parse_from | Where to parse the data from | string | `body` | false |  |
+| timezone | Timezone to use when parsing the timestamp | timezone | `UTC` | false |  |
 | parse_to | Where the data will parse to | string | `body` | false | `attributes`, `body` |
-| lazy_quotes | If true, a quote may appear in an unquoted field and a non-doubled quote may appear in a quoted field. Cannot be true if 'ignore_quotes' is true. | bool | `false` | false |  |
-| ignore_quotes | If true, all quotes are ignored, and fields are simply split on the delimiter. Cannot be true if 'lazy_quotes' is true. | bool | `false` | false |  |
 | delete_after_read | Will delete static log files once they are completely read. When set, 'start_at' must be set to beginning. | bool | `false` | false |  |
 | include_file_name | Include File Name as a label | bool | `true` | false |  |
 | include_file_path | Include File Path as a label | bool | `false` | false |  |
@@ -45,12 +42,10 @@ receivers:
       log_type: w3c
       start_at: beginning
       max_concurrent_files: 512
+      timestamp_layout: %Y-%m-%d %H:%M:%S
       timestamp_layout_type: strptime
-      timestamp_location: UTC
-      parse_from: body
+      timezone: UTC
       parse_to: body
-      lazy_quotes: false
-      ignore_quotes: false
       delete_after_read: false
       include_file_name: true
       include_file_path: false
