@@ -15,6 +15,7 @@ Log Parser for W3C
 | timestamp_layout | Optional timestamp layout which will parse a timestamp field | string |  | false |  |
 | timestamp_parse_from | Field to parse the timestamp from, required if 'timestamp_layout' is set | string |  | false |  |
 | timestamp_layout_type | Optional timestamp layout type for parsing the timestamp, suggested if 'timestamp_layout' is set | string |  | false | `strptime`, `gotime`, `epoch` |
+| timestamp_location | The geographic location (timezone) to use when parsing a timestamp that does not include a timezone. The available locations depend on the local IANA Time Zone database. | string | `UTC` | false |  |
 | parse_from | Where to parse the data from | string | `body` | false |  |
 | parse_to | Where the data will parse to | string | `body` | false | `attributes`, `body` |
 | lazy_quotes | If true, a quote may appear in an unquoted field and a non-doubled quote may appear in a quoted field. Cannot be true if 'ignore_quotes' is true. | bool | `false` | false |  |
@@ -44,6 +45,7 @@ receivers:
       log_type: w3c
       start_at: beginning
       max_concurrent_files: 512
+      timestamp_location: UTC
       parse_from: body
       parse_to: body
       lazy_quotes: false
