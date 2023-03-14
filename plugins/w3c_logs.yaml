@@ -48,9 +48,6 @@ parameters:
       - strptime
       - gotime
       - epoch
-  - name: severity
-    description: Optional severity block which will parse a severity field
-    type: string
   - name: parse_from
     description: Where to parse the data from
     type: string
