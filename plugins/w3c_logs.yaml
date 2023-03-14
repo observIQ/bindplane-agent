@@ -44,6 +44,10 @@ parameters:
   - name: timestamp_layout_type
     description: Optional timestamp layout type for parsing the timestamp, suggested if timestamp_layout is set
     type: string
+    supported:
+      - strptime
+      - gotime
+      - epoch
   - name: severity
     description: Optional severity block which will parse a severity field
     type: string
