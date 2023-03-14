@@ -25,7 +25,7 @@ parameters:
     type: string
     default: w3c
   - name: start_at
-    description: At startup, where to start reading logs from the file. Must be set to "beginning" if 'header' is not specified.
+    description: At startup, where to start reading logs from the file. Must be set to "beginning" if 'header' is not specified or if 'delete_after_read' is being used.
     type: string
     supported:
       - beginning
@@ -39,10 +39,10 @@ parameters:
     description: Optional timestamp layout which will parse a timestamp field
     type: string
   - name: timestamp_parse_from
-    description: Field to parse the timestamp from, required if timestamp_layout is set
+    description: Field to parse the timestamp from, required if 'timestamp_layout' is set
     type: string
   - name: timestamp_layout_type
-    description: Optional timestamp layout type for parsing the timestamp, suggested if timestamp_layout is set
+    description: Optional timestamp layout type for parsing the timestamp, suggested if 'timestamp_layout' is set
     type: string
     supported:
       - strptime
@@ -60,15 +60,15 @@ parameters:
       - body
     default: body
   - name: lazy_quotes
-    description: If true, a quote may appear in an unquoted field and a non-doubled quote may appear in a quoted field. Cannot be true if ignore_quotes is true.
+    description: If true, a quote may appear in an unquoted field and a non-doubled quote may appear in a quoted field. Cannot be true if 'ignore_quotes' is true.
     type: bool
     default: false
   - name: ignore_quotes
-    description: If true, all quotes are ignored, and fields are simply split on the delimiter. Cannot be true if lazy_quotes is true.
+    description: If true, all quotes are ignored, and fields are simply split on the delimiter. Cannot be true if 'lazy_quotes' is true.
     type: bool
     default: false
   - name: delete_after_read
-    description: Will delete static log files once they are completely read
+    description: Will delete static log files once they are completely read. When set, 'start_at' must be set to beginning.
     type: bool
     default: false
   - name: include_file_name
