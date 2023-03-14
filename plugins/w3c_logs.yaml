@@ -35,6 +35,41 @@ parameters:
     description: Max number of W3C files that will be open during a polling cycle
     type: int
     default: 512
+  - name: timestamp_layout
+    description: Optional timestamp layout which will parse a timestamp field
+    type: string
+  - name: timestamp_parse_from
+    description: Field to parse the timestamp from, required if timestamp_layout is set
+    type: string
+  - name: timestamp_layout_type
+    description: Optional timestamp layout type for parsing the timestamp, suggested if timestamp_layout is set
+    type: string
+  - name: severity
+    description: Optional severity block which will parse a severity field
+    type: string
+  - name: parse_from
+    description: Where to parse the data from
+    type: string
+    default: body
+  - name: parse_to
+    description: Where the data will parse to
+    type: string
+    supported:
+      - attributes
+      - body
+    default: body
+  - name: lazy_quotes
+    description: If true, a quote may appear in an unquoted field and a non-doubled quote may appear in a quoted field. Cannot be true if ignore_quotes is true.
+    type: bool
+    default: false
+  - name: ignore_quotes
+    description: If true, all quotes are ignored, and fields are simply split on the delimiter. Cannot be true if lazy_quotes is true.
+    type: bool
+    default: false
+  - name: delete_after_read
+    description: Will delete static log files once they are completely read
+    type: bool
+    default: false
   - name: include_file_name
     description: Include File Name as a label
     type: bool
@@ -74,6 +109,7 @@ template: |
       storage: file_storage
       start_at: '{{ .start_at }}'
       max_concurrent_files: {{ .max_concurrent_files }}
+      delete_after_read: {{ .delete_after_read }}
       include_file_name: {{ .include_file_name }}
       include_file_path: {{ .include_file_path }}
       include_file_name_resolved: {{ .include_file_name_resolved }}
@@ -104,10 +140,14 @@ template: |
       operators:
         - type: filter
           expr: 'body matches "^#"'
-
         - type: csv_parser
           ignore_quotes: true
+          parse_from: '{{ .parse_from }}'
+          parse_to: {{ .parse_to }}
+          lazy_quotes: {{ .lazy_quotes }}
+          ignore_quotes: {{ .ignore_quotes }}
           delimiter: '{{ .delimiter }}'
+
           {{ if .header_delimiter }} 
           header_delimiter: '{{ .header_delimiter }}'
           {{ end }}
@@ -120,6 +160,14 @@ template: |
         {{ if not .header }}
         - type: remove
           field: "attributes.header_fields"
+        {{ end }}
+        {{ if .timestamp_layout }}
+        timestamp:
+          parse_from: {{ .timestamp_parse_from }}
+          layout: {{ .timestamp_layout }}
+          {{ if .timestamp_layout_type }}
+          layout_type: .timestamp_layout_type
+          {{ end }}
         {{ end }}
           
   service:
