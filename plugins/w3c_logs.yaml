@@ -48,6 +48,7 @@ parameters:
       - strptime
       - gotime
       - epoch
+    default: strptime
   - name: timestamp_location
     description: The geographic location (timezone) to use when parsing a timestamp that does not include a timezone. The available locations depend on the local IANA Time Zone database.
     type: string
@@ -172,6 +173,9 @@ template: |
           layout: {{ .timestamp_layout }}
           {{ if .timestamp_layout_type }}
           layout_type: .timestamp_layout_type
+          {{ end }}
+          {{ if .timestamp_location }}
+          location: .timestamp_location
           {{ end }}
         {{ end }}
           

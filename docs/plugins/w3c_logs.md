@@ -14,7 +14,7 @@ Log Parser for W3C
 | max_concurrent_files | Max number of W3C files that will be open during a polling cycle | int | `512` | false |  |
 | timestamp_layout | Optional timestamp layout which will parse a timestamp field | string |  | false |  |
 | timestamp_parse_from | Field to parse the timestamp from, required if 'timestamp_layout' is set | string |  | false |  |
-| timestamp_layout_type | Optional timestamp layout type for parsing the timestamp, suggested if 'timestamp_layout' is set | string |  | false | `strptime`, `gotime`, `epoch` |
+| timestamp_layout_type | Optional timestamp layout type for parsing the timestamp, suggested if 'timestamp_layout' is set | string | `strptime` | false | `strptime`, `gotime`, `epoch` |
 | timestamp_location | The geographic location (timezone) to use when parsing a timestamp that does not include a timezone. The available locations depend on the local IANA Time Zone database. | string | `UTC` | false |  |
 | parse_from | Where to parse the data from | string | `body` | false |  |
 | parse_to | Where the data will parse to | string | `body` | false | `attributes`, `body` |
@@ -45,6 +45,7 @@ receivers:
       log_type: w3c
       start_at: beginning
       max_concurrent_files: 512
+      timestamp_layout_type: strptime
       timestamp_location: UTC
       parse_from: body
       parse_to: body
