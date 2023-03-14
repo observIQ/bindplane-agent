@@ -153,6 +153,13 @@ template: |
           lazy_quotes: {{ .lazy_quotes }}
           ignore_quotes: {{ .ignore_quotes }}
           delimiter: '{{ .delimiter }}'
+          {{ if .timestamp_layout }}
+          timestamp:
+            parse_from: {{ .timestamp_parse_from }}
+            layout: '{{ .timestamp_layout }}'
+            layout_type: {{ .timestamp_layout_type }}
+            location: {{ .timestamp_location }}
+          {{ end }}
 
           {{ if .header_delimiter }} 
           header_delimiter: '{{ .header_delimiter }}'
@@ -166,17 +173,6 @@ template: |
         {{ if not .header }}
         - type: remove
           field: "attributes.header_fields"
-        {{ end }}
-        {{ if .timestamp_layout }}
-        timestamp:
-          parse_from: {{ .timestamp_parse_from }}
-          layout: {{ .timestamp_layout }}
-          {{ if .timestamp_layout_type }}
-          layout_type: .timestamp_layout_type
-          {{ end }}
-          {{ if .timestamp_location }}
-          location: .timestamp_location
-          {{ end }}
         {{ end }}
           
   service:
