@@ -125,6 +125,135 @@ func TestCheckManagerConfigNoFile(t *testing.T) {
 	require.Equal(t, expected, actual)
 }
 
+func TestCheckManagerConfigNoFileTLS(t *testing.T) {
+	testCases := []struct {
+		name        string
+		setupFunc   func()
+		cleanupFunc func()
+		expectFunc  func() *opamp.TLSConfig
+		expectedErr error
+	}{
+		{
+			name: "no-tls",
+			setupFunc: func() {
+				return
+			},
+			cleanupFunc: func() {
+				return
+			},
+			expectFunc: func() *opamp.TLSConfig {
+				return nil
+			},
+			expectedErr: nil,
+		},
+		{
+			name: "skip-verify",
+			setupFunc: func() {
+				t.Setenv(tlsSkipVerifyENV, "true")
+			},
+			cleanupFunc: func() {
+				t.Setenv(tlsSkipVerifyENV, "")
+			},
+			expectFunc: func() *opamp.TLSConfig {
+				return &opamp.TLSConfig{
+					InsecureSkipVerify: true,
+				}
+			},
+			expectedErr: nil,
+		},
+		{
+			name: "skip-verify_invalid",
+			setupFunc: func() {
+				t.Setenv(tlsSkipVerifyENV, "invalid")
+			},
+			cleanupFunc: func() {
+				t.Setenv(tlsSkipVerifyENV, "")
+			},
+			expectFunc: func() *opamp.TLSConfig {
+				return nil
+			},
+			expectedErr: errors.New("invalid value 'invalid' for environment option 'OPAMP_TLS_SKIP_VERIFY'"),
+		},
+		{
+			name: "tls",
+			setupFunc: func() {
+				t.Setenv(tlsCaENV, "/tls/ca.crt")
+			},
+			cleanupFunc: func() {
+				t.Setenv(tlsCaENV, "")
+			},
+			expectFunc: func() *opamp.TLSConfig {
+				ca := "/tls/ca.crt"
+				return &opamp.TLSConfig{
+					CAFile: &ca,
+				}
+			},
+			expectedErr: nil,
+		},
+		{
+			name: "mtls",
+			setupFunc: func() {
+				t.Setenv(tlsKeyENV, "/tls/tls.key")
+				t.Setenv(tlsCertENV, "/tls/tls.crt")
+			},
+			cleanupFunc: func() {
+				t.Setenv(tlsKeyENV, "")
+				t.Setenv(tlsCertENV, "")
+			},
+			expectFunc: func() *opamp.TLSConfig {
+				key := "/tls/tls.key"
+				cert := "/tls/tls.crt"
+				return &opamp.TLSConfig{
+					KeyFile:  &key,
+					CertFile: &cert,
+				}
+			},
+			expectedErr: nil,
+		},
+		{
+			name: "tls_all",
+			setupFunc: func() {
+				t.Setenv(tlsSkipVerifyENV, "true")
+				t.Setenv(tlsCaENV, "/tls/ca.crt")
+				t.Setenv(tlsKeyENV, "/tls/tls.key")
+				t.Setenv(tlsCertENV, "/tls/tls.crt")
+			},
+			cleanupFunc: func() {
+				t.Setenv(tlsSkipVerifyENV, "")
+				t.Setenv(tlsCaENV, "")
+				t.Setenv(tlsKeyENV, "")
+				t.Setenv(tlsCertENV, "")
+			},
+			expectFunc: func() *opamp.TLSConfig {
+				ca := "/tls/ca.crt"
+				key := "/tls/tls.key"
+				cert := "/tls/tls.crt"
+				return &opamp.TLSConfig{
+					InsecureSkipVerify: true,
+					CAFile:             &ca,
+					KeyFile:            &key,
+					CertFile:           &cert,
+				}
+			},
+			expectedErr: nil,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			tc.setupFunc()
+			defer tc.cleanupFunc()
+
+			actual, err := configureTLS()
+			if tc.expectedErr != nil {
+				require.ErrorContains(t, err, tc.expectedErr.Error())
+				return
+			}
+			require.Equal(t, tc.expectFunc(), actual)
+		})
+	}
+}
+
 func TestManagerConfigNoAgentIDWillSet(t *testing.T) {
 	tmpDir := t.TempDir()
 	manager := filepath.Join(tmpDir, "manager.yaml")

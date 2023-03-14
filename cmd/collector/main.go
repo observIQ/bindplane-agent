@@ -21,6 +21,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strconv"
 	_ "time/tzdata"
 
 	"github.com/observiq/observiq-otel-collector/collector"
@@ -36,14 +37,18 @@ import (
 
 const (
 	// env variable name constants
-	endpointENV    = "OPAMP_ENDPOINT"
-	agentIDENV     = "OPAMP_AGENT_ID"
-	secretkeyENV   = "OPAMP_SECRET_KEY" //#nosec G101
-	labelsENV      = "OPAMP_LABELS"
-	agentNameENV   = "OPAMP_AGENT_NAME"
-	configPathENV  = "CONFIG_YAML_PATH"
-	managerPathENV = "MANAGER_YAML_PATH"
-	loggingPathENV = "LOGGING_YAML_PATH"
+	endpointENV      = "OPAMP_ENDPOINT"
+	agentIDENV       = "OPAMP_AGENT_ID"
+	secretkeyENV     = "OPAMP_SECRET_KEY" //#nosec G101
+	labelsENV        = "OPAMP_LABELS"
+	agentNameENV     = "OPAMP_AGENT_NAME"
+	tlsSkipVerifyENV = "OPAMP_TLS_SKIP_VERIFY"
+	tlsCaENV         = "OPAMP_TLS_CA"
+	tlsCertENV       = "OPAMP_TLS_CERT"
+	tlsKeyENV        = "OPAMP_TLS_KEY"
+	configPathENV    = "CONFIG_YAML_PATH"
+	managerPathENV   = "MANAGER_YAML_PATH"
+	loggingPathENV   = "LOGGING_YAML_PATH"
 )
 
 func main() {
@@ -188,6 +193,15 @@ func checkManagerConfig(configPath *string) error {
 			newConfig.Labels = &label
 		}
 
+		tlsConfig, err := configureTLS()
+		if err != nil {
+			return fmt.Errorf("failed to configure tls: %w", err)
+		}
+
+		if tlsConfig != nil {
+			newConfig.TLS = tlsConfig
+		}
+
 		data, err := yaml.Marshal(newConfig)
 		if err != nil {
 			return fmt.Errorf("failed to marshal config: %w", err)
@@ -261,4 +275,38 @@ func checkForCollectorRollbackConfig(configPath string) error {
 	}
 
 	return nil
+}
+
+func configureTLS() (*opamp.TLSConfig, error) {
+	tlsConfig := opamp.TLSConfig{}
+	tlsConfigured := false
+
+	if skipVerify := os.Getenv(tlsSkipVerifyENV); skipVerify != "" {
+		s, err := strconv.ParseBool(skipVerify)
+		if err != nil {
+			return nil, fmt.Errorf("invalid value '%s' for environment option '%s': %w", skipVerify, tlsSkipVerifyENV, err)
+		}
+		tlsConfig.InsecureSkipVerify = s
+		tlsConfigured = true
+	}
+
+	if ca := os.Getenv(tlsCaENV); ca != "" {
+		tlsConfig.CAFile = &ca
+		tlsConfigured = true
+	}
+
+	if crt := os.Getenv(tlsCertENV); crt != "" {
+		tlsConfig.CertFile = &crt
+		tlsConfigured = true
+	}
+
+	if key := os.Getenv(tlsKeyENV); key != "" {
+		tlsConfig.KeyFile = &key
+		tlsConfigured = true
+	}
+
+	if tlsConfigured {
+		return &tlsConfig, nil
+	}
+	return nil, nil
 }
