@@ -129,16 +129,12 @@ func TestCheckManagerConfigNoFileTLS(t *testing.T) {
 	testCases := []struct {
 		name        string
 		setupFunc   func()
-		cleanupFunc func()
 		expectFunc  func() *opamp.TLSConfig
 		expectedErr error
 	}{
 		{
 			name: "no-tls",
 			setupFunc: func() {
-				return
-			},
-			cleanupFunc: func() {
 				return
 			},
 			expectFunc: func() *opamp.TLSConfig {
@@ -150,9 +146,6 @@ func TestCheckManagerConfigNoFileTLS(t *testing.T) {
 			name: "skip-verify",
 			setupFunc: func() {
 				t.Setenv(tlsSkipVerifyENV, "true")
-			},
-			cleanupFunc: func() {
-				t.Setenv(tlsSkipVerifyENV, "")
 			},
 			expectFunc: func() *opamp.TLSConfig {
 				return &opamp.TLSConfig{
@@ -166,9 +159,6 @@ func TestCheckManagerConfigNoFileTLS(t *testing.T) {
 			setupFunc: func() {
 				t.Setenv(tlsSkipVerifyENV, "invalid")
 			},
-			cleanupFunc: func() {
-				t.Setenv(tlsSkipVerifyENV, "")
-			},
 			expectFunc: func() *opamp.TLSConfig {
 				return nil
 			},
@@ -178,9 +168,6 @@ func TestCheckManagerConfigNoFileTLS(t *testing.T) {
 			name: "tls",
 			setupFunc: func() {
 				t.Setenv(tlsCaENV, "/tls/ca.crt")
-			},
-			cleanupFunc: func() {
-				t.Setenv(tlsCaENV, "")
 			},
 			expectFunc: func() *opamp.TLSConfig {
 				ca := "/tls/ca.crt"
@@ -195,10 +182,6 @@ func TestCheckManagerConfigNoFileTLS(t *testing.T) {
 			setupFunc: func() {
 				t.Setenv(tlsKeyENV, "/tls/tls.key")
 				t.Setenv(tlsCertENV, "/tls/tls.crt")
-			},
-			cleanupFunc: func() {
-				t.Setenv(tlsKeyENV, "")
-				t.Setenv(tlsCertENV, "")
 			},
 			expectFunc: func() *opamp.TLSConfig {
 				key := "/tls/tls.key"
@@ -218,12 +201,6 @@ func TestCheckManagerConfigNoFileTLS(t *testing.T) {
 				t.Setenv(tlsKeyENV, "/tls/tls.key")
 				t.Setenv(tlsCertENV, "/tls/tls.crt")
 			},
-			cleanupFunc: func() {
-				t.Setenv(tlsSkipVerifyENV, "")
-				t.Setenv(tlsCaENV, "")
-				t.Setenv(tlsKeyENV, "")
-				t.Setenv(tlsCertENV, "")
-			},
 			expectFunc: func() *opamp.TLSConfig {
 				ca := "/tls/ca.crt"
 				key := "/tls/tls.key"
@@ -242,7 +219,12 @@ func TestCheckManagerConfigNoFileTLS(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			tc.setupFunc()
-			defer tc.cleanupFunc()
+			defer func() {
+				os.Unsetenv(tlsSkipVerifyENV)
+				os.Unsetenv(tlsCaENV)
+				os.Unsetenv(tlsKeyENV)
+				os.Unsetenv(tlsCertENV)
+			}()
 
 			actual, err := configureTLS()
 			if tc.expectedErr != nil {
