@@ -81,6 +81,7 @@ require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/azureeventhubreceiver v0.73.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/bigipreceiver v0.73.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/carbonreceiver v0.73.0
+	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/cloudflarereceiver v0.0.0-20230313204356-4f27accf111d
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/cloudfoundryreceiver v0.73.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/collectdreceiver v0.73.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/couchdbreceiver v0.73.0
