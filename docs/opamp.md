@@ -48,12 +48,14 @@ If the collector can not find the specified `manager.yaml` file it will search f
 
 **Note**: Only the `OPAMP_ENDPOINT` is required. If this is not set and there is no `manager.yaml` the collector will start in its normal standalone mode.
 
-| Environment Variable | Required | Description                                                                       |
-| :------------------- | :------: | :-------------------------------------------------------------------------------- |
-| OPAMP_ENDPOINT       | X        | The API endpoint to communicate with the server via websocket                     |
-| OPAMP_SECRET_KEY     |          | The Secret Key defined for the server to be used for authorization                |
-| OPAMP_AGENT_ID       |          | A UUID used to uniquely identify the agent. If not supplied one will be generated |
-| OPAMP_LABELS         |          | A comma separated list of labels in the form `label=value`                        |
-| OPAMP_AGENT_NAME     |          | Human readable name for the agent                                                 |
-
-
+| Environment Variable  | Required | Description                                                                       |
+| :-------------------- | :------: | :-------------------------------------------------------------------------------- |
+| OPAMP_ENDPOINT        | X        | The API endpoint to communicate with the server via websocket                     |
+| OPAMP_SECRET_KEY      |          | The Secret Key defined for the server to be used for authorization                |
+| OPAMP_AGENT_ID        |          | A UUID used to uniquely identify the agent. If not supplied one will be generated |
+| OPAMP_LABELS          |          | A comma separated list of labels in the form `label=value`                        |
+| OPAMP_AGENT_NAME      |          | Human readable name for the agent                                                 |
+| OPAMP_TLS_SKIP_VERIFY |          | Set to `"true"` to skip verification of the OpAMP server's TLS certificate        |
+| OPAMP_TLS_CA          |          | File path to a certificate authority file that should be used to validate the server's TLS certificate |
+| OPAMP_TLS_CERT        |          | File path to a certificate file that will be used for client TLS authentication |
+| OPAMP_TLS_KEY         |          | File path to a private key file that will be used for client TLS authentication |
