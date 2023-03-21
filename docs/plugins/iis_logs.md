@@ -15,7 +15,7 @@ Log parser for IIS
 | include_file_path | Enable to include file path in logs | bool | `true` | false |  |
 | include_file_name_resolved | Enable to include file name resolved in logs | bool | `false` | false |  |
 | include_file_path_resolved | Enable to include file path resolved in logs | bool | `false` | false |  |
-| max_concurrent_files | Max number of W3C files that will be open during a polling cycle | int | `512` | false |  |
+| max_concurrent_files | Max number of W3C files that will be open during a batch | int | `1024` | false |  |
 | start_at | At startup, where to start reading logs from the file (`beginning` or `end`). | string | `beginning` | false | `beginning`, `end` |
 | retain_raw_logs | When enabled will preserve the original log message in a `raw_log` key. This will either be in the `body` or `attributes` depending on how `parse_to` is configured. | bool | `false` | false |  |
 | parse_to | Where to parse structured log parts | string | `body` | false | `body`, `attributes` |
@@ -38,7 +38,7 @@ receivers:
       include_file_path: true
       include_file_name_resolved: false
       include_file_path_resolved: false
-      max_concurrent_files: 512
+      max_concurrent_files: 1024
       start_at: beginning
       retain_raw_logs: false
       parse_to: body

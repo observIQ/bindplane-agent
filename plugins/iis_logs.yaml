@@ -43,9 +43,9 @@ parameters:
     type: bool
     default: false
   - name: max_concurrent_files
-    description: Max number of W3C files that will be open during a polling cycle
+    description: Max number of W3C files that will be open during a batch
     type: int
-    default: 512
+    default: 1024
   - name: start_at
     description: At startup, where to start reading logs from the file (`beginning` or `end`).
     type: string
