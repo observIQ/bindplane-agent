@@ -11,7 +11,7 @@ Log Parser for W3C
 | encoding | Specify the encoding of the file(s) being read. In most cases, you can leave the default option selected. | string | `utf-8` | false | `utf-8`, `utf-16le`, `utf-16be`, `ascii`, `big5` |
 | log_type | Adds the specified 'Type' as a label to each log message. | string | `w3c` | false |  |
 | start_at | At startup, where to start reading logs from the file. Must be set to "beginning" if 'header' is not specified or if 'delete_after_read' is being used. | string | `beginning` | false | `beginning`, `end` |
-| max_concurrent_files | Max number of W3C files that will be open during a polling cycle | int | `512` | false |  |
+| max_concurrent_files | Max number of W3C files that will be open during a batch | int | `1024` | false |  |
 | timestamp_layout | Optional timestamp layout which will parse a timestamp field | string | `%Y-%m-%d %H:%M:%S` | false |  |
 | timestamp_parse_from | Field to parse the timestamp from, required if 'timestamp_layout' is set | string |  | false |  |
 | timestamp_layout_type | Optional timestamp layout type for parsing the timestamp, suggested if 'timestamp_layout' is set | string | `strptime` | false | `strptime`, `gotime`, `epoch` |
@@ -41,7 +41,7 @@ receivers:
       encoding: utf-8
       log_type: w3c
       start_at: beginning
-      max_concurrent_files: 512
+      max_concurrent_files: 1024
       timestamp_layout: %Y-%m-%d %H:%M:%S
       timestamp_layout_type: strptime
       timezone: UTC
