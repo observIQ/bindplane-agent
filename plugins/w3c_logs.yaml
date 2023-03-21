@@ -32,9 +32,9 @@ parameters:
       - end
     default: beginning
   - name: max_concurrent_files
-    description: Max number of W3C files that will be open during a polling cycle
+    description: Max number of W3C files that will be open during a batch
     type: int
-    default: 512
+    default: 1024
   - name: timestamp_layout
     description: Optional timestamp layout which will parse a timestamp field
     type: string
