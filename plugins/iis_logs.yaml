@@ -42,6 +42,10 @@ parameters:
     description: Enable to include file path resolved in logs
     type: bool
     default: false
+  - name: max_concurrent_files
+    description: Max number of W3C files that will be open during a batch
+    type: int
+    default: 1024
   - name: start_at
     description: At startup, where to start reading logs from the file (`beginning` or `end`).
     type: string
@@ -96,6 +100,7 @@ template: |
       include_file_name_resolved: {{ .include_file_name_resolved }}
       include_file_path_resolved: {{ .include_file_path_resolved }}
       start_at: {{ .start_at }}
+      max_concurrent_files: {{ .max_concurrent_files }}
       operators: 
       - type: filter
         expr: 'body matches "^#"'
@@ -193,6 +198,7 @@ template: |
       include_file_name_resolved: {{ .include_file_name_resolved }}
       include_file_path_resolved: {{ .include_file_path_resolved }}
       start_at: {{ .start_at }}
+      max_concurrent_files: {{ .max_concurrent_files }}
       operators: 
       {{ if .retain_raw_logs }}
       - id: save_raw_log
@@ -268,6 +274,7 @@ template: |
       include_file_name_resolved: {{ .include_file_name_resolved }}
       include_file_path_resolved: {{ .include_file_path_resolved }}
       start_at: {{ .start_at }}
+      max_concurrent_files: {{ .max_concurrent_files }}
       operators: 
       {{ if .retain_raw_logs }}
       - id: save_raw_log
