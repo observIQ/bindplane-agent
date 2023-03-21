@@ -202,6 +202,10 @@ dockers:
       - "observiq/observiq-otel-collector-amd64:{{ .Major }}.{{ .Minor }}.{{ .Patch }}"
       - "observiq/observiq-otel-collector-amd64:{{ .Major }}.{{ .Minor }}"
       - "observiq/observiq-otel-collector-amd64:{{ .Major }}"
+      - "ghcr.io/observiq/observiq-otel-collector-amd64:latest"
+      - "ghcr.io/observiq/observiq-otel-collector-amd64:{{ .Major }}.{{ .Minor }}.{{ .Patch }}"
+      - "ghcr.io/observiq/observiq-otel-collector-amd64:{{ .Major }}.{{ .Minor }}"
+      - "ghcr.io/observiq/observiq-otel-collector-amd64:{{ .Major }}"
     dockerfile: ./docker/Dockerfile.ubuntu
     use: buildx
     build_flag_templates:
@@ -225,6 +229,10 @@ dockers:
       - "observiq/observiq-otel-collector-arm64:{{ .Major }}.{{ .Minor }}.{{ .Patch }}"
       - "observiq/observiq-otel-collector-arm64:{{ .Major }}.{{ .Minor }}"
       - "observiq/observiq-otel-collector-arm64:{{ .Major }}"
+      - "ghcr.io/observiq/observiq-otel-collector-arm64:latest"
+      - "ghcr.io/observiq/observiq-otel-collector-arm64:{{ .Major }}.{{ .Minor }}.{{ .Patch }}"
+      - "ghcr.io/observiq/observiq-otel-collector-arm64:{{ .Major }}.{{ .Minor }}"
+      - "ghcr.io/observiq/observiq-otel-collector-arm64:{{ .Major }}"
     dockerfile: ./docker/Dockerfile.ubuntu
     use: buildx
     build_flag_templates:
@@ -246,6 +254,7 @@ dockers:
       - collector
     image_templates:
       - "observiq/observiq-otel-collector-amd64:{{ .Major }}.{{ .Minor }}.{{ .Patch }}-ubi8"
+      - "ghcr.io/observiq/observiq-otel-collector-amd64:{{ .Major }}.{{ .Minor }}.{{ .Patch }}-ubi8"
     dockerfile: ./docker/Dockerfile.ubi8
     use: buildx
     build_flag_templates:
@@ -266,6 +275,7 @@ dockers:
       - collector
     image_templates:
       - "observiq/observiq-otel-collector-arm64:{{ .Major }}.{{ .Minor }}.{{ .Patch }}-ubi8"
+      - "ghcr.io/observiq/observiq-otel-collector-arm64:{{ .Major }}.{{ .Minor }}.{{ .Patch }}-ubi8"
     dockerfile: ./docker/Dockerfile.ubi8
     use: buildx
     build_flag_templates:
@@ -305,6 +315,31 @@ docker_manifests:
     image_templates:
       - "observiq/observiq-otel-collector-amd64:{{ .Major }}.{{ .Minor }}.{{ .Patch }}-ubi8"
       - "observiq/observiq-otel-collector-arm64:{{ .Major }}.{{ .Minor }}.{{ .Patch }}-ubi8"
+    skip_push: false
+  - name_template: "ghcr.io/observiq/observiq-otel-collector:latest"
+    image_templates:
+      - "ghcr.io/observiq/observiq-otel-collector-amd64:latest"
+      - "ghcr.io/observiq/observiq-otel-collector-arm64:latest"
+    skip_push: false
+  - name_template: "ghcr.io/observiq/observiq-otel-collector:{{ .Major }}.{{ .Minor }}.{{ .Patch }}"
+    image_templates:
+      - "ghcr.io/observiq/observiq-otel-collector-amd64:{{ .Major }}.{{ .Minor }}.{{ .Patch }}"
+      - "ghcr.io/observiq/observiq-otel-collector-arm64:{{ .Major }}.{{ .Minor }}.{{ .Patch }}"
+    skip_push: false
+  - name_template: "ghcr.io/observiq/observiq-otel-collector:{{ .Major }}.{{ .Minor }}"
+    image_templates:
+      - "ghcr.io/observiq/observiq-otel-collector-amd64:{{ .Major }}.{{ .Minor }}"
+      - "ghcr.io/observiq/observiq-otel-collector-arm64:{{ .Major }}.{{ .Minor }}"
+    skip_push: false
+  - name_template: "ghcr.io/observiq/observiq-otel-collector:{{ .Major }}"
+    image_templates:
+      - "ghcr.io/observiq/observiq-otel-collector-amd64:{{ .Major }}"
+      - "ghcr.io/observiq/observiq-otel-collector-arm64:{{ .Major }}"
+    skip_push: false
+  - name_template: "ghcr.io/observiq/observiq-otel-collector:{{ .Major }}.{{ .Minor }}.{{ .Patch }}-ubi8"
+    image_templates:
+      - "ghcr.io/observiq/observiq-otel-collector-amd64:{{ .Major }}.{{ .Minor }}.{{ .Patch }}-ubi8"
+      - "ghcr.io/observiq/observiq-otel-collector-arm64:{{ .Major }}.{{ .Minor }}.{{ .Patch }}-ubi8"
     skip_push: false
 
 # https://goreleaser.com/customization/checksum/
