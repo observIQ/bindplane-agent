@@ -22,8 +22,8 @@ jobs:
         with:
           # either 'goreleaser' (default) or 'goreleaser-pro'
           distribution: goreleaser
-          version: "v1.14.1"
-          args: build --single-target --skip-validate --rm-dist
+          version: "v1.16.1"
+          args: build --single-target --skip-validate --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Copy Windows Collector Binary
@@ -82,8 +82,8 @@ jobs:
         with:
           # either 'goreleaser' (default) or 'goreleaser-pro'
           distribution: goreleaser
-          version: "v1.14.1"
-          args: build --single-target --skip-validate --rm-dist
+          version: "v1.16.1"
+          args: build --single-target --skip-validate --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GOARCH: "386"
@@ -175,11 +175,30 @@ jobs:
         uses: goreleaser/goreleaser-action@v4
         with:
           distribution: goreleaser
-          version: "v1.14.1"
-          args: release --rm-dist --timeout 120m
+          version: "v1.16.1"
+          args: release --clean --timeout 120m
         env:
           GITHUB_TOKEN: ${{ secrets.ORG_GORELEASER_GITHUB_TOKEN }}
           COSIGN_PWD: ${{ secrets.ORG_COSIGN_PWD }}
+      # Create artifact bundle and upload to release
+      - name: Create artifact archive
+        run : |
+          mkdir artifacts
+          cp ./scripts/install/*.sh ./artifacts
+          cp ./observiq-otel-collector.msi/observiq-otel-collector.msi ./artifacts
+          cp ./observiq-otel-collector-x86.msi/observiq-otel-collector-x86.msi ./artifacts
+          cp ./dist/*tar.gz ./artifacts
+          cp ./dist/*zip ./artifacts
+          cp ./dist/*.rpm ./artifacts
+          cp ./dist/*.deb ./artifacts
+          cp ./dist/*SHA256SUMS ./artifacts
+          tar -czvf observiq-otel-collector-${{ github.ref_name }}-artifacts.tar.gz -C ./artifacts .
+      - name: Upload artifact bundle to release
+        uses: AButler/upload-release-assets@v2.0
+        with:
+          repo-token: ${{ secrets.ORG_GORELEASER_GITHUB_TOKEN }}
+          files: 'observiq-otel-collector-${{ github.ref_name }}-artifacts.tar.gz'
+          release-tag: ${{ github.ref_name }}
       # Trigger installation tests in otel-collector-installer-testing
       - name: Trigger Installation Testing
         uses: peter-evans/repository-dispatch@v2

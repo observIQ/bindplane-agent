@@ -1,4 +1,4 @@
-version: 0.1.0
+version: 0.2.0
 title: W3C
 description: Log Parser for W3C
 parameters:
@@ -25,16 +25,46 @@ parameters:
     type: string
     default: w3c
   - name: start_at
-    description: At startup, where to start reading logs from the file. Must be set to "beginning" if 'header' is not specified.
+    description: At startup, where to start reading logs from the file. Must be set to "beginning" if 'header' is not specified or if 'delete_after_read' is being used.
     type: string
     supported:
       - beginning
       - end
     default: beginning
   - name: max_concurrent_files
-    description: Max number of W3C files that will be open during a polling cycle
+    description: Max number of W3C files that will be open during a batch
     type: int
-    default: 512
+    default: 1024
+  - name: timestamp_layout
+    description: Optional timestamp layout which will parse a timestamp field
+    type: string
+    default: '%Y-%m-%d %H:%M:%S'
+  - name: timestamp_parse_from
+    description: Field to parse the timestamp from, required if 'timestamp_layout' is set
+    type: string
+  - name: timestamp_layout_type
+    description: Optional timestamp layout type for parsing the timestamp, suggested if 'timestamp_layout' is set
+    type: string
+    supported:
+      - strptime
+      - gotime
+      - epoch
+    default: strptime
+  - name: timezone
+    description: Timezone to use when parsing the timestamp
+    type: timezone
+    default: UTC
+  - name: parse_to
+    description: Where the data will parse to
+    type: string
+    supported:
+      - attributes
+      - body
+    default: body
+  - name: delete_after_read
+    description: Will delete static log files once they are completely read. When set, 'start_at' must be set to beginning.
+    type: bool
+    default: false
   - name: include_file_name
     description: Include File Name as a label
     type: bool
@@ -74,6 +104,7 @@ template: |
       storage: file_storage
       start_at: '{{ .start_at }}'
       max_concurrent_files: {{ .max_concurrent_files }}
+      delete_after_read: {{ .delete_after_read }}
       include_file_name: {{ .include_file_name }}
       include_file_path: {{ .include_file_path }}
       include_file_name_resolved: {{ .include_file_name_resolved }}
@@ -104,10 +135,10 @@ template: |
       operators:
         - type: filter
           expr: 'body matches "^#"'
-
         - type: csv_parser
           ignore_quotes: true
           delimiter: '{{ .delimiter }}'
+
           {{ if .header_delimiter }} 
           header_delimiter: '{{ .header_delimiter }}'
           {{ end }}
@@ -121,6 +152,41 @@ template: |
         - type: remove
           field: "attributes.header_fields"
         {{ end }}
+
+        # If both date & time field exists, parse the timestamp
+        - type: router
+          routes:
+          - output: add_timestamp
+            expr: '{{ .parse_to }}.date != nil and {{ .parse_to }}.time != nil'
+          default: time_parser
+
+        # Combines data + time fields into timestamp field
+        - id: add_timestamp
+          type: add
+          field: {{ .parse_to }}.timestamp
+          value: EXPR({{ .parse_to }}.date + " " + {{ .parse_to }}.time)
+
+        # Remove date field
+        - id: remove_date
+          type: remove
+          field: {{ .parse_to }}.date
+
+        # Remove time field
+        - id: remove_time
+          type: remove
+          field: {{ .parse_to }}.time
+
+        - id: time_parser
+          type: time_parser
+          if: '{{ .parse_to }}.timestamp != nil or {{ .timestamp_parse_from }} != nil'
+          {{ if .timestamp_parse_from }}
+          parse_from: {{ .timestamp_parse_from }}
+          {{ else }}
+          parse_from: {{ .parse_to }}.timestamp
+          {{ end }}
+          layout: '{{ .timestamp_layout }}'
+          layout_type: {{ .timestamp_layout_type }}
+          location: {{.timezone}}
           
   service:
     extensions: [file_storage]

@@ -85,9 +85,9 @@ build-windows-x86:
 install-tools:
 	go install github.com/client9/misspell/cmd/misspell@v0.3.4
 	go install github.com/google/addlicense@v1.1.0
-	go install github.com/goreleaser/goreleaser@v1.14.1
+	go install github.com/goreleaser/goreleaser@v1.16.1
 	go install github.com/mgechev/revive@v1.2.3
-	go install github.com/open-telemetry/opentelemetry-collector-contrib/cmd/mdatagen@v0.73.0
+	go install github.com/open-telemetry/opentelemetry-collector-contrib/cmd/mdatagen@v0.74.0
 	go install github.com/securego/gosec/v2/cmd/gosec@v2.15.0
 	go install github.com/sigstore/cosign/cmd/cosign@v1.10.1
 	go install github.com/uw-labs/lichen@v0.1.7
@@ -197,7 +197,7 @@ release-prep:
 # Build and sign, skip release and ignore dirty git tree
 .PHONY: release-test
 release-test:
-	GORELEASER_CURRENT_TAG=$(shell git tag | grep -E -i '^v[0-9]+\.[0-9]+\.[0-9]+' | sort -r --version-sort | head -n1) goreleaser release --parallelism 4 --skip-validate --skip-publish --skip-sign --rm-dist --snapshot
+	GORELEASER_CURRENT_TAG=$(shell git tag | grep -E -i '^v[0-9]+\.[0-9]+\.[0-9]+' | sort -r --version-sort | head -n1) goreleaser release --parallelism 4 --skip-validate --skip-publish --skip-sign --clean --snapshot
 
 .PHONY: for-all
 for-all:

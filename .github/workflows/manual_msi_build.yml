@@ -23,8 +23,8 @@ jobs:
         with:
           # either 'goreleaser' (default) or 'goreleaser-pro'
           distribution: goreleaser
-          version: "v1.14.1"
-          args: build --single-target --skip-validate --rm-dist --snapshot
+          version: "v1.16.1"
+          args: build --single-target --skip-validate --clean --snapshot
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Copy Windows Collector Binary
@@ -81,8 +81,8 @@ jobs:
         with:
           # either 'goreleaser' (default) or 'goreleaser-pro'
           distribution: goreleaser
-          version: "v1.14.1"
-          args: build --single-target --skip-validate --rm-dist --snapshot
+          version: "v1.16.1"
+          args: build --single-target --skip-validate --clean --snapshot
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GOARCH: "386"
