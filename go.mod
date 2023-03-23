@@ -47,6 +47,7 @@ require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/signalfxexporter v0.74.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/splunkhecexporter v0.74.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/zipkinexporter v0.74.0
+	github.com/open-telemetry/opentelemetry-collector-contrib/extension/basicauthextension v0.74.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/extension/bearertokenauthextension v0.74.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/extension/healthcheckextension v0.74.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/extension/oidcauthextension v0.74.0
@@ -160,11 +161,13 @@ require (
 )
 
 require (
+	github.com/GehirnInc/crypt v0.0.0-20200316065508-bb7000b8a962 // indirect
 	github.com/elastic/go-elasticsearch/v7 v7.17.7 // indirect
 	github.com/grafana/loki/pkg/push v0.0.0-20230127072203-4e8cc8d71928 // indirect
 	github.com/influxdata/influxdb-observability/otel2influx v0.3.4 // indirect
 	github.com/observiq/observiq-otel-collector/expr v1.21.0 // indirect
 	github.com/panta/machineid v1.0.2 // indirect
+	github.com/tg123/go-htpasswd v1.2.1 // indirect
 )
 
 require (
