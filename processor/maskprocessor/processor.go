@@ -52,7 +52,7 @@ func newProcessor(logger *zap.Logger, cfg *Config) *maskProcessor {
 
 // start is used to start the processor.
 func (p *maskProcessor) start(context.Context, component.Host) error {
-	rules, err := p.cfg.CompileRules()
+	rules, err := p.createRules()
 	if err != nil {
 		return err
 	}
@@ -210,4 +210,28 @@ func (p *maskProcessor) createMaskFunc(field string) func(k string, v pcommon.Va
 		p.maskValue(childField, v)
 		return true
 	}
+}
+
+// createRules creates a map of rules for the processor.
+func (p *maskProcessor) createRules() (map[string]*regexp.Regexp, error) {
+	if len(p.cfg.Rules) == 0 {
+		return compileRules(defaultRules)
+	}
+
+	return compileRules(p.cfg.Rules)
+}
+
+// compileRules compiles rules from the provided map of expressions.
+func compileRules(exprs map[string]string) (map[string]*regexp.Regexp, error) {
+	rules := make(map[string]*regexp.Regexp)
+	for key, expr := range exprs {
+		rule, err := regexp.Compile(expr)
+		if err != nil {
+			return nil, fmt.Errorf("rule '%s' does not compile as valid regex", key)
+		}
+
+		mask := fmt.Sprintf("[masked_%s]", key)
+		rules[mask] = rule
+	}
+	return rules, nil
 }

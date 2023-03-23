@@ -27,15 +27,7 @@ func TestNewFactory(t *testing.T) {
 	factory := NewFactory()
 	require.Equal(t, typeStr, string(factory.Type()))
 
-	expectedCfg := &Config{
-		Rules: map[string]string{
-			"email":       emailRule,
-			"ssn":         ssnRule,
-			"credit_card": creditCardRule,
-			"phone":       phoneRule,
-		},
-	}
-
+	expectedCfg := &Config{}
 	cfg, ok := factory.CreateDefaultConfig().(*Config)
 	require.True(t, ok)
 	require.Equal(t, expectedCfg, cfg)
