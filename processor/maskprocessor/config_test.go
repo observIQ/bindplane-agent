@@ -31,7 +31,7 @@ func TestConfigValidate(t *testing.T) {
 		{
 			desc: "Default rules",
 			cfg: Config{
-				Rules: defaultRules,
+				Rules: createDefaultRules(),
 			},
 			expectedErr: nil,
 		},

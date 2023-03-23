@@ -32,12 +32,10 @@ const (
 var (
 	consumerCapabilities = consumer.Capabilities{MutatesData: true}
 	errInvalidConfigType = errors.New("config is not of type maskprocessor.Config")
-	defaultRules         = map[string]string{
-		"email":       `\b[a-z0-9._%\+\-—|]+@[a-z0-9.\-—|]+\.[a-z|]{2,6}\b`,
-		"ssn":         `\b\d{3}[- ]\d{2}[- ]\d{4}\b`,
-		"credit_card": `\b(?:(?:(?:\d{4}[- ]?){3}\d{4}|\d{15,16}))\b`,
-		"phone":       `\b((\+|\b)[1l][\-\. ])?\(?\b[\dOlZSB]{3,5}([\-\. ]|\) ?)[\dOlZSB]{3}[\-\. ][\dOlZSB]{4}\b`,
-	}
+	emailRule            = `\b[a-z0-9._%\+\-—|]+@[a-z0-9.\-—|]+\.[a-z|]{2,6}\b`
+	ssnRule              = `\b\d{3}[- ]\d{2}[- ]\d{4}\b`
+	creditCardRule       = `\b(?:(?:(?:\d{4}[- ]?){3}\d{4}|\d{15,16}))\b`
+	phoneRule            = `\b((\+|\b)[1l][\-\. ])?\(?\b[\dOlZSB]{3,5}([\-\. ]|\) ?)[\dOlZSB]{3}[\-\. ][\dOlZSB]{4}\b`
 )
 
 // NewFactory creates a new ProcessorFactory with default configuration
@@ -54,7 +52,17 @@ func NewFactory() processor.Factory {
 // createDefaultConfig creates a default config for the mask processor.
 func createDefaultConfig() component.Config {
 	return &Config{
-		Rules: defaultRules,
+		Rules: createDefaultRules(),
+	}
+}
+
+// createDefaultRules creates a default set of rules for the mask processor.
+func createDefaultRules() map[string]string {
+	return map[string]string{
+		"email":       emailRule,
+		"ssn":         ssnRule,
+		"credit_card": creditCardRule,
+		"phone":       phoneRule,
 	}
 }
 
