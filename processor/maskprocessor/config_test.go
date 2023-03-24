@@ -28,13 +28,6 @@ func TestConfigValidate(t *testing.T) {
 		expectedErr error
 	}{
 		{
-			desc: "Default rules",
-			cfg: Config{
-				Rules: defaultRules,
-			},
-			expectedErr: nil,
-		},
-		{
 			desc: "Invalid rule",
 			cfg: Config{
 				Rules: map[string]string{

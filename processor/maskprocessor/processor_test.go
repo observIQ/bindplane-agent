@@ -166,9 +166,6 @@ func TestFailedStart(t *testing.T) {
 }
 
 func TestCreateRules(t *testing.T) {
-	compiledDefaultRules, err := compileRules(defaultRules)
-	require.NoError(t, err)
-
 	testCases := []struct {
 		desc          string
 		exprs         map[string]string
@@ -194,7 +191,7 @@ func TestCreateRules(t *testing.T) {
 		{
 			desc:          "No rules",
 			exprs:         map[string]string{},
-			expectedRules: compiledDefaultRules,
+			expectedRules: defaultRules,
 		},
 	}
 

@@ -33,6 +33,13 @@ const (
 	bodyField       = "body"
 )
 
+var defaultRules = map[string]*regexp.Regexp{
+	"email":       regexp.MustCompile(`\b[a-z0-9._%\+\-—|]+@[a-z0-9.\-—|]+\.[a-z|]{2,6}\b`),
+	"ssn":         regexp.MustCompile(`\b\d{3}[- ]\d{2}[- ]\d{4}\b`),
+	"credit_card": regexp.MustCompile(`\b(?:(?:(?:\d{4}[- ]?){3}\d{4}|\d{15,16}))\b`),
+	"phone":       regexp.MustCompile(`\b((\+|\b)[1l][\-\. ])?\(?\b[\dOlZSB]{3,5}([\-\. ]|\) ?)[\dOlZSB]{3}[\-\. ][\dOlZSB]{4}\b`),
+}
+
 // maskProcessor is the processor used to mask data.
 type maskProcessor struct {
 	logger           *zap.Logger
@@ -215,7 +222,7 @@ func (p *maskProcessor) createMaskFunc(field string) func(k string, v pcommon.Va
 // createRules creates a map of rules for the processor.
 func (p *maskProcessor) createRules() (map[string]*regexp.Regexp, error) {
 	if len(p.cfg.Rules) == 0 {
-		return compileRules(defaultRules)
+		return defaultRules, nil
 	}
 
 	return compileRules(p.cfg.Rules)
