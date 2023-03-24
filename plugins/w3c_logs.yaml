@@ -137,8 +137,8 @@ template: |
           expr: 'body matches "^#"'
         - type: csv_parser
           ignore_quotes: true
+          parse_to: {{ .parse_to }}
           delimiter: '{{ .delimiter }}'
-
           {{ if .header_delimiter }} 
           header_delimiter: '{{ .header_delimiter }}'
           {{ end }}
