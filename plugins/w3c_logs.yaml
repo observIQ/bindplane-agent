@@ -1,4 +1,4 @@
-version: 0.2.0
+version: 0.2.1
 title: W3C
 description: Log Parser for W3C
 parameters:
@@ -178,10 +178,11 @@ template: |
 
         - id: time_parser
           type: time_parser
-          if: '{{ .parse_to }}.timestamp != nil or {{ .timestamp_parse_from }} != nil'
           {{ if .timestamp_parse_from }}
+          if: '{{ .timestamp_parse_from }} != nil'
           parse_from: {{ .timestamp_parse_from }}
           {{ else }}
+          if: '{{ .parse_to }}.timestamp != nil'
           parse_from: {{ .parse_to }}.timestamp
           {{ end }}
           layout: '{{ .timestamp_layout }}'
