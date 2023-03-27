@@ -36,7 +36,7 @@ parameters:
       - end
     default: end
   - name: log_driver
-    description: |
+    description: >-
       The container runtime's log driver used to write container logs to disk.
       Valid options include `auto`, `docker-json-file` and `containerd-cri`.
       When set to `auto`, the format will be detected using regex. Format detection
