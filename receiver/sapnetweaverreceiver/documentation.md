@@ -368,7 +368,7 @@ The response time duration.
 
 ### sapnetweaver.session.count
 
-The amount of of sessions created.
+The amount of sessions created.
 
 Collected from SAPControl Web Service Interface > GetAlertTree > R3ServiceS > ITS > Number of Sessions.
 

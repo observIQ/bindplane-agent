@@ -712,7 +712,7 @@ func TestMetricsBuilder(t *testing.T) {
 					validatedMetrics["sapnetweaver.session.count"] = true
 					assert.Equal(t, pmetric.MetricTypeSum, ms.At(i).Type())
 					assert.Equal(t, 1, ms.At(i).Sum().DataPoints().Len())
-					assert.Equal(t, "The amount of of sessions created.", ms.At(i).Description())
+					assert.Equal(t, "The amount of sessions created.", ms.At(i).Description())
 					assert.Equal(t, "{sessions}", ms.At(i).Unit())
 					assert.Equal(t, false, ms.At(i).Sum().IsMonotonic())
 					assert.Equal(t, pmetric.AggregationTemporalityCumulative, ms.At(i).Sum().AggregationTemporality())

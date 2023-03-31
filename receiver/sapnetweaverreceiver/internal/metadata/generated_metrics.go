@@ -1845,7 +1845,7 @@ type metricSapnetweaverSessionCount struct {
 // init fills sapnetweaver.session.count metric with initial data.
 func (m *metricSapnetweaverSessionCount) init() {
 	m.data.SetName("sapnetweaver.session.count")
-	m.data.SetDescription("The amount of of sessions created.")
+	m.data.SetDescription("The amount of sessions created.")
 	m.data.SetUnit("{sessions}")
 	m.data.SetEmptySum()
 	m.data.Sum().SetIsMonotonic(false)
