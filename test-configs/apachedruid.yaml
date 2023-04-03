@@ -1,0 +1,21 @@
+receivers:
+  apachedruid:
+    metrics:
+      endpoint: localhost:8080
+      basic_auth:
+        username: uName
+        password: PassWord
+exporters:
+  file:
+    path: ./test.json
+service:
+  telemetry:
+    metrics:
+      address: 0.0.0.0:8889 
+  pipelines:
+    metrics:
+      receivers:
+      - apachedruid
+      exporters:
+      - file
+  

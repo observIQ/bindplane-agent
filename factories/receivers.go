@@ -15,6 +15,7 @@
 package factories
 
 import (
+	"github.com/observiq/observiq-otel-collector/receiver/apachedruidreceiver"
 	"github.com/observiq/observiq-otel-collector/receiver/pluginreceiver"
 	"github.com/observiq/observiq-otel-collector/receiver/routereceiver"
 	"github.com/observiq/observiq-otel-collector/receiver/sapnetweaverreceiver"
@@ -86,6 +87,7 @@ import (
 )
 
 var defaultReceivers = []receiver.Factory{
+	apachedruidreceiver.NewFactory(),
 	activedirectorydsreceiver.NewFactory(),
 	aerospikereceiver.NewFactory(),
 	apachereceiver.NewFactory(),

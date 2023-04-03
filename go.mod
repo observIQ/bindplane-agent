@@ -15,6 +15,7 @@ require (
 	github.com/observiq/observiq-otel-collector/processor/resourceattributetransposerprocessor v1.21.1
 	github.com/observiq/observiq-otel-collector/processor/samplingprocessor v1.21.1
 	github.com/observiq/observiq-otel-collector/processor/throughputmeasurementprocessor v1.21.1
+	github.com/observiq/observiq-otel-collector/receiver/apachedruidreceiver v1.21.1
 	github.com/observiq/observiq-otel-collector/receiver/pluginreceiver v1.21.1
 	github.com/observiq/observiq-otel-collector/receiver/routereceiver v1.21.1
 	github.com/observiq/observiq-otel-collector/receiver/sapnetweaverreceiver v1.21.1
@@ -556,6 +557,8 @@ require (
 )
 
 replace github.com/observiq/observiq-otel-collector/processor/resourceattributetransposerprocessor => ./processor/resourceattributetransposerprocessor
+
+replace github.com/observiq/observiq-otel-collector/receiver/apachedruidreceiver => ./receiver/apachedruidreceiver
 
 replace github.com/observiq/observiq-otel-collector/receiver/pluginreceiver => ./receiver/pluginreceiver
 

@@ -1,0 +1,51 @@
+name: apachedruidreceiver
+
+resource_attributes:
+  apachedruid.node.name:
+    description: The name of the node.
+    type: string
+    enabled: true
+
+metrics:
+  apachedruid.historical.average_query_time:
+    enabled: true
+    description: The average number of milliseconds taken to complete a query on historical processes.
+    unit: ms
+    gauge:
+      value_type: double
+  apachedruid.historical.query_count:
+    enabled: true
+    description: Total number of queries executed on historical processes since the previous data point.
+    sum:
+      value_type: int
+      monotonic: false
+      aggregation: cumulative
+  apachedruid.historical.failed_query_count:
+    enabled: true
+    description: Total number of failed queries on historical processes since the previous data point.
+    sum:
+      value_type: int
+      monotonic: false
+      aggregation: cumulative
+  apachedruid.broker.average_query_time:
+    enabled: true
+    description: The average number of milliseconds taken to complete a query on broker processes.
+    unit: ms
+    gauge:
+      value_type: double
+  apachedruid.broker.query_count:
+    enabled: true
+    description: Total number of queries executed on broker processes since the previous data point.
+    sum:
+      value_type: int
+      monotonic: false
+      aggregation: cumulative
+  apachedruid.broker.failed_query_count:
+    enabled: true
+    description: Total number of failed queries on broker processes since the previous data point.
+    sum:
+      value_type: int
+      monotonic: false
+      aggregation: cumulative
+
+      
