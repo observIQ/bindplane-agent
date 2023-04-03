@@ -30,10 +30,10 @@ type Config struct {
 }
 
 type MetricsConfig struct {
-	BasicAuth                     *BasicAuth                  `mapstructure:"basic_auth"`
-	Endpoint                      string                      `mapstructure:"endpoint"`
-	TLS                           *configtls.TLSServerSetting `mapstructure:"tls"`
-	metadata.MetricsBuilderConfig `mapstructure:",squash"`
+	BasicAuth            *BasicAuth                    `mapstructure:"basic_auth"`
+	Endpoint             string                        `mapstructure:"endpoint"`
+	TLS                  *configtls.TLSServerSetting   `mapstructure:"tls"`
+	MetricsBuilderConfig metadata.MetricsBuilderConfig `mapstructure:",squash"`
 }
 
 type BasicAuth struct {
