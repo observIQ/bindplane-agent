@@ -179,6 +179,13 @@ update-otel:
 	./scripts/update-docs.sh "$(OTEL_VERSION)"
 	$(MAKE) tidy
 
+# update-modules updates all submodules to be the new version.
+# Usage: make update-modules NEW_VERSION=vx.x.x
+.PHONY: update-modules
+update-modules:
+	./scripts/update-module-version.sh "$(NEW_VERSION)"
+	$(MAKE) tidy
+
 # Downloads and setups dependencies that are packaged with binary
 .PHONY: release-prep
 release-prep:
