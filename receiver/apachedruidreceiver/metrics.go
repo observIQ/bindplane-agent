@@ -23,7 +23,6 @@ import (
 	"io"
 	"net"
 	"net/http"
-	"strings"
 	"sync"
 	"time"
 
@@ -34,6 +33,16 @@ import (
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.opentelemetry.io/collector/receiver"
 	"go.uber.org/zap"
+)
+
+const (
+	DRUID_QUERY_COUNT             string = "query/count"
+	DRUID_QUERY_SUCCESS_COUNT     string = "query/success/count"
+	DRUID_QUERY_FAILED_COUNT      string = "query/failed/count"
+	DRUID_QUERY_INTERRUPTED_COUNT string = "query/interrupted/count"
+	DRUID_QUERY_TIMEOUT_COUNT     string = "query/timeout/count"
+	DRUID_SQLQUERY_TIME           string = "sqlQuery/time"
+	DRUID_SQLQUERY_BYTES          string = "sqlQuery/bytes"
 )
 
 type metricsReceiver struct {
@@ -144,11 +153,6 @@ func (mReceiver *metricsReceiver) startListening(ctx context.Context, host compo
 }
 
 func (mReceiver *metricsReceiver) handleRequest(rw http.ResponseWriter, request *http.Request) {
-	// fmt.Print("Request header: ")
-	// fmt.Println(request.Header)
-	// fmt.Print("Request body: ")
-	// fmt.Printf("%s %s %s\n", request.Method, request.Host, request.URL) TODO
-
 	if mReceiver.config.BasicAuth != nil {
 		auth := request.Header.Get("Authorization")
 		credentials := fmt.Sprintf("%s:%s", mReceiver.config.BasicAuth.Username, mReceiver.config.BasicAuth.Password)
@@ -177,14 +181,11 @@ func (mReceiver *metricsReceiver) handleRequest(rw http.ResponseWriter, request 
 	}
 
 	payload, err := io.ReadAll(request.Body)
-
 	if err != nil {
 		rw.WriteHeader(http.StatusBadRequest)
 		mReceiver.logger.Debug("Failed to read metrics payload", zap.Error(err), zap.String("remote", request.RemoteAddr))
 		return
 	}
-
-	mReceiver.logger.Debug("Request body: ", zap.String("payload", string(payload)))
 
 	var metrics []interface{}
 	if err = json.Unmarshal(payload, &metrics); err != nil {
@@ -205,82 +206,103 @@ func (mReceiver *metricsReceiver) handleRequest(rw http.ResponseWriter, request 
 func (mReceiver *metricsReceiver) processMetrics(metrics []interface{}) pmetric.Metrics {
 	now := pcommon.NewTimestampFromTime(time.Now())
 
-	fmt.Println("Pre-processed: ")
-	fmt.Println(metrics)
-	processedMetrics := mReceiver.mapMetrics(metrics)
-	fmt.Println("Post-processed: ")
-	fmt.Println(processedMetrics)
+	purgedMetrics, service := purgeMetrics(metrics)
+	queryCountStats := getQueryCountStats(purgedMetrics)
 
-	mReceiver.recordApachedruidBrokerAverageQueryTimeDataPoint(now, processedMetrics)
-	mReceiver.recordApachedruidBrokerFailedQueryCountDataPoint(now, processedMetrics)
-	mReceiver.recordApachedruidBrokerQueryCountDataPoint(now, processedMetrics)
-	mReceiver.recordApachedruidHistoricalAverageQueryTimeDataPoint(now, processedMetrics)
-	mReceiver.recordApachedruidHistoricalFailedQueryCountDataPoint(now, processedMetrics)
-	mReceiver.recordApachedruidHistoricalQueryCountDataPoint(now, processedMetrics)
+	mReceiver.metricsBuilder.RecordApachedruidQueryCountDataPoint(now, int64(queryCountStats[DRUID_QUERY_COUNT]))
+	mReceiver.metricsBuilder.RecordApachedruidSuccessQueryCountDataPoint(now, int64(queryCountStats[DRUID_QUERY_SUCCESS_COUNT]))
+	mReceiver.metricsBuilder.RecordApachedruidFailedQueryCountDataPoint(now, int64(queryCountStats[DRUID_QUERY_FAILED_COUNT]))
+	mReceiver.metricsBuilder.RecordApachedruidInterruptedQueryCountDataPoint(now, int64(queryCountStats[DRUID_QUERY_INTERRUPTED_COUNT]))
+	mReceiver.metricsBuilder.RecordApachedruidTimeoutQueryCountDataPoint(now, int64(queryCountStats[DRUID_QUERY_TIMEOUT_COUNT]))
+	mReceiver.recordSqlQueryDataPoints(now, purgedMetrics)
 
-	// not quite sure this makes sense. seems odd to be using the "Druid" node name when the Endpoint is actually the one the server is listening on...
-	return mReceiver.metricsBuilder.Emit(metadata.WithApachedruidNodeName(mReceiver.config.Endpoint))
+	return mReceiver.metricsBuilder.Emit(metadata.WithApachedruidService(service))
 }
 
-func (mReceiver *metricsReceiver) mapMetrics(metrics []interface{}) map[string]float64 {
-	metricsMap := make(map[string]float64)
+// remove all metrics published to the receiver besides the ones it cares about
+func purgeMetrics(metrics []interface{}) ([]interface{}, string) {
+	collectedMetrics := [7]string{DRUID_QUERY_COUNT, DRUID_QUERY_SUCCESS_COUNT, DRUID_QUERY_FAILED_COUNT, DRUID_QUERY_INTERRUPTED_COUNT, DRUID_QUERY_TIMEOUT_COUNT, DRUID_SQLQUERY_TIME, DRUID_SQLQUERY_BYTES}
+	purgedArray := make([]interface{}, 0)
+	var service string
+
 	for _, dataPoint := range metrics {
 		if dataPoint == nil {
 			continue
 		}
 
 		currentPoint := dataPoint.(map[string]interface{})
-		service, serviceOk := currentPoint["service"]
-		metric, metricOk := currentPoint["metric"]
-		valueInterface, valueOk := currentPoint["value"]
-		if !(serviceOk && metricOk && valueOk) {
+		if metric, metricOk := currentPoint["metric"]; !metricOk || !contains(collectedMetrics[:], metric.(string)) {
 			continue
 		}
-		value, ok := valueInterface.(float64)
-		if !ok {
-			mReceiver.logger.Error("Failed to parse metric value as float")
-		}
 
-		metricsMap[strings.TrimSpace(service.(string))+"/"+strings.TrimSpace(metric.(string))] += value
-	}
-
-	return metricsMap
-}
-
-func (mReceiver *metricsReceiver) recordApachedruidBrokerAverageQueryTimeDataPoint(now pcommon.Timestamp, metrics map[string]float64) {
-	var averageQueryTime float64
-	if totalQueries, ok := metrics["druid/broker/query/count"]; ok && totalQueries > 0 {
-		if totalQueryTime, ok := metrics["druid/broker/query/time"]; ok {
-			averageQueryTime = totalQueryTime / totalQueries
+		purgedArray = append(purgedArray, currentPoint)
+		if service == "" {
+			if serviceInterface, ok := currentPoint["service"]; ok {
+				service = serviceInterface.(string)
+			}
 		}
 	}
 
-	mReceiver.metricsBuilder.RecordApachedruidBrokerAverageQueryTimeDataPoint(now, averageQueryTime)
+	return purgedArray, service
 }
 
-func (mReceiver *metricsReceiver) recordApachedruidBrokerFailedQueryCountDataPoint(now pcommon.Timestamp, metrics map[string]float64) {
-	mReceiver.metricsBuilder.RecordApachedruidBrokerFailedQueryCountDataPoint(now, int64(metrics["druid/broker/query/failed/count"]))
-}
+func getQueryCountStats(metrics []interface{}) map[string]float64 {
+	queryCountStats := make(map[string]float64)
 
-func (mReceiver *metricsReceiver) recordApachedruidBrokerQueryCountDataPoint(now pcommon.Timestamp, metrics map[string]float64) {
-	mReceiver.metricsBuilder.RecordApachedruidBrokerQueryCountDataPoint(now, int64(metrics["druid/broker/query/count"]))
-}
-
-func (mReceiver *metricsReceiver) recordApachedruidHistoricalAverageQueryTimeDataPoint(now pcommon.Timestamp, metrics map[string]float64) {
-	var averageQueryTime float64
-	if totalQueries, ok := metrics["druid/historical/query/count"]; ok && totalQueries > 0 {
-		if totalQueryTime, ok := metrics["druid/historical/query/time"]; ok {
-			averageQueryTime = totalQueryTime / totalQueries
+	for _, dataPoint := range metrics {
+		currentPoint := dataPoint.(map[string]interface{})
+		metric, metricOk := currentPoint["metric"]
+		value, valueOk := currentPoint["value"]
+		if metricOk && valueOk {
+			if v, vOk := value.(float64); vOk {
+				queryCountStats[metric.(string)] = v
+			}
 		}
 	}
 
-	mReceiver.metricsBuilder.RecordApachedruidHistoricalAverageQueryTimeDataPoint(now, averageQueryTime)
+	return queryCountStats
 }
 
-func (mReceiver *metricsReceiver) recordApachedruidHistoricalFailedQueryCountDataPoint(now pcommon.Timestamp, metrics map[string]float64) {
-	mReceiver.metricsBuilder.RecordApachedruidHistoricalFailedQueryCountDataPoint(now, int64(metrics["druid/historical/query/failed/count"]))
+func (mReceiver *metricsReceiver) recordSqlQueryDataPoints(now pcommon.Timestamp, metrics []interface{}) {
+	dataSources := make([]string, 0)
+	sqlQueryCount := make(map[string]float64)
+	sqlQueryTime := make(map[string]float64)
+	sqlQueryBytes := make(map[string]float64)
+	for _, dataPoint := range metrics {
+		currentPoint := dataPoint.(map[string]interface{})
+		metric, metricOk := currentPoint["metric"]
+		value, valueOk := currentPoint["value"]
+		dataSource, dsOk := currentPoint["dataSource"]
+		if metricOk && valueOk && dsOk {
+			if ds, dOk := dataSource.(string); dOk {
+				if m := metric.(string); m == DRUID_SQLQUERY_TIME || m == DRUID_SQLQUERY_BYTES {
+					if m == DRUID_SQLQUERY_TIME {
+						sqlQueryTime[ds] += value.(float64)
+						sqlQueryCount[ds]++
+					} else {
+						sqlQueryBytes[ds] += value.(float64)
+					}
+					if !contains(dataSources, ds) {
+						dataSources = append(dataSources, ds)
+					}
+				}
+			}
+		}
+	}
+
+	for _, source := range dataSources {
+		count := sqlQueryCount[source]
+		mReceiver.metricsBuilder.RecordApachedruidAverageSQLQueryTimeDataPoint(now, sqlQueryTime[source]/count, source)
+		mReceiver.metricsBuilder.RecordApachedruidAverageSQLQueryBytesDataPoint(now, sqlQueryBytes[source]/count, source)
+		mReceiver.metricsBuilder.RecordApachedruidSQLQueryCountDataPoint(now, int64(count), source)
+	}
 }
 
-func (mReceiver *metricsReceiver) recordApachedruidHistoricalQueryCountDataPoint(now pcommon.Timestamp, metrics map[string]float64) {
-	mReceiver.metricsBuilder.RecordApachedruidHistoricalQueryCountDataPoint(now, int64(metrics["druid/historical/query/count"]))
+func contains(s []string, e string) bool {
+	for _, a := range s {
+		if a == e {
+			return true
+		}
+	}
+	return false
 }

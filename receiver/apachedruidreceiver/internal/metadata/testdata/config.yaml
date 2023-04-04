@@ -1,35 +1,43 @@
 default:
 all_set:
   metrics:
-    apachedruid.broker.average_query_time:
+    apachedruid.average_sql_query_bytes:
       enabled: true
-    apachedruid.broker.failed_query_count:
+    apachedruid.average_sql_query_time:
       enabled: true
-    apachedruid.broker.query_count:
+    apachedruid.failed_query_count:
       enabled: true
-    apachedruid.historical.average_query_time:
+    apachedruid.interrupted_query_count:
       enabled: true
-    apachedruid.historical.failed_query_count:
+    apachedruid.query_count:
       enabled: true
-    apachedruid.historical.query_count:
+    apachedruid.sql_query_count:
+      enabled: true
+    apachedruid.success_query_count:
+      enabled: true
+    apachedruid.timeout_query_count:
       enabled: true
   resource_attributes:
-    apachedruid.node.name:
+    apachedruid.service:
       enabled: true
 none_set:
   metrics:
-    apachedruid.broker.average_query_time:
+    apachedruid.average_sql_query_bytes:
       enabled: false
-    apachedruid.broker.failed_query_count:
+    apachedruid.average_sql_query_time:
       enabled: false
-    apachedruid.broker.query_count:
+    apachedruid.failed_query_count:
       enabled: false
-    apachedruid.historical.average_query_time:
+    apachedruid.interrupted_query_count:
       enabled: false
-    apachedruid.historical.failed_query_count:
+    apachedruid.query_count:
       enabled: false
-    apachedruid.historical.query_count:
+    apachedruid.sql_query_count:
+      enabled: false
+    apachedruid.success_query_count:
+      enabled: false
+    apachedruid.timeout_query_count:
       enabled: false
   resource_attributes:
-    apachedruid.node.name:
+    apachedruid.service:
       enabled: false

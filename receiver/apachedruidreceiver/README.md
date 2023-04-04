@@ -16,13 +16,20 @@ Steps 2 and 3 are optional, if you would like to configure your Druid emitter to
 2. Receive a properly CA signed SSL certificate for use on the collector host.
 3. Configure the receiver using the previously acquired SSL certificate, and then start the collector.
 4. Alter your Druid configuration to enable metric emission over HTTP: https://druid.apache.org/docs/latest/configuration/index.html#enabling-metrics
-  - Currently supported processes include Broker and Historical processes.
+  - The receiver currently utilizes/has support for these Druid metrics:
+    - query/count
+    - query/success/count
+    - query/failed/count
+    - query/interrupted/count
+    - query/timeout/count
+    - sqlQuery/time
+    - sqlQuery/bytes
   - Receiver-relevant configuration properties include:
     - Required configurations include:
       - druid.emitter
         - must be druid.emitter=http
       - druid.monitoring.monitors
-        - must be druid.monitoring.monitors=["org.apache.druid.server.metrics.QueryCountStatsMonitor"]
+        - Recommended: druid.monitoring.monitors=["org.apache.druid.server.metrics.QueryCountStatsMonitor"]
       - druid.emitter.http.recipientBaseUrl
         - This is the endpoint on which the receiver will be listening for POST requests from the Druid emitter.
         - Example: http://localhost:8080

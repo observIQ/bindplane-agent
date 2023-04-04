@@ -33,32 +33,40 @@ func (ms *MetricSettings) Unmarshal(parser *confmap.Conf) error {
 
 // MetricsSettings provides settings for apachedruidreceiver metrics.
 type MetricsSettings struct {
-	ApachedruidBrokerAverageQueryTime     MetricSettings `mapstructure:"apachedruid.broker.average_query_time"`
-	ApachedruidBrokerFailedQueryCount     MetricSettings `mapstructure:"apachedruid.broker.failed_query_count"`
-	ApachedruidBrokerQueryCount           MetricSettings `mapstructure:"apachedruid.broker.query_count"`
-	ApachedruidHistoricalAverageQueryTime MetricSettings `mapstructure:"apachedruid.historical.average_query_time"`
-	ApachedruidHistoricalFailedQueryCount MetricSettings `mapstructure:"apachedruid.historical.failed_query_count"`
-	ApachedruidHistoricalQueryCount       MetricSettings `mapstructure:"apachedruid.historical.query_count"`
+	ApachedruidAverageSQLQueryBytes  MetricSettings `mapstructure:"apachedruid.average_sql_query_bytes"`
+	ApachedruidAverageSQLQueryTime   MetricSettings `mapstructure:"apachedruid.average_sql_query_time"`
+	ApachedruidFailedQueryCount      MetricSettings `mapstructure:"apachedruid.failed_query_count"`
+	ApachedruidInterruptedQueryCount MetricSettings `mapstructure:"apachedruid.interrupted_query_count"`
+	ApachedruidQueryCount            MetricSettings `mapstructure:"apachedruid.query_count"`
+	ApachedruidSQLQueryCount         MetricSettings `mapstructure:"apachedruid.sql_query_count"`
+	ApachedruidSuccessQueryCount     MetricSettings `mapstructure:"apachedruid.success_query_count"`
+	ApachedruidTimeoutQueryCount     MetricSettings `mapstructure:"apachedruid.timeout_query_count"`
 }
 
 func DefaultMetricsSettings() MetricsSettings {
 	return MetricsSettings{
-		ApachedruidBrokerAverageQueryTime: MetricSettings{
+		ApachedruidAverageSQLQueryBytes: MetricSettings{
 			Enabled: true,
 		},
-		ApachedruidBrokerFailedQueryCount: MetricSettings{
+		ApachedruidAverageSQLQueryTime: MetricSettings{
 			Enabled: true,
 		},
-		ApachedruidBrokerQueryCount: MetricSettings{
+		ApachedruidFailedQueryCount: MetricSettings{
 			Enabled: true,
 		},
-		ApachedruidHistoricalAverageQueryTime: MetricSettings{
+		ApachedruidInterruptedQueryCount: MetricSettings{
 			Enabled: true,
 		},
-		ApachedruidHistoricalFailedQueryCount: MetricSettings{
+		ApachedruidQueryCount: MetricSettings{
 			Enabled: true,
 		},
-		ApachedruidHistoricalQueryCount: MetricSettings{
+		ApachedruidSQLQueryCount: MetricSettings{
+			Enabled: true,
+		},
+		ApachedruidSuccessQueryCount: MetricSettings{
+			Enabled: true,
+		},
+		ApachedruidTimeoutQueryCount: MetricSettings{
 			Enabled: true,
 		},
 	}
@@ -71,32 +79,33 @@ type ResourceAttributeSettings struct {
 
 // ResourceAttributesSettings provides settings for apachedruidreceiver metrics.
 type ResourceAttributesSettings struct {
-	ApachedruidNodeName ResourceAttributeSettings `mapstructure:"apachedruid.node.name"`
+	ApachedruidService ResourceAttributeSettings `mapstructure:"apachedruid.service"`
 }
 
 func DefaultResourceAttributesSettings() ResourceAttributesSettings {
 	return ResourceAttributesSettings{
-		ApachedruidNodeName: ResourceAttributeSettings{
+		ApachedruidService: ResourceAttributeSettings{
 			Enabled: true,
 		},
 	}
 }
 
-type metricApachedruidBrokerAverageQueryTime struct {
+type metricApachedruidAverageSQLQueryBytes struct {
 	data     pmetric.Metric // data buffer for generated metric.
 	settings MetricSettings // metric settings provided by user.
 	capacity int            // max observed number of data points added to the metric.
 }
 
-// init fills apachedruid.broker.average_query_time metric with initial data.
-func (m *metricApachedruidBrokerAverageQueryTime) init() {
-	m.data.SetName("apachedruid.broker.average_query_time")
-	m.data.SetDescription("The average number of milliseconds taken to complete a query on broker processes.")
-	m.data.SetUnit("ms")
+// init fills apachedruid.average_sql_query_bytes metric with initial data.
+func (m *metricApachedruidAverageSQLQueryBytes) init() {
+	m.data.SetName("apachedruid.average_sql_query_bytes")
+	m.data.SetDescription("The average number of bytes returned by a SQL query.")
+	m.data.SetUnit("")
 	m.data.SetEmptyGauge()
+	m.data.Gauge().DataPoints().EnsureCapacity(m.capacity)
 }
 
-func (m *metricApachedruidBrokerAverageQueryTime) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val float64) {
+func (m *metricApachedruidAverageSQLQueryBytes) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val float64, dataSourceAttributeValue string) {
 	if !m.settings.Enabled {
 		return
 	}
@@ -104,17 +113,18 @@ func (m *metricApachedruidBrokerAverageQueryTime) recordDataPoint(start pcommon.
 	dp.SetStartTimestamp(start)
 	dp.SetTimestamp(ts)
 	dp.SetDoubleValue(val)
+	dp.Attributes().PutStr("data_source", dataSourceAttributeValue)
 }
 
 // updateCapacity saves max length of data point slices that will be used for the slice capacity.
-func (m *metricApachedruidBrokerAverageQueryTime) updateCapacity() {
+func (m *metricApachedruidAverageSQLQueryBytes) updateCapacity() {
 	if m.data.Gauge().DataPoints().Len() > m.capacity {
 		m.capacity = m.data.Gauge().DataPoints().Len()
 	}
 }
 
 // emit appends recorded metric data to a metrics slice and prepares it for recording another set of data points.
-func (m *metricApachedruidBrokerAverageQueryTime) emit(metrics pmetric.MetricSlice) {
+func (m *metricApachedruidAverageSQLQueryBytes) emit(metrics pmetric.MetricSlice) {
 	if m.settings.Enabled && m.data.Gauge().DataPoints().Len() > 0 {
 		m.updateCapacity()
 		m.data.MoveTo(metrics.AppendEmpty())
@@ -122,8 +132,8 @@ func (m *metricApachedruidBrokerAverageQueryTime) emit(metrics pmetric.MetricSli
 	}
 }
 
-func newMetricApachedruidBrokerAverageQueryTime(settings MetricSettings) metricApachedruidBrokerAverageQueryTime {
-	m := metricApachedruidBrokerAverageQueryTime{settings: settings}
+func newMetricApachedruidAverageSQLQueryBytes(settings MetricSettings) metricApachedruidAverageSQLQueryBytes {
+	m := metricApachedruidAverageSQLQueryBytes{settings: settings}
 	if settings.Enabled {
 		m.data = pmetric.NewMetric()
 		m.init()
@@ -131,123 +141,22 @@ func newMetricApachedruidBrokerAverageQueryTime(settings MetricSettings) metricA
 	return m
 }
 
-type metricApachedruidBrokerFailedQueryCount struct {
+type metricApachedruidAverageSQLQueryTime struct {
 	data     pmetric.Metric // data buffer for generated metric.
 	settings MetricSettings // metric settings provided by user.
 	capacity int            // max observed number of data points added to the metric.
 }
 
-// init fills apachedruid.broker.failed_query_count metric with initial data.
-func (m *metricApachedruidBrokerFailedQueryCount) init() {
-	m.data.SetName("apachedruid.broker.failed_query_count")
-	m.data.SetDescription("Total number of failed queries on broker processes since the previous data point.")
-	m.data.SetUnit("")
-	m.data.SetEmptySum()
-	m.data.Sum().SetIsMonotonic(false)
-	m.data.Sum().SetAggregationTemporality(pmetric.AggregationTemporalityCumulative)
-}
-
-func (m *metricApachedruidBrokerFailedQueryCount) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val int64) {
-	if !m.settings.Enabled {
-		return
-	}
-	dp := m.data.Sum().DataPoints().AppendEmpty()
-	dp.SetStartTimestamp(start)
-	dp.SetTimestamp(ts)
-	dp.SetIntValue(val)
-}
-
-// updateCapacity saves max length of data point slices that will be used for the slice capacity.
-func (m *metricApachedruidBrokerFailedQueryCount) updateCapacity() {
-	if m.data.Sum().DataPoints().Len() > m.capacity {
-		m.capacity = m.data.Sum().DataPoints().Len()
-	}
-}
-
-// emit appends recorded metric data to a metrics slice and prepares it for recording another set of data points.
-func (m *metricApachedruidBrokerFailedQueryCount) emit(metrics pmetric.MetricSlice) {
-	if m.settings.Enabled && m.data.Sum().DataPoints().Len() > 0 {
-		m.updateCapacity()
-		m.data.MoveTo(metrics.AppendEmpty())
-		m.init()
-	}
-}
-
-func newMetricApachedruidBrokerFailedQueryCount(settings MetricSettings) metricApachedruidBrokerFailedQueryCount {
-	m := metricApachedruidBrokerFailedQueryCount{settings: settings}
-	if settings.Enabled {
-		m.data = pmetric.NewMetric()
-		m.init()
-	}
-	return m
-}
-
-type metricApachedruidBrokerQueryCount struct {
-	data     pmetric.Metric // data buffer for generated metric.
-	settings MetricSettings // metric settings provided by user.
-	capacity int            // max observed number of data points added to the metric.
-}
-
-// init fills apachedruid.broker.query_count metric with initial data.
-func (m *metricApachedruidBrokerQueryCount) init() {
-	m.data.SetName("apachedruid.broker.query_count")
-	m.data.SetDescription("Total number of queries executed on broker processes since the previous data point.")
-	m.data.SetUnit("")
-	m.data.SetEmptySum()
-	m.data.Sum().SetIsMonotonic(false)
-	m.data.Sum().SetAggregationTemporality(pmetric.AggregationTemporalityCumulative)
-}
-
-func (m *metricApachedruidBrokerQueryCount) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val int64) {
-	if !m.settings.Enabled {
-		return
-	}
-	dp := m.data.Sum().DataPoints().AppendEmpty()
-	dp.SetStartTimestamp(start)
-	dp.SetTimestamp(ts)
-	dp.SetIntValue(val)
-}
-
-// updateCapacity saves max length of data point slices that will be used for the slice capacity.
-func (m *metricApachedruidBrokerQueryCount) updateCapacity() {
-	if m.data.Sum().DataPoints().Len() > m.capacity {
-		m.capacity = m.data.Sum().DataPoints().Len()
-	}
-}
-
-// emit appends recorded metric data to a metrics slice and prepares it for recording another set of data points.
-func (m *metricApachedruidBrokerQueryCount) emit(metrics pmetric.MetricSlice) {
-	if m.settings.Enabled && m.data.Sum().DataPoints().Len() > 0 {
-		m.updateCapacity()
-		m.data.MoveTo(metrics.AppendEmpty())
-		m.init()
-	}
-}
-
-func newMetricApachedruidBrokerQueryCount(settings MetricSettings) metricApachedruidBrokerQueryCount {
-	m := metricApachedruidBrokerQueryCount{settings: settings}
-	if settings.Enabled {
-		m.data = pmetric.NewMetric()
-		m.init()
-	}
-	return m
-}
-
-type metricApachedruidHistoricalAverageQueryTime struct {
-	data     pmetric.Metric // data buffer for generated metric.
-	settings MetricSettings // metric settings provided by user.
-	capacity int            // max observed number of data points added to the metric.
-}
-
-// init fills apachedruid.historical.average_query_time metric with initial data.
-func (m *metricApachedruidHistoricalAverageQueryTime) init() {
-	m.data.SetName("apachedruid.historical.average_query_time")
-	m.data.SetDescription("The average number of milliseconds taken to complete a query on historical processes.")
+// init fills apachedruid.average_sql_query_time metric with initial data.
+func (m *metricApachedruidAverageSQLQueryTime) init() {
+	m.data.SetName("apachedruid.average_sql_query_time")
+	m.data.SetDescription("The average number of milliseconds taken to complete a SQL query.")
 	m.data.SetUnit("ms")
 	m.data.SetEmptyGauge()
+	m.data.Gauge().DataPoints().EnsureCapacity(m.capacity)
 }
 
-func (m *metricApachedruidHistoricalAverageQueryTime) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val float64) {
+func (m *metricApachedruidAverageSQLQueryTime) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val float64, dataSourceAttributeValue string) {
 	if !m.settings.Enabled {
 		return
 	}
@@ -255,17 +164,18 @@ func (m *metricApachedruidHistoricalAverageQueryTime) recordDataPoint(start pcom
 	dp.SetStartTimestamp(start)
 	dp.SetTimestamp(ts)
 	dp.SetDoubleValue(val)
+	dp.Attributes().PutStr("data_source", dataSourceAttributeValue)
 }
 
 // updateCapacity saves max length of data point slices that will be used for the slice capacity.
-func (m *metricApachedruidHistoricalAverageQueryTime) updateCapacity() {
+func (m *metricApachedruidAverageSQLQueryTime) updateCapacity() {
 	if m.data.Gauge().DataPoints().Len() > m.capacity {
 		m.capacity = m.data.Gauge().DataPoints().Len()
 	}
 }
 
 // emit appends recorded metric data to a metrics slice and prepares it for recording another set of data points.
-func (m *metricApachedruidHistoricalAverageQueryTime) emit(metrics pmetric.MetricSlice) {
+func (m *metricApachedruidAverageSQLQueryTime) emit(metrics pmetric.MetricSlice) {
 	if m.settings.Enabled && m.data.Gauge().DataPoints().Len() > 0 {
 		m.updateCapacity()
 		m.data.MoveTo(metrics.AppendEmpty())
@@ -273,8 +183,8 @@ func (m *metricApachedruidHistoricalAverageQueryTime) emit(metrics pmetric.Metri
 	}
 }
 
-func newMetricApachedruidHistoricalAverageQueryTime(settings MetricSettings) metricApachedruidHistoricalAverageQueryTime {
-	m := metricApachedruidHistoricalAverageQueryTime{settings: settings}
+func newMetricApachedruidAverageSQLQueryTime(settings MetricSettings) metricApachedruidAverageSQLQueryTime {
+	m := metricApachedruidAverageSQLQueryTime{settings: settings}
 	if settings.Enabled {
 		m.data = pmetric.NewMetric()
 		m.init()
@@ -282,23 +192,23 @@ func newMetricApachedruidHistoricalAverageQueryTime(settings MetricSettings) met
 	return m
 }
 
-type metricApachedruidHistoricalFailedQueryCount struct {
+type metricApachedruidFailedQueryCount struct {
 	data     pmetric.Metric // data buffer for generated metric.
 	settings MetricSettings // metric settings provided by user.
 	capacity int            // max observed number of data points added to the metric.
 }
 
-// init fills apachedruid.historical.failed_query_count metric with initial data.
-func (m *metricApachedruidHistoricalFailedQueryCount) init() {
-	m.data.SetName("apachedruid.historical.failed_query_count")
-	m.data.SetDescription("Total number of failed queries on historical processes since the previous data point.")
+// init fills apachedruid.failed_query_count metric with initial data.
+func (m *metricApachedruidFailedQueryCount) init() {
+	m.data.SetName("apachedruid.failed_query_count")
+	m.data.SetDescription("Total number of failed queries since the previous data point.")
 	m.data.SetUnit("")
 	m.data.SetEmptySum()
 	m.data.Sum().SetIsMonotonic(false)
 	m.data.Sum().SetAggregationTemporality(pmetric.AggregationTemporalityCumulative)
 }
 
-func (m *metricApachedruidHistoricalFailedQueryCount) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val int64) {
+func (m *metricApachedruidFailedQueryCount) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val int64) {
 	if !m.settings.Enabled {
 		return
 	}
@@ -309,14 +219,14 @@ func (m *metricApachedruidHistoricalFailedQueryCount) recordDataPoint(start pcom
 }
 
 // updateCapacity saves max length of data point slices that will be used for the slice capacity.
-func (m *metricApachedruidHistoricalFailedQueryCount) updateCapacity() {
+func (m *metricApachedruidFailedQueryCount) updateCapacity() {
 	if m.data.Sum().DataPoints().Len() > m.capacity {
 		m.capacity = m.data.Sum().DataPoints().Len()
 	}
 }
 
 // emit appends recorded metric data to a metrics slice and prepares it for recording another set of data points.
-func (m *metricApachedruidHistoricalFailedQueryCount) emit(metrics pmetric.MetricSlice) {
+func (m *metricApachedruidFailedQueryCount) emit(metrics pmetric.MetricSlice) {
 	if m.settings.Enabled && m.data.Sum().DataPoints().Len() > 0 {
 		m.updateCapacity()
 		m.data.MoveTo(metrics.AppendEmpty())
@@ -324,8 +234,8 @@ func (m *metricApachedruidHistoricalFailedQueryCount) emit(metrics pmetric.Metri
 	}
 }
 
-func newMetricApachedruidHistoricalFailedQueryCount(settings MetricSettings) metricApachedruidHistoricalFailedQueryCount {
-	m := metricApachedruidHistoricalFailedQueryCount{settings: settings}
+func newMetricApachedruidFailedQueryCount(settings MetricSettings) metricApachedruidFailedQueryCount {
+	m := metricApachedruidFailedQueryCount{settings: settings}
 	if settings.Enabled {
 		m.data = pmetric.NewMetric()
 		m.init()
@@ -333,23 +243,23 @@ func newMetricApachedruidHistoricalFailedQueryCount(settings MetricSettings) met
 	return m
 }
 
-type metricApachedruidHistoricalQueryCount struct {
+type metricApachedruidInterruptedQueryCount struct {
 	data     pmetric.Metric // data buffer for generated metric.
 	settings MetricSettings // metric settings provided by user.
 	capacity int            // max observed number of data points added to the metric.
 }
 
-// init fills apachedruid.historical.query_count metric with initial data.
-func (m *metricApachedruidHistoricalQueryCount) init() {
-	m.data.SetName("apachedruid.historical.query_count")
-	m.data.SetDescription("Total number of queries executed on historical processes since the previous data point.")
+// init fills apachedruid.interrupted_query_count metric with initial data.
+func (m *metricApachedruidInterruptedQueryCount) init() {
+	m.data.SetName("apachedruid.interrupted_query_count")
+	m.data.SetDescription("Total number of interrupted queries since the previous data point.")
 	m.data.SetUnit("")
 	m.data.SetEmptySum()
 	m.data.Sum().SetIsMonotonic(false)
 	m.data.Sum().SetAggregationTemporality(pmetric.AggregationTemporalityCumulative)
 }
 
-func (m *metricApachedruidHistoricalQueryCount) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val int64) {
+func (m *metricApachedruidInterruptedQueryCount) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val int64) {
 	if !m.settings.Enabled {
 		return
 	}
@@ -360,14 +270,14 @@ func (m *metricApachedruidHistoricalQueryCount) recordDataPoint(start pcommon.Ti
 }
 
 // updateCapacity saves max length of data point slices that will be used for the slice capacity.
-func (m *metricApachedruidHistoricalQueryCount) updateCapacity() {
+func (m *metricApachedruidInterruptedQueryCount) updateCapacity() {
 	if m.data.Sum().DataPoints().Len() > m.capacity {
 		m.capacity = m.data.Sum().DataPoints().Len()
 	}
 }
 
 // emit appends recorded metric data to a metrics slice and prepares it for recording another set of data points.
-func (m *metricApachedruidHistoricalQueryCount) emit(metrics pmetric.MetricSlice) {
+func (m *metricApachedruidInterruptedQueryCount) emit(metrics pmetric.MetricSlice) {
 	if m.settings.Enabled && m.data.Sum().DataPoints().Len() > 0 {
 		m.updateCapacity()
 		m.data.MoveTo(metrics.AppendEmpty())
@@ -375,8 +285,214 @@ func (m *metricApachedruidHistoricalQueryCount) emit(metrics pmetric.MetricSlice
 	}
 }
 
-func newMetricApachedruidHistoricalQueryCount(settings MetricSettings) metricApachedruidHistoricalQueryCount {
-	m := metricApachedruidHistoricalQueryCount{settings: settings}
+func newMetricApachedruidInterruptedQueryCount(settings MetricSettings) metricApachedruidInterruptedQueryCount {
+	m := metricApachedruidInterruptedQueryCount{settings: settings}
+	if settings.Enabled {
+		m.data = pmetric.NewMetric()
+		m.init()
+	}
+	return m
+}
+
+type metricApachedruidQueryCount struct {
+	data     pmetric.Metric // data buffer for generated metric.
+	settings MetricSettings // metric settings provided by user.
+	capacity int            // max observed number of data points added to the metric.
+}
+
+// init fills apachedruid.query_count metric with initial data.
+func (m *metricApachedruidQueryCount) init() {
+	m.data.SetName("apachedruid.query_count")
+	m.data.SetDescription("Total number of queries executed since the previous data point.")
+	m.data.SetUnit("")
+	m.data.SetEmptySum()
+	m.data.Sum().SetIsMonotonic(false)
+	m.data.Sum().SetAggregationTemporality(pmetric.AggregationTemporalityCumulative)
+}
+
+func (m *metricApachedruidQueryCount) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val int64) {
+	if !m.settings.Enabled {
+		return
+	}
+	dp := m.data.Sum().DataPoints().AppendEmpty()
+	dp.SetStartTimestamp(start)
+	dp.SetTimestamp(ts)
+	dp.SetIntValue(val)
+}
+
+// updateCapacity saves max length of data point slices that will be used for the slice capacity.
+func (m *metricApachedruidQueryCount) updateCapacity() {
+	if m.data.Sum().DataPoints().Len() > m.capacity {
+		m.capacity = m.data.Sum().DataPoints().Len()
+	}
+}
+
+// emit appends recorded metric data to a metrics slice and prepares it for recording another set of data points.
+func (m *metricApachedruidQueryCount) emit(metrics pmetric.MetricSlice) {
+	if m.settings.Enabled && m.data.Sum().DataPoints().Len() > 0 {
+		m.updateCapacity()
+		m.data.MoveTo(metrics.AppendEmpty())
+		m.init()
+	}
+}
+
+func newMetricApachedruidQueryCount(settings MetricSettings) metricApachedruidQueryCount {
+	m := metricApachedruidQueryCount{settings: settings}
+	if settings.Enabled {
+		m.data = pmetric.NewMetric()
+		m.init()
+	}
+	return m
+}
+
+type metricApachedruidSQLQueryCount struct {
+	data     pmetric.Metric // data buffer for generated metric.
+	settings MetricSettings // metric settings provided by user.
+	capacity int            // max observed number of data points added to the metric.
+}
+
+// init fills apachedruid.sql_query_count metric with initial data.
+func (m *metricApachedruidSQLQueryCount) init() {
+	m.data.SetName("apachedruid.sql_query_count")
+	m.data.SetDescription("Total number of SQL queries executed since the previous data point.")
+	m.data.SetUnit("")
+	m.data.SetEmptySum()
+	m.data.Sum().SetIsMonotonic(false)
+	m.data.Sum().SetAggregationTemporality(pmetric.AggregationTemporalityCumulative)
+	m.data.Sum().DataPoints().EnsureCapacity(m.capacity)
+}
+
+func (m *metricApachedruidSQLQueryCount) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val int64, dataSourceAttributeValue string) {
+	if !m.settings.Enabled {
+		return
+	}
+	dp := m.data.Sum().DataPoints().AppendEmpty()
+	dp.SetStartTimestamp(start)
+	dp.SetTimestamp(ts)
+	dp.SetIntValue(val)
+	dp.Attributes().PutStr("data_source", dataSourceAttributeValue)
+}
+
+// updateCapacity saves max length of data point slices that will be used for the slice capacity.
+func (m *metricApachedruidSQLQueryCount) updateCapacity() {
+	if m.data.Sum().DataPoints().Len() > m.capacity {
+		m.capacity = m.data.Sum().DataPoints().Len()
+	}
+}
+
+// emit appends recorded metric data to a metrics slice and prepares it for recording another set of data points.
+func (m *metricApachedruidSQLQueryCount) emit(metrics pmetric.MetricSlice) {
+	if m.settings.Enabled && m.data.Sum().DataPoints().Len() > 0 {
+		m.updateCapacity()
+		m.data.MoveTo(metrics.AppendEmpty())
+		m.init()
+	}
+}
+
+func newMetricApachedruidSQLQueryCount(settings MetricSettings) metricApachedruidSQLQueryCount {
+	m := metricApachedruidSQLQueryCount{settings: settings}
+	if settings.Enabled {
+		m.data = pmetric.NewMetric()
+		m.init()
+	}
+	return m
+}
+
+type metricApachedruidSuccessQueryCount struct {
+	data     pmetric.Metric // data buffer for generated metric.
+	settings MetricSettings // metric settings provided by user.
+	capacity int            // max observed number of data points added to the metric.
+}
+
+// init fills apachedruid.success_query_count metric with initial data.
+func (m *metricApachedruidSuccessQueryCount) init() {
+	m.data.SetName("apachedruid.success_query_count")
+	m.data.SetDescription("Total number of successful queries since the previous data point.")
+	m.data.SetUnit("")
+	m.data.SetEmptySum()
+	m.data.Sum().SetIsMonotonic(false)
+	m.data.Sum().SetAggregationTemporality(pmetric.AggregationTemporalityCumulative)
+}
+
+func (m *metricApachedruidSuccessQueryCount) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val int64) {
+	if !m.settings.Enabled {
+		return
+	}
+	dp := m.data.Sum().DataPoints().AppendEmpty()
+	dp.SetStartTimestamp(start)
+	dp.SetTimestamp(ts)
+	dp.SetIntValue(val)
+}
+
+// updateCapacity saves max length of data point slices that will be used for the slice capacity.
+func (m *metricApachedruidSuccessQueryCount) updateCapacity() {
+	if m.data.Sum().DataPoints().Len() > m.capacity {
+		m.capacity = m.data.Sum().DataPoints().Len()
+	}
+}
+
+// emit appends recorded metric data to a metrics slice and prepares it for recording another set of data points.
+func (m *metricApachedruidSuccessQueryCount) emit(metrics pmetric.MetricSlice) {
+	if m.settings.Enabled && m.data.Sum().DataPoints().Len() > 0 {
+		m.updateCapacity()
+		m.data.MoveTo(metrics.AppendEmpty())
+		m.init()
+	}
+}
+
+func newMetricApachedruidSuccessQueryCount(settings MetricSettings) metricApachedruidSuccessQueryCount {
+	m := metricApachedruidSuccessQueryCount{settings: settings}
+	if settings.Enabled {
+		m.data = pmetric.NewMetric()
+		m.init()
+	}
+	return m
+}
+
+type metricApachedruidTimeoutQueryCount struct {
+	data     pmetric.Metric // data buffer for generated metric.
+	settings MetricSettings // metric settings provided by user.
+	capacity int            // max observed number of data points added to the metric.
+}
+
+// init fills apachedruid.timeout_query_count metric with initial data.
+func (m *metricApachedruidTimeoutQueryCount) init() {
+	m.data.SetName("apachedruid.timeout_query_count")
+	m.data.SetDescription("Total number of timed out queries since the previous data point.")
+	m.data.SetUnit("")
+	m.data.SetEmptySum()
+	m.data.Sum().SetIsMonotonic(false)
+	m.data.Sum().SetAggregationTemporality(pmetric.AggregationTemporalityCumulative)
+}
+
+func (m *metricApachedruidTimeoutQueryCount) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val int64) {
+	if !m.settings.Enabled {
+		return
+	}
+	dp := m.data.Sum().DataPoints().AppendEmpty()
+	dp.SetStartTimestamp(start)
+	dp.SetTimestamp(ts)
+	dp.SetIntValue(val)
+}
+
+// updateCapacity saves max length of data point slices that will be used for the slice capacity.
+func (m *metricApachedruidTimeoutQueryCount) updateCapacity() {
+	if m.data.Sum().DataPoints().Len() > m.capacity {
+		m.capacity = m.data.Sum().DataPoints().Len()
+	}
+}
+
+// emit appends recorded metric data to a metrics slice and prepares it for recording another set of data points.
+func (m *metricApachedruidTimeoutQueryCount) emit(metrics pmetric.MetricSlice) {
+	if m.settings.Enabled && m.data.Sum().DataPoints().Len() > 0 {
+		m.updateCapacity()
+		m.data.MoveTo(metrics.AppendEmpty())
+		m.init()
+	}
+}
+
+func newMetricApachedruidTimeoutQueryCount(settings MetricSettings) metricApachedruidTimeoutQueryCount {
+	m := metricApachedruidTimeoutQueryCount{settings: settings}
 	if settings.Enabled {
 		m.data = pmetric.NewMetric()
 		m.init()
@@ -393,18 +509,20 @@ type MetricsBuilderConfig struct {
 // MetricsBuilder provides an interface for scrapers to report metrics while taking care of all the transformations
 // required to produce metric representation defined in metadata and user settings.
 type MetricsBuilder struct {
-	startTime                                   pcommon.Timestamp   // start time that will be applied to all recorded data points.
-	metricsCapacity                             int                 // maximum observed number of metrics per resource.
-	resourceCapacity                            int                 // maximum observed number of resource attributes.
-	metricsBuffer                               pmetric.Metrics     // accumulates metrics data before emitting.
-	buildInfo                                   component.BuildInfo // contains version information
-	resourceAttributesSettings                  ResourceAttributesSettings
-	metricApachedruidBrokerAverageQueryTime     metricApachedruidBrokerAverageQueryTime
-	metricApachedruidBrokerFailedQueryCount     metricApachedruidBrokerFailedQueryCount
-	metricApachedruidBrokerQueryCount           metricApachedruidBrokerQueryCount
-	metricApachedruidHistoricalAverageQueryTime metricApachedruidHistoricalAverageQueryTime
-	metricApachedruidHistoricalFailedQueryCount metricApachedruidHistoricalFailedQueryCount
-	metricApachedruidHistoricalQueryCount       metricApachedruidHistoricalQueryCount
+	startTime                              pcommon.Timestamp   // start time that will be applied to all recorded data points.
+	metricsCapacity                        int                 // maximum observed number of metrics per resource.
+	resourceCapacity                       int                 // maximum observed number of resource attributes.
+	metricsBuffer                          pmetric.Metrics     // accumulates metrics data before emitting.
+	buildInfo                              component.BuildInfo // contains version information
+	resourceAttributesSettings             ResourceAttributesSettings
+	metricApachedruidAverageSQLQueryBytes  metricApachedruidAverageSQLQueryBytes
+	metricApachedruidAverageSQLQueryTime   metricApachedruidAverageSQLQueryTime
+	metricApachedruidFailedQueryCount      metricApachedruidFailedQueryCount
+	metricApachedruidInterruptedQueryCount metricApachedruidInterruptedQueryCount
+	metricApachedruidQueryCount            metricApachedruidQueryCount
+	metricApachedruidSQLQueryCount         metricApachedruidSQLQueryCount
+	metricApachedruidSuccessQueryCount     metricApachedruidSuccessQueryCount
+	metricApachedruidTimeoutQueryCount     metricApachedruidTimeoutQueryCount
 }
 
 // metricBuilderOption applies changes to default metrics builder.
@@ -433,16 +551,18 @@ func NewMetricsBuilderConfig(ms MetricsSettings, ras ResourceAttributesSettings)
 
 func NewMetricsBuilder(mbc MetricsBuilderConfig, settings receiver.CreateSettings, options ...metricBuilderOption) *MetricsBuilder {
 	mb := &MetricsBuilder{
-		startTime:                                   pcommon.NewTimestampFromTime(time.Now()),
-		metricsBuffer:                               pmetric.NewMetrics(),
-		buildInfo:                                   settings.BuildInfo,
-		resourceAttributesSettings:                  mbc.ResourceAttributes,
-		metricApachedruidBrokerAverageQueryTime:     newMetricApachedruidBrokerAverageQueryTime(mbc.Metrics.ApachedruidBrokerAverageQueryTime),
-		metricApachedruidBrokerFailedQueryCount:     newMetricApachedruidBrokerFailedQueryCount(mbc.Metrics.ApachedruidBrokerFailedQueryCount),
-		metricApachedruidBrokerQueryCount:           newMetricApachedruidBrokerQueryCount(mbc.Metrics.ApachedruidBrokerQueryCount),
-		metricApachedruidHistoricalAverageQueryTime: newMetricApachedruidHistoricalAverageQueryTime(mbc.Metrics.ApachedruidHistoricalAverageQueryTime),
-		metricApachedruidHistoricalFailedQueryCount: newMetricApachedruidHistoricalFailedQueryCount(mbc.Metrics.ApachedruidHistoricalFailedQueryCount),
-		metricApachedruidHistoricalQueryCount:       newMetricApachedruidHistoricalQueryCount(mbc.Metrics.ApachedruidHistoricalQueryCount),
+		startTime:                              pcommon.NewTimestampFromTime(time.Now()),
+		metricsBuffer:                          pmetric.NewMetrics(),
+		buildInfo:                              settings.BuildInfo,
+		resourceAttributesSettings:             mbc.ResourceAttributes,
+		metricApachedruidAverageSQLQueryBytes:  newMetricApachedruidAverageSQLQueryBytes(mbc.Metrics.ApachedruidAverageSQLQueryBytes),
+		metricApachedruidAverageSQLQueryTime:   newMetricApachedruidAverageSQLQueryTime(mbc.Metrics.ApachedruidAverageSQLQueryTime),
+		metricApachedruidFailedQueryCount:      newMetricApachedruidFailedQueryCount(mbc.Metrics.ApachedruidFailedQueryCount),
+		metricApachedruidInterruptedQueryCount: newMetricApachedruidInterruptedQueryCount(mbc.Metrics.ApachedruidInterruptedQueryCount),
+		metricApachedruidQueryCount:            newMetricApachedruidQueryCount(mbc.Metrics.ApachedruidQueryCount),
+		metricApachedruidSQLQueryCount:         newMetricApachedruidSQLQueryCount(mbc.Metrics.ApachedruidSQLQueryCount),
+		metricApachedruidSuccessQueryCount:     newMetricApachedruidSuccessQueryCount(mbc.Metrics.ApachedruidSuccessQueryCount),
+		metricApachedruidTimeoutQueryCount:     newMetricApachedruidTimeoutQueryCount(mbc.Metrics.ApachedruidTimeoutQueryCount),
 	}
 	for _, op := range options {
 		op(mb)
@@ -463,11 +583,11 @@ func (mb *MetricsBuilder) updateCapacity(rm pmetric.ResourceMetrics) {
 // ResourceMetricsOption applies changes to provided resource metrics.
 type ResourceMetricsOption func(ResourceAttributesSettings, pmetric.ResourceMetrics)
 
-// WithApachedruidNodeName sets provided value as "apachedruid.node.name" attribute for current resource.
-func WithApachedruidNodeName(val string) ResourceMetricsOption {
+// WithApachedruidService sets provided value as "apachedruid.service" attribute for current resource.
+func WithApachedruidService(val string) ResourceMetricsOption {
 	return func(ras ResourceAttributesSettings, rm pmetric.ResourceMetrics) {
-		if ras.ApachedruidNodeName.Enabled {
-			rm.Resource().Attributes().PutStr("apachedruid.node.name", val)
+		if ras.ApachedruidService.Enabled {
+			rm.Resource().Attributes().PutStr("apachedruid.service", val)
 		}
 	}
 }
@@ -504,12 +624,14 @@ func (mb *MetricsBuilder) EmitForResource(rmo ...ResourceMetricsOption) {
 	ils.Scope().SetName("otelcol/apachedruidreceiver")
 	ils.Scope().SetVersion(mb.buildInfo.Version)
 	ils.Metrics().EnsureCapacity(mb.metricsCapacity)
-	mb.metricApachedruidBrokerAverageQueryTime.emit(ils.Metrics())
-	mb.metricApachedruidBrokerFailedQueryCount.emit(ils.Metrics())
-	mb.metricApachedruidBrokerQueryCount.emit(ils.Metrics())
-	mb.metricApachedruidHistoricalAverageQueryTime.emit(ils.Metrics())
-	mb.metricApachedruidHistoricalFailedQueryCount.emit(ils.Metrics())
-	mb.metricApachedruidHistoricalQueryCount.emit(ils.Metrics())
+	mb.metricApachedruidAverageSQLQueryBytes.emit(ils.Metrics())
+	mb.metricApachedruidAverageSQLQueryTime.emit(ils.Metrics())
+	mb.metricApachedruidFailedQueryCount.emit(ils.Metrics())
+	mb.metricApachedruidInterruptedQueryCount.emit(ils.Metrics())
+	mb.metricApachedruidQueryCount.emit(ils.Metrics())
+	mb.metricApachedruidSQLQueryCount.emit(ils.Metrics())
+	mb.metricApachedruidSuccessQueryCount.emit(ils.Metrics())
+	mb.metricApachedruidTimeoutQueryCount.emit(ils.Metrics())
 
 	for _, op := range rmo {
 		op(mb.resourceAttributesSettings, rm)
@@ -530,34 +652,44 @@ func (mb *MetricsBuilder) Emit(rmo ...ResourceMetricsOption) pmetric.Metrics {
 	return metrics
 }
 
-// RecordApachedruidBrokerAverageQueryTimeDataPoint adds a data point to apachedruid.broker.average_query_time metric.
-func (mb *MetricsBuilder) RecordApachedruidBrokerAverageQueryTimeDataPoint(ts pcommon.Timestamp, val float64) {
-	mb.metricApachedruidBrokerAverageQueryTime.recordDataPoint(mb.startTime, ts, val)
+// RecordApachedruidAverageSQLQueryBytesDataPoint adds a data point to apachedruid.average_sql_query_bytes metric.
+func (mb *MetricsBuilder) RecordApachedruidAverageSQLQueryBytesDataPoint(ts pcommon.Timestamp, val float64, dataSourceAttributeValue string) {
+	mb.metricApachedruidAverageSQLQueryBytes.recordDataPoint(mb.startTime, ts, val, dataSourceAttributeValue)
 }
 
-// RecordApachedruidBrokerFailedQueryCountDataPoint adds a data point to apachedruid.broker.failed_query_count metric.
-func (mb *MetricsBuilder) RecordApachedruidBrokerFailedQueryCountDataPoint(ts pcommon.Timestamp, val int64) {
-	mb.metricApachedruidBrokerFailedQueryCount.recordDataPoint(mb.startTime, ts, val)
+// RecordApachedruidAverageSQLQueryTimeDataPoint adds a data point to apachedruid.average_sql_query_time metric.
+func (mb *MetricsBuilder) RecordApachedruidAverageSQLQueryTimeDataPoint(ts pcommon.Timestamp, val float64, dataSourceAttributeValue string) {
+	mb.metricApachedruidAverageSQLQueryTime.recordDataPoint(mb.startTime, ts, val, dataSourceAttributeValue)
 }
 
-// RecordApachedruidBrokerQueryCountDataPoint adds a data point to apachedruid.broker.query_count metric.
-func (mb *MetricsBuilder) RecordApachedruidBrokerQueryCountDataPoint(ts pcommon.Timestamp, val int64) {
-	mb.metricApachedruidBrokerQueryCount.recordDataPoint(mb.startTime, ts, val)
+// RecordApachedruidFailedQueryCountDataPoint adds a data point to apachedruid.failed_query_count metric.
+func (mb *MetricsBuilder) RecordApachedruidFailedQueryCountDataPoint(ts pcommon.Timestamp, val int64) {
+	mb.metricApachedruidFailedQueryCount.recordDataPoint(mb.startTime, ts, val)
 }
 
-// RecordApachedruidHistoricalAverageQueryTimeDataPoint adds a data point to apachedruid.historical.average_query_time metric.
-func (mb *MetricsBuilder) RecordApachedruidHistoricalAverageQueryTimeDataPoint(ts pcommon.Timestamp, val float64) {
-	mb.metricApachedruidHistoricalAverageQueryTime.recordDataPoint(mb.startTime, ts, val)
+// RecordApachedruidInterruptedQueryCountDataPoint adds a data point to apachedruid.interrupted_query_count metric.
+func (mb *MetricsBuilder) RecordApachedruidInterruptedQueryCountDataPoint(ts pcommon.Timestamp, val int64) {
+	mb.metricApachedruidInterruptedQueryCount.recordDataPoint(mb.startTime, ts, val)
 }
 
-// RecordApachedruidHistoricalFailedQueryCountDataPoint adds a data point to apachedruid.historical.failed_query_count metric.
-func (mb *MetricsBuilder) RecordApachedruidHistoricalFailedQueryCountDataPoint(ts pcommon.Timestamp, val int64) {
-	mb.metricApachedruidHistoricalFailedQueryCount.recordDataPoint(mb.startTime, ts, val)
+// RecordApachedruidQueryCountDataPoint adds a data point to apachedruid.query_count metric.
+func (mb *MetricsBuilder) RecordApachedruidQueryCountDataPoint(ts pcommon.Timestamp, val int64) {
+	mb.metricApachedruidQueryCount.recordDataPoint(mb.startTime, ts, val)
 }
 
-// RecordApachedruidHistoricalQueryCountDataPoint adds a data point to apachedruid.historical.query_count metric.
-func (mb *MetricsBuilder) RecordApachedruidHistoricalQueryCountDataPoint(ts pcommon.Timestamp, val int64) {
-	mb.metricApachedruidHistoricalQueryCount.recordDataPoint(mb.startTime, ts, val)
+// RecordApachedruidSQLQueryCountDataPoint adds a data point to apachedruid.sql_query_count metric.
+func (mb *MetricsBuilder) RecordApachedruidSQLQueryCountDataPoint(ts pcommon.Timestamp, val int64, dataSourceAttributeValue string) {
+	mb.metricApachedruidSQLQueryCount.recordDataPoint(mb.startTime, ts, val, dataSourceAttributeValue)
+}
+
+// RecordApachedruidSuccessQueryCountDataPoint adds a data point to apachedruid.success_query_count metric.
+func (mb *MetricsBuilder) RecordApachedruidSuccessQueryCountDataPoint(ts pcommon.Timestamp, val int64) {
+	mb.metricApachedruidSuccessQueryCount.recordDataPoint(mb.startTime, ts, val)
+}
+
+// RecordApachedruidTimeoutQueryCountDataPoint adds a data point to apachedruid.timeout_query_count metric.
+func (mb *MetricsBuilder) RecordApachedruidTimeoutQueryCountDataPoint(ts pcommon.Timestamp, val int64) {
+	mb.metricApachedruidTimeoutQueryCount.recordDataPoint(mb.startTime, ts, val)
 }
 
 // Reset resets metrics builder to its initial state. It should be used when external metrics source is restarted,

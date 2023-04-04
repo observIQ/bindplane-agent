@@ -60,29 +60,37 @@ func TestMetricsBuilder(t *testing.T) {
 
 			defaultMetricsCount++
 			allMetricsCount++
-			mb.RecordApachedruidBrokerAverageQueryTimeDataPoint(ts, 1)
+			mb.RecordApachedruidAverageSQLQueryBytesDataPoint(ts, 1, "attr-val")
 
 			defaultMetricsCount++
 			allMetricsCount++
-			mb.RecordApachedruidBrokerFailedQueryCountDataPoint(ts, 1)
+			mb.RecordApachedruidAverageSQLQueryTimeDataPoint(ts, 1, "attr-val")
 
 			defaultMetricsCount++
 			allMetricsCount++
-			mb.RecordApachedruidBrokerQueryCountDataPoint(ts, 1)
+			mb.RecordApachedruidFailedQueryCountDataPoint(ts, 1)
 
 			defaultMetricsCount++
 			allMetricsCount++
-			mb.RecordApachedruidHistoricalAverageQueryTimeDataPoint(ts, 1)
+			mb.RecordApachedruidInterruptedQueryCountDataPoint(ts, 1)
 
 			defaultMetricsCount++
 			allMetricsCount++
-			mb.RecordApachedruidHistoricalFailedQueryCountDataPoint(ts, 1)
+			mb.RecordApachedruidQueryCountDataPoint(ts, 1)
 
 			defaultMetricsCount++
 			allMetricsCount++
-			mb.RecordApachedruidHistoricalQueryCountDataPoint(ts, 1)
+			mb.RecordApachedruidSQLQueryCountDataPoint(ts, 1, "attr-val")
 
-			metrics := mb.Emit(WithApachedruidNodeName("attr-val"))
+			defaultMetricsCount++
+			allMetricsCount++
+			mb.RecordApachedruidSuccessQueryCountDataPoint(ts, 1)
+
+			defaultMetricsCount++
+			allMetricsCount++
+			mb.RecordApachedruidTimeoutQueryCountDataPoint(ts, 1)
+
+			metrics := mb.Emit(WithApachedruidService("attr-val"))
 
 			if test.configSet == testSetNone {
 				assert.Equal(t, 0, metrics.ResourceMetrics().Len())
@@ -93,10 +101,10 @@ func TestMetricsBuilder(t *testing.T) {
 			rm := metrics.ResourceMetrics().At(0)
 			attrCount := 0
 			enabledAttrCount := 0
-			attrVal, ok := rm.Resource().Attributes().Get("apachedruid.node.name")
+			attrVal, ok := rm.Resource().Attributes().Get("apachedruid.service")
 			attrCount++
-			assert.Equal(t, mb.resourceAttributesSettings.ApachedruidNodeName.Enabled, ok)
-			if mb.resourceAttributesSettings.ApachedruidNodeName.Enabled {
+			assert.Equal(t, mb.resourceAttributesSettings.ApachedruidService.Enabled, ok)
+			if mb.resourceAttributesSettings.ApachedruidService.Enabled {
 				enabledAttrCount++
 				assert.EqualValues(t, "attr-val", attrVal.Str())
 			}
@@ -114,24 +122,42 @@ func TestMetricsBuilder(t *testing.T) {
 			validatedMetrics := make(map[string]bool)
 			for i := 0; i < ms.Len(); i++ {
 				switch ms.At(i).Name() {
-				case "apachedruid.broker.average_query_time":
-					assert.False(t, validatedMetrics["apachedruid.broker.average_query_time"], "Found a duplicate in the metrics slice: apachedruid.broker.average_query_time")
-					validatedMetrics["apachedruid.broker.average_query_time"] = true
+				case "apachedruid.average_sql_query_bytes":
+					assert.False(t, validatedMetrics["apachedruid.average_sql_query_bytes"], "Found a duplicate in the metrics slice: apachedruid.average_sql_query_bytes")
+					validatedMetrics["apachedruid.average_sql_query_bytes"] = true
 					assert.Equal(t, pmetric.MetricTypeGauge, ms.At(i).Type())
 					assert.Equal(t, 1, ms.At(i).Gauge().DataPoints().Len())
-					assert.Equal(t, "The average number of milliseconds taken to complete a query on broker processes.", ms.At(i).Description())
+					assert.Equal(t, "The average number of bytes returned by a SQL query.", ms.At(i).Description())
+					assert.Equal(t, "", ms.At(i).Unit())
+					dp := ms.At(i).Gauge().DataPoints().At(0)
+					assert.Equal(t, start, dp.StartTimestamp())
+					assert.Equal(t, ts, dp.Timestamp())
+					assert.Equal(t, pmetric.NumberDataPointValueTypeDouble, dp.ValueType())
+					assert.Equal(t, float64(1), dp.DoubleValue())
+					attrVal, ok := dp.Attributes().Get("data_source")
+					assert.True(t, ok)
+					assert.EqualValues(t, "attr-val", attrVal.Str())
+				case "apachedruid.average_sql_query_time":
+					assert.False(t, validatedMetrics["apachedruid.average_sql_query_time"], "Found a duplicate in the metrics slice: apachedruid.average_sql_query_time")
+					validatedMetrics["apachedruid.average_sql_query_time"] = true
+					assert.Equal(t, pmetric.MetricTypeGauge, ms.At(i).Type())
+					assert.Equal(t, 1, ms.At(i).Gauge().DataPoints().Len())
+					assert.Equal(t, "The average number of milliseconds taken to complete a SQL query.", ms.At(i).Description())
 					assert.Equal(t, "ms", ms.At(i).Unit())
 					dp := ms.At(i).Gauge().DataPoints().At(0)
 					assert.Equal(t, start, dp.StartTimestamp())
 					assert.Equal(t, ts, dp.Timestamp())
 					assert.Equal(t, pmetric.NumberDataPointValueTypeDouble, dp.ValueType())
 					assert.Equal(t, float64(1), dp.DoubleValue())
-				case "apachedruid.broker.failed_query_count":
-					assert.False(t, validatedMetrics["apachedruid.broker.failed_query_count"], "Found a duplicate in the metrics slice: apachedruid.broker.failed_query_count")
-					validatedMetrics["apachedruid.broker.failed_query_count"] = true
+					attrVal, ok := dp.Attributes().Get("data_source")
+					assert.True(t, ok)
+					assert.EqualValues(t, "attr-val", attrVal.Str())
+				case "apachedruid.failed_query_count":
+					assert.False(t, validatedMetrics["apachedruid.failed_query_count"], "Found a duplicate in the metrics slice: apachedruid.failed_query_count")
+					validatedMetrics["apachedruid.failed_query_count"] = true
 					assert.Equal(t, pmetric.MetricTypeSum, ms.At(i).Type())
 					assert.Equal(t, 1, ms.At(i).Sum().DataPoints().Len())
-					assert.Equal(t, "Total number of failed queries on broker processes since the previous data point.", ms.At(i).Description())
+					assert.Equal(t, "Total number of failed queries since the previous data point.", ms.At(i).Description())
 					assert.Equal(t, "", ms.At(i).Unit())
 					assert.Equal(t, false, ms.At(i).Sum().IsMonotonic())
 					assert.Equal(t, pmetric.AggregationTemporalityCumulative, ms.At(i).Sum().AggregationTemporality())
@@ -140,12 +166,12 @@ func TestMetricsBuilder(t *testing.T) {
 					assert.Equal(t, ts, dp.Timestamp())
 					assert.Equal(t, pmetric.NumberDataPointValueTypeInt, dp.ValueType())
 					assert.Equal(t, int64(1), dp.IntValue())
-				case "apachedruid.broker.query_count":
-					assert.False(t, validatedMetrics["apachedruid.broker.query_count"], "Found a duplicate in the metrics slice: apachedruid.broker.query_count")
-					validatedMetrics["apachedruid.broker.query_count"] = true
+				case "apachedruid.interrupted_query_count":
+					assert.False(t, validatedMetrics["apachedruid.interrupted_query_count"], "Found a duplicate in the metrics slice: apachedruid.interrupted_query_count")
+					validatedMetrics["apachedruid.interrupted_query_count"] = true
 					assert.Equal(t, pmetric.MetricTypeSum, ms.At(i).Type())
 					assert.Equal(t, 1, ms.At(i).Sum().DataPoints().Len())
-					assert.Equal(t, "Total number of queries executed on broker processes since the previous data point.", ms.At(i).Description())
+					assert.Equal(t, "Total number of interrupted queries since the previous data point.", ms.At(i).Description())
 					assert.Equal(t, "", ms.At(i).Unit())
 					assert.Equal(t, false, ms.At(i).Sum().IsMonotonic())
 					assert.Equal(t, pmetric.AggregationTemporalityCumulative, ms.At(i).Sum().AggregationTemporality())
@@ -154,24 +180,12 @@ func TestMetricsBuilder(t *testing.T) {
 					assert.Equal(t, ts, dp.Timestamp())
 					assert.Equal(t, pmetric.NumberDataPointValueTypeInt, dp.ValueType())
 					assert.Equal(t, int64(1), dp.IntValue())
-				case "apachedruid.historical.average_query_time":
-					assert.False(t, validatedMetrics["apachedruid.historical.average_query_time"], "Found a duplicate in the metrics slice: apachedruid.historical.average_query_time")
-					validatedMetrics["apachedruid.historical.average_query_time"] = true
-					assert.Equal(t, pmetric.MetricTypeGauge, ms.At(i).Type())
-					assert.Equal(t, 1, ms.At(i).Gauge().DataPoints().Len())
-					assert.Equal(t, "The average number of milliseconds taken to complete a query on historical processes.", ms.At(i).Description())
-					assert.Equal(t, "ms", ms.At(i).Unit())
-					dp := ms.At(i).Gauge().DataPoints().At(0)
-					assert.Equal(t, start, dp.StartTimestamp())
-					assert.Equal(t, ts, dp.Timestamp())
-					assert.Equal(t, pmetric.NumberDataPointValueTypeDouble, dp.ValueType())
-					assert.Equal(t, float64(1), dp.DoubleValue())
-				case "apachedruid.historical.failed_query_count":
-					assert.False(t, validatedMetrics["apachedruid.historical.failed_query_count"], "Found a duplicate in the metrics slice: apachedruid.historical.failed_query_count")
-					validatedMetrics["apachedruid.historical.failed_query_count"] = true
+				case "apachedruid.query_count":
+					assert.False(t, validatedMetrics["apachedruid.query_count"], "Found a duplicate in the metrics slice: apachedruid.query_count")
+					validatedMetrics["apachedruid.query_count"] = true
 					assert.Equal(t, pmetric.MetricTypeSum, ms.At(i).Type())
 					assert.Equal(t, 1, ms.At(i).Sum().DataPoints().Len())
-					assert.Equal(t, "Total number of failed queries on historical processes since the previous data point.", ms.At(i).Description())
+					assert.Equal(t, "Total number of queries executed since the previous data point.", ms.At(i).Description())
 					assert.Equal(t, "", ms.At(i).Unit())
 					assert.Equal(t, false, ms.At(i).Sum().IsMonotonic())
 					assert.Equal(t, pmetric.AggregationTemporalityCumulative, ms.At(i).Sum().AggregationTemporality())
@@ -180,12 +194,43 @@ func TestMetricsBuilder(t *testing.T) {
 					assert.Equal(t, ts, dp.Timestamp())
 					assert.Equal(t, pmetric.NumberDataPointValueTypeInt, dp.ValueType())
 					assert.Equal(t, int64(1), dp.IntValue())
-				case "apachedruid.historical.query_count":
-					assert.False(t, validatedMetrics["apachedruid.historical.query_count"], "Found a duplicate in the metrics slice: apachedruid.historical.query_count")
-					validatedMetrics["apachedruid.historical.query_count"] = true
+				case "apachedruid.sql_query_count":
+					assert.False(t, validatedMetrics["apachedruid.sql_query_count"], "Found a duplicate in the metrics slice: apachedruid.sql_query_count")
+					validatedMetrics["apachedruid.sql_query_count"] = true
 					assert.Equal(t, pmetric.MetricTypeSum, ms.At(i).Type())
 					assert.Equal(t, 1, ms.At(i).Sum().DataPoints().Len())
-					assert.Equal(t, "Total number of queries executed on historical processes since the previous data point.", ms.At(i).Description())
+					assert.Equal(t, "Total number of SQL queries executed since the previous data point.", ms.At(i).Description())
+					assert.Equal(t, "", ms.At(i).Unit())
+					assert.Equal(t, false, ms.At(i).Sum().IsMonotonic())
+					assert.Equal(t, pmetric.AggregationTemporalityCumulative, ms.At(i).Sum().AggregationTemporality())
+					dp := ms.At(i).Sum().DataPoints().At(0)
+					assert.Equal(t, start, dp.StartTimestamp())
+					assert.Equal(t, ts, dp.Timestamp())
+					assert.Equal(t, pmetric.NumberDataPointValueTypeInt, dp.ValueType())
+					assert.Equal(t, int64(1), dp.IntValue())
+					attrVal, ok := dp.Attributes().Get("data_source")
+					assert.True(t, ok)
+					assert.EqualValues(t, "attr-val", attrVal.Str())
+				case "apachedruid.success_query_count":
+					assert.False(t, validatedMetrics["apachedruid.success_query_count"], "Found a duplicate in the metrics slice: apachedruid.success_query_count")
+					validatedMetrics["apachedruid.success_query_count"] = true
+					assert.Equal(t, pmetric.MetricTypeSum, ms.At(i).Type())
+					assert.Equal(t, 1, ms.At(i).Sum().DataPoints().Len())
+					assert.Equal(t, "Total number of successful queries since the previous data point.", ms.At(i).Description())
+					assert.Equal(t, "", ms.At(i).Unit())
+					assert.Equal(t, false, ms.At(i).Sum().IsMonotonic())
+					assert.Equal(t, pmetric.AggregationTemporalityCumulative, ms.At(i).Sum().AggregationTemporality())
+					dp := ms.At(i).Sum().DataPoints().At(0)
+					assert.Equal(t, start, dp.StartTimestamp())
+					assert.Equal(t, ts, dp.Timestamp())
+					assert.Equal(t, pmetric.NumberDataPointValueTypeInt, dp.ValueType())
+					assert.Equal(t, int64(1), dp.IntValue())
+				case "apachedruid.timeout_query_count":
+					assert.False(t, validatedMetrics["apachedruid.timeout_query_count"], "Found a duplicate in the metrics slice: apachedruid.timeout_query_count")
+					validatedMetrics["apachedruid.timeout_query_count"] = true
+					assert.Equal(t, pmetric.MetricTypeSum, ms.At(i).Type())
+					assert.Equal(t, 1, ms.At(i).Sum().DataPoints().Len())
+					assert.Equal(t, "Total number of timed out queries since the previous data point.", ms.At(i).Description())
 					assert.Equal(t, "", ms.At(i).Unit())
 					assert.Equal(t, false, ms.At(i).Sum().IsMonotonic())
 					assert.Equal(t, pmetric.AggregationTemporalityCumulative, ms.At(i).Sum().AggregationTemporality())

@@ -161,7 +161,7 @@ func TestHandleRequest(t *testing.T) {
 			request: &http.Request{
 				Method: "POST",
 				URL:    &url.URL{},
-				Body:   io.NopCloser(bytes.NewBufferString(`[{"service": "druid/broker","metric": "query/time","value": 55},{"service": "druid/broker","metric": "query/time","value": 123},{"service": "druid/broker","metric": "query/count","value": 15},{"service": "druid/broker","metric": "query/failed/count","value": 3},{"service": "druid/historical","metric": "query/time","value": 44},{"service": "druid/historical","metric": "query/time","value": 66},{"service": "druid/historical","metric": "query/count","value": 99},{"service": "druid/historical","metric": "query/failed/count","value": 5}]`)),
+				Body:   io.NopCloser(bytes.NewBufferString(`[{"service":"druid/broker","metric":"query/count","value":123},{"service":"druid/broker","metric":"query/success/count","value":101},{"service":"druid/broker","metric":"query/failed/count","value":12},{"service":"druid/broker","metric":"query/interrupted/count","value":6},{"service":"druid/broker","metric":"query/timeout/count","value":4},{"service":"druid/broker","metric":"sqlQuery/time","dataSource":"table_1","value":97},{"service":"druid/broker","metric":"sqlQuery/bytes","dataSource":"table_1","value":450},{"service":"druid/broker","metric":"sqlQuery/time","dataSource":"table_1","value":115},{"service":"druid/broker","metric":"sqlQuery/bytes","dataSource":"table_1","value":1024},{"service":"druid/broker","metric":"sqlQuery/time","dataSource":"table_2","value":12},{"service":"druid/broker","metric":"sqlQuery/bytes","dataSource":"table_2","value":97},{"service":"druid/broker","metric":"sqlQuery/time","dataSource":"table_2","value":18},{"service":"druid/broker","metric":"sqlQuery/bytes","dataSource":"table_2","value":112}]`)),
 				Header: map[string][]string{
 					textproto.CanonicalMIMEHeaderKey("Authorization"): {ENCODED_CREDENTIALS},
 					textproto.CanonicalMIMEHeaderKey("Content-Type"):  {"application/json"},
@@ -201,7 +201,7 @@ func TestHandleRequest(t *testing.T) {
 
 			if !tc.consumerFailure {
 				if tc.metricExpected {
-					assert.Equal(t, 6, consumer.(*consumertest.MetricsSink).DataPointCount(), "Did not receive metrics")
+					assert.Equal(t, 11, consumer.(*consumertest.MetricsSink).DataPointCount(), "Did not receive metrics")
 				} else {
 					assert.Equal(t, 0, consumer.(*consumertest.MetricsSink).DataPointCount(), "Received metrics when they should have been dropped")
 				}

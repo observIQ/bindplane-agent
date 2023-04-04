@@ -1,51 +1,76 @@
 name: apachedruidreceiver
 
 resource_attributes:
-  apachedruid.node.name:
-    description: The name of the node.
+  apachedruid.service:
+    description: Name of the Druid service
     type: string
     enabled: true
 
+attributes:
+  data_source:
+    description: Name of the Druid table being queried.
+    type: string
+
 metrics:
-  apachedruid.historical.average_query_time:
+  apachedruid.query_count:
     enabled: true
-    description: The average number of milliseconds taken to complete a query on historical processes.
+    description: Total number of queries executed since the previous data point.
+    sum:
+      value_type: int
+      monotonic: false
+      aggregation: cumulative
+  apachedruid.success_query_count:
+    enabled: true
+    description: Total number of successful queries since the previous data point.
+    sum:
+      value_type: int
+      monotonic: false
+      aggregation: cumulative
+    attributes: []
+  apachedruid.failed_query_count:
+    enabled: true
+    description: Total number of failed queries since the previous data point.
+    sum:
+      value_type: int
+      monotonic: false
+      aggregation: cumulative
+    attributes: []
+  apachedruid.interrupted_query_count:
+    enabled: true
+    description: Total number of interrupted queries since the previous data point.
+    sum:
+      value_type: int
+      monotonic: false
+      aggregation: cumulative
+    attributes: []
+  apachedruid.timeout_query_count:
+    enabled: true
+    description: Total number of timed out queries since the previous data point.
+    sum:
+      value_type: int
+      monotonic: false
+      aggregation: cumulative
+    attributes: []
+  apachedruid.average_sql_query_time:
+    enabled: true
+    description: The average number of milliseconds taken to complete a SQL query.
     unit: ms
     gauge:
       value_type: double
-  apachedruid.historical.query_count:
+    attributes: ["data_source"]
+  apachedruid.average_sql_query_bytes:
     enabled: true
-    description: Total number of queries executed on historical processes since the previous data point.
-    sum:
-      value_type: int
-      monotonic: false
-      aggregation: cumulative
-  apachedruid.historical.failed_query_count:
-    enabled: true
-    description: Total number of failed queries on historical processes since the previous data point.
-    sum:
-      value_type: int
-      monotonic: false
-      aggregation: cumulative
-  apachedruid.broker.average_query_time:
-    enabled: true
-    description: The average number of milliseconds taken to complete a query on broker processes.
-    unit: ms
+    description: The average number of bytes returned by a SQL query.
     gauge:
       value_type: double
-  apachedruid.broker.query_count:
+    attributes: ["data_source"]
+  apachedruid.sql_query_count:
     enabled: true
-    description: Total number of queries executed on broker processes since the previous data point.
+    description: Total number of SQL queries executed since the previous data point.
     sum:
       value_type: int
       monotonic: false
       aggregation: cumulative
-  apachedruid.broker.failed_query_count:
-    enabled: true
-    description: Total number of failed queries on broker processes since the previous data point.
-    sum:
-      value_type: int
-      monotonic: false
-      aggregation: cumulative
+    attributes: ["data_source"]
 
       

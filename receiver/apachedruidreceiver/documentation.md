@@ -12,49 +12,83 @@ metrics:
     enabled: false
 ```
 
-### apachedruid.broker.average_query_time
+### apachedruid.average_sql_query_bytes
 
-The average number of milliseconds taken to complete a query on broker processes.
+The average number of bytes returned by a SQL query.
+
+| Unit | Metric Type | Value Type |
+| ---- | ----------- | ---------- |
+|  | Gauge | Double |
+
+#### Attributes
+
+| Name | Description | Values |
+| ---- | ----------- | ------ |
+| data_source | Name of the Druid table being queried. | Any Str |
+
+### apachedruid.average_sql_query_time
+
+The average number of milliseconds taken to complete a SQL query.
 
 | Unit | Metric Type | Value Type |
 | ---- | ----------- | ---------- |
 | ms | Gauge | Double |
 
-### apachedruid.broker.failed_query_count
+#### Attributes
 
-Total number of failed queries on broker processes since the previous data point.
+| Name | Description | Values |
+| ---- | ----------- | ------ |
+| data_source | Name of the Druid table being queried. | Any Str |
 
-| Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
-| ---- | ----------- | ---------- | ----------------------- | --------- |
-|  | Sum | Int | Cumulative | false |
+### apachedruid.failed_query_count
 
-### apachedruid.broker.query_count
-
-Total number of queries executed on broker processes since the previous data point.
+Total number of failed queries since the previous data point.
 
 | Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
 | ---- | ----------- | ---------- | ----------------------- | --------- |
 |  | Sum | Int | Cumulative | false |
 
-### apachedruid.historical.average_query_time
+### apachedruid.interrupted_query_count
 
-The average number of milliseconds taken to complete a query on historical processes.
-
-| Unit | Metric Type | Value Type |
-| ---- | ----------- | ---------- |
-| ms | Gauge | Double |
-
-### apachedruid.historical.failed_query_count
-
-Total number of failed queries on historical processes since the previous data point.
+Total number of interrupted queries since the previous data point.
 
 | Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
 | ---- | ----------- | ---------- | ----------------------- | --------- |
 |  | Sum | Int | Cumulative | false |
 
-### apachedruid.historical.query_count
+### apachedruid.query_count
 
-Total number of queries executed on historical processes since the previous data point.
+Total number of queries executed since the previous data point.
+
+| Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
+| ---- | ----------- | ---------- | ----------------------- | --------- |
+|  | Sum | Int | Cumulative | false |
+
+### apachedruid.sql_query_count
+
+Total number of SQL queries executed since the previous data point.
+
+| Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
+| ---- | ----------- | ---------- | ----------------------- | --------- |
+|  | Sum | Int | Cumulative | false |
+
+#### Attributes
+
+| Name | Description | Values |
+| ---- | ----------- | ------ |
+| data_source | Name of the Druid table being queried. | Any Str |
+
+### apachedruid.success_query_count
+
+Total number of successful queries since the previous data point.
+
+| Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
+| ---- | ----------- | ---------- | ----------------------- | --------- |
+|  | Sum | Int | Cumulative | false |
+
+### apachedruid.timeout_query_count
+
+Total number of timed out queries since the previous data point.
 
 | Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
 | ---- | ----------- | ---------- | ----------------------- | --------- |
@@ -64,4 +98,4 @@ Total number of queries executed on historical processes since the previous data
 
 | Name | Description | Values | Enabled |
 | ---- | ----------- | ------ | ------- |
-| apachedruid.node.name | The name of the node. | Any Str | true |
+| apachedruid.service | Name of the Druid service | Any Str | true |
