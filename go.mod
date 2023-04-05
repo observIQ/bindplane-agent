@@ -165,6 +165,7 @@ require (
 	github.com/elastic/go-elasticsearch/v7 v7.17.7 // indirect
 	github.com/grafana/loki/pkg/push v0.0.0-20230127072203-4e8cc8d71928 // indirect
 	github.com/influxdata/influxdb-observability/otel2influx v0.3.4 // indirect
+	github.com/observiq/observiq-otel-collector/counter v1.22.0 // indirect
 	github.com/observiq/observiq-otel-collector/expr v1.22.0 // indirect
 	github.com/panta/machineid v1.0.2 // indirect
 	github.com/shoenig/go-m1cpu v0.1.4 // indirect
@@ -582,6 +583,8 @@ replace github.com/observiq/observiq-otel-collector/processor/metricextractproce
 replace github.com/observiq/observiq-otel-collector/processor/logdeduplicationprocessor => ./processor/logdeduplicationprocessor
 
 replace github.com/observiq/observiq-otel-collector/expr => ./expr
+
+replace github.com/observiq/observiq-otel-collector/counter => ./counter
 
 // Does not build with windows and only used in configschema executable
 // Relevant issue https://github.com/mattn/go-ieproxy/issues/45
