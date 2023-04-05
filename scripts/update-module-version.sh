@@ -20,33 +20,20 @@ if [ -z "$TARGET_VERSION" ]; then
     exit 1
 fi
 
-PDATA_TARGET_VERSION=$2
-
-if [ -z "$PDATA_TARGET_VERSION" ]; then
-    echo "Must specify a target pdata version"
-    exit 1
-fi
-
 LOCAL_MODULES=$(find . -type f -name "go.mod" -exec dirname {} \; | sort)
 for local_mod in $LOCAL_MODULES
 do
     # Run in a subshell so that the CD doesn't change this shell's current directory
     (
-        echo "Updating deps in $local_mod"
+        echo "Updating version in $local_mod"
         cd "$local_mod" || exit 1
         OTEL_MODULES=$(go list -m -f '{{if not (or .Indirect .Main)}}{{.Path}}{{end}}' all |
-            grep -E -e '(?:^github.com/open-telemetry/opentelemetry-collector-contrib)|(?:^go.opentelemetry.io/collector)')
+            grep -E -e '^github.com/observiq/observiq-otel-collector')
 
         for mod in $OTEL_MODULES
         do
-            if case $mod in go.opentelemetry.io/collector/pdata*) ;; *) false;; esac; then
-                # pdata package is versioned separately
-                echo "$local_mod: $mod@$PDATA_TARGET_VERSION"
-                go mod edit -require "$mod@$PDATA_TARGET_VERSION"
-            else
-                echo "$local_mod: $mod@$TARGET_VERSION"
-                go mod edit -require "$mod@$TARGET_VERSION"
-            fi;
+            echo "$local_mod: $mod@$TARGET_VERSION"
+            go mod edit -require "$mod@$TARGET_VERSION"
         done
     )
 done

@@ -172,12 +172,18 @@ add-license:
 
 # update-otel attempts to update otel dependencies in go.mods,
 # and update the otel versions in the docs.
-# Currently, does not handle operations-collector updates.
-# Usage: make update-otel OTEL_VERSION=vx.x.x
+# Usage: make update-otel OTEL_VERSION=vx.x.x PDATA_VERSION=vx.x.x-rcx
 .PHONY: update-otel
 update-otel:
-	./scripts/update-otel.sh "$(OTEL_VERSION)"
+	./scripts/update-otel.sh "$(OTEL_VERSION)" "$(PDATA_VERSION)"
 	./scripts/update-docs.sh "$(OTEL_VERSION)"
+	$(MAKE) tidy
+
+# update-modules updates all submodules to be the new version.
+# Usage: make update-modules NEW_VERSION=vx.x.x
+.PHONY: update-modules
+update-modules:
+	./scripts/update-module-version.sh "$(NEW_VERSION)"
 	$(MAKE) tidy
 
 # Downloads and setups dependencies that are packaged with binary
