@@ -4,6 +4,7 @@ import (
 	"go.opentelemetry.io/collector/pdata/ptrace"
 )
 
+// Span specific fields for use in expressions
 const (
 	SpanKindField          = "trace_kind"
 	SpanStatusCodeField    = "trace_status_code"
@@ -26,6 +27,7 @@ var spanStatusCodeToString = map[ptrace.StatusCode]string{
 	ptrace.StatusCodeUnset: "unset",
 }
 
+// Span is the simplified representation of a metric datapoint.
 type Span = map[string]any
 
 func convertToSpan(span ptrace.Span, resource map[string]any) Span {
@@ -39,26 +41,28 @@ func convertToSpan(span ptrace.Span, resource map[string]any) Span {
 	}
 }
 
+// SpanResourceGroup represents a ptrace.ResourceSpans as native go types
 type SpanResourceGroup struct {
 	Resource map[string]any
 	Spans    []Span
 }
 
-func ConvertToSpanResourceGroups(logs ptrace.Traces) []SpanResourceGroup {
-	groups := make([]SpanResourceGroup, 0, logs.ResourceSpans().Len())
+// ConvertToSpanResourceGroups converts a ptrace.Traces into a slice of SpanResourceGroup
+func ConvertToSpanResourceGroups(traces ptrace.Traces) []SpanResourceGroup {
+	groups := make([]SpanResourceGroup, 0, traces.ResourceSpans().Len())
 
-	for i := 0; i < logs.ResourceSpans().Len(); i++ {
-		resourceLogs := logs.ResourceSpans().At(i)
-		resource := resourceLogs.Resource().Attributes().AsRaw()
+	for i := 0; i < traces.ResourceSpans().Len(); i++ {
+		resourceSpans := traces.ResourceSpans().At(i)
+		resource := resourceSpans.Resource().Attributes().AsRaw()
 		group := SpanResourceGroup{
 			Resource: resource,
-			Spans:    make([]Span, 0, resourceLogs.ScopeSpans().Len()),
+			Spans:    make([]Span, 0, resourceSpans.ScopeSpans().Len()),
 		}
-		for j := 0; j < resourceLogs.ScopeSpans().Len(); j++ {
-			logs := resourceLogs.ScopeSpans().At(j).Spans()
-			for k := 0; k < logs.Len(); k++ {
-				log := logs.At(k)
-				group.Spans = append(group.Spans, convertToSpan(log, resource))
+		for j := 0; j < resourceSpans.ScopeSpans().Len(); j++ {
+			spans := resourceSpans.ScopeSpans().At(j).Spans()
+			for k := 0; k < spans.Len(); k++ {
+				span := spans.At(k)
+				group.Spans = append(group.Spans, convertToSpan(span, resource))
 			}
 		}
 		groups = append(groups, group)

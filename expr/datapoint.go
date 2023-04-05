@@ -19,6 +19,7 @@ import (
 	"go.opentelemetry.io/collector/pdata/pmetric"
 )
 
+// Metric specific fields for use in expressions
 const (
 	MetricNameField     = "metric_name"
 	DatapointValueField = "datapoint_value"
@@ -93,11 +94,13 @@ func convertNumberDatapoint(dp pmetric.NumberDataPoint, resource map[string]any,
 	return datapoint
 }
 
+// DatapointResourceGroup represents a pmetric.ResourceMetrics as native go types
 type DatapointResourceGroup struct {
 	Resource   map[string]any
 	Datapoints []Datapoint
 }
 
+// ConvertToDatapointResourceGroup converts a pmetric.Metrics into a slice of DatapointResourceGroup
 func ConvertToDatapointResourceGroup(metrics pmetric.Metrics) []DatapointResourceGroup {
 	groups := make([]DatapointResourceGroup, 0, metrics.ResourceMetrics().Len())
 
