@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Package counter contains structs used to count telemetry grouped by resource and attributes.
 package counter
 
 import "encoding/json"
@@ -21,7 +22,7 @@ type TelemetryCounter struct {
 	resources map[string]*ResourceCounter
 }
 
-// NewLogCounter creates a new LogCounter.
+// NewTelemetryCounter creates a new TelemetryCounter.
 func NewTelemetryCounter() *TelemetryCounter {
 	return &TelemetryCounter{
 		resources: make(map[string]*ResourceCounter),
@@ -38,6 +39,7 @@ func (t *TelemetryCounter) Add(resource, attributes map[string]any) {
 	t.resources[key].Add(attributes)
 }
 
+// Resources returns a map of resource ID to a counter for that resource.
 func (t TelemetryCounter) Resources() map[string]*ResourceCounter {
 	return t.resources
 }
@@ -71,10 +73,12 @@ func (r *ResourceCounter) Add(attributes map[string]any) {
 	r.attributes[key].Add()
 }
 
+// Attributes returns a map of attribute set ID to a counter for that attribute set.
 func (r ResourceCounter) Attributes() map[string]*AttributeCounter {
 	return r.attributes
 }
 
+// Values returns the raw map value of the resource that this counter counts.
 func (r ResourceCounter) Values() map[string]any {
 	return r.values
 }
@@ -97,10 +101,12 @@ func (a *AttributeCounter) Add() {
 	a.count++
 }
 
+// Count returns the number of counts for this attribute counter.
 func (a AttributeCounter) Count() int {
 	return a.count
 }
 
+// Values returns the attribute map that this counter tracks.
 func (a AttributeCounter) Values() map[string]any {
 	return a.values
 }
