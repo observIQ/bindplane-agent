@@ -7,6 +7,7 @@ require (
 	github.com/mholt/archiver/v3 v3.5.1
 	github.com/observiq/observiq-otel-collector/exporter/googlecloudexporter v1.22.0
 	github.com/observiq/observiq-otel-collector/packagestate v1.22.0
+	github.com/observiq/observiq-otel-collector/processor/datapointcountprocessor v1.22.0
 	github.com/observiq/observiq-otel-collector/processor/logcountprocessor v1.22.0
 	github.com/observiq/observiq-otel-collector/processor/logdeduplicationprocessor v1.22.0
 	github.com/observiq/observiq-otel-collector/processor/maskprocessor v1.22.0
@@ -584,6 +585,8 @@ replace github.com/observiq/observiq-otel-collector/processor/metricextractproce
 replace github.com/observiq/observiq-otel-collector/processor/logdeduplicationprocessor => ./processor/logdeduplicationprocessor
 
 replace github.com/observiq/observiq-otel-collector/processor/spancountprocessor => ./processor/spancountprocessor
+
+replace github.com/observiq/observiq-otel-collector/processor/datapointcountprocessor => ./processor/datapointcountprocessor
 
 replace github.com/observiq/observiq-otel-collector/expr => ./expr
 

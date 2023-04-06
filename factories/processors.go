@@ -16,6 +16,7 @@ package factories
 
 import (
 	"github.com/observiq/observiq-otel-collector/internal/processor/snapshotprocessor"
+	"github.com/observiq/observiq-otel-collector/processor/datapointcountprocessor"
 	"github.com/observiq/observiq-otel-collector/processor/logcountprocessor"
 	"github.com/observiq/observiq-otel-collector/processor/logdeduplicationprocessor"
 	"github.com/observiq/observiq-otel-collector/processor/maskprocessor"
@@ -54,6 +55,7 @@ var defaultProcessors = []processor.Factory{
 	batchprocessor.NewFactory(),
 	processortest.NewNopFactory(),
 	cumulativetodeltaprocessor.NewFactory(),
+	datapointcountprocessor.NewFactory(),
 	deltatorateprocessor.NewFactory(),
 	filterprocessor.NewFactory(),
 	groupbyattrsprocessor.NewFactory(),
