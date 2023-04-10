@@ -20,7 +20,7 @@ This processor is used to detect and mask sensitive data.
 | exclude      | []string | `[]`    | A list of json dot notation fields that will be excluded from masking. The prefixes `resource`, `attributes`, and `body` can be used to indicate the root of the field. |
 
 ### Example Config
-The following config is an example configuration of the mask processor using default values. This configuration will receive logs through an otlp receiver. The mask processor will then search and mask any logs that match the predefined email, ssn, credit_card, or phone rules. The logs will then be sent to the logging exporter.
+The following config is an example configuration of the mask processor using default values. This configuration will receive logs through an otlp receiver. The mask processor will then search and mask any logs that match the predefined email, ssn, credit_card, phone, or ipv4 rules. The logs will then be sent to the logging exporter.
 ```yaml
 receivers:
     otlp:
