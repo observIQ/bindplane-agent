@@ -99,8 +99,14 @@
                         <ServiceDependency Id="{{$d}}"/>
                         {{end}}
                         {{if $f.Service.Delayed}}
-                        <ServiceConfig DelayedAutoStart="yes" OnInstall="yes" OnReinstall ="yes"/>
+                        <ServiceConfig DelayedAutoStart="yes" OnInstall="yes" OnReinstall ="yes" FailureActionsWhen="failedToStopOrReturnedError"/>
                         {{end}}
+                        <util:ServiceConfig xmlns:util="http://schemas.microsoft.com/wix/UtilExtension"
+                                            FirstFailureActionType="restart"
+                                            SecondFailureActionType="restart"
+                                            ThirdFailureActionType="restart"
+                                            ResetPeriodInDays="30"
+                                            RestartServiceDelayInSeconds="5"/>
                     </ServiceInstall>
                     <ServiceControl Id="ServiceControl{{$f.ID}}" Name="{{$f.Service.Name}}" Start="install" Stop="both" Remove="uninstall"/>
                     {{end}}
