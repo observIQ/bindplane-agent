@@ -56,15 +56,15 @@ template: |
         - include: pinecone_request_count_total
           match_type: strict
           action: update
-          new_name: "pinecone.request.count.total"
+          new_name: "pinecone.request.count"
         - include: pinecone_request_error_count_total
           match_type: strict
           action: update
-          new_name: "pinecone.request.error.count.total"
+          new_name: "pinecone.request.error.count"
         - include: pinecone_request_latency_seconds
           match_type: strict
           action: update
-          new_name: "pinecone.request.latency.seconds"
+          new_name: "pinecone.request.latency"
         - include: pinecone_index_fullness
           match_type: strict
           action: update
@@ -75,21 +75,21 @@ template: |
       - context: datapoint
         statements:
         - convert_gauge_to_sum("cumulative", false) where metric.name == "pinecone.vector.count"
-        - convert_gauge_to_sum("cumulative", true) where metric.name == "pinecone.request.count.total"
-        # - convert_gauge_to_sum("cumulative", true) where metric.name == "pinecone.request.error.count.total"
+        - convert_gauge_to_sum("cumulative", true) where metric.name == "pinecone.request.count"
+        - convert_gauge_to_sum("cumulative", true) where metric.name == "pinecone.request.error.count"
       - context: metric
         statements:
         - set(description, "Number of items per pod in the index.") where name == "pinecone.vector.count"
         - set(unit, "{items}") where name == "pinecone.vector.count"
 
-        - set(description, "Number of data plane calls made by clients.") where name == "pinecone.request.count.total"
-        - set(unit, "{requests}") where name == "pinecone.request.count.total"
+        - set(description, "Number of data plane calls made by clients.") where name == "pinecone.request.count"
+        - set(unit, "{requests}") where name == "pinecone.request.count"
 
-        - set(description, "Number of data plane calls made by clients that resulted in errors.") where name == "pinecone.request.error.count.total"
-        - set(unit, "requests") where name == "pinecone.request.error.count.total"
+        - set(description, "Number of data plane calls made by clients that resulted in errors.") where name == "pinecone.request.error.count"
+        - set(unit, "requests") where name == "pinecone.request.error.count"
 
-        - set(description, "Distribution of server-side processing latency for pinecone data plane calls.") where name == "pinecone.request.latency.seconds"
-        - set(unit, "s") where name == "pinecone.request.latency.seconds"
+        - set(description, "Distribution of server-side processing latency for pinecone data plane calls.") where name == "pinecone.request.latency"
+        - set(unit, "s") where name == "pinecone.request.latency"
 
         - set(description, "The fullness of the index on a scale of 0 to 1.") where name == "pinecone.index.fullness"
         - set(unit, "1") where name == "pinecone.index.fullness"
