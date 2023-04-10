@@ -8,7 +8,8 @@
     <?error Unsupported value of sys.BUILDARCH=$(sys.BUILDARCH)?>
 <?endif?>
 
-<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi"
+     xmlns:util="http://schemas.microsoft.com/wix/UtilExtension">
    <!-- This hardcoded GUID is specifically for the observiq-otel-collector.
         If Id is set to "*", it auto generates an ID, which seems OK, but new MSIs will no longer be able to
         correlate itself with old versions of the installer, and will fail to uninstall old versions properly -->
@@ -101,8 +102,7 @@
                         {{if $f.Service.Delayed}}
                         <ServiceConfig DelayedAutoStart="yes" OnInstall="yes" OnReinstall ="yes" FailureActionsWhen="failedToStopOrReturnedError"/>
                         {{end}}
-                        <util:ServiceConfig xmlns:util="http://schemas.microsoft.com/wix/UtilExtension"
-                                            FirstFailureActionType="restart"
+                        <util:ServiceConfig FirstFailureActionType="restart"
                                             SecondFailureActionType="restart"
                                             ThirdFailureActionType="restart"
                                             ResetPeriodInDays="30"
