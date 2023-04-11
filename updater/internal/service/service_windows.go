@@ -22,6 +22,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"go.uber.org/zap"
 	"golang.org/x/sys/windows/svc"
@@ -173,6 +174,11 @@ func (w windowsService) Update() error {
 	err = s.UpdateConfig(newConf)
 	if err != nil {
 		return fmt.Errorf("failed to updater service: %w", err)
+	}
+
+	// Set the recovery actions
+	if err := setRecoveryActions(s); err != nil {
+		return fmt.Errorf("failed to set recovery actions for the service: %w", err)
 	}
 
 	return nil
@@ -367,4 +373,28 @@ func configStartType(winapiStartType uint32, delayed bool) (string, error) {
 	default:
 		return "", fmt.Errorf("invalid winapi start type: %d", winapiStartType)
 	}
+}
+
+// setRecoveryActions sets the service recovery actions for the passed in service
+func setRecoveryActions(s *mgr.Service) error {
+	// Windows requires specifying 3 recoveryActions. We want to ensure the service always restarts after 5 seconds
+	recoveryActions := []mgr.RecoveryAction{
+		{
+			Type:  mgr.ServiceRestart,
+			Delay: 5 * time.Second,
+		},
+		{
+			Type:  mgr.ServiceRestart,
+			Delay: 5 * time.Second,
+		},
+		{
+			Type:  mgr.ServiceRestart,
+			Delay: 5 * time.Second,
+		},
+	}
+
+	// Reset the counter every 30 days
+	resetDays := 30 * 24 * time.Hour
+
+	return s.SetRecoveryActions(recoveryActions, uint32(resetDays.Seconds()))
 }
