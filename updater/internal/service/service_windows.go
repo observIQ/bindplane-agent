@@ -35,6 +35,11 @@ import (
 const (
 	defaultProductName = "observIQ Distro for OpenTelemetry Collector"
 	defaultServiceName = "observiq-otel-collector"
+
+	// defaultRecoveryDelay is the duration in which to wait between service restarts due to failures
+	defaultRecoveryDelay = 5 * time.Second
+	// defaultResetPeriod is the time in which to reset the service failure count to zero
+	defaultResetPeriod = 30 * 24 * time.Hour
 )
 
 // Option is an extra option for creating a Service
@@ -381,20 +386,17 @@ func setRecoveryActions(s *mgr.Service) error {
 	recoveryActions := []mgr.RecoveryAction{
 		{
 			Type:  mgr.ServiceRestart,
-			Delay: 5 * time.Second,
+			Delay: defaultRecoveryDelay,
 		},
 		{
 			Type:  mgr.ServiceRestart,
-			Delay: 5 * time.Second,
+			Delay: defaultRecoveryDelay,
 		},
 		{
 			Type:  mgr.ServiceRestart,
-			Delay: 5 * time.Second,
+			Delay: defaultRecoveryDelay,
 		},
 	}
 
-	// Reset the counter every 30 days
-	resetDays := 30 * 24 * time.Hour
-
-	return s.SetRecoveryActions(recoveryActions, uint32(resetDays.Seconds()))
+	return s.SetRecoveryActions(recoveryActions, uint32(defaultResetPeriod.Seconds()))
 }
