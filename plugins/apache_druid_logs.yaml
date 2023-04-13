@@ -3,7 +3,7 @@ title: Apache Druid
 description: Log parser for Apache Druid
 parameters:
   - name: log_directory
-    description: Filepath of the folder which contains the Apache Druid logs
+    description: Absolute filepath of the folder which contains the Apache Druid logs
     type: "string"
     required: true
   - name: enable_broker_logs

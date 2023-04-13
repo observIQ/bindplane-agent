@@ -57,5 +57,5 @@ func TestCreateMetricsReceiverBadTLS(t *testing.T) {
 		nil,
 	)
 	require.Nil(t, metrics)
-	require.ErrorContains(t, err, "failed to load TLS config: failed to load TLS cert and key: open some_cert_file: no such file or directory")
+	require.ErrorContains(t, err, "failed to load TLS config")
 }

@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Package apachedruidreceiver provides a receiver that receives telemetry from an Apache Druid instance.
 package apachedruidreceiver
 
 import (

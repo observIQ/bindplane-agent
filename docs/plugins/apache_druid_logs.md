@@ -6,7 +6,7 @@ Log parser for Apache Druid
 
 | Name | Description | Type | Default | Required | Values |
 |:-- |:-- |:-- |:-- |:-- |:-- |
-| log_directory | Filepath of the folder which contains the Apache Druid logs. Use an absolute filepath, not a relative filepath. | string | none | true |  |
+| log_directory | Absolute filepath of the folder which contains the Apache Druid logs | string |  | true |  |
 | enable_broker_logs | Enable to collect Apache Druid broker logs | bool | `true` | false |  |
 | broker_log_filename | Filename containing Apache druid broker logs | string | `broker.log` | false |  |
 | enable_coordinator_overlord_logs | Enable to collect Apache Druid coordinator and overlord logs | bool | `true` | false |  |
@@ -31,7 +31,7 @@ receivers:
   plugin:
     path: ./plugins/apache_druid_logs.yaml
     parameters:
-      log_directory: /var/log/
+      log_directory: $LOG_DIRECTORY
       enable_broker_logs: true
       broker_log_filename: broker.log
       enable_coordinator_overlord_logs: true
