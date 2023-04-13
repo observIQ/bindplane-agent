@@ -1,0 +1,223 @@
+version: 0.0.1
+title: Apache Druid
+description: Log parser for Apache Druid
+parameters:
+  - name: log_directory
+    description: Filepath of the folder which contains the Apache Druid logs
+    type: "string"
+    required: true
+  - name: enable_broker_logs
+    description: Enable to collect Apache Druid broker logs
+    type: bool
+    default: true
+  - name: broker_log_filename
+    description: Filename containing Apache druid broker logs
+    type: "string"
+    default: 
+    - "broker.log"
+  - name: enable_coordinator_overlord_logs
+    description: Enable to collect Apache Druid coordinator and overlord logs
+    type: bool
+    default: true
+  - name: coordinator_overlord_log_filename
+    description: Filename containing Apache Druid coordinator and overlord logs
+    type: "string"
+    default: 
+    - "coordinator-overlord.log"
+  - name: enable_historical_logs
+    description: Enable to collect Apache Druid historical logs
+    type: bool
+    default: true
+  - name: historical_log_filename
+    description: Filename containing Apache Druid historical logs
+    type: "string"
+    default: 
+    - "historical.log"
+  - name: enable_middle_manager_logs
+    description: Enable to collect Apache Druid middle manager logs
+    type: bool
+    default: true
+  - name: middle_manager_log_filename
+    description: Filename containing Apache Druid middle manager logs
+    type: "string"
+    default: 
+    - "middleManager.log"
+  - name: enable_router_logs
+    description: Enable to collect Apache Druid router logs
+    type: bool
+    default: true
+  - name: router_log_filename
+    description: Filename containing Apache Druid router logs
+    type: "string"
+    default: 
+    - "router.log"
+  - name: enable_zookeeper_logs
+    description: Enable to collect Apache Druid ZooKeeper logs
+    type: bool
+    default: true
+  - name: zookeeper_log_filename
+    description: Filename containing Apache Druid ZooKeeper logs
+    type: "string"
+    default: 
+    - "zookeeper.log"
+  - name: start_at
+    description: At startup, where to start reading logs from the file (`beginning` or `end`)
+    type: string
+    valid_values:
+     - beginning
+     - end
+    default: end
+  # Apache Druid logs do not include a timezone in their timestamps, so we need to set it explicitly.
+  - name: timezone
+    description: Timezone to use when parsing the timestamp
+    type: timezone
+    default: UTC
+template: |
+  receivers:
+    {{ if .enable_broker_logs }}
+    filelog/broker_logs:
+      include:
+        - '{{ .log_directory }}{{ .broker_log_filename }}'
+      multiline:
+        line_start_pattern: '\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2},\d{3}'
+      start_at: {{ .start_at }}
+      attributes:
+        log_type: 'druid.broker'
+      operators:
+        - type: regex_parser
+          regex: '(?P<timestamp>\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2},\d{3})\s+(?P<severity>[A-Z]+)\s+(?P<message>\[(?P<source>[\S\s]+)\]\s+(?P<javaClass>[A-Za-z0-9\.$]+)\s+-\s+?[\S\s]+)'
+          severity:
+            parse_from: attributes.severity
+          timestamp:
+            parse_from: attributes.timestamp
+            layout: '%FT%T,%L'
+            location: {{ .timezone }}
+    {{ end }}
+
+    {{ if .enable_coordinator_overlord_logs }}
+    filelog/coordinator_overlord_logs:
+      include:
+        - '{{ .log_directory }}{{ .coordinator_overlord_log_filename }}'
+      multiline:
+        line_start_pattern: '\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2},\d{3}'
+      start_at: {{ .start_at }}
+      attributes:
+        log_type: 'druid.coordinator_overlord'
+      operators:
+        - type: regex_parser
+          regex: '(?P<timestamp>\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2},\d{3})\s+(?P<severity>[A-Z]+)\s+(?P<message>\[(?P<source>[\S\s]+)\]\s+(?P<javaClass>[A-Za-z0-9\.$]+)\s+-\s+?[\S\s]+)'
+          severity:
+            parse_from: attributes.severity
+          timestamp:
+            parse_from: attributes.timestamp
+            layout: '%FT%T,%L'
+            location: {{ .timezone }}
+    {{ end }}
+
+    {{ if .enable_historical_logs }}
+    filelog/historical_logs:
+      include:
+        - '{{ .log_directory }}{{ .historical_log_filename }}'
+      multiline:
+        line_start_pattern: '\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2},\d{3}'
+      start_at: {{ .start_at }}
+      attributes:
+        log_type: 'druid.historical'
+      operators:
+        - type: regex_parser
+          regex: '(?P<timestamp>\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2},\d{3})\s+(?P<severity>[A-Z]+)\s+(?P<message>\[(?P<source>[\S\s]+)\]\s+(?P<javaClass>[A-Za-z0-9\.$]+)\s+-\s+?[\S\s]+)'
+          severity:
+            parse_from: attributes.severity
+          timestamp:
+            parse_from: attributes.timestamp
+            layout: '%FT%T,%L'
+            location: {{ .timezone }}
+    {{ end }}
+
+    {{ if .enable_middle_manager_logs }}
+    filelog/middle_manager_logs:
+      include:
+        - '{{ .log_directory }}{{ .middle_manager_log_filename  }}'
+      multiline:
+        line_start_pattern: '\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2},\d{3}'
+      start_at: {{ .start_at }}
+      attributes:
+        log_type: 'druid.middle_manager'
+      operators:
+        - type: regex_parser
+          regex: '(?P<timestamp>\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2},\d{3})\s+(?P<severity>[A-Z]+)\s+(?P<message>\[(?P<source>[\S\s]+)\]\s+(?P<javaClass>[A-Za-z0-9\.$]+)\s+-\s+?[\S\s]+)'
+          severity:
+            parse_from: attributes.severity
+          timestamp:
+            parse_from: attributes.timestamp
+            layout: '%FT%T,%L'
+            location: {{ .timezone }}
+    {{ end }}
+
+    {{ if .enable_router_logs }}
+    filelog/router_logs:
+      include:
+        - '{{ .log_directory }}{{ .router_log_filename }}'
+      multiline:
+        line_start_pattern: '\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2},\d{3}'
+      start_at: {{ .start_at }}
+      attributes:
+        log_type: 'druid.router'
+      operators:
+        - type: regex_parser
+          regex: '(?P<timestamp>\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2},\d{3})\s+(?P<severity>[A-Z]+)\s+(?P<message>\[(?P<source>[\S\s]+)\]\s+(?P<javaClass>[A-Za-z0-9\.$]+)\s+-\s+?[\S\s]+)'
+          severity:
+            parse_from: attributes.severity
+          timestamp:
+            parse_from: attributes.timestamp
+            layout: '%FT%T,%L'
+            location: {{ .timezone }}
+    {{ end }}
+
+    {{ if .enable_zookeeper_logs }}
+    filelog/zookeeper_logs:
+      include:
+        - '{{ .log_directory }}{{ .zookeeper_log_filename }}'
+      multiline:
+        line_start_pattern: '\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2},\d{3}'
+      start_at: {{ .start_at }}
+      attributes:
+        log_type: 'druid.zookeeper'
+      operators:
+        - type: regex_parser
+          regex: '(?P<timestamp>\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2},\d{3})\s+(?P<severity>[A-Z]+)\s+(?P<message>\[(?P<source>[\S\s]+)\]\s+(?P<javaClass>[A-Za-z0-9\.$]+)\s+-\s+?[\S\s]+)'
+          severity:
+            parse_from: attributes.severity
+          timestamp:
+            parse_from: attributes.timestamp
+            layout: '%FT%T,%L'
+            location: {{ .timezone }}
+    {{ end }}
+
+  service:
+    pipelines:
+      logs:
+        receivers:
+          {{ if .enable_broker_logs }}
+          - filelog/broker_logs
+          {{ end }}
+
+          {{ if .enable_coordinator_overlord_logs }}
+          - filelog/coordinator_overlord_logs
+          {{ end }}
+
+          {{ if .enable_historical_logs }}
+          - filelog/historical_logs
+          {{ end }}
+
+          {{ if .enable_middle_manager_logs }}
+          - filelog/middle_manager_logs
+          {{ end }}
+
+          {{ if .enable_router_logs }}
+          - filelog/router_logs
+          {{ end }}
+
+          {{ if .enable_zookeeper_logs }}
+          - filelog/zookeeper_logs
+          {{ end }}
