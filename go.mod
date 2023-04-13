@@ -17,7 +17,7 @@ require (
 	github.com/observiq/observiq-otel-collector/processor/samplingprocessor v1.22.0
 	github.com/observiq/observiq-otel-collector/processor/spancountprocessor v1.22.0
 	github.com/observiq/observiq-otel-collector/processor/throughputmeasurementprocessor v1.22.0
-		github.com/observiq/observiq-otel-collector/receiver/apachedruidreceiver v1.22.0
+	github.com/observiq/observiq-otel-collector/receiver/apachedruidreceiver v1.22.0
 	github.com/observiq/observiq-otel-collector/receiver/pluginreceiver v1.22.0
 	github.com/observiq/observiq-otel-collector/receiver/routereceiver v1.22.0
 	github.com/observiq/observiq-otel-collector/receiver/sapnetweaverreceiver v1.22.0
