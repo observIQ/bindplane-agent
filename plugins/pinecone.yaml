@@ -33,6 +33,8 @@ template: |
                   (pinecone_request_count_total)|\
                   (pinecone_request_error_count_total)|\
                   (pinecone_request_latency_seconds)|\
+                  (pinecone_request_latency_seconds_sum)|\
+                  (pinecone_request_latency_seconds_count)|\
                   (pinecone_index_fullness)"
                 action: keep
   processors:
@@ -89,7 +91,7 @@ template: |
         - set(unit, "requests") where name == "pinecone.request.error.count"
 
         - set(description, "Distribution of server-side processing latency for pinecone data plane calls.") where name == "pinecone.request.latency"
-        - set(unit, "s") where name == "pinecone.request.latency"
+        - set(unit, 1) where name == "pinecone.request.latency"
 
         - set(description, "The fullness of the index on a scale of 0 to 1.") where name == "pinecone.index.fullness"
         - set(unit, "1") where name == "pinecone.index.fullness"
