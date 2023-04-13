@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package apachedruidreceiver // import "github.com/open-telemetry/opentelemetry-collector-contrib/receiver/apachedruidreceiver"
+package apachedruidreceiver
 
 import (
 	"context"
@@ -36,13 +36,13 @@ import (
 )
 
 const (
-	DRUID_QUERY_COUNT             string = "query/count"
-	DRUID_QUERY_SUCCESS_COUNT     string = "query/success/count"
-	DRUID_QUERY_FAILED_COUNT      string = "query/failed/count"
-	DRUID_QUERY_INTERRUPTED_COUNT string = "query/interrupted/count"
-	DRUID_QUERY_TIMEOUT_COUNT     string = "query/timeout/count"
-	DRUID_SQLQUERY_TIME           string = "sqlQuery/time"
-	DRUID_SQLQUERY_BYTES          string = "sqlQuery/bytes"
+	druidQueryCount            string = "query/count"
+	druidQuerySuccessCount     string = "query/success/count"
+	druidQueryFailedCount      string = "query/failed/count"
+	druidQueryInterruptedCount string = "query/interrupted/count"
+	druidQueryTimeoutCount     string = "query/timeout/count"
+	druidSQLQueryTime          string = "sqlQuery/time"
+	druidSQLQueryBytes         string = "sqlQuery/bytes"
 )
 
 type metricsReceiver struct {
@@ -209,19 +209,19 @@ func (mReceiver *metricsReceiver) processMetrics(metrics []interface{}) pmetric.
 	purgedMetrics, service := purgeMetrics(metrics)
 	queryCountStats := getQueryCountStats(purgedMetrics)
 
-	mReceiver.metricsBuilder.RecordApachedruidQueryCountDataPoint(now, int64(queryCountStats[DRUID_QUERY_COUNT]))
-	mReceiver.metricsBuilder.RecordApachedruidSuccessQueryCountDataPoint(now, int64(queryCountStats[DRUID_QUERY_SUCCESS_COUNT]))
-	mReceiver.metricsBuilder.RecordApachedruidFailedQueryCountDataPoint(now, int64(queryCountStats[DRUID_QUERY_FAILED_COUNT]))
-	mReceiver.metricsBuilder.RecordApachedruidInterruptedQueryCountDataPoint(now, int64(queryCountStats[DRUID_QUERY_INTERRUPTED_COUNT]))
-	mReceiver.metricsBuilder.RecordApachedruidTimeoutQueryCountDataPoint(now, int64(queryCountStats[DRUID_QUERY_TIMEOUT_COUNT]))
-	mReceiver.recordSqlQueryDataPoints(now, purgedMetrics)
+	mReceiver.metricsBuilder.RecordApachedruidQueryCountDataPoint(now, int64(queryCountStats[druidQueryCount]))
+	mReceiver.metricsBuilder.RecordApachedruidSuccessQueryCountDataPoint(now, int64(queryCountStats[druidQuerySuccessCount]))
+	mReceiver.metricsBuilder.RecordApachedruidFailedQueryCountDataPoint(now, int64(queryCountStats[druidQueryFailedCount]))
+	mReceiver.metricsBuilder.RecordApachedruidInterruptedQueryCountDataPoint(now, int64(queryCountStats[druidQueryInterruptedCount]))
+	mReceiver.metricsBuilder.RecordApachedruidTimeoutQueryCountDataPoint(now, int64(queryCountStats[druidQueryTimeoutCount]))
+	mReceiver.recordSQLQueryDataPoints(now, purgedMetrics)
 
 	return mReceiver.metricsBuilder.Emit(metadata.WithApachedruidService(service))
 }
 
 // remove all metrics published to the receiver besides the ones it cares about
 func purgeMetrics(metrics []interface{}) ([]interface{}, string) {
-	collectedMetrics := [7]string{DRUID_QUERY_COUNT, DRUID_QUERY_SUCCESS_COUNT, DRUID_QUERY_FAILED_COUNT, DRUID_QUERY_INTERRUPTED_COUNT, DRUID_QUERY_TIMEOUT_COUNT, DRUID_SQLQUERY_TIME, DRUID_SQLQUERY_BYTES}
+	collectedMetrics := [7]string{druidQueryCount, druidQuerySuccessCount, druidQueryFailedCount, druidQueryInterruptedCount, druidQueryTimeoutCount, druidSQLQueryTime, druidSQLQueryBytes}
 	purgedArray := make([]interface{}, 0)
 	var service string
 
@@ -263,7 +263,7 @@ func getQueryCountStats(metrics []interface{}) map[string]float64 {
 	return queryCountStats
 }
 
-func (mReceiver *metricsReceiver) recordSqlQueryDataPoints(now pcommon.Timestamp, metrics []interface{}) {
+func (mReceiver *metricsReceiver) recordSQLQueryDataPoints(now pcommon.Timestamp, metrics []interface{}) {
 	dataSources := make([]string, 0)
 	sqlQueryCount := make(map[string]float64)
 	sqlQueryTime := make(map[string]float64)
@@ -275,8 +275,8 @@ func (mReceiver *metricsReceiver) recordSqlQueryDataPoints(now pcommon.Timestamp
 		dataSource, dsOk := currentPoint["dataSource"]
 		if metricOk && valueOk && dsOk {
 			if ds, dOk := dataSource.(string); dOk {
-				if m := metric.(string); m == DRUID_SQLQUERY_TIME || m == DRUID_SQLQUERY_BYTES {
-					if m == DRUID_SQLQUERY_TIME {
+				if m := metric.(string); m == druidSQLQueryTime || m == druidSQLQueryBytes {
+					if m == druidSQLQueryTime {
 						sqlQueryTime[ds] += value.(float64)
 						sqlQueryCount[ds]++
 					} else {

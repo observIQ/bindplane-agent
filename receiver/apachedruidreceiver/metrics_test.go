@@ -34,9 +34,9 @@ import (
 )
 
 const (
-	VALID_USERNAME      = "john.doe"
-	VALID_PASSWORD      = "abcd1234"
-	ENCODED_CREDENTIALS = "Basic am9obi5kb2U6YWJjZDEyMzQ="
+	validUsername      = "john.doe"
+	validPassword      = "abcd1234"
+	encodedCredentials = "Basic am9obi5kb2U6YWJjZDEyMzQ="
 )
 
 func TestHandleRequest(t *testing.T) {
@@ -59,8 +59,8 @@ func TestHandleRequest(t *testing.T) {
 			metricExpected:     false,
 			consumerFailure:    false,
 			configBasicAuth: &BasicAuth{
-				Username: VALID_USERNAME,
-				Password: VALID_PASSWORD,
+				Username: validUsername,
+				Password: validPassword,
 			},
 		},
 		{
@@ -77,8 +77,8 @@ func TestHandleRequest(t *testing.T) {
 			metricExpected:     false,
 			consumerFailure:    false,
 			configBasicAuth: &BasicAuth{
-				Username: VALID_USERNAME,
-				Password: VALID_PASSWORD,
+				Username: validUsername,
+				Password: validPassword,
 			},
 		},
 		{
@@ -88,15 +88,15 @@ func TestHandleRequest(t *testing.T) {
 				URL:    &url.URL{},
 				Body:   io.NopCloser(bytes.NewBufferString(`{"ClientIP": "127.0.0.1"}`)),
 				Header: map[string][]string{
-					textproto.CanonicalMIMEHeaderKey("Authorization"): {ENCODED_CREDENTIALS},
+					textproto.CanonicalMIMEHeaderKey("Authorization"): {encodedCredentials},
 				},
 			},
 			expectedStatusCode: http.StatusBadRequest,
 			metricExpected:     false,
 			consumerFailure:    false,
 			configBasicAuth: &BasicAuth{
-				Username: VALID_USERNAME,
-				Password: VALID_PASSWORD,
+				Username: validUsername,
+				Password: validPassword,
 			},
 		},
 		{
@@ -106,7 +106,7 @@ func TestHandleRequest(t *testing.T) {
 				URL:    &url.URL{},
 				Body:   io.NopCloser(bytes.NewBufferString(`{"ClientIP": "127.0.0.1"}`)),
 				Header: map[string][]string{
-					textproto.CanonicalMIMEHeaderKey("Authorization"): {ENCODED_CREDENTIALS},
+					textproto.CanonicalMIMEHeaderKey("Authorization"): {encodedCredentials},
 					textproto.CanonicalMIMEHeaderKey("Content-Type"):  {"text/html"},
 				},
 			},
@@ -114,8 +114,8 @@ func TestHandleRequest(t *testing.T) {
 			metricExpected:     false,
 			consumerFailure:    false,
 			configBasicAuth: &BasicAuth{
-				Username: VALID_USERNAME,
-				Password: VALID_PASSWORD,
+				Username: validUsername,
+				Password: validPassword,
 			},
 		},
 		{
@@ -125,7 +125,7 @@ func TestHandleRequest(t *testing.T) {
 				URL:    &url.URL{},
 				Body:   io.NopCloser(bytes.NewBufferString(`<?xml version="1.0" encoding="UTF-8" standalone="no" ?>`)),
 				Header: map[string][]string{
-					textproto.CanonicalMIMEHeaderKey("Authorization"): {ENCODED_CREDENTIALS},
+					textproto.CanonicalMIMEHeaderKey("Authorization"): {encodedCredentials},
 					textproto.CanonicalMIMEHeaderKey("Content-Type"):  {"application/json"},
 				},
 			},
@@ -133,8 +133,8 @@ func TestHandleRequest(t *testing.T) {
 			metricExpected:     false,
 			consumerFailure:    false,
 			configBasicAuth: &BasicAuth{
-				Username: VALID_USERNAME,
-				Password: VALID_PASSWORD,
+				Username: validUsername,
+				Password: validPassword,
 			},
 		},
 		{
@@ -144,7 +144,7 @@ func TestHandleRequest(t *testing.T) {
 				URL:    &url.URL{},
 				Body:   io.NopCloser(bytes.NewBufferString(`[{"ClientIP": "127.0.0.1"}]`)),
 				Header: map[string][]string{
-					textproto.CanonicalMIMEHeaderKey("Authorization"): {ENCODED_CREDENTIALS},
+					textproto.CanonicalMIMEHeaderKey("Authorization"): {encodedCredentials},
 					textproto.CanonicalMIMEHeaderKey("Content-Type"):  {"application/json"},
 				},
 			},
@@ -152,8 +152,8 @@ func TestHandleRequest(t *testing.T) {
 			metricExpected:     false,
 			consumerFailure:    true,
 			configBasicAuth: &BasicAuth{
-				Username: VALID_USERNAME,
-				Password: VALID_PASSWORD,
+				Username: validUsername,
+				Password: validPassword,
 			},
 		},
 		{
@@ -163,7 +163,7 @@ func TestHandleRequest(t *testing.T) {
 				URL:    &url.URL{},
 				Body:   io.NopCloser(bytes.NewBufferString(`[{"service":"druid/broker","metric":"query/count","value":123},{"service":"druid/broker","metric":"query/success/count","value":101},{"service":"druid/broker","metric":"query/failed/count","value":12},{"service":"druid/broker","metric":"query/interrupted/count","value":6},{"service":"druid/broker","metric":"query/timeout/count","value":4},{"service":"druid/broker","metric":"sqlQuery/time","dataSource":"table_1","value":97},{"service":"druid/broker","metric":"sqlQuery/bytes","dataSource":"table_1","value":450},{"service":"druid/broker","metric":"sqlQuery/time","dataSource":"table_1","value":115},{"service":"druid/broker","metric":"sqlQuery/bytes","dataSource":"table_1","value":1024},{"service":"druid/broker","metric":"sqlQuery/time","dataSource":"table_2","value":12},{"service":"druid/broker","metric":"sqlQuery/bytes","dataSource":"table_2","value":97},{"service":"druid/broker","metric":"sqlQuery/time","dataSource":"table_2","value":18},{"service":"druid/broker","metric":"sqlQuery/bytes","dataSource":"table_2","value":112}]`)),
 				Header: map[string][]string{
-					textproto.CanonicalMIMEHeaderKey("Authorization"): {ENCODED_CREDENTIALS},
+					textproto.CanonicalMIMEHeaderKey("Authorization"): {encodedCredentials},
 					textproto.CanonicalMIMEHeaderKey("Content-Type"):  {"application/json"},
 				},
 			},
@@ -171,8 +171,8 @@ func TestHandleRequest(t *testing.T) {
 			metricExpected:     true,
 			consumerFailure:    false,
 			configBasicAuth: &BasicAuth{
-				Username: VALID_USERNAME,
-				Password: VALID_PASSWORD,
+				Username: validUsername,
+				Password: validPassword,
 			},
 		},
 	}

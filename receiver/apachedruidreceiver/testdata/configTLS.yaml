@@ -6,4 +6,4 @@ apachedruid:
     endpoint: 0.0.0.0:12345
     basic_auth:
       username: john.doe
-      password: 1234abcd
+      password: abcd1234

@@ -13,8 +13,7 @@ parameters:
   - name: broker_log_filename
     description: Filename containing Apache druid broker logs
     type: "string"
-    default: 
-    - "broker.log"
+    default: "broker.log"
   - name: enable_coordinator_overlord_logs
     description: Enable to collect Apache Druid coordinator and overlord logs
     type: bool
@@ -22,8 +21,7 @@ parameters:
   - name: coordinator_overlord_log_filename
     description: Filename containing Apache Druid coordinator and overlord logs
     type: "string"
-    default: 
-    - "coordinator-overlord.log"
+    default: "coordinator-overlord.log"
   - name: enable_historical_logs
     description: Enable to collect Apache Druid historical logs
     type: bool
@@ -31,8 +29,7 @@ parameters:
   - name: historical_log_filename
     description: Filename containing Apache Druid historical logs
     type: "string"
-    default: 
-    - "historical.log"
+    default: "historical.log"
   - name: enable_middle_manager_logs
     description: Enable to collect Apache Druid middle manager logs
     type: bool
@@ -40,8 +37,7 @@ parameters:
   - name: middle_manager_log_filename
     description: Filename containing Apache Druid middle manager logs
     type: "string"
-    default: 
-    - "middleManager.log"
+    default: "middleManager.log"
   - name: enable_router_logs
     description: Enable to collect Apache Druid router logs
     type: bool
@@ -49,8 +45,7 @@ parameters:
   - name: router_log_filename
     description: Filename containing Apache Druid router logs
     type: "string"
-    default: 
-    - "router.log"
+    default: "router.log"
   - name: enable_zookeeper_logs
     description: Enable to collect Apache Druid ZooKeeper logs
     type: bool
@@ -58,8 +53,7 @@ parameters:
   - name: zookeeper_log_filename
     description: Filename containing Apache Druid ZooKeeper logs
     type: "string"
-    default: 
-    - "zookeeper.log"
+    default: "zookeeper.log"
   - name: start_at
     description: At startup, where to start reading logs from the file (`beginning` or `end`)
     type: string

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package apachedruidreceiver // import "github.com/observiq/observiq-otel-collector/receiver/apachedruidreceiver"
+package apachedruidreceiver
 
 import (
 	"context"

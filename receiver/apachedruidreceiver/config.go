@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package apachedruidreceiver // import "github.com/open-telemetry/opentelemetry-collector-contrib/receiver/apachedruidreceiver"
+package apachedruidreceiver
 
 import (
 	"errors"
@@ -24,11 +24,12 @@ import (
 	"go.uber.org/multierr"
 )
 
-// Config is the configuration of an Apache Druid metrics receiver
+// Config is the configuration of an Apache Druid receiver
 type Config struct {
 	Metrics MetricsConfig `mapstructure:"metrics"`
 }
 
+// MetricsConfig is the metrics portion of the configuration of an Apache Druid receiver
 type MetricsConfig struct {
 	BasicAuth            *BasicAuth                    `mapstructure:"basic_auth"`
 	Endpoint             string                        `mapstructure:"endpoint"`
@@ -36,6 +37,7 @@ type MetricsConfig struct {
 	MetricsBuilderConfig metadata.MetricsBuilderConfig `mapstructure:",squash"`
 }
 
+// BasicAuth is basic username-password authentication
 type BasicAuth struct {
 	Username string `mapstructure:"username"`
 	Password string `mapstructure:"password"`
@@ -49,6 +51,7 @@ var (
 	errNoPass     = errors.New("basic_auth was configured, but no password was specified")
 )
 
+// Validate validates missing and invalid configuration fields.
 func (c *Config) Validate() error {
 	if c.Metrics.Endpoint == "" {
 		return errNoEndpoint
