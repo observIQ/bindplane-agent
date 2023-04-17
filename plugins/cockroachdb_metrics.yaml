@@ -1,0 +1,175 @@
+version: 0.0.1
+title: Cockroach Database Metrics
+description: Metrics receiver for Cockroach Database
+parameters:
+  - name: endpoint
+    description: Address to scrape metrics from
+    type: string
+    default: http://localhost:8080/_status/vars
+  - name: scrape_interval
+    description: Time in between every scrape request
+    type: string
+    default: 60s
+template: |
+  receivers:
+    prometheus/cockroachdb:
+      config:
+        scrape_configs:
+          - job_name: 'cockroachdb'
+            scrape_interval: '{{ .scrape_interval }}'
+            static_configs:
+              - targets: ['{{ .endpoint }}']
+            basic_auth:
+              username: '{{ .username }}'
+              password: '{{ .password }}'
+            metric_relabel_configs:
+              # Include only a few key metrics
+              - source_labels: [ __name__ ]
+                regex: "(round_trip_latency.*)|\
+                  (sql_distsql_exec_latency.*)|\
+                  (sql_exec_latency.*)|\
+                  (sql_service_latency.*)|\
+                  (sql_query_count)|\
+                  (txn_aborts)|\
+                  (txn_commits)|\
+                  (txn_durations.*)|\
+                  (exec_error)|\
+                  (timeseries_write_errors)|\
+                  (sys_cpu_sys_percent)|\
+                  (sys_cpu_user_percent)|\
+                  (sys_cpu_user_ns)|\
+                  (sys_cpu_sys_ns)|\
+                  (capacity)|\
+                  (capacity_used)|\
+                  (capacity_reserved)|\
+                  (capacity_available)|\
+                  (liveness_livenodes)|\
+                  (liveness_heartbeatfailures)|\
+                  (liveness_heartbeatlatency.*)"
+                action: keep
+
+    metricstransform/couchbase:
+      transforms:
+        # Rename from prometheus metric name to OTel metric name.
+        # We cannot do this with metric_relabel_configs, as the prometheus receiver does not
+        # allow metric renames at this time.
+        - include: round_trip_latency
+          match_type: strict
+          action: update
+          new_name: "round.trip.latency"
+        - include: sql_distsql_exec_latency
+          match_type: strict
+          action: update
+          new_name: "sql.distsql.exec.latency"
+        - include: sql_exec_latency
+          match_type: strict
+          action: update
+          new_name: "sql.exec.latency"
+        - include: sql_service_latency
+          match_type: strict
+          action: update
+          new_name: "sql.service.latency"
+        - include: txn_aborts
+          match_type: strict
+          action: update
+          new_name: "txn.aborts"
+        - include: txn_commits
+          match_type: strict
+          action: update
+          new_name: "txn.commits"
+        - include: txn_durations
+          match_type: strict
+          action: update
+          new_name: "txn.durations.time"
+        - include: exec_error
+          match_type: strict
+          action: update
+          new_name: "exec.error.count"
+        - include: timeseries_write_errors
+          match_type: strict
+          action: update
+          new_name: "timeseries.write.errors.count"
+        - include: sys_cpu_user_percent
+          match_type: strict
+          action: update
+          new_name: "sys.cpu.user.utilization"
+        - include: sys_cpu_sys_percent
+          match_type: strict
+          action: update
+          new_name: "sys.cpu.sys.utilization"
+        - include: sys_cpu_user_ns
+          match_type: strict
+          action: update
+          new_name: "sys.cpu.user.time"
+        - include: sys_cpu_sys_ns
+          match_type: strict
+          action: update
+          new_name: "sys.cpu.sys.time"
+        - include: liveness_livenodes
+          match_type: strict
+          action: update
+          new_name: "liveness.livenodes"
+        - include: liveness_heartbeatfailures
+          match_type: strict
+          action: update
+          new_name: "liveness.heartbeatfailures"
+        - include: liveness_heartbeatlatency
+          match_type: strict
+          action: update
+          new_name: "liveness.heartbeatlatency"
+        # Combine several different capacity metrics into one
+        - include: ^capacity_(?P<state>used|reserved|available)$$
+          match_type: regexp
+          action: combine
+          new_name: "capacity.limit"
+
+    transform/cockroachdb:
+      metric_statements:
+        - context: metric
+          statements:
+          - convert_gauge_to_sum("cumulative", true) where name == "couchbase.bucket.operation.count"
+          - set(description, "Number of operations on the bucket.") where name == "couchbase.bucket.operation.count"
+          - set(unit, "{operations}") where name == "couchbase.bucket.operation.count"
+
+          - convert_gauge_to_sum("cumulative", false) where name == "couchbase.bucket.item.count"
+          - set(description, "Number of items that belong to the bucket.") where name == "couchbase.bucket.item.count"
+          - set(unit, "{items}") where name == "couchbase.bucket.item.count"
+
+          - convert_gauge_to_sum("cumulative", false) where name == "couchbase.bucket.vbucket.count"
+          - set(description, "Number of non-resident vBuckets.") where name == "couchbase.bucket.vbucket.count"
+          - set(unit, "{vbuckets}") where name == "couchbase.bucket.vbucket.count"
+
+          - convert_gauge_to_sum("cumulative", false) where name == "couchbase.bucket.memory.usage"
+          - set(description, "Usage of total memory available to the bucket.") where name == "couchbase.bucket.memory.usage"
+          - set(unit, "By") where name == "couchbase.bucket.memory.usage"
+
+          - convert_gauge_to_sum("cumulative", true) where name == "couchbase.bucket.item.ejection.count"
+          - set(description, "Number of item value ejections from memory to disk.") where name == "couchbase.bucket.item.ejection.count"
+          - set(unit, "{ejections}") where name == "couchbase.bucket.item.ejection.count"
+
+          - convert_gauge_to_sum("cumulative", true) where name == "couchbase.bucket.error.oom.count"
+          - set(description, "Number of out of memory errors.") where name == "couchbase.bucket.error.oom.count"
+          - set(unit, "{errors}") where name == "couchbase.bucket.error.oom.count"
+
+          - set(description, "The memory usage at which items will be ejected.") where name == "couchbase.bucket.memory.high_water_mark.limit"
+          - set(unit, "By") where name == "couchbase.bucket.memory.high_water_mark.limit"
+
+          - set(description, "The memory usage at which ejections will stop that were previously triggered by a high water mark breach.") where name == "couchbase.bucket.memory.low_water_mark.limit"
+          - set(unit, "By") where name == "couchbase.bucket.memory.low_water_mark.limit"
+
+
+
+
+
+  processors:
+    filter/cockroachdb:
+      # Filter out prometheus scraping meta-metrics.
+      metrics:
+        exclude:
+          match_type: strict
+          metric_names:
+            - scrape_samples_post_metric_relabeling
+            - scrape_series_added
+            - scrape_duration_seconds
+            - scrape_samples_scraped
+            - up
