@@ -127,35 +127,62 @@ template: |
       metric_statements:
         - context: metric
           statements:
-          - convert_gauge_to_sum("cumulative", true) where name == "couchbase.bucket.operation.count"
-          - set(description, "Number of operations on the bucket.") where name == "couchbase.bucket.operation.count"
-          - set(unit, "{operations}") where name == "couchbase.bucket.operation.count"
+          - set(description, "") where name == "crdb.round.trip.latency"
+          - set(unit, "{operations}") where name == "crdb.round.trip.latency"
 
-          - convert_gauge_to_sum("cumulative", false) where name == "couchbase.bucket.item.count"
-          - set(description, "Number of items that belong to the bucket.") where name == "couchbase.bucket.item.count"
-          - set(unit, "{items}") where name == "couchbase.bucket.item.count"
+          - set(description, "") where name == "crdb.sql.distsql.exec.latency"
+          - set(unit, "{operations}") where name == "crdb.sql.distsql.exec.latency"
 
-          - convert_gauge_to_sum("cumulative", false) where name == "couchbase.bucket.vbucket.count"
-          - set(description, "Number of non-resident vBuckets.") where name == "couchbase.bucket.vbucket.count"
-          - set(unit, "{vbuckets}") where name == "couchbase.bucket.vbucket.count"
+          - set(description, "") where name == "crdb.sql.exec.latency"
+          - set(unit, "{operations}") where name == "crdb.sql.exec.latency"
 
-          - convert_gauge_to_sum("cumulative", false) where name == "couchbase.bucket.memory.usage"
-          - set(description, "Usage of total memory available to the bucket.") where name == "couchbase.bucket.memory.usage"
-          - set(unit, "By") where name == "couchbase.bucket.memory.usage"
+          - set(description, "") where name == "crdb.sql.service.latency"
+          - set(unit, "{operations}") where name == "crdb.sql.service.latency"
 
-          - convert_gauge_to_sum("cumulative", true) where name == "couchbase.bucket.item.ejection.count"
-          - set(description, "Number of item value ejections from memory to disk.") where name == "couchbase.bucket.item.ejection.count"
-          - set(unit, "{ejections}") where name == "couchbase.bucket.item.ejection.count"
+          - set(description, "") where name == "crdb.sql.query.count"
+          - set(unit, "{operations}") where name == "crdb.sql.query.count"
 
-          - convert_gauge_to_sum("cumulative", true) where name == "couchbase.bucket.error.oom.count"
-          - set(description, "Number of out of memory errors.") where name == "couchbase.bucket.error.oom.count"
-          - set(unit, "{errors}") where name == "couchbase.bucket.error.oom.count"
+          - set(description, "") where name == "crdb.txn.abandons.count"
+          - set(unit, "{operations}") where name == "crdb.txn.abandons.count"
 
-          - set(description, "The memory usage at which items will be ejected.") where name == "couchbase.bucket.memory.high_water_mark.limit"
-          - set(unit, "By") where name == "couchbase.bucket.memory.high_water_mark.limit"
+          - set(description, "") where name == "crdb.txn.aborts.count"
+          - set(unit, "{operations}") where name == "crdb.txn.aborts.count"
 
-          - set(description, "The memory usage at which ejections will stop that were previously triggered by a high water mark breach.") where name == "couchbase.bucket.memory.low_water_mark.limit"
-          - set(unit, "By") where name == "couchbase.bucket.memory.low_water_mark.limit"
+          - set(description, "") where name == "crdb.txn.commits.count"
+          - set(unit, "{operations}") where name == "crdb.txn.commits.count"
+
+          - set(description, "") where name == "crdb.txn.durations.time"
+          - set(unit, "{operations}") where name == "crdb.txn.durations.time"
+
+          - set(description, "") where name == "crdb.exec.errors.count"
+          - set(unit, "{operations}") where name == "crdb.exec.errors.count"
+
+          - set(description, "") where name == "crdb.timeseries.write.errors.count"
+          - set(unit, "{operations}") where name == "crdb.timeseries.write.errors.count"
+
+          - set(description, "") where name == "crdb.sys.cpu.user.utilization"
+          - set(unit, "{operations}") where name == "crdb.sys.cpu.user.utilization"
+
+          - set(description, "") where name == "crdb.sys.cpu.sys.utilization"
+          - set(unit, "{operations}") where name == "crdb.sys.cpu.sys.utilization"
+
+          - set(description, "") where name == "crdb.sys.cpu.user.time"
+          - set(unit, "{operations}") where name == "crdb.sys.cpu.user.time"
+
+          - set(description, "") where name == "crdb.sys.cpu.sys.time"
+          - set(unit, "{operations}") where name == "crdb.sys.cpu.sys.time"
+
+          - set(description, "") where name == "crdb.capacity.limit"
+          - set(unit, "{operations}") where name == "crdb.capacity.limit"
+
+          - set(description, "") where name == "crdb.liveness.livenodes"
+          - set(unit, "{operations}") where name == "crdb.liveness.livenodes"
+
+          - set(description, "") where name == "crdb.liveness.heartbeatfailures"
+          - set(unit, "{operations}") where name == "crdb.liveness.heartbeatfailures"
+          
+          - set(description, "") where name == "crdb.liveness.heartbeatlatency"
+          - set(unit, "{operations}") where name == "crdb.liveness.heartbeatlatency"
 
 
 
