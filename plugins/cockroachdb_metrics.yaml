@@ -2,10 +2,10 @@ version: 0.0.1
 title: Cockroach Database Metrics
 description: Metrics receiver for Cockroach Database
 parameters:
-  - name: endpoint
-    description: Address to scrape metrics from
-    type: string
-    default: http://localhost:8080/_status/vars
+  - name: port
+    description: Port used for HTTP requests from the DB Console
+    type: int
+    default: 8080
   - name: scrape_interval
     description: Time in between every scrape request
     type: string
@@ -17,11 +17,9 @@ template: |
         scrape_configs:
           - job_name: 'cockroachdb'
             scrape_interval: '{{ .scrape_interval }}'
+            metrics_path: "_status/vars"
             static_configs:
-              - targets: ['{{ .endpoint }}']
-            basic_auth:
-              username: '{{ .username }}'
-              password: '{{ .password }}'
+              - targets: ['localhost:{{ .port }}']
             metric_relabel_configs:
               # Include only a few key metrics
               - source_labels: [ __name__ ]
@@ -56,10 +54,23 @@ template: |
                   (sql_mem_sql_session_current)|\
                   (sql_mem_sql_session_max)|\
                   (sql_mem_sql_txn_current)|\
-                  (sql_mem_sql_txn_max)|\"
+                  (sql_mem_sql_txn_max)"
                 action: keep
 
-    metricstransform/couchbase:
+  processors:
+    filter/cockroachdb:
+      # Filter out prometheus scraping meta-metrics.
+      metrics:
+        exclude:
+          match_type: strict
+          metric_names:
+            - scrape_samples_post_metric_relabeling
+            - scrape_series_added
+            - scrape_duration_seconds
+            - scrape_samples_scraped
+            - up
+
+    metricstransform/cockroachdb:
       transforms:
         # Rename from prometheus metric name to OTel metric name.
         # We cannot do this with metric_relabel_configs, as the prometheus receiver does not
@@ -289,19 +300,8 @@ template: |
 
           - set(description, "Number of SQL UPDATE statements sucessfully executed") where name == "crdb.sql.update.count"
           - set(unit, "{statements}") where name == "crdb.sql.update.count"
-
-
-
-
-  processors:
-    filter/cockroachdb:
-      # Filter out prometheus scraping meta-metrics.
-      metrics:
-        exclude:
-          match_type: strict
-          metric_names:
-            - scrape_samples_post_metric_relabeling
-            - scrape_series_added
-            - scrape_duration_seconds
-            - scrape_samples_scraped
-            - up
+  service:
+    pipelines:
+      metrics/cockroachdb:
+        receivers: [prometheus/cockroachdb]
+        processors: [filter/cockroachdb, metricstransform/cockroachdb, transform/cockroachdb]
