@@ -30,6 +30,7 @@ require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/azuremonitorexporter v0.75.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/carbonexporter v0.75.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/coralogixexporter v0.75.0
+	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/datadogexporter v0.75.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/dynatraceexporter v0.75.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/elasticsearchexporter v0.75.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/f5cloudexporter v0.75.0
@@ -442,7 +443,6 @@ require (
 	github.com/nginxinc/nginx-prometheus-exporter v0.8.1-0.20201110005315-f5a5f8086c19 // indirect
 	github.com/nwaples/rardecode v1.1.0 // indirect
 	github.com/observiq/ctimefmt v1.0.0 // indirect
-	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/datadogexporter v0.75.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlecloudexporter v0.75.0 // indirect; indi72.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/internal/aws/awsutil v0.75.0 // indirect; indi72.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/internal/aws/containerinsight v0.75.0 // indirect; indi72.0
