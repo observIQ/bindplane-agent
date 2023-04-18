@@ -221,7 +221,7 @@ github.com/denisenkom/go-mssqldb v0.12.2 h1:1OcPn5GBIobjWNd+8yjfHNIaFX14B1pWI3F9
 github.com/dennwc/varint v1.0.0 h1:kGNFFSSw8ToIy3obO/kKr8U9GZYUAxQEVuix4zfDWzE=
 github.com/digitalocean/godo v1.97.0 h1:p9w1yCcWMZcxFSLPToNGXA96WfUVLXqoHti6GzVomL4=
 github.com/docker/distribution v2.8.1+incompatible h1:Q50tZOPR6T/hjNsyc9g8/syEs6bk8XXApsHjKukMl68=
-github.com/docker/docker v23.0.1+incompatible h1:vjgvJZxprTTE1A37nm+CLNAdwu6xZekyoiVlUZEINcY=
+github.com/docker/docker v23.0.3+incompatible h1:9GhVsShNWz1hO//9BNg/dpMnZW25KydO4wtVxWAIbho=
 github.com/docker/go-connections v0.4.0 h1:El9xVISelRB7BuFusrZozjnkIM5YnzCViNKohAFqRJQ=
 github.com/docker/go-units v0.5.0 h1:69rxXcBk27SvSaaxTtLh/8llcHD8vYHT7WSdRZ/jvr4=
 github.com/dustin/go-humanize v1.0.0/go.mod h1:HtrtbFcZ19U5GC7JDqmcUSB87Iq5E25KnS6fMYU6eOk=
