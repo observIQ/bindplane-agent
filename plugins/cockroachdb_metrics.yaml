@@ -6,6 +6,14 @@ parameters:
     description: Port used for HTTP requests from the DB Console
     type: int
     default: 8080
+  - name: username
+    description: Username to access sql Database (only needed if database is secure)
+    type: string
+    default: ""
+  - name: password
+    description: Password to access sql Database (only needed if database is secure)
+    type: string
+    default: ""
   - name: scrape_interval
     description: Time in between every scrape request
     type: string
@@ -20,6 +28,9 @@ template: |
             metrics_path: "_status/vars"
             static_configs:
               - targets: ['localhost:{{ .port }}']
+            basic_auth:
+              username: '{{ .username }}'
+              password: ' {{ .password }}'
             metric_relabel_configs:
               # Include only a few key metrics
               - source_labels: [ __name__ ]
