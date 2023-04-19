@@ -1,4 +1,4 @@
-version: 0.0.1
+version: 0.0.2
 title: Couchbase Metrics
 description: Metrics receiver for Couchbase
 parameters:
@@ -124,37 +124,37 @@ template: |
 
     transform/couchbase:
       metric_statements:
-        - context: metric
+        - context: datapoint
           statements:
-          - convert_gauge_to_sum("cumulative", true) where name == "couchbase.bucket.operation.count"
-          - set(description, "Number of operations on the bucket.") where name == "couchbase.bucket.operation.count"
-          - set(unit, "{operations}") where name == "couchbase.bucket.operation.count"
+          - convert_gauge_to_sum("cumulative", true) where metric.name == "couchbase.bucket.operation.count"
+          - set(metric.description, "Number of operations on the bucket.") where metric.name == "couchbase.bucket.operation.count"
+          - set(metric.unit, "{operations}") where metric.name == "couchbase.bucket.operation.count"
 
-          - convert_gauge_to_sum("cumulative", false) where name == "couchbase.bucket.item.count"
-          - set(description, "Number of items that belong to the bucket.") where name == "couchbase.bucket.item.count"
-          - set(unit, "{items}") where name == "couchbase.bucket.item.count"
+          - convert_gauge_to_sum("cumulative", false) where metric.name == "couchbase.bucket.item.count"
+          - set(metric.description, "Number of items that belong to the bucket.") where metric.name == "couchbase.bucket.item.count"
+          - set(metric.unit, "{items}") where metric.name == "couchbase.bucket.item.count"
 
-          - convert_gauge_to_sum("cumulative", false) where name == "couchbase.bucket.vbucket.count"
-          - set(description, "Number of non-resident vBuckets.") where name == "couchbase.bucket.vbucket.count"
-          - set(unit, "{vbuckets}") where name == "couchbase.bucket.vbucket.count"
+          - convert_gauge_to_sum("cumulative", false) where metric.name == "couchbase.bucket.vbucket.count"
+          - set(metric.description, "Number of non-resident vBuckets.") where metric.name == "couchbase.bucket.vbucket.count"
+          - set(metric.unit, "{vbuckets}") where metric.name == "couchbase.bucket.vbucket.count"
 
-          - convert_gauge_to_sum("cumulative", false) where name == "couchbase.bucket.memory.usage"
-          - set(description, "Usage of total memory available to the bucket.") where name == "couchbase.bucket.memory.usage"
-          - set(unit, "By") where name == "couchbase.bucket.memory.usage"
+          - convert_gauge_to_sum("cumulative", false) where metric.name == "couchbase.bucket.memory.usage"
+          - set(metric.description, "Usage of total memory available to the bucket.") where metric.name == "couchbase.bucket.memory.usage"
+          - set(metric.unit, "By") where metric.name == "couchbase.bucket.memory.usage"
 
-          - convert_gauge_to_sum("cumulative", true) where name == "couchbase.bucket.item.ejection.count"
-          - set(description, "Number of item value ejections from memory to disk.") where name == "couchbase.bucket.item.ejection.count"
-          - set(unit, "{ejections}") where name == "couchbase.bucket.item.ejection.count"
+          - convert_gauge_to_sum("cumulative", true) where metric.name == "couchbase.bucket.item.ejection.count"
+          - set(metric.description, "Number of item value ejections from memory to disk.") where metric.name == "couchbase.bucket.item.ejection.count"
+          - set(metric.unit, "{ejections}") where metric.name == "couchbase.bucket.item.ejection.count"
 
-          - convert_gauge_to_sum("cumulative", true) where name == "couchbase.bucket.error.oom.count"
-          - set(description, "Number of out of memory errors.") where name == "couchbase.bucket.error.oom.count"
-          - set(unit, "{errors}") where name == "couchbase.bucket.error.oom.count"
+          - convert_gauge_to_sum("cumulative", true) where metric.name == "couchbase.bucket.error.oom.count"
+          - set(metric.description, "Number of out of memory errors.") where metric.name == "couchbase.bucket.error.oom.count"
+          - set(metric.unit, "{errors}") where metric.name == "couchbase.bucket.error.oom.count"
 
-          - set(description, "The memory usage at which items will be ejected.") where name == "couchbase.bucket.memory.high_water_mark.limit"
-          - set(unit, "By") where name == "couchbase.bucket.memory.high_water_mark.limit"
+          - set(metric.description, "The memory usage at which items will be ejected.") where metric.name == "couchbase.bucket.memory.high_water_mark.limit"
+          - set(metric.unit, "By") where metric.name == "couchbase.bucket.memory.high_water_mark.limit"
 
-          - set(description, "The memory usage at which ejections will stop that were previously triggered by a high water mark breach.") where name == "couchbase.bucket.memory.low_water_mark.limit"
-          - set(unit, "By") where name == "couchbase.bucket.memory.low_water_mark.limit"
+          - set(metric.description, "The memory usage at which ejections will stop that were previously triggered by a high water mark breach.") where metric.name == "couchbase.bucket.memory.low_water_mark.limit"
+          - set(metric.unit, "By") where metric.name == "couchbase.bucket.memory.low_water_mark.limit"
 
   service:
     pipelines:

@@ -51,7 +51,7 @@ jobs:
       # Installs go-msi and wix.
       - name: Install Build Tools
         run: |
-          curl -f -L -o go-msi.exe https://github.com/observIQ/go-msi/releases/download/v2.1.0/go-msi.exe
+          curl -f -L -o go-msi.exe https://github.com/observIQ/go-msi/releases/download/v2.2.0/go-msi.exe
           curl -f -L -o wix310-binaries.zip http://wixtoolset.org/downloads/v3.10.3.3007/wix310-binaries.zip
           unzip wix310-binaries.zip
         working-directory: C:/build
@@ -112,7 +112,7 @@ jobs:
       # Installs go-msi and wix.
       - name: Install Build Tools
         run: |
-          curl -f -L -o go-msi.exe https://github.com/observIQ/go-msi/releases/download/v2.1.0/go-msi.exe
+          curl -f -L -o go-msi.exe https://github.com/observIQ/go-msi/releases/download/v2.2.0/go-msi.exe
           curl -f -L -o wix310-binaries.zip http://wixtoolset.org/downloads/v3.10.3.3007/wix310-binaries.zip
           unzip wix310-binaries.zip
         working-directory: C:/build
@@ -159,6 +159,12 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.ORG_GORELEASER_GITHUB_TOKEN }}
+      - name: Login to Google Artifact Repository
+        uses: docker/login-action@v2
+        with:
+          registry: us-central1-docker.pkg.dev
+          username: _json_key
+          password: ${{ secrets.ORG_OBSERVIQ_PUBLIC_GCR_JSON_KEY }}
       - name: Retrieve Windows 64-bit MSI Installer
         uses: actions/download-artifact@v3
         with:

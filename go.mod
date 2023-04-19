@@ -5,19 +5,21 @@ go 1.19
 require (
 	github.com/google/uuid v1.3.0
 	github.com/mholt/archiver/v3 v3.5.1
-	github.com/observiq/observiq-otel-collector/exporter/googlecloudexporter v1.22.0
-	github.com/observiq/observiq-otel-collector/packagestate v1.22.0
-	github.com/observiq/observiq-otel-collector/processor/logcountprocessor v1.22.0
-	github.com/observiq/observiq-otel-collector/processor/logdeduplicationprocessor v1.22.0
-	github.com/observiq/observiq-otel-collector/processor/maskprocessor v1.22.0
-	github.com/observiq/observiq-otel-collector/processor/metricextractprocessor v1.22.0
-	github.com/observiq/observiq-otel-collector/processor/metricstatsprocessor v1.22.0
-	github.com/observiq/observiq-otel-collector/processor/resourceattributetransposerprocessor v1.22.0
-	github.com/observiq/observiq-otel-collector/processor/samplingprocessor v1.22.0
-	github.com/observiq/observiq-otel-collector/processor/throughputmeasurementprocessor v1.22.0
-	github.com/observiq/observiq-otel-collector/receiver/pluginreceiver v1.22.0
-	github.com/observiq/observiq-otel-collector/receiver/routereceiver v1.22.0
-	github.com/observiq/observiq-otel-collector/receiver/sapnetweaverreceiver v1.22.0
+	github.com/observiq/observiq-otel-collector/exporter/googlecloudexporter v1.23.0
+	github.com/observiq/observiq-otel-collector/packagestate v1.23.0
+	github.com/observiq/observiq-otel-collector/processor/datapointcountprocessor v1.23.0
+	github.com/observiq/observiq-otel-collector/processor/logcountprocessor v1.23.0
+	github.com/observiq/observiq-otel-collector/processor/logdeduplicationprocessor v1.23.0
+	github.com/observiq/observiq-otel-collector/processor/maskprocessor v1.23.0
+	github.com/observiq/observiq-otel-collector/processor/metricextractprocessor v1.23.0
+	github.com/observiq/observiq-otel-collector/processor/metricstatsprocessor v1.23.0
+	github.com/observiq/observiq-otel-collector/processor/resourceattributetransposerprocessor v1.23.0
+	github.com/observiq/observiq-otel-collector/processor/samplingprocessor v1.23.0
+	github.com/observiq/observiq-otel-collector/processor/spancountprocessor v1.23.0
+	github.com/observiq/observiq-otel-collector/processor/throughputmeasurementprocessor v1.23.0
+	github.com/observiq/observiq-otel-collector/receiver/pluginreceiver v1.23.0
+	github.com/observiq/observiq-otel-collector/receiver/routereceiver v1.23.0
+	github.com/observiq/observiq-otel-collector/receiver/sapnetweaverreceiver v1.23.0
 	github.com/oklog/ulid/v2 v2.1.0
 	github.com/open-telemetry/opamp-go v0.2.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/alibabacloudlogserviceexporter v0.75.0
@@ -28,6 +30,7 @@ require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/azuremonitorexporter v0.75.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/carbonexporter v0.75.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/coralogixexporter v0.75.0
+	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/datadogexporter v0.75.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/dynatraceexporter v0.75.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/elasticsearchexporter v0.75.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/f5cloudexporter v0.75.0
@@ -155,20 +158,48 @@ require (
 	go.opentelemetry.io/collector/receiver/otlpreceiver v0.75.0
 	go.uber.org/multierr v1.11.0
 	go.uber.org/zap v1.24.0
-	golang.org/x/sys v0.6.0
+	golang.org/x/sys v0.7.0
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
 	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
+	github.com/DataDog/agent-payload/v5 v5.0.80 // indirect
+	github.com/DataDog/datadog-agent/pkg/obfuscate v0.44.0-rc.5 // indirect
+	github.com/DataDog/datadog-agent/pkg/remoteconfig/state v0.44.0-rc.5 // indirect
+	github.com/DataDog/datadog-agent/pkg/trace v0.44.0-rc.5 // indirect
+	github.com/DataDog/datadog-agent/pkg/util/cgroups v0.44.0-rc.5 // indirect
+	github.com/DataDog/datadog-agent/pkg/util/log v0.44.0-rc.5 // indirect
+	github.com/DataDog/datadog-agent/pkg/util/pointer v0.44.0-rc.5 // indirect
+	github.com/DataDog/datadog-agent/pkg/util/scrubber v0.44.0-rc.5 // indirect
+	github.com/DataDog/datadog-api-client-go/v2 v2.11.0 // indirect
+	github.com/DataDog/datadog-go/v5 v5.1.1 // indirect
+	github.com/DataDog/go-tuf v0.3.0--fix-localmeta-fork // indirect
+	github.com/DataDog/gohai v0.0.0-20220718130825-1776f9beb9cc // indirect
+	github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes v0.1.4 // indirect
+	github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/metrics v0.1.4 // indirect
+	github.com/DataDog/opentelemetry-mapping-go/pkg/quantile v0.1.4 // indirect
+	github.com/DataDog/sketches-go v1.4.1 // indirect
+	github.com/DataDog/zstd v1.5.2 // indirect
 	github.com/GehirnInc/crypt v0.0.0-20200316065508-bb7000b8a962 // indirect
+	github.com/cihub/seelog v0.0.0-20170130134532-f561c5e57575 // indirect
+	github.com/containerd/cgroups v1.0.4 // indirect
+	github.com/dustin/go-humanize v1.0.0 // indirect
 	github.com/elastic/go-elasticsearch/v7 v7.17.7 // indirect
+	github.com/golang/glog v1.0.0 // indirect
+	github.com/golang/mock v1.6.0 // indirect
+	github.com/google/s2a-go v0.1.0 // indirect
 	github.com/grafana/loki/pkg/push v0.0.0-20230127072203-4e8cc8d71928 // indirect
 	github.com/influxdata/influxdb-observability/otel2influx v0.3.4 // indirect
-	github.com/observiq/observiq-otel-collector/expr v1.22.0 // indirect
+	github.com/observiq/observiq-otel-collector/counter v1.23.0 // indirect
+	github.com/observiq/observiq-otel-collector/expr v1.23.0 // indirect
+	github.com/outcaste-io/ristretto v0.2.0 // indirect
 	github.com/panta/machineid v1.0.2 // indirect
+	github.com/patrickmn/go-cache v2.1.0+incompatible // indirect
+	github.com/secure-systems-lab/go-securesystemslib v0.4.0 // indirect
 	github.com/shoenig/go-m1cpu v0.1.4 // indirect
 	github.com/tg123/go-htpasswd v1.2.1 // indirect
+	gopkg.in/zorkian/go-datadog-api.v2 v2.30.0 // indirect
 )
 
 require (
@@ -197,15 +228,15 @@ require (
 
 require (
 	cloud.google.com/go v0.110.0 // indirect
-	cloud.google.com/go/compute v1.18.0 // indirect
+	cloud.google.com/go/compute v1.19.0 // indirect
 	cloud.google.com/go/compute/metadata v0.2.3 // indirect
-	cloud.google.com/go/iam v0.12.0 // indirect
+	cloud.google.com/go/iam v0.13.0 // indirect
 	cloud.google.com/go/logging v1.7.0 // indirect
 	cloud.google.com/go/longrunning v0.4.1 // indirect
-	cloud.google.com/go/monitoring v1.12.0 // indirect
+	cloud.google.com/go/monitoring v1.13.0 // indirect
 	cloud.google.com/go/pubsub v1.30.0 // indirect
 	cloud.google.com/go/spanner v1.44.0 // indirect
-	cloud.google.com/go/trace v1.8.0 // indirect
+	cloud.google.com/go/trace v1.9.0 // indirect
 	code.cloudfoundry.org/clock v1.0.0 // indirect
 	code.cloudfoundry.org/go-diodes v0.0.0-20211115184647-b584dd5df32c // indirect
 	code.cloudfoundry.org/go-loggregator v7.4.0+incompatible // indirect
@@ -225,10 +256,10 @@ require (
 	github.com/Azure/go-autorest/logger v0.2.1 // indirect
 	github.com/Azure/go-autorest/tracing v0.6.0 // indirect
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/detectors/gcp v1.12.0 // indirect
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector v0.36.0 // indirect
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector v0.37.1 // indirect
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/googlemanagedprometheus v0.36.0 // indirect
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.12.0 // indirect
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.36.0 // indirect
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.13.1 // indirect
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.37.1 // indirect
 	github.com/Microsoft/go-winio v0.6.0 // indirect
 	github.com/ReneKroon/ttlcache/v2 v2.11.0 // indirect
 	github.com/SAP/go-hdb v1.1.7 // indirect
@@ -284,7 +315,7 @@ require (
 	github.com/devigned/tab v0.1.1 // indirect
 	github.com/digitalocean/godo v1.97.0 // indirect
 	github.com/docker/distribution v2.8.1+incompatible // indirect
-	github.com/docker/docker v23.0.1+incompatible // indirect
+	github.com/docker/docker v23.0.3+incompatible // indirect
 	github.com/docker/go-connections v0.4.1-0.20210727194412-58542c764a11 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
 	github.com/dsnet/compress v0.0.2-0.20210315054119-f66993602bf5 // indirect
@@ -334,7 +365,7 @@ require (
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/gofuzz v1.2.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.2.3 // indirect
-	github.com/googleapis/gax-go/v2 v2.7.1 // indirect
+	github.com/googleapis/gax-go/v2 v2.8.0 // indirect
 	github.com/gophercloud/gophercloud v1.2.0 // indirect
 	github.com/gorilla/mux v1.8.0 // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect
@@ -386,7 +417,7 @@ require (
 	github.com/lib/pq v1.10.7 // indirect
 	github.com/lightstep/go-expohisto v1.0.0 // indirect
 	github.com/linode/linodego v1.14.1 // indirect
-	github.com/lufia/plan9stats v0.0.0-20211012122336-39d0f177ccd0 // indirect
+	github.com/lufia/plan9stats v0.0.0-20220517141722-cf486979b281 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-ieproxy v0.0.9 // indirect
@@ -459,7 +490,7 @@ require (
 	github.com/pkg/browser v0.0.0-20210911075715-681adbf594b8 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
-	github.com/power-devops/perfstat v0.0.0-20210106213030-5aafc221ea8c // indirect
+	github.com/power-devops/perfstat v0.0.0-20220216144756-c35f1ee13d7c // indirect
 	github.com/pquerna/cachecontrol v0.1.0 // indirect
 	github.com/prometheus/client_golang v1.14.0 // indirect
 	github.com/prometheus/client_model v0.3.0 // indirect
@@ -524,18 +555,18 @@ require (
 	golang.org/x/crypto v0.7.0 // indirect
 	golang.org/x/exp v0.0.0-20230321023759-10a507213a29 // indirect
 	golang.org/x/mod v0.9.0 // indirect
-	golang.org/x/net v0.8.0 // indirect
-	golang.org/x/oauth2 v0.6.0 // indirect
+	golang.org/x/net v0.9.0 // indirect
+	golang.org/x/oauth2 v0.7.0 // indirect
 	golang.org/x/sync v0.1.0 // indirect
-	golang.org/x/term v0.6.0 // indirect
-	golang.org/x/text v0.8.0 // indirect
+	golang.org/x/term v0.7.0 // indirect
+	golang.org/x/text v0.9.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
 	golang.org/x/tools v0.7.0 // indirect
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
 	gonum.org/v1/gonum v0.12.0 // indirect
-	google.golang.org/api v0.114.0 // indirect
+	google.golang.org/api v0.118.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
-	google.golang.org/genproto v0.0.0-20230320184635-7606e756e683 // indirect
+	google.golang.org/genproto v0.0.0-20230403163135-c38d8f061ccd // indirect
 	google.golang.org/grpc v1.54.0 // indirect
 	google.golang.org/protobuf v1.30.0 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
@@ -581,7 +612,13 @@ replace github.com/observiq/observiq-otel-collector/processor/metricextractproce
 
 replace github.com/observiq/observiq-otel-collector/processor/logdeduplicationprocessor => ./processor/logdeduplicationprocessor
 
+replace github.com/observiq/observiq-otel-collector/processor/spancountprocessor => ./processor/spancountprocessor
+
+replace github.com/observiq/observiq-otel-collector/processor/datapointcountprocessor => ./processor/datapointcountprocessor
+
 replace github.com/observiq/observiq-otel-collector/expr => ./expr
+
+replace github.com/observiq/observiq-otel-collector/counter => ./counter
 
 // Does not build with windows and only used in configschema executable
 // Relevant issue https://github.com/mattn/go-ieproxy/issues/45

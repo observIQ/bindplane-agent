@@ -530,6 +530,19 @@ func requireServiceConfigMatches(t *testing.T, binaryPath, name string, startTyp
 	assert.Equal(t, expectedBinaryPathName, cfg.BinaryPathName)
 	// We always install as LocalSystem, which is the "super user" of the system
 	assert.Equal(t, "LocalSystem", cfg.ServiceStartName)
+
+	// Check Recovery Actions are set
+	recoveryActions, err := s.RecoveryActions()
+	require.NoError(t, err)
+
+	for _, action := range recoveryActions {
+		assert.Equal(t, mgr.ServiceRestart, action.Type)
+		assert.Equal(t, defaultRecoveryDelay, action.Delay)
+	}
+
+	period, err := s.ResetPeriod()
+	require.NoError(t, err)
+	assert.Equal(t, uint32(defaultResetPeriod.Seconds()), period)
 }
 
 func requireServiceRunningStatus(t *testing.T, running bool) {

@@ -4,12 +4,12 @@ go 1.19
 
 require (
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51
-	github.com/observiq/observiq-otel-collector/packagestate v1.22.0
+	github.com/observiq/observiq-otel-collector/packagestate v1.23.0
 	github.com/open-telemetry/opamp-go v0.2.0
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.8.2
 	go.uber.org/zap v1.24.0
-	golang.org/x/sys v0.6.0
+	golang.org/x/sys v0.7.0
 )
 
 require (
