@@ -2,10 +2,10 @@ version: 0.0.1
 title: Cockroach Database Metrics
 description: Metrics receiver for Cockroach Database
 parameters:
-  - name: port
-    description: Port used for HTTP requests from the DB Console
-    type: int
-    default: 8080
+  - name: endpoint
+    description: Endpoint used for HTTP requests from the DB Console
+    type: string
+    default: localhost:8080
   - name: username
     description: Username to access sql Database (only needed if database is secure)
     type: string
@@ -27,17 +27,29 @@ template: |
             scrape_interval: '{{ .scrape_interval }}'
             metrics_path: "_status/vars"
             static_configs:
-              - targets: ['localhost:{{ .port }}']
+              - targets: ['{{ .endpoint }}']
             basic_auth:
               username: '{{ .username }}'
               password: ' {{ .password }}'
             metric_relabel_configs:
               # Include only a few key metrics
               - source_labels: [ __name__ ]
-                regex: "(round_trip_latency.*)|\
-                  (sql_distsql_exec_latency.*)|\
-                  (sql_exec_latency.*)|\
-                  (sql_service_latency.*)|\
+                regex: "(round_trip_latency)|\
+                  (round_trip_latency_sum)|\
+                  (round_trip_latency_count)|\
+                  (round_trip_latency_bucket)|\
+                  (sql_distsql_exec_latency)|\
+                  (sql_distsql_exec_latency_sum)|\
+                  (sql_distsql_exec_latency_count)|\
+                  (sql_distsql_exec_latency_bucket)|\
+                  (sql_exec_latency)|\
+                  (sql_exec_latency_sum)|\
+                  (sql_exec_latency_count)|\
+                  (sql_exec_latency_bucket)|\
+                  (sql_service_latency)|\
+                  (sql_service_latency_sum)|\
+                  (sql_service_latency_count)|\
+                  (sql_service_latency_bucket)|\
                   (sql_query_count)|\
                   (txn_abandons)|\
                   (txn_aborts)|\
@@ -50,22 +62,22 @@ template: |
                   (sys_cpu_user_ns)|\
                   (sys_cpu_sys_ns)|\
                   (capacity_.*)|\
+                  (syscount)|\
                   (liveness_livenodes)|\
                   (liveness_heartbeatfailures)|\
-                  (liveness_heartbeatlatency.*)|\ 
-                  (syscount)|\
+                  (liveness_heartbeatlatency.*)|\
                   (sql_insert_count)|\
                   (sql_delete_count)|\
                   (sql_update_count)|\
                   (sql_select_count)|\
                   (sql_stats_mem_current)|\
                   (sql_mem_distsql_current)|\
-                  (sql_mem_distsql_max)|\
-                  (sql_stats_mem_max)|\
+                  (sql_mem_distsql_max.*)|\
+                  (sql_stats_mem_max.*)|\
                   (sql_mem_sql_session_current)|\
-                  (sql_mem_sql_session_max)|\
+                  (sql_mem_sql_session_max.*)|\
                   (sql_mem_sql_txn_current)|\
-                  (sql_mem_sql_txn_max)"
+                  (sql_mem_sql_txn_max.*)"
                 action: keep
 
   processors:
@@ -106,6 +118,10 @@ template: |
           match_type: strict
           action: update
           new_name: "crdb.transaction.aborts"
+        - include: sql_query_count
+          match_type: strict
+          action: update
+          new_name: crdb.sql.query.count
         - include: txn_abandons
           match_type: strict
           action: update
@@ -113,7 +129,7 @@ template: |
         - include: txn_commits
           match_type: strict
           action: update
-          new_name: "crdb.transaction.commits"
+          new_name: "crdb.transaction.commits.count"
         - include: txn_durations
           match_type: strict
           action: update
@@ -121,7 +137,7 @@ template: |
         - include: exec_error
           match_type: strict
           action: update
-          new_name: "crdb.exec.error.count"
+          new_name: "crdb.exec.errors.count"
         - include: timeseries_write_errors
           match_type: strict
           action: update
@@ -154,10 +170,6 @@ template: |
           match_type: strict
           action: update
           new_name: "crdb.liveness.heartbeat_latency"
-        - include: syscount
-          match_type: strict
-          action: update
-          new_name: "crdb.sys.kv.count"
         - include: sql_insert_count
           match_type: strict
           action: update
@@ -166,6 +178,10 @@ template: |
           match_type: strict
           action: update
           new_name: "crdb.sql.delete_count"
+        - include: syscount
+          match_type: strict
+          action: update
+          new_name: "crdb.sys.pairs.count"
         - include: sql_update_count
           match_type: strict
           action: update
@@ -177,7 +193,7 @@ template: |
         - include: sql_stats_mem_current
           match_type: strict
           action: update
-          new_name: "crdb.sql.stats.mem.current"
+          new_name: "crdb.mem.sql.current"
         - include: sql_mem_distsql_current
           match_type: strict
           action: update
@@ -189,7 +205,7 @@ template: |
         - include: sql_stats_mem_max
           match_type: strict
           action: update
-          new_name: "crdb.sql.stats.mem.max"
+          new_name: "crdb.mem.sql.max"
         - include: sql_mem_sql_session_current
           match_type: strict
           action: update
@@ -210,7 +226,7 @@ template: |
         - include: ^capacity_(?P<state>used|reserved|available)$$
           match_type: regexp
           action: combine
-          new_name: "crdb.capacity.limit"
+          new_name: "crdb.capacity.usage"
 
     transform/cockroachdb:
       metric_statements:
@@ -261,8 +277,8 @@ template: |
           - set(description, "Total system cpu time") where name == "crdb.sys.cpu.sys.time"
           - set(unit, "ns") where name == "crdb.sys.cpu.sys.time"
 
-          - set(description, "Total storage capacity") where name == "crdb.capacity.limit"
-          - set(unit, "Bytes") where name == "crdb.capacity.limit"
+          - set(description, "Total storage capacity") where name == "crdb.capacity.usage"
+          - set(unit, "Bytes") where name == "crdb.capacity.usage"
 
           - set(description, "Number of live nodes in the cluster (will be 0 if this node is not itself live)") where name == "crdb.liveness.livenodes"
           - set(unit, "{nodes}") where name == "crdb.liveness.livenodes"
@@ -273,8 +289,8 @@ template: |
           - set(description, "Node liveness heartbeat latency") where name == "crdb.liveness.heartbeat_latency"
           - set(unit, "ns") where name == "crdb.liveness.heartbeat_latency"
 
-          - set(description, "Current sql statement memory usage") where name == "crdb.sql.stats.mem.current"
-          - set(unit, "By") where name == "crdb.sql.stats.mem.current"
+          - set(description, "Current sql statement memory usage") where name == "crdb.mem.sql.current"
+          - set(unit, "By") where name == "crdb.mem.sql.current"
 
           - set(description, "Current sql statement memory usage for distsql") where name == "crdb.mem.distsql.current"
           - set(unit, "By") where name == "crdb.mem.distsql.current"
@@ -282,8 +298,8 @@ template: |
           - set(description, "Memory usage per sql statement for distsql") where name == "crdb.mem.distsql.max"
           - set(unit, "By") where name == "crdb.mem.distsql.max"
 
-          - set(description, "Memory usage per sql statement") where name == "crdb.sql.stats.mem.max"
-          - set(unit, "By") where name == "crdb.sql.stats.mem.max"
+          - set(description, "Memory usage per sql statement") where name == "crdb.mem.sql.max"
+          - set(unit, "By") where name == "crdb.mem.sql.max"
 
           - set(description, "Current sql session memory usage") where name == "crdb.mem.sql.session.current"
           - set(unit, "By") where name == "crdb.mem.sql.session.current"
@@ -297,8 +313,8 @@ template: |
           - set(description, "Memory usage per sql transaction") where name == "crdb.mem.sql.transaction.max"
           - set(unit, "By") where name == "crdb.mem.sql.transaction.max"
 
-          - set(description, "Count of system KV pairs") where name == "crdb.sys.kv.count"
-          - set(unit, "{pairs}") where name == "crdb.sys.kv.count"
+          - set(description, "Count of system KV pairs") where name == "crdb.sys.pairs.count"
+          - set(unit, "{pairs}") where name == "crdb.sys.pairs.count"
 
           - set(description, "Number of SQL SELECT statements sucessfully executed") where name == "crdb.sql.select.count"
           - set(unit, "{statements}") where name == "crdb.sql.select.count"
