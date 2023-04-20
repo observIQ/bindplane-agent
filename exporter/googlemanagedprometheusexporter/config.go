@@ -23,7 +23,6 @@ import (
 
 	gmp "github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlemanagedprometheusexporter"
 	"go.opentelemetry.io/collector/component"
-	"go.opentelemetry.io/collector/processor/batchprocessor"
 	"go.uber.org/multierr"
 	"google.golang.org/api/option"
 )
@@ -34,23 +33,21 @@ const (
 
 // Config is the config the google managed prometheus exporter
 type Config struct {
-	Credentials     string                 `mapstructure:"credentials"`
-	CredentialsFile string                 `mapstructure:"credentials_file"`
-	GCPConfig       *gmp.Config            `mapstructure:",squash"`
-	BatchConfig     *batchprocessor.Config `mapstructure:"batch"`
+	Credentials     string      `mapstructure:"credentials"`
+	CredentialsFile string      `mapstructure:"credentials_file"`
+	GMPConfig       *gmp.Config `mapstructure:",squash"`
 }
 
 // Validate validates the config
 func (c *Config) Validate() error {
 	var err error
-	err = multierr.Append(err, c.GCPConfig.Validate())
-	err = multierr.Append(err, c.BatchConfig.Validate())
+	err = multierr.Append(err, c.GMPConfig.Validate())
 	return err
 }
 
 // setClientOptions sets the client options used by the GCP config
 func (c *Config) setClientOptions() {
-	c.GCPConfig.MetricConfig.ClientConfig.GetClientOptions = c.getClientOptions
+	c.GMPConfig.MetricConfig.ClientConfig.GetClientOptions = c.getClientOptions
 }
 
 // getClientOptions returns the client options used by the exporter
@@ -69,7 +66,7 @@ func (c *Config) getClientOptions() []option.ClientOption {
 
 // setProject sets the project id from credentials if not already set
 func (c *Config) setProject() error {
-	if c.GCPConfig.ProjectID != "" {
+	if c.GMPConfig.ProjectID != "" {
 		return nil
 	}
 
@@ -99,7 +96,7 @@ func (c *Config) updateProjectFromJSON(jsonBytes []byte) error {
 		return errors.New("project id is not a string")
 	}
 
-	c.GCPConfig.ProjectID = strValue
+	c.GMPConfig.ProjectID = strValue
 	return nil
 }
 
@@ -115,8 +112,7 @@ func (c *Config) updateProjectFromFile(fileName string) error {
 // createDefaultConfig creates the default config for the exporter
 func createDefaultConfig() component.Config {
 	return &Config{
-		GCPConfig:   createDefaultGCPConfig(),
-		BatchConfig: createDefaultBatchConfig(),
+		GMPConfig: createDefaultGCPConfig(),
 	}
 }
 
@@ -124,15 +120,7 @@ func createDefaultConfig() component.Config {
 func createDefaultGCPConfig() *gmp.Config {
 	factory := gmp.NewFactory()
 	config := factory.CreateDefaultConfig().(*gmp.Config)
-	config.RetrySettings.Enabled = false
 	config.UserAgent = defaultUserAgent
 
-	return config
-}
-
-// createDefaultBatchConfig creates a default batch config
-func createDefaultBatchConfig() *batchprocessor.Config {
-	factory := batchprocessor.NewFactory()
-	config := factory.CreateDefaultConfig().(*batchprocessor.Config)
 	return config
 }

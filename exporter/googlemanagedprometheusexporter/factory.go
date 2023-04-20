@@ -21,18 +21,15 @@ import (
 
 	gmp "github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlemanagedprometheusexporter"
 	"go.opentelemetry.io/collector/component"
-	"go.opentelemetry.io/collector/consumer"
 	"go.opentelemetry.io/collector/exporter"
-	"go.opentelemetry.io/collector/processor"
-	"go.opentelemetry.io/collector/processor/batchprocessor"
 	"go.uber.org/zap"
 )
 
-// gmpFactory is the factory used to create the underlying gcp exporter
+// gmpFactory is the factory used to create the underlying google managed prometheus exporter
 var gmpFactory = gmp.NewFactory()
 
 const (
-	// typeStr is the type of the google cloud exporter
+	// typeStr is the type of the google managed prometheus exporter
 	typeStr = "googlemanagedprometheus"
 
 	// The stability level of the exporter. Matches the current exporter in contrib
@@ -57,39 +54,10 @@ func createMetricsExporter(ctx context.Context, set exporter.CreateSettings, cfg
 		set.Logger.Error("Failed to set project automatically", zap.Error(err))
 	}
 
-	gcpExporter, err := gmpFactory.CreateMetricsExporter(ctx, set, exporterConfig.GCPConfig)
+	gmpExporter, err := gmpFactory.CreateMetricsExporter(ctx, set, exporterConfig.GMPConfig)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create metrics exporter: %w", err)
 	}
 
-	processors := []processor.Metrics{}
-	processorConfigs := []component.Config{
-		exporterConfig.BatchConfig,
-	}
-
-	processorFactories := []processor.Factory{
-		batchprocessor.NewFactory(),
-	}
-
-	processorSettings := processor.CreateSettings{
-		TelemetrySettings: set.TelemetrySettings,
-		BuildInfo:         set.BuildInfo,
-	}
-
-	var consumer consumer.Metrics = gcpExporter
-	for i, processorConfig := range processorConfigs {
-		factory := processorFactories[i]
-		processor, err := factory.CreateMetricsProcessor(ctx, processorSettings, processorConfig, consumer)
-		if err != nil {
-			return nil, fmt.Errorf("failed to create metrics processor %s: %w", set.ID.String(), err)
-		}
-		processors = append(processors, processor)
-		consumer = processor
-	}
-
-	return &googleManagedPrometheusExporter{
-		metricsProcessors: processors,
-		metricsExporter:   gcpExporter,
-		metricsConsumer:   consumer,
-	}, nil
+	return gmpExporter, nil
 }

@@ -27,7 +27,7 @@ func TestCreateDefaultConfig(t *testing.T) {
 	googleCfg, ok := cfg.(*Config)
 	require.True(t, ok)
 
-	require.Equal(t, defaultUserAgent, googleCfg.GCPConfig.UserAgent)
+	require.Equal(t, defaultUserAgent, googleCfg.GMPConfig.UserAgent)
 	require.Nil(t, googleCfg.Validate())
 }
 
@@ -40,7 +40,7 @@ func TestSetClientOptionsWithCredentials(t *testing.T) {
 		{
 			name: "With no credentials",
 			config: &Config{
-				GCPConfig: &gmp.Config{},
+				GMPConfig: &gmp.Config{},
 			},
 			opts: []option.ClientOption{},
 		},
@@ -48,7 +48,7 @@ func TestSetClientOptionsWithCredentials(t *testing.T) {
 			name: "With credentials json",
 			config: &Config{
 				Credentials: "testjson",
-				GCPConfig:   &gmp.Config{},
+				GMPConfig:   &gmp.Config{},
 			},
 			opts: []option.ClientOption{
 				option.WithCredentialsJSON([]byte("testjson")),
@@ -58,7 +58,7 @@ func TestSetClientOptionsWithCredentials(t *testing.T) {
 			name: "With credentials file",
 			config: &Config{
 				CredentialsFile: "testfile",
-				GCPConfig:       &gmp.Config{},
+				GMPConfig:       &gmp.Config{},
 			},
 			opts: []option.ClientOption{
 				option.WithCredentialsFile("testfile"),
@@ -69,7 +69,7 @@ func TestSetClientOptionsWithCredentials(t *testing.T) {
 			config: &Config{
 				Credentials:     "testjson",
 				CredentialsFile: "testfile",
-				GCPConfig:       &gmp.Config{},
+				GMPConfig:       &gmp.Config{},
 			},
 			opts: []option.ClientOption{
 				option.WithCredentialsJSON([]byte("testjson")),
@@ -79,12 +79,12 @@ func TestSetClientOptionsWithCredentials(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			require.Nil(t, tc.config.GCPConfig.MetricConfig.ClientConfig.GetClientOptions)
+			require.Nil(t, tc.config.GMPConfig.MetricConfig.ClientConfig.GetClientOptions)
 
 			tc.config.setClientOptions()
-			require.NotNil(t, tc.config.GCPConfig.MetricConfig.ClientConfig.GetClientOptions)
+			require.NotNil(t, tc.config.GMPConfig.MetricConfig.ClientConfig.GetClientOptions)
 
-			opts := tc.config.GCPConfig.MetricConfig.ClientConfig.GetClientOptions()
+			opts := tc.config.GMPConfig.MetricConfig.ClientConfig.GetClientOptions()
 			require.Equal(t, tc.opts, opts)
 		})
 	}
@@ -100,7 +100,7 @@ func TestSetProject(t *testing.T) {
 		{
 			name: "With project already set",
 			config: &Config{
-				GCPConfig: &gmp.Config{
+				GMPConfig: &gmp.Config{
 					GMPConfig: gmp.GMPConfig{
 						ProjectID: "test",
 					},
@@ -112,7 +112,7 @@ func TestSetProject(t *testing.T) {
 			name: "With project in json credentials",
 			config: &Config{
 				Credentials: `{"project_id":"test"}`,
-				GCPConfig:   &gmp.Config{},
+				GMPConfig:   &gmp.Config{},
 			},
 			expectedProject: "test",
 		},
@@ -120,7 +120,7 @@ func TestSetProject(t *testing.T) {
 			name: "With missing json key",
 			config: &Config{
 				Credentials: `{"test":"value"}`,
-				GCPConfig:   &gmp.Config{},
+				GMPConfig:   &gmp.Config{},
 			},
 			expectedErr: "project id does not exist",
 		},
@@ -128,7 +128,7 @@ func TestSetProject(t *testing.T) {
 			name: "With invalid json",
 			config: &Config{
 				Credentials: `{`,
-				GCPConfig:   &gmp.Config{},
+				GMPConfig:   &gmp.Config{},
 			},
 			expectedErr: "failed to unmarshal credentials",
 		},
@@ -136,7 +136,7 @@ func TestSetProject(t *testing.T) {
 			name: "With invalid string",
 			config: &Config{
 				Credentials: `{"project_id":100}`,
-				GCPConfig:   &gmp.Config{},
+				GMPConfig:   &gmp.Config{},
 			},
 			expectedErr: "project id is not a string",
 		},
@@ -150,7 +150,7 @@ func TestSetProject(t *testing.T) {
 				require.Contains(t, err.Error(), tc.expectedErr)
 			}
 
-			require.Equal(t, tc.expectedProject, tc.config.GCPConfig.ProjectID)
+			require.Equal(t, tc.expectedProject, tc.config.GMPConfig.ProjectID)
 		})
 	}
 }
