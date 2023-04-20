@@ -55,7 +55,8 @@ type metricsReceiver struct {
 	metricsBuilder *metadata.MetricsBuilder
 }
 
-type Datapoint struct {
+// datapoint represents a datapoint received for a single metric from Druid
+type datapoint struct {
 	Metric     string      `json:"metric"`
 	Service    string      `json:"service"`
 	Value      float64     `json:"value"`
@@ -185,7 +186,10 @@ func (mReceiver *metricsReceiver) handleRequest(rw http.ResponseWriter, request 
 	if request.Header.Get("Content-Type") != "application/json" {
 		rw.WriteHeader(http.StatusBadRequest)
 		errMessage := "Content type must be JSON"
-		rw.Write([]byte(errMessage))
+		if _, err := rw.Write([]byte(errMessage)); err != nil {
+			mReceiver.logger.Debug("Error writing response message to Druid", zap.Error(err), zap.String("remote", request.RemoteAddr))
+			return
+		}
 		mReceiver.logger.Debug(errMessage, zap.String("remote", request.RemoteAddr))
 		return
 	}
@@ -197,7 +201,7 @@ func (mReceiver *metricsReceiver) handleRequest(rw http.ResponseWriter, request 
 		return
 	}
 
-	var metrics []Datapoint
+	var metrics []datapoint
 	if err = json.Unmarshal(payload, &metrics); err != nil {
 		rw.WriteHeader(http.StatusBadRequest)
 		mReceiver.logger.Debug("Failed to convert metrics payload from JSON array to golang slice", zap.Error(err), zap.String("remote", request.RemoteAddr))
@@ -221,7 +225,7 @@ func (mReceiver *metricsReceiver) handleRequest(rw http.ResponseWriter, request 
 	rw.WriteHeader(http.StatusOK)
 }
 
-func (mReceiver *metricsReceiver) processMetrics(metrics []Datapoint, service string) pmetric.Metrics {
+func (mReceiver *metricsReceiver) processMetrics(metrics []datapoint, service string) pmetric.Metrics {
 	now := pcommon.NewTimestampFromTime(time.Now())
 
 	queryCountStats := make(map[string]float64)
@@ -240,9 +244,9 @@ func (mReceiver *metricsReceiver) processMetrics(metrics []Datapoint, service st
 }
 
 // remove all metrics published to the receiver besides the ones it cares about
-func purgeMetrics(metrics []Datapoint) ([]Datapoint, string) {
+func purgeMetrics(metrics []datapoint) ([]datapoint, string) {
 	collectedMetrics := [7]string{druidQueryCount, druidQuerySuccessCount, druidQueryFailedCount, druidQueryInterruptedCount, druidQueryTimeoutCount, druidSQLQueryTime, druidSQLQueryBytes}
-	purgedArray := make([]Datapoint, 0)
+	purgedArray := make([]datapoint, 0)
 	var service string
 
 	for _, dataPoint := range metrics {
@@ -259,7 +263,7 @@ func purgeMetrics(metrics []Datapoint) ([]Datapoint, string) {
 	return purgedArray, service
 }
 
-func (mReceiver *metricsReceiver) recordSQLQueryDataPoints(now pcommon.Timestamp, metrics []Datapoint) {
+func (mReceiver *metricsReceiver) recordSQLQueryDataPoints(now pcommon.Timestamp, metrics []datapoint) {
 	dataSources := make([]string, 0)
 	sqlQueryCount := make(map[string]float64)
 	sqlQueryTime := make(map[string]float64)
