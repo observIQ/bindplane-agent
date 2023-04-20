@@ -24,6 +24,7 @@ import (
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/azuremonitorexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/carbonexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/coralogixexporter"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/datadogexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/dynatraceexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/elasticsearchexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/f5cloudexporter"
@@ -59,6 +60,7 @@ var defaultExporters = []exporter.Factory{
 	azuremonitorexporter.NewFactory(),
 	carbonexporter.NewFactory(),
 	coralogixexporter.NewFactory(),
+	datadogexporter.NewFactory(),
 	dynatraceexporter.NewFactory(),
 	elasticsearchexporter.NewFactory(),
 	exportertest.NewNopFactory(),

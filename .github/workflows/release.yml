@@ -159,6 +159,12 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.ORG_GORELEASER_GITHUB_TOKEN }}
+      - name: Login to Google Artifact Repository
+        uses: docker/login-action@v2
+        with:
+          registry: us-central1-docker.pkg.dev
+          username: _json_key
+          password: ${{ secrets.ORG_OBSERVIQ_PUBLIC_GCR_JSON_KEY }}
       - name: Retrieve Windows 64-bit MSI Installer
         uses: actions/download-artifact@v3
         with:
