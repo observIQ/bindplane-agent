@@ -6,7 +6,7 @@ require (
 	github.com/google/uuid v1.3.0
 	github.com/mholt/archiver/v3 v3.5.1
 	github.com/observiq/observiq-otel-collector/exporter/googlecloudexporter v1.23.0
-	github.com/observiq/observiq-otel-collector/exporter/googlemanagedprometheusexporter v1.22.0
+	github.com/observiq/observiq-otel-collector/exporter/googlemanagedprometheusexporter v1.23.0
 	github.com/observiq/observiq-otel-collector/packagestate v1.23.0
 	github.com/observiq/observiq-otel-collector/processor/datapointcountprocessor v1.23.0
 	github.com/observiq/observiq-otel-collector/processor/logcountprocessor v1.23.0
