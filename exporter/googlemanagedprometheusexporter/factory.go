@@ -19,7 +19,7 @@ import (
 	"context"
 	"fmt"
 
-	gcp "github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlemanagedprometheusexporter"
+	gmp "github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlemanagedprometheusexporter"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/consumer"
 	"go.opentelemetry.io/collector/exporter"
@@ -28,8 +28,8 @@ import (
 	"go.uber.org/zap"
 )
 
-// gcpFactory is the factory used to create the underlying gcp exporter
-var gcpFactory = gcp.NewFactory()
+// gmpFactory is the factory used to create the underlying gcp exporter
+var gmpFactory = gmp.NewFactory()
 
 const (
 	// typeStr is the type of the google cloud exporter
@@ -57,7 +57,7 @@ func createMetricsExporter(ctx context.Context, set exporter.CreateSettings, cfg
 		set.Logger.Error("Failed to set project automatically", zap.Error(err))
 	}
 
-	gcpExporter, err := gcpFactory.CreateMetricsExporter(ctx, set, exporterConfig.GCPConfig)
+	gcpExporter, err := gmpFactory.CreateMetricsExporter(ctx, set, exporterConfig.GCPConfig)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create metrics exporter: %w", err)
 	}
@@ -88,7 +88,6 @@ func createMetricsExporter(ctx context.Context, set exporter.CreateSettings, cfg
 	}
 
 	return &googleManagedPrometheusExporter{
-		appendHost:        exporterConfig.AppendHost,
 		metricsProcessors: processors,
 		metricsExporter:   gcpExporter,
 		metricsConsumer:   consumer,

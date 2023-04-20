@@ -18,7 +18,7 @@ import (
 	"context"
 	"testing"
 
-	gcp "github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlecloudexporter"
+	gmp "github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlemanagedprometheusexporter"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/exporter"
@@ -28,15 +28,15 @@ import (
 func TestCreateMetricExporterSuccess(t *testing.T) {
 	mockExporter := &MockExporter{}
 
-	gcpFactory = exporter.NewFactory(
+	gmpFactory = exporter.NewFactory(
 		typeStr,
-		gcpFactory.CreateDefaultConfig,
+		gmpFactory.CreateDefaultConfig,
 		exporter.WithMetrics(func(_ context.Context, _ exporter.CreateSettings, _ component.Config) (exporter.Metrics, error) {
 			return mockExporter, nil
 		}, stability),
 	)
 	defer func() {
-		gcpFactory = gcp.NewFactory()
+		gmpFactory = gmp.NewFactory()
 	}()
 
 	factory := NewFactory()
@@ -53,12 +53,12 @@ func TestCreateMetricExporterSuccess(t *testing.T) {
 }
 
 func TestCreateExporterFailure(t *testing.T) {
-	gcpFactory = exporter.NewFactory(
+	gmpFactory = exporter.NewFactory(
 		typeStr,
-		gcpFactory.CreateDefaultConfig,
+		gmpFactory.CreateDefaultConfig,
 	)
 	defer func() {
-		gcpFactory = gcp.NewFactory()
+		gmpFactory = gmp.NewFactory()
 	}()
 
 	factory := NewFactory()

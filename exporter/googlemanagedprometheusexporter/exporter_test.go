@@ -21,14 +21,10 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/consumer"
-	"go.opentelemetry.io/collector/pdata/plog"
 	"go.opentelemetry.io/collector/pdata/pmetric"
-	"go.opentelemetry.io/collector/pdata/ptrace"
 	"go.opentelemetry.io/collector/processor"
-	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
 )
 
 func TestExporterCapabilities(t *testing.T) {
@@ -165,24 +161,6 @@ func TestExporterShutdown(t *testing.T) {
 	}
 }
 
-func TestAppendMetricAttrs(t *testing.T) {
-	metrics := pmetric.NewMetrics()
-	metric1 := metrics.ResourceMetrics().AppendEmpty()
-	metric1.Resource().Attributes().PutStr(string(semconv.HostNameKey), "test-hostname")
-	metric2 := metrics.ResourceMetrics().AppendEmpty()
-
-	e := googleManagedPrometheusExporter{}
-	e.appendMetricHost(&metrics)
-
-	metric1Host, ok := metric1.Resource().Attributes().Get(string(semconv.HostNameKey))
-	require.True(t, ok)
-	require.Equal(t, "test-hostname", metric1Host.AsString())
-
-	metric2Host, ok := metric2.Resource().Attributes().Get(string(semconv.HostNameKey))
-	require.True(t, ok)
-	require.Equal(t, hostname, metric2Host.AsString())
-}
-
 func createValidProcessor() *MockProcessor {
 	processor := &MockProcessor{}
 	processor.On("Start", mock.Anything, mock.Anything).Return(nil)
@@ -230,20 +208,6 @@ func (_m *MockProcessor) Capabilities() consumer.Capabilities {
 	return r0
 }
 
-// ConsumeLogs provides a mock function with given fields: ctx, ld
-func (_m *MockProcessor) ConsumeLogs(ctx context.Context, ld plog.Logs) error {
-	ret := _m.Called(ctx, ld)
-
-	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, plog.Logs) error); ok {
-		r0 = rf(ctx, ld)
-	} else {
-		r0 = ret.Error(0)
-	}
-
-	return r0
-}
-
 // ConsumeMetrics provides a mock function with given fields: ctx, md
 func (_m *MockProcessor) ConsumeMetrics(ctx context.Context, md pmetric.Metrics) error {
 	ret := _m.Called(ctx, md)
@@ -251,20 +215,6 @@ func (_m *MockProcessor) ConsumeMetrics(ctx context.Context, md pmetric.Metrics)
 	var r0 error
 	if rf, ok := ret.Get(0).(func(context.Context, pmetric.Metrics) error); ok {
 		r0 = rf(ctx, md)
-	} else {
-		r0 = ret.Error(0)
-	}
-
-	return r0
-}
-
-// ConsumeTraces provides a mock function with given fields: ctx, td
-func (_m *MockProcessor) ConsumeTraces(ctx context.Context, td ptrace.Traces) error {
-	ret := _m.Called(ctx, td)
-
-	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, ptrace.Traces) error); ok {
-		r0 = rf(ctx, td)
 	} else {
 		r0 = ret.Error(0)
 	}

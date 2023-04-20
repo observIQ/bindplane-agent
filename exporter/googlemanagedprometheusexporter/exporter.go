@@ -17,23 +17,16 @@ package googlemanagedprometheusexporter
 import (
 	"context"
 	"fmt"
-	"os"
 
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/consumer"
 	"go.opentelemetry.io/collector/exporter"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.opentelemetry.io/collector/processor"
-	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
 )
-
-// hostname is the name of the current host
-var hostname = getHostname()
 
 // googleManagedPrometheusExporter is a google managed prometheus exporter wrapped with additional functionality
 type googleManagedPrometheusExporter struct {
-	appendHost bool
-
 	metricsProcessors []processor.Metrics
 	metricsExporter   exporter.Metrics
 	metricsConsumer   consumer.Metrics
@@ -41,10 +34,6 @@ type googleManagedPrometheusExporter struct {
 
 // ConsumeMetrics consumes metrics
 func (e *googleManagedPrometheusExporter) ConsumeMetrics(ctx context.Context, md pmetric.Metrics) error {
-	if e.appendHost {
-		e.appendMetricHost(&md)
-	}
-
 	if e.metricsConsumer == nil {
 		return nil
 	}
@@ -89,24 +78,4 @@ func (e *googleManagedPrometheusExporter) Shutdown(ctx context.Context) error {
 	}
 
 	return nil
-}
-
-// appendMetricHost appends hostname to metrics if not already present
-func (e *googleManagedPrometheusExporter) appendMetricHost(md *pmetric.Metrics) {
-	for i := 0; i < md.ResourceMetrics().Len(); i++ {
-		resourceAttrs := md.ResourceMetrics().At(i).Resource().Attributes()
-		_, hostNameExists := resourceAttrs.Get(string(semconv.HostNameKey))
-		_, hostIDExists := resourceAttrs.Get(string(semconv.HostIDKey))
-		if !hostNameExists && !hostIDExists {
-			resourceAttrs.PutStr(string(semconv.HostNameKey), hostname)
-		}
-	}
-}
-
-// getHostname returns the current hostname or "unknown" if not found
-func getHostname() string {
-	if hostname, err := os.Hostname(); err == nil {
-		return hostname
-	}
-	return "unknown"
 }

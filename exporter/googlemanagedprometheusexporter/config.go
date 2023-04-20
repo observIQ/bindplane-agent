@@ -36,7 +36,6 @@ const (
 type Config struct {
 	Credentials     string                 `mapstructure:"credentials"`
 	CredentialsFile string                 `mapstructure:"credentials_file"`
-	AppendHost      bool                   `mapstructure:"append_host"`
 	GCPConfig       *gmp.Config            `mapstructure:",squash"`
 	BatchConfig     *batchprocessor.Config `mapstructure:"batch"`
 }
@@ -118,7 +117,6 @@ func createDefaultConfig() component.Config {
 	return &Config{
 		GCPConfig:   createDefaultGCPConfig(),
 		BatchConfig: createDefaultBatchConfig(),
-		AppendHost:  true,
 	}
 }
 
