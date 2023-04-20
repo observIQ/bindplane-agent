@@ -23,7 +23,6 @@ import (
 
 	gmp "github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlemanagedprometheusexporter"
 	"go.opentelemetry.io/collector/component"
-	"go.uber.org/multierr"
 	"google.golang.org/api/option"
 )
 
@@ -40,9 +39,7 @@ type Config struct {
 
 // Validate validates the config
 func (c *Config) Validate() error {
-	var err error
-	err = multierr.Append(err, c.GMPConfig.Validate())
-	return err
+	return c.GMPConfig.Validate()
 }
 
 // setClientOptions sets the client options used by the GCP config
