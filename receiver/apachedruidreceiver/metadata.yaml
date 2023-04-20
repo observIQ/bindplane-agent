@@ -72,5 +72,3 @@ metrics:
       monotonic: false
       aggregation: cumulative
     attributes: ["data_source"]
-
-      

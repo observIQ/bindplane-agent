@@ -55,6 +55,13 @@ type metricsReceiver struct {
 	metricsBuilder *metadata.MetricsBuilder
 }
 
+type Datapoint struct {
+	Metric     string      `json:"metric"`
+	Service    string      `json:"service"`
+	Value      float64     `json:"value"`
+	DataSource interface{} `json:"dataSource"`
+}
+
 func newMetricsReceiver(params receiver.CreateSettings, cfg *Config, consumer consumer.Metrics) (*metricsReceiver, error) {
 	var tlsConfig *tls.Config
 	recv := &metricsReceiver{
@@ -131,23 +138,24 @@ func (mReceiver *metricsReceiver) startListening(ctx context.Context, host compo
 				host.ReportFatalError(err)
 			}
 		}()
-	} else {
-		go func() {
-			defer mReceiver.wg.Done()
-
-			mReceiver.logger.Debug("Starting Serve",
-				zap.String("address", mReceiver.config.Endpoint))
-
-			err = mReceiver.server.Serve(listener)
-
-			mReceiver.logger.Debug("Serve done")
-
-			if err != http.ErrServerClosed {
-				mReceiver.logger.Error("Serve failed", zap.Error(err))
-				host.ReportFatalError(err)
-			}
-		}()
+		return nil
 	}
+
+	go func() {
+		defer mReceiver.wg.Done()
+
+		mReceiver.logger.Debug("Starting Serve",
+			zap.String("address", mReceiver.config.Endpoint))
+
+		err = mReceiver.server.Serve(listener)
+
+		mReceiver.logger.Debug("Serve done")
+
+		if err != http.ErrServerClosed {
+			mReceiver.logger.Error("Serve failed", zap.Error(err))
+			host.ReportFatalError(err)
+		}
+	}()
 
 	return nil
 }
@@ -176,7 +184,9 @@ func (mReceiver *metricsReceiver) handleRequest(rw http.ResponseWriter, request 
 
 	if request.Header.Get("Content-Type") != "application/json" {
 		rw.WriteHeader(http.StatusBadRequest)
-		mReceiver.logger.Debug("Content type must be JSON", zap.String("remote", request.RemoteAddr))
+		errMessage := "Content type must be JSON"
+		rw.Write([]byte(errMessage))
+		mReceiver.logger.Debug(errMessage, zap.String("remote", request.RemoteAddr))
 		return
 	}
 
@@ -187,14 +197,22 @@ func (mReceiver *metricsReceiver) handleRequest(rw http.ResponseWriter, request 
 		return
 	}
 
-	var metrics []interface{}
+	var metrics []Datapoint
 	if err = json.Unmarshal(payload, &metrics); err != nil {
 		rw.WriteHeader(http.StatusBadRequest)
 		mReceiver.logger.Debug("Failed to convert metrics payload from JSON array to golang slice", zap.Error(err), zap.String("remote", request.RemoteAddr))
 		return
 	}
 
-	if err := mReceiver.consumer.ConsumeMetrics(request.Context(), mReceiver.processMetrics(metrics)); err != nil {
+	purgedMetrics, service := purgeMetrics(metrics)
+
+	if len(purgedMetrics) == 0 {
+		rw.WriteHeader(http.StatusOK)
+		mReceiver.logger.Debug("No relevant metrics provided by request", zap.String("remote", request.RemoteAddr))
+		return
+	}
+
+	if err := mReceiver.consumer.ConsumeMetrics(request.Context(), mReceiver.processMetrics(purgedMetrics, service)); err != nil {
 		rw.WriteHeader(http.StatusInternalServerError)
 		mReceiver.logger.Error("Failed to consume payload as metric", zap.Error(err))
 		return
@@ -203,87 +221,63 @@ func (mReceiver *metricsReceiver) handleRequest(rw http.ResponseWriter, request 
 	rw.WriteHeader(http.StatusOK)
 }
 
-func (mReceiver *metricsReceiver) processMetrics(metrics []interface{}) pmetric.Metrics {
+func (mReceiver *metricsReceiver) processMetrics(metrics []Datapoint, service string) pmetric.Metrics {
 	now := pcommon.NewTimestampFromTime(time.Now())
 
-	purgedMetrics, service := purgeMetrics(metrics)
-	queryCountStats := getQueryCountStats(purgedMetrics)
+	queryCountStats := make(map[string]float64)
+	for _, dataPoint := range metrics {
+		queryCountStats[dataPoint.Metric] = dataPoint.Value
+	}
 
 	mReceiver.metricsBuilder.RecordApachedruidQueryCountDataPoint(now, int64(queryCountStats[druidQueryCount]))
 	mReceiver.metricsBuilder.RecordApachedruidSuccessQueryCountDataPoint(now, int64(queryCountStats[druidQuerySuccessCount]))
 	mReceiver.metricsBuilder.RecordApachedruidFailedQueryCountDataPoint(now, int64(queryCountStats[druidQueryFailedCount]))
 	mReceiver.metricsBuilder.RecordApachedruidInterruptedQueryCountDataPoint(now, int64(queryCountStats[druidQueryInterruptedCount]))
 	mReceiver.metricsBuilder.RecordApachedruidTimeoutQueryCountDataPoint(now, int64(queryCountStats[druidQueryTimeoutCount]))
-	mReceiver.recordSQLQueryDataPoints(now, purgedMetrics)
+	mReceiver.recordSQLQueryDataPoints(now, metrics)
 
 	return mReceiver.metricsBuilder.Emit(metadata.WithApachedruidService(service))
 }
 
 // remove all metrics published to the receiver besides the ones it cares about
-func purgeMetrics(metrics []interface{}) ([]interface{}, string) {
+func purgeMetrics(metrics []Datapoint) ([]Datapoint, string) {
 	collectedMetrics := [7]string{druidQueryCount, druidQuerySuccessCount, druidQueryFailedCount, druidQueryInterruptedCount, druidQueryTimeoutCount, druidSQLQueryTime, druidSQLQueryBytes}
-	purgedArray := make([]interface{}, 0)
+	purgedArray := make([]Datapoint, 0)
 	var service string
 
 	for _, dataPoint := range metrics {
-		if dataPoint == nil {
+		if dataPoint.Metric == "" || !contains(collectedMetrics[:], dataPoint.Metric) {
 			continue
 		}
 
-		currentPoint := dataPoint.(map[string]interface{})
-		if metric, metricOk := currentPoint["metric"]; !metricOk || !contains(collectedMetrics[:], metric.(string)) {
-			continue
-		}
-
-		purgedArray = append(purgedArray, currentPoint)
+		purgedArray = append(purgedArray, dataPoint)
 		if service == "" {
-			if serviceInterface, ok := currentPoint["service"]; ok {
-				service = serviceInterface.(string)
-			}
+			service = dataPoint.Service
 		}
 	}
 
 	return purgedArray, service
 }
 
-func getQueryCountStats(metrics []interface{}) map[string]float64 {
-	queryCountStats := make(map[string]float64)
-
-	for _, dataPoint := range metrics {
-		currentPoint := dataPoint.(map[string]interface{})
-		metric, metricOk := currentPoint["metric"]
-		value, valueOk := currentPoint["value"]
-		if metricOk && valueOk {
-			if v, vOk := value.(float64); vOk {
-				queryCountStats[metric.(string)] = v
-			}
-		}
-	}
-
-	return queryCountStats
-}
-
-func (mReceiver *metricsReceiver) recordSQLQueryDataPoints(now pcommon.Timestamp, metrics []interface{}) {
+func (mReceiver *metricsReceiver) recordSQLQueryDataPoints(now pcommon.Timestamp, metrics []Datapoint) {
 	dataSources := make([]string, 0)
 	sqlQueryCount := make(map[string]float64)
 	sqlQueryTime := make(map[string]float64)
 	sqlQueryBytes := make(map[string]float64)
 	for _, dataPoint := range metrics {
-		currentPoint := dataPoint.(map[string]interface{})
-		metric, metricOk := currentPoint["metric"]
-		value, valueOk := currentPoint["value"]
-		dataSource, dsOk := currentPoint["dataSource"]
-		if metricOk && valueOk && dsOk {
-			if ds, dOk := dataSource.(string); dOk {
-				if m := metric.(string); m == druidSQLQueryTime || m == druidSQLQueryBytes {
-					if m == druidSQLQueryTime {
-						sqlQueryTime[ds] += value.(float64)
-						sqlQueryCount[ds]++
-					} else {
-						sqlQueryBytes[ds] += value.(float64)
+		if dataSource, ok := dataPoint.DataSource.(string); ok {
+			if dataSource != "" {
+				switch dataPoint.Metric {
+				case druidSQLQueryTime:
+					sqlQueryTime[dataSource] += dataPoint.Value
+					sqlQueryCount[dataSource]++
+					if !contains(dataSources, dataSource) {
+						dataSources = append(dataSources, dataSource)
 					}
-					if !contains(dataSources, ds) {
-						dataSources = append(dataSources, ds)
+				case druidSQLQueryBytes:
+					sqlQueryBytes[dataSource] += dataPoint.Value
+					if !contains(dataSources, dataSource) {
+						dataSources = append(dataSources, dataSource)
 					}
 				}
 			}
