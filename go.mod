@@ -6,6 +6,7 @@ require (
 	github.com/google/uuid v1.3.0
 	github.com/mholt/archiver/v3 v3.5.1
 	github.com/observiq/observiq-otel-collector/exporter/googlecloudexporter v1.23.0
+	github.com/observiq/observiq-otel-collector/exporter/googlemanagedprometheusexporter v1.23.0
 	github.com/observiq/observiq-otel-collector/packagestate v1.23.0
 	github.com/observiq/observiq-otel-collector/processor/datapointcountprocessor v1.23.0
 	github.com/observiq/observiq-otel-collector/processor/logcountprocessor v1.23.0
@@ -36,7 +37,6 @@ require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/f5cloudexporter v0.75.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/fileexporter v0.75.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlecloudpubsubexporter v0.75.0
-	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlemanagedprometheusexporter v0.75.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/influxdbexporter v0.75.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/jaegerexporter v0.75.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/kafkaexporter v0.75.0
@@ -193,6 +193,7 @@ require (
 	github.com/influxdata/influxdb-observability/otel2influx v0.3.4 // indirect
 	github.com/observiq/observiq-otel-collector/counter v1.23.0 // indirect
 	github.com/observiq/observiq-otel-collector/expr v1.23.0 // indirect
+	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlemanagedprometheusexporter v0.75.0 // indirect
 	github.com/outcaste-io/ristretto v0.2.0 // indirect
 	github.com/panta/machineid v1.0.2 // indirect
 	github.com/patrickmn/go-cache v2.1.0+incompatible // indirect
@@ -619,6 +620,8 @@ replace github.com/observiq/observiq-otel-collector/processor/datapointcountproc
 replace github.com/observiq/observiq-otel-collector/expr => ./expr
 
 replace github.com/observiq/observiq-otel-collector/counter => ./counter
+
+replace github.com/observiq/observiq-otel-collector/exporter/googlemanagedprometheusexporter => ./exporter/googlemanagedprometheusexporter
 
 // Does not build with windows and only used in configschema executable
 // Relevant issue https://github.com/mattn/go-ieproxy/issues/45
