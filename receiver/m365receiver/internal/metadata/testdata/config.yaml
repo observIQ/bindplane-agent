@@ -1,0 +1,19 @@
+default:
+all_set:
+  metrics:
+    m365.sharepoint.files.active.count:
+      enabled: true
+    m365.sharepoint.files.count:
+      enabled: true
+    m365.sharepoint.sites.active.count:
+      enabled: true
+  resource_attributes:
+none_set:
+  metrics:
+    m365.sharepoint.files.active.count:
+      enabled: false
+    m365.sharepoint.files.count:
+      enabled: false
+    m365.sharepoint.sites.active.count:
+      enabled: false
+  resource_attributes:
