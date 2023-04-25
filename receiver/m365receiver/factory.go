@@ -16,12 +16,6 @@ package m365receiver // import "github.com/observiq/observiq-otel-collector/rece
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
-	"io"
-	"net/http"
-	"net/url"
-	"strings"
 	"time"
 
 	"go.opentelemetry.io/collector/component"
@@ -48,7 +42,7 @@ func NewFactory() receiver.Factory {
 func createDefaultConfig() component.Config {
 	return &Config{
 		ScraperControllerSettings: scraperhelper.ScraperControllerSettings{
-			CollectionInterval: 12 * time.Hour,
+			CollectionInterval: 5 * time.Second,
 		},
 		HTTPClientSettings: confighttp.HTTPClientSettings{
 			Timeout: 10 * time.Second,
@@ -65,14 +59,8 @@ func createMetricsReceiver(
 ) (receiver.Metrics, error) {
 	cfg := rConf.(*Config)
 
-	//get authorization token
-	token, err := getAuthorizationToken(cfg)
-	if err != nil {
-		return nil, err
-	}
-
 	//create receiver
-	ns := newM365Scraper(params, cfg, token)
+	ns := newM365Scraper(params, cfg)
 	scraper, err := scraperhelper.NewScraper(typeStr, ns.scrape, scraperhelper.WithStart(ns.start))
 	if err != nil {
 		return nil, err
@@ -85,51 +73,4 @@ func createMetricsReceiver(
 		scraperhelper.AddScraper(scraper),
 	)
 
-}
-
-//Getting new authentication token for metrics
-
-type response struct {
-	Token string `json:"access_token"`
-}
-
-func getAuthorizationToken(cfg *Config) (string, error) {
-	auth_endpoint := fmt.Sprintf("https://login.microsoftonline.com/%s/oauth2/v2.0/token", cfg.Tenant_id)
-
-	formData := url.Values{
-		"grant_type":    {"client_credentials"},
-		"scope":         {"https://graph.microsoft.com/.default"},
-		"client_id":     {cfg.Client_id},
-		"client_secret": {cfg.Client_secret},
-	}
-
-	requestBody := strings.NewReader(formData.Encode())
-
-	req, err := http.NewRequest("POST", auth_endpoint, requestBody)
-	if err != nil {
-		return "", err
-	}
-
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return "", err
-	}
-
-	defer resp.Body.Close()
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return "", err
-	}
-
-	var token response
-	err = json.Unmarshal(body, &token)
-	if err != nil {
-		return "", err
-	}
-
-	return token.Token, nil
 }

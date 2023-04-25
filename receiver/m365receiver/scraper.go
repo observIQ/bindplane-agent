@@ -16,10 +16,6 @@ package m365receiver // import "github.com/observiq/observiq-otel-collector/rece
 
 import (
 	"context"
-	"encoding/csv"
-	"fmt"
-	"net/http"
-	"strconv"
 	"time"
 
 	"go.opentelemetry.io/collector/component"
@@ -31,26 +27,44 @@ import (
 	"github.com/observiq/observiq-otel-collector/receiver/m365receiver/internal/metadata"
 )
 
+type reportPair struct {
+	columns  map[string]int //relevant column name and index for csv file
+	endpoint string         //unique report endpoint
+}
+
+var reports = []reportPair{
+	{
+		columns:  map[string]int{"files": 2, "files.active": 3},
+		endpoint: "getSharePointSiteUsageFileCounts(period='D7')",
+	},
+	{
+		columns:  map[string]int{"sites.active": 3},
+		endpoint: "getSharePointSiteUsageSiteCounts(period='D7')",
+	},
+	//TODO: make rest of maps
+}
+
+type mClient interface {
+	GetCSV(endpoint string) ([]string, error)
+	GetToken() error
+}
+
 type m365Scraper struct {
-	settings                  component.TelemetrySettings
-	cfg                       *Config
-	httpClient                *http.Client
-	mb                        *metadata.MetricsBuilder
-	metricsAuthorizationToken string
+	settings component.TelemetrySettings
+	cfg      *Config
+	client   mClient
+	mb       *metadata.MetricsBuilder
 }
 
 func newM365Scraper(
 	settings receiver.CreateSettings,
 	cfg *Config,
-	token string,
 ) *m365Scraper {
 	m := &m365Scraper{
-		settings:                  settings.TelemetrySettings,
-		cfg:                       cfg,
-		mb:                        metadata.NewMetricsBuilder(cfg.MetricsBuilderConfig, settings),
-		metricsAuthorizationToken: "Bearer " + token,
+		settings: settings.TelemetrySettings,
+		cfg:      cfg,
+		mb:       metadata.NewMetricsBuilder(cfg.MetricsBuilderConfig, settings),
 	}
-
 	return m
 }
 
@@ -59,154 +73,65 @@ func (m *m365Scraper) start(_ context.Context, host component.Host) error {
 	if err != nil {
 		return err
 	}
-	m.httpClient = httpClient
+
+	m.client = newM365Client(httpClient, m.cfg)
+
+	err = m.client.GetToken()
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
-type reportPair struct {
-	columns  map[string]int
-	endpoint string
-}
-
-var (
-	rootEndpoint = "https://graph.microsoft.com/v1.0/reports/"
-	reports      = []reportPair{
-		{
-			columns:  map[string]int{"files": 2, "files.active": 3},
-			endpoint: "getSharePointSiteUsageFileCounts(period='D7')",
-		},
-		{
-			columns:  map[string]int{"sites.active": 3},
-			endpoint: "getSharePointSiteUsageSiteCounts(period='D7')",
-		},
-	}
-
-	//sharepointFiles = reportPair{map[string]int{"files": 2, "files.active": 3}, "getSharePointSiteUsageFileCounts(period='D7')"}
-	//todo: make rest of maps
-)
-
+// retrieves data, builds metrics & emits them
 func (m *m365Scraper) scrape(context.Context) (pmetric.Metrics, error) {
-	//todo
-
-	//initialize all workers
-	//run all workers
-	//collect from all workers
-	//loop through resulting data and map metrics
-
-	m365Data := m.runWorkers()
+	m365Data, err := m.getStats()
+	if err != nil {
+		//TODO: error handling
+	}
 
 	errs := &scrapererror.ScrapeErrors{}
 	now := pcommon.NewTimestampFromTime(time.Now())
+
+	//fmt.Println(m365Data)
+
 	for metricKey, metricValue := range m365Data {
 		switch metricKey {
 		case "files":
-			addPartialIfError(errs, m.mb.RecordM365SharepointFilesCountDataPoint(now, strconv.Itoa(metricValue)))
+			addPartialIfError(errs, m.mb.RecordM365SharepointFilesCountDataPoint(now, metricValue))
 		case "files.active":
-			addPartialIfError(errs, m.mb.RecordM365SharepointFilesActiveCountDataPoint(now, strconv.Itoa(metricValue)))
+			addPartialIfError(errs, m.mb.RecordM365SharepointFilesActiveCountDataPoint(now, metricValue))
 		case "sites.active":
-			addPartialIfError(errs, m.mb.RecordM365SharepointSitesActiveCountDataPoint(now, strconv.Itoa(metricValue)))
+			addPartialIfError(errs, m.mb.RecordM365SharepointSitesActiveCountDataPoint(now, metricValue))
 		}
-
 	}
 
 	return m.mb.Emit(), errs.Combine()
 }
 
+func (m *m365Scraper) getStats() (map[string]string, error) {
+	reportData := map[string]string{}
+
+	for _, r := range reports {
+		//fmt.Println(r.endpoint)
+		line, err := m.client.GetCSV(r.endpoint)
+		if err != nil {
+			//TODO: error handling
+		}
+
+		for k, v := range r.columns {
+			reportData[k] = line[v]
+		}
+
+	}
+
+	return reportData, nil
+}
+
+// adds any errors from recording metric values
 func addPartialIfError(errs *scrapererror.ScrapeErrors, err error) {
 	if err != nil {
 		errs.AddPartial(1, err)
 	}
-}
-
-func (m *m365Scraper) runWorkers() map[string]int {
-	done := make(chan map[string]int)
-	var workers = []worker{}
-
-	for _, r := range reports {
-		workers = append(workers, *newWorkerStruct(r.columns, m.metricsAuthorizationToken, r.endpoint))
-	}
-
-	for _, w := range workers {
-		go w.parseData(done, m.httpClient)
-	}
-
-	numWorkers := len(workers)
-	var results = map[string]int{}
-
-	for i := 0; i < numWorkers; i++ {
-		data := <-done
-		for k, v := range data {
-			results[k] = v
-		}
-	}
-
-	return results
-}
-
-/******************************************************************/
-/*********************** Worker Definition ************************/
-/******************************************************************/
-
-type worker struct {
-	endpoint   string         //api endpoint for this report
-	token      string         //authorization token to access apis
-	csvData    [][]string     //read the csv data directly into this to avoid downloading files
-	csvColumns map[string]int //the column numbers that the relevant data for this report are in
-}
-
-// returns a new worker struct
-func newWorkerStruct(i_csvColumns map[string]int, i_token string, i_endpoint string) *worker {
-	return &worker{
-		endpoint:   i_endpoint,
-		token:      i_token,
-		csvColumns: i_csvColumns,
-	}
-}
-
-// retrieves csv data from endpoint and places data into csvData object
-func (w *worker) getCSVData(httpC *http.Client) {
-	req, err := http.NewRequest("GET", w.endpoint, nil)
-	if err != nil {
-		//todo ERROR HANDLING
-	}
-
-	req.Header.Set("Authorization", w.token)
-	resp, err := httpC.Do(req)
-	if err != nil {
-		//todo ERROR HANDLING
-	}
-	defer resp.Body.Close()
-	csvReader := csv.NewReader(resp.Body)
-
-	//skip first line of csv data (contains headers)
-	_, err = csvReader.Read()
-	if err != nil {
-		//todo ERROR HANDLING
-	}
-
-	//read rest of csv data
-	w.csvData, err = csvReader.ReadAll()
-	if err != nil {
-		//todo ERROR HANDLING
-	}
-}
-
-// parses through csv data and creates metric points with data
-func (w *worker) parseData(done chan map[string]int, httpC *http.Client) {
-	w.getCSVData(httpC)
-
-	data := map[string]int{}
-
-	for _, line := range w.csvData {
-		for k, v := range w.csvColumns {
-			val, err := strconv.Atoi(line[v])
-			if err != nil {
-				fmt.Println(err)
-			}
-
-			data[k] += val
-		}
-	}
-
-	done <- data
 }
