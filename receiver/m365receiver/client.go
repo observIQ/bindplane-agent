@@ -71,7 +71,7 @@ func (m *m365Client) GetToken() error {
 
 	req, err := http.NewRequest("POST", auth_endpoint, requestBody)
 	if err != nil {
-		//TODO: error handling
+		return err
 	}
 
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
@@ -79,20 +79,20 @@ func (m *m365Client) GetToken() error {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		//TODO: error handling
+		return err
 	}
 
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		//TODO: error handling
+		return err
 	}
 
 	var token response
 	err = json.Unmarshal(body, &token)
 	if err != nil {
-		//TODO: error handling
+		return err
 	}
 
 	m.token = token.Token

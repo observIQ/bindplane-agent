@@ -22,7 +22,7 @@ import (
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.opentelemetry.io/collector/receiver"
-	"go.opentelemetry.io/collector/receiver/scrapererror"
+	"go.uber.org/zap"
 
 	"github.com/observiq/observiq-otel-collector/receiver/m365receiver/internal/metadata"
 )
@@ -51,6 +51,7 @@ type mClient interface {
 
 type m365Scraper struct {
 	settings component.TelemetrySettings
+	logger   *zap.Logger
 	cfg      *Config
 	client   mClient
 	mb       *metadata.MetricsBuilder
@@ -62,6 +63,7 @@ func newM365Scraper(
 ) *m365Scraper {
 	m := &m365Scraper{
 		settings: settings.TelemetrySettings,
+		logger:   settings.Logger,
 		cfg:      cfg,
 		mb:       metadata.NewMetricsBuilder(cfg.MetricsBuilderConfig, settings),
 	}
@@ -71,6 +73,7 @@ func newM365Scraper(
 func (m *m365Scraper) start(_ context.Context, host component.Host) error {
 	httpClient, err := m.cfg.ToClient(host, m.settings)
 	if err != nil {
+		m.logger.Error("error creating http client", zap.Error(err))
 		return err
 	}
 
@@ -78,6 +81,7 @@ func (m *m365Scraper) start(_ context.Context, host component.Host) error {
 
 	err = m.client.GetToken()
 	if err != nil {
+		m.logger.Error("error creating authorization token", zap.Error(err))
 		return err
 	}
 
@@ -88,50 +92,45 @@ func (m *m365Scraper) start(_ context.Context, host component.Host) error {
 func (m *m365Scraper) scrape(context.Context) (pmetric.Metrics, error) {
 	m365Data, err := m.getStats()
 	if err != nil {
-		//TODO: error handling
-	}
+		//troubleshoot stale token
+		m.logger.Error("error getting stats, possible bad token, trying again", zap.Error(err))
+		m.client.GetToken()
 
-	errs := &scrapererror.ScrapeErrors{}
-	now := pcommon.NewTimestampFromTime(time.Now())
-
-	//fmt.Println(m365Data)
-
-	for metricKey, metricValue := range m365Data {
-		switch metricKey {
-		case "files":
-			addPartialIfError(errs, m.mb.RecordM365SharepointFilesCountDataPoint(now, metricValue))
-		case "files.active":
-			addPartialIfError(errs, m.mb.RecordM365SharepointFilesActiveCountDataPoint(now, metricValue))
-		case "sites.active":
-			addPartialIfError(errs, m.mb.RecordM365SharepointSitesActiveCountDataPoint(now, metricValue))
+		m365Data, err = m.getStats()
+		if err != nil {
+			m.logger.Error("unable to retrieve stats", zap.Error(err))
+			return pmetric.Metrics{}, err
 		}
 	}
 
-	return m.mb.Emit(), errs.Combine()
+	now := pcommon.NewTimestampFromTime(time.Now())
+	for metricKey, metricValue := range m365Data {
+		switch metricKey {
+		case "files":
+			m.mb.RecordM365SharepointFilesCountDataPoint(now, metricValue)
+		case "files.active":
+			m.mb.RecordM365SharepointFilesActiveCountDataPoint(now, metricValue)
+		case "sites.active":
+			m.mb.RecordM365SharepointSitesActiveCountDataPoint(now, metricValue)
+		}
+	}
+
+	return m.mb.Emit(), nil
 }
 
 func (m *m365Scraper) getStats() (map[string]string, error) {
 	reportData := map[string]string{}
 
 	for _, r := range reports {
-		//fmt.Println(r.endpoint)
 		line, err := m.client.GetCSV(r.endpoint)
 		if err != nil {
-			//TODO: error handling
+			return map[string]string{}, err
 		}
 
 		for k, v := range r.columns {
 			reportData[k] = line[v]
 		}
-
 	}
 
 	return reportData, nil
-}
-
-// adds any errors from recording metric values
-func addPartialIfError(errs *scrapererror.ScrapeErrors, err error) {
-	if err != nil {
-		errs.AddPartial(1, err)
-	}
 }
