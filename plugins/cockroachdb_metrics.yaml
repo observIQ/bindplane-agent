@@ -170,26 +170,10 @@ template: |
           match_type: strict
           action: update
           new_name: "crdb.liveness.heartbeat_latency"
-        - include: sql_insert_count
-          match_type: strict
-          action: update
-          new_name: "crdb.sql.insert.count"
-        - include: sql_delete_count
-          match_type: strict
-          action: update
-          new_name: "crdb.sql.delete_count"
         - include: syscount
           match_type: strict
           action: update
           new_name: "crdb.sys.pairs.count"
-        - include: sql_update_count
-          match_type: strict
-          action: update
-          new_name: "crdb.sql.update.count"
-        - include: sql_select_count
-          match_type: strict
-          action: update
-          new_name: "crdb.sql.select.count"
         - include: sql_stats_mem_current
           match_type: strict
           action: update
@@ -227,6 +211,11 @@ template: |
           match_type: regexp
           action: combine
           new_name: "crdb.capacity.usage"
+        # Combine several dml query counts into one
+        - include: ^sql_(?P<state>insert|delete|update|select)_count$$
+          match_type: regexp
+          action: combine
+          new_name: "crdb.sql.dml.query.count"
 
     transform/cockroachdb:
       metric_statements:
@@ -316,17 +305,9 @@ template: |
           - set(description, "Count of system KV pairs") where name == "crdb.sys.pairs.count"
           - set(unit, "{pairs}") where name == "crdb.sys.pairs.count"
 
-          - set(description, "Number of SQL SELECT statements sucessfully executed") where name == "crdb.sql.select.count"
-          - set(unit, "{statements}") where name == "crdb.sql.select.count"
-
-          - set(description, "Number of SQL INSERT statements sucessfully executed") where name == "crdb.sql.insert.count"
-          - set(unit, "{statements}") where name == "crdb.sql.insert.count"
-
-          - set(description, "Number of SQL DELETE statements sucessfully executed") where name == "crdb.sql.delete.count"
-          - set(unit, "{statements}") where name == "crdb.sql.delete.count"
-
-          - set(description, "Number of SQL UPDATE statements sucessfully executed") where name == "crdb.sql.update.count"
-          - set(unit, "{statements}") where name == "crdb.sql.update.count"
+          - set(description, "Number of SQL SELECT, INSERT, DELETE, UPDATE, statements sucessfully executed") where name == "crdb.sql.dml.query.count"
+          - set(unit, "{statements}") where name == "crdb.sql.dml.query.count"
+  
   service:
     pipelines:
       metrics/cockroachdb:

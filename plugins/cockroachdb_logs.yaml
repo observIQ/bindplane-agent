@@ -1,0 +1,248 @@
+version: 0.0.1
+title: CockroachDB
+description: Log parser for CockroachDB
+parameters:
+  - name: enable_health_log
+    description: Enable to collect health logs
+    type: bool
+    default: true
+  - name: health_log_path
+    description: The absolute path to the CockroachDB health logs
+    type: "[]string"
+    default:
+      - "/var/log/cockroach-data/logs/cockroach-health.log"
+  - name: enable_dev_log
+    description: Enable to collect general developer logs.
+    type: bool
+    default: true
+  - name: dev_log_path
+    description: The absolute path to the CockroachDB Dev Logs
+    type: "[]string"
+    default:
+      - "/var/log/cockroach-data/logs/cockroach.log"
+  - name: enable_error_log
+    description: Enable to collect stderr logs.
+    type: bool
+    default: true
+  - name: error_log_path
+    description: The absolute path to the CockroachDB stderr logs
+    type: "[]string"
+    default:
+      - "/var/log/cockroach-data/logs/cockroach-stderr.log"
+  - name: enable_sql_schema_log
+    description: Enable to collect sql schema logs.
+    type: bool
+    default: true
+  - name: sql_schema_log_path
+    description: The absolute path to the CockroachDB sql schema logs
+    type: "[]string"
+    default:
+      - "/var/log/cockroach-data/logs/cockroach-sql-schema.log"
+  - name: enable_telemetry_log
+    description: Enable to collect telemetry logs.
+    type: bool
+    default: true
+  - name: telemetry_log_path
+    description: The absolute path to the CockroachDB telemetry logs
+    type: "[]string"
+    default:
+      - "/var/log/cockroach-data/logs/cockroach-telemetry.log"
+  - name: enable_kv_distribution_log
+    description: Enable to collect kv distribution logs.
+    type: bool
+    default: true
+  - name: kv_distribution_log_path
+    description: The absolute path to the CockroachDB kv distribution logs
+    type: "[]string"
+    default:
+      - "/var/log/cockroach-data/logs/cockroach-kv-distribution.log"
+  - name: enable_pebble_log
+    description: Enable to collect cockroachdb pebble logs.
+    type: bool
+    default: true
+  - name: pebble_log_path
+    description: The absolute path to the CockroachDB pebble logs
+    type: "[]string"
+    default:
+      - "/var/log/cockroach-data/logs/cockroach-pebble.log"
+  - name: start_at
+    description: At startup, where to start reading logs from the file ('beginning' or 'end')
+    type: string
+    supported:
+      - beginning
+      - end
+    default: beginning
+template: |
+  receivers:
+    {{ if .enable_health_log }}
+    filelog/health_logs:
+      include:
+        {{ range $fp := .health_log_path }}
+        - '{{ $fp }}'
+        {{ end }}
+      multiline:
+        line_start_pattern: '[IWEF]\d{6}\s\d{2}:\d{2}:\d{2}\.\d{6}\s'
+      start_at: {{ .start_at }}
+      attributes:
+        log_type: 'cockroach.health'
+      operators:
+        - type: regex_parser
+          regex: '^(?P<Type>[IWEF])(?P<timestamp>\d{6}\s+\d{2}:\d{2}:\d{2}\.\d{6})\s+(?P<GoID>\d+)\s*(?:(?P<Channel>\d+)@)?(?P<Location>\S+)\s+(?:)⋮?\s+(?P<Node>\[[^\]]+\])\s+(?:(?P<Counter>\d+\s+)?)(?P<Message>.*)'
+          timestamp:
+            parse_from: attributes.timestamp
+            layout: '%y%m%d %H:%M:%S.%f'
+          severity: 
+            parse_from: attributes.Type
+    {{ end }} ## End Health Logs.
+
+    {{ if .enable_dev_log }}
+    filelog/dev_logs:
+      include:
+        {{ range $fp := .dev_log_path}}
+        - '{{ $fp }}'
+        {{ end }}
+      multiline: 
+        line_start_pattern: '[IWEF]\d{6}\s\d{2}:\d{2}:\d{2}\.\d{6}\s'
+      start_at: {{ .start_at }}
+      attributes:
+        log_type: 'cockroach.dev'
+      operators:
+        - type: regex_parser
+          regex: '^(?P<Type>[IWEF])(?P<timestamp>\d{6}\s+\d{2}:\d{2}:\d{2}\.\d{6})\s+(?P<GoID>\d+)\s*(?:(?P<Channel>\d+)@)?(?P<Location>\S+)\s+(?:)⋮?\s+(?P<Node>\[[^\]]+\])\s+(?:(?P<Counter>\d+\s+)?)(?P<Message>.*)'
+          timestamp:
+            parse_from: attributes.timestamp
+            layout: '%y%m%d %H:%M:%S.%f'
+          severity:
+            parse_from: attributes.Type
+    {{ end }} ## End of dev logs.
+
+    
+    {{ if .enable_error_log }}
+    filelog/error_logs:
+      include:
+        {{ range $fp := .error_log_path }}
+        - '{{ $fp }}'
+        {{ end }}
+      multiline:
+        line_start_pattern: '[IWEF]\d{6}\s\d{2}:\d{2}:\d{2}\.\d{6}\s'
+      start_at: {{ .start_at }}
+      attributes:
+        log_type: 'cockroach.error'
+      operators:
+        - type: regex_parser
+          regex: '^(?P<Type>[IWEF])(?P<timestamp>\d{6}\s+\d{2}:\d{2}:\d{2}\.\d{6})\s+(?P<GoID>\d+)\s*(?:(?P<Channel>\d+)@)?(?P<Location>\S+)\s+(?:)⋮?\s+(?P<Node>\[[^\]]+\])\s+(?:(?P<Counter>\d+\s+)?)(?P<Message>.*)'
+          timestamp:
+            parse_from: attributes.timestamp
+            layout: '%y%m%d %H:%M:%S.%f'
+          severity:
+            parse_from: attributes.Type
+    {{ end }} ## End of Error Logs.
+
+    {{ if .enable_sql_schema_log }}
+    filelog/sql_schema_logs:
+      include:
+        {{ range $fp := .sql_schema_log_path }}
+        - '{{ $fp }}' 
+        {{ end }} 
+      multiline:
+        line_start_pattern: '[IWEF]\d{6}\s\d{2}:\d{2}:\d{2}\.\d{6}\s'
+      start_at: {{ .start_at }}
+      attributes:
+        log_type: 'cockroach.schema'
+      operators:
+        - type: regex_parser
+          regex: '^(?P<Type>[IWEF])(?P<timestamp>\d{6}\s+\d{2}:\d{2}:\d{2}\.\d{6})\s+(?P<GoID>\d+)\s*(?:(?P<Channel>\d+)@)?(?P<Location>\S+)\s+(?:)⋮?\s+(?P<Node>\[[^\]]+\])\s+(?:(?P<Counter>\d+\s+)?)(?P<Message>.*)'
+          timestamp:
+            parse_from: attributes.timestamp
+            layout: '%y%m%d %H:%M:%S.%f'
+          severity:
+            parse_from: attributes.Type
+    {{ end }} # End of sql schema logs
+    
+    {{ if .enable_telemetry_log }}
+    filelog/telemetry_logs:
+      include:
+        {{ range $fp := .telemetry_log_path }}
+        - '{{ $fp }}' 
+        {{ end }} 
+      multiline:
+        line_start_pattern: '[IWEF]\d{6}\s\d{2}:\d{2}:\d{2}\.\d{6}\s'
+      start_at: {{ .start_at }}
+      attributes:
+        log_type: 'cockroach.telemetry'
+      operators:
+        - type: regex_parser
+          regex: '^(?P<Type>[IWEF])(?P<timestamp>\d{6}\s+\d{2}:\d{2}:\d{2}\.\d{6})\s+(?P<GoID>\d+)\s*(?:(?P<Channel>\d+)@)?(?P<Location>\S+)\s+(?:)⋮?\s+(?P<Node>\[[^\]]+\])\s+(?:(?P<Counter>\d+\s+)?)(?P<Message>.*)'
+          timestamp:
+            parse_from: attributes.timestamp
+            layout: '%y%m%d %H:%M:%S.%f'
+          severity:
+            parse_from: attributes.Type
+    {{ end }} # End of telemetry logs
+
+    {{ if .enable_kv_distribution_log }}
+    filelog/kv_distribution_logs:
+      include:
+        {{ range $fp := .kv_distribution_log_path }}
+         - '{{ $fp }}'
+        {{ end }} 
+      multiline:
+        line_start_pattern: '[IWEF]\d{6}\s\d{2}:\d{2}:\d{2}\.\d{6}\s'
+      start_at: {{ .start_at }}
+      attributes:
+        log_type: 'cockroach.kv.distribution'
+      operators:
+        - type: regex_parser
+          regex: '^(?P<Type>[IWEF])(?P<timestamp>\d{6}\s+\d{2}:\d{2}:\d{2}\.\d{6})\s+(?P<GoID>\d+)\s*(?:(?P<Channel>\d+)@)?(?P<Location>\S+)\s+(?:)⋮?\s+(?P<Node>\[[^\]]+\])\s+(?:(?P<Counter>\d+\s+)?)(?P<Message>.*)'
+          timestamp:
+            parse_from: attributes.timestamp
+            layout: '%y%m%d %H:%M:%S.%f'
+          severity:
+            parse_from: attributes.Type
+    {{ end }} # End of kv distribution logs
+    {{ if .enable_pebble_log }}
+    filelog/pebble_logs:
+      include:
+        {{ range $fp := .pebble_log_path }}
+         - '{{ $fp }}'
+        {{ end }} 
+      multiline:
+        line_start_pattern: '[IWEF]\d{6}\s\d{2}:\d{2}:\d{2}\.\d{6}\s'
+      start_at: {{ .start_at }}
+      attributes:
+        log_type: 'cockroach.pebble'
+      operators:
+        - type: regex_parser
+          regex: '^(?P<Type>[IWEF])(?P<timestamp>\d{6}\s+\d{2}:\d{2}:\d{2}\.\d{6})\s+(?P<GoID>\d+)\s*(?:(?P<Channel>\d+)@)?(?P<Location>\S+)\s+(?:)⋮?\s+(?P<Node>\[[^\]]+\])\s+(?:(?P<Counter>\d+\s+)?)(?P<Message>.*)'
+          timestamp:
+            parse_from: attributes.timestamp
+            layout: '%y%m%d %H:%M:%S.%f'
+          severity:
+            parse_from: attributes.Type
+    {{ end }} # End of pebble logs.
+
+  service:
+    pipelines:
+      logs:
+        receivers:
+          {{ if .enable_health_log }}
+          - filelog/health_logs
+          {{ end }}
+          {{ if .enable_dev_log }}
+          - filelog/dev_logs
+          {{ end }}
+          {{ if .enable_error_log }}
+          - filelog/error_logs
+          {{ end }}
+          {{ if .enable_sql_schema_log }}
+          - filelog/sql_schema_logs
+          {{ end }}
+          {{ if .enable_telemetry_log }}
+          - filelog/telemetry_logs
+          {{ end }}
+          {{ if .enable_kv_distribution_log }}
+          - filelog/kv_distribution_logs
+          {{ end }}
+          {{ if .enable_pebble_log }}
+          - filelog/pebble_logs
+          {{ end }}
