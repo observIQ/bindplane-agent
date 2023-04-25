@@ -20,6 +20,8 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/observiq/observiq-otel-collector/receiver/m365receiver/internal/metadata"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest/pmetrictest"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
@@ -39,7 +41,11 @@ func TestScraper(t *testing.T) {
 		"2023-04-23", "All", "8", "0", "2023-04-23", "7",
 	}, nil)
 
-	scraper := newM365Scraper(receivertest.NewNopCreateSettings(), &Config{})
+	scraper := newM365Scraper(
+		receivertest.NewNopCreateSettings(),
+		&Config{MetricsBuilderConfig: metadata.DefaultMetricsBuilderConfig()},
+	)
+
 	scraper.start(context.Background(), componenttest.NewNopHost())
 	scraper.client = mc
 
@@ -48,13 +54,20 @@ func TestScraper(t *testing.T) {
 	require.NotEmpty(t, actualMetrics)
 
 	//generate testdata file
-	m := pmetric.JSONMarshaler{}
+	/*m := pmetric.JSONMarshaler{}
 	mBytes, err := m.MarshalMetrics(actualMetrics)
 	require.NoError(t, err)
 	goldenPath := filepath.Join("testdata", "metrics", "unit-test-metrics.json")
 	err = os.WriteFile(goldenPath, mBytes, 0666)
-	require.NoError(t, err)
+	require.NoError(t, err)*/
 
+	//validate output of scrape
+	expectedFile := filepath.Join("testdata", "metrics", "unit-test-metrics.json")
+	expectedMetrics, err := ReadMetrics(expectedFile)
+	require.NoError(t, err)
+	require.NoError(t, pmetrictest.CompareMetrics(expectedMetrics, actualMetrics,
+		pmetrictest.IgnoreMetricDataPointsOrder(), pmetrictest.IgnoreStartTimestamp(), pmetrictest.IgnoreTimestamp()),
+	)
 }
 
 type mockClient struct {
@@ -69,4 +82,13 @@ func (mw *mockClient) GetCSV(endpoint string) ([]string, error) {
 func (mw *mockClient) GetToken() error {
 	args := mw.Called()
 	return args.Error(0)
+}
+
+func ReadMetrics(filePath string) (pmetric.Metrics, error) {
+	expectedFileBytes, err := os.ReadFile(filePath)
+	if err != nil {
+		return pmetric.Metrics{}, err
+	}
+	unmarshaller := &pmetric.JSONUnmarshaler{}
+	return unmarshaller.UnmarshalMetrics(expectedFileBytes)
 }
