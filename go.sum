@@ -1553,9 +1553,9 @@ github.com/open-telemetry/opentelemetry-collector-contrib/pkg/experimentalmetric
 github.com/open-telemetry/opentelemetry-collector-contrib/pkg/experimentalmetricmetadata v0.74.0/go.mod h1:kLKdaPGMwQo/3UPB7xekmtzlk7sk2+DxIjxMn5vcUZk=
 github.com/open-telemetry/opentelemetry-collector-contrib/pkg/ottl v0.74.0 h1:HUDDdk1cjAYu4unzCq3PC8j+zuOsBIkLMFXjuOW975Q=
 github.com/open-telemetry/opentelemetry-collector-contrib/pkg/ottl v0.74.0/go.mod h1:ste/ffn1fzB4Iaf/wIMsIvyFzIUkc/Rn6/f/Cf8FAoE=
-github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest v0.74.0 h1:DmOc+i5N1Ut23tJnHJUIcne5JWnYh6x2VL7YG4PP+tg=
-github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatautil v0.74.0 h1:9zWdiR9+bem0LvvWWoMZU6R3xTmu0WbcAPe8kI/jpyk=
-github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatautil v0.74.0/go.mod h1:3RViz8fguswWAFR+8W2Kzmch3eecOVK935QVsBdpUk4=
+github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest v0.75.0 h1:bKHtHeOaw1PC5RCif6z25nxv1VIKvHVy7KqsigBIVr0=
+github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatautil v0.75.0 h1:QU3vgTIsLc42+n43ZYDcF7Cf7e3b24xVCExbpvu4jnY=
+github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatautil v0.75.0/go.mod h1:5oMhwmHLeTMb8BxMsa1Ip+eabpw9m2f1Cuk3fe1q2FQ=
 github.com/open-telemetry/opentelemetry-collector-contrib/pkg/resourcetotelemetry v0.74.0 h1:HQGFpz3olAA1AGH1AgVKV2dygf9QGyQF7cwTMFDdthI=
 github.com/open-telemetry/opentelemetry-collector-contrib/pkg/resourcetotelemetry v0.74.0/go.mod h1:Nw7FXUNb5aKbHxdJvXPOh382a9P0dTKfsrIv4ZIXjig=
 github.com/open-telemetry/opentelemetry-collector-contrib/pkg/stanza v0.74.0 h1:d8X4cr/yTATsuh+uzTwBU9GSutnJ3Pvs0dW2yBKku8k=
