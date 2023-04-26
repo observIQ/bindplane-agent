@@ -13,20 +13,18 @@ import (
 type m365Client struct {
 	cfg    *Config
 	client *http.Client
-	root   string
 	token  string
 }
 
 func newM365Client(c *http.Client, cfg *Config) *m365Client {
 	return &m365Client{
 		cfg:    cfg,
-		root:   "https://graph.microsoft.com/v1.0/reports/",
 		client: c,
 	}
 }
 
 func (m *m365Client) GetCSV(endpoint string) ([]string, error) {
-	req, err := http.NewRequest("GET", m.root+endpoint, nil)
+	req, err := http.NewRequest("GET", endpoint, nil)
 	if err != nil {
 		return []string{}, err
 	}

@@ -32,48 +32,49 @@ import (
 
 func TestScraper(t *testing.T) {
 	//mocks
+	root := "https://graph.microsoft.com/v1.0/reports/"
 	mc := &mockClient{}
 	mc.On("GetToken").Return(nil)
-	mc.On("GetCSV", "getSharePointSiteUsageFileCounts(period='D7')").Return([]string{
+	mc.On("GetCSV", root+"getSharePointSiteUsageFileCounts(period='D7')").Return([]string{
 		"2023-04-23", "All", "2", "0", "2023-04-23", "7",
 	}, nil)
-	mc.On("GetCSV", "getSharePointSiteUsageSiteCounts(period='D7')").Return([]string{
+	mc.On("GetCSV", root+"getSharePointSiteUsageSiteCounts(period='D7')").Return([]string{
 		"2023-04-23", "All", "8", "0", "2023-04-23", "7",
 	}, nil)
-	mc.On("GetCSV", "getSharePointSiteUsagePages(period='D7')").Return([]string{
+	mc.On("GetCSV", root+"getSharePointSiteUsagePages(period='D7')").Return([]string{
 		"2023-04-23", "All", "3", "2023-04-23", "7",
 	}, nil)
-	mc.On("GetCSV", "getSharePointActivityPages(period='D7')").Return([]string{
+	mc.On("GetCSV", root+"getSharePointActivityPages(period='D7')").Return([]string{
 		"2023-04-23", "10", "2023-04-23", "7",
 	}, nil)
-	mc.On("GetCSV", "getSharePointSiteUsageStorage(period='D7')").Return([]string{
+	mc.On("GetCSV", root+"getSharePointSiteUsageStorage(period='D7')").Return([]string{
 		"2023-04-23", "All", "1111", "2023-04-23", "7",
 	}, nil)
-	mc.On("GetCSV", "getTeamsDeviceUsageDistributionUserCounts(period='D7')").Return([]string{
+	mc.On("GetCSV", root+"getTeamsDeviceUsageDistributionUserCounts(period='D7')").Return([]string{
 		"2023-04-23", "2", "0", "4", "6", "8", "10", "12", "14", "7",
 	}, nil)
-	mc.On("GetCSV", "getTeamsUserActivityCounts(period='D7')").Return([]string{
+	mc.On("GetCSV", root+"getTeamsUserActivityCounts(period='D7')").Return([]string{
 		"2023-04-23", "2023-04-23", "2", "1", "1", "4", "6", "8", "1", "1", "1", "1", "1", "7",
 	}, nil)
-	mc.On("GetCSV", "getOneDriveUsageFileCounts(period='D7')").Return([]string{
+	mc.On("GetCSV", root+"getOneDriveUsageFileCounts(period='D7')").Return([]string{
 		"2023-04-23", "All", "6", "3", "2024-04-23", "7",
 	}, nil)
-	mc.On("GetCSV", "getOneDriveActivityUserCounts(period='D7')").Return([]string{
+	mc.On("GetCSV", root+"getOneDriveActivityUserCounts(period='D7')").Return([]string{
 		"2023-04-23", "2", "4", "6", "8", "2023-04-23", "7",
 	}, nil)
-	mc.On("GetCSV", "getMailboxUsageMailboxCounts(period='D7')").Return([]string{
+	mc.On("GetCSV", root+"getMailboxUsageMailboxCounts(period='D7')").Return([]string{
 		"2023-04-23", "5", "3", "2023-04-23", "7",
 	}, nil)
-	mc.On("GetCSV", "getEmailActivityCounts(period='D7')").Return([]string{
+	mc.On("GetCSV", root+"getEmailActivityCounts(period='D7')").Return([]string{
 		"2023-04-23", "2", "4", "6", "1", "1", "2023-04-23", "7",
 	}, nil)
-	mc.On("GetCSV", "getMailboxUsageStorage(period='D7')").Return([]string{
+	mc.On("GetCSV", root+"getMailboxUsageStorage(period='D7')").Return([]string{
 		"2023-04-23", "50", "2023-04-23", "7",
 	}, nil)
-	mc.On("GetCSV", "getEmailAppUsageAppsUserCounts(period='D7')").Return([]string{
+	mc.On("GetCSV", root+"getEmailAppUsageAppsUserCounts(period='D7')").Return([]string{
 		"2023-04-23", "1", "2", "4", "6", "8", "10", "12", "14", "16", "2023-04-23", "7",
 	}, nil)
-	mc.On("GetCSV", "getMailboxUsageQuotaStatusMailboxCounts(period='D7')").Return([]string{
+	mc.On("GetCSV", root+"getMailboxUsageQuotaStatusMailboxCounts(period='D7')").Return([]string{
 		"2023-04-23", "2", "4", "6", "8", "10", "2023-04-23", "7",
 	}, nil)
 

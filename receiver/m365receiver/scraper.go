@@ -102,6 +102,7 @@ type m365Scraper struct {
 	cfg      *Config
 	client   mClient
 	mb       *metadata.MetricsBuilder
+	root     string
 }
 
 func newM365Scraper(
@@ -113,6 +114,7 @@ func newM365Scraper(
 		logger:   settings.Logger,
 		cfg:      cfg,
 		mb:       metadata.NewMetricsBuilder(cfg.MetricsBuilderConfig, settings),
+		root:     "https://graph.microsoft.com/v1.0/reports/",
 	}
 	return m
 }
@@ -245,7 +247,7 @@ func (m *m365Scraper) getStats() (map[string]string, error) {
 	reportData := map[string]string{}
 
 	for _, r := range reports {
-		line, err := m.client.GetCSV(r.endpoint)
+		line, err := m.client.GetCSV(m.root + r.endpoint)
 		if err != nil {
 			m.logger.Sugar().Errorf("unable to get stats for: %s", r.endpoint, zap.Error(err))
 			continue

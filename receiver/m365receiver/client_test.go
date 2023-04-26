@@ -14,18 +14,8 @@
 
 package m365receiver
 
-import (
-	"testing"
+import "testing"
 
-	"github.com/stretchr/testify/require"
-)
+func TestGetCSV(t *testing.T) {
 
-func TestType(t *testing.T) {
-	factory := NewFactory()
-	ft := factory.Type()
-	require.EqualValues(t, "m365", ft)
 }
-
-//TODO: more factory tests
-//unsure of how to test m365 factory
-//default config is incorrect bc tenantID, clientID, and clientSecret are all required on start up
