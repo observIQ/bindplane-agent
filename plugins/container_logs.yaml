@@ -101,7 +101,7 @@ template: |
           # 2022-06-18T16:52:59.639114537Z stdout F {"message":"registered Stackdriver tracing","severity":"info","timestamp":"2022-06-18T16:52:59.639034532Z"}
           - id: containerd_cri_parser
             type: regex_parser
-            regex: '^(?P<time>[^\s]+) (?P<stream>\w+) (?P<partial>\w)?\s+?(?P<log>.*)'
+            regex: '^(?P<time>[^\s]+) (?P<stream>\w+) (?P<partial>\w)? ?(?P<log>.*)'
           - type: recombine
             source_identifier: attributes["log.file.name"]
             combine_field: attributes.log
