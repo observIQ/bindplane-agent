@@ -12,6 +12,94 @@ metrics:
     enabled: false
 ```
 
+### m365.onedrive.files.active.count
+
+The number of active files across the OneDrive.
+
+| Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
+| ---- | ----------- | ---------- | ----------------------- | --------- |
+| {files} | Sum | Int | Cumulative | false |
+
+### m365.onedrive.files.count
+
+The number of total files across the OneDrive.
+
+| Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
+| ---- | ----------- | ---------- | ----------------------- | --------- |
+| {files} | Sum | Int | Cumulative | false |
+
+### m365.onedrive.user_activity.count
+
+The number of users who have interacted with a OneDrive file, by action.
+
+| Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
+| ---- | ----------- | ---------- | ----------------------- | --------- |
+| {users} | Sum | Int | Cumulative | false |
+
+#### Attributes
+
+| Name | Description | Values |
+| ---- | ----------- | ------ |
+| kind | The OneDrive user activity types. | Str: ``view_edit``, ``synced``, ``internal_share``, ``external_share`` |
+
+### m365.outlook.app.user.count
+
+The number of unique users per app over the period of time in the organization Outlook.
+
+| Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
+| ---- | ----------- | ---------- | ----------------------- | --------- |
+| {users} | Sum | Int | Cumulative | false |
+
+#### Attributes
+
+| Name | Description | Values |
+| ---- | ----------- | ------ |
+| kind | The number of users of Outlook apps. | Str: ``pop3``, ``imap4``, ``smtp``, ``windows``, ``mac``, ``web``, ``mobile``, ``other_mobile`` |
+
+### m365.outlook.email_activity.count
+
+The number of email actions by members over the period of time in the organization Outlook.
+
+| Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
+| ---- | ----------- | ---------- | ----------------------- | --------- |
+| {emails} | Sum | Int | Cumulative | false |
+
+#### Attributes
+
+| Name | Description | Values |
+| ---- | ----------- | ------ |
+| kind | The Outlook user activity types. | Str: ``read``, ``sent``, ``received`` |
+
+### m365.outlook.mailboxes.active.count
+
+The number of mailboxes that have been active each day in the organization.
+
+| Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
+| ---- | ----------- | ---------- | ----------------------- | --------- |
+| {mailboxes} | Sum | Int | Cumulative | false |
+
+### m365.outlook.quota_status.count
+
+The number of mailboxes in the various quota statuses over the period of time in the org.
+
+| Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
+| ---- | ----------- | ---------- | ----------------------- | --------- |
+| {mailboxes} | Sum | Int | Cumulative | false |
+
+#### Attributes
+
+| Name | Description | Values |
+| ---- | ----------- | ------ |
+| kind | The types of Outlook quota states. | Str: ``under_limit``, ``warning``, ``send_prohibited``, ``send_receive_prohibited``, ``indeterminate`` |
+
+### m365.outlook.storage.count
+
+The amount of storage used in Outlook by the organization.
+
+| Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
+| ---- | ----------- | ---------- | ----------------------- | --------- |
+| By | Sum | Int | Cumulative | false |
+
 ### m365.sharepoint.files.active.count
 
 The number of active files across all sites.
@@ -28,6 +116,30 @@ The number of total files across all sites.
 | ---- | ----------- | ---------- | ----------------------- | --------- |
 | {files} | Sum | Int | Cumulative | false |
 
+### m365.sharepoint.pages.unique.count
+
+The number of unique views of pages across all sites.
+
+| Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
+| ---- | ----------- | ---------- | ----------------------- | --------- |
+| {views} | Sum | Int | Cumulative | false |
+
+### m365.sharepoint.pages.viewed.count
+
+The number of unique pages viewed across all sites.
+
+| Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
+| ---- | ----------- | ---------- | ----------------------- | --------- |
+| {pages} | Sum | Int | Cumulative | false |
+
+### m365.sharepoint.site.storage.count
+
+The amount of storage used by all sites across the Sharepoint.
+
+| Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
+| ---- | ----------- | ---------- | ----------------------- | --------- |
+| By | Sum | Int | Cumulative | false |
+
 ### m365.sharepoint.sites.active.count
 
 The number of active sites across the Sharepoint.
@@ -35,3 +147,49 @@ The number of active sites across the Sharepoint.
 | Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
 | ---- | ----------- | ---------- | ----------------------- | --------- |
 | {files} | Sum | Int | Cumulative | false |
+
+### m365.teams.calls.count
+
+The number of MS Teams calls from users in the organization.
+
+| Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
+| ---- | ----------- | ---------- | ----------------------- | --------- |
+| {calls} | Sum | Int | Cumulative | false |
+
+### m365.teams.device_usage.count
+
+The number of unique users by device/platform that have used Teams.
+
+| Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
+| ---- | ----------- | ---------- | ----------------------- | --------- |
+| {users} | Sum | Int | Cumulative | false |
+
+#### Attributes
+
+| Name | Description | Values |
+| ---- | ----------- | ------ |
+| kind | The device types. | Str: ``Android``, ``iOS``, ``Mac``, ``Windows``, ``Chrome OS``, ``Linux``, ``Web`` |
+
+### m365.teams.meetings.count
+
+The number of MS Teams meetings for users in the organization.
+
+| Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
+| ---- | ----------- | ---------- | ----------------------- | --------- |
+| {meetings} | Sum | Int | Cumulative | false |
+
+### m365.teams.message.team.count
+
+The number of MS Teams team-messages sent by users in the organization.
+
+| Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
+| ---- | ----------- | ---------- | ----------------------- | --------- |
+| {messages} | Sum | Int | Cumulative | false |
+
+### m365.teams.messages.private.count
+
+The number of MS Teams private-messages sent by users in the organization.
+
+| Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
+| ---- | ----------- | ---------- | ----------------------- | --------- |
+| {messages} | Sum | Int | Cumulative | false |

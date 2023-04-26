@@ -46,7 +46,11 @@ func (m *m365Client) GetCSV(endpoint string) ([]string, error) {
 	}
 	data, err := csvReader.Read()
 	if err != nil {
-		return []string{}, err
+		if err == io.EOF { //no data in report, scraper should still run
+			return []string{}, nil
+		} else {
+			return []string{}, err
+		}
 	}
 
 	return data, nil
