@@ -105,9 +105,9 @@ func TestValidate(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.desc, func(t *testing.T) {
 			cfg := NewFactory().CreateDefaultConfig().(*Config)
-			cfg.Tenant_id = tc.tenantID
-			cfg.Client_id = tc.clientID
-			cfg.Client_secret = tc.clientSecret
+			cfg.TenantID = tc.tenantID
+			cfg.ClientID = tc.clientID
+			cfg.ClientSecret = tc.clientSecret
 
 			err := component.ValidateConfig(cfg)
 

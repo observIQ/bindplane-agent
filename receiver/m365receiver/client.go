@@ -11,15 +11,19 @@ import (
 )
 
 type m365Client struct {
-	cfg    *Config
-	client *http.Client
-	token  string
+	client       *http.Client
+	authEndpoint string
+	clientID     string
+	clientSecret string
+	token        string
 }
 
 func newM365Client(c *http.Client, cfg *Config) *m365Client {
 	return &m365Client{
-		cfg:    cfg,
-		client: c,
+		client:       c,
+		authEndpoint: fmt.Sprintf("https://login.microsoftonline.com/%s/oauth2/v2.0/token", cfg.TenantID),
+		clientID:     cfg.ClientID,
+		clientSecret: cfg.ClientSecret,
 	}
 }
 
@@ -60,18 +64,16 @@ type response struct {
 }
 
 func (m *m365Client) GetToken() error {
-	auth_endpoint := fmt.Sprintf("https://login.microsoftonline.com/%s/oauth2/v2.0/token", m.cfg.Tenant_id)
-
 	formData := url.Values{
 		"grant_type":    {"client_credentials"},
 		"scope":         {"https://graph.microsoft.com/.default"},
-		"client_id":     {m.cfg.Client_id},
-		"client_secret": {m.cfg.Client_secret},
+		"client_id":     {m.clientID},
+		"client_secret": {m.clientSecret},
 	}
 
 	requestBody := strings.NewReader(formData.Encode())
 
-	req, err := http.NewRequest("POST", auth_endpoint, requestBody)
+	req, err := http.NewRequest("POST", m.authEndpoint, requestBody)
 	if err != nil {
 		return err
 	}
@@ -82,6 +84,10 @@ func (m *m365Client) GetToken() error {
 	resp, err := client.Do(req)
 	if err != nil {
 		return err
+	}
+	if resp.StatusCode != 200 {
+		//TODO: how to handle this
+		return fmt.Errorf("got non 200 status code from request, got %d", resp.StatusCode)
 	}
 
 	defer resp.Body.Close()

@@ -28,35 +28,35 @@ type Config struct {
 	scraperhelper.ScraperControllerSettings `mapstructure:",squash"`
 	confighttp.HTTPClientSettings           `mapstructure:",squash"`
 	MetricsBuilderConfig                    metadata.MetricsBuilderConfig `mapstructure:",squash"`
-	Tenant_id                               string                        `mapstructure:"tenant_id"`
-	Client_id                               string                        `mapstructure:"client_id"`
-	Client_secret                           string                        `mapstructure:"client_secret"`
+	TenantID                                string                        `mapstructure:"tenant_id"`
+	ClientID                                string                        `mapstructure:"client_id"`
+	ClientSecret                            string                        `mapstructure:"client_secret"`
 }
 
 func (c *Config) Validate() error {
-	if c.Tenant_id == "" {
+	if c.TenantID == "" {
 		return fmt.Errorf("missing tenant_id; required")
 	} else {
-		_, err := uuid.Parse(c.Tenant_id)
+		_, err := uuid.Parse(c.TenantID)
 		if err != nil {
 			return fmt.Errorf("tenant_id is invalid; must be a GUID")
 		}
 	}
 
-	if c.Client_id == "" {
+	if c.ClientID == "" {
 		return fmt.Errorf("missing client_id; required")
 	} else {
-		_, err := uuid.Parse(c.Client_id)
+		_, err := uuid.Parse(c.ClientID)
 		if err != nil {
 			return fmt.Errorf("client_id is invalid; must be a GUID")
 		}
 	}
 
-	if c.Client_secret == "" {
+	if c.ClientSecret == "" {
 		return fmt.Errorf("missing client_secret; required")
 	} else {
 		re := regexp.MustCompile("^[a-zA-Z0-9-_.~]{1,40}$")
-		if !re.MatchString(c.Client_secret) {
+		if !re.MatchString(c.ClientSecret) {
 			return fmt.Errorf("client_secret is invalid; does not follow correct structure")
 		}
 	}
