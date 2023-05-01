@@ -119,7 +119,7 @@ func newM365Scraper(
 	return m
 }
 
-func (m *m365Scraper) start(_ context.Context, host component.Host) error {
+func (m *m365Scraper) Start(_ context.Context, host component.Host) error {
 	httpClient, err := m.cfg.ToClient(host, m.settings)
 	if err != nil {
 		m.logger.Error("error creating http client", zap.Error(err))
@@ -134,6 +134,10 @@ func (m *m365Scraper) start(_ context.Context, host component.Host) error {
 		return err
 	}
 
+	return nil
+}
+
+func (m *m365Scraper) Shutdown(_ context.Context) error {
 	return nil
 }
 

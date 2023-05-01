@@ -104,9 +104,3 @@ func newMockServerToken(t *testing.T) *httptest.Server {
 		rw.WriteHeader(404)
 	}))
 }
-
-// r.ParseForm()
-//     topic := r.Form.Get("topic")
-//     if topic != "meaningful-topic" {
-//       t.Errorf("Expected request to have ‘topic=meaningful-topic’, got: ‘%s’", topic)
-//     }

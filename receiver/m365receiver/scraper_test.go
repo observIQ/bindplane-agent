@@ -83,7 +83,7 @@ func TestScraper(t *testing.T) {
 		&Config{MetricsBuilderConfig: metadata.DefaultMetricsBuilderConfig()},
 	)
 
-	scraper.start(context.Background(), componenttest.NewNopHost())
+	scraper.Start(context.Background(), componenttest.NewNopHost())
 	scraper.client = mc
 
 	actualMetrics, err := scraper.scrape(context.Background())

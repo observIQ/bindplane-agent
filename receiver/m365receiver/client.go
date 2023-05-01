@@ -38,6 +38,12 @@ func (m *m365Client) GetCSV(endpoint string) ([]string, error) {
 	if err != nil {
 		return []string{}, err
 	}
+
+	if resp.StatusCode != 200 {
+		//TODO: how to handle this
+		return []string{}, fmt.Errorf("got non 200 status code from request, got %d", resp.StatusCode)
+	}
+
 	defer resp.Body.Close()
 	csvReader := csv.NewReader(resp.Body)
 
@@ -80,8 +86,7 @@ func (m *m365Client) GetToken() error {
 
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	resp, err := m.client.Do(req)
 	if err != nil {
 		return err
 	}
