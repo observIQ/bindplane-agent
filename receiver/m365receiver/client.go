@@ -90,12 +90,13 @@ func (m *m365Client) GetToken() error {
 	if err != nil {
 		return err
 	}
+
+	defer resp.Body.Close()
+
 	if resp.StatusCode != 200 {
 		//TODO: how to handle this
 		return fmt.Errorf("got non 200 status code from request, got %d", resp.StatusCode)
 	}
-
-	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
