@@ -19,7 +19,7 @@ Below is a list of supported exporters with links to their documentation pages.
 | File Exporter                                                     | [fileexporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.76.3/exporter/fileexporter/README.md) |
 | Google Cloud Exporter                                             | [googlecloudexporter](../exporter/googlecloudexporter/README.md) |
 | Google Cloud Pub/Sub Exporter                                     | [googlecloudpubsubexporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.76.3/exporter/googlecloudpubsubexporter/README.md) |
-| Google Managed Service for Prometheus Collector Exporter          | [googlemanagedprometheus](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.76.3/exporter/googlemanagedprometheusexporter/README.md) |
+| Google Managed Service for Prometheus Collector Exporter          | [googlemanagedprometheus](../exporter/googlemanagedprometheusexporter/README.md) |
 | InfluxDB Exporter                                                 | [influxdbexporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.76.3/exporter/influxdbexporter/README.md) |
 | Jaeger gRPC Exporter                                              | [jaegerexporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.76.3/exporter/jaegerexporter/README.md) |
 | Kafka Exporter                                                    | [kafkaexporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.76.3/exporter/kafkaexporter/README.md) |
