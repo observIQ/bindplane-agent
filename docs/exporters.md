@@ -8,6 +8,7 @@ Below is a list of supported exporters with links to their documentation pages.
 | AWS CloudWatch Logs Exporter                                      | [awscloudwatchlogsexporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.76.3/exporter/awscloudwatchlogsexporter/README.md) |
 | AWS CloudWatch EMF Exporter                                       | [awsemfexporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.76.3/exporter/awsemfexporter/README.md) |
 | AWS Kinesis Exporter                                              | [awskinesisexporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.76.3/exporter/awskinesisexporter/README.md) |
+| AWS S3 Exporter                                                   | [awss3exporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.76.3/exporter/awss3exporter/README.md) |
 | AWS X-Ray Tracing Exporter                                        | [awsxrayexporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.76.3/exporter/awsxrayexporter/README.md) |
 | Azure Monitor Exporter                                            | [azuremonitorexporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.76.3/exporter/azuremonitorexporter/README.md) |
 | Carbon Exporter                                                   | [carbonexporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.76.3/exporter/carbonexporter/README.md) |
