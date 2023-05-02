@@ -53,12 +53,12 @@ func TestM365Integration(t *testing.T) {
 	require.NotEmpty(t, actualMetrics)
 
 	//generate testdata file
-	/*m := pmetric.JSONMarshaler{}
-	mBytes, err := m.MarshalMetrics(actualMetrics)
-	require.NoError(t, err)
-	path := filepath.Join("testdata", "metrics", "integration-test-metrics.json")
-	err = os.WriteFile(path, mBytes, 0666)
-	require.NoError(t, err)*/
+	// m := pmetric.JSONMarshaler{}
+	// mBytes, err := m.MarshalMetrics(actualMetrics)
+	// require.NoError(t, err)
+	// path := filepath.Join("testdata", "metrics", "integration-test-metrics.json")
+	// err = os.WriteFile(path, mBytes, 0666)
+	// require.NoError(t, err)
 
 	//check output
 	expectedFile := filepath.Join("testdata", "metrics", "integration-test-metrics.json")
@@ -340,7 +340,7 @@ func httpTestHandler(rw http.ResponseWriter, req *http.Request) {
 		rw.WriteHeader(200)
 		rw.Header().Add("Content-Type", "application/octet-stream")
 		rw.Write([]byte(
-			"Report Refresh Date,Report Date,Team Chat Messages,Post Messages,Reply Messages,Private Chat Messages,Calls,Meetings,Audio Duration,Video Duration,Screen Share Duration,Meetings Organized,Meetings Attended,Report Period\n2023-04-25,2023-04-25,9,13,17,3,16,1,8,12,11,7\n2023-04-24,2023-04-25,12,18,19,5,7,8,1,2,1,7\n2023-04-23,2023-04-25,4,4,4,18,8,4,0,7,0,7\n2023-04-22,2023-04-25,1,2,7,8,14,18,7,3,3,7\n2023-04-21,2023-04-25,17,19,3,12,8,13,2,18,19,7\n2023-04-20,2023-04-25,16,1,7,8,11,18,7,11,14,7\n2023-04-19,2023-04-25,4,7,8,5,5,7,5,18,5,7\n",
+			"Report Refresh Date,Report Date,Team Chat Messages,Post Messages,Reply Messages,Private Chat Messages,Calls,Meetings,Audio Duration,Video Duration,Screen Share Duration,Meetings Organized,Meetings Attended,Report Period\n2023-04-25,2023-04-25,4,13,8,0,20,11,2,20,11,0,14,7\n2023-04-24,2023-04-25,11,8,9,9,13,3,2,2,16,8,7\n2023-04-23,2023-04-25,4,5,5,18,5,5,1,20,5,14,7\n2023-04-22,2023-04-25,18,3,3,11,20,1,1,8,1,5,7\n2023-04-21,2023-04-25,11,18,10,6,13,2,3,3,3,14,7\n2023-04-20,2023-04-25,19,6,18,17,11,17,4,4,4,4,7\n2023-04-19,2023-04-25,10,14,10,7,4,4,4,4,4,4,7\n",
 		))
 		return
 	}

@@ -30,11 +30,79 @@ import (
 	"go.opentelemetry.io/collector/receiver/receivertest"
 )
 
+func TestStart(t *testing.T) { //unsure how to isolate this function, and how to test correct response
+	scraper := newM365Scraper(
+		receivertest.NewNopCreateSettings(),
+		&Config{MetricsBuilderConfig: metadata.DefaultMetricsBuilderConfig()},
+	)
+	err := scraper.start(context.Background(), componenttest.NewNopHost())
+	require.EqualError(t, err, "got non 200 status code from request, got 404")
+}
+
+func TestBadToken(t *testing.T) {
+	scraper := newM365Scraper(
+		receivertest.NewNopCreateSettings(),
+		&Config{MetricsBuilderConfig: metadata.DefaultMetricsBuilderConfig()},
+	)
+	err := scraper.start(context.Background(), componenttest.NewNopHost())
+	require.EqualError(t, err, "got non 200 status code from request, got 404")
+	_, err = scraper.scrape(context.Background())
+	require.EqualError(t, err, "got non 200 status code from request, got 401")
+}
+
+func TestPartialMetrics(t *testing.T) {
+	//mocks, only do the first endpoint, leave out all other metrics
+	root := "https://graph.microsoft.com/v1.0/reports/"
+	mc := &mockClient{}
+	mc.On("GetCSV", root+"getSharePointSiteUsageFileCounts(period='D7')").Return([]string{
+		"2023-04-23", "All", "2", "0", "2023-04-23", "7",
+	}, nil)
+	mc.On("GetCSV", root+"getSharePointSiteUsageSiteCounts(period='D7')").Return([]string{}, nil)
+	mc.On("GetCSV", root+"getSharePointSiteUsagePages(period='D7')").Return([]string{}, nil)
+	mc.On("GetCSV", root+"getSharePointActivityPages(period='D7')").Return([]string{}, nil)
+	mc.On("GetCSV", root+"getSharePointSiteUsageStorage(period='D7')").Return([]string{}, nil)
+	mc.On("GetCSV", root+"getTeamsDeviceUsageDistributionUserCounts(period='D7')").Return([]string{}, nil)
+	mc.On("GetCSV", root+"getTeamsUserActivityCounts(period='D7')").Return([]string{}, nil)
+	mc.On("GetCSV", root+"getOneDriveUsageFileCounts(period='D7')").Return([]string{}, nil)
+	mc.On("GetCSV", root+"getOneDriveActivityUserCounts(period='D7')").Return([]string{}, nil)
+	mc.On("GetCSV", root+"getMailboxUsageMailboxCounts(period='D7')").Return([]string{}, nil)
+	mc.On("GetCSV", root+"getEmailActivityCounts(period='D7')").Return([]string{}, nil)
+	mc.On("GetCSV", root+"getMailboxUsageStorage(period='D7')").Return([]string{}, nil)
+	mc.On("GetCSV", root+"getEmailAppUsageAppsUserCounts(period='D7')").Return([]string{}, nil)
+	mc.On("GetCSV", root+"getMailboxUsageQuotaStatusMailboxCounts(period='D7')").Return([]string{}, nil)
+
+	scraper := newM365Scraper(
+		receivertest.NewNopCreateSettings(),
+		&Config{MetricsBuilderConfig: metadata.DefaultMetricsBuilderConfig()},
+	)
+
+	scraper.client = mc
+
+	actualMetrics, err := scraper.scrape(context.Background())
+	require.NoError(t, err)
+	require.NotEmpty(t, actualMetrics)
+
+	//generate testdata file
+	// m := pmetric.JSONMarshaler{}
+	// mBytes, err := m.MarshalMetrics(actualMetrics)
+	// require.NoError(t, err)
+	// goldenPath := filepath.Join("testdata", "metrics", "unit-test-partialMetrics.json")
+	// err = os.WriteFile(goldenPath, mBytes, 0666)
+	// require.NoError(t, err)
+
+	//validate output of scrape
+	expectedFile := filepath.Join("testdata", "metrics", "unit-test-partialMetrics.json")
+	expectedMetrics, err := ReadMetrics(expectedFile)
+	require.NoError(t, err)
+	require.NoError(t, pmetrictest.CompareMetrics(expectedMetrics, actualMetrics,
+		pmetrictest.IgnoreMetricDataPointsOrder(), pmetrictest.IgnoreStartTimestamp(), pmetrictest.IgnoreTimestamp()),
+	)
+}
+
 func TestScraper(t *testing.T) {
 	//mocks
 	root := "https://graph.microsoft.com/v1.0/reports/"
 	mc := &mockClient{}
-	mc.On("GetToken").Return(nil)
 	mc.On("GetCSV", root+"getSharePointSiteUsageFileCounts(period='D7')").Return([]string{
 		"2023-04-23", "All", "2", "0", "2023-04-23", "7",
 	}, nil)
@@ -83,7 +151,6 @@ func TestScraper(t *testing.T) {
 		&Config{MetricsBuilderConfig: metadata.DefaultMetricsBuilderConfig()},
 	)
 
-	scraper.Start(context.Background(), componenttest.NewNopHost())
 	scraper.client = mc
 
 	actualMetrics, err := scraper.scrape(context.Background())
@@ -91,12 +158,12 @@ func TestScraper(t *testing.T) {
 	require.NotEmpty(t, actualMetrics)
 
 	//generate testdata file
-	/*m := pmetric.JSONMarshaler{}
-	mBytes, err := m.MarshalMetrics(actualMetrics)
-	require.NoError(t, err)
-	goldenPath := filepath.Join("testdata", "metrics", "unit-test-metrics.json")
-	err = os.WriteFile(goldenPath, mBytes, 0666)
-	require.NoError(t, err)*/
+	// m := pmetric.JSONMarshaler{}
+	// mBytes, err := m.MarshalMetrics(actualMetrics)
+	// require.NoError(t, err)
+	// goldenPath := filepath.Join("testdata", "metrics", "unit-test-metrics.json")
+	// err = os.WriteFile(goldenPath, mBytes, 0666)
+	// require.NoError(t, err)
 
 	//validate output of scrape
 	expectedFile := filepath.Join("testdata", "metrics", "unit-test-metrics.json")
