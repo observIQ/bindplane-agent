@@ -28,7 +28,7 @@ import (
 )
 
 type reportPair struct {
-	columns  map[string]int //relevant column name and index for csv file
+	columns  map[string]int //relevant metric name and index for csv file
 	endpoint string         //unique report endpoint
 }
 
@@ -122,7 +122,7 @@ func newM365Scraper(
 func (m *m365Scraper) start(_ context.Context, host component.Host) error {
 	httpClient, err := m.cfg.ToClient(host, m.settings)
 	if err != nil {
-		m.logger.Error("error creating http client", zap.Error(err))
+		m.logger.Error("Error creating HTTP client.", zap.Error(err))
 		return err
 	}
 
@@ -130,7 +130,7 @@ func (m *m365Scraper) start(_ context.Context, host component.Host) error {
 
 	err = m.client.GetToken()
 	if err != nil {
-		m.logger.Error("error creating authorization token", zap.Error(err))
+		m.logger.Error("Error creating authorization token.", zap.Error(err))
 		return err
 	}
 
@@ -142,12 +142,24 @@ func (m *m365Scraper) scrape(context.Context) (pmetric.Metrics, error) {
 	m365Data, err := m.getStats()
 	if err != nil {
 		//troubleshoot stale token
-		m.logger.Error("error getting stats, possible bad token, trying again", zap.Error(err))
-		m.client.GetToken()
-
-		m365Data, err = m.getStats()
-		if err != nil {
-			m.logger.Error("unable to retrieve stats", zap.Error(err))
+		m.logger.Error("Error retrieving stats.", zap.Error(err))
+		if err.Error() == "Access token invalid." {
+			m.logger.Error("Possible stale token. Attempting to regenerate.")
+			err = m.client.GetToken()
+			if err != nil {
+				//something went wrong with generating token.
+				m.logger.Error("Error creating authorization token.", zap.Error(err))
+				return pmetric.Metrics{}, err
+			}
+			//retry data retrieval with fresh token
+			m365Data, err = m.getStats()
+			if err != nil {
+				//not an error with the access token
+				m.logger.Error("Unable to retrieve stats.", zap.Error(err))
+				return pmetric.Metrics{}, err
+			}
+		} else {
+			//not an error with the access token
 			return pmetric.Metrics{}, err
 		}
 	}
@@ -252,7 +264,7 @@ func (m *m365Scraper) getStats() (map[string]string, error) {
 			return map[string]string{}, err
 		}
 		if len(line) == 0 {
-			m.logger.Sugar().Errorf("unable to get stats for: %s", r.endpoint, zap.Error(err))
+			m.logger.Sugar().Errorf("No data available from %s endpoint and associated metrics.", r.endpoint, zap.Error(err))
 			continue
 		}
 

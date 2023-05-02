@@ -30,15 +30,27 @@ func TestGetToken(t *testing.T) {
 	testClient.clientID = "testClientID"
 	testClient.clientSecret = "testClientSecret"
 
+	// test 1: correct behavior
 	err := testClient.GetToken()
 	require.NoError(t, err)
 	require.Equal(t, "testAccessToken", testClient.token)
 
-	//err testing
+	// test 2: incorrect client secret
 	testClient.clientSecret = "err"
 	err = testClient.GetToken()
-	assert.EqualError(t, err, "got non 200 status code from request, got 400")
+	assert.EqualError(t, err, "The provided client_secret is incorrect or does not belong to the given client_id.")
 
+	// test 3: incorrect client id
+	testClient.clientSecret = "testClientSecret"
+	testClient.clientID = "err"
+	err = testClient.GetToken()
+	assert.EqualError(t, err, "The provided client_id is incorrect or does not exist within the given tenant directory.")
+
+	// test 4: incorrect tenant_id
+	testClient.clientID = "testClientID"
+	testClient.authEndpoint = m365Mock.URL + "/err"
+	err = testClient.GetToken()
+	assert.EqualError(t, err, "The provided tenant_id is incorrect or does not exist.")
 }
 
 func TestGetCSV(t *testing.T) {
@@ -61,7 +73,7 @@ func TestGetCSV(t *testing.T) {
 	//err testing
 	testClient.token = "err"
 	_, err = testClient.GetCSV(m365Mock.URL + "/getSharePointSiteUsageFileCounts(period='D7')")
-	assert.EqualError(t, err, "got non 200 status code from request, got 400")
+	assert.EqualError(t, err, "Access token invalid.")
 }
 
 //	Mock Servers
@@ -77,7 +89,7 @@ func newMockServerCSV() *httptest.Server {
 
 			if a := req.Header.Get("Authorization"); a != "foo" {
 				rw.WriteHeader(400)
-				rw.Write([]byte("Error, not authorized"))
+				rw.Write([]byte(`{"error": {"code": "InvalidAuthenticationToken"}}`))
 				return
 			}
 
@@ -132,12 +144,12 @@ func newMockServerToken() *httptest.Server {
 			}
 			if cID := req.Form.Get("client_id"); cID != "testClientID" {
 				rw.WriteHeader(400)
-				rw.Write([]byte("Error, incorrect ID"))
+				rw.Write([]byte(`{"error":"unauthorized_client"}`))
 				return
 			}
 			if cSec := req.Form.Get("client_secret"); cSec != "testClientSecret" {
-				rw.WriteHeader(400)
-				rw.Write([]byte("Error, incorrect secret"))
+				rw.WriteHeader(401)
+				rw.Write([]byte(`{"error": "invalid_client"}`))
 				return
 			}
 
@@ -150,6 +162,10 @@ func newMockServerToken() *httptest.Server {
 					"access_token": "testAccessToken"
 				}`))
 			return
+		}
+		if req.URL.String() == "/err" {
+			rw.WriteHeader(400)
+			rw.Write([]byte(`{"error": "invalid_request"}`))
 		}
 		rw.WriteHeader(404)
 		return

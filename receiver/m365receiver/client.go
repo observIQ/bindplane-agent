@@ -18,6 +18,18 @@ type m365Client struct {
 	token        string
 }
 
+type response struct {
+	Token string `json:"access_token"`
+}
+type tokenError struct {
+	Err string `json:"error"`
+}
+type csvError struct {
+	ErrorCSV struct {
+		Code string `json:"code"`
+	} `json:"error"`
+}
+
 func newM365Client(c *http.Client, cfg *Config) *m365Client {
 	return &m365Client{
 		client:       c,
@@ -39,9 +51,22 @@ func (m *m365Client) GetCSV(endpoint string) ([]string, error) {
 		return []string{}, err
 	}
 
+	//troubleshoot resp err if present
 	if resp.StatusCode != 200 {
-		//TODO: how to handle this
-		return []string{}, fmt.Errorf("got non 200 status code from request, got %d", resp.StatusCode)
+		//get error code
+		var respErr csvError
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return []string{}, err
+		}
+		err = json.Unmarshal(body, &respErr)
+		if err != nil {
+			return []string{}, err
+		}
+		if respErr.ErrorCSV.Code == "InvalidAuthenticationToken" {
+			return []string{}, fmt.Errorf("Access token invalid.")
+		}
+		return []string{}, fmt.Errorf("Got non 200 status code from request, got %d.", resp.StatusCode)
 	}
 
 	defer resp.Body.Close()
@@ -65,10 +90,6 @@ func (m *m365Client) GetCSV(endpoint string) ([]string, error) {
 }
 
 // Get authorization token
-type response struct {
-	Token string `json:"access_token"`
-}
-
 func (m *m365Client) GetToken() error {
 	formData := url.Values{
 		"grant_type":    {"client_credentials"},
@@ -93,9 +114,28 @@ func (m *m365Client) GetToken() error {
 
 	defer resp.Body.Close()
 
+	//troubleshoot resp err if present
 	if resp.StatusCode != 200 {
-		//TODO: how to handle this
-		return fmt.Errorf("got non 200 status code from request, got %d", resp.StatusCode)
+		//get error code
+		var respErr tokenError
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return err
+		}
+		err = json.Unmarshal(body, &respErr)
+		if err != nil {
+			return err
+		}
+		//match on error code
+		switch respErr.Err {
+		case "unauthorized_client":
+			return fmt.Errorf("The provided client_id is incorrect or does not exist within the given tenant directory.")
+		case "invalid_client":
+			return fmt.Errorf("The provided client_secret is incorrect or does not belong to the given client_id.")
+		case "invalid_request":
+			return fmt.Errorf("The provided tenant_id is incorrect or does not exist.")
+		}
+		return fmt.Errorf("Got non 200 status code from request, got %d.", resp.StatusCode)
 	}
 
 	body, err := io.ReadAll(resp.Body)
