@@ -22,6 +22,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"go.uber.org/zap"
 	"golang.org/x/sys/windows/svc"
@@ -34,6 +35,11 @@ import (
 const (
 	defaultProductName = "observIQ Distro for OpenTelemetry Collector"
 	defaultServiceName = "observiq-otel-collector"
+
+	// defaultRecoveryDelay is the duration in which to wait between service restarts due to failures
+	defaultRecoveryDelay = 5 * time.Second
+	// defaultResetPeriod is the time in which to reset the service failure count to zero
+	defaultResetPeriod = 30 * 24 * time.Hour
 )
 
 // Option is an extra option for creating a Service
@@ -173,6 +179,11 @@ func (w windowsService) Update() error {
 	err = s.UpdateConfig(newConf)
 	if err != nil {
 		return fmt.Errorf("failed to updater service: %w", err)
+	}
+
+	// Set the recovery actions
+	if err := setRecoveryActions(s); err != nil {
+		return fmt.Errorf("failed to set recovery actions for the service: %w", err)
 	}
 
 	return nil
@@ -367,4 +378,25 @@ func configStartType(winapiStartType uint32, delayed bool) (string, error) {
 	default:
 		return "", fmt.Errorf("invalid winapi start type: %d", winapiStartType)
 	}
+}
+
+// setRecoveryActions sets the service recovery actions for the passed in service
+func setRecoveryActions(s *mgr.Service) error {
+	// Windows requires specifying 3 recoveryActions. We want to ensure the service always restarts after 5 seconds
+	recoveryActions := []mgr.RecoveryAction{
+		{
+			Type:  mgr.ServiceRestart,
+			Delay: defaultRecoveryDelay,
+		},
+		{
+			Type:  mgr.ServiceRestart,
+			Delay: defaultRecoveryDelay,
+		},
+		{
+			Type:  mgr.ServiceRestart,
+			Delay: defaultRecoveryDelay,
+		},
+	}
+
+	return s.SetRecoveryActions(recoveryActions, uint32(defaultResetPeriod.Seconds()))
 }

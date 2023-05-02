@@ -20,6 +20,19 @@ if [ -z "$TARGET_VERSION" ]; then
     exit 1
 fi
 
+CONTRIB_TARGET_VERSION=$2
+if [ -z "$CONTRIB_TARGET_VERSION" ]; then
+    echo "Must specify a target contrib version"
+    exit 1
+fi
+
+PDATA_TARGET_VERSION=$3
+
+if [ -z "$PDATA_TARGET_VERSION" ]; then
+    echo "Must specify a target pdata version"
+    exit 1
+fi
+
 LOCAL_MODULES=$(find . -type f -name "go.mod" -exec dirname {} \; | sort)
 for local_mod in $LOCAL_MODULES
 do
@@ -32,8 +45,17 @@ do
 
         for mod in $OTEL_MODULES
         do
-            echo "$local_mod: $mod@$TARGET_VERSION"
-            go mod edit -require "$mod@$TARGET_VERSION"
+            if case $mod in go.opentelemetry.io/collector/pdata*) ;; *) false;; esac; then
+                # pdata package is versioned separately
+                echo "$local_mod: $mod@$PDATA_TARGET_VERSION"
+                go mod edit -require "$mod@$PDATA_TARGET_VERSION"
+            elif case $mod in github.com/open-telemetry/opentelemetry-collector-contrib*) ;; *) false;; esac; then
+                echo "$local_mod: $mod@$CONTRIB_TARGET_VERSION"
+                go mod edit -require "$mod@$CONTRIB_TARGET_VERSION"
+            else
+                echo "$local_mod: $mod@$TARGET_VERSION"
+                go mod edit -require "$mod@$TARGET_VERSION"
+            fi;
         done
     )
 done

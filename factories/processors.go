@@ -16,6 +16,7 @@ package factories
 
 import (
 	"github.com/observiq/observiq-otel-collector/internal/processor/snapshotprocessor"
+	"github.com/observiq/observiq-otel-collector/processor/datapointcountprocessor"
 	"github.com/observiq/observiq-otel-collector/processor/logcountprocessor"
 	"github.com/observiq/observiq-otel-collector/processor/logdeduplicationprocessor"
 	"github.com/observiq/observiq-otel-collector/processor/maskprocessor"
@@ -23,6 +24,7 @@ import (
 	"github.com/observiq/observiq-otel-collector/processor/metricstatsprocessor"
 	"github.com/observiq/observiq-otel-collector/processor/resourceattributetransposerprocessor"
 	"github.com/observiq/observiq-otel-collector/processor/samplingprocessor"
+	"github.com/observiq/observiq-otel-collector/processor/spancountprocessor"
 	"github.com/observiq/observiq-otel-collector/processor/throughputmeasurementprocessor"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/attributesprocessor"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/cumulativetodeltaprocessor"
@@ -53,6 +55,7 @@ var defaultProcessors = []processor.Factory{
 	batchprocessor.NewFactory(),
 	processortest.NewNopFactory(),
 	cumulativetodeltaprocessor.NewFactory(),
+	datapointcountprocessor.NewFactory(),
 	deltatorateprocessor.NewFactory(),
 	filterprocessor.NewFactory(),
 	groupbyattrsprocessor.NewFactory(),
@@ -74,6 +77,7 @@ var defaultProcessors = []processor.Factory{
 	routingprocessor.NewFactory(),
 	samplingprocessor.NewFactory(),
 	snapshotprocessor.NewFactory(),
+	spancountprocessor.NewFactory(),
 	spanmetricsprocessor.NewFactory(),
 	spanprocessor.NewFactory(),
 	throughputmeasurementprocessor.NewFactory(),

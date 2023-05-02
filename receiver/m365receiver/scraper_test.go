@@ -217,6 +217,10 @@ func (mw *mockClient) GetToken() error {
 	return args.Error(0)
 }
 
+func (mw *mockClient) shutdown() error {
+	return nil
+}
+
 func ReadMetrics(filePath string) (pmetric.Metrics, error) {
 	expectedFileBytes, err := os.ReadFile(filePath)
 	if err != nil {

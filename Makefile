@@ -87,7 +87,7 @@ install-tools:
 	go install github.com/google/addlicense@v1.1.0
 	go install github.com/goreleaser/goreleaser@v1.16.1
 	go install github.com/mgechev/revive@v1.2.3
-	go install github.com/open-telemetry/opentelemetry-collector-contrib/cmd/mdatagen@v0.74.0
+	go install github.com/open-telemetry/opentelemetry-collector-contrib/cmd/mdatagen@v0.76.3
 	go install github.com/securego/gosec/v2/cmd/gosec@v2.15.0
 	go install github.com/sigstore/cosign/cmd/cosign@v1.10.1
 	go install github.com/uw-labs/lichen@v0.1.7
@@ -172,12 +172,18 @@ add-license:
 
 # update-otel attempts to update otel dependencies in go.mods,
 # and update the otel versions in the docs.
-# Currently, does not handle operations-collector updates.
-# Usage: make update-otel OTEL_VERSION=vx.x.x
+# Usage: make update-otel OTEL_VERSION=vx.x.x PDATA_VERSION=vx.x.x-rcx
 .PHONY: update-otel
 update-otel:
-	./scripts/update-otel.sh "$(OTEL_VERSION)"
+	./scripts/update-otel.sh "$(OTEL_VERSION)" "$(PDATA_VERSION)"
 	./scripts/update-docs.sh "$(OTEL_VERSION)"
+	$(MAKE) tidy
+
+# update-modules updates all submodules to be the new version.
+# Usage: make update-modules NEW_VERSION=vx.x.x
+.PHONY: update-modules
+update-modules:
+	./scripts/update-module-version.sh "$(NEW_VERSION)"
 	$(MAKE) tidy
 
 # Downloads and setups dependencies that are packaged with binary
