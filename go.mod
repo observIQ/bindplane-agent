@@ -5,22 +5,22 @@ go 1.19
 require (
 	github.com/google/uuid v1.3.0
 	github.com/mholt/archiver/v3 v3.5.1
-	github.com/observiq/observiq-otel-collector/exporter/googlecloudexporter v1.24.0
-	github.com/observiq/observiq-otel-collector/exporter/googlemanagedprometheusexporter v1.24.0
-	github.com/observiq/observiq-otel-collector/packagestate v1.24.0
-	github.com/observiq/observiq-otel-collector/processor/datapointcountprocessor v1.24.0
-	github.com/observiq/observiq-otel-collector/processor/logcountprocessor v1.24.0
-	github.com/observiq/observiq-otel-collector/processor/logdeduplicationprocessor v1.24.0
-	github.com/observiq/observiq-otel-collector/processor/maskprocessor v1.24.0
-	github.com/observiq/observiq-otel-collector/processor/metricextractprocessor v1.24.0
-	github.com/observiq/observiq-otel-collector/processor/metricstatsprocessor v1.24.0
-	github.com/observiq/observiq-otel-collector/processor/resourceattributetransposerprocessor v1.24.0
-	github.com/observiq/observiq-otel-collector/processor/samplingprocessor v1.24.0
-	github.com/observiq/observiq-otel-collector/processor/spancountprocessor v1.24.0
-	github.com/observiq/observiq-otel-collector/processor/throughputmeasurementprocessor v1.24.0
-	github.com/observiq/observiq-otel-collector/receiver/pluginreceiver v1.24.0
-	github.com/observiq/observiq-otel-collector/receiver/routereceiver v1.24.0
-	github.com/observiq/observiq-otel-collector/receiver/sapnetweaverreceiver v1.24.0
+	github.com/observiq/observiq-otel-collector/exporter/googlecloudexporter v1.25.0
+	github.com/observiq/observiq-otel-collector/exporter/googlemanagedprometheusexporter v1.25.0
+	github.com/observiq/observiq-otel-collector/packagestate v1.25.0
+	github.com/observiq/observiq-otel-collector/processor/datapointcountprocessor v1.25.0
+	github.com/observiq/observiq-otel-collector/processor/logcountprocessor v1.25.0
+	github.com/observiq/observiq-otel-collector/processor/logdeduplicationprocessor v1.25.0
+	github.com/observiq/observiq-otel-collector/processor/maskprocessor v1.25.0
+	github.com/observiq/observiq-otel-collector/processor/metricextractprocessor v1.25.0
+	github.com/observiq/observiq-otel-collector/processor/metricstatsprocessor v1.25.0
+	github.com/observiq/observiq-otel-collector/processor/resourceattributetransposerprocessor v1.25.0
+	github.com/observiq/observiq-otel-collector/processor/samplingprocessor v1.25.0
+	github.com/observiq/observiq-otel-collector/processor/spancountprocessor v1.25.0
+	github.com/observiq/observiq-otel-collector/processor/throughputmeasurementprocessor v1.25.0
+	github.com/observiq/observiq-otel-collector/receiver/pluginreceiver v1.25.0
+	github.com/observiq/observiq-otel-collector/receiver/routereceiver v1.25.0
+	github.com/observiq/observiq-otel-collector/receiver/sapnetweaverreceiver v1.25.0
 	github.com/oklog/ulid/v2 v2.1.0
 	github.com/open-telemetry/opamp-go v0.2.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/alibabacloudlogserviceexporter v0.76.3
@@ -189,8 +189,8 @@ require (
 	github.com/google/s2a-go v0.1.2 // indirect
 	github.com/grafana/loki/pkg/push v0.0.0-20230127072203-4e8cc8d71928 // indirect
 	github.com/influxdata/influxdb-observability/otel2influx v0.3.6 // indirect
-	github.com/observiq/observiq-otel-collector/counter v1.24.0 // indirect
-	github.com/observiq/observiq-otel-collector/expr v1.24.0 // indirect
+	github.com/observiq/observiq-otel-collector/counter v1.25.0 // indirect
+	github.com/observiq/observiq-otel-collector/expr v1.25.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlemanagedprometheusexporter v0.76.3 // indirect
 	github.com/outcaste-io/ristretto v0.2.1 // indirect
 	github.com/panta/machineid v1.0.2 // indirect
