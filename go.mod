@@ -18,7 +18,7 @@ require (
 	github.com/observiq/observiq-otel-collector/processor/samplingprocessor v1.24.0
 	github.com/observiq/observiq-otel-collector/processor/spancountprocessor v1.24.0
 	github.com/observiq/observiq-otel-collector/processor/throughputmeasurementprocessor v1.24.0
-	github.com/observiq/observiq-otel-collector/receiver/m365receiver v0.0.0-00010101000000-000000000000
+	github.com/observiq/observiq-otel-collector/receiver/m365receiver v1.24.0
 	github.com/observiq/observiq-otel-collector/receiver/pluginreceiver v1.24.0
 	github.com/observiq/observiq-otel-collector/receiver/routereceiver v1.24.0
 	github.com/observiq/observiq-otel-collector/receiver/sapnetweaverreceiver v1.24.0
