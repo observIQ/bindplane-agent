@@ -39,6 +39,11 @@ func newM365Client(c *http.Client, cfg *Config) *m365Client {
 	}
 }
 
+func (m *m365Client) shutdown() error {
+	m.client.CloseIdleConnections()
+	return nil
+}
+
 func (m *m365Client) GetCSV(endpoint string) ([]string, error) {
 	req, err := http.NewRequest("GET", endpoint, nil)
 	if err != nil {

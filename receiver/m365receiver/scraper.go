@@ -94,6 +94,7 @@ var reports = []reportPair{
 type mClient interface {
 	GetCSV(endpoint string) ([]string, error)
 	GetToken() error
+	shutdown() error
 }
 
 type m365Scraper struct {
@@ -135,6 +136,10 @@ func (m *m365Scraper) start(_ context.Context, host component.Host) error {
 	}
 
 	return nil
+}
+
+func (m *m365Scraper) shutdown(_ context.Context) error {
+	return m.client.shutdown()
 }
 
 // retrieves data, builds metrics & emits them

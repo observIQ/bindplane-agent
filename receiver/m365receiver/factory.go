@@ -36,6 +36,7 @@ func NewFactory() receiver.Factory {
 		typeStr,
 		createDefaultConfig,
 		receiver.WithMetrics(createMetricsReceiver, metadata.Stability),
+		// receiver.WithLogs(createLogsReceiver, metadata.Stability),
 	)
 }
 
@@ -61,7 +62,7 @@ func createMetricsReceiver(
 
 	//create receiver
 	ns := newM365Scraper(params, cfg)
-	scraper, err := scraperhelper.NewScraper(typeStr, ns.scrape, scraperhelper.WithStart(ns.start))
+	scraper, err := scraperhelper.NewScraper(typeStr, ns.scrape, scraperhelper.WithStart(ns.start), scraperhelper.WithShutdown(ns.shutdown))
 	if err != nil {
 		return nil, err
 	}
@@ -74,3 +75,12 @@ func createMetricsReceiver(
 	)
 
 }
+
+// func createLogsReceiver(
+// 	_ context.Context,
+// 	params receiver.CreateSettings,
+// 	rConf component.Config,
+// 	consumer consumer.Logs,
+// ) (receiver.Logs, error) {
+
+// }
