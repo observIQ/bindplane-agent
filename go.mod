@@ -27,6 +27,7 @@ require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/awscloudwatchlogsexporter v0.76.3
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/awsemfexporter v0.76.3
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/awskinesisexporter v0.76.3
+	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/awss3exporter v0.76.3
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/awsxrayexporter v0.76.3
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/azuremonitorexporter v0.76.3
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/carbonexporter v0.76.3
@@ -274,7 +275,7 @@ require (
 	github.com/apache/arrow/go/arrow v0.0.0-20211112161151-bc219186db40 // indirect
 	github.com/apache/thrift v0.18.1 // indirect
 	github.com/armon/go-metrics v0.4.1 // indirect
-	github.com/aws/aws-sdk-go v1.44.249 // indirect
+	github.com/aws/aws-sdk-go v1.44.253 // indirect
 	github.com/aws/aws-sdk-go-v2 v1.17.8 // indirect
 	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.4.10 // indirect
 	github.com/aws/aws-sdk-go-v2/config v1.18.21 // indirect
