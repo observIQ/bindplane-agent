@@ -1,4 +1,4 @@
-version: 0.5.0
+version: 0.4.0
 title: Kubernetes Container Logs
 description: Log parser for Kubernetes Container logs. This plugin is meant to be used with the OpenTelemetry Operator for Kubernetes (https://github.com/open-telemetry/opentelemetry-operator).
 parameters:
@@ -101,7 +101,7 @@ template: |
           # 2022-06-18T16:52:59.639114537Z stdout F {"message":"registered Stackdriver tracing","severity":"info","timestamp":"2022-06-18T16:52:59.639034532Z"}
           - id: containerd_cri_parser
             type: regex_parser
-            regex: '^(?P<time>[^\s]+) (?P<stream>\w+) (?P<partial>\w)? ?(?P<log>.*)'
+            regex: '^(?P<time>[^\s]+) (?P<stream>\w+) (?P<partial>\w)?\s+?(?P<log>.*)'
           - type: recombine
             source_identifier: attributes["log.file.name"]
             combine_field: attributes.log
@@ -138,43 +138,16 @@ template: |
             from: attributes.log
             to: body
 
-          # Initial severity is derived from the stream field, which can be
-          # "stderr" or "stdout"
-          - type: severity_parser
-            parse_from: attributes.stream
-            mapping:
-              info: stdout
-              error: stderr
-
           # Parse body as json if the body appears to be json
           {{ if .body_json_parsing }}
           - type: json_parser
             if: body matches "^{.*}\\s*$"
             parse_from: body
             parse_to: body
-
-          # After parsing the log body as json, parse severity
-          # or level if present, with severity taking precedence.
-          - type: router
-            default: file_name_parser
-            routes:
-              - expr: 'body.severity != nil'
-                output: body_severity_parser
-              - expr: 'body.level != nil'
-                output: body_level_parser
-          - type: severity_parser
-            id: body_severity_parser
-            parse_from: body.severity
-            output: file_name_parser
-          - type: severity_parser
-            id: body_level_parser
-            parse_from: body.level
-            output: file_name_parser
           {{ end }}
 
           # Detect pod, namespace, and container names from the file name.
           - type: regex_parser
-            id: file_name_parser
             regex: '^(?P<pod>[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*)_(?P<namespace>[^_]+)_(?P<container>.+)-'
             parse_from: attributes["log.file.name"]
             cache:
