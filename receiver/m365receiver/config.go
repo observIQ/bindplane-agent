@@ -1,4 +1,4 @@
-// Copyright  OpenTelemetry Authors
+// Copyright observIQ, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import (
 	"go.opentelemetry.io/collector/receiver/scraperhelper"
 )
 
+// Config defines configuration for Microsoft Office 365 receiver.
 type Config struct {
 	scraperhelper.ScraperControllerSettings `mapstructure:",squash"`
 	confighttp.HTTPClientSettings           `mapstructure:",squash"`
@@ -33,32 +34,30 @@ type Config struct {
 	ClientSecret                            string                        `mapstructure:"client_secret"`
 }
 
+// Validate validates the configuration by checking for missing or invalid fields
 func (c *Config) Validate() error {
 	if c.TenantID == "" {
 		return fmt.Errorf("missing tenant_id; required")
-	} else {
-		_, err := uuid.Parse(c.TenantID)
-		if err != nil {
-			return fmt.Errorf("tenant_id is invalid; must be a GUID")
-		}
+	}
+	_, err := uuid.Parse(c.TenantID)
+	if err != nil {
+		return fmt.Errorf("tenant_id is invalid; must be a GUID")
 	}
 
 	if c.ClientID == "" {
 		return fmt.Errorf("missing client_id; required")
-	} else {
-		_, err := uuid.Parse(c.ClientID)
-		if err != nil {
-			return fmt.Errorf("client_id is invalid; must be a GUID")
-		}
+	}
+	_, err = uuid.Parse(c.ClientID)
+	if err != nil {
+		return fmt.Errorf("client_id is invalid; must be a GUID")
 	}
 
 	if c.ClientSecret == "" {
 		return fmt.Errorf("missing client_secret; required")
-	} else {
-		re := regexp.MustCompile("^[a-zA-Z0-9-_.~]{1,40}$")
-		if !re.MatchString(c.ClientSecret) {
-			return fmt.Errorf("client_secret is invalid; does not follow correct structure")
-		}
+	}
+	re := regexp.MustCompile("^[a-zA-Z0-9-_.~]{1,40}$")
+	if !re.MatchString(c.ClientSecret) {
+		return fmt.Errorf("client_secret is invalid; does not follow correct structure")
 	}
 
 	return nil

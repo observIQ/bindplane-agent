@@ -1,4 +1,4 @@
-// Copyright  OpenTelemetry Authors
+// Copyright observIQ, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package m365receiver
+package m365receiver //import "github.com/observiq/observiq-otel-collector/receiver/m365receiver"
 
 import (
 	"net/http"
@@ -38,19 +38,19 @@ func TestGetToken(t *testing.T) {
 	// test 2: incorrect client secret
 	testClient.clientSecret = "err"
 	err = testClient.GetToken()
-	assert.EqualError(t, err, "The provided client_secret is incorrect or does not belong to the given client_id.")
+	assert.EqualError(t, err, "the provided client_secret is incorrect or does not belong to the given client_id")
 
 	// test 3: incorrect client id
 	testClient.clientSecret = "testClientSecret"
 	testClient.clientID = "err"
 	err = testClient.GetToken()
-	assert.EqualError(t, err, "The provided client_id is incorrect or does not exist within the given tenant directory.")
+	assert.EqualError(t, err, "the provided client_id is incorrect or does not exist within the given tenant directory")
 
 	// test 4: incorrect tenant_id
 	testClient.clientID = "testClientID"
 	testClient.authEndpoint = m365Mock.URL + "/err"
 	err = testClient.GetToken()
-	assert.EqualError(t, err, "The provided tenant_id is incorrect or does not exist.")
+	assert.EqualError(t, err, "the provided tenant_id is incorrect or does not exist")
 }
 
 func TestGetCSV(t *testing.T) {
@@ -73,7 +73,7 @@ func TestGetCSV(t *testing.T) {
 	//err testing
 	testClient.token = "err"
 	_, err = testClient.GetCSV(m365Mock.URL + "/getSharePointSiteUsageFileCounts(period='D7')")
-	assert.EqualError(t, err, "Access token invalid.")
+	assert.EqualError(t, err, "access token invalid")
 }
 
 //	Mock Servers
@@ -108,7 +108,7 @@ func newMockServerCSV() *httptest.Server {
 
 			if a := req.Header.Get("Authorization"); a != "foo" {
 				rw.WriteHeader(400)
-				rw.Write([]byte("Error, not authorized"))
+				rw.Write([]byte(`{"error": {"code": "InvalidAuthenticationToken"}}`))
 				return
 			}
 

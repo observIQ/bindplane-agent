@@ -1,4 +1,4 @@
-// Copyright  OpenTelemetry Authors
+// Copyright observIQ, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ const (
 	typeStr = "m365"
 )
 
+// NewFactory creates a factory for Microsoft Office 365 receiver.
 func NewFactory() receiver.Factory {
 	return receiver.NewFactory(
 		typeStr,

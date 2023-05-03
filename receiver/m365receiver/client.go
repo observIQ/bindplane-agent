@@ -1,3 +1,18 @@
+// Copyright observIQ, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+// Package m365receiver import "github.com/observiq/observiq-otel-collector/receiver/m365receiver"
 package m365receiver
 
 import (
@@ -69,9 +84,9 @@ func (m *m365Client) GetCSV(endpoint string) ([]string, error) {
 			return []string{}, err
 		}
 		if respErr.ErrorCSV.Code == "InvalidAuthenticationToken" {
-			return []string{}, fmt.Errorf("Access token invalid.")
+			return []string{}, fmt.Errorf("access token invalid")
 		}
-		return []string{}, fmt.Errorf("Got non 200 status code from request, got %d.", resp.StatusCode)
+		return []string{}, fmt.Errorf("got non 200 status code from request, got %d", resp.StatusCode)
 	}
 
 	defer resp.Body.Close()
@@ -86,9 +101,8 @@ func (m *m365Client) GetCSV(endpoint string) ([]string, error) {
 	if err != nil {
 		if err == io.EOF { //no data in report, scraper should still run
 			return []string{}, nil
-		} else {
-			return []string{}, err
 		}
+		return []string{}, err
 	}
 
 	return data, nil
@@ -134,13 +148,13 @@ func (m *m365Client) GetToken() error {
 		//match on error code
 		switch respErr.Err {
 		case "unauthorized_client":
-			return fmt.Errorf("The provided client_id is incorrect or does not exist within the given tenant directory.")
+			return fmt.Errorf("the provided client_id is incorrect or does not exist within the given tenant directory")
 		case "invalid_client":
-			return fmt.Errorf("The provided client_secret is incorrect or does not belong to the given client_id.")
+			return fmt.Errorf("the provided client_secret is incorrect or does not belong to the given client_id")
 		case "invalid_request":
-			return fmt.Errorf("The provided tenant_id is incorrect or does not exist.")
+			return fmt.Errorf("the provided tenant_id is incorrect or does not exist")
 		}
-		return fmt.Errorf("Got non 200 status code from request, got %d.", resp.StatusCode)
+		return fmt.Errorf("got non 200 status code from request, got %d", resp.StatusCode)
 	}
 
 	body, err := io.ReadAll(resp.Body)

@@ -1,4 +1,4 @@
-// Copyright  OpenTelemetry Authors
+// Copyright observIQ, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package m365receiver
+package m365receiver // import "github.com/observiq/observiq-otel-collector/receiver/m365receiver"
 
 import (
 	"context"
@@ -30,15 +30,6 @@ import (
 	"go.opentelemetry.io/collector/receiver/receivertest"
 )
 
-func TestStart(t *testing.T) { //unsure how to isolate this function, and how to test correct response
-	// scraper := newM365Scraper(
-	// 	receivertest.NewNopCreateSettings(),
-	// 	&Config{MetricsBuilderConfig: metadata.DefaultMetricsBuilderConfig()},
-	// )
-	// err := scraper.start(context.Background(), componenttest.NewNopHost())
-	// require.EqualError(t, err, "got non 200 status code from request, got 404")
-}
-
 func TestBadToken(t *testing.T) {
 	//testing error handling at start of scrape
 	//mocks
@@ -51,14 +42,14 @@ func TestBadToken(t *testing.T) {
 	scraper.client = mc
 
 	//test 1: incorrect token requirements, scraper fails to gen a new, correct token
-	mc.On("GetCSV", root+"getSharePointSiteUsageFileCounts(period='D7')").Return([]string{}, fmt.Errorf("Access token invalid.")).Once()
-	mc.On("GetToken").Return(fmt.Errorf("The provided client_id is incorrect or does not exist within the given tenant directory.")).Once()
+	mc.On("GetCSV", root+"getSharePointSiteUsageFileCounts(period='D7')").Return([]string{}, fmt.Errorf("access token invalid")).Once()
+	mc.On("GetToken").Return(fmt.Errorf("the provided client_id is incorrect or does not exist within the given tenant directory")).Once()
 
 	_, err := scraper.scrape(context.Background())
-	require.EqualError(t, err, "The provided client_id is incorrect or does not exist within the given tenant directory.")
+	require.EqualError(t, err, "the provided client_id is incorrect or does not exist within the given tenant directory")
 
 	//test 2: stale token, getCSV will return empty data just for simplicity in this test
-	mc.On("GetCSV", root+"getSharePointSiteUsageFileCounts(period='D7')").Return([]string{}, fmt.Errorf("Access token invalid.")).Once()
+	mc.On("GetCSV", root+"getSharePointSiteUsageFileCounts(period='D7')").Return([]string{}, fmt.Errorf("access token invalid")).Once()
 	mc.On("GetToken").Return(nil).Once()
 	mc.On("GetCSV", root+"getSharePointSiteUsageFileCounts(period='D7')").Return([]string{}, nil)
 	mc.On("GetCSV", root+"getSharePointSiteUsageSiteCounts(period='D7')").Return([]string{}, nil)

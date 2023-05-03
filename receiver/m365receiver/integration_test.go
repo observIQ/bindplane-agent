@@ -1,4 +1,4 @@
-// Copyright  OpenTelemetry Authors
+// Copyright observIQ, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ func TestM365Integration(t *testing.T) {
 	rcvr := newM365Scraper(settings, cfg)
 
 	//create m365Client object with the http.Client = to the mock server for the integration tests
-	mockServer := newIntMockServer(t)
+	mockServer := newIntMockServer()
 	client := newM365Client(mockServer.Client(), cfg)
 	client.authEndpoint = mockServer.URL + "/" + cfg.TenantID
 	err := client.GetToken()
@@ -70,7 +70,7 @@ func TestM365Integration(t *testing.T) {
 		pmetrictest.IgnoreStartTimestamp(), pmetrictest.IgnoreTimestamp()))
 }
 
-func newIntMockServer(t *testing.T) *httptest.Server {
+func newIntMockServer() *httptest.Server {
 	return httptest.NewServer(http.HandlerFunc(httpTestHandler))
 }
 
@@ -78,25 +78,34 @@ func httpTestHandler(rw http.ResponseWriter, req *http.Request) {
 	//token authorization
 	if req.URL.String() == "/testTenantID" {
 		if req.Method != "POST" {
-			//t.Errorf("expected POST request, got %s", req.Method)
+			rw.WriteHeader(400)
+			return
 		}
 
 		req.ParseForm()
 		if gType := req.Form.Get("grant_type"); gType != "client_credentials" {
-			//t.Errorf("Expected request to have 'grant_type=client_credentials', got: %s", gType)
+			rw.WriteHeader(400)
+			rw.Write([]byte("Error, incorrect grant_type"))
+			return
 		}
 		if scope := req.Form.Get("scope"); scope != "https://graph.microsoft.com/.default" {
-			//t.Errorf("Expected request to have 'scope=https://graph.microsoft.com/.default', got %s", scope)
+			rw.WriteHeader(400)
+			rw.Write([]byte("Error, incorrect scope"))
+			return
 		}
 		if cID := req.Form.Get("client_id"); cID != "testClientID" {
-			//t.Errorf("Expected request to have 'client_id=testClientID', got %s", cID)
+			rw.WriteHeader(400)
+			rw.Write([]byte(`{"error":"unauthorized_client"}`))
+			return
 		}
 		if cSec := req.Form.Get("client_secret"); cSec != "testClientSecret" {
-			//t.Errorf("Expected request to have 'client_secret=testClientSecret', got %s", cSec)
+			rw.WriteHeader(401)
+			rw.Write([]byte(`{"error": "invalid_client"}`))
+			return
 		}
 
 		rw.WriteHeader(200)
-		_, err := rw.Write([]byte(
+		rw.Write([]byte(
 			`{
 				"token_type": "Bearer",
 				"expires_in": 3599,
@@ -104,10 +113,6 @@ func httpTestHandler(rw http.ResponseWriter, req *http.Request) {
 				"access_token": "testAccessToken"
 			}`,
 		))
-		if err != nil {
-			//todo
-		}
-		//require.NoError(t, err)
 		return
 	}
 
@@ -115,10 +120,12 @@ func httpTestHandler(rw http.ResponseWriter, req *http.Request) {
 	//sharepoint
 	if req.URL.String() == "/getSharePointSiteUsageFileCounts(period='D7')" {
 		if req.Method != "GET" {
-			//todo
+			rw.WriteHeader(400)
+			return
 		}
 		if a := req.Header.Get("Authorization"); a != "testAccessToken" {
-			//todo
+			rw.WriteHeader(400)
+			rw.Write([]byte(`{"error": {"code": "InvalidAuthenticationToken"}}`))
 		}
 		rw.Header().Add("Content-Type", "text/plain")
 		rw.Header().Add("Location", "/SharePointSiteUsageFileCountsCSV")
@@ -127,10 +134,12 @@ func httpTestHandler(rw http.ResponseWriter, req *http.Request) {
 	}
 	if req.URL.String() == "/getSharePointSiteUsageSiteCounts(period='D7')" {
 		if req.Method != "GET" {
-			//todo
+			rw.WriteHeader(400)
+			return
 		}
 		if a := req.Header.Get("Authorization"); a != "testAccessToken" {
-			//todo
+			rw.WriteHeader(400)
+			rw.Write([]byte(`{"error": {"code": "InvalidAuthenticationToken"}}`))
 		}
 		rw.Header().Add("Content-Type", "text/plain")
 		rw.Header().Add("Location", "/SharePointSiteUsageSiteCountsCSV")
@@ -139,10 +148,12 @@ func httpTestHandler(rw http.ResponseWriter, req *http.Request) {
 	}
 	if req.URL.String() == "/getSharePointSiteUsagePages(period='D7')" {
 		if req.Method != "GET" {
-			//todo
+			rw.WriteHeader(400)
+			return
 		}
 		if a := req.Header.Get("Authorization"); a != "testAccessToken" {
-			//todo
+			rw.WriteHeader(400)
+			rw.Write([]byte(`{"error": {"code": "InvalidAuthenticationToken"}}`))
 		}
 		rw.Header().Add("Content-Type", "text/plain")
 		rw.Header().Add("Location", "/SharePointSiteUsagePagesCSV")
@@ -151,10 +162,12 @@ func httpTestHandler(rw http.ResponseWriter, req *http.Request) {
 	}
 	if req.URL.String() == "/getSharePointActivityPages(period='D7')" {
 		if req.Method != "GET" {
-			//todo
+			rw.WriteHeader(400)
+			return
 		}
 		if a := req.Header.Get("Authorization"); a != "testAccessToken" {
-			//todo
+			rw.WriteHeader(400)
+			rw.Write([]byte(`{"error": {"code": "InvalidAuthenticationToken"}}`))
 		}
 		rw.Header().Add("Content-Type", "text/plain")
 		rw.Header().Add("Location", "/SharePointActivityPagesCSV")
@@ -163,10 +176,12 @@ func httpTestHandler(rw http.ResponseWriter, req *http.Request) {
 	}
 	if req.URL.String() == "/getSharePointSiteUsageStorage(period='D7')" {
 		if req.Method != "GET" {
-			//todo
+			rw.WriteHeader(400)
+			return
 		}
 		if a := req.Header.Get("Authorization"); a != "testAccessToken" {
-			//todo
+			rw.WriteHeader(400)
+			rw.Write([]byte(`{"error": {"code": "InvalidAuthenticationToken"}}`))
 		}
 		rw.Header().Add("Content-Type", "text/plain")
 		rw.Header().Add("Location", "/SharePointSiteUsageStorageCSV")
@@ -176,10 +191,12 @@ func httpTestHandler(rw http.ResponseWriter, req *http.Request) {
 	//teams
 	if req.URL.String() == "/getTeamsDeviceUsageDistributionUserCounts(period='D7')" {
 		if req.Method != "GET" {
-			//todo
+			rw.WriteHeader(400)
+			return
 		}
 		if a := req.Header.Get("Authorization"); a != "testAccessToken" {
-			//todo
+			rw.WriteHeader(400)
+			rw.Write([]byte(`{"error": {"code": "InvalidAuthenticationToken"}}`))
 		}
 		rw.Header().Add("Content-Type", "text/plain")
 		rw.Header().Add("Location", "/TeamsDeviceUsageDistributionUserCountsCSV")
@@ -188,10 +205,12 @@ func httpTestHandler(rw http.ResponseWriter, req *http.Request) {
 	}
 	if req.URL.String() == "/getTeamsUserActivityCounts(period='D7')" {
 		if req.Method != "GET" {
-			//todo
+			rw.WriteHeader(400)
+			return
 		}
 		if a := req.Header.Get("Authorization"); a != "testAccessToken" {
-			//todo
+			rw.WriteHeader(400)
+			rw.Write([]byte(`{"error": {"code": "InvalidAuthenticationToken"}}`))
 		}
 		rw.Header().Add("Content-Type", "text/plain")
 		rw.Header().Add("Location", "/TeamsUserActivityCountsCSV")
@@ -201,10 +220,12 @@ func httpTestHandler(rw http.ResponseWriter, req *http.Request) {
 	//onedrive
 	if req.URL.String() == "/getOneDriveUsageFileCounts(period='D7')" {
 		if req.Method != "GET" {
-			//todo
+			rw.WriteHeader(400)
+			return
 		}
 		if a := req.Header.Get("Authorization"); a != "testAccessToken" {
-			//todo
+			rw.WriteHeader(400)
+			rw.Write([]byte(`{"error": {"code": "InvalidAuthenticationToken"}}`))
 		}
 		rw.Header().Add("Content-Type", "text/plain")
 		rw.Header().Add("Location", "/OneDriveUsageFileCountsCSV")
@@ -213,10 +234,12 @@ func httpTestHandler(rw http.ResponseWriter, req *http.Request) {
 	}
 	if req.URL.String() == "/getOneDriveActivityUserCounts(period='D7')" {
 		if req.Method != "GET" {
-			//todo
+			rw.WriteHeader(400)
+			return
 		}
 		if a := req.Header.Get("Authorization"); a != "testAccessToken" {
-			//todo
+			rw.WriteHeader(400)
+			rw.Write([]byte(`{"error": {"code": "InvalidAuthenticationToken"}}`))
 		}
 		rw.Header().Add("Content-Type", "text/plain")
 		rw.Header().Add("Location", "/OneDriveActivityUserCountsCSV")
@@ -226,10 +249,12 @@ func httpTestHandler(rw http.ResponseWriter, req *http.Request) {
 	//Outlook
 	if req.URL.String() == "/getMailboxUsageMailboxCounts(period='D7')" {
 		if req.Method != "GET" {
-			//todo
+			rw.WriteHeader(400)
+			return
 		}
 		if a := req.Header.Get("Authorization"); a != "testAccessToken" {
-			//todo
+			rw.WriteHeader(400)
+			rw.Write([]byte(`{"error": {"code": "InvalidAuthenticationToken"}}`))
 		}
 		rw.Header().Add("Content-Type", "text/plain")
 		rw.Header().Add("Location", "/MailboxUsageMailboxCountsCSV")
@@ -238,10 +263,12 @@ func httpTestHandler(rw http.ResponseWriter, req *http.Request) {
 	}
 	if req.URL.String() == "/getEmailActivityCounts(period='D7')" {
 		if req.Method != "GET" {
-			//todo
+			rw.WriteHeader(400)
+			return
 		}
 		if a := req.Header.Get("Authorization"); a != "testAccessToken" {
-			//todo
+			rw.WriteHeader(400)
+			rw.Write([]byte(`{"error": {"code": "InvalidAuthenticationToken"}}`))
 		}
 		rw.Header().Add("Content-Type", "text/plain")
 		rw.Header().Add("Location", "/EmailActivityCountsCSV")
@@ -250,10 +277,12 @@ func httpTestHandler(rw http.ResponseWriter, req *http.Request) {
 	}
 	if req.URL.String() == "/getMailboxUsageStorage(period='D7')" {
 		if req.Method != "GET" {
-			//todo
+			rw.WriteHeader(400)
+			return
 		}
 		if a := req.Header.Get("Authorization"); a != "testAccessToken" {
-			//todo
+			rw.WriteHeader(400)
+			rw.Write([]byte(`{"error": {"code": "InvalidAuthenticationToken"}}`))
 		}
 		rw.Header().Add("Content-Type", "text/plain")
 		rw.Header().Add("Location", "/MailboxUsageStorageCSV")
@@ -262,10 +291,12 @@ func httpTestHandler(rw http.ResponseWriter, req *http.Request) {
 	}
 	if req.URL.String() == "/getEmailAppUsageAppsUserCounts(period='D7')" {
 		if req.Method != "GET" {
-			//todo
+			rw.WriteHeader(400)
+			return
 		}
 		if a := req.Header.Get("Authorization"); a != "testAccessToken" {
-			//todo
+			rw.WriteHeader(400)
+			rw.Write([]byte(`{"error": {"code": "InvalidAuthenticationToken"}}`))
 		}
 		rw.Header().Add("Content-Type", "text/plain")
 		rw.Header().Add("Location", "/EmailAppUsageAppsUserCountsCSV")
@@ -274,10 +305,12 @@ func httpTestHandler(rw http.ResponseWriter, req *http.Request) {
 	}
 	if req.URL.String() == "/getMailboxUsageQuotaStatusMailboxCounts(period='D7')" {
 		if req.Method != "GET" {
-			//todo
+			rw.WriteHeader(400)
+			return
 		}
 		if a := req.Header.Get("Authorization"); a != "testAccessToken" {
-			//todo
+			rw.WriteHeader(400)
+			rw.Write([]byte(`{"error": {"code": "InvalidAuthenticationToken"}}`))
 		}
 		rw.Header().Add("Content-Type", "text/plain")
 		rw.Header().Add("Location", "/MailboxUsageQuotaStatusMailboxCountsCSV")
