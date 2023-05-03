@@ -9,16 +9,19 @@ parameters:
   - name: username
     description: Username to access sql Database (only needed if database is secure)
     type: string
-    required: false
+    default: ""
   - name: password
     description: Password to access sql Database (only needed if database is secure)
     type: string
-    required: false
+    default: ""
   - name: scrape_interval
     description: Time in between every scrape request
     type: string
     default: 60s
-  - timezone
+  - name: timezone
+    description: Timezone to use when parsing the timestamp
+    type: timezone
+    default: UTC
 template: |
   receivers:
     prometheus/cockroachdb:
