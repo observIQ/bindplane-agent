@@ -60,79 +60,79 @@ func TestMetricsBuilder(t *testing.T) {
 
 			defaultMetricsCount++
 			allMetricsCount++
-			mb.RecordM365OnedriveFilesActiveCountDataPoint(ts, "1")
+			mb.RecordM365OnedriveFilesActiveCountDataPoint(ts, 1)
 
 			defaultMetricsCount++
 			allMetricsCount++
-			mb.RecordM365OnedriveFilesCountDataPoint(ts, "1")
+			mb.RecordM365OnedriveFilesCountDataPoint(ts, 1)
 
 			defaultMetricsCount++
 			allMetricsCount++
-			mb.RecordM365OnedriveUserActivityCountDataPoint(ts, "1", AttributeOnedriveActivity(1))
+			mb.RecordM365OnedriveUserActivityCountDataPoint(ts, 1, AttributeOnedriveActivity(1))
 
 			defaultMetricsCount++
 			allMetricsCount++
-			mb.RecordM365OutlookAppUserCountDataPoint(ts, "1", AttributeOutlookApps(1))
+			mb.RecordM365OutlookAppUserCountDataPoint(ts, 1, AttributeOutlookApps(1))
 
 			defaultMetricsCount++
 			allMetricsCount++
-			mb.RecordM365OutlookEmailActivityCountDataPoint(ts, "1", AttributeOutlookActivity(1))
+			mb.RecordM365OutlookEmailActivityCountDataPoint(ts, 1, AttributeOutlookActivity(1))
 
 			defaultMetricsCount++
 			allMetricsCount++
-			mb.RecordM365OutlookMailboxesActiveCountDataPoint(ts, "1")
+			mb.RecordM365OutlookMailboxesActiveCountDataPoint(ts, 1)
 
 			defaultMetricsCount++
 			allMetricsCount++
-			mb.RecordM365OutlookQuotaStatusCountDataPoint(ts, "1", AttributeOutlookQuotas(1))
+			mb.RecordM365OutlookQuotaStatusCountDataPoint(ts, 1, AttributeOutlookQuotas(1))
 
 			defaultMetricsCount++
 			allMetricsCount++
-			mb.RecordM365OutlookStorageCountDataPoint(ts, "1")
+			mb.RecordM365OutlookStorageCountDataPoint(ts, 1)
 
 			defaultMetricsCount++
 			allMetricsCount++
-			mb.RecordM365SharepointFilesActiveCountDataPoint(ts, "1")
+			mb.RecordM365SharepointFilesActiveCountDataPoint(ts, 1)
 
 			defaultMetricsCount++
 			allMetricsCount++
-			mb.RecordM365SharepointFilesCountDataPoint(ts, "1")
+			mb.RecordM365SharepointFilesCountDataPoint(ts, 1)
 
 			defaultMetricsCount++
 			allMetricsCount++
-			mb.RecordM365SharepointPagesUniqueCountDataPoint(ts, "1")
+			mb.RecordM365SharepointPagesUniqueCountDataPoint(ts, 1)
 
 			defaultMetricsCount++
 			allMetricsCount++
-			mb.RecordM365SharepointPagesViewedCountDataPoint(ts, "1")
+			mb.RecordM365SharepointPagesViewedCountDataPoint(ts, 1)
 
 			defaultMetricsCount++
 			allMetricsCount++
-			mb.RecordM365SharepointSiteStorageCountDataPoint(ts, "1")
+			mb.RecordM365SharepointSiteStorageCountDataPoint(ts, 1)
 
 			defaultMetricsCount++
 			allMetricsCount++
-			mb.RecordM365SharepointSitesActiveCountDataPoint(ts, "1")
+			mb.RecordM365SharepointSitesActiveCountDataPoint(ts, 1)
 
 			defaultMetricsCount++
 			allMetricsCount++
-			mb.RecordM365TeamsCallsCountDataPoint(ts, "1")
+			mb.RecordM365TeamsCallsCountDataPoint(ts, 1)
 
 			defaultMetricsCount++
 			allMetricsCount++
-			mb.RecordM365TeamsDeviceUsageCountDataPoint(ts, "1", AttributeTeamsDevices(1))
+			mb.RecordM365TeamsDeviceUsageCountDataPoint(ts, 1, AttributeTeamsDevices(1))
 
 			defaultMetricsCount++
 			allMetricsCount++
-			mb.RecordM365TeamsMeetingsCountDataPoint(ts, "1")
+			mb.RecordM365TeamsMeetingsCountDataPoint(ts, 1)
 
 			defaultMetricsCount++
 			allMetricsCount++
-			mb.RecordM365TeamsMessageTeamCountDataPoint(ts, "1")
+			mb.RecordM365TeamsMessageTeamCountDataPoint(ts, 1)
 
 			defaultMetricsCount++
 			allMetricsCount++
-			mb.RecordM365TeamsMessagesPrivateCountDataPoint(ts, "1")
+			mb.RecordM365TeamsMessagesPrivateCountDataPoint(ts, 1)
 
 			metrics := mb.Emit()
 

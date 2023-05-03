@@ -3,8 +3,6 @@
 package metadata
 
 import (
-	"fmt"
-	"strconv"
 	"time"
 
 	"go.opentelemetry.io/collector/component"
@@ -1485,193 +1483,98 @@ func (mb *MetricsBuilder) Emit(rmo ...ResourceMetricsOption) pmetric.Metrics {
 }
 
 // RecordM365OnedriveFilesActiveCountDataPoint adds a data point to m365.onedrive.files.active.count metric.
-func (mb *MetricsBuilder) RecordM365OnedriveFilesActiveCountDataPoint(ts pcommon.Timestamp, inputVal string) error {
-	val, err := strconv.ParseInt(inputVal, 10, 64)
-	if err != nil {
-		return fmt.Errorf("failed to parse int64 for M365OnedriveFilesActiveCount, value was %s: %w", inputVal, err)
-	}
+func (mb *MetricsBuilder) RecordM365OnedriveFilesActiveCountDataPoint(ts pcommon.Timestamp, val int64) {
 	mb.metricM365OnedriveFilesActiveCount.recordDataPoint(mb.startTime, ts, val)
-	return nil
 }
 
 // RecordM365OnedriveFilesCountDataPoint adds a data point to m365.onedrive.files.count metric.
-func (mb *MetricsBuilder) RecordM365OnedriveFilesCountDataPoint(ts pcommon.Timestamp, inputVal string) error {
-	val, err := strconv.ParseInt(inputVal, 10, 64)
-	if err != nil {
-		return fmt.Errorf("failed to parse int64 for M365OnedriveFilesCount, value was %s: %w", inputVal, err)
-	}
+func (mb *MetricsBuilder) RecordM365OnedriveFilesCountDataPoint(ts pcommon.Timestamp, val int64) {
 	mb.metricM365OnedriveFilesCount.recordDataPoint(mb.startTime, ts, val)
-	return nil
 }
 
 // RecordM365OnedriveUserActivityCountDataPoint adds a data point to m365.onedrive.user_activity.count metric.
-func (mb *MetricsBuilder) RecordM365OnedriveUserActivityCountDataPoint(ts pcommon.Timestamp, inputVal string, onedriveActivityAttributeValue AttributeOnedriveActivity) error {
-	val, err := strconv.ParseInt(inputVal, 10, 64)
-	if err != nil {
-		return fmt.Errorf("failed to parse int64 for M365OnedriveUserActivityCount, value was %s: %w", inputVal, err)
-	}
+func (mb *MetricsBuilder) RecordM365OnedriveUserActivityCountDataPoint(ts pcommon.Timestamp, val int64, onedriveActivityAttributeValue AttributeOnedriveActivity) {
 	mb.metricM365OnedriveUserActivityCount.recordDataPoint(mb.startTime, ts, val, onedriveActivityAttributeValue.String())
-	return nil
 }
 
 // RecordM365OutlookAppUserCountDataPoint adds a data point to m365.outlook.app.user.count metric.
-func (mb *MetricsBuilder) RecordM365OutlookAppUserCountDataPoint(ts pcommon.Timestamp, inputVal string, outlookAppsAttributeValue AttributeOutlookApps) error {
-	val, err := strconv.ParseInt(inputVal, 10, 64)
-	if err != nil {
-		return fmt.Errorf("failed to parse int64 for M365OutlookAppUserCount, value was %s: %w", inputVal, err)
-	}
+func (mb *MetricsBuilder) RecordM365OutlookAppUserCountDataPoint(ts pcommon.Timestamp, val int64, outlookAppsAttributeValue AttributeOutlookApps) {
 	mb.metricM365OutlookAppUserCount.recordDataPoint(mb.startTime, ts, val, outlookAppsAttributeValue.String())
-	return nil
 }
 
 // RecordM365OutlookEmailActivityCountDataPoint adds a data point to m365.outlook.email_activity.count metric.
-func (mb *MetricsBuilder) RecordM365OutlookEmailActivityCountDataPoint(ts pcommon.Timestamp, inputVal string, outlookActivityAttributeValue AttributeOutlookActivity) error {
-	val, err := strconv.ParseInt(inputVal, 10, 64)
-	if err != nil {
-		return fmt.Errorf("failed to parse int64 for M365OutlookEmailActivityCount, value was %s: %w", inputVal, err)
-	}
+func (mb *MetricsBuilder) RecordM365OutlookEmailActivityCountDataPoint(ts pcommon.Timestamp, val int64, outlookActivityAttributeValue AttributeOutlookActivity) {
 	mb.metricM365OutlookEmailActivityCount.recordDataPoint(mb.startTime, ts, val, outlookActivityAttributeValue.String())
-	return nil
 }
 
 // RecordM365OutlookMailboxesActiveCountDataPoint adds a data point to m365.outlook.mailboxes.active.count metric.
-func (mb *MetricsBuilder) RecordM365OutlookMailboxesActiveCountDataPoint(ts pcommon.Timestamp, inputVal string) error {
-	val, err := strconv.ParseInt(inputVal, 10, 64)
-	if err != nil {
-		return fmt.Errorf("failed to parse int64 for M365OutlookMailboxesActiveCount, value was %s: %w", inputVal, err)
-	}
+func (mb *MetricsBuilder) RecordM365OutlookMailboxesActiveCountDataPoint(ts pcommon.Timestamp, val int64) {
 	mb.metricM365OutlookMailboxesActiveCount.recordDataPoint(mb.startTime, ts, val)
-	return nil
 }
 
 // RecordM365OutlookQuotaStatusCountDataPoint adds a data point to m365.outlook.quota_status.count metric.
-func (mb *MetricsBuilder) RecordM365OutlookQuotaStatusCountDataPoint(ts pcommon.Timestamp, inputVal string, outlookQuotasAttributeValue AttributeOutlookQuotas) error {
-	val, err := strconv.ParseInt(inputVal, 10, 64)
-	if err != nil {
-		return fmt.Errorf("failed to parse int64 for M365OutlookQuotaStatusCount, value was %s: %w", inputVal, err)
-	}
+func (mb *MetricsBuilder) RecordM365OutlookQuotaStatusCountDataPoint(ts pcommon.Timestamp, val int64, outlookQuotasAttributeValue AttributeOutlookQuotas) {
 	mb.metricM365OutlookQuotaStatusCount.recordDataPoint(mb.startTime, ts, val, outlookQuotasAttributeValue.String())
-	return nil
 }
 
 // RecordM365OutlookStorageCountDataPoint adds a data point to m365.outlook.storage.count metric.
-func (mb *MetricsBuilder) RecordM365OutlookStorageCountDataPoint(ts pcommon.Timestamp, inputVal string) error {
-	val, err := strconv.ParseInt(inputVal, 10, 64)
-	if err != nil {
-		return fmt.Errorf("failed to parse int64 for M365OutlookStorageCount, value was %s: %w", inputVal, err)
-	}
+func (mb *MetricsBuilder) RecordM365OutlookStorageCountDataPoint(ts pcommon.Timestamp, val int64) {
 	mb.metricM365OutlookStorageCount.recordDataPoint(mb.startTime, ts, val)
-	return nil
 }
 
 // RecordM365SharepointFilesActiveCountDataPoint adds a data point to m365.sharepoint.files.active.count metric.
-func (mb *MetricsBuilder) RecordM365SharepointFilesActiveCountDataPoint(ts pcommon.Timestamp, inputVal string) error {
-	val, err := strconv.ParseInt(inputVal, 10, 64)
-	if err != nil {
-		return fmt.Errorf("failed to parse int64 for M365SharepointFilesActiveCount, value was %s: %w", inputVal, err)
-	}
+func (mb *MetricsBuilder) RecordM365SharepointFilesActiveCountDataPoint(ts pcommon.Timestamp, val int64) {
 	mb.metricM365SharepointFilesActiveCount.recordDataPoint(mb.startTime, ts, val)
-	return nil
 }
 
 // RecordM365SharepointFilesCountDataPoint adds a data point to m365.sharepoint.files.count metric.
-func (mb *MetricsBuilder) RecordM365SharepointFilesCountDataPoint(ts pcommon.Timestamp, inputVal string) error {
-	val, err := strconv.ParseInt(inputVal, 10, 64)
-	if err != nil {
-		return fmt.Errorf("failed to parse int64 for M365SharepointFilesCount, value was %s: %w", inputVal, err)
-	}
+func (mb *MetricsBuilder) RecordM365SharepointFilesCountDataPoint(ts pcommon.Timestamp, val int64) {
 	mb.metricM365SharepointFilesCount.recordDataPoint(mb.startTime, ts, val)
-	return nil
 }
 
 // RecordM365SharepointPagesUniqueCountDataPoint adds a data point to m365.sharepoint.pages.unique.count metric.
-func (mb *MetricsBuilder) RecordM365SharepointPagesUniqueCountDataPoint(ts pcommon.Timestamp, inputVal string) error {
-	val, err := strconv.ParseInt(inputVal, 10, 64)
-	if err != nil {
-		return fmt.Errorf("failed to parse int64 for M365SharepointPagesUniqueCount, value was %s: %w", inputVal, err)
-	}
+func (mb *MetricsBuilder) RecordM365SharepointPagesUniqueCountDataPoint(ts pcommon.Timestamp, val int64) {
 	mb.metricM365SharepointPagesUniqueCount.recordDataPoint(mb.startTime, ts, val)
-	return nil
 }
 
 // RecordM365SharepointPagesViewedCountDataPoint adds a data point to m365.sharepoint.pages.viewed.count metric.
-func (mb *MetricsBuilder) RecordM365SharepointPagesViewedCountDataPoint(ts pcommon.Timestamp, inputVal string) error {
-	val, err := strconv.ParseInt(inputVal, 10, 64)
-	if err != nil {
-		return fmt.Errorf("failed to parse int64 for M365SharepointPagesViewedCount, value was %s: %w", inputVal, err)
-	}
+func (mb *MetricsBuilder) RecordM365SharepointPagesViewedCountDataPoint(ts pcommon.Timestamp, val int64) {
 	mb.metricM365SharepointPagesViewedCount.recordDataPoint(mb.startTime, ts, val)
-	return nil
 }
 
 // RecordM365SharepointSiteStorageCountDataPoint adds a data point to m365.sharepoint.site.storage.count metric.
-func (mb *MetricsBuilder) RecordM365SharepointSiteStorageCountDataPoint(ts pcommon.Timestamp, inputVal string) error {
-	val, err := strconv.ParseInt(inputVal, 10, 64)
-	if err != nil {
-		return fmt.Errorf("failed to parse int64 for M365SharepointSiteStorageCount, value was %s: %w", inputVal, err)
-	}
+func (mb *MetricsBuilder) RecordM365SharepointSiteStorageCountDataPoint(ts pcommon.Timestamp, val int64) {
 	mb.metricM365SharepointSiteStorageCount.recordDataPoint(mb.startTime, ts, val)
-	return nil
 }
 
 // RecordM365SharepointSitesActiveCountDataPoint adds a data point to m365.sharepoint.sites.active.count metric.
-func (mb *MetricsBuilder) RecordM365SharepointSitesActiveCountDataPoint(ts pcommon.Timestamp, inputVal string) error {
-	val, err := strconv.ParseInt(inputVal, 10, 64)
-	if err != nil {
-		return fmt.Errorf("failed to parse int64 for M365SharepointSitesActiveCount, value was %s: %w", inputVal, err)
-	}
+func (mb *MetricsBuilder) RecordM365SharepointSitesActiveCountDataPoint(ts pcommon.Timestamp, val int64) {
 	mb.metricM365SharepointSitesActiveCount.recordDataPoint(mb.startTime, ts, val)
-	return nil
 }
 
 // RecordM365TeamsCallsCountDataPoint adds a data point to m365.teams.calls.count metric.
-func (mb *MetricsBuilder) RecordM365TeamsCallsCountDataPoint(ts pcommon.Timestamp, inputVal string) error {
-	val, err := strconv.ParseInt(inputVal, 10, 64)
-	if err != nil {
-		return fmt.Errorf("failed to parse int64 for M365TeamsCallsCount, value was %s: %w", inputVal, err)
-	}
+func (mb *MetricsBuilder) RecordM365TeamsCallsCountDataPoint(ts pcommon.Timestamp, val int64) {
 	mb.metricM365TeamsCallsCount.recordDataPoint(mb.startTime, ts, val)
-	return nil
 }
 
 // RecordM365TeamsDeviceUsageCountDataPoint adds a data point to m365.teams.device_usage.count metric.
-func (mb *MetricsBuilder) RecordM365TeamsDeviceUsageCountDataPoint(ts pcommon.Timestamp, inputVal string, teamsDevicesAttributeValue AttributeTeamsDevices) error {
-	val, err := strconv.ParseInt(inputVal, 10, 64)
-	if err != nil {
-		return fmt.Errorf("failed to parse int64 for M365TeamsDeviceUsageCount, value was %s: %w", inputVal, err)
-	}
+func (mb *MetricsBuilder) RecordM365TeamsDeviceUsageCountDataPoint(ts pcommon.Timestamp, val int64, teamsDevicesAttributeValue AttributeTeamsDevices) {
 	mb.metricM365TeamsDeviceUsageCount.recordDataPoint(mb.startTime, ts, val, teamsDevicesAttributeValue.String())
-	return nil
 }
 
 // RecordM365TeamsMeetingsCountDataPoint adds a data point to m365.teams.meetings.count metric.
-func (mb *MetricsBuilder) RecordM365TeamsMeetingsCountDataPoint(ts pcommon.Timestamp, inputVal string) error {
-	val, err := strconv.ParseInt(inputVal, 10, 64)
-	if err != nil {
-		return fmt.Errorf("failed to parse int64 for M365TeamsMeetingsCount, value was %s: %w", inputVal, err)
-	}
+func (mb *MetricsBuilder) RecordM365TeamsMeetingsCountDataPoint(ts pcommon.Timestamp, val int64) {
 	mb.metricM365TeamsMeetingsCount.recordDataPoint(mb.startTime, ts, val)
-	return nil
 }
 
 // RecordM365TeamsMessageTeamCountDataPoint adds a data point to m365.teams.message.team.count metric.
-func (mb *MetricsBuilder) RecordM365TeamsMessageTeamCountDataPoint(ts pcommon.Timestamp, inputVal string) error {
-	val, err := strconv.ParseInt(inputVal, 10, 64)
-	if err != nil {
-		return fmt.Errorf("failed to parse int64 for M365TeamsMessageTeamCount, value was %s: %w", inputVal, err)
-	}
+func (mb *MetricsBuilder) RecordM365TeamsMessageTeamCountDataPoint(ts pcommon.Timestamp, val int64) {
 	mb.metricM365TeamsMessageTeamCount.recordDataPoint(mb.startTime, ts, val)
-	return nil
 }
 
 // RecordM365TeamsMessagesPrivateCountDataPoint adds a data point to m365.teams.messages.private.count metric.
-func (mb *MetricsBuilder) RecordM365TeamsMessagesPrivateCountDataPoint(ts pcommon.Timestamp, inputVal string) error {
-	val, err := strconv.ParseInt(inputVal, 10, 64)
-	if err != nil {
-		return fmt.Errorf("failed to parse int64 for M365TeamsMessagesPrivateCount, value was %s: %w", inputVal, err)
-	}
+func (mb *MetricsBuilder) RecordM365TeamsMessagesPrivateCountDataPoint(ts pcommon.Timestamp, val int64) {
 	mb.metricM365TeamsMessagesPrivateCount.recordDataPoint(mb.startTime, ts, val)
-	return nil
 }
 
 // Reset resets metrics builder to its initial state. It should be used when external metrics source is restarted,

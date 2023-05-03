@@ -16,6 +16,7 @@ package m365receiver // import "github.com/observiq/observiq-otel-collector/rece
 
 import (
 	"context"
+	"strconv"
 	"time"
 
 	"go.opentelemetry.io/collector/component"
@@ -147,9 +148,8 @@ func (m *m365Scraper) scrape(context.Context) (pmetric.Metrics, error) {
 	m365Data, err := m.getStats()
 	if err != nil {
 		//troubleshoot stale token
-		m.logger.Error("error retrieving stats", zap.Error(err))
 		if err.Error() == "access token invalid" {
-			m.logger.Error("possible stale token; attempting to regenerate")
+			m.logger.Debug("possible stale token; attempting to regenerate")
 			err = m.client.GetToken()
 			if err != nil {
 				//something went wrong with generating token.
@@ -165,6 +165,7 @@ func (m *m365Scraper) scrape(context.Context) (pmetric.Metrics, error) {
 			}
 		} else {
 			//not an error with the access token
+			m.logger.Error("error retrieving stats", zap.Error(err))
 			return pmetric.Metrics{}, err
 		}
 	}
@@ -173,108 +174,111 @@ func (m *m365Scraper) scrape(context.Context) (pmetric.Metrics, error) {
 	for metricKey, metricValue := range m365Data {
 		switch metricKey {
 		case "sharepoint.files":
-			m.mb.RecordM365SharepointFilesCountDataPoint(now, metricValue)
+			m.mb.RecordM365SharepointFilesCountDataPoint(now, int64(metricValue))
 		case "sharepoint.files.active":
-			m.mb.RecordM365SharepointFilesActiveCountDataPoint(now, metricValue)
+			m.mb.RecordM365SharepointFilesActiveCountDataPoint(now, int64(metricValue))
 		case "sharepoint.sites.active":
-			m.mb.RecordM365SharepointSitesActiveCountDataPoint(now, metricValue)
+			m.mb.RecordM365SharepointSitesActiveCountDataPoint(now, int64(metricValue))
 		case "sharepoint.pages.viewed":
-			m.mb.RecordM365SharepointPagesViewedCountDataPoint(now, metricValue)
+			m.mb.RecordM365SharepointPagesViewedCountDataPoint(now, int64(metricValue))
 		case "sharepoint.pages.unique":
-			m.mb.RecordM365SharepointPagesUniqueCountDataPoint(now, metricValue)
+			m.mb.RecordM365SharepointPagesUniqueCountDataPoint(now, int64(metricValue))
 		case "sharepoint.site.storage":
-			m.mb.RecordM365SharepointSiteStorageCountDataPoint(now, metricValue)
+			m.mb.RecordM365SharepointSiteStorageCountDataPoint(now, int64(metricValue))
 		case "device.web":
-			m.mb.RecordM365TeamsDeviceUsageCountDataPoint(now, metricValue, metadata.AttributeTeamsDevicesWeb)
+			m.mb.RecordM365TeamsDeviceUsageCountDataPoint(now, int64(metricValue), metadata.AttributeTeamsDevicesWeb)
 		case "device.android":
-			m.mb.RecordM365TeamsDeviceUsageCountDataPoint(now, metricValue, metadata.AttributeTeamsDevicesAndroid)
+			m.mb.RecordM365TeamsDeviceUsageCountDataPoint(now, int64(metricValue), metadata.AttributeTeamsDevicesAndroid)
 		case "device.ios":
-			m.mb.RecordM365TeamsDeviceUsageCountDataPoint(now, metricValue, metadata.AttributeTeamsDevicesIOS)
+			m.mb.RecordM365TeamsDeviceUsageCountDataPoint(now, int64(metricValue), metadata.AttributeTeamsDevicesIOS)
 		case "device.mac":
-			m.mb.RecordM365TeamsDeviceUsageCountDataPoint(now, metricValue, metadata.AttributeTeamsDevicesMac)
+			m.mb.RecordM365TeamsDeviceUsageCountDataPoint(now, int64(metricValue), metadata.AttributeTeamsDevicesMac)
 		case "device.windows":
-			m.mb.RecordM365TeamsDeviceUsageCountDataPoint(now, metricValue, metadata.AttributeTeamsDevicesWindows)
+			m.mb.RecordM365TeamsDeviceUsageCountDataPoint(now, int64(metricValue), metadata.AttributeTeamsDevicesWindows)
 		case "device.chromeos":
-			m.mb.RecordM365TeamsDeviceUsageCountDataPoint(now, metricValue, metadata.AttributeTeamsDevicesChromeOS)
+			m.mb.RecordM365TeamsDeviceUsageCountDataPoint(now, int64(metricValue), metadata.AttributeTeamsDevicesChromeOS)
 		case "device.linux":
-			m.mb.RecordM365TeamsDeviceUsageCountDataPoint(now, metricValue, metadata.AttributeTeamsDevicesLinux)
+			m.mb.RecordM365TeamsDeviceUsageCountDataPoint(now, int64(metricValue), metadata.AttributeTeamsDevicesLinux)
 		case "teams.message.team":
-			m.mb.RecordM365TeamsMessageTeamCountDataPoint(now, metricValue)
+			m.mb.RecordM365TeamsMessageTeamCountDataPoint(now, int64(metricValue))
 		case "teams.message.private":
-			m.mb.RecordM365TeamsMessagesPrivateCountDataPoint(now, metricValue)
+			m.mb.RecordM365TeamsMessagesPrivateCountDataPoint(now, int64(metricValue))
 		case "teams.calls":
-			m.mb.RecordM365TeamsCallsCountDataPoint(now, metricValue)
+			m.mb.RecordM365TeamsCallsCountDataPoint(now, int64(metricValue))
 		case "teams.meetings":
-			m.mb.RecordM365TeamsMeetingsCountDataPoint(now, metricValue)
+			m.mb.RecordM365TeamsMeetingsCountDataPoint(now, int64(metricValue))
 		case "onedrive.files":
-			m.mb.RecordM365OnedriveFilesCountDataPoint(now, metricValue)
+			m.mb.RecordM365OnedriveFilesCountDataPoint(now, int64(metricValue))
 		case "onedrive.files.active":
-			m.mb.RecordM365OnedriveFilesActiveCountDataPoint(now, metricValue)
+			m.mb.RecordM365OnedriveFilesActiveCountDataPoint(now, int64(metricValue))
 		case "onedrive.activity.view_edit":
-			m.mb.RecordM365OnedriveUserActivityCountDataPoint(now, metricValue, metadata.AttributeOnedriveActivityViewEdit)
+			m.mb.RecordM365OnedriveUserActivityCountDataPoint(now, int64(metricValue), metadata.AttributeOnedriveActivityViewEdit)
 		case "onedrive.activity.synced":
-			m.mb.RecordM365OnedriveUserActivityCountDataPoint(now, metricValue, metadata.AttributeOnedriveActivitySynced)
+			m.mb.RecordM365OnedriveUserActivityCountDataPoint(now, int64(metricValue), metadata.AttributeOnedriveActivitySynced)
 		case "onedrive.activity.internal":
-			m.mb.RecordM365OnedriveUserActivityCountDataPoint(now, metricValue, metadata.AttributeOnedriveActivityInternalShare)
+			m.mb.RecordM365OnedriveUserActivityCountDataPoint(now, int64(metricValue), metadata.AttributeOnedriveActivityInternalShare)
 		case "onedrive.activity.external":
-			m.mb.RecordM365OnedriveUserActivityCountDataPoint(now, metricValue, metadata.AttributeOnedriveActivityExternalShare)
+			m.mb.RecordM365OnedriveUserActivityCountDataPoint(now, int64(metricValue), metadata.AttributeOnedriveActivityExternalShare)
 		case "outlook.mailboxes.active":
-			m.mb.RecordM365OutlookMailboxesActiveCountDataPoint(now, metricValue)
+			m.mb.RecordM365OutlookMailboxesActiveCountDataPoint(now, int64(metricValue))
 		case "outlook.read":
-			m.mb.RecordM365OutlookEmailActivityCountDataPoint(now, metricValue, metadata.AttributeOutlookActivityRead)
+			m.mb.RecordM365OutlookEmailActivityCountDataPoint(now, int64(metricValue), metadata.AttributeOutlookActivityRead)
 		case "outlook.sent":
-			m.mb.RecordM365OutlookEmailActivityCountDataPoint(now, metricValue, metadata.AttributeOutlookActivitySent)
+			m.mb.RecordM365OutlookEmailActivityCountDataPoint(now, int64(metricValue), metadata.AttributeOutlookActivitySent)
 		case "outlook.received":
-			m.mb.RecordM365OutlookEmailActivityCountDataPoint(now, metricValue, metadata.AttributeOutlookActivityReceived)
+			m.mb.RecordM365OutlookEmailActivityCountDataPoint(now, int64(metricValue), metadata.AttributeOutlookActivityReceived)
 		case "outlook.storage":
-			m.mb.RecordM365OutlookStorageCountDataPoint(now, metricValue)
+			m.mb.RecordM365OutlookStorageCountDataPoint(now, int64(metricValue))
 		case "outlook.pop3":
-			m.mb.RecordM365OutlookAppUserCountDataPoint(now, metricValue, metadata.AttributeOutlookAppsPop3)
+			m.mb.RecordM365OutlookAppUserCountDataPoint(now, int64(metricValue), metadata.AttributeOutlookAppsPop3)
 		case "outlook.imap4":
-			m.mb.RecordM365OutlookAppUserCountDataPoint(now, metricValue, metadata.AttributeOutlookAppsImap4)
+			m.mb.RecordM365OutlookAppUserCountDataPoint(now, int64(metricValue), metadata.AttributeOutlookAppsImap4)
 		case "outlook.smtp":
-			m.mb.RecordM365OutlookAppUserCountDataPoint(now, metricValue, metadata.AttributeOutlookAppsSmtp)
+			m.mb.RecordM365OutlookAppUserCountDataPoint(now, int64(metricValue), metadata.AttributeOutlookAppsSmtp)
 		case "outlook.windows":
-			m.mb.RecordM365OutlookAppUserCountDataPoint(now, metricValue, metadata.AttributeOutlookAppsWindows)
+			m.mb.RecordM365OutlookAppUserCountDataPoint(now, int64(metricValue), metadata.AttributeOutlookAppsWindows)
 		case "outlook.mac":
-			m.mb.RecordM365OutlookAppUserCountDataPoint(now, metricValue, metadata.AttributeOutlookAppsMac)
+			m.mb.RecordM365OutlookAppUserCountDataPoint(now, int64(metricValue), metadata.AttributeOutlookAppsMac)
 		case "outlook.web":
-			m.mb.RecordM365OutlookAppUserCountDataPoint(now, metricValue, metadata.AttributeOutlookAppsWeb)
+			m.mb.RecordM365OutlookAppUserCountDataPoint(now, int64(metricValue), metadata.AttributeOutlookAppsWeb)
 		case "outlook.mobile":
-			m.mb.RecordM365OutlookAppUserCountDataPoint(now, metricValue, metadata.AttributeOutlookAppsMobile)
+			m.mb.RecordM365OutlookAppUserCountDataPoint(now, int64(metricValue), metadata.AttributeOutlookAppsMobile)
 		case "outlook.other_mobile":
-			m.mb.RecordM365OutlookAppUserCountDataPoint(now, metricValue, metadata.AttributeOutlookAppsOtherMobile)
+			m.mb.RecordM365OutlookAppUserCountDataPoint(now, int64(metricValue), metadata.AttributeOutlookAppsOtherMobile)
 		case "outlook.under_limit":
-			m.mb.RecordM365OutlookQuotaStatusCountDataPoint(now, metricValue, metadata.AttributeOutlookQuotasUnderLimit)
+			m.mb.RecordM365OutlookQuotaStatusCountDataPoint(now, int64(metricValue), metadata.AttributeOutlookQuotasUnderLimit)
 		case "outlook.warning":
-			m.mb.RecordM365OutlookQuotaStatusCountDataPoint(now, metricValue, metadata.AttributeOutlookQuotasWarning)
+			m.mb.RecordM365OutlookQuotaStatusCountDataPoint(now, int64(metricValue), metadata.AttributeOutlookQuotasWarning)
 		case "outlook.send_prohibited":
-			m.mb.RecordM365OutlookQuotaStatusCountDataPoint(now, metricValue, metadata.AttributeOutlookQuotasSendProhibited)
+			m.mb.RecordM365OutlookQuotaStatusCountDataPoint(now, int64(metricValue), metadata.AttributeOutlookQuotasSendProhibited)
 		case "outlook.send_receive_prohibited":
-			m.mb.RecordM365OutlookQuotaStatusCountDataPoint(now, metricValue, metadata.AttributeOutlookQuotasSendReceiveProhibited)
+			m.mb.RecordM365OutlookQuotaStatusCountDataPoint(now, int64(metricValue), metadata.AttributeOutlookQuotasSendReceiveProhibited)
 		case "outlook.indeterminate":
-			m.mb.RecordM365OutlookQuotaStatusCountDataPoint(now, metricValue, metadata.AttributeOutlookQuotasIndeterminate)
+			m.mb.RecordM365OutlookQuotaStatusCountDataPoint(now, int64(metricValue), metadata.AttributeOutlookQuotasIndeterminate)
 		}
 	}
 
 	return m.mb.Emit(), nil
 }
 
-func (m *m365Scraper) getStats() (map[string]string, error) {
-	reportData := map[string]string{}
+func (m *m365Scraper) getStats() (map[string]int, error) {
+	reportData := map[string]int{}
 
 	for _, r := range reports {
 		line, err := m.client.GetCSV(m.root + r.endpoint)
 		if err != nil {
-			return map[string]string{}, err
+			return map[string]int{}, err
 		}
 		if len(line) == 0 {
-			m.logger.Sugar().Errorf("no data available from %s endpoint and associated metrics", r.endpoint, zap.Error(err))
+			m.logger.Debug("no data available from endpoint and associated metrics: ", zap.String("endpoint", r.endpoint), zap.Error(err))
 			continue
 		}
 
 		for k, v := range r.columns {
-			reportData[k] = line[v]
+			reportData[k], err = strconv.Atoi(line[v])
+			if err != nil {
+				return map[string]int{}, err
+			}
 		}
 	}
 

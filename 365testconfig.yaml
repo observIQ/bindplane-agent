@@ -12,5 +12,6 @@ exporters:
 service:
   pipelines:
     metrics:
+      level: debug
       receivers: [m365]
       exporters: [file/no_rotation]
