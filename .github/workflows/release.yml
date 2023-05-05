@@ -21,11 +21,12 @@ jobs:
         uses: goreleaser/goreleaser-action@v4
         with:
           # either 'goreleaser' (default) or 'goreleaser-pro'
-          distribution: goreleaser
+          distribution: goreleaser-pro
           version: "v1.16.1"
           args: build --single-target --skip-validate --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GORELEASER_KEY: ${{ secrets.GORELEASER_KEY }}
       - name: Copy Windows Collector Binary
         run: cp dist/collector_windows_amd64_v1/observiq-otel-collector.exe windows/observiq-otel-collector.exe
       - name: Copy Windows Updater Binary
@@ -81,11 +82,12 @@ jobs:
         uses: goreleaser/goreleaser-action@v4
         with:
           # either 'goreleaser' (default) or 'goreleaser-pro'
-          distribution: goreleaser
+          distribution: goreleaser-pro
           version: "v1.16.1"
           args: build --single-target --skip-validate --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GORELEASER_KEY: ${{ secrets.GORELEASER_KEY }}
           GOARCH: "386"
       - name: Copy Windows Collector Binary
         run: cp dist/collector_windows_386/observiq-otel-collector.exe windows/observiq-otel-collector.exe
@@ -186,11 +188,12 @@ jobs:
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v4
         with:
-          distribution: goreleaser
+          distribution: goreleaser-pro
           version: "v1.16.1"
           args: release --clean --timeout 120m
         env:
           GITHUB_TOKEN: ${{ secrets.ORG_GORELEASER_GITHUB_TOKEN }}
+          GORELEASER_KEY: ${{ secrets.GORELEASER_KEY }}
           COSIGN_PWD: ${{ secrets.ORG_COSIGN_PWD }}
       # Create artifact bundle and upload to release
       - name: Create artifact archive
