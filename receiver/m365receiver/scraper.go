@@ -29,66 +29,219 @@ import (
 )
 
 type reportPair struct {
-	columns  map[string]int //relevant metric name and index for csv file
-	endpoint string         //unique report endpoint
+	columns map[string]int //relevant metric name and index for csv file
+
+	endpoint string                                                                     //unique report endpoint
+	indexes  map[int]func(mb *metadata.MetricsBuilder, ts pcommon.Timestamp, val int64) //map of csv file index and recordMetric func
 }
 
 var reports = []reportPair{
 	{
-		columns:  map[string]int{"sharepoint.files": 2, "sharepoint.files.active": 3},
+		//columns:  map[string]int{"sharepoint.files": 2, "sharepoint.files.active": 3},
 		endpoint: "getSharePointSiteUsageFileCounts(period='D7')",
+		indexes: map[int]func(mb *metadata.MetricsBuilder, ts pcommon.Timestamp, val int64){
+			2: func(mb *metadata.MetricsBuilder, ts pcommon.Timestamp, val int64) {
+				mb.RecordM365SharepointFilesCountDataPoint(ts, val)
+			},
+			3: func(mb *metadata.MetricsBuilder, ts pcommon.Timestamp, val int64) {
+				mb.RecordM365SharepointFilesActiveCountDataPoint(ts, val)
+			},
+		},
 	},
 	{
-		columns:  map[string]int{"sharepoint.sites.active": 3},
+		//columns:  map[string]int{"sharepoint.sites.active": 3},
 		endpoint: "getSharePointSiteUsageSiteCounts(period='D7')",
+		indexes: map[int]func(mb *metadata.MetricsBuilder, ts pcommon.Timestamp, val int64){
+			3: func(mb *metadata.MetricsBuilder, ts pcommon.Timestamp, val int64) {
+				mb.RecordM365SharepointSitesActiveCountDataPoint(ts, val)
+			},
+		},
 	},
 	{
-		columns:  map[string]int{"sharepoint.pages.viewed": 2},
+		//columns:  map[string]int{"sharepoint.pages.viewed": 2},
 		endpoint: "getSharePointSiteUsagePages(period='D7')",
+		indexes: map[int]func(mb *metadata.MetricsBuilder, ts pcommon.Timestamp, val int64){
+			2: func(mb *metadata.MetricsBuilder, ts pcommon.Timestamp, val int64) {
+				mb.RecordM365SharepointPagesViewedCountDataPoint(ts, val)
+			},
+		},
 	},
 	{
-		columns:  map[string]int{"sharepoint.pages.unique": 1},
+		//columns:  map[string]int{"sharepoint.pages.unique": 1},
 		endpoint: "getSharePointActivityPages(period='D7')",
+		indexes: map[int]func(mb *metadata.MetricsBuilder, ts pcommon.Timestamp, val int64){
+			1: func(mb *metadata.MetricsBuilder, ts pcommon.Timestamp, val int64) {
+				mb.RecordM365SharepointPagesUniqueCountDataPoint(ts, val)
+			},
+		},
 	},
 	{
-		columns:  map[string]int{"sharepoint.site.storage": 2},
+		//columns:  map[string]int{"sharepoint.site.storage": 2},
 		endpoint: "getSharePointSiteUsageStorage(period='D7')",
+		indexes: map[int]func(mb *metadata.MetricsBuilder, ts pcommon.Timestamp, val int64){
+			2: func(mb *metadata.MetricsBuilder, ts pcommon.Timestamp, val int64) {
+				mb.RecordM365SharepointSiteStorageCountDataPoint(ts, val)
+			},
+		},
 	},
 	{
-		columns:  map[string]int{"device.web": 1, "device.android": 3, "device.ios": 4, "device.mac": 5, "device.windows": 6, "device.chromeos": 7, "device.linux": 8},
+		//columns:  map[string]int{"device.web": 1, "device.android": 3, "device.ios": 4, "device.mac": 5, "device.windows": 6, "device.chromeos": 7, "device.linux": 8},
 		endpoint: "getTeamsDeviceUsageDistributionUserCounts(period='D7')",
+		indexes: map[int]func(mb *metadata.MetricsBuilder, ts pcommon.Timestamp, val int64){
+			1: func(mb *metadata.MetricsBuilder, ts pcommon.Timestamp, val int64) {
+				mb.RecordM365TeamsDeviceUsageCountDataPoint(ts, val, metadata.AttributeTeamsDevicesWeb)
+			},
+			3: func(mb *metadata.MetricsBuilder, ts pcommon.Timestamp, val int64) {
+				mb.RecordM365TeamsDeviceUsageCountDataPoint(ts, val, metadata.AttributeTeamsDevicesAndroid)
+			},
+			4: func(mb *metadata.MetricsBuilder, ts pcommon.Timestamp, val int64) {
+				mb.RecordM365TeamsDeviceUsageCountDataPoint(ts, val, metadata.AttributeTeamsDevicesIOS)
+			},
+			5: func(mb *metadata.MetricsBuilder, ts pcommon.Timestamp, val int64) {
+				mb.RecordM365TeamsDeviceUsageCountDataPoint(ts, val, metadata.AttributeTeamsDevicesMac)
+			},
+			6: func(mb *metadata.MetricsBuilder, ts pcommon.Timestamp, val int64) {
+				mb.RecordM365TeamsDeviceUsageCountDataPoint(ts, val, metadata.AttributeTeamsDevicesWindows)
+			},
+			7: func(mb *metadata.MetricsBuilder, ts pcommon.Timestamp, val int64) {
+				mb.RecordM365TeamsDeviceUsageCountDataPoint(ts, val, metadata.AttributeTeamsDevicesChromeOS)
+			},
+			8: func(mb *metadata.MetricsBuilder, ts pcommon.Timestamp, val int64) {
+				mb.RecordM365TeamsDeviceUsageCountDataPoint(ts, val, metadata.AttributeTeamsDevicesLinux)
+			},
+		},
 	},
 	{
-		columns:  map[string]int{"teams.message.team": 2, "teams.message.private": 5, "teams.calls": 6, "teams.meetings": 7},
+		//columns:  map[string]int{"teams.message.team": 2, "teams.message.private": 5, "teams.calls": 6, "teams.meetings": 7},
 		endpoint: "getTeamsUserActivityCounts(period='D7')",
+		indexes: map[int]func(mb *metadata.MetricsBuilder, ts pcommon.Timestamp, val int64){
+			2: func(mb *metadata.MetricsBuilder, ts pcommon.Timestamp, val int64) {
+				mb.RecordM365TeamsMessageTeamCountDataPoint(ts, val)
+			},
+			5: func(mb *metadata.MetricsBuilder, ts pcommon.Timestamp, val int64) {
+				mb.RecordM365TeamsMessagesPrivateCountDataPoint(ts, val)
+			},
+			6: func(mb *metadata.MetricsBuilder, ts pcommon.Timestamp, val int64) {
+				mb.RecordM365TeamsCallsCountDataPoint(ts, val)
+			},
+			7: func(mb *metadata.MetricsBuilder, ts pcommon.Timestamp, val int64) {
+				mb.RecordM365TeamsMeetingsCountDataPoint(ts, val)
+			},
+		},
 	},
 	{
-		columns:  map[string]int{"onedrive.files": 2, "onedrive.files.active": 3},
+		//columns:  map[string]int{"onedrive.files": 2, "onedrive.files.active": 3},
 		endpoint: "getOneDriveUsageFileCounts(period='D7')",
+		indexes: map[int]func(mb *metadata.MetricsBuilder, ts pcommon.Timestamp, val int64){
+			2: func(mb *metadata.MetricsBuilder, ts pcommon.Timestamp, val int64) {
+				mb.RecordM365OnedriveFilesCountDataPoint(ts, val)
+			},
+			3: func(mb *metadata.MetricsBuilder, ts pcommon.Timestamp, val int64) {
+				mb.RecordM365OnedriveFilesActiveCountDataPoint(ts, val)
+			},
+		},
 	},
 	{
-		columns:  map[string]int{"onedrive.activity.view_edit": 1, "onedrive.activity.synced": 2, "onedrive.activity.internal": 3, "onedrive.activity.external": 4},
+		//columns:  map[string]int{"onedrive.activity.view_edit": 1, "onedrive.activity.synced": 2, "onedrive.activity.internal": 3, "onedrive.activity.external": 4},
 		endpoint: "getOneDriveActivityUserCounts(period='D7')",
+		indexes: map[int]func(mb *metadata.MetricsBuilder, ts pcommon.Timestamp, val int64){
+			1: func(mb *metadata.MetricsBuilder, ts pcommon.Timestamp, val int64) {
+				mb.RecordM365OnedriveUserActivityCountDataPoint(ts, val, metadata.AttributeOnedriveActivityViewEdit)
+			},
+			2: func(mb *metadata.MetricsBuilder, ts pcommon.Timestamp, val int64) {
+				mb.RecordM365OnedriveUserActivityCountDataPoint(ts, val, metadata.AttributeOnedriveActivitySynced)
+			},
+			3: func(mb *metadata.MetricsBuilder, ts pcommon.Timestamp, val int64) {
+				mb.RecordM365OnedriveUserActivityCountDataPoint(ts, val, metadata.AttributeOnedriveActivityInternalShare)
+			},
+			4: func(mb *metadata.MetricsBuilder, ts pcommon.Timestamp, val int64) {
+				mb.RecordM365OnedriveUserActivityCountDataPoint(ts, val, metadata.AttributeOnedriveActivityExternalShare)
+			},
+		},
 	},
 	{
-		columns:  map[string]int{"outlook.mailboxes.active": 2},
+		//columns:  map[string]int{"outlook.mailboxes.active": 2},
 		endpoint: "getMailboxUsageMailboxCounts(period='D7')",
+		indexes: map[int]func(mb *metadata.MetricsBuilder, ts pcommon.Timestamp, val int64){
+			2: func(mb *metadata.MetricsBuilder, ts pcommon.Timestamp, val int64) {
+				mb.RecordM365OutlookMailboxesActiveCountDataPoint(ts, val)
+			},
+		},
 	},
 	{
-		columns:  map[string]int{"outlook.read": 3, "outlook.sent": 1, "outlook.received": 2},
+		//columns:  map[string]int{"outlook.read": 3, "outlook.sent": 1, "outlook.received": 2},
 		endpoint: "getEmailActivityCounts(period='D7')",
+		indexes: map[int]func(mb *metadata.MetricsBuilder, ts pcommon.Timestamp, val int64){
+			1: func(mb *metadata.MetricsBuilder, ts pcommon.Timestamp, val int64) {
+				mb.RecordM365OutlookEmailActivityCountDataPoint(ts, val, metadata.AttributeOutlookActivitySent)
+			},
+			2: func(mb *metadata.MetricsBuilder, ts pcommon.Timestamp, val int64) {
+				mb.RecordM365OutlookEmailActivityCountDataPoint(ts, val, metadata.AttributeOutlookActivityReceived)
+			},
+			3: func(mb *metadata.MetricsBuilder, ts pcommon.Timestamp, val int64) {
+				mb.RecordM365OutlookEmailActivityCountDataPoint(ts, val, metadata.AttributeOutlookActivityRead)
+			},
+		},
 	},
 	{
-		columns:  map[string]int{"outlook.storage": 1},
+		//columns:  map[string]int{"outlook.storage": 1},
 		endpoint: "getMailboxUsageStorage(period='D7')",
+		indexes: map[int]func(mb *metadata.MetricsBuilder, ts pcommon.Timestamp, val int64){
+			1: func(mb *metadata.MetricsBuilder, ts pcommon.Timestamp, val int64) {
+				mb.RecordM365OutlookStorageCountDataPoint(ts, val)
+			},
+		},
 	},
 	{
-		columns:  map[string]int{"outlook.pop3": 7, "outlook.imap4": 8, "outlook.smtp": 9, "outlook.windows": 3, "outlook.mac": 2, "outlook.web": 6, "outlook.mobile": 4, "outlook.other_mobile": 5},
+		//columns:  map[string]int{"outlook.pop3": 7, "outlook.imap4": 8, "outlook.smtp": 9, "outlook.windows": 3, "outlook.mac": 2, "outlook.web": 6, "outlook.mobile": 4, "outlook.other_mobile": 5},
 		endpoint: "getEmailAppUsageAppsUserCounts(period='D7')",
+		indexes: map[int]func(mb *metadata.MetricsBuilder, ts pcommon.Timestamp, val int64){
+			2: func(mb *metadata.MetricsBuilder, ts pcommon.Timestamp, val int64) {
+				mb.RecordM365OutlookAppUserCountDataPoint(ts, val, metadata.AttributeOutlookAppsMac)
+			},
+			3: func(mb *metadata.MetricsBuilder, ts pcommon.Timestamp, val int64) {
+				mb.RecordM365OutlookAppUserCountDataPoint(ts, val, metadata.AttributeOutlookAppsWindows)
+			},
+			4: func(mb *metadata.MetricsBuilder, ts pcommon.Timestamp, val int64) {
+				mb.RecordM365OutlookAppUserCountDataPoint(ts, val, metadata.AttributeOutlookAppsMobile)
+			},
+			5: func(mb *metadata.MetricsBuilder, ts pcommon.Timestamp, val int64) {
+				mb.RecordM365OutlookAppUserCountDataPoint(ts, val, metadata.AttributeOutlookAppsOtherMobile)
+			},
+			6: func(mb *metadata.MetricsBuilder, ts pcommon.Timestamp, val int64) {
+				mb.RecordM365OutlookAppUserCountDataPoint(ts, val, metadata.AttributeOutlookAppsWeb)
+			},
+			7: func(mb *metadata.MetricsBuilder, ts pcommon.Timestamp, val int64) {
+				mb.RecordM365OutlookAppUserCountDataPoint(ts, val, metadata.AttributeOutlookAppsPop3)
+			},
+			8: func(mb *metadata.MetricsBuilder, ts pcommon.Timestamp, val int64) {
+				mb.RecordM365OutlookAppUserCountDataPoint(ts, val, metadata.AttributeOutlookAppsImap4)
+			},
+			9: func(mb *metadata.MetricsBuilder, ts pcommon.Timestamp, val int64) {
+				mb.RecordM365OutlookAppUserCountDataPoint(ts, val, metadata.AttributeOutlookAppsSmtp)
+			},
+		},
 	},
 	{
-		columns:  map[string]int{"outlook.under_limit": 1, "outlook.warning": 2, "outlook.send_prohibited": 3, "outlook.send_receive_prohibited": 4, "outlook.indeterminate": 5},
+		//columns:  map[string]int{"outlook.under_limit": 1, "outlook.warning": 2, "outlook.send_prohibited": 3, "outlook.send_receive_prohibited": 4, "outlook.indeterminate": 5},
 		endpoint: "getMailboxUsageQuotaStatusMailboxCounts(period='D7')",
+		indexes: map[int]func(mb *metadata.MetricsBuilder, ts pcommon.Timestamp, val int64){
+			1: func(mb *metadata.MetricsBuilder, ts pcommon.Timestamp, val int64) {
+				mb.RecordM365OutlookQuotaStatusCountDataPoint(ts, val, metadata.AttributeOutlookQuotasUnderLimit)
+			},
+			2: func(mb *metadata.MetricsBuilder, ts pcommon.Timestamp, val int64) {
+				mb.RecordM365OutlookQuotaStatusCountDataPoint(ts, val, metadata.AttributeOutlookQuotasWarning)
+			},
+			3: func(mb *metadata.MetricsBuilder, ts pcommon.Timestamp, val int64) {
+				mb.RecordM365OutlookQuotaStatusCountDataPoint(ts, val, metadata.AttributeOutlookQuotasSendProhibited)
+			},
+			4: func(mb *metadata.MetricsBuilder, ts pcommon.Timestamp, val int64) {
+				mb.RecordM365OutlookQuotaStatusCountDataPoint(ts, val, metadata.AttributeOutlookQuotasSendReceiveProhibited)
+			},
+			5: func(mb *metadata.MetricsBuilder, ts pcommon.Timestamp, val int64) {
+				mb.RecordM365OutlookQuotaStatusCountDataPoint(ts, val, metadata.AttributeOutlookQuotasIndeterminate)
+			},
+		},
 	},
 }
 
@@ -145,7 +298,7 @@ func (m *m365Scraper) shutdown(_ context.Context) error {
 
 // retrieves data, builds metrics & emits them
 func (m *m365Scraper) scrape(context.Context) (pmetric.Metrics, error) {
-	m365Data, err := m.getStats()
+	err := m.getStats()
 	if err != nil {
 		//troubleshoot stale token
 		if err.Error() == "access token invalid" {
@@ -157,7 +310,7 @@ func (m *m365Scraper) scrape(context.Context) (pmetric.Metrics, error) {
 				return pmetric.Metrics{}, err
 			}
 			//retry data retrieval with fresh token
-			m365Data, err = m.getStats()
+			err = m.getStats()
 			if err != nil {
 				//not a stale access token error, unsure what is wrong
 				m.logger.Error("unable to retrieve stats", zap.Error(err))
@@ -170,117 +323,30 @@ func (m *m365Scraper) scrape(context.Context) (pmetric.Metrics, error) {
 		}
 	}
 
-	now := pcommon.NewTimestampFromTime(time.Now())
-	for metricKey, metricValue := range m365Data {
-		switch metricKey {
-		case "sharepoint.files":
-			m.mb.RecordM365SharepointFilesCountDataPoint(now, int64(metricValue))
-		case "sharepoint.files.active":
-			m.mb.RecordM365SharepointFilesActiveCountDataPoint(now, int64(metricValue))
-		case "sharepoint.sites.active":
-			m.mb.RecordM365SharepointSitesActiveCountDataPoint(now, int64(metricValue))
-		case "sharepoint.pages.viewed":
-			m.mb.RecordM365SharepointPagesViewedCountDataPoint(now, int64(metricValue))
-		case "sharepoint.pages.unique":
-			m.mb.RecordM365SharepointPagesUniqueCountDataPoint(now, int64(metricValue))
-		case "sharepoint.site.storage":
-			m.mb.RecordM365SharepointSiteStorageCountDataPoint(now, int64(metricValue))
-		case "device.web":
-			m.mb.RecordM365TeamsDeviceUsageCountDataPoint(now, int64(metricValue), metadata.AttributeTeamsDevicesWeb)
-		case "device.android":
-			m.mb.RecordM365TeamsDeviceUsageCountDataPoint(now, int64(metricValue), metadata.AttributeTeamsDevicesAndroid)
-		case "device.ios":
-			m.mb.RecordM365TeamsDeviceUsageCountDataPoint(now, int64(metricValue), metadata.AttributeTeamsDevicesIOS)
-		case "device.mac":
-			m.mb.RecordM365TeamsDeviceUsageCountDataPoint(now, int64(metricValue), metadata.AttributeTeamsDevicesMac)
-		case "device.windows":
-			m.mb.RecordM365TeamsDeviceUsageCountDataPoint(now, int64(metricValue), metadata.AttributeTeamsDevicesWindows)
-		case "device.chromeos":
-			m.mb.RecordM365TeamsDeviceUsageCountDataPoint(now, int64(metricValue), metadata.AttributeTeamsDevicesChromeOS)
-		case "device.linux":
-			m.mb.RecordM365TeamsDeviceUsageCountDataPoint(now, int64(metricValue), metadata.AttributeTeamsDevicesLinux)
-		case "teams.message.team":
-			m.mb.RecordM365TeamsMessageTeamCountDataPoint(now, int64(metricValue))
-		case "teams.message.private":
-			m.mb.RecordM365TeamsMessagesPrivateCountDataPoint(now, int64(metricValue))
-		case "teams.calls":
-			m.mb.RecordM365TeamsCallsCountDataPoint(now, int64(metricValue))
-		case "teams.meetings":
-			m.mb.RecordM365TeamsMeetingsCountDataPoint(now, int64(metricValue))
-		case "onedrive.files":
-			m.mb.RecordM365OnedriveFilesCountDataPoint(now, int64(metricValue))
-		case "onedrive.files.active":
-			m.mb.RecordM365OnedriveFilesActiveCountDataPoint(now, int64(metricValue))
-		case "onedrive.activity.view_edit":
-			m.mb.RecordM365OnedriveUserActivityCountDataPoint(now, int64(metricValue), metadata.AttributeOnedriveActivityViewEdit)
-		case "onedrive.activity.synced":
-			m.mb.RecordM365OnedriveUserActivityCountDataPoint(now, int64(metricValue), metadata.AttributeOnedriveActivitySynced)
-		case "onedrive.activity.internal":
-			m.mb.RecordM365OnedriveUserActivityCountDataPoint(now, int64(metricValue), metadata.AttributeOnedriveActivityInternalShare)
-		case "onedrive.activity.external":
-			m.mb.RecordM365OnedriveUserActivityCountDataPoint(now, int64(metricValue), metadata.AttributeOnedriveActivityExternalShare)
-		case "outlook.mailboxes.active":
-			m.mb.RecordM365OutlookMailboxesActiveCountDataPoint(now, int64(metricValue))
-		case "outlook.read":
-			m.mb.RecordM365OutlookEmailActivityCountDataPoint(now, int64(metricValue), metadata.AttributeOutlookActivityRead)
-		case "outlook.sent":
-			m.mb.RecordM365OutlookEmailActivityCountDataPoint(now, int64(metricValue), metadata.AttributeOutlookActivitySent)
-		case "outlook.received":
-			m.mb.RecordM365OutlookEmailActivityCountDataPoint(now, int64(metricValue), metadata.AttributeOutlookActivityReceived)
-		case "outlook.storage":
-			m.mb.RecordM365OutlookStorageCountDataPoint(now, int64(metricValue))
-		case "outlook.pop3":
-			m.mb.RecordM365OutlookAppUserCountDataPoint(now, int64(metricValue), metadata.AttributeOutlookAppsPop3)
-		case "outlook.imap4":
-			m.mb.RecordM365OutlookAppUserCountDataPoint(now, int64(metricValue), metadata.AttributeOutlookAppsImap4)
-		case "outlook.smtp":
-			m.mb.RecordM365OutlookAppUserCountDataPoint(now, int64(metricValue), metadata.AttributeOutlookAppsSmtp)
-		case "outlook.windows":
-			m.mb.RecordM365OutlookAppUserCountDataPoint(now, int64(metricValue), metadata.AttributeOutlookAppsWindows)
-		case "outlook.mac":
-			m.mb.RecordM365OutlookAppUserCountDataPoint(now, int64(metricValue), metadata.AttributeOutlookAppsMac)
-		case "outlook.web":
-			m.mb.RecordM365OutlookAppUserCountDataPoint(now, int64(metricValue), metadata.AttributeOutlookAppsWeb)
-		case "outlook.mobile":
-			m.mb.RecordM365OutlookAppUserCountDataPoint(now, int64(metricValue), metadata.AttributeOutlookAppsMobile)
-		case "outlook.other_mobile":
-			m.mb.RecordM365OutlookAppUserCountDataPoint(now, int64(metricValue), metadata.AttributeOutlookAppsOtherMobile)
-		case "outlook.under_limit":
-			m.mb.RecordM365OutlookQuotaStatusCountDataPoint(now, int64(metricValue), metadata.AttributeOutlookQuotasUnderLimit)
-		case "outlook.warning":
-			m.mb.RecordM365OutlookQuotaStatusCountDataPoint(now, int64(metricValue), metadata.AttributeOutlookQuotasWarning)
-		case "outlook.send_prohibited":
-			m.mb.RecordM365OutlookQuotaStatusCountDataPoint(now, int64(metricValue), metadata.AttributeOutlookQuotasSendProhibited)
-		case "outlook.send_receive_prohibited":
-			m.mb.RecordM365OutlookQuotaStatusCountDataPoint(now, int64(metricValue), metadata.AttributeOutlookQuotasSendReceiveProhibited)
-		case "outlook.indeterminate":
-			m.mb.RecordM365OutlookQuotaStatusCountDataPoint(now, int64(metricValue), metadata.AttributeOutlookQuotasIndeterminate)
-		}
-	}
-
 	return m.mb.Emit(), nil
 }
 
-func (m *m365Scraper) getStats() (map[string]int, error) {
-	reportData := map[string]int{}
+func (m *m365Scraper) getStats() error {
+	now := pcommon.NewTimestampFromTime(time.Now())
 
 	for _, r := range reports {
 		line, err := m.client.GetCSV(m.root + r.endpoint)
 		if err != nil {
-			return map[string]int{}, err
+			return err
 		}
 		if len(line) == 0 {
 			m.logger.Debug("no data available from endpoint and associated metrics: ", zap.String("endpoint", r.endpoint), zap.Error(err))
 			continue
 		}
 
-		for k, v := range r.columns {
-			reportData[k], err = strconv.Atoi(line[v])
-			if err != nil {
-				return map[string]int{}, err
+		for k, v := range r.indexes {
+			data, err := strconv.Atoi(line[k])
+			if err != nil { // error converting string to int
+				return err
 			}
+			v(m.mb, now, int64(data))
 		}
 	}
 
-	return reportData, nil
+	return nil
 }
