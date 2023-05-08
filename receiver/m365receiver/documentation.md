@@ -40,7 +40,7 @@ The number of users who have interacted with a OneDrive file, by action.
 
 | Name | Description | Values |
 | ---- | ----------- | ------ |
-| kind | The OneDrive user activity types. | Str: ``view_edit``, ``synced``, ``internal_share``, ``external_share`` |
+| activity | The OneDrive user activity types. | Str: ``view_edit``, ``synced``, ``internal_share``, ``external_share`` |
 
 ### m365.outlook.app.user.count
 
@@ -54,7 +54,7 @@ The number of unique users per app over the period of time in the organization O
 
 | Name | Description | Values |
 | ---- | ----------- | ------ |
-| kind | The number of users of Outlook apps. | Str: ``pop3``, ``imap4``, ``smtp``, ``windows``, ``mac``, ``web``, ``mobile``, ``other_mobile`` |
+| app | The number of users of Outlook apps. | Str: ``pop3``, ``imap4``, ``smtp``, ``windows``, ``mac``, ``web``, ``mobile``, ``other_mobile`` |
 
 ### m365.outlook.email_activity.count
 
@@ -68,7 +68,7 @@ The number of email actions by members over the period of time in the organizati
 
 | Name | Description | Values |
 | ---- | ----------- | ------ |
-| kind | The Outlook user activity types. | Str: ``read``, ``sent``, ``received`` |
+| activity | The Outlook user activity types. | Str: ``read``, ``sent``, ``received`` |
 
 ### m365.outlook.mailboxes.active.count
 
@@ -90,7 +90,7 @@ The number of mailboxes in the various quota statuses over the period of time in
 
 | Name | Description | Values |
 | ---- | ----------- | ------ |
-| kind | The types of Outlook quota states. | Str: ``under_limit``, ``warning``, ``send_prohibited``, ``send_receive_prohibited``, ``indeterminate`` |
+| state | The types of Outlook quota states. | Str: ``under_limit``, ``warning``, ``send_prohibited``, ``send_receive_prohibited``, ``indeterminate`` |
 
 ### m365.outlook.storage.count
 
@@ -168,7 +168,7 @@ The number of unique users by device/platform that have used Teams.
 
 | Name | Description | Values |
 | ---- | ----------- | ------ |
-| kind | The device types. | Str: ``Android``, ``iOS``, ``Mac``, ``Windows``, ``Chrome OS``, ``Linux``, ``Web`` |
+| device | The device types. | Str: ``Android``, ``iOS``, ``Mac``, ``Windows``, ``Chrome OS``, ``Linux``, ``Web`` |
 
 ### m365.teams.meetings.count
 

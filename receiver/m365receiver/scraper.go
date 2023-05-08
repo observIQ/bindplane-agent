@@ -128,7 +128,7 @@ func (m *m365Scraper) start(_ context.Context, host component.Host) error {
 		return err
 	}
 
-	m.client = newM365Client(httpClient, m.cfg)
+	m.client = newM365Client(httpClient, m.cfg, "https://graph.microsoft.com/.default")
 
 	err = m.client.GetToken()
 	if err != nil {
@@ -159,7 +159,7 @@ func (m *m365Scraper) scrape(context.Context) (pmetric.Metrics, error) {
 			//retry data retrieval with fresh token
 			m365Data, err = m.getStats()
 			if err != nil {
-				//not an error with the access token
+				//not a stale access token error, unsure what is wrong
 				m.logger.Error("unable to retrieve stats", zap.Error(err))
 				return pmetric.Metrics{}, err
 			}

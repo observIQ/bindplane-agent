@@ -37,7 +37,7 @@ func NewFactory() receiver.Factory {
 		typeStr,
 		createDefaultConfig,
 		receiver.WithMetrics(createMetricsReceiver, metadata.Stability),
-		// receiver.WithLogs(createLogsReceiver, metadata.Stability),
+		receiver.WithLogs(createLogsReceiver, metadata.Stability),
 	)
 }
 
@@ -77,11 +77,13 @@ func createMetricsReceiver(
 
 }
 
-// func createLogsReceiver(
-// 	_ context.Context,
-// 	params receiver.CreateSettings,
-// 	rConf component.Config,
-// 	consumer consumer.Logs,
-// ) (receiver.Logs, error) {
-
-// }
+func createLogsReceiver(
+	_ context.Context,
+	params receiver.CreateSettings,
+	rConf component.Config,
+	consumer consumer.Logs,
+) (receiver.Logs, error) {
+	cfg := rConf.(*Config)
+	rcvr := newM365Logs(cfg, params, consumer)
+	return rcvr, nil
+}

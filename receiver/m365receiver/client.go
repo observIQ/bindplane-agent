@@ -31,9 +31,10 @@ type m365Client struct {
 	clientID     string
 	clientSecret string
 	token        string
+	scope        string
 }
 
-type response struct {
+type auth struct {
 	Token string `json:"access_token"`
 }
 type tokenError struct {
@@ -45,12 +46,28 @@ type csvError struct {
 	} `json:"error"`
 }
 
-func newM365Client(c *http.Client, cfg *Config) *m365Client {
+type logResp struct {
+	Content string `json:"contentUri"`
+}
+
+type jsonLogs struct {
+	OrganizationId string `json:"OrganizationId"`
+	Workload       string `json:"Workload,omitempty"`
+	UserId         string `json:"UserId"`
+	UserType       int    `json:"UserType"`
+	CreationTime   string `json:"CreationTime"` //diff type for timestamp?
+	Id             string `json:"Id"`
+	Operation      string `json:"Operation"`
+	ResultStatus   string `json:"ResultStatus,omitempty"`
+}
+
+func newM365Client(c *http.Client, cfg *Config, scope string) *m365Client {
 	return &m365Client{
 		client:       c,
 		authEndpoint: fmt.Sprintf("https://login.microsoftonline.com/%s/oauth2/v2.0/token", cfg.TenantID),
 		clientID:     cfg.ClientID,
 		clientSecret: cfg.ClientSecret,
+		scope:        scope,
 	}
 }
 
@@ -59,60 +76,12 @@ func (m *m365Client) shutdown() error {
 	return nil
 }
 
-func (m *m365Client) GetCSV(endpoint string) ([]string, error) {
-	req, err := http.NewRequest("GET", endpoint, nil)
-	if err != nil {
-		return []string{}, err
-	}
-
-	req.Header.Set("Authorization", m.token)
-	resp, err := m.client.Do(req)
-	if err != nil {
-		return []string{}, err
-	}
-
-	//troubleshoot resp err if present
-	if resp.StatusCode != 200 {
-		//get error code
-		var respErr csvError
-		body, err := io.ReadAll(resp.Body)
-		if err != nil {
-			return []string{}, err
-		}
-		err = json.Unmarshal(body, &respErr)
-		if err != nil {
-			return []string{}, err
-		}
-		if respErr.ErrorCSV.Code == "InvalidAuthenticationToken" {
-			return []string{}, fmt.Errorf("access token invalid")
-		}
-		return []string{}, fmt.Errorf("got non 200 status code from request, got %d", resp.StatusCode)
-	}
-
-	defer func() { _ = resp.Body.Close() }()
-	csvReader := csv.NewReader(resp.Body)
-
-	//parse out 2nd line & return csv data
-	_, err = csvReader.Read()
-	if err != nil {
-		return []string{}, err
-	}
-	data, err := csvReader.Read()
-	if err != nil {
-		if err == io.EOF { //no data in report, scraper should still run
-			return []string{}, nil
-		}
-		return []string{}, err
-	}
-
-	return data, nil
-}
-
 // Get authorization token
+// metrics token has scope = "https://graph.microsoft.com/.default" & logs token has scope = "https://manage.office.com/.default"
 func (m *m365Client) GetToken() error {
 	formData := url.Values{
 		"grant_type":    {"client_credentials"},
-		"scope":         {"https://graph.microsoft.com/.default"},
+		"scope":         {m.scope},
 		"client_id":     {m.clientID},
 		"client_secret": {m.clientSecret},
 	}
@@ -162,7 +131,7 @@ func (m *m365Client) GetToken() error {
 		return err
 	}
 
-	var token response
+	var token auth
 	err = json.Unmarshal(body, &token)
 	if err != nil {
 		return err
@@ -171,4 +140,124 @@ func (m *m365Client) GetToken() error {
 	m.token = token.Token
 
 	return nil
+}
+
+// function for getting metrics data
+func (m *m365Client) GetCSV(endpoint string) ([]string, error) {
+	req, err := http.NewRequest("GET", endpoint, nil)
+	if err != nil {
+		return []string{}, err
+	}
+
+	req.Header.Set("Authorization", m.token)
+	resp, err := m.client.Do(req)
+	if err != nil {
+		return []string{}, err
+	}
+
+	//troubleshoot resp err if present
+	if resp.StatusCode != 200 {
+		//get error code
+		var respErr csvError
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return []string{}, err
+		}
+		err = json.Unmarshal(body, &respErr)
+		if err != nil {
+			return []string{}, err
+		}
+		if respErr.ErrorCSV.Code == "InvalidAuthenticationToken" {
+			return []string{}, fmt.Errorf("access token invalid")
+		}
+		return []string{}, fmt.Errorf("got non 200 status code from request, got %d", resp.StatusCode)
+	}
+
+	defer func() { _ = resp.Body.Close() }()
+	csvReader := csv.NewReader(resp.Body)
+
+	//parse out 2nd line & return csv data
+	_, err = csvReader.Read()
+	if err != nil {
+		return []string{}, err
+	}
+	data, err := csvReader.Read()
+	if err != nil {
+		if err == io.EOF { //no data in report, scraper should still run
+			return []string{}, nil
+		}
+		return []string{}, err
+	}
+
+	return data, nil
+}
+
+// function for getting log data
+func (m *m365Client) GetJSON(endpoint string) ([]jsonLogs, error) {
+	//1. make request to Audit endpoint
+	req, err := http.NewRequest("GET", endpoint, nil)
+	if err != nil {
+		return []jsonLogs{}, err
+	}
+	req.Header.Set("Authorization", "Bearer"+m.token)
+	resp, err := m.client.Do(req)
+	if err != nil {
+		return []jsonLogs{}, err
+	}
+
+	//2. error handle
+	if resp.StatusCode != 200 {
+		//TODO: figure out error codes/handling for management api endpoint
+	}
+
+	//3.0 check if contentUri field if present
+	defer func() { _ = resp.Body.Close() }() //TODO: how does this work with multiple resp assignments?
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return []jsonLogs{}, err
+	}
+	//if body is empty, no new log data available
+	if len(body) == 0 {
+		return []jsonLogs{}, nil
+	}
+
+	//3.5 extract contentUri field
+	var contentUri logResp
+	err = json.Unmarshal(body, &contentUri)
+	if err != nil {
+		return []jsonLogs{}, err
+	}
+
+	//4. make new GET request to contentUri, including token
+	req, err = http.NewRequest("GET", contentUri.Content, nil)
+	if err != nil {
+		return []jsonLogs{}, err
+	}
+	req.Header.Set("Authorization", "Bearer"+m.token)
+	resp, err = m.client.Do(req)
+	if err != nil {
+		return []jsonLogs{}, err
+	}
+
+	//5. error handle
+	if resp.StatusCode != 200 {
+		//TODO: figure out error codes/handling for management api endpoint
+	}
+
+	//6. read in json
+	defer func() { _ = resp.Body.Close() }()
+
+	body, err = io.ReadAll(resp.Body)
+	if err != nil {
+		return []jsonLogs{}, err
+	}
+
+	var logData []jsonLogs
+	err = json.Unmarshal(body, &logData)
+	if err != nil {
+		return []jsonLogs{}, err
+	}
+
+	return logData, nil
 }

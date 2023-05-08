@@ -454,7 +454,7 @@ func (m *metricM365OnedriveUserActivityCount) recordDataPoint(start pcommon.Time
 	dp.SetStartTimestamp(start)
 	dp.SetTimestamp(ts)
 	dp.SetIntValue(val)
-	dp.Attributes().PutStr("kind", onedriveActivityAttributeValue)
+	dp.Attributes().PutStr("activity", onedriveActivityAttributeValue)
 }
 
 // updateCapacity saves max length of data point slices that will be used for the slice capacity.
@@ -507,7 +507,7 @@ func (m *metricM365OutlookAppUserCount) recordDataPoint(start pcommon.Timestamp,
 	dp.SetStartTimestamp(start)
 	dp.SetTimestamp(ts)
 	dp.SetIntValue(val)
-	dp.Attributes().PutStr("kind", outlookAppsAttributeValue)
+	dp.Attributes().PutStr("app", outlookAppsAttributeValue)
 }
 
 // updateCapacity saves max length of data point slices that will be used for the slice capacity.
@@ -560,7 +560,7 @@ func (m *metricM365OutlookEmailActivityCount) recordDataPoint(start pcommon.Time
 	dp.SetStartTimestamp(start)
 	dp.SetTimestamp(ts)
 	dp.SetIntValue(val)
-	dp.Attributes().PutStr("kind", outlookActivityAttributeValue)
+	dp.Attributes().PutStr("activity", outlookActivityAttributeValue)
 }
 
 // updateCapacity saves max length of data point slices that will be used for the slice capacity.
@@ -664,7 +664,7 @@ func (m *metricM365OutlookQuotaStatusCount) recordDataPoint(start pcommon.Timest
 	dp.SetStartTimestamp(start)
 	dp.SetTimestamp(ts)
 	dp.SetIntValue(val)
-	dp.Attributes().PutStr("kind", outlookQuotasAttributeValue)
+	dp.Attributes().PutStr("state", outlookQuotasAttributeValue)
 }
 
 // updateCapacity saves max length of data point slices that will be used for the slice capacity.
@@ -1125,7 +1125,7 @@ func (m *metricM365TeamsDeviceUsageCount) recordDataPoint(start pcommon.Timestam
 	dp.SetStartTimestamp(start)
 	dp.SetTimestamp(ts)
 	dp.SetIntValue(val)
-	dp.Attributes().PutStr("kind", teamsDevicesAttributeValue)
+	dp.Attributes().PutStr("device", teamsDevicesAttributeValue)
 }
 
 // updateCapacity saves max length of data point slices that will be used for the slice capacity.

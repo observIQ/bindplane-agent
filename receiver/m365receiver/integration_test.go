@@ -41,7 +41,7 @@ func TestM365Integration(t *testing.T) {
 
 	//create m365Client object with the http.Client = to the mock server for the integration tests
 	mockServer := newIntMockServer()
-	client := newM365Client(mockServer.Client(), cfg)
+	client := newM365Client(mockServer.Client(), cfg, "https://graph.microsoft.com/.default")
 	client.authEndpoint = mockServer.URL + "/" + cfg.TenantID
 	err := client.GetToken()
 	require.NoError(t, err)

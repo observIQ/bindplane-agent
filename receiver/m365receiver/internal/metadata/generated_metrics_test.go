@@ -201,7 +201,7 @@ func TestMetricsBuilder(t *testing.T) {
 					assert.Equal(t, ts, dp.Timestamp())
 					assert.Equal(t, pmetric.NumberDataPointValueTypeInt, dp.ValueType())
 					assert.Equal(t, int64(1), dp.IntValue())
-					attrVal, ok := dp.Attributes().Get("kind")
+					attrVal, ok := dp.Attributes().Get("activity")
 					assert.True(t, ok)
 					assert.Equal(t, "view_edit", attrVal.Str())
 				case "m365.outlook.app.user.count":
@@ -218,7 +218,7 @@ func TestMetricsBuilder(t *testing.T) {
 					assert.Equal(t, ts, dp.Timestamp())
 					assert.Equal(t, pmetric.NumberDataPointValueTypeInt, dp.ValueType())
 					assert.Equal(t, int64(1), dp.IntValue())
-					attrVal, ok := dp.Attributes().Get("kind")
+					attrVal, ok := dp.Attributes().Get("app")
 					assert.True(t, ok)
 					assert.Equal(t, "pop3", attrVal.Str())
 				case "m365.outlook.email_activity.count":
@@ -235,7 +235,7 @@ func TestMetricsBuilder(t *testing.T) {
 					assert.Equal(t, ts, dp.Timestamp())
 					assert.Equal(t, pmetric.NumberDataPointValueTypeInt, dp.ValueType())
 					assert.Equal(t, int64(1), dp.IntValue())
-					attrVal, ok := dp.Attributes().Get("kind")
+					attrVal, ok := dp.Attributes().Get("activity")
 					assert.True(t, ok)
 					assert.Equal(t, "read", attrVal.Str())
 				case "m365.outlook.mailboxes.active.count":
@@ -266,7 +266,7 @@ func TestMetricsBuilder(t *testing.T) {
 					assert.Equal(t, ts, dp.Timestamp())
 					assert.Equal(t, pmetric.NumberDataPointValueTypeInt, dp.ValueType())
 					assert.Equal(t, int64(1), dp.IntValue())
-					attrVal, ok := dp.Attributes().Get("kind")
+					attrVal, ok := dp.Attributes().Get("state")
 					assert.True(t, ok)
 					assert.Equal(t, "under_limit", attrVal.Str())
 				case "m365.outlook.storage.count":
@@ -395,7 +395,7 @@ func TestMetricsBuilder(t *testing.T) {
 					assert.Equal(t, ts, dp.Timestamp())
 					assert.Equal(t, pmetric.NumberDataPointValueTypeInt, dp.ValueType())
 					assert.Equal(t, int64(1), dp.IntValue())
-					attrVal, ok := dp.Attributes().Get("kind")
+					attrVal, ok := dp.Attributes().Get("device")
 					assert.True(t, ok)
 					assert.Equal(t, "Android", attrVal.Str())
 				case "m365.teams.meetings.count":

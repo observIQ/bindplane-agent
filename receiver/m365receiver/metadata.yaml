@@ -6,27 +6,27 @@ status:
 
 attributes:
   teamsDevices:
-    name_override: kind
+    name_override: device
     description: The device types.
     type: string
     enum: [Android, iOS, Mac, Windows, Chrome OS, Linux, Web]
   onedriveActivity:
-    name_override: kind
+    name_override: activity
     description: The OneDrive user activity types.
     type: string
     enum: [view_edit, synced, internal_share, external_share]
   outlookActivity:
-    name_override: kind
+    name_override: activity
     description: The Outlook user activity types.
     type: string
     enum: [read, sent, received]
   outlookApps:
-    name_override: kind
+    name_override: app
     description: The number of users of Outlook apps.
     type: string
     enum: [pop3, imap4, smtp, windows, mac, web, mobile, other_mobile]
   outlookQuotas:
-    name_override: kind
+    name_override: state
     description: The types of Outlook quota states.
     type: string
     enum: [under_limit, warning, send_prohibited, send_receive_prohibited, indeterminate]

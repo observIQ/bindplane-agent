@@ -25,7 +25,7 @@ import (
 
 func TestGetToken(t *testing.T) {
 	m365Mock := newMockServerToken()
-	testClient := newM365Client(m365Mock.Client(), &Config{})
+	testClient := newM365Client(m365Mock.Client(), &Config{}, "https://graph.microsoft.com/.default")
 	testClient.authEndpoint = m365Mock.URL + "/testTenantID"
 	testClient.clientID = "testClientID"
 	testClient.clientSecret = "testClientSecret"
@@ -55,7 +55,7 @@ func TestGetToken(t *testing.T) {
 
 func TestGetCSV(t *testing.T) {
 	m365Mock := newMockServerCSV()
-	testClient := newM365Client(m365Mock.Client(), &Config{})
+	testClient := newM365Client(m365Mock.Client(), &Config{}, "https://graph.microsoft.com/.default")
 	testClient.token = "foo"
 
 	//expected behavior
