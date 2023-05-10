@@ -17,6 +17,7 @@ package m365receiver // import "github.com/observiq/observiq-otel-collector/rece
 import (
 	"fmt"
 	"regexp"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/observiq/observiq-otel-collector/receiver/m365receiver/internal/metadata"
@@ -32,6 +33,16 @@ type Config struct {
 	TenantID                                string                        `mapstructure:"tenant_id"`
 	ClientID                                string                        `mapstructure:"client_id"`
 	ClientSecret                            string                        `mapstructure:"client_secret"`
+	Logs                                    *LogsConfig                   `mapstructure:"logs"`
+}
+
+type LogsConfig struct {
+	PollInterval   time.Duration `mapstructure:"poll_interval"`
+	GeneralLogs    bool          `mapstructure:"General"`
+	ExchangeLogs   bool          `mapstructure:"Exchange"`
+	SharepointLogs bool          `mapstructure:"Sharepoint"`
+	AzureADLogs    bool          `mapstructure:"AzureAD"`
+	DLPLogs        bool          `mapstructure:"DLP"`
 }
 
 // Validate validates the configuration by checking for missing or invalid fields

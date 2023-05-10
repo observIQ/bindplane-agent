@@ -50,6 +50,13 @@ func createDefaultConfig() component.Config {
 			Timeout: 10 * time.Second,
 		},
 		MetricsBuilderConfig: metadata.DefaultMetricsBuilderConfig(),
+		Logs: &LogsConfig{
+			GeneralLogs:    true,
+			ExchangeLogs:   true,
+			SharepointLogs: true,
+			AzureADLogs:    true,
+			DLPLogs:        true,
+		},
 	}
 }
 

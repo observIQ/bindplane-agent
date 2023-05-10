@@ -46,6 +46,10 @@ type csvError struct {
 	} `json:"error"`
 }
 
+type jsonError struct {
+	Message string `json:"Message"`
+}
+
 type logResp struct {
 	Content string `json:"contentUri"`
 }
@@ -55,7 +59,7 @@ type jsonLogs struct {
 	Workload       string `json:"Workload,omitempty"`
 	UserId         string `json:"UserId"`
 	UserType       int    `json:"UserType"`
-	CreationTime   string `json:"CreationTime"` //diff type for timestamp?
+	CreationTime   string `json:"CreationTime"`
 	Id             string `json:"Id"`
 	Operation      string `json:"Operation"`
 	ResultStatus   string `json:"ResultStatus,omitempty"`
@@ -77,7 +81,8 @@ func (m *m365Client) shutdown() error {
 }
 
 // Get authorization token
-// metrics token has scope = "https://graph.microsoft.com/.default" & logs token has scope = "https://manage.office.com/.default"
+// metrics token has scope = "https://graph.microsoft.com/.default"
+// logs token has scope = "https://manage.office.com/.default"
 func (m *m365Client) GetToken() error {
 	formData := url.Values{
 		"grant_type":    {"client_credentials"},
@@ -194,65 +199,85 @@ func (m *m365Client) GetCSV(endpoint string) ([]string, error) {
 
 // function for getting log data
 func (m *m365Client) GetJSON(endpoint string) ([]jsonLogs, error) {
-	//1. make request to Audit endpoint
+	// make request to Audit endpoint
 	req, err := http.NewRequest("GET", endpoint, nil)
 	if err != nil {
 		return []jsonLogs{}, err
 	}
-	req.Header.Set("Authorization", "Bearer"+m.token)
+	req.Header.Set("Authorization", "Bearer "+m.token)
 	resp, err := m.client.Do(req)
 	if err != nil {
 		return []jsonLogs{}, err
 	}
+	defer func() { _ = resp.Body.Close() }()
 
-	//2. error handle
+	// troubleshoot error code
 	if resp.StatusCode != 200 {
-		//TODO: figure out error codes/handling for management api endpoint
+		var respErr jsonError
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return []jsonLogs{}, err
+		}
+		err = json.Unmarshal(body, &respErr)
+		if err != nil {
+			return []jsonLogs{}, err
+		}
+		if respErr.Message == "Authorization has been denied for this request." {
+			return []jsonLogs{}, fmt.Errorf("authorization denied")
+		}
+		return []jsonLogs{}, fmt.Errorf("got non 200 status code from request, got %d", resp.StatusCode)
 	}
 
-	//3.0 check if contentUri field if present
-	defer func() { _ = resp.Body.Close() }() //TODO: how does this work with multiple resp assignments?
-
+	// check if contentUri field if present
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return []jsonLogs{}, err
 	}
-	//if body is empty, no new log data available
-	if len(body) == 0 {
+	if len(body) == 0 { // if body is empty, no new log data available
 		return []jsonLogs{}, nil
 	}
 
-	//3.5 extract contentUri field
+	// extract contentUri field
 	var contentUri logResp
 	err = json.Unmarshal(body, &contentUri)
 	if err != nil {
 		return []jsonLogs{}, err
 	}
 
-	//4. make new GET request to contentUri, including token
-	req, err = http.NewRequest("GET", contentUri.Content, nil)
+	// make new GET request to contentUri, including token
+	redirectReq, err := http.NewRequest("GET", contentUri.Content, nil)
 	if err != nil {
 		return []jsonLogs{}, err
 	}
-	req.Header.Set("Authorization", "Bearer"+m.token)
-	resp, err = m.client.Do(req)
+	redirectReq.Header.Set("Authorization", "Bearer "+m.token)
+	redirectResp, err := m.client.Do(redirectReq)
 	if err != nil {
 		return []jsonLogs{}, err
 	}
+	defer func() { _ = redirectResp.Body.Close() }()
 
-	//5. error handle
-	if resp.StatusCode != 200 {
-		//TODO: figure out error codes/handling for management api endpoint
+	// troubleshoot error code
+	if redirectResp.StatusCode != 200 {
+		var respErr jsonError
+		body, err := io.ReadAll(redirectResp.Body)
+		if err != nil {
+			return []jsonLogs{}, err
+		}
+		err = json.Unmarshal(body, &respErr)
+		if err != nil {
+			return []jsonLogs{}, err
+		}
+		if respErr.Message == "Authorization has been denied for this request." {
+			return []jsonLogs{}, fmt.Errorf("authorization denied")
+		}
+		return []jsonLogs{}, fmt.Errorf("got non 200 status code from request, got %d", redirectResp.StatusCode)
 	}
 
-	//6. read in json
-	defer func() { _ = resp.Body.Close() }()
-
+	// read in json
 	body, err = io.ReadAll(resp.Body)
 	if err != nil {
 		return []jsonLogs{}, err
 	}
-
 	var logData []jsonLogs
 	err = json.Unmarshal(body, &logData)
 	if err != nil {
