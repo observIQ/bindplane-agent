@@ -108,18 +108,18 @@ func TestProcessTraces(t *testing.T) {
 			},
 		})
 
-		inputMetrics := testMetrics()
+		inputTraces := testTraces()
 
-		outputLogs, err := p.processMetrics(context.Background(), inputMetrics)
+		outputTraces, err := p.processTraces(context.Background(), inputTraces)
 		require.NoError(t, err)
 
-		outResourceMetrics := outputLogs.ResourceMetrics().At(0)
-		outMetricsSlice := outResourceMetrics.ScopeMetrics().At(0).Metrics()
+		outResourceSpans := outputTraces.ResourceSpans().At(0)
+		span := outResourceSpans.ScopeSpans().At(0).Spans().At(0)
+
 		require.Equal(t, map[string]any{
 			"resource_key": "resource_value",
-		}, outResourceMetrics.Resource().Attributes().AsRaw())
-		requireMetricsAttrsEqual(t, rawAttributes, outMetricsSlice)
-
+		}, outResourceSpans.Resource().Attributes().AsRaw())
+		require.Equal(t, rawAttributes, span.Attributes().AsRaw())
 	})
 }
 

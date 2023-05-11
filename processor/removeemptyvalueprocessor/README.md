@@ -35,8 +35,8 @@ The following config is an example configuration of the `removeemptyvalues` proc
 
 ```yaml
 receivers:
-  filelog:
-    include: [/tmp/example/apache.log]
+  windowseventlog:
+    channel: application
 
 processors:
   removeemptyvalues:
@@ -47,29 +47,35 @@ exporters:
 service:
   pipelines:
     logs:
-      receivers: [filelog]
+      receivers: [windowseventlog]
       processors: [removeemptyvalues]
       exporters: [logging]
 ```
 
 ## How to
+### Remove empty fields from nginx logs
 
-### Sample 75% of incoming telemetry
-
-The following configuration will drop 75% of incoming `metrics`, `logs` or `traces`.
-
-```yaml
-processors:
-  sampling:
-    drop_ratio: 0.75
-```
-
-### Drop all incoming telemetry
-
-The following configuration will drop 100% of incoming `metrics`, `logs`, or `traces`. Essentially dropping all data.
+The following configuration removes empty fields from nginx logs, where empty fields have a value of "-".
 
 ```yaml
+receivers:
+  plugin:
+    path: "./plugins/nginx_logs.yaml"
+
 processors:
-  sampling:
-    drop_ratio: 1.0
+  removeemptyvalues:
+    empty_string_values:
+      # Remove fields with the value of "-"
+      - "-"
+
+exporters:
+  logging:
+
+service:
+  pipelines:
+    logs:
+      receivers: [plugin]
+      processors: [removeemptyvalues]
+      exporters: [logging]
 ```
+

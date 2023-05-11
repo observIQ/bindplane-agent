@@ -46,15 +46,18 @@ func (sp *emptyValueProcessor) processTraces(_ context.Context, td ptrace.Traces
 			cleanMap(resourceSpan.Resource().Attributes(), sp.c)
 		}
 
+		if !sp.c.EnableAttributes {
+			// Skip loops for attributes if we don't need to clean them.
+			continue
+		}
+
 		for j := 0; j < scopeSpans.Len(); j++ {
 			scopeSpan := scopeSpans.At(j)
 			spans := scopeSpan.Spans()
 
 			for k := 0; k < spans.Len(); k++ {
 				span := spans.At(k)
-				if sp.c.EnableAttributes {
-					cleanMap(span.Attributes(), sp.c)
-				}
+				cleanMap(span.Attributes(), sp.c)
 			}
 		}
 	}
@@ -102,21 +105,25 @@ func (sp *emptyValueProcessor) processMetrics(_ context.Context, md pmetric.Metr
 			cleanMap(resourceMetric.Resource().Attributes(), sp.c)
 		}
 
+		if !sp.c.EnableAttributes {
+			// Skip loops for attributes if we don't need to clean them.
+			continue
+		}
+
 		for j := 0; j < scopeMetrics.Len(); j++ {
 			scopeMetric := scopeMetrics.At(j)
 			metrics := scopeMetric.Metrics()
 
 			for k := 0; k < metrics.Len(); k++ {
 				metric := metrics.At(k)
-				if sp.c.EnableAttributes {
-					cleanMetricAttrs(metric, sp.c)
-				}
+				cleanMetricAttrs(metric, sp.c)
 			}
 		}
 	}
 	return md, nil
 }
 
+// cleanMap removes empty values from the map, as defined by the config.
 func cleanMap(m pcommon.Map, c Config) {
 	m.RemoveIf(func(s string, v pcommon.Value) bool {
 		switch v.Type() {
@@ -125,21 +132,21 @@ func cleanMap(m pcommon.Map, c Config) {
 		case pcommon.ValueTypeMap:
 			subMap := v.Map()
 			cleanMap(subMap, c)
-			return subMap.Len() == 0 && c.RemoveEmptyMaps
+			return c.RemoveEmptyMaps && subMap.Len() == 0
 		case pcommon.ValueTypeSlice:
-			s := v.Slice()
-			return s.Len() == 0 && c.RemoveEmptyLists
+			return c.RemoveEmptyLists && v.Slice().Len() == 0
 		case pcommon.ValueTypeStr:
-			str := v.Str()
-			return shouldFilterString(str, c)
+			return shouldFilterString(v.Str(), c.EmptyStringValues)
 		}
 
 		return false
 	})
 }
 
-func shouldFilterString(s string, c Config) bool {
-	for _, filteredString := range c.EmptyStringValues {
+// shouldFilterString returns true if the given string should be considered an "empty" value,
+// according to the config.
+func shouldFilterString(s string, emptyValues []string) bool {
+	for _, filteredString := range emptyValues {
 		if s == filteredString {
 			return true
 		}
@@ -148,6 +155,7 @@ func shouldFilterString(s string, c Config) bool {
 	return false
 }
 
+// cleanMetricAttrs removes any attributes that should be considered empty from all the datapoints in the metrics.
 func cleanMetricAttrs(metric pmetric.Metric, c Config) {
 	switch metric.Type() {
 	case pmetric.MetricTypeGauge:
@@ -186,22 +194,23 @@ func cleanMetricAttrs(metric pmetric.Metric, c Config) {
 	}
 }
 
+// cleanLogBody removes empty values from the log body.
 func cleanLogBody(lr plog.LogRecord, c Config) {
 	body := lr.Body()
 	switch body.Type() {
 	case pcommon.ValueTypeMap:
 		bodyMap := body.Map()
 		cleanMap(bodyMap, c)
-		if bodyMap.Len() == 0 && c.RemoveEmptyMaps {
+		if c.RemoveEmptyMaps && bodyMap.Len() == 0 {
 			pcommon.NewValueEmpty().CopyTo(body)
 		}
 	case pcommon.ValueTypeSlice:
 		bodySlice := body.Slice()
-		if bodySlice.Len() == 0 && c.RemoveEmptyLists {
+		if c.RemoveEmptyLists && bodySlice.Len() == 0 {
 			pcommon.NewValueEmpty().CopyTo(body)
 		}
 	case pcommon.ValueTypeStr:
-		if shouldFilterString(body.Str(), c) {
+		if shouldFilterString(body.Str(), c.EmptyStringValues) {
 			pcommon.NewValueEmpty().CopyTo(body)
 		}
 	}
