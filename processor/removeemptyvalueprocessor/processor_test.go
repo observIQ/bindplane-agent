@@ -288,17 +288,6 @@ var rawBody = map[string]any{
 	"body_key":         "body_value",
 	"empty.map":        map[string]any{},
 	"empty.slice":      []any{},
-	"nested.slice": map[string]any{
-		"slice": []any{
-			[]any{
-				map[string]any{
-					"some.key": "-",
-				},
-			},
-			"-",
-			nil,
-		},
-	},
 }
 
 func testLog() plog.Logs {

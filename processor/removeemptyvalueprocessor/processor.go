@@ -128,29 +128,6 @@ func cleanMap(m pcommon.Map, c Config) {
 			return subMap.Len() == 0 && c.RemoveEmptyMaps
 		case pcommon.ValueTypeSlice:
 			s := v.Slice()
-			cleanSlice(s, c)
-			return s.Len() == 0 && c.RemoveEmptyLists
-		case pcommon.ValueTypeStr:
-			str := v.Str()
-			return shouldFilterString(str, c)
-		}
-
-		return false
-	})
-}
-
-func cleanSlice(s pcommon.Slice, c Config) {
-	s.RemoveIf(func(v pcommon.Value) bool {
-		switch v.Type() {
-		case pcommon.ValueTypeEmpty:
-			return c.RemoveNulls
-		case pcommon.ValueTypeMap:
-			subMap := v.Map()
-			cleanMap(subMap, c)
-			return subMap.Len() == 0 && c.RemoveEmptyMaps
-		case pcommon.ValueTypeSlice:
-			s := v.Slice()
-			cleanSlice(s, c)
 			return s.Len() == 0 && c.RemoveEmptyLists
 		case pcommon.ValueTypeStr:
 			str := v.Str()
@@ -220,7 +197,6 @@ func cleanLogBody(lr plog.LogRecord, c Config) {
 		}
 	case pcommon.ValueTypeSlice:
 		bodySlice := body.Slice()
-		cleanSlice(bodySlice, c)
 		if bodySlice.Len() == 0 && c.RemoveEmptyLists {
 			pcommon.NewValueEmpty().CopyTo(body)
 		}
