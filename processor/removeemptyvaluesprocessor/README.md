@@ -27,7 +27,7 @@ The following options may be configured:
 | enable_resource_attributes | bool | `true` | If true, resource attributes are purged of empty values. |
 | enable_attributes | bool | `true` | If true, attributes are purged of empty values. |
 | enable_log_body | bool | `true` | If true, the log body is purged of empty values. |
-| empty_string_values | []string | `[]` | A list of string values considered "empty". |
+| empty_string_values | []string | `[]` | A list of case-insensitive string values considered "empty". |
 | exclude_keys | []string | `[]` | A list of keys to exclude from removal. These keys are in the format of `<field>.<path-to-key>` (e.g. `resource.k8s.pod.id`). Valid fields are `body`, `resource`, and `attributes`. |
 
 ### Example Configuration
