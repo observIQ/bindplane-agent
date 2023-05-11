@@ -309,7 +309,7 @@ template: |
           - set(description, "Count of system KV pairs") where name == "crdb.sys.pairs.count"
           - set(unit, "{pairs}") where name == "crdb.sys.pairs.count"
 
-          - set(description, "Number of SQL SELECT, INSERT, DELETE, UPDATE, statements sucessfully executed") where name == "crdb.sql.dml.query.count"
+          - set(description, "Number of SQL SELECT, INSERT, DELETE, UPDATE, statements successfully executed") where name == "crdb.sql.dml.query.count"
           - set(unit, "{statements}") where name == "crdb.sql.dml.query.count"
   
   service:
