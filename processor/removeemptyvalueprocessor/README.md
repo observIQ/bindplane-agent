@@ -1,0 +1,75 @@
+# Remove Empty Value Processor
+
+This processor removes empty values from telemetry's attributes and resource attributes, as well as from log record's body.
+
+## Supported pipelines
+
+- Logs
+- Metrics
+- Traces
+
+## How it works
+
+1. The user configures the processor in their pipeline, optionally configuring `empty_string_values` with a list of string values that are considered "empty".
+2. For each piece of telemetry data, each entry in the resource attributes, the attributes, and the log record body (if it is a map) is visited.
+3. Map entries are removed if the value is null, or if the value is one of the string values contained in `empty_string_values`. Optionally, empty maps and lists may be removed by configuring the `remove_empty_lists` and `remove_empty_maps` settings.
+4. The telemetry data is then passed to the next component in the pipeline.
+
+## Configuration
+
+The following options may be configured:
+
+| Field | Type | Default | Description |
+| -- | -- | -- | -- |
+| remove_nulls | bool | `true` | If true, entries with a value of null are removed. |
+| remove_empty_lists | bool | `false` | If true, entries with a value of an empty list are removed. |
+| remove_empty_maps | bool | `false` | If true, entries with a value of an empty map are removed. |
+| enable_resource_attributes | bool | `true` | If true, resource attributes are purged of empty values. |
+| enable_attributes | bool | `true` | If true, attributes are purged of empty values. |
+| enable_log_body | bool | `true` | If true, the log body is purged of empty values. |
+| empty_string_values | []string | `[]` | A list of string values considered "empty". |
+
+### Example Configuration
+
+The following config is an example configuration of the `removeemptyvalues` processor with defaults in a logs pipeline sending to the `logging` exporter.
+
+```yaml
+receivers:
+  filelog:
+    include: [/tmp/example/apache.log]
+
+processors:
+  removeemptyvalues:
+
+exporters:
+  logging:
+
+service:
+  pipelines:
+    logs:
+      receivers: [filelog]
+      processors: [removeemptyvalues]
+      exporters: [logging]
+```
+
+## How to
+
+### Sample 75% of incoming telemetry
+
+The following configuration will drop 75% of incoming `metrics`, `logs` or `traces`.
+
+```yaml
+processors:
+  sampling:
+    drop_ratio: 0.75
+```
+
+### Drop all incoming telemetry
+
+The following configuration will drop 100% of incoming `metrics`, `logs`, or `traces`. Essentially dropping all data.
+
+```yaml
+processors:
+  sampling:
+    drop_ratio: 1.0
+```
