@@ -69,22 +69,17 @@ func TestLoadConfig(t *testing.T) {
 		{
 			id: component.NewIDWithName(typeStr, "exclude_fields"),
 			expected: &Config{
-				RemoveNulls:       false,
-				RemoveEmptyLists:  true,
-				RemoveEmptyMaps:   true,
+				RemoveNulls:       true,
 				EmptyStringValues: []string{},
 				ExcludeKeys: []MapKey{
 					{
 						field: "body",
-						key:   "key",
 					},
 					{
 						field: "resource",
-						key:   "key.something",
 					},
 					{
 						field: "attributes",
-						key:   "attribute.key",
 					},
 				},
 			},
