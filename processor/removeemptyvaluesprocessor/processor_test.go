@@ -53,6 +53,39 @@ func TestProcessMetrics(t *testing.T) {
 		}, outMetricsSlice)
 	})
 
+	t.Run("Removes attributes, ignore excluded", func(t *testing.T) {
+		p := newEmptyValueProcessor(zaptest.NewLogger(t), Config{
+			RemoveNulls:              true,
+			RemoveEmptyLists:         true,
+			RemoveEmptyMaps:          true,
+			EnableResourceAttributes: false,
+			EnableAttributes:         true,
+			EnableLogBody:            false,
+			EmptyStringValues: []string{
+				"-",
+			},
+			ExcludeKeys: []MapKey{
+				{
+					Field: AttributesField,
+					Key:   "empty.key",
+				},
+			},
+		})
+
+		inputMetrics := testMetrics()
+
+		outputLogs, err := p.processMetrics(context.Background(), inputMetrics)
+		require.NoError(t, err)
+
+		outResourceMetrics := outputLogs.ResourceMetrics().At(0)
+		outMetricsSlice := outResourceMetrics.ScopeMetrics().At(0).Metrics()
+		require.Equal(t, rawResourceAttributes, outResourceMetrics.Resource().Attributes().AsRaw())
+		requireMetricsAttrsEqual(t, map[string]any{
+			"attr_key":  "attr_value",
+			"empty.key": nil,
+		}, outMetricsSlice)
+	})
+
 	t.Run("Removes resource attributes", func(t *testing.T) {
 		p := newEmptyValueProcessor(zaptest.NewLogger(t), Config{
 			RemoveNulls:              true,
@@ -77,7 +110,43 @@ func TestProcessMetrics(t *testing.T) {
 			"resource_key": "resource_value",
 		}, outResourceMetrics.Resource().Attributes().AsRaw())
 		requireMetricsAttrsEqual(t, rawAttributes, outMetricsSlice)
+	})
 
+	t.Run("Removes resource attributes, ignores excluded", func(t *testing.T) {
+		p := newEmptyValueProcessor(zaptest.NewLogger(t), Config{
+			RemoveNulls:              true,
+			RemoveEmptyLists:         true,
+			RemoveEmptyMaps:          true,
+			EnableResourceAttributes: true,
+			EnableAttributes:         false,
+			EnableLogBody:            false,
+			EmptyStringValues: []string{
+				"-",
+			},
+			ExcludeKeys: []MapKey{
+				{
+					Field: ResourceField,
+					Key:   "nested.map.map.some.key",
+				},
+			},
+		})
+
+		inputMetrics := testMetrics()
+
+		outputLogs, err := p.processMetrics(context.Background(), inputMetrics)
+		require.NoError(t, err)
+
+		outResourceMetrics := outputLogs.ResourceMetrics().At(0)
+		outMetricsSlice := outResourceMetrics.ScopeMetrics().At(0).Metrics()
+		require.Equal(t, map[string]any{
+			"resource_key": "resource_value",
+			"nested.map": map[string]any{
+				"map": map[string]any{
+					"some.key": "-",
+				},
+			},
+		}, outResourceMetrics.Resource().Attributes().AsRaw())
+		requireMetricsAttrsEqual(t, rawAttributes, outMetricsSlice)
 	})
 }
 
@@ -109,6 +178,40 @@ func TestProcessTraces(t *testing.T) {
 		}, span.Attributes().AsRaw())
 	})
 
+	t.Run("Removes attributes, ignores excluded", func(t *testing.T) {
+		p := newEmptyValueProcessor(zaptest.NewLogger(t), Config{
+			RemoveNulls:              true,
+			RemoveEmptyLists:         true,
+			RemoveEmptyMaps:          true,
+			EnableResourceAttributes: false,
+			EnableAttributes:         true,
+			EnableLogBody:            false,
+			EmptyStringValues: []string{
+				"-",
+			},
+			ExcludeKeys: []MapKey{
+				{
+					Field: AttributesField,
+					Key:   "empty.key",
+				},
+			},
+		})
+
+		inputTraces := testTraces()
+
+		outputTraces, err := p.processTraces(context.Background(), inputTraces)
+		require.NoError(t, err)
+
+		outResourceSpans := outputTraces.ResourceSpans().At(0)
+		span := outResourceSpans.ScopeSpans().At(0).Spans().At(0)
+
+		require.Equal(t, rawResourceAttributes, outResourceSpans.Resource().Attributes().AsRaw())
+		require.Equal(t, map[string]any{
+			"attr_key":  "attr_value",
+			"empty.key": nil,
+		}, span.Attributes().AsRaw())
+	})
+
 	t.Run("Removes resource attributes", func(t *testing.T) {
 		p := newEmptyValueProcessor(zaptest.NewLogger(t), Config{
 			RemoveNulls:              true,
@@ -132,6 +235,44 @@ func TestProcessTraces(t *testing.T) {
 
 		require.Equal(t, map[string]any{
 			"resource_key": "resource_value",
+		}, outResourceSpans.Resource().Attributes().AsRaw())
+		require.Equal(t, rawAttributes, span.Attributes().AsRaw())
+	})
+
+	t.Run("Removes resource attributes, ignores excluded", func(t *testing.T) {
+		p := newEmptyValueProcessor(zaptest.NewLogger(t), Config{
+			RemoveNulls:              true,
+			RemoveEmptyLists:         true,
+			RemoveEmptyMaps:          true,
+			EnableResourceAttributes: true,
+			EnableAttributes:         false,
+			EnableLogBody:            false,
+			EmptyStringValues: []string{
+				"-",
+			},
+			ExcludeKeys: []MapKey{
+				{
+					Field: ResourceField,
+					Key:   "nested.map.map.some.key",
+				},
+			},
+		})
+
+		inputTraces := testTraces()
+
+		outputTraces, err := p.processTraces(context.Background(), inputTraces)
+		require.NoError(t, err)
+
+		outResourceSpans := outputTraces.ResourceSpans().At(0)
+		span := outResourceSpans.ScopeSpans().At(0).Spans().At(0)
+
+		require.Equal(t, map[string]any{
+			"resource_key": "resource_value",
+			"nested.map": map[string]any{
+				"map": map[string]any{
+					"some.key": "-",
+				},
+			},
 		}, outResourceSpans.Resource().Attributes().AsRaw())
 		require.Equal(t, rawAttributes, span.Attributes().AsRaw())
 	})
@@ -166,6 +307,41 @@ func TestProcessLogs(t *testing.T) {
 		require.Equal(t, rawBody, outLogRecord.Body().Map().AsRaw())
 	})
 
+	t.Run("Removes attributes, skips excluded", func(t *testing.T) {
+		p := newEmptyValueProcessor(zaptest.NewLogger(t), Config{
+			RemoveNulls:              true,
+			RemoveEmptyLists:         true,
+			RemoveEmptyMaps:          true,
+			EnableResourceAttributes: false,
+			EnableAttributes:         true,
+			EnableLogBody:            false,
+			EmptyStringValues: []string{
+				"-",
+			},
+			ExcludeKeys: []MapKey{
+				{
+					Field: AttributesField,
+					Key:   "empty.key",
+				},
+			},
+		})
+
+		inputLog := testLog()
+
+		outputLogs, err := p.processLogs(context.Background(), inputLog)
+		require.NoError(t, err)
+
+		outResourceLogs := outputLogs.ResourceLogs().At(0)
+		outLogRecord := outResourceLogs.ScopeLogs().At(0).LogRecords().At(0)
+
+		require.Equal(t, rawResourceAttributes, outResourceLogs.Resource().Attributes().AsRaw())
+		require.Equal(t, map[string]any{
+			"attr_key":  "attr_value",
+			"empty.key": nil,
+		}, outLogRecord.Attributes().AsRaw())
+		require.Equal(t, rawBody, outLogRecord.Body().Map().AsRaw())
+	})
+
 	t.Run("Removes resource attributes", func(t *testing.T) {
 		p := newEmptyValueProcessor(zaptest.NewLogger(t), Config{
 			RemoveNulls:              true,
@@ -189,6 +365,45 @@ func TestProcessLogs(t *testing.T) {
 
 		require.Equal(t, map[string]any{
 			"resource_key": "resource_value",
+		}, outResourceLogs.Resource().Attributes().AsRaw())
+		require.Equal(t, rawAttributes, outLogRecord.Attributes().AsRaw())
+		require.Equal(t, rawBody, outLogRecord.Body().Map().AsRaw())
+	})
+
+	t.Run("Removes resource attributes, ignores excluded", func(t *testing.T) {
+		p := newEmptyValueProcessor(zaptest.NewLogger(t), Config{
+			RemoveNulls:              true,
+			RemoveEmptyLists:         true,
+			RemoveEmptyMaps:          true,
+			EnableResourceAttributes: true,
+			EnableAttributes:         false,
+			EnableLogBody:            false,
+			EmptyStringValues: []string{
+				"-",
+			},
+			ExcludeKeys: []MapKey{
+				{
+					Field: ResourceField,
+					Key:   "nested.map.map.some.key",
+				},
+			},
+		})
+
+		inputLog := testLog()
+
+		outputLogs, err := p.processLogs(context.Background(), inputLog)
+		require.NoError(t, err)
+
+		outResourceLogs := outputLogs.ResourceLogs().At(0)
+		outLogRecord := outResourceLogs.ScopeLogs().At(0).LogRecords().At(0)
+
+		require.Equal(t, map[string]any{
+			"resource_key": "resource_value",
+			"nested.map": map[string]any{
+				"map": map[string]any{
+					"some.key": "-",
+				},
+			},
 		}, outResourceLogs.Resource().Attributes().AsRaw())
 		require.Equal(t, rawAttributes, outLogRecord.Attributes().AsRaw())
 		require.Equal(t, rawBody, outLogRecord.Body().Map().AsRaw())
@@ -219,6 +434,41 @@ func TestProcessLogs(t *testing.T) {
 		require.Equal(t, rawAttributes, outLogRecord.Attributes().AsRaw())
 		require.Equal(t, map[string]any{
 			"body_key": "body_value",
+		}, outLogRecord.Body().Map().AsRaw())
+	})
+
+	t.Run("Removes body keys, ignores excluded", func(t *testing.T) {
+		p := newEmptyValueProcessor(zaptest.NewLogger(t), Config{
+			RemoveNulls:              true,
+			RemoveEmptyLists:         true,
+			RemoveEmptyMaps:          true,
+			EnableResourceAttributes: false,
+			EnableAttributes:         false,
+			EnableLogBody:            true,
+			EmptyStringValues: []string{
+				"-",
+			},
+			ExcludeKeys: []MapKey{
+				{
+					Field: BodyField,
+					Key:   "empty.key",
+				},
+			},
+		})
+
+		inputLog := testLog()
+
+		outputLogs, err := p.processLogs(context.Background(), inputLog)
+		require.NoError(t, err)
+
+		outResourceLogs := outputLogs.ResourceLogs().At(0)
+		outLogRecord := outResourceLogs.ScopeLogs().At(0).LogRecords().At(0)
+
+		require.Equal(t, rawResourceAttributes, outResourceLogs.Resource().Attributes().AsRaw())
+		require.Equal(t, rawAttributes, outLogRecord.Attributes().AsRaw())
+		require.Equal(t, map[string]any{
+			"body_key":  "body_value",
+			"empty.key": nil,
 		}, outLogRecord.Body().Map().AsRaw())
 	})
 
@@ -283,7 +533,8 @@ var rawResourceAttributes = map[string]any{
 	"empty.slice":      []any{},
 	"nested.map": map[string]any{
 		"map": map[string]any{
-			"some.key": "-",
+			"some.key":    "-",
+			"another.key": "-",
 		},
 	},
 }

@@ -15,12 +15,73 @@
 package removeemptyvaluesprocessor
 
 import (
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/tj/assert"
+	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/component/componenttest"
+	"go.opentelemetry.io/collector/confmap/confmaptest"
 )
 
 func TestValidStruct(t *testing.T) {
 	require.NoError(t, componenttest.CheckConfigStruct(&Config{}))
+}
+
+func TestLoadConfig(t *testing.T) {
+	cm, err := confmaptest.LoadConf(filepath.Join("testdata", "config.yaml"))
+	require.NoError(t, err)
+
+	testCases := []struct {
+		id       component.ID
+		expected component.Config
+	}{
+		{
+			id:       component.NewIDWithName(typeStr, "defaults"),
+			expected: createDefaultConfig(),
+		},
+		{
+			id: component.NewIDWithName(typeStr, ""),
+			expected: &Config{
+				RemoveNulls:              false,
+				RemoveEmptyLists:         true,
+				RemoveEmptyMaps:          true,
+				EnableResourceAttributes: false,
+				EnableAttributes:         false,
+				EnableLogBody:            false,
+				EmptyStringValues: []string{
+					"-",
+				},
+				ExcludeKeys: []MapKey{
+					{
+						Field: "body",
+						Key:   "key",
+					},
+					{
+						Field: "resource",
+						Key:   "key.something",
+					},
+					{
+						Field: "attributes",
+						Key:   "attribute.key",
+					},
+				},
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.id.String(), func(t *testing.T) {
+			factory := NewFactory()
+			cfg := factory.CreateDefaultConfig()
+
+			sub, err := cm.Sub(tc.id.String())
+			require.NoError(t, err)
+			require.NoError(t, component.UnmarshalConfig(sub, cfg))
+
+			assert.NoError(t, component.ValidateConfig(cfg))
+			require.Equal(t, tc.expected, cfg)
+		})
+	}
 }

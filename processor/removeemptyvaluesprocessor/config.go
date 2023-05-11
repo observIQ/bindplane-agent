@@ -15,6 +15,48 @@
 // Package removeemptyvaluesprocessor provides a processor that removes empty values from telemetry data
 package removeemptyvaluesprocessor
 
+import (
+	"bytes"
+	"fmt"
+)
+
+// valid fields that can be referenced in the MapKey's field
+const (
+	AttributesField = "attributes"
+	ResourceField   = "resource"
+	BodyField       = "body"
+)
+
+// MapKey represents a key into a particular map (denoted by field)
+type MapKey struct {
+	Field string
+	Key   string
+}
+
+// UnmarshalText unmarshals the given []byte into a MapKey.
+// The format of the key is "<field>.<path-to-key>"
+func (m *MapKey) UnmarshalText(text []byte) error {
+	field, key, found := bytes.Cut(text, []byte("."))
+	if !found {
+		return fmt.Errorf("failed to determine field: %s", text)
+	}
+
+	if len(key) == 0 {
+		return fmt.Errorf("key part of (%s) must be non-zero in length", text)
+	}
+
+	for _, validField := range []string{AttributesField, ResourceField, BodyField} {
+		if validField == string(field) {
+			// this key indexes into a valid field, and therefore
+			m.Key = string(key)
+			m.Field = string(field)
+			return nil
+		}
+	}
+
+	return fmt.Errorf("invalid field (%s), must be one of attributes, resource, or body", field)
+}
+
 // Config is the configuration for the processor
 type Config struct {
 	RemoveNulls              bool     `mapstructure:"remove_nulls"`
@@ -24,6 +66,7 @@ type Config struct {
 	EnableAttributes         bool     `mapstructure:"enable_attributes"`
 	EnableLogBody            bool     `mapstructure:"enable_log_body"`
 	EmptyStringValues        []string `mapstructure:"empty_string_values"`
+	ExcludeKeys              []MapKey `mapstructure:"exclude_keys"`
 }
 
 // Validate validates the processor configuration

@@ -200,6 +200,7 @@ require (
 	github.com/secure-systems-lab/go-securesystemslib v0.4.0 // indirect
 	github.com/shoenig/go-m1cpu v0.1.4 // indirect
 	github.com/tg123/go-htpasswd v1.2.1 // indirect
+	github.com/tj/assert v0.0.3 // indirect
 	go.opentelemetry.io/otel/bridge/opencensus v0.37.0 // indirect
 	gopkg.in/zorkian/go-datadog-api.v2 v2.30.0 // indirect
 )
