@@ -67,13 +67,13 @@ func (evp *emptyValueProcessor) SkipResourceAttributes() bool {
 }
 
 func (evp *emptyValueProcessor) SkipAttributes() bool {
-	// If only the field is specified, but no trailing key, the whole resource should be skipped
+	// If only the field is specified, but no trailing key, the whole attributes map should be skipped
 	_, ok := evp.excludeAttributeKeySet[""]
 	return ok
 }
 
 func (evp *emptyValueProcessor) SkipBody() bool {
-	// If only the field is specified, but no trailing key, the whole resource should be skipped
+	// If only the field is specified, but no trailing key, the whole body should be skipped
 	_, ok := evp.excludeBodyKeySet[""]
 	return ok
 }
