@@ -195,7 +195,7 @@ func trimMapKeyPrefix(prefix string, keys []MapKey) []MapKey {
 // according to the config.
 func shouldFilterString(s string, emptyValues []string) bool {
 	for _, filteredString := range emptyValues {
-		if s == filteredString {
+		if strings.EqualFold(s, filteredString) {
 			return true
 		}
 	}
