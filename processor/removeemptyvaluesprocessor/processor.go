@@ -176,11 +176,12 @@ func cleanMap(m pcommon.Map, c Config, excludeKeys []MapKey) {
 func trimMapKeyPrefix(prefix string, keys []MapKey) []MapKey {
 	outKeys := make([]MapKey, 0, len(keys))
 	for _, mk := range keys {
-		trimmedKey, found := strings.CutPrefix(mk.key, prefix+".")
-		if !found {
+		if !strings.HasPrefix(mk.key, prefix+".") {
 			// prefix was not found, so this key does not belong to the submap.
 			continue
 		}
+
+		trimmedKey := mk.key[len(prefix)+1:]
 
 		outKeys = append(outKeys, MapKey{
 			field: mk.field,
