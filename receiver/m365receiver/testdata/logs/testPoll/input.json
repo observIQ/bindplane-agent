@@ -1,32 +1,47 @@
 [
     {
-        "OrganizationId": "test1",
+        "OrganizationId": "ignore",
         "Workload": "test1",
         "UserId": "test1",
         "UserType": 0,
         "CreationTime": "2023-05-10T09:07:33",
         "Id": "test1",
         "Operation": "test1",
-        "ResultStatus": "test1"
+        "ResultStatus": "test1",
+        "Actor": {
+            "ID": "azure-actor-id-test",
+            "Type": 0,
+            "ignore": "ignore"
+        }
     },
     {
-        "OrganizationId": "test2",
+        "OrganizationId": "ignore",
         "Workload": "test2",
         "UserId": "test2",
         "UserType": 0,
+        "PolicyDetails": {
+            "PolicyId": "test-policy-id",
+            "PolicyName": "test-policy-name"
+        },
         "CreationTime": "2023-05-10T09:07:33",
         "Id": "test2",
         "Operation": "test2",
         "ResultStatus": "test2"
     },
     {
-        "OrganizationId": "test3",
+        "OrganizationId": "ignore",
         "Workload": "test3",
         "UserId": "test3",
         "UserType": 0,
         "CreationTime": "2023-05-10T09:07:33",
         "Id": "test3",
         "Operation": "test3",
-        "ResultStatus": "test3"
+        "ResultStatus": "test3",
+        "SharePointMetaData": {
+            "From": "sharepoint-metadata-test"
+        },
+        "ignore": {
+            "ignore": "ignore"
+        }
     }
 ]

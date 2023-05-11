@@ -137,10 +137,10 @@ func (l *m365LogsReceiver) pollLogs(ctx context.Context) error {
 	st := pcommon.NewTimestampFromTime(time.Now().Add(-l.pollInterval)).AsTime()
 	now := time.Now()
 
-	for _, a := range l.audits {
-		endpoint := l.root + a.route + fmt.Sprintf("&;startTime=%s&;endTime=%s", st, now)
-		l.wg.Add(1)
-		go l.poll(ctx, now, &a, endpoint)
+	l.wg.Add(5)
+	for i := 0; i < len(l.audits); i++ {
+		endpoint := l.root + l.audits[i].route + fmt.Sprintf("&;startTime=%s&;endTime=%s", st, now)
+		go l.poll(ctx, now, &l.audits[i], endpoint)
 	}
 
 	return nil
@@ -237,10 +237,33 @@ func parseOptionalAttributes(m *pcommon.Map, log *jsonLogs) {
 	if log.ResultStatus != "" {
 		m.PutStr("result_status", log.ResultStatus)
 	}
+	if log.SharepointSite != "" {
+		m.PutStr("sharepoint.site.id", log.SharepointSite)
+	}
+	if log.SharepointSourceFileName != "" {
+		m.PutStr("sharepoint.source.file.name", log.SharepointSourceFileName)
+	}
+	if log.ExchangeMailboxGUID != "" {
+		m.PutStr("exchange.mailbox.id", log.ExchangeMailboxGUID)
+	}
+	if log.AzureActor != (AzureActor{}) {
+		m.PutStr("azure.actor.id", log.AzureActor.ID)
+		m.PutStr("azure.actor.type", matchAzureUserType(log.AzureActor.Type))
+	}
+	if log.DLPSharePointMetaData != (SharePointMetaData{}) {
+		m.PutStr("dlp.sharepoint.user", log.DLPSharePointMetaData.From)
+	}
+	if log.DLPExchangeMetaData != (ExchangeMetaData{}) {
+		m.PutStr("dlp.exchange.message.id", log.DLPExchangeMetaData.MessageID)
+	}
+	if log.DLPPolicyDetails != (PolicyDetails{}) {
+		m.PutStr("dlp.policy_details.policy.id", log.DLPPolicyDetails.PolicyId)
+		m.PutStr("dlp.policy_details.policy.name", log.DLPPolicyDetails.PolicyName)
+	}
 }
 
-func matchUserType(userType int) string {
-	switch userType {
+func matchUserType(user int) string {
+	switch user {
 	case 0:
 		return "Regular"
 	case 1:
@@ -259,6 +282,25 @@ func matchUserType(userType int) string {
 		return "CustomPolicy"
 	case 8:
 		return "SystemPolicy"
+	default:
+		return "impossible"
+	}
+}
+
+func matchAzureUserType(user int) string {
+	switch user {
+	case 0:
+		return "Claim"
+	case 1:
+		return "Name"
+	case 2:
+		return "Other"
+	case 3:
+		return "PUID"
+	case 4:
+		return "SPN"
+	case 5:
+		return "UPN"
 	default:
 		return "impossible"
 	}

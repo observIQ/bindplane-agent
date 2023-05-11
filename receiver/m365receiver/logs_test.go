@@ -62,14 +62,14 @@ func TestPoll(t *testing.T) {
 	cfg.Logs.PollInterval = 1 * time.Second
 
 	sink := &consumertest.LogsSink{}
-	l := newM365Logs(cfg, receivertest.NewNopCreateSettings(), sink)
+	rcv := newM365Logs(cfg, receivertest.NewNopCreateSettings(), sink)
 	client := &mockLogsClient{}
-	l.client = client
+	rcv.client = client
 	client.On("GetJSON", mock.Anything).Return(client.loadTestLogs(t), nil)
 
-	err := l.pollLogs(context.Background())
+	err := rcv.pollLogs(context.Background())
 	require.NoError(t, err)
-	l.wg.Wait()
+	rcv.wg.Wait()
 
 	logs := sink.AllLogs()
 
@@ -103,24 +103,22 @@ func TestTransformLogs(t *testing.T) {
 	file := filepath.Join("testdata", "logs", "transform-test.json")
 	logData := []jsonLogs{
 		{
-			OrganizationId: "testID",
-			Workload:       "testWorkload",
-			UserId:         "testUserID",
-			UserType:       0,
-			CreationTime:   "2023-05-10T09:07:33",
-			Id:             "testID",
-			Operation:      "testOperation",
-			ResultStatus:   "testResultStatus",
+			Workload:     "testWorkload",
+			UserId:       "testUserID",
+			UserType:     0,
+			CreationTime: "2023-05-10T09:07:33",
+			Id:           "testID",
+			Operation:    "testOperation",
+			ResultStatus: "testResultStatus",
 		},
 		{
-			OrganizationId: "testID2",
-			Workload:       "testWorkload2",
-			UserId:         "testUserID2",
-			UserType:       0,
-			CreationTime:   "2023-05-10T09:07:33",
-			Id:             "testID2",
-			Operation:      "testOperation2",
-			ResultStatus:   "testResultStatus2",
+			Workload:     "testWorkload2",
+			UserId:       "testUserID2",
+			UserType:     0,
+			CreationTime: "2023-05-10T09:07:33",
+			Id:           "testID2",
+			Operation:    "testOperation2",
+			ResultStatus: "testResultStatus2",
 		},
 	}
 

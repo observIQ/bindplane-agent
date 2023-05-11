@@ -34,6 +34,7 @@ type m365Client struct {
 	scope        string
 }
 
+// HTTP parsing structs
 type auth struct {
 	Token string `json:"access_token"`
 }
@@ -54,15 +55,40 @@ type logResp struct {
 	Content string `json:"contentUri"`
 }
 
+// JSON parsing structs
 type jsonLogs struct {
-	OrganizationId string `json:"OrganizationId"`
-	Workload       string `json:"Workload,omitempty"`
-	UserId         string `json:"UserId"`
-	UserType       int    `json:"UserType"`
-	CreationTime   string `json:"CreationTime"`
-	Id             string `json:"Id"`
-	Operation      string `json:"Operation"`
-	ResultStatus   string `json:"ResultStatus,omitempty"`
+	Workload                 string             `json:"Workload,omitempty"`
+	UserId                   string             `json:"UserId"`
+	UserType                 int                `json:"UserType"`
+	CreationTime             string             `json:"CreationTime"`
+	Id                       string             `json:"Id"`
+	Operation                string             `json:"Operation"`
+	ResultStatus             string             `json:"ResultStatus,omitempty"`
+	SharepointSite           string             `json:"Site,omitempty"`
+	SharepointSourceFileName string             `json:"SourceFileName,omitempty"`
+	ExchangeMailboxGUID      string             `json:"MailboxGuid,omitempty"`
+	AzureActor               AzureActor         `json:"Actor,omitempty"`
+	DLPSharePointMetaData    SharePointMetaData `json:"SharePointMetaData,omitempty"`
+	DLPExchangeMetaData      ExchangeMetaData   `json:"ExchangeMetaData,omitempty"`
+	DLPPolicyDetails         PolicyDetails      `json:"PolicyDetails,omitempty"`
+}
+
+type AzureActor struct {
+	ID   string `json:"ID"`
+	Type int    `json:"Type"`
+}
+
+type SharePointMetaData struct {
+	From string `json:"From"`
+}
+
+type ExchangeMetaData struct {
+	MessageID string `json:"MessageID"`
+}
+
+type PolicyDetails struct {
+	PolicyId   string `json:"PolicyId"`
+	PolicyName string `json:"PolicyName"`
 }
 
 func newM365Client(c *http.Client, cfg *Config, scope string) *m365Client {
