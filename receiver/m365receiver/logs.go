@@ -21,6 +21,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/stanza/adapter"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/consumer"
 	"go.opentelemetry.io/collector/extension/experimental/storage"
@@ -28,6 +29,10 @@ import (
 	"go.opentelemetry.io/collector/pdata/plog"
 	"go.opentelemetry.io/collector/receiver"
 	"go.uber.org/zap"
+)
+
+const (
+	logStorageKey = "last_recorded_event"
 )
 
 type lClient interface {
@@ -43,6 +48,7 @@ type m365LogsReceiver struct {
 	cfg           *Config
 	client        lClient
 	storageClient storage.Client
+	id            component.ID
 
 	wg           *sync.WaitGroup
 	mu           sync.Mutex
@@ -50,7 +56,12 @@ type m365LogsReceiver struct {
 	pollInterval time.Duration
 	cancel       context.CancelFunc
 	audits       []auditMetaData
+	record       *logRecord
 	root         string
+}
+
+type logRecord struct {
+	NextStartTime *time.Time `mapstructure:"next_start_time"`
 }
 
 type auditMetaData struct {
@@ -66,6 +77,7 @@ func newM365Logs(cfg *Config, settings receiver.CreateSettings, consumer consume
 		consumer:      consumer,
 		cfg:           cfg,
 		storageClient: storage.NewNopClient(),
+		id:            settings.ID,
 		wg:            &sync.WaitGroup{},
 		pollInterval:  cfg.Logs.PollInterval,
 		audits: []auditMetaData{
@@ -97,18 +109,25 @@ func (l *m365LogsReceiver) Start(ctx context.Context, host component.Host) error
 	}
 
 	// set cancel function
-	//TODO: add checkpoint stuff here when that point comes
 	cancelCtx, cancel := context.WithCancel(ctx)
 	l.cancel = cancel
+
+	// init checkpoint stuff
+	storageClient, err := adapter.GetStorageClient(ctx, host, l.cfg.StorageID, l.id)
+	if err != nil {
+		return fmt.Errorf("failed to get storage client: %w", err)
+	}
+	l.storageClient = storageClient
+	l.loadCheckpoint(cancelCtx)
 
 	return l.startPolling(cancelCtx)
 }
 
-func (l *m365LogsReceiver) Shutdown(_ context.Context) error {
+func (l *m365LogsReceiver) Shutdown(ctx context.Context) error {
 	l.logger.Debug("shutting down logs receiver")
 	l.cancel()
 	l.wg.Wait()
-	return nil
+	return l.checkpoint(ctx)
 }
 
 // spins a go routine at each poll interval to go get logs
@@ -137,18 +156,21 @@ func (l *m365LogsReceiver) pollLogs(ctx context.Context) error {
 	st := pcommon.NewTimestampFromTime(time.Now().Add(-l.pollInterval)).AsTime()
 	now := time.Now()
 
-	l.wg.Add(5)
+	auditWG := &sync.WaitGroup{}
+	auditWG.Add(5)
 	for i := 0; i < len(l.audits); i++ {
 		endpoint := l.root + l.audits[i].route + fmt.Sprintf("&;startTime=%s&;endTime=%s", st, now)
-		go l.poll(ctx, now, &l.audits[i], endpoint)
+		go l.poll(ctx, now, &l.audits[i], endpoint, auditWG)
 	}
+	auditWG.Wait()
 
-	return nil
+	l.record.NextStartTime = &now
+	return l.checkpoint(ctx)
 }
 
 // collects log data from endpoint, transforms logs, consumes logs
-func (l *m365LogsReceiver) poll(ctx context.Context, now time.Time, audit *auditMetaData, endpoint string) {
-	defer l.wg.Done()
+func (l *m365LogsReceiver) poll(ctx context.Context, now time.Time, audit *auditMetaData, endpoint string, wg *sync.WaitGroup) {
+	defer wg.Done()
 	if !audit.enabled {
 		return
 	}
@@ -227,6 +249,37 @@ func (l *m365LogsReceiver) transformLogs(now pcommon.Timestamp, audit *auditMeta
 	}
 
 	return logs
+}
+
+// sets the checkpoint
+func (l *m365LogsReceiver) checkpoint(ctx context.Context) error {
+	bytes, err := json.Marshal(l.record)
+	if err != nil {
+		return fmt.Errorf("unable to write checkpoint: %w", err)
+	}
+	return l.storageClient.Set(ctx, logStorageKey, bytes)
+}
+
+// loads the checkpoint
+func (l *m365LogsReceiver) loadCheckpoint(ctx context.Context) {
+	bytes, err := l.storageClient.Get(ctx, logStorageKey)
+	if err != nil {
+		l.logger.Info("unable to load checkpoint from storage client, continuing without a previous checkpoint", zap.Error(err))
+		l.record = &logRecord{}
+		return
+	}
+
+	if bytes == nil {
+		l.record = &logRecord{}
+	}
+
+	var record logRecord
+	if err = json.Unmarshal(bytes, &record); err != nil {
+		l.logger.Error("unable to decode stored record for events, continuing without a checkpoint", zap.Error(err))
+		l.record = &logRecord{}
+		return
+	}
+	l.record = &record
 }
 
 // adds any attributes to log that may or may not be present

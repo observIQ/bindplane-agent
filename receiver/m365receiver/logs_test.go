@@ -69,7 +69,6 @@ func TestPoll(t *testing.T) {
 
 	err := rcv.pollLogs(context.Background())
 	require.NoError(t, err)
-	rcv.wg.Wait()
 
 	logs := sink.AllLogs()
 

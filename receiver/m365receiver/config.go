@@ -21,6 +21,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/observiq/observiq-otel-collector/receiver/m365receiver/internal/metadata"
+	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/config/confighttp"
 	"go.opentelemetry.io/collector/receiver/scraperhelper"
 )
@@ -34,6 +35,7 @@ type Config struct {
 	ClientID                                string                        `mapstructure:"client_id"`
 	ClientSecret                            string                        `mapstructure:"client_secret"`
 	Logs                                    *LogsConfig                   `mapstructure:"logs"`
+	StorageID                               *component.ID                 `mapstructure:"storage"`
 }
 
 type LogsConfig struct {
