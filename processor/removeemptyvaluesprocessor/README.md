@@ -1,4 +1,4 @@
-# Remove Empty Value Processor
+# Remove Empty Values Processor
 
 This processor removes empty values from telemetry's attributes and resource attributes, as well as from log record's body.
 

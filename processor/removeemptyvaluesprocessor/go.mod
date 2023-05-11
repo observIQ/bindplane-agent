@@ -1,4 +1,4 @@
-module github.com/observiq/observiq-otel-collector/processor/removeemptyvalueprocessor
+module github.com/observiq/observiq-otel-collector/processor/removeemptyvaluesprocessor
 
 go 1.19
 

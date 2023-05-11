@@ -1,4 +1,4 @@
-package removeemptyvalueprocessor
+package removeemptyvaluesprocessor
 
 import (
 	"context"
