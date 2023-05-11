@@ -168,10 +168,8 @@ func (evp *emptyValueProcessor) processMetrics(_ context.Context, md pmetric.Met
 // cleanMap removes empty values from the map, as defined by the config.
 func cleanMap(m pcommon.Map, c Config, excludeKeys map[string]struct{}) {
 	m.RemoveIf(func(s string, v pcommon.Value) bool {
-		for key := range excludeKeys {
-			if key == s {
-				return false
-			}
+		if _, ok := excludeKeys[s]; ok {
+			return false
 		}
 
 		switch v.Type() {
