@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// package removeemptyvaluesprocessor provides a processor that removes empty values from telemetry data
+// Package removeemptyvaluesprocessor provides a processor that removes empty values from telemetry data
 package removeemptyvaluesprocessor
 
 // Config is the configuration for the processor
