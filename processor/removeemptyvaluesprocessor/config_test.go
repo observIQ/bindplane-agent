@@ -55,16 +55,16 @@ func TestLoadConfig(t *testing.T) {
 				},
 				ExcludeKeys: []MapKey{
 					{
-						Field: "body",
-						Key:   "key",
+						field: "body",
+						key:   "key",
 					},
 					{
-						Field: "resource",
-						Key:   "key.something",
+						field: "resource",
+						key:   "key.something",
 					},
 					{
-						Field: "attributes",
-						Key:   "attribute.key",
+						field: "attributes",
+						key:   "attribute.key",
 					},
 				},
 			},

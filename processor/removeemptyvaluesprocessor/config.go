@@ -22,15 +22,15 @@ import (
 
 // valid fields that can be referenced in the MapKey's field
 const (
-	AttributesField = "attributes"
-	ResourceField   = "resource"
-	BodyField       = "body"
+	attributesField = "attributes"
+	resourceField   = "resource"
+	bodyField       = "body"
 )
 
 // MapKey represents a key into a particular map (denoted by field)
 type MapKey struct {
-	Field string
-	Key   string
+	field string
+	key   string
 }
 
 // UnmarshalText unmarshals the given []byte into a MapKey.
@@ -45,11 +45,11 @@ func (m *MapKey) UnmarshalText(text []byte) error {
 		return fmt.Errorf("key part of (%s) must be non-zero in length", text)
 	}
 
-	for _, validField := range []string{AttributesField, ResourceField, BodyField} {
+	for _, validField := range []string{attributesField, resourceField, bodyField} {
 		if validField == string(field) {
 			// this key indexes into a valid field, and therefore
-			m.Key = string(key)
-			m.Field = string(field)
+			m.key = string(key)
+			m.field = string(field)
 			return nil
 		}
 	}

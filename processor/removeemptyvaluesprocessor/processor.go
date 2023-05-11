@@ -39,12 +39,12 @@ func newEmptyValueProcessor(logger *zap.Logger, cfg Config) *emptyValueProcessor
 	var excludeBodyKeys []MapKey
 
 	for _, mapKey := range cfg.ExcludeKeys {
-		switch mapKey.Field {
-		case AttributesField:
+		switch mapKey.field {
+		case attributesField:
 			excludeAttributeKeys = append(excludeAttributeKeys, mapKey)
-		case ResourceField:
+		case resourceField:
 			excludeResourceKeys = append(excludeResourceKeys, mapKey)
-		case BodyField:
+		case bodyField:
 			excludeBodyKeys = append(excludeBodyKeys, mapKey)
 		}
 	}
@@ -149,7 +149,7 @@ func (evp *emptyValueProcessor) processMetrics(_ context.Context, md pmetric.Met
 func cleanMap(m pcommon.Map, c Config, excludeKeys []MapKey) {
 	m.RemoveIf(func(s string, v pcommon.Value) bool {
 		for _, mk := range excludeKeys {
-			if mk.Key == s {
+			if mk.key == s {
 				return false
 			}
 		}
@@ -176,15 +176,15 @@ func cleanMap(m pcommon.Map, c Config, excludeKeys []MapKey) {
 func trimMapKeyPrefix(prefix string, keys []MapKey) []MapKey {
 	outKeys := make([]MapKey, 0, len(keys))
 	for _, mk := range keys {
-		trimmedKey, found := strings.CutPrefix(mk.Key, prefix+".")
+		trimmedKey, found := strings.CutPrefix(mk.key, prefix+".")
 		if !found {
 			// prefix was not found, so this key does not belong to the submap.
 			continue
 		}
 
 		outKeys = append(outKeys, MapKey{
-			Field: mk.Field,
-			Key:   trimmedKey,
+			field: mk.field,
+			key:   trimmedKey,
 		})
 	}
 

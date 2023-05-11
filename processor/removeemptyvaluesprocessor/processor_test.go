@@ -66,8 +66,8 @@ func TestProcessMetrics(t *testing.T) {
 			},
 			ExcludeKeys: []MapKey{
 				{
-					Field: AttributesField,
-					Key:   "empty.key",
+					field: attributesField,
+					key:   "empty.key",
 				},
 			},
 		})
@@ -125,8 +125,8 @@ func TestProcessMetrics(t *testing.T) {
 			},
 			ExcludeKeys: []MapKey{
 				{
-					Field: ResourceField,
-					Key:   "nested.map.map.some.key",
+					field: resourceField,
+					key:   "nested.map.map.some.key",
 				},
 			},
 		})
@@ -191,8 +191,8 @@ func TestProcessTraces(t *testing.T) {
 			},
 			ExcludeKeys: []MapKey{
 				{
-					Field: AttributesField,
-					Key:   "empty.key",
+					field: attributesField,
+					key:   "empty.key",
 				},
 			},
 		})
@@ -252,8 +252,8 @@ func TestProcessTraces(t *testing.T) {
 			},
 			ExcludeKeys: []MapKey{
 				{
-					Field: ResourceField,
-					Key:   "nested.map.map.some.key",
+					field: resourceField,
+					key:   "nested.map.map.some.key",
 				},
 			},
 		})
@@ -320,8 +320,8 @@ func TestProcessLogs(t *testing.T) {
 			},
 			ExcludeKeys: []MapKey{
 				{
-					Field: AttributesField,
-					Key:   "empty.key",
+					field: attributesField,
+					key:   "empty.key",
 				},
 			},
 		})
@@ -383,8 +383,8 @@ func TestProcessLogs(t *testing.T) {
 			},
 			ExcludeKeys: []MapKey{
 				{
-					Field: ResourceField,
-					Key:   "nested.map.map.some.key",
+					field: resourceField,
+					key:   "nested.map.map.some.key",
 				},
 			},
 		})
@@ -450,8 +450,8 @@ func TestProcessLogs(t *testing.T) {
 			},
 			ExcludeKeys: []MapKey{
 				{
-					Field: BodyField,
-					Key:   "empty.key",
+					field: bodyField,
+					key:   "empty.key",
 				},
 			},
 		})
