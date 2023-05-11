@@ -62,6 +62,7 @@ func (m *MapKey) UnmarshalText(text []byte) error {
 	return nil
 }
 
+// Validate validates the MapKey, returning an error if it is invalid.
 func (m MapKey) Validate() error {
 	for _, field := range allFields {
 		if field == m.field {
