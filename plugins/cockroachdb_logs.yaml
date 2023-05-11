@@ -12,7 +12,7 @@ parameters:
     default:
       - "/var/log/cockroach-data/logs/cockroach-health.log"
   - name: enable_dev_log
-    description: Enable to collect general developer logs.
+    description: Enable to collect general Dev logs.
     type: bool
     default: true
   - name: dev_log_path
@@ -79,7 +79,7 @@ parameters:
 template: |
   receivers:
     {{ if .enable_health_log }}
-    filelog/health_logs:
+    filelog/cockroachdb_health_logs:
       include:
         {{ range $fp := .health_log_path }}
         - '{{ $fp }}'
@@ -101,7 +101,7 @@ template: |
     {{ end }} ## End Health Logs.
 
     {{ if .enable_dev_log }}
-    filelog/dev_logs:
+    filelog/cockroachdb_dev_logs:
       include:
         {{ range $fp := .dev_log_path}}
         - '{{ $fp }}'
@@ -124,7 +124,7 @@ template: |
 
     
     {{ if .enable_error_log }}
-    filelog/error_logs:
+    filelog/cockroachdb_error_logs:
       include:
         {{ range $fp := .error_log_path }}
         - '{{ $fp }}'
@@ -146,7 +146,7 @@ template: |
     {{ end }} ## End of Error Logs.
 
     {{ if .enable_sql_schema_log }}
-    filelog/sql_schema_logs:
+    filelog/cockroachdb_sql_schema_logs:
       include:
         {{ range $fp := .sql_schema_log_path }}
         - '{{ $fp }}' 
@@ -168,7 +168,7 @@ template: |
     {{ end }} # End of sql schema logs
     
     {{ if .enable_telemetry_log }}
-    filelog/telemetry_logs:
+    filelog/cockroachdb_telemetry_logs:
       include:
         {{ range $fp := .telemetry_log_path }}
         - '{{ $fp }}' 
@@ -190,7 +190,7 @@ template: |
     {{ end }} # End of telemetry logs
 
     {{ if .enable_kv_distribution_log }}
-    filelog/kv_distribution_logs:
+    filelog/cockroachdb_kv_distribution_logs:
       include:
         {{ range $fp := .kv_distribution_log_path }}
          - '{{ $fp }}'
@@ -212,7 +212,7 @@ template: |
     {{ end }} # End of kv distribution logs
     
     {{ if .enable_pebble_log }}
-    filelog/pebble_logs:
+    filelog/cockroachdb_pebble_logs:
       include:
         {{ range $fp := .pebble_log_path }}
          - '{{ $fp }}'
@@ -238,23 +238,23 @@ template: |
       logs:
         receivers:
           {{ if .enable_health_log }}
-          - filelog/health_logs
+          - filelog/cockroachdb_health_logs
           {{ end }}
           {{ if .enable_dev_log }}
-          - filelog/dev_logs
+          - filelog/cockroachdb_dev_logs
           {{ end }}
           {{ if .enable_error_log }}
-          - filelog/error_logs
+          - filelog/cockroachdb_error_logs
           {{ end }}
           {{ if .enable_sql_schema_log }}
-          - filelog/sql_schema_logs
+          - filelog/cockroachdb_sql_schema_logs
           {{ end }}
           {{ if .enable_telemetry_log }}
-          - filelog/telemetry_logs
+          - filelog/cockroachdb_telemetry_logs
           {{ end }}
           {{ if .enable_kv_distribution_log }}
-          - filelog/kv_distribution_logs
+          - filelog/cockroachdb_kv_distribution_logs
           {{ end }}
           {{ if .enable_pebble_log }}
-          - filelog/pebble_logs
+          - filelog/cockroachdb_pebble_logs
           {{ end }}

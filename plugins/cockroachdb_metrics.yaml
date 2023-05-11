@@ -216,7 +216,7 @@ template: |
           action: combine
           new_name: "crdb.capacity.usage"
         # Combine several dml query counts into one
-        - include: ^sql_(?P<state>insert|delete|update|select)_count$$
+        - include: ^sql_(?P<command>insert|delete|update|select)_count$$
           match_type: regexp
           action: combine
           new_name: "crdb.sql.dml.query.count"
@@ -264,10 +264,10 @@ template: |
           - set(description, "Current system cpu percentage") where name == "crdb.sys.cpu.sys.utilization"
           - set(unit, "%") where name == "crdb.sys.cpu.sys.utilization"
 
-          - set(description, "Total user cpu time") where name == "crdb.sys.cpu.user.time"
+          - set(description, "Time cpu spent running user code on a given node over a time interval") where name == "crdb.sys.cpu.user.time"
           - set(unit, "ns") where name == "crdb.sys.cpu.user.time"
 
-          - set(description, "Total system cpu time") where name == "crdb.sys.cpu.sys.time"
+          - set(description, "Time cpu spent running system code on a given node over a time interval") where name == "crdb.sys.cpu.sys.time"
           - set(unit, "ns") where name == "crdb.sys.cpu.sys.time"
 
           - set(description, "Total storage capacity") where name == "crdb.capacity.usage"
