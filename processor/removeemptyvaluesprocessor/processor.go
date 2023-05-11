@@ -26,35 +26,37 @@ import (
 )
 
 type emptyValueProcessor struct {
-	logger               *zap.Logger
-	c                    Config
-	excludeResourceKeys  []MapKey
-	excludeAttributeKeys []MapKey
-	excludeBodyKeys      []MapKey
+	logger                 *zap.Logger
+	c                      Config
+	excludeResourceKeySet  map[string]struct{}
+	excludeAttributeKeySet map[string]struct{}
+	excludeBodyKeySet      map[string]struct{}
 }
 
 func newEmptyValueProcessor(logger *zap.Logger, cfg Config) *emptyValueProcessor {
-	var excludeResourceKeys []MapKey
-	var excludeAttributeKeys []MapKey
-	var excludeBodyKeys []MapKey
+	var (
+		excludeResourceKeySet  = make(map[string]struct{})
+		excludeAttributeKeySet = make(map[string]struct{})
+		excludeBodyKeySet      = make(map[string]struct{})
+	)
 
 	for _, mapKey := range cfg.ExcludeKeys {
 		switch mapKey.field {
 		case attributesField:
-			excludeAttributeKeys = append(excludeAttributeKeys, mapKey)
+			excludeAttributeKeySet[mapKey.key] = struct{}{}
 		case resourceField:
-			excludeResourceKeys = append(excludeResourceKeys, mapKey)
+			excludeResourceKeySet[mapKey.key] = struct{}{}
 		case bodyField:
-			excludeBodyKeys = append(excludeBodyKeys, mapKey)
+			excludeBodyKeySet[mapKey.key] = struct{}{}
 		}
 	}
 
 	return &emptyValueProcessor{
-		logger:               logger,
-		c:                    cfg,
-		excludeResourceKeys:  excludeResourceKeys,
-		excludeAttributeKeys: excludeAttributeKeys,
-		excludeBodyKeys:      excludeBodyKeys,
+		logger:                 logger,
+		c:                      cfg,
+		excludeResourceKeySet:  excludeResourceKeySet,
+		excludeAttributeKeySet: excludeAttributeKeySet,
+		excludeBodyKeySet:      excludeBodyKeySet,
 	}
 }
 
@@ -65,7 +67,7 @@ func (evp *emptyValueProcessor) processTraces(_ context.Context, td ptrace.Trace
 		scopeSpans := resourceSpan.ScopeSpans()
 
 		if evp.c.EnableResourceAttributes {
-			cleanMap(resourceSpan.Resource().Attributes(), evp.c, evp.excludeResourceKeys)
+			cleanMap(resourceSpan.Resource().Attributes(), evp.c, evp.excludeResourceKeySet)
 		}
 
 		if !evp.c.EnableAttributes {
@@ -79,7 +81,7 @@ func (evp *emptyValueProcessor) processTraces(_ context.Context, td ptrace.Trace
 
 			for k := 0; k < spans.Len(); k++ {
 				span := spans.At(k)
-				cleanMap(span.Attributes(), evp.c, evp.excludeAttributeKeys)
+				cleanMap(span.Attributes(), evp.c, evp.excludeAttributeKeySet)
 			}
 		}
 	}
@@ -94,7 +96,7 @@ func (evp *emptyValueProcessor) processLogs(_ context.Context, ld plog.Logs) (pl
 		scopeLogs := resourceLog.ScopeLogs()
 
 		if evp.c.EnableResourceAttributes {
-			cleanMap(resourceLog.Resource().Attributes(), evp.c, evp.excludeResourceKeys)
+			cleanMap(resourceLog.Resource().Attributes(), evp.c, evp.excludeResourceKeySet)
 		}
 
 		for j := 0; j < scopeLogs.Len(); j++ {
@@ -104,11 +106,11 @@ func (evp *emptyValueProcessor) processLogs(_ context.Context, ld plog.Logs) (pl
 			for k := 0; k < logRecords.Len(); k++ {
 				logRecord := logRecords.At(k)
 				if evp.c.EnableAttributes {
-					cleanMap(logRecord.Attributes(), evp.c, evp.excludeAttributeKeys)
+					cleanMap(logRecord.Attributes(), evp.c, evp.excludeAttributeKeySet)
 				}
 
 				if evp.c.EnableLogBody {
-					cleanLogBody(logRecord, evp.c, evp.excludeBodyKeys)
+					cleanLogBody(logRecord, evp.c, evp.excludeBodyKeySet)
 				}
 			}
 		}
@@ -124,7 +126,7 @@ func (evp *emptyValueProcessor) processMetrics(_ context.Context, md pmetric.Met
 		scopeMetrics := resourceMetric.ScopeMetrics()
 
 		if evp.c.EnableResourceAttributes {
-			cleanMap(resourceMetric.Resource().Attributes(), evp.c, evp.excludeResourceKeys)
+			cleanMap(resourceMetric.Resource().Attributes(), evp.c, evp.excludeResourceKeySet)
 		}
 
 		if !evp.c.EnableAttributes {
@@ -138,7 +140,7 @@ func (evp *emptyValueProcessor) processMetrics(_ context.Context, md pmetric.Met
 
 			for k := 0; k < metrics.Len(); k++ {
 				metric := metrics.At(k)
-				cleanMetricAttrs(metric, evp.c, evp.excludeAttributeKeys)
+				cleanMetricAttrs(metric, evp.c, evp.excludeAttributeKeySet)
 			}
 		}
 	}
@@ -146,10 +148,10 @@ func (evp *emptyValueProcessor) processMetrics(_ context.Context, md pmetric.Met
 }
 
 // cleanMap removes empty values from the map, as defined by the config.
-func cleanMap(m pcommon.Map, c Config, excludeKeys []MapKey) {
+func cleanMap(m pcommon.Map, c Config, excludeKeys map[string]struct{}) {
 	m.RemoveIf(func(s string, v pcommon.Value) bool {
-		for _, mk := range excludeKeys {
-			if mk.key == s {
+		for mk := range excludeKeys {
+			if mk == s {
 				return false
 			}
 		}
@@ -173,20 +175,15 @@ func cleanMap(m pcommon.Map, c Config, excludeKeys []MapKey) {
 
 // trimMapKeyPrefix returns the provided keys with the specified prefix removed.
 // Any keys that don't have the prefix are removed from the returned list.
-func trimMapKeyPrefix(prefix string, keys []MapKey) []MapKey {
-	outKeys := make([]MapKey, 0, len(keys))
-	for _, mk := range keys {
-		if !strings.HasPrefix(mk.key, prefix+".") {
-			// prefix was not found, so this key does not belong to the submap.
+func trimMapKeyPrefix(prefix string, keySet map[string]struct{}) map[string]struct{} {
+	outKeys := make(map[string]struct{}, len(keySet))
+	for mk := range keySet {
+		trimmedKey := strings.TrimPrefix(mk, prefix+".")
+		if len(trimmedKey) == len(mk) {
+			// the original key was left untrimmed, so this must not have the prefix
 			continue
 		}
-
-		trimmedKey := mk.key[len(prefix)+1:]
-
-		outKeys = append(outKeys, MapKey{
-			field: mk.field,
-			key:   trimmedKey,
-		})
+		outKeys[trimmedKey] = struct{}{}
 	}
 
 	return outKeys
@@ -205,7 +202,7 @@ func shouldFilterString(s string, emptyValues []string) bool {
 }
 
 // cleanMetricAttrs removes any attributes that should be considered empty from all the datapoints in the metrics.
-func cleanMetricAttrs(metric pmetric.Metric, c Config, keys []MapKey) {
+func cleanMetricAttrs(metric pmetric.Metric, c Config, keys map[string]struct{}) {
 	switch metric.Type() {
 	case pmetric.MetricTypeGauge:
 		dps := metric.Gauge().DataPoints()
@@ -244,7 +241,7 @@ func cleanMetricAttrs(metric pmetric.Metric, c Config, keys []MapKey) {
 }
 
 // cleanLogBody removes empty values from the log body.
-func cleanLogBody(lr plog.LogRecord, c Config, keys []MapKey) {
+func cleanLogBody(lr plog.LogRecord, c Config, keys map[string]struct{}) {
 	body := lr.Body()
 	switch body.Type() {
 	case pcommon.ValueTypeMap:

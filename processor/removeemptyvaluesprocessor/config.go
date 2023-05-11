@@ -27,6 +27,8 @@ const (
 	bodyField       = "body"
 )
 
+var allFields = []string{attributesField, resourceField, bodyField}
+
 // MapKey represents a key into a particular map (denoted by field)
 type MapKey struct {
 	field string
@@ -45,7 +47,7 @@ func (m *MapKey) UnmarshalText(text []byte) error {
 		return fmt.Errorf("key part of (%s) must be non-zero in length", text)
 	}
 
-	for _, validField := range []string{attributesField, resourceField, bodyField} {
+	for _, validField := range allFields {
 		if validField == string(field) {
 			// this key indexes into a valid field, and therefore
 			m.key = string(key)
