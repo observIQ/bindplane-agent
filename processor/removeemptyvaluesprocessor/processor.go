@@ -60,17 +60,35 @@ func newEmptyValueProcessor(logger *zap.Logger, cfg Config) *emptyValueProcessor
 	}
 }
 
+func (evp *emptyValueProcessor) SkipResourceAttributes() bool {
+	// If only the field is specified, but no trailing key, the whole resource should be skipped
+	_, ok := evp.excludeResourceKeySet[""]
+	return ok
+}
+
+func (evp *emptyValueProcessor) SkipAttributes() bool {
+	// If only the field is specified, but no trailing key, the whole resource should be skipped
+	_, ok := evp.excludeAttributeKeySet[""]
+	return ok
+}
+
+func (evp *emptyValueProcessor) SkipBody() bool {
+	// If only the field is specified, but no trailing key, the whole resource should be skipped
+	_, ok := evp.excludeBodyKeySet[""]
+	return ok
+}
+
 func (evp *emptyValueProcessor) processTraces(_ context.Context, td ptrace.Traces) (ptrace.Traces, error) {
 	resourceSpans := td.ResourceSpans()
 	for i := 0; i < resourceSpans.Len(); i++ {
 		resourceSpan := resourceSpans.At(i)
 		scopeSpans := resourceSpan.ScopeSpans()
 
-		if evp.c.EnableResourceAttributes {
+		if !evp.SkipResourceAttributes() {
 			cleanMap(resourceSpan.Resource().Attributes(), evp.c, evp.excludeResourceKeySet)
 		}
 
-		if !evp.c.EnableAttributes {
+		if evp.SkipAttributes() {
 			// Skip loops for attributes if we don't need to clean them.
 			continue
 		}
@@ -95,7 +113,7 @@ func (evp *emptyValueProcessor) processLogs(_ context.Context, ld plog.Logs) (pl
 		resourceLog := resourceLogs.At(i)
 		scopeLogs := resourceLog.ScopeLogs()
 
-		if evp.c.EnableResourceAttributes {
+		if !evp.SkipResourceAttributes() {
 			cleanMap(resourceLog.Resource().Attributes(), evp.c, evp.excludeResourceKeySet)
 		}
 
@@ -105,11 +123,11 @@ func (evp *emptyValueProcessor) processLogs(_ context.Context, ld plog.Logs) (pl
 
 			for k := 0; k < logRecords.Len(); k++ {
 				logRecord := logRecords.At(k)
-				if evp.c.EnableAttributes {
+				if !evp.SkipAttributes() {
 					cleanMap(logRecord.Attributes(), evp.c, evp.excludeAttributeKeySet)
 				}
 
-				if evp.c.EnableLogBody {
+				if !evp.SkipBody() {
 					cleanLogBody(logRecord, evp.c, evp.excludeBodyKeySet)
 				}
 			}
@@ -125,11 +143,11 @@ func (evp *emptyValueProcessor) processMetrics(_ context.Context, md pmetric.Met
 		resourceMetric := resourceMetrics.At(i)
 		scopeMetrics := resourceMetric.ScopeMetrics()
 
-		if evp.c.EnableResourceAttributes {
+		if !evp.SkipResourceAttributes() {
 			cleanMap(resourceMetric.Resource().Attributes(), evp.c, evp.excludeResourceKeySet)
 		}
 
-		if !evp.c.EnableAttributes {
+		if evp.SkipAttributes() {
 			// Skip loops for attributes if we don't need to clean them.
 			continue
 		}
@@ -183,6 +201,7 @@ func trimMapKeyPrefix(prefix string, keySet map[string]struct{}) map[string]stru
 			// the original key was left untrimmed, so this must not have the prefix
 			continue
 		}
+
 		outKeys[trimmedKey] = struct{}{}
 	}
 

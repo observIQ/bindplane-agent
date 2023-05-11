@@ -24,11 +24,8 @@ The following options may be configured:
 | remove_nulls | bool | `true` | If true, entries with a value of null are removed. |
 | remove_empty_lists | bool | `false` | If true, entries with a value of an empty list are removed. |
 | remove_empty_maps | bool | `false` | If true, entries with a value of an empty map are removed. |
-| enable_resource_attributes | bool | `true` | If true, resource attributes are purged of empty values. |
-| enable_attributes | bool | `true` | If true, attributes are purged of empty values. |
-| enable_log_body | bool | `true` | If true, the log body is purged of empty values. |
 | empty_string_values | []string | `[]` | A list of case-insensitive string values considered "empty". |
-| exclude_keys | []string | `[]` | A list of keys to exclude from removal. These keys are in the format of `<field>.<path-to-key>` (e.g. `resource.k8s.pod.id`). Valid fields are `body`, `resource`, and `attributes`. |
+| exclude_keys | []string | `[]` | A list of keys to exclude from removal. These keys are in the format of `<field>.<path-to-key>` (e.g. `resource.k8s.pod.id`). You may also just specify `<field>` to exclude the whole field. Valid fields are `body`, `resource`, and `attributes`. |
 
 ### Example Configuration
 

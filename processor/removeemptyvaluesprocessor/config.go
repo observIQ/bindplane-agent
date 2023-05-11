@@ -38,6 +38,15 @@ type MapKey struct {
 // UnmarshalText unmarshals the given []byte into a MapKey.
 // The format of the key is "<field>.<path-to-key>"
 func (m *MapKey) UnmarshalText(text []byte) error {
+	for _, field := range allFields {
+		if field == string(text) {
+			// this is an exact match for excluding an entire field, so just filling in
+			// the field is acceptable.
+			m.field = field
+			return nil
+		}
+	}
+
 	field, key, found := bytes.Cut(text, []byte("."))
 	if !found {
 		return fmt.Errorf("failed to determine field: %s", text)
@@ -47,31 +56,37 @@ func (m *MapKey) UnmarshalText(text []byte) error {
 		return fmt.Errorf("key part of (%s) must be non-zero in length", text)
 	}
 
-	for _, validField := range allFields {
-		if validField == string(field) {
-			// this key indexes into a valid field, and therefore
-			m.key = string(key)
-			m.field = string(field)
+	m.field = string(field)
+	m.key = string(key)
+
+	return nil
+}
+
+func (m MapKey) Validate() error {
+	for _, field := range allFields {
+		if field == m.field {
 			return nil
 		}
 	}
 
-	return fmt.Errorf("invalid field (%s), must be one of attributes, resource, or body", field)
+	return fmt.Errorf("invalid field (%s), field must be body, attributes, or resource", m.field)
 }
 
 // Config is the configuration for the processor
 type Config struct {
-	RemoveNulls              bool     `mapstructure:"remove_nulls"`
-	RemoveEmptyLists         bool     `mapstructure:"remove_empty_lists"`
-	RemoveEmptyMaps          bool     `mapstructure:"remove_empty_maps"`
-	EnableResourceAttributes bool     `mapstructure:"enable_resource_attributes"`
-	EnableAttributes         bool     `mapstructure:"enable_attributes"`
-	EnableLogBody            bool     `mapstructure:"enable_log_body"`
-	EmptyStringValues        []string `mapstructure:"empty_string_values"`
-	ExcludeKeys              []MapKey `mapstructure:"exclude_keys"`
+	RemoveNulls       bool     `mapstructure:"remove_nulls"`
+	RemoveEmptyLists  bool     `mapstructure:"remove_empty_lists"`
+	RemoveEmptyMaps   bool     `mapstructure:"remove_empty_maps"`
+	EmptyStringValues []string `mapstructure:"empty_string_values"`
+	ExcludeKeys       []MapKey `mapstructure:"exclude_keys"`
 }
 
 // Validate validates the processor configuration
 func (cfg Config) Validate() error {
+	for i, key := range cfg.ExcludeKeys {
+		if err := key.Validate(); err != nil {
+			return fmt.Errorf("exclude_keys[%d]: %w", i, err)
+		}
+	}
 	return nil
 }

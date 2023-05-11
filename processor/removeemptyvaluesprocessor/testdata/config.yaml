@@ -1,12 +1,9 @@
 removeemptyvalues/defaults:
 
-removeemptyvalues:
+removeemptyvalues/exclude_keys:
   remove_nulls: false
   remove_empty_lists: true
   remove_empty_maps: true
-  enable_resource_attributes: false
-  enable_attributes: false
-  enable_log_body: false
   empty_string_values:
     - "-"
   exclude_keys:
@@ -14,3 +11,8 @@ removeemptyvalues:
     - "resource.key.something"
     - "attributes.attribute.key"
 
+removeemptyvalues/exclude_fields:
+  exclude_keys:
+    - "body"
+    - "resource"
+    - "attributes"

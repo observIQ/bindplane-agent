@@ -28,13 +28,10 @@ func TestNewFactory(t *testing.T) {
 	require.Equal(t, typeStr, string(factory.Type()))
 
 	expectedCfg := &Config{
-		RemoveNulls:              true,
-		RemoveEmptyLists:         false,
-		RemoveEmptyMaps:          false,
-		EnableResourceAttributes: true,
-		EnableAttributes:         true,
-		EnableLogBody:            true,
-		EmptyStringValues:        []string{},
+		RemoveNulls:       true,
+		RemoveEmptyLists:  false,
+		RemoveEmptyMaps:   false,
+		EmptyStringValues: []string{},
 	}
 
 	cfg, ok := factory.CreateDefaultConfig().(*Config)

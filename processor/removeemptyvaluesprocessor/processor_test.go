@@ -29,14 +29,19 @@ import (
 func TestProcessMetrics(t *testing.T) {
 	t.Run("Removes attributes", func(t *testing.T) {
 		p := newEmptyValueProcessor(zaptest.NewLogger(t), Config{
-			RemoveNulls:              true,
-			RemoveEmptyLists:         true,
-			RemoveEmptyMaps:          true,
-			EnableResourceAttributes: false,
-			EnableAttributes:         true,
-			EnableLogBody:            false,
+			RemoveNulls:      true,
+			RemoveEmptyLists: true,
+			RemoveEmptyMaps:  true,
 			EmptyStringValues: []string{
 				"-",
+			},
+			ExcludeKeys: []MapKey{
+				{
+					field: resourceField,
+				},
+				{
+					field: bodyField,
+				},
 			},
 		})
 
@@ -55,12 +60,9 @@ func TestProcessMetrics(t *testing.T) {
 
 	t.Run("Removes attributes, ignore excluded", func(t *testing.T) {
 		p := newEmptyValueProcessor(zaptest.NewLogger(t), Config{
-			RemoveNulls:              true,
-			RemoveEmptyLists:         true,
-			RemoveEmptyMaps:          true,
-			EnableResourceAttributes: false,
-			EnableAttributes:         true,
-			EnableLogBody:            false,
+			RemoveNulls:      true,
+			RemoveEmptyLists: true,
+			RemoveEmptyMaps:  true,
 			EmptyStringValues: []string{
 				"-",
 			},
@@ -68,6 +70,12 @@ func TestProcessMetrics(t *testing.T) {
 				{
 					field: attributesField,
 					key:   "empty.key",
+				},
+				{
+					field: resourceField,
+				},
+				{
+					field: bodyField,
 				},
 			},
 		})
@@ -88,14 +96,19 @@ func TestProcessMetrics(t *testing.T) {
 
 	t.Run("Removes resource attributes", func(t *testing.T) {
 		p := newEmptyValueProcessor(zaptest.NewLogger(t), Config{
-			RemoveNulls:              true,
-			RemoveEmptyLists:         true,
-			RemoveEmptyMaps:          true,
-			EnableResourceAttributes: true,
-			EnableAttributes:         false,
-			EnableLogBody:            false,
+			RemoveNulls:      true,
+			RemoveEmptyLists: true,
+			RemoveEmptyMaps:  true,
 			EmptyStringValues: []string{
 				"-",
+			},
+			ExcludeKeys: []MapKey{
+				{
+					field: attributesField,
+				},
+				{
+					field: bodyField,
+				},
 			},
 		})
 
@@ -114,12 +127,9 @@ func TestProcessMetrics(t *testing.T) {
 
 	t.Run("Removes resource attributes, ignores excluded", func(t *testing.T) {
 		p := newEmptyValueProcessor(zaptest.NewLogger(t), Config{
-			RemoveNulls:              true,
-			RemoveEmptyLists:         true,
-			RemoveEmptyMaps:          true,
-			EnableResourceAttributes: true,
-			EnableAttributes:         false,
-			EnableLogBody:            false,
+			RemoveNulls:      true,
+			RemoveEmptyLists: true,
+			RemoveEmptyMaps:  true,
 			EmptyStringValues: []string{
 				"-",
 			},
@@ -127,6 +137,12 @@ func TestProcessMetrics(t *testing.T) {
 				{
 					field: resourceField,
 					key:   "nested.map.map.some.key",
+				},
+				{
+					field: attributesField,
+				},
+				{
+					field: bodyField,
 				},
 			},
 		})
@@ -153,14 +169,19 @@ func TestProcessMetrics(t *testing.T) {
 func TestProcessTraces(t *testing.T) {
 	t.Run("Removes attributes", func(t *testing.T) {
 		p := newEmptyValueProcessor(zaptest.NewLogger(t), Config{
-			RemoveNulls:              true,
-			RemoveEmptyLists:         true,
-			RemoveEmptyMaps:          true,
-			EnableResourceAttributes: false,
-			EnableAttributes:         true,
-			EnableLogBody:            false,
+			RemoveNulls:      true,
+			RemoveEmptyLists: true,
+			RemoveEmptyMaps:  true,
 			EmptyStringValues: []string{
 				"-",
+			},
+			ExcludeKeys: []MapKey{
+				{
+					field: resourceField,
+				},
+				{
+					field: bodyField,
+				},
 			},
 		})
 
@@ -180,12 +201,9 @@ func TestProcessTraces(t *testing.T) {
 
 	t.Run("Removes attributes, ignores excluded", func(t *testing.T) {
 		p := newEmptyValueProcessor(zaptest.NewLogger(t), Config{
-			RemoveNulls:              true,
-			RemoveEmptyLists:         true,
-			RemoveEmptyMaps:          true,
-			EnableResourceAttributes: false,
-			EnableAttributes:         true,
-			EnableLogBody:            false,
+			RemoveNulls:      true,
+			RemoveEmptyLists: true,
+			RemoveEmptyMaps:  true,
 			EmptyStringValues: []string{
 				"-",
 			},
@@ -193,6 +211,12 @@ func TestProcessTraces(t *testing.T) {
 				{
 					field: attributesField,
 					key:   "empty.key",
+				},
+				{
+					field: resourceField,
+				},
+				{
+					field: bodyField,
 				},
 			},
 		})
@@ -214,14 +238,19 @@ func TestProcessTraces(t *testing.T) {
 
 	t.Run("Removes resource attributes", func(t *testing.T) {
 		p := newEmptyValueProcessor(zaptest.NewLogger(t), Config{
-			RemoveNulls:              true,
-			RemoveEmptyLists:         true,
-			RemoveEmptyMaps:          true,
-			EnableResourceAttributes: true,
-			EnableAttributes:         false,
-			EnableLogBody:            false,
+			RemoveNulls:      true,
+			RemoveEmptyLists: true,
+			RemoveEmptyMaps:  true,
 			EmptyStringValues: []string{
 				"-",
+			},
+			ExcludeKeys: []MapKey{
+				{
+					field: attributesField,
+				},
+				{
+					field: bodyField,
+				},
 			},
 		})
 
@@ -241,12 +270,9 @@ func TestProcessTraces(t *testing.T) {
 
 	t.Run("Removes resource attributes, ignores excluded", func(t *testing.T) {
 		p := newEmptyValueProcessor(zaptest.NewLogger(t), Config{
-			RemoveNulls:              true,
-			RemoveEmptyLists:         true,
-			RemoveEmptyMaps:          true,
-			EnableResourceAttributes: true,
-			EnableAttributes:         false,
-			EnableLogBody:            false,
+			RemoveNulls:      true,
+			RemoveEmptyLists: true,
+			RemoveEmptyMaps:  true,
 			EmptyStringValues: []string{
 				"-",
 			},
@@ -254,6 +280,12 @@ func TestProcessTraces(t *testing.T) {
 				{
 					field: resourceField,
 					key:   "nested.map.map.some.key",
+				},
+				{
+					field: attributesField,
+				},
+				{
+					field: bodyField,
 				},
 			},
 		})
@@ -281,14 +313,19 @@ func TestProcessTraces(t *testing.T) {
 func TestProcessLogs(t *testing.T) {
 	t.Run("Removes attributes", func(t *testing.T) {
 		p := newEmptyValueProcessor(zaptest.NewLogger(t), Config{
-			RemoveNulls:              true,
-			RemoveEmptyLists:         true,
-			RemoveEmptyMaps:          true,
-			EnableResourceAttributes: false,
-			EnableAttributes:         true,
-			EnableLogBody:            false,
+			RemoveNulls:      true,
+			RemoveEmptyLists: true,
+			RemoveEmptyMaps:  true,
 			EmptyStringValues: []string{
 				"-",
+			},
+			ExcludeKeys: []MapKey{
+				{
+					field: resourceField,
+				},
+				{
+					field: bodyField,
+				},
 			},
 		})
 
@@ -309,12 +346,9 @@ func TestProcessLogs(t *testing.T) {
 
 	t.Run("Removes attributes, skips excluded", func(t *testing.T) {
 		p := newEmptyValueProcessor(zaptest.NewLogger(t), Config{
-			RemoveNulls:              true,
-			RemoveEmptyLists:         true,
-			RemoveEmptyMaps:          true,
-			EnableResourceAttributes: false,
-			EnableAttributes:         true,
-			EnableLogBody:            false,
+			RemoveNulls:      true,
+			RemoveEmptyLists: true,
+			RemoveEmptyMaps:  true,
 			EmptyStringValues: []string{
 				"-",
 			},
@@ -322,6 +356,12 @@ func TestProcessLogs(t *testing.T) {
 				{
 					field: attributesField,
 					key:   "empty.key",
+				},
+				{
+					field: resourceField,
+				},
+				{
+					field: bodyField,
 				},
 			},
 		})
@@ -344,14 +384,19 @@ func TestProcessLogs(t *testing.T) {
 
 	t.Run("Removes resource attributes", func(t *testing.T) {
 		p := newEmptyValueProcessor(zaptest.NewLogger(t), Config{
-			RemoveNulls:              true,
-			RemoveEmptyLists:         true,
-			RemoveEmptyMaps:          true,
-			EnableResourceAttributes: true,
-			EnableAttributes:         false,
-			EnableLogBody:            false,
+			RemoveNulls:      true,
+			RemoveEmptyLists: true,
+			RemoveEmptyMaps:  true,
 			EmptyStringValues: []string{
 				"-",
+			},
+			ExcludeKeys: []MapKey{
+				{
+					field: attributesField,
+				},
+				{
+					field: bodyField,
+				},
 			},
 		})
 
@@ -372,12 +417,9 @@ func TestProcessLogs(t *testing.T) {
 
 	t.Run("Removes resource attributes, ignores excluded", func(t *testing.T) {
 		p := newEmptyValueProcessor(zaptest.NewLogger(t), Config{
-			RemoveNulls:              true,
-			RemoveEmptyLists:         true,
-			RemoveEmptyMaps:          true,
-			EnableResourceAttributes: true,
-			EnableAttributes:         false,
-			EnableLogBody:            false,
+			RemoveNulls:      true,
+			RemoveEmptyLists: true,
+			RemoveEmptyMaps:  true,
 			EmptyStringValues: []string{
 				"-",
 			},
@@ -385,6 +427,12 @@ func TestProcessLogs(t *testing.T) {
 				{
 					field: resourceField,
 					key:   "nested.map.map.some.key",
+				},
+				{
+					field: attributesField,
+				},
+				{
+					field: bodyField,
 				},
 			},
 		})
@@ -411,14 +459,19 @@ func TestProcessLogs(t *testing.T) {
 
 	t.Run("Removes body keys", func(t *testing.T) {
 		p := newEmptyValueProcessor(zaptest.NewLogger(t), Config{
-			RemoveNulls:              true,
-			RemoveEmptyLists:         true,
-			RemoveEmptyMaps:          true,
-			EnableResourceAttributes: false,
-			EnableAttributes:         false,
-			EnableLogBody:            true,
+			RemoveNulls:      true,
+			RemoveEmptyLists: true,
+			RemoveEmptyMaps:  true,
 			EmptyStringValues: []string{
 				"-",
+			},
+			ExcludeKeys: []MapKey{
+				{
+					field: attributesField,
+				},
+				{
+					field: resourceField,
+				},
 			},
 		})
 
@@ -439,12 +492,9 @@ func TestProcessLogs(t *testing.T) {
 
 	t.Run("Removes body keys, ignores excluded", func(t *testing.T) {
 		p := newEmptyValueProcessor(zaptest.NewLogger(t), Config{
-			RemoveNulls:              true,
-			RemoveEmptyLists:         true,
-			RemoveEmptyMaps:          true,
-			EnableResourceAttributes: false,
-			EnableAttributes:         false,
-			EnableLogBody:            true,
+			RemoveNulls:      true,
+			RemoveEmptyLists: true,
+			RemoveEmptyMaps:  true,
 			EmptyStringValues: []string{
 				"-",
 			},
@@ -452,6 +502,12 @@ func TestProcessLogs(t *testing.T) {
 				{
 					field: bodyField,
 					key:   "empty.key",
+				},
+				{
+					field: attributesField,
+				},
+				{
+					field: resourceField,
 				},
 			},
 		})
@@ -474,14 +530,19 @@ func TestProcessLogs(t *testing.T) {
 
 	t.Run("Removes empty slice body", func(t *testing.T) {
 		p := newEmptyValueProcessor(zaptest.NewLogger(t), Config{
-			RemoveNulls:              true,
-			RemoveEmptyLists:         true,
-			RemoveEmptyMaps:          true,
-			EnableResourceAttributes: false,
-			EnableAttributes:         false,
-			EnableLogBody:            true,
+			RemoveNulls:      true,
+			RemoveEmptyLists: true,
+			RemoveEmptyMaps:  true,
 			EmptyStringValues: []string{
 				"-",
+			},
+			ExcludeKeys: []MapKey{
+				{
+					field: attributesField,
+				},
+				{
+					field: resourceField,
+				},
 			},
 		})
 
@@ -500,14 +561,19 @@ func TestProcessLogs(t *testing.T) {
 
 	t.Run("Removes string body", func(t *testing.T) {
 		p := newEmptyValueProcessor(zaptest.NewLogger(t), Config{
-			RemoveNulls:              true,
-			RemoveEmptyLists:         true,
-			RemoveEmptyMaps:          true,
-			EnableResourceAttributes: false,
-			EnableAttributes:         false,
-			EnableLogBody:            true,
+			RemoveNulls:      true,
+			RemoveEmptyLists: true,
+			RemoveEmptyMaps:  true,
 			EmptyStringValues: []string{
 				"-",
+			},
+			ExcludeKeys: []MapKey{
+				{
+					field: attributesField,
+				},
+				{
+					field: resourceField,
+				},
 			},
 		})
 

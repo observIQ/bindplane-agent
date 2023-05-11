@@ -42,17 +42,37 @@ func TestLoadConfig(t *testing.T) {
 			expected: createDefaultConfig(),
 		},
 		{
-			id: component.NewIDWithName(typeStr, ""),
+			id: component.NewIDWithName(typeStr, "exclude_keys"),
 			expected: &Config{
-				RemoveNulls:              false,
-				RemoveEmptyLists:         true,
-				RemoveEmptyMaps:          true,
-				EnableResourceAttributes: false,
-				EnableAttributes:         false,
-				EnableLogBody:            false,
+				RemoveNulls:      false,
+				RemoveEmptyLists: true,
+				RemoveEmptyMaps:  true,
 				EmptyStringValues: []string{
 					"-",
 				},
+				ExcludeKeys: []MapKey{
+					{
+						field: "body",
+						key:   "key",
+					},
+					{
+						field: "resource",
+						key:   "key.something",
+					},
+					{
+						field: "attributes",
+						key:   "attribute.key",
+					},
+				},
+			},
+		},
+		{
+			id: component.NewIDWithName(typeStr, "exclude_fields"),
+			expected: &Config{
+				RemoveNulls:       false,
+				RemoveEmptyLists:  true,
+				RemoveEmptyMaps:   true,
+				EmptyStringValues: []string{},
 				ExcludeKeys: []MapKey{
 					{
 						field: "body",
@@ -82,6 +102,69 @@ func TestLoadConfig(t *testing.T) {
 
 			assert.NoError(t, component.ValidateConfig(cfg))
 			require.Equal(t, tc.expected, cfg)
+		})
+	}
+}
+
+func TestConfig_Validate(t *testing.T) {
+	testCases := []struct {
+		name        string
+		c           Config
+		expectedErr string
+	}{
+		{
+			name: "Valid Config",
+			c: Config{
+				RemoveNulls:      true,
+				RemoveEmptyLists: true,
+				RemoveEmptyMaps:  true,
+				EmptyStringValues: []string{
+					"-",
+					"",
+				},
+				ExcludeKeys: []MapKey{
+					{
+						field: "body",
+					},
+					{
+						field: "attributes",
+						key:   "some.key",
+					},
+				},
+			},
+		},
+		{
+			name: "Default Config",
+			c:    *createDefaultConfig().(*Config),
+		},
+		{
+			name: "Invalid Config",
+			c: Config{
+				RemoveNulls:      true,
+				RemoveEmptyLists: true,
+				RemoveEmptyMaps:  true,
+				EmptyStringValues: []string{
+					"-",
+					"",
+				},
+				ExcludeKeys: []MapKey{
+					{
+						field: "bodies",
+					},
+				},
+			},
+			expectedErr: "exclude_keys[0]: invalid field (bodies), field must be body, attributes, or resource",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			err := tc.c.Validate()
+			if tc.expectedErr != "" {
+				require.ErrorContains(t, err, tc.expectedErr)
+			} else {
+				require.NoError(t, err)
+			}
 		})
 	}
 }

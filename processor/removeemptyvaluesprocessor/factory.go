@@ -47,13 +47,10 @@ func NewFactory() processor.Factory {
 
 func createDefaultConfig() component.Config {
 	return &Config{
-		RemoveNulls:              true,
-		RemoveEmptyLists:         false,
-		RemoveEmptyMaps:          false,
-		EnableResourceAttributes: true,
-		EnableAttributes:         true,
-		EnableLogBody:            true,
-		EmptyStringValues:        []string{},
+		RemoveNulls:       true,
+		RemoveEmptyLists:  false,
+		RemoveEmptyMaps:   false,
+		EmptyStringValues: []string{},
 	}
 }
 
