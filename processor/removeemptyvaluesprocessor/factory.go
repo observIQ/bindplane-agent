@@ -63,9 +63,9 @@ func createTracesProcessor(
 	nextConsumer consumer.Traces,
 ) (processor.Traces, error) {
 	oCfg := cfg.(*Config)
-	sp := newEmptyValueProcessor(set.Logger, *oCfg)
+	evp := newEmptyValueProcessor(set.Logger, *oCfg)
 
-	return processorhelper.NewTracesProcessor(ctx, set, cfg, nextConsumer, sp.processTraces, processorhelper.WithCapabilities(consumerCapabilities))
+	return processorhelper.NewTracesProcessor(ctx, set, cfg, nextConsumer, evp.processTraces, processorhelper.WithCapabilities(consumerCapabilities))
 }
 
 func createLogsProcessor(
@@ -75,9 +75,9 @@ func createLogsProcessor(
 	nextConsumer consumer.Logs,
 ) (processor.Logs, error) {
 	oCfg := cfg.(*Config)
-	tmp := newEmptyValueProcessor(set.Logger, *oCfg)
+	evp := newEmptyValueProcessor(set.Logger, *oCfg)
 
-	return processorhelper.NewLogsProcessor(ctx, set, cfg, nextConsumer, tmp.processLogs, processorhelper.WithCapabilities(consumerCapabilities))
+	return processorhelper.NewLogsProcessor(ctx, set, cfg, nextConsumer, evp.processLogs, processorhelper.WithCapabilities(consumerCapabilities))
 }
 
 func createMetricsProcessor(
@@ -87,7 +87,7 @@ func createMetricsProcessor(
 	nextConsumer consumer.Metrics,
 ) (processor.Metrics, error) {
 	oCfg := cfg.(*Config)
-	tmp := newEmptyValueProcessor(set.Logger, *oCfg)
+	evp := newEmptyValueProcessor(set.Logger, *oCfg)
 
-	return processorhelper.NewMetricsProcessor(ctx, set, cfg, nextConsumer, tmp.processMetrics, processorhelper.WithCapabilities(consumerCapabilities))
+	return processorhelper.NewMetricsProcessor(ctx, set, cfg, nextConsumer, evp.processMetrics, processorhelper.WithCapabilities(consumerCapabilities))
 }

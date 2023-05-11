@@ -36,17 +36,17 @@ func newEmptyValueProcessor(logger *zap.Logger, cfg Config) *emptyValueProcessor
 	}
 }
 
-func (sp *emptyValueProcessor) processTraces(_ context.Context, td ptrace.Traces) (ptrace.Traces, error) {
+func (evp *emptyValueProcessor) processTraces(_ context.Context, td ptrace.Traces) (ptrace.Traces, error) {
 	resourceSpans := td.ResourceSpans()
 	for i := 0; i < resourceSpans.Len(); i++ {
 		resourceSpan := resourceSpans.At(i)
 		scopeSpans := resourceSpan.ScopeSpans()
 
-		if sp.c.EnableResourceAttributes {
-			cleanMap(resourceSpan.Resource().Attributes(), sp.c)
+		if evp.c.EnableResourceAttributes {
+			cleanMap(resourceSpan.Resource().Attributes(), evp.c)
 		}
 
-		if !sp.c.EnableAttributes {
+		if !evp.c.EnableAttributes {
 			// Skip loops for attributes if we don't need to clean them.
 			continue
 		}
@@ -57,7 +57,7 @@ func (sp *emptyValueProcessor) processTraces(_ context.Context, td ptrace.Traces
 
 			for k := 0; k < spans.Len(); k++ {
 				span := spans.At(k)
-				cleanMap(span.Attributes(), sp.c)
+				cleanMap(span.Attributes(), evp.c)
 			}
 		}
 	}
@@ -65,14 +65,14 @@ func (sp *emptyValueProcessor) processTraces(_ context.Context, td ptrace.Traces
 	return td, nil
 }
 
-func (sp *emptyValueProcessor) processLogs(_ context.Context, ld plog.Logs) (plog.Logs, error) {
+func (evp *emptyValueProcessor) processLogs(_ context.Context, ld plog.Logs) (plog.Logs, error) {
 	resourceLogs := ld.ResourceLogs()
 	for i := 0; i < resourceLogs.Len(); i++ {
 		resourceLog := resourceLogs.At(i)
 		scopeLogs := resourceLog.ScopeLogs()
 
-		if sp.c.EnableResourceAttributes {
-			cleanMap(resourceLog.Resource().Attributes(), sp.c)
+		if evp.c.EnableResourceAttributes {
+			cleanMap(resourceLog.Resource().Attributes(), evp.c)
 		}
 
 		for j := 0; j < scopeLogs.Len(); j++ {
@@ -81,12 +81,12 @@ func (sp *emptyValueProcessor) processLogs(_ context.Context, ld plog.Logs) (plo
 
 			for k := 0; k < logRecords.Len(); k++ {
 				logRecord := logRecords.At(k)
-				if sp.c.EnableAttributes {
-					cleanMap(logRecord.Attributes(), sp.c)
+				if evp.c.EnableAttributes {
+					cleanMap(logRecord.Attributes(), evp.c)
 				}
 
-				if sp.c.EnableLogBody {
-					cleanLogBody(logRecord, sp.c)
+				if evp.c.EnableLogBody {
+					cleanLogBody(logRecord, evp.c)
 				}
 			}
 		}
@@ -95,17 +95,17 @@ func (sp *emptyValueProcessor) processLogs(_ context.Context, ld plog.Logs) (plo
 	return ld, nil
 }
 
-func (sp *emptyValueProcessor) processMetrics(_ context.Context, md pmetric.Metrics) (pmetric.Metrics, error) {
+func (evp *emptyValueProcessor) processMetrics(_ context.Context, md pmetric.Metrics) (pmetric.Metrics, error) {
 	resourceMetrics := md.ResourceMetrics()
 	for i := 0; i < resourceMetrics.Len(); i++ {
 		resourceMetric := resourceMetrics.At(i)
 		scopeMetrics := resourceMetric.ScopeMetrics()
 
-		if sp.c.EnableResourceAttributes {
-			cleanMap(resourceMetric.Resource().Attributes(), sp.c)
+		if evp.c.EnableResourceAttributes {
+			cleanMap(resourceMetric.Resource().Attributes(), evp.c)
 		}
 
-		if !sp.c.EnableAttributes {
+		if !evp.c.EnableAttributes {
 			// Skip loops for attributes if we don't need to clean them.
 			continue
 		}
@@ -116,7 +116,7 @@ func (sp *emptyValueProcessor) processMetrics(_ context.Context, md pmetric.Metr
 
 			for k := 0; k < metrics.Len(); k++ {
 				metric := metrics.At(k)
-				cleanMetricAttrs(metric, sp.c)
+				cleanMetricAttrs(metric, evp.c)
 			}
 		}
 	}
