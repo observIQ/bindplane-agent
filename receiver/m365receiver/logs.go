@@ -46,6 +46,7 @@ type m365LogsReceiver struct {
 
 	wg           *sync.WaitGroup
 	mu           sync.Mutex
+	consumerMu   sync.Mutex
 	pollInterval time.Duration
 	cancel       context.CancelFunc
 	audits       []auditMetaData
@@ -68,11 +69,11 @@ func newM365Logs(cfg *Config, settings receiver.CreateSettings, consumer consume
 		wg:            &sync.WaitGroup{},
 		pollInterval:  cfg.Logs.PollInterval,
 		audits: []auditMetaData{
-			{"General", "Audit.General", cfg.Logs.GeneralLogs},
-			{"Exchange", "Audit.Exchange", cfg.Logs.ExchangeLogs},
-			{"SharePoint", "Audit.SharePoint", cfg.Logs.SharepointLogs},
-			{"AzureAD", "Audit.AzureActiveDirectory", cfg.Logs.AzureADLogs},
-			{"DLP", "DLP.All", cfg.Logs.DLPLogs},
+			{"general", "Audit.General", cfg.Logs.GeneralLogs},
+			{"exchange", "Audit.Exchange", cfg.Logs.ExchangeLogs},
+			{"sharepoint", "Audit.SharePoint", cfg.Logs.SharepointLogs},
+			{"azureAD", "Audit.AzureActiveDirectory", cfg.Logs.AzureADLogs},
+			{"dlp", "DLP.All", cfg.Logs.DLPLogs},
 		},
 		root: fmt.Sprintf("https://manage.office.com/api/v1.0/%s/activity/feed/subscriptions/content?contentType=", cfg.TenantID),
 	}
@@ -95,11 +96,17 @@ func (l *m365LogsReceiver) Start(ctx context.Context, host component.Host) error
 		return err
 	}
 
-	return l.startPolling(ctx)
+	// set cancel function
+	//TODO: add checkpoint stuff here when that point comes
+	cancelCtx, cancel := context.WithCancel(ctx)
+	l.cancel = cancel
+
+	return l.startPolling(cancelCtx)
 }
 
 func (l *m365LogsReceiver) Shutdown(_ context.Context) error {
 	l.logger.Debug("shutting down logs receiver")
+	l.cancel()
 	l.wg.Wait()
 	return nil
 }
@@ -130,10 +137,10 @@ func (l *m365LogsReceiver) pollLogs(ctx context.Context) error {
 	st := pcommon.NewTimestampFromTime(time.Now().Add(-l.pollInterval)).AsTime()
 	now := time.Now()
 
-	l.wg.Add(5)
-	for _, p := range l.audits {
-		endpoint := l.root + p.route + fmt.Sprintf("&;startTime=%s&;endTime=%s", st, now)
-		go l.poll(ctx, now, &p, endpoint)
+	for _, a := range l.audits {
+		endpoint := l.root + a.route + fmt.Sprintf("&;startTime=%s&;endTime=%s", st, now)
+		l.wg.Add(1)
+		go l.poll(ctx, now, &a, endpoint)
 	}
 
 	return nil
@@ -172,11 +179,13 @@ func (l *m365LogsReceiver) poll(ctx context.Context, now time.Time, audit *audit
 
 	logs := l.transformLogs(pcommon.NewTimestampFromTime(now), audit, logData)
 
+	l.consumerMu.Lock()
 	if logs.LogRecordCount() > 0 {
 		if err = l.consumer.ConsumeLogs(ctx, logs); err != nil {
 			l.logger.Error("error consuming events", zap.Error(err))
 		}
 	}
+	l.consumerMu.Unlock()
 }
 
 // constructs logs from logData

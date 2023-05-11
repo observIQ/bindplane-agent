@@ -3,7 +3,7 @@
     {
       "resource": {
         "attributes": [
-          { "key": "m365.audit", "value": { "stringValue": "Exchange" } },
+          { "key": "m365.audit", "value": { "stringValue": "sharepoint" } },
           {
             "key": "m365.organization_id",
             "value": { "stringValue": "testTenantID" }
@@ -16,7 +16,7 @@
           "logRecords": [
             {
               "timeUnixNano": "1683709653000000000",
-              "observedTimeUnixNano": "1683748594499859000",
+              "observedTimeUnixNano": "1683820224811348000",
               "body": {
                 "stringValue": "{\"OrganizationId\":\"test1\",\"Workload\":\"test1\",\"UserId\":\"test1\",\"UserType\":0,\"CreationTime\":\"2023-05-10T09:07:33\",\"Id\":\"test1\",\"Operation\":\"test1\",\"ResultStatus\":\"test1\"}"
               },
@@ -38,7 +38,7 @@
           "logRecords": [
             {
               "timeUnixNano": "1683709653000000000",
-              "observedTimeUnixNano": "1683748594499859000",
+              "observedTimeUnixNano": "1683820224811348000",
               "body": {
                 "stringValue": "{\"OrganizationId\":\"test2\",\"Workload\":\"test2\",\"UserId\":\"test2\",\"UserType\":0,\"CreationTime\":\"2023-05-10T09:07:33\",\"Id\":\"test2\",\"Operation\":\"test2\",\"ResultStatus\":\"test2\"}"
               },
@@ -60,7 +60,7 @@
           "logRecords": [
             {
               "timeUnixNano": "1683709653000000000",
-              "observedTimeUnixNano": "1683748594499859000",
+              "observedTimeUnixNano": "1683820224811348000",
               "body": {
                 "stringValue": "{\"OrganizationId\":\"test3\",\"Workload\":\"test3\",\"UserId\":\"test3\",\"UserType\":0,\"CreationTime\":\"2023-05-10T09:07:33\",\"Id\":\"test3\",\"Operation\":\"test3\",\"ResultStatus\":\"test3\"}"
               },

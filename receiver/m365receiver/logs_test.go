@@ -17,6 +17,7 @@ package m365receiver // import "github.com/observiq/observiq-otel-collector/rece
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -31,41 +32,68 @@ import (
 	"go.opentelemetry.io/collector/receiver/receivertest"
 )
 
-func TestPoll(t *testing.T) {
+func TestStartPolling(t *testing.T) {
 	cfg := createDefaultConfig().(*Config)
 	cfg.TenantID = "testTenantID"
 	cfg.Logs.PollInterval = 1 * time.Second
-	// cfg.Logs.ExchangeLogs = false
-	// cfg.Logs.SharepointLogs = false
-	// cfg.Logs.AzureADLogs = false
-	// cfg.Logs.DLPLogs = false
 
-	file := filepath.Join("testdata", "logs", "foo.json")
 	sink := &consumertest.LogsSink{}
 	l := newM365Logs(cfg, receivertest.NewNopCreateSettings(), sink)
 	client := &mockLogsClient{}
 	l.client = client
 	client.On("GetJSON", mock.Anything).Return(client.loadTestLogs(t), nil)
+	cancelCtx, cancel := context.WithCancel(context.Background())
+	l.cancel = cancel
 
-	err := l.startPolling(context.Background())
+	err := l.startPolling(cancelCtx)
 	require.NoError(t, err)
 
 	require.Eventually(t, func() bool {
 		return sink.LogRecordCount() > 0
 	}, 5*time.Second, 1*time.Second)
 
-	// write logs
-	marshaler := &plog.JSONMarshaler{}
-	lBytes, err := marshaler.MarshalLogs(sink.AllLogs()[0])
+	err = l.Shutdown(context.Background())
 	require.NoError(t, err)
-	err = os.WriteFile(file, lBytes, 0666)
-	require.NoError(t, err)
+}
 
-	// compare logs
-	// expected, err := ReadLogs(file)
-	// require.NoError(t, err)
-	// logs := sink.AllLogs()[0]
-	// require.NoError(t, plogtest.CompareLogs(expected, logs, plogtest.IgnoreObservedTimestamp()))
+func TestPoll(t *testing.T) {
+	cfg := createDefaultConfig().(*Config)
+	cfg.TenantID = "testTenantID"
+	cfg.Logs.PollInterval = 1 * time.Second
+
+	sink := &consumertest.LogsSink{}
+	l := newM365Logs(cfg, receivertest.NewNopCreateSettings(), sink)
+	client := &mockLogsClient{}
+	l.client = client
+	client.On("GetJSON", mock.Anything).Return(client.loadTestLogs(t), nil)
+
+	err := l.pollLogs(context.Background())
+	require.NoError(t, err)
+	l.wg.Wait()
+
+	logs := sink.AllLogs()
+
+	// write logs for each service resource
+	// for _, l := range logs {
+	// 	audit, exist := l.ResourceLogs().At(0).Resource().Attributes().Get("m365.audit")
+	// 	require.True(t, exist)
+
+	// 	marshaler := &plog.JSONMarshaler{}
+	// 	lBytes, err := marshaler.MarshalLogs(l)
+	// 	require.NoError(t, err)
+	// 	err = os.WriteFile(filepath.Join("testdata", "logs", "testPoll", fmt.Sprintf("%s.json", audit.Str())), lBytes, 0666)
+	// 	require.NoError(t, err)
+	// }
+
+	// compare logs for each service resource
+	for _, l := range logs {
+		audit, exist := l.ResourceLogs().At(0).Resource().Attributes().Get("m365.audit")
+		require.True(t, exist)
+
+		expected, err := ReadLogs(filepath.Join("testdata", "logs", "testPoll", fmt.Sprintf("%s.json", audit.Str())))
+		require.NoError(t, err)
+		require.NoError(t, plogtest.CompareLogs(expected, l, plogtest.IgnoreObservedTimestamp()))
+	}
 }
 
 func TestTransformLogs(t *testing.T) {
@@ -141,7 +169,7 @@ type mockLogsClient struct {
 }
 
 func (mc *mockLogsClient) loadTestLogs(t *testing.T) []jsonLogs {
-	testLogs := filepath.Join("testdata", "logs", "poll-test-input.json")
+	testLogs := filepath.Join("testdata", "logs", "testPoll", "input.json")
 	logBytes, err := os.ReadFile(testLogs)
 	require.NoError(t, err)
 
