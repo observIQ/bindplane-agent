@@ -16,6 +16,7 @@ package removeemptyvaluesprocessor
 
 import (
 	"context"
+	"errors"
 
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/consumer"
@@ -24,12 +25,12 @@ import (
 )
 
 const (
-	typeStr = "removeemptyvalues"
-
+	typeStr   = "removeemptyvalues"
 	stability = component.StabilityLevelAlpha
 )
 
 var (
+	errInvalidConfigType = errors.New("config is not of type removeemptyvaluesprocessor.Config")
 	consumerCapabilities = consumer.Capabilities{MutatesData: true}
 )
 
@@ -62,7 +63,10 @@ func createTracesProcessor(
 	cfg component.Config,
 	nextConsumer consumer.Traces,
 ) (processor.Traces, error) {
-	oCfg := cfg.(*Config)
+	oCfg, ok := cfg.(*Config)
+	if !ok {
+		return nil, errInvalidConfigType
+	}
 	evp := newEmptyValueProcessor(set.Logger, *oCfg)
 
 	return processorhelper.NewTracesProcessor(ctx, set, cfg, nextConsumer, evp.processTraces, processorhelper.WithCapabilities(consumerCapabilities))
@@ -74,7 +78,10 @@ func createLogsProcessor(
 	cfg component.Config,
 	nextConsumer consumer.Logs,
 ) (processor.Logs, error) {
-	oCfg := cfg.(*Config)
+	oCfg, ok := cfg.(*Config)
+	if !ok {
+		return nil, errInvalidConfigType
+	}
 	evp := newEmptyValueProcessor(set.Logger, *oCfg)
 
 	return processorhelper.NewLogsProcessor(ctx, set, cfg, nextConsumer, evp.processLogs, processorhelper.WithCapabilities(consumerCapabilities))
@@ -86,7 +93,10 @@ func createMetricsProcessor(
 	cfg component.Config,
 	nextConsumer consumer.Metrics,
 ) (processor.Metrics, error) {
-	oCfg := cfg.(*Config)
+	oCfg, ok := cfg.(*Config)
+	if !ok {
+		return nil, errInvalidConfigType
+	}
 	evp := newEmptyValueProcessor(set.Logger, *oCfg)
 
 	return processorhelper.NewMetricsProcessor(ctx, set, cfg, nextConsumer, evp.processMetrics, processorhelper.WithCapabilities(consumerCapabilities))
