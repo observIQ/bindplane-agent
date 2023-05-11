@@ -14,7 +14,7 @@ require (
 	github.com/observiq/observiq-otel-collector/processor/maskprocessor v1.25.0
 	github.com/observiq/observiq-otel-collector/processor/metricextractprocessor v1.25.0
 	github.com/observiq/observiq-otel-collector/processor/metricstatsprocessor v1.25.0
-	github.com/observiq/observiq-otel-collector/processor/removeemptyvaluesprocessor v0.0.0-00010101000000-000000000000
+	github.com/observiq/observiq-otel-collector/processor/removeemptyvaluesprocessor v1.25.0
 	github.com/observiq/observiq-otel-collector/processor/resourceattributetransposerprocessor v1.25.0
 	github.com/observiq/observiq-otel-collector/processor/samplingprocessor v1.25.0
 	github.com/observiq/observiq-otel-collector/processor/spancountprocessor v1.25.0
