@@ -196,6 +196,7 @@ func cleanMap(m pcommon.Map, c Config, excludeKeys map[string]struct{}) {
 func trimMapKeyPrefix(prefix string, keySet map[string]struct{}) map[string]struct{} {
 	outKeys := make(map[string]struct{}, len(keySet))
 	for key := range keySet {
+		// TODO: use strings.CutPrefix when we update to go1.20
 		trimmedKey := strings.TrimPrefix(key, prefix+".")
 		if len(trimmedKey) == len(key) {
 			// the original key was left untrimmed, so this must not have the prefix
