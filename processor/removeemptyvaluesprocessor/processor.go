@@ -150,8 +150,8 @@ func (evp *emptyValueProcessor) processMetrics(_ context.Context, md pmetric.Met
 // cleanMap removes empty values from the map, as defined by the config.
 func cleanMap(m pcommon.Map, c Config, excludeKeys map[string]struct{}) {
 	m.RemoveIf(func(s string, v pcommon.Value) bool {
-		for mk := range excludeKeys {
-			if mk == s {
+		for key := range excludeKeys {
+			if key == s {
 				return false
 			}
 		}
@@ -177,9 +177,9 @@ func cleanMap(m pcommon.Map, c Config, excludeKeys map[string]struct{}) {
 // Any keys that don't have the prefix are removed from the returned list.
 func trimMapKeyPrefix(prefix string, keySet map[string]struct{}) map[string]struct{} {
 	outKeys := make(map[string]struct{}, len(keySet))
-	for mk := range keySet {
-		trimmedKey := strings.TrimPrefix(mk, prefix+".")
-		if len(trimmedKey) == len(mk) {
+	for key := range keySet {
+		trimmedKey := strings.TrimPrefix(key, prefix+".")
+		if len(trimmedKey) == len(key) {
 			// the original key was left untrimmed, so this must not have the prefix
 			continue
 		}
