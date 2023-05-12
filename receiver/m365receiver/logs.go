@@ -39,6 +39,7 @@ const (
 type lClient interface {
 	GetJSON(endpoint string) ([]jsonLogs, error)
 	GetToken() error
+	StartSubscription(endpoint string) error
 	shutdown() error
 }
 
@@ -59,6 +60,7 @@ type m365LogsReceiver struct {
 	audits       []auditMetaData
 	record       *logRecord
 	root         string
+	startRoot    string
 }
 
 type logRecord struct {
@@ -88,7 +90,8 @@ func newM365Logs(cfg *Config, settings receiver.CreateSettings, consumer consume
 			{"azureAD", "Audit.AzureActiveDirectory", cfg.Logs.AzureADLogs},
 			{"dlp", "DLP.All", cfg.Logs.DLPLogs},
 		},
-		root: fmt.Sprintf("https://manage.office.com/api/v1.0/%s/activity/feed/subscriptions/content?contentType=", cfg.TenantID),
+		root:      fmt.Sprintf("https://manage.office.com/api/v1.0/%s/activity/feed/subscriptions/content?contentType=", cfg.TenantID),
+		startRoot: fmt.Sprintf("https://manage.office.com/api/v1.0/%s/activity/feed/subscriptions/start?contentType=", cfg.TenantID),
 	}
 }
 
@@ -101,12 +104,19 @@ func (l *m365LogsReceiver) Start(ctx context.Context, host component.Host) error
 		return err
 	}
 
-	// create m365 log client
+	// create m365 log client, create token and start audit subscriptions
 	l.client = newM365Client(httpClient, l.cfg, "https://manage.office.com/.default")
 	err = l.client.GetToken()
 	if err != nil {
 		l.logger.Error("error creating authorization token", zap.Error(err))
 		return err
+	}
+	for _, a := range l.audits {
+		err = l.client.StartSubscription(l.startRoot + a.route)
+		if err != nil {
+			l.logger.Error("error starting audit subscriptions", zap.Error(err))
+			return err
+		}
 	}
 
 	// set cancel function

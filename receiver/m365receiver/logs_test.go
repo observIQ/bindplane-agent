@@ -186,6 +186,10 @@ func (mc *mockLogsClient) GetToken() error {
 	return nil
 }
 
+func (mc *mockLogsClient) StartSubscription(endpoint string) error {
+	return nil
+}
+
 func (mc *mockLogsClient) shutdown() error {
 	return nil
 }

@@ -41,9 +41,10 @@ type auth struct {
 type tokenError struct {
 	Err string `json:"error"`
 }
-type csvError struct {
-	ErrorCSV struct {
-		Code string `json:"code"`
+type defaultError struct {
+	Error struct {
+		Code    string `json:"code"`
+		Message string `json:"message"`
 	} `json:"error"`
 }
 
@@ -237,7 +238,7 @@ func (m *m365Client) GetCSV(endpoint string) ([]string, error) {
 	//troubleshoot resp err if present
 	if resp.StatusCode != 200 {
 		//get error code
-		var respErr csvError
+		var respErr defaultError
 		body, err := io.ReadAll(resp.Body)
 		if err != nil {
 			return []string{}, err
@@ -246,7 +247,7 @@ func (m *m365Client) GetCSV(endpoint string) ([]string, error) {
 		if err != nil {
 			return []string{}, err
 		}
-		if respErr.ErrorCSV.Code == "InvalidAuthenticationToken" {
+		if respErr.Error.Code == "InvalidAuthenticationToken" {
 			return []string{}, fmt.Errorf("access token invalid")
 		}
 		return []string{}, fmt.Errorf("got non 200 status code from request, got %d", resp.StatusCode)
@@ -359,4 +360,53 @@ func (m *m365Client) GetJSON(endpoint string) ([]jsonLogs, error) {
 	}
 
 	return logData, nil
+}
+
+func (m *m365Client) StartSubscription(endpoint string) error {
+	req, err := http.NewRequest("POST", endpoint, nil)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Authorization", "Bearer "+m.token)
+	resp, err := m.client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = resp.Body.Close() }()
+
+	// troubleshoot error handling (bad token or subscription already started)
+	if resp.StatusCode != 200 {
+		if resp.StatusCode == 401 { //possible stale token; do i even need to worry about stale token?
+			var respErr jsonError
+			body, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return err
+			}
+			err = json.Unmarshal(body, &respErr)
+			if err != nil {
+				return err
+			}
+			if respErr.Message == "Authorization has been denied for this request." {
+				return fmt.Errorf("authorization denied")
+			}
+
+		} else if resp.StatusCode == 400 { // subscription already started possibly
+			var respErr defaultError
+			body, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return err
+			}
+			err = json.Unmarshal(body, &respErr)
+			if err != nil {
+				return err
+			}
+			if respErr.Error.Message == "The subscription is already enabled. No property change." {
+				return nil
+			}
+		}
+		//unsure what the error is
+		return fmt.Errorf("got non 200 status code from request, got %d", resp.StatusCode)
+	}
+	//if StatusCode == 200, then subscription was successfully started
+	return nil
 }
