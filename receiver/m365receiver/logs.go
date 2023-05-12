@@ -18,6 +18,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strconv"
 	"sync"
 	"time"
 
@@ -299,19 +300,107 @@ func parseOptionalAttributes(m *pcommon.Map, log *jsonLogs) {
 	if log.ExchangeMailboxGUID != "" {
 		m.PutStr("exchange.mailbox.id", log.ExchangeMailboxGUID)
 	}
-	if log.AzureActor != (AzureActor{}) {
+	if log.AzureActor != nil {
 		m.PutStr("azure.actor.id", log.AzureActor.ID)
 		m.PutStr("azure.actor.type", matchAzureUserType(log.AzureActor.Type))
 	}
-	if log.DLPSharePointMetaData != (SharePointMetaData{}) {
+	if log.DLPSharePointMetaData != nil {
 		m.PutStr("dlp.sharepoint.user", log.DLPSharePointMetaData.From)
 	}
-	if log.DLPExchangeMetaData != (ExchangeMetaData{}) {
+	if log.DLPExchangeMetaData != nil {
 		m.PutStr("dlp.exchange.message.id", log.DLPExchangeMetaData.MessageID)
 	}
-	if log.DLPPolicyDetails != (PolicyDetails{}) {
+	if log.DLPPolicyDetails != nil {
 		m.PutStr("dlp.policy_details.policy.id", log.DLPPolicyDetails.PolicyId)
 		m.PutStr("dlp.policy_details.policy.name", log.DLPPolicyDetails.PolicyName)
+	}
+	if log.SecurityAlertId != "" {
+		m.PutStr("security.alert.id", log.SecurityAlertId)
+	}
+	if log.SecurityAlertName != "" {
+		m.PutStr("security.alert.name", log.SecurityAlertName)
+	}
+	if log.YammerActorId != "" {
+		m.PutStr("yammer.user.id", log.YammerActorId)
+	}
+	if log.YammerFileId != nil {
+		m.PutStr("yammer.file.id", strconv.Itoa(*log.YammerFileId))
+	}
+	if log.DefenderEmail != nil {
+		m.PutStr("defender.email.attachment", log.DefenderEmail.FileName)
+	}
+	if log.DefenderURL != "" {
+		m.PutStr("defender.url.url", log.DefenderURL)
+	}
+	if log.DefenderFile != nil {
+		m.PutStr("defender.file.id", log.DefenderFile.DocumentId)
+		m.PutStr("defender.file.verdict", matchFileVerdict(log.DefenderFile.FileVerdict))
+	}
+	if log.DefenderFileSource != nil {
+		m.PutStr("defender.file.source_workload", matchSourceWorkload(*log.DefenderFileSource))
+	}
+	if log.InvestigationId != "" {
+		m.PutStr("investigation.id", log.InvestigationId)
+	}
+	if log.InvestigationStatus != "" {
+		m.PutStr("investigation.status", log.InvestigationStatus)
+	}
+	if log.PowerAppName != "" {
+		m.PutStr("powerbi.app.name", log.PowerAppName)
+	}
+	if log.DynamicsEntityId != "" {
+		m.PutStr("dynamics365.entity.id", log.DynamicsEntityId)
+	}
+	if log.DynamicsEntityName != "" {
+		m.PutStr("dynamics365.entity.name", log.DynamicsEntityName)
+	}
+	if log.QuarantineSource != nil {
+		m.PutStr("quarantine.request_source", matchQuarantineSource(*log.QuarantineSource))
+	}
+	if log.FormId != "" {
+		m.PutStr("forms.form.id", log.FormId)
+	}
+	if log.MIPLabelId != "" {
+		m.PutStr("mip.label.id", log.MIPLabelId)
+	}
+	if log.EncryptedMessageId != "" {
+		m.PutStr("encrypted_portal.message.id", log.EncryptedMessageId)
+	}
+	if log.CommCompliance != nil {
+		m.PutStr("communication_compliance.exchange.network_message_id", log.CommCompliance.NetworkMessageId)
+	}
+	if log.ConnectorJobId != "" {
+		m.PutStr("compliance_connector.job.id", log.ConnectorJobId)
+	}
+	if log.ConnectorTaskId != "" {
+		m.PutStr("compliance_connector.task.id", log.ConnectorTaskId)
+	}
+	if log.DataShareInvitation != nil {
+		m.PutStr("system_sync.data_share.share.id", log.DataShareInvitation.ShareId)
+	}
+	if log.MSGraphConsentAppId != "" {
+		m.PutStr("graph.consent.app.id", log.MSGraphConsentAppId)
+	}
+	if log.VivaGoalsUsername != "" {
+		m.PutStr("viva_goals.username", log.VivaGoalsUsername)
+	}
+	if log.VivaGoalsOrgName != "" {
+		m.PutStr("viva_goals.organization", log.VivaGoalsOrgName)
+	}
+	if log.MSToDoAppId != "" {
+		m.PutStr("to_do.app.id", log.MSToDoAppId)
+	}
+	if log.MSToDoItemId != "" {
+		m.PutStr("to_do.item.id", log.MSToDoItemId)
+	}
+	if log.MSWebProjectId != "" {
+		m.PutStr("web_project.project.id", log.MSWebProjectId)
+	}
+	if log.MSWebRoadmapId != "" {
+		m.PutStr("web_project.road_map.id", log.MSWebRoadmapId)
+	}
+	if log.MSWebRoadmapItemId != "" {
+		m.PutStr("web_project.road_map.item.id", log.MSWebRoadmapItemId)
 	}
 }
 
@@ -354,6 +443,49 @@ func matchAzureUserType(user int) string {
 		return "SPN"
 	case 5:
 		return "UPN"
+	default:
+		return "impossible"
+	}
+}
+
+func matchFileVerdict(v int) string {
+	switch v {
+	case 0:
+		return "Good"
+	case 1:
+		return "Bad"
+	case -1:
+		return "Error"
+	case -2:
+		return "Timeout"
+	case -3:
+		return "Pending"
+	default:
+		return "impossible"
+	}
+}
+
+func matchSourceWorkload(w int) string {
+	switch w {
+	case 0:
+		return "SharePoint Online"
+	case 1:
+		return "OneDrive for Business"
+	case 2:
+		return "Microsoft Teams"
+	default:
+		return "impossible"
+	}
+}
+
+func matchQuarantineSource(s int) string {
+	switch s {
+	case 0:
+		return "SCC"
+	case 1:
+		return "Cmdlet"
+	case 2:
+		return "URLlink"
 	default:
 		return "impossible"
 	}

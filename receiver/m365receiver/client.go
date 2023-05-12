@@ -57,20 +57,49 @@ type logResp struct {
 
 // JSON parsing structs
 type jsonLogs struct {
-	Workload                 string             `json:"Workload,omitempty"`
-	UserId                   string             `json:"UserId"`
-	UserType                 int                `json:"UserType"`
-	CreationTime             string             `json:"CreationTime"`
-	Id                       string             `json:"Id"`
-	Operation                string             `json:"Operation"`
-	ResultStatus             string             `json:"ResultStatus,omitempty"`
-	SharepointSite           string             `json:"Site,omitempty"`
-	SharepointSourceFileName string             `json:"SourceFileName,omitempty"`
-	ExchangeMailboxGUID      string             `json:"MailboxGuid,omitempty"`
-	AzureActor               AzureActor         `json:"Actor,omitempty"`
-	DLPSharePointMetaData    SharePointMetaData `json:"SharePointMetaData,omitempty"`
-	DLPExchangeMetaData      ExchangeMetaData   `json:"ExchangeMetaData,omitempty"`
-	DLPPolicyDetails         PolicyDetails      `json:"PolicyDetails,omitempty"`
+	Workload                 string              `json:"Workload,omitempty"`
+	UserId                   string              `json:"UserId"`
+	UserType                 int                 `json:"UserType"`
+	CreationTime             string              `json:"CreationTime"`
+	Id                       string              `json:"Id"`
+	Operation                string              `json:"Operation"`
+	ResultStatus             string              `json:"ResultStatus,omitempty"`
+	SharepointSite           string              `json:"Site,omitempty"`
+	SharepointSourceFileName string              `json:"SourceFileName,omitempty"`
+	ExchangeMailboxGUID      string              `json:"MailboxGuid,omitempty"`
+	AzureActor               *AzureActor         `json:"Actor,omitempty"`
+	DLPSharePointMetaData    *SharePointMetaData `json:"SharePointMetaData,omitempty"`
+	DLPExchangeMetaData      *ExchangeMetaData   `json:"ExchangeMetaData,omitempty"`
+	DLPPolicyDetails         *PolicyDetails      `json:"PolicyDetails,omitempty"`
+	SecurityAlertId          string              `json:"AlertId,omitempty"`
+	SecurityAlertName        string              `json:"Name,omitempty"`
+	YammerActorId            string              `json:"ActorUserId,omitempty"`
+	YammerFileId             *int                `json:"FileId,omitempty"`
+	DefenderEmail            *AttachmentData     `json:"AttachmentData,omitempty"`
+	DefenderURL              string              `json:"URL,omitempty"` //DefenderURLId            string             `json:"UserId,omitempty"`
+	DefenderFile             *FileData           `json:"FileData,omitempty"`
+	DefenderFileSource       *int                `json:"SourceWorkload,omitempty"`
+	InvestigationId          string              `json:"InvestigationId,omitempty"`
+	InvestigationStatus      string              `json:"Status,omitempty"`
+	PowerAppName             string              `json:"AppName,omitempty"`
+	DynamicsEntityId         string              `json:"EntityId,omitempty"`
+	DynamicsEntityName       string              `json:"EntityName,omitempty"`
+	QuarantineSource         *int                `json:"RequestSource,omitempty"`
+	FormId                   string              `json:"FormId,omitempty"`
+	MIPLabelId               string              `json:"LabelId,omitempty"`
+	EncryptedMessageId       string              `json:"MessageId,omitempty"`
+	CommCompliance           *ExchangeDetails    `json:"ExchangeDetails,omitempty"`
+	ConnectorJobId           string              `json:"JobId,omitempty"`
+	ConnectorTaskId          string              `json:"TaskId,omitempty"`
+	DataShareInvitation      *Invitation         `json:"Invitation,omitempty"`
+	MSGraphConsentAppId      string              `json:"ApplicationId,omitempty"`
+	VivaGoalsUsername        string              `json:"Username,omitempty"`
+	VivaGoalsOrgName         string              `json:"OrganizationName,omitempty"`
+	MSToDoAppId              string              `json:"ActorAppId,omitempty"`
+	MSToDoItemId             string              `json:"ItemID,omitempty"`
+	MSWebProjectId           string              `json:"ProjectId,omitempty"`
+	MSWebRoadmapId           string              `json:"RoadmapId,omitempty"`
+	MSWebRoadmapItemId       string              `json:"RoadmapItemId,omitempty"`
 }
 
 type AzureActor struct {
@@ -90,6 +119,25 @@ type PolicyDetails struct {
 	PolicyId   string `json:"PolicyId"`
 	PolicyName string `json:"PolicyName"`
 }
+
+type AttachmentData struct {
+	FileName string `json:"FileName"`
+}
+
+type FileData struct {
+	DocumentId  string `json:"DocumentId"`
+	FileVerdict int    `json:"FileVerdict"`
+}
+
+type ExchangeDetails struct {
+	NetworkMessageId string `json:"NetworkMessageId,omitempty"`
+}
+
+type Invitation struct {
+	ShareId string `json:"ShareId"`
+}
+
+// client implementation
 
 func newM365Client(c *http.Client, cfg *Config, scope string) *m365Client {
 	return &m365Client{

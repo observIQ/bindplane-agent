@@ -66,6 +66,7 @@ func TestPoll(t *testing.T) {
 	client := &mockLogsClient{}
 	rcv.client = client
 	client.On("GetJSON", mock.Anything).Return(client.loadTestLogs(t), nil)
+	rcv.record = &logRecord{}
 
 	err := rcv.pollLogs(context.Background())
 	require.NoError(t, err)
