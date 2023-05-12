@@ -51,6 +51,32 @@ service:
 ```
 
 ## How to
+
+### Remove fields with empty string values
+The following configuration removes fields that are the empty string ("") or null from Windows Event Logs:
+
+```yaml
+receivers:
+  windowseventlog:
+    channel: application
+
+processors:
+  removeemptyvalues:
+    empty_string_values:
+      # "" must be explicitly defined to remove empty strings
+      - ""
+
+exporters:
+  logging:
+
+service:
+  pipelines:
+    logs:
+      receivers: [windowseventlog]
+      processors: [removeemptyvalues]
+      exporters: [logging]
+```
+
 ### Remove empty fields from nginx logs
 
 The following configuration removes empty fields from nginx logs, where empty fields have a value of "-".
