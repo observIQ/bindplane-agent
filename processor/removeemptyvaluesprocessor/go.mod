@@ -1,31 +1,21 @@
-module github.com/observiq/observiq-otel-collector/processor/logcountprocessor
+module github.com/observiq/observiq-otel-collector/processor/removeemptyvaluesprocessor
 
 go 1.19
 
 require (
-	github.com/observiq/observiq-otel-collector/counter v1.25.0
-	github.com/observiq/observiq-otel-collector/expr v1.25.0
-	github.com/observiq/observiq-otel-collector/receiver/routereceiver v1.25.0
 	github.com/stretchr/testify v1.8.2
+	github.com/tj/assert v0.0.3
 	go.opentelemetry.io/collector v0.76.1
 	go.opentelemetry.io/collector/component v0.76.1
+	go.opentelemetry.io/collector/confmap v0.76.1
 	go.opentelemetry.io/collector/consumer v0.76.1
 	go.opentelemetry.io/collector/pdata v1.0.0-rcv0011
-	go.opentelemetry.io/collector/receiver v0.76.1
 	go.uber.org/zap v1.24.0
 )
 
 require (
 	github.com/benbjohnson/clock v1.3.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/pmezard/go-difflib v1.0.0 // indirect
-	go.opentelemetry.io/collector/confmap v0.76.1 // indirect
-	go.opentelemetry.io/collector/featuregate v0.76.1 // indirect
-	gopkg.in/yaml.v3 v3.0.1 // indirect
-)
-
-require (
-	github.com/antonmedv/expr v1.12.5 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
@@ -35,6 +25,9 @@ require (
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
+	github.com/pmezard/go-difflib v1.0.0 // indirect
+	go.opencensus.io v0.24.0 // indirect
+	go.opentelemetry.io/collector/featuregate v0.76.1 // indirect
 	go.opentelemetry.io/otel v1.14.0 // indirect
 	go.opentelemetry.io/otel/metric v0.37.0 // indirect
 	go.opentelemetry.io/otel/trace v1.14.0 // indirect
@@ -46,10 +39,5 @@ require (
 	google.golang.org/genproto v0.0.0-20230110181048-76db0878b65f // indirect
 	google.golang.org/grpc v1.54.0 // indirect
 	google.golang.org/protobuf v1.30.0 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
-
-replace github.com/observiq/observiq-otel-collector/receiver/routereceiver => ../../receiver/routereceiver
-
-replace github.com/observiq/observiq-otel-collector/expr => ../../expr
-
-replace github.com/observiq/observiq-otel-collector/counter => ../../counter
