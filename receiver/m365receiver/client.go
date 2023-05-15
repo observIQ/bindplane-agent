@@ -16,6 +16,7 @@
 package m365receiver
 
 import (
+	"context"
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
@@ -130,7 +131,7 @@ type FileData struct {
 	FileVerdict int    `json:"FileVerdict"`
 }
 
-type ExchangeDetails struct {
+type ExchangeDetails struct { //will this be nil if not present
 	NetworkMessageId string `json:"NetworkMessageId,omitempty"`
 }
 
@@ -273,9 +274,9 @@ func (m *m365Client) GetCSV(endpoint string) ([]string, error) {
 }
 
 // function for getting log data
-func (m *m365Client) GetJSON(endpoint string) ([]jsonLogs, error) {
+func (m *m365Client) GetJSON(ctx context.Context, endpoint string) ([]jsonLogs, error) {
 	// make request to Audit endpoint
-	req, err := http.NewRequest("GET", endpoint, nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", endpoint, nil)
 	if err != nil {
 		return []jsonLogs{}, err
 	}
@@ -319,37 +320,8 @@ func (m *m365Client) GetJSON(endpoint string) ([]jsonLogs, error) {
 		return []jsonLogs{}, err
 	}
 
-	// make new GET request to contentUri, including token
-	redirectReq, err := http.NewRequest("GET", contentUri.Content, nil)
-	if err != nil {
-		return []jsonLogs{}, err
-	}
-	redirectReq.Header.Set("Authorization", "Bearer "+m.token)
-	redirectResp, err := m.client.Do(redirectReq)
-	if err != nil {
-		return []jsonLogs{}, err
-	}
-	defer func() { _ = redirectResp.Body.Close() }()
-
-	// troubleshoot error code
-	if redirectResp.StatusCode != 200 {
-		var respErr jsonError
-		body, err := io.ReadAll(redirectResp.Body)
-		if err != nil {
-			return []jsonLogs{}, err
-		}
-		err = json.Unmarshal(body, &respErr)
-		if err != nil {
-			return []jsonLogs{}, err
-		}
-		if respErr.Message == "Authorization has been denied for this request." {
-			return []jsonLogs{}, fmt.Errorf("authorization denied")
-		}
-		return []jsonLogs{}, fmt.Errorf("got non 200 status code from request, got %d", redirectResp.StatusCode)
-	}
-
 	// read in json
-	body, err = io.ReadAll(resp.Body)
+	body, err = m.followLink(ctx, &contentUri)
 	if err != nil {
 		return []jsonLogs{}, err
 	}
@@ -360,6 +332,39 @@ func (m *m365Client) GetJSON(endpoint string) ([]jsonLogs, error) {
 	}
 
 	return logData, nil
+}
+
+// followLink will follow the response of a first request that has a link to the actual content
+func (m *m365Client) followLink(ctx context.Context, lr *logResp) ([]byte, error) {
+	redirectReq, err := http.NewRequestWithContext(ctx, "GET", lr.Content, nil)
+	if err != nil {
+		return []byte{}, err
+	}
+	redirectReq.Header.Set("Authorization", "Bearer "+m.token)
+	redirectResp, err := m.client.Do(redirectReq)
+	if err != nil {
+		return []byte{}, err
+	}
+	defer func() { _ = redirectResp.Body.Close() }()
+
+	// troubleshoot error code
+	if redirectResp.StatusCode != 200 {
+		var respErr jsonError
+		body, err := io.ReadAll(redirectResp.Body)
+		if err != nil {
+			return []byte{}, err
+		}
+		err = json.Unmarshal(body, &respErr)
+		if err != nil {
+			return []byte{}, err
+		}
+		if respErr.Message == "Authorization has been denied for this request." {
+			return []byte{}, fmt.Errorf("authorization denied")
+		}
+		return []byte{}, fmt.Errorf("got non 200 status code from request, got %d", redirectResp.StatusCode)
+	}
+
+	return io.ReadAll(redirectResp.Body)
 }
 
 func (m *m365Client) StartSubscription(endpoint string) error {
@@ -374,23 +379,12 @@ func (m *m365Client) StartSubscription(endpoint string) error {
 	}
 	defer func() { _ = resp.Body.Close() }()
 
-	// troubleshoot error handling (bad token or subscription already started)
+	// troubleshoot error handling, mainly sub already enabled
+	// no error if sub already enabled, not troubleshooting stale token
+	// only called while code is synchronous right after a GetToken call
+	// if token is stale, don't think regenerating it will fix anything
 	if resp.StatusCode != 200 {
-		if resp.StatusCode == 401 { //possible stale token; do i even need to worry about stale token?
-			var respErr jsonError
-			body, err := io.ReadAll(resp.Body)
-			if err != nil {
-				return err
-			}
-			err = json.Unmarshal(body, &respErr)
-			if err != nil {
-				return err
-			}
-			if respErr.Message == "Authorization has been denied for this request." {
-				return fmt.Errorf("authorization denied")
-			}
-
-		} else if resp.StatusCode == 400 { // subscription already started possibly
+		if resp.StatusCode == 400 { // subscription already started possibly
 			var respErr defaultError
 			body, err := io.ReadAll(resp.Body)
 			if err != nil {

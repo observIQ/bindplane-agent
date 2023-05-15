@@ -37,7 +37,7 @@ const (
 )
 
 type lClient interface {
-	GetJSON(endpoint string) ([]jsonLogs, error)
+	GetJSON(ctx context.Context, endpoint string) ([]jsonLogs, error)
 	GetToken() error
 	StartSubscription(endpoint string) error
 	shutdown() error
@@ -187,7 +187,7 @@ func (l *m365LogsReceiver) poll(ctx context.Context, now time.Time, audit *audit
 	}
 
 	l.mu.Lock()
-	logData, err := l.client.GetJSON(endpoint)
+	logData, err := l.client.GetJSON(ctx, endpoint)
 	if err != nil {
 		if err.Error() == "authorization denied" { // troubleshoot stale token
 			l.logger.Debug("possible stale token; attempting to regenerate")
@@ -197,16 +197,17 @@ func (l *m365LogsReceiver) poll(ctx context.Context, now time.Time, audit *audit
 				l.mu.Unlock()
 				return
 			}
-			logData, err = l.client.GetJSON(endpoint)
+			logData, err = l.client.GetJSON(ctx, endpoint)
 			if err != nil { // not a stale token error, unsure what is wrong
 				l.logger.Error("unable to retrieve logs", zap.Error(err))
 				l.mu.Unlock()
 				return
 			}
+		} else {
+			l.logger.Error("error retrieving logs", zap.Error(err))
+			l.mu.Unlock()
+			return
 		}
-		l.logger.Error("error retrieving logs", zap.Error(err))
-		l.mu.Unlock()
-		return
 	}
 	l.mu.Unlock()
 

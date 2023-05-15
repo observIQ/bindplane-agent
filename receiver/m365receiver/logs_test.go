@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sync"
 	"testing"
 	"time"
 
@@ -44,6 +45,7 @@ func TestStartPolling(t *testing.T) {
 	client.On("GetJSON", mock.Anything).Return(client.loadTestLogs(t), nil)
 	cancelCtx, cancel := context.WithCancel(context.Background())
 	l.cancel = cancel
+	l.record = &logRecord{}
 
 	err := l.startPolling(cancelCtx)
 	require.NoError(t, err)
@@ -94,6 +96,58 @@ func TestPoll(t *testing.T) {
 		require.NoError(t, err)
 		require.NoError(t, plogtest.CompareLogs(expected, l, plogtest.IgnoreObservedTimestamp()))
 	}
+}
+
+func TestPollErrHandle(t *testing.T) {
+	cfg := createDefaultConfig().(*Config)
+	cfg.TenantID = "test"
+	sink := &consumertest.LogsSink{}
+	client := &mockLogsClient{}
+	audit := auditMetaData{
+		name:    "general",
+		route:   "Audit.General",
+		enabled: true,
+	}
+	wg := &sync.WaitGroup{}
+	rcv := newM365Logs(cfg, receivertest.NewNopCreateSettings(), sink)
+	rcv.client = client
+
+	// unable to fix token
+	client.On("GetJSON", "Audit.General").Return([]jsonLogs{}, fmt.Errorf("authorization denied")).Once()
+	client.On("GetToken").Return(fmt.Errorf("err")).Once()
+	wg.Add(1)
+	rcv.poll(context.Background(), time.Now(), &audit, "Audit.General", wg)
+	require.Never(t, func() bool {
+		return sink.LogRecordCount() > 0
+	}, 3*time.Second, 1*time.Second)
+
+	// GetJSON still doesn't work
+	client.On("GetJSON", "Audit.General").Return([]jsonLogs{}, fmt.Errorf("authorization denied")).Once()
+	client.On("GetToken").Return(nil).Once()
+	client.On("GetJSON", "Audit.General").Return([]jsonLogs{}, fmt.Errorf("err")).Once()
+	wg.Add(1)
+	rcv.poll(context.Background(), time.Now(), &audit, "Audit.General", wg)
+	require.Never(t, func() bool {
+		return sink.LogRecordCount() > 0
+	}, 3*time.Second, 1*time.Second)
+
+	// GetJSON never worked
+	client.On("GetJSON", "Audit.General").Return([]jsonLogs{}, fmt.Errorf("err")).Once()
+	wg.Add(1)
+	rcv.poll(context.Background(), time.Now(), &audit, "Audit.General", wg)
+	require.Never(t, func() bool {
+		return sink.LogRecordCount() > 0
+	}, 3*time.Second, 1*time.Second)
+
+	// regenerate token works
+	client.On("GetJSON", "Audit.General").Return([]jsonLogs{}, fmt.Errorf("authorization denied")).Once()
+	client.On("GetJSON", "Audit.General").Return(client.loadTestLogs(t), nil).Once()
+	client.On("GetToken").Return(nil).Once()
+	wg.Add(1)
+	rcv.poll(context.Background(), time.Now(), &audit, "Audit.General", wg)
+	require.Eventually(t, func() bool {
+		return sink.LogRecordCount() > 0
+	}, 5*time.Second, 1*time.Second)
 }
 
 func TestTransformLogs(t *testing.T) {
@@ -177,13 +231,14 @@ func (mc *mockLogsClient) loadTestLogs(t *testing.T) []jsonLogs {
 	return logs
 }
 
-func (mc *mockLogsClient) GetJSON(endpoint string) ([]jsonLogs, error) {
+func (mc *mockLogsClient) GetJSON(ctx context.Context, endpoint string) ([]jsonLogs, error) {
 	args := mc.Called(endpoint)
 	return args.Get(0).([]jsonLogs), args.Error(1)
 }
 
 func (mc *mockLogsClient) GetToken() error {
-	return nil
+	args := mc.Called()
+	return args.Error(0)
 }
 
 func (mc *mockLogsClient) StartSubscription(endpoint string) error {

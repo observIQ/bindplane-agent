@@ -15,6 +15,8 @@
 package m365receiver //import "github.com/observiq/observiq-otel-collector/receiver/m365receiver"
 
 import (
+	"context"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -76,26 +78,56 @@ func TestGetCSV(t *testing.T) {
 	assert.EqualError(t, err, "access token invalid")
 }
 
-// func TestGetJSON(t *testing.T) {
-// 	m365Mock := newMockServerJSON()
-// 	testClient := newM365Client(m365Mock.Client(), &Config{}, "https://manage.office.com/.default")
-// 	testClient.token = "foo"
+func TestStartSubscription(t *testing.T) {
+	m365Mock := newMockServerSub()
+	testClient := newM365Client(m365Mock.Client(), &Config{}, "https://manage.office.com/.default")
+	testClient.token = "foo"
 
-// 	//expected behavior
-// 	testJson, err := testClient.GetJSON(m365Mock.URL + "/testJSON")
-// 	require.NoError(t, err)
-// 	expectedJSON := jsonLogs{
-// 		OrganizationId: "testOrgId",
-// 		Workload:       "testWorkload",
-// 		UserId:         "testUserId",
-// 		UserType:       0,
-// 		CreationTime:   "2023-05-09T22:25:14",
-// 		Id:             "testId",
-// 		Operation:      "testOperation",
-// 		ResultStatus:   "testResultStatus",
-// 	}
-// 	require.Equal(t, testJson, expectedJSON)
-// }
+	//expected behavior
+	err := testClient.StartSubscription(m365Mock.URL + "/testStartSub")
+	require.NoError(t, err)
+
+	//sub already enabled
+	err = testClient.StartSubscription(m365Mock.URL + "/testSubStartedAlready")
+	require.NoError(t, err)
+}
+
+func TestGetJSON(t *testing.T) {
+	m365Mock := newMockServerJSON()
+	testClient := newM365Client(m365Mock.Client(), &Config{}, "https://manage.office.com/.default")
+	testClient.token = "foo"
+
+	//expected behavior
+	testJson, err := testClient.GetJSON(context.Background(), m365Mock.URL+"/testJSON")
+	require.NoError(t, err)
+	expectedJSON := []jsonLogs{
+		{
+			Workload:     "testWorkload",
+			UserId:       "testUserId",
+			UserType:     0,
+			CreationTime: "2023-05-09T22:25:14",
+			Id:           "testId",
+			Operation:    "testOperation",
+			ResultStatus: "testResultStatus",
+		},
+	}
+	require.Equal(t, testJson, expectedJSON)
+
+	// bad token
+	testClient.token = "bad"
+	testJson, err = testClient.GetJSON(context.Background(), m365Mock.URL+"/testJSON")
+	require.EqualError(t, err, "authorization denied")
+}
+
+func TestFollowLinkErr(t *testing.T) {
+	m365Mock := newMockServerJSON()
+	testClient := newM365Client(m365Mock.Client(), &Config{}, "https://manage.office.com/.default")
+	testClient.token = "bad"
+	testURI := logResp{Content: m365Mock.URL + "/testJSONredirect"}
+
+	_, err := testClient.followLink(context.Background(), &testURI)
+	require.EqualError(t, err, "authorization denied")
+}
 
 //	Mock Servers
 
@@ -160,14 +192,14 @@ func newMockServerJSON() *httptest.Server {
 			}
 
 			rw.WriteHeader(200)
-			rw.Write([]byte(
+			rw.Write([]byte(fmt.Sprintf(
 				`{
-					"contentUri": "/testJSONredirect"
-				}`,
-			))
+					"contentUri": "%s/testJSONredirect"
+				}`, "http://"+req.Host)))
 			return
+
 		}
-		if req.URL.String() == "/testJSONredirect" { // <- TODO may be wrong
+		if req.URL.String() == "/testJSONredirect" {
 			if req.Method != "GET" {
 				rw.WriteHeader(405)
 				rw.Write([]byte("error, incorrect HTTP method"))
@@ -182,18 +214,59 @@ func newMockServerJSON() *httptest.Server {
 
 			rw.WriteHeader(200)
 			rw.Write([]byte(
+				`[
+					{
+						"CreationTime": "2023-05-09T22:25:14",
+						"Id": "testId",
+						"Operation": "testOperation",
+						"OrganizationID": "testOrgId",
+						"ResultStatus": "testResultStatus",
+						"UserId": "testUserId",
+						"UserType": 0,
+						"Workload": "testWorkload"
+					}
+				]`,
+			))
+		}
+	}))
+}
+
+func newMockServerSub() *httptest.Server {
+	return httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+		if req.URL.String() == "/testStartSub" {
+			if req.Method != "POST" {
+				rw.WriteHeader(405)
+				rw.Write([]byte("error, incorrect HTTP method"))
+			}
+			if a := req.Header.Get("Authorization"); a != "Bearer foo" {
+				rw.WriteHeader(401)
+				rw.Write([]byte(`{"Message": "Authorization has been denied for this request."}`))
+				return
+			}
+			rw.WriteHeader(200)
+		}
+		if req.URL.String() == "/testSubStartedAlready" {
+			if req.Method != "POST" {
+				rw.WriteHeader(405)
+				rw.Write([]byte("error, incorrect HTTP method"))
+			}
+			if a := req.Header.Get("Authorization"); a != "Bearer foo" {
+				rw.WriteHeader(401)
+				rw.Write([]byte(`{"Message": "Authorization has been denied for this request."}`))
+				return
+			}
+			rw.WriteHeader(400)
+			rw.Write([]byte(
 				`{
-					"CreationTime": "2023-05-09T22:25:14",
-					"Id": "testId",
-					"Operation": "testOperation",
-					"OrganizationID": "testOrgId",
-					"ResultStatus": "testResultStatus",
-					"UserId": "testUserId",
-					"UserType": 0,
-					"Workload": "testWorkload",
+					"error": {
+						"code": "ignore",
+						"message": "The subscription is already enabled. No property change."
+					}
 				}`,
 			))
 		}
+		rw.WriteHeader(404)
+		return
 	}))
 }
 
