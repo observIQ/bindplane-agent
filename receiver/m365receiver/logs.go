@@ -34,10 +34,11 @@ import (
 
 const (
 	logStorageKey = "last_recorded_event"
+	layout        = "2006-01-02T15:04:05"
 )
 
 type lClient interface {
-	GetJSON(ctx context.Context, endpoint string) ([]jsonLogs, error)
+	GetJSON(ctx context.Context, endpoint string) (logData, error)
 	GetToken() error
 	StartSubscription(endpoint string) error
 	shutdown() error
@@ -164,13 +165,13 @@ func (l *m365LogsReceiver) startPolling(ctx context.Context) error {
 
 // spins a go routine for each audit type/endpoint
 func (l *m365LogsReceiver) pollLogs(ctx context.Context) error {
-	st := pcommon.NewTimestampFromTime(time.Now().Add(-l.pollInterval)).AsTime()
+	st := pcommon.NewTimestampFromTime(time.Now().Add(-l.pollInterval)).AsTime().Format(layout)
 	now := time.Now()
 
 	auditWG := &sync.WaitGroup{}
 	auditWG.Add(5)
 	for i := 0; i < len(l.audits); i++ {
-		endpoint := l.root + l.audits[i].route + fmt.Sprintf("&;startTime=%s&;endTime=%s", st, now)
+		endpoint := l.root + l.audits[i].route + fmt.Sprintf("&;startTime=%s&;endTime=%s", st, now.Format(layout))
 		go l.poll(ctx, now, &l.audits[i], endpoint, auditWG)
 	}
 	auditWG.Wait()
@@ -187,7 +188,7 @@ func (l *m365LogsReceiver) poll(ctx context.Context, now time.Time, audit *audit
 	}
 
 	l.mu.Lock()
-	logData, err := l.client.GetJSON(ctx, endpoint)
+	data, err := l.client.GetJSON(ctx, endpoint)
 	if err != nil {
 		if err.Error() == "authorization denied" { // troubleshoot stale token
 			l.logger.Debug("possible stale token; attempting to regenerate")
@@ -197,7 +198,7 @@ func (l *m365LogsReceiver) poll(ctx context.Context, now time.Time, audit *audit
 				l.mu.Unlock()
 				return
 			}
-			logData, err = l.client.GetJSON(ctx, endpoint)
+			data, err = l.client.GetJSON(ctx, endpoint)
 			if err != nil { // not a stale token error, unsure what is wrong
 				l.logger.Error("unable to retrieve logs", zap.Error(err))
 				l.mu.Unlock()
@@ -205,13 +206,14 @@ func (l *m365LogsReceiver) poll(ctx context.Context, now time.Time, audit *audit
 			}
 		} else {
 			l.logger.Error("error retrieving logs", zap.Error(err))
+			l.logger.Error(endpoint)
 			l.mu.Unlock()
 			return
 		}
 	}
 	l.mu.Unlock()
 
-	logs := l.transformLogs(pcommon.NewTimestampFromTime(now), audit, logData)
+	logs := l.transformLogs(pcommon.NewTimestampFromTime(now), audit, data)
 
 	l.consumerMu.Lock()
 	if logs.LogRecordCount() > 0 {
@@ -223,24 +225,21 @@ func (l *m365LogsReceiver) poll(ctx context.Context, now time.Time, audit *audit
 }
 
 // constructs logs from logData
-func (l *m365LogsReceiver) transformLogs(now pcommon.Timestamp, audit *auditMetaData, logData []jsonLogs) plog.Logs {
+func (l *m365LogsReceiver) transformLogs(now pcommon.Timestamp, audit *auditMetaData, data logData) plog.Logs {
 	logs := plog.NewLogs()
 	resourceLogs := logs.ResourceLogs().AppendEmpty()
 	ra := resourceLogs.Resource().Attributes()
 	ra.PutStr("m365.audit", audit.name)
 	ra.PutStr("m365.organization_id", l.cfg.TenantID)
 
-	for _, log := range logData {
-		// log body
+	for i := 0; i < len(data.logs); i++ {
+		log := data.logs[i]
 		logRecord := resourceLogs.ScopeLogs().AppendEmpty().LogRecords().AppendEmpty()
-		bodyBytes, err := json.Marshal(log)
-		if err != nil {
-			l.logger.Error("unable to marshal event into body string", zap.Error(err))
-		}
-		logRecord.Body().SetStr(string(bodyBytes))
+
+		// log body
+		logRecord.Body().SetStr("\"C" + data.body[i])
 
 		// timestamp
-		const layout = "2006-01-02T15:04:05"
 		ts, err := time.Parse(layout, log.CreationTime)
 		if err != nil {
 			l.logger.Warn("unable to interpret when an event was created, expecting a RFC3339 timestamp", zap.String("timestamp", log.CreationTime), zap.String("log", log.Id))
@@ -296,6 +295,7 @@ func (l *m365LogsReceiver) loadCheckpoint(ctx context.Context) {
 
 // adds any attributes to log that may or may not be present
 func parseOptionalAttributes(m *pcommon.Map, log *jsonLogs) {
+	recordType := matchRecordType(log.RecordType)
 	if log.Workload != "" {
 		m.PutStr("workload", log.Workload)
 	}
@@ -327,8 +327,6 @@ func parseOptionalAttributes(m *pcommon.Map, log *jsonLogs) {
 	}
 	if log.SecurityAlertId != "" {
 		m.PutStr("security.alert.id", log.SecurityAlertId)
-	}
-	if log.SecurityAlertName != "" {
 		m.PutStr("security.alert.name", log.SecurityAlertName)
 	}
 	if log.YammerActorId != "" {
@@ -340,7 +338,7 @@ func parseOptionalAttributes(m *pcommon.Map, log *jsonLogs) {
 	if log.DefenderEmail != nil {
 		m.PutStr("defender.email.attachment", log.DefenderEmail.FileName)
 	}
-	if log.DefenderURL != "" {
+	if recordType == "ThreatIntelligenceUrl" {
 		m.PutStr("defender.url.url", log.DefenderURL)
 	}
 	if log.DefenderFile != nil {
@@ -356,7 +354,7 @@ func parseOptionalAttributes(m *pcommon.Map, log *jsonLogs) {
 	if log.InvestigationStatus != "" {
 		m.PutStr("investigation.status", log.InvestigationStatus)
 	}
-	if log.PowerAppName != "" {
+	if log.PowerAppName == "PowerBIAudit" {
 		m.PutStr("powerbi.app.name", log.PowerAppName)
 	}
 	if log.DynamicsEntityId != "" {
@@ -374,29 +372,33 @@ func parseOptionalAttributes(m *pcommon.Map, log *jsonLogs) {
 	if log.MIPLabelId != "" {
 		m.PutStr("mip.label.id", log.MIPLabelId)
 	}
-	if log.EncryptedMessageId != "" {
-		m.PutStr("encrypted_portal.message.id", log.EncryptedMessageId)
+	if recordType == "OMEPortal" {
+		if log.EncryptedMessageId != "" {
+			m.PutStr("encrypted_portal.message.id", log.EncryptedMessageId)
+		}
 	}
 	if log.CommCompliance != nil {
 		m.PutStr("communication_compliance.exchange.network_message_id", log.CommCompliance.NetworkMessageId)
 	}
 	if log.ConnectorJobId != "" {
 		m.PutStr("compliance_connector.job.id", log.ConnectorJobId)
-	}
-	if log.ConnectorTaskId != "" {
-		m.PutStr("compliance_connector.task.id", log.ConnectorTaskId)
+		if log.ConnectorTaskId != "" {
+			m.PutStr("compliance_connector.task.id", log.ConnectorTaskId)
+		}
 	}
 	if log.DataShareInvitation != nil {
 		m.PutStr("system_sync.data_share.share.id", log.DataShareInvitation.ShareId)
 	}
-	if log.MSGraphConsentAppId != "" {
-		m.PutStr("graph.consent.app.id", log.MSGraphConsentAppId)
+	if recordType == "MicrosoftGraphDataConnectConsent" {
+		if log.MSGraphConsentAppId != "" {
+			m.PutStr("graph.consent.app.id", log.MSGraphConsentAppId)
+		}
 	}
 	if log.VivaGoalsUsername != "" {
 		m.PutStr("viva_goals.username", log.VivaGoalsUsername)
-	}
-	if log.VivaGoalsOrgName != "" {
-		m.PutStr("viva_goals.organization", log.VivaGoalsOrgName)
+		if log.VivaGoalsOrgName != "" {
+			m.PutStr("viva_goals.organization", log.VivaGoalsOrgName)
+		}
 	}
 	if log.MSToDoAppId != "" {
 		m.PutStr("to_do.app.id", log.MSToDoAppId)
@@ -499,5 +501,19 @@ func matchQuarantineSource(s int) string {
 		return "URLlink"
 	default:
 		return "impossible"
+	}
+}
+func matchRecordType(r int) string {
+	switch r {
+	case 20:
+		return "PowerBIAudit"
+	case 41:
+		return "ThreatIntelligenceUrl"
+	case 154:
+		return "OMEPortal"
+	case 217:
+		return "MicrosoftGraphDataConnectConsent"
+	default:
+		return "ignore"
 	}
 }

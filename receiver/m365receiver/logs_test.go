@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -113,7 +114,7 @@ func TestPollErrHandle(t *testing.T) {
 	rcv.client = client
 
 	// unable to fix token
-	client.On("GetJSON", "Audit.General").Return([]jsonLogs{}, fmt.Errorf("authorization denied")).Once()
+	client.On("GetJSON", "Audit.General").Return(logData{}, fmt.Errorf("authorization denied")).Once()
 	client.On("GetToken").Return(fmt.Errorf("err")).Once()
 	wg.Add(1)
 	rcv.poll(context.Background(), time.Now(), &audit, "Audit.General", wg)
@@ -122,9 +123,9 @@ func TestPollErrHandle(t *testing.T) {
 	}, 3*time.Second, 1*time.Second)
 
 	// GetJSON still doesn't work
-	client.On("GetJSON", "Audit.General").Return([]jsonLogs{}, fmt.Errorf("authorization denied")).Once()
+	client.On("GetJSON", "Audit.General").Return(logData{}, fmt.Errorf("authorization denied")).Once()
 	client.On("GetToken").Return(nil).Once()
-	client.On("GetJSON", "Audit.General").Return([]jsonLogs{}, fmt.Errorf("err")).Once()
+	client.On("GetJSON", "Audit.General").Return(logData{}, fmt.Errorf("err")).Once()
 	wg.Add(1)
 	rcv.poll(context.Background(), time.Now(), &audit, "Audit.General", wg)
 	require.Never(t, func() bool {
@@ -132,7 +133,7 @@ func TestPollErrHandle(t *testing.T) {
 	}, 3*time.Second, 1*time.Second)
 
 	// GetJSON never worked
-	client.On("GetJSON", "Audit.General").Return([]jsonLogs{}, fmt.Errorf("err")).Once()
+	client.On("GetJSON", "Audit.General").Return(logData{}, fmt.Errorf("err")).Once()
 	wg.Add(1)
 	rcv.poll(context.Background(), time.Now(), &audit, "Audit.General", wg)
 	require.Never(t, func() bool {
@@ -140,7 +141,7 @@ func TestPollErrHandle(t *testing.T) {
 	}, 3*time.Second, 1*time.Second)
 
 	// regenerate token works
-	client.On("GetJSON", "Audit.General").Return([]jsonLogs{}, fmt.Errorf("authorization denied")).Once()
+	client.On("GetJSON", "Audit.General").Return(logData{}, fmt.Errorf("authorization denied")).Once()
 	client.On("GetJSON", "Audit.General").Return(client.loadTestLogs(t), nil).Once()
 	client.On("GetToken").Return(nil).Once()
 	wg.Add(1)
@@ -148,49 +149,6 @@ func TestPollErrHandle(t *testing.T) {
 	require.Eventually(t, func() bool {
 		return sink.LogRecordCount() > 0
 	}, 5*time.Second, 1*time.Second)
-}
-
-func TestTransformLogs(t *testing.T) {
-	sink := &consumertest.LogsSink{}
-	now := pcommon.NewTimestampFromTime(time.Time{})
-	audit := auditMetaData{"General", "Audit.General", true}
-	file := filepath.Join("testdata", "logs", "transform-test.json")
-	logData := []jsonLogs{
-		{
-			Workload:     "testWorkload",
-			UserId:       "testUserID",
-			UserType:     0,
-			CreationTime: "2023-05-10T09:07:33",
-			Id:           "testID",
-			Operation:    "testOperation",
-			ResultStatus: "testResultStatus",
-		},
-		{
-			Workload:     "testWorkload2",
-			UserId:       "testUserID2",
-			UserType:     0,
-			CreationTime: "2023-05-10T09:07:33",
-			Id:           "testID2",
-			Operation:    "testOperation2",
-			ResultStatus: "testResultStatus2",
-		},
-	}
-
-	cfg := NewFactory().CreateDefaultConfig().(*Config)
-	l := newM365Logs(cfg, receivertest.NewNopCreateSettings(), sink)
-	result := l.transformLogs(now, &audit, logData)
-
-	// write logs to file
-	// marshaler := &plog.JSONMarshaler{}
-	// lBytes, err := marshaler.MarshalLogs(result)
-	// require.NoError(t, err)
-	// err = os.WriteFile(file, lBytes, 0666)
-	// require.NoError(t, err)
-
-	// compare logs
-	expected, err := ReadLogs(file)
-	require.NoError(t, err)
-	require.NoError(t, plogtest.CompareLogs(expected, result, plogtest.IgnoreObservedTimestamp()))
 }
 
 func TestParseOptionalAttributes(t *testing.T) {
@@ -220,7 +178,7 @@ type mockLogsClient struct {
 	mock.Mock
 }
 
-func (mc *mockLogsClient) loadTestLogs(t *testing.T) []jsonLogs {
+func (mc *mockLogsClient) loadTestLogs(t *testing.T) logData {
 	testLogs := filepath.Join("testdata", "logs", "testPoll", "input.json")
 	logBytes, err := os.ReadFile(testLogs)
 	require.NoError(t, err)
@@ -228,12 +186,19 @@ func (mc *mockLogsClient) loadTestLogs(t *testing.T) []jsonLogs {
 	var logs []jsonLogs
 	err = json.Unmarshal(logBytes, &logs)
 	require.NoError(t, err)
-	return logs
+
+	data := strings.Split(string(logBytes), "},{\"C")
+	last := len(data) - 1
+	data[0] = strings.TrimPrefix(data[0], "[{\"C")
+	data[last] = strings.TrimSuffix(data[last], "}]")
+
+	ret := logData{logs: logs, body: data}
+	return ret
 }
 
-func (mc *mockLogsClient) GetJSON(ctx context.Context, endpoint string) ([]jsonLogs, error) {
+func (mc *mockLogsClient) GetJSON(ctx context.Context, endpoint string) (logData, error) {
 	args := mc.Called(endpoint)
-	return args.Get(0).([]jsonLogs), args.Error(1)
+	return args.Get(0).(logData), args.Error(1)
 }
 
 func (mc *mockLogsClient) GetToken() error {

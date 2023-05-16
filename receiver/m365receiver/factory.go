@@ -51,6 +51,7 @@ func createDefaultConfig() component.Config {
 		},
 		MetricsBuilderConfig: metadata.DefaultMetricsBuilderConfig(),
 		Logs: &LogsConfig{
+			PollInterval:   1 * time.Minute,
 			GeneralLogs:    true,
 			ExchangeLogs:   true,
 			SharepointLogs: true,

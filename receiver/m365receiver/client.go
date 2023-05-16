@@ -58,6 +58,12 @@ type logResp struct {
 }
 
 // JSON parsing structs
+
+type logData struct {
+	logs []jsonLogs
+	body []string
+}
+
 type jsonLogs struct {
 	Workload                 string              `json:"Workload,omitempty"`
 	UserId                   string              `json:"UserId"`
@@ -66,6 +72,7 @@ type jsonLogs struct {
 	Id                       string              `json:"Id"`
 	Operation                string              `json:"Operation"`
 	ResultStatus             string              `json:"ResultStatus,omitempty"`
+	RecordType               int                 `json:"RecordType"`
 	SharepointSite           string              `json:"Site,omitempty"`
 	SharepointSourceFileName string              `json:"SourceFileName,omitempty"`
 	ExchangeMailboxGUID      string              `json:"MailboxGuid,omitempty"`
@@ -74,29 +81,29 @@ type jsonLogs struct {
 	DLPExchangeMetaData      *ExchangeMetaData   `json:"ExchangeMetaData,omitempty"`
 	DLPPolicyDetails         *PolicyDetails      `json:"PolicyDetails,omitempty"`
 	SecurityAlertId          string              `json:"AlertId,omitempty"`
-	SecurityAlertName        string              `json:"Name,omitempty"`
+	SecurityAlertName        string              `json:"Name,omitempty"` // conflict with teams and investigation DONE-combine
 	YammerActorId            string              `json:"ActorUserId,omitempty"`
 	YammerFileId             *int                `json:"FileId,omitempty"`
 	DefenderEmail            *AttachmentData     `json:"AttachmentData,omitempty"`
-	DefenderURL              string              `json:"URL,omitempty"` //DefenderURLId            string             `json:"UserId,omitempty"`
+	DefenderURL              string              `json:"URL,omitempty"` // conflict with investigation DONE-recordType
 	DefenderFile             *FileData           `json:"FileData,omitempty"`
 	DefenderFileSource       *int                `json:"SourceWorkload,omitempty"`
 	InvestigationId          string              `json:"InvestigationId,omitempty"`
 	InvestigationStatus      string              `json:"Status,omitempty"`
-	PowerAppName             string              `json:"AppName,omitempty"`
+	PowerAppName             string              `json:"AppName,omitempty"` // conflict with defender DONE-recordType
 	DynamicsEntityId         string              `json:"EntityId,omitempty"`
 	DynamicsEntityName       string              `json:"EntityName,omitempty"`
 	QuarantineSource         *int                `json:"RequestSource,omitempty"`
 	FormId                   string              `json:"FormId,omitempty"`
 	MIPLabelId               string              `json:"LabelId,omitempty"`
-	EncryptedMessageId       string              `json:"MessageId,omitempty"`
+	EncryptedMessageId       string              `json:"MessageId,omitempty"` //conflicting field name with yammer and teams DONE-recordType
 	CommCompliance           *ExchangeDetails    `json:"ExchangeDetails,omitempty"`
 	ConnectorJobId           string              `json:"JobId,omitempty"`
-	ConnectorTaskId          string              `json:"TaskId,omitempty"`
+	ConnectorTaskId          string              `json:"TaskId,omitempty"` //conflict with MS web DONE-combine
 	DataShareInvitation      *Invitation         `json:"Invitation,omitempty"`
-	MSGraphConsentAppId      string              `json:"ApplicationId,omitempty"`
+	MSGraphConsentAppId      string              `json:"ApplicationId,omitempty"` //lots of conflicts DONE-recordType
 	VivaGoalsUsername        string              `json:"Username,omitempty"`
-	VivaGoalsOrgName         string              `json:"OrganizationName,omitempty"`
+	VivaGoalsOrgName         string              `json:"OrganizationName,omitempty"` //conflicts DONE-combine
 	MSToDoAppId              string              `json:"ActorAppId,omitempty"`
 	MSToDoItemId             string              `json:"ItemID,omitempty"`
 	MSWebProjectId           string              `json:"ProjectId,omitempty"`
@@ -274,16 +281,16 @@ func (m *m365Client) GetCSV(endpoint string) ([]string, error) {
 }
 
 // function for getting log data
-func (m *m365Client) GetJSON(ctx context.Context, endpoint string) ([]jsonLogs, error) {
+func (m *m365Client) GetJSON(ctx context.Context, endpoint string) (logData, error) {
 	// make request to Audit endpoint
 	req, err := http.NewRequestWithContext(ctx, "GET", endpoint, nil)
 	if err != nil {
-		return []jsonLogs{}, err
+		return logData{}, err
 	}
 	req.Header.Set("Authorization", "Bearer "+m.token)
 	resp, err := m.client.Do(req)
 	if err != nil {
-		return []jsonLogs{}, err
+		return logData{}, err
 	}
 	defer func() { _ = resp.Body.Close() }()
 
@@ -292,46 +299,85 @@ func (m *m365Client) GetJSON(ctx context.Context, endpoint string) ([]jsonLogs, 
 		var respErr jsonError
 		body, err := io.ReadAll(resp.Body)
 		if err != nil {
-			return []jsonLogs{}, err
+			return logData{}, err
 		}
 		err = json.Unmarshal(body, &respErr)
 		if err != nil {
-			return []jsonLogs{}, err
+			return logData{}, err
 		}
 		if respErr.Message == "Authorization has been denied for this request." {
-			return []jsonLogs{}, fmt.Errorf("authorization denied")
+			return logData{}, fmt.Errorf("authorization denied")
 		}
-		return []jsonLogs{}, fmt.Errorf("got non 200 status code from request, got %d", resp.StatusCode)
+		return logData{}, fmt.Errorf("got non 200 status code from request, got %d", resp.StatusCode)
 	}
 
 	// check if contentUri field if present
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return []jsonLogs{}, err
+		return logData{}, err
 	}
-	if len(body) == 0 { // if body is empty, no new log data available
-		return []jsonLogs{}, nil
+	if string(body) == "[]" { // if body is empty, no new log data available
+		return logData{}, nil
 	}
 
 	// extract contentUri field
-	var contentUri logResp
-	err = json.Unmarshal(body, &contentUri)
+	var lr []logResp
+	err = json.Unmarshal(body, &lr)
 	if err != nil {
-		return []jsonLogs{}, err
+		return logData{}, err
 	}
 
 	// read in json
-	body, err = m.followLink(ctx, &contentUri)
+	body, err = m.followLink(ctx, &lr[0])
 	if err != nil {
-		return []jsonLogs{}, err
+		return logData{}, err
 	}
-	var logData []jsonLogs
-	err = json.Unmarshal(body, &logData)
+	var data logData
+	err = json.Unmarshal(body, &data.logs)
 	if err != nil {
-		return []jsonLogs{}, err
+		return logData{}, err
 	}
+	data.body = m.parseBody(body)
 
-	return logData, nil
+	return data, nil
+}
+
+func (m *m365Client) StartSubscription(endpoint string) error {
+	req, err := http.NewRequest("POST", endpoint, nil)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Authorization", "Bearer "+m.token)
+	resp, err := m.client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = resp.Body.Close() }()
+
+	// troubleshoot error handling, mainly sub already enabled
+	// no error if sub already enabled, not troubleshooting stale token
+	// only called while code is synchronous right after a GetT5oken call
+	// if token is stale, regenerating it won't fix anything
+	if resp.StatusCode != 200 {
+		if resp.StatusCode == 400 { // subscription already started possibly
+			var respErr defaultError
+			body, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return err
+			}
+			err = json.Unmarshal(body, &respErr)
+			if err != nil {
+				return err
+			}
+			if respErr.Error.Message == "The subscription is already enabled. No property change." {
+				return nil
+			}
+		}
+		//unsure what the error is
+		return fmt.Errorf("got non 200 status code from request, got %d", resp.StatusCode)
+	}
+	//if StatusCode == 200, then subscription was successfully started
+	return nil
 }
 
 // followLink will follow the response of a first request that has a link to the actual content
@@ -367,40 +413,11 @@ func (m *m365Client) followLink(ctx context.Context, lr *logResp) ([]byte, error
 	return io.ReadAll(redirectResp.Body)
 }
 
-func (m *m365Client) StartSubscription(endpoint string) error {
-	req, err := http.NewRequest("POST", endpoint, nil)
-	if err != nil {
-		return err
-	}
-	req.Header.Set("Authorization", "Bearer "+m.token)
-	resp, err := m.client.Do(req)
-	if err != nil {
-		return err
-	}
-	defer func() { _ = resp.Body.Close() }()
-
-	// troubleshoot error handling, mainly sub already enabled
-	// no error if sub already enabled, not troubleshooting stale token
-	// only called while code is synchronous right after a GetToken call
-	// if token is stale, don't think regenerating it will fix anything
-	if resp.StatusCode != 200 {
-		if resp.StatusCode == 400 { // subscription already started possibly
-			var respErr defaultError
-			body, err := io.ReadAll(resp.Body)
-			if err != nil {
-				return err
-			}
-			err = json.Unmarshal(body, &respErr)
-			if err != nil {
-				return err
-			}
-			if respErr.Error.Message == "The subscription is already enabled. No property change." {
-				return nil
-			}
-		}
-		//unsure what the error is
-		return fmt.Errorf("got non 200 status code from request, got %d", resp.StatusCode)
-	}
-	//if StatusCode == 200, then subscription was successfully started
-	return nil
+// parseBody takes the byte[] response and parses it into string objects
+func (m *m365Client) parseBody(body []byte) []string {
+	data := strings.Split(string(body), "},{\"C")
+	last := len(data) - 1
+	data[0] = strings.TrimPrefix(data[0], "[{\"C")
+	data[last] = strings.TrimSuffix(data[last], "}]")
+	return data
 }

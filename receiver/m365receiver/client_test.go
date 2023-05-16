@@ -111,7 +111,7 @@ func TestGetJSON(t *testing.T) {
 			ResultStatus: "testResultStatus",
 		},
 	}
-	require.Equal(t, testJson, expectedJSON)
+	require.Equal(t, testJson.logs, expectedJSON)
 
 	// bad token
 	testClient.token = "bad"
@@ -193,9 +193,9 @@ func newMockServerJSON() *httptest.Server {
 
 			rw.WriteHeader(200)
 			rw.Write([]byte(fmt.Sprintf(
-				`{
+				`[{
 					"contentUri": "%s/testJSONredirect"
-				}`, "http://"+req.Host)))
+				}]`, "http://"+req.Host)))
 			return
 
 		}
