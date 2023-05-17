@@ -38,6 +38,7 @@ type Config struct {
 	StorageID                               *component.ID                 `mapstructure:"storage"`
 }
 
+// LogsConfig defines configuration for the M365 logs receiver
 type LogsConfig struct {
 	PollInterval   time.Duration `mapstructure:"poll_interval"`
 	GeneralLogs    bool          `mapstructure:"General"`

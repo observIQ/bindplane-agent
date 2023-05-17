@@ -66,10 +66,10 @@ type logData struct {
 
 type jsonLogs struct {
 	Workload                 string              `json:"Workload,omitempty"`
-	UserId                   string              `json:"UserId"`
+	UserID                   string              `json:"UserId"`
 	UserType                 int                 `json:"UserType"`
 	CreationTime             string              `json:"CreationTime"`
-	Id                       string              `json:"Id"`
+	ID                       string              `json:"Id"`
 	Operation                string              `json:"Operation"`
 	ResultStatus             string              `json:"ResultStatus,omitempty"`
 	RecordType               int                 `json:"RecordType"`
@@ -80,74 +80,81 @@ type jsonLogs struct {
 	DLPSharePointMetaData    *SharePointMetaData `json:"SharePointMetaData,omitempty"`
 	DLPExchangeMetaData      *ExchangeMetaData   `json:"ExchangeMetaData,omitempty"`
 	DLPPolicyDetails         *PolicyDetails      `json:"PolicyDetails,omitempty"`
-	SecurityAlertId          string              `json:"AlertId,omitempty"`
+	SecurityAlertID          string              `json:"AlertId,omitempty"`
 	SecurityAlertName        string              `json:"Name,omitempty"` // conflict with teams and investigation DONE-combine
-	YammerActorId            string              `json:"ActorUserId,omitempty"`
-	YammerFileId             *int                `json:"FileId,omitempty"`
+	YammerActorID            string              `json:"ActorUserId,omitempty"`
+	YammerFileID             *int                `json:"FileId,omitempty"`
 	DefenderEmail            *AttachmentData     `json:"AttachmentData,omitempty"`
 	DefenderURL              string              `json:"URL,omitempty"` // conflict with investigation DONE-recordType
 	DefenderFile             *FileData           `json:"FileData,omitempty"`
 	DefenderFileSource       *int                `json:"SourceWorkload,omitempty"`
-	InvestigationId          string              `json:"InvestigationId,omitempty"`
+	InvestigationID          string              `json:"InvestigationId,omitempty"`
 	InvestigationStatus      string              `json:"Status,omitempty"`
 	PowerAppName             string              `json:"AppName,omitempty"` // conflict with defender DONE-recordType
-	DynamicsEntityId         string              `json:"EntityId,omitempty"`
+	DynamicsEntityID         string              `json:"EntityId,omitempty"`
 	DynamicsEntityName       string              `json:"EntityName,omitempty"`
 	QuarantineSource         *int                `json:"RequestSource,omitempty"`
-	FormId                   string              `json:"FormId,omitempty"`
-	MIPLabelId               string              `json:"LabelId,omitempty"`
-	EncryptedMessageId       string              `json:"MessageId,omitempty"` //conflicting field name with yammer and teams DONE-recordType
+	FormID                   string              `json:"FormId,omitempty"`
+	MIPLabelID               string              `json:"LabelId,omitempty"`
+	EncryptedMessageID       string              `json:"MessageId,omitempty"` //conflicting field name with yammer and teams DONE-recordType
 	CommCompliance           *ExchangeDetails    `json:"ExchangeDetails,omitempty"`
-	ConnectorJobId           string              `json:"JobId,omitempty"`
-	ConnectorTaskId          string              `json:"TaskId,omitempty"` //conflict with MS web DONE-combine
+	ConnectorJobID           string              `json:"JobId,omitempty"`
+	ConnectorTaskID          string              `json:"TaskId,omitempty"` //conflict with MS web DONE-combine
 	DataShareInvitation      *Invitation         `json:"Invitation,omitempty"`
-	MSGraphConsentAppId      string              `json:"ApplicationId,omitempty"` //lots of conflicts DONE-recordType
+	MSGraphConsentAppID      string              `json:"ApplicationId,omitempty"` //lots of conflicts DONE-recordType
 	VivaGoalsUsername        string              `json:"Username,omitempty"`
 	VivaGoalsOrgName         string              `json:"OrganizationName,omitempty"` //conflicts DONE-combine
-	MSToDoAppId              string              `json:"ActorAppId,omitempty"`
-	MSToDoItemId             string              `json:"ItemID,omitempty"`
-	MSWebProjectId           string              `json:"ProjectId,omitempty"`
-	MSWebRoadmapId           string              `json:"RoadmapId,omitempty"`
-	MSWebRoadmapItemId       string              `json:"RoadmapItemId,omitempty"`
+	MSToDoAppID              string              `json:"ActorAppId,omitempty"`
+	MSToDoItemID             string              `json:"ItemID,omitempty"`
+	MSWebProjectID           string              `json:"ProjectId,omitempty"`
+	MSWebRoadmapID           string              `json:"RoadmapId,omitempty"`
+	MSWebRoadmapItemID       string              `json:"RoadmapItemId,omitempty"`
 }
 
+// AzureActor json struct
 type AzureActor struct {
 	ID   string `json:"ID"`
 	Type int    `json:"Type"`
 }
 
+// SharePointMetaData json struct
 type SharePointMetaData struct {
 	From string `json:"From"`
 }
 
+// ExchangeMetaData json struct
 type ExchangeMetaData struct {
 	MessageID string `json:"MessageID"`
 }
 
+// PolicyDetails json struct
 type PolicyDetails struct {
-	PolicyId   string `json:"PolicyId"`
+	PolicyID   string `json:"PolicyId"`
 	PolicyName string `json:"PolicyName"`
 }
 
+// AttachmentData json struct
 type AttachmentData struct {
 	FileName string `json:"FileName"`
 }
 
+// FileData json struct
 type FileData struct {
-	DocumentId  string `json:"DocumentId"`
+	DocumentID  string `json:"DocumentId"`
 	FileVerdict int    `json:"FileVerdict"`
 }
 
-type ExchangeDetails struct { //will this be nil if not present
-	NetworkMessageId string `json:"NetworkMessageId,omitempty"`
+// ExchangeDetails json struct
+type ExchangeDetails struct {
+	NetworkMessageID string `json:"NetworkMessageId,omitempty"`
 }
 
+// Invitation json struct
 type Invitation struct {
-	ShareId string `json:"ShareId"`
+	ShareID string `json:"ShareId"`
 }
 
 // client implementation
-
 func newM365Client(c *http.Client, cfg *Config, scope string) *m365Client {
 	return &m365Client{
 		client:       c,

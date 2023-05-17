@@ -242,7 +242,7 @@ func (l *m365LogsReceiver) transformLogs(now pcommon.Timestamp, audit *auditMeta
 		// timestamp
 		ts, err := time.Parse(layout, log.CreationTime)
 		if err != nil {
-			l.logger.Warn("unable to interpret when an event was created, expecting a RFC3339 timestamp", zap.String("timestamp", log.CreationTime), zap.String("log", log.Id))
+			l.logger.Warn("unable to interpret when an event was created, expecting a RFC3339 timestamp", zap.String("timestamp", log.CreationTime), zap.String("log", log.ID))
 			logRecord.SetTimestamp(now)
 		} else {
 			logRecord.SetTimestamp(pcommon.NewTimestampFromTime(ts))
@@ -251,9 +251,9 @@ func (l *m365LogsReceiver) transformLogs(now pcommon.Timestamp, audit *auditMeta
 
 		// attributes
 		attrs := logRecord.Attributes()
-		attrs.PutStr("id", log.Id)
+		attrs.PutStr("id", log.ID)
 		attrs.PutStr("operation", log.Operation)
-		attrs.PutStr("user_id", log.UserId)
+		attrs.PutStr("user_id", log.UserID)
 		attrs.PutStr("user_type", matchUserType(log.UserType))
 
 		parseOptionalAttributes(&attrs, &log)
@@ -322,18 +322,18 @@ func parseOptionalAttributes(m *pcommon.Map, log *jsonLogs) {
 		m.PutStr("dlp.exchange.message.id", log.DLPExchangeMetaData.MessageID)
 	}
 	if log.DLPPolicyDetails != nil {
-		m.PutStr("dlp.policy_details.policy.id", log.DLPPolicyDetails.PolicyId)
+		m.PutStr("dlp.policy_details.policy.id", log.DLPPolicyDetails.PolicyID)
 		m.PutStr("dlp.policy_details.policy.name", log.DLPPolicyDetails.PolicyName)
 	}
-	if log.SecurityAlertId != "" {
-		m.PutStr("security.alert.id", log.SecurityAlertId)
+	if log.SecurityAlertID != "" {
+		m.PutStr("security.alert.id", log.SecurityAlertID)
 		m.PutStr("security.alert.name", log.SecurityAlertName)
 	}
-	if log.YammerActorId != "" {
-		m.PutStr("yammer.user.id", log.YammerActorId)
+	if log.YammerActorID != "" {
+		m.PutStr("yammer.user.id", log.YammerActorID)
 	}
-	if log.YammerFileId != nil {
-		m.PutStr("yammer.file.id", strconv.Itoa(*log.YammerFileId))
+	if log.YammerFileID != nil {
+		m.PutStr("yammer.file.id", strconv.Itoa(*log.YammerFileID))
 	}
 	if log.DefenderEmail != nil {
 		m.PutStr("defender.email.attachment", log.DefenderEmail.FileName)
@@ -342,14 +342,14 @@ func parseOptionalAttributes(m *pcommon.Map, log *jsonLogs) {
 		m.PutStr("defender.url.url", log.DefenderURL)
 	}
 	if log.DefenderFile != nil {
-		m.PutStr("defender.file.id", log.DefenderFile.DocumentId)
+		m.PutStr("defender.file.id", log.DefenderFile.DocumentID)
 		m.PutStr("defender.file.verdict", matchFileVerdict(log.DefenderFile.FileVerdict))
 	}
 	if log.DefenderFileSource != nil {
 		m.PutStr("defender.file.source_workload", matchSourceWorkload(*log.DefenderFileSource))
 	}
-	if log.InvestigationId != "" {
-		m.PutStr("investigation.id", log.InvestigationId)
+	if log.InvestigationID != "" {
+		m.PutStr("investigation.id", log.InvestigationID)
 	}
 	if log.InvestigationStatus != "" {
 		m.PutStr("investigation.status", log.InvestigationStatus)
@@ -357,8 +357,8 @@ func parseOptionalAttributes(m *pcommon.Map, log *jsonLogs) {
 	if log.PowerAppName == "PowerBIAudit" {
 		m.PutStr("powerbi.app.name", log.PowerAppName)
 	}
-	if log.DynamicsEntityId != "" {
-		m.PutStr("dynamics365.entity.id", log.DynamicsEntityId)
+	if log.DynamicsEntityID != "" {
+		m.PutStr("dynamics365.entity.id", log.DynamicsEntityID)
 	}
 	if log.DynamicsEntityName != "" {
 		m.PutStr("dynamics365.entity.name", log.DynamicsEntityName)
@@ -366,32 +366,32 @@ func parseOptionalAttributes(m *pcommon.Map, log *jsonLogs) {
 	if log.QuarantineSource != nil {
 		m.PutStr("quarantine.request_source", matchQuarantineSource(*log.QuarantineSource))
 	}
-	if log.FormId != "" {
-		m.PutStr("forms.form.id", log.FormId)
+	if log.FormID != "" {
+		m.PutStr("forms.form.id", log.FormID)
 	}
-	if log.MIPLabelId != "" {
-		m.PutStr("mip.label.id", log.MIPLabelId)
+	if log.MIPLabelID != "" {
+		m.PutStr("mip.label.id", log.MIPLabelID)
 	}
 	if recordType == "OMEPortal" {
-		if log.EncryptedMessageId != "" {
-			m.PutStr("encrypted_portal.message.id", log.EncryptedMessageId)
+		if log.EncryptedMessageID != "" {
+			m.PutStr("encrypted_portal.message.id", log.EncryptedMessageID)
 		}
 	}
 	if log.CommCompliance != nil {
-		m.PutStr("communication_compliance.exchange.network_message_id", log.CommCompliance.NetworkMessageId)
+		m.PutStr("communication_compliance.exchange.network_message_id", log.CommCompliance.NetworkMessageID)
 	}
-	if log.ConnectorJobId != "" {
-		m.PutStr("compliance_connector.job.id", log.ConnectorJobId)
-		if log.ConnectorTaskId != "" {
-			m.PutStr("compliance_connector.task.id", log.ConnectorTaskId)
+	if log.ConnectorJobID != "" {
+		m.PutStr("compliance_connector.job.id", log.ConnectorJobID)
+		if log.ConnectorTaskID != "" {
+			m.PutStr("compliance_connector.task.id", log.ConnectorTaskID)
 		}
 	}
 	if log.DataShareInvitation != nil {
-		m.PutStr("system_sync.data_share.share.id", log.DataShareInvitation.ShareId)
+		m.PutStr("system_sync.data_share.share.id", log.DataShareInvitation.ShareID)
 	}
 	if recordType == "MicrosoftGraphDataConnectConsent" {
-		if log.MSGraphConsentAppId != "" {
-			m.PutStr("graph.consent.app.id", log.MSGraphConsentAppId)
+		if log.MSGraphConsentAppID != "" {
+			m.PutStr("graph.consent.app.id", log.MSGraphConsentAppID)
 		}
 	}
 	if log.VivaGoalsUsername != "" {
@@ -400,20 +400,20 @@ func parseOptionalAttributes(m *pcommon.Map, log *jsonLogs) {
 			m.PutStr("viva_goals.organization", log.VivaGoalsOrgName)
 		}
 	}
-	if log.MSToDoAppId != "" {
-		m.PutStr("to_do.app.id", log.MSToDoAppId)
+	if log.MSToDoAppID != "" {
+		m.PutStr("to_do.app.id", log.MSToDoAppID)
 	}
-	if log.MSToDoItemId != "" {
-		m.PutStr("to_do.item.id", log.MSToDoItemId)
+	if log.MSToDoItemID != "" {
+		m.PutStr("to_do.item.id", log.MSToDoItemID)
 	}
-	if log.MSWebProjectId != "" {
-		m.PutStr("web_project.project.id", log.MSWebProjectId)
+	if log.MSWebProjectID != "" {
+		m.PutStr("web_project.project.id", log.MSWebProjectID)
 	}
-	if log.MSWebRoadmapId != "" {
-		m.PutStr("web_project.road_map.id", log.MSWebRoadmapId)
+	if log.MSWebRoadmapID != "" {
+		m.PutStr("web_project.road_map.id", log.MSWebRoadmapID)
 	}
-	if log.MSWebRoadmapItemId != "" {
-		m.PutStr("web_project.road_map.item.id", log.MSWebRoadmapItemId)
+	if log.MSWebRoadmapItemID != "" {
+		m.PutStr("web_project.road_map.item.id", log.MSWebRoadmapItemID)
 	}
 }
 

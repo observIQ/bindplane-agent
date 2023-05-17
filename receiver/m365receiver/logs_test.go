@@ -196,7 +196,7 @@ func (mc *mockLogsClient) loadTestLogs(t *testing.T) logData {
 	return ret
 }
 
-func (mc *mockLogsClient) GetJSON(ctx context.Context, endpoint string) (logData, error) {
+func (mc *mockLogsClient) GetJSON(_ context.Context, endpoint string) (logData, error) {
 	args := mc.Called(endpoint)
 	return args.Get(0).(logData), args.Error(1)
 }
@@ -206,7 +206,7 @@ func (mc *mockLogsClient) GetToken() error {
 	return args.Error(0)
 }
 
-func (mc *mockLogsClient) StartSubscription(endpoint string) error {
+func (mc *mockLogsClient) StartSubscription(_ string) error {
 	return nil
 }
 
