@@ -41,11 +41,11 @@ type Config struct {
 // LogsConfig defines configuration for the M365 logs receiver
 type LogsConfig struct {
 	PollInterval   time.Duration `mapstructure:"poll_interval"`
-	GeneralLogs    bool          `mapstructure:"General"`
-	ExchangeLogs   bool          `mapstructure:"Exchange"`
-	SharepointLogs bool          `mapstructure:"Sharepoint"`
-	AzureADLogs    bool          `mapstructure:"AzureAD"`
-	DLPLogs        bool          `mapstructure:"DLP"`
+	GeneralLogs    bool          `mapstructure:"general"`
+	ExchangeLogs   bool          `mapstructure:"exchange"`
+	SharepointLogs bool          `mapstructure:"sharepoint"`
+	AzureADLogs    bool          `mapstructure:"azureAD"`
+	DLPLogs        bool          `mapstructure:"dlp"`
 }
 
 // Validate validates the configuration by checking for missing or invalid fields
