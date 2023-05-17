@@ -53,9 +53,9 @@ Collect metrics:
 ```yaml
 receivers:
   m365:
-  tenant_id: tenant_id
-  client_id: client_id
-  client_secret: client_secret
+    tenant_id: tenant_id
+    client_id: client_id
+    client_secret: client_secret
 exporters:
 
 service:
@@ -82,7 +82,7 @@ service:
       exporters: 
 ```
 
-Collect logs (custom poll interval, storage component, only sharepoint & azureAD logs)
+Collect logs (custom poll interval, storage component, only sharepoint & azureAD logs):
 ```yaml
 receivers:
   m365:

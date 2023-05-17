@@ -336,7 +336,7 @@ type metricM365OnedriveFilesActiveCount struct {
 // init fills m365.onedrive.files.active.count metric with initial data.
 func (m *metricM365OnedriveFilesActiveCount) init() {
 	m.data.SetName("m365.onedrive.files.active.count")
-	m.data.SetDescription("The number of active files across the OneDrive.")
+	m.data.SetDescription("The number of active files across the OneDrive in the last 7 days.")
 	m.data.SetUnit("{files}")
 	m.data.SetEmptySum()
 	m.data.Sum().SetIsMonotonic(false)
@@ -387,7 +387,7 @@ type metricM365OnedriveFilesCount struct {
 // init fills m365.onedrive.files.count metric with initial data.
 func (m *metricM365OnedriveFilesCount) init() {
 	m.data.SetName("m365.onedrive.files.count")
-	m.data.SetDescription("The number of total files across the OneDrive.")
+	m.data.SetDescription("The number of total files across the OneDrive for the last 7 days.")
 	m.data.SetUnit("{files}")
 	m.data.SetEmptySum()
 	m.data.Sum().SetIsMonotonic(false)
@@ -438,7 +438,7 @@ type metricM365OnedriveUserActivityCount struct {
 // init fills m365.onedrive.user_activity.count metric with initial data.
 func (m *metricM365OnedriveUserActivityCount) init() {
 	m.data.SetName("m365.onedrive.user_activity.count")
-	m.data.SetDescription("The number of users who have interacted with a OneDrive file, by action.")
+	m.data.SetDescription("The number of users who have interacted with a OneDrive file, by action, in the last 7 days.")
 	m.data.SetUnit("{users}")
 	m.data.SetEmptySum()
 	m.data.Sum().SetIsMonotonic(false)
@@ -491,7 +491,7 @@ type metricM365OutlookAppUserCount struct {
 // init fills m365.outlook.app.user.count metric with initial data.
 func (m *metricM365OutlookAppUserCount) init() {
 	m.data.SetName("m365.outlook.app.user.count")
-	m.data.SetDescription("The number of unique users per app over the period of time in the organization Outlook.")
+	m.data.SetDescription("The number of unique users per app over the period of time in the organization Outlook in the last 7 days.")
 	m.data.SetUnit("{users}")
 	m.data.SetEmptySum()
 	m.data.Sum().SetIsMonotonic(false)
@@ -597,7 +597,7 @@ type metricM365OutlookMailboxesActiveCount struct {
 // init fills m365.outlook.mailboxes.active.count metric with initial data.
 func (m *metricM365OutlookMailboxesActiveCount) init() {
 	m.data.SetName("m365.outlook.mailboxes.active.count")
-	m.data.SetDescription("The number of mailboxes that have been active each day in the organization.")
+	m.data.SetDescription("The number of mailboxes that have been active each day in the organization for the last 7 days.")
 	m.data.SetUnit("{mailboxes}")
 	m.data.SetEmptySum()
 	m.data.Sum().SetIsMonotonic(false)
@@ -648,7 +648,7 @@ type metricM365OutlookQuotaStatusCount struct {
 // init fills m365.outlook.quota_status.count metric with initial data.
 func (m *metricM365OutlookQuotaStatusCount) init() {
 	m.data.SetName("m365.outlook.quota_status.count")
-	m.data.SetDescription("The number of mailboxes in the various quota statuses over the period of time in the org.")
+	m.data.SetDescription("The number of mailboxes in the various quota statuses over the period of time in the org in the last 7 days.")
 	m.data.SetUnit("{mailboxes}")
 	m.data.SetEmptySum()
 	m.data.Sum().SetIsMonotonic(false)
@@ -701,7 +701,7 @@ type metricM365OutlookStorageCount struct {
 // init fills m365.outlook.storage.count metric with initial data.
 func (m *metricM365OutlookStorageCount) init() {
 	m.data.SetName("m365.outlook.storage.count")
-	m.data.SetDescription("The amount of storage used in Outlook by the organization.")
+	m.data.SetDescription("The amount of storage used in Outlook by the organization in the last 7 days.")
 	m.data.SetUnit("By")
 	m.data.SetEmptySum()
 	m.data.Sum().SetIsMonotonic(false)
@@ -752,7 +752,7 @@ type metricM365SharepointFilesActiveCount struct {
 // init fills m365.sharepoint.files.active.count metric with initial data.
 func (m *metricM365SharepointFilesActiveCount) init() {
 	m.data.SetName("m365.sharepoint.files.active.count")
-	m.data.SetDescription("The number of active files across all sites.")
+	m.data.SetDescription("The number of active files across all sites in the last 7 days.")
 	m.data.SetUnit("{files}")
 	m.data.SetEmptySum()
 	m.data.Sum().SetIsMonotonic(false)
@@ -803,7 +803,7 @@ type metricM365SharepointFilesCount struct {
 // init fills m365.sharepoint.files.count metric with initial data.
 func (m *metricM365SharepointFilesCount) init() {
 	m.data.SetName("m365.sharepoint.files.count")
-	m.data.SetDescription("The number of total files across all sites.")
+	m.data.SetDescription("The number of total files across all sites in the last 7 days.")
 	m.data.SetUnit("{files}")
 	m.data.SetEmptySum()
 	m.data.Sum().SetIsMonotonic(false)
@@ -854,7 +854,7 @@ type metricM365SharepointPagesUniqueCount struct {
 // init fills m365.sharepoint.pages.unique.count metric with initial data.
 func (m *metricM365SharepointPagesUniqueCount) init() {
 	m.data.SetName("m365.sharepoint.pages.unique.count")
-	m.data.SetDescription("The number of unique views of pages across all sites.")
+	m.data.SetDescription("The number of unique views of pages across all sites in the last 7 days.")
 	m.data.SetUnit("{views}")
 	m.data.SetEmptySum()
 	m.data.Sum().SetIsMonotonic(false)
@@ -905,7 +905,7 @@ type metricM365SharepointPagesViewedCount struct {
 // init fills m365.sharepoint.pages.viewed.count metric with initial data.
 func (m *metricM365SharepointPagesViewedCount) init() {
 	m.data.SetName("m365.sharepoint.pages.viewed.count")
-	m.data.SetDescription("The number of unique pages viewed across all sites.")
+	m.data.SetDescription("The number of unique pages viewed across all sites in the last 7 days.")
 	m.data.SetUnit("{pages}")
 	m.data.SetEmptySum()
 	m.data.Sum().SetIsMonotonic(false)
@@ -956,7 +956,7 @@ type metricM365SharepointSiteStorageCount struct {
 // init fills m365.sharepoint.site.storage.count metric with initial data.
 func (m *metricM365SharepointSiteStorageCount) init() {
 	m.data.SetName("m365.sharepoint.site.storage.count")
-	m.data.SetDescription("The amount of storage used by all sites across the Sharepoint.")
+	m.data.SetDescription("The amount of storage used by all sites across SharePoint in the last 7 days.")
 	m.data.SetUnit("By")
 	m.data.SetEmptySum()
 	m.data.Sum().SetIsMonotonic(false)
@@ -1007,7 +1007,7 @@ type metricM365SharepointSitesActiveCount struct {
 // init fills m365.sharepoint.sites.active.count metric with initial data.
 func (m *metricM365SharepointSitesActiveCount) init() {
 	m.data.SetName("m365.sharepoint.sites.active.count")
-	m.data.SetDescription("The number of active sites across the Sharepoint.")
+	m.data.SetDescription("The number of active sites across SharePoint in the last 7 days.")
 	m.data.SetUnit("{files}")
 	m.data.SetEmptySum()
 	m.data.Sum().SetIsMonotonic(false)
@@ -1058,7 +1058,7 @@ type metricM365TeamsCallsCount struct {
 // init fills m365.teams.calls.count metric with initial data.
 func (m *metricM365TeamsCallsCount) init() {
 	m.data.SetName("m365.teams.calls.count")
-	m.data.SetDescription("The number of MS Teams calls from users in the organization.")
+	m.data.SetDescription("The number of MS Teams calls from users in the organization in the last 7 days.")
 	m.data.SetUnit("{calls}")
 	m.data.SetEmptySum()
 	m.data.Sum().SetIsMonotonic(false)
@@ -1109,7 +1109,7 @@ type metricM365TeamsDeviceUsageCount struct {
 // init fills m365.teams.device_usage.count metric with initial data.
 func (m *metricM365TeamsDeviceUsageCount) init() {
 	m.data.SetName("m365.teams.device_usage.count")
-	m.data.SetDescription("The number of unique users by device/platform that have used Teams.")
+	m.data.SetDescription("The number of unique users by device/platform that have used Teams in the last 7 days.")
 	m.data.SetUnit("{users}")
 	m.data.SetEmptySum()
 	m.data.Sum().SetIsMonotonic(false)
@@ -1162,7 +1162,7 @@ type metricM365TeamsMeetingsCount struct {
 // init fills m365.teams.meetings.count metric with initial data.
 func (m *metricM365TeamsMeetingsCount) init() {
 	m.data.SetName("m365.teams.meetings.count")
-	m.data.SetDescription("The number of MS Teams meetings for users in the organization.")
+	m.data.SetDescription("The number of MS Teams meetings for users in the organization in the last 7 days.")
 	m.data.SetUnit("{meetings}")
 	m.data.SetEmptySum()
 	m.data.Sum().SetIsMonotonic(false)
@@ -1213,7 +1213,7 @@ type metricM365TeamsMessageTeamCount struct {
 // init fills m365.teams.message.team.count metric with initial data.
 func (m *metricM365TeamsMessageTeamCount) init() {
 	m.data.SetName("m365.teams.message.team.count")
-	m.data.SetDescription("The number of MS Teams team-messages sent by users in the organization.")
+	m.data.SetDescription("The number of MS Teams team-messages sent by users in the organization in the last 7 days.")
 	m.data.SetUnit("{messages}")
 	m.data.SetEmptySum()
 	m.data.Sum().SetIsMonotonic(false)
@@ -1264,7 +1264,7 @@ type metricM365TeamsMessagesPrivateCount struct {
 // init fills m365.teams.messages.private.count metric with initial data.
 func (m *metricM365TeamsMessagesPrivateCount) init() {
 	m.data.SetName("m365.teams.messages.private.count")
-	m.data.SetDescription("The number of MS Teams private-messages sent by users in the organization.")
+	m.data.SetDescription("The number of MS Teams private-messages sent by users in the organization in the last 7 days.")
 	m.data.SetUnit("{messages}")
 	m.data.SetEmptySum()
 	m.data.Sum().SetIsMonotonic(false)

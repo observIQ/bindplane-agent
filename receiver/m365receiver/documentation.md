@@ -14,7 +14,7 @@ metrics:
 
 ### m365.onedrive.files.active.count
 
-The number of active files across the OneDrive.
+The number of active files across the OneDrive in the last 7 days.
 
 | Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
 | ---- | ----------- | ---------- | ----------------------- | --------- |
@@ -22,7 +22,7 @@ The number of active files across the OneDrive.
 
 ### m365.onedrive.files.count
 
-The number of total files across the OneDrive.
+The number of total files across the OneDrive for the last 7 days.
 
 | Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
 | ---- | ----------- | ---------- | ----------------------- | --------- |
@@ -30,7 +30,7 @@ The number of total files across the OneDrive.
 
 ### m365.onedrive.user_activity.count
 
-The number of users who have interacted with a OneDrive file, by action.
+The number of users who have interacted with a OneDrive file, by action, in the last 7 days.
 
 | Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
 | ---- | ----------- | ---------- | ----------------------- | --------- |
@@ -44,7 +44,7 @@ The number of users who have interacted with a OneDrive file, by action.
 
 ### m365.outlook.app.user.count
 
-The number of unique users per app over the period of time in the organization Outlook.
+The number of unique users per app over the period of time in the organization Outlook in the last 7 days.
 
 | Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
 | ---- | ----------- | ---------- | ----------------------- | --------- |
@@ -72,7 +72,7 @@ The number of email actions by members over the period of time in the organizati
 
 ### m365.outlook.mailboxes.active.count
 
-The number of mailboxes that have been active each day in the organization.
+The number of mailboxes that have been active each day in the organization for the last 7 days.
 
 | Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
 | ---- | ----------- | ---------- | ----------------------- | --------- |
@@ -80,7 +80,7 @@ The number of mailboxes that have been active each day in the organization.
 
 ### m365.outlook.quota_status.count
 
-The number of mailboxes in the various quota statuses over the period of time in the org.
+The number of mailboxes in the various quota statuses over the period of time in the org in the last 7 days.
 
 | Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
 | ---- | ----------- | ---------- | ----------------------- | --------- |
@@ -94,7 +94,7 @@ The number of mailboxes in the various quota statuses over the period of time in
 
 ### m365.outlook.storage.count
 
-The amount of storage used in Outlook by the organization.
+The amount of storage used in Outlook by the organization in the last 7 days.
 
 | Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
 | ---- | ----------- | ---------- | ----------------------- | --------- |
@@ -102,7 +102,7 @@ The amount of storage used in Outlook by the organization.
 
 ### m365.sharepoint.files.active.count
 
-The number of active files across all sites.
+The number of active files across all sites in the last 7 days.
 
 | Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
 | ---- | ----------- | ---------- | ----------------------- | --------- |
@@ -110,7 +110,7 @@ The number of active files across all sites.
 
 ### m365.sharepoint.files.count
 
-The number of total files across all sites.
+The number of total files across all sites in the last 7 days.
 
 | Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
 | ---- | ----------- | ---------- | ----------------------- | --------- |
@@ -118,7 +118,7 @@ The number of total files across all sites.
 
 ### m365.sharepoint.pages.unique.count
 
-The number of unique views of pages across all sites.
+The number of unique views of pages across all sites in the last 7 days.
 
 | Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
 | ---- | ----------- | ---------- | ----------------------- | --------- |
@@ -126,7 +126,7 @@ The number of unique views of pages across all sites.
 
 ### m365.sharepoint.pages.viewed.count
 
-The number of unique pages viewed across all sites.
+The number of unique pages viewed across all sites in the last 7 days.
 
 | Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
 | ---- | ----------- | ---------- | ----------------------- | --------- |
@@ -134,7 +134,7 @@ The number of unique pages viewed across all sites.
 
 ### m365.sharepoint.site.storage.count
 
-The amount of storage used by all sites across the Sharepoint.
+The amount of storage used by all sites across SharePoint in the last 7 days.
 
 | Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
 | ---- | ----------- | ---------- | ----------------------- | --------- |
@@ -142,7 +142,7 @@ The amount of storage used by all sites across the Sharepoint.
 
 ### m365.sharepoint.sites.active.count
 
-The number of active sites across the Sharepoint.
+The number of active sites across SharePoint in the last 7 days.
 
 | Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
 | ---- | ----------- | ---------- | ----------------------- | --------- |
@@ -150,7 +150,7 @@ The number of active sites across the Sharepoint.
 
 ### m365.teams.calls.count
 
-The number of MS Teams calls from users in the organization.
+The number of MS Teams calls from users in the organization in the last 7 days.
 
 | Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
 | ---- | ----------- | ---------- | ----------------------- | --------- |
@@ -158,7 +158,7 @@ The number of MS Teams calls from users in the organization.
 
 ### m365.teams.device_usage.count
 
-The number of unique users by device/platform that have used Teams.
+The number of unique users by device/platform that have used Teams in the last 7 days.
 
 | Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
 | ---- | ----------- | ---------- | ----------------------- | --------- |
@@ -172,7 +172,7 @@ The number of unique users by device/platform that have used Teams.
 
 ### m365.teams.meetings.count
 
-The number of MS Teams meetings for users in the organization.
+The number of MS Teams meetings for users in the organization in the last 7 days.
 
 | Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
 | ---- | ----------- | ---------- | ----------------------- | --------- |
@@ -180,7 +180,7 @@ The number of MS Teams meetings for users in the organization.
 
 ### m365.teams.message.team.count
 
-The number of MS Teams team-messages sent by users in the organization.
+The number of MS Teams team-messages sent by users in the organization in the last 7 days.
 
 | Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
 | ---- | ----------- | ---------- | ----------------------- | --------- |
@@ -188,7 +188,7 @@ The number of MS Teams team-messages sent by users in the organization.
 
 ### m365.teams.messages.private.count
 
-The number of MS Teams private-messages sent by users in the organization.
+The number of MS Teams private-messages sent by users in the organization in the last 7 days.
 
 | Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
 | ---- | ----------- | ---------- | ----------------------- | --------- |

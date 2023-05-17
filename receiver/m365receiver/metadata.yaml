@@ -34,7 +34,7 @@ attributes:
 metrics:
   m365.sharepoint.files.count:
     enabled: true
-    description: The number of total files across all sites.
+    description: The number of total files across all sites in the last 7 days.
     unit: "{files}"
     sum:
       value_type: int
@@ -43,7 +43,7 @@ metrics:
     attributes: []
   m365.sharepoint.files.active.count:
     enabled: true
-    description: The number of active files across all sites.
+    description: The number of active files across all sites in the last 7 days.
     unit: "{files}"
     sum:
       value_type: int
@@ -52,7 +52,7 @@ metrics:
     attributes: []
   m365.sharepoint.sites.active.count:
     enabled: true
-    description: The number of active sites across the Sharepoint.
+    description: The number of active sites across SharePoint in the last 7 days.
     unit: "{files}"
     sum:
       value_type: int
@@ -61,7 +61,7 @@ metrics:
     attributes: []
   m365.sharepoint.pages.viewed.count:
     enabled: true
-    description: The number of unique pages viewed across all sites.
+    description: The number of unique pages viewed across all sites in the last 7 days.
     unit: "{pages}"
     sum:
       value_type: int
@@ -70,7 +70,7 @@ metrics:
     attributes: []
   m365.sharepoint.pages.unique.count:
     enabled: true
-    description: The number of unique views of pages across all sites.
+    description: The number of unique views of pages across all sites in the last 7 days.
     unit: "{views}"
     sum:
       value_type: int
@@ -79,7 +79,7 @@ metrics:
     attributes: []
   m365.sharepoint.site.storage.count:
     enabled: true
-    description: The amount of storage used by all sites across the Sharepoint.
+    description: The amount of storage used by all sites across SharePoint in the last 7 days.
     unit: By
     sum:
       value_type: int
@@ -88,7 +88,7 @@ metrics:
     attributes: []
   m365.teams.device_usage.count:
     enabled: true
-    description: The number of unique users by device/platform that have used Teams.
+    description: The number of unique users by device/platform that have used Teams in the last 7 days.
     unit: "{users}"
     sum:
       value_type: int
@@ -97,7 +97,7 @@ metrics:
     attributes: [teamsDevices]
   m365.teams.calls.count:
     enabled: true
-    description: The number of MS Teams calls from users in the organization.
+    description: The number of MS Teams calls from users in the organization in the last 7 days.
     unit: "{calls}"
     sum:
       value_type: int
@@ -106,7 +106,7 @@ metrics:
     attributes: []
   m365.teams.meetings.count:
     enabled: true
-    description: The number of MS Teams meetings for users in the organization.
+    description: The number of MS Teams meetings for users in the organization in the last 7 days.
     unit: "{meetings}"
     sum:
       value_type: int
@@ -115,7 +115,7 @@ metrics:
     attributes: []
   m365.teams.message.team.count:
     enabled: true
-    description: The number of MS Teams team-messages sent by users in the organization.
+    description: The number of MS Teams team-messages sent by users in the organization in the last 7 days.
     unit: "{messages}"
     sum:
       value_type: int
@@ -124,7 +124,7 @@ metrics:
     attributes: []
   m365.teams.messages.private.count:
     enabled: true
-    description: The number of MS Teams private-messages sent by users in the organization.
+    description: The number of MS Teams private-messages sent by users in the organization in the last 7 days.
     unit: "{messages}"
     sum:
       value_type: int
@@ -133,7 +133,7 @@ metrics:
     attributes: []
   m365.onedrive.files.count:
     enabled: true
-    description: The number of total files across the OneDrive.
+    description: The number of total files across the OneDrive for the last 7 days.
     unit: "{files}"
     sum:
       value_type: int
@@ -142,7 +142,7 @@ metrics:
     attributes: []
   m365.onedrive.files.active.count:
     enabled: true
-    description: The number of active files across the OneDrive.
+    description: The number of active files across the OneDrive in the last 7 days.
     unit: "{files}"
     sum:
       value_type: int
@@ -151,7 +151,7 @@ metrics:
     attributes: []
   m365.onedrive.user_activity.count:
     enabled: true
-    description: The number of users who have interacted with a OneDrive file, by action.
+    description: The number of users who have interacted with a OneDrive file, by action, in the last 7 days.
     unit: "{users}"
     sum:
       value_type: int
@@ -160,7 +160,7 @@ metrics:
     attributes: [onedriveActivity]
   m365.outlook.mailboxes.active.count:
     enabled: true
-    description: The number of mailboxes that have been active each day in the organization.
+    description: The number of mailboxes that have been active each day in the organization for the last 7 days.
     unit: "{mailboxes}"
     sum:
       value_type: int
@@ -178,7 +178,7 @@ metrics:
     attributes: [outlookActivity]
   m365.outlook.storage.count:
     enabled: true
-    description: The amount of storage used in Outlook by the organization.
+    description: The amount of storage used in Outlook by the organization in the last 7 days.
     unit: By
     sum:
       value_type: int
@@ -187,7 +187,7 @@ metrics:
     attributes: []
   m365.outlook.app.user.count:
     enabled: true
-    description: The number of unique users per app over the period of time in the organization Outlook.
+    description: The number of unique users per app over the period of time in the organization Outlook in the last 7 days.
     unit: "{users}"
     sum:
       value_type: int
@@ -196,7 +196,7 @@ metrics:
     attributes: [outlookApps]
   m365.outlook.quota_status.count:
     enabled: true
-    description: The number of mailboxes in the various quota statuses over the period of time in the org.
+    description: The number of mailboxes in the various quota statuses over the period of time in the org in the last 7 days.
     unit: "{mailboxes}"
     sum:
       value_type: int

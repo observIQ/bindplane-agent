@@ -164,7 +164,7 @@ func TestMetricsBuilder(t *testing.T) {
 					validatedMetrics["m365.onedrive.files.active.count"] = true
 					assert.Equal(t, pmetric.MetricTypeSum, ms.At(i).Type())
 					assert.Equal(t, 1, ms.At(i).Sum().DataPoints().Len())
-					assert.Equal(t, "The number of active files across the OneDrive.", ms.At(i).Description())
+					assert.Equal(t, "The number of active files across the OneDrive in the last 7 days.", ms.At(i).Description())
 					assert.Equal(t, "{files}", ms.At(i).Unit())
 					assert.Equal(t, false, ms.At(i).Sum().IsMonotonic())
 					assert.Equal(t, pmetric.AggregationTemporalityCumulative, ms.At(i).Sum().AggregationTemporality())
@@ -178,7 +178,7 @@ func TestMetricsBuilder(t *testing.T) {
 					validatedMetrics["m365.onedrive.files.count"] = true
 					assert.Equal(t, pmetric.MetricTypeSum, ms.At(i).Type())
 					assert.Equal(t, 1, ms.At(i).Sum().DataPoints().Len())
-					assert.Equal(t, "The number of total files across the OneDrive.", ms.At(i).Description())
+					assert.Equal(t, "The number of total files across the OneDrive for the last 7 days.", ms.At(i).Description())
 					assert.Equal(t, "{files}", ms.At(i).Unit())
 					assert.Equal(t, false, ms.At(i).Sum().IsMonotonic())
 					assert.Equal(t, pmetric.AggregationTemporalityCumulative, ms.At(i).Sum().AggregationTemporality())
@@ -192,7 +192,7 @@ func TestMetricsBuilder(t *testing.T) {
 					validatedMetrics["m365.onedrive.user_activity.count"] = true
 					assert.Equal(t, pmetric.MetricTypeSum, ms.At(i).Type())
 					assert.Equal(t, 1, ms.At(i).Sum().DataPoints().Len())
-					assert.Equal(t, "The number of users who have interacted with a OneDrive file, by action.", ms.At(i).Description())
+					assert.Equal(t, "The number of users who have interacted with a OneDrive file, by action, in the last 7 days.", ms.At(i).Description())
 					assert.Equal(t, "{users}", ms.At(i).Unit())
 					assert.Equal(t, false, ms.At(i).Sum().IsMonotonic())
 					assert.Equal(t, pmetric.AggregationTemporalityCumulative, ms.At(i).Sum().AggregationTemporality())
@@ -209,7 +209,7 @@ func TestMetricsBuilder(t *testing.T) {
 					validatedMetrics["m365.outlook.app.user.count"] = true
 					assert.Equal(t, pmetric.MetricTypeSum, ms.At(i).Type())
 					assert.Equal(t, 1, ms.At(i).Sum().DataPoints().Len())
-					assert.Equal(t, "The number of unique users per app over the period of time in the organization Outlook.", ms.At(i).Description())
+					assert.Equal(t, "The number of unique users per app over the period of time in the organization Outlook in the last 7 days.", ms.At(i).Description())
 					assert.Equal(t, "{users}", ms.At(i).Unit())
 					assert.Equal(t, false, ms.At(i).Sum().IsMonotonic())
 					assert.Equal(t, pmetric.AggregationTemporalityCumulative, ms.At(i).Sum().AggregationTemporality())
@@ -243,7 +243,7 @@ func TestMetricsBuilder(t *testing.T) {
 					validatedMetrics["m365.outlook.mailboxes.active.count"] = true
 					assert.Equal(t, pmetric.MetricTypeSum, ms.At(i).Type())
 					assert.Equal(t, 1, ms.At(i).Sum().DataPoints().Len())
-					assert.Equal(t, "The number of mailboxes that have been active each day in the organization.", ms.At(i).Description())
+					assert.Equal(t, "The number of mailboxes that have been active each day in the organization for the last 7 days.", ms.At(i).Description())
 					assert.Equal(t, "{mailboxes}", ms.At(i).Unit())
 					assert.Equal(t, false, ms.At(i).Sum().IsMonotonic())
 					assert.Equal(t, pmetric.AggregationTemporalityCumulative, ms.At(i).Sum().AggregationTemporality())
@@ -257,7 +257,7 @@ func TestMetricsBuilder(t *testing.T) {
 					validatedMetrics["m365.outlook.quota_status.count"] = true
 					assert.Equal(t, pmetric.MetricTypeSum, ms.At(i).Type())
 					assert.Equal(t, 1, ms.At(i).Sum().DataPoints().Len())
-					assert.Equal(t, "The number of mailboxes in the various quota statuses over the period of time in the org.", ms.At(i).Description())
+					assert.Equal(t, "The number of mailboxes in the various quota statuses over the period of time in the org in the last 7 days.", ms.At(i).Description())
 					assert.Equal(t, "{mailboxes}", ms.At(i).Unit())
 					assert.Equal(t, false, ms.At(i).Sum().IsMonotonic())
 					assert.Equal(t, pmetric.AggregationTemporalityCumulative, ms.At(i).Sum().AggregationTemporality())
@@ -274,7 +274,7 @@ func TestMetricsBuilder(t *testing.T) {
 					validatedMetrics["m365.outlook.storage.count"] = true
 					assert.Equal(t, pmetric.MetricTypeSum, ms.At(i).Type())
 					assert.Equal(t, 1, ms.At(i).Sum().DataPoints().Len())
-					assert.Equal(t, "The amount of storage used in Outlook by the organization.", ms.At(i).Description())
+					assert.Equal(t, "The amount of storage used in Outlook by the organization in the last 7 days.", ms.At(i).Description())
 					assert.Equal(t, "By", ms.At(i).Unit())
 					assert.Equal(t, false, ms.At(i).Sum().IsMonotonic())
 					assert.Equal(t, pmetric.AggregationTemporalityCumulative, ms.At(i).Sum().AggregationTemporality())
@@ -288,7 +288,7 @@ func TestMetricsBuilder(t *testing.T) {
 					validatedMetrics["m365.sharepoint.files.active.count"] = true
 					assert.Equal(t, pmetric.MetricTypeSum, ms.At(i).Type())
 					assert.Equal(t, 1, ms.At(i).Sum().DataPoints().Len())
-					assert.Equal(t, "The number of active files across all sites.", ms.At(i).Description())
+					assert.Equal(t, "The number of active files across all sites in the last 7 days.", ms.At(i).Description())
 					assert.Equal(t, "{files}", ms.At(i).Unit())
 					assert.Equal(t, false, ms.At(i).Sum().IsMonotonic())
 					assert.Equal(t, pmetric.AggregationTemporalityCumulative, ms.At(i).Sum().AggregationTemporality())
@@ -302,7 +302,7 @@ func TestMetricsBuilder(t *testing.T) {
 					validatedMetrics["m365.sharepoint.files.count"] = true
 					assert.Equal(t, pmetric.MetricTypeSum, ms.At(i).Type())
 					assert.Equal(t, 1, ms.At(i).Sum().DataPoints().Len())
-					assert.Equal(t, "The number of total files across all sites.", ms.At(i).Description())
+					assert.Equal(t, "The number of total files across all sites in the last 7 days.", ms.At(i).Description())
 					assert.Equal(t, "{files}", ms.At(i).Unit())
 					assert.Equal(t, false, ms.At(i).Sum().IsMonotonic())
 					assert.Equal(t, pmetric.AggregationTemporalityCumulative, ms.At(i).Sum().AggregationTemporality())
@@ -316,7 +316,7 @@ func TestMetricsBuilder(t *testing.T) {
 					validatedMetrics["m365.sharepoint.pages.unique.count"] = true
 					assert.Equal(t, pmetric.MetricTypeSum, ms.At(i).Type())
 					assert.Equal(t, 1, ms.At(i).Sum().DataPoints().Len())
-					assert.Equal(t, "The number of unique views of pages across all sites.", ms.At(i).Description())
+					assert.Equal(t, "The number of unique views of pages across all sites in the last 7 days.", ms.At(i).Description())
 					assert.Equal(t, "{views}", ms.At(i).Unit())
 					assert.Equal(t, false, ms.At(i).Sum().IsMonotonic())
 					assert.Equal(t, pmetric.AggregationTemporalityCumulative, ms.At(i).Sum().AggregationTemporality())
@@ -330,7 +330,7 @@ func TestMetricsBuilder(t *testing.T) {
 					validatedMetrics["m365.sharepoint.pages.viewed.count"] = true
 					assert.Equal(t, pmetric.MetricTypeSum, ms.At(i).Type())
 					assert.Equal(t, 1, ms.At(i).Sum().DataPoints().Len())
-					assert.Equal(t, "The number of unique pages viewed across all sites.", ms.At(i).Description())
+					assert.Equal(t, "The number of unique pages viewed across all sites in the last 7 days.", ms.At(i).Description())
 					assert.Equal(t, "{pages}", ms.At(i).Unit())
 					assert.Equal(t, false, ms.At(i).Sum().IsMonotonic())
 					assert.Equal(t, pmetric.AggregationTemporalityCumulative, ms.At(i).Sum().AggregationTemporality())
@@ -344,7 +344,7 @@ func TestMetricsBuilder(t *testing.T) {
 					validatedMetrics["m365.sharepoint.site.storage.count"] = true
 					assert.Equal(t, pmetric.MetricTypeSum, ms.At(i).Type())
 					assert.Equal(t, 1, ms.At(i).Sum().DataPoints().Len())
-					assert.Equal(t, "The amount of storage used by all sites across the Sharepoint.", ms.At(i).Description())
+					assert.Equal(t, "The amount of storage used by all sites across SharePoint in the last 7 days.", ms.At(i).Description())
 					assert.Equal(t, "By", ms.At(i).Unit())
 					assert.Equal(t, false, ms.At(i).Sum().IsMonotonic())
 					assert.Equal(t, pmetric.AggregationTemporalityCumulative, ms.At(i).Sum().AggregationTemporality())
@@ -358,7 +358,7 @@ func TestMetricsBuilder(t *testing.T) {
 					validatedMetrics["m365.sharepoint.sites.active.count"] = true
 					assert.Equal(t, pmetric.MetricTypeSum, ms.At(i).Type())
 					assert.Equal(t, 1, ms.At(i).Sum().DataPoints().Len())
-					assert.Equal(t, "The number of active sites across the Sharepoint.", ms.At(i).Description())
+					assert.Equal(t, "The number of active sites across SharePoint in the last 7 days.", ms.At(i).Description())
 					assert.Equal(t, "{files}", ms.At(i).Unit())
 					assert.Equal(t, false, ms.At(i).Sum().IsMonotonic())
 					assert.Equal(t, pmetric.AggregationTemporalityCumulative, ms.At(i).Sum().AggregationTemporality())
@@ -372,7 +372,7 @@ func TestMetricsBuilder(t *testing.T) {
 					validatedMetrics["m365.teams.calls.count"] = true
 					assert.Equal(t, pmetric.MetricTypeSum, ms.At(i).Type())
 					assert.Equal(t, 1, ms.At(i).Sum().DataPoints().Len())
-					assert.Equal(t, "The number of MS Teams calls from users in the organization.", ms.At(i).Description())
+					assert.Equal(t, "The number of MS Teams calls from users in the organization in the last 7 days.", ms.At(i).Description())
 					assert.Equal(t, "{calls}", ms.At(i).Unit())
 					assert.Equal(t, false, ms.At(i).Sum().IsMonotonic())
 					assert.Equal(t, pmetric.AggregationTemporalityCumulative, ms.At(i).Sum().AggregationTemporality())
@@ -386,7 +386,7 @@ func TestMetricsBuilder(t *testing.T) {
 					validatedMetrics["m365.teams.device_usage.count"] = true
 					assert.Equal(t, pmetric.MetricTypeSum, ms.At(i).Type())
 					assert.Equal(t, 1, ms.At(i).Sum().DataPoints().Len())
-					assert.Equal(t, "The number of unique users by device/platform that have used Teams.", ms.At(i).Description())
+					assert.Equal(t, "The number of unique users by device/platform that have used Teams in the last 7 days.", ms.At(i).Description())
 					assert.Equal(t, "{users}", ms.At(i).Unit())
 					assert.Equal(t, false, ms.At(i).Sum().IsMonotonic())
 					assert.Equal(t, pmetric.AggregationTemporalityCumulative, ms.At(i).Sum().AggregationTemporality())
@@ -403,7 +403,7 @@ func TestMetricsBuilder(t *testing.T) {
 					validatedMetrics["m365.teams.meetings.count"] = true
 					assert.Equal(t, pmetric.MetricTypeSum, ms.At(i).Type())
 					assert.Equal(t, 1, ms.At(i).Sum().DataPoints().Len())
-					assert.Equal(t, "The number of MS Teams meetings for users in the organization.", ms.At(i).Description())
+					assert.Equal(t, "The number of MS Teams meetings for users in the organization in the last 7 days.", ms.At(i).Description())
 					assert.Equal(t, "{meetings}", ms.At(i).Unit())
 					assert.Equal(t, false, ms.At(i).Sum().IsMonotonic())
 					assert.Equal(t, pmetric.AggregationTemporalityCumulative, ms.At(i).Sum().AggregationTemporality())
@@ -417,7 +417,7 @@ func TestMetricsBuilder(t *testing.T) {
 					validatedMetrics["m365.teams.message.team.count"] = true
 					assert.Equal(t, pmetric.MetricTypeSum, ms.At(i).Type())
 					assert.Equal(t, 1, ms.At(i).Sum().DataPoints().Len())
-					assert.Equal(t, "The number of MS Teams team-messages sent by users in the organization.", ms.At(i).Description())
+					assert.Equal(t, "The number of MS Teams team-messages sent by users in the organization in the last 7 days.", ms.At(i).Description())
 					assert.Equal(t, "{messages}", ms.At(i).Unit())
 					assert.Equal(t, false, ms.At(i).Sum().IsMonotonic())
 					assert.Equal(t, pmetric.AggregationTemporalityCumulative, ms.At(i).Sum().AggregationTemporality())
@@ -431,7 +431,7 @@ func TestMetricsBuilder(t *testing.T) {
 					validatedMetrics["m365.teams.messages.private.count"] = true
 					assert.Equal(t, pmetric.MetricTypeSum, ms.At(i).Type())
 					assert.Equal(t, 1, ms.At(i).Sum().DataPoints().Len())
-					assert.Equal(t, "The number of MS Teams private-messages sent by users in the organization.", ms.At(i).Description())
+					assert.Equal(t, "The number of MS Teams private-messages sent by users in the organization in the last 7 days.", ms.At(i).Description())
 					assert.Equal(t, "{messages}", ms.At(i).Unit())
 					assert.Equal(t, false, ms.At(i).Sum().IsMonotonic())
 					assert.Equal(t, pmetric.AggregationTemporalityCumulative, ms.At(i).Sum().AggregationTemporality())
