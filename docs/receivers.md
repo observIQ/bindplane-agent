@@ -38,7 +38,6 @@ Below is a list of supported receivers with links to their documentation pages.
 | Kafka Receiver                              | [kafkareceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.77.0/receiver/kafkareceiver/README.md) |
 | Kafka Metrics Receiver                      | [kafkametricsreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.77.0/receiver/kafkametricsreceiver/README.md) |
 | Memcached Receiver                          | [memcachedreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.77.0/receiver/memcachedreceiver/README.md) |
-| Microsoft .NET Process Diagnostics Receiver | [dotnetdiagnosticsreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.77.0/receiver/dotnetdiagnosticsreceiver/README.md) |
 | Microsoft IIS Receiver                      | [iisreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.77.0/receiver/iisreceiver/README.md) |
 | Microsoft SQL Server Receiver               | [sqlserverreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.77.0/receiver/sqlserverreceiver/README.md) |
 | MongoDB Receiver                            | [mongodbreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.77.0/receiver/mongodbreceiver/README.md) |
