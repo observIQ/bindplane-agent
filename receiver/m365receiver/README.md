@@ -17,7 +17,7 @@ It's recommended to begin with the Office 365 instance since the receiver needs 
 
 ### Configuring Office 365
 The steps below outline how to configure Office 365 to allow the receiver to collect metrics from it. 
-To use this receiver, the instance of Office 365 needs the following subscriptions: **Microsoft 365 Business Basic**, **Microsoft 365 E5 Compliance** or **Microsoft 365 E3**.
+To use this receiver, the instance of Office 365 needs the following subscriptions: **Microsoft 365 Business Basic**, **Microsoft 365 E5 Compliance**, and **Microsoft 365 E3**. (Works with the respective "upgraded" versions as well.)
 
 1. **Login to Azure:** Log in to Microsoft Azure under an Admin account for the instance of 365 to be monitored.
 2. **Register the receiver in Azure AD:** Navigate to Azure Active Directory. Then go to "App Registrations" and select "New Registration". 
@@ -27,7 +27,15 @@ Give the app a descriptive name like "365 Receiver". For "Supported account type
     - **Logs:** Select "Office 365 Management APIs", then "Application Permissions". Now select the "ActivityFeed.Read", "ActivityFeed.ReadDlp", and "ServiceHealth.Read" permissions. Click "Add Permissions" at the bottom of the panel.
 4. **Grant Admin Consent:** Select the "Grant admin consent for {organization}" button and confirm the pop-up. This will allow the application to access the data returned by the Microsoft Graph and Office 365 Management APIs.
 5. **Generate Client Secret:** Select the "Certificates & secrets" tab in the left panel. Under the "Client Secrets" tab, select "New Client Secret." Give it a meaningful description and select the recommended period of 180 days. Save the text in the "Value" column since this is the only time that value will be accessible.
+    - **Note:** The receiver will need to be reconfigured with a newly generated Client Secret once the initial one expires.
 6. **Save Client ID and Tenant ID values:** You will also need the "client_id" value found on the information page for the application that was created. The value will be listed as "Application (client) id." You will also need the tenant value which will be listed as "Directory (tenant) id." Save these values for later.
+
+**Note: The first time an instance of Microsoft Office 365 is set up for monitoring, an extra step for collecting logs is required.**
+1. Log into [Microsoft Purview Compliance Portal](https://compliance.microsoft.com) with an admin account.
+2. Navigate to "Solutions" then ["Audit"](https://compliance.microsoft.com/auditlogsearch).
+3. If auditing is not turned on for your organization, a banner is displayed prompting you start recording user and admin activity.
+4. Select "Start recording user and admin activity".
+**It will take up to 60 minutes for the change to take effect, so until that point do not run the receiver with logs turned on or else it will fail.**
 
 After following the above steps, the instance of Microsoft Office 365 is ready for monitoring and the receiver can now be configured.
 
