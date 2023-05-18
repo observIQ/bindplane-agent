@@ -312,8 +312,12 @@ func parseOptionalAttributes(m *pcommon.Map, log *jsonLogs) {
 		m.PutStr("exchange.mailbox.id", log.ExchangeMailboxGUID)
 	}
 	if log.AzureActor != nil {
-		m.PutStr("azure.actor.id", log.AzureActor.ID)
-		m.PutStr("azure.actor.type", matchAzureUserType(log.AzureActor.Type))
+		slice := m.PutEmptySlice("azure.actors")
+		aMap := slice.AppendEmpty().SetEmptyMap()
+		for _, r := range *log.AzureActor {
+			aMap.PutStr("actor.id", r.ID)
+			aMap.PutStr("actor.type", matchAzureUserType(r.Type))
+		}
 	}
 	if log.DLPSharePointMetaData != nil {
 		m.PutStr("dlp.sharepoint.user", log.DLPSharePointMetaData.From)
@@ -322,8 +326,12 @@ func parseOptionalAttributes(m *pcommon.Map, log *jsonLogs) {
 		m.PutStr("dlp.exchange.message.id", log.DLPExchangeMetaData.MessageID)
 	}
 	if log.DLPPolicyDetails != nil {
-		m.PutStr("dlp.policy_details.policy.id", log.DLPPolicyDetails.PolicyID)
-		m.PutStr("dlp.policy_details.policy.name", log.DLPPolicyDetails.PolicyName)
+		slice := m.PutEmptySlice("dlp.policy_details")
+		aMap := slice.AppendEmpty().SetEmptyMap()
+		for _, r := range *log.DLPPolicyDetails {
+			aMap.PutStr("policy.id", r.PolicyID)
+			aMap.PutStr("policy.name", r.PolicyName)
+		}
 	}
 	if log.SecurityAlertID != "" {
 		m.PutStr("security.alert.id", log.SecurityAlertID)
@@ -336,7 +344,11 @@ func parseOptionalAttributes(m *pcommon.Map, log *jsonLogs) {
 		m.PutStr("yammer.file.id", strconv.Itoa(*log.YammerFileID))
 	}
 	if log.DefenderEmail != nil {
-		m.PutStr("defender.email.attachment", log.DefenderEmail.FileName)
+		slice := m.PutEmptySlice("defender.email.attachments")
+		aMap := slice.AppendEmpty().SetEmptyMap()
+		for _, r := range *log.DefenderEmail {
+			aMap.PutStr("file.name", r.FileName)
+		}
 	}
 	if recordType == "ThreatIntelligenceUrl" {
 		m.PutStr("defender.url.url", log.DefenderURL)

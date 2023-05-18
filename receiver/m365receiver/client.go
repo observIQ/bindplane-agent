@@ -76,15 +76,15 @@ type jsonLogs struct {
 	SharepointSite           string              `json:"Site,omitempty"`
 	SharepointSourceFileName string              `json:"SourceFileName,omitempty"`
 	ExchangeMailboxGUID      string              `json:"MailboxGuid,omitempty"`
-	AzureActor               *AzureActor         `json:"Actor,omitempty"`
+	AzureActor               *[]AzureActor       `json:"Actor,omitempty"`
 	DLPSharePointMetaData    *SharePointMetaData `json:"SharePointMetaData,omitempty"`
 	DLPExchangeMetaData      *ExchangeMetaData   `json:"ExchangeMetaData,omitempty"`
-	DLPPolicyDetails         *PolicyDetails      `json:"PolicyDetails,omitempty"`
+	DLPPolicyDetails         *[]PolicyDetails    `json:"PolicyDetails,omitempty"`
 	SecurityAlertID          string              `json:"AlertId,omitempty"`
 	SecurityAlertName        string              `json:"Name,omitempty"` // conflict with teams and investigation DONE-combine
 	YammerActorID            string              `json:"ActorUserId,omitempty"`
 	YammerFileID             *int                `json:"FileId,omitempty"`
-	DefenderEmail            *AttachmentData     `json:"AttachmentData,omitempty"`
+	DefenderEmail            *[]AttachmentData   `json:"AttachmentData,omitempty"`
 	DefenderURL              string              `json:"URL,omitempty"` // conflict with investigation DONE-recordType
 	DefenderFile             *FileData           `json:"FileData,omitempty"`
 	DefenderFileSource       *int                `json:"SourceWorkload,omitempty"`
