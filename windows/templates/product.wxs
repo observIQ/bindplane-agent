@@ -66,7 +66,7 @@
       </SetProperty>
 
       <!-- Set command prompt -->
-      <SetProperty Id="CMDEXE" Value="[%SystemRoot%]\system32\cmd.exe"/>
+      <SetProperty Id="CMDEXE" Value="[%SystemRoot%]\system32\cmd.exe" Before="CostInitialize"/>
         
 
       <Directory Id="TARGETDIR" Name="SourceDir">
