@@ -178,7 +178,7 @@ func newMockServerCSV() *httptest.Server {
 
 func newMockServerJSON() *httptest.Server {
 	return httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
-		if req.URL.String() == "/testJSON" {
+		if req.URL.Path == "/testJSON" {
 			if req.Method != "GET" {
 				rw.WriteHeader(405)
 				rw.Write([]byte("error, incorrect HTTP method"))
@@ -228,6 +228,7 @@ func newMockServerJSON() *httptest.Server {
 				]`,
 			))
 		}
+		rw.WriteHeader(404)
 	}))
 }
 
