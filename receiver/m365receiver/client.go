@@ -81,29 +81,29 @@ type jsonLogs struct {
 	DLPExchangeMetaData      *ExchangeMetaData   `json:"ExchangeMetaData,omitempty"`
 	DLPPolicyDetails         *[]PolicyDetails    `json:"PolicyDetails,omitempty"`
 	SecurityAlertID          string              `json:"AlertId,omitempty"`
-	SecurityAlertName        string              `json:"Name,omitempty"` // conflict with teams and investigation DONE-combine
+	SecurityAlertName        string              `json:"Name,omitempty"`
 	YammerActorID            string              `json:"ActorUserId,omitempty"`
 	YammerFileID             *int                `json:"FileId,omitempty"`
 	DefenderEmail            *[]AttachmentData   `json:"AttachmentData,omitempty"`
-	DefenderURL              string              `json:"URL,omitempty"` // conflict with investigation DONE-recordType
+	DefenderURL              string              `json:"URL,omitempty"`
 	DefenderFile             *FileData           `json:"FileData,omitempty"`
 	DefenderFileSource       *int                `json:"SourceWorkload,omitempty"`
 	InvestigationID          string              `json:"InvestigationId,omitempty"`
 	InvestigationStatus      string              `json:"Status,omitempty"`
-	PowerAppName             string              `json:"AppName,omitempty"` // conflict with defender DONE-recordType
+	PowerAppName             string              `json:"AppName,omitempty"`
 	DynamicsEntityID         string              `json:"EntityId,omitempty"`
 	DynamicsEntityName       string              `json:"EntityName,omitempty"`
 	QuarantineSource         *int                `json:"RequestSource,omitempty"`
 	FormID                   string              `json:"FormId,omitempty"`
 	MIPLabelID               string              `json:"LabelId,omitempty"`
-	EncryptedMessageID       string              `json:"MessageId,omitempty"` //conflicting field name with yammer and teams DONE-recordType
+	EncryptedMessageID       string              `json:"MessageId,omitempty"`
 	CommCompliance           *ExchangeDetails    `json:"ExchangeDetails,omitempty"`
 	ConnectorJobID           string              `json:"JobId,omitempty"`
-	ConnectorTaskID          string              `json:"TaskId,omitempty"` //conflict with MS web DONE-combine
+	ConnectorTaskID          string              `json:"TaskId,omitempty"`
 	DataShareInvitation      *Invitation         `json:"Invitation,omitempty"`
-	MSGraphConsentAppID      string              `json:"ApplicationId,omitempty"` //lots of conflicts DONE-recordType
+	MSGraphConsentAppID      string              `json:"ApplicationId,omitempty"`
 	VivaGoalsUsername        string              `json:"Username,omitempty"`
-	VivaGoalsOrgName         string              `json:"OrganizationName,omitempty"` //conflicts DONE-combine
+	VivaGoalsOrgName         string              `json:"OrganizationName,omitempty"`
 	MSToDoAppID              string              `json:"ActorAppId,omitempty"`
 	MSToDoItemID             string              `json:"ItemID,omitempty"`
 	MSWebProjectID           string              `json:"ProjectId,omitempty"`
@@ -288,13 +288,18 @@ func (m *m365Client) GetCSV(endpoint string) ([]string, error) {
 }
 
 // function for getting log data
-func (m *m365Client) GetJSON(ctx context.Context, endpoint string) (logData, error) {
+func (m *m365Client) GetJSON(ctx context.Context, endpoint string, end string, start string) (logData, error) {
 	// make request to Audit endpoint
 	req, err := http.NewRequestWithContext(ctx, "GET", endpoint, nil)
 	if err != nil {
 		return logData{}, err
 	}
 	req.Header.Set("Authorization", "Bearer "+m.token)
+	q := req.URL.Query()
+	q.Add("startTime", start)
+	q.Add("endTime", end)
+	req.URL.RawQuery = q.Encode()
+
 	resp, err := m.client.Do(req)
 	if err != nil {
 		return logData{}, err

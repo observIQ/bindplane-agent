@@ -26,9 +26,3 @@ release_deps
 collector*.yaml
 manager*.yaml
 logging*.yaml
-
-#m365recv dev files
-m365metricsconfig.yaml
-m365logsconfig.yaml
-out.json
-

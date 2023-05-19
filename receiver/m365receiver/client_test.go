@@ -98,7 +98,7 @@ func TestGetJSON(t *testing.T) {
 	testClient.token = "foo"
 
 	//expected behavior
-	testJSON, err := testClient.GetJSON(context.Background(), m365Mock.URL+"/testJSON")
+	testJSON, err := testClient.GetJSON(context.Background(), m365Mock.URL+"/testJSON", "", "")
 	require.NoError(t, err)
 	expectedJSON := []jsonLogs{
 		{
@@ -115,7 +115,7 @@ func TestGetJSON(t *testing.T) {
 
 	// bad token
 	testClient.token = "bad"
-	testJSON, err = testClient.GetJSON(context.Background(), m365Mock.URL+"/testJSON")
+	testJSON, err = testClient.GetJSON(context.Background(), m365Mock.URL+"/testJSON", "", "")
 	require.EqualError(t, err, "authorization denied")
 }
 

@@ -38,7 +38,7 @@ const (
 )
 
 type lClient interface {
-	GetJSON(ctx context.Context, endpoint string) (logData, error)
+	GetJSON(ctx context.Context, endpoint string, end string, start string) (logData, error)
 	GetToken() error
 	StartSubscription(endpoint string) error
 	shutdown() error
@@ -165,14 +165,19 @@ func (l *m365LogsReceiver) startPolling(ctx context.Context) error {
 
 // spins a go routine for each audit type/endpoint
 func (l *m365LogsReceiver) pollLogs(ctx context.Context) error {
-	st := pcommon.NewTimestampFromTime(time.Now().Add(-l.pollInterval)).AsTime().Format(layout)
-	now := time.Now()
+	var st string
+	if l.record.NextStartTime != nil {
+		st = l.record.NextStartTime.Format(layout)
+	} else {
+		st = pcommon.NewTimestampFromTime(time.Now().Add(-l.pollInterval)).AsTime().UTC().Format(layout)
+	}
+
+	now := time.Now().UTC()
 
 	auditWG := &sync.WaitGroup{}
 	auditWG.Add(5)
 	for i := 0; i < len(l.audits); i++ {
-		endpoint := l.root + l.audits[i].route + fmt.Sprintf("&;startTime=%s&;endTime=%s", st, now.Format(layout))
-		go l.poll(ctx, now, &l.audits[i], endpoint, auditWG)
+		go l.poll(ctx, now, st, &l.audits[i], auditWG)
 	}
 	auditWG.Wait()
 
@@ -181,14 +186,14 @@ func (l *m365LogsReceiver) pollLogs(ctx context.Context) error {
 }
 
 // collects log data from endpoint, transforms logs, consumes logs
-func (l *m365LogsReceiver) poll(ctx context.Context, now time.Time, audit *auditMetaData, endpoint string, wg *sync.WaitGroup) {
+func (l *m365LogsReceiver) poll(ctx context.Context, now time.Time, st string, audit *auditMetaData, wg *sync.WaitGroup) {
 	defer wg.Done()
 	if !audit.enabled {
 		return
 	}
 
 	l.mu.Lock()
-	data, err := l.client.GetJSON(ctx, endpoint)
+	data, err := l.client.GetJSON(ctx, l.root+audit.route, now.Format(layout), st)
 	if err != nil {
 		if err.Error() == "authorization denied" { // troubleshoot stale token
 			l.logger.Debug("possible stale token; attempting to regenerate")
@@ -198,7 +203,7 @@ func (l *m365LogsReceiver) poll(ctx context.Context, now time.Time, audit *audit
 				l.mu.Unlock()
 				return
 			}
-			data, err = l.client.GetJSON(ctx, endpoint)
+			data, err = l.client.GetJSON(ctx, l.root+audit.route, now.Format(layout), st)
 			if err != nil { // not a stale token error, unsure what is wrong
 				l.logger.Error("unable to retrieve logs", zap.Error(err))
 				l.mu.Unlock()
@@ -206,7 +211,7 @@ func (l *m365LogsReceiver) poll(ctx context.Context, now time.Time, audit *audit
 			}
 		} else {
 			l.logger.Error("error retrieving logs", zap.Error(err))
-			l.logger.Error(endpoint)
+			l.logger.Error(audit.route) //debug only
 			l.mu.Unlock()
 			return
 		}
@@ -282,6 +287,7 @@ func (l *m365LogsReceiver) loadCheckpoint(ctx context.Context) {
 
 	if bytes == nil {
 		l.record = &logRecord{}
+		return
 	}
 
 	var record logRecord

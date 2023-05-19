@@ -43,7 +43,7 @@ func TestStartPolling(t *testing.T) {
 	l := newM365Logs(cfg, receivertest.NewNopCreateSettings(), sink)
 	client := &mockLogsClient{}
 	l.client = client
-	client.On("GetJSON", mock.Anything).Return(client.loadTestLogs(t), nil)
+	client.On("GetJSON", mock.Anything, mock.Anything, mock.Anything).Return(client.loadTestLogs(t), nil)
 	cancelCtx, cancel := context.WithCancel(context.Background())
 	l.cancel = cancel
 	l.record = &logRecord{}
@@ -68,7 +68,7 @@ func TestPoll(t *testing.T) {
 	rcv := newM365Logs(cfg, receivertest.NewNopCreateSettings(), sink)
 	client := &mockLogsClient{}
 	rcv.client = client
-	client.On("GetJSON", mock.Anything).Return(client.loadTestLogs(t), nil)
+	client.On("GetJSON", mock.Anything, mock.Anything, mock.Anything).Return(client.loadTestLogs(t), nil)
 	rcv.record = &logRecord{}
 
 	err := rcv.pollLogs(context.Background())
@@ -114,38 +114,38 @@ func TestPollErrHandle(t *testing.T) {
 	rcv.client = client
 
 	// unable to fix token
-	client.On("GetJSON", "Audit.General").Return(logData{}, fmt.Errorf("authorization denied")).Once()
+	client.On("GetJSON", rcv.root+"Audit.General", mock.Anything, mock.Anything).Return(logData{}, fmt.Errorf("authorization denied")).Once()
 	client.On("GetToken").Return(fmt.Errorf("err")).Once()
 	wg.Add(1)
-	rcv.poll(context.Background(), time.Now(), &audit, "Audit.General", wg)
+	rcv.poll(context.Background(), time.Now(), "", &audit, wg)
 	require.Never(t, func() bool {
 		return sink.LogRecordCount() > 0
 	}, 3*time.Second, 1*time.Second)
 
 	// GetJSON still doesn't work
-	client.On("GetJSON", "Audit.General").Return(logData{}, fmt.Errorf("authorization denied")).Once()
+	client.On("GetJSON", rcv.root+"Audit.General", mock.Anything, mock.Anything).Return(logData{}, fmt.Errorf("authorization denied")).Once()
 	client.On("GetToken").Return(nil).Once()
-	client.On("GetJSON", "Audit.General").Return(logData{}, fmt.Errorf("err")).Once()
+	client.On("GetJSON", rcv.root+"Audit.General", mock.Anything, mock.Anything).Return(logData{}, fmt.Errorf("err")).Once()
 	wg.Add(1)
-	rcv.poll(context.Background(), time.Now(), &audit, "Audit.General", wg)
+	rcv.poll(context.Background(), time.Now(), "", &audit, wg)
 	require.Never(t, func() bool {
 		return sink.LogRecordCount() > 0
 	}, 3*time.Second, 1*time.Second)
 
 	// GetJSON never worked
-	client.On("GetJSON", "Audit.General").Return(logData{}, fmt.Errorf("err")).Once()
+	client.On("GetJSON", rcv.root+"Audit.General", mock.Anything, mock.Anything).Return(logData{}, fmt.Errorf("err")).Once()
 	wg.Add(1)
-	rcv.poll(context.Background(), time.Now(), &audit, "Audit.General", wg)
+	rcv.poll(context.Background(), time.Now(), "", &audit, wg)
 	require.Never(t, func() bool {
 		return sink.LogRecordCount() > 0
 	}, 3*time.Second, 1*time.Second)
 
 	// regenerate token works
-	client.On("GetJSON", "Audit.General").Return(logData{}, fmt.Errorf("authorization denied")).Once()
-	client.On("GetJSON", "Audit.General").Return(client.loadTestLogs(t), nil).Once()
+	client.On("GetJSON", rcv.root+"Audit.General", mock.Anything, mock.Anything).Return(logData{}, fmt.Errorf("authorization denied")).Once()
+	client.On("GetJSON", rcv.root+"Audit.General", mock.Anything, mock.Anything).Return(client.loadTestLogs(t), nil).Once()
 	client.On("GetToken").Return(nil).Once()
 	wg.Add(1)
-	rcv.poll(context.Background(), time.Now(), &audit, "Audit.General", wg)
+	rcv.poll(context.Background(), time.Now(), "", &audit, wg)
 	require.Eventually(t, func() bool {
 		return sink.LogRecordCount() > 0
 	}, 5*time.Second, 1*time.Second)
@@ -196,8 +196,8 @@ func (mc *mockLogsClient) loadTestLogs(t *testing.T) logData {
 	return ret
 }
 
-func (mc *mockLogsClient) GetJSON(_ context.Context, endpoint string) (logData, error) {
-	args := mc.Called(endpoint)
+func (mc *mockLogsClient) GetJSON(_ context.Context, endpoint string, end string, start string) (logData, error) {
+	args := mc.Called(endpoint, end, start)
 	return args.Get(0).(logData), args.Error(1)
 }
 
