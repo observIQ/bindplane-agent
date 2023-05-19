@@ -65,18 +65,9 @@
         <![CDATA[NOT INSTALLDIR]]>
       </SetProperty>
 
-      <!-- Load Powershell location -->
-      <Property Id="POWERSHELLEXE">
-          <RegistrySearch Id="POWERSHELLEXE"
-                          Type="raw"
-                          Root="HKLM"
-                          Key="SOFTWARE\Microsoft\PowerShell\1\ShellIds\Microsoft.PowerShell"
-                          Name="Path" />
-      </Property>
-
-      <Condition Message="This application requires Windows PowerShell to be installed.">
-        <![CDATA[POWERSHELLEXE]]>
-      </Condition>
+      <!-- Set command prompt -->
+      <SetProperty Id="CMDEXE" Value="[%SystemRoot%]\system32\cmd.exe">
+        
 
       <Directory Id="TARGETDIR" Name="SourceDir">
 
@@ -202,14 +193,14 @@
 
       <CustomAction Id="CustomExecCreateManagerYaml_set"
               Property="CustomExecCreateManagerYaml"
-              Value="&quot;[POWERSHELLEXE]&quot; -ExecutionPolicy Bypass -NoProfile -Command &quot;&amp; '[INSTALLDIR]install\generate-manager-yaml.ps1' -install_dir '[INSTALLDIR]' -endpoint '[OPAMPENDPOINT]' -secret_key '[OPAMPSECRETKEY]' -labels '[OPAMPLABELS]'&quot;"
+              Value="&quot;[CMDEXE]&quot; /C [INSTALLDIR]install\generate-manager-yaml.bat &quot;[INSTALLDIR]&quot; &quot;[OPAMPENDPOINT]&quot; &quot;[OPAMPSECRETKEY]&quot; &quot;[OPAMPLABELS]&quot;"
               Execute="immediate"/>
 
       <CustomAction Id="CustomExecCreateManagerYaml" BinaryKey="WixCA" DllEntry="WixQuietExec" Execute="deferred" Impersonate="no" Return="check" />
 
       <CustomAction Id="CustomExecRemoveManagerYaml_set"
               Property="CustomExecRemoveManagerYaml"
-              Value="&quot;[POWERSHELLEXE]&quot; -ExecutionPolicy Bypass -NoProfile -Command &quot;Remove-Item -Force -ErrorAction Continue -Path '[INSTALLDIR]manager.yaml'&quot;"
+              Value="&quot;[CMDEXE]&quot; /C del &quot;[INSTALLDIR]manager.yaml&quot;"
               Execute="immediate"/>
 
       <CustomAction Id="CustomExecRemoveManagerYaml" BinaryKey="WixCA" DllEntry="WixQuietExec" Execute="deferred" Impersonate="no" Return="ignore" />
