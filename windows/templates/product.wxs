@@ -193,7 +193,7 @@
 
       <CustomAction Id="CustomExecCreateManagerYaml_set"
               Property="CustomExecCreateManagerYaml"
-              Value="&quot;[CMDEXE]&quot; /C [INSTALLDIR]install\generate-manager-yaml.bat &quot;[INSTALLDIR]&quot; &quot;[OPAMPENDPOINT]&quot; &quot;[OPAMPSECRETKEY]&quot; &quot;[OPAMPLABELS]&quot;"
+              Value="&quot;[CMDEXE]&quot; /C &quot;[INSTALLDIR]install\generate-manager-yaml.bat&quot; &quot;[INSTALLDIR]&quot; &quot;[OPAMPENDPOINT]&quot; &quot;[OPAMPSECRETKEY]&quot; &quot;[OPAMPLABELS]&quot;"
               Execute="immediate"/>
 
       <CustomAction Id="CustomExecCreateManagerYaml" BinaryKey="WixCA" DllEntry="WixQuietExec" Execute="deferred" Impersonate="no" Return="check" />
