@@ -33,7 +33,7 @@ import (
 )
 
 const (
-	logStorageKey = "last_recorded_event"
+	logStorageKey = "last_recorded_log"
 	layout        = "2006-01-02T15:04:05"
 )
 
@@ -175,8 +175,8 @@ func (l *m365LogsReceiver) pollLogs(ctx context.Context) error {
 	now := time.Now().UTC()
 
 	auditWG := &sync.WaitGroup{}
-	auditWG.Add(5)
 	for i := 0; i < len(l.audits); i++ {
+		auditWG.Add(1)
 		go l.poll(ctx, now, st, &l.audits[i], auditWG)
 	}
 	auditWG.Wait()
@@ -192,56 +192,67 @@ func (l *m365LogsReceiver) poll(ctx context.Context, now time.Time, st string, a
 		return
 	}
 
+	data, err := l.getLogs(ctx, now.Format(layout), st, audit)
+	if err != nil {
+		return
+	}
+
+	logs := l.transformLogs(pcommon.NewTimestampFromTime(now), audit, data)
+
+	l.consumerMu.Lock()
+	defer l.consumerMu.Unlock()
+	if logs.LogRecordCount() > 0 {
+		if err = l.consumer.ConsumeLogs(ctx, logs); err != nil {
+			l.logger.Error("error consuming events", zap.Error(err))
+		}
+	}
+}
+
+func (l *m365LogsReceiver) getLogs(ctx context.Context, end string, start string, audit *auditMetaData) (logData, error) {
 	l.mu.Lock()
-	data, err := l.client.GetJSON(ctx, l.root+audit.route, now.Format(layout), st)
+	defer l.mu.Unlock()
+
+	data, err := l.client.GetJSON(ctx, l.root+audit.route, end, start)
 	if err != nil {
 		if err.Error() == "authorization denied" { // troubleshoot stale token
 			l.logger.Debug("possible stale token; attempting to regenerate")
 			err = l.client.GetToken()
 			if err != nil { // something went wrong generating token
 				l.logger.Error("error creating authorization token", zap.Error(err))
-				l.mu.Unlock()
-				return
+				return logData{}, err
 			}
-			data, err = l.client.GetJSON(ctx, l.root+audit.route, now.Format(layout), st)
+			data, err = l.client.GetJSON(ctx, l.root+audit.route, end, start)
 			if err != nil { // not a stale token error, unsure what is wrong
 				l.logger.Error("unable to retrieve logs", zap.Error(err))
-				l.mu.Unlock()
-				return
+				return logData{}, nil
 			}
 		} else {
 			l.logger.Error("error retrieving logs", zap.Error(err))
 			l.logger.Error(audit.route) //debug only
-			l.mu.Unlock()
-			return
+			return logData{}, nil
 		}
 	}
-	l.mu.Unlock()
 
-	logs := l.transformLogs(pcommon.NewTimestampFromTime(now), audit, data)
-
-	l.consumerMu.Lock()
-	if logs.LogRecordCount() > 0 {
-		if err = l.consumer.ConsumeLogs(ctx, logs); err != nil {
-			l.logger.Error("error consuming events", zap.Error(err))
-		}
-	}
-	l.consumerMu.Unlock()
+	return data, nil
 }
 
 // constructs logs from logData
 func (l *m365LogsReceiver) transformLogs(now pcommon.Timestamp, audit *auditMetaData, data logData) plog.Logs {
 	logs := plog.NewLogs()
 	resourceLogs := logs.ResourceLogs().AppendEmpty()
+	scopeLogs := resourceLogs.ScopeLogs().AppendEmpty()
+
 	ra := resourceLogs.Resource().Attributes()
 	ra.PutStr("m365.audit", audit.name)
 	ra.PutStr("m365.organization_id", l.cfg.TenantID)
 
 	for i := 0; i < len(data.logs); i++ {
 		log := data.logs[i]
-		logRecord := resourceLogs.ScopeLogs().AppendEmpty().LogRecords().AppendEmpty()
+		logRecord := scopeLogs.LogRecords().AppendEmpty()
 
 		// log body
+		// add ("C) to the start of all log bodies because that is trimmed off
+		// when separating the log bodies apart in the client func GetJSON
 		logRecord.Body().SetStr("\"C" + data.body[i])
 
 		// timestamp
@@ -261,6 +272,7 @@ func (l *m365LogsReceiver) transformLogs(now pcommon.Timestamp, audit *auditMeta
 		attrs.PutStr("user_id", log.UserID)
 		attrs.PutStr("user_type", matchUserType(log.UserType))
 
+		// optional attributes
 		parseOptionalAttributes(&attrs, &log)
 	}
 
@@ -292,38 +304,41 @@ func (l *m365LogsReceiver) loadCheckpoint(ctx context.Context) {
 
 	var record logRecord
 	if err = json.Unmarshal(bytes, &record); err != nil {
-		l.logger.Error("unable to decode stored record for events, continuing without a checkpoint", zap.Error(err))
+		l.logger.Error("unable to decode stored record for logs, continuing without a checkpoint", zap.Error(err))
 		l.record = &logRecord{}
 		return
 	}
 	l.record = &record
 }
 
+// for jsonLog fields that are strings
+func setAttributeIfNotEmpty(m *pcommon.Map, field, value string) {
+	if value != "" {
+		m.PutStr(field, value)
+	}
+}
+
 // adds any attributes to log that may or may not be present
 func parseOptionalAttributes(m *pcommon.Map, log *jsonLogs) {
-	recordType := matchRecordType(log.RecordType)
-	if log.Workload != "" {
-		m.PutStr("workload", log.Workload)
-	}
-	if log.ResultStatus != "" {
-		m.PutStr("result_status", log.ResultStatus)
-	}
-	if log.SharepointSite != "" {
-		m.PutStr("sharepoint.site.id", log.SharepointSite)
-	}
-	if log.SharepointSourceFileName != "" {
-		m.PutStr("sharepoint.source.file.name", log.SharepointSourceFileName)
-	}
-	if log.ExchangeMailboxGUID != "" {
-		m.PutStr("exchange.mailbox.id", log.ExchangeMailboxGUID)
-	}
-	if log.AzureActor != nil {
-		slice := m.PutEmptySlice("azure.actors")
-		aMap := slice.AppendEmpty().SetEmptyMap()
-		for _, r := range *log.AzureActor {
-			aMap.PutStr("actor.id", r.ID)
-			aMap.PutStr("actor.type", matchAzureUserType(r.Type))
-		}
+	setAttributeIfNotEmpty(m, "workload", log.Workload)
+	setAttributeIfNotEmpty(m, "result_status", log.ResultStatus)
+	setAttributeIfNotEmpty(m, "sharepoint.site.id", log.SharepointSite)
+	setAttributeIfNotEmpty(m, "exchange.mailbox.id", log.ExchangeMailboxGUID)
+	setAttributeIfNotEmpty(m, "yammer.user.id", log.YammerActorID)
+	setAttributeIfNotEmpty(m, "investigation.id", log.InvestigationID)
+	setAttributeIfNotEmpty(m, "investigation.status", log.InvestigationStatus)
+	setAttributeIfNotEmpty(m, "dynamics365.entity.id", log.DynamicsEntityID)
+	setAttributeIfNotEmpty(m, "dynamics365.entity.name", log.DynamicsEntityName)
+	setAttributeIfNotEmpty(m, "forms.form.id", log.FormID)
+	setAttributeIfNotEmpty(m, "mip.label.id", log.MIPLabelID)
+	setAttributeIfNotEmpty(m, "todo.app.id", log.MSToDoAppID)
+	setAttributeIfNotEmpty(m, "todo.item.id", log.MSToDoItemID)
+	setAttributeIfNotEmpty(m, "web.project.id", log.MSWebProjectID)
+	setAttributeIfNotEmpty(m, "web.roadmap.id", log.MSWebRoadmapID)
+	setAttributeIfNotEmpty(m, "web.roadmap.item.id", log.MSWebRoadmapItemID)
+
+	if log.YammerFileID != nil {
+		m.PutStr("yammer.file.id", strconv.Itoa(*log.YammerFileID))
 	}
 	if log.DLPSharePointMetaData != nil {
 		m.PutStr("dlp.sharepoint.user", log.DLPSharePointMetaData.From)
@@ -331,112 +346,78 @@ func parseOptionalAttributes(m *pcommon.Map, log *jsonLogs) {
 	if log.DLPExchangeMetaData != nil {
 		m.PutStr("dlp.exchange.message.id", log.DLPExchangeMetaData.MessageID)
 	}
-	if log.DLPPolicyDetails != nil {
-		slice := m.PutEmptySlice("dlp.policy_details")
-		aMap := slice.AppendEmpty().SetEmptyMap()
-		for _, r := range *log.DLPPolicyDetails {
-			aMap.PutStr("policy.id", r.PolicyID)
-			aMap.PutStr("policy.name", r.PolicyName)
-		}
+	if log.QuarantineSource != nil {
+		m.PutStr("quarantine.request_source", matchQuarantineSource(*log.QuarantineSource))
 	}
-	if log.SecurityAlertID != "" {
-		m.PutStr("security.alert.id", log.SecurityAlertID)
-		m.PutStr("security.alert.name", log.SecurityAlertName)
+	if log.DefenderFileSource != nil {
+		m.PutStr("defender.file.source_workload", matchSourceWorkload(*log.DefenderFileSource))
 	}
-	if log.YammerActorID != "" {
-		m.PutStr("yammer.user.id", log.YammerActorID)
+	if log.CommCompliance != nil {
+		m.PutStr("communication_compliance.exchange.network_message_id", log.CommCompliance.NetworkMessageID)
 	}
-	if log.YammerFileID != nil {
-		m.PutStr("yammer.file.id", strconv.Itoa(*log.YammerFileID))
-	}
-	if log.DefenderEmail != nil {
-		slice := m.PutEmptySlice("defender.email.attachments")
-		aMap := slice.AppendEmpty().SetEmptyMap()
-		for _, r := range *log.DefenderEmail {
-			aMap.PutStr("file.name", r.FileName)
-		}
-	}
-	if recordType == "ThreatIntelligenceUrl" {
-		m.PutStr("defender.url.url", log.DefenderURL)
+	if log.DataShareInvitation != nil {
+		m.PutStr("system_sync.data_share.share.id", log.DataShareInvitation.ShareID)
 	}
 	if log.DefenderFile != nil {
 		m.PutStr("defender.file.id", log.DefenderFile.DocumentID)
 		m.PutStr("defender.file.verdict", matchFileVerdict(log.DefenderFile.FileVerdict))
 	}
-	if log.DefenderFileSource != nil {
-		m.PutStr("defender.file.source_workload", matchSourceWorkload(*log.DefenderFileSource))
-	}
-	if log.InvestigationID != "" {
-		m.PutStr("investigation.id", log.InvestigationID)
-	}
-	if log.InvestigationStatus != "" {
-		m.PutStr("investigation.status", log.InvestigationStatus)
-	}
-	if log.PowerAppName == "PowerBIAudit" {
-		m.PutStr("powerbi.app.name", log.PowerAppName)
-	}
-	if log.DynamicsEntityID != "" {
-		m.PutStr("dynamics365.entity.id", log.DynamicsEntityID)
-	}
-	if log.DynamicsEntityName != "" {
-		m.PutStr("dynamics365.entity.name", log.DynamicsEntityName)
-	}
-	if log.QuarantineSource != nil {
-		m.PutStr("quarantine.request_source", matchQuarantineSource(*log.QuarantineSource))
-	}
-	if log.FormID != "" {
-		m.PutStr("forms.form.id", log.FormID)
-	}
-	if log.MIPLabelID != "" {
-		m.PutStr("mip.label.id", log.MIPLabelID)
-	}
-	if recordType == "OMEPortal" {
-		if log.EncryptedMessageID != "" {
-			m.PutStr("encrypted_portal.message.id", log.EncryptedMessageID)
-		}
-	}
-	if log.CommCompliance != nil {
-		m.PutStr("communication_compliance.exchange.network_message_id", log.CommCompliance.NetworkMessageID)
+	if log.SecurityAlertID != "" {
+		m.PutStr("security.alert.id", log.SecurityAlertID)
+		m.PutStr("security.alert.name", log.SecurityAlertName)
 	}
 	if log.ConnectorJobID != "" {
 		m.PutStr("compliance_connector.job.id", log.ConnectorJobID)
-		if log.ConnectorTaskID != "" {
-			m.PutStr("compliance_connector.task.id", log.ConnectorTaskID)
-		}
-	}
-	if log.DataShareInvitation != nil {
-		m.PutStr("system_sync.data_share.share.id", log.DataShareInvitation.ShareID)
-	}
-	if recordType == "MicrosoftGraphDataConnectConsent" {
-		if log.MSGraphConsentAppID != "" {
-			m.PutStr("graph.consent.app.id", log.MSGraphConsentAppID)
-		}
+		setAttributeIfNotEmpty(m, "compliance_connector.task.id", log.ConnectorTaskID)
 	}
 	if log.VivaGoalsUsername != "" {
 		m.PutStr("viva_goals.username", log.VivaGoalsUsername)
-		if log.VivaGoalsOrgName != "" {
-			m.PutStr("viva_goals.organization", log.VivaGoalsOrgName)
+		setAttributeIfNotEmpty(m, "viva_goals.organization", log.VivaGoalsOrgName)
+	}
+
+	recordType := matchRecordType(log.RecordType)
+	if recordType == "ThreatIntelligenceUrl" {
+		m.PutStr("defender.url.url", log.DefenderURL)
+	}
+	if recordType == "PowerBIAudit" {
+		m.PutStr("powerbi.app.name", log.PowerAppName)
+	}
+	if recordType == "OMEPortal" {
+		setAttributeIfNotEmpty(m, "encrypted_portal.message.id", log.EncryptedMessageID)
+	}
+	if recordType == "MicrosoftGraphDataConnectConsent" {
+		setAttributeIfNotEmpty(m, "graph.consent.app.id", log.MSGraphConsentAppID)
+	}
+
+	if log.AzureActor != nil {
+		slice := m.PutEmptySlice("azure.actors")
+		for _, r := range *log.AzureActor {
+			pair := slice.AppendEmpty().SetEmptyMap()
+			pair.PutStr("actor.id", r.ID)
+			pair.PutStr("actor.type", matchAzureUserType(r.Type))
 		}
 	}
-	if log.MSToDoAppID != "" {
-		m.PutStr("to_do.app.id", log.MSToDoAppID)
+	if log.DLPPolicyDetails != nil {
+		slice := m.PutEmptySlice("dlp.policy_details")
+		for _, r := range *log.DLPPolicyDetails {
+			pair := slice.AppendEmpty().SetEmptyMap()
+			pair.PutStr("policy.id", r.PolicyID)
+			pair.PutStr("policy.name", r.PolicyName)
+		}
 	}
-	if log.MSToDoItemID != "" {
-		m.PutStr("to_do.item.id", log.MSToDoItemID)
+
+	if log.DefenderEmail != nil {
+		slice := m.PutEmptySlice("defender.email.attachments")
+		for _, r := range *log.DefenderEmail {
+			pair := slice.AppendEmpty().SetEmptyMap()
+			pair.PutStr("file.name", r.FileName)
+		}
 	}
-	if log.MSWebProjectID != "" {
-		m.PutStr("web_project.project.id", log.MSWebProjectID)
-	}
-	if log.MSWebRoadmapID != "" {
-		m.PutStr("web_project.road_map.id", log.MSWebRoadmapID)
-	}
-	if log.MSWebRoadmapItemID != "" {
-		m.PutStr("web_project.road_map.item.id", log.MSWebRoadmapItemID)
-	}
+
 }
 
-func matchUserType(user int) string {
-	switch user {
+func matchUserType(x int) string {
+	switch x {
 	case 0:
 		return "Regular"
 	case 1:
@@ -460,8 +441,8 @@ func matchUserType(user int) string {
 	}
 }
 
-func matchAzureUserType(user int) string {
-	switch user {
+func matchAzureUserType(x int) string {
+	switch x {
 	case 0:
 		return "Claim"
 	case 1:
@@ -479,8 +460,8 @@ func matchAzureUserType(user int) string {
 	}
 }
 
-func matchFileVerdict(v int) string {
-	switch v {
+func matchFileVerdict(x int) string {
+	switch x {
 	case 0:
 		return "Good"
 	case 1:
@@ -496,8 +477,8 @@ func matchFileVerdict(v int) string {
 	}
 }
 
-func matchSourceWorkload(w int) string {
-	switch w {
+func matchSourceWorkload(x int) string {
+	switch x {
 	case 0:
 		return "SharePoint Online"
 	case 1:
@@ -509,8 +490,8 @@ func matchSourceWorkload(w int) string {
 	}
 }
 
-func matchQuarantineSource(s int) string {
-	switch s {
+func matchQuarantineSource(x int) string {
+	switch x {
 	case 0:
 		return "SCC"
 	case 1:
@@ -521,8 +502,8 @@ func matchQuarantineSource(s int) string {
 		return "impossible"
 	}
 }
-func matchRecordType(r int) string {
-	switch r {
+func matchRecordType(x int) string {
+	switch x {
 	case 20:
 		return "PowerBIAudit"
 	case 41:

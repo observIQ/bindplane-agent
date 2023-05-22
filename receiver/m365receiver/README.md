@@ -4,7 +4,7 @@
 | -------------------------- | ----------- |
 | Stability | [dev] |
 | Supported pipeline types | metrics, logs |
-| Distributions | [contrib] |
+| Distributions | [observIQ] |
 
 Receives metrics from [Microsoft Office 365](https://www.microsoft365.com/)
 via the [Microsoft Graph API](https://learn.microsoft.com/en-us/graph/api/overview?view=graph-rest-1.0&preserve-view=true),

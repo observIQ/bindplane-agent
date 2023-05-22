@@ -65,42 +65,34 @@ type logData struct {
 }
 
 type jsonLogs struct {
-	Workload                 string              `json:"Workload,omitempty"`
-	UserID                   string              `json:"UserId"`
-	UserType                 int                 `json:"UserType"`
-	CreationTime             string              `json:"CreationTime"`
-	ID                       string              `json:"Id"`
-	Operation                string              `json:"Operation"`
-	ResultStatus             string              `json:"ResultStatus,omitempty"`
-	RecordType               int                 `json:"RecordType"`
+	// common schema attributes
+	UserType     int    `json:"UserType"`
+	RecordType   int    `json:"RecordType"`
+	UserID       string `json:"UserId"`
+	CreationTime string `json:"CreationTime"`
+	ID           string `json:"Id"`
+	Operation    string `json:"Operation"`
+	Workload     string `json:"Workload,omitempty"`
+	ResultStatus string `json:"ResultStatus,omitempty"`
+
+	// optional schema attributes
 	SharepointSite           string              `json:"Site,omitempty"`
 	SharepointSourceFileName string              `json:"SourceFileName,omitempty"`
 	ExchangeMailboxGUID      string              `json:"MailboxGuid,omitempty"`
-	AzureActor               *[]AzureActor       `json:"Actor,omitempty"`
-	DLPSharePointMetaData    *SharePointMetaData `json:"SharePointMetaData,omitempty"`
-	DLPExchangeMetaData      *ExchangeMetaData   `json:"ExchangeMetaData,omitempty"`
-	DLPPolicyDetails         *[]PolicyDetails    `json:"PolicyDetails,omitempty"`
 	SecurityAlertID          string              `json:"AlertId,omitempty"`
 	SecurityAlertName        string              `json:"Name,omitempty"`
 	YammerActorID            string              `json:"ActorUserId,omitempty"`
-	YammerFileID             *int                `json:"FileId,omitempty"`
-	DefenderEmail            *[]AttachmentData   `json:"AttachmentData,omitempty"`
 	DefenderURL              string              `json:"URL,omitempty"`
-	DefenderFile             *FileData           `json:"FileData,omitempty"`
-	DefenderFileSource       *int                `json:"SourceWorkload,omitempty"`
 	InvestigationID          string              `json:"InvestigationId,omitempty"`
 	InvestigationStatus      string              `json:"Status,omitempty"`
 	PowerAppName             string              `json:"AppName,omitempty"`
 	DynamicsEntityID         string              `json:"EntityId,omitempty"`
 	DynamicsEntityName       string              `json:"EntityName,omitempty"`
-	QuarantineSource         *int                `json:"RequestSource,omitempty"`
 	FormID                   string              `json:"FormId,omitempty"`
 	MIPLabelID               string              `json:"LabelId,omitempty"`
 	EncryptedMessageID       string              `json:"MessageId,omitempty"`
-	CommCompliance           *ExchangeDetails    `json:"ExchangeDetails,omitempty"`
 	ConnectorJobID           string              `json:"JobId,omitempty"`
 	ConnectorTaskID          string              `json:"TaskId,omitempty"`
-	DataShareInvitation      *Invitation         `json:"Invitation,omitempty"`
 	MSGraphConsentAppID      string              `json:"ApplicationId,omitempty"`
 	VivaGoalsUsername        string              `json:"Username,omitempty"`
 	VivaGoalsOrgName         string              `json:"OrganizationName,omitempty"`
@@ -109,6 +101,17 @@ type jsonLogs struct {
 	MSWebProjectID           string              `json:"ProjectId,omitempty"`
 	MSWebRoadmapID           string              `json:"RoadmapId,omitempty"`
 	MSWebRoadmapItemID       string              `json:"RoadmapItemId,omitempty"`
+	DefenderFileSource       *int                `json:"SourceWorkload,omitempty"`
+	QuarantineSource         *int                `json:"RequestSource,omitempty"`
+	YammerFileID             *int                `json:"FileId,omitempty"`
+	CommCompliance           *ExchangeDetails    `json:"ExchangeDetails,omitempty"`
+	DataShareInvitation      *Invitation         `json:"Invitation,omitempty"`
+	DefenderFile             *FileData           `json:"FileData,omitempty"`
+	DLPSharePointMetaData    *SharePointMetaData `json:"SharePointMetaData,omitempty"`
+	DLPExchangeMetaData      *ExchangeMetaData   `json:"ExchangeMetaData,omitempty"`
+	DefenderEmail            *[]AttachmentData   `json:"AttachmentData,omitempty"`
+	AzureActor               *[]AzureActor       `json:"Actor,omitempty"`
+	DLPPolicyDetails         *[]PolicyDetails    `json:"PolicyDetails,omitempty"`
 }
 
 // AzureActor json struct
@@ -368,7 +371,7 @@ func (m *m365Client) StartSubscription(endpoint string) error {
 
 	// troubleshoot error handling, mainly sub already enabled
 	// no error if sub already enabled, not troubleshooting stale token
-	// only called while code is synchronous right after a GetT5oken call
+	// only called while code is synchronous right after a GetToken call
 	// if token is stale, regenerating it won't fix anything
 	if resp.StatusCode != 200 {
 		if resp.StatusCode == 400 { // subscription already started possibly
