@@ -35,7 +35,6 @@ import (
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/collectdreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/couchdbreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/dockerstatsreceiver"
-	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/dotnetdiagnosticsreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/elasticsearchreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/filelogreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/flinkmetricsreceiver"
@@ -103,7 +102,6 @@ var defaultReceivers = []receiver.Factory{
 	collectdreceiver.NewFactory(),
 	couchdbreceiver.NewFactory(),
 	dockerstatsreceiver.NewFactory(),
-	dotnetdiagnosticsreceiver.NewFactory(),
 	elasticsearchreceiver.NewFactory(),
 	filelogreceiver.NewFactory(),
 	flinkmetricsreceiver.NewFactory(),
