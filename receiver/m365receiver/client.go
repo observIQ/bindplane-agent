@@ -35,36 +35,27 @@ type m365Client struct {
 	scope        string
 }
 
-// HTTP parsing structs
-type auth struct {
-	Token string `json:"access_token"`
-}
-type tokenError struct {
-	Err string `json:"error"`
-}
-type defaultError struct {
+// api error struct
+type apiError struct {
 	Error struct {
 		Code    string `json:"code"`
 		Message string `json:"message"`
-	} `json:"error"`
+	} `json:"error,omitempty"`
+	Message string `json:"Message,omitempty"`
 }
 
-type jsonError struct {
-	Message string `json:"Message"`
-}
-
+// log response struct
 type logResp struct {
 	Content string `json:"contentUri"`
 }
 
-// JSON parsing structs
-
 type logData struct {
-	logs []jsonLogs
+	logs []jsonLog
 	body []string
 }
 
-type jsonLogs struct {
+// JSON parsing structs
+type jsonLog struct {
 	// common schema attributes
 	UserType     int    `json:"UserType"`
 	RecordType   int    `json:"RecordType"`
@@ -200,10 +191,12 @@ func (m *m365Client) GetToken() error {
 
 	defer func() { _ = resp.Body.Close() }()
 
-	//troubleshoot resp err if present
+	// troubleshoot resp err if present
 	if resp.StatusCode != 200 {
-		//get error code
-		var respErr tokenError
+		// get error code
+		respErr := struct {
+			Err string `json:"error"`
+		}{}
 		body, err := io.ReadAll(resp.Body)
 		if err != nil {
 			return err
@@ -224,19 +217,19 @@ func (m *m365Client) GetToken() error {
 		return fmt.Errorf("got non 200 status code from request, got %d", resp.StatusCode)
 	}
 
+	// read in access token
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return err
 	}
-
-	var token auth
+	token := struct {
+		Token string `json:"access_token"`
+	}{}
 	err = json.Unmarshal(body, &token)
 	if err != nil {
 		return err
 	}
-
 	m.token = token.Token
-
 	return nil
 }
 
@@ -256,12 +249,7 @@ func (m *m365Client) GetCSV(endpoint string) ([]string, error) {
 	//troubleshoot resp err if present
 	if resp.StatusCode != 200 {
 		//get error code
-		var respErr defaultError
-		body, err := io.ReadAll(resp.Body)
-		if err != nil {
-			return []string{}, err
-		}
-		err = json.Unmarshal(body, &respErr)
+		respErr, err := m.readInErr(resp)
 		if err != nil {
 			return []string{}, err
 		}
@@ -311,12 +299,7 @@ func (m *m365Client) GetJSON(ctx context.Context, endpoint string, end string, s
 
 	// troubleshoot error code
 	if resp.StatusCode != 200 {
-		var respErr jsonError
-		body, err := io.ReadAll(resp.Body)
-		if err != nil {
-			return logData{}, err
-		}
-		err = json.Unmarshal(body, &respErr)
+		respErr, err := m.readInErr(resp)
 		if err != nil {
 			return logData{}, err
 		}
@@ -375,12 +358,7 @@ func (m *m365Client) StartSubscription(endpoint string) error {
 	// if token is stale, regenerating it won't fix anything
 	if resp.StatusCode != 200 {
 		if resp.StatusCode == 400 { // subscription already started possibly
-			var respErr defaultError
-			body, err := io.ReadAll(resp.Body)
-			if err != nil {
-				return err
-			}
-			err = json.Unmarshal(body, &respErr)
+			respErr, err := m.readInErr(resp)
 			if err != nil {
 				return err
 			}
@@ -410,12 +388,7 @@ func (m *m365Client) followLink(ctx context.Context, lr *logResp) ([]byte, error
 
 	// troubleshoot error code
 	if redirectResp.StatusCode != 200 {
-		var respErr jsonError
-		body, err := io.ReadAll(redirectResp.Body)
-		if err != nil {
-			return []byte{}, err
-		}
-		err = json.Unmarshal(body, &respErr)
+		respErr, err := m.readInErr(redirectResp)
 		if err != nil {
 			return []byte{}, err
 		}
@@ -435,4 +408,17 @@ func (m *m365Client) parseBody(body []byte) []string {
 	data[0] = strings.TrimPrefix(data[0], "[{\"C")
 	data[last] = strings.TrimSuffix(data[last], "}]")
 	return data
+}
+
+func (m *m365Client) readInErr(resp *http.Response) (apiError, error) {
+	var respErr apiError
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return apiError{}, err
+	}
+	err = json.Unmarshal(body, &respErr)
+	if err != nil {
+		return apiError{}, err
+	}
+	return respErr, nil
 }

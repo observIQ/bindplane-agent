@@ -319,7 +319,7 @@ func setAttributeIfNotEmpty(m *pcommon.Map, field, value string) {
 }
 
 // adds any attributes to log that may or may not be present
-func parseOptionalAttributes(m *pcommon.Map, log *jsonLogs) {
+func parseOptionalAttributes(m *pcommon.Map, log *jsonLog) {
 	setAttributeIfNotEmpty(m, "workload", log.Workload)
 	setAttributeIfNotEmpty(m, "result_status", log.ResultStatus)
 	setAttributeIfNotEmpty(m, "sharepoint.site.id", log.SharepointSite)

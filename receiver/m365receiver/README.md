@@ -46,18 +46,17 @@ The Microsoft Office 365 receiver takes the following parameters. `tenant_id`, `
 - `client_id` : (required) the identifier this receiver will use to monitor the given tenant/instance
 - `client_secret` : (required) the private key this receiver will use, must belong to the given client_id
 - `logs`
-    - `poll_interval` : time in minutes
-    - `general` : true or false
-    - `exchange` : true or false
-    - `sharepoint` : true or false
-    - `azureAD` : true of false
-    - `dlp` : true or false
+    - `poll_interval` : (default 5m) time in minutes
+    - `general` : (default true) true or false
+    - `exchange` : (default true) true or false
+    - `sharepoint` : (default true) true or false
+    - `azureAD` : (default true) true of false
+    - `dlp` : (default true) true or false
 - `storage` : The component ID of a storage extension which can be used when polling for `logs` . The storage extension prevents duplication of data after a collector restart by remembering which data were previously collected.
 
 **Example Configs**
 
-Collect metrics:
-
+Collect metrics: 
 ```yaml
 receivers:
   m365:
@@ -65,16 +64,16 @@ receivers:
     client_id: client_id
     client_secret: client_secret
 exporters:
-
+  file/no_rotation:
+    path: /some/file/path/foo.json
 service:
   pipelines:
     metrics:
       receivers: [m365]
-      exporters: 
+      exporters: [file/no_rotation]
 ```
 
 Collect logs (default values):
-
 ```yaml
 receivers:
   m365:
@@ -82,12 +81,13 @@ receivers:
     client_id: client_id
     client_secret: client_secret
 exporters:
-
+  file/no_rotation:
+    path: /some/file/path/foo.json
 service:
   pipelines:
     logs:
       receivers: [m365]
-      exporters: 
+      exporters: [file/no_rotation]
 ```
 
 Collect logs (custom poll interval, storage component, only sharepoint & azureAD logs):
@@ -104,10 +104,14 @@ receivers:
       dlp: false
     storage: file_storage
 exporters:
-
+  file/no_rotation:
+    path: /some/file/path/foo.json
 service:
   pipelines:
     logs:
       receivers: [m365]
-      exporters: 
+      exporters: [file/no_rotation]
 ```
+
+[dev]:https://github.com/open-telemetry/opentelemetry-collector#development
+[observIQ]:https://github.com/observIQ/observiq-otel-collector

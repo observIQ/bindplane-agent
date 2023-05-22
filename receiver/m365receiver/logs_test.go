@@ -153,7 +153,7 @@ func TestPollErrHandle(t *testing.T) {
 
 func TestParseOptionalAttributes(t *testing.T) {
 	m := pcommon.NewMap()
-	log := jsonLogs{
+	log := jsonLog{
 		Workload:     "testWorkload",
 		ResultStatus: "",
 	}
@@ -183,7 +183,7 @@ func (mc *mockLogsClient) loadTestLogs(t *testing.T) logData {
 	logBytes, err := os.ReadFile(testLogs)
 	require.NoError(t, err)
 
-	var logs []jsonLogs
+	var logs []jsonLog
 	err = json.Unmarshal(logBytes, &logs)
 	require.NoError(t, err)
 

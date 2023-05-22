@@ -100,7 +100,7 @@ func TestGetJSON(t *testing.T) {
 	//expected behavior
 	testJSON, err := testClient.GetJSON(context.Background(), m365Mock.URL+"/testJSON", "", "")
 	require.NoError(t, err)
-	expectedJSON := []jsonLogs{
+	expectedJSON := []jsonLog{
 		{
 			Workload:     "testWorkload",
 			UserID:       "testUserId",
