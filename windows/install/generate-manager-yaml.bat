@@ -16,7 +16,7 @@ if "%endpoint%"=="" (
     exit /b 0
 )
 
-set "managerfile=%install_dir%\manager.yaml"
+set "managerfile=%install_dir%manager.yaml"
 
 echo Writing manager yaml
 set "endpointField=endpoint: "%endpoint%""
