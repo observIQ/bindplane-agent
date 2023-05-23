@@ -3,7 +3,7 @@ module github.com/observiq/observiq-otel-collector/processor/removeemptyvaluespr
 go 1.19
 
 require (
-	github.com/stretchr/testify v1.8.2
+	github.com/stretchr/testify v1.8.3
 	github.com/tj/assert v0.0.3
 	go.opentelemetry.io/collector v0.77.0
 	go.opentelemetry.io/collector/component v0.77.0
