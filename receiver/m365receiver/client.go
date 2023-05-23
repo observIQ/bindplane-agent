@@ -35,33 +35,12 @@ type m365Client struct {
 	scope        string
 }
 
-// ReqType enum for request handler
-type ReqType int64
-
-// enums for ReqType
-const (
-	Token   ReqType = 0
-	Sub     ReqType = 1
-	JSON    ReqType = 2
-	Default ReqType = 3
-)
-
 // Option func for GetJSON request handler case
 type Option func(r *http.Request)
 
-// WithTime is the option func for request handler
-func WithTime(end string, start string) Option {
-	return func(r *http.Request) {
-		q := r.URL.Query()
-		q.Add("startTime", start)
-		q.Add("endTime", end)
-		r.URL.RawQuery = q.Encode()
-	}
-}
-
 // api error struct
 type apiError struct {
-	Error struct {
+	Error *struct {
 		Code    string `json:"code"`
 		Message string `json:"message"`
 	} `json:"error,omitempty"`
@@ -188,7 +167,14 @@ func (m *m365Client) shutdown() error {
 // metrics token has scope = "https://graph.microsoft.com/.default"
 // logs token has scope = "https://manage.office.com/.default"
 func (m *m365Client) GetToken(ctx context.Context) error {
-	resp, err := m.makeRequest(ctx, Token, m.authEndpoint)
+	formData := url.Values{
+		"grant_type":    {"client_credentials"},
+		"scope":         {m.scope},
+		"client_id":     {m.clientID},
+		"client_secret": {m.clientSecret},
+	}
+	requestBody := strings.NewReader(formData.Encode())
+	resp, err := m.makeRequest(ctx, requestBody, "POST", m.authEndpoint, WithBody())
 	if err != nil {
 		return err
 	}
@@ -239,22 +225,14 @@ func (m *m365Client) GetToken(ctx context.Context) error {
 
 // function for getting metrics data
 func (m *m365Client) GetCSV(ctx context.Context, endpoint string) ([]string, error) {
-	resp, err := m.makeRequest(ctx, Default, endpoint)
+	resp, err := m.makeRequest(ctx, nil, "GET", endpoint, WithToken(m.token))
 	if err != nil {
 		return []string{}, err
 	}
 
 	//troubleshoot resp err if present
 	if resp.StatusCode != 200 {
-		//get error code
-		respErr, err := m.readInErr(resp)
-		if err != nil {
-			return []string{}, err
-		}
-		if respErr.Error.Code == "InvalidAuthenticationToken" {
-			return []string{}, fmt.Errorf("access token invalid")
-		}
-		return []string{}, fmt.Errorf("got non 200 status code from request, got %d", resp.StatusCode)
+		return []string{}, m.handleErrors(resp)
 	}
 
 	defer func() { _ = resp.Body.Close() }()
@@ -279,7 +257,7 @@ func (m *m365Client) GetCSV(ctx context.Context, endpoint string) ([]string, err
 // function for getting log data
 func (m *m365Client) GetJSON(ctx context.Context, endpoint string, end string, start string) (logData, error) {
 	// make request to Audit endpoint
-	resp, err := m.makeRequest(ctx, JSON, endpoint, WithTime(end, start))
+	resp, err := m.makeRequest(ctx, nil, "GET", endpoint, WithToken(m.token), WithTime(end, start))
 	if err != nil {
 		return logData{}, err
 	}
@@ -287,14 +265,7 @@ func (m *m365Client) GetJSON(ctx context.Context, endpoint string, end string, s
 
 	// troubleshoot error code
 	if resp.StatusCode != 200 {
-		respErr, err := m.readInErr(resp)
-		if err != nil {
-			return logData{}, err
-		}
-		if respErr.Message == "Authorization has been denied for this request." {
-			return logData{}, fmt.Errorf("authorization denied")
-		}
-		return logData{}, fmt.Errorf("got non 200 status code from request, got %d", resp.StatusCode)
+		return logData{}, m.handleErrors(resp)
 	}
 
 	// get redirect link
@@ -322,7 +293,7 @@ func (m *m365Client) GetJSON(ctx context.Context, endpoint string, end string, s
 }
 
 func (m *m365Client) StartSubscription(ctx context.Context, endpoint string) error {
-	resp, err := m.makeRequest(ctx, Sub, endpoint)
+	resp, err := m.makeRequest(ctx, nil, "POST", endpoint, WithToken(m.token))
 	if err != nil {
 		return err
 	}
@@ -333,17 +304,7 @@ func (m *m365Client) StartSubscription(ctx context.Context, endpoint string) err
 	// only called while code is synchronous right after a GetToken call
 	// if token is stale, regenerating it won't fix anything
 	if resp.StatusCode != 200 {
-		if resp.StatusCode == 400 { // subscription already started possibly
-			respErr, err := m.readInErr(resp)
-			if err != nil {
-				return err
-			}
-			if respErr.Error.Message == "The subscription is already enabled. No property change." {
-				return nil
-			}
-		}
-		//unsure what the error is
-		return fmt.Errorf("got non 200 status code from request, got %d", resp.StatusCode)
+		return m.handleErrors(resp)
 	}
 	//if StatusCode == 200, then subscription was successfully started
 	return nil
@@ -351,7 +312,7 @@ func (m *m365Client) StartSubscription(ctx context.Context, endpoint string) err
 
 // followLink will follow the response of a first request that has a link to the actual content
 func (m *m365Client) followLink(ctx context.Context, endpoint string) ([]byte, error) {
-	resp, err := m.makeRequest(ctx, Default, endpoint)
+	resp, err := m.makeRequest(ctx, nil, "GET", endpoint, WithToken(m.token))
 	if err != nil {
 		return []byte{}, err
 	}
@@ -359,17 +320,29 @@ func (m *m365Client) followLink(ctx context.Context, endpoint string) ([]byte, e
 
 	// troubleshoot error code
 	if resp.StatusCode != 200 {
-		respErr, err := m.readInErr(resp)
-		if err != nil {
-			return []byte{}, err
-		}
-		if respErr.Message == "Authorization has been denied for this request." {
-			return []byte{}, fmt.Errorf("authorization denied")
-		}
-		return []byte{}, fmt.Errorf("got non 200 status code from request, got %d", resp.StatusCode)
+		return []byte{}, m.handleErrors(resp)
 	}
 
 	return io.ReadAll(resp.Body)
+}
+
+// handles error reading for client funcs
+func (m *m365Client) handleErrors(r *http.Response) error {
+	respErr, err := m.readInErr(r)
+	if err != nil {
+		return err
+	}
+	if respErr.Message != "" && respErr.Message == "Authorization has been denied for this request." { // bad token
+		return fmt.Errorf("authorization denied")
+	}
+	if respErr.Error != nil {
+		if respErr.Error.Code == "AF20024" { // sub already started, not an issue
+			return nil
+		} else if respErr.Error.Code == "InvalidAuthenticationToken" { // stale token error, potentially
+			return fmt.Errorf("access token invalid")
+		}
+	}
+	return fmt.Errorf("got non 200 status code from request, got %d", r.StatusCode)
 }
 
 // parseBody takes the byte[] response and parses it into string objects
@@ -416,45 +389,38 @@ func (m *m365Client) readInContent(resp *http.Response) (string, error) {
 }
 
 // handles requests for client functions
-func (m *m365Client) makeRequest(ctx context.Context, r ReqType, endpoint string, opts ...Option) (*http.Response, error) {
-	switch r {
-	case 0: // token case
-		formData := url.Values{
-			"grant_type":    {"client_credentials"},
-			"scope":         {m.scope},
-			"client_id":     {m.clientID},
-			"client_secret": {m.clientSecret},
-		}
-		requestBody := strings.NewReader(formData.Encode())
-		req, err := http.NewRequestWithContext(ctx, "POST", endpoint, requestBody)
-		if err != nil {
-			return nil, err
-		}
-		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-		return m.client.Do(req)
-	case 1: // subscription case
-		req, err := http.NewRequestWithContext(ctx, "POST", endpoint, nil)
-		if err != nil {
-			return nil, err
-		}
-		req.Header.Set("Authorization", "Bearer "+m.token)
-		return m.client.Do(req)
-	case 2: // json case
-		req, err := http.NewRequestWithContext(ctx, "GET", endpoint, nil)
-		if err != nil {
-			return nil, err
-		}
-		req.Header.Set("Authorization", "Bearer "+m.token)
-		opts[0](req)
-		return m.client.Do(req)
-	case 3: // csv & followLink case
-		req, err := http.NewRequestWithContext(ctx, "GET", endpoint, nil)
-		if err != nil {
-			return nil, err
-		}
-		req.Header.Set("Authorization", "Bearer "+m.token)
-		return m.client.Do(req)
-	default:
-		return nil, nil
+func (m *m365Client) makeRequest(ctx context.Context, body io.Reader, httpMethod, endpoint string, opts ...Option) (*http.Response, error) {
+	req, err := http.NewRequestWithContext(ctx, httpMethod, endpoint, body)
+	if err != nil {
+		return nil, err
+	}
+	for _, o := range opts {
+		o(req)
+	}
+
+	return m.client.Do(req)
+}
+
+// WithBody is an option func for the request handler
+func WithBody() Option {
+	return func(r *http.Request) {
+		r.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	}
+}
+
+// WithToken is an option func for the request handler
+func WithToken(token string) Option {
+	return func(r *http.Request) {
+		r.Header.Set("Authorization", "Bearer "+token)
+	}
+}
+
+// WithTime is an option func for the request handler
+func WithTime(end, start string) Option {
+	return func(r *http.Request) {
+		q := r.URL.Query()
+		q.Add("startTime", start)
+		q.Add("endTime", end)
+		r.URL.RawQuery = q.Encode()
 	}
 }

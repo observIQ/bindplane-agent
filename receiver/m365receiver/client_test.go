@@ -259,7 +259,7 @@ func newMockServerSub() *httptest.Server {
 			rw.Write([]byte(
 				`{
 					"error": {
-						"code": "ignore",
+						"code": "AF20024",
 						"message": "The subscription is already enabled. No property change."
 					}
 				}`,
