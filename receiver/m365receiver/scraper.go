@@ -246,8 +246,8 @@ var reports = []reportPair{
 }
 
 type mClient interface {
-	GetCSV(endpoint string) ([]string, error)
-	GetToken() error
+	GetCSV(ctx context.Context, endpoint string) ([]string, error)
+	GetToken(ctx context.Context) error
 	shutdown() error
 }
 
@@ -274,7 +274,7 @@ func newM365Scraper(
 	return m
 }
 
-func (m *m365Scraper) start(_ context.Context, host component.Host) error {
+func (m *m365Scraper) start(ctx context.Context, host component.Host) error {
 	httpClient, err := m.cfg.ToClient(host, m.settings)
 	if err != nil {
 		m.logger.Error("error creating HTTP client", zap.Error(err))
@@ -283,7 +283,7 @@ func (m *m365Scraper) start(_ context.Context, host component.Host) error {
 
 	m.client = newM365Client(httpClient, m.cfg, "https://graph.microsoft.com/.default")
 
-	err = m.client.GetToken()
+	err = m.client.GetToken(ctx)
 	if err != nil {
 		m.logger.Error("error creating authorization token", zap.Error(err))
 		return err
@@ -297,20 +297,20 @@ func (m *m365Scraper) shutdown(_ context.Context) error {
 }
 
 // retrieves data, builds metrics & emits them
-func (m *m365Scraper) scrape(context.Context) (pmetric.Metrics, error) {
-	err := m.getStats()
+func (m *m365Scraper) scrape(ctx context.Context) (pmetric.Metrics, error) {
+	err := m.getStats(ctx)
 	if err != nil {
 		//troubleshoot stale token
 		if err.Error() == "access token invalid" {
 			m.logger.Debug("possible stale token; attempting to regenerate")
-			err = m.client.GetToken()
+			err = m.client.GetToken(ctx)
 			if err != nil {
 				//something went wrong with generating token.
 				m.logger.Error("error creating authorization token", zap.Error(err))
 				return pmetric.Metrics{}, err
 			}
 			//retry data retrieval with fresh token
-			err = m.getStats()
+			err = m.getStats(ctx)
 			if err != nil {
 				//not a stale access token error, unsure what is wrong
 				m.logger.Error("unable to retrieve stats", zap.Error(err))
@@ -326,11 +326,11 @@ func (m *m365Scraper) scrape(context.Context) (pmetric.Metrics, error) {
 	return m.mb.Emit(), nil
 }
 
-func (m *m365Scraper) getStats() error {
+func (m *m365Scraper) getStats(ctx context.Context) error {
 	now := pcommon.NewTimestampFromTime(time.Now())
 
 	for _, r := range reports {
-		line, err := m.client.GetCSV(m.root + r.endpoint)
+		line, err := m.client.GetCSV(ctx, m.root+r.endpoint)
 		if err != nil {
 			return err
 		}

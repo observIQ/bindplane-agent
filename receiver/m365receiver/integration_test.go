@@ -44,7 +44,7 @@ func TestM365Integration(t *testing.T) {
 	mockServer := newIntMockServer()
 	client := newM365Client(mockServer.Client(), cfg, "https://graph.microsoft.com/.default")
 	client.authEndpoint = mockServer.URL + "/" + cfg.TenantID
-	err := client.GetToken()
+	err := client.GetToken(context.Background())
 	require.NoError(t, err)
 	rcvr.client = client
 	rcvr.root = mockServer.URL + "/"
@@ -80,7 +80,7 @@ func checkMethodAndAuth(rw http.ResponseWriter, req *http.Request) error {
 		rw.WriteHeader(400)
 		return fmt.Errorf("err")
 	}
-	if a := req.Header.Get("Authorization"); a != "testAccessToken" {
+	if a := req.Header.Get("Authorization"); a != "Bearer testAccessToken" {
 		rw.WriteHeader(400)
 		rw.Write([]byte(`{"error": {"code": "InvalidAuthenticationToken"}}`))
 		return fmt.Errorf("err")

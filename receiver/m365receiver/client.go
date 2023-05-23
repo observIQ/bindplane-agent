@@ -35,6 +35,27 @@ type m365Client struct {
 	scope        string
 }
 
+// request types
+type ReqType int64
+
+const (
+	Token   ReqType = 0
+	Sub     ReqType = 1
+	JSON    ReqType = 2
+	Default ReqType = 3
+)
+
+type Option func(r *http.Request)
+
+func WithTime(end string, start string) Option {
+	return func(r *http.Request) {
+		q := r.URL.Query()
+		q.Add("startTime", start)
+		q.Add("endTime", end)
+		r.URL.RawQuery = q.Encode()
+	}
+}
+
 // api error struct
 type apiError struct {
 	Error struct {
@@ -42,11 +63,6 @@ type apiError struct {
 		Message string `json:"message"`
 	} `json:"error,omitempty"`
 	Message string `json:"Message,omitempty"`
-}
-
-// log response struct
-type logResp struct {
-	Content string `json:"contentUri"`
 }
 
 type logData struct {
@@ -167,24 +183,8 @@ func (m *m365Client) shutdown() error {
 // Get authorization token
 // metrics token has scope = "https://graph.microsoft.com/.default"
 // logs token has scope = "https://manage.office.com/.default"
-func (m *m365Client) GetToken() error {
-	formData := url.Values{
-		"grant_type":    {"client_credentials"},
-		"scope":         {m.scope},
-		"client_id":     {m.clientID},
-		"client_secret": {m.clientSecret},
-	}
-
-	requestBody := strings.NewReader(formData.Encode())
-
-	req, err := http.NewRequest("POST", m.authEndpoint, requestBody)
-	if err != nil {
-		return err
-	}
-
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-
-	resp, err := m.client.Do(req)
+func (m *m365Client) GetToken(ctx context.Context) error {
+	resp, err := m.makeRequest(ctx, Token, m.authEndpoint)
 	if err != nil {
 		return err
 	}
@@ -234,14 +234,8 @@ func (m *m365Client) GetToken() error {
 }
 
 // function for getting metrics data
-func (m *m365Client) GetCSV(endpoint string) ([]string, error) {
-	req, err := http.NewRequest("GET", endpoint, nil)
-	if err != nil {
-		return []string{}, err
-	}
-
-	req.Header.Set("Authorization", m.token)
-	resp, err := m.client.Do(req)
+func (m *m365Client) GetCSV(ctx context.Context, endpoint string) ([]string, error) {
+	resp, err := m.makeRequest(ctx, Default, endpoint)
 	if err != nil {
 		return []string{}, err
 	}
@@ -281,17 +275,7 @@ func (m *m365Client) GetCSV(endpoint string) ([]string, error) {
 // function for getting log data
 func (m *m365Client) GetJSON(ctx context.Context, endpoint string, end string, start string) (logData, error) {
 	// make request to Audit endpoint
-	req, err := http.NewRequestWithContext(ctx, "GET", endpoint, nil)
-	if err != nil {
-		return logData{}, err
-	}
-	req.Header.Set("Authorization", "Bearer "+m.token)
-	q := req.URL.Query()
-	q.Add("startTime", start)
-	q.Add("endTime", end)
-	req.URL.RawQuery = q.Encode()
-
-	resp, err := m.client.Do(req)
+	resp, err := m.makeRequest(ctx, JSON, endpoint, WithTime(end, start))
 	if err != nil {
 		return logData{}, err
 	}
@@ -309,24 +293,17 @@ func (m *m365Client) GetJSON(ctx context.Context, endpoint string, end string, s
 		return logData{}, fmt.Errorf("got non 200 status code from request, got %d", resp.StatusCode)
 	}
 
-	// check if contentUri field if present
-	body, err := io.ReadAll(resp.Body)
+	// get redirect link
+	redirectLink, err := m.readInContent(resp)
 	if err != nil {
 		return logData{}, err
 	}
-	if string(body) == "[]" { // if body is empty, no new log data available
+	if redirectLink == "" {
 		return logData{}, nil
 	}
 
-	// extract contentUri field
-	var lr []logResp
-	err = json.Unmarshal(body, &lr)
-	if err != nil {
-		return logData{}, err
-	}
-
 	// read in json
-	body, err = m.followLink(ctx, &lr[0])
+	body, err := m.followLink(ctx, redirectLink)
 	if err != nil {
 		return logData{}, err
 	}
@@ -340,13 +317,8 @@ func (m *m365Client) GetJSON(ctx context.Context, endpoint string, end string, s
 	return data, nil
 }
 
-func (m *m365Client) StartSubscription(endpoint string) error {
-	req, err := http.NewRequest("POST", endpoint, nil)
-	if err != nil {
-		return err
-	}
-	req.Header.Set("Authorization", "Bearer "+m.token)
-	resp, err := m.client.Do(req)
+func (m *m365Client) StartSubscription(ctx context.Context, endpoint string) error {
+	resp, err := m.makeRequest(ctx, Sub, endpoint)
 	if err != nil {
 		return err
 	}
@@ -374,31 +346,26 @@ func (m *m365Client) StartSubscription(endpoint string) error {
 }
 
 // followLink will follow the response of a first request that has a link to the actual content
-func (m *m365Client) followLink(ctx context.Context, lr *logResp) ([]byte, error) {
-	redirectReq, err := http.NewRequestWithContext(ctx, "GET", lr.Content, nil)
+func (m *m365Client) followLink(ctx context.Context, endpoint string) ([]byte, error) {
+	resp, err := m.makeRequest(ctx, Default, endpoint)
 	if err != nil {
 		return []byte{}, err
 	}
-	redirectReq.Header.Set("Authorization", "Bearer "+m.token)
-	redirectResp, err := m.client.Do(redirectReq)
-	if err != nil {
-		return []byte{}, err
-	}
-	defer func() { _ = redirectResp.Body.Close() }()
+	defer func() { _ = resp.Body.Close() }()
 
 	// troubleshoot error code
-	if redirectResp.StatusCode != 200 {
-		respErr, err := m.readInErr(redirectResp)
+	if resp.StatusCode != 200 {
+		respErr, err := m.readInErr(resp)
 		if err != nil {
 			return []byte{}, err
 		}
 		if respErr.Message == "Authorization has been denied for this request." {
 			return []byte{}, fmt.Errorf("authorization denied")
 		}
-		return []byte{}, fmt.Errorf("got non 200 status code from request, got %d", redirectResp.StatusCode)
+		return []byte{}, fmt.Errorf("got non 200 status code from request, got %d", resp.StatusCode)
 	}
 
-	return io.ReadAll(redirectResp.Body)
+	return io.ReadAll(resp.Body)
 }
 
 // parseBody takes the byte[] response and parses it into string objects
@@ -410,6 +377,7 @@ func (m *m365Client) parseBody(body []byte) []string {
 	return data
 }
 
+// reads in errors for responses
 func (m *m365Client) readInErr(resp *http.Response) (apiError, error) {
 	var respErr apiError
 	body, err := io.ReadAll(resp.Body)
@@ -421,4 +389,68 @@ func (m *m365Client) readInErr(resp *http.Response) (apiError, error) {
 		return apiError{}, err
 	}
 	return respErr, nil
+}
+
+// reads in content uri for GetJSON
+func (m *m365Client) readInContent(resp *http.Response) (string, error) {
+	// check if contentUri field if present
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+	if string(body) == "[]" { // if body is empty, no new log data available
+		return "", nil
+	}
+	// extract contentUri field
+	lr := []struct {
+		Content string `json:"contentUri"`
+	}{}
+	if err = json.Unmarshal(body, &lr); err != nil {
+		return "", err
+	}
+	return lr[0].Content, nil
+}
+
+// handles requests for client functions
+func (m *m365Client) makeRequest(ctx context.Context, r ReqType, endpoint string, opts ...Option) (*http.Response, error) {
+	switch r {
+	case 0: // token case
+		formData := url.Values{
+			"grant_type":    {"client_credentials"},
+			"scope":         {m.scope},
+			"client_id":     {m.clientID},
+			"client_secret": {m.clientSecret},
+		}
+		requestBody := strings.NewReader(formData.Encode())
+		req, err := http.NewRequestWithContext(ctx, "POST", endpoint, requestBody)
+		if err != nil {
+			return nil, err
+		}
+		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+		return m.client.Do(req)
+	case 1: // subscription case
+		req, err := http.NewRequestWithContext(ctx, "POST", endpoint, nil)
+		if err != nil {
+			return nil, err
+		}
+		req.Header.Set("Authorization", "Bearer "+m.token)
+		return m.client.Do(req)
+	case 2: // json case
+		req, err := http.NewRequestWithContext(ctx, "GET", endpoint, nil)
+		if err != nil {
+			return nil, err
+		}
+		req.Header.Set("Authorization", "Bearer "+m.token)
+		opts[0](req)
+		return m.client.Do(req)
+	case 3: // csv & followLink case
+		req, err := http.NewRequestWithContext(ctx, "GET", endpoint, nil)
+		if err != nil {
+			return nil, err
+		}
+		req.Header.Set("Authorization", "Bearer "+m.token)
+		return m.client.Do(req)
+	default:
+		return nil, nil
+	}
 }

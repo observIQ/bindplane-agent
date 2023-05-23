@@ -39,8 +39,8 @@ const (
 
 type lClient interface {
 	GetJSON(ctx context.Context, endpoint string, end string, start string) (logData, error)
-	GetToken() error
-	StartSubscription(endpoint string) error
+	GetToken(ctx context.Context) error
+	StartSubscription(ctx context.Context, endpoint string) error
 	shutdown() error
 }
 
@@ -107,13 +107,13 @@ func (l *m365LogsReceiver) Start(ctx context.Context, host component.Host) error
 
 	// create m365 log client, create token and start audit subscriptions
 	l.client = newM365Client(httpClient, l.cfg, "https://manage.office.com/.default")
-	err = l.client.GetToken()
+	err = l.client.GetToken(ctx)
 	if err != nil {
 		l.logger.Error("error creating authorization token", zap.Error(err))
 		return err
 	}
 	for _, a := range l.audits {
-		err = l.client.StartSubscription(l.startRoot + a.route)
+		err = l.client.StartSubscription(ctx, l.startRoot+a.route)
 		if err != nil {
 			l.logger.Error("error starting audit subscriptions", zap.Error(err))
 			return err
@@ -216,7 +216,7 @@ func (l *m365LogsReceiver) getLogs(ctx context.Context, end string, start string
 	if err != nil {
 		if err.Error() == "authorization denied" { // troubleshoot stale token
 			l.logger.Debug("possible stale token; attempting to regenerate")
-			err = l.client.GetToken()
+			err = l.client.GetToken(ctx)
 			if err != nil { // something went wrong generating token
 				l.logger.Error("error creating authorization token", zap.Error(err))
 				return logData{}, err

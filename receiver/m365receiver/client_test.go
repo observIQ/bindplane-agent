@@ -33,25 +33,25 @@ func TestGetToken(t *testing.T) {
 	testClient.clientSecret = "testClientSecret"
 
 	// test 1: correct behavior
-	err := testClient.GetToken()
+	err := testClient.GetToken(context.Background())
 	require.NoError(t, err)
 	require.Equal(t, "testAccessToken", testClient.token)
 
 	// test 2: incorrect client secret
 	testClient.clientSecret = "err"
-	err = testClient.GetToken()
+	err = testClient.GetToken(context.Background())
 	assert.EqualError(t, err, "the provided client_secret is incorrect or does not belong to the given client_id")
 
 	// test 3: incorrect client id
 	testClient.clientSecret = "testClientSecret"
 	testClient.clientID = "err"
-	err = testClient.GetToken()
+	err = testClient.GetToken(context.Background())
 	assert.EqualError(t, err, "the provided client_id is incorrect or does not exist within the given tenant directory")
 
 	// test 4: incorrect tenant_id
 	testClient.clientID = "testClientID"
 	testClient.authEndpoint = m365Mock.URL + "/err"
-	err = testClient.GetToken()
+	err = testClient.GetToken(context.Background())
 	assert.EqualError(t, err, "the provided tenant_id is incorrect or does not exist")
 }
 
@@ -61,20 +61,20 @@ func TestGetCSV(t *testing.T) {
 	testClient.token = "foo"
 
 	//expected behavior
-	testLine, err := testClient.GetCSV(m365Mock.URL + "/getSharePointSiteUsageFileCounts(period='D7')")
+	testLine, err := testClient.GetCSV(context.Background(), m365Mock.URL+"/getSharePointSiteUsageFileCounts(period='D7')")
 	require.NoError(t, err)
 	expectedLine := []string{"2023-04-25", "All", "2", "0", "2023-04-25", "7"}
 	require.Equal(t, expectedLine, testLine)
 
 	//test no returned data
-	testLine, err = testClient.GetCSV(m365Mock.URL + "/testNoData")
+	testLine, err = testClient.GetCSV(context.Background(), m365Mock.URL+"/testNoData")
 	require.NoError(t, err)
 	expectedLine = []string{}
 	require.Equal(t, expectedLine, testLine)
 
 	//err testing
 	testClient.token = "err"
-	_, err = testClient.GetCSV(m365Mock.URL + "/getSharePointSiteUsageFileCounts(period='D7')")
+	_, err = testClient.GetCSV(context.Background(), m365Mock.URL+"/getSharePointSiteUsageFileCounts(period='D7')")
 	assert.EqualError(t, err, "access token invalid")
 }
 
@@ -84,11 +84,11 @@ func TestStartSubscription(t *testing.T) {
 	testClient.token = "foo"
 
 	//expected behavior
-	err := testClient.StartSubscription(m365Mock.URL + "/testStartSub")
+	err := testClient.StartSubscription(context.Background(), m365Mock.URL+"/testStartSub")
 	require.NoError(t, err)
 
 	//sub already enabled
-	err = testClient.StartSubscription(m365Mock.URL + "/testSubStartedAlready")
+	err = testClient.StartSubscription(context.Background(), m365Mock.URL+"/testSubStartedAlready")
 	require.NoError(t, err)
 }
 
@@ -123,9 +123,8 @@ func TestFollowLinkErr(t *testing.T) {
 	m365Mock := newMockServerJSON()
 	testClient := newM365Client(m365Mock.Client(), &Config{}, "https://manage.office.com/.default")
 	testClient.token = "bad"
-	testURI := logResp{Content: m365Mock.URL + "/testJSONredirect"}
 
-	_, err := testClient.followLink(context.Background(), &testURI)
+	_, err := testClient.followLink(context.Background(), m365Mock.URL+"/testJSONredirect")
 	require.EqualError(t, err, "authorization denied")
 }
 
@@ -140,7 +139,7 @@ func newMockServerCSV() *httptest.Server {
 				return
 			}
 
-			if a := req.Header.Get("Authorization"); a != "foo" {
+			if a := req.Header.Get("Authorization"); a != "Bearer foo" {
 				rw.WriteHeader(400)
 				rw.Write([]byte(`{"error": {"code": "InvalidAuthenticationToken"}}`))
 				return
@@ -159,7 +158,7 @@ func newMockServerCSV() *httptest.Server {
 				return
 			}
 
-			if a := req.Header.Get("Authorization"); a != "foo" {
+			if a := req.Header.Get("Authorization"); a != "Bearer foo" {
 				rw.WriteHeader(400)
 				rw.Write([]byte(`{"error": {"code": "InvalidAuthenticationToken"}}`))
 				return

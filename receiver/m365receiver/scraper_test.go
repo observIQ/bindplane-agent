@@ -42,29 +42,29 @@ func TestBadToken(t *testing.T) {
 	scraper.client = mc
 
 	//test 1: incorrect token requirements, scraper fails to gen a new, correct token
-	mc.On("GetCSV", root+"getSharePointSiteUsageFileCounts(period='D7')").Return([]string{}, fmt.Errorf("access token invalid")).Once()
-	mc.On("GetToken").Return(fmt.Errorf("the provided client_id is incorrect or does not exist within the given tenant directory")).Once()
+	mc.On("GetCSV", mock.Anything, root+"getSharePointSiteUsageFileCounts(period='D7')").Return([]string{}, fmt.Errorf("access token invalid")).Once()
+	mc.On("GetToken", mock.Anything).Return(fmt.Errorf("the provided client_id is incorrect or does not exist within the given tenant directory")).Once()
 
 	_, err := scraper.scrape(context.Background())
 	require.EqualError(t, err, "the provided client_id is incorrect or does not exist within the given tenant directory")
 
 	//test 2: stale token, getCSV will return empty data just for simplicity in this test
-	mc.On("GetCSV", root+"getSharePointSiteUsageFileCounts(period='D7')").Return([]string{}, fmt.Errorf("access token invalid")).Once()
-	mc.On("GetToken").Return(nil).Once()
-	mc.On("GetCSV", root+"getSharePointSiteUsageFileCounts(period='D7')").Return([]string{}, nil)
-	mc.On("GetCSV", root+"getSharePointSiteUsageSiteCounts(period='D7')").Return([]string{}, nil)
-	mc.On("GetCSV", root+"getSharePointSiteUsagePages(period='D7')").Return([]string{}, nil)
-	mc.On("GetCSV", root+"getSharePointActivityPages(period='D7')").Return([]string{}, nil)
-	mc.On("GetCSV", root+"getSharePointSiteUsageStorage(period='D7')").Return([]string{}, nil)
-	mc.On("GetCSV", root+"getTeamsDeviceUsageDistributionUserCounts(period='D7')").Return([]string{}, nil)
-	mc.On("GetCSV", root+"getTeamsUserActivityCounts(period='D7')").Return([]string{}, nil)
-	mc.On("GetCSV", root+"getOneDriveUsageFileCounts(period='D7')").Return([]string{}, nil)
-	mc.On("GetCSV", root+"getOneDriveActivityUserCounts(period='D7')").Return([]string{}, nil)
-	mc.On("GetCSV", root+"getMailboxUsageMailboxCounts(period='D7')").Return([]string{}, nil)
-	mc.On("GetCSV", root+"getEmailActivityCounts(period='D7')").Return([]string{}, nil)
-	mc.On("GetCSV", root+"getMailboxUsageStorage(period='D7')").Return([]string{}, nil)
-	mc.On("GetCSV", root+"getEmailAppUsageAppsUserCounts(period='D7')").Return([]string{}, nil)
-	mc.On("GetCSV", root+"getMailboxUsageQuotaStatusMailboxCounts(period='D7')").Return([]string{}, nil)
+	mc.On("GetCSV", mock.Anything, root+"getSharePointSiteUsageFileCounts(period='D7')").Return([]string{}, fmt.Errorf("access token invalid")).Once()
+	mc.On("GetToken", mock.Anything).Return(nil).Once()
+	mc.On("GetCSV", mock.Anything, root+"getSharePointSiteUsageFileCounts(period='D7')").Return([]string{}, nil)
+	mc.On("GetCSV", mock.Anything, root+"getSharePointSiteUsageSiteCounts(period='D7')").Return([]string{}, nil)
+	mc.On("GetCSV", mock.Anything, root+"getSharePointSiteUsagePages(period='D7')").Return([]string{}, nil)
+	mc.On("GetCSV", mock.Anything, root+"getSharePointActivityPages(period='D7')").Return([]string{}, nil)
+	mc.On("GetCSV", mock.Anything, root+"getSharePointSiteUsageStorage(period='D7')").Return([]string{}, nil)
+	mc.On("GetCSV", mock.Anything, root+"getTeamsDeviceUsageDistributionUserCounts(period='D7')").Return([]string{}, nil)
+	mc.On("GetCSV", mock.Anything, root+"getTeamsUserActivityCounts(period='D7')").Return([]string{}, nil)
+	mc.On("GetCSV", mock.Anything, root+"getOneDriveUsageFileCounts(period='D7')").Return([]string{}, nil)
+	mc.On("GetCSV", mock.Anything, root+"getOneDriveActivityUserCounts(period='D7')").Return([]string{}, nil)
+	mc.On("GetCSV", mock.Anything, root+"getMailboxUsageMailboxCounts(period='D7')").Return([]string{}, nil)
+	mc.On("GetCSV", mock.Anything, root+"getEmailActivityCounts(period='D7')").Return([]string{}, nil)
+	mc.On("GetCSV", mock.Anything, root+"getMailboxUsageStorage(period='D7')").Return([]string{}, nil)
+	mc.On("GetCSV", mock.Anything, root+"getEmailAppUsageAppsUserCounts(period='D7')").Return([]string{}, nil)
+	mc.On("GetCSV", mock.Anything, root+"getMailboxUsageQuotaStatusMailboxCounts(period='D7')").Return([]string{}, nil)
 
 	_, err = scraper.scrape(context.Background())
 	require.NoError(t, err)
@@ -74,22 +74,22 @@ func TestPartialMetrics(t *testing.T) {
 	//mocks, only do the first endpoint, leave out all other metrics
 	root := "https://graph.microsoft.com/v1.0/reports/"
 	mc := &mockClient{}
-	mc.On("GetCSV", root+"getSharePointSiteUsageFileCounts(period='D7')").Return([]string{
+	mc.On("GetCSV", mock.Anything, root+"getSharePointSiteUsageFileCounts(period='D7')").Return([]string{
 		"2023-04-23", "All", "2", "0", "2023-04-23", "7",
 	}, nil)
-	mc.On("GetCSV", root+"getSharePointSiteUsageSiteCounts(period='D7')").Return([]string{}, nil)
-	mc.On("GetCSV", root+"getSharePointSiteUsagePages(period='D7')").Return([]string{}, nil)
-	mc.On("GetCSV", root+"getSharePointActivityPages(period='D7')").Return([]string{}, nil)
-	mc.On("GetCSV", root+"getSharePointSiteUsageStorage(period='D7')").Return([]string{}, nil)
-	mc.On("GetCSV", root+"getTeamsDeviceUsageDistributionUserCounts(period='D7')").Return([]string{}, nil)
-	mc.On("GetCSV", root+"getTeamsUserActivityCounts(period='D7')").Return([]string{}, nil)
-	mc.On("GetCSV", root+"getOneDriveUsageFileCounts(period='D7')").Return([]string{}, nil)
-	mc.On("GetCSV", root+"getOneDriveActivityUserCounts(period='D7')").Return([]string{}, nil)
-	mc.On("GetCSV", root+"getMailboxUsageMailboxCounts(period='D7')").Return([]string{}, nil)
-	mc.On("GetCSV", root+"getEmailActivityCounts(period='D7')").Return([]string{}, nil)
-	mc.On("GetCSV", root+"getMailboxUsageStorage(period='D7')").Return([]string{}, nil)
-	mc.On("GetCSV", root+"getEmailAppUsageAppsUserCounts(period='D7')").Return([]string{}, nil)
-	mc.On("GetCSV", root+"getMailboxUsageQuotaStatusMailboxCounts(period='D7')").Return([]string{}, nil)
+	mc.On("GetCSV", mock.Anything, root+"getSharePointSiteUsageSiteCounts(period='D7')").Return([]string{}, nil)
+	mc.On("GetCSV", mock.Anything, root+"getSharePointSiteUsagePages(period='D7')").Return([]string{}, nil)
+	mc.On("GetCSV", mock.Anything, root+"getSharePointActivityPages(period='D7')").Return([]string{}, nil)
+	mc.On("GetCSV", mock.Anything, root+"getSharePointSiteUsageStorage(period='D7')").Return([]string{}, nil)
+	mc.On("GetCSV", mock.Anything, root+"getTeamsDeviceUsageDistributionUserCounts(period='D7')").Return([]string{}, nil)
+	mc.On("GetCSV", mock.Anything, root+"getTeamsUserActivityCounts(period='D7')").Return([]string{}, nil)
+	mc.On("GetCSV", mock.Anything, root+"getOneDriveUsageFileCounts(period='D7')").Return([]string{}, nil)
+	mc.On("GetCSV", mock.Anything, root+"getOneDriveActivityUserCounts(period='D7')").Return([]string{}, nil)
+	mc.On("GetCSV", mock.Anything, root+"getMailboxUsageMailboxCounts(period='D7')").Return([]string{}, nil)
+	mc.On("GetCSV", mock.Anything, root+"getEmailActivityCounts(period='D7')").Return([]string{}, nil)
+	mc.On("GetCSV", mock.Anything, root+"getMailboxUsageStorage(period='D7')").Return([]string{}, nil)
+	mc.On("GetCSV", mock.Anything, root+"getEmailAppUsageAppsUserCounts(period='D7')").Return([]string{}, nil)
+	mc.On("GetCSV", mock.Anything, root+"getMailboxUsageQuotaStatusMailboxCounts(period='D7')").Return([]string{}, nil)
 
 	scraper := newM365Scraper(
 		receivertest.NewNopCreateSettings(),
@@ -123,46 +123,46 @@ func TestScraper(t *testing.T) {
 	//mocks
 	root := "https://graph.microsoft.com/v1.0/reports/"
 	mc := &mockClient{}
-	mc.On("GetCSV", root+"getSharePointSiteUsageFileCounts(period='D7')").Return([]string{
+	mc.On("GetCSV", mock.Anything, root+"getSharePointSiteUsageFileCounts(period='D7')").Return([]string{
 		"2023-04-23", "All", "2", "0", "2023-04-23", "7",
 	}, nil)
-	mc.On("GetCSV", root+"getSharePointSiteUsageSiteCounts(period='D7')").Return([]string{
+	mc.On("GetCSV", mock.Anything, root+"getSharePointSiteUsageSiteCounts(period='D7')").Return([]string{
 		"2023-04-23", "All", "8", "0", "2023-04-23", "7",
 	}, nil)
-	mc.On("GetCSV", root+"getSharePointSiteUsagePages(period='D7')").Return([]string{
+	mc.On("GetCSV", mock.Anything, root+"getSharePointSiteUsagePages(period='D7')").Return([]string{
 		"2023-04-23", "All", "3", "2023-04-23", "7",
 	}, nil)
-	mc.On("GetCSV", root+"getSharePointActivityPages(period='D7')").Return([]string{
+	mc.On("GetCSV", mock.Anything, root+"getSharePointActivityPages(period='D7')").Return([]string{
 		"2023-04-23", "10", "2023-04-23", "7",
 	}, nil)
-	mc.On("GetCSV", root+"getSharePointSiteUsageStorage(period='D7')").Return([]string{
+	mc.On("GetCSV", mock.Anything, root+"getSharePointSiteUsageStorage(period='D7')").Return([]string{
 		"2023-04-23", "All", "1111", "2023-04-23", "7",
 	}, nil)
-	mc.On("GetCSV", root+"getTeamsDeviceUsageDistributionUserCounts(period='D7')").Return([]string{
+	mc.On("GetCSV", mock.Anything, root+"getTeamsDeviceUsageDistributionUserCounts(period='D7')").Return([]string{
 		"2023-04-23", "2", "0", "4", "6", "8", "10", "12", "14", "7",
 	}, nil)
-	mc.On("GetCSV", root+"getTeamsUserActivityCounts(period='D7')").Return([]string{
+	mc.On("GetCSV", mock.Anything, root+"getTeamsUserActivityCounts(period='D7')").Return([]string{
 		"2023-04-23", "2023-04-23", "2", "1", "1", "4", "6", "8", "1", "1", "1", "1", "1", "7",
 	}, nil)
-	mc.On("GetCSV", root+"getOneDriveUsageFileCounts(period='D7')").Return([]string{
+	mc.On("GetCSV", mock.Anything, root+"getOneDriveUsageFileCounts(period='D7')").Return([]string{
 		"2023-04-23", "All", "6", "3", "2024-04-23", "7",
 	}, nil)
-	mc.On("GetCSV", root+"getOneDriveActivityUserCounts(period='D7')").Return([]string{
+	mc.On("GetCSV", mock.Anything, root+"getOneDriveActivityUserCounts(period='D7')").Return([]string{
 		"2023-04-23", "2", "4", "6", "8", "2023-04-23", "7",
 	}, nil)
-	mc.On("GetCSV", root+"getMailboxUsageMailboxCounts(period='D7')").Return([]string{
+	mc.On("GetCSV", mock.Anything, root+"getMailboxUsageMailboxCounts(period='D7')").Return([]string{
 		"2023-04-23", "5", "3", "2023-04-23", "7",
 	}, nil)
-	mc.On("GetCSV", root+"getEmailActivityCounts(period='D7')").Return([]string{
+	mc.On("GetCSV", mock.Anything, root+"getEmailActivityCounts(period='D7')").Return([]string{
 		"2023-04-23", "2", "4", "6", "1", "1", "2023-04-23", "7",
 	}, nil)
-	mc.On("GetCSV", root+"getMailboxUsageStorage(period='D7')").Return([]string{
+	mc.On("GetCSV", mock.Anything, root+"getMailboxUsageStorage(period='D7')").Return([]string{
 		"2023-04-23", "50", "2023-04-23", "7",
 	}, nil)
-	mc.On("GetCSV", root+"getEmailAppUsageAppsUserCounts(period='D7')").Return([]string{
+	mc.On("GetCSV", mock.Anything, root+"getEmailAppUsageAppsUserCounts(period='D7')").Return([]string{
 		"2023-04-23", "1", "2", "4", "6", "8", "10", "12", "14", "16", "2023-04-23", "7",
 	}, nil)
-	mc.On("GetCSV", root+"getMailboxUsageQuotaStatusMailboxCounts(period='D7')").Return([]string{
+	mc.On("GetCSV", mock.Anything, root+"getMailboxUsageQuotaStatusMailboxCounts(period='D7')").Return([]string{
 		"2023-04-23", "2", "4", "6", "8", "10", "2023-04-23", "7",
 	}, nil)
 
@@ -198,13 +198,13 @@ type mockClient struct {
 	mock.Mock
 }
 
-func (mw *mockClient) GetCSV(endpoint string) ([]string, error) {
-	args := mw.Called(endpoint)
+func (mw *mockClient) GetCSV(ctx context.Context, endpoint string) ([]string, error) {
+	args := mw.Called(ctx, endpoint)
 	return args.Get(0).([]string), args.Error(1)
 }
 
-func (mw *mockClient) GetToken() error {
-	args := mw.Called()
+func (mw *mockClient) GetToken(ctx context.Context) error {
+	args := mw.Called(ctx)
 	return args.Error(0)
 }
 
