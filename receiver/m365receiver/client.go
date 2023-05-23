@@ -35,9 +35,10 @@ type m365Client struct {
 	scope        string
 }
 
-// request types
+// ReqType enum for request handler
 type ReqType int64
 
+// enums for ReqType
 const (
 	Token   ReqType = 0
 	Sub     ReqType = 1
@@ -45,8 +46,10 @@ const (
 	Default ReqType = 3
 )
 
+// Option func for GetJSON request handler case
 type Option func(r *http.Request)
 
+// WithTime is the option func for request handler
 func WithTime(end string, start string) Option {
 	return func(r *http.Request) {
 		q := r.URL.Query()
@@ -65,6 +68,7 @@ type apiError struct {
 	Message string `json:"Message,omitempty"`
 }
 
+// return type for logs
 type logData struct {
 	logs []jsonLog
 	body []string
