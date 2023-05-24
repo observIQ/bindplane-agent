@@ -340,6 +340,9 @@ func (m *m365Scraper) getStats(ctx context.Context) error {
 		}
 
 		for k, v := range r.indexes {
+			if line[k] == "" {
+				continue
+			}
 			data, err := strconv.Atoi(line[k])
 			if err != nil { // error converting string to int
 				return err

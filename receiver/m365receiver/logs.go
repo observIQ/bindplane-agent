@@ -38,7 +38,7 @@ const (
 )
 
 type lClient interface {
-	GetJSON(ctx context.Context, endpoint string, end string, start string) (logData, error)
+	GetJSON(ctx context.Context, endpoint string, end string, start string) ([]logData, error)
 	GetToken(ctx context.Context) error
 	StartSubscription(ctx context.Context, endpoint string) error
 	shutdown() error
@@ -208,7 +208,7 @@ func (l *m365LogsReceiver) poll(ctx context.Context, now time.Time, st string, a
 	}
 }
 
-func (l *m365LogsReceiver) getLogs(ctx context.Context, end string, start string, audit *auditMetaData) (logData, error) {
+func (l *m365LogsReceiver) getLogs(ctx context.Context, end string, start string, audit *auditMetaData) ([]logData, error) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 
@@ -219,17 +219,17 @@ func (l *m365LogsReceiver) getLogs(ctx context.Context, end string, start string
 			err = l.client.GetToken(ctx)
 			if err != nil { // something went wrong generating token
 				l.logger.Error("error creating authorization token", zap.Error(err))
-				return logData{}, err
+				return []logData{}, err
 			}
 			data, err = l.client.GetJSON(ctx, l.root+audit.route, end, start)
 			if err != nil { // not a stale token error, unsure what is wrong
 				l.logger.Error("unable to retrieve logs", zap.Error(err))
-				return logData{}, nil
+				return []logData{}, nil
 			}
 		} else {
 			l.logger.Error("error retrieving logs", zap.Error(err))
 			l.logger.Error(audit.route) //debug only
-			return logData{}, nil
+			return []logData{}, nil
 		}
 	}
 
@@ -237,28 +237,25 @@ func (l *m365LogsReceiver) getLogs(ctx context.Context, end string, start string
 }
 
 // constructs logs from logData
-func (l *m365LogsReceiver) transformLogs(now pcommon.Timestamp, audit *auditMetaData, data logData) plog.Logs {
+func (l *m365LogsReceiver) transformLogs(now pcommon.Timestamp, audit *auditMetaData, data []logData) plog.Logs {
 	logs := plog.NewLogs()
 	resourceLogs := logs.ResourceLogs().AppendEmpty()
 	scopeLogs := resourceLogs.ScopeLogs().AppendEmpty()
 
 	ra := resourceLogs.Resource().Attributes()
 	ra.PutStr("m365.audit", audit.name)
-	ra.PutStr("m365.organization_id", l.cfg.TenantID)
+	ra.PutStr("m365.organization.id", l.cfg.TenantID)
 
-	for i := 0; i < len(data.logs); i++ {
-		log := data.logs[i]
+	for _, log := range data {
 		logRecord := scopeLogs.LogRecords().AppendEmpty()
 
 		// log body
-		// add ("C) to the start of all log bodies because that is trimmed off
-		// when separating the log bodies apart in the client func GetJSON
-		logRecord.Body().SetStr("\"C" + data.body[i])
+		logRecord.Body().SetStr(log.body)
 
 		// timestamp
-		ts, err := time.Parse(layout, log.CreationTime)
+		ts, err := time.Parse(layout, log.log.CreationTime)
 		if err != nil {
-			l.logger.Warn("unable to interpret when an event was created, expecting a RFC3339 timestamp", zap.String("timestamp", log.CreationTime), zap.String("log", log.ID))
+			l.logger.Warn("unable to interpret when an event was created, expecting a RFC3339 timestamp", zap.String("timestamp", log.log.CreationTime), zap.String("log", log.log.ID))
 			logRecord.SetTimestamp(now)
 		} else {
 			logRecord.SetTimestamp(pcommon.NewTimestampFromTime(ts))
@@ -267,13 +264,13 @@ func (l *m365LogsReceiver) transformLogs(now pcommon.Timestamp, audit *auditMeta
 
 		// attributes
 		attrs := logRecord.Attributes()
-		attrs.PutStr("id", log.ID)
-		attrs.PutStr("operation", log.Operation)
-		attrs.PutStr("user_id", log.UserID)
-		attrs.PutStr("user_type", matchUserType(log.UserType))
+		attrs.PutStr("id", log.log.ID)
+		attrs.PutStr("operation", log.log.Operation)
+		attrs.PutStr("user.id", log.log.UserID)
+		attrs.PutStr("user.type", matchUserType(log.log.UserType))
 
 		// optional attributes
-		parseOptionalAttributes(&attrs, &log)
+		parseOptionalAttributes(&attrs, &log.log)
 	}
 
 	return logs
@@ -321,7 +318,7 @@ func setAttributeIfNotEmpty(m *pcommon.Map, field, value string) {
 // adds any attributes to log that may or may not be present
 func parseOptionalAttributes(m *pcommon.Map, log *jsonLog) {
 	setAttributeIfNotEmpty(m, "workload", log.Workload)
-	setAttributeIfNotEmpty(m, "result_status", log.ResultStatus)
+	setAttributeIfNotEmpty(m, "result", log.ResultStatus)
 	setAttributeIfNotEmpty(m, "sharepoint.site.id", log.SharepointSite)
 	setAttributeIfNotEmpty(m, "exchange.mailbox.id", log.ExchangeMailboxGUID)
 	setAttributeIfNotEmpty(m, "yammer.user.id", log.YammerActorID)
@@ -353,10 +350,10 @@ func parseOptionalAttributes(m *pcommon.Map, log *jsonLog) {
 		m.PutStr("defender.file.source_workload", matchSourceWorkload(*log.DefenderFileSource))
 	}
 	if log.CommCompliance != nil {
-		m.PutStr("communication_compliance.exchange.network_message_id", log.CommCompliance.NetworkMessageID)
+		m.PutStr("communication_compliance.exchange.network.message.id", log.CommCompliance.NetworkMessageID)
 	}
 	if log.DataShareInvitation != nil {
-		m.PutStr("system_sync.data_share.share.id", log.DataShareInvitation.ShareID)
+		m.PutStr("system_sync.data.share.id", log.DataShareInvitation.ShareID)
 	}
 	if log.DefenderFile != nil {
 		m.PutStr("defender.file.id", log.DefenderFile.DocumentID)
@@ -371,8 +368,8 @@ func parseOptionalAttributes(m *pcommon.Map, log *jsonLog) {
 		setAttributeIfNotEmpty(m, "compliance_connector.task.id", log.ConnectorTaskID)
 	}
 	if log.VivaGoalsUsername != "" {
-		m.PutStr("viva_goals.username", log.VivaGoalsUsername)
-		setAttributeIfNotEmpty(m, "viva_goals.organization", log.VivaGoalsOrgName)
+		m.PutStr("viva.username", log.VivaGoalsUsername)
+		setAttributeIfNotEmpty(m, "viva.organization.name", log.VivaGoalsOrgName)
 	}
 
 	recordType := matchRecordType(log.RecordType)

@@ -49,8 +49,8 @@ type apiError struct {
 
 // return type for logs
 type logData struct {
-	logs []jsonLog
-	body []string
+	log  jsonLog
+	body string
 }
 
 // JSON parsing structs
@@ -255,39 +255,44 @@ func (m *m365Client) GetCSV(ctx context.Context, endpoint string) ([]string, err
 }
 
 // function for getting log data
-func (m *m365Client) GetJSON(ctx context.Context, endpoint string, end string, start string) (logData, error) {
+func (m *m365Client) GetJSON(ctx context.Context, endpoint string, end string, start string) ([]logData, error) {
 	// make request to Audit endpoint
 	resp, err := m.makeRequest(ctx, nil, "GET", endpoint, WithToken(m.token), WithTime(end, start))
 	if err != nil {
-		return logData{}, err
+		return []logData{}, err
 	}
 	defer func() { _ = resp.Body.Close() }()
 
 	// troubleshoot error code
 	if resp.StatusCode != 200 {
-		return logData{}, m.handleErrors(resp)
+		return []logData{}, m.handleErrors(resp)
 	}
 
-	// get redirect link
-	redirectLink, err := m.readInContent(resp)
+	// get redirect links
+	redirectLinks, err := m.readInContent(resp)
 	if err != nil {
-		return logData{}, err
+		return []logData{}, err
 	}
-	if redirectLink == "" {
-		return logData{}, nil
+	if redirectLinks == nil { // if no data, return no err
+		return []logData{}, nil
 	}
 
-	// read in json
-	body, err := m.followLink(ctx, redirectLink)
-	if err != nil {
-		return logData{}, err
+	// follows redirect link(s) to get json array of logs
+	// parse json array into individual strings, still in json
+	// append to data each body and corresponding json struct
+	var data = []logData{}
+	for _, l := range redirectLinks {
+		body, err := m.followLink(ctx, l)
+		if err != nil {
+			return []logData{}, err
+		}
+		bodies := m.parseBody(body)
+		for _, b := range bodies {
+			var log = jsonLog{}
+			err = json.Unmarshal([]byte(b), &log)
+			data = append(data, logData{log: log, body: b})
+		}
 	}
-	var data logData
-	err = json.Unmarshal(body, &data.logs)
-	if err != nil {
-		return logData{}, err
-	}
-	data.body = m.parseBody(body)
 
 	return data, nil
 }
@@ -346,11 +351,17 @@ func (m *m365Client) handleErrors(r *http.Response) error {
 }
 
 // parseBody takes the byte[] response and parses it into string objects
+// restores strings to json format after splits and trims
 func (m *m365Client) parseBody(body []byte) []string {
 	data := strings.Split(string(body), "},{\"C")
 	last := len(data) - 1
 	data[0] = strings.TrimPrefix(data[0], "[{\"C")
 	data[last] = strings.TrimSuffix(data[last], "}]")
+	for i := 0; i < len(data); i++ {
+		foo := "{\"C" + data[i] + "}"
+		data[i] = foo
+	}
+	data[last] = strings.TrimSuffix(data[last], ",")
 	return data
 }
 
@@ -369,23 +380,28 @@ func (m *m365Client) readInErr(resp *http.Response) (apiError, error) {
 }
 
 // reads in content uri for GetJSON
-func (m *m365Client) readInContent(resp *http.Response) (string, error) {
+func (m *m365Client) readInContent(resp *http.Response) ([]string, error) {
 	// check if contentUri field if present
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return "", err
+		return []string{}, err
 	}
 	if string(body) == "[]" { // if body is empty, no new log data available
-		return "", nil
+		return []string{}, nil
 	}
 	// extract contentUri field
 	lr := []struct {
 		Content string `json:"contentUri"`
 	}{}
 	if err = json.Unmarshal(body, &lr); err != nil {
-		return "", err
+		return []string{}, err
 	}
-	return lr[0].Content, nil
+	var endpoints = []string{}
+	for _, i := range lr {
+		endpoints = append(endpoints, i.Content)
+	}
+
+	return endpoints, nil
 }
 
 // handles requests for client functions

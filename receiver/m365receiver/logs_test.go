@@ -116,7 +116,7 @@ func TestPollErrHandle(t *testing.T) {
 	rcv.client = client
 
 	// unable to fix token
-	client.On("GetJSON", mock.Anything, rcv.root+"Audit.General", mock.Anything, mock.Anything).Return(logData{}, fmt.Errorf("authorization denied")).Once()
+	client.On("GetJSON", mock.Anything, rcv.root+"Audit.General", mock.Anything, mock.Anything).Return([]logData{}, fmt.Errorf("authorization denied")).Once()
 	client.On("GetToken", mock.Anything).Return(fmt.Errorf("err")).Once()
 	wg.Add(1)
 	rcv.poll(context.Background(), time.Now(), "", &audit, wg)
@@ -125,9 +125,9 @@ func TestPollErrHandle(t *testing.T) {
 	}, 3*time.Second, 1*time.Second)
 
 	// GetJSON still doesn't work
-	client.On("GetJSON", mock.Anything, rcv.root+"Audit.General", mock.Anything, mock.Anything).Return(logData{}, fmt.Errorf("authorization denied")).Once()
+	client.On("GetJSON", mock.Anything, rcv.root+"Audit.General", mock.Anything, mock.Anything).Return([]logData{}, fmt.Errorf("authorization denied")).Once()
 	client.On("GetToken", mock.Anything).Return(nil).Once()
-	client.On("GetJSON", mock.Anything, rcv.root+"Audit.General", mock.Anything, mock.Anything).Return(logData{}, fmt.Errorf("err")).Once()
+	client.On("GetJSON", mock.Anything, rcv.root+"Audit.General", mock.Anything, mock.Anything).Return([]logData{}, fmt.Errorf("err")).Once()
 	wg.Add(1)
 	rcv.poll(context.Background(), time.Now(), "", &audit, wg)
 	require.Never(t, func() bool {
@@ -135,7 +135,7 @@ func TestPollErrHandle(t *testing.T) {
 	}, 3*time.Second, 1*time.Second)
 
 	// GetJSON never worked
-	client.On("GetJSON", mock.Anything, rcv.root+"Audit.General", mock.Anything, mock.Anything).Return(logData{}, fmt.Errorf("err")).Once()
+	client.On("GetJSON", mock.Anything, rcv.root+"Audit.General", mock.Anything, mock.Anything).Return([]logData{}, fmt.Errorf("err")).Once()
 	wg.Add(1)
 	rcv.poll(context.Background(), time.Now(), "", &audit, wg)
 	require.Never(t, func() bool {
@@ -144,7 +144,7 @@ func TestPollErrHandle(t *testing.T) {
 
 	// regenerate token works
 	file := filepath.Join("testdata", "logs", "testPollLogs", "input.json")
-	client.On("GetJSON", mock.Anything, rcv.root+"Audit.General", mock.Anything, mock.Anything).Return(logData{}, fmt.Errorf("authorization denied")).Once()
+	client.On("GetJSON", mock.Anything, rcv.root+"Audit.General", mock.Anything, mock.Anything).Return([]logData{}, fmt.Errorf("authorization denied")).Once()
 	client.On("GetJSON", mock.Anything, rcv.root+"Audit.General", mock.Anything, mock.Anything).Return(client.loadTestLogs(t, file), nil).Once()
 	client.On("GetToken", mock.Anything).Return(nil).Once()
 	wg.Add(1)
@@ -181,7 +181,7 @@ type mockLogsClient struct {
 	mock.Mock
 }
 
-func (mc *mockLogsClient) loadTestLogs(t *testing.T, file string) logData {
+func (mc *mockLogsClient) loadTestLogs(t *testing.T, file string) []logData {
 	logBytes, err := os.ReadFile(file)
 	require.NoError(t, err)
 
@@ -193,14 +193,25 @@ func (mc *mockLogsClient) loadTestLogs(t *testing.T, file string) logData {
 	last := len(data) - 1
 	data[0] = strings.TrimPrefix(data[0], "[{\"C")
 	data[last] = strings.TrimSuffix(data[last], "}]")
+	for i := 0; i < len(data); i++ {
+		foo := "{\"C" + data[i] + "}"
+		data[i] = foo
+	}
+	data[last] = strings.TrimSuffix(data[last], ",")
 
-	ret := logData{logs: logs, body: data}
+	var ret = []logData{}
+	for _, b := range data {
+		var log = jsonLog{}
+		err = json.Unmarshal([]byte(b), &log)
+		ret = append(ret, logData{log: log, body: b})
+	}
+
 	return ret
 }
 
-func (mc *mockLogsClient) GetJSON(ctx context.Context, endpoint string, end string, start string) (logData, error) {
+func (mc *mockLogsClient) GetJSON(ctx context.Context, endpoint string, end string, start string) ([]logData, error) {
 	args := mc.Called(ctx, endpoint, end, start)
-	return args.Get(0).(logData), args.Error(1)
+	return args.Get(0).([]logData), args.Error(1)
 }
 
 func (mc *mockLogsClient) GetToken(ctx context.Context) error {

@@ -100,18 +100,20 @@ func TestGetJSON(t *testing.T) {
 	//expected behavior
 	testJSON, err := testClient.GetJSON(context.Background(), m365Mock.URL+"/testJSON", "", "")
 	require.NoError(t, err)
-	expectedJSON := []jsonLog{
-		{
+	expectedJSON := logData{
+		log: jsonLog{
 			Workload:     "testWorkload",
 			UserID:       "testUserId",
+			RecordType:   0,
 			UserType:     0,
 			CreationTime: "2023-05-09T22:25:14",
 			ID:           "testId",
 			Operation:    "testOperation",
 			ResultStatus: "testResultStatus",
 		},
+		body: "{\"CreationTime\": \"2023-05-09T22:25:14\",\"Id\": \"testId\",\"Operation\": \"testOperation\",\"OrganizationID\": \"testOrgId\",\"ResultStatus\": \"testResultStatus\",\"UserId\": \"testUserId\",\"UserType\": 0,\"Workload\": \"testWorkload\"}",
 	}
-	require.Equal(t, testJSON.logs, expectedJSON)
+	require.Equal(t, expectedJSON, testJSON[0])
 
 	// bad token
 	testClient.token = "bad"
@@ -213,18 +215,7 @@ func newMockServerJSON() *httptest.Server {
 
 			rw.WriteHeader(200)
 			rw.Write([]byte(
-				`[
-					{
-						"CreationTime": "2023-05-09T22:25:14",
-						"Id": "testId",
-						"Operation": "testOperation",
-						"OrganizationID": "testOrgId",
-						"ResultStatus": "testResultStatus",
-						"UserId": "testUserId",
-						"UserType": 0,
-						"Workload": "testWorkload"
-					}
-				]`,
+				`[{"CreationTime": "2023-05-09T22:25:14","Id": "testId","Operation": "testOperation","OrganizationID": "testOrgId","ResultStatus": "testResultStatus","UserId": "testUserId","UserType": 0,"Workload": "testWorkload"}]`,
 			))
 		}
 		rw.WriteHeader(404)
