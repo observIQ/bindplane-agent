@@ -20,8 +20,11 @@ Log parser for CockroachDB
 | kv_distribution_log_path | The absolute path to the CockroachDB kv distribution logs | []string | `[/var/log/cockroach-data/logs/cockroach-kv-distribution.log]` | false |  |
 | enable_pebble_log | Enable to collect cockroachdb pebble logs. | bool | `true` | false |  |
 | pebble_log_path | The absolute path to the CockroachDB pebble logs | []string | `[/var/log/cockroach-data/logs/cockroach-pebble.log]` | false |  |
-| start_at | At startup, where to start reading logs from the file ('beginning' or 'end') | string | `beginning` | false | `beginning`, `end` |
+| start_at | At startup, where to start reading logs from the file ('beginning' or 'end') | string | `end` | false | `beginning`, `end` |
 | timezone | Timezone to use when parsing the timestamp | timezone | `UTC` | false |  |
+| retain_raw_logs | When enabled will preserve the original log message in a `raw_log` key. This will either be in the `body` or `attributes` depending on how `parse_to` is configured. | bool | `false` | false |  |
+| parse_to | Where to parse structured log parts | string | `body` | false | `body`, `attributes` |
+| offset_storage_dir | The directory that the offset storage file will be created | string | `$OIQ_OTEL_COLLECTOR_HOME/storage` | false |  |
 
 ## Example Config:
 
@@ -46,6 +49,9 @@ receivers:
       kv_distribution_log_path: [/var/log/cockroach-data/logs/cockroach-kv-distribution.log]
       enable_pebble_log: true
       pebble_log_path: [/var/log/cockroach-data/logs/cockroach-pebble.log]
-      start_at: beginning
+      start_at: end
       timezone: UTC
+      retain_raw_logs: false
+      parse_to: body
+      offset_storage_dir: $OIQ_OTEL_COLLECTOR_HOME/storage
 ```
