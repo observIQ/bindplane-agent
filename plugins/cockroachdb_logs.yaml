@@ -116,7 +116,7 @@ template: |
             preset: none
             mapping:
               info: I
-              warning: W
+              warn: W
               error: E
               fatal: F
     {{ end }}
@@ -144,7 +144,7 @@ template: |
             preset: none
             mapping:
               info: I
-              warning: W
+              warn: W
               error: E
               fatal: F
     {{ end }}
@@ -173,7 +173,7 @@ template: |
             preset: none
             mapping:
               info: I
-              warning: W
+              warn: W
               error: E
               fatal: F
     {{ end }}
@@ -201,7 +201,7 @@ template: |
             preset: none
             mapping:
               info: I
-              warning: W
+              warn: W
               error: E
               fatal: F
     {{ end }}
@@ -229,7 +229,7 @@ template: |
             preset: none
             mapping:
               info: I
-              warning: W
+              warn: W
               error: E
               fatal: F
     {{ end }}
@@ -257,7 +257,7 @@ template: |
             preset: none
             mapping:
               info: I
-              warning: W
+              warn: W
               error: E
               fatal: F
     {{ end }}
@@ -285,7 +285,7 @@ template: |
             preset: none
             mapping:
               info: I
-              warning: W
+              warn: W
               error: E
               fatal: F
     {{ end }}
