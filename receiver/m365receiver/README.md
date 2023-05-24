@@ -54,6 +54,8 @@ The Microsoft Office 365 receiver takes the following parameters. `tenant_id`, `
     - `dlp` : (default true) true or false
 - `storage` : The component ID of a storage extension which can be used when polling for `logs` . The storage extension prevents duplication of data after a collector restart by remembering which data were previously collected.
 
+**Note: The metrics scraper only runs once every 24 hours because of the nature of the data returned by Microsoft Office**
+
 **Example Configs**
 
 Collect metrics: 

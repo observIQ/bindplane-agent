@@ -228,7 +228,6 @@ func (l *m365LogsReceiver) getLogs(ctx context.Context, end string, start string
 			}
 		} else {
 			l.logger.Error("error retrieving logs", zap.Error(err))
-			l.logger.Error(audit.route) //debug only
 			return []logData{}, nil
 		}
 	}

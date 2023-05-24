@@ -44,7 +44,7 @@ func NewFactory() receiver.Factory {
 func createDefaultConfig() component.Config {
 	return &Config{
 		ScraperControllerSettings: scraperhelper.ScraperControllerSettings{
-			CollectionInterval: 5 * time.Second,
+			CollectionInterval: 24 * time.Hour,
 		},
 		HTTPClientSettings: confighttp.HTTPClientSettings{
 			Timeout: 10 * time.Second,
