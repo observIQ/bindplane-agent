@@ -71,11 +71,26 @@ parameters:
     supported:
       - beginning
       - end
-    default: beginning
+    default: end 
   - name: timezone
     description: Timezone to use when parsing the timestamp
     type: timezone
     default: UTC
+  - name: retain_raw_logs
+    description: When enabled will preserve the original log message in a `raw_log` key. This will either be in the `body` or `attributes` depending on how `parse_to` is configured.
+    type: bool
+    default: false
+  - name: parse_to
+    description: Where to parse structured log parts
+    type: string
+    supported:
+      - body
+      - attributes
+    default: body
+  - name: offset_storage_dir
+    description: The directory that the offset storage file will be created
+    type: string
+    default: $OIQ_OTEL_COLLECTOR_HOME/storage
 template: |
   receivers:
     {{ if .enable_health_log }}
@@ -98,7 +113,13 @@ template: |
             location: {{ .timezone }}
           severity: 
             parse_from: attributes.Type
-    {{ end }} ## End Health Logs.
+            preset: none
+            mapping:
+              info: I
+              warning: W
+              error: E
+              fatal: F
+    {{ end }}
 
     {{ if .enable_dev_log }}
     filelog/cockroachdb_dev_logs:
@@ -120,7 +141,13 @@ template: |
             location: {{ .timezone }}
           severity:
             parse_from: attributes.Type
-    {{ end }} ## End of dev logs.
+            preset: none
+            mapping:
+              info: I
+              warning: W
+              error: E
+              fatal: F
+    {{ end }}
 
     
     {{ if .enable_error_log }}
@@ -143,7 +170,13 @@ template: |
             location: {{ .timezone }}
           severity:
             parse_from: attributes.Type
-    {{ end }} ## End of Error Logs.
+            preset: none
+            mapping:
+              info: I
+              warning: W
+              error: E
+              fatal: F
+    {{ end }}
 
     {{ if .enable_sql_schema_log }}
     filelog/cockroachdb_sql_schema_logs:
@@ -165,7 +198,13 @@ template: |
             location: {{ .timezone }}
           severity:
             parse_from: attributes.Type
-    {{ end }} # End of sql schema logs
+            preset: none
+            mapping:
+              info: I
+              warning: W
+              error: E
+              fatal: F
+    {{ end }}
     
     {{ if .enable_telemetry_log }}
     filelog/cockroachdb_telemetry_logs:
@@ -187,7 +226,13 @@ template: |
             location: {{ .timezone }}
           severity:
             parse_from: attributes.Type
-    {{ end }} # End of telemetry logs
+            preset: none
+            mapping:
+              info: I
+              warning: W
+              error: E
+              fatal: F
+    {{ end }}
 
     {{ if .enable_kv_distribution_log }}
     filelog/cockroachdb_kv_distribution_logs:
@@ -209,7 +254,13 @@ template: |
             location: {{ .timezone }}
           severity:
             parse_from: attributes.Type
-    {{ end }} # End of kv distribution logs
+            preset: none
+            mapping:
+              info: I
+              warning: W
+              error: E
+              fatal: F
+    {{ end }}
     
     {{ if .enable_pebble_log }}
     filelog/cockroachdb_pebble_logs:
@@ -231,7 +282,13 @@ template: |
             location: {{ .timezone }}
           severity:
             parse_from: attributes.Type
-    {{ end }} # End of pebble logs.
+            preset: none
+            mapping:
+              info: I
+              warning: W
+              error: E
+              fatal: F
+    {{ end }}
 
   service:
     pipelines:
