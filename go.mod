@@ -19,6 +19,7 @@ require (
 	github.com/observiq/observiq-otel-collector/processor/samplingprocessor v1.26.0
 	github.com/observiq/observiq-otel-collector/processor/spancountprocessor v1.26.0
 	github.com/observiq/observiq-otel-collector/processor/throughputmeasurementprocessor v1.26.0
+	github.com/observiq/observiq-otel-collector/receiver/generatereceiver v1.26.0
 	github.com/observiq/observiq-otel-collector/receiver/pluginreceiver v1.26.0
 	github.com/observiq/observiq-otel-collector/receiver/routereceiver v1.26.0
 	github.com/observiq/observiq-otel-collector/receiver/sapnetweaverreceiver v1.26.0
@@ -588,6 +589,8 @@ require (
 )
 
 replace github.com/observiq/observiq-otel-collector/processor/resourceattributetransposerprocessor => ./processor/resourceattributetransposerprocessor
+
+replace github.com/observiq/observiq-otel-collector/receiver/generatereceiver => ./receiver/generatereceiver
 
 replace github.com/observiq/observiq-otel-collector/receiver/pluginreceiver => ./receiver/pluginreceiver
 

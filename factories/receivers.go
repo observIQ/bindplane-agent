@@ -15,6 +15,7 @@
 package factories
 
 import (
+	"github.com/observiq/observiq-otel-collector/receiver/generatereceiver"
 	"github.com/observiq/observiq-otel-collector/receiver/pluginreceiver"
 	"github.com/observiq/observiq-otel-collector/receiver/routereceiver"
 	"github.com/observiq/observiq-otel-collector/receiver/sapnetweaverreceiver"
@@ -105,6 +106,7 @@ var defaultReceivers = []receiver.Factory{
 	filelogreceiver.NewFactory(),
 	flinkmetricsreceiver.NewFactory(),
 	fluentforwardreceiver.NewFactory(),
+	generatereceiver.NewFactory(),
 	googlecloudpubsubreceiver.NewFactory(),
 	googlecloudspannerreceiver.NewFactory(),
 	hostmetricsreceiver.NewFactory(),
