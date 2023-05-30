@@ -10,9 +10,7 @@
 
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi"
      xmlns:util="http://schemas.microsoft.com/wix/UtilExtension">
-   <!-- This hardcoded GUID is specifically for the observiq-otel-collector.
-        If Id is set to "*", it auto generates an ID, which seems OK, but new MSIs will no longer be able to
-        correlate itself with old versions of the installer, and will fail to uninstall old versions properly -->
+
    <Product Id="*" UpgradeCode="{{.UpgradeCode}}"
             Name="{{.Product}}"
             Version="{{.Version.MSI}}"
@@ -65,18 +63,10 @@
         <![CDATA[NOT INSTALLDIR]]>
       </SetProperty>
 
-      <!-- Load Powershell location -->
-      <Property Id="POWERSHELLEXE">
-          <RegistrySearch Id="POWERSHELLEXE"
-                          Type="raw"
-                          Root="HKLM"
-                          Key="SOFTWARE\Microsoft\PowerShell\1\ShellIds\Microsoft.PowerShell"
-                          Name="Path" />
-      </Property>
-
-      <Condition Message="This application requires Windows PowerShell to be installed.">
-        <![CDATA[POWERSHELLEXE]]>
-      </Condition>
+      <!-- Set command prompt -->
+      <SetProperty Id="CMDEXE" Value="[%SystemRoot]\system32\cmd.exe" Before="CostInitialize">
+        <![CDATA[NOT CMDEXE]]>
+      </SetProperty>
 
       <Directory Id="TARGETDIR" Name="SourceDir">
 
@@ -200,16 +190,21 @@
       <CustomAction Id="CustomExec{{$i}}" BinaryKey="WixCA" DllEntry="WixQuietExec" Execute="{{$h.Execute}}" Impersonate="{{$h.Impersonate}}" {{if gt ($h.Return | len) 0}} Return="{{$h.Return}}" {{end}}/>
       {{end}}
 
+      <!-- 
+        This command needs CALL in it, otherwise the quoted values aren't treated correctly.
+        https://stackoverflow.com/questions/17674255/why-does-windows-start-command-not-work-with-spaces-in-arguments-and-path
+      -->
+
       <CustomAction Id="CustomExecCreateManagerYaml_set"
               Property="CustomExecCreateManagerYaml"
-              Value="&quot;[POWERSHELLEXE]&quot; -ExecutionPolicy Bypass -NoProfile -Command &quot;&amp; '[INSTALLDIR]install\generate-manager-yaml.ps1' -install_dir '[INSTALLDIR]' -endpoint '[OPAMPENDPOINT]' -secret_key '[OPAMPSECRETKEY]' -labels '[OPAMPLABELS]'&quot;"
+              Value="&quot;[CMDEXE]&quot; /C CALL &quot;[INSTALLDIR]install\generate-manager-yaml.bat&quot; &quot;[INSTALLDIR]&quot; &quot;[OPAMPENDPOINT]&quot; &quot;[OPAMPSECRETKEY]&quot; &quot;[OPAMPLABELS]&quot;"
               Execute="immediate"/>
 
       <CustomAction Id="CustomExecCreateManagerYaml" BinaryKey="WixCA" DllEntry="WixQuietExec" Execute="deferred" Impersonate="no" Return="check" />
 
       <CustomAction Id="CustomExecRemoveManagerYaml_set"
               Property="CustomExecRemoveManagerYaml"
-              Value="&quot;[POWERSHELLEXE]&quot; -ExecutionPolicy Bypass -NoProfile -Command &quot;Remove-Item -Force -ErrorAction Continue -Path '[INSTALLDIR]manager.yaml'&quot;"
+              Value="&quot;[CMDEXE]&quot; /C del &quot;[INSTALLDIR]manager.yaml&quot;"
               Execute="immediate"/>
 
       <CustomAction Id="CustomExecRemoveManagerYaml" BinaryKey="WixCA" DllEntry="WixQuietExec" Execute="deferred" Impersonate="no" Return="ignore" />
