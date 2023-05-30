@@ -1,20 +1,99 @@
 # Microsoft Office 365 Receiver
-
-| Status |  |
-| -------------------------- | ----------- |
-| Stability | [dev] |
-| Supported pipeline types | metrics, logs |
-| Distributions | [observIQ] |
-
 Receives metrics from [Microsoft Office 365](https://www.microsoft365.com/)
 via the [Microsoft Graph API](https://learn.microsoft.com/en-us/graph/api/overview?view=graph-rest-1.0&preserve-view=true),
 and logs via the [Microsoft Management API](https://learn.microsoft.com/en-us/office/office-365-management-api/office-365-management-activity-api-schema).
 
-## Getting Started
-To monitor metrics and logs from Microsoft Office 365, some configuration is required for the receiver 
-as well as the instance of Office 365 to be monitored. The guide below will outline how to configure both. 
-It's recommended to begin with the Office 365 instance since the receiver needs parameters obtained from the instance.
+## Minimum Collector Versions
+- Introduced: [v1.25.0](https://github.com/observIQ/observiq-otel-collector/releases/tag/v1.25.0)
 
+## Supported Pipelines
+- Metrics
+- Logs
+
+## How It Works
+1. The user configures their instance of Microsoft Office to enable monitoring of metrics, logs, or both.
+2. The user configures this receiver in a pipeline.
+3. The user configures a supported component to route telemetry from this receiver.
+
+## Prerequisites
+- Created instance of Microsoft Office 365 with the following subscriptions: Microsoft 365 Business Basic, Microsoft 365 E5 Compliance, Microsoft 365 E3 (Works with the respective "upgraded" versions as well.)
+- Access to an Admin account for the instance of 365 to be monitored.
+
+## Configuration
+| Field               | Type     | Default                                                                                  | Description                                                                                                                                                             |
+|---------------------|----------|------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| tenant_id | string | `(no default)` | `required` Identifies the instance of 365 to be monitored by this receiver. Needed for metrics and logs. |
+| client_id | string | `(no default)` | `required` The identifier this receiver will use to monitor the given tenant/instance. Needed for metrics and logs. |
+| client_secret | string | `(no default) | `required` The private key this receiver will use, must belong to the given client_id. Needed for metrics and logs. |
+| logs | object | `(n/a)` | Configuration object for other fields listed below. Include to indicate logs should be collected. |
+| `logs` poll_interval | duration | `5m` | The receiver collects logs on an interval. Value must be in minutes (i.e. `10m`, `120m`). Can be omitted for default interval of 5 minutes. |
+| `logs` general | bool | `true` | Indicates whether or not logs should be collected from the General audit/content blob. Can be omitted to indicate true. | 
+| `logs` exchange | bool | `true` | Indicates whether or not logs should be collected from the Exchange audit/content blob. Can be omitted to indicate true. |    
+| `logs` sharepoint | bool | `true` | Indicates whether or not logs should be collected from the SharePoint audit/content blob. Can be omitted to indicate true. |  
+| `logs` azureAD | bool | `true` | Indicates whether or not logs should be collected from the Azure Active Directory audit/content blob. Can be omitted to indicate true. | 
+| `logs` dlp | bool | `true` | Indicates whether or not logs should be collected from the Data Loss Prevention audit/content blob. Can be omitted to indicate true. | 
+| storage | component | `(no default)` | The component ID of a storage extension which can be used when polling for `logs` . The storage extension prevents duplication of data after a collector restart by remembering which data were previously collected. No storage is used when omitted.                         
+
+## Example Configurations
+
+### Collect metrics: 
+```yaml
+receivers:
+  m365:
+    tenant_id: tenant_id
+    client_id: client_id
+    client_secret: client_secret
+exporters:
+  file/no_rotation:
+    path: /some/file/path/foo.json
+service:
+  pipelines:
+    metrics:
+      receivers: [m365]
+      exporters: [file/no_rotation]
+```
+
+### Collect logs (default values):
+```yaml
+receivers:
+  m365:
+    tenant_id: tenant_id
+    client_id: client_id
+    client_secret: client_secret
+exporters:
+  file/no_rotation:
+    path: /some/file/path/foo.json
+service:
+  pipelines:
+    logs:
+      receivers: [m365]
+      exporters: [file/no_rotation]
+```
+
+### Collect logs (custom poll interval, storage component, only sharepoint & azureAD logs):
+```yaml
+receivers:
+  m365:
+    tenant_id: tenant_id
+    client_id: client_id
+    client_secret: client_secret
+    logs:
+      poll_interval: 10m
+      general: false
+      exchange: false
+      dlp: false
+    storage: file_storage
+exporters:
+  file/no_rotation:
+    path: /some/file/path/foo.json
+service:
+  pipelines:
+    logs:
+      receivers: [m365]
+      exporters: [file/no_rotation]
+```
+
+## How To
 ### Configuring Office 365
 The steps below outline how to configure Office 365 to allow the receiver to collect metrics from it. 
 To use this receiver, the instance of Office 365 needs the following subscriptions: **Microsoft 365 Business Basic**, **Microsoft 365 E5 Compliance**, and **Microsoft 365 E3**. (Works with the respective "upgraded" versions as well.)
@@ -39,81 +118,5 @@ Give the app a descriptive name like "365 Receiver". For "Supported account type
 
 After following the above steps, the instance of Microsoft Office 365 is ready for monitoring and the receiver can now be configured.
 
-### Configuring the receiver
-The Microsoft Office 365 receiver takes the following parameters. `tenant_id`, `client_id`, and `client_secret` are the only required values to receive metrics and logs. These values will have been retrieved while following the [Configuring Office 365](#configuring-office-365) guide. For metrics, the only parameters are the required ones already mentioned. All other parameters are optional ones for collecting logs. The default poll interval is 5 minutes and all logs are collected/true by default. 
-
-- `tenant_id` : (required) identifies the instance of 365 to be monitored
-- `client_id` : (required) the identifier this receiver will use to monitor the given tenant/instance
-- `client_secret` : (required) the private key this receiver will use, must belong to the given client_id
-- `logs`
-    - `poll_interval` : (default 5m) time in minutes
-    - `general` : (default true) true or false
-    - `exchange` : (default true) true or false
-    - `sharepoint` : (default true) true or false
-    - `azureAD` : (default true) true of false
-    - `dlp` : (default true) true or false
-- `storage` : The component ID of a storage extension which can be used when polling for `logs` . The storage extension prevents duplication of data after a collector restart by remembering which data were previously collected.
-
-**Note: The metrics scraper only runs once every 24 hours because of the nature of the data returned by Microsoft Office**
-
-**Example Configs**
-
-Collect metrics: 
-```yaml
-receivers:
-  m365:
-    tenant_id: tenant_id
-    client_id: client_id
-    client_secret: client_secret
-exporters:
-  file/no_rotation:
-    path: /some/file/path/foo.json
-service:
-  pipelines:
-    metrics:
-      receivers: [m365]
-      exporters: [file/no_rotation]
-```
-
-Collect logs (default values):
-```yaml
-receivers:
-  m365:
-    tenant_id: tenant_id
-    client_id: client_id
-    client_secret: client_secret
-exporters:
-  file/no_rotation:
-    path: /some/file/path/foo.json
-service:
-  pipelines:
-    logs:
-      receivers: [m365]
-      exporters: [file/no_rotation]
-```
-
-Collect logs (custom poll interval, storage component, only sharepoint & azureAD logs):
-```yaml
-receivers:
-  m365:
-    tenant_id: tenant_id
-    client_id: client_id
-    client_secret: client_secret
-    logs:
-      poll_interval: 10m
-      general: false
-      exchange: false
-      dlp: false
-    storage: file_storage
-exporters:
-  file/no_rotation:
-    path: /some/file/path/foo.json
-service:
-  pipelines:
-    logs:
-      receivers: [m365]
-      exporters: [file/no_rotation]
-```
-
-[dev]:https://github.com/open-telemetry/opentelemetry-collector#development
-[observIQ]:https://github.com/observIQ/observiq-otel-collector
+## Notes
+- The metrics scraper only runs once every 24 hours because of the nature of the data returned by Microsoft Office

@@ -82,7 +82,6 @@ func createMetricsReceiver(
 		consumer,
 		scraperhelper.AddScraper(scraper),
 	)
-
 }
 
 func createLogsReceiver(

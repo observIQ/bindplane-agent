@@ -17,14 +17,10 @@ package m365receiver
 import (
 	"context"
 	"testing"
-	"time"
 
-	"github.com/observiq/observiq-otel-collector/receiver/m365receiver/internal/metadata"
 	"github.com/stretchr/testify/require"
-	"go.opentelemetry.io/collector/config/confighttp"
 	"go.opentelemetry.io/collector/consumer/consumertest"
 	"go.opentelemetry.io/collector/receiver/receivertest"
-	"go.opentelemetry.io/collector/receiver/scraperhelper"
 )
 
 func TestType(t *testing.T) {
@@ -38,22 +34,21 @@ func TestCreateMetricsReceiver(t *testing.T) {
 	test, err := factory.CreateMetricsReceiver(
 		context.Background(),
 		receivertest.NewNopCreateSettings(),
-		&Config{
-			ScraperControllerSettings: scraperhelper.ScraperControllerSettings{
-				CollectionInterval: 10 * time.Second,
-			},
-			HTTPClientSettings: confighttp.HTTPClientSettings{
-				Timeout: 10 * time.Second,
-			},
-			MetricsBuilderConfig: metadata.DefaultMetricsBuilderConfig(),
-		},
+		createDefaultConfig(),
 		consumertest.NewNop(),
 	)
 	require.NoError(t, err)
 	require.NotNil(t, test)
 }
 
-// func TestValidConfig(t *testing.T) {
-// 	factory := NewFactory()
-// 	require.NoError(t, component.ValidateConfig(factory.CreateDefaultConfig()))
-// }
+func TestCreateLogsReceiver(t *testing.T) {
+	factory := NewFactory()
+	test, err := factory.CreateLogsReceiver(
+		context.Background(),
+		receivertest.NewNopCreateSettings(),
+		createDefaultConfig(),
+		consumertest.NewNop(),
+	)
+	require.NoError(t, err)
+	require.NotNil(t, test)
+}
