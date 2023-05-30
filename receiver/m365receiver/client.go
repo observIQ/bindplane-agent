@@ -361,7 +361,6 @@ func (m *m365Client) parseBody(body []byte) []string {
 		foo := "{\"C" + data[i] + "}"
 		data[i] = foo
 	}
-	data[last] = strings.TrimSuffix(data[last], ",")
 	return data
 }
 
