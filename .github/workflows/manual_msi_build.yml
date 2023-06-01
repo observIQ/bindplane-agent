@@ -23,15 +23,15 @@ jobs:
         with:
           # either 'goreleaser' (default) or 'goreleaser-pro'
           distribution: goreleaser-pro
-          version: "v1.16.1"
+          version: "v1.18.2"
           args: build --single-target --skip-validate --clean --snapshot
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GORELEASER_KEY: ${{ secrets.GORELEASER_KEY }}
       - name: Copy Windows Collector Binary
-        run: cp dist/collector_windows_amd64_v1/observiq-otel-collector.exe windows/observiq-otel-collector.exe
+        run: cp dist/windows_amd64/collector_windows_amd64_v1/observiq-otel-collector.exe windows/observiq-otel-collector.exe
       - name: Copy Windows Updater Binary
-        run: cp dist/updater_windows_amd64_v1/updater.exe windows/updater.exe
+        run: cp dist/windows_amd64/updater_windows_amd64_v1/updater.exe windows/updater.exe
       - name: Copy Plugins to MSI Build Directory
         run: cp -r release_deps/plugins windows/
       - name: Copy Example Config
@@ -82,16 +82,16 @@ jobs:
         with:
           # either 'goreleaser' (default) or 'goreleaser-pro'
           distribution: goreleaser-pro
-          version: "v1.16.1"
+          version: "v1.18.2"
           args: build --single-target --skip-validate --clean --snapshot
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GORELEASER_KEY: ${{ secrets.GORELEASER_KEY }}
           GOARCH: "386"
       - name: Copy Windows Collector Binary
-        run: cp dist/collector_windows_386/observiq-otel-collector.exe windows/observiq-otel-collector.exe
+        run: cp dist/windows_386/collector_windows_386/observiq-otel-collector.exe windows/observiq-otel-collector.exe
       - name: Copy Windows Updater Binary
-        run: cp dist/updater_windows_386/updater.exe windows/updater.exe
+        run: cp dist/windows_386/updater_windows_386/updater.exe windows/updater.exe
       - name: Copy Plugins to MSI Build Directory
         run: cp -r release_deps/plugins windows/
       - name: Copy Example Config
