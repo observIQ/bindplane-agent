@@ -4,7 +4,7 @@ via the [Microsoft Graph API](https://learn.microsoft.com/en-us/graph/api/overvi
 and logs via the [Microsoft Management API](https://learn.microsoft.com/en-us/office/office-365-management-api/office-365-management-activity-api-schema).
 
 ## Minimum Collector Versions
-- Introduced: [v1.25.0](https://github.com/observIQ/observiq-otel-collector/releases/tag/v1.25.0)
+- Introduced: [v1.27.0](https://github.com/observIQ/observiq-otel-collector/releases/tag/v1.27.0)
 
 ## Supported Pipelines
 - Metrics
@@ -24,14 +24,14 @@ and logs via the [Microsoft Management API](https://learn.microsoft.com/en-us/of
 |---------------------|----------|------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | tenant_id | string | `(no default)` | `required` Identifies the instance of 365 to be monitored by this receiver. Needed for metrics and logs. |
 | client_id | string | `(no default)` | `required` The identifier this receiver will use to monitor the given tenant/instance. Needed for metrics and logs. |
-| client_secret | string | `(no default) | `required` The private key this receiver will use, must belong to the given client_id. Needed for metrics and logs. |
+| client_secret | string | `(no default)` | `required` The private key this receiver will use, must belong to the given client_id. Needed for metrics and logs. |
 | logs | object | `(n/a)` | Configuration object for other fields listed below. Include to indicate logs should be collected. |
 | `logs` poll_interval | duration | `5m` | The receiver collects logs on an interval. Value must be in minutes (i.e. `10m`, `120m`). Can be omitted for default interval of 5 minutes. |
-| `logs` general | bool | `true` | Indicates whether or not logs should be collected from the General audit/content blob. Can be omitted to indicate true. | 
-| `logs` exchange | bool | `true` | Indicates whether or not logs should be collected from the Exchange audit/content blob. Can be omitted to indicate true. |    
-| `logs` sharepoint | bool | `true` | Indicates whether or not logs should be collected from the SharePoint audit/content blob. Can be omitted to indicate true. |  
-| `logs` azureAD | bool | `true` | Indicates whether or not logs should be collected from the Azure Active Directory audit/content blob. Can be omitted to indicate true. | 
-| `logs` dlp | bool | `true` | Indicates whether or not logs should be collected from the Data Loss Prevention audit/content blob. Can be omitted to indicate true. | 
+| logs.general | bool | `true` | Indicates whether or not logs should be collected from the General audit/content blob. Can be omitted to indicate true. | 
+| logs.exchange | bool | `true` | Indicates whether or not logs should be collected from the Exchange audit/content blob. Can be omitted to indicate true. |    
+| logs.sharepoint | bool | `true` | Indicates whether or not logs should be collected from the SharePoint audit/content blob. Can be omitted to indicate true. |  
+| logs.azureAD | bool | `true` | Indicates whether or not logs should be collected from the Azure Active Directory audit/content blob. Can be omitted to indicate true. | 
+| logs.dlp | bool | `true` | Indicates whether or not logs should be collected from the Data Loss Prevention audit/content blob. Can be omitted to indicate true. | 
 | storage | component | `(no default)` | The component ID of a storage extension which can be used when polling for `logs` . The storage extension prevents duplication of data after a collector restart by remembering which data were previously collected. No storage is used when omitted.                         
 
 ## Example Configurations
