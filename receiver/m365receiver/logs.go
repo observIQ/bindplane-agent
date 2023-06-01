@@ -55,7 +55,6 @@ type m365LogsReceiver struct {
 
 	wg           *sync.WaitGroup
 	mu           sync.Mutex
-	consumerMu   sync.Mutex
 	pollInterval time.Duration
 	cancel       context.CancelFunc
 	audits       []auditMetaData
@@ -148,6 +147,7 @@ func (l *m365LogsReceiver) startPolling(ctx context.Context) error {
 	l.wg.Add(1)
 	go func() {
 		defer l.wg.Done()
+		defer t.Stop()
 		for {
 			select {
 			case <-t.C:
@@ -199,8 +199,6 @@ func (l *m365LogsReceiver) poll(ctx context.Context, now time.Time, st string, a
 
 	logs := l.transformLogs(pcommon.NewTimestampFromTime(now), audit, data)
 
-	l.consumerMu.Lock()
-	defer l.consumerMu.Unlock()
 	if logs.LogRecordCount() > 0 {
 		if err = l.consumer.ConsumeLogs(ctx, logs); err != nil {
 			l.logger.Error("error consuming events", zap.Error(err))
@@ -224,11 +222,11 @@ func (l *m365LogsReceiver) getLogs(ctx context.Context, end string, start string
 			data, err = l.client.GetJSON(ctx, l.root+audit.route, end, start)
 			if err != nil { // not a stale token error, unsure what is wrong
 				l.logger.Error("unable to retrieve logs", zap.Error(err))
-				return []logData{}, nil
+				return []logData{}, err
 			}
 		} else {
 			l.logger.Error("error retrieving logs", zap.Error(err))
-			return []logData{}, nil
+			return []logData{}, err
 		}
 	}
 
@@ -433,7 +431,7 @@ func matchUserType(x int) string {
 	case 8:
 		return "SystemPolicy"
 	default:
-		return "impossible"
+		return "unknown"
 	}
 }
 
@@ -452,7 +450,7 @@ func matchAzureUserType(x int) string {
 	case 5:
 		return "UPN"
 	default:
-		return "impossible"
+		return "unknown"
 	}
 }
 
@@ -469,7 +467,7 @@ func matchFileVerdict(x int) string {
 	case -3:
 		return "Pending"
 	default:
-		return "impossible"
+		return "unknown"
 	}
 }
 
@@ -482,7 +480,7 @@ func matchSourceWorkload(x int) string {
 	case 2:
 		return "Microsoft Teams"
 	default:
-		return "impossible"
+		return "unknown"
 	}
 }
 
@@ -495,7 +493,7 @@ func matchQuarantineSource(x int) string {
 	case 2:
 		return "URLlink"
 	default:
-		return "impossible"
+		return "unknown"
 	}
 }
 func matchRecordType(x int) string {
