@@ -278,19 +278,21 @@ func (m *m365Client) GetJSON(ctx context.Context, endpoint string, end string, s
 	}
 
 	// follows redirect link(s) to get json array of logs
-	// parse json array into individual strings, still in json
-	// append to data each body and corresponding json struct
+	// parses top level array objects
 	var data = []logData{}
 	for _, l := range redirectLinks {
 		body, err := m.followLink(ctx, l)
 		if err != nil {
 			return []logData{}, err
 		}
-		bodies := m.parseBody(body)
+		bodies, err := m.parseBody(body)
+		if err != nil {
+			return []logData{}, err
+		}
 		for _, b := range bodies {
 			var log = jsonLog{}
-			err = json.Unmarshal([]byte(b), &log)
-			data = append(data, logData{log: log, body: b})
+			err = json.Unmarshal(b, &log)
+			data = append(data, logData{log: log, body: string(b)})
 		}
 	}
 
@@ -352,16 +354,13 @@ func (m *m365Client) handleErrors(r *http.Response) error {
 
 // parseBody takes the byte[] response and parses it into string objects
 // restores strings to json format after splits and trims
-func (m *m365Client) parseBody(body []byte) []string {
-	data := strings.Split(string(body), "},{\"C")
-	last := len(data) - 1
-	data[0] = strings.TrimPrefix(data[0], "[{\"C")
-	data[last] = strings.TrimSuffix(data[last], "}]")
-	for i := 0; i < len(data); i++ {
-		foo := "{\"C" + data[i] + "}"
-		data[i] = foo
+func (m *m365Client) parseBody(body []byte) ([]json.RawMessage, error) {
+	var rawMessages []json.RawMessage
+	err := json.Unmarshal(body, &rawMessages)
+	if err != nil {
+		return []json.RawMessage{}, err
 	}
-	return data
+	return rawMessages, nil
 }
 
 // reads in errors for responses

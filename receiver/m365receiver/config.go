@@ -26,6 +26,8 @@ import (
 	"go.opentelemetry.io/collector/receiver/scraperhelper"
 )
 
+var clientSecretRegEx = regexp.MustCompile("^[a-zA-Z0-9-_.~]{1,40}$")
+
 // Config defines configuration for Microsoft Office 365 receiver.
 type Config struct {
 	scraperhelper.ScraperControllerSettings `mapstructure:",squash"`
@@ -69,8 +71,8 @@ func (c *Config) Validate() error {
 	if c.ClientSecret == "" {
 		return fmt.Errorf("missing client_secret; required")
 	}
-	re := regexp.MustCompile("^[a-zA-Z0-9-_.~]{1,40}$")
-	if !re.MatchString(c.ClientSecret) {
+
+	if !clientSecretRegEx.MatchString(c.ClientSecret) {
 		return fmt.Errorf("client_secret is invalid; does not follow correct structure")
 	}
 
