@@ -92,7 +92,7 @@ The number of mailboxes in the various quota statuses over the period of time in
 | ---- | ----------- | ------ |
 | state | The types of Outlook quota states. | Str: ``under_limit``, ``warning``, ``send_prohibited``, ``send_receive_prohibited``, ``indeterminate`` |
 
-### m365.outlook.storage.count
+### m365.outlook.storage.used
 
 The amount of storage used in Outlook by the organization in the last 7 days.
 
@@ -132,7 +132,7 @@ The number of unique pages viewed across all sites in the last 7 days.
 | ---- | ----------- | ---------- | ----------------------- | --------- |
 | {pages} | Sum | Int | Cumulative | false |
 
-### m365.sharepoint.site.storage.count
+### m365.sharepoint.site.storage.used
 
 The amount of storage used by all sites across SharePoint in the last 7 days.
 
@@ -146,7 +146,7 @@ The number of active sites across SharePoint in the last 7 days.
 
 | Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
 | ---- | ----------- | ---------- | ----------------------- | --------- |
-| {files} | Sum | Int | Cumulative | false |
+| {sites} | Sum | Int | Cumulative | false |
 
 ### m365.teams.calls.count
 
@@ -156,7 +156,7 @@ The number of MS Teams calls from users in the organization in the last 7 days.
 | ---- | ----------- | ---------- | ----------------------- | --------- |
 | {calls} | Sum | Int | Cumulative | false |
 
-### m365.teams.device_usage.count
+### m365.teams.device_usage.users
 
 The number of unique users by device/platform that have used Teams in the last 7 days.
 
@@ -178,17 +178,17 @@ The number of MS Teams meetings for users in the organization in the last 7 days
 | ---- | ----------- | ---------- | ----------------------- | --------- |
 | {meetings} | Sum | Int | Cumulative | false |
 
-### m365.teams.message.team.count
+### m365.teams.messages.private.count
 
-The number of MS Teams team-messages sent by users in the organization in the last 7 days.
+The number of MS Teams private-messages sent by users in the organization in the last 7 days.
 
 | Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
 | ---- | ----------- | ---------- | ----------------------- | --------- |
 | {messages} | Sum | Int | Cumulative | false |
 
-### m365.teams.messages.private.count
+### m365.teams.messages.team.count
 
-The number of MS Teams private-messages sent by users in the organization in the last 7 days.
+The number of MS Teams team-messages sent by users in the organization in the last 7 days.
 
 | Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
 | ---- | ----------- | ---------- | ----------------------- | --------- |

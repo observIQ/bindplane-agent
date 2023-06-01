@@ -53,7 +53,7 @@ metrics:
   m365.sharepoint.sites.active.count:
     enabled: true
     description: The number of active sites across SharePoint in the last 7 days.
-    unit: "{files}"
+    unit: "{sites}"
     sum:
       value_type: int
       monotonic: false
@@ -77,7 +77,7 @@ metrics:
       monotonic: false
       aggregation: cumulative
     attributes: []
-  m365.sharepoint.site.storage.count:
+  m365.sharepoint.site.storage.used:
     enabled: true
     description: The amount of storage used by all sites across SharePoint in the last 7 days.
     unit: By
@@ -86,7 +86,7 @@ metrics:
       monotonic: false
       aggregation: cumulative
     attributes: []
-  m365.teams.device_usage.count:
+  m365.teams.device_usage.users:
     enabled: true
     description: The number of unique users by device/platform that have used Teams in the last 7 days.
     unit: "{users}"
@@ -113,7 +113,7 @@ metrics:
       monotonic: false
       aggregation: cumulative
     attributes: []
-  m365.teams.message.team.count:
+  m365.teams.messages.team.count:
     enabled: true
     description: The number of MS Teams team-messages sent by users in the organization in the last 7 days.
     unit: "{messages}"
@@ -176,7 +176,7 @@ metrics:
       monotonic: false
       aggregation: cumulative
     attributes: [outlookActivity]
-  m365.outlook.storage.count:
+  m365.outlook.storage.used:
     enabled: true
     description: The amount of storage used in Outlook by the organization in the last 7 days.
     unit: By

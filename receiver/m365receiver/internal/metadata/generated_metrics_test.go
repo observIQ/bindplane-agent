@@ -88,7 +88,7 @@ func TestMetricsBuilder(t *testing.T) {
 
 			defaultMetricsCount++
 			allMetricsCount++
-			mb.RecordM365OutlookStorageCountDataPoint(ts, 1)
+			mb.RecordM365OutlookStorageUsedDataPoint(ts, 1)
 
 			defaultMetricsCount++
 			allMetricsCount++
@@ -108,7 +108,7 @@ func TestMetricsBuilder(t *testing.T) {
 
 			defaultMetricsCount++
 			allMetricsCount++
-			mb.RecordM365SharepointSiteStorageCountDataPoint(ts, 1)
+			mb.RecordM365SharepointSiteStorageUsedDataPoint(ts, 1)
 
 			defaultMetricsCount++
 			allMetricsCount++
@@ -120,7 +120,7 @@ func TestMetricsBuilder(t *testing.T) {
 
 			defaultMetricsCount++
 			allMetricsCount++
-			mb.RecordM365TeamsDeviceUsageCountDataPoint(ts, 1, AttributeTeamsDevices(1))
+			mb.RecordM365TeamsDeviceUsageUsersDataPoint(ts, 1, AttributeTeamsDevices(1))
 
 			defaultMetricsCount++
 			allMetricsCount++
@@ -128,11 +128,11 @@ func TestMetricsBuilder(t *testing.T) {
 
 			defaultMetricsCount++
 			allMetricsCount++
-			mb.RecordM365TeamsMessageTeamCountDataPoint(ts, 1)
+			mb.RecordM365TeamsMessagesPrivateCountDataPoint(ts, 1)
 
 			defaultMetricsCount++
 			allMetricsCount++
-			mb.RecordM365TeamsMessagesPrivateCountDataPoint(ts, 1)
+			mb.RecordM365TeamsMessagesTeamCountDataPoint(ts, 1)
 
 			metrics := mb.Emit()
 
@@ -269,9 +269,9 @@ func TestMetricsBuilder(t *testing.T) {
 					attrVal, ok := dp.Attributes().Get("state")
 					assert.True(t, ok)
 					assert.Equal(t, "under_limit", attrVal.Str())
-				case "m365.outlook.storage.count":
-					assert.False(t, validatedMetrics["m365.outlook.storage.count"], "Found a duplicate in the metrics slice: m365.outlook.storage.count")
-					validatedMetrics["m365.outlook.storage.count"] = true
+				case "m365.outlook.storage.used":
+					assert.False(t, validatedMetrics["m365.outlook.storage.used"], "Found a duplicate in the metrics slice: m365.outlook.storage.used")
+					validatedMetrics["m365.outlook.storage.used"] = true
 					assert.Equal(t, pmetric.MetricTypeSum, ms.At(i).Type())
 					assert.Equal(t, 1, ms.At(i).Sum().DataPoints().Len())
 					assert.Equal(t, "The amount of storage used in Outlook by the organization in the last 7 days.", ms.At(i).Description())
@@ -339,9 +339,9 @@ func TestMetricsBuilder(t *testing.T) {
 					assert.Equal(t, ts, dp.Timestamp())
 					assert.Equal(t, pmetric.NumberDataPointValueTypeInt, dp.ValueType())
 					assert.Equal(t, int64(1), dp.IntValue())
-				case "m365.sharepoint.site.storage.count":
-					assert.False(t, validatedMetrics["m365.sharepoint.site.storage.count"], "Found a duplicate in the metrics slice: m365.sharepoint.site.storage.count")
-					validatedMetrics["m365.sharepoint.site.storage.count"] = true
+				case "m365.sharepoint.site.storage.used":
+					assert.False(t, validatedMetrics["m365.sharepoint.site.storage.used"], "Found a duplicate in the metrics slice: m365.sharepoint.site.storage.used")
+					validatedMetrics["m365.sharepoint.site.storage.used"] = true
 					assert.Equal(t, pmetric.MetricTypeSum, ms.At(i).Type())
 					assert.Equal(t, 1, ms.At(i).Sum().DataPoints().Len())
 					assert.Equal(t, "The amount of storage used by all sites across SharePoint in the last 7 days.", ms.At(i).Description())
@@ -359,7 +359,7 @@ func TestMetricsBuilder(t *testing.T) {
 					assert.Equal(t, pmetric.MetricTypeSum, ms.At(i).Type())
 					assert.Equal(t, 1, ms.At(i).Sum().DataPoints().Len())
 					assert.Equal(t, "The number of active sites across SharePoint in the last 7 days.", ms.At(i).Description())
-					assert.Equal(t, "{files}", ms.At(i).Unit())
+					assert.Equal(t, "{sites}", ms.At(i).Unit())
 					assert.Equal(t, false, ms.At(i).Sum().IsMonotonic())
 					assert.Equal(t, pmetric.AggregationTemporalityCumulative, ms.At(i).Sum().AggregationTemporality())
 					dp := ms.At(i).Sum().DataPoints().At(0)
@@ -381,9 +381,9 @@ func TestMetricsBuilder(t *testing.T) {
 					assert.Equal(t, ts, dp.Timestamp())
 					assert.Equal(t, pmetric.NumberDataPointValueTypeInt, dp.ValueType())
 					assert.Equal(t, int64(1), dp.IntValue())
-				case "m365.teams.device_usage.count":
-					assert.False(t, validatedMetrics["m365.teams.device_usage.count"], "Found a duplicate in the metrics slice: m365.teams.device_usage.count")
-					validatedMetrics["m365.teams.device_usage.count"] = true
+				case "m365.teams.device_usage.users":
+					assert.False(t, validatedMetrics["m365.teams.device_usage.users"], "Found a duplicate in the metrics slice: m365.teams.device_usage.users")
+					validatedMetrics["m365.teams.device_usage.users"] = true
 					assert.Equal(t, pmetric.MetricTypeSum, ms.At(i).Type())
 					assert.Equal(t, 1, ms.At(i).Sum().DataPoints().Len())
 					assert.Equal(t, "The number of unique users by device/platform that have used Teams in the last 7 days.", ms.At(i).Description())
@@ -412,12 +412,12 @@ func TestMetricsBuilder(t *testing.T) {
 					assert.Equal(t, ts, dp.Timestamp())
 					assert.Equal(t, pmetric.NumberDataPointValueTypeInt, dp.ValueType())
 					assert.Equal(t, int64(1), dp.IntValue())
-				case "m365.teams.message.team.count":
-					assert.False(t, validatedMetrics["m365.teams.message.team.count"], "Found a duplicate in the metrics slice: m365.teams.message.team.count")
-					validatedMetrics["m365.teams.message.team.count"] = true
+				case "m365.teams.messages.private.count":
+					assert.False(t, validatedMetrics["m365.teams.messages.private.count"], "Found a duplicate in the metrics slice: m365.teams.messages.private.count")
+					validatedMetrics["m365.teams.messages.private.count"] = true
 					assert.Equal(t, pmetric.MetricTypeSum, ms.At(i).Type())
 					assert.Equal(t, 1, ms.At(i).Sum().DataPoints().Len())
-					assert.Equal(t, "The number of MS Teams team-messages sent by users in the organization in the last 7 days.", ms.At(i).Description())
+					assert.Equal(t, "The number of MS Teams private-messages sent by users in the organization in the last 7 days.", ms.At(i).Description())
 					assert.Equal(t, "{messages}", ms.At(i).Unit())
 					assert.Equal(t, false, ms.At(i).Sum().IsMonotonic())
 					assert.Equal(t, pmetric.AggregationTemporalityCumulative, ms.At(i).Sum().AggregationTemporality())
@@ -426,12 +426,12 @@ func TestMetricsBuilder(t *testing.T) {
 					assert.Equal(t, ts, dp.Timestamp())
 					assert.Equal(t, pmetric.NumberDataPointValueTypeInt, dp.ValueType())
 					assert.Equal(t, int64(1), dp.IntValue())
-				case "m365.teams.messages.private.count":
-					assert.False(t, validatedMetrics["m365.teams.messages.private.count"], "Found a duplicate in the metrics slice: m365.teams.messages.private.count")
-					validatedMetrics["m365.teams.messages.private.count"] = true
+				case "m365.teams.messages.team.count":
+					assert.False(t, validatedMetrics["m365.teams.messages.team.count"], "Found a duplicate in the metrics slice: m365.teams.messages.team.count")
+					validatedMetrics["m365.teams.messages.team.count"] = true
 					assert.Equal(t, pmetric.MetricTypeSum, ms.At(i).Type())
 					assert.Equal(t, 1, ms.At(i).Sum().DataPoints().Len())
-					assert.Equal(t, "The number of MS Teams private-messages sent by users in the organization in the last 7 days.", ms.At(i).Description())
+					assert.Equal(t, "The number of MS Teams team-messages sent by users in the organization in the last 7 days.", ms.At(i).Description())
 					assert.Equal(t, "{messages}", ms.At(i).Unit())
 					assert.Equal(t, false, ms.At(i).Sum().IsMonotonic())
 					assert.Equal(t, pmetric.AggregationTemporalityCumulative, ms.At(i).Sum().AggregationTemporality())

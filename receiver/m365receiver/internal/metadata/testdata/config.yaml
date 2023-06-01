@@ -15,7 +15,7 @@ all_set:
       enabled: true
     m365.outlook.quota_status.count:
       enabled: true
-    m365.outlook.storage.count:
+    m365.outlook.storage.used:
       enabled: true
     m365.sharepoint.files.active.count:
       enabled: true
@@ -25,19 +25,19 @@ all_set:
       enabled: true
     m365.sharepoint.pages.viewed.count:
       enabled: true
-    m365.sharepoint.site.storage.count:
+    m365.sharepoint.site.storage.used:
       enabled: true
     m365.sharepoint.sites.active.count:
       enabled: true
     m365.teams.calls.count:
       enabled: true
-    m365.teams.device_usage.count:
+    m365.teams.device_usage.users:
       enabled: true
     m365.teams.meetings.count:
       enabled: true
-    m365.teams.message.team.count:
-      enabled: true
     m365.teams.messages.private.count:
+      enabled: true
+    m365.teams.messages.team.count:
       enabled: true
   resource_attributes:
 none_set:
@@ -56,7 +56,7 @@ none_set:
       enabled: false
     m365.outlook.quota_status.count:
       enabled: false
-    m365.outlook.storage.count:
+    m365.outlook.storage.used:
       enabled: false
     m365.sharepoint.files.active.count:
       enabled: false
@@ -66,18 +66,18 @@ none_set:
       enabled: false
     m365.sharepoint.pages.viewed.count:
       enabled: false
-    m365.sharepoint.site.storage.count:
+    m365.sharepoint.site.storage.used:
       enabled: false
     m365.sharepoint.sites.active.count:
       enabled: false
     m365.teams.calls.count:
       enabled: false
-    m365.teams.device_usage.count:
+    m365.teams.device_usage.users:
       enabled: false
     m365.teams.meetings.count:
       enabled: false
-    m365.teams.message.team.count:
-      enabled: false
     m365.teams.messages.private.count:
+      enabled: false
+    m365.teams.messages.team.count:
       enabled: false
   resource_attributes:

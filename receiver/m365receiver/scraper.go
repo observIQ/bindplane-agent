@@ -80,7 +80,7 @@ var reports = []reportPair{
 		endpoint: "getSharePointSiteUsageStorage(period='D7')",
 		indexes: map[int]func(mb *metadata.MetricsBuilder, ts pcommon.Timestamp, val int64){
 			2: func(mb *metadata.MetricsBuilder, ts pcommon.Timestamp, val int64) {
-				mb.RecordM365SharepointSiteStorageCountDataPoint(ts, val)
+				mb.RecordM365SharepointSiteStorageUsedDataPoint(ts, val)
 			},
 		},
 	},
@@ -89,25 +89,25 @@ var reports = []reportPair{
 		endpoint: "getTeamsDeviceUsageDistributionUserCounts(period='D7')",
 		indexes: map[int]func(mb *metadata.MetricsBuilder, ts pcommon.Timestamp, val int64){
 			1: func(mb *metadata.MetricsBuilder, ts pcommon.Timestamp, val int64) {
-				mb.RecordM365TeamsDeviceUsageCountDataPoint(ts, val, metadata.AttributeTeamsDevicesWeb)
+				mb.RecordM365TeamsDeviceUsageUsersDataPoint(ts, val, metadata.AttributeTeamsDevicesWeb)
 			},
 			3: func(mb *metadata.MetricsBuilder, ts pcommon.Timestamp, val int64) {
-				mb.RecordM365TeamsDeviceUsageCountDataPoint(ts, val, metadata.AttributeTeamsDevicesAndroid)
+				mb.RecordM365TeamsDeviceUsageUsersDataPoint(ts, val, metadata.AttributeTeamsDevicesAndroid)
 			},
 			4: func(mb *metadata.MetricsBuilder, ts pcommon.Timestamp, val int64) {
-				mb.RecordM365TeamsDeviceUsageCountDataPoint(ts, val, metadata.AttributeTeamsDevicesIOS)
+				mb.RecordM365TeamsDeviceUsageUsersDataPoint(ts, val, metadata.AttributeTeamsDevicesIOS)
 			},
 			5: func(mb *metadata.MetricsBuilder, ts pcommon.Timestamp, val int64) {
-				mb.RecordM365TeamsDeviceUsageCountDataPoint(ts, val, metadata.AttributeTeamsDevicesMac)
+				mb.RecordM365TeamsDeviceUsageUsersDataPoint(ts, val, metadata.AttributeTeamsDevicesMac)
 			},
 			6: func(mb *metadata.MetricsBuilder, ts pcommon.Timestamp, val int64) {
-				mb.RecordM365TeamsDeviceUsageCountDataPoint(ts, val, metadata.AttributeTeamsDevicesWindows)
+				mb.RecordM365TeamsDeviceUsageUsersDataPoint(ts, val, metadata.AttributeTeamsDevicesWindows)
 			},
 			7: func(mb *metadata.MetricsBuilder, ts pcommon.Timestamp, val int64) {
-				mb.RecordM365TeamsDeviceUsageCountDataPoint(ts, val, metadata.AttributeTeamsDevicesChromeOS)
+				mb.RecordM365TeamsDeviceUsageUsersDataPoint(ts, val, metadata.AttributeTeamsDevicesChromeOS)
 			},
 			8: func(mb *metadata.MetricsBuilder, ts pcommon.Timestamp, val int64) {
-				mb.RecordM365TeamsDeviceUsageCountDataPoint(ts, val, metadata.AttributeTeamsDevicesLinux)
+				mb.RecordM365TeamsDeviceUsageUsersDataPoint(ts, val, metadata.AttributeTeamsDevicesLinux)
 			},
 		},
 	},
@@ -116,7 +116,7 @@ var reports = []reportPair{
 		endpoint: "getTeamsUserActivityCounts(period='D7')",
 		indexes: map[int]func(mb *metadata.MetricsBuilder, ts pcommon.Timestamp, val int64){
 			2: func(mb *metadata.MetricsBuilder, ts pcommon.Timestamp, val int64) {
-				mb.RecordM365TeamsMessageTeamCountDataPoint(ts, val)
+				mb.RecordM365TeamsMessagesTeamCountDataPoint(ts, val)
 			},
 			5: func(mb *metadata.MetricsBuilder, ts pcommon.Timestamp, val int64) {
 				mb.RecordM365TeamsMessagesPrivateCountDataPoint(ts, val)
@@ -188,7 +188,7 @@ var reports = []reportPair{
 		endpoint: "getMailboxUsageStorage(period='D7')",
 		indexes: map[int]func(mb *metadata.MetricsBuilder, ts pcommon.Timestamp, val int64){
 			1: func(mb *metadata.MetricsBuilder, ts pcommon.Timestamp, val int64) {
-				mb.RecordM365OutlookStorageCountDataPoint(ts, val)
+				mb.RecordM365OutlookStorageUsedDataPoint(ts, val)
 			},
 		},
 	},
