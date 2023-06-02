@@ -34,7 +34,7 @@ template: |
               - targets: ['{{ .endpoint }}']
             basic_auth:
               username: '{{ .username }}'
-              password: ' {{ .password }}'
+              password: '{{ .password }}'
             metric_relabel_configs:
               # Include only a few key metrics
               - source_labels: [ __name__ ]
