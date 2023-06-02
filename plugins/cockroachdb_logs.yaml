@@ -92,9 +92,13 @@ parameters:
     type: string
     default: $OIQ_OTEL_COLLECTOR_HOME/storage
 template: |
+  extensions:
+    file_storage:
+      directory: {{ .offset_storage_dir }}
   receivers:
     {{ if .enable_health_log }}
     filelog/cockroachdb_health_logs:
+      storage: file_storage
       include:
         {{ range $fp := .health_log_path }}
         - '{{ $fp }}'
@@ -105,24 +109,38 @@ template: |
       attributes:
         log_type: 'cockroach.health'
       operators:
+        {{ if .retain_raw_logs }}
+        - id: save_raw_log
+          type: copy
+          from: body
+          to: attributes.raw_log
+        {{ end }}
         - type: regex_parser
           regex: '^(?P<Type>[IWEF])(?P<timestamp>\d{6}\s+\d{2}:\d{2}:\d{2}\.\d{6})\s+(?P<GoID>\d+)\s*(?:(?P<Channel>\d+)@)?(?P<Location>\S+)\s+(?:)⋮?\s+(?P<Node>\[[^\]]+\])\s+(?:(?P<Counter>\d+\s+)?)(?P<Message>.*)'
+          parse_to: {{ .parse_to }}
           timestamp:
-            parse_from: attributes.timestamp
+            parse_from: {{ .parse_to }}.timestamp
             layout: '%y%m%d %H:%M:%S.%f'
             location: {{ .timezone }}
           severity: 
-            parse_from: attributes.Type
+            parse_from: {{ .parse_to }}.Type
             preset: none
             mapping:
               info: I
               warn: W
               error: E
               fatal: F
+        {{ if and .retain_raw_logs (eq .parse_to "body")}}
+        - id: move_raw_log
+          type: move
+          from: attributes.raw_log
+          to: body.raw_log
+        {{ end }}
     {{ end }}
 
     {{ if .enable_dev_log }}
     filelog/cockroachdb_dev_logs:
+      storage: file_storage
       include:
         {{ range $fp := .dev_log_path}}
         - '{{ $fp }}'
@@ -135,12 +153,13 @@ template: |
       operators:
         - type: regex_parser
           regex: '^(?P<Type>[IWEF])(?P<timestamp>\d{6}\s+\d{2}:\d{2}:\d{2}\.\d{6})\s+(?P<GoID>\d+)\s*(?:(?P<Channel>\d+)@)?(?P<Location>\S+)\s+(?:)⋮?\s+(?P<Node>\[[^\]]+\])\s+(?:(?P<Counter>\d+\s+)?)(?P<Message>.*)'
+          parse_to: {{ .parse_to }}
           timestamp:
-            parse_from: attributes.timestamp
+            parse_from: {{ .parse_to }}.timestamp
             layout: '%y%m%d %H:%M:%S.%f'
             location: {{ .timezone }}
           severity:
-            parse_from: attributes.Type
+            parse_from: {{ .parse_to }}.Type
             preset: none
             mapping:
               info: I
@@ -152,6 +171,7 @@ template: |
     
     {{ if .enable_error_log }}
     filelog/cockroachdb_error_logs:
+      storage: file_storage
       include:
         {{ range $fp := .error_log_path }}
         - '{{ $fp }}'
@@ -164,12 +184,13 @@ template: |
       operators:
         - type: regex_parser
           regex: '^(?P<Type>[IWEF])(?P<timestamp>\d{6}\s+\d{2}:\d{2}:\d{2}\.\d{6})\s+(?P<GoID>\d+)\s*(?:(?P<Channel>\d+)@)?(?P<Location>\S+)\s+(?:)⋮?\s+(?P<Node>\[[^\]]+\])\s+(?:(?P<Counter>\d+\s+)?)(?P<Message>.*)'
+          parse_to: {{ .parse_to }}
           timestamp:
-            parse_from: attributes.timestamp
+            parse_from: {{ .parse_to }}.timestamp
             layout: '%y%m%d %H:%M:%S.%f'
             location: {{ .timezone }}
           severity:
-            parse_from: attributes.Type
+            parse_from: {{ .parse_to }}.Type
             preset: none
             mapping:
               info: I
@@ -180,6 +201,7 @@ template: |
 
     {{ if .enable_sql_schema_log }}
     filelog/cockroachdb_sql_schema_logs:
+      storage: file_storage
       include:
         {{ range $fp := .sql_schema_log_path }}
         - '{{ $fp }}' 
@@ -192,12 +214,13 @@ template: |
       operators:
         - type: regex_parser
           regex: '^(?P<Type>[IWEF])(?P<timestamp>\d{6}\s+\d{2}:\d{2}:\d{2}\.\d{6})\s+(?P<GoID>\d+)\s*(?:(?P<Channel>\d+)@)?(?P<Location>\S+)\s+(?:)⋮?\s+(?P<Node>\[[^\]]+\])\s+(?:(?P<Counter>\d+\s+)?)(?P<Message>.*)'
+          parse_to: {{ .parse_to }}
           timestamp:
-            parse_from: attributes.timestamp
+            parse_from: {{ .parse_to }}.timestamp
             layout: '%y%m%d %H:%M:%S.%f'
             location: {{ .timezone }}
           severity:
-            parse_from: attributes.Type
+            parse_from: {{ .parse_to }}.Type
             preset: none
             mapping:
               info: I
@@ -208,6 +231,7 @@ template: |
     
     {{ if .enable_telemetry_log }}
     filelog/cockroachdb_telemetry_logs:
+      storage: file_storage
       include:
         {{ range $fp := .telemetry_log_path }}
         - '{{ $fp }}' 
@@ -220,12 +244,13 @@ template: |
       operators:
         - type: regex_parser
           regex: '^(?P<Type>[IWEF])(?P<timestamp>\d{6}\s+\d{2}:\d{2}:\d{2}\.\d{6})\s+(?P<GoID>\d+)\s*(?:(?P<Channel>\d+)@)?(?P<Location>\S+)\s+(?:)⋮?\s+(?P<Node>\[[^\]]+\])\s+(?:(?P<Counter>\d+\s+)?)(?P<Message>.*)'
+          parse_to: {{ .parse_to }}
           timestamp:
-            parse_from: attributes.timestamp
+            parse_from: {{ .parse_to }}.timestamp
             layout: '%y%m%d %H:%M:%S.%f'
             location: {{ .timezone }}
           severity:
-            parse_from: attributes.Type
+            parse_from: {{ .parse_to }}.Type
             preset: none
             mapping:
               info: I
@@ -236,6 +261,7 @@ template: |
 
     {{ if .enable_kv_distribution_log }}
     filelog/cockroachdb_kv_distribution_logs:
+      storage: file_storage
       include:
         {{ range $fp := .kv_distribution_log_path }}
          - '{{ $fp }}'
@@ -248,12 +274,13 @@ template: |
       operators:
         - type: regex_parser
           regex: '^(?P<Type>[IWEF])(?P<timestamp>\d{6}\s+\d{2}:\d{2}:\d{2}\.\d{6})\s+(?P<GoID>\d+)\s*(?:(?P<Channel>\d+)@)?(?P<Location>\S+)\s+(?:)⋮?\s+(?P<Node>\[[^\]]+\])\s+(?:(?P<Counter>\d+\s+)?)(?P<Message>.*)'
+          parse_to: {{ .parse_to }}
           timestamp:
-            parse_from: attributes.timestamp
+            parse_from: {{ .parse_to }}.timestamp
             layout: '%y%m%d %H:%M:%S.%f'
             location: {{ .timezone }}
           severity:
-            parse_from: attributes.Type
+            parse_from: {{ .parse_to }}.Type
             preset: none
             mapping:
               info: I
@@ -264,6 +291,7 @@ template: |
     
     {{ if .enable_pebble_log }}
     filelog/cockroachdb_pebble_logs:
+      storage: file_storage
       include:
         {{ range $fp := .pebble_log_path }}
          - '{{ $fp }}'
@@ -276,12 +304,13 @@ template: |
       operators:
         - type: regex_parser
           regex: '^(?P<Type>[IWEF])(?P<timestamp>\d{6}\s+\d{2}:\d{2}:\d{2}\.\d{6})\s+(?P<GoID>\d+)\s*(?:(?P<Channel>\d+)@)?(?P<Location>\S+)\s+(?:)⋮?\s+(?P<Node>\[[^\]]+\])\s+(?:(?P<Counter>\d+\s+)?)(?P<Message>.*)'
+          parse_to: {{ .parse_to }}
           timestamp:
-            parse_from: attributes.timestamp
+            parse_from: {{ .parse_to }}.timestamp
             layout: '%y%m%d %H:%M:%S.%f'
             location: {{ .timezone }}
           severity:
-            parse_from: attributes.Type
+            parse_from: {{ .parse_to }}.Type
             preset: none
             mapping:
               info: I
