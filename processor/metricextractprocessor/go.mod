@@ -16,6 +16,9 @@ require (
 require (
 	github.com/alecthomas/participle/v2 v2.0.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/gobwas/glob v0.2.3 // indirect
+	github.com/google/uuid v1.3.0 // indirect
+	github.com/iancoleman/strcase v0.2.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/internal/coreinternal v0.79.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/ottl v0.79.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect

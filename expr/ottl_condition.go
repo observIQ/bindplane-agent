@@ -6,7 +6,6 @@ import (
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/ottl"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/ottl/contexts/ottldatapoint"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/ottl/contexts/ottllog"
-	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/ottl/contexts/ottlmetric"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/ottl/contexts/ottlspan"
 	"go.opentelemetry.io/collector/component"
 )
@@ -21,7 +20,7 @@ func (e OTTLCondition[T]) Match(ctx context.Context, tCtx T) (bool, error) {
 }
 
 func NewOTTLSpanCondition(condition string, set component.TelemetrySettings) (*OTTLCondition[ottlspan.TransformContext], error) {
-	statementStr := "drop() where " + condition
+	statementStr := "noop() where " + condition
 	statement, err := NewOTTLSpanStatement(statementStr, set)
 	if err != nil {
 		return nil, err
@@ -32,20 +31,8 @@ func NewOTTLSpanCondition(condition string, set component.TelemetrySettings) (*O
 	}, nil
 }
 
-func NewOTTLMetricCondition(condition string, set component.TelemetrySettings) (*OTTLCondition[ottlmetric.TransformContext], error) {
-	statementStr := "drop() where " + condition
-	statement, err := NewOTTLMetricStatement(statementStr, set)
-	if err != nil {
-		return nil, err
-	}
-
-	return &OTTLCondition[ottlmetric.TransformContext]{
-		statement: statement,
-	}, nil
-}
-
 func NewOTTLDatapointCondition(condition string, set component.TelemetrySettings) (*OTTLCondition[ottldatapoint.TransformContext], error) {
-	statementStr := "drop() where " + condition
+	statementStr := "noop() where " + condition
 	statement, err := NewOTTLDatapointStatement(statementStr, set)
 	if err != nil {
 		return nil, err
@@ -56,9 +43,9 @@ func NewOTTLDatapointCondition(condition string, set component.TelemetrySettings
 	}, nil
 }
 
-func NewOTTLLogCondition(condition string, set component.TelemetrySettings) (*OTTLCondition[ottllog.TransformContext], error) {
-	statementStr := "drop() where " + condition
-	statement, err := NewOTTLLogStatement(statementStr, set)
+func NewOTTLLogRecordCondition(condition string, set component.TelemetrySettings) (*OTTLCondition[ottllog.TransformContext], error) {
+	statementStr := "noop() where " + condition
+	statement, err := NewOTTLLogRecordStatement(statementStr, set)
 	if err != nil {
 		return nil, err
 	}

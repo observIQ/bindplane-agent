@@ -12,6 +12,9 @@ require (
 require (
 	github.com/alecthomas/participle/v2 v2.0.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/gobwas/glob v0.2.3 // indirect
+	github.com/google/uuid v1.3.0 // indirect
+	github.com/iancoleman/strcase v0.2.0 // indirect
 	github.com/knadh/koanf v1.5.0 // indirect
 	github.com/mitchellh/copystructure v1.2.0 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
@@ -45,3 +48,8 @@ require (
 	google.golang.org/grpc v1.55.0 // indirect
 	google.golang.org/protobuf v1.30.0 // indirect
 )
+
+// Pull in changes to OTTL to allow body to be indexed
+// Can be removed when ottl is updated to v0.79.0
+// Points to this commit: https://github.com/open-telemetry/opentelemetry-collector-contrib/commit/85a618f8bb7204b63d3d7bf0f679cc61c0f42ea0
+replace github.com/open-telemetry/opentelemetry-collector-contrib/pkg/ottl v0.78.0 => github.com/open-telemetry/opentelemetry-collector-contrib/pkg/ottl v0.78.1-0.20230524155147-85a618f8bb72
