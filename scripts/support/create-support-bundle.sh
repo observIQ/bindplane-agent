@@ -19,6 +19,8 @@ PREREQS="printf sed uname sudo tar gzip"
 INDENT_WIDTH='  '
 indent=""
 
+collector_config=/opt/observiq-otel-collector/config.yaml
+
 # Colors
 num_colors=$(tput colors 2>/dev/null)
 if test -n "$num_colors" && test "$num_colors" -ge 8; then
@@ -257,7 +259,7 @@ function bundle_files() {
     fi
 
     # Check if the files exist, if yes append them to the tar file
-    for file in /etc/issue /etc/os-release /opt/observiq-otel-collector/config.yaml
+    for file in /etc/issue /etc/os-release
     do
         if [ -f "$file" ]; then
             sudo tar --append --file=$tar_filename $file
@@ -266,6 +268,15 @@ function bundle_files() {
             info "File $(fg_red "$file")$(reset) does not exist."
         fi
     done
+
+    if [ -f "$collector_config" ]; then
+        read -p "Do you want to include the collector config (y or n)? " response
+        if [ "$response" != "y" ]; then
+            info "Adding collector config $(fg_cyan "$collector_config")$(reset)"
+            sudo tar --append --file=$tar_filename $collector_config
+        fi
+    fi
+
     # Compress the tar file
     info "Compressing the tar file..."
     gzip $tar_filename

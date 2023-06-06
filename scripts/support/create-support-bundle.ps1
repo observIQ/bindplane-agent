@@ -1,3 +1,17 @@
+# Copyright  observIQ, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 # Define the default directory for logs
 $collector_dir = "C:\Program Files\observIQ OpenTelemetry Collector"
 
@@ -19,7 +33,7 @@ $output_dir = "Support_Bundle_$datestamp"
 New-Item -ItemType Directory -Force -Path $output_dir
 
 # Determine whether to copy only the most recent log
-$response = Read-Host -Prompt "Do you want to include only the most recent logs? [Y/n] "
+$response = Read-Host -Prompt "Do you want to include only the most recent logs (Y or n)?  "
 if ($response -eq "n") {
     Copy-Item "$collector_dir\log\*" -Destination "$output_dir\" -Force
 } else {
@@ -27,7 +41,12 @@ if ($response -eq "n") {
 }
 
 # Collector Config
-Copy-Item "$collector_dir\config.yaml" -Destination "$output_dir\" -Force
+$response = Read-Host -Prompt "Do you want to include the collector config (Y or n)? "
+
+if ($response -ne "n") {
+    Write-Host "Adding $collector_dir\config.yaml"
+    Copy-Item "$collector_dir\config.yaml" -Destination "$output_dir\" -Force
+}
 
 # Capture system info
 Get-ComputerInfo | Out-File "$output_dir\systeminfo.txt"
