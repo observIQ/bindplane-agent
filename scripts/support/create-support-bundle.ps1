@@ -13,12 +13,19 @@
 # limitations under the License.
 
 # Define the default directory for logs
-$collector_dir = "C:\Program Files\observIQ OpenTelemetry Collector"
+$registry_path = "Registry::HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall\observIQ Distro for OpenTelemetry Collector"
+
+if (Test-Path $registry_path) {
+    $collector_dir = (Get-ItemProperty -Path $registry_path -Name "InstallLocation").InstallLocation
+} else {
+    $collector_dir = "C:\Program Files\observIQ OpenTelemetry Collector"
+    Write-Host "observIQ OpenTelemetry Collector directory not found in the registry. Trying default location: $collector_dir"
+}
 
 # Check if the directory exists
 if (!(Test-Path $collector_dir)) {
     Write-Host "Directory $collector_dir does not exist."
-    $collector_dir = Read-Host -Prompt "Please enter the directory for logs"
+    $collector_dir = Read-Host -Prompt "Please enter the directory for the observIQ OpenTelemetry Collector installation"
     if (!(Test-Path $collector_dir)) {
         Write-Host "Directory $collector_dir does not exist."
         exit
@@ -37,6 +44,11 @@ $response = Read-Host -Prompt "Do you want to include only the most recent logs 
 if ($response -eq "n") {
     Copy-Item "$collector_dir\log\*" -Destination "$output_dir\" -Force
 } else {
+    if (Test-Path "$collector_dir\log\observiq_collector.err") {
+        Write-Host "Adding $collector_dir\log\observiq_collector.err"
+        Copy-Item "$collector_dir\log\observiq_collector.err" -Destination "$output_dir\" -Force
+    }
+    Write-Host "Adding $collector_dir\log\collector.log"
     Copy-Item "$collector_dir\log\collector.log" -Destination "$output_dir\" -Force
 }
 

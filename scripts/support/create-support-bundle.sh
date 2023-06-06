@@ -19,7 +19,7 @@ PREREQS="printf sed uname sudo tar gzip"
 INDENT_WIDTH='  '
 indent=""
 
-collector_config=/opt/observiq-otel-collector/config.yaml
+collector_dir=/opt/observiq-otel-collector
 
 # Colors
 num_colors=$(tput colors 2>/dev/null)
@@ -215,7 +215,7 @@ check_prereqs() {
   banner "Checking Prerequisites"
   increase_indent
   root_check
-  os_check
+#   os_check
   os_arch_check
   dependencies_check
   success "Prerequisite check complete!"
@@ -226,7 +226,7 @@ function bundle_files() {
     banner "Collecting files for support bundle"
     increase_indent
     # Directory for logs
-    log_dir="/opt/observiq-otel-collector/log"
+    log_dir="$collector_dir/log"
     
     # Check if directory exists
     if [ ! -d "$log_dir" ]; then
@@ -256,6 +256,12 @@ function bundle_files() {
             info "No logs found in $(fg_red $log_dir)"
             return 1
         fi
+        # Get the /log/observiq_collector.err file
+        err_file="$log_dir/observiq_collector.err"
+        if [ -f "$err_file" ]; then
+            sudo tar --append --file=$tar_filename $err_file
+            info "Added file $(fg_cyan "$err_file")$(reset) to the tar file."
+        fi
     fi
 
     # Check if the files exist, if yes append them to the tar file
@@ -269,6 +275,7 @@ function bundle_files() {
         fi
     done
 
+    collector_config="$collector_dir/config.yaml"
     if [ -f "$collector_config" ]; then
         read -p "Do you want to include the collector config (y or n)? " response
         if [ "$response" != "y" ]; then

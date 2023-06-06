@@ -15,11 +15,11 @@
 setlocal enabledelayedexpansion
 
 :: Default directory for logs
-set "collector_dir=C:\Program Files\observIQ OpenTelemetry Collector"
+FOR /F "tokens=2*" %%A IN ('reg query "HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\observIQ Distro for OpenTelemetry Collector" /v "InstallLocation"') DO set "collector_dir=%%~B"
 
 :: Check if directory exists, and ask for it if not
 if not exist "%collector_dir%" (
-    echo Directory %collector_dir% does not exist.
+    echo observIQ OpenTelemetry Collector directory not found in the registry.
     call :get_dir
 )
 
@@ -41,6 +41,9 @@ set /p response="Do you want to include only the most recent logs? [Y/n] "
 if /I "%response%"=="n" (
     xcopy /Y "%collector_dir%\log\*" "%output_dir%\"
 ) else (
+    if exist "%collector_dir%\log\observiq_collector.err" (
+        xcopy /Y "%collector_dir%\log\observiq_collector.err" "%output_dir%\"
+    )
     xcopy /Y "%collector_dir%\log\collector.log" "%output_dir%\"
 )
 
@@ -62,7 +65,7 @@ goto :eof
 
 :: Subroutine to get the directory from the user
 :get_dir
-set /p collector_dir=Please enter the directory for the collector installation: 
+set /p collector_dir=Please enter the directory for the observIQ OpenTelemetry Collector installation:
 if not exist "%collector_dir%" (
     echo Directory %collector_dir% does not exist.
     exit /b
