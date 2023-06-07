@@ -215,7 +215,7 @@ check_prereqs() {
   banner "Checking Prerequisites"
   increase_indent
   root_check
-#   os_check
+  os_check
   os_arch_check
   dependencies_check
   success "Prerequisite check complete!"
@@ -244,12 +244,12 @@ function bundle_files() {
     if [ "$response" = "n" ]; then
         # Get all the log files
         info "Collecting all log files in $(fg_cyan "$log_dir")$(reset)"
-        sudo tar -cvf $tar_filename $log_dir
+        tar -cf $tar_filename -C $log_dir $(ls -Art $log_dir)
     else
         # Get the most recent log file
         recent_log=$(ls -Art $log_dir | tail -n 1)
         if [ -n "$recent_log" ]; then
-            sudo tar -cvf $tar_filename "$log_dir/$recent_log" 
+            tar -cf $tar_filename -C $log_dir $recent_log
             info "Added file $(fg_cyan "$recent_log")$(reset) to the tar file."
 
         else
@@ -259,28 +259,31 @@ function bundle_files() {
         # Get the /log/observiq_collector.err file
         err_file="$log_dir/observiq_collector.err"
         if [ -f "$err_file" ]; then
-            sudo tar --append --file=$tar_filename $err_file
+            tar --append --file=$tar_filename -C $log_dir observiq_collector.err
             info "Added file $(fg_cyan "$err_file")$(reset) to the tar file."
         fi
     fi
 
     # Check if the files exist, if yes append them to the tar file
-    for file in /etc/issue /etc/os-release
+    for file in issue os-release
     do
-        if [ -f "$file" ]; then
-            sudo tar --append --file=$tar_filename $file
-            info "Added file $(fg_cyan "$file")$(reset) to the tar file."
+        if [ -f "/etc/$file" ]; then
+            # These might be symlinks, so cat them to real files
+            cat "/etc/$file" > "$file"
+            tar --append --file=$tar_filename $file
+            rm $file
+            info "Added file $(fg_cyan "/etc/$file")$(reset) to the tar file."
         else
-            info "File $(fg_red "$file")$(reset) does not exist."
+            info "File $(fg_red "/etc/$file")$(reset) does not exist."
         fi
     done
 
     collector_config="$collector_dir/config.yaml"
     if [ -f "$collector_config" ]; then
         read -p "Do you want to include the collector config (y or n)? " response
-        if [ "$response" != "y" ]; then
+        if [ "$response" = "y" ]; then
             info "Adding collector config $(fg_cyan "$collector_config")$(reset)"
-            sudo tar --append --file=$tar_filename $collector_config
+            tar --append --file=$tar_filename -C $collector_dir config.yaml
         fi
     fi
 
