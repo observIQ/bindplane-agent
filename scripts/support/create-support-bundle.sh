@@ -141,16 +141,9 @@ failed() {
 
 root_check() {
   system_user_name=$(id -un)
-  if [ "${system_user_name}" != 'root' ]
-  then
-    # If not root, ensure the running user has access to
-    # sudo.
-    if sudo -l | grep "${system_user_name}" >/dev/null; then
-        return
-    else
-        failed
-        error_exit "$LINENO" "Script needs to be run as root or with sudo"
-    fi
+  if [[ "${system_user_name}" != 'root' || $EUID -ne 0 ]]; then
+    failed
+    error_exit "$LINENO" "Script needs to be run as root or with sudo"
   fi
 }
 
