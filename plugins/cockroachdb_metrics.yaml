@@ -7,11 +7,11 @@ parameters:
     type: string
     default: localhost:8080
   - name: username
-    description: Username to access sql Database (only needed if database is secure)
+    description: Username to access sql database (only needed if database is secure)
     type: string
     default: ""
   - name: password
-    description: Password to access sql Database (only needed if database is secure)
+    description: Password to access sql database (only needed if database is secure)
     type: string
     default: ""
   - name: scrape_interval
@@ -22,6 +22,29 @@ parameters:
     description: Timezone to use when parsing the timestamp
     type: timezone
     default: UTC
+  - name: ca_file_path
+    description: file path for CA certification file for CockroachDB
+    type: string
+    required: false
+  - name: cert_file_path
+    description: File path for CockroachDB certification file.
+    type: string
+    required: false
+  - name: key_file_path
+    description: File path for CockroachDB private key
+    type: string
+    required: false
+  - name: insecure_skip_verify
+    description: option to enable insecure flag (allows self signed certificates)
+    type: bool
+    default: false
+    required: false
+  - name: server_name
+    description: name of the server
+    type: string
+    required: false
+    default: ""
+
 template: |
   receivers:
     prometheus/cockroachdb:
@@ -32,9 +55,17 @@ template: |
             metrics_path: "_status/vars"
             static_configs:
               - targets: ['{{ .endpoint }}']
+            {{ if and .username .password }}
             basic_auth:
               username: '{{ .username }}'
               password: '{{ .password }}'
+            tls_config:
+              insecure_skip_verify: {{ .insecure_skip_verify }}
+              server_name: {{ .server_name }} 
+              ca_file: {{ .ca_file_path }} 
+              cert_file: {{ .cert_file_path }}
+              key_file: {{ .key_file_path }}
+            {{ end }}
             metric_relabel_configs:
               # Include only a few key metrics
               - source_labels: [ __name__ ]
@@ -94,6 +125,7 @@ template: |
             - scrape_samples_post_metric_relabeling
             - scrape_series_added
             - scrape_duration_seconds
+            - scrape_duration
             - scrape_samples_scraped
             - up
 
