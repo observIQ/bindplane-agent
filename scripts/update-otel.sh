@@ -20,7 +20,13 @@ if [ -z "$TARGET_VERSION" ]; then
     exit 1
 fi
 
-PDATA_TARGET_VERSION=$2
+CONTRIB_TARGET_VERSION=$2
+if [ -z "$CONTRIB_TARGET_VERSION" ]; then
+    echo "Must specify a target contrib version"
+    exit 1
+fi
+
+PDATA_TARGET_VERSION=$3
 
 if [ -z "$PDATA_TARGET_VERSION" ]; then
     echo "Must specify a target pdata version"
@@ -43,6 +49,9 @@ do
                 # pdata package is versioned separately
                 echo "$local_mod: $mod@$PDATA_TARGET_VERSION"
                 go mod edit -require "$mod@$PDATA_TARGET_VERSION"
+            elif case $mod in github.com/open-telemetry/opentelemetry-collector-contrib*) ;; *) false;; esac; then
+                echo "$local_mod: $mod@$CONTRIB_TARGET_VERSION"
+                go mod edit -require "$mod@$CONTRIB_TARGET_VERSION"
             else
                 echo "$local_mod: $mod@$TARGET_VERSION"
                 go mod edit -require "$mod@$TARGET_VERSION"
