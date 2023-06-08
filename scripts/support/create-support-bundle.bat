@@ -51,7 +51,7 @@ if /I "%response%"=="n" (
 set /p response="Do you want to include the collector config file? [Y/n] "
 if /I not "%response%"=="n" (
     echo Copying %collector_dir%\config.yaml
-    xcopy /Y "%collector_dir%\config.yaml" "%output_dir%\"
+    xcopy /Y "%collector_dir%config.yaml" "%output_dir%\"
 )
 
 :: Capture system info
