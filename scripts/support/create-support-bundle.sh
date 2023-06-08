@@ -274,11 +274,18 @@ function bundle_files() {
     collector_config="$collector_dir/config.yaml"
     if [ -f "$collector_config" ]; then
         read -p "Do you want to include the collector config (y or n)? " response
-        if [ "$response" = "y" ]; then
+        if [ "$response" != "n" ]; then
             info "Adding collector config $(fg_cyan "$collector_config")$(reset)"
             tar --append --file=$tar_filename -C $collector_dir config.yaml
         fi
     fi
+
+    # Grab the logs from journalctl -- in some cases, the collector.log file 
+    # may be empty, but there may be logs in journalctl
+    info "Collecting logs from journalctl..."
+    journalctl -u observiq-otel-collector.service -n 50 > journalctl.log
+    tar --append --file=$tar_filename journalctl.log
+    rm journalctl.log
 
     # Compress the tar file
     info "Compressing the tar file..."
