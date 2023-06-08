@@ -15,6 +15,7 @@
 package factories
 
 import (
+	"github.com/observiq/observiq-otel-collector/receiver/m365receiver"
 	"github.com/observiq/observiq-otel-collector/receiver/pluginreceiver"
 	"github.com/observiq/observiq-otel-collector/receiver/routereceiver"
 	"github.com/observiq/observiq-otel-collector/receiver/sapnetweaverreceiver"
@@ -34,7 +35,6 @@ import (
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/collectdreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/couchdbreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/dockerstatsreceiver"
-	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/dotnetdiagnosticsreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/elasticsearchreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/filelogreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/flinkmetricsreceiver"
@@ -102,7 +102,6 @@ var defaultReceivers = []receiver.Factory{
 	collectdreceiver.NewFactory(),
 	couchdbreceiver.NewFactory(),
 	dockerstatsreceiver.NewFactory(),
-	dotnetdiagnosticsreceiver.NewFactory(),
 	elasticsearchreceiver.NewFactory(),
 	filelogreceiver.NewFactory(),
 	flinkmetricsreceiver.NewFactory(),
@@ -120,6 +119,7 @@ var defaultReceivers = []receiver.Factory{
 	kafkametricsreceiver.NewFactory(),
 	kafkareceiver.NewFactory(),
 	kubeletstatsreceiver.NewFactory(),
+	m365receiver.NewFactory(),
 	memcachedreceiver.NewFactory(),
 	mongodbatlasreceiver.NewFactory(),
 	mongodbreceiver.NewFactory(),

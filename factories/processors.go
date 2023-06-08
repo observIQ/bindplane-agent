@@ -22,6 +22,7 @@ import (
 	"github.com/observiq/observiq-otel-collector/processor/maskprocessor"
 	"github.com/observiq/observiq-otel-collector/processor/metricextractprocessor"
 	"github.com/observiq/observiq-otel-collector/processor/metricstatsprocessor"
+	"github.com/observiq/observiq-otel-collector/processor/removeemptyvaluesprocessor"
 	"github.com/observiq/observiq-otel-collector/processor/resourceattributetransposerprocessor"
 	"github.com/observiq/observiq-otel-collector/processor/samplingprocessor"
 	"github.com/observiq/observiq-otel-collector/processor/spancountprocessor"
@@ -71,6 +72,7 @@ var defaultProcessors = []processor.Factory{
 	metricstatsprocessor.NewFactory(),
 	metricstransformprocessor.NewFactory(),
 	probabilisticsamplerprocessor.NewFactory(),
+	removeemptyvaluesprocessor.NewFactory(),
 	resourceattributetransposerprocessor.NewFactory(),
 	resourcedetectionprocessor.NewFactory(),
 	resourceprocessor.NewFactory(),
