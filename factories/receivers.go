@@ -15,6 +15,7 @@
 package factories
 
 import (
+	"github.com/observiq/observiq-otel-collector/receiver/m365receiver"
 	"github.com/observiq/observiq-otel-collector/receiver/pluginreceiver"
 	"github.com/observiq/observiq-otel-collector/receiver/routereceiver"
 	"github.com/observiq/observiq-otel-collector/receiver/sapnetweaverreceiver"
@@ -118,6 +119,7 @@ var defaultReceivers = []receiver.Factory{
 	kafkametricsreceiver.NewFactory(),
 	kafkareceiver.NewFactory(),
 	kubeletstatsreceiver.NewFactory(),
+	m365receiver.NewFactory(),
 	memcachedreceiver.NewFactory(),
 	mongodbatlasreceiver.NewFactory(),
 	mongodbreceiver.NewFactory(),
