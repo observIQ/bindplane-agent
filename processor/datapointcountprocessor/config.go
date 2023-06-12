@@ -33,7 +33,7 @@ const (
 	defaultInterval = time.Minute
 
 	// defaultMatch is the default match expression.
-	defaultMatchOTTL = "true"
+	defaultOTTLMatch = "true"
 )
 
 // Config is the config of the processor.
@@ -74,6 +74,6 @@ func createDefaultConfig() component.Config {
 		MetricName: defaultMetricName,
 		MetricUnit: defaultMetricUnit,
 		Interval:   defaultInterval,
-		OTTLMatch:  defaultMatchOTTL,
+		OTTLMatch:  defaultOTTLMatch,
 	}
 }
