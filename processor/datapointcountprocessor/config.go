@@ -16,6 +16,7 @@
 package datapointcountprocessor
 
 import (
+	"fmt"
 	"time"
 
 	"go.opentelemetry.io/collector/component"
@@ -32,17 +33,39 @@ const (
 	defaultInterval = time.Minute
 
 	// defaultMatch is the default match expression.
-	defaultMatch = "true"
+	defaultMatchOTTL = "true"
 )
 
 // Config is the config of the processor.
 type Config struct {
-	Route      string            `mapstructure:"route"`
-	MetricName string            `mapstructure:"metric_name"`
-	MetricUnit string            `mapstructure:"metric_unit"`
-	Interval   time.Duration     `mapstructure:"interval"`
-	Match      string            `mapstructure:"match"`
-	Attributes map[string]string `mapstructure:"attributes"`
+	Route          string            `mapstructure:"route"`
+	MetricName     string            `mapstructure:"metric_name"`
+	MetricUnit     string            `mapstructure:"metric_unit"`
+	Interval       time.Duration     `mapstructure:"interval"`
+	Match          string            `mapstructure:"match"`
+	OTTLMatch      string            `mapstructure:"ottl_match"`
+	Attributes     map[string]string `mapstructure:"attributes"`
+	OTTLAttributes map[string]string `mapstructure:"ottl_attributes"`
+}
+
+func (c Config) Validate() error {
+	if c.Match != "" && c.OTTLMatch != "" {
+		return fmt.Errorf("only one of match and ottl_match can be set")
+	}
+
+	if c.Match == "" && c.OTTLMatch == "" {
+		return fmt.Errorf("one of match and ottl_match must be set")
+	}
+
+	if c.Attributes != nil && c.OTTLAttributes != nil {
+		return fmt.Errorf("only one of attributes and ottl_attributes can be set")
+	}
+
+	return nil
+}
+
+func (c Config) IsOTTL() bool {
+	return c.OTTLMatch != ""
 }
 
 // createDefaultConfig returns the default config for the processor.
@@ -51,6 +74,6 @@ func createDefaultConfig() component.Config {
 		MetricName: defaultMetricName,
 		MetricUnit: defaultMetricUnit,
 		Interval:   defaultInterval,
-		Match:      defaultMatch,
+		OTTLMatch:  defaultMatchOTTL,
 	}
 }
