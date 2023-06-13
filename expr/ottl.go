@@ -13,6 +13,7 @@ import (
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/ottl/ottlfuncs"
 )
 
+// NewOTTLSpanStatement parses the given statement into an ottl.Statement for a span transform context.
 func NewOTTLSpanStatement(statementStr string, set component.TelemetrySettings) (*ottl.Statement[ottlspan.TransformContext], error) {
 	parser, err := ottlspan.NewParser(functions[ottlspan.TransformContext](), set)
 	if err != nil {
@@ -27,6 +28,7 @@ func NewOTTLSpanStatement(statementStr string, set component.TelemetrySettings) 
 	return statement, nil
 }
 
+// NewOTTLDatapointStatement parses the given statement into an ottl.Statement for a datapoint transform context.
 func NewOTTLDatapointStatement(statementStr string, set component.TelemetrySettings) (*ottl.Statement[ottldatapoint.TransformContext], error) {
 	parser, err := ottldatapoint.NewParser(functions[ottldatapoint.TransformContext](), set)
 	if err != nil {
@@ -40,6 +42,7 @@ func NewOTTLDatapointStatement(statementStr string, set component.TelemetrySetti
 	return statement, nil
 }
 
+// NewOTTLLogRecordStatement parses the given statement into an ottl.Statement for a log transform context.
 func NewOTTLLogRecordStatement(statementStr string, set component.TelemetrySettings) (*ottl.Statement[ottllog.TransformContext], error) {
 	parser, err := ottllog.NewParser(functions[ottllog.TransformContext](), set)
 	if err != nil {
@@ -54,6 +57,9 @@ func NewOTTLLogRecordStatement(statementStr string, set component.TelemetrySetti
 	return statement, nil
 }
 
+// functions is the list of available functions for OTTL statements.
+// We include all the converter functions here (functions that do not edit telemetry),
+// as well as two custom functions, noop and value.
 func functions[T any]() map[string]ottl.Factory[T] {
 	return ottl.CreateFactoryMap[T](
 		ottlfuncs.NewConcatFactory[T](),
@@ -73,6 +79,8 @@ func functions[T any]() map[string]ottl.Factory[T] {
 	)
 }
 
+// newNoopFactory returns a factory for the noop function, which does nothing.
+// It's used to implement conditions.
 func newNoopFactory[K any]() ottl.Factory[K] {
 	return ottl.NewFactory("noop", nil, createNoopFunction[K])
 }
@@ -91,11 +99,14 @@ type valueArguments[K any] struct {
 	Target ottl.Getter[K] `ottlarg:"0"`
 }
 
+// newValueFactory returns a factory for the value function, which returns the value of it's first argument.
+// We need this function because OTTL does not allow direct access to fields on the context, instead
+// expecting a function as the first token.
 func newValueFactory[K any]() ottl.Factory[K] {
 	return ottl.NewFactory("value", &valueArguments[K]{}, createValueFunction[K])
 }
 
-func createValueFunction[K any](c ottl.FunctionContext, a ottl.Arguments) (ottl.ExprFunc[K], error) {
+func createValueFunction[K any](_ ottl.FunctionContext, a ottl.Arguments) (ottl.ExprFunc[K], error) {
 	args, ok := a.(*valueArguments[K])
 	if !ok {
 		return nil, fmt.Errorf("valueFactory args must be of type *valueArguments[K]")

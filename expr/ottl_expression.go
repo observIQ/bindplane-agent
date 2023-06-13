@@ -11,7 +11,7 @@ import (
 	"go.opentelemetry.io/collector/component"
 )
 
-// OTTLExpression evaluates an OTTL expression, returning it's resultant value.
+// OTTLExpression evaluates an OTTL expression, returning a resultant value.
 type OTTLExpression[T any] struct {
 	statement *ottl.Statement[T]
 }
@@ -25,6 +25,7 @@ func (e OTTLExpression[T]) Execute(ctx context.Context, tCtx T) (any, error) {
 // NewOTTLSpanExpression creates a new expression for spans.
 // The expression is wrapped in an editor function, so only Converter functions and target expressions can be used.
 func NewOTTLSpanExpression(expression string, set component.TelemetrySettings) (*OTTLExpression[ottlspan.TransformContext], error) {
+	// Wrap the expression in the "value" function, since the ottl grammar expects a function first.
 	statementStr := fmt.Sprintf("value(%s) where 1==1", expression)
 	statement, err := NewOTTLSpanStatement(statementStr, set)
 	if err != nil {
@@ -39,6 +40,7 @@ func NewOTTLSpanExpression(expression string, set component.TelemetrySettings) (
 // NewOTTLDatapointExpression creates a new expression for datapoints.
 // The expression is wrapped in an editor function, so only Converter functions and target expressions can be used.
 func NewOTTLDatapointExpression(expression string, set component.TelemetrySettings) (*OTTLExpression[ottldatapoint.TransformContext], error) {
+	// Wrap the expression in the "value" function, since the ottl grammar expects a function first.
 	statementStr := fmt.Sprintf("value(%s) where 1==1", expression)
 	statement, err := NewOTTLDatapointStatement(statementStr, set)
 	if err != nil {
@@ -53,6 +55,7 @@ func NewOTTLDatapointExpression(expression string, set component.TelemetrySettin
 // NewOTTLLogRecordExpression creates a new expression for log records.
 // The expression is wrapped in an editor function, so only Converter functions and target expressions can be used.
 func NewOTTLLogRecordExpression(expression string, set component.TelemetrySettings) (*OTTLExpression[ottllog.TransformContext], error) {
+	// Wrap the expression in the "value" function, since the ottl grammar expects a function first.
 	statementStr := fmt.Sprintf("value(%s) where 1==1", expression)
 	statement, err := NewOTTLLogRecordStatement(statementStr, set)
 	if err != nil {
