@@ -105,9 +105,11 @@ func TestConsumeMetricsOTTL(t *testing.T) {
 	countMetricConsumer := &consumertest.MetricsSink{}
 	nextMetricConsumer := &consumertest.MetricsSink{}
 
+	ottlMatchExpression := `value_double == 60 and resource.attributes["service.name"] == "test2"`
+
 	processorCfg := createDefaultConfig().(*Config)
 	processorCfg.Interval = time.Millisecond * 100
-	processorCfg.OTTLMatch = `value_double == 60 and resource.attributes["service.name"] == "test2"`
+	processorCfg.OTTLMatch = &ottlMatchExpression
 	processorCfg.OTTLAttributes = map[string]string{
 		"dimension1": `value_double`,
 		"dimension2": `resource.attributes["service.name"]`,

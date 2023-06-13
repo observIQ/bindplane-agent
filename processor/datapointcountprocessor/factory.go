@@ -71,7 +71,7 @@ func createExprMetricsProcessor(cfg *Config, params processor.CreateSettings, co
 }
 
 func createOTTLMetricsProcessor(cfg *Config, params processor.CreateSettings, consumer consumer.Metrics) (processor.Metrics, error) {
-	match, err := expr.NewOTTLDatapointCondition(cfg.OTTLMatch, params.TelemetrySettings)
+	match, err := expr.NewOTTLDatapointCondition(cfg.OTTLMatchExpression(), params.TelemetrySettings)
 	if err != nil {
 		return nil, fmt.Errorf("invalid match expression: %w", err)
 	}

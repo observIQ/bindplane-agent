@@ -43,18 +43,14 @@ type Config struct {
 	MetricUnit     string            `mapstructure:"metric_unit"`
 	Interval       time.Duration     `mapstructure:"interval"`
 	Match          string            `mapstructure:"match"`
-	OTTLMatch      string            `mapstructure:"ottl_match"`
+	OTTLMatch      *string           `mapstructure:"ottl_match"`
 	Attributes     map[string]string `mapstructure:"attributes"`
 	OTTLAttributes map[string]string `mapstructure:"ottl_attributes"`
 }
 
 func (c Config) Validate() error {
-	if c.Match != "" && c.OTTLMatch != "" {
+	if c.Match != "" && c.OTTLMatch != nil {
 		return fmt.Errorf("only one of match and ottl_match can be set")
-	}
-
-	if c.Match == "" && c.OTTLMatch == "" {
-		return fmt.Errorf("one of match and ottl_match must be set")
 	}
 
 	if c.Attributes != nil && c.OTTLAttributes != nil {
@@ -64,8 +60,16 @@ func (c Config) Validate() error {
 	return nil
 }
 
+func (c Config) OTTLMatchExpression() string {
+	if c.OTTLMatch != nil {
+		return *c.OTTLMatch
+	}
+	return defaultOTTLMatch
+}
+
 func (c Config) IsOTTL() bool {
-	return c.OTTLMatch != ""
+	// We assume OTTL if the Expr expression is unfilled
+	return c.Match == ""
 }
 
 // createDefaultConfig returns the default config for the processor.
@@ -74,6 +78,5 @@ func createDefaultConfig() component.Config {
 		MetricName: defaultMetricName,
 		MetricUnit: defaultMetricUnit,
 		Interval:   defaultInterval,
-		OTTLMatch:  defaultOTTLMatch,
 	}
 }
