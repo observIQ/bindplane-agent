@@ -57,7 +57,7 @@ func createMetricsProcessor(_ context.Context, params processor.CreateSettings, 
 }
 
 func createExprMetricsProcessor(cfg *Config, params processor.CreateSettings, consumer consumer.Metrics) (processor.Metrics, error) {
-	match, err := expr.CreateBoolExpression(cfg.Match)
+	match, err := expr.CreateBoolExpression(cfg.exprMatchExpression())
 	if err != nil {
 		return nil, fmt.Errorf("invalid match expression: %w", err)
 	}
