@@ -49,7 +49,7 @@ func createLogsProcessor(_ context.Context, params processor.CreateSettings, cfg
 		return nil, fmt.Errorf("invalid config type: %+v", cfg)
 	}
 
-	if processorCfg.IsOTTL() {
+	if processorCfg.isOTTL() {
 		return createOTTLLogsProcessor(processorCfg, params, consumer)
 	}
 
@@ -71,7 +71,7 @@ func createExprLogsProcessor(cfg *Config, params processor.CreateSettings, consu
 }
 
 func createOTTLLogsProcessor(cfg *Config, params processor.CreateSettings, consumer consumer.Logs) (processor.Logs, error) {
-	match, err := expr.NewOTTLLogRecordCondition(cfg.OTTLMatchExpression(), params.TelemetrySettings)
+	match, err := expr.NewOTTLLogRecordCondition(cfg.ottlMatchExpression(), params.TelemetrySettings)
 	if err != nil {
 		return nil, fmt.Errorf("invalid match expression: %w", err)
 	}

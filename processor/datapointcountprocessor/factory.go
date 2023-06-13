@@ -49,7 +49,7 @@ func createMetricsProcessor(_ context.Context, params processor.CreateSettings, 
 		return nil, fmt.Errorf("invalid config type: %+v", cfg)
 	}
 
-	if processorCfg.IsOTTL() {
+	if processorCfg.isOTTL() {
 		return createOTTLMetricsProcessor(processorCfg, params, consumer)
 	}
 
@@ -71,7 +71,7 @@ func createExprMetricsProcessor(cfg *Config, params processor.CreateSettings, co
 }
 
 func createOTTLMetricsProcessor(cfg *Config, params processor.CreateSettings, consumer consumer.Metrics) (processor.Metrics, error) {
-	match, err := expr.NewOTTLDatapointCondition(cfg.OTTLMatchExpression(), params.TelemetrySettings)
+	match, err := expr.NewOTTLDatapointCondition(cfg.ottlMatchExpression(), params.TelemetrySettings)
 	if err != nil {
 		return nil, fmt.Errorf("invalid match expression: %w", err)
 	}

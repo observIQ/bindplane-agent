@@ -48,6 +48,7 @@ type Config struct {
 	OTTLAttributes map[string]string `mapstructure:"ottl_attributes"`
 }
 
+// Validate validates the config, returning an error if the config is invalid
 func (c Config) Validate() error {
 	if c.Match != "" && c.OTTLMatch != nil {
 		return fmt.Errorf("only one of match and ottl_match can be set")
@@ -60,14 +61,14 @@ func (c Config) Validate() error {
 	return nil
 }
 
-func (c Config) OTTLMatchExpression() string {
+func (c Config) ottlMatchExpression() string {
 	if c.OTTLMatch != nil {
 		return *c.OTTLMatch
 	}
 	return defaultOTTLMatch
 }
 
-func (c Config) IsOTTL() bool {
+func (c Config) isOTTL() bool {
 	// We assume OTTL if the Expr expression is unfilled
 	return c.Match == ""
 }

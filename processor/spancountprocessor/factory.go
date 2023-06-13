@@ -49,7 +49,7 @@ func createTracesProcessor(_ context.Context, params processor.CreateSettings, c
 		return nil, fmt.Errorf("invalid config type: %+v", cfg)
 	}
 
-	if processorCfg.IsOTTL() {
+	if processorCfg.isOTTL() {
 		return createOTTLTracesProcessor(processorCfg, params, consumer)
 	}
 
@@ -71,7 +71,7 @@ func createExprTracesProcessor(cfg *Config, params processor.CreateSettings, con
 }
 
 func createOTTLTracesProcessor(cfg *Config, params processor.CreateSettings, consumer consumer.Traces) (processor.Traces, error) {
-	match, err := expr.NewOTTLSpanCondition(cfg.OTTLMatchExpression(), params.TelemetrySettings)
+	match, err := expr.NewOTTLSpanCondition(cfg.ottlMatchExpression(), params.TelemetrySettings)
 	if err != nil {
 		return nil, fmt.Errorf("invalid match expression: %w", err)
 	}
