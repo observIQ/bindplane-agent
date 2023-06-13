@@ -6,7 +6,7 @@ This processor is used to convert the number of logs received during an interval
 
 ## How It Works
 1. The user configures the log count processor in their logs pipeline and a route receiver in their desired metrics pipeline.
-2. If any incoming logs match the `match` expression, they are counted and dimensioned by their `attributes`. Regardless of match, all logs are sent to the next component in the logs pipeline.
+2. If any incoming logs match the `ottl_match` expression, they are counted and dimensioned by their `ottl_attributes`. Regardless of match, all logs are sent to the next component in the logs pipeline.
 3. After each configured interval, the observed log counts are converted into gauge metrics. These metrics are sent to the configured route receiver.
 
 

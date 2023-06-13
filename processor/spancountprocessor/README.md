@@ -6,7 +6,7 @@ This processor is used to convert the number of spans received during an interva
 
 ## How It Works
 1. The user configures the span count processor in their traces pipeline and a route receiver in their target metrics pipeline.
-2. If any incoming spans match the `match` expression, they are counted and dimensioned by their `attributes`. Regardless of match, all spans are sent to the next component in the traces pipeline.
+2. If any incoming spans match the `ottl_match` expression, they are counted and dimensioned by their `ottl_attributes`. Regardless of match, all spans are sent to the next component in the traces pipeline.
 3. After each configured interval, the observed metric counts are converted into gauge metrics. These metrics are sent to the configured route receiver.
 
 
