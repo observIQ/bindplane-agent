@@ -2,6 +2,7 @@
 ALLDOC := $(shell find . \( -name "*.md" -o -name "*.yaml" \) \
                                 -type f | sort)
 ALL_MODULES := $(shell find . -type f -name "go.mod" -exec dirname {} \; | sort )
+ALL_MDATAGEN_MODULES := $(shell find . -type f -name "metadata.yaml" -exec dirname {} \; | sort )
 
 # All source code files
 ALL_SRC := $(shell find . -name '*.go' -o -name '*.sh' -o -name 'Dockerfile*' -type f | sort)
@@ -87,7 +88,7 @@ install-tools:
 	go install github.com/google/addlicense@v1.1.0
 	go install github.com/goreleaser/goreleaser@v1.18.2
 	go install github.com/mgechev/revive@v1.3.1
-	go install github.com/open-telemetry/opentelemetry-collector-contrib/cmd/mdatagen@v0.78.0
+	go install github.com/open-telemetry/opentelemetry-collector-contrib/cmd/mdatagen@v0.79.0
 	go install github.com/securego/gosec/v2/cmd/gosec@v2.16.0
 	go install github.com/sigstore/cosign/cmd/cosign@v1.10.1
 	go install github.com/uw-labs/lichen@v0.1.7
