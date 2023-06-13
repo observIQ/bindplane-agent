@@ -26,3 +26,44 @@ func TestCreateDefaultProcessorConfig(t *testing.T) {
 	require.Equal(t, defaultMetricName, cfg.MetricName)
 	require.Equal(t, defaultMetricUnit, cfg.MetricUnit)
 }
+
+func TestConfig_Validate(t *testing.T) {
+	ottlMatch := "true"
+	testCases := []struct {
+		name   string
+		config *Config
+		err    string
+	}{
+		{
+			name:   "default",
+			config: createDefaultConfig().(*Config),
+		},
+		{
+			name: "both match and ottl_match set",
+			config: &Config{
+				Match:     "true",
+				OTTLMatch: &ottlMatch,
+			},
+			err: "only one of match and ottl_match can be set",
+		},
+		{
+			name: "both attributes and ottl attributes are set",
+			config: &Config{
+				Attributes:     map[string]string{"thing": "true"},
+				OTTLAttributes: map[string]string{"thing": "true"},
+			},
+			err: "only one of attributes and ottl_attributes can be set",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			err := tc.config.Validate()
+			if tc.err != "" {
+				require.ErrorContains(t, err, tc.err)
+			} else {
+				require.NoError(t, err)
+			}
+		})
+	}
+}
