@@ -40,7 +40,7 @@ func (e OTTLExpression[T]) Execute(ctx context.Context, tCtx T) (any, error) {
 // The expression is wrapped in an editor function, so only Converter functions and target expressions can be used.
 func NewOTTLSpanExpression(expression string, set component.TelemetrySettings) (*OTTLExpression[ottlspan.TransformContext], error) {
 	// Wrap the expression in the "value" function, since the ottl grammar expects a function first.
-	statementStr := fmt.Sprintf("value(%s) where 1==1", expression)
+	statementStr := fmt.Sprintf("value(%s)", expression)
 	statement, err := NewOTTLSpanStatement(statementStr, set)
 	if err != nil {
 		return nil, err
@@ -55,7 +55,7 @@ func NewOTTLSpanExpression(expression string, set component.TelemetrySettings) (
 // The expression is wrapped in an editor function, so only Converter functions and target expressions can be used.
 func NewOTTLDatapointExpression(expression string, set component.TelemetrySettings) (*OTTLExpression[ottldatapoint.TransformContext], error) {
 	// Wrap the expression in the "value" function, since the ottl grammar expects a function first.
-	statementStr := fmt.Sprintf("value(%s) where 1==1", expression)
+	statementStr := fmt.Sprintf("value(%s)", expression)
 	statement, err := NewOTTLDatapointStatement(statementStr, set)
 	if err != nil {
 		return nil, err
@@ -70,7 +70,7 @@ func NewOTTLDatapointExpression(expression string, set component.TelemetrySettin
 // The expression is wrapped in an editor function, so only Converter functions and target expressions can be used.
 func NewOTTLLogRecordExpression(expression string, set component.TelemetrySettings) (*OTTLExpression[ottllog.TransformContext], error) {
 	// Wrap the expression in the "value" function, since the ottl grammar expects a function first.
-	statementStr := fmt.Sprintf("value(%s) where 1==1", expression)
+	statementStr := fmt.Sprintf("value(%s)", expression)
 	statement, err := NewOTTLLogRecordStatement(statementStr, set)
 	if err != nil {
 		return nil, err
