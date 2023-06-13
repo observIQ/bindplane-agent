@@ -75,7 +75,7 @@ func newOTTLProcessor(
 	}
 }
 
-func (p *spanCountProcessor) IsOTTL() bool {
+func (p *spanCountProcessor) isOTTL() bool {
 	return p.OTTLmatch != nil
 }
 
@@ -107,7 +107,7 @@ func (p *spanCountProcessor) ConsumeTraces(ctx context.Context, t ptrace.Traces)
 	p.mux.Lock()
 	defer p.mux.Unlock()
 
-	if p.IsOTTL() {
+	if p.isOTTL() {
 		p.consumeTracesOTTL(ctx, t)
 	} else {
 		p.consumeTracesExpr(ctx, t)

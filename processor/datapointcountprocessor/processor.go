@@ -79,7 +79,7 @@ func newOTTLProcessor(config *Config,
 	}
 }
 
-func (p *metricCountProcessor) IsOTTL() bool {
+func (p *metricCountProcessor) isOTTL() bool {
 	return p.OTTLmatch != nil
 }
 
@@ -111,7 +111,7 @@ func (p *metricCountProcessor) ConsumeMetrics(ctx context.Context, m pmetric.Met
 	p.mux.Lock()
 	defer p.mux.Unlock()
 
-	if p.IsOTTL() {
+	if p.isOTTL() {
 		p.consumeMetricsOTTL(ctx, m)
 	} else {
 		p.consumeMetricsExpr(ctx, m)

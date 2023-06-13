@@ -74,7 +74,7 @@ func newOTTLProcessor(
 	}
 }
 
-func (p *logCountProcessor) IsOTTL() bool {
+func (p *logCountProcessor) isOTTL() bool {
 	return p.OTTLmatch != nil
 }
 
@@ -106,7 +106,7 @@ func (p *logCountProcessor) ConsumeLogs(ctx context.Context, pl plog.Logs) error
 	p.mux.Lock()
 	defer p.mux.Unlock()
 
-	if p.IsOTTL() {
+	if p.isOTTL() {
 		p.consumeLogsOTTL(ctx, pl)
 	} else {
 		p.consumeLogsExpr(ctx, pl)
