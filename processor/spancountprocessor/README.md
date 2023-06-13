@@ -11,16 +11,16 @@ This processor is used to convert the number of spans received during an interva
 
 
 ## Configuration
-| Field           | Type     | Default      | Description                                                                                                                                                                                                                                                      |
-|-----------------|----------|--------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| ottl_match      | string   | `true`       | An [OTTL] expression used to match which datapoints to count. All paths in the [span context] are available to reference. All [converters] are available to use.                                                                                                 |
-| match           | string   | ``           | **DEPRECATED** use `ottl_match` instead. A boolean [expression](https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md) used to match which spans to count. By default, all spans are counted.                                                |
-| route           | string   | ` `          | The name of the [route receiver](../../receiver/routereceiver/README.md) to send metrics to.                                                                                                                                                                     |
-| interval        | duration | `1m`         | The interval at which count metrics are created. The counter will reset after each interval.                                                                                                                                                                     |
-| metric_name     | string   | `span.count` | The name of the metric created.                                                                                                                                                                                                                                  |
-| metric_unit     | string   | `{spans}`    | The unit of the metric created.                                                                                                                                                                                                                                  |
-| ottl_attributes | map      | `{}`         | **DEPRECATED** use `ottl_attributes` instead. The mapped attributes of the metric created. Each key is an attribute name. Each value is an [OTTL] expression. All paths in the [span context] are available to reference. All [converters] are available to use. |
-| attributes      | map      | `{}`         | The mapped attributes of the metric created. Each key is an attribute name. Each value is an [expression](https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md) that extracts data from the span.                                           |
+| Field           | Type     | Default      | Description                                                                                                                                                                                                                                                          |
+|-----------------|----------|--------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ottl_match      | string   | `true`       | An [OTTL] expression used to match which datapoints to count. All paths in the [span context] are available to reference. All [converters] are available to use.                                                                                                     |
+| match           | string   | ``           | **DEPRECATED** use `ottl_match` instead. A boolean [expression](https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md) used to match which spans to count. By default, all spans are counted.                                                    |
+| route           | string   | ` `          | The name of the [route receiver](../../receiver/routereceiver/README.md) to send metrics to.                                                                                                                                                                         |
+| interval        | duration | `1m`         | The interval at which count metrics are created. The counter will reset after each interval.                                                                                                                                                                         |
+| metric_name     | string   | `span.count` | The name of the metric created.                                                                                                                                                                                                                                      |
+| metric_unit     | string   | `{spans}`    | The unit of the metric created.                                                                                                                                                                                                                                      |
+| ottl_attributes | map      | `{}`         | The mapped attributes of the metric created. Each key is an attribute name. Each value is an [OTTL] expression. All paths in the [span context] are available to reference. All [converters] are available to use.                                                   |
+| attributes      | map      | `{}`         | **DEPRECATED** use `ottl_attributes` instead. The mapped attributes of the metric created. Each key is an attribute name. Each value is an [expression](https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md) that extracts data from the span. |
 
 [OTTL]: https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/v0.79.0/pkg/ottl#readme
 [converters]: https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.79.0/pkg/ottl/ottlfuncs/README.md#converters
@@ -79,7 +79,7 @@ The following configuration adds a match expression that will count only spans w
 ```yaml
 processors:
     spancount:
-        match: end_time_unix_nano - start_time_unix_nano > 1000000000
+        ottl_match: end_time_unix_nano - start_time_unix_nano > 1000000000
 ```
 
 ### Extract metric attributes
@@ -87,7 +87,7 @@ The following configuration extracts the status code and kind values from traces
 ```yaml
 processors:
     spancount:
-        attributes:
+        ottl_attributes:
             status_code: status.code
             kind: kind
 ```

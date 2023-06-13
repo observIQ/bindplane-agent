@@ -116,7 +116,7 @@ func (p *spanCountProcessor) ConsumeTraces(ctx context.Context, t ptrace.Traces)
 	return p.consumer.ConsumeTraces(ctx, t)
 }
 
-// consumeMetricsOTTL processes the metrics using configured OTTL expressions
+// consumeTracesOTTL processes the traces using configured OTTL expressions
 func (p *spanCountProcessor) consumeTracesOTTL(ctx context.Context, t ptrace.Traces) {
 	resourceSpans := t.ResourceSpans()
 	for i := 0; i < resourceSpans.Len(); i++ {
@@ -144,7 +144,7 @@ func (p *spanCountProcessor) consumeTracesOTTL(ctx context.Context, t ptrace.Tra
 	}
 }
 
-// consumeMetricsOTTL processes the metrics using configured OTTL expressions
+// consumeTracesExpr processes the traces using configured Expr expressions
 func (p *spanCountProcessor) consumeTracesExpr(ctx context.Context, t ptrace.Traces) {
 	resourceGroups := expr.ConvertToSpanResourceGroups(t)
 	for _, group := range resourceGroups {

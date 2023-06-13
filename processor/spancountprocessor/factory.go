@@ -50,13 +50,13 @@ func createTracesProcessor(_ context.Context, params processor.CreateSettings, c
 	}
 
 	if processorCfg.IsOTTL() {
-		return createOTTLMetricsProcessor(processorCfg, params, consumer)
+		return createOTTLTracesProcessor(processorCfg, params, consumer)
 	}
 
-	return createExprMetricsProcessor(processorCfg, params, consumer)
+	return createExprTracesProcessor(processorCfg, params, consumer)
 }
 
-func createExprMetricsProcessor(cfg *Config, params processor.CreateSettings, consumer consumer.Traces) (processor.Traces, error) {
+func createExprTracesProcessor(cfg *Config, params processor.CreateSettings, consumer consumer.Traces) (processor.Traces, error) {
 	match, err := expr.CreateBoolExpression(cfg.Match)
 	if err != nil {
 		return nil, fmt.Errorf("invalid match expression: %w", err)
@@ -70,7 +70,7 @@ func createExprMetricsProcessor(cfg *Config, params processor.CreateSettings, co
 	return newExprProcessor(cfg, consumer, match, attrs, params.Logger), nil
 }
 
-func createOTTLMetricsProcessor(cfg *Config, params processor.CreateSettings, consumer consumer.Traces) (processor.Traces, error) {
+func createOTTLTracesProcessor(cfg *Config, params processor.CreateSettings, consumer consumer.Traces) (processor.Traces, error) {
 	match, err := expr.NewOTTLSpanCondition(cfg.OTTLMatchExpression(), params.TelemetrySettings)
 	if err != nil {
 		return nil, fmt.Errorf("invalid match expression: %w", err)

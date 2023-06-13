@@ -6,6 +6,7 @@ require (
 	github.com/observiq/observiq-otel-collector/counter v1.27.0
 	github.com/observiq/observiq-otel-collector/expr v1.27.0
 	github.com/observiq/observiq-otel-collector/receiver/routereceiver v1.27.0
+	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/ottl v0.79.0
 	github.com/stretchr/testify v1.8.4
 	go.opentelemetry.io/collector v0.79.0
 	go.opentelemetry.io/collector/component v0.79.0
@@ -40,7 +41,6 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/internal/coreinternal v0.79.0 // indirect
-	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/ottl v0.79.0 // indirect
 	go.opentelemetry.io/otel v1.16.0 // indirect
 	go.opentelemetry.io/otel/metric v1.16.0 // indirect
 	go.opentelemetry.io/otel/trace v1.16.0 // indirect
@@ -60,3 +60,8 @@ replace github.com/observiq/observiq-otel-collector/receiver/routereceiver => ..
 replace github.com/observiq/observiq-otel-collector/expr => ../../expr
 
 replace github.com/observiq/observiq-otel-collector/counter => ../../counter
+
+// Pull in changes to OTTL to allow body to be indexed
+// Can be removed when ottl is updated to v0.79.0
+// Points to this commit: https://github.com/open-telemetry/opentelemetry-collector-contrib/commit/85a618f8bb7204b63d3d7bf0f679cc61c0f42ea0
+replace github.com/open-telemetry/opentelemetry-collector-contrib/pkg/ottl v0.78.0 => github.com/open-telemetry/opentelemetry-collector-contrib/pkg/ottl v0.78.1-0.20230524155147-85a618f8bb72
