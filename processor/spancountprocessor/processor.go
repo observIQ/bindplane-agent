@@ -110,7 +110,7 @@ func (p *spanCountProcessor) ConsumeTraces(ctx context.Context, t ptrace.Traces)
 	if p.isOTTL() {
 		p.consumeTracesOTTL(ctx, t)
 	} else {
-		p.consumeTracesExpr(ctx, t)
+		p.consumeTracesExpr(t)
 	}
 
 	return p.consumer.ConsumeTraces(ctx, t)
@@ -145,7 +145,7 @@ func (p *spanCountProcessor) consumeTracesOTTL(ctx context.Context, t ptrace.Tra
 }
 
 // consumeTracesExpr processes the traces using configured Expr expressions
-func (p *spanCountProcessor) consumeTracesExpr(ctx context.Context, t ptrace.Traces) {
+func (p *spanCountProcessor) consumeTracesExpr(t ptrace.Traces) {
 	resourceGroups := expr.ConvertToSpanResourceGroups(t)
 	for _, group := range resourceGroups {
 		resource := group.Resource

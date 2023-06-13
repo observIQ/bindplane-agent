@@ -109,7 +109,7 @@ func (p *logCountProcessor) ConsumeLogs(ctx context.Context, pl plog.Logs) error
 	if p.isOTTL() {
 		p.consumeLogsOTTL(ctx, pl)
 	} else {
-		p.consumeLogsExpr(ctx, pl)
+		p.consumeLogsExpr(pl)
 	}
 
 	return p.consumer.ConsumeLogs(ctx, pl)
@@ -143,7 +143,7 @@ func (p *logCountProcessor) consumeLogsOTTL(ctx context.Context, pl plog.Logs) {
 	}
 }
 
-func (p *logCountProcessor) consumeLogsExpr(ctx context.Context, pl plog.Logs) {
+func (p *logCountProcessor) consumeLogsExpr(pl plog.Logs) {
 	resourceGroups := expr.ConvertToResourceGroups(pl)
 	for _, group := range resourceGroups {
 		resource := group.Resource

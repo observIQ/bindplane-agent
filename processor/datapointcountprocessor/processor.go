@@ -114,14 +114,14 @@ func (p *metricCountProcessor) ConsumeMetrics(ctx context.Context, m pmetric.Met
 	if p.isOTTL() {
 		p.consumeMetricsOTTL(ctx, m)
 	} else {
-		p.consumeMetricsExpr(ctx, m)
+		p.consumeMetricsExpr(m)
 	}
 
 	return p.consumer.ConsumeMetrics(ctx, m)
 }
 
 // consumeMetricsOTTL processes the metrics using configured expr expressions
-func (p *metricCountProcessor) consumeMetricsExpr(ctx context.Context, m pmetric.Metrics) {
+func (p *metricCountProcessor) consumeMetricsExpr(m pmetric.Metrics) {
 	resourceGroups := expr.ConvertToDatapointResourceGroup(m)
 	for _, group := range resourceGroups {
 		resource := group.Resource
