@@ -57,7 +57,7 @@ func createTracesProcessor(_ context.Context, params processor.CreateSettings, c
 }
 
 func createExprTracesProcessor(cfg *Config, params processor.CreateSettings, consumer consumer.Traces) (processor.Traces, error) {
-	match, err := expr.CreateBoolExpression(cfg.Match)
+	match, err := expr.CreateBoolExpression(cfg.exprMatchExpression())
 	if err != nil {
 		return nil, fmt.Errorf("invalid match expression: %w", err)
 	}
