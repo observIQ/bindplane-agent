@@ -32,7 +32,7 @@ const (
 	// defaultInterval is the default metric interval.
 	defaultInterval = time.Minute
 
-	// defaultMatch is the default match expression.
+	// defaultOTTLMatch is the default match expression.
 	defaultOTTLMatch = "true"
 )
 

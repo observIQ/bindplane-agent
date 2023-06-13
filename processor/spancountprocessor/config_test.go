@@ -23,7 +23,6 @@ import (
 func TestCreateDefaultProcessorConfig(t *testing.T) {
 	cfg := createDefaultConfig().(*Config)
 	require.Equal(t, defaultInterval, cfg.Interval)
-	require.Equal(t, defaultMatch, cfg.Match)
 	require.Equal(t, defaultMetricName, cfg.MetricName)
 	require.Equal(t, defaultMetricUnit, cfg.MetricUnit)
 }
