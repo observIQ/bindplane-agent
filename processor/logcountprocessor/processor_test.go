@@ -41,9 +41,10 @@ func TestConsumeLogs(t *testing.T) {
 	logConsumer := &LogConsumer{logChan: make(chan plog.Logs, 1)}
 	metricConsumer := &MetricConsumer{metricChan: make(chan pmetric.Metrics, 1)}
 
+	matchExpr := `body.message == "test1" and resource["service.name"] == "test2"`
 	processorCfg := createDefaultConfig().(*Config)
 	processorCfg.Interval = time.Millisecond * 100
-	processorCfg.Match = `body.message == "test1" and resource["service.name"] == "test2"`
+	processorCfg.Match = &matchExpr
 	processorCfg.Attributes = map[string]string{
 		"dimension1": `body.message`,
 		"dimension2": `resource["service.name"]`,

@@ -41,7 +41,7 @@ func TestConfig_Validate(t *testing.T) {
 		{
 			name: "both match and ottl_match set",
 			config: &Config{
-				Match:     "true",
+				Match:     strp("true"),
 				OTTLMatch: &ottlMatch,
 			},
 			err: "only one of match and ottl_match can be set",
@@ -53,6 +53,22 @@ func TestConfig_Validate(t *testing.T) {
 				OTTLAttributes: map[string]string{"thing": "true"},
 			},
 			err: "only one of attributes and ottl_attributes can be set",
+		},
+		{
+			name: "both match and ottl attributes are set",
+			config: &Config{
+				Match:          strp("true"),
+				OTTLAttributes: map[string]string{"thing": "true"},
+			},
+			err: "cannot use match with ottl_attributes",
+		},
+		{
+			name: "both match and ottl attributes are set",
+			config: &Config{
+				OTTLMatch:  strp("true"),
+				Attributes: map[string]string{"thing": "true"},
+			},
+			err: "cannot use ottl_match with attributes",
 		},
 	}
 
