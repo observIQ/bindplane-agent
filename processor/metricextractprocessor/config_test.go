@@ -22,7 +22,6 @@ import (
 
 func TestCreateDefaultProcessorConfig(t *testing.T) {
 	cfg := createDefaultConfig().(*Config)
-	require.Equal(t, defaultMatch, cfg.Match)
 	require.Equal(t, defaultMetricName, cfg.MetricName)
 	require.Equal(t, defaultMetricUnit, cfg.MetricUnit)
 }
@@ -36,7 +35,7 @@ func TestConfigValidate(t *testing.T) {
 		{
 			name: "valid config",
 			config: &Config{
-				Match:      "true",
+				Match:      strp("true"),
 				Extract:    "message",
 				MetricName: "metric",
 				MetricUnit: "unit",
@@ -46,7 +45,7 @@ func TestConfigValidate(t *testing.T) {
 		{
 			name: "invalid metric type",
 			config: &Config{
-				Match:      "true",
+				Match:      strp("true"),
 				Extract:    "message",
 				MetricName: "metric",
 				MetricUnit: "unit",
@@ -57,17 +56,17 @@ func TestConfigValidate(t *testing.T) {
 		{
 			name: "missing extract",
 			config: &Config{
-				Match:      "true",
+				Match:      strp("true"),
 				MetricName: "metric",
 				MetricUnit: "unit",
 				MetricType: gaugeDoubleType,
 			},
-			expectedErr: errExtractMissing.Error(),
+			expectedErr: errExprExtractMissing.Error(),
 		},
 		{
 			name: "invalid match",
 			config: &Config{
-				Match:      "++",
+				Match:      strp("++"),
 				Extract:    "message",
 				MetricName: "metric",
 				MetricUnit: "unit",
@@ -78,7 +77,7 @@ func TestConfigValidate(t *testing.T) {
 		{
 			name: "invalid extract",
 			config: &Config{
-				Match:      "true",
+				Match:      strp("true"),
 				Extract:    "++",
 				MetricName: "metric",
 				MetricUnit: "unit",
@@ -89,7 +88,7 @@ func TestConfigValidate(t *testing.T) {
 		{
 			name: "invalid attribute",
 			config: &Config{
-				Match:      "true",
+				Match:      strp("true"),
 				Extract:    "message",
 				MetricName: "metric",
 				MetricUnit: "unit",
@@ -113,4 +112,8 @@ func TestConfigValidate(t *testing.T) {
 			require.Contains(t, err.Error(), tc.expectedErr)
 		})
 	}
+}
+
+func strp(s string) *string {
+	return &s
 }

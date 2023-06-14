@@ -30,19 +30,19 @@ import (
 )
 
 func TestProcessorStart(t *testing.T) {
-	processor := &extractProcessor{}
+	processor := &exprExtractProcessor{}
 	err := processor.Start(context.Background(), nil)
 	require.NoError(t, err)
 }
 
 func TestProcessorShutdown(t *testing.T) {
-	processor := &extractProcessor{}
+	processor := &exprExtractProcessor{}
 	err := processor.Shutdown(context.Background())
 	require.NoError(t, err)
 }
 
 func TestProcessorCapabilities(t *testing.T) {
-	processor := &extractProcessor{}
+	processor := &exprExtractProcessor{}
 	require.Equal(t, consumer.Capabilities{MutatesData: false}, processor.Capabilities())
 }
 
@@ -56,7 +56,7 @@ func TestProcessorExtractMetrics(t *testing.T) {
 		{
 			name: "no match",
 			cfg: &Config{
-				Match:      "false",
+				Match:      strp("false"),
 				Extract:    "body",
 				Attributes: map[string]string{},
 			},
@@ -77,7 +77,7 @@ func TestProcessorExtractMetrics(t *testing.T) {
 		{
 			name: "no extract",
 			cfg: &Config{
-				Match:      "true",
+				Match:      strp("true"),
 				Extract:    "body.missing",
 				Attributes: map[string]string{},
 			},
@@ -98,7 +98,7 @@ func TestProcessorExtractMetrics(t *testing.T) {
 		{
 			name: "invalid gauge double",
 			cfg: &Config{
-				Match:   "true",
+				Match:   strp("true"),
 				Extract: "body.value",
 				Attributes: map[string]string{
 					"service": "attributes.service",
@@ -124,7 +124,7 @@ func TestProcessorExtractMetrics(t *testing.T) {
 		{
 			name: "invalid gauge int",
 			cfg: &Config{
-				Match:   "true",
+				Match:   strp("true"),
 				Extract: "body.value",
 				Attributes: map[string]string{
 					"service": "attributes.service",
@@ -150,7 +150,7 @@ func TestProcessorExtractMetrics(t *testing.T) {
 		{
 			name: "valid gauge int",
 			cfg: &Config{
-				Match:   "true",
+				Match:   strp("true"),
 				Extract: "body.value",
 				Attributes: map[string]string{
 					"service": "attributes.service",
@@ -194,7 +194,7 @@ func TestProcessorExtractMetrics(t *testing.T) {
 		{
 			name: "valid gauge double",
 			cfg: &Config{
-				Match:   "true",
+				Match:   strp("true"),
 				Extract: "body.value",
 				Attributes: map[string]string{
 					"service": "attributes.service",
@@ -238,7 +238,7 @@ func TestProcessorExtractMetrics(t *testing.T) {
 		{
 			name: "valid counter int",
 			cfg: &Config{
-				Match:   "true",
+				Match:   strp("true"),
 				Extract: "body.value",
 				Attributes: map[string]string{
 					"service": "attributes.service",
@@ -282,7 +282,7 @@ func TestProcessorExtractMetrics(t *testing.T) {
 		{
 			name: "valid counter double",
 			cfg: &Config{
-				Match:   "true",
+				Match:   strp("true"),
 				Extract: "body.value",
 				Attributes: map[string]string{
 					"service": "attributes.service",
@@ -331,7 +331,7 @@ func TestProcessorExtractMetrics(t *testing.T) {
 			p, err := factory.CreateLogsProcessor(context.Background(), processor.CreateSettings{TelemetrySettings: component.TelemetrySettings{Logger: zap.NewNop()}}, tc.cfg, nil)
 			require.NoError(t, err)
 
-			processor := p.(*extractProcessor)
+			processor := p.(*exprExtractProcessor)
 			metrics := processor.extractMetrics(tc.logs)
 			require.Equal(t, tc.metrics, metrics)
 		})

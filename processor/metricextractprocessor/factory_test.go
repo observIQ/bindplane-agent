@@ -40,7 +40,7 @@ func TestCreateLogsProcessor(t *testing.T) {
 		{
 			name: "valid config",
 			cfg: &Config{
-				Match:      "true",
+				Match:      strp("true"),
 				Extract:    "message",
 				MetricType: gaugeDoubleType,
 			},
@@ -48,7 +48,7 @@ func TestCreateLogsProcessor(t *testing.T) {
 		{
 			name: "invalid match",
 			cfg: &Config{
-				Match:      "++",
+				Match:      strp("++"),
 				Extract:    "message",
 				MetricType: gaugeDoubleType,
 			},
@@ -57,7 +57,7 @@ func TestCreateLogsProcessor(t *testing.T) {
 		{
 			name: "invalid attributes",
 			cfg: &Config{
-				Match:      "true",
+				Match:      strp("true"),
 				Extract:    "message",
 				MetricType: gaugeDoubleType,
 				Attributes: map[string]string{"a": "++"},
@@ -67,7 +67,7 @@ func TestCreateLogsProcessor(t *testing.T) {
 		{
 			name: "invalid extract",
 			cfg: &Config{
-				Match:      "true",
+				Match:      strp("true"),
 				Extract:    "++",
 				MetricType: gaugeDoubleType,
 			},
@@ -86,7 +86,7 @@ func TestCreateLogsProcessor(t *testing.T) {
 			p, err := f.CreateLogsProcessor(context.Background(), processor.CreateSettings{}, tc.cfg, nil)
 			if tc.expectedErr == "" {
 				require.NoError(t, err)
-				require.IsType(t, &extractProcessor{}, p)
+				require.IsType(t, &exprExtractProcessor{}, p)
 			} else {
 				require.Error(t, err)
 				require.Contains(t, err.Error(), tc.expectedErr)
