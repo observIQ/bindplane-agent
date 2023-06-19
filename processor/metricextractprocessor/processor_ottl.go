@@ -79,17 +79,17 @@ func (e *ottlExtractProcessor) extractMetrics(ctx context.Context, pl plog.Logs)
 		scopeLogs := resourceLog.ScopeLogs()
 		resource := resourceLog.Resource()
 
-		resourceMetric := metrics.ResourceMetrics().AppendEmpty()
-		resource.Attributes().CopyTo(resourceMetric.Resource().Attributes())
+		resourceMetrics := pmetric.NewResourceMetrics()
+		resource.Attributes().CopyTo(resourceMetrics.Resource().Attributes())
 
-		scopeMetrics := resourceMetric.ScopeMetrics().AppendEmpty()
+		scopeMetrics := resourceMetrics.ScopeMetrics().AppendEmpty()
 		scopeMetrics.Scope().SetName(typeStr)
 
-		metric := pmetric.NewMetric()
+		metric := scopeMetrics.Metrics().AppendEmpty()
 		metric.SetName(e.config.MetricName)
 		metric.SetUnit(e.config.MetricUnit)
 
-		var dpSlice pmetric.NumberDataPointSlice
+		var dpSlice pmetric.NumberDataPointSlice = pmetric.NewNumberDataPointSlice()
 		switch e.config.MetricType {
 		case gaugeDoubleType, gaugeIntType:
 			dpSlice = metric.SetEmptyGauge().DataPoints()
@@ -119,8 +119,8 @@ func (e *ottlExtractProcessor) extractMetrics(ctx context.Context, pl plog.Logs)
 		}
 
 		if dpSlice.Len() != 0 {
-			// Move new metric into existing slice if we added any datapoints
-			metric.MoveTo(scopeMetrics.Metrics().AppendEmpty())
+			// Add the resource metric to the slice if we had any datapoints.
+			resourceMetrics.MoveTo(metrics.ResourceMetrics().AppendEmpty())
 		}
 	}
 
@@ -131,6 +131,10 @@ func (e *ottlExtractProcessor) addDatapointOTTL(ctx context.Context, lr plog.Log
 	val, err := e.ottlValue.Execute(ctx, logCtx)
 	if err != nil {
 		e.logger.Error("Failed when extracting value.", zap.Error(err))
+		return
+	}
+
+	if val == nil {
 		return
 	}
 

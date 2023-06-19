@@ -19,14 +19,16 @@ import (
 	"testing"
 	"time"
 
+	"github.com/observiq/observiq-otel-collector/receiver/routereceiver"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/consumer"
+	"go.opentelemetry.io/collector/consumer/consumertest"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/plog"
 	"go.opentelemetry.io/collector/pdata/pmetric"
-	"go.opentelemetry.io/collector/processor"
-	"go.uber.org/zap"
+	"go.opentelemetry.io/collector/processor/processortest"
+	"go.opentelemetry.io/collector/receiver/receivertest"
 )
 
 func TestProcessorStart(t *testing.T) {
@@ -48,10 +50,11 @@ func TestProcessorCapabilities(t *testing.T) {
 
 func TestProcessorExtractMetrics(t *testing.T) {
 	var testCases = []struct {
-		name    string
-		cfg     *Config
-		logs    plog.Logs
-		metrics pmetric.Metrics
+		name      string
+		cfg       *Config
+		logs      plog.Logs
+		metrics   pmetric.Metrics
+		noMetrics bool
 	}{
 		{
 			name: "no match",
@@ -72,7 +75,7 @@ func TestProcessorExtractMetrics(t *testing.T) {
 
 				return logs
 			}(),
-			metrics: pmetric.NewMetrics(),
+			noMetrics: true,
 		},
 		{
 			name: "no extract",
@@ -93,7 +96,7 @@ func TestProcessorExtractMetrics(t *testing.T) {
 
 				return logs
 			}(),
-			metrics: pmetric.NewMetrics(),
+			noMetrics: true,
 		},
 		{
 			name: "invalid gauge double",
@@ -119,7 +122,7 @@ func TestProcessorExtractMetrics(t *testing.T) {
 
 				return logs
 			}(),
-			metrics: pmetric.NewMetrics(),
+			noMetrics: true,
 		},
 		{
 			name: "invalid gauge int",
@@ -145,7 +148,7 @@ func TestProcessorExtractMetrics(t *testing.T) {
 
 				return logs
 			}(),
-			metrics: pmetric.NewMetrics(),
+			noMetrics: true,
 		},
 		{
 			name: "valid gauge int",
@@ -323,17 +326,308 @@ func TestProcessorExtractMetrics(t *testing.T) {
 				return metrics
 			}(),
 		},
+		{
+			name: "OTTL no match",
+			cfg: &Config{
+				OTTLMatch:      strp("false"),
+				OTTLExtract:    "body",
+				OTTLAttributes: map[string]string{},
+			},
+			logs: func() plog.Logs {
+				logs := plog.NewLogs()
+				resourceLogs := logs.ResourceLogs().AppendEmpty()
+				resourceLogs.Resource().Attributes().FromRaw(map[string]any{"host": "test"})
+
+				record := resourceLogs.ScopeLogs().AppendEmpty().LogRecords().AppendEmpty()
+				record.Body().SetEmptyMap().FromRaw(map[string]any{"value": 20})
+				record.SetTimestamp(pcommon.NewTimestampFromTime(time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)))
+				record.Attributes().FromRaw(map[string]any{"service": "test-service"})
+
+				return logs
+			}(),
+			noMetrics: true,
+		},
+		{
+			name: "OTTL no extract",
+			cfg: &Config{
+				OTTLMatch:      strp("true"),
+				OTTLExtract:    `body["dne"]`,
+				OTTLAttributes: map[string]string{},
+			},
+			logs: func() plog.Logs {
+				logs := plog.NewLogs()
+				resourceLogs := logs.ResourceLogs().AppendEmpty()
+				resourceLogs.Resource().Attributes().FromRaw(map[string]any{"host": "test"})
+
+				record := resourceLogs.ScopeLogs().AppendEmpty().LogRecords().AppendEmpty()
+				record.Body().SetEmptyMap().FromRaw(map[string]any{"value": 20})
+				record.SetTimestamp(pcommon.NewTimestampFromTime(time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)))
+				record.Attributes().FromRaw(map[string]any{"service": "test-service"})
+
+				return logs
+			}(),
+			noMetrics: true,
+		},
+		{
+			name: "OTTL invalid gauge double",
+			cfg: &Config{
+				OTTLMatch:   strp("true"),
+				OTTLExtract: `body["value"]`,
+				OTTLAttributes: map[string]string{
+					"service": `attributes["service"]`,
+				},
+				MetricType: gaugeDoubleType,
+				MetricName: "test.metric",
+				MetricUnit: "unitless",
+			},
+			logs: func() plog.Logs {
+				logs := plog.NewLogs()
+				resourceLogs := logs.ResourceLogs().AppendEmpty()
+				resourceLogs.Resource().Attributes().FromRaw(map[string]any{"host": "test"})
+
+				record := resourceLogs.ScopeLogs().AppendEmpty().LogRecords().AppendEmpty()
+				record.Body().SetEmptyMap().FromRaw(map[string]any{"value": "test"})
+				record.SetTimestamp(pcommon.NewTimestampFromTime(time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)))
+				record.Attributes().FromRaw(map[string]any{"service": "test-service"})
+
+				return logs
+			}(),
+			noMetrics: true,
+		},
+		{
+			name: "OTTL invalid gauge int",
+			cfg: &Config{
+				OTTLMatch:   strp("true"),
+				OTTLExtract: `body["value"]`,
+				OTTLAttributes: map[string]string{
+					"service": `attributes["service"]`,
+				},
+				MetricType: gaugeIntType,
+				MetricName: "test.metric",
+				MetricUnit: "unitless",
+			},
+			logs: func() plog.Logs {
+				logs := plog.NewLogs()
+				resourceLogs := logs.ResourceLogs().AppendEmpty()
+				resourceLogs.Resource().Attributes().FromRaw(map[string]any{"host": "test"})
+
+				record := resourceLogs.ScopeLogs().AppendEmpty().LogRecords().AppendEmpty()
+				record.Body().SetEmptyMap().FromRaw(map[string]any{"value": "test"})
+				record.SetTimestamp(pcommon.NewTimestampFromTime(time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)))
+				record.Attributes().FromRaw(map[string]any{"service": "test-service"})
+
+				return logs
+			}(),
+			noMetrics: true,
+		},
+		{
+			name: "OTTL valid gauge int",
+			cfg: &Config{
+				OTTLMatch:   strp("true"),
+				OTTLExtract: `body["value"]`,
+				OTTLAttributes: map[string]string{
+					"service": `attributes["service"]`,
+				},
+				MetricType: gaugeIntType,
+				MetricName: "test.metric",
+				MetricUnit: "unitless",
+			},
+			logs: func() plog.Logs {
+				logs := plog.NewLogs()
+				resourceLogs := logs.ResourceLogs().AppendEmpty()
+				resourceLogs.Resource().Attributes().FromRaw(map[string]any{"host": "test"})
+
+				record := resourceLogs.ScopeLogs().AppendEmpty().LogRecords().AppendEmpty()
+				record.Body().SetEmptyMap().FromRaw(map[string]any{"value": 20})
+				record.SetTimestamp(pcommon.NewTimestampFromTime(time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)))
+				record.Attributes().FromRaw(map[string]any{"service": "test-service"})
+
+				return logs
+			}(),
+			metrics: func() pmetric.Metrics {
+				metrics := pmetric.NewMetrics()
+				resourceMetrics := metrics.ResourceMetrics().AppendEmpty()
+				resourceMetrics.Resource().Attributes().FromRaw(map[string]any{"host": "test"})
+
+				scopeMetrics := resourceMetrics.ScopeMetrics().AppendEmpty()
+				scopeMetrics.Scope().SetName(typeStr)
+
+				metric := scopeMetrics.Metrics().AppendEmpty()
+				metric.SetName("test.metric")
+				metric.SetUnit("unitless")
+
+				dataPoint := metric.SetEmptyGauge().DataPoints().AppendEmpty()
+				dataPoint.SetTimestamp(pcommon.NewTimestampFromTime(time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)))
+				dataPoint.Attributes().FromRaw(map[string]any{"service": "test-service"})
+				dataPoint.SetIntValue(20)
+
+				return metrics
+			}(),
+		},
+		{
+			name: "OTTL valid gauge double",
+			cfg: &Config{
+				OTTLMatch:   strp("true"),
+				OTTLExtract: `body["value"]`,
+				OTTLAttributes: map[string]string{
+					"service": `attributes["service"]`,
+				},
+				MetricType: gaugeDoubleType,
+				MetricName: "test.metric",
+				MetricUnit: "unitless",
+			},
+			logs: func() plog.Logs {
+				logs := plog.NewLogs()
+				resourceLogs := logs.ResourceLogs().AppendEmpty()
+				resourceLogs.Resource().Attributes().FromRaw(map[string]any{"host": "test"})
+
+				record := resourceLogs.ScopeLogs().AppendEmpty().LogRecords().AppendEmpty()
+				record.Body().SetEmptyMap().FromRaw(map[string]any{"value": 20.5})
+				record.SetTimestamp(pcommon.NewTimestampFromTime(time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)))
+				record.Attributes().FromRaw(map[string]any{"service": "test-service"})
+
+				return logs
+			}(),
+			metrics: func() pmetric.Metrics {
+				metrics := pmetric.NewMetrics()
+				resourceMetrics := metrics.ResourceMetrics().AppendEmpty()
+				resourceMetrics.Resource().Attributes().FromRaw(map[string]any{"host": "test"})
+
+				scopeMetrics := resourceMetrics.ScopeMetrics().AppendEmpty()
+				scopeMetrics.Scope().SetName(typeStr)
+
+				metric := scopeMetrics.Metrics().AppendEmpty()
+				metric.SetName("test.metric")
+				metric.SetUnit("unitless")
+
+				dataPoint := metric.SetEmptyGauge().DataPoints().AppendEmpty()
+				dataPoint.SetTimestamp(pcommon.NewTimestampFromTime(time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)))
+				dataPoint.Attributes().FromRaw(map[string]any{"service": "test-service"})
+				dataPoint.SetDoubleValue(20.5)
+
+				return metrics
+			}(),
+		},
+		{
+			name: "OTTL valid counter int",
+			cfg: &Config{
+				OTTLMatch:   strp("true"),
+				OTTLExtract: `body["value"]`,
+				OTTLAttributes: map[string]string{
+					"service": `attributes["service"]`,
+				},
+				MetricType: counterIntType,
+				MetricName: "test.metric",
+				MetricUnit: "unitless",
+			},
+			logs: func() plog.Logs {
+				logs := plog.NewLogs()
+				resourceLogs := logs.ResourceLogs().AppendEmpty()
+				resourceLogs.Resource().Attributes().FromRaw(map[string]any{"host": "test"})
+
+				record := resourceLogs.ScopeLogs().AppendEmpty().LogRecords().AppendEmpty()
+				record.Body().SetEmptyMap().FromRaw(map[string]any{"value": 20})
+				record.SetTimestamp(pcommon.NewTimestampFromTime(time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)))
+				record.Attributes().FromRaw(map[string]any{"service": "test-service"})
+
+				return logs
+			}(),
+			metrics: func() pmetric.Metrics {
+				metrics := pmetric.NewMetrics()
+				resourceMetrics := metrics.ResourceMetrics().AppendEmpty()
+				resourceMetrics.Resource().Attributes().FromRaw(map[string]any{"host": "test"})
+
+				scopeMetrics := resourceMetrics.ScopeMetrics().AppendEmpty()
+				scopeMetrics.Scope().SetName(typeStr)
+
+				metric := scopeMetrics.Metrics().AppendEmpty()
+				metric.SetName("test.metric")
+				metric.SetUnit("unitless")
+
+				dataPoint := metric.SetEmptySum().DataPoints().AppendEmpty()
+				dataPoint.SetTimestamp(pcommon.NewTimestampFromTime(time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)))
+				dataPoint.Attributes().FromRaw(map[string]any{"service": "test-service"})
+				dataPoint.SetIntValue(20)
+
+				return metrics
+			}(),
+		},
+		{
+			name: "OTTL valid counter double",
+			cfg: &Config{
+				OTTLMatch:   strp("true"),
+				OTTLExtract: `body["value"]`,
+				OTTLAttributes: map[string]string{
+					"service": `attributes["service"]`,
+				},
+				MetricType: counterDoubleType,
+				MetricName: "test.metric",
+				MetricUnit: "unitless",
+			},
+			logs: func() plog.Logs {
+				logs := plog.NewLogs()
+				resourceLogs := logs.ResourceLogs().AppendEmpty()
+				resourceLogs.Resource().Attributes().FromRaw(map[string]any{"host": "test"})
+
+				record := resourceLogs.ScopeLogs().AppendEmpty().LogRecords().AppendEmpty()
+				record.Body().SetEmptyMap().FromRaw(map[string]any{"value": 20.5})
+				record.SetTimestamp(pcommon.NewTimestampFromTime(time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)))
+				record.Attributes().FromRaw(map[string]any{"service": "test-service"})
+
+				return logs
+			}(),
+			metrics: func() pmetric.Metrics {
+				metrics := pmetric.NewMetrics()
+				resourceMetrics := metrics.ResourceMetrics().AppendEmpty()
+				resourceMetrics.Resource().Attributes().FromRaw(map[string]any{"host": "test"})
+
+				scopeMetrics := resourceMetrics.ScopeMetrics().AppendEmpty()
+				scopeMetrics.Scope().SetName(typeStr)
+
+				metric := scopeMetrics.Metrics().AppendEmpty()
+				metric.SetName("test.metric")
+				metric.SetUnit("unitless")
+
+				dataPoint := metric.SetEmptySum().DataPoints().AppendEmpty()
+				dataPoint.SetTimestamp(pcommon.NewTimestampFromTime(time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)))
+				dataPoint.Attributes().FromRaw(map[string]any{"service": "test-service"})
+				dataPoint.SetDoubleValue(20.5)
+
+				return metrics
+			}(),
+		},
 	}
+
+	routeReceiverName := "TestProcessorExtractMetrics"
+
+	routeMetrics := &consumertest.MetricsSink{}
+	createSettings := receivertest.NewNopCreateSettings()
+	createSettings.ID = component.NewIDWithName(component.DataTypeMetrics, routeReceiverName)
+
+	routereceiver.NewFactory().CreateMetricsReceiver(context.Background(), createSettings, routereceiver.Config{}, routeMetrics)
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
+			t.Cleanup(routeMetrics.Reset)
+
+			logSink := &consumertest.LogsSink{}
+			tc.cfg.Route = routeReceiverName
+
 			factory := NewFactory()
-			p, err := factory.CreateLogsProcessor(context.Background(), processor.CreateSettings{TelemetrySettings: component.TelemetrySettings{Logger: zap.NewNop()}}, tc.cfg, nil)
+
+			p, err := factory.CreateLogsProcessor(context.Background(), processortest.NewNopCreateSettings(), tc.cfg, logSink)
 			require.NoError(t, err)
 
-			processor := p.(*exprExtractProcessor)
-			metrics := processor.extractMetrics(tc.logs)
-			require.Equal(t, tc.metrics, metrics)
+			err = p.ConsumeLogs(context.Background(), tc.logs)
+			require.NoError(t, err)
+
+			metrics := routeMetrics.AllMetrics()
+			if tc.noMetrics {
+				require.Equal(t, 0, len(metrics))
+			} else {
+				require.Equal(t, 1, len(metrics))
+				require.Equal(t, tc.metrics, metrics[0])
+			}
 		})
 	}
 }
