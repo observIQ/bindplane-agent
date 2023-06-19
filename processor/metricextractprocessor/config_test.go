@@ -33,13 +33,23 @@ func TestConfigValidate(t *testing.T) {
 		expectedErr string
 	}{
 		{
-			name: "valid config",
+			name: "valid config (expr)",
 			config: &Config{
 				Match:      strp("true"),
 				Extract:    "message",
 				MetricName: "metric",
 				MetricUnit: "unit",
 				MetricType: gaugeDoubleType,
+			},
+		},
+		{
+			name: "valid config (ottl)",
+			config: &Config{
+				OTTLMatch:   strp("true"),
+				OTTLExtract: `body["message"]`,
+				MetricName:  "metric",
+				MetricUnit:  "unit",
+				MetricType:  gaugeDoubleType,
 			},
 		},
 		{
@@ -54,7 +64,7 @@ func TestConfigValidate(t *testing.T) {
 			expectedErr: errMetricTypeInvalid.Error(),
 		},
 		{
-			name: "missing extract",
+			name: "missing extract (expr)",
 			config: &Config{
 				Match:      strp("true"),
 				MetricName: "metric",
@@ -64,7 +74,17 @@ func TestConfigValidate(t *testing.T) {
 			expectedErr: errExprExtractMissing.Error(),
 		},
 		{
-			name: "invalid match",
+			name: "missing extract (ottl)",
+			config: &Config{
+				OTTLMatch:  strp("true"),
+				MetricName: "metric",
+				MetricUnit: "unit",
+				MetricType: gaugeDoubleType,
+			},
+			expectedErr: errOTTLExtractMissing.Error(),
+		},
+		{
+			name: "invalid match (expr)",
 			config: &Config{
 				Match:      strp("++"),
 				Extract:    "message",
@@ -75,7 +95,18 @@ func TestConfigValidate(t *testing.T) {
 			expectedErr: "invalid match",
 		},
 		{
-			name: "invalid extract",
+			name: "invalid match (ottl)",
+			config: &Config{
+				OTTLMatch:   strp("++"),
+				OTTLExtract: "message",
+				MetricName:  "metric",
+				MetricUnit:  "unit",
+				MetricType:  gaugeDoubleType,
+			},
+			expectedErr: "invalid ottl_match",
+		},
+		{
+			name: "invalid extract (expr)",
 			config: &Config{
 				Match:      strp("true"),
 				Extract:    "++",
@@ -86,7 +117,18 @@ func TestConfigValidate(t *testing.T) {
 			expectedErr: "invalid extract",
 		},
 		{
-			name: "invalid attribute",
+			name: "invalid extract (ottl)",
+			config: &Config{
+				OTTLMatch:   strp("true"),
+				OTTLExtract: "++",
+				MetricName:  "metric",
+				MetricUnit:  "unit",
+				MetricType:  gaugeDoubleType,
+			},
+			expectedErr: "invalid ottl_extract",
+		},
+		{
+			name: "invalid attribute (expr)",
 			config: &Config{
 				Match:      strp("true"),
 				Extract:    "message",
@@ -98,6 +140,31 @@ func TestConfigValidate(t *testing.T) {
 				},
 			},
 			expectedErr: "invalid attributes",
+		},
+		{
+			name: "invalid attribute (ottl)",
+			config: &Config{
+				OTTLMatch:   strp("true"),
+				OTTLExtract: `body["message"]`,
+				MetricName:  "metric",
+				MetricUnit:  "unit",
+				MetricType:  gaugeDoubleType,
+				OTTLAttributes: map[string]string{
+					"invalid": "++",
+				},
+			},
+			expectedErr: "invalid ottl_attributes",
+		},
+		{
+			name: "mixed ottl and expr config",
+			config: &Config{
+				OTTLMatch:  strp("true"),
+				Extract:    "message",
+				MetricName: "metric",
+				MetricUnit: "unit",
+				MetricType: gaugeDoubleType,
+			},
+			expectedErr: "cannot use ottl fields (ottl_match, ottl_extract, ottl_attributes) and expr fields (match, extract, attributes)",
 		},
 	}
 

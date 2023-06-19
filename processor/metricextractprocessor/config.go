@@ -84,7 +84,7 @@ func (c Config) Validate() error {
 	usesOTTLFields := c.OTTLExtract != "" || c.OTTLMatch != nil || c.OTTLAttributes != nil
 
 	if usesExprFields && usesOTTLFields {
-		return errors.New("cannot use ottl fields (ottl_match, ottl_extract, ottl_attributes) and expr fields (match, extract, attributes).")
+		return errors.New("cannot use ottl fields (ottl_match, ottl_extract, ottl_attributes) and expr fields (match, extract, attributes)")
 	}
 
 	switch c.MetricType {

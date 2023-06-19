@@ -20,7 +20,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/component"
-	"go.opentelemetry.io/collector/processor"
+	"go.opentelemetry.io/collector/processor/processortest"
 )
 
 func TestNewProcessorFactory(t *testing.T) {
@@ -55,6 +55,15 @@ func TestCreateLogsProcessor(t *testing.T) {
 			expectedErr: "invalid match expression",
 		},
 		{
+			name: "invalid ottl match",
+			cfg: &Config{
+				OTTLMatch:   strp("++"),
+				OTTLExtract: `body["message"]`,
+				MetricType:  gaugeDoubleType,
+			},
+			expectedErr: "invalid ottl_match",
+		},
+		{
 			name: "invalid attributes",
 			cfg: &Config{
 				Match:      strp("true"),
@@ -63,6 +72,16 @@ func TestCreateLogsProcessor(t *testing.T) {
 				Attributes: map[string]string{"a": "++"},
 			},
 			expectedErr: "invalid attribute expression",
+		},
+		{
+			name: "invalid ottl attributes",
+			cfg: &Config{
+				OTTLMatch:      strp("true"),
+				OTTLExtract:    `body["message"]`,
+				MetricType:     gaugeDoubleType,
+				OTTLAttributes: map[string]string{"a": "++"},
+			},
+			expectedErr: "invalid ottl_attributes",
 		},
 		{
 			name: "invalid extract",
@@ -74,6 +93,15 @@ func TestCreateLogsProcessor(t *testing.T) {
 			expectedErr: "invalid extract expression",
 		},
 		{
+			name: "invalid ottl extract",
+			cfg: &Config{
+				OTTLMatch:   strp("true"),
+				OTTLExtract: "++",
+				MetricType:  gaugeDoubleType,
+			},
+			expectedErr: "invalid ottl_extract",
+		},
+		{
 			name:        "invalid config type",
 			cfg:         nil,
 			expectedErr: "invalid config type",
@@ -83,7 +111,7 @@ func TestCreateLogsProcessor(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			f := NewFactory()
-			p, err := f.CreateLogsProcessor(context.Background(), processor.CreateSettings{}, tc.cfg, nil)
+			p, err := f.CreateLogsProcessor(context.Background(), processortest.NewNopCreateSettings(), tc.cfg, nil)
 			if tc.expectedErr == "" {
 				require.NoError(t, err)
 				require.IsType(t, &exprExtractProcessor{}, p)
