@@ -20,6 +20,8 @@ import (
 	"time"
 
 	"github.com/observiq/observiq-otel-collector/receiver/routereceiver"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest/plogtest"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest/pmetrictest"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/consumer"
@@ -618,15 +620,21 @@ func TestProcessorExtractMetrics(t *testing.T) {
 			p, err := factory.CreateLogsProcessor(context.Background(), processortest.NewNopCreateSettings(), tc.cfg, logSink)
 			require.NoError(t, err)
 
+			logsClone := plog.NewLogs()
+			tc.logs.CopyTo(logsClone)
+
 			err = p.ConsumeLogs(context.Background(), tc.logs)
 			require.NoError(t, err)
+
+			require.NoError(t, plogtest.CompareLogs(logsClone, logSink.AllLogs()[0]))
 
 			metrics := routeMetrics.AllMetrics()
 			if tc.noMetrics {
 				require.Equal(t, 0, len(metrics))
 			} else {
 				require.Equal(t, 1, len(metrics))
-				require.Equal(t, tc.metrics, metrics[0])
+				require.NoError(t, pmetrictest.CompareMetrics(tc.metrics, metrics[0]))
+
 			}
 		})
 	}
