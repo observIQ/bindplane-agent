@@ -199,6 +199,8 @@ func convertAnyToInt(value any) (int64, error) {
 		return int64(value), nil
 	case int64:
 		return value, nil
+	case float32:
+		return int64(value), nil
 	case float64:
 		return int64(value), nil
 	case string:
@@ -218,6 +220,8 @@ func convertAnyToFloat(value any) (float64, error) {
 	case int32:
 		return float64(value), nil
 	case int64:
+		return float64(value), nil
+	case float32:
 		return float64(value), nil
 	case float64:
 		return value, nil

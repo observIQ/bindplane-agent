@@ -639,3 +639,128 @@ func TestProcessorExtractMetrics(t *testing.T) {
 		})
 	}
 }
+
+func TestConvertAnyToInt(t *testing.T) {
+	testCases := []struct {
+		name     string
+		value    any
+		expected int64
+		err      string
+	}{
+		{
+			name:     "int",
+			value:    int(10),
+			expected: 10,
+		},
+		{
+			name:     "int32",
+			value:    int32(11),
+			expected: 11,
+		},
+		{
+			name:     "int64",
+			value:    int64(12),
+			expected: 12,
+		},
+		{
+			name:     "float32",
+			value:    float32(13),
+			expected: 13,
+		},
+		{
+			name:     "float64",
+			value:    float64(14),
+			expected: 14,
+		},
+		{
+			name:     "string",
+			value:    "15",
+			expected: 15,
+		},
+		{
+			name:  "string (invalid)",
+			value: "not a number",
+			err:   "failed to convert string to int:",
+		},
+		{
+			name:  "invalid type",
+			value: new(chan int),
+			err:   "invalid value type:",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			v, err := convertAnyToInt(tc.value)
+			require.Equal(t, tc.expected, v)
+			if tc.err != "" {
+				require.ErrorContains(t, err, tc.err)
+			} else {
+				require.NoError(t, err)
+			}
+
+		})
+	}
+}
+
+func TestConvertAnyToFloat(t *testing.T) {
+	testCases := []struct {
+		name     string
+		value    any
+		expected float64
+		err      string
+	}{
+		{
+			name:     "int",
+			value:    int(10),
+			expected: 10,
+		},
+		{
+			name:     "int32",
+			value:    int32(11),
+			expected: 11,
+		},
+		{
+			name:     "int64",
+			value:    int64(12),
+			expected: 12,
+		},
+		{
+			name:     "float32",
+			value:    float32(13),
+			expected: 13,
+		},
+		{
+			name:     "float64",
+			value:    float64(14),
+			expected: 14,
+		},
+		{
+			name:     "string",
+			value:    "15",
+			expected: 15,
+		},
+		{
+			name:  "string (invalid)",
+			value: "not a number",
+			err:   "failed to convert string to float:",
+		},
+		{
+			name:  "invalid type",
+			value: new(chan int),
+			err:   "invalid value type:",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			v, err := convertAnyToFloat(tc.value)
+			require.Equal(t, tc.expected, v)
+			if tc.err != "" {
+				require.ErrorContains(t, err, tc.err)
+			} else {
+				require.NoError(t, err)
+			}
+		})
+	}
+}
