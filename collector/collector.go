@@ -23,16 +23,20 @@ import (
 	"sync"
 	"time"
 
+	"github.com/observiq/observiq-otel-collector/factories"
 	"go.opentelemetry.io/collector/otelcol"
 	"go.uber.org/zap"
 )
+
+// The timeout for how long to wait on shutting down the collector before bailing out during a Restart.
+var collectorRestartTimeout = 10 * time.Second
 
 // Collector is an interface for running the open telemetry collector.
 //
 //go:generate mockery --name Collector --filename mock_collector.go --structname MockCollector
 type Collector interface {
 	Run(context.Context) error
-	Stop()
+	Stop(context.Context)
 	Restart(context.Context) error
 	SetLoggingOpts([]zap.Option)
 	GetLoggingOpts() []zap.Option
@@ -44,21 +48,34 @@ type collector struct {
 	configPaths []string
 	version     string
 	loggingOpts []zap.Option
-	mux         sync.Mutex
-	svc         *otelcol.Collector
-	statusChan  chan *Status
-	wg          *sync.WaitGroup
+	// factories for modifying in test
+	factories  otelcol.Factories
+	mux        sync.Mutex
+	svc        *otelcol.Collector
+	statusChan chan *Status
+	wg         *sync.WaitGroup
+
+	// collectorCtx is the context that is fed into collector.Run
+	// Cancelling it will force shutdown
+	collectorCtx       context.Context
+	collectorCtxCancel func()
 }
 
 // New returns a new collector.
-func New(configPaths []string, version string, loggingOpts []zap.Option) Collector {
+func New(configPaths []string, version string, loggingOpts []zap.Option) (Collector, error) {
+	factories, err := factories.DefaultFactories()
+	if err != nil {
+		return nil, fmt.Errorf("error while setting up default factories: %w", err)
+	}
+
 	return &collector{
 		configPaths: configPaths,
 		version:     version,
 		loggingOpts: loggingOpts,
 		statusChan:  make(chan *Status, 10),
 		wg:          &sync.WaitGroup{},
-	}
+		factories:   factories,
+	}, nil
 }
 
 // GetLoggingOpts returns the current logging options
@@ -83,7 +100,7 @@ func (c *collector) Run(ctx context.Context) error {
 
 	// The OT collector only supports using settings once during the lifetime
 	// of a single collector instance. We must remake the settings on each startup.
-	settings, err := NewSettings(c.configPaths, c.version, c.loggingOpts)
+	settings, err := NewSettings(c.configPaths, c.version, c.loggingOpts, c.factories)
 	if err != nil {
 		return err
 	}
@@ -98,6 +115,11 @@ func (c *collector) Run(ctx context.Context) error {
 	}
 
 	startupErr := make(chan error, 1)
+
+	// Note: This doesn't provide any timeout mechanism if the incoming context is cancelled.
+	// If the context passed to Start is cancelled, shutdown could take a very long time (due to e.g. pipeline draining).
+	// This is because the collector passes the background context if the start context is cancelled before shutdown is called.
+	c.collectorCtx, c.collectorCtxCancel = context.WithCancel(ctx)
 	wg := sync.WaitGroup{}
 	wg.Add(1)
 
@@ -106,6 +128,9 @@ func (c *collector) Run(ctx context.Context) error {
 
 	go func() {
 		defer wg.Done()
+
+		// Ensure the collectorCtx context is cancelled after the service is done running, even if we cancelled it in Stop.
+		defer c.collectorCtxCancel()
 
 		// Catch panic
 		defer func() {
@@ -128,7 +153,7 @@ func (c *collector) Run(ctx context.Context) error {
 			}
 		}()
 
-		err := svc.Run(ctx)
+		err := svc.Run(c.collectorCtx)
 		c.sendStatus(false, false, err)
 
 		// The error may be nil;
@@ -145,7 +170,7 @@ func (c *collector) Run(ctx context.Context) error {
 }
 
 // Stop will stop the collector.
-func (c *collector) Stop() {
+func (c *collector) Stop(ctx context.Context) {
 	c.mux.Lock()
 	defer c.mux.Unlock()
 
@@ -154,14 +179,34 @@ func (c *collector) Stop() {
 	}
 
 	c.svc.Shutdown()
+
+	shutdownCompleteChan := make(chan struct{})
+
+	go func() {
+		select {
+		case <-ctx.Done():
+			// Cancel the start context if the stop context is cancelled.
+			// Ideally, we'd be able to pass a context into shutdown, but the OTEL collector
+			// doesn't support that.
+			c.collectorCtxCancel()
+		case <-shutdownCompleteChan: // shutdown before context cancellation
+		}
+	}()
+
 	c.wg.Wait()
+	close(shutdownCompleteChan)
+
 	c.svc = nil
 }
 
 // Restart will restart the collector. It will also reset the status channel.
 // After calling restart call Status() to get a handle to the new channel.
 func (c *collector) Restart(ctx context.Context) error {
-	c.Stop()
+	// We stop with a timeout, because we don't want the collector to hang when restarting.
+	timeoutCtx, cancel := context.WithTimeout(ctx, collectorRestartTimeout)
+	defer cancel()
+	c.Stop(timeoutCtx)
+
 	// Reset status channel so it's not polluted by the collector shutting down and restarting
 	c.statusChan = make(chan *Status, 10)
 	return c.Run(ctx)

@@ -18,28 +18,38 @@ import (
 	"context"
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
+	"go.opentelemetry.io/collector/component"
+	"go.opentelemetry.io/collector/consumer"
+	"go.opentelemetry.io/collector/receiver"
 )
+
+const slowShutdownTypestr = "slowshutdown"
 
 func TestCollectorRunValid(t *testing.T) {
 	ctx := context.Background()
 
-	collector := New([]string{"./test/valid.yaml"}, "0.0.0", nil)
-	err := collector.Run(ctx)
+	collector, err := New([]string{"./test/valid.yaml"}, "0.0.0", nil)
+	require.NoError(t, err)
+
+	err = collector.Run(ctx)
 	require.NoError(t, err)
 
 	status := <-collector.Status()
 	require.True(t, status.Running)
 	require.NoError(t, status.Err)
 
-	collector.Stop()
+	collector.Stop(ctx)
 	status = <-collector.Status()
 	require.False(t, status.Running)
 }
 
 func TestCollectorRunMultiple(t *testing.T) {
-	collector := New([]string{"./test/valid.yaml"}, "0.0.0", nil)
+	collector, err := New([]string{"./test/valid.yaml"}, "0.0.0", nil)
+	require.NoError(t, err)
+
 	for i := 1; i < 5; i++ {
 		ctx := context.Background()
 
@@ -52,7 +62,7 @@ func TestCollectorRunMultiple(t *testing.T) {
 			require.True(t, status.Running)
 			require.NoError(t, status.Err)
 
-			collector.Stop()
+			collector.Stop(ctx)
 			status = <-collector.Status()
 			require.False(t, status.Running)
 		})
@@ -62,8 +72,10 @@ func TestCollectorRunMultiple(t *testing.T) {
 func TestCollectorRunInvalidConfig(t *testing.T) {
 	ctx := context.Background()
 
-	collector := New([]string{"./test/invalid.yaml"}, "0.0.0", nil)
-	err := collector.Run(ctx)
+	collector, err := New([]string{"./test/invalid.yaml"}, "0.0.0", nil)
+	require.NoError(t, err)
+
+	err = collector.Run(ctx)
 	require.Error(t, err)
 
 	status := <-collector.Status()
@@ -72,26 +84,26 @@ func TestCollectorRunInvalidConfig(t *testing.T) {
 	require.ErrorContains(t, status.Err, "cannot unmarshal the configuration")
 }
 
-// There currently exists a limitation in the collector lifecycle regarding context.
-// Context is not respected when starting the collector and a collector could run indefinitely
-// in this scenario. Once this is addressed, we can readd this test.
-//
-// func TestCollectorRunCancelledContext(t *testing.T) {
-// 	ctx, cancel := context.WithCancel(context.Background())
-// 	cancel()
+func TestCollectorRunCancelledContext(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
 
-// 	collector := New("./test/valid.yaml", "0.0.0", nil)
-// 	err := collector.Run(ctx)
-// 	require.EqualError(t, context.Canceled, err.Error())
-// }
+	collector, err := New([]string{"./test/valid.yaml"}, "0.0.0", nil)
+	require.NoError(t, err)
+
+	err = collector.Run(ctx)
+	require.EqualError(t, context.Canceled, err.Error())
+}
 
 func TestCollectorRunTwice(t *testing.T) {
 	ctx := context.Background()
 
-	collector := New([]string{"./test/valid.yaml"}, "0.0.0", nil)
-	err := collector.Run(ctx)
+	collector, err := New([]string{"./test/valid.yaml"}, "0.0.0", nil)
 	require.NoError(t, err)
-	defer collector.Stop()
+
+	err = collector.Run(ctx)
+	require.NoError(t, err)
+	defer collector.Stop(ctx)
 
 	status := <-collector.Status()
 	require.True(t, status.Running)
@@ -101,7 +113,7 @@ func TestCollectorRunTwice(t *testing.T) {
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "service already running")
 
-	collector.Stop()
+	collector.Stop(ctx)
 	status = <-collector.Status()
 	require.False(t, status.Running)
 }
@@ -109,8 +121,10 @@ func TestCollectorRunTwice(t *testing.T) {
 func TestCollectorRestart(t *testing.T) {
 	ctx := context.Background()
 
-	collector := New([]string{"./test/valid.yaml"}, "0.0.0", nil)
-	err := collector.Run(ctx)
+	collector, err := New([]string{"./test/valid.yaml"}, "0.0.0", nil)
+	require.NoError(t, err)
+
+	err = collector.Run(ctx)
 	require.NoError(t, err)
 
 	status := <-collector.Status()
@@ -123,13 +137,122 @@ func TestCollectorRestart(t *testing.T) {
 	status = <-collector.Status()
 	require.True(t, status.Running)
 
-	collector.Stop()
+	collector.Stop(ctx)
 	status = <-collector.Status()
 	require.False(t, status.Running)
 }
 
 func TestCollectorPrematureStop(t *testing.T) {
-	collector := New([]string{"./test/valid.yaml"}, "0.0.0", nil)
-	collector.Stop()
+	collector, err := New([]string{"./test/valid.yaml"}, "0.0.0", nil)
+	require.NoError(t, err)
+
+	collector.Stop(context.Background())
 	require.Equal(t, 0, len(collector.Status()))
+}
+
+func TestCollectorStopContextTimeout(t *testing.T) {
+	col, err := New([]string{"./test/slow_receiver.yaml"}, "0.0.0", nil)
+	require.NoError(t, err)
+
+	concreteCol := col.(*collector)
+	concreteCol.factories.Receivers[slowShutdownTypestr] = slowShutdownReceiverFactory()
+
+	err = col.Run(context.Background())
+	require.NoError(t, err)
+
+	status := <-col.Status()
+	require.True(t, status.Running)
+	require.NoError(t, status.Err)
+
+	stopCtx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
+	t.Cleanup(cancel)
+
+	stopped := make(chan struct{})
+	go func() {
+		col.Stop(stopCtx)
+		close(stopped)
+	}()
+
+	select {
+	case <-time.After(5 * time.Second):
+		t.Fatalf("Shutdown took too long")
+	case <-stopped:
+	}
+
+	status = <-col.Status()
+	require.False(t, status.Running)
+}
+
+func TestCollectorRestartContextTimeout(t *testing.T) {
+	col, err := New([]string{"./test/slow_receiver.yaml"}, "0.0.0", nil)
+	require.NoError(t, err)
+
+	// Replace the restart timeout to be shorter so the test doesn't take a long time.
+	oldTimeout := collectorRestartTimeout
+	collectorRestartTimeout = 500 * time.Millisecond
+	t.Cleanup(func() {
+		collectorRestartTimeout = oldTimeout
+	})
+
+	concreteCol := col.(*collector)
+	concreteCol.factories.Receivers[slowShutdownTypestr] = slowShutdownReceiverFactory()
+
+	err = col.Run(context.Background())
+	require.NoError(t, err)
+
+	status := <-col.Status()
+	require.True(t, status.Running)
+	require.NoError(t, status.Err)
+
+	restarted := make(chan struct{})
+	go func() {
+		err = col.Restart(context.Background())
+		require.NoError(t, err)
+		close(restarted)
+	}()
+
+	select {
+	case <-time.After(5 * time.Second):
+		t.Fatalf("Shutdown took too long")
+	case <-restarted:
+	}
+
+	status = <-col.Status()
+	require.True(t, status.Running)
+
+	stopCtx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
+	t.Cleanup(cancel)
+
+	stopped := make(chan struct{})
+	go func() {
+		col.Stop(stopCtx)
+		close(stopped)
+	}()
+
+	status = <-col.Status()
+	require.False(t, status.Running)
+}
+
+// slowShutdownReceiver only shutsdown if the shutdown context is cancelled.
+func slowShutdownReceiverFactory() receiver.Factory {
+	return receiver.NewFactory(slowShutdownTypestr,
+		func() component.Config { return &struct{}{} },
+		receiver.WithLogs(createLogsSlowShutdownReceiverReceiver, component.StabilityLevelDevelopment),
+	)
+}
+
+func createLogsSlowShutdownReceiverReceiver(_ context.Context, set receiver.CreateSettings, cfg component.Config, consumer consumer.Logs) (receiver.Logs, error) {
+	return &slowShutdownReceiver{}, nil
+}
+
+// slowShutdownReceiver is a receiver that does not shut down unless it's context is cancelled.
+type slowShutdownReceiver struct{}
+
+func (slowShutdownReceiver) Start(_ context.Context, _ component.Host) error {
+	return nil
+}
+
+func (slowShutdownReceiver) Shutdown(ctx context.Context) error {
+	<-ctx.Done()
+	return nil
 }
