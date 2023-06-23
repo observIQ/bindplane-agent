@@ -119,7 +119,9 @@ func (c *collector) Run(ctx context.Context) error {
 	// Note: This doesn't provide any timeout mechanism if the incoming context is cancelled.
 	// If the context passed to Start is cancelled, shutdown could take a very long time (due to e.g. pipeline draining).
 	// This is because the collector passes the background context if the start context is cancelled before shutdown is called.
-	c.collectorCtx, c.collectorCtxCancel = context.WithCancel(ctx)
+	collectorCtx, collectorCtxCancel := context.WithCancel(ctx)
+	c.collectorCtx = collectorCtx
+	c.collectorCtxCancel = collectorCtxCancel
 	wg := sync.WaitGroup{}
 	wg.Add(1)
 
@@ -130,7 +132,7 @@ func (c *collector) Run(ctx context.Context) error {
 		defer wg.Done()
 
 		// Ensure the collectorCtx context is cancelled after the service is done running, even if we cancelled it in Stop.
-		defer c.collectorCtxCancel()
+		defer collectorCtxCancel()
 
 		// Catch panic
 		defer func() {
@@ -153,7 +155,7 @@ func (c *collector) Run(ctx context.Context) error {
 			}
 		}()
 
-		err := svc.Run(c.collectorCtx)
+		err := svc.Run(collectorCtx)
 		c.sendStatus(false, false, err)
 
 		// The error may be nil;

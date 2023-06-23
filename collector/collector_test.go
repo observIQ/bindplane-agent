@@ -199,6 +199,7 @@ func TestCollectorRestartContextTimeout(t *testing.T) {
 
 	err = col.Run(context.Background())
 	require.NoError(t, err)
+	defer col.Stop(context.Background())
 
 	status := <-col.Status()
 	require.True(t, status.Running)
