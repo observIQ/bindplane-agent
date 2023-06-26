@@ -48,8 +48,3 @@ require (
 	google.golang.org/grpc v1.56.0 // indirect
 	google.golang.org/protobuf v1.30.0 // indirect
 )
-
-// Pull in changes to OTTL to allow body to be indexed
-// Can be removed when ottl is updated to v0.79.0
-// Points to this commit: https://github.com/open-telemetry/opentelemetry-collector-contrib/commit/85a618f8bb7204b63d3d7bf0f679cc61c0f42ea0
-replace github.com/open-telemetry/opentelemetry-collector-contrib/pkg/ottl v0.78.0 => github.com/open-telemetry/opentelemetry-collector-contrib/pkg/ottl v0.78.1-0.20230524155147-85a618f8bb72
