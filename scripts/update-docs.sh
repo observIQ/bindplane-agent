@@ -31,6 +31,10 @@ docs/processors.md
 docs/extensions.md
 docs/exporters.md
 docs/receivers.md
+processor/datapointcountprocessor/README.md
+processor/logcountprocessor/README.md
+processor/metricextractprocessor/README.md
+processor/spancountprocessor/README.md
 exporter/googlecloudexporter/README.md
 exporter/googlemanagedprometheusexporter/README.md
 EOF
@@ -41,6 +45,9 @@ do
     # Point contrib links to new version
     sed -i '' -Ee \
         "s|https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v[^/]*|https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/$CONTRIB_TARGET_VERSION|" \
+        "$doc"
+    sed -i '' -Ee \
+        "s|https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/v[^/]*|https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/$CONTRIB_TARGET_VERSION|" \
         "$doc"
     # Point core links to new version
     sed -i '' -Ee \
