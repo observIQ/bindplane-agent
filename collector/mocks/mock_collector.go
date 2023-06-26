@@ -82,9 +82,9 @@ func (_m *MockCollector) Status() <-chan *collector.Status {
 	return r0
 }
 
-// Stop provides a mock function with given fields:
-func (_m *MockCollector) Stop() {
-	_m.Called()
+// Stop provides a mock function with given fields: _a0
+func (_m *MockCollector) Stop(_a0 context.Context) {
+	_m.Called(_a0)
 }
 
 type mockConstructorTestingTNewMockCollector interface {

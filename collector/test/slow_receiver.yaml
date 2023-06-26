@@ -1,0 +1,11 @@
+receivers:
+  slowshutdown:
+
+exporters:
+  nop:
+
+service:
+  pipelines:
+    logs:
+      receivers: [slowshutdown]
+      exporters: [nop]

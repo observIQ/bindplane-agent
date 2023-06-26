@@ -240,7 +240,7 @@ func (c *Client) Disconnect(ctx context.Context) error {
 	c.stopCollectorMonitoring()
 
 	c.safeSetDisconnecting(true)
-	c.collector.Stop()
+	c.collector.Stop(ctx)
 	return c.opampClient.Stop(ctx)
 }
 
