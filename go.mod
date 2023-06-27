@@ -223,7 +223,7 @@ require (
 
 require (
 	github.com/Azure/azure-amqp-common-go/v4 v4.2.0 // indirect
-	github.com/bmatcuk/doublestar/v4 v4.6.0 // indirect
+	github.com/bmatcuk/doublestar/v4 v4.6.0
 	github.com/hooklift/gowsdl v0.5.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatautil v0.80.0 // indirect; indir2ct
 	github.com/ovh/go-ovh v1.3.0 // indirect
@@ -648,3 +648,6 @@ replace github.com/observiq/observiq-otel-collector/exporter/googlemanagedpromet
 // Does not build with windows and only used in configschema executable
 // Relevant issue https://github.com/mattn/go-ieproxy/issues/45
 replace github.com/mattn/go-ieproxy v0.0.9 => github.com/mattn/go-ieproxy v0.0.1
+
+// For debug logs
+replace github.com/open-telemetry/opentelemetry-collector-contrib/pkg/stanza => github.com/observiq/opentelemetry-collector-contrib/pkg/stanza v0.0.0-20230627234640-da189dc011d9

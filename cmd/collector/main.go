@@ -25,6 +25,7 @@ import (
 	_ "time/tzdata"
 
 	"github.com/observiq/observiq-otel-collector/collector"
+	"github.com/observiq/observiq-otel-collector/internal/debug"
 	"github.com/observiq/observiq-otel-collector/internal/logging"
 	"github.com/observiq/observiq-otel-collector/internal/service"
 	"github.com/observiq/observiq-otel-collector/internal/version"
@@ -52,6 +53,8 @@ const (
 )
 
 func main() {
+	debug.TryDebugCommand()
+
 	collectorConfigPaths := pflag.StringSlice("config", getDefaultCollectorConfigPaths(), "the collector config path")
 	managerConfigPath := pflag.String("manager", getDefaultManagerConfigPath(), "The configuration for remote management")
 	loggingConfigPath := pflag.String("logging", getDefaultLoggingConfigPath(), "the collector logging config path")

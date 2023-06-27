@@ -1461,6 +1461,8 @@ github.com/nxadm/tail v1.4.8/go.mod h1:+ncqLTQzXmGhMZNUePPaPqPvBxHAIsmXswZKocGu+
 github.com/observiq/ctimefmt v1.0.0 h1:r7vTJ+Slkrt9fZ67mkf+mA6zAdR5nGIJRMTzkUyvilk=
 github.com/observiq/ctimefmt v1.0.0/go.mod h1:mxi62//WbSpG/roCO1c6MqZ7zQTvjVtYheqHN3eOjvc=
 github.com/observiq/nanojack v0.0.0-20201106172433-343928847ebc h1:49ewVBwLcy+eYqI4R0ICilCI4dPjddpFXWv3liXzUxM=
+github.com/observiq/opentelemetry-collector-contrib/pkg/stanza v0.0.0-20230627234640-da189dc011d9 h1:KzlkyCpFstUNkDaqNnl9ERclHwbGOwMQ4y2XiygcDqo=
+github.com/observiq/opentelemetry-collector-contrib/pkg/stanza v0.0.0-20230627234640-da189dc011d9/go.mod h1:rPhXh9uzzs0gU4i7iqVwzt8+eKjwiQSxVI3tkGBgnk0=
 github.com/oklog/oklog v0.3.2/go.mod h1:FCV+B7mhrz4o+ueLpx+KqkyXRGMWOYEvfiXtdGtbWGs=
 github.com/oklog/run v1.0.0/go.mod h1:dlhp/R75TPv97u0XWUtDeV/lRKWPKSdTuV0TZvrmrQA=
 github.com/oklog/run v1.1.0/go.mod h1:sVPdnTZT1zYwAJeCMu2Th4T21pA3FPOQRfWjQlk7DVU=
@@ -1645,8 +1647,6 @@ github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatautil v0.80.0 
 github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatautil v0.80.0/go.mod h1:REypWmuMlISg05C+TYStCpDxjOAnZBq30J793c15mdU=
 github.com/open-telemetry/opentelemetry-collector-contrib/pkg/resourcetotelemetry v0.80.0 h1:CqYgmPPPFTHMPNymMFM22A6R0GSUXfPzu8kwMHI6AmU=
 github.com/open-telemetry/opentelemetry-collector-contrib/pkg/resourcetotelemetry v0.80.0/go.mod h1:rGOF0E6vNjS/pdIBo43dgkLEAbabnGYuG3InxAs4mbI=
-github.com/open-telemetry/opentelemetry-collector-contrib/pkg/stanza v0.80.0 h1:P519Jfw2dNW4FyepOUoN+EBGwhKZpDNGxfxBcbKm0pU=
-github.com/open-telemetry/opentelemetry-collector-contrib/pkg/stanza v0.80.0/go.mod h1:rPhXh9uzzs0gU4i7iqVwzt8+eKjwiQSxVI3tkGBgnk0=
 github.com/open-telemetry/opentelemetry-collector-contrib/pkg/translator/jaeger v0.52.0/go.mod h1:tU7s/ki/QePSIZ7ExYGWLMb9erCAt66brQHBEHxr8HU=
 github.com/open-telemetry/opentelemetry-collector-contrib/pkg/translator/jaeger v0.54.0/go.mod h1:uWFgO68sLEqWrQxL8rws1CkB8EUNQaedP3FWI1gMJOU=
 github.com/open-telemetry/opentelemetry-collector-contrib/pkg/translator/jaeger v0.57.2/go.mod h1:4rFuWKMbzM9H39RbDvPtJfAp/fxsHydhJhKns6skmK0=
