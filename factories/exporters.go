@@ -17,6 +17,7 @@ package factories
 import (
 	"github.com/observiq/observiq-otel-collector/exporter/googlecloudexporter"
 	"github.com/observiq/observiq-otel-collector/exporter/googlemanagedprometheusexporter"
+	"github.com/observiq/observiq-otel-collector/internal/version"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/alibabacloudlogserviceexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/awscloudwatchlogsexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/awsemfexporter"
@@ -68,7 +69,7 @@ var defaultExporters = []exporter.Factory{
 	exportertest.NewNopFactory(),
 	f5cloudexporter.NewFactory(),
 	fileexporter.NewFactory(),
-	googlecloudexporter.NewFactory(),
+	googlecloudexporter.NewFactory(version.Version()),
 	googlecloudpubsubexporter.NewFactory(),
 	googlemanagedprometheusexporter.NewFactory(),
 	influxdbexporter.NewFactory(),
