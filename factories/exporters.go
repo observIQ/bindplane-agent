@@ -71,7 +71,7 @@ var defaultExporters = []exporter.Factory{
 	fileexporter.NewFactory(),
 	googlecloudexporter.NewFactory(version.Version()),
 	googlecloudpubsubexporter.NewFactory(),
-	googlemanagedprometheusexporter.NewFactory(),
+	googlemanagedprometheusexporter.NewFactory(version.Version()),
 	influxdbexporter.NewFactory(),
 	jaegerexporter.NewFactory(),
 	kafkaexporter.NewFactory(),
