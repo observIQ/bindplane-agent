@@ -1,14 +1,14 @@
 # OpAMP Configuration
 
-The observIQ Distro for OpenTelemetry Collector can be setup as an agent that is managed by the [BindPlane OP platform](https://github.com/observiq/bindplane-op) via OpAMP.
+The BindPlane Agent can be setup as an agent that is managed by the [BindPlane OP platform](https://github.com/observiq/bindplane-op) via OpAMP.
 
 ## Configuration
 
-The collector can be configured to connect to the server a few different ways.
+The agent can be configured to connect to the server a few different ways.
 
 ### Config File
 
-The collector can be configured to read its connection config from a `manager.yaml` file. The `--manager` flag can be used to specify the location of this config file, by default it's `./manager.yaml`. The contents of the `manager.yaml` are detailed out in the table below.
+The agent can be configured to read its connection config from a `manager.yaml` file. The `--manager` flag can be used to specify the location of this config file, by default it's `./manager.yaml`. The contents of the `manager.yaml` are detailed out in the table below.
 
 | Parameter  | Required | Description                                                        |
 | :--------  | :------: | :----------------------------------------------------------------- |
@@ -29,7 +29,7 @@ agent_id: dffb297b-1983-4a06-858e-eebf4ad3d419
 
 #### TLS Config
 
-If TLS is enabled on the server the collector will need to be configured in order to connect. 
+If TLS is enabled on the server the agent will need to be configured in order to connect. 
 
 **Note**: If using TLS on the server the `endpoint` field will need to have the `wss` protocol for TLS enabled websockets.
 
@@ -42,11 +42,11 @@ If TLS is enabled on the server the collector will need to be configured in orde
 
 ### Environment variables
 
-The collector can also use environment variables to set portions of the connection configuration. This is useful for a containerized collector where a mounted volume might not be present. 
+The agent can also use environment variables to set portions of the connection configuration. This is useful for a containerized agent where a mounted volume might not be present. 
 
-If the collector can not find the specified `manager.yaml` file it will search for the environment variables and create a `manager.yaml` at the location of the `--manager` command argument.
+If the agent can not find the specified `manager.yaml` file it will search for the environment variables and create a `manager.yaml` at the location of the `--manager` command argument.
 
-**Note**: Only the `OPAMP_ENDPOINT` is required. If this is not set and there is no `manager.yaml` the collector will start in its normal standalone mode.
+**Note**: Only the `OPAMP_ENDPOINT` is required. If this is not set and there is no `manager.yaml` the agent will start in its normal standalone mode.
 
 | Environment Variable  | Required | Description                                                                       |
 | :-------------------- | :------: | :-------------------------------------------------------------------------------- |

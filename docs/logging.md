@@ -1,8 +1,8 @@
 # Logging
 
-The observIQ Distro for OpenTelemetry Collector offers two methods of collecting logs. First is individual receivers such as Filelog and Journald. Second is the Plugin receiver which utilizes pre-configured plugins to gather logs from many different sources.
+The BindPlane Agent offers two methods of collecting logs. First is individual receivers such as Filelog and Journald. Second is the Plugin receiver which utilizes pre-configured plugins to gather logs from many different sources.
 
-## Using Indivudal Receivers
+## Using Individual Receivers
 
 To add logging using an individual receiver, add the receiver into your `config.yaml` similar to the Filelog example below. The available logging receivers include:
 
