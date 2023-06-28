@@ -2,25 +2,25 @@
 
 OpenTelemetry is at the core of standardizing telemetry solutions. At observIQ, we’re focused on building the very best in open source telemetry software. Our relationship with OpenTelemetry began in 2021, with observIQ, contributing our logging agent, Stanza, to the OpenTelemetry community. Now, we are shifting our focus to simplifying OpenTelemetry solutions to its large base of users. On that note, we launched a collector that combines the best of both worlds, with OpenTelemetry at its core, combined with observIQ’s functionalities to simplify its usage.
 
-In this post, we are taking you through the installation of the observIQ distribution of the OpenTelemetry collector and the steps to configure the collector to gather host metrics, eventually forwarding those metrics to the Google Cloud Operations.
+In this post, we are taking you through the installation of the BindPlane Agent and the steps to configure the agent to gather host metrics, eventually forwarding those metrics to the Google Cloud Operations.
 
-## Installing the collector
+## Installing the agent
 
 The simplest way to get started is with one of the single-line installation commands shown below. For more advanced options, you'll find a variety of installation options for Linux, Windows, and macOS on GitHub.
 
-Use the following single-line installation script to install the observiq-otel collector.
-Please note that the collector must be installed on the system which you wish to collect host metrics from.
+Use the following single-line installation script to install the BindPlane Agent.
+Please note that the agent must be installed on the system which you wish to collect host metrics from.
 
 #### Windows:
 
 ```batch
-msiexec /i "https://github.com/observIQ/observiq-otel-collector/releases/latest/download/observiq-otel-collector.msi" /quiet
+msiexec /i "https://github.com/observIQ/bindplane-agent/releases/latest/download/observiq-otel-collector.msi" /quiet
 ```
 
 #### Linux:
 
 ```shell
-sudo sh -c "$(curl -fsSlL https://github.com/observiq/observiq-otel-collector/releases/latest/download/install_unix.sh)" install_unix.sh
+sudo sh -c "$(curl -fsSlL https://github.com/observiq/bindplane-agent/releases/latest/download/install_unix.sh)" install_unix.sh
 ```
 
 For more details on installation, see our [Linux](/docs/installation-linux.md), [Windows](/docs/installation-windows.md), and [Mac](/docs/installation-mac.md) installation guides. For Kubernetes, visit our [Kubernetes repo](https://github.com/observIQ/observiq-otel-collector-k8s).
@@ -38,11 +38,11 @@ Metrics: `roles/monitoring.metricWriter`
 
 Logs: `roles/logging.logWriter`
 
-Create a service account JSON key and place it on the system that is running the collector.
+Create a service account JSON key and place it on the system that is running the agent.
 
 ### Linux
 
-In this example, the key is placed at `/opt/observiq-otel-collector/sa.json` and its permissions are restricted to the user running the collector process.
+In this example, the key is placed at `/opt/observiq-otel-collector/sa.json` and its permissions are restricted to the user running the agent process.
 
 ```shell
 sudo cp sa.json /opt/observiq-otel-collector/sa.json
@@ -67,7 +67,7 @@ Environment=GOOGLE_APPLICATION_CREDENTIALS=/opt/observiq-otel-collector/sa.json
  
 If an override is already in place, simply insert the Environment parameter into the existing Service section.
 
-Restart the collector
+Restart the agent
 
 ```shell
 sudo systemctl restart observiq-otel-collector
@@ -86,14 +86,14 @@ setx GOOGLE_APPLICATION_CREDENTIALS "C:/observiq/collector/sa.json" /m
  
 Restart the service using the services application.
 
-## Configuring the collector
+## Configuring the agent
 
 In this sample configuration, the steps to use the host metrics receiver to fetch metrics from the host system and export them to Google Cloud Operations are detailed. This is how it works:
 
-The collector scrapes metrics and logs from the host and exports them to a destination assigned in the configuration file. 
+The agent scrapes metrics and logs from the host and exports them to a destination assigned in the configuration file. 
 To export the metrics to Google Cloud Operations, use the configurations outlined in the googlecloudexporter as in the example `config.yaml` below.
 
-After the installation, the config file for the collector can be found at:
+After the installation, the config file for the agent can be found at:
 
 Windows: `C:\Program Files\observIQ OpenTelemetry Collector\config.yaml`
 
@@ -103,7 +103,7 @@ Edit the configuration file and use the following configuration.
 
 ```yaml
 # Receivers collect metrics from a source. The host metrics receiver will
-# get CPU load metrics about the machine the collector is running on
+# get CPU load metrics about the machine the agent is running on
 # every minute.
 receivers:
   hostmetrics:
@@ -131,7 +131,7 @@ service:
       exporters: [googlecloud]
 ```
 
-Restart the collector
+Restart the agent
 
 ```shell
 systemctl restart observiq-otel-collector
@@ -139,7 +139,7 @@ systemctl restart observiq-otel-collector
 
 ## Viewing the metrics in Google Cloud Operations
 
-You should now be able to view the host metrics in your Metrics explorer. Nice work! This is how simple it is to collect host metrics with the observIQ Distro for OpenTelemetry Collector.
+You should now be able to view the host metrics in your Metrics explorer. Nice work! This is how simple it is to collect host metrics with the BindPlane Agent.
 
 ### Metrics collected
 
@@ -160,4 +160,4 @@ You should now be able to view the host metrics in your Metrics explorer. Nice w
 
 Check out our list of supported [receivers](), [processors](), [exporters](), and [extensions]() for more information about making a config. To see more monitoring examples, be sure to follow the [Observability Blog](https://observiq.com/blog/).
 
-observIQ’s distribution is a game-changer for companies looking to implement the OpenTelemetry standards. The single line installer, seamlessly integrated receivers, exporter, and processor pool make working with this collector simple. For questions, requests, and suggestions, reach out to our support team at support@observIQ.com.
+observIQ’s BindPlane Agent is a game-changer for companies looking to implement the OpenTelemetry standards. The single line installer, seamlessly integrated receivers, exporter, and processor pool make working with this agent simple. For questions, requests, and suggestions, reach out to our support team at support@observIQ.com.
