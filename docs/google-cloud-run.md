@@ -1,13 +1,13 @@
 ## Cloud Run
 
-The collector can be deployed with [Google Cloud Run](https://cloud.google.com/run).
+The agent can be deployed with [Google Cloud Run](https://cloud.google.com/run).
 
 This example uses a configuration for MongoDB Atlas, however this process can be used
 for other configurations as well.
 
 ## Image
 
-Push the collector image to your GCR account:
+Push the agent image to your GCR account:
 - replace `1.1.0` with your desired version
 - replace `myproject` with your gcr project
 
@@ -25,7 +25,7 @@ Follow the steps in [Image](./google-cloud-run.md#image) before continuing.
 
 1. Create secret: cloudrun-mongodb-publickey (mongodb atlas public key)
 2. Create secret: cloudrun-mongodb-privatekey (mongodb atlas private key)
-3. Create secret: cloudrun-mongodb-config  (collector config.yaml, upload as a file)
+3. Create secret: cloudrun-mongodb-config  (agent config.yaml, upload as a file)
 4. Give the Cloud Run service account "secret accessor" for each secret (from steps 1-3)
 
 ![Secrets](assets/secrets.png)
@@ -39,7 +39,7 @@ Follow the steps in [Image](./google-cloud-run.md#image) before continuing.
 4. Set autoscaling min 1 and max 1.
 5. Ingress: Allow internal traffic only.
 6. Authentication: Require authentication.
-7. Container port: 8888 (collector's metrics port)
+7. Container port: 8888 (agent's metrics port)
 
 ![General Config](assets/general_config.png)
 
