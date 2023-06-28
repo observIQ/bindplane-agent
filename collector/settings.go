@@ -15,10 +15,8 @@
 package collector
 
 import (
-	"fmt"
 	"os"
 
-	"github.com/observiq/observiq-otel-collector/factories"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/confmap"
 	"go.opentelemetry.io/collector/confmap/converter/expandconverter"
@@ -30,12 +28,7 @@ import (
 const buildDescription = "observIQ's opentelemetry-collector distribution"
 
 // NewSettings returns new settings for the collector with default values.
-func NewSettings(configPaths []string, version string, loggingOpts []zap.Option) (*otelcol.CollectorSettings, error) {
-	factories, err := factories.DefaultFactories()
-	if err != nil {
-		return nil, fmt.Errorf("error while setting up default factories: %w", err)
-	}
-
+func NewSettings(configPaths []string, version string, loggingOpts []zap.Option, factories otelcol.Factories) (*otelcol.CollectorSettings, error) {
 	buildInfo := component.BuildInfo{
 		Command:     os.Args[0],
 		Description: buildDescription,

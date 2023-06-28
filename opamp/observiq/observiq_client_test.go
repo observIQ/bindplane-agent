@@ -491,7 +491,7 @@ func TestClientDisconnect(t *testing.T) {
 	mockCollector := colmocks.NewMockCollector(t)
 	statusChan := make(chan *collector.Status)
 	mockCollector.On("Status").Return((<-chan *collector.Status)(statusChan))
-	mockCollector.On("Stop").Return()
+	mockCollector.On("Stop", ctx).Return()
 
 	c := &Client{
 		opampClient:   mockOpAmpClient,

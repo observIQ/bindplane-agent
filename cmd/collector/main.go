@@ -82,10 +82,13 @@ func main() {
 
 	// Set feature flags
 	if err := collector.SetFeatureFlags(); err != nil {
-		log.Fatalf("Failed to set feature flags: %v", err)
+		logger.Fatal("Failed to set feature flags.", zap.Error(err))
 	}
 
-	col := collector.New(*collectorConfigPaths, version.Version(), logOpts)
+	col, err := collector.New(*collectorConfigPaths, version.Version(), logOpts)
+	if err != nil {
+		logger.Fatal("Failed to create collector.", zap.Error(err))
+	}
 
 	// See if manager config file exists. If so run in remote managed mode otherwise standalone mode
 	if err := checkManagerConfig(managerConfigPath); err == nil {

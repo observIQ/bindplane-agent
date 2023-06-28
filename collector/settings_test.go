@@ -18,6 +18,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/observiq/observiq-otel-collector/factories"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/filelogreceiver"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/component"
@@ -25,9 +26,12 @@ import (
 )
 
 func TestNewSettings(t *testing.T) {
+	facts, err := factories.DefaultFactories()
+	require.NoError(t, err)
+
 	t.Setenv("FILE", "./test.log")
 	configPaths := []string{"./test/valid_with_env_var.yaml"}
-	settings, err := NewSettings(configPaths, "0.0.0", nil)
+	settings, err := NewSettings(configPaths, "0.0.0", nil, facts)
 	require.NoError(t, err)
 
 	// Make sure environment variable replacement is working
