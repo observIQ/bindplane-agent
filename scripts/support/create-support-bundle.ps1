@@ -19,13 +19,13 @@ if (Test-Path $registry_path) {
     $collector_dir = (Get-ItemProperty -Path $registry_path -Name "InstallLocation").InstallLocation
 } else {
     $collector_dir = "C:\Program Files\observIQ OpenTelemetry Collector"
-    Write-Host "observIQ OpenTelemetry Collector directory not found in the registry. Trying default location: $collector_dir"
+    Write-Host "BindPlane Agent directory not found in the registry. Trying default location: $collector_dir"
 }
 
 # Check if the directory exists
 if (!(Test-Path $collector_dir)) {
     Write-Host "Directory $collector_dir does not exist."
-    $collector_dir = Read-Host -Prompt "Please enter the directory for the observIQ OpenTelemetry Collector installation"
+    $collector_dir = Read-Host -Prompt "Please enter the directory for the BindPlane Agent installation"
     if (!(Test-Path $collector_dir)) {
         Write-Host "Directory $collector_dir does not exist."
         exit
@@ -53,7 +53,7 @@ if ($response -eq "n") {
 }
 
 # Collector Config
-$response = Read-Host -Prompt "Do you want to include the collector config (Y or n)? "
+$response = Read-Host -Prompt "Do you want to include the agent config (Y or n)? "
 
 if ($response -ne "n") {
     Write-Host "Adding $collector_dir\config.yaml"

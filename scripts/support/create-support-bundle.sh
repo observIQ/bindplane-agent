@@ -273,9 +273,9 @@ function bundle_files() {
 
     collector_config="$collector_dir/config.yaml"
     if [ -f "$collector_config" ]; then
-        read -p "Do you want to include the collector config (y or n)? " response
+        read -p "Do you want to include the agent config (y or n)? " response
         if [ "$response" != "n" ]; then
-            info "Adding collector config $(fg_cyan "$collector_config")$(reset)"
+            info "Adding agent config $(fg_cyan "$collector_config")$(reset)"
             tar --append --file=$tar_filename -C $collector_dir config.yaml
         fi
     fi

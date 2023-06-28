@@ -19,7 +19,7 @@ FOR /F "tokens=2*" %%A IN ('reg query "HKLM\Software\Microsoft\Windows\CurrentVe
 
 :: Check if directory exists, and ask for it if not
 if not exist "%collector_dir%" (
-    echo observIQ OpenTelemetry Collector directory not found in the registry.
+    echo BindPlane Agent directory not found in the registry.
     call :get_dir
 )
 
@@ -48,7 +48,7 @@ if /I "%response%"=="n" (
 )
 
 :: Add the configuration file
-set /p response="Do you want to include the collector config file? [Y/n] "
+set /p response="Do you want to include the agent config file? [Y/n] "
 if /I not "%response%"=="n" (
     echo Copying %collector_dir%\config.yaml
     xcopy /Y "%collector_dir%config.yaml" "%output_dir%\"
