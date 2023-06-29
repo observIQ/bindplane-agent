@@ -92,7 +92,7 @@ install-tools:
 	go install github.com/securego/gosec/v2/cmd/gosec@v2.16.0
 	go install github.com/sigstore/cosign/cmd/cosign@v1.10.1
 	go install github.com/uw-labs/lichen@v0.1.7
-	go install github.com/vektra/mockery/v2@v2.28.1
+	go install github.com/vektra/mockery/v2@v2.30.16
 	go install golang.org/x/tools/cmd/goimports@latest
 
 .PHONY: lint
