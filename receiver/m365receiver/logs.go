@@ -247,7 +247,7 @@ func (l *m365LogsReceiver) transformLogs(now pcommon.Timestamp, audit *auditMeta
 		logRecord := scopeLogs.LogRecords().AppendEmpty()
 
 		// parses body string and sets that as log body, but uses string if parsing fails
-		parsedBody := map[string]interface{}{}
+		parsedBody := map[string]any{}
 		if err := json.Unmarshal([]byte(log.body), &parsedBody); err != nil {
 			l.logger.Warn("unable to unmarshal log body", zap.Error(err))
 			logRecord.Body().SetStr(log.body)
