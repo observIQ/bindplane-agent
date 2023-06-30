@@ -1526,6 +1526,8 @@ github.com/open-telemetry/opentelemetry-collector-contrib/connector/countconnect
 github.com/open-telemetry/opentelemetry-collector-contrib/connector/countconnector v0.80.0/go.mod h1:Ewj0oOjGsiq4CL7L+ha9tUbrRcuJ7GIzuCri5l15hrI=
 github.com/open-telemetry/opentelemetry-collector-contrib/connector/servicegraphconnector v0.80.0 h1:fJF/5xzmnrXVKIMan4Q54toP8brqiGmaNTLQGrYnfro=
 github.com/open-telemetry/opentelemetry-collector-contrib/connector/servicegraphconnector v0.80.0/go.mod h1:YepdDwedXtA3g7Q3bnDVJ07Onjn8AusMdwsH+f3phco=
+github.com/open-telemetry/opentelemetry-collector-contrib/connector/spanmetricsconnector v0.80.0 h1:j6Zo+MvskAAc5LNMHqeqjti3hxQZPBkqoK956wHhDdY=
+github.com/open-telemetry/opentelemetry-collector-contrib/connector/spanmetricsconnector v0.80.0/go.mod h1:mv3/RQWBvNvB4IFnB9oqGe147e2KsLiFT5nkovkH/2o=
 github.com/open-telemetry/opentelemetry-collector-contrib/exporter/alibabacloudlogserviceexporter v0.80.0 h1:laaZbMB3sqD/fMY6/qYHCzBQzydEtDEsfZhKXS7SbWE=
 github.com/open-telemetry/opentelemetry-collector-contrib/exporter/alibabacloudlogserviceexporter v0.80.0/go.mod h1:RywFkM6+jN7PALPsq0eH56U7w/zRlCppOZ00+yJZf54=
 github.com/open-telemetry/opentelemetry-collector-contrib/exporter/awscloudwatchlogsexporter v0.80.0 h1:obgvtZU3dG88muulCQrl5joo+1bU0AfRBQilcVLXoQw=

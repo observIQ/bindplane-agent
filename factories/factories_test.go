@@ -80,7 +80,7 @@ func TestCombineFactories(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			factories, err := combineFactories(tc.receivers, tc.processors, tc.exporters, tc.extensions)
+			factories, err := combineFactories(tc.receivers, tc.processors, tc.exporters, tc.extensions, tc.connectors)
 
 			if tc.expectedError != nil {
 				assert.Error(t, tc.expectedError, err)

@@ -27,6 +27,7 @@ require (
 	github.com/open-telemetry/opamp-go v0.2.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/connector/countconnector v0.80.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/connector/servicegraphconnector v0.80.0
+	github.com/open-telemetry/opentelemetry-collector-contrib/connector/spanmetricsconnector v0.80.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/alibabacloudlogserviceexporter v0.80.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/awscloudwatchlogsexporter v0.80.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/awsemfexporter v0.80.0
