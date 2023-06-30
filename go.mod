@@ -146,6 +146,8 @@ require (
 	go.opentelemetry.io/collector v0.80.0
 	go.opentelemetry.io/collector/component v0.80.0
 	go.opentelemetry.io/collector/confmap v0.80.0
+	go.opentelemetry.io/collector/connector v0.80.0
+	go.opentelemetry.io/collector/connector/forwardconnector v0.80.0
 	go.opentelemetry.io/collector/consumer v0.80.0
 	go.opentelemetry.io/collector/exporter v0.80.0
 	go.opentelemetry.io/collector/exporter/loggingexporter v0.80.0
@@ -213,7 +215,6 @@ require (
 	go.opentelemetry.io/collector/config/configtelemetry v0.80.0 // indirect
 	go.opentelemetry.io/collector/config/configtls v0.80.0 // indirect
 	go.opentelemetry.io/collector/config/internal v0.80.0 // indirect
-	go.opentelemetry.io/collector/connector v0.80.0 // indirect
 	go.opentelemetry.io/collector/extension/auth v0.80.0 // indirect
 	go.opentelemetry.io/otel/bridge/opencensus v0.39.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20230530153820-e85fd2cbaebc // indirect
