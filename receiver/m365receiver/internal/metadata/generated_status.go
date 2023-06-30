@@ -7,6 +7,7 @@ import (
 )
 
 const (
-	Type      = "m365receiver"
-	Stability = component.StabilityLevelDevelopment
+	Type             = "m365"
+	MetricsStability = component.StabilityLevelAlpha
+	LogsStability    = component.StabilityLevelAlpha
 )
