@@ -29,6 +29,7 @@ fi
 read -r -d '' DOC_FILES << EOF
 docs/processors.md
 docs/extensions.md
+docs/connectors.md
 docs/exporters.md
 docs/receivers.md
 processor/datapointcountprocessor/README.md

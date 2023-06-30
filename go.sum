@@ -1522,6 +1522,12 @@ github.com/onsi/gomega v1.27.4/go.mod h1:riYq/GJKh8hhoM01HN6Vmuy93AarCXCBGpvFDK3
 github.com/op/go-logging v0.0.0-20160315200505-970db520ece7/go.mod h1:HzydrMdWErDVzsI23lYNej1Htcns9BCg93Dk0bBINWk=
 github.com/open-telemetry/opamp-go v0.2.0 h1:dV7wTkG5XNiorU62N1CJPr3f5dM0PGEtUUBtvK+LEG0=
 github.com/open-telemetry/opamp-go v0.2.0/go.mod h1:IMdeuHGVc5CjKSu5/oNV0o+UmiXuahoHvoZ4GOmAI9M=
+github.com/open-telemetry/opentelemetry-collector-contrib/connector/countconnector v0.80.0 h1:eR5EDPW7wsqvIsuvOTk9+DNsUCG0ZUC9zqhVzKBW0ro=
+github.com/open-telemetry/opentelemetry-collector-contrib/connector/countconnector v0.80.0/go.mod h1:Ewj0oOjGsiq4CL7L+ha9tUbrRcuJ7GIzuCri5l15hrI=
+github.com/open-telemetry/opentelemetry-collector-contrib/connector/servicegraphconnector v0.80.0 h1:fJF/5xzmnrXVKIMan4Q54toP8brqiGmaNTLQGrYnfro=
+github.com/open-telemetry/opentelemetry-collector-contrib/connector/servicegraphconnector v0.80.0/go.mod h1:YepdDwedXtA3g7Q3bnDVJ07Onjn8AusMdwsH+f3phco=
+github.com/open-telemetry/opentelemetry-collector-contrib/connector/spanmetricsconnector v0.80.0 h1:j6Zo+MvskAAc5LNMHqeqjti3hxQZPBkqoK956wHhDdY=
+github.com/open-telemetry/opentelemetry-collector-contrib/connector/spanmetricsconnector v0.80.0/go.mod h1:mv3/RQWBvNvB4IFnB9oqGe147e2KsLiFT5nkovkH/2o=
 github.com/open-telemetry/opentelemetry-collector-contrib/exporter/alibabacloudlogserviceexporter v0.80.0 h1:laaZbMB3sqD/fMY6/qYHCzBQzydEtDEsfZhKXS7SbWE=
 github.com/open-telemetry/opentelemetry-collector-contrib/exporter/alibabacloudlogserviceexporter v0.80.0/go.mod h1:RywFkM6+jN7PALPsq0eH56U7w/zRlCppOZ00+yJZf54=
 github.com/open-telemetry/opentelemetry-collector-contrib/exporter/awscloudwatchlogsexporter v0.80.0 h1:obgvtZU3dG88muulCQrl5joo+1bU0AfRBQilcVLXoQw=
@@ -1694,6 +1700,8 @@ github.com/open-telemetry/opentelemetry-collector-contrib/processor/resourceproc
 github.com/open-telemetry/opentelemetry-collector-contrib/processor/resourceprocessor v0.80.0/go.mod h1:LET0BoVkJtXSW262byM7R2l+LKxUEyb2mmj2Q1IEprc=
 github.com/open-telemetry/opentelemetry-collector-contrib/processor/routingprocessor v0.80.0 h1:iyPN/Auye9VAO0VNHh9CRES661jrS1dv/S9W6bor5jE=
 github.com/open-telemetry/opentelemetry-collector-contrib/processor/routingprocessor v0.80.0/go.mod h1:tTfepomfuCKIyVJLHfiJ5kgNQ6FGdns/YBXf0/rwyJo=
+github.com/open-telemetry/opentelemetry-collector-contrib/processor/servicegraphprocessor v0.80.0 h1:G8Ci9J7alCklki1akVDBmT40qzxJyNS0nRm47KknWd0=
+github.com/open-telemetry/opentelemetry-collector-contrib/processor/servicegraphprocessor v0.80.0/go.mod h1:qfUn0nunL4zbubziCbr6ectmvrGYfEinRGydmrvdkyE=
 github.com/open-telemetry/opentelemetry-collector-contrib/processor/spanmetricsprocessor v0.80.0 h1:+aUgA8hzbaBGyraAy7WGjyzq0zLvvTAaq0q0RO934HM=
 github.com/open-telemetry/opentelemetry-collector-contrib/processor/spanmetricsprocessor v0.80.0/go.mod h1:cjPA2Zcmy6ZSiKe1+gFGGjN4wgRRcPFwYuL/AnM6nIo=
 github.com/open-telemetry/opentelemetry-collector-contrib/processor/spanprocessor v0.80.0 h1:E0eTh3rgRm38HQ3YX7y+IsSCsAsN1oy31aLAGzBW0jY=
@@ -2354,6 +2362,8 @@ go.opentelemetry.io/collector/confmap v0.80.0 h1:OJapAGOdvyUiovMH5yL860s3ULo9eC2
 go.opentelemetry.io/collector/confmap v0.80.0/go.mod h1:L2d3LUsKYxAAORcpuXjW/Pln95vmw5p6lWDf6Pr/fUg=
 go.opentelemetry.io/collector/connector v0.80.0 h1:25kCO4FrvJIcJ2mm1rJnZW1rwbywWKin9g9rIe4tnaM=
 go.opentelemetry.io/collector/connector v0.80.0/go.mod h1:Eg46LNt0UHiNB3H80TVYiKmDK+hdrRZsF9aPHMqEReM=
+go.opentelemetry.io/collector/connector/forwardconnector v0.80.0 h1:oUciRFmSbfU+zwZc62IjH7TH6SGrA9cJ71B8vhZdV58=
+go.opentelemetry.io/collector/connector/forwardconnector v0.80.0/go.mod h1:/NJt0Oy0OQDifw3NwNWDcYZrNbQqfqToHkeGFAutLVg=
 go.opentelemetry.io/collector/consumer v0.80.0 h1:IQfkrNvZ6/ZkfQs/d6JENgfYPE3g3NcVcy1eC8nku58=
 go.opentelemetry.io/collector/consumer v0.80.0/go.mod h1://MinWlTMlL44B8WvUzLnYWBKgxfgGE8grpxoUiL9aQ=
 go.opentelemetry.io/collector/exporter v0.80.0 h1:BjwrMGhlrJ6IyhOOkPruzycCk7dv6vuf+VORzsVtcLI=

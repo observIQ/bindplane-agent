@@ -25,6 +25,9 @@ require (
 	github.com/observiq/observiq-otel-collector/receiver/sapnetweaverreceiver v1.29.0
 	github.com/oklog/ulid/v2 v2.1.0
 	github.com/open-telemetry/opamp-go v0.2.0
+	github.com/open-telemetry/opentelemetry-collector-contrib/connector/countconnector v0.80.0
+	github.com/open-telemetry/opentelemetry-collector-contrib/connector/servicegraphconnector v0.80.0
+	github.com/open-telemetry/opentelemetry-collector-contrib/connector/spanmetricsconnector v0.80.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/alibabacloudlogserviceexporter v0.80.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/awscloudwatchlogsexporter v0.80.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/awsemfexporter v0.80.0
@@ -146,6 +149,8 @@ require (
 	go.opentelemetry.io/collector v0.80.0
 	go.opentelemetry.io/collector/component v0.80.0
 	go.opentelemetry.io/collector/confmap v0.80.0
+	go.opentelemetry.io/collector/connector v0.80.0
+	go.opentelemetry.io/collector/connector/forwardconnector v0.80.0
 	go.opentelemetry.io/collector/consumer v0.80.0
 	go.opentelemetry.io/collector/exporter v0.80.0
 	go.opentelemetry.io/collector/exporter/loggingexporter v0.80.0
@@ -199,6 +204,7 @@ require (
 	github.com/observiq/observiq-otel-collector/counter v1.29.0 // indirect
 	github.com/observiq/observiq-otel-collector/expr v1.29.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlemanagedprometheusexporter v0.80.0 // indirect
+	github.com/open-telemetry/opentelemetry-collector-contrib/processor/servicegraphprocessor v0.80.0 // indirect
 	github.com/outcaste-io/ristretto v0.2.1 // indirect
 	github.com/patrickmn/go-cache v2.1.0+incompatible // indirect
 	github.com/secure-systems-lab/go-securesystemslib v0.5.0 // indirect
@@ -213,7 +219,6 @@ require (
 	go.opentelemetry.io/collector/config/configtelemetry v0.80.0 // indirect
 	go.opentelemetry.io/collector/config/configtls v0.80.0 // indirect
 	go.opentelemetry.io/collector/config/internal v0.80.0 // indirect
-	go.opentelemetry.io/collector/connector v0.80.0 // indirect
 	go.opentelemetry.io/collector/extension/auth v0.80.0 // indirect
 	go.opentelemetry.io/otel/bridge/opencensus v0.39.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20230530153820-e85fd2cbaebc // indirect
