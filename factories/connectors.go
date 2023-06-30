@@ -15,10 +15,12 @@
 package factories
 
 import (
+	"github.com/open-telemetry/opentelemetry-collector-contrib/connector/countconnector"
 	"go.opentelemetry.io/collector/connector"
 	"go.opentelemetry.io/collector/connector/forwardconnector"
 )
 
 var defaultConnectors = []connector.Factory{
+	countconnector.NewFactory(),
 	forwardconnector.NewFactory(),
 }
