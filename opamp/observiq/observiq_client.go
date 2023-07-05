@@ -211,6 +211,13 @@ func (c *Client) Connect(ctx context.Context) error {
 			// SaveRemoteConfigStatusFunc
 		},
 		PackagesStateProvider: c.packagesStateProvider,
+		Capabilities: protobufs.AgentCapabilities_AgentCapabilities_ReportsStatus |
+			protobufs.AgentCapabilities_AgentCapabilities_AcceptsPackages |
+			protobufs.AgentCapabilities_AgentCapabilities_ReportsPackageStatuses |
+			protobufs.AgentCapabilities_AgentCapabilities_AcceptsRestartCommand |
+			protobufs.AgentCapabilities_AgentCapabilities_ReportsEffectiveConfig |
+			protobufs.AgentCapabilities_AgentCapabilities_AcceptsRemoteConfig |
+			protobufs.AgentCapabilities_AgentCapabilities_ReportsRemoteConfig,
 	}
 
 	// Start the embedded collector
@@ -259,7 +266,7 @@ func (c *Client) onConnectHandler() {
 
 	collectorPkgStatus := pkgStatuses.Packages[packagestate.CollectorPackageName]
 	// If we were not installing before the connection, nothing else to do
-	if collectorPkgStatus.Status != protobufs.PackageStatus_Installing {
+	if collectorPkgStatus.Status != protobufs.PackageStatusEnum_PackageStatusEnum_Installing {
 		return
 	}
 
@@ -318,14 +325,14 @@ func (c *Client) onRemoteConfigHandler(ctx context.Context, remoteConfig *protob
 	changed, err := c.configManager.ApplyConfigChanges(remoteConfig)
 	remoteCfgStatus := &protobufs.RemoteConfigStatus{
 		LastRemoteConfigHash: remoteConfig.GetConfigHash(),
-		Status:               protobufs.RemoteConfigStatus_APPLIED,
+		Status:               protobufs.RemoteConfigStatuses_RemoteConfigStatuses_APPLIED,
 	}
 
 	// If we received and error apply it to the config
 	if err != nil {
 		c.logger.Error("Failed applying remote config", zap.Error(err))
 
-		remoteCfgStatus.Status = protobufs.RemoteConfigStatus_FAILED
+		remoteCfgStatus.Status = protobufs.RemoteConfigStatuses_RemoteConfigStatuses_FAILED
 		remoteCfgStatus.ErrorMessage = fmt.Sprintf("Failed to apply config changes: %s", err.Error())
 	}
 
@@ -397,7 +404,7 @@ func (c *Client) onPackagesAvailableHandler(availablePkgs *protobufs.PackagesAva
 	}
 
 	// Start update if applicable
-	if curPkgStatuses.Packages[packagestate.CollectorPackageName].Status == protobufs.PackageStatus_Installing {
+	if curPkgStatuses.Packages[packagestate.CollectorPackageName].Status == protobufs.PackageStatusEnum_PackageStatusEnum_Installing {
 		collectorDownloadableFile := availablePkgs.GetPackages()[packagestate.CollectorPackageName].GetFile()
 		c.startCollectorPackageInstall(curPkgStatuses, collectorDownloadableFile)
 	}
@@ -423,7 +430,7 @@ func (c *Client) buildInitialPackageStatus(pkgName string, availablePkg *protobu
 			Name:                 pkgName,
 			ServerOfferedVersion: availablePkg.GetVersion(),
 			ServerOfferedHash:    availablePkg.GetHash(),
-			Status:               protobufs.PackageStatus_InstallFailed,
+			Status:               protobufs.PackageStatusEnum_PackageStatusEnum_InstallFailed,
 			ErrorMessage:         "Package not supported",
 		}
 	}
@@ -439,7 +446,7 @@ func (c *Client) buildInitialCollectorPackageStatus(pkgName string, availablePkg
 		AgentHasVersion:      version.Version(),
 		ServerOfferedVersion: availablePkg.GetVersion(),
 		ServerOfferedHash:    availablePkg.GetHash(),
-		Status:               protobufs.PackageStatus_Installed,
+		Status:               protobufs.PackageStatusEnum_PackageStatusEnum_Installed,
 	}
 
 	// If the new version is the same as the current version we are already installed
@@ -470,7 +477,7 @@ func (c *Client) buildInitialCollectorPackageStatus(pkgName string, availablePkg
 		c.logger.Info("Packaged update failed because no new version detected",
 			zap.String("package", pkgName))
 		initPkgStatus.ErrorMessage = "Packaged update failed because no new version detected"
-		initPkgStatus.Status = protobufs.PackageStatus_InstallFailed
+		initPkgStatus.Status = protobufs.PackageStatusEnum_PackageStatusEnum_InstallFailed
 
 		return initPkgStatus
 	}
@@ -480,12 +487,12 @@ func (c *Client) buildInitialCollectorPackageStatus(pkgName string, availablePkg
 		c.logger.Info("Packaged update failed because no downloadable file detected",
 			zap.String("package", pkgName))
 		initPkgStatus.ErrorMessage = "Packaged update failed because no downloadable file detected"
-		initPkgStatus.Status = protobufs.PackageStatus_InstallFailed
+		initPkgStatus.Status = protobufs.PackageStatusEnum_PackageStatusEnum_InstallFailed
 
 		return initPkgStatus
 	}
 
-	initPkgStatus.Status = protobufs.PackageStatus_Installing
+	initPkgStatus.Status = protobufs.PackageStatusEnum_PackageStatusEnum_Installing
 
 	return initPkgStatus
 }
@@ -538,7 +545,7 @@ func (c *Client) tryToFailPackageInstall(errMsg string, sendStatusNow bool) {
 
 	collectorPackageStatus := pkgStatuses.Packages[packagestate.CollectorPackageName]
 	// If we were not installing before the connection, nothing else to do
-	if collectorPackageStatus.Status != protobufs.PackageStatus_Installing {
+	if collectorPackageStatus.Status != protobufs.PackageStatusEnum_PackageStatusEnum_Installing {
 		return
 	}
 
@@ -561,7 +568,7 @@ func (c *Client) failPackageInstall(pkgStatuses *protobufs.PackageStatuses, errM
 		return
 	}
 
-	collectorPkgStatus.Status = protobufs.PackageStatus_InstallFailed
+	collectorPkgStatus.Status = protobufs.PackageStatusEnum_PackageStatusEnum_InstallFailed
 	if collectorPkgStatus.ErrorMessage == "" {
 		collectorPkgStatus.ErrorMessage = errMsg
 	}
@@ -599,7 +606,7 @@ func (c *Client) finishPackageInstall(pkgStatuses *protobufs.PackageStatuses) {
 		return
 	}
 
-	collectorPkgStatus.Status = protobufs.PackageStatus_Installed
+	collectorPkgStatus.Status = protobufs.PackageStatusEnum_PackageStatusEnum_Installed
 	collectorPkgStatus.AgentHasVersion = version.Version()
 	collectorPkgStatus.AgentHasHash = collectorPkgStatus.ServerOfferedHash
 

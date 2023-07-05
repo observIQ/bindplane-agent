@@ -46,6 +46,20 @@ func (_m *MockOpAMPClient) SetAgentDescription(descr *protobufs.AgentDescription
 	return r0
 }
 
+// SetHealth provides a mock function with given fields: health
+func (_m *MockOpAMPClient) SetHealth(health *protobufs.AgentHealth) error {
+	ret := _m.Called(health)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(*protobufs.AgentHealth) error); ok {
+		r0 = rf(health)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // SetPackageStatuses provides a mock function with given fields: statuses
 func (_m *MockOpAMPClient) SetPackageStatuses(statuses *protobufs.PackageStatuses) error {
 	ret := _m.Called(statuses)

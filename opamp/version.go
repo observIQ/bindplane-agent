@@ -15,7 +15,7 @@
 package opamp
 
 // opampVersion is currently an internally set version to track the version of the OpAMP library we're using to be compatible with platforms
-const opampVersion = "v0.2.0"
+const opampVersion = "v0.7.1"
 
 // Version returns the internally set OpAMP version
 func Version() string {

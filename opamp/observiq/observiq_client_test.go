@@ -173,7 +173,7 @@ func TestClientConnect(t *testing.T) {
 						AgentHasHash:         hash,
 						ServerOfferedVersion: newVersion,
 						ServerOfferedHash:    newHash,
-						Status:               protobufs.PackageStatus_Installing,
+						Status:               protobufs.PackageStatusEnum_PackageStatusEnum_Installing,
 					},
 				}
 				packageStatuses := &protobufs.PackageStatuses{
@@ -189,7 +189,7 @@ func TestClientConnect(t *testing.T) {
 				mockStateProvider.On("SetLastReportedStatuses", mock.Anything).Return(nil).Run(func(args mock.Arguments) {
 					status := args.Get(0).(*protobufs.PackageStatuses)
 					assert.Equal(t, "Failed setting agent description: oops", status.Packages[packagestate.CollectorPackageName].ErrorMessage)
-					assert.Equal(t, protobufs.PackageStatus_InstallFailed, status.Packages[packagestate.CollectorPackageName].Status)
+					assert.Equal(t, protobufs.PackageStatusEnum_PackageStatusEnum_InstallFailed, status.Packages[packagestate.CollectorPackageName].Status)
 				})
 
 				c := &Client{
@@ -219,7 +219,7 @@ func TestClientConnect(t *testing.T) {
 						AgentHasHash:         hash,
 						ServerOfferedVersion: newVersion,
 						ServerOfferedHash:    newHash,
-						Status:               protobufs.PackageStatus_Installing,
+						Status:               protobufs.PackageStatusEnum_PackageStatusEnum_Installing,
 					},
 				}
 				packageStatuses := &protobufs.PackageStatuses{
@@ -234,7 +234,7 @@ func TestClientConnect(t *testing.T) {
 				mockStateProvider.On("SetLastReportedStatuses", mock.Anything).Return(nil).Run(func(args mock.Arguments) {
 					status := args.Get(0).(*protobufs.PackageStatuses)
 					assert.Contains(t, status.Packages[packagestate.CollectorPackageName].ErrorMessage, "Failed creating TLS config: failed to read CA file: open bad-ca.cert:")
-					assert.Equal(t, protobufs.PackageStatus_InstallFailed, status.Packages[packagestate.CollectorPackageName].Status)
+					assert.Equal(t, protobufs.PackageStatusEnum_PackageStatusEnum_InstallFailed, status.Packages[packagestate.CollectorPackageName].Status)
 				})
 				badCAFile := "bad-ca.cert"
 
@@ -268,7 +268,7 @@ func TestClientConnect(t *testing.T) {
 						AgentHasHash:         hash,
 						ServerOfferedVersion: newVersion,
 						ServerOfferedHash:    newHash,
-						Status:               protobufs.PackageStatus_Installing,
+						Status:               protobufs.PackageStatusEnum_PackageStatusEnum_Installing,
 					},
 				}
 				packageStatuses := &protobufs.PackageStatuses{
@@ -283,7 +283,7 @@ func TestClientConnect(t *testing.T) {
 				mockStateProvider.On("SetLastReportedStatuses", mock.Anything).Return(nil).Run(func(args mock.Arguments) {
 					status := args.Get(0).(*protobufs.PackageStatuses)
 					assert.Equal(t, "Collector failed to start: oops", status.Packages[packagestate.CollectorPackageName].ErrorMessage)
-					assert.Equal(t, protobufs.PackageStatus_InstallFailed, status.Packages[packagestate.CollectorPackageName].Status)
+					assert.Equal(t, protobufs.PackageStatusEnum_PackageStatusEnum_InstallFailed, status.Packages[packagestate.CollectorPackageName].Status)
 				})
 
 				expectedErr := errors.New("oops")
@@ -318,7 +318,7 @@ func TestClientConnect(t *testing.T) {
 						AgentHasHash:         hash,
 						ServerOfferedVersion: newVersion,
 						ServerOfferedHash:    newHash,
-						Status:               protobufs.PackageStatus_Installing,
+						Status:               protobufs.PackageStatusEnum_PackageStatusEnum_Installing,
 					},
 				}
 				packageStatuses := &protobufs.PackageStatuses{
@@ -335,7 +335,7 @@ func TestClientConnect(t *testing.T) {
 				mockStateProvider.On("SetLastReportedStatuses", mock.Anything).Return(nil).Run(func(args mock.Arguments) {
 					status := args.Get(0).(*protobufs.PackageStatuses)
 					assert.Equal(t, "OpAMP client failed to start: oops", status.Packages[packagestate.CollectorPackageName].ErrorMessage)
-					assert.Equal(t, protobufs.PackageStatus_InstallFailed, status.Packages[packagestate.CollectorPackageName].Status)
+					assert.Equal(t, protobufs.PackageStatusEnum_PackageStatusEnum_InstallFailed, status.Packages[packagestate.CollectorPackageName].Status)
 				})
 
 				statusChannel := make(chan *collector.Status)
@@ -446,7 +446,7 @@ func TestClientConnect(t *testing.T) {
 						Name:                 packagestate.CollectorPackageName,
 						AgentHasVersion:      version.Version(),
 						ServerOfferedVersion: version.Version(),
-						Status:               protobufs.PackageStatus_Installed,
+						Status:               protobufs.PackageStatusEnum_PackageStatusEnum_Installed,
 					},
 				}
 				packageStatuses := &protobufs.PackageStatuses{
@@ -573,7 +573,7 @@ func TestClient_onConnectHandler(t *testing.T) {
 						AgentHasHash:         hash,
 						ServerOfferedVersion: newVersion,
 						ServerOfferedHash:    newHash,
-						Status:               protobufs.PackageStatus_InstallFailed,
+						Status:               protobufs.PackageStatusEnum_PackageStatusEnum_InstallFailed,
 						ErrorMessage:         errorMessage,
 					},
 				}
@@ -607,7 +607,7 @@ func TestClient_onConnectHandler(t *testing.T) {
 						AgentHasHash:         hash,
 						ServerOfferedVersion: newVersion,
 						ServerOfferedHash:    newHash,
-						Status:               protobufs.PackageStatus_Installing,
+						Status:               protobufs.PackageStatusEnum_PackageStatusEnum_Installing,
 					},
 				}
 				packageStatuses := &protobufs.PackageStatuses{
@@ -630,7 +630,7 @@ func TestClient_onConnectHandler(t *testing.T) {
 					assert.Equal(t, newVersion, status.Packages[packagestate.CollectorPackageName].ServerOfferedVersion)
 					assert.Equal(t, newHash, status.Packages[packagestate.CollectorPackageName].ServerOfferedHash)
 					assert.Equal(t, "Failed because of collector version mismatch: expected 99.99.99, actual latest", status.Packages[packagestate.CollectorPackageName].ErrorMessage)
-					assert.Equal(t, protobufs.PackageStatus_InstallFailed, status.Packages[packagestate.CollectorPackageName].Status)
+					assert.Equal(t, protobufs.PackageStatusEnum_PackageStatusEnum_InstallFailed, status.Packages[packagestate.CollectorPackageName].Status)
 				})
 
 				c := &Client{
@@ -656,7 +656,7 @@ func TestClient_onConnectHandler(t *testing.T) {
 						AgentHasHash:         hash,
 						ServerOfferedVersion: newVersion,
 						ServerOfferedHash:    newHash,
-						Status:               protobufs.PackageStatus_Installing,
+						Status:               protobufs.PackageStatusEnum_PackageStatusEnum_Installing,
 					},
 				}
 				packageStatuses := &protobufs.PackageStatuses{
@@ -681,7 +681,7 @@ func TestClient_onConnectHandler(t *testing.T) {
 					assert.Equal(t, newVersion, status.Packages[packagestate.CollectorPackageName].ServerOfferedVersion)
 					assert.Equal(t, newHash, status.Packages[packagestate.CollectorPackageName].ServerOfferedHash)
 					assert.Equal(t, "", status.Packages[packagestate.CollectorPackageName].ErrorMessage)
-					assert.Equal(t, protobufs.PackageStatus_Installed, status.Packages[packagestate.CollectorPackageName].Status)
+					assert.Equal(t, protobufs.PackageStatusEnum_PackageStatusEnum_Installed, status.Packages[packagestate.CollectorPackageName].Status)
 				})
 
 				c := &Client{
@@ -769,7 +769,7 @@ func TestClient_onConnectFailedHandler(t *testing.T) {
 						AgentHasHash:         hash,
 						ServerOfferedVersion: newVersion,
 						ServerOfferedHash:    newHash,
-						Status:               protobufs.PackageStatus_InstallFailed,
+						Status:               protobufs.PackageStatusEnum_PackageStatusEnum_InstallFailed,
 						ErrorMessage:         errorMessage,
 					},
 				}
@@ -803,7 +803,7 @@ func TestClient_onConnectFailedHandler(t *testing.T) {
 						AgentHasHash:         hash,
 						ServerOfferedVersion: newVersion,
 						ServerOfferedHash:    newHash,
-						Status:               protobufs.PackageStatus_Installing,
+						Status:               protobufs.PackageStatusEnum_PackageStatusEnum_Installing,
 					},
 				}
 				packageStatuses := &protobufs.PackageStatuses{
@@ -828,7 +828,7 @@ func TestClient_onConnectFailedHandler(t *testing.T) {
 					assert.Equal(t, newVersion, status.Packages[packagestate.CollectorPackageName].ServerOfferedVersion)
 					assert.Equal(t, newHash, status.Packages[packagestate.CollectorPackageName].ServerOfferedHash)
 					assert.Equal(t, fmt.Sprintf("Failed to connect to OpAMP Server: %s", expectedErr), status.Packages[packagestate.CollectorPackageName].ErrorMessage)
-					assert.Equal(t, protobufs.PackageStatus_InstallFailed, status.Packages[packagestate.CollectorPackageName].Status)
+					assert.Equal(t, protobufs.PackageStatusEnum_PackageStatusEnum_InstallFailed, status.Packages[packagestate.CollectorPackageName].Status)
 				})
 
 				c := &Client{
@@ -884,7 +884,7 @@ func TestClient_onRemoteConfigHandler(t *testing.T) {
 
 					assert.NotNil(t, status)
 					assert.Equal(t, remoteConfig.GetConfigHash(), status.GetLastRemoteConfigHash())
-					assert.Equal(t, protobufs.RemoteConfigStatus_FAILED, status.GetStatus())
+					assert.Equal(t, protobufs.RemoteConfigStatuses_RemoteConfigStatuses_FAILED, status.GetStatus())
 					assert.Contains(t, status.GetErrorMessage(), expectedErr.Error())
 
 				})
@@ -916,7 +916,7 @@ func TestClient_onRemoteConfigHandler(t *testing.T) {
 
 					assert.NotNil(t, status)
 					assert.Equal(t, remoteConfig.GetConfigHash(), status.GetLastRemoteConfigHash())
-					assert.Equal(t, protobufs.RemoteConfigStatus_APPLIED, status.GetStatus())
+					assert.Equal(t, protobufs.RemoteConfigStatuses_RemoteConfigStatuses_APPLIED, status.GetStatus())
 					assert.Equal(t, "", status.GetErrorMessage())
 
 				})
@@ -947,7 +947,7 @@ func TestClient_onRemoteConfigHandler(t *testing.T) {
 
 					assert.NotNil(t, status)
 					assert.Equal(t, remoteConfig.GetConfigHash(), status.GetLastRemoteConfigHash())
-					assert.Equal(t, protobufs.RemoteConfigStatus_APPLIED, status.GetStatus())
+					assert.Equal(t, protobufs.RemoteConfigStatuses_RemoteConfigStatuses_APPLIED, status.GetStatus())
 					assert.Equal(t, "", status.GetErrorMessage())
 
 				})
@@ -1002,7 +1002,7 @@ func TestClient_onRemoteConfigHandler(t *testing.T) {
 
 					assert.NotNil(t, status)
 					assert.Equal(t, remoteConfig.GetConfigHash(), status.GetLastRemoteConfigHash())
-					assert.Equal(t, protobufs.RemoteConfigStatus_APPLIED, status.GetStatus())
+					assert.Equal(t, protobufs.RemoteConfigStatuses_RemoteConfigStatuses_APPLIED, status.GetStatus())
 					assert.Equal(t, "", status.GetErrorMessage())
 
 				})
@@ -1052,7 +1052,7 @@ func TestClient_onPackagesAvailableHandler(t *testing.T) {
 			AgentHasHash:         packageHash,
 			ServerOfferedVersion: version.Version(),
 			ServerOfferedHash:    packageHash,
-			Status:               protobufs.PackageStatus_Installed,
+			Status:               protobufs.PackageStatusEnum_PackageStatusEnum_Installed,
 		},
 	}
 	packageStatuses := &protobufs.PackageStatuses{
@@ -1081,7 +1081,7 @@ func TestClient_onPackagesAvailableHandler(t *testing.T) {
 					assert.Equal(t, packagesAvailable.Packages[collectorPackageName].Version, status.Packages[collectorPackageName].ServerOfferedVersion)
 					assert.Equal(t, packagesAvailable.Packages[collectorPackageName].Hash, status.Packages[collectorPackageName].ServerOfferedHash)
 					assert.Equal(t, "", status.Packages[collectorPackageName].ErrorMessage)
-					assert.Equal(t, protobufs.PackageStatus_Installed, status.Packages[collectorPackageName].Status)
+					assert.Equal(t, protobufs.PackageStatusEnum_PackageStatusEnum_Installed, status.Packages[collectorPackageName].Status)
 					assert.Equal(t, collectorPackageName, status.Packages[collectorPackageName].Name)
 					assert.Equal(t, packagesAvailable.Packages[collectorPackageName].Hash, status.Packages[collectorPackageName].AgentHasHash)
 					assert.Equal(t, packagesAvailable.Packages[collectorPackageName].Version, status.Packages[collectorPackageName].AgentHasVersion)
@@ -1114,7 +1114,7 @@ func TestClient_onPackagesAvailableHandler(t *testing.T) {
 					assert.Equal(t, packagesAvailable.Packages[collectorPackageName].Version, status.Packages[collectorPackageName].ServerOfferedVersion)
 					assert.Equal(t, packagesAvailable.Packages[collectorPackageName].Hash, status.Packages[collectorPackageName].ServerOfferedHash)
 					assert.Equal(t, "", status.Packages[collectorPackageName].ErrorMessage)
-					assert.Equal(t, protobufs.PackageStatus_Installed, status.Packages[collectorPackageName].Status)
+					assert.Equal(t, protobufs.PackageStatusEnum_PackageStatusEnum_Installed, status.Packages[collectorPackageName].Status)
 					assert.Equal(t, collectorPackageName, status.Packages[collectorPackageName].Name)
 					assert.Equal(t, packageStatuses.Packages[collectorPackageName].AgentHasHash, status.Packages[collectorPackageName].AgentHasHash)
 					assert.Equal(t, packageStatuses.Packages[collectorPackageName].AgentHasVersion, status.Packages[collectorPackageName].AgentHasVersion)
@@ -1164,14 +1164,14 @@ func TestClient_onPackagesAvailableHandler(t *testing.T) {
 					assert.Equal(t, packagesAvailableNotSupported.Packages[collectorPackageName].Version, status.Packages[collectorPackageName].ServerOfferedVersion)
 					assert.Equal(t, packagesAvailableNotSupported.Packages[collectorPackageName].Hash, status.Packages[collectorPackageName].ServerOfferedHash)
 					assert.Equal(t, "", status.Packages[collectorPackageName].ErrorMessage)
-					assert.Equal(t, protobufs.PackageStatus_Installed, status.Packages[collectorPackageName].Status)
+					assert.Equal(t, protobufs.PackageStatusEnum_PackageStatusEnum_Installed, status.Packages[collectorPackageName].Status)
 					assert.Equal(t, collectorPackageName, status.Packages[collectorPackageName].Name)
 					assert.Equal(t, packagesAvailableNotSupported.Packages[collectorPackageName].Hash, status.Packages[collectorPackageName].AgentHasHash)
 					assert.Equal(t, packagesAvailableNotSupported.Packages[collectorPackageName].Version, status.Packages[collectorPackageName].AgentHasVersion)
 					assert.Equal(t, packagesAvailableNotSupported.Packages[badPackageName].Version, status.Packages[badPackageName].ServerOfferedVersion)
 					assert.Equal(t, packagesAvailableNotSupported.Packages[badPackageName].Hash, status.Packages[badPackageName].ServerOfferedHash)
 					assert.Equal(t, "Package not supported", status.Packages[badPackageName].ErrorMessage)
-					assert.Equal(t, protobufs.PackageStatus_InstallFailed, status.Packages[badPackageName].Status)
+					assert.Equal(t, protobufs.PackageStatusEnum_PackageStatusEnum_InstallFailed, status.Packages[badPackageName].Status)
 					assert.Equal(t, badPackageName, status.Packages[badPackageName].Name)
 					assert.Nil(t, status.Packages[badPackageName].AgentHasHash)
 					assert.Equal(t, "", status.Packages[badPackageName].AgentHasVersion)
@@ -1197,7 +1197,7 @@ func TestClient_onPackagesAvailableHandler(t *testing.T) {
 						AgentHasHash:         newPackageHash,
 						ServerOfferedVersion: newVersion,
 						ServerOfferedHash:    newPackageHash,
-						Status:               protobufs.PackageStatus_Installed,
+						Status:               protobufs.PackageStatusEnum_PackageStatusEnum_Installed,
 					},
 				}
 				packageStatusesDiffHash := &protobufs.PackageStatuses{
@@ -1219,7 +1219,7 @@ func TestClient_onPackagesAvailableHandler(t *testing.T) {
 					assert.Equal(t, packagesAvailable.Packages[collectorPackageName].Version, status.Packages[collectorPackageName].ServerOfferedVersion)
 					assert.Equal(t, packagesAvailable.Packages[collectorPackageName].Hash, status.Packages[collectorPackageName].ServerOfferedHash)
 					assert.Equal(t, "", status.Packages[collectorPackageName].ErrorMessage)
-					assert.Equal(t, protobufs.PackageStatus_Installed, status.Packages[collectorPackageName].Status)
+					assert.Equal(t, protobufs.PackageStatusEnum_PackageStatusEnum_Installed, status.Packages[collectorPackageName].Status)
 					assert.Equal(t, collectorPackageName, status.Packages[collectorPackageName].Name)
 					assert.Equal(t, packagesAvailable.Packages[collectorPackageName].Hash, status.Packages[collectorPackageName].AgentHasHash)
 					assert.NotEqual(t, statusesDiffHash[collectorPackageName].AgentHasHash, status.Packages[collectorPackageName].AgentHasHash)
@@ -1261,7 +1261,7 @@ func TestClient_onPackagesAvailableHandler(t *testing.T) {
 						AgentHasHash:         packageHash,
 						ServerOfferedVersion: newVersion,
 						ServerOfferedHash:    newPackageHash,
-						Status:               protobufs.PackageStatus_Installing,
+						Status:               protobufs.PackageStatusEnum_PackageStatusEnum_Installing,
 					},
 				}
 				savedPackageStatuses := &protobufs.PackageStatuses{
@@ -1293,7 +1293,7 @@ func TestClient_onPackagesAvailableHandler(t *testing.T) {
 					assert.Equal(t, packagesAvailableNew.Packages[collectorPackageName].Version, status.Packages[collectorPackageName].ServerOfferedVersion)
 					assert.Equal(t, packagesAvailableNew.Packages[collectorPackageName].Hash, status.Packages[collectorPackageName].ServerOfferedHash)
 					assert.Equal(t, "", status.Packages[collectorPackageName].ErrorMessage)
-					assert.Equal(t, protobufs.PackageStatus_Installing, status.Packages[collectorPackageName].Status)
+					assert.Equal(t, protobufs.PackageStatusEnum_PackageStatusEnum_Installing, status.Packages[collectorPackageName].Status)
 					assert.Equal(t, collectorPackageName, status.Packages[collectorPackageName].Name)
 					assert.Equal(t, packageStatuses.Packages[collectorPackageName].AgentHasHash, status.Packages[collectorPackageName].AgentHasHash)
 					assert.Equal(t, packageStatuses.Packages[collectorPackageName].AgentHasVersion, status.Packages[collectorPackageName].AgentHasVersion)
@@ -1308,7 +1308,7 @@ func TestClient_onPackagesAvailableHandler(t *testing.T) {
 					assert.Equal(t, packagesAvailableNew.Packages[collectorPackageName].Version, status.Packages[collectorPackageName].ServerOfferedVersion)
 					assert.Equal(t, packagesAvailableNew.Packages[collectorPackageName].Hash, status.Packages[collectorPackageName].ServerOfferedHash)
 					assert.Equal(t, "Failed to run the latest Updater: oops", status.Packages[collectorPackageName].ErrorMessage)
-					assert.Equal(t, protobufs.PackageStatus_InstallFailed, status.Packages[collectorPackageName].Status)
+					assert.Equal(t, protobufs.PackageStatusEnum_PackageStatusEnum_InstallFailed, status.Packages[collectorPackageName].Status)
 					assert.Equal(t, collectorPackageName, status.Packages[collectorPackageName].Name)
 					assert.Equal(t, packageStatuses.Packages[collectorPackageName].AgentHasHash, status.Packages[collectorPackageName].AgentHasHash)
 					assert.Equal(t, packageStatuses.Packages[collectorPackageName].AgentHasVersion, status.Packages[collectorPackageName].AgentHasVersion)
@@ -1392,7 +1392,7 @@ func TestClient_onPackagesAvailableHandler(t *testing.T) {
 					assert.Equal(t, packagesAvailableNoFile.Packages[collectorPackageName].Version, status.Packages[collectorPackageName].ServerOfferedVersion)
 					assert.Equal(t, packagesAvailableNoFile.Packages[collectorPackageName].Hash, status.Packages[collectorPackageName].ServerOfferedHash)
 					assert.Equal(t, "Packaged update failed because no downloadable file detected", status.Packages[collectorPackageName].ErrorMessage)
-					assert.Equal(t, protobufs.PackageStatus_InstallFailed, status.Packages[collectorPackageName].Status)
+					assert.Equal(t, protobufs.PackageStatusEnum_PackageStatusEnum_InstallFailed, status.Packages[collectorPackageName].Status)
 					assert.Equal(t, collectorPackageName, status.Packages[collectorPackageName].Name)
 					assert.Equal(t, packageStatuses.Packages[collectorPackageName].AgentHasHash, status.Packages[collectorPackageName].AgentHasHash)
 					assert.Equal(t, packageStatuses.Packages[collectorPackageName].AgentHasVersion, status.Packages[collectorPackageName].AgentHasVersion)
@@ -1441,7 +1441,7 @@ func TestClient_onPackagesAvailableHandler(t *testing.T) {
 					assert.Equal(t, packagesAvailableNew.Packages[collectorPackageName].Version, status.Packages[collectorPackageName].ServerOfferedVersion)
 					assert.Equal(t, packagesAvailableNew.Packages[collectorPackageName].Hash, status.Packages[collectorPackageName].ServerOfferedHash)
 					assert.Equal(t, "", status.Packages[collectorPackageName].ErrorMessage)
-					assert.Equal(t, protobufs.PackageStatus_Installing, status.Packages[collectorPackageName].Status)
+					assert.Equal(t, protobufs.PackageStatusEnum_PackageStatusEnum_Installing, status.Packages[collectorPackageName].Status)
 					assert.Equal(t, collectorPackageName, status.Packages[collectorPackageName].Name)
 					assert.Equal(t, packageStatuses.Packages[collectorPackageName].AgentHasHash, status.Packages[collectorPackageName].AgentHasHash)
 					assert.Equal(t, packageStatuses.Packages[collectorPackageName].AgentHasVersion, status.Packages[collectorPackageName].AgentHasVersion)
@@ -1456,7 +1456,7 @@ func TestClient_onPackagesAvailableHandler(t *testing.T) {
 					assert.Equal(t, packagesAvailableNew.Packages[collectorPackageName].Version, status.Packages[collectorPackageName].ServerOfferedVersion)
 					assert.Equal(t, packagesAvailableNew.Packages[collectorPackageName].Hash, status.Packages[collectorPackageName].ServerOfferedHash)
 					assert.Equal(t, "Failed to download and verify downloadable file: oops", status.Packages[collectorPackageName].ErrorMessage)
-					assert.Equal(t, protobufs.PackageStatus_InstallFailed, status.Packages[collectorPackageName].Status)
+					assert.Equal(t, protobufs.PackageStatusEnum_PackageStatusEnum_InstallFailed, status.Packages[collectorPackageName].Status)
 					assert.Equal(t, collectorPackageName, status.Packages[collectorPackageName].Name)
 					assert.Equal(t, packageStatuses.Packages[collectorPackageName].AgentHasHash, status.Packages[collectorPackageName].AgentHasHash)
 					assert.Equal(t, packageStatuses.Packages[collectorPackageName].AgentHasVersion, status.Packages[collectorPackageName].AgentHasVersion)
@@ -1489,7 +1489,7 @@ func TestClient_onPackagesAvailableHandler(t *testing.T) {
 					assert.Equal(t, packagesAvailable.Packages[collectorPackageName].Version, status.Packages[collectorPackageName].ServerOfferedVersion)
 					assert.Equal(t, packagesAvailable.Packages[collectorPackageName].Hash, status.Packages[collectorPackageName].ServerOfferedHash)
 					assert.Equal(t, "", status.Packages[collectorPackageName].ErrorMessage)
-					assert.Equal(t, protobufs.PackageStatus_Installed, status.Packages[collectorPackageName].Status)
+					assert.Equal(t, protobufs.PackageStatusEnum_PackageStatusEnum_Installed, status.Packages[collectorPackageName].Status)
 					assert.Equal(t, collectorPackageName, status.Packages[collectorPackageName].Name)
 					assert.Equal(t, packagesAvailable.Packages[collectorPackageName].Hash, status.Packages[collectorPackageName].AgentHasHash)
 					assert.Equal(t, packagesAvailable.Packages[collectorPackageName].Version, status.Packages[collectorPackageName].AgentHasVersion)
@@ -1523,7 +1523,7 @@ func TestClient_onPackagesAvailableHandler(t *testing.T) {
 					assert.Equal(t, packagesAvailable.Packages[collectorPackageName].Version, status.Packages[collectorPackageName].ServerOfferedVersion)
 					assert.Equal(t, packagesAvailable.Packages[collectorPackageName].Hash, status.Packages[collectorPackageName].ServerOfferedHash)
 					assert.Equal(t, "", status.Packages[collectorPackageName].ErrorMessage)
-					assert.Equal(t, protobufs.PackageStatus_Installed, status.Packages[collectorPackageName].Status)
+					assert.Equal(t, protobufs.PackageStatusEnum_PackageStatusEnum_Installed, status.Packages[collectorPackageName].Status)
 					assert.Equal(t, collectorPackageName, status.Packages[collectorPackageName].Name)
 					assert.Equal(t, packagesAvailable.Packages[collectorPackageName].Hash, status.Packages[collectorPackageName].AgentHasHash)
 					assert.Equal(t, packagesAvailable.Packages[collectorPackageName].Version, status.Packages[collectorPackageName].AgentHasVersion)

@@ -50,13 +50,13 @@ type FileStateManager struct {
 }
 
 type packageState struct {
-	Name          string                         `json:"name"`
-	AgentVersion  string                         `json:"agent_version"`
-	AgentHash     []byte                         `json:"agent_hash"`
-	ServerVersion string                         `json:"server_version"`
-	ServerHash    []byte                         `json:"server_hash"`
-	Status        protobufs.PackageStatus_Status `json:"status"`
-	ErrorMessage  string                         `json:"error_message"`
+	Name          string                      `json:"name"`
+	AgentVersion  string                      `json:"agent_version"`
+	AgentHash     []byte                      `json:"agent_hash"`
+	ServerVersion string                      `json:"server_version"`
+	ServerHash    []byte                      `json:"server_hash"`
+	Status        protobufs.PackageStatusEnum `json:"status"`
+	ErrorMessage  string                      `json:"error_message"`
 }
 type packageStates struct {
 	AllPackagesHash []byte                   `json:"all_packages_hash"`
