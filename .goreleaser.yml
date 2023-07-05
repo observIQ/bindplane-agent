@@ -21,6 +21,9 @@ builds:
       - arm64
       - arm
       - "386"
+    goarm:
+      - 6
+      - 7
     ignore:
       - goos: windows
         goarch: arm
@@ -52,6 +55,9 @@ builds:
       - arm64
       - arm
       - "386"
+    goarm:
+      - 6
+      - 7
     ignore:
       - goos: windows
         goarch: arm
@@ -71,7 +77,7 @@ builds:
 # https://goreleaser.com/customization/archive/
 archives:
   - format: tar.gz
-    name_template: "{{ .ProjectName }}-v{{ .Version }}-{{ .Os }}-{{ .Arch }}"
+    name_template: "{{ .ProjectName }}-v{{ .Version }}-{{ .Os }}-{{ .Arch }}{{ with .Arm }}v{{ . }}{{ end }}"
     files:
       - LICENSE
       - src: release_deps/opentelemetry-java-contrib-jmx-metrics.jar
@@ -104,7 +110,7 @@ archives:
 
 nfpms:
   - id: collector
-    file_name_template: "{{ .PackageName }}_v{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    file_name_template: "{{ .PackageName }}_v{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ with .Arm }}v{{ . }}{{ end }}"
     package_name: observiq-otel-collector
     vendor: observIQ, Inc
     maintainer: observIQ <support@observiq.com>
@@ -249,6 +255,39 @@ dockers:
       - "--label=revision={{.FullCommit}}"
       - "--label=version={{.Version}}"
       - "--platform=linux/arm64"
+    extra_files:
+      - plugins
+      - config/example.yaml
+      - config/logging.stdout.yaml
+      - LICENSE
+
+  - id: ubuntu-arm7
+    goos: linux
+    goarch: arm
+    goarm: 7
+    ids:
+      - collector
+    image_templates:
+      - "observiq/observiq-otel-collector-armv7:latest"
+      - "observiq/observiq-otel-collector-armv7:{{ .Major }}.{{ .Minor }}.{{ .Patch }}"
+      - "observiq/observiq-otel-collector-armv7:{{ .Major }}.{{ .Minor }}"
+      - "observiq/observiq-otel-collector-armv7:{{ .Major }}"
+      - "ghcr.io/observiq/observiq-otel-collector-armv7:latest"
+      - "ghcr.io/observiq/observiq-otel-collector-armv7:{{ .Major }}.{{ .Minor }}.{{ .Patch }}"
+      - "ghcr.io/observiq/observiq-otel-collector-armv7:{{ .Major }}.{{ .Minor }}"
+      - "ghcr.io/observiq/observiq-otel-collector-armv7:{{ .Major }}"
+      - "us-central1-docker.pkg.dev/observiq-containers/collector/observiq-otel-collector-armv7:latest"
+      - "us-central1-docker.pkg.dev/observiq-containers/collector/observiq-otel-collector-armv7:{{ .Major }}.{{ .Minor }}.{{ .Patch }}"
+      - "us-central1-docker.pkg.dev/observiq-containers/collector/observiq-otel-collector-armv7:{{ .Major }}.{{ .Minor }}"
+      - "us-central1-docker.pkg.dev/observiq-containers/collector/observiq-otel-collector-armv7:{{ .Major }}"
+    dockerfile: ./docker/Dockerfile.ubuntu
+    use: buildx
+    build_flag_templates:
+      - "--label=created={{.Date}}"
+      - "--label=title={{.ProjectName}}"
+      - "--label=revision={{.FullCommit}}"
+      - "--label=version={{.Version}}"
+      - "--platform=linux/arm/v7"
     extra_files:
       - plugins
       - config/example.yaml
