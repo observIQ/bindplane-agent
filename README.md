@@ -107,6 +107,10 @@ For supported exporters and their documentation see [exporters](/docs/exporters.
 
 For supported extensions and their documentation see [extensions](/docs/extensions.md).
 
+#### Connectors
+
+For supported connectors and their documentation see [connectors](/docs/connectors.md).
+
 ## Example
 
 Here is an example `config.yaml` setup for hostmetrics on Google Cloud. To make sure your environment is set up with required prerequisites, see our [Google Cloud Exporter Prerequisites](/config/google_cloud_exporter/README.md) page. Further details for this GCP example can be found [here](/config/google_cloud_exporter/hostmetrics).
