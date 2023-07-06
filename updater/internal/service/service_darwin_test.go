@@ -29,6 +29,63 @@ import (
 )
 
 func TestDarwinServiceInstall(t *testing.T) {
+	serviceName := "darwin-service"
+	legacyServiceName := "legacy-darwin-service"
+
+	t.Run("Test install + legacy uninstall", func(t *testing.T) {
+		installedServicePath := filepath.Join(os.Getenv("HOME"), "Library", "LaunchAgents", "darwin-service.plist")
+		legacyInstalledServicePath := filepath.Join(os.Getenv("HOME"), "Library", "LaunchAgents", "legacy-darwin-service.plist")
+
+		uninstallService(t, installedServicePath)
+		uninstallService(t, legacyInstalledServicePath)
+
+		// Install legacy service
+		legacyService := &darwinService{
+			newServiceFilePath:       filepath.Join("testdata", "legacy-darwin-service.plist"),
+			installedServiceFilePath: legacyInstalledServicePath,
+			logger:                   zaptest.NewLogger(t),
+		}
+
+		err := legacyService.install()
+		require.NoError(t, err)
+		require.FileExists(t, legacyInstalledServicePath)
+
+		// We want to check that the legacy service was actually loaded
+		requireServiceLoadedStatus(t, legacyServiceName, true)
+
+		// Setup new service
+		d := &darwinService{
+			newServiceFilePath:             filepath.Join("testdata", "darwin-service.plist"),
+			installedServiceFilePath:       installedServicePath,
+			legacyInstalledServiceFilePath: legacyInstalledServicePath,
+			logger:                         zaptest.NewLogger(t),
+		}
+
+		// Uninstall old service
+		err = d.uninstall()
+		require.NoError(t, err)
+		require.NoFileExists(t, installedServicePath)
+		require.NoFileExists(t, legacyInstalledServicePath)
+
+		// We want to check that the legacy service is no longer listed
+		requireServiceLoadedStatus(t, legacyServiceName, false)
+
+		// Install new service
+		err = d.install()
+		require.NoError(t, err)
+		require.FileExists(t, installedServicePath)
+
+		// We want to check that the service was actually loaded
+		requireServiceLoadedStatus(t, serviceName, true)
+
+		err = d.uninstall()
+		require.NoError(t, err)
+		require.NoFileExists(t, installedServicePath)
+
+		// Make sure the service is no longer listed
+		requireServiceLoadedStatus(t, serviceName, false)
+	})
+
 	t.Run("Test install + uninstall", func(t *testing.T) {
 		installedServicePath := filepath.Join(os.Getenv("HOME"), "Library", "LaunchAgents", "darwin-service.plist")
 
@@ -45,14 +102,14 @@ func TestDarwinServiceInstall(t *testing.T) {
 		require.FileExists(t, installedServicePath)
 
 		// We want to check that the service was actually loaded
-		requireServiceLoadedStatus(t, true)
+		requireServiceLoadedStatus(t, serviceName, true)
 
 		err = d.uninstall()
 		require.NoError(t, err)
 		require.NoFileExists(t, installedServicePath)
 
 		// Make sure the service is no longer listed
-		requireServiceLoadedStatus(t, false)
+		requireServiceLoadedStatus(t, serviceName, false)
 	})
 
 	t.Run("Test stop + start", func(t *testing.T) {
@@ -72,24 +129,24 @@ func TestDarwinServiceInstall(t *testing.T) {
 		require.FileExists(t, installedServicePath)
 
 		// We want to check that the service was actually loaded
-		requireServiceLoadedStatus(t, true)
+		requireServiceLoadedStatus(t, serviceName, true)
 
 		err = d.Start()
 		require.NoError(t, err)
 
-		requireServiceRunning(t)
+		requireServiceRunning(t, serviceName)
 
 		err = d.Stop()
 		require.NoError(t, err)
 
-		requireServiceLoadedStatus(t, false)
+		requireServiceLoadedStatus(t, serviceName, false)
 
 		err = d.uninstall()
 		require.NoError(t, err)
 		require.NoFileExists(t, installedServicePath)
 
 		// Make sure the service is no longer listed
-		requireServiceLoadedStatus(t, false)
+		requireServiceLoadedStatus(t, serviceName, false)
 	})
 
 	t.Run("Test invalid path for input file", func(t *testing.T) {
@@ -105,7 +162,7 @@ func TestDarwinServiceInstall(t *testing.T) {
 
 		err := d.install()
 		require.ErrorContains(t, err, "failed to open input file")
-		requireServiceLoadedStatus(t, false)
+		requireServiceLoadedStatus(t, serviceName, false)
 	})
 
 	t.Run("Test invalid path for output file for install", func(t *testing.T) {
@@ -121,7 +178,7 @@ func TestDarwinServiceInstall(t *testing.T) {
 
 		err := d.install()
 		require.ErrorContains(t, err, "failed to write service file")
-		requireServiceLoadedStatus(t, false)
+		requireServiceLoadedStatus(t, serviceName, false)
 	})
 
 	t.Run("Uninstall fails if not installed", func(t *testing.T) {
@@ -136,8 +193,8 @@ func TestDarwinServiceInstall(t *testing.T) {
 		}
 
 		err := d.uninstall()
-		require.ErrorContains(t, err, "failed to stat installed service file")
-		requireServiceLoadedStatus(t, false)
+		require.ErrorContains(t, err, "failed to find installed service file")
+		requireServiceLoadedStatus(t, serviceName, false)
 	})
 
 	t.Run("Start fails if service not found", func(t *testing.T) {
@@ -167,7 +224,7 @@ func TestDarwinServiceInstall(t *testing.T) {
 		}
 
 		err := d.Stop()
-		require.ErrorContains(t, err, "failed to stat installed service file")
+		require.ErrorContains(t, err, "failed to find installed service file")
 	})
 
 	t.Run("Backup installed service succeeds", func(t *testing.T) {
@@ -194,7 +251,7 @@ func TestDarwinServiceInstall(t *testing.T) {
 		require.FileExists(t, installedServicePath)
 
 		// We want to check that the service was actually loaded
-		requireServiceLoadedStatus(t, true)
+		requireServiceLoadedStatus(t, serviceName, true)
 
 		require.NoError(t, d.Stop())
 
@@ -250,7 +307,7 @@ func TestDarwinServiceInstall(t *testing.T) {
 		require.FileExists(t, installedServicePath)
 
 		// We want to check that the service was actually loaded
-		requireServiceLoadedStatus(t, true)
+		requireServiceLoadedStatus(t, serviceName, true)
 
 		require.NoError(t, d.Stop())
 
@@ -277,10 +334,10 @@ func uninstallService(t *testing.T, installedPath string) {
 
 const exitCodeServiceNotFound = 113
 
-func requireServiceLoadedStatus(t *testing.T, loaded bool) {
+func requireServiceLoadedStatus(t *testing.T, serviceName string, loaded bool) {
 	t.Helper()
 
-	cmd := exec.Command("launchctl", "list", "darwin-service")
+	cmd := exec.Command("launchctl", "list", serviceName)
 	err := cmd.Run()
 	if loaded {
 		// If the service should be loaded, then we expect a 0 exit code, so no error is given
@@ -295,10 +352,10 @@ func requireServiceLoadedStatus(t *testing.T, loaded bool) {
 
 var descriptionPIDRegex = regexp.MustCompile(`\s*"PID" = \d+;`)
 
-func requireServiceRunning(t *testing.T) {
+func requireServiceRunning(t *testing.T, serviceName string) {
 	t.Helper()
 
-	cmd := exec.Command("launchctl", "list", "darwin-service")
+	cmd := exec.Command("launchctl", "list", serviceName)
 	out, err := cmd.Output()
 	require.NoError(t, err)
 	matches := descriptionPIDRegex.Match(out)

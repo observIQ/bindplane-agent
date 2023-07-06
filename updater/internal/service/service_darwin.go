@@ -17,6 +17,7 @@
 package service
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -28,7 +29,10 @@ import (
 )
 
 const (
-	darwinServiceFilePath = "/Library/LaunchDaemons/com.observiq.collector.plist"
+	darwinServiceFilePath = "/Library/LaunchDaemons/com.bindplane.agent.plist"
+
+	// legacyDarwinServiceFilePath is the service file path for the legacy service file
+	legacyDarwinServiceFilePath = "/Library/LaunchDaemons/com.observiq.collector.plist"
 )
 
 // Option is an extra option for creating a Service
@@ -44,10 +48,11 @@ func WithServiceFile(svcFilePath string) Option {
 // NewService returns an instance of the Service interface for managing the observiq-otel-collector service on the current OS.
 func NewService(logger *zap.Logger, installDir string, opts ...Option) Service {
 	darwinSvc := &darwinService{
-		newServiceFilePath:       filepath.Join(path.ServiceFileDir(installDir), "com.observiq.collector.plist"),
-		installedServiceFilePath: darwinServiceFilePath,
-		installDir:               path.DarwinInstallDir,
-		logger:                   logger.Named("darwin-service"),
+		newServiceFilePath:             filepath.Join(path.ServiceFileDir(installDir), "com.bindplane.agent.plist"),
+		installedServiceFilePath:       darwinServiceFilePath,
+		legacyInstalledServiceFilePath: legacyDarwinServiceFilePath,
+		installDir:                     path.DarwinInstallDir,
+		logger:                         logger.Named("darwin-service"),
 	}
 
 	for _, opt := range opts {
@@ -62,6 +67,8 @@ type darwinService struct {
 	newServiceFilePath string
 	// installedServiceFilePath is the file path to the installed plist file
 	installedServiceFilePath string
+	// legacyInstalledServiceFilePath is the legacy file path for the plist file
+	legacyInstalledServiceFilePath string
 	// installDir is the root directory of the main installation
 	installDir string
 	logger     *zap.Logger
@@ -87,16 +94,32 @@ func (d darwinService) Start() error {
 func (d darwinService) Stop() error {
 	// Launchctl exits with error code 0 if the file does not exist.
 	// We want to ensure that we error in this scenario.
-	if _, err := os.Stat(d.installedServiceFilePath); err != nil {
-		return fmt.Errorf("failed to stat installed service file: %w", err)
+	currentServiceFile, err := d.determineCurrentServiceFilePath()
+	if err != nil {
+		return err
 	}
 
-	//#nosec G204 -- installedServiceFilePath is not determined by user input
-	cmd := exec.Command("launchctl", "unload", d.installedServiceFilePath)
+	//#nosec G204 -- currentServiceFile is not determined by user input
+	cmd := exec.Command("launchctl", "unload", currentServiceFile)
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("running launchctl failed: %w", err)
 	}
 	return nil
+}
+
+// determineServiceFilePath returns the path to the service file that is being used currently
+func (d darwinService) determineCurrentServiceFilePath() (string, error) {
+	// check for the legacy file first
+	if _, err := os.Stat(d.legacyInstalledServiceFilePath); err == nil {
+		return d.legacyInstalledServiceFilePath, nil
+	}
+
+	// check for new service file
+	if _, err := os.Stat(d.installedServiceFilePath); err == nil {
+		return d.installedServiceFilePath, nil
+	}
+
+	return "", errors.New("failed to find installed service file")
 }
 
 // Installs the service
@@ -120,7 +143,13 @@ func (d darwinService) uninstall() error {
 		return err
 	}
 
-	if err := os.Remove(d.installedServiceFilePath); err != nil {
+	// determine the current service file
+	currentServiceFile, err := d.determineCurrentServiceFilePath()
+	if err != nil {
+		return err
+	}
+
+	if err := os.Remove(currentServiceFile); err != nil {
 		return fmt.Errorf("failed to remove service file: %w", err)
 	}
 

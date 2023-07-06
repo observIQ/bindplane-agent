@@ -26,7 +26,7 @@ After installing the `observiq-otel-collector` you can change the configuration 
 
 The default configuration file can be found at `/opt/observiq-otel-collector/config.yaml`.
 
-After changing the configuration file run `sudo launchctl unload /Library/LaunchDaemons/com.observiq.collector.plist; sudo launchctl load /Library/LaunchDaemons/com.observiq.collector.plist` for the changes to take effect.
+After changing the configuration file run `sudo launchctl unload /Library/LaunchDaemons/com.bindplane.agent.plist; sudo launchctl load /Library/LaunchDaemons/com.bindplane.agent.plist` for the changes to take effect.
 
 For more information on configuring the collector, see the [OpenTelemetry docs](https://opentelemetry.io/docs/collector/configuration/).
 
@@ -42,10 +42,10 @@ The collector uses `launchctl` to control the collector lifecycle using the foll
 
 ```sh
 # Start the collector
-sudo launchctl load /Library/LaunchDaemons/com.observiq.collector.plist
+sudo launchctl load /Library/LaunchDaemons/com.bindplane.agent.plist
 
 # Stop the collector
-sudo launchctl unload /Library/LaunchDaemons/com.observiq.collector.plist
+sudo launchctl unload /Library/LaunchDaemons/com.bindplane.agent.plist
 ```
 
 ## Uninstalling
