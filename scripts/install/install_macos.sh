@@ -16,7 +16,7 @@
 set -e
 
 # Collector Constants
-SERVICE_NAME="com.observiq.collector"
+SERVICE_NAME="com.bindplane.agent"
 DOWNLOAD_BASE="https://github.com/observiq/observiq-otel-collector/releases/download"
 
 # Script Constants
@@ -508,6 +508,14 @@ install_package()
     # Existing service file, we should stop & unload first.
     info "Uninstalling existing service file..."
     launchctl unload -w "/Library/LaunchDaemons/$SERVICE_NAME.plist" > /dev/null 2>&1 || error_exit "$LINENO" "Failed to unload service file /Library/LaunchDaemons/$SERVICE_NAME.plist"
+    succeeded
+  fi
+
+  # If we're using the old service file then stop the service and remove that
+  if [ -f "/Library/LaunchDaemons/com.observiq.collector.plist" ]; then
+    info "Uninstalling existing service file..."
+    launchctl unload -w "/Library/LaunchDaemons/com.observiq.collector.plist" > /dev/null 2>&1 || error_exit "$LINENO" "Failed to unload service file /Library/LaunchDaemons/com.observiq.collector.plist"
+    rm /Library/LaunchDaemons/com.observiq.collector.plist || error_exit "$LINENO" "Failed to remove old service file /Library/LaunchDaemons/com.observiq.collector.plist"
     succeeded
   fi
 
