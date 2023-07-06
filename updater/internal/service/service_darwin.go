@@ -169,7 +169,13 @@ func (d darwinService) Update() error {
 }
 
 func (d darwinService) Backup() error {
-	if err := file.CopyFileNoOverwrite(d.logger.Named("copy-file"), d.installedServiceFilePath, path.BackupServiceFile(d.installDir)); err != nil {
+	// determine the current service file
+	currentServiceFile, err := d.determineCurrentServiceFilePath()
+	if err != nil {
+		return fmt.Errorf("failed to copy service file: %w", err)
+	}
+
+	if err := file.CopyFileNoOverwrite(d.logger.Named("copy-file"), currentServiceFile, path.BackupServiceFile(d.installDir)); err != nil {
 		return fmt.Errorf("failed to copy service file: %w", err)
 	}
 
