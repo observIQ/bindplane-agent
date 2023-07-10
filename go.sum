@@ -1748,8 +1748,8 @@ github.com/open-telemetry/opentelemetry-collector-contrib/receiver/dockerstatsre
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/dockerstatsreceiver v0.81.0/go.mod h1:EE9qIjrIY230XPRtdNigqAYPL286iJY3jcHnauj1WR4=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/elasticsearchreceiver v0.81.0 h1:4L0FT0s3t+qCrrB28uCEuSnceYuaYajYgFlKi4XxOFk=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/elasticsearchreceiver v0.81.0/go.mod h1:EXaH2+eqjWc+XgmUKIIAJ+P+fQxtqZCbcBzGaiEa1/8=
-github.com/open-telemetry/opentelemetry-collector-contrib/receiver/filelogreceiver v0.81.0 h1:hAhbuCBvFCQc/TRcBb/7l8MtyUdB1FFVS+80ffQlGg4=
-github.com/open-telemetry/opentelemetry-collector-contrib/receiver/filelogreceiver v0.81.0/go.mod h1:mc4DUjy7KQEqTVf1pFMABTwU0a7jmYlFMRGwWtscSXQ=
+github.com/open-telemetry/opentelemetry-collector-contrib/receiver/filelogreceiver v0.81.1-0.20230710145641-456849a6b56d h1:updDK6zq2wTEJpz4Bf7SOfsnoXJdUfjTkO42wuaH7hA=
+github.com/open-telemetry/opentelemetry-collector-contrib/receiver/filelogreceiver v0.81.1-0.20230710145641-456849a6b56d/go.mod h1:mc4DUjy7KQEqTVf1pFMABTwU0a7jmYlFMRGwWtscSXQ=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/flinkmetricsreceiver v0.81.0 h1:H1QYaj4TIJqwLssuV5JnWLjORSSdnESL5rQs/4iwj8Q=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/flinkmetricsreceiver v0.81.0/go.mod h1:4vBx9+g+L2ZXSy8dibvaTZ0Fbb7gXPqHrFTUV5P0Xfo=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/fluentforwardreceiver v0.81.0 h1:QjAGLAVupmdJVysJlULs35X7vPTiC3XLL7oLPlEWYMI=
