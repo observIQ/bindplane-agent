@@ -460,8 +460,5 @@ func writeMetrics(filePath string, metrics pmetric.Metrics) error {
 		return err
 	}
 	b = append(b, []byte("\n")...)
-	if err := os.WriteFile(filePath, b, 0600); err != nil {
-		return err
-	}
-	return nil
+	return os.WriteFile(filePath, b, 0600)
 }
