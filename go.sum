@@ -1748,8 +1748,6 @@ github.com/open-telemetry/opentelemetry-collector-contrib/receiver/dockerstatsre
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/dockerstatsreceiver v0.81.0/go.mod h1:EE9qIjrIY230XPRtdNigqAYPL286iJY3jcHnauj1WR4=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/elasticsearchreceiver v0.81.0 h1:4L0FT0s3t+qCrrB28uCEuSnceYuaYajYgFlKi4XxOFk=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/elasticsearchreceiver v0.81.0/go.mod h1:EXaH2+eqjWc+XgmUKIIAJ+P+fQxtqZCbcBzGaiEa1/8=
-github.com/open-telemetry/opentelemetry-collector-contrib/receiver/filelogreceiver v0.81.1-0.20230710145641-456849a6b56d h1:updDK6zq2wTEJpz4Bf7SOfsnoXJdUfjTkO42wuaH7hA=
-github.com/open-telemetry/opentelemetry-collector-contrib/receiver/filelogreceiver v0.81.1-0.20230710145641-456849a6b56d/go.mod h1:mc4DUjy7KQEqTVf1pFMABTwU0a7jmYlFMRGwWtscSXQ=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/filelogreceiver v0.81.1-0.20230710164028-4874893a9395 h1:rlFMd7sTiWQv3wS5ew0SoVRJbUc4w6CLgsE+Aqy+dhM=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/filelogreceiver v0.81.1-0.20230710164028-4874893a9395/go.mod h1:mc4DUjy7KQEqTVf1pFMABTwU0a7jmYlFMRGwWtscSXQ=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/flinkmetricsreceiver v0.81.0 h1:H1QYaj4TIJqwLssuV5JnWLjORSSdnESL5rQs/4iwj8Q=
@@ -3318,7 +3316,6 @@ k8s.io/client-go v0.27.3/go.mod h1:2MBEKuTo6V1lbKy3z1euEGnhPfGZLKTS9tiJ2xodM48=
 k8s.io/code-generator v0.21.1/go.mod h1:hUlps5+9QaTrKx+jiM4rmq7YmH8wPOIko64uZCHDh6Q=
 k8s.io/gengo v0.0.0-20200413195148-3a45101e95ac/go.mod h1:ezvh/TsK7cY6rbqRK0oQQ8IAqLxYwwyPxAX1Pzy0ii0=
 k8s.io/gengo v0.0.0-20201214224949-b6c5ce23f027/go.mod h1:FiNAH4ZV3gBg2Kwh89tzAEV2be7d5xI0vBa/VySYy3E=
-k8s.io/gengo v0.0.0-20210813121822-485abfe95c7c/go.mod h1:FiNAH4ZV3gBg2Kwh89tzAEV2be7d5xI0vBa/VySYy3E=
 k8s.io/klog v1.0.0 h1:Pt+yjF5aB1xDSVbau4VsWe+dQNzA0qv1LlXdC2dF6Q8=
 k8s.io/klog v1.0.0/go.mod h1:4Bi6QPql/J/LkTDqv7R/cd3hPo4k2DG6Ptcz060Ez5I=
 k8s.io/klog/v2 v2.0.0/go.mod h1:PBfzABfn139FHAV07az/IF9Wp1bkk3vpT2XSJ76fSDE=
