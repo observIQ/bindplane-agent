@@ -98,7 +98,7 @@ require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/couchdbreceiver v0.81.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/dockerstatsreceiver v0.81.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/elasticsearchreceiver v0.81.0
-	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/filelogreceiver v0.81.1-0.20230710145641-456849a6b56d
+	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/filelogreceiver v0.81.1-0.20230710164028-4874893a9395
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/flinkmetricsreceiver v0.81.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/fluentforwardreceiver v0.81.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/googlecloudpubsubreceiver v0.81.0
