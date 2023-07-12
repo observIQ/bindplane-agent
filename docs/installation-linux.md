@@ -40,7 +40,7 @@ Then you may install the package using `rpm`, see this example for installing th
 
 ```sh
 sudo rpm -U ./observiq-otel-collector_v${VERSION}_linux_amd64.rpm
-sudo systemctl enable --now observiq-otel-collector
+sudo systemctl enable --now bindplane-agent
 ```
 
 ### DEB Installation
@@ -51,11 +51,11 @@ Then you may install the package using `dpkg`, see this example for installing t
 
 ```sh
 sudo dpkg -i ./observiq-otel-collector_v${VERSION}_linux_amd64.deb
-sudo systemctl enable --now observiq-otel-collector
+sudo systemctl enable --now bindplane-agent
 ```
 
 ## Configuring the Collector
-After installing, systems with systemd installed will have the `observiq-otel-collector` service up and running!
+After installing, systems with systemd installed will have the `bindplane-agent` service up and running!
 
 **Logging**
 
@@ -71,13 +71,13 @@ For more information on configuring the collector, see the [OpenTelemetry docs](
 
 **Permissions**
 
-By default, the `observiq-otel-collector` service runs as the "root" user. Some OpenTelemetry components require root permissions in order to read log files owned by other users.
+By default, the `bindplane-agent` service runs as the "root" user. Some OpenTelemetry components require root permissions in order to read log files owned by other users.
 
 It may be desirable to run the collector as an unprivileged user. For example, a metrics only collector does not require root access.
 
 To run the collector as the `observiq-otel-collector` user, you may create a systemd override.
 
-Run `sudo systemctl edit observiq-otel-collector` and paste the following config:
+Run `sudo systemctl edit bindplane-agent` and paste the following config:
 ```
 [Service]
 User=observiq-otel-collector
@@ -88,19 +88,19 @@ Restart the collector for these changes to take effect.
 ## Restarting the Collector
 On systemd systems, the collector may be restarted with the following command:
 ```sh
-systemctl restart observiq-otel-collector
+systemctl restart bindplane-agent
 ```
 
 ## Stopping the Collector
 On systemd systems, the collector may be stopped with the following command:
 ```sh
-systemctl stop observiq-otel-collector
+systemctl stop bindplane-agent
 ```
 
 ## Starting the Collector
 On systemd systems, the collector may be started with the following command:
 ```sh
-systemctl start observiq-otel-collector
+systemctl start bindplane-agent
 ```
 
 ## Uninstalling
