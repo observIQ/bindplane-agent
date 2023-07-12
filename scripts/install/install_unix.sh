@@ -162,7 +162,7 @@ usage()
   USAGE=$(cat <<EOF
 Usage:
   $(fg_yellow '-v, --version')
-      Defines the version of the observIQ Distro for OpenTelemetry Collector.
+      Defines the version of the BindPlane Agent.
       If not provided, this will default to the latest version.
       Alternatively the COLLECTOR_VERSION environment variable can be
       set to configure the collector version.
@@ -170,7 +170,7 @@ Usage:
 
   $(fg_yellow '-l, --url')
       Defines the URL that the components will be downloaded from.
-      If not provided, this will default to observIQ Distro for OpenTelemetry Collector\'s GitHub releases.
+      If not provided, this will default to BindPlane Agent\'s GitHub releases.
       Example: '-l http://my.domain.org/observiq-otel-collector' will download from there.
 
   $(fg_yellow '-b, --base-url')
@@ -559,7 +559,7 @@ latest_version()
 # extracting the binaries, and then removing the archive.
 install_package()
 {
-  banner "Installing observIQ Distro for OpenTelemetry Collector"
+  banner "Installing BindPlane Agent"
   increase_indent
 
   # if the user didn't specify a local file then download the package
@@ -611,7 +611,7 @@ install_package()
     succeeded
   fi
 
-  success "observIQ Distro for OpenTelemetry Collector installation complete!"
+  success "BindPlane Agent installation complete!"
   decrease_indent
 }
 
@@ -659,8 +659,8 @@ display_results()
     increase_indent
     info "Collector Home:     $(fg_cyan "/opt/observiq-otel-collector")$(reset)"
     info "Collector Config:   $(fg_cyan "/opt/observiq-otel-collector/config.yaml")$(reset)"
-    info "Start Command:      $(fg_cyan "sudo systemctl start observiq-otel-collector")$(reset)"
-    info "Stop Command:       $(fg_cyan "sudo systemctl stop observiq-otel-collector")$(reset)"
+    info "Start Command:      $(fg_cyan "sudo systemctl start bindplane-agent")$(reset)"
+    info "Stop Command:       $(fg_cyan "sudo systemctl stop bindplane-agent")$(reset)"
     info "Logs Command:       $(fg_cyan "sudo tail -F /opt/observiq-otel-collector/log/collector.log")$(reset)"
     decrease_indent
 
@@ -701,7 +701,7 @@ uninstall()
   observiq_banner
 
   set_package_type
-  banner "Uninstalling observIQ Distro for OpenTelemetry Collector"
+  banner "Uninstalling BindPlane Agent"
   increase_indent
 
   info "Checking permissions..."

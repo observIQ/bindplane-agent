@@ -17,6 +17,9 @@
 set -e
 
 manage_systemd_service() {
+    # If there is not bindplane-agent service then create the alias to the observiq-otel-collector service
+    systemctl status bindplane-agent >/dev/null 2>&1 || ln -s /usr/lib/systemd/system/observiq-otel-collector.service /usr/lib/systemd/system/bindplane-agent.service
+
     systemctl daemon-reload
 
     echo "configured systemd service"
@@ -34,17 +37,17 @@ To view logs from the collector, run:
 For more information on configuring the collector, see the docs:
   https://github.com/observiq/observiq-otel-collector/tree/main#observiq-opentelemetry-collector
 
-To stop the observiq-otel-collector service, run:
-  sudo systemctl stop observiq-otel-collector
+To stop the bindplane-agent service, run:
+  sudo systemctl stop bindplane-agent
 
-To start the observiq-otel-collector service, run:
-  sudo systemctl start observiq-otel-collector
+To start the bindplane-agent service, run:
+  sudo systemctl start bindplane-agent
 
-To restart the observiq-otel-collector service, run:
-  sudo systemctl restart observiq-otel-collector
+To restart the bindplane-agent service, run:
+  sudo systemctl restart bindplane-agent
 
 To enable the service on startup, run:
-  sudo systemctl enable observiq-otel-collector
+  sudo systemctl enable bindplane-agent
 
 If you have any other questions please contact us at support@observiq.com
 EOF

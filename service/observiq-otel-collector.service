@@ -1,5 +1,5 @@
 [Unit]
-Description=observIQ's distribution of the OpenTelemetry collector
+Description=BindPlane Agent
 After=network.target
 StartLimitIntervalSec=120
 StartLimitBurst=5
@@ -20,3 +20,4 @@ RestartSec=5s
 KillMode=process
 [Install]
 WantedBy=multi-user.target
+Alias=bindplane-agent.service
