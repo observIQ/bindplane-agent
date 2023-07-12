@@ -22,6 +22,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 
 	"github.com/observiq/observiq-otel-collector/updater/internal/file"
 	"github.com/observiq/observiq-otel-collector/updater/internal/path"
@@ -83,7 +84,7 @@ func (d darwinService) Start() error {
 	}
 
 	//#nosec G204 -- installedServiceFilePath is not determined by user input
-	cmd := exec.Command("launchctl", "load", d.installedServiceFilePath)
+	cmd := exec.Command("launchctl", "load", "-w", d.installedServiceFilePath)
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("running launchctl failed: %w", err)
 	}
@@ -100,7 +101,7 @@ func (d darwinService) Stop() error {
 	}
 
 	//#nosec G204 -- currentServiceFile is not determined by user input
-	cmd := exec.Command("launchctl", "unload", currentServiceFile)
+	cmd := exec.Command("launchctl", "unload", "-w", currentServiceFile)
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("running launchctl failed: %w", err)
 	}
@@ -173,6 +174,21 @@ func (d darwinService) Backup() error {
 	currentServiceFile, err := d.determineCurrentServiceFilePath()
 	if err != nil {
 		return fmt.Errorf("failed to copy service file: %w", err)
+	}
+
+	// If the current file is the legacy one then open it up and replace the service name with the new one.
+	// It's ok if we don't fully revert back the service file as long as the service starts.
+	if currentServiceFile == d.legacyInstalledServiceFilePath {
+		contents, err := os.ReadFile(currentServiceFile)
+		if err != nil {
+			return fmt.Errorf("failed to open legacy service file: %w", err)
+		}
+
+		newContents := strings.Replace(string(contents), "com.observiq.collector", "com.bindplane.agent", 1)
+
+		if err := os.WriteFile(currentServiceFile, []byte(newContents), 0600); err != nil {
+			return fmt.Errorf("failed to update legacy service file: %w", err)
+		}
 	}
 
 	if err := file.CopyFileNoOverwrite(d.logger.Named("copy-file"), currentServiceFile, path.BackupServiceFile(d.installDir)); err != nil {
