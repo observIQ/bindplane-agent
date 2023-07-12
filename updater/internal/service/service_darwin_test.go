@@ -265,6 +265,57 @@ func TestDarwinServiceInstall(t *testing.T) {
 		require.NoError(t, d.uninstall())
 	})
 
+	t.Run("Backup installed service succeeds with legacy", func(t *testing.T) {
+		installedServicePath := filepath.Join(os.Getenv("HOME"), "Library", "LaunchAgents", "darwin-service.plist")
+		legacyInstalledServicePath := filepath.Join(os.Getenv("HOME"), "Library", "LaunchAgents", "legacy-darwin-service.plist")
+
+		uninstallService(t, installedServicePath)
+		uninstallService(t, legacyInstalledServicePath)
+
+		// Install legacy service
+		legacyService := &darwinService{
+			newServiceFilePath:       filepath.Join("testdata", "legacy-darwin-service.plist"),
+			installedServiceFilePath: legacyInstalledServicePath,
+			logger:                   zaptest.NewLogger(t),
+		}
+
+		err := legacyService.install()
+		require.NoError(t, err)
+		require.FileExists(t, legacyInstalledServicePath)
+
+		// We want to check that the service was actually loaded
+		requireServiceLoadedStatus(t, legacyServiceName, true)
+
+		require.NoError(t, legacyService.Stop())
+
+		// Setup new service file
+		newServiceFile := filepath.Join("testdata", "darwin-service.plist")
+		serviceFileContents, err := os.ReadFile(newServiceFile)
+		require.NoError(t, err)
+
+		installDir := t.TempDir()
+		require.NoError(t, os.MkdirAll(path.BackupDir(installDir), 0775))
+
+		d := &darwinService{
+			newServiceFilePath:             newServiceFile,
+			newServiceLabel:                "darwin-service",
+			installedServiceFilePath:       installedServicePath,
+			legacyInstalledServiceFilePath: legacyInstalledServicePath,
+			legacyServiceLabel:             "legacy-darwin-service",
+			installDir:                     installDir,
+			logger:                         zaptest.NewLogger(t),
+		}
+
+		err = d.Backup()
+		require.NoError(t, err)
+		require.FileExists(t, path.BackupServiceFile(installDir))
+
+		backupServiceContents, err := os.ReadFile(path.BackupServiceFile(installDir))
+
+		require.Equal(t, serviceFileContents, backupServiceContents)
+		require.NoError(t, d.uninstall())
+	})
+
 	t.Run("Backup installed service fails if not installed", func(t *testing.T) {
 		installedServicePath := filepath.Join(os.Getenv("HOME"), "Library", "LaunchAgents", "darwin-service.plist")
 

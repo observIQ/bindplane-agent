@@ -32,8 +32,13 @@ import (
 const (
 	darwinServiceFilePath = "/Library/LaunchDaemons/com.bindplane.agent.plist"
 
+	darwinServiceName = "com.bindplane.agent"
+
 	// legacyDarwinServiceFilePath is the service file path for the legacy service file
 	legacyDarwinServiceFilePath = "/Library/LaunchDaemons/com.observiq.collector.plist"
+
+	// legacyServiceName is the service name for the legacy service
+	legacyServiceName = "com.observiq.collector"
 )
 
 // Option is an extra option for creating a Service
@@ -50,8 +55,10 @@ func WithServiceFile(svcFilePath string) Option {
 func NewService(logger *zap.Logger, installDir string, opts ...Option) Service {
 	darwinSvc := &darwinService{
 		newServiceFilePath:             filepath.Join(path.ServiceFileDir(installDir), "com.bindplane.agent.plist"),
+		newServiceLabel:                darwinServiceName,
 		installedServiceFilePath:       darwinServiceFilePath,
 		legacyInstalledServiceFilePath: legacyDarwinServiceFilePath,
+		legacyServiceLabel:             legacyServiceName,
 		installDir:                     path.DarwinInstallDir,
 		logger:                         logger.Named("darwin-service"),
 	}
@@ -66,10 +73,14 @@ func NewService(logger *zap.Logger, installDir string, opts ...Option) Service {
 type darwinService struct {
 	// newServiceFilePath is the file path to the new plist file
 	newServiceFilePath string
+	// newServiceLabel is the label in the new service
+	newServiceLabel string
 	// installedServiceFilePath is the file path to the installed plist file
 	installedServiceFilePath string
 	// legacyInstalledServiceFilePath is the legacy file path for the plist file
 	legacyInstalledServiceFilePath string
+	// legacyServiceLabel is the label in the legacy service
+	legacyServiceLabel string
 	// installDir is the root directory of the main installation
 	installDir string
 	logger     *zap.Logger
@@ -184,7 +195,7 @@ func (d darwinService) Backup() error {
 			return fmt.Errorf("failed to open legacy service file: %w", err)
 		}
 
-		newContents := strings.Replace(string(contents), "com.observiq.collector", "com.bindplane.agent", 1)
+		newContents := strings.Replace(string(contents), d.legacyServiceLabel, d.newServiceLabel, 1)
 
 		if err := os.WriteFile(currentServiceFile, []byte(newContents), 0600); err != nil {
 			return fmt.Errorf("failed to update legacy service file: %w", err)
