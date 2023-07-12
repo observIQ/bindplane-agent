@@ -23,11 +23,10 @@ RUN curl -L \
     "https://github.com/open-telemetry/opentelemetry-java-contrib/releases/download/${JMX_JAR_VERSION}/opentelemetry-jmx-metrics.jar"
 
 
-# OpenJDK stage provides the Java runtime used by JMX receivers.
-# Contrib's integration tests use openjdk 1.8.0
-# https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/jmxreceiver/testdata/Dockerfile.cassandra
+# eclipse-temurn stage provides the Java runtime used by JMX receivers.
+# It is a replacement for the openjdk image, which is considered deprecated.
 #
-FROM openjdk:8u312-slim-buster as openjdk
+FROM eclipse-temurin:8-jdk as jdk
 
 
 # Final Stage
@@ -58,9 +57,9 @@ RUN mkdir \
 ENV OIQ_OTEL_COLLECTOR_HOME=/etc/otel
 ENV OIQ_OTEL_COLLECTOR_STORAGE=/etc/otel/storage
 
-COPY --from=openjdk /usr/local/openjdk-8 /usr/local/openjdk-8
-ENV JAVA_HOME=/usr/local/openjdk-8
-ENV PATH=$PATH:/usr/local/openjdk-8/bin
+ENV JAVA_HOME=/opt/java/openjdk
+COPY --from=jdk $JAVA_HOME $JAVA_HOME
+ENV PATH="${JAVA_HOME}/bin:${PATH}"
 
 RUN mkdir /licenses
 COPY LICENSE /licenses/observiq-otel-collector.license
