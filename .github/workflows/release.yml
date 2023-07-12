@@ -222,11 +222,3 @@ jobs:
           repository: observIQ/otel-collector-installer-testing
           event-type: upstream_prerelease
           client-payload: '{ "version": "${{ github.ref_name }}" }'
-      # Trigger amplify repo
-      - name: Update Amplify Version
-        uses: peter-evans/repository-dispatch@v2
-        with:
-          token: ${{ secrets.ORG_GORELEASER_GITHUB_TOKEN }}
-          repository: observIQ/amplify
-          event-type: update_collector_version
-          client-payload: '{ "version": "${{ github.ref_name }}" }'
