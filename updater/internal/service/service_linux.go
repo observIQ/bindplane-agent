@@ -17,6 +17,7 @@
 package service
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -31,6 +32,7 @@ import (
 
 const linuxServiceName = "observiq-otel-collector"
 const linuxServiceFilePath = "/usr/lib/systemd/system/observiq-otel-collector.service"
+const linuxAliasServiceFilePath = "/usr/lib/systemd/system/bindplane-agent.service"
 
 // Option is an extra option for creating a Service
 type Option func(linuxSvc *linuxService)
@@ -48,6 +50,7 @@ func NewService(logger *zap.Logger, installDir string, opts ...Option) Service {
 		newServiceFilePath:       filepath.Join(path.ServiceFileDir(installDir), "observiq-otel-collector.service"),
 		serviceName:              linuxServiceName,
 		installedServiceFilePath: linuxServiceFilePath,
+		serviceFileAliasPath:     linuxAliasServiceFilePath,
 		installDir:               installDir,
 		logger:                   logger.Named("linux-service"),
 	}
@@ -66,8 +69,10 @@ type linuxService struct {
 	serviceName string
 	// installedServiceFilePath is the file path to the installed unit file
 	installedServiceFilePath string
-	installDir               string
-	logger                   *zap.Logger
+	// serviceFileAliasPath is the file path of the symlink alias to the service file
+	serviceFileAliasPath string
+	installDir           string
+	logger               *zap.Logger
 }
 
 // Start the service
@@ -116,6 +121,13 @@ func (l linuxService) install() error {
 
 	if _, err := io.Copy(outFile, inFile); err != nil {
 		return fmt.Errorf("failed to copy service file: %w", err)
+	}
+
+	// Create a symlink to the service to be used as an alias
+	if _, err := os.Stat(l.serviceFileAliasPath); errors.Is(err, os.ErrNotExist) {
+		if symerr := os.Symlink(linuxServiceFilePath, l.serviceFileAliasPath); symerr != nil {
+			return fmt.Errorf("failed to create service symlink: %w", err)
+		}
 	}
 
 	cmd := exec.Command("systemctl", "daemon-reload")
