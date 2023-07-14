@@ -1653,8 +1653,8 @@ github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatautil v0.81.0 
 github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatautil v0.81.0/go.mod h1:OUF0FMVFQQnlqc+QUMyQScszuBnqO9pO7xL7/kK1PM0=
 github.com/open-telemetry/opentelemetry-collector-contrib/pkg/resourcetotelemetry v0.81.0 h1:Ic7Jg3q2TU1t7cPRcG6wNncQS4r85TvYU8N2iPVv0j0=
 github.com/open-telemetry/opentelemetry-collector-contrib/pkg/resourcetotelemetry v0.81.0/go.mod h1:LVTxkVTuCAvpmbJu6TADF57OHAHV2nsQU9pGaJOx1Pg=
-github.com/open-telemetry/opentelemetry-collector-contrib/pkg/stanza v0.81.0 h1:IeAco3Q34Aduu8g7/6kKzavZojQTj18G+uXJypyEa3c=
-github.com/open-telemetry/opentelemetry-collector-contrib/pkg/stanza v0.81.0/go.mod h1:O6eCO9lo7HPJ9EXSBmfN0Su/f25HJQE00zK0SurhJiQ=
+github.com/open-telemetry/opentelemetry-collector-contrib/pkg/stanza v0.81.1-0.20230710164028-4874893a9395 h1:QCo8QcZG6Oc8gl3cy/CMoS08cus7QdhhzFJ0WBnAFsM=
+github.com/open-telemetry/opentelemetry-collector-contrib/pkg/stanza v0.81.1-0.20230710164028-4874893a9395/go.mod h1:O6eCO9lo7HPJ9EXSBmfN0Su/f25HJQE00zK0SurhJiQ=
 github.com/open-telemetry/opentelemetry-collector-contrib/pkg/translator/jaeger v0.52.0/go.mod h1:tU7s/ki/QePSIZ7ExYGWLMb9erCAt66brQHBEHxr8HU=
 github.com/open-telemetry/opentelemetry-collector-contrib/pkg/translator/jaeger v0.54.0/go.mod h1:uWFgO68sLEqWrQxL8rws1CkB8EUNQaedP3FWI1gMJOU=
 github.com/open-telemetry/opentelemetry-collector-contrib/pkg/translator/jaeger v0.57.2/go.mod h1:4rFuWKMbzM9H39RbDvPtJfAp/fxsHydhJhKns6skmK0=
@@ -3216,8 +3216,8 @@ google.golang.org/grpc v1.46.2/go.mod h1:vN9eftEi1UMyUsIF80+uQXhHjbXYbm0uXoFCACu
 google.golang.org/grpc v1.47.0/go.mod h1:vN9eftEi1UMyUsIF80+uQXhHjbXYbm0uXoFCACuMGWk=
 google.golang.org/grpc v1.48.0/go.mod h1:vN9eftEi1UMyUsIF80+uQXhHjbXYbm0uXoFCACuMGWk=
 google.golang.org/grpc v1.51.0/go.mod h1:wgNDFcnuBGmxLKI/qn4T+m5BtEBYXJPvibbUPsAIPww=
-google.golang.org/grpc v1.56.1 h1:z0dNfjIl0VpaZ9iSVjA6daGatAYwPGstTjt5vkRMFkQ=
-google.golang.org/grpc v1.56.1/go.mod h1:I9bI3vqKfayGqPUAwGdOSu7kt6oIJLixfffKrpXqQ9s=
+google.golang.org/grpc v1.56.2 h1:fVRFRnXvU+x6C4IlHZewvJOVHoOv1TUuQyoRsYnB4bI=
+google.golang.org/grpc v1.56.2/go.mod h1:I9bI3vqKfayGqPUAwGdOSu7kt6oIJLixfffKrpXqQ9s=
 google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.1.0/go.mod h1:6Kw0yEErY5E/yWrBtf03jp27GLLJujG4z/JK95pnjjw=
 google.golang.org/protobuf v0.0.0-20200109180630-ec00e32a8dfd/go.mod h1:DFci5gLYBciE7Vtevhsrf46CRTquxDuWsQurQQe4oz8=
 google.golang.org/protobuf v0.0.0-20200221191635-4d8936d0db64/go.mod h1:kwYJMbMJ01Woi6D6+Kah6886xMZcty6N08ah7+eCXa0=
