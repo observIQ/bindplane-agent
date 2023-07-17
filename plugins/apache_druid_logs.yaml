@@ -56,6 +56,17 @@ parameters:
     description: Timezone to use when parsing the timestamp
     type: timezone
     default: UTC
+  - name: retain_raw_logs
+    description: When enabled will preserve the original log message in a `raw_log` key. This will either be in the `body` or `attributes` depending on how `parse_to` is configured.
+    type: bool
+    default: false
+  - name: parse_to
+    description: Where to parse structured log parts
+    type: string
+    supported:
+      - body
+      - attributes
+    default: body
 template: |
   receivers:
     {{ if .enable_broker_logs }}
@@ -68,6 +79,12 @@ template: |
       attributes:
         log_type: 'druid.broker'
       operators:
+        {{ if .retain_raw_logs }}
+        - id: save_raw_log
+          type: copy
+          from: body
+          to: attributes.raw_log
+        {{ end }}
         - type: regex_parser
           regex: '(?P<timestamp>\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2},\d{3})\s+(?P<severity>[A-Z]+)\s+(?P<message>\[(?P<source>[\S\s]+)\]\s+(?P<javaClass>[A-Za-z0-9\.$]+)\s+-\s+?[\S\s]+)'
           parse_to: body
@@ -77,6 +94,12 @@ template: |
             parse_from: body.timestamp
             layout: '%FT%T,%L'
             location: {{ .timezone }}
+        {{ if and .retain_raw_logs (eq .parse_to "body")}}
+        - id: move_raw_log
+          type: move
+          from: attributes.raw_log
+          to: body.raw_log
+        {{ end }}
     {{ end }}
 
     {{ if .enable_coordinator_overlord_logs }}
@@ -89,6 +112,12 @@ template: |
       attributes:
         log_type: 'druid.coordinator_overlord'
       operators:
+        {{ if .retain_raw_logs }}
+        - id: save_raw_log
+          type: copy
+          from: body
+          to: attributes.raw_log
+        {{ end }}
         - type: regex_parser
           regex: '(?P<timestamp>\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2},\d{3})\s+(?P<severity>[A-Z]+)\s+(?P<message>\[(?P<source>[\S\s]+)\]\s+(?P<javaClass>[A-Za-z0-9\.$]+)\s+-\s+?[\S\s]+)'
           parse_to: body
@@ -98,6 +127,12 @@ template: |
             parse_from: body.timestamp
             layout: '%FT%T,%L'
             location: {{ .timezone }}
+        {{ if and .retain_raw_logs (eq .parse_to "body")}}
+        - id: move_raw_log
+          type: move
+          from: attributes.raw_log
+          to: body.raw_log
+        {{ end }}
     {{ end }}
 
     {{ if .enable_historical_logs }}
@@ -110,6 +145,12 @@ template: |
       attributes:
         log_type: 'druid.historical'
       operators:
+        {{ if .retain_raw_logs }}
+        - id: save_raw_log
+          type: copy
+          from: body
+          to: attributes.raw_log
+        {{ end }}
         - type: regex_parser
           regex: '(?P<timestamp>\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2},\d{3})\s+(?P<severity>[A-Z]+)\s+(?P<message>\[(?P<source>[\S\s]+)\]\s+(?P<javaClass>[A-Za-z0-9\.$]+)\s+-\s+?[\S\s]+)'
           parse_to: body
@@ -119,6 +160,12 @@ template: |
             parse_from: body.timestamp
             layout: '%FT%T,%L'
             location: {{ .timezone }}
+        {{ if and .retain_raw_logs (eq .parse_to "body")}}
+        - id: move_raw_log
+          type: move
+          from: attributes.raw_log
+          to: body.raw_log
+        {{ end }}
     {{ end }}
 
     {{ if .enable_middle_manager_logs }}
@@ -131,6 +178,12 @@ template: |
       attributes:
         log_type: 'druid.middle_manager'
       operators:
+        {{ if .retain_raw_logs }}
+        - id: save_raw_log
+          type: copy
+          from: body
+          to: attributes.raw_log
+        {{ end }}
         - type: regex_parser
           regex: '(?P<timestamp>\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2},\d{3})\s+(?P<severity>[A-Z]+)\s+(?P<message>\[(?P<source>[\S\s]+)\]\s+(?P<javaClass>[A-Za-z0-9\.$]+)\s+-\s+?[\S\s]+)'
           parse_to: body
@@ -140,6 +193,12 @@ template: |
             parse_from: body.timestamp
             layout: '%FT%T,%L'
             location: {{ .timezone }}
+        {{ if and .retain_raw_logs (eq .parse_to "body")}}
+        - id: move_raw_log
+          type: move
+          from: attributes.raw_log
+          to: body.raw_log
+        {{ end }}
     {{ end }}
 
     {{ if .enable_router_logs }}
@@ -152,6 +211,12 @@ template: |
       attributes:
         log_type: 'druid.router'
       operators:
+        {{ if .retain_raw_logs }}
+        - id: save_raw_log
+          type: copy
+          from: body
+          to: attributes.raw_log
+        {{ end }}
         - type: regex_parser
           regex: '(?P<timestamp>\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2},\d{3})\s+(?P<severity>[A-Z]+)\s+(?P<message>\[(?P<source>[\S\s]+)\]\s+(?P<javaClass>[A-Za-z0-9\.$]+)\s+-\s+?[\S\s]+)'
           parse_to: body
@@ -161,6 +226,12 @@ template: |
             parse_from: body.timestamp
             layout: '%FT%T,%L'
             location: {{ .timezone }}
+        {{ if and .retain_raw_logs (eq .parse_to "body")}}
+        - id: move_raw_log
+          type: move
+          from: attributes.raw_log
+          to: body.raw_log
+        {{ end }}
     {{ end }}
 
     {{ if .enable_zookeeper_logs }}
@@ -173,6 +244,12 @@ template: |
       attributes:
         log_type: 'druid.zookeeper'
       operators:
+        {{ if .retain_raw_logs }}
+        - id: save_raw_log
+          type: copy
+          from: body
+          to: attributes.raw_log
+        {{ end }}
         - type: regex_parser
           regex: '(?P<timestamp>\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2},\d{3})\s+(?P<severity>[A-Z]+)\s+(?P<message>\[(?P<source>[\S\s]+)\]\s+(?P<javaClass>[A-Za-z0-9\.$]+)\s+-\s+?[\S\s]+)'
           parse_to: body
@@ -182,6 +259,12 @@ template: |
             parse_from: body.timestamp
             layout: '%FT%T,%L'
             location: {{ .timezone }}
+        {{ if and .retain_raw_logs (eq .parse_to "body")}}
+        - id: move_raw_log
+          type: move
+          from: attributes.raw_log
+          to: body.raw_log
+        {{ end }}
     {{ end }}
 
   service:
