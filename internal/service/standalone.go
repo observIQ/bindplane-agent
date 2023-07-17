@@ -86,7 +86,7 @@ func (s StandaloneCollectorService) Stop(ctx context.Context) error {
 
 	collectorStoppedChan := make(chan struct{})
 	go func() {
-		s.col.Stop()
+		s.col.Stop(ctx)
 		s.wg.Wait()
 		close(collectorStoppedChan)
 	}()

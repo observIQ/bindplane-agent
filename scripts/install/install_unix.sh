@@ -582,6 +582,12 @@ install_package()
   fi
 
   info "Installing package..."
+  # if target install directory doesn't exist and we're using dpkg ensure a clean state 
+  # by checking for the package and running purge if it exists.
+  if [ ! -d "/opt/observiq-otel-collector" ] && [ "$package_type" = "deb" ]; then
+    dpkg -s "observiq-otel-collector" > /dev/null 2>&1 && dpkg --purge "observiq-otel-collector" > /dev/null 2>&1
+  fi
+
   unpack_package || error_exit "$LINENO" "Failed to extract package"
   succeeded
 

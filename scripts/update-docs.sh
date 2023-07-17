@@ -20,12 +20,24 @@ if [ -z "$TARGET_VERSION" ]; then
     exit 1
 fi
 
+CONTRIB_TARGET_VERSION=$2
+if [ -z "$CONTRIB_TARGET_VERSION" ]; then
+    echo "Must specify a target contrib version"
+    exit 1
+fi
+
 read -r -d '' DOC_FILES << EOF
 docs/processors.md
 docs/extensions.md
+docs/connectors.md
 docs/exporters.md
 docs/receivers.md
+processor/datapointcountprocessor/README.md
+processor/logcountprocessor/README.md
+processor/metricextractprocessor/README.md
+processor/spancountprocessor/README.md
 exporter/googlecloudexporter/README.md
+exporter/googlemanagedprometheusexporter/README.md
 EOF
 
 for doc in $DOC_FILES
@@ -33,7 +45,10 @@ do
     echo "$doc"
     # Point contrib links to new version
     sed -i '' -Ee \
-        "s|https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v[^/]*|https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/$TARGET_VERSION|" \
+        "s|https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v[^/]*|https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/$CONTRIB_TARGET_VERSION|" \
+        "$doc"
+    sed -i '' -Ee \
+        "s|https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/v[^/]*|https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/$CONTRIB_TARGET_VERSION|" \
         "$doc"
     # Point core links to new version
     sed -i '' -Ee \

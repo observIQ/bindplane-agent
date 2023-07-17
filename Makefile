@@ -2,6 +2,7 @@
 ALLDOC := $(shell find . \( -name "*.md" -o -name "*.yaml" \) \
                                 -type f | sort)
 ALL_MODULES := $(shell find . -type f -name "go.mod" -exec dirname {} \; | sort )
+ALL_MDATAGEN_MODULES := $(shell find . -type f -name "metadata.yaml" -exec dirname {} \; | sort )
 
 # All source code files
 ALL_SRC := $(shell find . -name '*.go' -o -name '*.sh' -o -name 'Dockerfile*' -type f | sort)
@@ -85,13 +86,13 @@ build-windows-x86:
 install-tools:
 	go install github.com/client9/misspell/cmd/misspell@v0.3.4
 	go install github.com/google/addlicense@v1.1.0
-	go install github.com/goreleaser/goreleaser@v1.16.1
-	go install github.com/mgechev/revive@v1.2.3
-	go install github.com/open-telemetry/opentelemetry-collector-contrib/cmd/mdatagen@v0.74.0
-	go install github.com/securego/gosec/v2/cmd/gosec@v2.15.0
+	go install github.com/goreleaser/goreleaser@v1.18.2
+	go install github.com/mgechev/revive@v1.3.1
+	go install github.com/open-telemetry/opentelemetry-collector-contrib/cmd/mdatagen@v0.81.0
+	go install github.com/securego/gosec/v2/cmd/gosec@v2.16.0
 	go install github.com/sigstore/cosign/cmd/cosign@v1.10.1
 	go install github.com/uw-labs/lichen@v0.1.7
-	go install github.com/vektra/mockery/v2@v2.20.0
+	go install github.com/vektra/mockery/v2@v2.31.1
 	go install golang.org/x/tools/cmd/goimports@latest
 
 .PHONY: lint
@@ -172,11 +173,11 @@ add-license:
 
 # update-otel attempts to update otel dependencies in go.mods,
 # and update the otel versions in the docs.
-# Usage: make update-otel OTEL_VERSION=vx.x.x PDATA_VERSION=vx.x.x-rcx
+# Usage: make update-otel OTEL_VERSION=vx.x.x CONTRIB_VERSION=vx.x.x PDATA_VERSION=vx.x.x-rcx
 .PHONY: update-otel
 update-otel:
-	./scripts/update-otel.sh "$(OTEL_VERSION)" "$(PDATA_VERSION)"
-	./scripts/update-docs.sh "$(OTEL_VERSION)"
+	./scripts/update-otel.sh "$(OTEL_VERSION)" "$(CONTRIB_VERSION)" "$(PDATA_VERSION)"
+	./scripts/update-docs.sh "$(OTEL_VERSION)" "$(CONTRIB_VERSION)"
 	$(MAKE) tidy
 
 # update-modules updates all submodules to be the new version.

@@ -38,6 +38,7 @@ exceptions:
     # Internal modules
     - path: "./processor/resourceattributetransposerprocessor"
     - path: "./receiver/apachedruidreceiver"
+    - path: "./receiver/m365receiver"
     - path: "./receiver/pluginreceiver"
     - path: "./receiver/routereceiver"
     - path: "./exporter/googlecloudexporter"

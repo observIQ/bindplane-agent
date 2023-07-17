@@ -16,10 +16,13 @@ package factories
 
 import (
 	"github.com/observiq/observiq-otel-collector/exporter/googlecloudexporter"
+	"github.com/observiq/observiq-otel-collector/exporter/googlemanagedprometheusexporter"
+	"github.com/observiq/observiq-otel-collector/internal/version"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/alibabacloudlogserviceexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/awscloudwatchlogsexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/awsemfexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/awskinesisexporter"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/awss3exporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/awsxrayexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/azuremonitorexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/carbonexporter"
@@ -30,7 +33,6 @@ import (
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/f5cloudexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/fileexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlecloudpubsubexporter"
-	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlemanagedprometheusexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/influxdbexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/jaegerexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/kafkaexporter"
@@ -56,6 +58,7 @@ var defaultExporters = []exporter.Factory{
 	awscloudwatchlogsexporter.NewFactory(),
 	awsemfexporter.NewFactory(),
 	awskinesisexporter.NewFactory(),
+	awss3exporter.NewFactory(),
 	awsxrayexporter.NewFactory(),
 	azuremonitorexporter.NewFactory(),
 	carbonexporter.NewFactory(),
@@ -66,9 +69,9 @@ var defaultExporters = []exporter.Factory{
 	exportertest.NewNopFactory(),
 	f5cloudexporter.NewFactory(),
 	fileexporter.NewFactory(),
-	googlecloudexporter.NewFactory(),
+	googlecloudexporter.NewFactory(version.Version()),
 	googlecloudpubsubexporter.NewFactory(),
-	googlemanagedprometheusexporter.NewFactory(),
+	googlemanagedprometheusexporter.NewFactory(version.Version()),
 	influxdbexporter.NewFactory(),
 	jaegerexporter.NewFactory(),
 	kafkaexporter.NewFactory(),

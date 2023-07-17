@@ -22,6 +22,7 @@ import (
 	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/attributesprocessor"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/tcplogreceiver"
 	"github.com/stretchr/testify/assert"
+	"go.opentelemetry.io/collector/connector"
 	"go.opentelemetry.io/collector/exporter"
 	"go.opentelemetry.io/collector/exporter/loggingexporter"
 	"go.opentelemetry.io/collector/extension"
@@ -36,6 +37,7 @@ func TestCombineFactories(t *testing.T) {
 		processors    []processor.Factory
 		exporters     []exporter.Factory
 		extensions    []extension.Factory
+		connectors    []connector.Factory
 		expectedError error
 	}{
 		{
@@ -44,6 +46,7 @@ func TestCombineFactories(t *testing.T) {
 			processors: defaultProcessors,
 			exporters:  defaultExporters,
 			extensions: defaultExtensions,
+			connectors: defaultConnectors,
 		},
 		{
 			name: "With single error",
@@ -77,7 +80,7 @@ func TestCombineFactories(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			factories, err := combineFactories(tc.receivers, tc.processors, tc.exporters, tc.extensions)
+			factories, err := combineFactories(tc.receivers, tc.processors, tc.exporters, tc.extensions, tc.connectors)
 
 			if tc.expectedError != nil {
 				assert.Error(t, tc.expectedError, err)
