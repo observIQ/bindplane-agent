@@ -559,7 +559,7 @@ display_results()
     increase_indent
     info "For more information on configuring the agent, see the docs:"
     increase_indent
-    info "$(fg_cyan "https://github.com/observIQ/bindplane-agent/tree/main#observiq-distro-for-opentelemetry-collector")$(reset)"
+    info "$(fg_cyan "https://github.com/observIQ/bindplane-agent/tree/main#bindplane-agent")$(reset)"
     decrease_indent
     info "If you have any other questions please contact us at $(fg_cyan support@observiq.com)$(reset)"
     decrease_indent
