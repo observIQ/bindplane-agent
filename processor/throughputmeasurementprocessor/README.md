@@ -9,7 +9,7 @@ Counters:
 - `metric_count`
 - `trace_count`
 
-## Minimum collector versions
+## Minimum agent versions
 - Introduced: [v1.8.0](https://github.com/observIQ/bindplane-agent/releases/tag/v1.8.0)
 
 ## Supported pipelines: 

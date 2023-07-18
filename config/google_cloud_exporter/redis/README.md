@@ -4,7 +4,7 @@ The Redis Receiver can be used to send Redis metrics to Google Cloud Monitoring.
 
 ## Limitations
 
-The collector must be installed on the Redis system.
+The agent must be installed on the Redis system.
 
 ## Prerequisites
 

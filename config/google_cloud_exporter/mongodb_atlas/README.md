@@ -30,7 +30,7 @@ Environment=MONGODB_ATLAS_PUBLIC_KEY=otel
 Environment=MONGODB_ATLAS_PRIVATE_KEY=otel
 ```
 
-After restarting the collector, the configuration will attempt to use the configured public and private key.
+After restarting the agent, the configuration will attempt to use the configured public and private key.
 
 ```bash
 sudo systemctl restart observiq-otel-collector

@@ -4,7 +4,7 @@ The Mongodb Receiver can be used to send Mongodb metrics to Google Cloud Monitor
 
 ## Limitations
 
-The collector must be installed on the Mongodb system.
+The agent must be installed on the Mongodb system.
 
 ## Prerequisites
 

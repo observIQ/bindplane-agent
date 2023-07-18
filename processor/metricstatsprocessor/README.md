@@ -1,7 +1,7 @@
 # Metric Stats Processor
 This processor calculates statistics from metrics over a configurable interval, allowing for metrics to be sampled at a higher rate, or to reduce the volume of metric data from push-based sources.
 
-## Minimum collector versions
+## Minimum agent versions
 - Introduced: [v1.19.0](https://github.com/observIQ/bindplane-agent/releases/tag/v1.19.0)
 
 ## Supported pipelines

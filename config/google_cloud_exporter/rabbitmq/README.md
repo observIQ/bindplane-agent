@@ -30,7 +30,7 @@ Environment=RABBITMQ_USERNAME=otel
 Environment=RABBITMQ_PASSWORD=otel
 ```
 
-After restarting the collector, the configuration will attempt to use the configured username and password.
+After restarting the agent, the configuration will attempt to use the configured username and password.
 
 ```bash
 sudo systemctl restart observiq-otel-collector

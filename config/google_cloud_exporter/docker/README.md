@@ -10,9 +10,9 @@ See the [prerequisites](../prerequisites.md) doc for Google Cloud prerequisites.
 
 **Docker Socket**
 
-The provided configuration assumes the collector is running on the Docker system. By default, the `endpoint` collected from is `unix:///var/run/docker.sock`.
+The provided configuration assumes the agent is running on the Docker system. By default, the `endpoint` collected from is `unix:///var/run/docker.sock`.
 
-The user running the collector must have permission to read the [docker socket](https://docs.docker.com/engine/install/linux-postinstall/).
+The user running the agent must have permission to read the [docker socket](https://docs.docker.com/engine/install/linux-postinstall/).
 
 ```bash
 sudo usermod -aG docker observiq-otel-collector
@@ -26,7 +26,7 @@ If the agent is running on the Docker host (not within a container), deployment 
 
 **Docker Container**
 
-If running the collector as a container, you will need to mount the Docker socket with a read only volume mount. Additionally, configuration and credentials will need to be mounted.
+If running the agent as a container, you will need to mount the Docker socket with a read only volume mount. Additionally, configuration and credentials will need to be mounted.
 
 Run as a container
 
@@ -46,7 +46,7 @@ Run with Docker Compose
 ```yaml
 version: "3.9"
 services:
-  collector:
+  agent:
     restart: always
     # Run as root if using a configuration that requires
     # root privileges.

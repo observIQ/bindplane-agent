@@ -8,8 +8,8 @@ See the [prerequisites](../README.md) doc for Google Cloud prerequisites.
 
 ## Limitations
 
-To avoid duplicate metrics, ensure each collector is scraping a single BIG-IP system. This ensures
-there is a unique `node_id` (hostname of the collector) label for each BIG-IP system being monitored.
+To avoid duplicate metrics, ensure each agent is scraping a single BIG-IP system. This ensures
+there is a unique `node_id` (hostname of the agent) label for each BIG-IP system being monitored.
 
 ## Configuration
 
@@ -18,7 +18,7 @@ An example configuration is located [here](./config.yaml).
 1. Copy [config.yaml](./config.yaml) to `/opt/observiq-otel-collector/config.yaml`.
 2. Update the `endpoint` field with the endpoint of your Big IP F5 iControl REST API.
 3. Follow the [authentication section](./README.md#authentication-environment-variables) for configuring username and password.
-4. Restart the collector: `sudo systemctl restart observiq-otel-collector`.
+4. Restart the agent: `sudo systemctl restart observiq-otel-collector`.
 
 ## Authentication Environment Variables
 
@@ -42,7 +42,7 @@ Environment=BIGIP_USERNAME=otel
 Environment=BIGIP_PASSWORD=otel
 ```
 
-After restarting the collector, the configuration will attempt to use the username:password `otel:otel`.
+After restarting the agent, the configuration will attempt to use the username:password `otel:otel`.
 
 ```bash
 sudo systemctl restart observiq-otel-collector
