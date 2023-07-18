@@ -38,7 +38,7 @@ docker run -d \
     --volume="$(pwd)/credentials.json:/etc/otel/credentials.json" \
     -e "GOOGLE_APPLICATION_CREDENTIALS=/etc/otel/credentials.json" \
     -e "DOCKER_AGENT_HOSTNAME=$(hostname)" \
-    observiq/bindplane-agent:v0.4.1
+    observiq/bindplane-agent:v1.30.0
 ```
 
 Run with Docker Compose

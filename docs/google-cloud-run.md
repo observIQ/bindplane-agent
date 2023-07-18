@@ -8,7 +8,7 @@ for other configurations as well.
 ## Image
 
 Push the agent image to your GCR account:
-- replace `1.1.0` with your desired version
+- replace `1.30.0` with your desired version
 - replace `myproject` with your gcr project
 
 ```bash

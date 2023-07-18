@@ -7,7 +7,7 @@ This script may also be used to update an existing installation.
 
 To install using the installation script, you may run:
 ```sh
-sudo sh -c "$(curl -fsSlL https://github.com/observIQ/bindplane-agent/releases/latest/download/install_macos.sh)" install_macos.sh
+sudo sh -c "$(curl -fsSlL https://github.com/observiq/bindplane-agent/releases/latest/download/install_macos.sh)" install_macos.sh
 ```
 
 #### Managed Mode
@@ -15,7 +15,7 @@ sudo sh -c "$(curl -fsSlL https://github.com/observIQ/bindplane-agent/releases/l
 To install the agent with an OpAMP connection configuration set the following flags. 
 
 ```sh
-sudo sh -c "$(curl -fsSlL https://github.com/observIQ/bindplane-agent/releases/latest/download/install_macos.sh)" install_macos.sh -e <your_endpoint> -s <secret-key>
+sudo sh -c "$(curl -fsSlL https://github.com/observiq/bindplane-agent/releases/latest/download/install_macos.sh)" install_macos.sh -e <your_endpoint> -s <secret-key>
 ```
 
 To read more about the generated connection configuration file see [OpAMP docs](./opamp.md).
@@ -52,5 +52,5 @@ sudo launchctl unload /Library/LaunchDaemons/com.observiq.collector.plist
 
 To uninstall an installation made with the install script, run:
 ```sh
-sudo sh -c "$(curl -fsSlL https://github.com/observIQ/bindplane-agent/releases/latest/download/install_macos.sh)" install_macos.sh -r
+sudo sh -c "$(curl -fsSlL https://github.com/observiq/bindplane-agent/releases/latest/download/install_macos.sh)" install_macos.sh -r
 ```

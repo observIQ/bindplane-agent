@@ -34,7 +34,7 @@ Tested, verified, and supported by observIQ
 
 To install using the installation script, you may run:
 ```sh
-sudo sh -c "$(curl -fsSlL https://github.com/observIQ/bindplane-agent/releases/latest/download/install_unix.sh)" install_unix.sh
+sudo sh -c "$(curl -fsSlL https://github.com/observiq/bindplane-agent/releases/latest/download/install_unix.sh)" install_unix.sh
 ```
 
 To install directly with the appropriate package manager, see [installing on Linux](/docs/installation-linux.md).
@@ -57,7 +57,7 @@ For more installation information see [installing on Windows](/docs/installation
 To install using the installation script, you may run:
 
 ```sh
-sudo sh -c "$(curl -fsSlL https://github.com/observIQ/bindplane-agent/releases/latest/download/install_macos.sh)" install_macos.sh
+sudo sh -c "$(curl -fsSlL https://github.com/observiq/bindplane-agent/releases/latest/download/install_macos.sh)" install_macos.sh
 ```
 
 For more installation information see [installing on macOS](/docs/installation-mac.md).

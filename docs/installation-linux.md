@@ -11,7 +11,7 @@ This script may also be used to update an existing installation.
 
 To install using the installation script, you may run:
 ```sh
-sudo sh -c "$(curl -fsSlL https://github.com/observIQ/bindplane-agent/releases/latest/download/install_unix.sh)" install_unix.sh
+sudo sh -c "$(curl -fsSlL https://github.com/observiq/bindplane-agent/releases/latest/download/install_unix.sh)" install_unix.sh
 ```
 
 #### Managed Mode
@@ -19,7 +19,7 @@ sudo sh -c "$(curl -fsSlL https://github.com/observIQ/bindplane-agent/releases/l
 To install the agent with an OpAMP connection configuration set the following flags. 
 
 ```sh
-sudo sh -c "$(curl -fsSlL https://github.com/observIQ/bindplane-agent/releases/latest/download/install_unix.sh)" install_unix.sh -e <your_endpoint> -s <secret-key>
+sudo sh -c "$(curl -fsSlL https://github.com/observiq/bindplane-agent/releases/latest/download/install_unix.sh)" install_unix.sh -e <your_endpoint> -s <secret-key>
 ```
 
 To read more about the generated connection configuration file see [OpAMP docs](./opamp.md).
@@ -29,7 +29,7 @@ To read more about the generated connection configuration file see [OpAMP docs](
 To install the agent from a local package use the `-f` with the path to the package.
 
 ```sh
-sudo sh -c "$(curl -fsSlL https://github.com/observIQ/bindplane-agent/releases/latest/download/install_unix.sh)" install_unix.sh -f <path_to_package>
+sudo sh -c "$(curl -fsSlL https://github.com/observiq/bindplane-agent/releases/latest/download/install_unix.sh)" install_unix.sh -f <path_to_package>
 ```
 
 ### RPM Installation
@@ -123,5 +123,5 @@ sudo dpkg -r observiq-otel-collector
 
 To uninstall an installation made with the install script, run:
 ```sh
-sudo sh -c "$(curl -fsSlL https://github.com/observIQ/bindplane-agent/releases/latest/download/install_unix.sh)" install_unix.sh -r
+sudo sh -c "$(curl -fsSlL https://github.com/observiq/bindplane-agent/releases/latest/download/install_unix.sh)" install_unix.sh -r
 ```
