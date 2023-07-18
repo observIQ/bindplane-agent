@@ -18,8 +18,8 @@ package factories
 import (
 	"fmt"
 
-	"github.com/observiq/observiq-otel-collector/internal/throughputwrapper"
-	"github.com/observiq/observiq-otel-collector/processor/throughputmeasurementprocessor"
+	"github.com/observiq/bindplane-agent/internal/throughputwrapper"
+	"github.com/observiq/bindplane-agent/processor/throughputmeasurementprocessor"
 	"go.opentelemetry.io/collector/connector"
 	"go.opentelemetry.io/collector/exporter"
 	"go.opentelemetry.io/collector/extension"

@@ -20,7 +20,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/observiq/observiq-otel-collector/internal/report/mocks"
+	"github.com/observiq/bindplane-agent/internal/report/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"

@@ -19,9 +19,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/observiq/observiq-otel-collector/collector"
-	"github.com/observiq/observiq-otel-collector/opamp"
-	"github.com/observiq/observiq-otel-collector/opamp/observiq"
+	"github.com/observiq/bindplane-agent/collector"
+	"github.com/observiq/bindplane-agent/opamp"
+	"github.com/observiq/bindplane-agent/opamp/observiq"
 	"go.uber.org/zap"
 )
 

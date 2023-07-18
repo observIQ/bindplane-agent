@@ -1,10 +1,10 @@
-module github.com/observiq/observiq-otel-collector/updater
+module github.com/observiq/bindplane-agent/updater
 
 go 1.19
 
 require (
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51
-	github.com/observiq/observiq-otel-collector/packagestate v1.30.0
+	github.com/observiq/bindplane-agent/packagestate v1.30.0
 	github.com/open-telemetry/opamp-go v0.2.0
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.8.4
@@ -24,4 +24,4 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace github.com/observiq/observiq-otel-collector/packagestate => ../packagestate
+replace github.com/observiq/bindplane-agent/packagestate => ../packagestate

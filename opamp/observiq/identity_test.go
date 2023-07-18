@@ -18,8 +18,8 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/observiq/observiq-otel-collector/internal/version"
-	"github.com/observiq/observiq-otel-collector/opamp"
+	"github.com/observiq/bindplane-agent/internal/version"
+	"github.com/observiq/bindplane-agent/opamp"
 	"github.com/open-telemetry/opamp-go/protobufs"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

@@ -20,8 +20,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/observiq/observiq-otel-collector/collector"
-	"github.com/observiq/observiq-otel-collector/collector/mocks"
+	"github.com/observiq/bindplane-agent/collector"
+	"github.com/observiq/bindplane-agent/collector/mocks"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )

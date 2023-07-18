@@ -19,8 +19,8 @@ import (
 	"errors"
 	"testing"
 
-	colmocks "github.com/observiq/observiq-otel-collector/collector/mocks"
-	"github.com/observiq/observiq-otel-collector/opamp/mocks"
+	colmocks "github.com/observiq/bindplane-agent/collector/mocks"
+	"github.com/observiq/bindplane-agent/opamp/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"

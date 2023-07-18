@@ -15,10 +15,10 @@
 package factories
 
 import (
-	"github.com/observiq/observiq-otel-collector/receiver/m365receiver"
-	"github.com/observiq/observiq-otel-collector/receiver/pluginreceiver"
-	"github.com/observiq/observiq-otel-collector/receiver/routereceiver"
-	"github.com/observiq/observiq-otel-collector/receiver/sapnetweaverreceiver"
+	"github.com/observiq/bindplane-agent/receiver/m365receiver"
+	"github.com/observiq/bindplane-agent/receiver/pluginreceiver"
+	"github.com/observiq/bindplane-agent/receiver/routereceiver"
+	"github.com/observiq/bindplane-agent/receiver/sapnetweaverreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/activedirectorydsreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/aerospikereceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/apachereceiver"

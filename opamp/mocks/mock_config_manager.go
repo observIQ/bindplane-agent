@@ -3,7 +3,7 @@
 package mocks
 
 import (
-	opamp "github.com/observiq/observiq-otel-collector/opamp"
+	opamp "github.com/observiq/bindplane-agent/opamp"
 	protobufs "github.com/open-telemetry/opamp-go/protobufs"
 	mock "github.com/stretchr/testify/mock"
 )

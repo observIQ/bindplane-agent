@@ -17,7 +17,7 @@ package action
 import (
 	"testing"
 
-	"github.com/observiq/observiq-otel-collector/updater/internal/service/mocks"
+	"github.com/observiq/bindplane-agent/updater/internal/service/mocks"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap/zaptest"
 )

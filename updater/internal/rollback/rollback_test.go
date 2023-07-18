@@ -21,8 +21,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	action_mocks "github.com/observiq/observiq-otel-collector/updater/internal/action/mocks"
-	service_mocks "github.com/observiq/observiq-otel-collector/updater/internal/service/mocks"
+	action_mocks "github.com/observiq/bindplane-agent/updater/internal/action/mocks"
+	service_mocks "github.com/observiq/bindplane-agent/updater/internal/service/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"

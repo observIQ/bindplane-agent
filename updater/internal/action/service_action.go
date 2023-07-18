@@ -15,8 +15,8 @@
 package action
 
 import (
-	"github.com/observiq/observiq-otel-collector/updater/internal/path"
-	"github.com/observiq/observiq-otel-collector/updater/internal/service"
+	"github.com/observiq/bindplane-agent/updater/internal/path"
+	"github.com/observiq/bindplane-agent/updater/internal/service"
 	"go.uber.org/zap"
 )
 

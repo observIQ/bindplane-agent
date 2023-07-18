@@ -22,9 +22,9 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/observiq/observiq-otel-collector/updater/internal/action"
-	rb_mocks "github.com/observiq/observiq-otel-collector/updater/internal/rollback/mocks"
-	"github.com/observiq/observiq-otel-collector/updater/internal/service/mocks"
+	"github.com/observiq/bindplane-agent/updater/internal/action"
+	rb_mocks "github.com/observiq/bindplane-agent/updater/internal/rollback/mocks"
+	"github.com/observiq/bindplane-agent/updater/internal/service/mocks"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap/zaptest"
