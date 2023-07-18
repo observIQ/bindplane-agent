@@ -65,7 +65,7 @@ with the prefix `workload.googleapis.com`.
 
 | Label       | Description | Example |
 | ----------- | ----------- | ------- |
-| `node_id`   | The hostname of the collector. Set within the [Google exporter](https://github.com/observIQ/observiq-otel-collector/tree/main/exporter/googlecloudexporter#metric-processing-steps), and required for [generic_node](https://cloud.google.com/monitoring/api/resources#tag_generic_node) monitored resource type. | `collector-0` |
+| `node_id`   | The hostname of the collector. Set within the [Google exporter](https://github.com/observIQ/bindplane-agent/tree/main/exporter/googlecloudexporter#metric-processing-steps), and required for [generic_node](https://cloud.google.com/monitoring/api/resources#tag_generic_node) monitored resource type. | `collector-0` |
 | `job` | Dervied from the Prometheus receiver's `config.scrape_configs` `job_name` value. This value should represent the applications being scraped by the scrape config. | `nodeexporter` |
 | `instance` | The host / ip and port being scraped by the scrape config. | `node-1:9100` |
 

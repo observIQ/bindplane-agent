@@ -10,7 +10,7 @@ Counters:
 - `trace_count`
 
 ## Minimum collector versions
-- Introduced: [v1.8.0](https://github.com/observIQ/observiq-otel-collector/releases/tag/v1.8.0)
+- Introduced: [v1.8.0](https://github.com/observIQ/bindplane-agent/releases/tag/v1.8.0)
 
 ## Supported pipelines: 
 - Logs

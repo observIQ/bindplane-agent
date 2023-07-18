@@ -29,7 +29,7 @@ import (
 	"go.uber.org/multierr"
 )
 
-// DefaultFactories returns the default factories used by the observIQ Distro for OpenTelemetry Collector
+// DefaultFactories returns the default factories used by the BindPlane Agent
 func DefaultFactories() (otelcol.Factories, error) {
 	return combineFactories(defaultReceivers, defaultProcessors, defaultExporters, defaultExtensions, defaultConnectors)
 }

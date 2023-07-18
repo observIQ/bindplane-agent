@@ -24,4 +24,4 @@ The CI runs the `ci-checks` make target, which includes linting, testing, and ch
 CI also does a build of all targets (`make build-all`)
 
 ## Releasing
-To release the collector, see [releasing documentation](releasing.md).
+To release the agent, see [releasing documentation](releasing.md).

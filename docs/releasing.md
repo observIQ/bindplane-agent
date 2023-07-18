@@ -10,7 +10,7 @@ Releases are managed through GitHub releases. The steps to create a release are 
   - Mark the release as a full release once it is finished.
   - Create a CHANGELOG
 
-3. Done! The collector is released
+3. Done! The agent is released
 
 # Testing Release locally
 

@@ -1,5 +1,5 @@
 {
-  "product": "observIQ Distro for OpenTelemetry Collector",
+  "product": "BindPlane Agent",
   "company": "observIQ, Inc.",
   "license": "./LICENSE.rtf",
   "info": {
@@ -13,7 +13,7 @@
       "service": {
         "name": "observiq-otel-collector",
         "start": "delayed",
-        "display-name": "observIQ Distro for OpenTelemetry Collector",
+        "display-name": "BindPlane Agent",
         "description": "observIQ's distribution of the OpenTelemetry collector.",
         "arguments": "--config &quot;[INSTALLDIR]config.yaml&quot; --logging &quot;[INSTALLDIR]logging.yaml&quot; --manager &quot;[INSTALLDIR]manager.yaml&quot;"
       }

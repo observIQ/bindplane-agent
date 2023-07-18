@@ -15,7 +15,7 @@ An example configuration is located [here](./config.yaml).
 
 ## Process metrics
 
-The host metrics receiver supports per process cpu, memory, disk, and network metrics. This feature requires elevetated privileges. On Linux, you must update the service configuration to run the collector as the root user. See the [installation documentation](https://github.com/observIQ/observiq-otel-collector/blob/main/docs/installation-linux.md#configuring-the-collector) for instructions.
+The host metrics receiver supports per process cpu, memory, disk, and network metrics. This feature requires elevetated privileges. On Linux, you must update the service configuration to run the collector as the root user. See the [installation documentation](https://github.com/observIQ/bindplane-agent/blob/main/docs/installation-linux.md#configuring-the-collector) for instructions.
 
 ## Metrics
 

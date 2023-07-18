@@ -8,7 +8,7 @@ The collector must be installed on the Postgresql system.
 
 ## Prerequisites
 
-See the [documentation](https://github.com/observIQ/observiq-otel-collector/blob/main/docs/receivers.md) for Postgresql prerequisites.
+See the [documentation](https://github.com/observIQ/bindplane-agent/blob/main/docs/receivers.md) for Postgresql prerequisites.
 
 See the [prerequisites](../README.md) doc for Google Cloud prerequisites.
 

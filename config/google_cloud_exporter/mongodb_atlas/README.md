@@ -4,7 +4,7 @@ The Mongodb Atlas Receiver can be used to send Mongodb Atlas metrics to Google C
 
 ## Prerequisites
 
-See the [documentation](https://github.com/observIQ/observiq-otel-collector/blob/main/docs/receivers.md) for Mongodb Atlas prerequisites.
+See the [documentation](https://github.com/observIQ/bindplane-agent/blob/main/docs/receivers.md) for Mongodb Atlas prerequisites.
 
 See the [prerequisites](../README.md) doc for Google Cloud prerequisites.
 

@@ -17,7 +17,7 @@ set -e
 
 # Collector Constants
 SERVICE_NAME="com.observiq.collector"
-DOWNLOAD_BASE="https://github.com/observiq/observiq-otel-collector/releases/download"
+DOWNLOAD_BASE="https://github.com/observIQ/bindplane-agent/releases/download"
 
 # Script Constants
 PREREQS="printf sed uname tr find grep"
@@ -160,7 +160,7 @@ usage()
   USAGE=$(cat <<EOF
 Usage:
   $(fg_yellow '-v, --version')
-      Defines the version of the observIQ Distro for OpenTelemetry Collector.
+      Defines the version of the BindPlane Agent.
       If not provided, this will default to the latest version.
       Alternatively the COLLECTOR_VERSION environment variable can be
       set to configure the collector version.
@@ -171,7 +171,7 @@ Usage:
 
   $(fg_yellow '-l, --url')
       Defines the URL that the components will be downloaded from.
-      If not provided, this will default to observIQ Distro for OpenTelemetry Collector\'s GitHub releases.
+      If not provided, this will default to BindPlane Agent\'s GitHub releases.
       Example: '-l http://my.domain.org/observiq-otel-collector' will download from there.
 
   $(fg_yellow '-b, --base-url')
@@ -434,7 +434,7 @@ latest_version()
 # This will install the package by downloading & unpacking the tarball into the install directory
 install_package()
 {
-  banner "Installing observIQ Distro for OpenTelemetry Collector"
+  banner "Installing BindPlane Agent"
   increase_indent 
 
   # Remove temporary directory, if it exists
@@ -525,7 +525,7 @@ install_package()
   rm -rf "$TMP_DIR" || error_exit "$LINENO" "Failed to remove temp dir: $TMP_DIR"
   succeeded
 
-  success "observIQ Distro for OpenTelemetry Collector installation complete!"
+  success "BindPlane Agent installation complete!"
   decrease_indent
 }
 
@@ -559,7 +559,7 @@ display_results()
     increase_indent
     info "For more information on configuring the collector, see the docs:"
     increase_indent
-    info "$(fg_cyan "https://github.com/observiq/observiq-otel-collector/tree/main#observiq-opentelemetry-collector")$(reset)"
+    info "$(fg_cyan "https://github.com/observIQ/bindplane-agent/tree/main#observiq-opentelemetry-collector")$(reset)"
     decrease_indent
     info "If you have any other questions please contact us at $(fg_cyan support@observiq.com)$(reset)"
     decrease_indent
@@ -570,7 +570,7 @@ display_results()
 
 uninstall()
 {
-  banner "Uninstalling observIQ Distro for OpenTelemetry Collector"
+  banner "Uninstalling BindPlane Agent"
   increase_indent
 
   if [ ! -f "$INSTALL_DIR/observiq-otel-collector" ]; then

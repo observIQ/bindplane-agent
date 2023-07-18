@@ -1,19 +1,19 @@
 # Disclaimer
 While the `main` branch is stable, it is still under development and documentation may not fully reflect the current feature set. Please refer to documentation for your specific release.
 
-# observIQ Distro for OpenTelemetry Collector
+# BindPlane Agent
 
 <center>
 
-[![Action Status](https://github.com/observIQ/observiq-otel-collector/workflows/Build/badge.svg)](https://github.com/observIQ/observiq-otel-collector/actions)
-[![Action Test Status](https://github.com/observIQ/observiq-otel-collector/workflows/Tests/badge.svg)](https://github.com/observIQ/observiq-otel-collector/actions)
+[![Action Status](https://github.com/observIQ/bindplane-agent/workflows/Build/badge.svg)](https://github.com/observIQ/bindplane-agent/actions)
+[![Action Test Status](https://github.com/observIQ/bindplane-agent/workflows/Tests/badge.svg)](https://github.com/observIQ/bindplane-agent/actions)
 [![Go Report Card](https://goreportcard.com/badge/github.com/observIQ/observiq-otel-collector)](https://goreportcard.com/report/github.com/observIQ/observiq-otel-collector)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Gosec](https://github.com/observIQ/observiq-otel-collector/actions/workflows/gosec.yml/badge.svg)](https://github.com/observIQ/observiq-otel-collector/actions/workflows/gosec.yml)
+[![Gosec](https://github.com/observIQ/bindplane-agent/actions/workflows/gosec.yml/badge.svg)](https://github.com/observIQ/bindplane-agent/actions/workflows/gosec.yml)
 
 </center>
 
-observIQ Distro for OpenTelemetry Collector is observIQ’s distribution of the [OpenTelemetry collector](https://github.com/open-telemetry/opentelemetry-collector). It provides a simple and unified solution to collect, refine, and ship telemetry data anywhere.
+BindPlane Agent is observIQ’s distribution of the [OpenTelemetry collector](https://github.com/open-telemetry/opentelemetry-collector). It provides a simple and unified solution to collect, refine, and ship telemetry data anywhere.
 
 ## Benefits
 
@@ -34,19 +34,19 @@ Tested, verified, and supported by observIQ
 
 To install using the installation script, you may run:
 ```sh
-sudo sh -c "$(curl -fsSlL https://github.com/observiq/observiq-otel-collector/releases/latest/download/install_unix.sh)" install_unix.sh
+sudo sh -c "$(curl -fsSlL https://github.com/observIQ/bindplane-agent/releases/latest/download/install_unix.sh)" install_unix.sh
 ```
 
 To install directly with the appropriate package manager, see [installing on Linux](/docs/installation-linux.md).
 
 #### Windows
 
-To install the collector on Windows run the Powershell command below to install the MSI with no UI.
+To install the BindPlane Agent on Windows run the Powershell command below to install the MSI with no UI.
 ```pwsh
-msiexec /i "https://github.com/observIQ/observiq-otel-collector/releases/latest/download/observiq-otel-collector.msi" /quiet
+msiexec /i "https://github.com/observIQ/bindplane-agent/releases/latest/download/observiq-otel-collector.msi" /quiet
 ```
 
-Alternately, for an interactive installation [download the latest MSI](https://github.com/observIQ/observiq-otel-collector/releases/latest).
+Alternately, for an interactive installation [download the latest MSI](https://github.com/observIQ/bindplane-agent/releases/latest).
 
 After downloading the MSI, simply double click it to open the installation wizard. Follow the instructions to configure and install the collector.
 
@@ -57,7 +57,7 @@ For more installation information see [installing on Windows](/docs/installation
 To install using the installation script, you may run:
 
 ```sh
-sudo sh -c "$(curl -fsSlL https://github.com/observiq/observiq-otel-collector/releases/latest/download/install_macos.sh)" install_macos.sh
+sudo sh -c "$(curl -fsSlL https://github.com/observIQ/bindplane-agent/releases/latest/download/install_macos.sh)" install_macos.sh
 ```
 
 For more installation information see [installing on macOS](/docs/installation-mac.md).
@@ -80,7 +80,7 @@ For more information on configuration see the [Configuration section](#configura
 
 ## Configuration
 
-The observIQ Distro for OpenTelemetry Collector uses OpenTelemetry configuration.
+The BindPlane Agent uses OpenTelemetry configuration.
 
 For sample configs, see the [config](/config/) directory.
 For general configuration help, see the [OpenTelemetry docs](https://opentelemetry.io/docs/collector/configuration/).
@@ -145,7 +145,7 @@ service:
 
 # Community
 
-The observIQ Distro for OpenTelemetry Collector is an open source project. If you'd like to contribute, take a look at our [contribution guidelines](/CONTRIBUTING.md) and [developer guide](/docs/development.md). We look forward to building with you.
+The BindPlane Agent is an open source project. If you'd like to contribute, take a look at our [contribution guidelines](/CONTRIBUTING.md) and [developer guide](/docs/development.md). We look forward to building with you.
 
 # How can we help?
 
