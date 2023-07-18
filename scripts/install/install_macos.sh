@@ -163,11 +163,11 @@ Usage:
       Defines the version of the BindPlane Agent.
       If not provided, this will default to the latest version.
       Alternatively the COLLECTOR_VERSION environment variable can be
-      set to configure the collector version.
+      set to configure the agent version.
       Example: '-v 1.2.12' will download 1.2.12.
 
   $(fg_yellow '-r, --uninstall')
-      Stops the collector services and uninstalls the collector.
+      Stops the agent services and uninstalls the agent.
 
   $(fg_yellow '-l, --url')
       Defines the URL that the components will be downloaded from.
@@ -180,10 +180,10 @@ Usage:
       Example: '-b http://my.domain.org/observiq-otel-collector/binaries' will be used as the base of the download URL.
    
   $(fg_yellow '-e, --endpoint')
-      Defines the endpoint of an OpAMP compatible management server for this collector install.
+      Defines the endpoint of an OpAMP compatible management server for this agent install.
       This parameter may also be provided through the ENDPOINT environment variable.
       
-      Specifying this will install the collector in a managed mode, as opposed to the
+      Specifying this will install the agent in a managed mode, as opposed to the
       normal headless mode.
   
   $(fg_yellow '-k, --labels')
@@ -359,7 +359,7 @@ set_os_arch()
   esac
 }
 
-# This will set the urls to use when downloading the collector and its plugins.
+# This will set the urls to use when downloading the agent and its plugins.
 # These urls are constructed based on the --version flag or COLLECTOR_VERSION env variable.
 # If not specified, the version defaults to whatever the latest release on github is.
 set_download_urls()
@@ -426,7 +426,7 @@ set_opamp_secret_key()
 # latest_version gets the tag of the latest release, without the v prefix.
 latest_version()
 {
-  curl -sSL -H"Accept: application/vnd.github.v3+json" https://api.github.com/repos/observIQ/observiq-otel-collector/releases/latest | \
+  curl -sSL -H"Accept: application/vnd.github.v3+json" https://api.github.com/repos/observIQ/bindplane-agent/releases/latest | \
     grep "\"tag_name\"" | \
     sed -E 's/ *"tag_name": "v([0-9]+\.[0-9]+\.[0-9+])",/\1/'
 }
@@ -548,8 +548,8 @@ display_results()
 {
     banner 'Information'
     increase_indent
-    info "Collector Home:     $(fg_cyan "$INSTALL_DIR")$(reset)"
-    info "Collector Config:   $(fg_cyan "$INSTALL_DIR/config.yaml")$(reset)"
+    info "Agent Home:         $(fg_cyan "$INSTALL_DIR")$(reset)"
+    info "Agent Config:       $(fg_cyan "$INSTALL_DIR/config.yaml")$(reset)"
     info "Start Command:      $(fg_cyan "sudo launchctl load /Library/LaunchDaemons/$SERVICE_NAME.plist")$(reset)"
     info "Stop Command:       $(fg_cyan "sudo launchctl unload /Library/LaunchDaemons/$SERVICE_NAME.plist")$(reset)"
     info "Logs Command:       $(fg_cyan "sudo tail -F $INSTALL_DIR/log/collector.log")$(reset)"
@@ -557,9 +557,9 @@ display_results()
 
     banner 'Support'
     increase_indent
-    info "For more information on configuring the collector, see the docs:"
+    info "For more information on configuring the agent, see the docs:"
     increase_indent
-    info "$(fg_cyan "https://github.com/observIQ/bindplane-agent/tree/main#observiq-opentelemetry-collector")$(reset)"
+    info "$(fg_cyan "https://github.com/observIQ/bindplane-agent/tree/main#observiq-distro-for-opentelemetry-collector")$(reset)"
     decrease_indent
     info "If you have any other questions please contact us at $(fg_cyan support@observiq.com)$(reset)"
     decrease_indent
@@ -574,7 +574,7 @@ uninstall()
   increase_indent
 
   if [ ! -f "$INSTALL_DIR/observiq-otel-collector" ]; then
-    # If the collector binary is not present, we assume that the collector is not installed
+    # If the agent binary is not present, we assume that the agent is not installed
     # In this case, do nothing.
     info "No install detected, skipping..."
     decrease_indent
