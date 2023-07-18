@@ -1,4 +1,4 @@
-version: 0.0.1
+version: 0.1.0
 title: Apache Common
 description: Log parser for Apache common format
 parameters:
@@ -14,6 +14,17 @@ parameters:
       - beginning
       - end
     default: end
+  - name: retain_raw_logs
+    description: When enabled will preserve the original log message in a `raw_log` key. This will either be in the `body` or `attributes` depending on how `parse_to` is configured.
+    type: bool
+    default: false
+  - name: parse_to
+    description: Where to parse structured log parts
+    type: string
+    supported:
+      - body
+      - attributes
+    default: body
 template: |
   receivers:
     filelog:
@@ -23,13 +34,20 @@ template: |
         {{end}}
       start_at: {{ .start_at }}
       operators:
+        {{ if .retain_raw_logs }}
+        - id: save_raw_log
+          type: copy
+          from: body
+          to: attributes.raw_log
+        {{ end }}
         - type: regex_parser
           regex: '^(?P<remote_addr>[^ ]*) (?P<remote_host>[^ ]*) (?P<remote_user>[^ ]*) \[(?P<time>[^\]]*)\] "(?P<method>\S+) +(?P<path>[^ ]*)( (?P<protocol>[^/]*)/(?P<protocol_version>[^\"]*)|[^\"]*)?" (?P<status>[^ ]*) (?P<body_bytes_sent>[^ ]*)(?: "(?P<http_referer>[^\"]*)" "(?P<http_user_agent>[^\"]*)"(?:\s+(?P<http_x_forwarded_for>[^ ]+))?)?'
+          parse_to: {{ .parse_to }}
           timestamp:
-            parse_from: attributes.time
+            parse_from: {{ .parse_to }}.time
             layout: '%d/%b/%Y:%H:%M:%S %z'
           severity:
-            parse_from: attributes.status
+            parse_from: {{ .parse_to }}.status
             preset: none
             mapping:
               info: 2xx
@@ -38,8 +56,14 @@ template: |
               error: 5xx
         - id: add_type
           type: add
-          field: attributes.log_type
+          field: {{ .parse_to }}.log_type
           value: 'apache_common'
+        {{ if and .retain_raw_logs (eq .parse_to "body")}}
+        - id: move_raw_log
+          type: move
+          from: attributes.raw_log
+          to: body.raw_log
+        {{ end }}
 
   service:
     pipelines:
