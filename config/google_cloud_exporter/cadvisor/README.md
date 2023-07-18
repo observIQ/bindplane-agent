@@ -37,7 +37,7 @@ services:
     - /var/lib/docker/:/var/lib/docker:ro
 
   agent:
-    image: observiq/observiq-otel-collector:1.1.0
+    image: observiq/bindplane-agent:1.30.0
     restart: always
     container_name: observiq-otel-collector
     hostname: observiq-otel-collector

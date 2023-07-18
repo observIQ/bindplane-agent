@@ -12,9 +12,9 @@ Push the agent image to your GCR account:
 - replace `myproject` with your gcr project
 
 ```bash
-docker pull observiq/observiq-otel-collector:1.1.0
-docker tag observiq/observiq-otel-collector:1.1.0 gcr.io/myproject/observiq-otel-collector:1.1.0
-docker push gcr.io/myproject/observiq-otel-collector:1.1.0
+docker pull observiq/bindplane-agent:1.30.0
+docker tag observiq/bindplane-agent:1.30.0 gcr.io/myproject/bindplane-agent:1.30.0
+docker push gcr.io/myproject/bindplane-agent:1.30.0
 ```
 
 ## Deployment
