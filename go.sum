@@ -1655,6 +1655,8 @@ github.com/open-telemetry/opentelemetry-collector-contrib/pkg/resourcetotelemetr
 github.com/open-telemetry/opentelemetry-collector-contrib/pkg/resourcetotelemetry v0.81.0/go.mod h1:LVTxkVTuCAvpmbJu6TADF57OHAHV2nsQU9pGaJOx1Pg=
 github.com/open-telemetry/opentelemetry-collector-contrib/pkg/stanza v0.81.0 h1:IeAco3Q34Aduu8g7/6kKzavZojQTj18G+uXJypyEa3c=
 github.com/open-telemetry/opentelemetry-collector-contrib/pkg/stanza v0.81.0/go.mod h1:O6eCO9lo7HPJ9EXSBmfN0Su/f25HJQE00zK0SurhJiQ=
+github.com/open-telemetry/opentelemetry-collector-contrib/pkg/stanza v0.81.1-0.20230710164028-4874893a9395 h1:QCo8QcZG6Oc8gl3cy/CMoS08cus7QdhhzFJ0WBnAFsM=
+github.com/open-telemetry/opentelemetry-collector-contrib/pkg/stanza v0.81.1-0.20230710164028-4874893a9395/go.mod h1:O6eCO9lo7HPJ9EXSBmfN0Su/f25HJQE00zK0SurhJiQ=
 github.com/open-telemetry/opentelemetry-collector-contrib/pkg/translator/jaeger v0.52.0/go.mod h1:tU7s/ki/QePSIZ7ExYGWLMb9erCAt66brQHBEHxr8HU=
 github.com/open-telemetry/opentelemetry-collector-contrib/pkg/translator/jaeger v0.54.0/go.mod h1:uWFgO68sLEqWrQxL8rws1CkB8EUNQaedP3FWI1gMJOU=
 github.com/open-telemetry/opentelemetry-collector-contrib/pkg/translator/jaeger v0.57.2/go.mod h1:4rFuWKMbzM9H39RbDvPtJfAp/fxsHydhJhKns6skmK0=
