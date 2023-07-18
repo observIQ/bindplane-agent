@@ -10,11 +10,11 @@
                 <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="370" Height="0" />
                 <Control Id="InstallDescription" Hidden="yes" Type="Text" X="135" Y="70" Width="220" Height="80" Transparent="yes" NoPrefix="yes" Text="Config location: 
     [INSTALLDIR]config.yaml
-To stop the collector service, run: 
+To stop the agent service, run: 
     Stop-Service -Name observiq-otel-collector
-To start the collector service, run: 
+To start the agent service, run: 
     Start-Service -Name observiq-otel-collector
-To restart collector the service, run:
+To restart agent the service, run:
     Restart-Service -Name observiq-otel-collector" >
                     <Condition Action="show">NOT Installed</Condition>
                 </Control>
