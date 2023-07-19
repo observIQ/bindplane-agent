@@ -39,8 +39,8 @@ services:
   agent:
     image: observiq/bindplane-agent:1.30.0
     restart: always
-    container_name: observiq-otel-collector
-    hostname: observiq-otel-collector
+    container_name: bindplane-agent
+    hostname: bindplane-agent
     deploy:
       resources:
         limits:

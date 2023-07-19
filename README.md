@@ -48,7 +48,7 @@ msiexec /i "https://github.com/observIQ/bindplane-agent/releases/latest/download
 
 Alternately, for an interactive installation [download the latest MSI](https://github.com/observIQ/bindplane-agent/releases/latest).
 
-After downloading the MSI, simply double click it to open the installation wizard. Follow the instructions to configure and install the collector.
+After downloading the MSI, simply double click it to open the installation wizard. Follow the instructions to configure and install the agent.
 
 For more installation information see [installing on Windows](/docs/installation-windows.md).
 
@@ -64,11 +64,11 @@ For more installation information see [installing on macOS](/docs/installation-m
 
 #### Kubernetes
 
-To deploy the collector on Kubernetes, further documentation can be found at our [observiq-otel-collector-k8s](https://github.com/observIQ/observiq-otel-collector-k8s) repository.
+To deploy the agent on Kubernetes, further documentation can be found at our [observiq-otel-collector-k8s](https://github.com/observIQ/observiq-otel-collector-k8s) repository.
 
 ### Next Steps
 
-Now that the collector is installed it is collecting basic metrics about the host machine printing them to the log. If you want to further configure your collector you may do so by editing the config file. To find your config file based on your OS reference the table below:
+Now that the agent is installed it is collecting basic metrics about the host machine printing them to the log. If you want to further configure your agent you may do so by editing the config file. To find your config file based on your OS reference the table below:
 
 | OS | Default Location |
 | :--- | :---- |
@@ -87,7 +87,7 @@ For general configuration help, see the [OpenTelemetry docs](https://opentelemet
 
 For configuration options of a specific component, take a look at the README found in their respective module roots. For a list of currently supported components see [Included Components](#included-components).
 
-For a list of possible command line arguments to use with the collector, run the collector with the `--help` argument.
+For a list of possible command line arguments to use with the agent, run the agent with the `--help` argument.
 
 ### Included Components
 
@@ -117,7 +117,7 @@ Here is an example `config.yaml` setup for hostmetrics on Google Cloud. To make 
 
 ```yaml
 # Receivers collect metrics from a source. The hostmetrics receiver will get
-# CPU load metrics about the machine the collector is running on every minute.
+# CPU load metrics about the machine the agent is running on every minute.
 receivers:
   hostmetrics:
     collection_interval: 60s
