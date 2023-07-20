@@ -4,11 +4,11 @@ The Mysql Receiver can be used to send Mysql metrics to Google Cloud Monitoring.
 
 ## Limitations
 
-The collector must be installed on the Mysql system.
+The agent must be installed on the Mysql system.
 
 ## Prerequisites
 
-See the [documentation](https://github.com/observIQ/observiq-otel-collector/blob/main/docs/receivers.md) for Mysql prerequisites.
+See the [documentation](https://github.com/observIQ/bindplane-agent/blob/main/docs/receivers.md) for Mysql prerequisites.
 
 See the [prerequisites](../README.md) doc for Google Cloud prerequisites.
 
@@ -34,7 +34,7 @@ Environment=MYSQL_USERNAME=otel
 Environment=MYSQL_PASSWORD=otel
 ```
 
-After restarting the collector, the configuration will attempt to use the username:password `otel:otel`.
+After restarting the agent, the configuration will attempt to use the username:password `otel:otel`.
 
 ```bash
 sudo systemctl restart observiq-otel-collector

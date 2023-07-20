@@ -26,7 +26,7 @@ import (
 	"path/filepath"
 
 	archiver "github.com/mholt/archiver/v3"
-	"github.com/observiq/observiq-otel-collector/opamp"
+	"github.com/observiq/bindplane-agent/opamp"
 	"github.com/open-telemetry/opamp-go/protobufs"
 	"go.uber.org/zap"
 )

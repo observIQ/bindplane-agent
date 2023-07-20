@@ -15,9 +15,9 @@
 
 set -e
 
-# Collector Constants
+# Agent Constants
 PACKAGE_NAME="observiq-otel-collector"
-DOWNLOAD_BASE="https://github.com/observiq/observiq-otel-collector/releases/download"
+DOWNLOAD_BASE="https://github.com/observIQ/bindplane-agent/releases/download"
 
 # Script Constants
 COLLECTOR_USER="observiq-otel-collector"
@@ -162,15 +162,15 @@ usage()
   USAGE=$(cat <<EOF
 Usage:
   $(fg_yellow '-v, --version')
-      Defines the version of the observIQ Distro for OpenTelemetry Collector.
+      Defines the version of the BindPlane Agent.
       If not provided, this will default to the latest version.
       Alternatively the COLLECTOR_VERSION environment variable can be
-      set to configure the collector version.
+      set to configure the agent version.
       Example: '-v 1.2.12' will download 1.2.12.
 
   $(fg_yellow '-l, --url')
       Defines the URL that the components will be downloaded from.
-      If not provided, this will default to observIQ Distro for OpenTelemetry Collector\'s GitHub releases.
+      If not provided, this will default to BindPlane Agent\'s GitHub releases.
       Example: '-l http://my.domain.org/observiq-otel-collector' will download from there.
 
   $(fg_yellow '-b, --base-url')
@@ -179,7 +179,7 @@ Usage:
       Example: '-b http://my.domain.org/observiq-otel-collector/binaries' will be used as the base of the download URL.
 
   $(fg_yellow '-f, --file')
-      Install Collector from a local file instead of downloading from a URL.
+      Install Agent from a local file instead of downloading from a URL.
 
   $(fg_yellow '-x, --proxy')
       Defines the proxy server to be used for communication by the install script.
@@ -192,10 +192,10 @@ Usage:
       Defines the proxy password to be used for communication by the install script.
     
   $(fg_yellow '-e, --endpoint')
-      Defines the endpoint of an OpAMP compatible management server for this collector install.
+      Defines the endpoint of an OpAMP compatible management server for this agent install.
       This parameter may also be provided through the ENDPOINT environment variable.
       
-      Specifying this will install the collector in a managed mode, as opposed to the
+      Specifying this will install the agent in a managed mode, as opposed to the
       normal headless mode.
   
   $(fg_yellow '-k, --labels')
@@ -387,7 +387,7 @@ set_package_type()
 
 }
 
-# This will set the urls to use when downloading the collector and its plugins.
+# This will set the urls to use when downloading the agent and its plugins.
 # These urls are constructed based on the --version flag or COLLECTOR_VERSION env variable.
 # If not specified, the version defaults to whatever the latest release on github is.
 set_download_urls()
@@ -555,11 +555,11 @@ latest_version()
     sed -E 's/ *"tag_name": "v([0-9]+\.[0-9]+\.[0-9+])",/\1/'
 }
 
-# This will install the package by downloading the archived collector,
+# This will install the package by downloading the archived agent,
 # extracting the binaries, and then removing the archive.
 install_package()
 {
-  banner "Installing observIQ Distro for OpenTelemetry Collector"
+  banner "Installing BindPlane Agent"
   increase_indent
 
   # if the user didn't specify a local file then download the package
@@ -601,7 +601,7 @@ install_package()
   if [ "$(systemctl is-enabled observiq-otel-collector)" = "enabled" ]; then
     # The unit is already enabled; It may be running, too, if this was an upgrade.
     # We'll want to restart, which will start it if it wasn't running already,
-    # and restart in the case that this was an upgrade on a running collector.
+    # and restart in the case that this was an upgrade on a running agent.
     info "Restarting service..."
     systemctl restart observiq-otel-collector
     succeeded
@@ -611,7 +611,7 @@ install_package()
     succeeded
   fi
 
-  success "observIQ Distro for OpenTelemetry Collector installation complete!"
+  success "BindPlane Agent installation complete!"
   decrease_indent
 }
 
@@ -639,7 +639,7 @@ create_manager_yml()
   if [ ! -f "$manager_yml_path" ]; then
     # Note here: We create the file and change permissions of the file here BEFORE writing info to it
     # We do this because the file may contain a secret key, so we want 0 window when the
-    # file is readable by anyone other than the collector & root
+    # file is readable by anyone other than the agent & root
     command printf '' >> "$manager_yml_path"
 
     chgrp "$COLLECTOR_USER" "$manager_yml_path"
@@ -657,8 +657,8 @@ display_results()
 {
     banner 'Information'
     increase_indent
-    info "Collector Home:     $(fg_cyan "/opt/observiq-otel-collector")$(reset)"
-    info "Collector Config:   $(fg_cyan "/opt/observiq-otel-collector/config.yaml")$(reset)"
+    info "Agent Home:         $(fg_cyan "/opt/observiq-otel-collector")$(reset)"
+    info "Agent Config:       $(fg_cyan "/opt/observiq-otel-collector/config.yaml")$(reset)"
     info "Start Command:      $(fg_cyan "sudo systemctl start observiq-otel-collector")$(reset)"
     info "Stop Command:       $(fg_cyan "sudo systemctl stop observiq-otel-collector")$(reset)"
     info "Logs Command:       $(fg_cyan "sudo tail -F /opt/observiq-otel-collector/log/collector.log")$(reset)"
@@ -666,9 +666,9 @@ display_results()
 
     banner 'Support'
     increase_indent
-    info "For more information on configuring the collector, see the docs:"
+    info "For more information on configuring the agent, see the docs:"
     increase_indent
-    info "$(fg_cyan "https://github.com/observiq/observiq-otel-collector/tree/main#observiq-opentelemetry-collector")$(reset)"
+    info "$(fg_cyan "https://github.com/observIQ/bindplane-agent/tree/main#bindplane-agent")$(reset)"
     decrease_indent
     info "If you have any other questions please contact us at $(fg_cyan support@observiq.com)$(reset)"
     increase_indent
@@ -701,7 +701,7 @@ uninstall()
   observiq_banner
 
   set_package_type
-  banner "Uninstalling observIQ Distro for OpenTelemetry Collector"
+  banner "Uninstalling BindPlane Agent"
   increase_indent
 
   info "Checking permissions..."

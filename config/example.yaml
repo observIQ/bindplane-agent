@@ -2,7 +2,7 @@
 # See the README for more information about the receivers available for configuration.
 receivers:
   # The hostmetrics receiver; this configuration will get cpu load metrics about the machine
-  # the collector is running on every minute.
+  # the agent is running on every minute.
   # For more information on configuring the hostmetrics receiver, refer to the documentation here:
   # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/hostmetricsreceiver
   hostmetrics:
@@ -13,7 +13,7 @@ receivers:
       filesystem:
       memory:
       network:
-      # Remove these scrapers for macOS collectors as they are not supported and will generate errors in the logs
+      # Remove these scrapers for macOS agents as they are not supported and will generate errors in the logs
       cpu:
       disk:
 

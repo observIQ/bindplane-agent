@@ -5,7 +5,7 @@ package mocks
 import (
 	context "context"
 
-	collector "github.com/observiq/observiq-otel-collector/collector"
+	collector "github.com/observiq/bindplane-agent/collector"
 
 	mock "github.com/stretchr/testify/mock"
 

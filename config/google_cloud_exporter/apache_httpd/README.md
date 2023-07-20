@@ -4,7 +4,7 @@ The Apache receiver can be used to send Apache HTTP metrics and logs to Google C
 
 ## Limitations
 
-The collector must be installed on the Apache HTTP system.
+The agent must be installed on the Apache HTTP system.
 
 ## Prerequisites
 

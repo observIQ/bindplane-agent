@@ -4,7 +4,7 @@ The RabbitMQ Receiver can be used to send RabbitMQ metrics to Google Cloud Monit
 
 ## Prerequisites
 
-See the [documentation](https://github.com/observIQ/observiq-otel-collector/blob/main/docs/receivers.md) for RabbitMQ prerequisites.
+See the [documentation](https://github.com/observIQ/bindplane-agent/blob/main/docs/receivers.md) for RabbitMQ prerequisites.
 
 See the [prerequisites](../README.md) doc for Google Cloud prerequisites.
 
@@ -30,7 +30,7 @@ Environment=RABBITMQ_USERNAME=otel
 Environment=RABBITMQ_PASSWORD=otel
 ```
 
-After restarting the collector, the configuration will attempt to use the configured username and password.
+After restarting the agent, the configuration will attempt to use the configured username and password.
 
 ```bash
 sudo systemctl restart observiq-otel-collector

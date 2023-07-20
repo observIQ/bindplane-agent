@@ -19,10 +19,10 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/observiq/observiq-otel-collector/updater/internal/logging"
-	"github.com/observiq/observiq-otel-collector/updater/internal/path"
-	"github.com/observiq/observiq-otel-collector/updater/internal/updater"
-	"github.com/observiq/observiq-otel-collector/updater/internal/version"
+	"github.com/observiq/bindplane-agent/updater/internal/logging"
+	"github.com/observiq/bindplane-agent/updater/internal/path"
+	"github.com/observiq/bindplane-agent/updater/internal/updater"
+	"github.com/observiq/bindplane-agent/updater/internal/version"
 	"github.com/spf13/pflag"
 	"go.uber.org/zap"
 )

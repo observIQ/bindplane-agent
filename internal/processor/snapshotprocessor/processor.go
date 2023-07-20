@@ -17,8 +17,8 @@ package snapshotprocessor
 import (
 	"context"
 
-	"github.com/observiq/observiq-otel-collector/internal/report"
-	"github.com/observiq/observiq-otel-collector/internal/report/snapshot"
+	"github.com/observiq/bindplane-agent/internal/report"
+	"github.com/observiq/bindplane-agent/internal/report/snapshot"
 	"go.opentelemetry.io/collector/pdata/plog"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.opentelemetry.io/collector/pdata/ptrace"

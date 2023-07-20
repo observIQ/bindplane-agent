@@ -19,7 +19,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/observiq/observiq-otel-collector/updater/internal/path"
+	"github.com/observiq/bindplane-agent/updater/internal/path"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap/zaptest"
 )

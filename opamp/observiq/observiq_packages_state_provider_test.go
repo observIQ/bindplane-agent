@@ -21,9 +21,9 @@ import (
 	"os"
 	"testing"
 
-	"github.com/observiq/observiq-otel-collector/internal/version"
-	"github.com/observiq/observiq-otel-collector/packagestate"
-	"github.com/observiq/observiq-otel-collector/packagestate/mocks"
+	"github.com/observiq/bindplane-agent/internal/version"
+	"github.com/observiq/bindplane-agent/packagestate"
+	"github.com/observiq/bindplane-agent/packagestate/mocks"
 	"github.com/open-telemetry/opamp-go/client/types"
 	"github.com/open-telemetry/opamp-go/protobufs"
 	"github.com/stretchr/testify/assert"

@@ -3,7 +3,7 @@
 package mocks
 
 import (
-	rollback "github.com/observiq/observiq-otel-collector/updater/internal/rollback"
+	rollback "github.com/observiq/bindplane-agent/updater/internal/rollback"
 	mock "github.com/stretchr/testify/mock"
 )
 

@@ -22,11 +22,11 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/observiq/observiq-otel-collector/updater/internal/action"
-	"github.com/observiq/observiq-otel-collector/updater/internal/file"
-	"github.com/observiq/observiq-otel-collector/updater/internal/path"
-	"github.com/observiq/observiq-otel-collector/updater/internal/rollback"
-	"github.com/observiq/observiq-otel-collector/updater/internal/service"
+	"github.com/observiq/bindplane-agent/updater/internal/action"
+	"github.com/observiq/bindplane-agent/updater/internal/file"
+	"github.com/observiq/bindplane-agent/updater/internal/path"
+	"github.com/observiq/bindplane-agent/updater/internal/rollback"
+	"github.com/observiq/bindplane-agent/updater/internal/service"
 	"go.uber.org/zap"
 )
 

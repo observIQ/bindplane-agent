@@ -20,9 +20,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/observiq/observiq-otel-collector/internal/logging"
-	"github.com/observiq/observiq-otel-collector/internal/report"
-	"github.com/observiq/observiq-otel-collector/opamp"
+	"github.com/observiq/bindplane-agent/internal/logging"
+	"github.com/observiq/bindplane-agent/internal/report"
+	"github.com/observiq/bindplane-agent/opamp"
 	"go.uber.org/zap"
 	"gopkg.in/yaml.v3"
 )

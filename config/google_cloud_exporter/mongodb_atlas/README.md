@@ -4,7 +4,7 @@ The Mongodb Atlas Receiver can be used to send Mongodb Atlas metrics to Google C
 
 ## Prerequisites
 
-See the [documentation](https://github.com/observIQ/observiq-otel-collector/blob/main/docs/receivers.md) for Mongodb Atlas prerequisites.
+See the [documentation](https://github.com/observIQ/bindplane-agent/blob/main/docs/receivers.md) for Mongodb Atlas prerequisites.
 
 See the [prerequisites](../README.md) doc for Google Cloud prerequisites.
 
@@ -30,7 +30,7 @@ Environment=MONGODB_ATLAS_PUBLIC_KEY=otel
 Environment=MONGODB_ATLAS_PRIVATE_KEY=otel
 ```
 
-After restarting the collector, the configuration will attempt to use the configured public and private key.
+After restarting the agent, the configuration will attempt to use the configured public and private key.
 
 ```bash
 sudo systemctl restart observiq-otel-collector

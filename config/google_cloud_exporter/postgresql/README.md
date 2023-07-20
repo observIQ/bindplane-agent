@@ -4,11 +4,11 @@ The Postgresql Receiver can be used to send Postgresql metrics to Google Cloud M
 
 ## Limitations
 
-The collector must be installed on the Postgresql system.
+The agent must be installed on the Postgresql system.
 
 ## Prerequisites
 
-See the [documentation](https://github.com/observIQ/observiq-otel-collector/blob/main/docs/receivers.md) for Postgresql prerequisites.
+See the [documentation](https://github.com/observIQ/bindplane-agent/blob/main/docs/receivers.md) for Postgresql prerequisites.
 
 See the [prerequisites](../README.md) doc for Google Cloud prerequisites.
 
@@ -34,7 +34,7 @@ Environment=POSTGRESQL_USERNAME=otel
 Environment=POSTGRESQL_PASSWORD=otel
 ```
 
-After restarting the collector, the configuration will attempt to use the username:password `otel:otel`.
+After restarting the agent, the configuration will attempt to use the username:password `otel:otel`.
 
 ```bash
 sudo systemctl restart observiq-otel-collector

@@ -4,7 +4,7 @@ The MongoDB Receiver can be used to send MongoDB metrics to Prometheus.
 
 ## Limitations
 
-The collector must be installed on the Mongodb system.
+The agent must be installed on the Mongodb system.
 
 ## Prerequisites
 

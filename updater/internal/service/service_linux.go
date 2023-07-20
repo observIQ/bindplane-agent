@@ -24,8 +24,8 @@ import (
 	"os/exec"
 	"path/filepath"
 
-	"github.com/observiq/observiq-otel-collector/updater/internal/file"
-	"github.com/observiq/observiq-otel-collector/updater/internal/path"
+	"github.com/observiq/bindplane-agent/updater/internal/file"
+	"github.com/observiq/bindplane-agent/updater/internal/path"
 	"go.uber.org/zap"
 )
 

@@ -1,23 +1,23 @@
-# Contributing to observiq-otel-collector
+# Contributing to bindplane-agent
 
 ## Pull Requests
 
 ### How to Submit Pull Requests
 
-Everyone is welcome to contribute code to `observiq-otel-collector` via GitHub pull requests (PRs).
+Everyone is welcome to contribute code to `bindplane-agent` via GitHub pull requests (PRs).
 
 To create a new PR, fork the project in GitHub and clone the upstream repo:
 
 ```sh
-$ git clone https://github.com/observiq/observiq-otel-collector
+$ git clone https://github.com/observIQ/bindplane-agent
 ```
 
-This would put the project in the `observiq-otel-collector` directory in current working directory.
+This would put the project in the `bindplane-agent` directory in current working directory.
 
 Enter the newly created directory and add your fork as a new remote:
 
 ```sh
-$ git remote add <YOUR_FORK> git@github.com:<YOUR_GITHUB_USERNAME>/observiq-otel-collector
+$ git remote add <YOUR_FORK> git@github.com:<YOUR_GITHUB_USERNAME>/bindplane-agent
 ```
 
 Check out a new branch, make modifications, run linters and tests, and push the branch to your fork:
@@ -31,7 +31,7 @@ $ git commit
 $ git push --set-upstream <YOUR_FORK> <YOUR_BRANCH_NAME>
 ```
 
-Open a pull request from your fork and feature branch to the main branch of the `observiq-otel-collector` repo.
+Open a pull request from your fork and feature branch to the main branch of the `bindplane-agent` repo.
 
 **Note**: If the PR is not ready for review, mark it as [`draft`](https://github.blog/2019-02-14-introducing-draft-pull-requests/).
 
@@ -39,7 +39,7 @@ Open a pull request from your fork and feature branch to the main branch of the 
 
 Our CI runs the following checks on each PR. You can run the following local commands to ensure your code is ready for PR:
 
-- Build (`make collector`)
+- Build (`make agent`)
 - CI Checks (`make ci-checks`)
 
 ### How to Receive Feedback
