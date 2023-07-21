@@ -24,6 +24,7 @@ parameters:
     default:
       # Excludes logs for the collector
       - "/var/log/containers/observiq-*-collector-*"
+      - "/var/log/containers/bindplane-*-agent-*"
   - name: body_json_parsing
     type: bool
     description: If the application log is detected as json, parse the values into the log entry's body.
