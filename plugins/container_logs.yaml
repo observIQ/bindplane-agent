@@ -1,4 +1,4 @@
-version: 0.5.0
+version: 0.5.1
 title: Kubernetes Container Logs
 description: Log parser for Kubernetes Container logs. This plugin is meant to be used with the OpenTelemetry Operator for Kubernetes (https://github.com/open-telemetry/opentelemetry-operator).
 parameters:
@@ -24,6 +24,7 @@ parameters:
     default:
       # Excludes logs for the collector
       - "/var/log/containers/observiq-*-collector-*"
+      - "/var/log/containers/bindplane-*-agent-*"
   - name: body_json_parsing
     type: bool
     description: If the application log is detected as json, parse the values into the log entry's body.
