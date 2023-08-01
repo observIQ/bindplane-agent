@@ -20,7 +20,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/observiq/observiq-otel-collector/updater/internal/file"
+	"github.com/observiq/bindplane-agent/updater/internal/file"
 	"go.uber.org/zap"
 )
 

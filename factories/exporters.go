@@ -15,9 +15,9 @@
 package factories
 
 import (
-	"github.com/observiq/observiq-otel-collector/exporter/googlecloudexporter"
-	"github.com/observiq/observiq-otel-collector/exporter/googlemanagedprometheusexporter"
-	"github.com/observiq/observiq-otel-collector/internal/version"
+	"github.com/observiq/bindplane-agent/exporter/googlecloudexporter"
+	"github.com/observiq/bindplane-agent/exporter/googlemanagedprometheusexporter"
+	"github.com/observiq/bindplane-agent/internal/version"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/alibabacloudlogserviceexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/awscloudwatchlogsexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/awsemfexporter"

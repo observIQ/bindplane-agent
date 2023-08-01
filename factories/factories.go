@@ -18,8 +18,8 @@ package factories
 import (
 	"fmt"
 
-	"github.com/observiq/observiq-otel-collector/internal/throughputwrapper"
-	"github.com/observiq/observiq-otel-collector/processor/throughputmeasurementprocessor"
+	"github.com/observiq/bindplane-agent/internal/throughputwrapper"
+	"github.com/observiq/bindplane-agent/processor/throughputmeasurementprocessor"
 	"go.opentelemetry.io/collector/connector"
 	"go.opentelemetry.io/collector/exporter"
 	"go.opentelemetry.io/collector/extension"
@@ -29,7 +29,7 @@ import (
 	"go.uber.org/multierr"
 )
 
-// DefaultFactories returns the default factories used by the observIQ Distro for OpenTelemetry Collector
+// DefaultFactories returns the default factories used by the BindPlane Agent
 func DefaultFactories() (otelcol.Factories, error) {
 	return combineFactories(defaultReceivers, defaultProcessors, defaultExporters, defaultExtensions, defaultConnectors)
 }

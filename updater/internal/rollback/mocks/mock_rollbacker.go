@@ -3,7 +3,7 @@
 package mocks
 
 import (
-	action "github.com/observiq/observiq-otel-collector/updater/internal/action"
+	action "github.com/observiq/bindplane-agent/updater/internal/action"
 	mock "github.com/stretchr/testify/mock"
 )
 

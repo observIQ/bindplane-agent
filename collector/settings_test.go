@@ -18,7 +18,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/observiq/observiq-otel-collector/factories"
+	"github.com/observiq/bindplane-agent/factories"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/filelogreceiver"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/component"

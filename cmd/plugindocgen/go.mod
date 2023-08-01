@@ -1,9 +1,9 @@
-module github.com/observiq/observiq-otel-collector/plugindocgen
+module github.com/observiq/bindplane-agent/plugindocgen
 
 go 1.19
 
 require (
-	github.com/observiq/observiq-otel-collector/receiver/pluginreceiver v1.30.0
+	github.com/observiq/bindplane-agent/receiver/pluginreceiver v1.31.0
 	github.com/spf13/pflag v1.0.5
 	gopkg.in/yaml.v3 v3.0.1
 )
@@ -82,7 +82,7 @@ require (
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
 
-replace github.com/observiq/observiq-otel-collector/receiver/pluginreceiver => ../../receiver/pluginreceiver
+replace github.com/observiq/bindplane-agent/receiver/pluginreceiver => ../../receiver/pluginreceiver
 
 // Fixes ambiguous import with google.cloud.com/go/compute/metadata
 replace cloud.google.com/go => cloud.google.com/go v0.105.0

@@ -29,7 +29,7 @@ import (
 	"golang.org/x/sys/windows/svc/mgr"
 
 	"github.com/kballard/go-shellquote"
-	"github.com/observiq/observiq-otel-collector/updater/internal/path"
+	"github.com/observiq/bindplane-agent/updater/internal/path"
 )
 
 const (

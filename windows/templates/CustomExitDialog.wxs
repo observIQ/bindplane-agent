@@ -10,11 +10,11 @@
                 <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="370" Height="0" />
                 <Control Id="InstallDescription" Hidden="yes" Type="Text" X="135" Y="70" Width="220" Height="80" Transparent="yes" NoPrefix="yes" Text="Config location: 
     [INSTALLDIR]config.yaml
-To stop the collector service, run: 
+To stop the agent service, run: 
     Stop-Service -Name observiq-otel-collector
-To start the collector service, run: 
+To start the agent service, run: 
     Start-Service -Name observiq-otel-collector
-To restart collector the service, run:
+To restart agent the service, run:
     Restart-Service -Name observiq-otel-collector" >
                     <Condition Action="show">NOT Installed</Condition>
                 </Control>
@@ -22,7 +22,7 @@ To restart collector the service, run:
                     <Condition Action="show">Installed</Condition>
                 </Control>
                 <Control Id="DocLink" Hidden="yes" Type="Hyperlink" X="135" Y="200" Width="220" Height="20" Transparent="yes">
-                    <Text><![CDATA[<a href="https://github.com/observIQ/observiq-otel-collector/blob/main/docs/installation-windows.md#configuring-the-collector">Click here for online documentation on configuration.</a>]]></Text>
+                    <Text><![CDATA[<a href="https://github.com/observIQ/bindplane-agent/blob/main/docs/installation-windows.md#configuring-the-agent">Click here for online documentation on configuration.</a>]]></Text>
                     <Condition Action="show">NOT Installed</Condition>
                 </Control>
                 <Control Id="Title" Type="Text" X="135" Y="20" Width="220" Height="60" Transparent="yes" NoPrefix="yes" Text="!(loc.ExitDialogTitle)" />

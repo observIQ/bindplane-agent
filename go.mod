@@ -1,28 +1,28 @@
-module github.com/observiq/observiq-otel-collector
+module github.com/observiq/bindplane-agent
 
 go 1.19
 
 require (
 	github.com/google/uuid v1.3.0
 	github.com/mholt/archiver/v3 v3.5.1
-	github.com/observiq/observiq-otel-collector/exporter/googlecloudexporter v1.30.0
-	github.com/observiq/observiq-otel-collector/exporter/googlemanagedprometheusexporter v1.30.0
-	github.com/observiq/observiq-otel-collector/packagestate v1.30.0
-	github.com/observiq/observiq-otel-collector/processor/datapointcountprocessor v1.30.0
-	github.com/observiq/observiq-otel-collector/processor/logcountprocessor v1.30.0
-	github.com/observiq/observiq-otel-collector/processor/logdeduplicationprocessor v1.30.0
-	github.com/observiq/observiq-otel-collector/processor/maskprocessor v1.30.0
-	github.com/observiq/observiq-otel-collector/processor/metricextractprocessor v1.30.0
-	github.com/observiq/observiq-otel-collector/processor/metricstatsprocessor v1.30.0
-	github.com/observiq/observiq-otel-collector/processor/removeemptyvaluesprocessor v1.30.0
-	github.com/observiq/observiq-otel-collector/processor/resourceattributetransposerprocessor v1.30.0
-	github.com/observiq/observiq-otel-collector/processor/samplingprocessor v1.30.0
-	github.com/observiq/observiq-otel-collector/processor/spancountprocessor v1.30.0
-	github.com/observiq/observiq-otel-collector/processor/throughputmeasurementprocessor v1.30.0
-	github.com/observiq/observiq-otel-collector/receiver/m365receiver v1.30.0
-	github.com/observiq/observiq-otel-collector/receiver/pluginreceiver v1.30.0
-	github.com/observiq/observiq-otel-collector/receiver/routereceiver v1.30.0
-	github.com/observiq/observiq-otel-collector/receiver/sapnetweaverreceiver v1.30.0
+	github.com/observiq/bindplane-agent/exporter/googlecloudexporter v1.31.0
+	github.com/observiq/bindplane-agent/exporter/googlemanagedprometheusexporter v1.31.0
+	github.com/observiq/bindplane-agent/packagestate v1.31.0
+	github.com/observiq/bindplane-agent/processor/datapointcountprocessor v1.31.0
+	github.com/observiq/bindplane-agent/processor/logcountprocessor v1.31.0
+	github.com/observiq/bindplane-agent/processor/logdeduplicationprocessor v1.31.0
+	github.com/observiq/bindplane-agent/processor/maskprocessor v1.31.0
+	github.com/observiq/bindplane-agent/processor/metricextractprocessor v1.31.0
+	github.com/observiq/bindplane-agent/processor/metricstatsprocessor v1.31.0
+	github.com/observiq/bindplane-agent/processor/removeemptyvaluesprocessor v1.31.0
+	github.com/observiq/bindplane-agent/processor/resourceattributetransposerprocessor v1.31.0
+	github.com/observiq/bindplane-agent/processor/samplingprocessor v1.31.0
+	github.com/observiq/bindplane-agent/processor/spancountprocessor v1.31.0
+	github.com/observiq/bindplane-agent/processor/throughputmeasurementprocessor v1.31.0
+	github.com/observiq/bindplane-agent/receiver/m365receiver v1.31.0
+	github.com/observiq/bindplane-agent/receiver/pluginreceiver v1.31.0
+	github.com/observiq/bindplane-agent/receiver/routereceiver v1.31.0
+	github.com/observiq/bindplane-agent/receiver/sapnetweaverreceiver v1.31.0
 	github.com/oklog/ulid/v2 v2.1.0
 	github.com/open-telemetry/opamp-go v0.2.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/connector/countconnector v0.81.0
@@ -202,8 +202,8 @@ require (
 	github.com/grafana/loki/pkg/push v0.0.0-20230127072203-4e8cc8d71928 // indirect
 	github.com/influxdata/influxdb-observability/otel2influx v0.5.2 // indirect
 	github.com/knadh/koanf/v2 v2.0.1 // indirect
-	github.com/observiq/observiq-otel-collector/counter v1.30.0 // indirect
-	github.com/observiq/observiq-otel-collector/expr v1.30.0 // indirect
+	github.com/observiq/bindplane-agent/counter v1.31.0 // indirect
+	github.com/observiq/bindplane-agent/expr v1.31.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlemanagedprometheusexporter v0.81.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/processor/servicegraphprocessor v0.81.0 // indirect
 	github.com/outcaste-io/ristretto v0.2.1 // indirect
@@ -222,8 +222,8 @@ require (
 	go.opentelemetry.io/collector/config/internal v0.81.0 // indirect
 	go.opentelemetry.io/collector/extension/auth v0.81.0 // indirect
 	go.opentelemetry.io/otel/bridge/opencensus v0.39.0 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20230530153820-e85fd2cbaebc // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20230629202037-9506855d4529 // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20230706204954-ccb25ca9f130 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20230711160842-782d3b101e98 // indirect
 	gopkg.in/zorkian/go-datadog-api.v2 v2.30.0 // indirect
 )
 
@@ -252,16 +252,16 @@ require (
 )
 
 require (
-	cloud.google.com/go v0.110.2 // indirect
-	cloud.google.com/go/compute v1.20.0 // indirect
+	cloud.google.com/go v0.110.4 // indirect
+	cloud.google.com/go/compute v1.20.1 // indirect
 	cloud.google.com/go/compute/metadata v0.2.4-0.20230617002413-005d2dfb6b68 // indirect
 	cloud.google.com/go/iam v1.1.0 // indirect
 	cloud.google.com/go/logging v1.7.0 // indirect
-	cloud.google.com/go/longrunning v0.5.0 // indirect
-	cloud.google.com/go/monitoring v1.13.0 // indirect
+	cloud.google.com/go/longrunning v0.5.1 // indirect
+	cloud.google.com/go/monitoring v1.15.1 // indirect
 	cloud.google.com/go/pubsub v1.32.0 // indirect
 	cloud.google.com/go/spanner v1.47.0 // indirect
-	cloud.google.com/go/trace v1.9.0 // indirect
+	cloud.google.com/go/trace v1.10.1 // indirect
 	code.cloudfoundry.org/clock v1.0.0 // indirect
 	code.cloudfoundry.org/go-diodes v0.0.0-20211115184647-b584dd5df32c // indirect
 	code.cloudfoundry.org/go-loggregator v7.4.0+incompatible // indirect
@@ -281,10 +281,10 @@ require (
 	github.com/Azure/go-autorest/logger v0.2.1 // indirect
 	github.com/Azure/go-autorest/tracing v0.6.0 // indirect
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/detectors/gcp v1.15.2 // indirect
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector v0.40.1 // indirect
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector v0.41.0 // indirect
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/googlemanagedprometheus v0.39.2 // indirect
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.16.1 // indirect
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.40.1 // indirect
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.17.0 // indirect
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.41.0 // indirect
 	github.com/Microsoft/go-winio v0.6.1 // indirect
 	github.com/ReneKroon/ttlcache/v2 v2.11.0 // indirect
 	github.com/SAP/go-hdb v1.3.9 // indirect
@@ -295,7 +295,7 @@ require (
 	github.com/alecthomas/units v0.0.0-20211218093645-b94a6e3cc137 // indirect
 	github.com/aliyun/aliyun-log-go-sdk v0.1.50 // indirect
 	github.com/andybalholm/brotli v1.0.1 // indirect
-	github.com/antonmedv/expr v1.12.5 // indirect
+	github.com/antonmedv/expr v1.12.7 // indirect
 	github.com/apache/arrow/go/arrow v0.0.0-20211112161151-bc219186db40 // indirect
 	github.com/apache/thrift v0.18.1 // indirect
 	github.com/armon/go-metrics v0.4.1 // indirect
@@ -390,7 +390,7 @@ require (
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/gofuzz v1.2.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.2.5 // indirect
-	github.com/googleapis/gax-go/v2 v2.11.0 // indirect
+	github.com/googleapis/gax-go/v2 v2.12.0 // indirect
 	github.com/gophercloud/gophercloud v1.2.0 // indirect
 	github.com/gorilla/mux v1.8.0 // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect
@@ -580,7 +580,7 @@ require (
 	golang.org/x/exp v0.0.0-20230522175609-2e198f4a06a1 // indirect
 	golang.org/x/mod v0.11.0 // indirect
 	golang.org/x/net v0.12.0 // indirect
-	golang.org/x/oauth2 v0.9.0 // indirect
+	golang.org/x/oauth2 v0.10.0 // indirect
 	golang.org/x/sync v0.3.0 // indirect
 	golang.org/x/term v0.10.0 // indirect
 	golang.org/x/text v0.11.0 // indirect
@@ -588,9 +588,9 @@ require (
 	golang.org/x/tools v0.10.0 // indirect
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
 	gonum.org/v1/gonum v0.13.0 // indirect
-	google.golang.org/api v0.130.0 // indirect
+	google.golang.org/api v0.132.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
-	google.golang.org/genproto v0.0.0-20230530153820-e85fd2cbaebc // indirect
+	google.golang.org/genproto v0.0.0-20230706204954-ccb25ca9f130 // indirect
 	google.golang.org/grpc v1.56.2 // indirect
 	google.golang.org/protobuf v1.31.0 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
@@ -610,45 +610,45 @@ require (
 	sigs.k8s.io/yaml v1.3.0 // indirect
 )
 
-replace github.com/observiq/observiq-otel-collector/processor/resourceattributetransposerprocessor => ./processor/resourceattributetransposerprocessor
+replace github.com/observiq/bindplane-agent/processor/resourceattributetransposerprocessor => ./processor/resourceattributetransposerprocessor
 
-replace github.com/observiq/observiq-otel-collector/receiver/pluginreceiver => ./receiver/pluginreceiver
+replace github.com/observiq/bindplane-agent/receiver/pluginreceiver => ./receiver/pluginreceiver
 
-replace github.com/observiq/observiq-otel-collector/receiver/m365receiver => ./receiver/m365receiver
+replace github.com/observiq/bindplane-agent/receiver/m365receiver => ./receiver/m365receiver
 
-replace github.com/observiq/observiq-otel-collector/receiver/routereceiver => ./receiver/routereceiver
+replace github.com/observiq/bindplane-agent/receiver/routereceiver => ./receiver/routereceiver
 
-replace github.com/observiq/observiq-otel-collector/receiver/sapnetweaverreceiver => ./receiver/sapnetweaverreceiver
+replace github.com/observiq/bindplane-agent/receiver/sapnetweaverreceiver => ./receiver/sapnetweaverreceiver
 
-replace github.com/observiq/observiq-otel-collector/exporter/googlecloudexporter => ./exporter/googlecloudexporter
+replace github.com/observiq/bindplane-agent/exporter/googlecloudexporter => ./exporter/googlecloudexporter
 
-replace github.com/observiq/observiq-otel-collector/packagestate => ./packagestate
+replace github.com/observiq/bindplane-agent/packagestate => ./packagestate
 
-replace github.com/observiq/observiq-otel-collector/processor/metricstatsprocessor => ./processor/metricstatsprocessor
+replace github.com/observiq/bindplane-agent/processor/metricstatsprocessor => ./processor/metricstatsprocessor
 
-replace github.com/observiq/observiq-otel-collector/processor/removeemptyvaluesprocessor => ./processor/removeemptyvaluesprocessor
+replace github.com/observiq/bindplane-agent/processor/removeemptyvaluesprocessor => ./processor/removeemptyvaluesprocessor
 
-replace github.com/observiq/observiq-otel-collector/processor/throughputmeasurementprocessor => ./processor/throughputmeasurementprocessor
+replace github.com/observiq/bindplane-agent/processor/throughputmeasurementprocessor => ./processor/throughputmeasurementprocessor
 
-replace github.com/observiq/observiq-otel-collector/processor/samplingprocessor => ./processor/samplingprocessor
+replace github.com/observiq/bindplane-agent/processor/samplingprocessor => ./processor/samplingprocessor
 
-replace github.com/observiq/observiq-otel-collector/processor/maskprocessor => ./processor/maskprocessor
+replace github.com/observiq/bindplane-agent/processor/maskprocessor => ./processor/maskprocessor
 
-replace github.com/observiq/observiq-otel-collector/processor/logcountprocessor => ./processor/logcountprocessor
+replace github.com/observiq/bindplane-agent/processor/logcountprocessor => ./processor/logcountprocessor
 
-replace github.com/observiq/observiq-otel-collector/processor/metricextractprocessor => ./processor/metricextractprocessor
+replace github.com/observiq/bindplane-agent/processor/metricextractprocessor => ./processor/metricextractprocessor
 
-replace github.com/observiq/observiq-otel-collector/processor/logdeduplicationprocessor => ./processor/logdeduplicationprocessor
+replace github.com/observiq/bindplane-agent/processor/logdeduplicationprocessor => ./processor/logdeduplicationprocessor
 
-replace github.com/observiq/observiq-otel-collector/processor/spancountprocessor => ./processor/spancountprocessor
+replace github.com/observiq/bindplane-agent/processor/spancountprocessor => ./processor/spancountprocessor
 
-replace github.com/observiq/observiq-otel-collector/processor/datapointcountprocessor => ./processor/datapointcountprocessor
+replace github.com/observiq/bindplane-agent/processor/datapointcountprocessor => ./processor/datapointcountprocessor
 
-replace github.com/observiq/observiq-otel-collector/expr => ./expr
+replace github.com/observiq/bindplane-agent/expr => ./expr
 
-replace github.com/observiq/observiq-otel-collector/counter => ./counter
+replace github.com/observiq/bindplane-agent/counter => ./counter
 
-replace github.com/observiq/observiq-otel-collector/exporter/googlemanagedprometheusexporter => ./exporter/googlemanagedprometheusexporter
+replace github.com/observiq/bindplane-agent/exporter/googlemanagedprometheusexporter => ./exporter/googlemanagedprometheusexporter
 
 // Does not build with windows and only used in configschema executable
 // Relevant issue https://github.com/mattn/go-ieproxy/issues/45

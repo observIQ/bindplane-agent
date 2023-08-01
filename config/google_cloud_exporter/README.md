@@ -33,7 +33,7 @@ A Google Cloud Service Account can used for authentication by creating a service
   - Metrics: `roles/monitoring.metricWriter`
   - Logs: `roles/logging.logWriter`
   - Traces: `roles/cloudtrace.agent`
-- [Create a service account json key](https://cloud.google.com/iam/docs/creating-managing-service-account-keys) and place it on the system that is running the collector.
+- [Create a service account json key](https://cloud.google.com/iam/docs/creating-managing-service-account-keys) and place it on the system that is running the agent.
 
 The `credentials_file` parameter can be set:
 ```yaml

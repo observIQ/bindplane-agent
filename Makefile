@@ -27,19 +27,19 @@ VERSION ?= $(if $(CURRENT_TAG),$(CURRENT_TAG),$(PREVIOUS_TAG))
 # Build binaries for current GOOS/GOARCH by default
 .DEFAULT_GOAL := build-binaries
 
-# Builds just the collector for current GOOS/GOARCH pair
-.PHONY: collector
-collector:
-	go build -ldflags "-s -w -X github.com/observiq/observiq-otel-collector/internal/version.version=$(VERSION)" -o $(OUTDIR)/collector_$(GOOS)_$(GOARCH)$(EXT) ./cmd/collector
+# Builds just the agent for current GOOS/GOARCH pair
+.PHONY: agent
+agent:
+	go build -ldflags "-s -w -X github.com/observiq/bindplane-agent/internal/version.version=$(VERSION)" -o $(OUTDIR)/collector_$(GOOS)_$(GOARCH)$(EXT) ./cmd/collector
 
 # Builds just the updater for current GOOS/GOARCH pair
 .PHONY: updater
 updater:
-	cd ./updater/; go build -ldflags "-s -w -X github.com/observiq/observiq-otel-collector/internal/version.version=$(VERSION)" -o ../$(OUTDIR)/updater_$(GOOS)_$(GOARCH)$(EXT) ./cmd/updater
+	cd ./updater/; go build -ldflags "-s -w -X github.com/observiq/bindplane-agent/internal/version.version=$(VERSION)" -o ../$(OUTDIR)/updater_$(GOOS)_$(GOARCH)$(EXT) ./cmd/updater
 
-# Builds the updater + collector for current GOOS/GOARCH pair
+# Builds the updater + agent for current GOOS/GOARCH pair
 .PHONY: build-binaries
-build-binaries: collector updater
+build-binaries: agent updater
 
 .PHONY: build-all
 build-all: build-linux build-darwin build-windows
@@ -216,7 +216,7 @@ for-all:
 	 	$${CMD} ); \
 	done
 
-# Release a new version of the collector. This will also tag all submodules
+# Release a new version of the agent. This will also tag all submodules
 .PHONY: release
 release:
 	@if [ -z "$(version)" ]; then \

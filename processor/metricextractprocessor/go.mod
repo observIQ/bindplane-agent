@@ -1,10 +1,10 @@
-module github.com/observiq/observiq-otel-collector/processor/metricextractprocessor
+module github.com/observiq/bindplane-agent/processor/metricextractprocessor
 
 go 1.19
 
 require (
-	github.com/observiq/observiq-otel-collector/expr v1.30.0
-	github.com/observiq/observiq-otel-collector/receiver/routereceiver v1.30.0
+	github.com/observiq/bindplane-agent/expr v1.31.0
+	github.com/observiq/bindplane-agent/receiver/routereceiver v1.31.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/ottl v0.81.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest v0.81.0
 	github.com/stretchr/testify v1.8.4
@@ -37,7 +37,7 @@ require (
 )
 
 require (
-	github.com/antonmedv/expr v1.12.5 // indirect; indirect // indirect
+	github.com/antonmedv/expr v1.12.7 // indirect; indirect // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
@@ -60,6 +60,6 @@ require (
 	google.golang.org/protobuf v1.31.0 // indirect
 )
 
-replace github.com/observiq/observiq-otel-collector/receiver/routereceiver => ../../receiver/routereceiver
+replace github.com/observiq/bindplane-agent/receiver/routereceiver => ../../receiver/routereceiver
 
-replace github.com/observiq/observiq-otel-collector/expr => ../../expr
+replace github.com/observiq/bindplane-agent/expr => ../../expr

@@ -4,7 +4,7 @@ The Journald receiver can be used to send [Journald](https://wiki.archlinux.org/
 
 ## Limitations
 
-The collector must be installed on the Journald system. The system must use Systemd as the init system, as Journald is the central logging solution for Systemd equipped systems. You can validate by running the `journalctl` command.
+The agent must be installed on the Journald system. The system must use Systemd as the init system, as Journald is the central logging solution for Systemd equipped systems. You can validate by running the `journalctl` command.
 
 ## Prerequisites
 

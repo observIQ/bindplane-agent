@@ -1,12 +1,12 @@
 # Kubernetes Telemetry with Google Cloud
 
-The collector is capable of sending Kubernetes telemetry to Google Cloud Monitoring.
+The agent is capable of sending Kubernetes telemetry to Google Cloud Monitoring.
 
 ## Deployment
 
 Deployment documentation can be found in our [observiq-otel-collector-k8s](https://github.com/observIQ/observiq-otel-collector-k8s) repository. 
 
-Deployments are cloud agnostic, meaning the collector(s) can run on most Kubernetes clusters, including development systems such as Minikube.
+Deployments are cloud agnostic, meaning the agent(s) can run on most Kubernetes clusters, including development systems such as Minikube.
 
 All metrics will show up under the following [Monitored resource types](https://cloud.google.com/monitoring/api/resources)
 - [k8s_cluster](https://cloud.google.com/monitoring/api/resources)

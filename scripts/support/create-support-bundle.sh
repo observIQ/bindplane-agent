@@ -103,7 +103,7 @@ usage() {
   increase_indent
   USAGE=$(cat <<EOF
 Usage:
-  Collects support bundle for observIQ Distro for OpenTelemetry Collector
+  Collects support bundle for BindPlane Agent
 EOF
   )
   info "$USAGE"

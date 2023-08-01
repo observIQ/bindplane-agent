@@ -32,7 +32,7 @@ To view logs from the collector, run:
   sudo tail -F /opt/observiq-otel-collector/log/collector.log
 
 For more information on configuring the collector, see the docs:
-  https://github.com/observiq/observiq-otel-collector/tree/main#observiq-opentelemetry-collector
+  https://github.com/observIQ/bindplane-agent/tree/main#observiq-opentelemetry-collector
 
 To stop the observiq-otel-collector service, run:
   sudo systemctl stop observiq-otel-collector

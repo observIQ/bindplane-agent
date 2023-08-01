@@ -19,7 +19,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/observiq/observiq-otel-collector/internal/service/mocks"
+	"github.com/observiq/bindplane-agent/internal/service/mocks"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"

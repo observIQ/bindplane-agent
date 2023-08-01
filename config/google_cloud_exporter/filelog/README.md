@@ -4,7 +4,7 @@ The Filelog receiver can be used to read log files and send the entries to Googl
 
 ## Limitations
 
-The collector must be installed on the target system. The user running the collector must have permission to read the files targeted by the Filelog receiver's configuration.
+The agent must be installed on the target system. The user running the agent must have permission to read the files targeted by the Filelog receiver's configuration.
 
 ## Prerequisites
 

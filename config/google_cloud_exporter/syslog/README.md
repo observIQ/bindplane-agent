@@ -11,7 +11,7 @@ See the [prerequisites](../README.md) doc for Google Cloud prerequisites.
 **Rsyslog RFC 3164**
 
 Configure [Rsyslog forwarding](https://www.rsyslog.com/sending-messages-to-a-remote-syslog-server/) to the agent system. In this example,
-the collector is installed on the Rsyslog system.
+the agent is installed on the Rsyslog system.
 
 ```
 *.* action(type="omfwd" target="localhost" port="5140" protocol="udp")
