@@ -53,7 +53,7 @@ parameters:
     default: end
   # Apache Druid logs do not include a timezone in their timestamps, so we need to set it explicitly.
   - name: timezone
-    description: Timezone to use when parsing the timestamp
+    description: Timezone to use when parsing the timestamp, since the log timestamp does not contain a timezone.
     type: timezone
     default: UTC
   - name: retain_raw_logs
