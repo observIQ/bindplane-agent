@@ -15,6 +15,7 @@
 package factories
 
 import (
+	"github.com/observiq/bindplane-agent/receiver/apachedruidreceiver"
 	"github.com/observiq/bindplane-agent/receiver/m365receiver"
 	"github.com/observiq/bindplane-agent/receiver/pluginreceiver"
 	"github.com/observiq/bindplane-agent/receiver/routereceiver"
@@ -87,6 +88,7 @@ import (
 )
 
 var defaultReceivers = []receiver.Factory{
+	apachedruidreceiver.NewFactory(),
 	activedirectorydsreceiver.NewFactory(),
 	aerospikereceiver.NewFactory(),
 	apachereceiver.NewFactory(),

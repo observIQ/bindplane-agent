@@ -1,0 +1,43 @@
+default:
+all_set:
+  metrics:
+    apachedruid.average_sql_query_bytes:
+      enabled: true
+    apachedruid.average_sql_query_time:
+      enabled: true
+    apachedruid.failed_query_count:
+      enabled: true
+    apachedruid.interrupted_query_count:
+      enabled: true
+    apachedruid.query_count:
+      enabled: true
+    apachedruid.sql_query_count:
+      enabled: true
+    apachedruid.success_query_count:
+      enabled: true
+    apachedruid.timeout_query_count:
+      enabled: true
+  resource_attributes:
+    apachedruid.service:
+      enabled: true
+none_set:
+  metrics:
+    apachedruid.average_sql_query_bytes:
+      enabled: false
+    apachedruid.average_sql_query_time:
+      enabled: false
+    apachedruid.failed_query_count:
+      enabled: false
+    apachedruid.interrupted_query_count:
+      enabled: false
+    apachedruid.query_count:
+      enabled: false
+    apachedruid.sql_query_count:
+      enabled: false
+    apachedruid.success_query_count:
+      enabled: false
+    apachedruid.timeout_query_count:
+      enabled: false
+  resource_attributes:
+    apachedruid.service:
+      enabled: false

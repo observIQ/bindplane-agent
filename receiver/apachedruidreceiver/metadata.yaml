@@ -1,0 +1,86 @@
+type: apachedruidreceiver
+
+status:
+  class: receiver
+  stability:
+    alpha: [metrics]
+
+resource_attributes:
+  apachedruid.service:
+    description: Name of the Druid service
+    type: string
+    enabled: true
+
+attributes:
+  data_source:
+    description: Name of the Druid table being queried.
+    type: string
+
+metrics:
+  apachedruid.query_count:
+    enabled: true
+    description: Number of queries executed.
+    sum:
+      value_type: int
+      monotonic: false
+      aggregation: cumulative
+    unit: "{ query }"
+  apachedruid.success_query_count:
+    enabled: true
+    description: Number of successful queries.
+    sum:
+      value_type: int
+      monotonic: false
+      aggregation: cumulative
+    attributes: []
+    unit: "{ query }"
+  apachedruid.failed_query_count:
+    enabled: true
+    description: Number of failed queries.
+    sum:
+      value_type: int
+      monotonic: false
+      aggregation: cumulative
+    attributes: []
+    unit: "{ query }"
+  apachedruid.interrupted_query_count:
+    enabled: true
+    description: Number of interrupted queries.
+    sum:
+      value_type: int
+      monotonic: false
+      aggregation: cumulative
+    attributes: []
+    unit: "{ query }"
+  apachedruid.timeout_query_count:
+    enabled: true
+    description: Number of timed out queries.
+    sum:
+      value_type: int
+      monotonic: false
+      aggregation: cumulative
+    attributes: []
+    unit: "{ query }"
+  apachedruid.average_sql_query_time:
+    enabled: true
+    description: Average number of milliseconds taken to complete a SQL query.
+    unit: ms
+    gauge:
+      value_type: double
+    attributes: ["data_source"]
+  apachedruid.average_sql_query_bytes:
+    enabled: true
+    description: Average number of bytes returned by a SQL query.
+    gauge:
+      value_type: double
+    attributes: ["data_source"]
+    unit: bytes
+  apachedruid.sql_query_count:
+    enabled: true
+    description: Number of SQL queries executed.
+    sum:
+      value_type: int
+      monotonic: false
+      aggregation: cumulative
+    attributes: ["data_source"]
+    unit: "{ sql_query }"
