@@ -24,11 +24,16 @@ import (
 	"os/signal"
 	"path/filepath"
 	"syscall"
+	"time"
 
 	"go.uber.org/zap"
 	"golang.org/x/sys/windows"
 	"golang.org/x/sys/windows/svc"
 )
+
+// windowsServiceShutdownTimeout is the amount of time to wait for the underlying service to stop before
+// forcefully stopping the process.
+var windowsServiceShutdownTimeout = 20 * time.Second
 
 // The following constants specify error codes for the service.
 // See https://docs.microsoft.com/en-us/windows/win32/debug/system-error-codes--1000-1299-
@@ -145,7 +150,18 @@ func (sh windowsServiceHandler) shutdown(s chan<- svc.Status) error {
 	stopTimeoutCtx, stopCancel := context.WithTimeout(context.Background(), stopTimeout)
 	defer stopCancel()
 
-	err := sh.svc.Stop(stopTimeoutCtx)
+	stopErrChan := make(chan error, 1)
+	go func() {
+		stopErrChan <- sh.svc.Stop(stopTimeoutCtx)
+	}()
+
+	var err error
+	select {
+	case <-time.After(windowsServiceShutdownTimeout):
+		err = errors.New("the service failed to shut down in a timely manner")
+	case stopErr := <-stopErrChan:
+		err = stopErr
+	}
 
 	s <- svc.Status{State: svc.Stopped}
 
