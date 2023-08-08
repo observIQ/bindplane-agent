@@ -116,7 +116,11 @@ func (w windowsService) Stop() error {
 	defer s.Close()
 
 	if _, err := s.Control(svc.Stop); err != nil {
-		return fmt.Errorf("failed to start service: %w", err)
+		return fmt.Errorf("failed to stop service: %w", err)
+	}
+
+	if err := waitForServiceStatus(s, svc.Stopped); err != nil {
+		return fmt.Errorf("failed waiting for service to stop: %w", err)
 	}
 
 	return nil
@@ -377,6 +381,19 @@ func configStartType(winapiStartType uint32, delayed bool) (string, error) {
 		return "manual", nil
 	default:
 		return "", fmt.Errorf("invalid winapi start type: %d", winapiStartType)
+	}
+}
+
+func waitForServiceStatus(s *mgr.Service, status svc.State) error {
+	for {
+		svc, err := s.Query()
+		if err != nil {
+			return err
+		}
+		if svc.State == status {
+			return nil
+		}
+		time.Sleep(200 * time.Millisecond)
 	}
 }
 
