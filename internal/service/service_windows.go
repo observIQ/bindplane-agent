@@ -158,7 +158,7 @@ func (sh windowsServiceHandler) shutdown(s chan<- svc.Status) error {
 	var err error
 	select {
 	case <-time.After(windowsServiceShutdownTimeout):
-		err = errors.New("the service failed to shut down in a timely manner")
+		err = fmt.Errorf("the service failed to shut down in a timely manner (timeout: %s)", windowsServiceShutdownTimeout)
 	case stopErr := <-stopErrChan:
 		err = stopErr
 	}
