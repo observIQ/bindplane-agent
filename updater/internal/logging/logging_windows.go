@@ -22,6 +22,7 @@ import (
 
 	"github.com/observiq/bindplane-agent/updater/internal/path"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 var registerSinkOnce = &sync.Once{}
@@ -51,6 +52,8 @@ func NewLogger(installDir string) (*zap.Logger, error) {
 	conf.OutputPaths = []string{
 		"winfile:///" + logFile,
 	}
+	conf.Level.SetLevel(zapcore.DebugLevel)
+	conf.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
 
 	prodLogger, err := conf.Build()
 	if err != nil {

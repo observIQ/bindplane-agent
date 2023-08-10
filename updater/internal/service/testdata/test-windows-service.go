@@ -16,6 +16,7 @@ package main
 
 import (
 	"log"
+	"time"
 
 	"golang.org/x/sys/windows/svc"
 )
@@ -47,6 +48,7 @@ func (sh *windowsService) Execute(args []string, r <-chan svc.ChangeRequest, s c
 		case svc.Interrogate:
 			s <- req.CurrentStatus
 		case svc.Stop, svc.Shutdown:
+			time.Sleep(5 * time.Second)
 			return false, 0
 		default:
 			return false, 1052
