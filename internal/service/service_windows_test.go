@@ -277,6 +277,86 @@ func TestWindowsServiceHandler(t *testing.T) {
 		require.Equal(t, statusCodeServiceException, statusCode, "status code was not ServiceException")
 	})
 
+	t.Run("Shutdown takes too long", func(t *testing.T) {
+		setWindowsServiceTimeout(t, 10*time.Millisecond)
+		rSvc := &mocks.MockRunnableService{}
+
+		blockStopChan := make(chan struct{}, 1)
+		t.Cleanup(func() {
+			blockStopChan <- struct{}{}
+		})
+
+		rSvc.On("Start", mock.Anything).Return(nil)
+		rSvc.On("Error").Return((<-chan error)(make(chan error)))
+		rSvc.On("Stop", mock.Anything).Run(func(args mock.Arguments) { <-blockStopChan }).Return(nil)
+
+		svcHandler := newWindowsServiceHandler(zap.NewNop(), rSvc)
+
+		changeChan := make(chan svc.ChangeRequest)
+		statusChan := make(chan svc.Status, 6)
+		svcHandlerDone := make(chan struct{})
+
+		var isSvcSpecificStatus bool
+		var statusCode uint32
+		go func() {
+			isSvcSpecificStatus, statusCode = svcHandler.Execute([]string{"service-name"}, changeChan, statusChan)
+			close(svcHandlerDone)
+		}()
+
+		select {
+		case status := <-statusChan:
+			require.Equal(t, svc.Status{State: svc.StartPending}, status)
+		case <-time.After(time.Second):
+			t.Fatalf("Timed out waiting for service status change to start pending")
+		}
+
+		select {
+		case status := <-statusChan:
+			require.Equal(t, svc.Status{State: svc.Running, Accepts: svc.AcceptStop | svc.AcceptShutdown}, status)
+		case <-time.After(time.Second):
+			t.Fatalf("Timed out waiting for service status change to running")
+		}
+
+		changeChan <- svc.ChangeRequest{
+			Cmd:           svc.Interrogate,
+			CurrentStatus: svc.Status{State: svc.Running, Accepts: svc.AcceptStop | svc.AcceptShutdown},
+		}
+
+		select {
+		case status := <-statusChan:
+			require.Equal(t, svc.Status{State: svc.Running, Accepts: svc.AcceptStop | svc.AcceptShutdown}, status)
+		case <-time.After(time.Second):
+			t.Fatalf("Timed out waiting for interrogate response")
+		}
+
+		changeChan <- svc.ChangeRequest{
+			Cmd: svc.Stop,
+		}
+
+		select {
+		case status := <-statusChan:
+			require.Equal(t, svc.Status{State: svc.StopPending}, status)
+		case <-time.After(time.Second):
+			t.Fatalf("Timed out waiting for status change to stop pending")
+		}
+
+		select {
+		case status := <-statusChan:
+			require.Equal(t, svc.Status{State: svc.Stopped}, status)
+		case <-time.After(time.Second):
+			t.Fatalf("Timed out waiting for status change to stopped")
+		}
+
+		select {
+		case <-svcHandlerDone: // OK
+		case <-time.After(time.Second):
+			t.Fatalf("Timed out waiting for service handler to return")
+		}
+
+		require.Equal(t, false, isSvcSpecificStatus, "status code marked as service specific")
+		require.Equal(t, statusCodeServiceException, statusCode, "status code was not ServiceException")
+	})
+
 	t.Run("Shutdown error after unexpected error", func(t *testing.T) {
 		rSvc := &mocks.MockRunnableService{}
 		stopError := errors.New("Failed to start service")
@@ -512,5 +592,13 @@ func TestWindowsServiceHandler(t *testing.T) {
 
 		require.Equal(t, false, isSvcSpecificStatus, "status code marked as service specific")
 		require.Equal(t, uint32(statusCodeInvalidServiceName), statusCode, "status code was not InvalidServiceName")
+	})
+}
+
+func setWindowsServiceTimeout(t *testing.T, d time.Duration) {
+	old := windowsServiceShutdownTimeout
+	windowsServiceShutdownTimeout = d
+	t.Cleanup(func() {
+		windowsServiceShutdownTimeout = old
 	})
 }
