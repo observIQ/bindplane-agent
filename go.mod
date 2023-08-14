@@ -5,25 +5,25 @@ go 1.19
 require (
 	github.com/google/uuid v1.3.0
 	github.com/mholt/archiver/v3 v3.5.1
-	github.com/observiq/bindplane-agent/exporter/googlecloudexporter v1.32.0
-	github.com/observiq/bindplane-agent/exporter/googlemanagedprometheusexporter v1.32.0
-	github.com/observiq/bindplane-agent/packagestate v1.32.0
-	github.com/observiq/bindplane-agent/processor/datapointcountprocessor v1.32.0
-	github.com/observiq/bindplane-agent/processor/logcountprocessor v1.32.0
-	github.com/observiq/bindplane-agent/processor/logdeduplicationprocessor v1.32.0
-	github.com/observiq/bindplane-agent/processor/maskprocessor v1.32.0
-	github.com/observiq/bindplane-agent/processor/metricextractprocessor v1.32.0
-	github.com/observiq/bindplane-agent/processor/metricstatsprocessor v1.32.0
-	github.com/observiq/bindplane-agent/processor/removeemptyvaluesprocessor v1.32.0
-	github.com/observiq/bindplane-agent/processor/resourceattributetransposerprocessor v1.32.0
-	github.com/observiq/bindplane-agent/processor/samplingprocessor v1.32.0
-	github.com/observiq/bindplane-agent/processor/spancountprocessor v1.32.0
-	github.com/observiq/bindplane-agent/processor/throughputmeasurementprocessor v1.32.0
-	github.com/observiq/bindplane-agent/receiver/apachedruidreceiver v1.32.0
-	github.com/observiq/bindplane-agent/receiver/m365receiver v1.32.0
-	github.com/observiq/bindplane-agent/receiver/pluginreceiver v1.32.0
-	github.com/observiq/bindplane-agent/receiver/routereceiver v1.32.0
-	github.com/observiq/bindplane-agent/receiver/sapnetweaverreceiver v1.32.0
+	github.com/observiq/bindplane-agent/exporter/googlecloudexporter v1.33.0
+	github.com/observiq/bindplane-agent/exporter/googlemanagedprometheusexporter v1.33.0
+	github.com/observiq/bindplane-agent/packagestate v1.33.0
+	github.com/observiq/bindplane-agent/processor/datapointcountprocessor v1.33.0
+	github.com/observiq/bindplane-agent/processor/logcountprocessor v1.33.0
+	github.com/observiq/bindplane-agent/processor/logdeduplicationprocessor v1.33.0
+	github.com/observiq/bindplane-agent/processor/maskprocessor v1.33.0
+	github.com/observiq/bindplane-agent/processor/metricextractprocessor v1.33.0
+	github.com/observiq/bindplane-agent/processor/metricstatsprocessor v1.33.0
+	github.com/observiq/bindplane-agent/processor/removeemptyvaluesprocessor v1.33.0
+	github.com/observiq/bindplane-agent/processor/resourceattributetransposerprocessor v1.33.0
+	github.com/observiq/bindplane-agent/processor/samplingprocessor v1.33.0
+	github.com/observiq/bindplane-agent/processor/spancountprocessor v1.33.0
+	github.com/observiq/bindplane-agent/processor/throughputmeasurementprocessor v1.33.0
+	github.com/observiq/bindplane-agent/receiver/apachedruidreceiver v1.33.0
+	github.com/observiq/bindplane-agent/receiver/m365receiver v1.33.0
+	github.com/observiq/bindplane-agent/receiver/pluginreceiver v1.33.0
+	github.com/observiq/bindplane-agent/receiver/routereceiver v1.33.0
+	github.com/observiq/bindplane-agent/receiver/sapnetweaverreceiver v1.33.0
 	github.com/oklog/ulid/v2 v2.1.0
 	github.com/open-telemetry/opamp-go v0.2.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/connector/countconnector v0.82.0
@@ -143,7 +143,7 @@ require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/windowsperfcountersreceiver v0.82.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/zipkinreceiver v0.82.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/zookeeperreceiver v0.82.0
-	github.com/shirou/gopsutil/v3 v3.23.6
+	github.com/shirou/gopsutil/v3 v3.23.7
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.8.4
 	go.opencensus.io v0.24.0
@@ -169,7 +169,7 @@ require (
 	go.opentelemetry.io/collector/receiver/otlpreceiver v0.82.0
 	go.uber.org/multierr v1.11.0
 	go.uber.org/zap v1.25.0
-	golang.org/x/sys v0.10.0
+	golang.org/x/sys v0.11.0
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
 	gopkg.in/yaml.v3 v3.0.1
 )
@@ -204,8 +204,8 @@ require (
 	github.com/grafana/loki/pkg/push v0.0.0-20230127072203-4e8cc8d71928 // indirect
 	github.com/influxdata/influxdb-observability/otel2influx v0.5.5 // indirect
 	github.com/knadh/koanf/v2 v2.0.1 // indirect
-	github.com/observiq/bindplane-agent/counter v1.32.0 // indirect
-	github.com/observiq/bindplane-agent/expr v1.32.0 // indirect
+	github.com/observiq/bindplane-agent/counter v1.33.0 // indirect
+	github.com/observiq/bindplane-agent/expr v1.33.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlemanagedprometheusexporter v0.82.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/processor/servicegraphprocessor v0.82.0 // indirect
 	github.com/outcaste-io/ristretto v0.2.1 // indirect
@@ -232,7 +232,7 @@ require (
 	go.opentelemetry.io/otel/exporters/stdout/stdouttrace v1.16.0 // indirect
 	go.opentelemetry.io/proto/otlp v0.19.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20230706204954-ccb25ca9f130 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20230720185612-659f7aaaa771 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20230726155614-23370e0ffb3e // indirect
 	gopkg.in/zorkian/go-datadog-api.v2 v2.30.0 // indirect
 	sigs.k8s.io/controller-runtime v0.15.0 // indirect
 )
@@ -597,7 +597,7 @@ require (
 	golang.org/x/tools v0.11.0 // indirect
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
 	gonum.org/v1/gonum v0.13.0 // indirect
-	google.golang.org/api v0.134.0 // indirect
+	google.golang.org/api v0.135.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20230706204954-ccb25ca9f130 // indirect
 	google.golang.org/grpc v1.57.0 // indirect

@@ -36,6 +36,7 @@ func NewLogger(installDir string) (*zap.Logger, error) {
 		logFile,
 	}
 	conf.Level.SetLevel(zapcore.DebugLevel)
+	conf.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
 
 	err := os.RemoveAll(logFile)
 	if err != nil {
