@@ -1743,8 +1743,8 @@ github.com/open-telemetry/opentelemetry-collector-contrib/receiver/awsfirehosere
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/awsfirehosereceiver v0.82.0/go.mod h1:7tD5+HCkx71fum+cGPevyiMaYlJq0clFliTuGKkWyPg=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/awsxrayreceiver v0.82.0 h1:aZ7P5unH4YlZTEt+eh0ojkhtOj3xKqo8Ywat5+dHAzM=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/awsxrayreceiver v0.82.0/go.mod h1:ouGAw/O/qJWPen9L4BPeHXTUANRwafYyWU/yvk1GEdY=
-github.com/open-telemetry/opentelemetry-collector-contrib/receiver/azureblobreceiver v0.83.0 h1:vYLCTrV46oQWeyf8pjF8Ckpqs8AfGvOF2FEXazyX4Y8=
-github.com/open-telemetry/opentelemetry-collector-contrib/receiver/azureblobreceiver v0.83.0/go.mod h1:ojJmB9MY2+qw8tHFccF/3vFTyTryyzYEZsTUEXl0nhc=
+github.com/open-telemetry/opentelemetry-collector-contrib/receiver/azureblobreceiver v0.82.0 h1:bNqCLRuZKfWBI3JgUS3KxGFJ5EyHh9fNXxrIvMlNpv8=
+github.com/open-telemetry/opentelemetry-collector-contrib/receiver/azureblobreceiver v0.82.0/go.mod h1:yEHMhSgDrxSR3DC3tPW1pl3gpx1oNJc2ZVUvYnb1cTk=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/azureeventhubreceiver v0.82.0 h1:MxWC2JiZERpDCGDvGRLrtO5PHsBPWWI674Hh4yXZjqs=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/azureeventhubreceiver v0.82.0/go.mod h1:vPzXLICG8xxPhAmaCdiouTMxDyP1rxNERAkf4mqyHC4=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/bigipreceiver v0.82.0 h1:YccZy2FGXswLjcZrAJuz2v4kA+rmRpMFa6O5wm9SnXM=
