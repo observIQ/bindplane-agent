@@ -1,6 +1,6 @@
 module github.com/observiq/bindplane-agent
 
-go 1.19
+go 1.20
 
 require (
 	github.com/google/uuid v1.3.0

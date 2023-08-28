@@ -1,6 +1,6 @@
 module github.com/observiq/bindplane-agent/plugindocgen
 
-go 1.19
+go 1.20
 
 require (
 	github.com/observiq/bindplane-agent/receiver/pluginreceiver v1.33.0

@@ -13,7 +13,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v3
         with:
-          go-version: "1.19"
+          go-version: "1.20"
           check-latest: true
           cache: true
           cache-dependency-path: '**/go.sum'
@@ -74,7 +74,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v3
         with:
-          go-version: "1.19"
+          go-version: "1.20"
           check-latest: true
           cache: true
           cache-dependency-path: '**/go.sum'
@@ -141,7 +141,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v3
         with:
-          go-version: "1.19"
+          go-version: "1.20"
           check-latest: true
           cache: true
           cache-dependency-path: '**/go.sum'

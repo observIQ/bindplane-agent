@@ -1,6 +1,6 @@
 module github.com/observiq/bindplane-agent/packagestate
 
-go 1.19
+go 1.20
 
 require (
 	github.com/open-telemetry/opamp-go v0.2.0

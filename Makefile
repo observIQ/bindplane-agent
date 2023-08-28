@@ -134,7 +134,7 @@ fmt:
 
 .PHONY: tidy
 tidy:
-	$(MAKE) for-all CMD="go mod tidy -compat=1.19"
+	$(MAKE) for-all CMD="go mod tidy -compat=1.20"
 
 .PHONY: gosec
 gosec:
