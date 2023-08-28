@@ -23,6 +23,10 @@ override:
     licenses: ["Apache-2.0"] # Actual packages used in the Loki exporter are Apache-2.0 https://github.com/grafana/loki/blob/main/pkg/logproto/LICENSE_APACHE2
   - path: "github.com/apache/arrow/go/arrow"
     licenses: ["Apache-2.0"] # Actual license is Apache-2.0 https://github.com/apache/arrow/blob/master/go/LICENSE.txt
+  - path: "github.com/apache/arrow/go/v12"
+    licenses: ["Apache-2.0"] # Actual license is Apache-2.0 https://github.com/apache/arrow/blob/master/go/LICENSE.txt
+  - path: "github.com/JohnCGriffin/overflow"
+    licenses: ["MIT"] # License is embedded in the readme https://github.com/JohnCGriffin/overflow/blob/master/README.md
 
 exceptions:
   licenseNotPermitted:
