@@ -3,7 +3,7 @@ module github.com/observiq/bindplane-agent
 go 1.20
 
 require (
-	github.com/google/uuid v1.3.0
+	github.com/google/uuid v1.3.1
 	github.com/mholt/archiver/v3 v3.5.1
 	github.com/observiq/bindplane-agent/exporter/googlecloudexporter v1.33.0
 	github.com/observiq/bindplane-agent/exporter/googlemanagedprometheusexporter v1.33.0
