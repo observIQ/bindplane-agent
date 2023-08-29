@@ -28,6 +28,7 @@ import (
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/awsecscontainermetricsreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/awsfirehosereceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/awsxrayreceiver"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/azureblobreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/azureeventhubreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/bigipreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/carbonreceiver"
@@ -96,6 +97,7 @@ var defaultReceivers = []receiver.Factory{
 	awsecscontainermetricsreceiver.NewFactory(),
 	awsfirehosereceiver.NewFactory(),
 	awsxrayreceiver.NewFactory(),
+	azureblobreceiver.NewFactory(),
 	azureeventhubreceiver.NewFactory(),
 	bigipreceiver.NewFactory(),
 	carbonreceiver.NewFactory(),
