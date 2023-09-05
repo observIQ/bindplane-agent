@@ -32,9 +32,9 @@ builds:
         goarch: "386"
     ldflags:
       - -s -w
-      - -X github.com/observiq/bindplane-agent/internal/version.version=v{{ .Version }}
-      - -X github.com/observiq/bindplane-agent/internal/version.gitHash={{ .FullCommit }}
-      - -X github.com/observiq/bindplane-agent/internal/version.date={{ .Date }}
+      - -X github.com/observiq/bindplane-agent/version.version=v{{ .Version }}
+      - -X github.com/observiq/bindplane-agent/version.gitHash={{ .FullCommit }}
+      - -X github.com/observiq/bindplane-agent/version.date={{ .Date }}
     no_unique_dist_dir: false
   - id: updater
     binary: updater

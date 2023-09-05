@@ -26,9 +26,9 @@ import (
 
 	"github.com/observiq/bindplane-agent/collector"
 	"github.com/observiq/bindplane-agent/internal/report"
-	"github.com/observiq/bindplane-agent/internal/version"
 	"github.com/observiq/bindplane-agent/opamp"
 	"github.com/observiq/bindplane-agent/packagestate"
+	"github.com/observiq/bindplane-agent/version"
 	"github.com/open-telemetry/opamp-go/client"
 	"github.com/open-telemetry/opamp-go/client/types"
 	"github.com/open-telemetry/opamp-go/protobufs"
