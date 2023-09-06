@@ -18,7 +18,6 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/observiq/bindplane-agent/internal/version"
 	"github.com/observiq/bindplane-agent/opamp"
 	"github.com/open-telemetry/opamp-go/protobufs"
 	"github.com/stretchr/testify/assert"
@@ -39,7 +38,9 @@ func Test_newIdentity(t *testing.T) {
 		AgentName: &agentNameContents,
 	}
 
-	got := newIdentity(zap.NewNop(), cfg)
+	expectedVersion := "0.0.0"
+
+	got := newIdentity(zap.NewNop(), cfg, expectedVersion)
 
 	// Check all fields from config
 	require.Equal(t, cfg.AgentID, got.agentID)
@@ -53,7 +54,7 @@ func Test_newIdentity(t *testing.T) {
 
 	// Check hardcoded/fields from runtime and other packages
 	require.Equal(t, got.serviceName, "com.observiq.collector")
-	require.Equal(t, got.version, version.Version())
+	require.Equal(t, got.version, expectedVersion)
 	require.Equal(t, got.oSArch, runtime.GOARCH)
 	require.Equal(t, got.oSFamily, runtime.GOOS)
 }

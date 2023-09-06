@@ -20,6 +20,7 @@ import (
 	"fmt"
 
 	"github.com/observiq/bindplane-agent/collector"
+	"github.com/observiq/bindplane-agent/internal/version"
 	"github.com/observiq/bindplane-agent/opamp"
 	"github.com/observiq/bindplane-agent/opamp/observiq"
 	"go.uber.org/zap"
@@ -48,6 +49,7 @@ func NewManagedCollectorService(col collector.Collector, logger *zap.Logger, man
 		DefaultLogger:       logger,
 		Config:              *opampConfig,
 		Collector:           col,
+		Version:             version.Version(),
 		TmpPath:             "./tmp",
 		ManagerConfigPath:   managerConfigPath,
 		CollectorConfigPath: collectorConfigPath,

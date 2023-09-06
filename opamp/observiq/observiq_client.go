@@ -73,6 +73,7 @@ type NewClientArgs struct {
 	DefaultLogger *zap.Logger
 	Config        opamp.Config
 	Collector     collector.Collector
+	Version       string
 
 	TmpPath             string
 	ManagerConfigPath   string
@@ -104,7 +105,7 @@ func NewClient(args *NewClientArgs) (opamp.Client, error) {
 
 	observiqClient := &Client{
 		logger:                  clientLogger,
-		ident:                   newIdentity(clientLogger, args.Config),
+		ident:                   newIdentity(clientLogger, args.Config, args.Version),
 		configManager:           configManager,
 		downloadableFileManager: newDownloadableFileManager(clientLogger, args.TmpPath),
 		collector:               args.Collector,

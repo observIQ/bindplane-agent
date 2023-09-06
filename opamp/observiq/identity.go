@@ -18,7 +18,6 @@ import (
 	"runtime"
 
 	ios "github.com/observiq/bindplane-agent/internal/os"
-	"github.com/observiq/bindplane-agent/internal/version"
 	"github.com/observiq/bindplane-agent/opamp"
 	"github.com/open-telemetry/opamp-go/protobufs"
 	"go.uber.org/zap"
@@ -39,7 +38,7 @@ type identity struct {
 }
 
 // newIdentity constructs a new identity for this collector
-func newIdentity(logger *zap.Logger, config opamp.Config) *identity {
+func newIdentity(logger *zap.Logger, config opamp.Config, version string) *identity {
 	// Grab various fields from OS
 	hostname, err := ios.Hostname()
 	if err != nil {
@@ -55,7 +54,7 @@ func newIdentity(logger *zap.Logger, config opamp.Config) *identity {
 		agentID:     config.AgentID,
 		agentName:   config.AgentName,
 		serviceName: "com.observiq.collector", // Hardcoded defines this type of agent to the server
-		version:     version.Version(),
+		version:     version,
 		labels:      config.Labels,
 		oSArch:      runtime.GOARCH,
 		oSDetails:   name,
