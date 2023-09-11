@@ -3,6 +3,8 @@ package azureblobexporter // import "github.com/observiq/bindplane-agent/exporte
 import (
 	"errors"
 	"fmt"
+
+	"go.opentelemetry.io/collector/exporter/exporterhelper"
 )
 
 // partitionType is the type of partition to store blobs under
@@ -14,6 +16,10 @@ const (
 )
 
 type Config struct {
+	exporterhelper.TimeoutSettings `mapstructure:",squash"` // squash ensures fields are correctly decoded in embedded struct.
+	exporterhelper.QueueSettings   `mapstructure:"sending_queue"`
+	exporterhelper.RetrySettings   `mapstructure:"retry_on_failure"`
+
 	// Azure Blob Storage connection key,
 	// which can be found in the Azure Blob Storage resource on the Azure Portal. (no default)
 	ConnectionString string `mapstructure:"connection_string"`
