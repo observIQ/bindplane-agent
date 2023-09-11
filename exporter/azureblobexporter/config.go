@@ -11,8 +11,8 @@ import (
 type partitionType string
 
 const (
-	minute partitionType = "minute"
-	hour   partitionType = "hour"
+	minutePartition partitionType = "minute"
+	hourParition    partitionType = "hour"
 )
 
 type Config struct {
@@ -50,7 +50,7 @@ func (c *Config) Validate() error {
 		return errors.New("container is required")
 	}
 
-	if c.Partition != minute && c.Partition != hour {
+	if c.Partition != minutePartition && c.Partition != hourParition {
 		return fmt.Errorf("invalid partition type '%s'", c.Partition)
 	}
 
