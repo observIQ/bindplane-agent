@@ -33,7 +33,7 @@ func newExporter(cfg *Config, params exporter.CreateSettings) (*azureBlobExporte
 		cfg:        cfg,
 		blobClient: blobClient,
 		logger:     params.Logger,
-		marshaler:  newMarshaler(),
+		marshaler:  newMarshaler(cfg.Compression),
 	}, nil
 }
 

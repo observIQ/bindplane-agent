@@ -12,7 +12,14 @@ type partitionType string
 
 const (
 	minutePartition partitionType = "minute"
-	hourParition    partitionType = "hour"
+	hourPartition   partitionType = "hour"
+)
+
+type compressionType string
+
+const (
+	noCompression   compressionType = ""
+	gzipCompression compressionType = "gzip"
 )
 
 type Config struct {
@@ -38,7 +45,8 @@ type Config struct {
 	// Valid values are "hour" or "minute". Default: minute
 	Partition partitionType `mapstructure:"partition"`
 
-	// TODO compression
+	// Compression is the type of compression to use
+	Compression compressionType `mapstructure:"compression"`
 }
 
 func (c *Config) Validate() error {
@@ -50,9 +58,14 @@ func (c *Config) Validate() error {
 		return errors.New("container is required")
 	}
 
-	if c.Partition != minutePartition && c.Partition != hourParition {
+	if c.Partition != minutePartition && c.Partition != hourPartition {
 		return fmt.Errorf("invalid partition type '%s'", c.Partition)
 	}
 
-	return nil
+	switch c.Compression {
+	case noCompression, gzipCompression:
+		return nil
+	default:
+		return fmt.Errorf("unsupported compression type: %s", c.Compression)
+	}
 }

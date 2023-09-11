@@ -1,6 +1,9 @@
 package azureblobexporter
 
 import (
+	"bytes"
+	"compress/gzip"
+
 	"go.opentelemetry.io/collector/pdata/plog"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.opentelemetry.io/collector/pdata/ptrace"
@@ -14,11 +17,20 @@ type marshaler interface {
 	format() string
 }
 
-func newMarshaler() marshaler {
-	return &baseMarshaller{
+func newMarshaler(compression compressionType) marshaler {
+	base := &baseMarshaller{
 		logsMarshaler:    &plog.JSONMarshaler{},
 		tracesMarshaler:  &ptrace.JSONMarshaler{},
 		metricsMarshaler: &pmetric.JSONMarshaler{},
+	}
+
+	switch compression {
+	case gzipCompression:
+		return &gzipMarshaller{
+			base: base,
+		}
+	default:
+		return base
 	}
 }
 
@@ -43,4 +55,52 @@ func (b *baseMarshaller) MarshalMetrics(md pmetric.Metrics) ([]byte, error) {
 
 func (b *baseMarshaller) format() string {
 	return "json"
+}
+
+// gzipMarshaller gzip compresses marshalled data
+type gzipMarshaller struct {
+	base *baseMarshaller
+}
+
+func (g *gzipMarshaller) MarshalTraces(td ptrace.Traces) ([]byte, error) {
+	data, err := g.base.MarshalTraces(td)
+	if err != nil {
+		return nil, err
+	}
+
+	return g.compress(data)
+}
+
+func (g *gzipMarshaller) MarshalLogs(ld plog.Logs) ([]byte, error) {
+	data, err := g.base.MarshalLogs(ld)
+	if err != nil {
+		return nil, err
+	}
+
+	return g.compress(data)
+}
+
+func (g *gzipMarshaller) MarshalMetrics(md pmetric.Metrics) ([]byte, error) {
+	data, err := g.base.MarshalMetrics(md)
+	if err != nil {
+		return nil, err
+	}
+
+	return g.compress(data)
+}
+
+func (g *gzipMarshaller) format() string {
+	return "json.gz"
+}
+
+func (g *gzipMarshaller) compress(data []byte) ([]byte, error) {
+	var buf bytes.Buffer
+	writer := gzip.NewWriter(&buf)
+
+	_, err := writer.Write(data)
+	if err != nil {
+		return nil, err
+	}
+
+	return buf.Bytes(), nil
 }
