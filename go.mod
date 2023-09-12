@@ -5,6 +5,7 @@ go 1.20
 require (
 	github.com/google/uuid v1.3.1
 	github.com/mholt/archiver/v3 v3.5.1
+	github.com/observiq/bindplane-agent/exporter/azureblobexporter v1.35.0
 	github.com/observiq/bindplane-agent/exporter/googlecloudexporter v1.35.0
 	github.com/observiq/bindplane-agent/exporter/googlemanagedprometheusexporter v1.35.0
 	github.com/observiq/bindplane-agent/packagestate v1.35.0
@@ -642,6 +643,8 @@ replace github.com/observiq/bindplane-agent/receiver/routereceiver => ./receiver
 replace github.com/observiq/bindplane-agent/receiver/sapnetweaverreceiver => ./receiver/sapnetweaverreceiver
 
 replace github.com/observiq/bindplane-agent/exporter/googlecloudexporter => ./exporter/googlecloudexporter
+
+replace github.com/observiq/bindplane-agent/exporter/azureblobexporter => ./exporter/azureblobexporter
 
 replace github.com/observiq/bindplane-agent/packagestate => ./packagestate
 

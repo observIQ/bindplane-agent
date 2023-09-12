@@ -82,14 +82,16 @@ func (a *azureBlobExporter) getBlobName(telemetryType string) string {
 	blobNameBuilder := strings.Builder{}
 
 	if a.cfg.RootFolder != "" {
-		blobNameBuilder.WriteString(a.cfg.RootFolder)
+		blobNameBuilder.WriteString(fmt.Sprintf("%s/", a.cfg.RootFolder))
 	}
 
-	blobNameBuilder.WriteString(fmt.Sprintf("/year=%d/month=%02d/day=%02d/hours=%02d", year, month, day, hour))
+	blobNameBuilder.WriteString(fmt.Sprintf("year=%d/month=%02d/day=%02d/hours=%02d", year, month, day, hour))
 
 	if a.cfg.Partition == minutePartition {
 		blobNameBuilder.WriteString(fmt.Sprintf("/minute=%02d", minute))
 	}
+
+	blobNameBuilder.WriteString("/")
 
 	if a.cfg.BlobPrefix != "" {
 		blobNameBuilder.WriteString(a.cfg.BlobPrefix)
