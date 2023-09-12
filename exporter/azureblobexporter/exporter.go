@@ -7,7 +7,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Azure/azure-sdk-for-go/sdk/storage/azblob"
 	"go.opentelemetry.io/collector/consumer"
 	"go.opentelemetry.io/collector/exporter"
 	"go.opentelemetry.io/collector/pdata/plog"
@@ -18,13 +17,13 @@ import (
 
 type azureBlobExporter struct {
 	cfg        *Config
-	blobClient *azblob.Client
+	blobClient blobClient
 	logger     *zap.Logger
 	marshaler  marshaler
 }
 
 func newExporter(cfg *Config, params exporter.CreateSettings) (*azureBlobExporter, error) {
-	blobClient, err := azblob.NewClientFromConnectionString(cfg.ConnectionString, nil)
+	blobClient, err := newAzureBlobClient(cfg.ConnectionString)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create blob client: %w", err)
 	}
@@ -107,8 +106,7 @@ func (a *azureBlobExporter) getBlobName(telemetryType string) string {
 }
 
 func (a *azureBlobExporter) uploadBuffer(ctx context.Context, blobName string, buf []byte) error {
-	_, err := a.blobClient.UploadBuffer(ctx, a.cfg.Container, blobName, buf, nil)
-	if err != nil {
+	if err := a.blobClient.UploadBuffer(ctx, a.cfg.Container, blobName, buf); err != nil {
 		return fmt.Errorf("failed to upload: %w", err)
 	}
 
