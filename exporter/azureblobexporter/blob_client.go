@@ -8,7 +8,7 @@ import (
 
 // blobClient is a wrapper for an Azure Blob client to allow mocking for testing.
 //
-//go:generate mockery --name blobClient --output ./internal/mocks --with-expecter --filename mock_blob_client.go --structname mockBlobClient
+//go:generate mockery --name blobClient --output ./internal/mocks --with-expecter --filename mock_blob_client.go --structname MockBlobClient
 type blobClient interface {
 	// UploadBuffer uploads a buffer in blocks to a block blob.
 	UploadBuffer(context.Context, string, string, []byte) error

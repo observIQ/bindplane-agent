@@ -10,11 +10,13 @@ import (
 )
 
 // marshaler marshals into data bytes based on configuration
+//
+//go:generate mockery --name marshaler --output ./internal/mocks --with-expecter --filename mock_marshaler.go --structname MockMarshaler
 type marshaler interface {
 	MarshalTraces(td ptrace.Traces) ([]byte, error)
 	MarshalLogs(ld plog.Logs) ([]byte, error)
 	MarshalMetrics(md pmetric.Metrics) ([]byte, error)
-	format() string
+	Format() string
 }
 
 func newMarshaler(compression compressionType) marshaler {
@@ -53,7 +55,7 @@ func (b *baseMarshaler) MarshalMetrics(md pmetric.Metrics) ([]byte, error) {
 	return b.metricsMarshaler.MarshalMetrics(md)
 }
 
-func (b *baseMarshaler) format() string {
+func (b *baseMarshaler) Format() string {
 	return "json"
 }
 
@@ -89,7 +91,7 @@ func (g *gzipMarshaler) MarshalMetrics(md pmetric.Metrics) ([]byte, error) {
 	return g.compress(data)
 }
 
-func (g *gzipMarshaler) format() string {
+func (g *gzipMarshaler) Format() string {
 	return "json.gz"
 }
 

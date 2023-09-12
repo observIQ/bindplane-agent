@@ -100,7 +100,7 @@ func (a *azureBlobExporter) getBlobName(telemetryType string) string {
 	randomID := randomInRange(100000000, 999999999)
 
 	// Write base file name
-	blobNameBuilder.WriteString(fmt.Sprintf("%s_%d.%s", telemetryType, randomID, a.marshaler.format()))
+	blobNameBuilder.WriteString(fmt.Sprintf("%s_%d.%s", telemetryType, randomID, a.marshaler.Format()))
 
 	return blobNameBuilder.String()
 }
