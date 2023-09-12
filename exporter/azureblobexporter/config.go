@@ -59,7 +59,7 @@ func (c *Config) Validate() error {
 	}
 
 	if c.Partition != minutePartition && c.Partition != hourPartition {
-		return fmt.Errorf("invalid partition type '%s'", c.Partition)
+		return fmt.Errorf("unsupported partition type '%s'", c.Partition)
 	}
 
 	switch c.Compression {
