@@ -1,3 +1,17 @@
+// Copyright observIQ, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package azureblobexporter // import "github.com/observiq/bindplane-agent/exporter/azureblobexporter"
 
 import (
@@ -84,7 +98,7 @@ func (a *azureBlobExporter) getBlobName(telemetryType string) string {
 		blobNameBuilder.WriteString(fmt.Sprintf("%s/", a.cfg.RootFolder))
 	}
 
-	blobNameBuilder.WriteString(fmt.Sprintf("year=%d/month=%02d/day=%02d/hours=%02d", year, month, day, hour))
+	blobNameBuilder.WriteString(fmt.Sprintf("year=%d/month=%02d/day=%02d/hour=%02d", year, month, day, hour))
 
 	if a.cfg.Partition == minutePartition {
 		blobNameBuilder.WriteString(fmt.Sprintf("/minute=%02d", minute))

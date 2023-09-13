@@ -1,8 +1,23 @@
+// Copyright observIQ, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package azureblobexporter // import "github.com/observiq/bindplane-agent/exporter/azureblobexporter"
 
 import (
 	"context"
 	"errors"
+	"regexp"
 	"testing"
 
 	"github.com/observiq/bindplane-agent/exporter/azureblobexporter/internal/mocks"
@@ -253,6 +268,62 @@ func Test_exporter_traceDataPusher(t *testing.T) {
 				require.ErrorContains(t, err, tc.expectedErr.Error())
 			}
 
+		})
+	}
+}
+
+func Test_exporter_getBlobName(t *testing.T) {
+	testCases := []struct {
+		desc          string
+		cfg           *Config
+		telemetryType string
+		expectedRegex string
+	}{
+		{
+			desc: "Base Empty config",
+			cfg: &Config{
+				Container: "otel",
+				Partition: minutePartition,
+			},
+			telemetryType: "metrics",
+			expectedRegex: `^year=\d{4}/month=\d{2}/day=\d{2}/hour=\d{2}/minute=\d{2}/metrics_\d+\.json$`,
+		},
+		{
+			desc: "Base Empty config hour",
+			cfg: &Config{
+				Container: "otel",
+				Partition: hourPartition,
+			},
+			telemetryType: "metrics",
+			expectedRegex: `^year=\d{4}/month=\d{2}/day=\d{2}/hour=\d{2}/metrics_\d+\.json$`,
+		},
+		{
+			desc: "Full config",
+			cfg: &Config{
+				Container:  "otel",
+				RootFolder: "root",
+				BlobPrefix: "blob",
+				Partition:  minutePartition,
+			},
+			telemetryType: "metrics",
+			expectedRegex: `^root/year=\d{4}/month=\d{2}/day=\d{2}/hour=\d{2}/minute=\d{2}/blobmetrics_\d+\.json$`,
+		},
+	}
+
+	for _, tc := range testCases {
+		currentTc := tc
+		t.Run(currentTc.desc, func(t *testing.T) {
+			t.Parallel()
+			mockMarshaller := mocks.NewMockMarshaler(t)
+			mockMarshaller.EXPECT().Format().Return("json")
+
+			exp := azureBlobExporter{
+				cfg:       currentTc.cfg,
+				marshaler: mockMarshaller,
+			}
+
+			actual := exp.getBlobName(currentTc.telemetryType)
+			require.Regexp(t, regexp.MustCompile(currentTc.expectedRegex), actual)
 		})
 	}
 }

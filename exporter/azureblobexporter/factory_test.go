@@ -12,7 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:generate mdatagen metadata.yaml
-
-// Package azureblobexporter stores OpenTelemetry data as an Azure Blob exporter.
 package azureblobexporter // import "github.com/observiq/bindplane-agent/exporter/azureblobexporter"
+
+import (
+	"testing"
+
+	"github.com/stretchr/testify/require"
+	"go.opentelemetry.io/collector/exporter/exporterhelper"
+)
+
+func Test_createDefaultConfig(t *testing.T) {
+	expectedCfg := &Config{
+		TimeoutSettings: exporterhelper.NewDefaultTimeoutSettings(),
+		QueueSettings:   exporterhelper.NewDefaultQueueSettings(),
+		RetrySettings:   exporterhelper.NewDefaultRetrySettings(),
+		Partition:       minutePartition,
+		Compression:     noCompression,
+	}
+
+	actual := createDefaultConfig()
+	require.Equal(t, expectedCfg, actual)
+}
