@@ -27,12 +27,20 @@ import (
 //
 //go:generate mockery --name marshaler --output ./internal/mocks --with-expecter --filename mock_marshaler.go --structname MockMarshaler
 type marshaler interface {
+	// MarshalTraces returns the marshaled json traces data
 	MarshalTraces(td ptrace.Traces) ([]byte, error)
+
+	// MarshalLogs returns the marshaled json logs data
 	MarshalLogs(ld plog.Logs) ([]byte, error)
+
+	// MarshalMetrics returns the marshaled json metrics data
 	MarshalMetrics(md pmetric.Metrics) ([]byte, error)
+
+	// Format returns the file format of the data this marshaler returns
 	Format() string
 }
 
+// newMarshaler creates a new marshaler based on compression type
 func newMarshaler(compression compressionType) marshaler {
 	base := &baseMarshaler{
 		logsMarshaler:    &plog.JSONMarshaler{},
@@ -57,18 +65,22 @@ type baseMarshaler struct {
 	metricsMarshaler pmetric.Marshaler
 }
 
+// MarshalTraces returns the marshaled json traces data
 func (b *baseMarshaler) MarshalTraces(td ptrace.Traces) ([]byte, error) {
 	return b.tracesMarshaler.MarshalTraces(td)
 }
 
+// MarshalLogs returns the marshaled json logs data
 func (b *baseMarshaler) MarshalLogs(ld plog.Logs) ([]byte, error) {
 	return b.logsMarshaler.MarshalLogs(ld)
 }
 
+// MarshalMetrics returns the marshaled json metrics data
 func (b *baseMarshaler) MarshalMetrics(md pmetric.Metrics) ([]byte, error) {
 	return b.metricsMarshaler.MarshalMetrics(md)
 }
 
+// Format returns the file format of the data this marshaler returns
 func (b *baseMarshaler) Format() string {
 	return "json"
 }
@@ -78,6 +90,7 @@ type gzipMarshaler struct {
 	base *baseMarshaler
 }
 
+// MarshalTraces returns the marshaled json traces data
 func (g *gzipMarshaler) MarshalTraces(td ptrace.Traces) ([]byte, error) {
 	data, err := g.base.MarshalTraces(td)
 	if err != nil {
@@ -87,6 +100,7 @@ func (g *gzipMarshaler) MarshalTraces(td ptrace.Traces) ([]byte, error) {
 	return g.compress(data)
 }
 
+// MarshalLogs returns the marshaled json logs data
 func (g *gzipMarshaler) MarshalLogs(ld plog.Logs) ([]byte, error) {
 	data, err := g.base.MarshalLogs(ld)
 	if err != nil {
@@ -96,6 +110,7 @@ func (g *gzipMarshaler) MarshalLogs(ld plog.Logs) ([]byte, error) {
 	return g.compress(data)
 }
 
+// MarshalMetrics returns the marshaled json metrics data
 func (g *gzipMarshaler) MarshalMetrics(md pmetric.Metrics) ([]byte, error) {
 	data, err := g.base.MarshalMetrics(md)
 	if err != nil {
@@ -105,10 +120,12 @@ func (g *gzipMarshaler) MarshalMetrics(md pmetric.Metrics) ([]byte, error) {
 	return g.compress(data)
 }
 
+// Format returns the file format of the data this marshaler returns
 func (g *gzipMarshaler) Format() string {
 	return "json.gz"
 }
 
+// compress applies gzip compression to the data
 func (g *gzipMarshaler) compress(data []byte) ([]byte, error) {
 	var buf bytes.Buffer
 	writer := gzip.NewWriter(&buf)

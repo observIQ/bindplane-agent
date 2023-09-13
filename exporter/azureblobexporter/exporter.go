@@ -29,6 +29,7 @@ import (
 	"go.uber.org/zap"
 )
 
+// azureBlobExporter exports OTLP data as Azure blobs
 type azureBlobExporter struct {
 	cfg        *Config
 	blobClient blobClient
@@ -36,6 +37,7 @@ type azureBlobExporter struct {
 	marshaler  marshaler
 }
 
+// newExporter creates a new Azure Blob exporter
 func newExporter(cfg *Config, params exporter.CreateSettings) (*azureBlobExporter, error) {
 	blobClient, err := newAzureBlobClient(cfg.ConnectionString)
 	if err != nil {
@@ -50,10 +52,12 @@ func newExporter(cfg *Config, params exporter.CreateSettings) (*azureBlobExporte
 	}, nil
 }
 
+// Capabilities lists the exporter's capabilities
 func (a *azureBlobExporter) Capabilities() consumer.Capabilities {
 	return consumer.Capabilities{MutatesData: false}
 }
 
+// metricsDataPusher pushes metrics data to Azure Blob
 func (a *azureBlobExporter) metricsDataPusher(ctx context.Context, md pmetric.Metrics) error {
 	buf, err := a.marshaler.MarshalMetrics(md)
 	if err != nil {
@@ -65,6 +69,7 @@ func (a *azureBlobExporter) metricsDataPusher(ctx context.Context, md pmetric.Me
 	return a.uploadBuffer(ctx, blobName, buf)
 }
 
+// logsDataPusher pushes logs data to Azure Blob
 func (a *azureBlobExporter) logsDataPusher(ctx context.Context, ld plog.Logs) error {
 	buf, err := a.marshaler.MarshalLogs(ld)
 	if err != nil {
@@ -76,6 +81,7 @@ func (a *azureBlobExporter) logsDataPusher(ctx context.Context, ld plog.Logs) er
 	return a.uploadBuffer(ctx, blobName, buf)
 }
 
+// traceDataPusher pushes trace data to Azure Blob
 func (a *azureBlobExporter) traceDataPusher(ctx context.Context, td ptrace.Traces) error {
 	buf, err := a.marshaler.MarshalTraces(td)
 	if err != nil {
@@ -87,6 +93,7 @@ func (a *azureBlobExporter) traceDataPusher(ctx context.Context, td ptrace.Trace
 	return a.uploadBuffer(ctx, blobName, buf)
 }
 
+// getBlobName formats the blob name based on the configuration and current time stamp
 func (a *azureBlobExporter) getBlobName(telemetryType string) string {
 	now := time.Now()
 	year, month, day := now.Date()
@@ -119,6 +126,7 @@ func (a *azureBlobExporter) getBlobName(telemetryType string) string {
 	return blobNameBuilder.String()
 }
 
+// uploadBuffer uploads the supplied buffer to the configured container with the given blobName
 func (a *azureBlobExporter) uploadBuffer(ctx context.Context, blobName string, buf []byte) error {
 	if err := a.blobClient.UploadBuffer(ctx, a.cfg.Container, blobName, buf); err != nil {
 		return fmt.Errorf("failed to upload: %w", err)
