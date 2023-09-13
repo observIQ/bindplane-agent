@@ -31,8 +31,8 @@ import (
 
 func Test_exporter_Capabilities(t *testing.T) {
 	exp := &azureBlobExporter{}
-	cap := exp.Capabilities()
-	require.False(t, cap.MutatesData)
+	capabilities := exp.Capabilities()
+	require.False(t, capabilities.MutatesData)
 }
 
 func Test_exporter_metricsDataPusher(t *testing.T) {

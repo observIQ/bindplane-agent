@@ -36,6 +36,7 @@ const (
 	gzipCompression compressionType = "gzip"
 )
 
+// Config the configuration for the azureblob exporter
 type Config struct {
 	exporterhelper.TimeoutSettings `mapstructure:",squash"` // squash ensures fields are correctly decoded in embedded struct.
 	exporterhelper.QueueSettings   `mapstructure:"sending_queue"`
@@ -63,6 +64,7 @@ type Config struct {
 	Compression compressionType `mapstructure:"compression"`
 }
 
+// Validate validates the config.
 func (c *Config) Validate() error {
 	if c.ConnectionString == "" {
 		return errors.New("connection_string is required")

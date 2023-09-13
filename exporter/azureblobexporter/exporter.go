@@ -127,6 +127,7 @@ func (a *azureBlobExporter) uploadBuffer(ctx context.Context, blobName string, b
 	return nil
 }
 
+// #nosec G404 -- randomly generated number is not used for security purposes. It's ok if it's weak
 func randomInRange(low, hi int) int {
 	return low + rand.Intn(hi-low)
 }
