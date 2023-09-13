@@ -93,7 +93,7 @@ func Test_managerReload(t *testing.T) {
 
 				client := &Client{
 					opampClient:   mockOpAmpClient,
-					ident:         newIdentity(zap.NewNop(), *currConfig),
+					ident:         newIdentity(zap.NewNop(), *currConfig, "0.0.0"),
 					currentConfig: *currConfig,
 				}
 				reloadFunc := managerReload(client, managerFilePath)
@@ -148,7 +148,7 @@ func Test_managerReload(t *testing.T) {
 
 				client := &Client{
 					opampClient:   mockOpAmpClient,
-					ident:         newIdentity(zap.NewNop(), *currConfig),
+					ident:         newIdentity(zap.NewNop(), *currConfig, "0.0.0"),
 					currentConfig: *currConfig,
 				}
 				reloadFunc := managerReload(client, managerFilePath)
