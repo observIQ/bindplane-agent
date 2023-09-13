@@ -29,6 +29,7 @@ const (
 	hourPartition   partitionType = "hour"
 )
 
+// compressionType is the type of compression to apply to blobs
 type compressionType string
 
 const (
@@ -42,7 +43,7 @@ type Config struct {
 	exporterhelper.QueueSettings   `mapstructure:"sending_queue"`
 	exporterhelper.RetrySettings   `mapstructure:"retry_on_failure"`
 
-	// Azure Blob Storage connection key,
+	// ConnectionString is the Azure Blob Storage connection key,
 	// which can be found in the Azure Blob Storage resource on the Azure Portal. (no default)
 	ConnectionString string `mapstructure:"connection_string"`
 
@@ -53,14 +54,14 @@ type Config struct {
 	BlobPrefix string `mapstructure:"blob_prefix"`
 
 	// RootFolder is the name of the root folder in path.
-	// Defaults to telemetry type eg: metrics, logs, traces.
 	RootFolder string `mapstructure:"root_folder"`
 
 	// Partition is the time granularity of the blob.
 	// Valid values are "hour" or "minute". Default: minute
 	Partition partitionType `mapstructure:"partition"`
 
-	// Compression is the type of compression to use
+	// Compression is the type of compression to use.
+	// Valid values are "none" or "gzip". Default: none
 	Compression compressionType `mapstructure:"compression"`
 }
 
