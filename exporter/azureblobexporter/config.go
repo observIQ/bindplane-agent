@@ -32,7 +32,7 @@ const (
 type compressionType string
 
 const (
-	noCompression   compressionType = ""
+	noCompression   compressionType = "none"
 	gzipCompression compressionType = "gzip"
 )
 
