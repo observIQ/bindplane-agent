@@ -95,7 +95,7 @@ func (a *azureBlobExporter) traceDataPusher(ctx context.Context, td ptrace.Trace
 
 // getBlobName formats the blob name based on the configuration and current time stamp
 func (a *azureBlobExporter) getBlobName(telemetryType string) string {
-	now := time.Now()
+	now := time.Now().UTC()
 	year, month, day := now.Date()
 	hour, minute, _ := now.Clock()
 
