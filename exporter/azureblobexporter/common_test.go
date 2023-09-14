@@ -20,10 +20,12 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/pdata/pcommon"
-	"go.opentelemetry.io/collector/pdata/plog" // File contains test helper functions
+	"go.opentelemetry.io/collector/pdata/plog"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.opentelemetry.io/collector/pdata/ptrace"
 )
+
+// File contains test helper functions
 
 // generateTestMetrics generates test metrics and the marshaled json output bytes
 func generateTestMetrics(t *testing.T) (md pmetric.Metrics, expectedBytes []byte) {

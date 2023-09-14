@@ -13,7 +13,7 @@ This exporter allows you to export metrics, traces, and logs to Azure Blob Stora
 | partition          | `minute`         | `true`   | Time granularity of blob name. Valid values are `hour` or `minute`.                                                            |
 | compression        | `none`           | `false`  | The type of compression applied to the data before sending it to storage. Valid values are `none` and `gzip`.                  |
 
-Blog paths will be in the form:
+Blob paths will be in the form:
 
 ```
 {root_folder}/year=XXXX/month=XX/day=XX/hour=XX/minute=XX

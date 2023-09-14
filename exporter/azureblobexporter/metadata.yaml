@@ -5,5 +5,3 @@ status:
   stability:
     alpha: [traces, metrics, logs]
   distributions: [observiq]
-  codeowners:
-    active: [atoulme, pdelewski]

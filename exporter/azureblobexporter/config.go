@@ -75,7 +75,10 @@ func (c *Config) Validate() error {
 		return errors.New("container is required")
 	}
 
-	if c.Partition != minutePartition && c.Partition != hourPartition {
+	switch c.Partition {
+	case minutePartition, hourPartition:
+	// do nothing
+	default:
 		return fmt.Errorf("unsupported partition type '%s'", c.Partition)
 	}
 

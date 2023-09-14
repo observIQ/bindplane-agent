@@ -98,5 +98,8 @@ func verifyGZipCompress(t *testing.T, input, actual []byte) {
 	_, err := writer.Write(input)
 	require.NoError(t, err)
 
+	err = writer.Close()
+	require.NoError(t, err)
+
 	require.Equal(t, buf.Bytes(), actual)
 }

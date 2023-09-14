@@ -135,5 +135,9 @@ func (g *gzipMarshaler) compress(data []byte) ([]byte, error) {
 		return nil, err
 	}
 
+	if err := writer.Close(); err != nil {
+		return nil, err
+	}
+
 	return buf.Bytes(), nil
 }
