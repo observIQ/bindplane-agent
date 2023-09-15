@@ -261,7 +261,7 @@ func Test_exporter_traceDataPusher(t *testing.T) {
 				marshaler:  mockMarshaler,
 			}
 
-			err := exp.traceDataPusher(context.Background(), td)
+			err := exp.tracesDataPusher(context.Background(), td)
 			if tc.expectedErr == nil {
 				require.NoError(t, err)
 			} else {

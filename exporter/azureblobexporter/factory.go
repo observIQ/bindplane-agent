@@ -100,7 +100,7 @@ func createTracesExporter(ctx context.Context, params exporter.CreateSettings, c
 	return exporterhelper.NewTracesExporter(ctx,
 		params,
 		config,
-		exp.traceDataPusher,
+		exp.tracesDataPusher,
 		exporterhelper.WithCapabilities(exp.Capabilities()),
 		exporterhelper.WithTimeout(cfg.TimeoutSettings),
 		exporterhelper.WithQueue(cfg.QueueSettings),

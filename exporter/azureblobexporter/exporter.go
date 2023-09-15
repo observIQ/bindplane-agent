@@ -81,8 +81,8 @@ func (a *azureBlobExporter) logsDataPusher(ctx context.Context, ld plog.Logs) er
 	return a.uploadBuffer(ctx, blobName, buf)
 }
 
-// traceDataPusher pushes trace data to Azure Blob
-func (a *azureBlobExporter) traceDataPusher(ctx context.Context, td ptrace.Traces) error {
+// tracesDataPusher pushes trace data to Azure Blob
+func (a *azureBlobExporter) tracesDataPusher(ctx context.Context, td ptrace.Traces) error {
 	buf, err := a.marshaler.MarshalTraces(td)
 	if err != nil {
 		return fmt.Errorf("failed to marshal traces: %w", err)
