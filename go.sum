@@ -1710,6 +1710,8 @@ github.com/open-telemetry/opentelemetry-collector-contrib/receiver/apachereceive
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/apachereceiver v0.85.0/go.mod h1:9xSYJUD86XV3re2AefcVEXM2/MZudcYWM+CIZYYXpVE=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/apachesparkreceiver v0.85.0 h1:FrklHpNd9r7f0jbNxhANZWwTwenKK7LeuFtoXY2GYxg=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/apachesparkreceiver v0.85.0/go.mod h1:oBFYEqYPyoyHLlT9kyirbpgaOswb1+D89hibKyETPfo=
+github.com/open-telemetry/opentelemetry-collector-contrib/receiver/awscloudwatchmetricsreceiver v0.85.0 h1:JGfKfEoSgVa/tjPNffoejvufPVb10Y+AsE9Hj5i+IzA=
+github.com/open-telemetry/opentelemetry-collector-contrib/receiver/awscloudwatchmetricsreceiver v0.85.0/go.mod h1:2L+NSIPu2UWYe9VbXQTgWKTaTr7UnxxSyRZo9IJDBCI=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/awscloudwatchreceiver v0.85.0 h1:DEDAY7PSM/CK6CiRmXebReKq+QpBQlqeI8d+2YRoh+I=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/awscloudwatchreceiver v0.85.0/go.mod h1:VZaI2To92q3k3WcwUDYSVGeZ5GNg0VbrWAFIxYj6qM4=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/awscontainerinsightreceiver v0.85.0 h1:p1hWRqobok0w6GzFR5TlK1/b7BSxXv5NbvdIEVW26gE=
