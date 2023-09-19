@@ -10,10 +10,11 @@ Below is a list of supported exporters with links to their documentation pages.
 | AWS Kinesis Exporter                                              | [awskinesisexporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.85.0/exporter/awskinesisexporter/README.md) |
 | AWS S3 Exporter                                                   | [awss3exporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.85.0/exporter/awss3exporter/README.md) |
 | AWS X-Ray Tracing Exporter                                        | [awsxrayexporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.85.0/exporter/awsxrayexporter/README.md) |
+| Azure Blob Exporter                                               | [azureblobexporter](../exporter/azureblobexporter/README.md) |
 | Azure Monitor Exporter                                            | [azuremonitorexporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.85.0/exporter/azuremonitorexporter/README.md) |
 | Carbon Exporter                                                   | [carbonexporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.85.0/exporter/carbonexporter/README.md) |
 | Coralogix Exporter                                                | [coralogixexporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.85.0/exporter/coralogixexporter/README.md) |
-| Datadog Exporter                                                | [datadogexporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.85.0/exporter/datadogexporter/README.md) |
+| Datadog Exporter                                                  | [datadogexporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.85.0/exporter/datadogexporter/README.md) |
 | Dynatrace Exporter                                                | [dynatraceexporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.85.0/exporter/dynatraceexporter/README.md) |
 | Elasticsearch Exporter                                            | [elasticsearchexporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.85.0/exporter/elasticsearchexporter/README.md) |
 | F5 Cloud Exporter                                                 | [f5cloudexporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.85.0/exporter/f5cloudexporter/README.md) |
