@@ -34,6 +34,19 @@ func DefaultFactories() (otelcol.Factories, error) {
 	return combineFactories(defaultReceivers, defaultProcessors, defaultExporters, defaultExtensions, defaultConnectors)
 }
 
+// RegisterComponentTelemetry registers or re-registers components with telemetry so that any stale metrics are cleaned out.
+func RegisterComponentTelemetry() error {
+	if err := throughputmeasurementprocessor.RegisterMetricViews(); err != nil {
+		return fmt.Errorf("failed to register throughput measurement processor telemetry: %w", err)
+	}
+
+	if err := throughputwrapper.RegisterMetricViews(); err != nil {
+		return fmt.Errorf("failed to register throughput wrapper telemetry: %w", err)
+	}
+
+	return nil
+}
+
 // combineFactories combines the supplied factories into a single Factories struct.
 // Any errors encountered will also be combined into a single error.
 func combineFactories(receivers []receiver.Factory, processors []processor.Factory,
@@ -41,8 +54,8 @@ func combineFactories(receivers []receiver.Factory, processors []processor.Facto
 	connectors []connector.Factory) (otelcol.Factories, error) {
 	var errs []error
 
-	// Register component telemetry
-	if err := registerComponentTelemetry(); err != nil {
+	// Ensure component telemetry is registered at least once by having it in  this method
+	if err := RegisterComponentTelemetry(); err != nil {
 		errs = append(errs, err)
 	}
 
@@ -88,16 +101,4 @@ func wrapReceivers(receivers []receiver.Factory) []receiver.Factory {
 	}
 
 	return wrappedReceivers
-}
-
-func registerComponentTelemetry() error {
-	if err := throughputmeasurementprocessor.RegisterMetricViews(); err != nil {
-		return fmt.Errorf("failed to register throughput measurement processor telemetry: %w", err)
-	}
-
-	if err := throughputwrapper.RegisterMetricViews(); err != nil {
-		return fmt.Errorf("failed to register throughput wrapper telemetry: %w", err)
-	}
-
-	return nil
 }
