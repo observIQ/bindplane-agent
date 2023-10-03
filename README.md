@@ -1,6 +1,3 @@
-# Disclaimer
-While the `main` branch is stable, it is still under development and documentation may not fully reflect the current feature set. Please refer to documentation for your specific release.
-
 # BindPlane Agent
 
 <center>
