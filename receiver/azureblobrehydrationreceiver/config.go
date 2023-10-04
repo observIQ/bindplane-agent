@@ -68,7 +68,7 @@ func (c *Config) Validate() error {
 // validateTimestamp validates the passed in timestamp string
 func validateTimestamp(timestamp string) error {
 	if timestamp == "" {
-		return errors.New("empty value")
+		return errors.New("missing value")
 	}
 
 	if _, err := time.Parse(timeFormat, timestamp); err != nil {
