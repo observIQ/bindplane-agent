@@ -176,11 +176,11 @@ func (r *rehydrationReceiver) rehydrateBlobs() {
 
 // constants for blob path parts
 const (
-	year   = "year"
-	month  = "month"
-	day    = "day"
-	hour   = "hour"
-	minute = "minute"
+	year   = "year="
+	month  = "month="
+	day    = "day="
+	hour   = "hour="
+	minute = "minute="
 )
 
 // strings that indicate what type of telemetry is in a blob
@@ -209,35 +209,15 @@ func (r *rehydrationReceiver) parseBlobPath(prefix *string, blobName string) (bl
 	}
 
 	nextExpectedPart := year
-	for ; i < len(parts); i++ {
+	for ; i < len(parts)-1; i++ {
 		part := parts[i]
-
-		// For the last part of the path parse the telemetry type
-		if i == len(parts)-1 {
-			// Special case to catch when using hour granularity.
-			// There won't be a minute=XX part of the path so if we're on the last
-			// part of the path and we still expect minutes just write ':00' for minutes.
-			if nextExpectedPart == minute {
-				tsBuilder.WriteString(":00")
-			}
-
-			switch {
-			case strings.Contains(part, metricBlobSignifier):
-				telemetryType = component.DataTypeMetrics
-			case strings.Contains(part, logsBlobSignifier):
-				telemetryType = component.DataTypeLogs
-			case strings.Contains(part, tracesBlobSignifier):
-				telemetryType = component.DataTypeTraces
-			}
-			continue
-		}
 
 		if !strings.HasPrefix(part, nextExpectedPart) {
 			err = errInvalidBlobPath
 			return
 		}
 
-		val := strings.TrimPrefix(part, fmt.Sprintf("%s=", nextExpectedPart))
+		val := strings.TrimPrefix(part, nextExpectedPart)
 
 		switch nextExpectedPart {
 		case year:
@@ -259,11 +239,29 @@ func (r *rehydrationReceiver) parseBlobPath(prefix *string, blobName string) (bl
 		tsBuilder.WriteString(val)
 	}
 
+	// Special case when using hour granularity.
+	// There won't be a minute=XX part of the path if we've exited the loop
+	// and we still expect minutes just write ':00' for minutes.
+	if nextExpectedPart == minute {
+		tsBuilder.WriteString(":00")
+	}
+
 	// Parse the expected format
 	*blobTime, err = time.Parse(timeFormat, tsBuilder.String())
 	if err != nil {
 		err = fmt.Errorf("parse blob time: %w", err)
 		return
+	}
+
+	// For the last part of the path parse the telemetry type
+	lastPart := parts[len(parts)-1]
+	switch {
+	case strings.Contains(lastPart, metricBlobSignifier):
+		telemetryType = component.DataTypeMetrics
+	case strings.Contains(lastPart, logsBlobSignifier):
+		telemetryType = component.DataTypeLogs
+	case strings.Contains(lastPart, tracesBlobSignifier):
+		telemetryType = component.DataTypeTraces
 	}
 
 	return
