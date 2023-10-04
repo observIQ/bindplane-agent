@@ -141,7 +141,7 @@ func (r *rehydrationReceiver) rehydrateBlobs() {
 		case <-r.ctx.Done():
 			return
 		default:
-			blobPaths, nextMarker, err := r.azureClient.ListBlobs(r.ctx, r.cfg.Container, prefix, marker)
+			blobs, nextMarker, err := r.azureClient.ListBlobs(r.ctx, r.cfg.Container, prefix, marker)
 			if err != nil {
 				r.logger.Error("Failed to list blobs", zap.Error(err))
 				continue
@@ -149,13 +149,13 @@ func (r *rehydrationReceiver) rehydrateBlobs() {
 
 			marker = nextMarker
 
-			for _, blobPath := range blobPaths {
-				blobTime, telemetryType, err := r.parseBlobPath(prefix, blobPath)
+			for _, blob := range blobs {
+				blobTime, telemetryType, err := r.parseBlobPath(prefix, blob.Name)
 				switch {
 				case errors.Is(err, errInvalidBlobPath):
-					r.logger.Debug("Skipping Blob, non-matching blob path", zap.String("blob", blobPath))
+					r.logger.Debug("Skipping Blob, non-matching blob path", zap.String("blob", blob.Name))
 				case err != nil:
-					r.logger.Error("Error processing blob path", zap.String("blob", blobPath), zap.Error(err))
+					r.logger.Error("Error processing blob path", zap.String("blob", blob.Name), zap.Error(err))
 				default:
 					// if the blob is not in the specified time range or not of the telemetry type supported by this receiver
 					// then skip consuming it.
@@ -164,8 +164,8 @@ func (r *rehydrationReceiver) rehydrateBlobs() {
 					}
 
 					// Process and consume the blob at the given path
-					if err := r.processBlob(blobPath); err != nil {
-						r.logger.Error("Error consuming blob", zap.String("blob", blobPath), zap.Error(err))
+					if err := r.processBlob(blob); err != nil {
+						r.logger.Error("Error consuming blob", zap.String("blob", blob.Name), zap.Error(err))
 					}
 				}
 			}
@@ -247,11 +247,12 @@ func (r *rehydrationReceiver) parseBlobPath(prefix *string, blobName string) (bl
 	}
 
 	// Parse the expected format
-	*blobTime, err = time.Parse(timeFormat, tsBuilder.String())
+	parsedTime, timeErr := time.Parse(timeFormat, tsBuilder.String())
 	if err != nil {
-		err = fmt.Errorf("parse blob time: %w", err)
+		err = fmt.Errorf("parse blob time: %w", timeErr)
 		return
 	}
+	blobTime = &parsedTime
 
 	// For the last part of the path parse the telemetry type
 	lastPart := parts[len(parts)-1]
@@ -277,16 +278,17 @@ func (r *rehydrationReceiver) isInTimeRange(blobTime time.Time) bool {
 // 1. Downloads the blob
 // 2. Decompresses the blob if applicable
 // 3. Pass the blob to the consumer
-func (r *rehydrationReceiver) processBlob(blobPath string) error {
-	blobBuffer := make([]byte, 1024)
+func (r *rehydrationReceiver) processBlob(blob *blobInfo) error {
+	// Allocate a buffer the size of the blob. If the buffer isn't big enough download errors.
+	blobBuffer := make([]byte, blob.Size)
 
-	size, err := r.azureClient.DownloadBlob(r.ctx, r.cfg.Container, blobPath, blobBuffer)
+	size, err := r.azureClient.DownloadBlob(r.ctx, r.cfg.Container, blob.Name, blobBuffer)
 	if err != nil {
 		return fmt.Errorf("download blob: %w", err)
 	}
 
 	// Check file extension see if we need to decompress
-	ext := filepath.Ext(blobPath)
+	ext := filepath.Ext(blob.Name)
 	switch {
 	case ext == ".gz":
 		blobBuffer, err = gzipDecompress(blobBuffer[:size])

@@ -7,10 +7,16 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/storage/azblob"
 )
 
+// blobInfo contains the necessary info to process a blob
+type blobInfo struct {
+	Name string
+	Size int64
+}
+
 // blobClient
 type blobClient interface {
-	// ListBlobs returns a list of blob names present in the container with the given prefix
-	ListBlobs(ctx context.Context, container string, prefix, marker *string) ([]string, *string, error)
+	// ListBlobs returns a list of blobInfo objects present in the container with the given prefix
+	ListBlobs(ctx context.Context, container string, prefix, marker *string) ([]*blobInfo, *string, error)
 
 	// DownloadBlob downloads the contents of the blob into the supplied buffer.
 	// It will return the count of bytes used in the buffer.
@@ -33,8 +39,11 @@ func newAzureBlobClient(connectionString string) (*azureBlobClient, error) {
 	}, nil
 }
 
-// ListBlobs returns a list of blob names present in the container with the given prefix
-func (a *azureBlobClient) ListBlobs(ctx context.Context, container string, prefix, marker *string) ([]string, *string, error) {
+// contentLengthKey key for the content length metadata
+const contentLengthKey = "ContentLength"
+
+// ListBlobs returns a list of blobInfo objects present in the container with the given prefix
+func (a *azureBlobClient) ListBlobs(ctx context.Context, container string, prefix, marker *string) ([]*blobInfo, *string, error) {
 	listOptions := &azblob.ListBlobsFlatOptions{
 		Marker: marker,
 		Prefix: prefix,
@@ -43,7 +52,7 @@ func (a *azureBlobClient) ListBlobs(ctx context.Context, container string, prefi
 	pager := a.azClient.NewListBlobsFlatPager(container, listOptions)
 
 	var nextMarker *string
-	blobNames := make([]string, 0)
+	blobs := make([]*blobInfo, 0)
 	for pager.More() {
 		resp, err := pager.NextPage(ctx)
 		if err != nil {
@@ -55,15 +64,22 @@ func (a *azureBlobClient) ListBlobs(ctx context.Context, container string, prefi
 			if blob.Deleted != nil && *blob.Deleted {
 				continue
 			}
-
-			if blob.Name != nil {
-				blobNames = append(blobNames, *blob.Name)
+			// All blob fields are pointers so check all pointers we need before we try to process it
+			if blob.Name == nil || blob.Properties == nil || blob.Properties.ContentLength == nil {
+				continue
 			}
+
+			info := &blobInfo{
+				Name: *blob.Name,
+				Size: *blob.Properties.ContentLength,
+			}
+
+			blobs = append(blobs, info)
 		}
 		nextMarker = resp.NextMarker
 	}
 
-	return blobNames, nextMarker, nil
+	return blobs, nextMarker, nil
 }
 
 func (a *azureBlobClient) DownloadBlob(ctx context.Context, container, blobPath string, buf []byte) (int64, error) {
