@@ -25,6 +25,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/observiq/bindplane-agent/receiver/azureblobrehydrationreceiver/internal/azureblob"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/consumer"
 	"go.uber.org/zap"
@@ -38,7 +39,7 @@ var errInvalidBlobPath = errors.New("invalid blob path")
 type rehydrationReceiver struct {
 	logger             *zap.Logger
 	cfg                *Config
-	azureClient        blobClient
+	azureClient        azureblob.BlobClient
 	supportedTelemetry component.DataType
 	consumer           blobConsumer
 
@@ -91,7 +92,7 @@ func newTracesReceiver(logger *zap.Logger, cfg *Config, nextConsumer consumer.Tr
 
 // newRehydrationReceiver creates a new rehydration receiver
 func newRehydrationReceiver(logger *zap.Logger, cfg *Config) (*rehydrationReceiver, error) {
-	azureClient, err := newAzureBlobClient(cfg.ConnectionString)
+	azureClient, err := azureblob.NewAzureBlobClient(cfg.ConnectionString)
 	if err != nil {
 		return nil, fmt.Errorf("new Azure client: %w", err)
 	}
@@ -300,7 +301,7 @@ func (r *rehydrationReceiver) isInTimeRange(blobTime time.Time) bool {
 // 1. Downloads the blob
 // 2. Decompresses the blob if applicable
 // 3. Pass the blob to the consumer
-func (r *rehydrationReceiver) processBlob(blob *blobInfo) error {
+func (r *rehydrationReceiver) processBlob(blob *azureblob.BlobInfo) error {
 	// Allocate a buffer the size of the blob. If the buffer isn't big enough download errors.
 	blobBuffer := make([]byte, blob.Size)
 
