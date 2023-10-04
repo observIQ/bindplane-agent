@@ -166,6 +166,14 @@ func (r *rehydrationReceiver) rehydrateBlobs() {
 					// Process and consume the blob at the given path
 					if err := r.processBlob(blob); err != nil {
 						r.logger.Error("Error consuming blob", zap.String("blob", blob.Name), zap.Error(err))
+						continue
+					}
+
+					// Delete blob if configured to do so
+					if r.cfg.DeleteOnRead {
+						if err := r.azureClient.DeleteBlob(r.ctx, r.cfg.Container, blob.Name); err != nil {
+							r.logger.Error("Error while attempting to delete blob", zap.String("blob", blob.Name), zap.Error(err))
+						}
 					}
 				}
 			}

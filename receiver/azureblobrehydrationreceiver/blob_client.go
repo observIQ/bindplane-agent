@@ -21,6 +21,9 @@ type blobClient interface {
 	// DownloadBlob downloads the contents of the blob into the supplied buffer.
 	// It will return the count of bytes used in the buffer.
 	DownloadBlob(ctx context.Context, container, blobPath string, buf []byte) (int64, error)
+
+	// DeleteBlob deletes the blob in the specified container
+	DeleteBlob(ctx context.Context, container, blobPath string) error
 }
 
 type azureBlobClient struct {
@@ -89,4 +92,10 @@ func (a *azureBlobClient) DownloadBlob(ctx context.Context, container, blobPath 
 	}
 
 	return bytesDownloaded, nil
+}
+
+// DeleteBlob deletes the blob in the specified container
+func (a *azureBlobClient) DeleteBlob(ctx context.Context, container, blobPath string) error {
+	_, err := a.azClient.DeleteBlob(ctx, container, blobPath, nil)
+	return err
 }
