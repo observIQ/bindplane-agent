@@ -11,11 +11,14 @@ import (
 type blobClient interface {
 	// ListBlobs returns a list of blob names present in the container with the given prefix
 	ListBlobs(ctx context.Context, container string, prefix, marker *string) ([]string, *string, error)
+
+	// DownloadBlob downloads the contents of the blob into the supplied buffer.
+	// It will return the count of bytes used in the buffer.
+	DownloadBlob(ctx context.Context, container, blobPath string, buf []byte) (int64, error)
 }
 
 type azureBlobClient struct {
-	azClient       *azblob.Client
-	maxPageResults int32
+	azClient *azblob.Client
 }
 
 // newAzureBlobClient creates a new azureBlobClient with the given connection string
@@ -61,4 +64,13 @@ func (a *azureBlobClient) ListBlobs(ctx context.Context, container string, prefi
 	}
 
 	return blobNames, nextMarker, nil
+}
+
+func (a *azureBlobClient) DownloadBlob(ctx context.Context, container, blobPath string, buf []byte) (int64, error) {
+	bytesDownloaded, err := a.azClient.DownloadBuffer(ctx, container, blobPath, buf, nil)
+	if err != nil {
+		return 0, fmt.Errorf("download: %w", err)
+	}
+
+	return bytesDownloaded, nil
 }

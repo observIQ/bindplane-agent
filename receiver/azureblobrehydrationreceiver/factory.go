@@ -10,6 +10,9 @@ import (
 	"go.opentelemetry.io/collector/receiver"
 )
 
+// errImproperCfgType error for when an invalid config type is passed to receiver creation funcs
+var errImproperCfgType = errors.New("improper config type")
+
 func NewFactory() receiver.Factory {
 	return receiver.NewFactory(
 		metadata.Type,
@@ -31,28 +34,28 @@ func createDefaultConfig() component.Config {
 func createMetricsReceiver(_ context.Context, params receiver.CreateSettings, conf component.Config, con consumer.Metrics) (receiver.Metrics, error) {
 	cfg, ok := conf.(*Config)
 	if !ok {
-		return nil, errors.New("improper config type")
+		return nil, errImproperCfgType
 	}
 
-	return newRehydrationReceiver(params.Logger, cfg)
+	return newMetricsReceiver(params.Logger, cfg, con)
 }
 
 // createLogsReceiver creates a logs receiver
 func createLogsReceiver(_ context.Context, params receiver.CreateSettings, conf component.Config, con consumer.Logs) (receiver.Logs, error) {
-	_, ok := conf.(*Config)
+	cfg, ok := conf.(*Config)
 	if !ok {
-		return nil, errors.New("improper config type")
+		return nil, errImproperCfgType
 	}
 
-	return nil, nil
+	return newLogsReceiver(params.Logger, cfg, con)
 }
 
 // createTracesReceiver creates a traces receiver
 func createTracesReceiver(_ context.Context, params receiver.CreateSettings, conf component.Config, con consumer.Traces) (receiver.Traces, error) {
-	_, ok := conf.(*Config)
+	cfg, ok := conf.(*Config)
 	if !ok {
-		return nil, errors.New("improper config type")
+		return nil, errImproperCfgType
 	}
 
-	return nil, nil
+	return newTracesReceiver(params.Logger, cfg, con)
 }

@@ -1,28 +1,32 @@
 package azureblobrehydrationreceiver //import "github.com/observiq/bindplane-agent/receiver/azureblobrehydrationreceiver"
 
 import (
+	"bytes"
+	"compress/gzip"
 	"context"
 	"errors"
 	"fmt"
+	"io"
+	"path/filepath"
 	"strings"
 	"time"
 
 	"go.opentelemetry.io/collector/component"
+	"go.opentelemetry.io/collector/consumer"
 	"go.uber.org/zap"
 )
 
 // azurePathSeparator the path separator that Azure storage uses
 const azurePathSeparator = "/"
 
-var (
-	errMissingHost     = errors.New("nil host")
-	errInvalidBlobPath = errors.New("invalid blob path")
-)
+var errInvalidBlobPath = errors.New("invalid blob path")
 
 type rehydrationReceiver struct {
-	logger      *zap.Logger
-	cfg         *Config
-	azureClient blobClient
+	logger             *zap.Logger
+	cfg                *Config
+	azureClient        blobClient
+	supportedTelemetry component.DataType
+	consumer           blobConsumer
 
 	startingTime time.Time
 	endingTime   time.Time
@@ -30,6 +34,45 @@ type rehydrationReceiver struct {
 	doneChan   chan struct{}
 	ctx        context.Context
 	cancelFunc context.CancelCauseFunc
+}
+
+// newMetricsReceiver creates a new metrics specific receiver.
+func newMetricsReceiver(logger *zap.Logger, cfg *Config, nextConsumer consumer.Metrics) (*rehydrationReceiver, error) {
+	r, err := newRehydrationReceiver(logger, cfg)
+	if err != nil {
+		return nil, err
+	}
+
+	r.supportedTelemetry = component.DataTypeMetrics
+	r.consumer = newMetricsConsumer(nextConsumer)
+
+	return r, nil
+}
+
+// newLogsReceiver creates a new logs specific receiver.
+func newLogsReceiver(logger *zap.Logger, cfg *Config, nextConsumer consumer.Logs) (*rehydrationReceiver, error) {
+	r, err := newRehydrationReceiver(logger, cfg)
+	if err != nil {
+		return nil, err
+	}
+
+	r.supportedTelemetry = component.DataTypeLogs
+	r.consumer = newLogsConsumer(nextConsumer)
+
+	return r, nil
+}
+
+// newTracesReceiver creates a new traces specific receiver.
+func newTracesReceiver(logger *zap.Logger, cfg *Config, nextConsumer consumer.Traces) (*rehydrationReceiver, error) {
+	r, err := newRehydrationReceiver(logger, cfg)
+	if err != nil {
+		return nil, err
+	}
+
+	r.supportedTelemetry = component.DataTypeTraces
+	r.consumer = newTracesConsumer(nextConsumer)
+
+	return r, nil
 }
 
 // newRehydrationReceiver creates a new rehydration receiver
@@ -65,15 +108,13 @@ func newRehydrationReceiver(logger *zap.Logger, cfg *Config) (*rehydrationReceiv
 	}, nil
 }
 
+// Start starts the rehydration receiver
 func (r *rehydrationReceiver) Start(_ context.Context, host component.Host) error {
-	if host == nil {
-		return errMissingHost
-	}
-
 	go r.rehydrateBlobs()
 	return nil
 }
 
+// Shutdown shuts down the rehydration receiver
 func (r *rehydrationReceiver) Shutdown(ctx context.Context) error {
 	r.cancelFunc(errors.New("shutdown"))
 	select {
@@ -84,6 +125,8 @@ func (r *rehydrationReceiver) Shutdown(ctx context.Context) error {
 	}
 }
 
+// rehydrateBlobs pulls blob paths from the UI and if they are within the specified
+// time range then the blobs will be downloaded and rehydrated.
 func (r *rehydrationReceiver) rehydrateBlobs() {
 	defer close(r.doneChan)
 
@@ -104,21 +147,29 @@ func (r *rehydrationReceiver) rehydrateBlobs() {
 				continue
 			}
 
+			marker = nextMarker
+
 			for _, blobPath := range blobPaths {
-				blobTime, _, err := r.parseBlobPath(prefix, blobPath)
+				blobTime, telemetryType, err := r.parseBlobPath(prefix, blobPath)
 				switch {
 				case errors.Is(err, errInvalidBlobPath):
 					r.logger.Debug("Skipping Blob, non-matching blob path", zap.String("blob", blobPath))
 				case err != nil:
 					r.logger.Error("Error processing blob path", zap.String("blob", blobPath), zap.Error(err))
 				default:
-					if r.isInTimeRange(*blobTime) {
+					// if the blob is not in the specified time range or not of the telemetry type supported by this receiver
+					// then skip consuming it.
+					if !r.isInTimeRange(*blobTime) || telemetryType != r.supportedTelemetry {
+						continue
+					}
 
+					// Process and consume the blob at the given path
+					if err := r.processBlob(blobPath); err != nil {
+						r.logger.Error("Error consuming blob", zap.String("blob", blobPath), zap.Error(err))
 					}
 				}
 			}
 
-			marker = nextMarker
 		}
 	}
 }
@@ -132,7 +183,7 @@ const (
 	minute = "minute"
 )
 
-// Strings that indicate what type of telemetry is in a blob
+// strings that indicate what type of telemetry is in a blob
 const (
 	metricBlobSignifier = "metrics_"
 	logsBlobSignifier   = "logs_"
@@ -165,7 +216,7 @@ func (r *rehydrationReceiver) parseBlobPath(prefix *string, blobName string) (bl
 		if i == len(parts)-1 {
 			// Special case to catch when using hour granularity.
 			// There won't be a minute=XX part of the path so if we're on the last
-			// part and we still expect minutes just write ':00' for minutes.
+			// part of the path and we still expect minutes just write ':00' for minutes.
 			if nextExpectedPart == minute {
 				tsBuilder.WriteString(":00")
 			}
@@ -178,6 +229,7 @@ func (r *rehydrationReceiver) parseBlobPath(prefix *string, blobName string) (bl
 			case strings.Contains(part, tracesBlobSignifier):
 				telemetryType = component.DataTypeTraces
 			}
+			continue
 		}
 
 		if !strings.HasPrefix(part, nextExpectedPart) {
@@ -221,4 +273,51 @@ func (r *rehydrationReceiver) parseBlobPath(prefix *string, blobName string) (bl
 func (r *rehydrationReceiver) isInTimeRange(blobTime time.Time) bool {
 	return (blobTime.Equal(r.startingTime) || blobTime.After(r.startingTime)) &&
 		(blobTime.Equal(r.endingTime) || blobTime.Before(r.endingTime))
+}
+
+// processBlob does the following:
+// 1. Downloads the blob
+// 2. Decompresses the blob if applicable
+// 3. Pass the blob to the consumer
+func (r *rehydrationReceiver) processBlob(blobPath string) error {
+	blobBuffer := make([]byte, 1024)
+
+	size, err := r.azureClient.DownloadBlob(r.ctx, r.cfg.Container, blobPath, blobBuffer)
+	if err != nil {
+		return fmt.Errorf("download blob: %w", err)
+	}
+
+	// Check file extension see if we need to decompress
+	ext := filepath.Ext(blobPath)
+	switch {
+	case ext == ".gz":
+		blobBuffer, err = gzipDecompress(blobBuffer[:size])
+		if err != nil {
+			return fmt.Errorf("gzip: %w", err)
+		}
+	case ext == ".json":
+		// Do nothing for json files
+	default:
+		return fmt.Errorf("unsupported file type: %s", ext)
+	}
+
+	if err := r.consumer.Consume(r.ctx, blobBuffer); err != nil {
+		return fmt.Errorf("consume: %w", err)
+	}
+	return nil
+}
+
+// gzipDecompress does a gzip decompression on the passed in contents
+func gzipDecompress(contents []byte) ([]byte, error) {
+	gr, err := gzip.NewReader(bytes.NewBuffer(contents))
+	if err != nil {
+		return nil, fmt.Errorf("new reader: %w", err)
+	}
+
+	result, err := io.ReadAll(gr)
+	if err != nil {
+		return nil, fmt.Errorf("decompression: %w", err)
+	}
+
+	return result, nil
 }
