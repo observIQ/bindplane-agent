@@ -17,6 +17,7 @@ package azureblobrehydrationreceiver //import "github.com/observiq/bindplane-age
 import (
 	"context"
 	"errors"
+	"time"
 
 	"github.com/observiq/bindplane-agent/receiver/azureblobrehydrationreceiver/internal/metadata"
 	"go.opentelemetry.io/collector/component"
@@ -41,6 +42,7 @@ func NewFactory() receiver.Factory {
 func createDefaultConfig() component.Config {
 	return &Config{
 		DeleteOnRead: false,
+		PollInterval: time.Minute,
 	}
 }
 

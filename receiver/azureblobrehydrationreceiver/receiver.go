@@ -38,8 +38,8 @@ const (
 	// azurePathSeparator the path separator that Azure storage uses
 	azurePathSeparator = "/"
 
-	// timestampStorageKey the key used for storing the last processed rehydration time
-	timestampStorageKey = "last_rehydrated_time"
+	// checkpointStorageKey the key used for storing the checkpoint
+	checkpointStorageKey = "azure_blob_checkpoint"
 )
 
 var errInvalidBlobPath = errors.New("invalid blob path")
@@ -165,9 +165,11 @@ func (r *rehydrationReceiver) Shutdown(ctx context.Context) error {
 // time range then the blobs will be downloaded and rehydrated.
 func (r *rehydrationReceiver) rehydrateBlobs() {
 	defer close(r.doneChan)
+	ticker := time.NewTicker(r.cfg.PollInterval)
+	defer ticker.Stop()
 
 	// load the previous checkpoint. If not exist should return zero value for time
-	checkpointTime := r.loadCheckpoint(r.ctx)
+	checkpoint := r.loadCheckpoint(r.ctx)
 
 	var prefix *string
 	if r.cfg.RootFolder != "" {
@@ -179,7 +181,7 @@ func (r *rehydrationReceiver) rehydrateBlobs() {
 		select {
 		case <-r.ctx.Done():
 			return
-		default:
+		case <-ticker.C:
 			// get blobs from Azure
 			blobs, nextMarker, err := r.azureClient.ListBlobs(r.ctx, r.cfg.Container, prefix, marker)
 			if err != nil {
@@ -197,7 +199,7 @@ func (r *rehydrationReceiver) rehydrateBlobs() {
 					r.logger.Debug("Skipping Blob, non-matching blob path", zap.String("blob", blob.Name))
 				case err != nil:
 					r.logger.Error("Error processing blob path", zap.String("blob", blob.Name), zap.Error(err))
-				case blobTime.Equal(checkpointTime) || blobTime.After(checkpointTime): // If the blob time is the same as or later than our checkpoint then process it
+				case checkpoint.ShouldParse(*blobTime, blob.Name):
 					// if the blob is not in the specified time range or not of the telemetry type supported by this receiver
 					// then skip consuming it.
 					if !r.isInTimeRange(*blobTime) || telemetryType != r.supportedTelemetry {
@@ -210,9 +212,9 @@ func (r *rehydrationReceiver) rehydrateBlobs() {
 						continue
 					}
 
-					// set and save the checkpoint after successfully processing the blob
-					checkpointTime = *blobTime
-					if err := r.checkpoint(r.ctx, checkpointTime); err != nil {
+					// Update and save the checkpoint with the most recently processed blob
+					checkpoint.UpdateCheckpoint(*blobTime, blob.Name)
+					if err := r.saveCheckpoint(r.ctx, checkpoint); err != nil {
 						r.logger.Error("Error while saving checkpoint", zap.Error(err))
 					}
 
@@ -229,35 +231,36 @@ func (r *rehydrationReceiver) rehydrateBlobs() {
 	}
 }
 
-// checkpoint saves the checkpoint to keep place in rehydration effort
-func (r *rehydrationReceiver) checkpoint(ctx context.Context, checkpointTime time.Time) error {
-	data, err := json.Marshal(&checkpointTime)
+// saveCheckpoint saves the checkpoint to keep place in rehydration effort
+func (r *rehydrationReceiver) saveCheckpoint(ctx context.Context, checkpoint *rehydrationCheckpoint) error {
+	data, err := json.Marshal(checkpoint)
 	if err != nil {
 		return fmt.Errorf("marshal checkpoint: %w", err)
 	}
 
-	return r.storageClient.Set(ctx, timestampStorageKey, data)
+	return r.storageClient.Set(ctx, checkpointStorageKey, data)
 }
 
 // loadCheckpoint loads a checkpoint timestamp to be used to keep place in rehydration effort
-func (r *rehydrationReceiver) loadCheckpoint(ctx context.Context) time.Time {
-	data, err := r.storageClient.Get(ctx, timestampStorageKey)
+func (r *rehydrationReceiver) loadCheckpoint(ctx context.Context) *rehydrationCheckpoint {
+	checkpoint := newCheckpoint()
+
+	data, err := r.storageClient.Get(ctx, checkpointStorageKey)
 	if err != nil {
 		r.logger.Info("Unable to load checkpoint from storage client, continuing without a previous checkpoint", zap.Error(err))
-		return time.Time{}
+		return checkpoint
 	}
 
 	if data == nil {
-		return time.Time{}
+		return checkpoint
 	}
 
-	var checkpointTime time.Time
-	if err := json.Unmarshal(data, &checkpointTime); err != nil {
+	if err := json.Unmarshal(data, checkpoint); err != nil {
 		r.logger.Error("Error while decoding the stored checkpoint, continuing without a checkpoint", zap.Error(err))
-		return time.Time{}
+		return checkpoint
 	}
 
-	return checkpointTime
+	return checkpoint
 }
 
 // constants for blob path parts

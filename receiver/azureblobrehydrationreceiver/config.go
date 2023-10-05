@@ -43,9 +43,11 @@ type Config struct {
 	EndingTime string `mapstructure:"ending_time"`
 
 	// DeleteOnRead indicates if a file should be deleted once it has been processed
+	// Default value of false
 	DeleteOnRead bool `mapstructure:"delete_on_read"`
 
-	// PollInterval is the interval at which the Azure API is scanned for blobs
+	// PollInterval is the interval at which the Azure API is scanned for blobs.
+	// Default value of 1m
 	PollInterval time.Duration `mapstructure:"poll_interval"`
 
 	// ID of the storage extension to use for storing progress
