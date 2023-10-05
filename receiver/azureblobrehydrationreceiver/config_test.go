@@ -12,11 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package azureblobrehydrationreceiver
+package azureblobrehydrationreceiver //import "github.com/observiq/bindplane-agent/receiver/azureblobrehydrationreceiver"
 
 import (
 	"errors"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 )
@@ -36,6 +37,7 @@ func TestConfigValidate(t *testing.T) {
 				StartingTime:     "2023-10-02T17:00",
 				EndingTime:       "2023-10-02T17:01",
 				DeleteOnRead:     false,
+				PollInterval:     time.Second,
 			},
 			expectErr: errors.New("connection_string is required"),
 		},
@@ -48,6 +50,7 @@ func TestConfigValidate(t *testing.T) {
 				StartingTime:     "2023-10-02T17:00",
 				EndingTime:       "2023-10-02T17:01",
 				DeleteOnRead:     false,
+				PollInterval:     time.Second,
 			},
 			expectErr: errors.New("container is required"),
 		},
@@ -60,6 +63,7 @@ func TestConfigValidate(t *testing.T) {
 				StartingTime:     "",
 				EndingTime:       "2023-10-02T17:01",
 				DeleteOnRead:     false,
+				PollInterval:     time.Second,
 			},
 			expectErr: errors.New("starting_time is invalid: missing value"),
 		},
@@ -72,6 +76,7 @@ func TestConfigValidate(t *testing.T) {
 				StartingTime:     "2023-10-02T17:00",
 				EndingTime:       "",
 				DeleteOnRead:     false,
+				PollInterval:     time.Second,
 			},
 			expectErr: errors.New("ending_time is invalid: missing value"),
 		},
@@ -84,6 +89,7 @@ func TestConfigValidate(t *testing.T) {
 				StartingTime:     "invalid_time",
 				EndingTime:       "2023-10-02T17:01",
 				DeleteOnRead:     false,
+				PollInterval:     time.Second,
 			},
 			expectErr: errors.New("starting_time is invalid: invalid timestamp"),
 		},
@@ -96,8 +102,48 @@ func TestConfigValidate(t *testing.T) {
 				StartingTime:     "2023-10-02T17:00",
 				EndingTime:       "invalid_time",
 				DeleteOnRead:     false,
+				PollInterval:     time.Second,
 			},
 			expectErr: errors.New("ending_time is invalid: invalid timestamp"),
+		},
+		{
+			desc: "ending_time not after starting_time",
+			cfg: &Config{
+				ConnectionString: "connection_string",
+				Container:        "container",
+				RootFolder:       "root",
+				StartingTime:     "2023-10-02T17:00",
+				EndingTime:       "2023-10-02T16:00",
+				DeleteOnRead:     false,
+				PollInterval:     time.Second,
+			},
+			expectErr: errors.New("ending_time must be at least one minute after starting_time"),
+		},
+		{
+			desc: "Bad poll_interval",
+			cfg: &Config{
+				ConnectionString: "connection_string",
+				Container:        "container",
+				RootFolder:       "root",
+				StartingTime:     "2023-10-02T17:00",
+				EndingTime:       "2023-10-02T17:01",
+				DeleteOnRead:     false,
+				PollInterval:     time.Millisecond,
+			},
+			expectErr: errors.New("poll_interval must be at least one second"),
+		},
+		{
+			desc: "Valid config",
+			cfg: &Config{
+				ConnectionString: "connection_string",
+				Container:        "container",
+				RootFolder:       "root",
+				StartingTime:     "2023-10-02T17:00",
+				EndingTime:       "2023-10-02T17:01",
+				DeleteOnRead:     false,
+				PollInterval:     time.Second,
+			},
+			expectErr: nil,
 		},
 	}
 

@@ -18,6 +18,7 @@ import (
 	"bytes"
 	"compress/gzip"
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -26,22 +27,31 @@ import (
 	"time"
 
 	"github.com/observiq/bindplane-agent/receiver/azureblobrehydrationreceiver/internal/azureblob"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/stanza/adapter"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/consumer"
+	"go.opentelemetry.io/collector/extension/experimental/storage"
 	"go.uber.org/zap"
 )
 
-// azurePathSeparator the path separator that Azure storage uses
-const azurePathSeparator = "/"
+const (
+	// azurePathSeparator the path separator that Azure storage uses
+	azurePathSeparator = "/"
+
+	// timestampStorageKey the key used for storing the last processed rehydration time
+	timestampStorageKey = "last_rehydrated_time"
+)
 
 var errInvalidBlobPath = errors.New("invalid blob path")
 
 type rehydrationReceiver struct {
 	logger             *zap.Logger
+	id                 component.ID
 	cfg                *Config
 	azureClient        azureblob.BlobClient
 	supportedTelemetry component.DataType
 	consumer           blobConsumer
+	storageClient      storage.Client
 
 	startingTime time.Time
 	endingTime   time.Time
@@ -52,8 +62,8 @@ type rehydrationReceiver struct {
 }
 
 // newMetricsReceiver creates a new metrics specific receiver.
-func newMetricsReceiver(logger *zap.Logger, cfg *Config, nextConsumer consumer.Metrics) (*rehydrationReceiver, error) {
-	r, err := newRehydrationReceiver(logger, cfg)
+func newMetricsReceiver(id component.ID, logger *zap.Logger, cfg *Config, nextConsumer consumer.Metrics) (*rehydrationReceiver, error) {
+	r, err := newRehydrationReceiver(id, logger, cfg)
 	if err != nil {
 		return nil, err
 	}
@@ -65,8 +75,8 @@ func newMetricsReceiver(logger *zap.Logger, cfg *Config, nextConsumer consumer.M
 }
 
 // newLogsReceiver creates a new logs specific receiver.
-func newLogsReceiver(logger *zap.Logger, cfg *Config, nextConsumer consumer.Logs) (*rehydrationReceiver, error) {
-	r, err := newRehydrationReceiver(logger, cfg)
+func newLogsReceiver(id component.ID, logger *zap.Logger, cfg *Config, nextConsumer consumer.Logs) (*rehydrationReceiver, error) {
+	r, err := newRehydrationReceiver(id, logger, cfg)
 	if err != nil {
 		return nil, err
 	}
@@ -78,8 +88,8 @@ func newLogsReceiver(logger *zap.Logger, cfg *Config, nextConsumer consumer.Logs
 }
 
 // newTracesReceiver creates a new traces specific receiver.
-func newTracesReceiver(logger *zap.Logger, cfg *Config, nextConsumer consumer.Traces) (*rehydrationReceiver, error) {
-	r, err := newRehydrationReceiver(logger, cfg)
+func newTracesReceiver(id component.ID, logger *zap.Logger, cfg *Config, nextConsumer consumer.Traces) (*rehydrationReceiver, error) {
+	r, err := newRehydrationReceiver(id, logger, cfg)
 	if err != nil {
 		return nil, err
 	}
@@ -91,7 +101,7 @@ func newTracesReceiver(logger *zap.Logger, cfg *Config, nextConsumer consumer.Tr
 }
 
 // newRehydrationReceiver creates a new rehydration receiver
-func newRehydrationReceiver(logger *zap.Logger, cfg *Config) (*rehydrationReceiver, error) {
+func newRehydrationReceiver(id component.ID, logger *zap.Logger, cfg *Config) (*rehydrationReceiver, error) {
 	azureClient, err := azureblob.NewAzureBlobClient(cfg.ConnectionString)
 	if err != nil {
 		return nil, fmt.Errorf("new Azure client: %w", err)
@@ -112,19 +122,30 @@ func newRehydrationReceiver(logger *zap.Logger, cfg *Config) (*rehydrationReceiv
 	ctx, cancel := context.WithCancelCause(context.Background())
 
 	return &rehydrationReceiver{
-		logger:       logger,
-		cfg:          cfg,
-		azureClient:  azureClient,
-		doneChan:     make(chan struct{}),
-		startingTime: startingTime,
-		endingTime:   endingTime,
-		ctx:          ctx,
-		cancelFunc:   cancel,
+		logger:        logger,
+		id:            id,
+		cfg:           cfg,
+		azureClient:   azureClient,
+		doneChan:      make(chan struct{}),
+		storageClient: storage.NewNopClient(),
+		startingTime:  startingTime,
+		endingTime:    endingTime,
+		ctx:           ctx,
+		cancelFunc:    cancel,
 	}, nil
 }
 
 // Start starts the rehydration receiver
-func (r *rehydrationReceiver) Start(_ context.Context, host component.Host) error {
+func (r *rehydrationReceiver) Start(ctx context.Context, host component.Host) error {
+	if r.cfg.StorageID != nil {
+		storageClient, err := adapter.GetStorageClient(ctx, host, r.cfg.StorageID, r.id)
+		if err != nil {
+			return fmt.Errorf("getStorageClient: %w", err)
+		}
+
+		r.storageClient = storageClient
+	}
+
 	go r.rehydrateBlobs()
 	return nil
 }
@@ -145,6 +166,9 @@ func (r *rehydrationReceiver) Shutdown(ctx context.Context) error {
 func (r *rehydrationReceiver) rehydrateBlobs() {
 	defer close(r.doneChan)
 
+	// load the previous checkpoint. If not exist should return zero value for time
+	checkpointTime := r.loadCheckpoint(r.ctx)
+
 	var prefix *string
 	if r.cfg.RootFolder != "" {
 		prefix = &r.cfg.RootFolder
@@ -156,6 +180,7 @@ func (r *rehydrationReceiver) rehydrateBlobs() {
 		case <-r.ctx.Done():
 			return
 		default:
+			// get blobs from Azure
 			blobs, nextMarker, err := r.azureClient.ListBlobs(r.ctx, r.cfg.Container, prefix, marker)
 			if err != nil {
 				r.logger.Error("Failed to list blobs", zap.Error(err))
@@ -164,6 +189,7 @@ func (r *rehydrationReceiver) rehydrateBlobs() {
 
 			marker = nextMarker
 
+			// Go through each blob and parse it's path to determine if we should consume it or not
 			for _, blob := range blobs {
 				blobTime, telemetryType, err := r.parseBlobPath(prefix, blob.Name)
 				switch {
@@ -171,7 +197,7 @@ func (r *rehydrationReceiver) rehydrateBlobs() {
 					r.logger.Debug("Skipping Blob, non-matching blob path", zap.String("blob", blob.Name))
 				case err != nil:
 					r.logger.Error("Error processing blob path", zap.String("blob", blob.Name), zap.Error(err))
-				default:
+				case blobTime.Equal(checkpointTime) || blobTime.After(checkpointTime): // If the blob time is the same as or later than our checkpoint then process it
 					// if the blob is not in the specified time range or not of the telemetry type supported by this receiver
 					// then skip consuming it.
 					if !r.isInTimeRange(*blobTime) || telemetryType != r.supportedTelemetry {
@@ -182,6 +208,12 @@ func (r *rehydrationReceiver) rehydrateBlobs() {
 					if err := r.processBlob(blob); err != nil {
 						r.logger.Error("Error consuming blob", zap.String("blob", blob.Name), zap.Error(err))
 						continue
+					}
+
+					// set and save the checkpoint after successfully processing the blob
+					checkpointTime = *blobTime
+					if err := r.checkpoint(r.ctx, checkpointTime); err != nil {
+						r.logger.Error("Error while saving checkpoint", zap.Error(err))
 					}
 
 					// Delete blob if configured to do so
@@ -195,6 +227,37 @@ func (r *rehydrationReceiver) rehydrateBlobs() {
 
 		}
 	}
+}
+
+// checkpoint saves the checkpoint to keep place in rehydration effort
+func (r *rehydrationReceiver) checkpoint(ctx context.Context, checkpointTime time.Time) error {
+	data, err := json.Marshal(&checkpointTime)
+	if err != nil {
+		return fmt.Errorf("marshal checkpoint: %w", err)
+	}
+
+	return r.storageClient.Set(ctx, timestampStorageKey, data)
+}
+
+// loadCheckpoint loads a checkpoint timestamp to be used to keep place in rehydration effort
+func (r *rehydrationReceiver) loadCheckpoint(ctx context.Context) time.Time {
+	data, err := r.storageClient.Get(ctx, timestampStorageKey)
+	if err != nil {
+		r.logger.Info("Unable to load checkpoint from storage client, continuing without a previous checkpoint", zap.Error(err))
+		return time.Time{}
+	}
+
+	if data == nil {
+		return time.Time{}
+	}
+
+	var checkpointTime time.Time
+	if err := json.Unmarshal(data, &checkpointTime); err != nil {
+		r.logger.Error("Error while decoding the stored checkpoint, continuing without a checkpoint", zap.Error(err))
+		return time.Time{}
+	}
+
+	return checkpointTime
 }
 
 // constants for blob path parts

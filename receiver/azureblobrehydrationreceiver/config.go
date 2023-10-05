@@ -18,6 +18,8 @@ import (
 	"errors" // timeFormat is the format for the starting and end time
 	"fmt"
 	"time"
+
+	"go.opentelemetry.io/collector/component"
 )
 
 const timeFormat = "2006-01-02T15:04"
@@ -42,6 +44,12 @@ type Config struct {
 
 	// DeleteOnRead indicates if a file should be deleted once it has been processed
 	DeleteOnRead bool `mapstructure:"delete_on_read"`
+
+	// PollInterval is the interval at which the Azure API is scanned for blobs
+	PollInterval time.Duration `mapstructure:"poll_interval"`
+
+	// ID of the storage extension to use for storing progress
+	StorageID *component.ID `mapstructure:"storage"`
 }
 
 // Validate validates the config
@@ -54,26 +62,38 @@ func (c *Config) Validate() error {
 		return errors.New("container is required")
 	}
 
-	if err := validateTimestamp(c.StartingTime); err != nil {
+	startingTs, err := validateTimestamp(c.StartingTime)
+	if err != nil {
 		return fmt.Errorf("starting_time is invalid: %w", err)
 	}
 
-	if err := validateTimestamp(c.EndingTime); err != nil {
+	endingTs, err := validateTimestamp(c.EndingTime)
+	if err != nil {
 		return fmt.Errorf("ending_time is invalid: %w", err)
+	}
+
+	// Check case where ending_time is to close or before starting time
+	if endingTs.Sub(*startingTs) < time.Minute {
+		return errors.New("ending_time must be at least one minute after starting_time")
+	}
+
+	if c.PollInterval < time.Second {
+		return errors.New("poll_interval must be at least one second")
 	}
 
 	return nil
 }
 
 // validateTimestamp validates the passed in timestamp string
-func validateTimestamp(timestamp string) error {
+func validateTimestamp(timestamp string) (*time.Time, error) {
 	if timestamp == "" {
-		return errors.New("missing value")
+		return nil, errors.New("missing value")
 	}
 
-	if _, err := time.Parse(timeFormat, timestamp); err != nil {
-		return errors.New("invalid timestamp format must be in the form YYYY-MM-DDTHH:MM")
+	ts, err := time.Parse(timeFormat, timestamp)
+	if err != nil {
+		return nil, errors.New("invalid timestamp format must be in the form YYYY-MM-DDTHH:MM")
 	}
 
-	return nil
+	return &ts, nil
 }

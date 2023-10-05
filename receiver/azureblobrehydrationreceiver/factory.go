@@ -51,7 +51,7 @@ func createMetricsReceiver(_ context.Context, params receiver.CreateSettings, co
 		return nil, errImproperCfgType
 	}
 
-	return newMetricsReceiver(params.Logger, cfg, con)
+	return newMetricsReceiver(params.ID, params.Logger, cfg, con)
 }
 
 // createLogsReceiver creates a logs receiver
@@ -61,7 +61,7 @@ func createLogsReceiver(_ context.Context, params receiver.CreateSettings, conf 
 		return nil, errImproperCfgType
 	}
 
-	return newLogsReceiver(params.Logger, cfg, con)
+	return newLogsReceiver(params.ID, params.Logger, cfg, con)
 }
 
 // createTracesReceiver creates a traces receiver
@@ -71,5 +71,5 @@ func createTracesReceiver(_ context.Context, params receiver.CreateSettings, con
 		return nil, errImproperCfgType
 	}
 
-	return newTracesReceiver(params.Logger, cfg, con)
+	return newTracesReceiver(params.ID, params.Logger, cfg, con)
 }
