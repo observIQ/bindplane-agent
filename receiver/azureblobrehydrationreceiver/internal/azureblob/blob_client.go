@@ -48,7 +48,7 @@ type AzureBlobClient struct {
 }
 
 // NewAzureBlobClient creates a new azureBlobClient with the given connection string
-func NewAzureBlobClient(connectionString string) (*AzureBlobClient, error) {
+func NewAzureBlobClient(connectionString string) (BlobClient, error) {
 	azClient, err := azblob.NewClientFromConnectionString(connectionString, nil)
 	if err != nil {
 		return nil, err

@@ -42,7 +42,12 @@ const (
 	checkpointStorageKey = "azure_blob_checkpoint"
 )
 
+// errInvalidBlobPath is the error for invalid blob path
 var errInvalidBlobPath = errors.New("invalid blob path")
+
+// newAzureBlobClient is the function use to create new Azure Blob Clients.
+// Meant to be overwritten for tests
+var newAzureBlobClient = azureblob.NewAzureBlobClient
 
 type rehydrationReceiver struct {
 	logger             *zap.Logger
@@ -102,7 +107,7 @@ func newTracesReceiver(id component.ID, logger *zap.Logger, cfg *Config, nextCon
 
 // newRehydrationReceiver creates a new rehydration receiver
 func newRehydrationReceiver(id component.ID, logger *zap.Logger, cfg *Config) (*rehydrationReceiver, error) {
-	azureClient, err := azureblob.NewAzureBlobClient(cfg.ConnectionString)
+	azureClient, err := newAzureBlobClient(cfg.ConnectionString)
 	if err != nil {
 		return nil, fmt.Errorf("new Azure client: %w", err)
 	}
