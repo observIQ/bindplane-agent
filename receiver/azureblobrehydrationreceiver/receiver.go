@@ -198,7 +198,7 @@ func (r *rehydrationReceiver) rehydrateBlobs() {
 
 			// Go through each blob and parse it's path to determine if we should consume it or not
 			for _, blob := range blobs {
-				blobTime, telemetryType, err := r.parseBlobPath(prefix, blob.Name)
+				blobTime, telemetryType, err := parseBlobPath(prefix, blob.Name)
 				switch {
 				case errors.Is(err, errInvalidBlobPath):
 					r.logger.Debug("Skipping Blob, non-matching blob path", zap.String("blob", blob.Name))
@@ -285,10 +285,10 @@ const (
 )
 
 // parseBlobPath returns true if the blob is within the existing time range
-func (r *rehydrationReceiver) parseBlobPath(prefix *string, blobName string) (blobTime *time.Time, telemetryType component.DataType, err error) {
+func parseBlobPath(prefix *string, blobName string) (blobTime *time.Time, telemetryType component.DataType, err error) {
 	parts := strings.Split(blobName, azurePathSeparator)
 
-	if len(parts) == 0 {
+	if len(parts) == 1 {
 		err = errInvalidBlobPath
 		return
 	}
@@ -342,7 +342,7 @@ func (r *rehydrationReceiver) parseBlobPath(prefix *string, blobName string) (bl
 
 	// Parse the expected format
 	parsedTime, timeErr := time.Parse(timeFormat, tsBuilder.String())
-	if err != nil {
+	if timeErr != nil {
 		err = fmt.Errorf("parse blob time: %w", timeErr)
 		return
 	}
