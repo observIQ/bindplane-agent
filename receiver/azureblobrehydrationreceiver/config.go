@@ -30,7 +30,7 @@ type Config struct {
 	// which can be found in the Azure Blob Storage resource on the Azure Portal. (no default)
 	ConnectionString string `mapstructure:"connection_string"`
 
-	// Container is the name of the user created storage container. (no default)
+	// Container is the name of the storage container to pull from. (no default)
 	Container string `mapstructure:"container"`
 
 	// RootFolder is the name of the root folder in path.

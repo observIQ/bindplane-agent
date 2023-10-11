@@ -1,6 +1,6 @@
 module github.com/observiq/bindplane-agent/receiver/azureblobrehydrationreceiver
 
-go 1.21.1
+go 1.20
 
 require (
 	github.com/Azure/azure-sdk-for-go/sdk/storage/azblob v1.1.0
