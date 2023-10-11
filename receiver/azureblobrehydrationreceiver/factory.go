@@ -28,6 +28,7 @@ import (
 // errImproperCfgType error for when an invalid config type is passed to receiver creation funcs
 var errImproperCfgType = errors.New("improper config type")
 
+// NewFactory creates a new receiver factory
 func NewFactory() receiver.Factory {
 	return receiver.NewFactory(
 		metadata.Type,

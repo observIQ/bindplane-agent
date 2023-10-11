@@ -24,6 +24,7 @@ import (
 
 	"github.com/observiq/bindplane-agent/receiver/azureblobrehydrationreceiver/internal/azureblob"
 	blobmocks "github.com/observiq/bindplane-agent/receiver/azureblobrehydrationreceiver/internal/azureblob/mocks"
+	"github.com/observiq/bindplane-agent/receiver/azureblobrehydrationreceiver/internal/mocks"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/component"
@@ -455,6 +456,120 @@ func Test_parseBlobPath(t *testing.T) {
 	}
 }
 
+func Test_processBlob(t *testing.T) {
+	containerName := "container"
+
+	// Tests jsonData to return for mock jsonData
+	jsonData := []byte(`{"one": "two"}`)
+	gzipData := gzipCompressData(t, jsonData)
+
+	testcases := []struct {
+		desc        string
+		info        *azureblob.BlobInfo
+		mockSetup   func(*blobmocks.MockBlobClient, *mocks.MockBlobConsumer)
+		expectedErr error
+	}{
+		{
+			desc: "Download blob error",
+			info: &azureblob.BlobInfo{
+				Name: "blob.json",
+				Size: 10,
+			},
+			mockSetup: func(mockClient *blobmocks.MockBlobClient, _ *mocks.MockBlobConsumer) {
+				mockClient.EXPECT().DownloadBlob(mock.Anything, containerName, "blob.json", mock.Anything).Return(0, errors.New("bad"))
+			},
+			expectedErr: errors.New("download blob: bad"),
+		},
+		{
+			desc: "unsupported extension",
+			info: &azureblob.BlobInfo{
+				Name: "blob.nope",
+				Size: 10,
+			},
+			mockSetup: func(mockClient *blobmocks.MockBlobClient, _ *mocks.MockBlobConsumer) {
+				mockClient.EXPECT().DownloadBlob(mock.Anything, containerName, "blob.nope", mock.Anything).Return(0, nil)
+			},
+			expectedErr: errors.New("unsupported file type: .nope"),
+		},
+		{
+			desc: "Gzip compression",
+			info: &azureblob.BlobInfo{
+				Name: "blob.json.gz",
+				Size: int64(len(gzipData)),
+			},
+			mockSetup: func(mockClient *blobmocks.MockBlobClient, mockConsumer *mocks.MockBlobConsumer) {
+				mockClient.EXPECT().DownloadBlob(mock.Anything, containerName, "blob.json.gz", mock.Anything).RunAndReturn(func(_ context.Context, _ string, _ string, buf []byte) (int64, error) {
+					copy(buf, gzipData)
+					return int64(len(gzipData)), nil
+				})
+
+				mockConsumer.EXPECT().Consume(mock.Anything, jsonData).Return(nil)
+			},
+			expectedErr: nil,
+		},
+		{
+			desc: "Json no compression",
+			info: &azureblob.BlobInfo{
+				Name: "blob.json",
+				Size: int64(len(jsonData)),
+			},
+			mockSetup: func(mockClient *blobmocks.MockBlobClient, mockConsumer *mocks.MockBlobConsumer) {
+				mockClient.EXPECT().DownloadBlob(mock.Anything, containerName, "blob.json", mock.Anything).RunAndReturn(func(_ context.Context, _ string, _ string, buf []byte) (int64, error) {
+					copy(buf, jsonData)
+					return int64(len(jsonData)), nil
+				})
+
+				mockConsumer.EXPECT().Consume(mock.Anything, jsonData).Return(nil)
+			},
+			expectedErr: nil,
+		},
+		{
+			desc: "Consume error",
+			info: &azureblob.BlobInfo{
+				Name: "blob.json",
+				Size: int64(len(jsonData)),
+			},
+			mockSetup: func(mockClient *blobmocks.MockBlobClient, mockConsumer *mocks.MockBlobConsumer) {
+				mockClient.EXPECT().DownloadBlob(mock.Anything, containerName, "blob.json", mock.Anything).RunAndReturn(func(_ context.Context, _ string, _ string, buf []byte) (int64, error) {
+					copy(buf, jsonData)
+					return int64(len(jsonData)), nil
+				})
+
+				mockConsumer.EXPECT().Consume(mock.Anything, jsonData).Return(errors.New("bad"))
+			},
+			expectedErr: errors.New("consume: bad"),
+		},
+	}
+
+	for _, tc := range testcases {
+		t.Run(tc.desc, func(t *testing.T) {
+			mockClient := blobmocks.NewMockBlobClient(t)
+			mockConsumer := mocks.NewMockBlobConsumer(t)
+
+			tc.mockSetup(mockClient, mockConsumer)
+
+			r := &rehydrationReceiver{
+				logger: zap.NewNop(),
+				cfg: &Config{
+					Container: containerName,
+				},
+				consumer:    mockConsumer,
+				azureClient: mockClient,
+				ctx:         context.Background(),
+			}
+
+			err := r.processBlob(tc.info)
+			if tc.expectedErr == nil {
+				require.NoError(t, err)
+			} else {
+				require.ErrorContains(t, err, tc.expectedErr.Error())
+			}
+		})
+	}
+}
+
+// setNewAzureBlobClient helper function used to set the newAzureBlobClient
+// function with a mock and return the mock.
 func setNewAzureBlobClient(t *testing.T) *blobmocks.MockBlobClient {
 	t.Helper()
 	oldfunc := newAzureBlobClient

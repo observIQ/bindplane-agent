@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Package azureblob contains client interfaces and implementations for accessing Blob storage
 package azureblob //import "github.com/observiq/bindplane-agent/receiver/azureblobrehydrationreceiver/internal/azureblob"
 
 import (
@@ -42,8 +43,8 @@ type BlobClient interface {
 	DeleteBlob(ctx context.Context, container, blobPath string) error
 }
 
-// AzureBlobClient is an implementation of the BlobClient for Azure
-type AzureBlobClient struct {
+// AzureClient is an implementation of the BlobClient for Azure
+type AzureClient struct {
 	azClient *azblob.Client
 }
 
@@ -54,7 +55,7 @@ func NewAzureBlobClient(connectionString string) (BlobClient, error) {
 		return nil, err
 	}
 
-	return &AzureBlobClient{
+	return &AzureClient{
 		azClient: azClient,
 	}, nil
 }
@@ -63,7 +64,7 @@ func NewAzureBlobClient(connectionString string) (BlobClient, error) {
 const contentLengthKey = "ContentLength"
 
 // ListBlobs returns a list of blobInfo objects present in the container with the given prefix
-func (a *AzureBlobClient) ListBlobs(ctx context.Context, container string, prefix, marker *string) ([]*BlobInfo, *string, error) {
+func (a *AzureClient) ListBlobs(ctx context.Context, container string, prefix, marker *string) ([]*BlobInfo, *string, error) {
 	listOptions := &azblob.ListBlobsFlatOptions{
 		Marker: marker,
 		Prefix: prefix,
@@ -104,7 +105,7 @@ func (a *AzureBlobClient) ListBlobs(ctx context.Context, container string, prefi
 
 // DownloadBlob downloads the contents of the blob into the supplied buffer.
 // It will return the count of bytes used in the buffer.
-func (a *AzureBlobClient) DownloadBlob(ctx context.Context, container, blobPath string, buf []byte) (int64, error) {
+func (a *AzureClient) DownloadBlob(ctx context.Context, container, blobPath string, buf []byte) (int64, error) {
 	bytesDownloaded, err := a.azClient.DownloadBuffer(ctx, container, blobPath, buf, nil)
 	if err != nil {
 		return 0, fmt.Errorf("download: %w", err)
@@ -114,7 +115,7 @@ func (a *AzureBlobClient) DownloadBlob(ctx context.Context, container, blobPath 
 }
 
 // DeleteBlob deletes the blob in the specified container
-func (a *AzureBlobClient) DeleteBlob(ctx context.Context, container, blobPath string) error {
+func (a *AzureClient) DeleteBlob(ctx context.Context, container, blobPath string) error {
 	_, err := a.azClient.DeleteBlob(ctx, container, blobPath, nil)
 	return err
 }
