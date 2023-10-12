@@ -37,4 +37,5 @@ Below is a list of supported exporters with links to their documentation pages.
 | SAPM Exporter                                                     | [sapmexporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.86.0/exporter/sapmexporter/README.md) |
 | SignalFX Metrics Exporter                                         | [signalfxexporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.86.0/exporter/signalfxexporter/README.md) |
 | Splunk HTTP Event Collector (HEC) Exporter                        | [splunkhecexporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.86.0/exporter/splunkhecexporter/README.md) |
+| Sumo Logic Exporter                                               | [sumologic](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.86.0/exporter/sumologicexporter/README.md) |
 | Zipkin Exporter                                                   | [zipkinexporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.86.0/exporter/zipkinexporter/README.md) |

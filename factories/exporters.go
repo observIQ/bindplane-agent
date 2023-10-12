@@ -46,6 +46,7 @@ import (
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/sapmexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/signalfxexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/splunkhecexporter"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/sumologicexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/zipkinexporter"
 	"go.opentelemetry.io/collector/exporter"
 	"go.opentelemetry.io/collector/exporter/exportertest"
@@ -89,5 +90,6 @@ var defaultExporters = []exporter.Factory{
 	sapmexporter.NewFactory(),
 	signalfxexporter.NewFactory(),
 	splunkhecexporter.NewFactory(),
+	sumologicexporter.NewFactory(),
 	zipkinexporter.NewFactory(),
 }
