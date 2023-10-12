@@ -151,7 +151,7 @@ func (r *rehydrationReceiver) Start(ctx context.Context, host component.Host) er
 		r.storageClient = storageClient
 	}
 
-	go r.rehydrateBlobs()
+	go r.scrape()
 	return nil
 }
 
@@ -166,74 +166,85 @@ func (r *rehydrationReceiver) Shutdown(ctx context.Context) error {
 	}
 }
 
-// rehydrateBlobs pulls blob paths from the UI and if they are within the specified
-// time range then the blobs will be downloaded and rehydrated.
-func (r *rehydrationReceiver) rehydrateBlobs() {
+// scrape scrapes the Azure api on interval
+func (r *rehydrationReceiver) scrape() {
 	defer close(r.doneChan)
 	ticker := time.NewTicker(r.cfg.PollInterval)
 	defer ticker.Stop()
 
+	var marker *string
+
 	// load the previous checkpoint. If not exist should return zero value for time
 	checkpoint := r.loadCheckpoint(r.ctx)
 
-	var prefix *string
-	if r.cfg.RootFolder != "" {
-		prefix = &r.cfg.RootFolder
-	}
+	// Call once before the loop to ensure we do a collection before the first ticker
+	r.rehydrateBlobs(checkpoint, marker)
 
-	var marker *string
 	for {
 		select {
 		case <-r.ctx.Done():
 			return
 		case <-ticker.C:
-			// get blobs from Azure
-			blobs, nextMarker, err := r.azureClient.ListBlobs(r.ctx, r.cfg.Container, prefix, marker)
-			if err != nil {
-				r.logger.Error("Failed to list blobs", zap.Error(err))
+			r.rehydrateBlobs(checkpoint, marker)
+		}
+	}
+}
+
+// rehydrateBlobs pulls blob paths from the UI and if they are within the specified
+// time range then the blobs will be downloaded and rehydrated.
+// The passed in checkpoint and marker will be updated and should be used in the next iteration
+func (r *rehydrationReceiver) rehydrateBlobs(checkpoint *rehydrationCheckpoint, marker *string) {
+	var prefix *string
+	if r.cfg.RootFolder != "" {
+		prefix = &r.cfg.RootFolder
+	}
+
+	// get blobs from Azure
+	blobs, nextMarker, err := r.azureClient.ListBlobs(r.ctx, r.cfg.Container, prefix, marker)
+	if err != nil {
+		r.logger.Error("Failed to list blobs", zap.Error(err))
+		return
+	}
+
+	marker = nextMarker
+
+	// Go through each blob and parse it's path to determine if we should consume it or not
+	for _, blob := range blobs {
+		blobTime, telemetryType, err := parseBlobPath(prefix, blob.Name)
+		switch {
+		case errors.Is(err, errInvalidBlobPath):
+			r.logger.Debug("Skipping Blob, non-matching blob path", zap.String("blob", blob.Name))
+		case err != nil:
+			r.logger.Error("Error processing blob path", zap.String("blob", blob.Name), zap.Error(err))
+		case checkpoint.ShouldParse(*blobTime, blob.Name):
+			// if the blob is not in the specified time range or not of the telemetry type supported by this receiver
+			// then skip consuming it.
+			if !r.isInTimeRange(*blobTime) || telemetryType != r.supportedTelemetry {
 				continue
 			}
 
-			marker = nextMarker
-
-			// Go through each blob and parse it's path to determine if we should consume it or not
-			for _, blob := range blobs {
-				blobTime, telemetryType, err := parseBlobPath(prefix, blob.Name)
-				switch {
-				case errors.Is(err, errInvalidBlobPath):
-					r.logger.Debug("Skipping Blob, non-matching blob path", zap.String("blob", blob.Name))
-				case err != nil:
-					r.logger.Error("Error processing blob path", zap.String("blob", blob.Name), zap.Error(err))
-				case checkpoint.ShouldParse(*blobTime, blob.Name):
-					// if the blob is not in the specified time range or not of the telemetry type supported by this receiver
-					// then skip consuming it.
-					if !r.isInTimeRange(*blobTime) || telemetryType != r.supportedTelemetry {
-						continue
-					}
-
-					// Process and consume the blob at the given path
-					if err := r.processBlob(blob); err != nil {
-						r.logger.Error("Error consuming blob", zap.String("blob", blob.Name), zap.Error(err))
-						continue
-					}
-
-					// Update and save the checkpoint with the most recently processed blob
-					checkpoint.UpdateCheckpoint(*blobTime, blob.Name)
-					if err := r.saveCheckpoint(r.ctx, checkpoint); err != nil {
-						r.logger.Error("Error while saving checkpoint", zap.Error(err))
-					}
-
-					// Delete blob if configured to do so
-					if r.cfg.DeleteOnRead {
-						if err := r.azureClient.DeleteBlob(r.ctx, r.cfg.Container, blob.Name); err != nil {
-							r.logger.Error("Error while attempting to delete blob", zap.String("blob", blob.Name), zap.Error(err))
-						}
-					}
-				}
+			// Process and consume the blob at the given path
+			if err := r.processBlob(blob); err != nil {
+				r.logger.Error("Error consuming blob", zap.String("blob", blob.Name), zap.Error(err))
+				continue
 			}
 
+			// Update and save the checkpoint with the most recently processed blob
+			checkpoint.UpdateCheckpoint(*blobTime, blob.Name)
+			if err := r.saveCheckpoint(r.ctx, checkpoint); err != nil {
+				r.logger.Error("Error while saving checkpoint", zap.Error(err))
+			}
+
+			// Delete blob if configured to do so
+			if r.cfg.DeleteOnRead {
+				if err := r.azureClient.DeleteBlob(r.ctx, r.cfg.Container, blob.Name); err != nil {
+					r.logger.Error("Error while attempting to delete blob", zap.String("blob", blob.Name), zap.Error(err))
+				}
+			}
 		}
 	}
+
+	return
 }
 
 // saveCheckpoint saves the checkpoint to keep place in rehydration effort
