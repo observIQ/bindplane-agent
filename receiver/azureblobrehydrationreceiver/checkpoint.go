@@ -19,7 +19,7 @@ import (
 )
 
 // rehydrationCheckpoint is the checkpoint used with a storage extension to
-// kep track of what's been rehydrated.
+// keep track of what's been rehydrated.
 type rehydrationCheckpoint struct {
 	// LastTs is the time created from the folder path of the last consumed blob
 	LastTs time.Time `json:"last_ts"`

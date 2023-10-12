@@ -15,13 +15,14 @@
 package azureblobrehydrationreceiver //import "github.com/observiq/bindplane-agent/receiver/azureblobrehydrationreceiver"
 
 import (
-	"errors" // timeFormat is the format for the starting and end time
+	"errors"
 	"fmt"
 	"time"
 
 	"go.opentelemetry.io/collector/component"
 )
 
+// timeFormat is the format for the starting and end time
 const timeFormat = "2006-01-02T15:04"
 
 // Config is the configuration for the azure blob rehydration receiver
