@@ -20,7 +20,7 @@ require (
 	github.com/observiq/bindplane-agent/processor/samplingprocessor v1.37.0
 	github.com/observiq/bindplane-agent/processor/spancountprocessor v1.37.0
 	github.com/observiq/bindplane-agent/processor/throughputmeasurementprocessor v1.37.0
-	github.com/observiq/bindplane-agent/receiver/azureblobrehydrationreceiver v1.36.0
+	github.com/observiq/bindplane-agent/receiver/azureblobrehydrationreceiver v1.37.0
 	github.com/observiq/bindplane-agent/receiver/m365receiver v1.37.0
 	github.com/observiq/bindplane-agent/receiver/pluginreceiver v1.37.0
 	github.com/observiq/bindplane-agent/receiver/routereceiver v1.37.0

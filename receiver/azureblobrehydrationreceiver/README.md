@@ -5,7 +5,7 @@ Rehydrates OTLP from Azure Blob Storage that was stored using the Azure Blob Exp
 This is not a traditional receiver that continually produces data but rather rehydrates all blobs found within a specified time range. Once all of the blobs have been rehydrated in that time range the receiver will stop producing data.
 
 ## Minimum Agent Versions
-- Introduced: [v1.36.0](https://github.com/observIQ/bindplane-agent/releases/tag/v1.36.0)
+- Introduced: [v1.37.0](https://github.com/observIQ/bindplane-agent/releases/tag/v1.37.0)
 
 ## Supported Pipelines
 - Metrics
@@ -36,7 +36,7 @@ This is not a traditional receiver that continually produces data but rather reh
 
 ### Basic Configuration
 
-This configurations specifies a `connection_string`, `container`, `starting_time`, and `ending_time`. 
+This configuration specifies a `connection_string`, `container`, `starting_time`, and `ending_time`. 
 This will rehydrate all blobs in the container `my-container` that have a path that represents they were created between `1:00pm` and `2:30pm` UTC time on `October 1, 2023`.
 
 Such a path could look like the following:
@@ -56,7 +56,7 @@ azureblobrehydration:
 
 ### Using Storage Extension Configuration
 
-This configurations shows using a storage extension to track rehydration progress over agent restarts. The `storage` field is set to the component ID of the storage extension.
+This configuration shows using a storage extension to track rehydration progress over agent restarts. The `storage` field is set to the component ID of the storage extension.
 
 
 ```yaml
@@ -75,7 +75,7 @@ receivers:
 
 ### Root Folder Configuration
 
-This configurations specifies an additional field `root_folder` to match the `root_folder` value of the Azure Blob Exporter. 
+This configuration specifies an additional field `root_folder` to match the `root_folder` value of the Azure Blob Exporter. 
 The `root_folder` value in the exporter will prefix the blob path with the root folder and it needs to be accounted for in the rehydration receiver.
 
 Such a path could look like the following:
@@ -96,7 +96,7 @@ azureblobrehydration:
 
 ### Delete on read Configuration
 
-This configurations enabled the `delete_on_read` functionality which will delete a blob from Azure after it has been successfully rehydrated into OTLP data and sent onto the next component in the pipeline. 
+This configuration enables the `delete_on_read` functionality which will delete a blob from Azure after it has been successfully rehydrated into OTLP data and sent onto the next component in the pipeline. 
 
 ```yaml
 azureblobrehydration:

@@ -413,5 +413,9 @@ func gzipDecompress(contents []byte) ([]byte, error) {
 		return nil, fmt.Errorf("decompression: %w", err)
 	}
 
+	if err := gr.Close(); err != nil {
+		return nil, fmt.Errorf("reader close: %w", err)
+	}
+
 	return result, nil
 }
