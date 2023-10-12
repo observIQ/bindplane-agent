@@ -1200,6 +1200,8 @@ github.com/open-telemetry/opentelemetry-collector-contrib/exporter/signalfxexpor
 github.com/open-telemetry/opentelemetry-collector-contrib/exporter/signalfxexporter v0.86.0/go.mod h1:SChDEn3vnLkeorh+Yx3FKmfFurWnFdsjHeUa6tuKkAA=
 github.com/open-telemetry/opentelemetry-collector-contrib/exporter/splunkhecexporter v0.86.0 h1:xqoxs6rG6G+klvzEyeEo0T35V0GFC900zJANj8sFJjM=
 github.com/open-telemetry/opentelemetry-collector-contrib/exporter/splunkhecexporter v0.86.0/go.mod h1:IfchAtrAQSOP254Vi3i8S2dA+nHTh1CnDafiy4k4Lik=
+github.com/open-telemetry/opentelemetry-collector-contrib/exporter/sumologicexporter v0.86.0 h1:Nehr8aNusRcEH0ser2m6Knihk5pRr+3+ZgQGh58/9/s=
+github.com/open-telemetry/opentelemetry-collector-contrib/exporter/sumologicexporter v0.86.0/go.mod h1:SZsMg6/trpy41E5hVGLj4c65GgUGFnHagXGc2lfuy1Q=
 github.com/open-telemetry/opentelemetry-collector-contrib/exporter/zipkinexporter v0.86.0 h1:ceMhhO3hO6ziyRL+MsHcjbOzyutSJRgZVzJSpRyd9is=
 github.com/open-telemetry/opentelemetry-collector-contrib/exporter/zipkinexporter v0.86.0/go.mod h1:NEJbsVZsxxMBq+vW1Gvs8H0WjN4cbF809pr3h0K3LNk=
 github.com/open-telemetry/opentelemetry-collector-contrib/extension/basicauthextension v0.86.0 h1:fefJjwcQbeFuNFVvilMJB0U4Sbpg5pG/NjuN1JEeg6A=
