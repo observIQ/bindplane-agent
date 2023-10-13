@@ -20,6 +20,7 @@ require (
 	github.com/observiq/bindplane-agent/processor/samplingprocessor v1.37.0
 	github.com/observiq/bindplane-agent/processor/spancountprocessor v1.37.0
 	github.com/observiq/bindplane-agent/processor/throughputmeasurementprocessor v1.37.0
+	github.com/observiq/bindplane-agent/receiver/azureblobrehydrationreceiver v1.37.0
 	github.com/observiq/bindplane-agent/receiver/m365receiver v1.37.0
 	github.com/observiq/bindplane-agent/receiver/pluginreceiver v1.37.0
 	github.com/observiq/bindplane-agent/receiver/routereceiver v1.37.0
@@ -673,6 +674,8 @@ replace github.com/observiq/bindplane-agent/expr => ./expr
 replace github.com/observiq/bindplane-agent/counter => ./counter
 
 replace github.com/observiq/bindplane-agent/exporter/googlemanagedprometheusexporter => ./exporter/googlemanagedprometheusexporter
+
+replace github.com/observiq/bindplane-agent/receiver/azureblobrehydrationreceiver => ./receiver/azureblobrehydrationreceiver
 
 // Does not build with windows and only used in configschema executable
 // Relevant issue https://github.com/mattn/go-ieproxy/issues/45
