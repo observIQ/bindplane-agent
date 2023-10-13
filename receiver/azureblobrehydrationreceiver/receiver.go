@@ -211,7 +211,7 @@ func (r *rehydrationReceiver) rehydrateBlobs(checkpoint *rehydrationCheckpoint, 
 
 	// Go through each blob and parse it's path to determine if we should consume it or not
 	for _, blob := range blobs {
-		blobTime, telemetryType, err := parseBlobPath(prefix, blob.Name)
+		blobTime, telemetryType, err := parseBlobPath(blob.Name)
 		switch {
 		case errors.Is(err, errInvalidBlobPath):
 			r.logger.Debug("Skipping Blob, non-matching blob path", zap.String("blob", blob.Name))
@@ -300,7 +300,7 @@ const (
 var blobNameRegex = regexp.MustCompile(`^(?:[^/]*/)?year=(\d{4})/month=(\d{2})/day=(\d{2})/hour=(\d{2})/(?:minute=(\d{2})/)?([^/].*)$`)
 
 // parseBlobPath returns true if the blob is within the existing time range
-func parseBlobPath(prefix *string, blobName string) (blobTime *time.Time, telemetryType component.DataType, err error) {
+func parseBlobPath(blobName string) (blobTime *time.Time, telemetryType component.DataType, err error) {
 	matches := blobNameRegex.FindStringSubmatch(blobName)
 	if matches == nil {
 		err = errInvalidBlobPath

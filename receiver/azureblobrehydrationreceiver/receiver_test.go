@@ -362,13 +362,11 @@ func Test_fullRehydration(t *testing.T) {
 }
 
 func Test_parseBlobPath(t *testing.T) {
-	prefix := "prefix"
 	expectedTimeMinute := time.Date(2023, time.January, 04, 12, 02, 0, 0, time.UTC)
 	expectedTimeHour := time.Date(2023, time.January, 04, 12, 00, 0, 0, time.UTC)
 
 	testcases := []struct {
 		desc         string
-		prefix       *string
 		blobName     string
 		expectedTime *time.Time
 		expectedType component.DataType
@@ -376,7 +374,6 @@ func Test_parseBlobPath(t *testing.T) {
 	}{
 		{
 			desc:         "Empty BlobName",
-			prefix:       nil,
 			blobName:     "",
 			expectedTime: nil,
 			expectedType: "",
@@ -384,7 +381,6 @@ func Test_parseBlobPath(t *testing.T) {
 		},
 		{
 			desc:         "Malformed path",
-			prefix:       nil,
 			blobName:     "year=2023/day=04/hour=12/minute=02/blobmetrics_12345.json",
 			expectedTime: nil,
 			expectedType: "",
@@ -392,7 +388,6 @@ func Test_parseBlobPath(t *testing.T) {
 		},
 		{
 			desc:         "Malformed timestamp",
-			prefix:       nil,
 			blobName:     "year=2003/month=00/day=04/hour=12/minute=01/blobmetrics_12345.json",
 			expectedTime: nil,
 			expectedType: "",
@@ -400,7 +395,6 @@ func Test_parseBlobPath(t *testing.T) {
 		},
 		{
 			desc:         "Prefix, minute, metrics",
-			prefix:       &prefix,
 			blobName:     "prefix/year=2023/month=01/day=04/hour=12/minute=02/blobmetrics_12345.json",
 			expectedTime: &expectedTimeMinute,
 			expectedType: component.DataTypeMetrics,
@@ -408,7 +402,6 @@ func Test_parseBlobPath(t *testing.T) {
 		},
 		{
 			desc:         "No Prefix, minute, metrics",
-			prefix:       nil,
 			blobName:     "year=2023/month=01/day=04/hour=12/minute=02/blobmetrics_12345.json",
 			expectedTime: &expectedTimeMinute,
 			expectedType: component.DataTypeMetrics,
@@ -416,7 +409,6 @@ func Test_parseBlobPath(t *testing.T) {
 		},
 		{
 			desc:         "No Prefix, minute, logs",
-			prefix:       nil,
 			blobName:     "year=2023/month=01/day=04/hour=12/minute=02/bloblogs_12345.json",
 			expectedTime: &expectedTimeMinute,
 			expectedType: component.DataTypeLogs,
@@ -424,7 +416,6 @@ func Test_parseBlobPath(t *testing.T) {
 		},
 		{
 			desc:         "No Prefix, minute, traces",
-			prefix:       nil,
 			blobName:     "year=2023/month=01/day=04/hour=12/minute=02/blobtraces_12345.json",
 			expectedTime: &expectedTimeMinute,
 			expectedType: component.DataTypeTraces,
@@ -432,7 +423,6 @@ func Test_parseBlobPath(t *testing.T) {
 		},
 		{
 			desc:         "No Prefix, hour, metrics",
-			prefix:       nil,
 			blobName:     "year=2023/month=01/day=04/hour=12/blobmetrics_12345.json",
 			expectedTime: &expectedTimeHour,
 			expectedType: component.DataTypeMetrics,
@@ -442,7 +432,7 @@ func Test_parseBlobPath(t *testing.T) {
 
 	for _, tc := range testcases {
 		t.Run(tc.desc, func(t *testing.T) {
-			actualTime, actualType, err := parseBlobPath(tc.prefix, tc.blobName)
+			actualTime, actualType, err := parseBlobPath(tc.blobName)
 			if tc.expectedErr != nil {
 				require.ErrorContains(t, err, tc.expectedErr.Error())
 				require.Nil(t, tc.expectedTime)
