@@ -393,7 +393,7 @@ func Test_parseBlobPath(t *testing.T) {
 		{
 			desc:         "Malformed timestamp",
 			prefix:       nil,
-			blobName:     "year=nope/month=0/day=4/hour=12/minute=1/blobmetrics_12345.json",
+			blobName:     "year=2003/month=00/day=04/hour=12/minute=01/blobmetrics_12345.json",
 			expectedTime: nil,
 			expectedType: "",
 			expectedErr:  errors.New("parse blob time"),

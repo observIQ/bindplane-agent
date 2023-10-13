@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"io"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"time"
 
@@ -295,72 +296,39 @@ const (
 	tracesBlobSignifier = "traces_"
 )
 
+// blobNameRegex is the regex used to detect if a blob matches the expected path
+var blobNameRegex = regexp.MustCompile(`^(?:[^/]*/)?year=(\d{4})/month=(\d{2})/day=(\d{2})/hour=(\d{2})/(?:minute=(\d{2})/)?([^/].*)$`)
+
 // parseBlobPath returns true if the blob is within the existing time range
 func parseBlobPath(prefix *string, blobName string) (blobTime *time.Time, telemetryType component.DataType, err error) {
-	parts := strings.Split(blobName, azurePathSeparator)
-
-	if len(parts) == 1 {
+	matches := blobNameRegex.FindStringSubmatch(blobName)
+	if matches == nil {
 		err = errInvalidBlobPath
 		return
 	}
 
-	// Build timestamp in 2006-01-02T15:04 format
-	tsBuilder := strings.Builder{}
+	year := matches[1]
+	month := matches[2]
+	day := matches[3]
+	hour := matches[4]
 
-	i := 0
-	// If we have a prefix start looking at the second part of the path
-	if prefix != nil {
-		i = 1
+	minute := "00"
+	if matches[5] != "" {
+		minute = matches[5]
 	}
 
-	nextExpectedPart := year
-	for ; i < len(parts)-1; i++ {
-		part := parts[i]
+	lastPart := matches[6]
 
-		if !strings.HasPrefix(part, nextExpectedPart) {
-			err = errInvalidBlobPath
-			return
-		}
-
-		val := strings.TrimPrefix(part, nextExpectedPart)
-
-		switch nextExpectedPart {
-		case year:
-			nextExpectedPart = month
-		case month:
-			tsBuilder.WriteString("-")
-			nextExpectedPart = day
-		case day:
-			tsBuilder.WriteString("-")
-			nextExpectedPart = hour
-		case hour:
-			tsBuilder.WriteString("T")
-			nextExpectedPart = minute
-		case minute:
-			tsBuilder.WriteString(":")
-			nextExpectedPart = ""
-		}
-
-		tsBuilder.WriteString(val)
-	}
-
-	// Special case when using hour granularity.
-	// There won't be a minute=XX part of the path if we've exited the loop
-	// and we still expect minutes just write ':00' for minutes.
-	if nextExpectedPart == minute {
-		tsBuilder.WriteString(":00")
-	}
+	timeString := fmt.Sprintf("%s-%s-%sT%s:%s", year, month, day, hour, minute)
 
 	// Parse the expected format
-	parsedTime, timeErr := time.Parse(timeFormat, tsBuilder.String())
+	parsedTime, timeErr := time.Parse(timeFormat, timeString)
 	if timeErr != nil {
 		err = fmt.Errorf("parse blob time: %w", timeErr)
 		return
 	}
 	blobTime = &parsedTime
 
-	// For the last part of the path parse the telemetry type
-	lastPart := parts[len(parts)-1]
 	switch {
 	case strings.Contains(lastPart, metricBlobSignifier):
 		telemetryType = component.DataTypeMetrics
