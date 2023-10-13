@@ -36,9 +36,6 @@ import (
 )
 
 const (
-	// azurePathSeparator the path separator that Azure storage uses
-	azurePathSeparator = "/"
-
 	// checkpointStorageKey the key used for storing the checkpoint
 	checkpointStorageKey = "azure_blob_checkpoint"
 )
@@ -279,15 +276,6 @@ func (r *rehydrationReceiver) loadCheckpoint(ctx context.Context) *rehydrationCh
 
 	return checkpoint
 }
-
-// constants for blob path parts
-const (
-	year   = "year="
-	month  = "month="
-	day    = "day="
-	hour   = "hour="
-	minute = "minute="
-)
 
 // strings that indicate what type of telemetry is in a blob
 const (
