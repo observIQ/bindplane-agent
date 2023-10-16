@@ -40,6 +40,14 @@ var (
 	ErrUnsupportedURL = errors.New("unsupported URL")
 )
 
+const capabilities = protobufs.AgentCapabilities_AgentCapabilities_ReportsStatus |
+	protobufs.AgentCapabilities_AgentCapabilities_AcceptsPackages |
+	protobufs.AgentCapabilities_AgentCapabilities_ReportsPackageStatuses |
+	protobufs.AgentCapabilities_AgentCapabilities_AcceptsRestartCommand |
+	protobufs.AgentCapabilities_AgentCapabilities_ReportsEffectiveConfig |
+	protobufs.AgentCapabilities_AgentCapabilities_AcceptsRemoteConfig |
+	protobufs.AgentCapabilities_AgentCapabilities_ReportsRemoteConfig
+
 // Ensure interface is satisfied
 var _ opamp.Client = (*Client)(nil)
 
@@ -211,13 +219,7 @@ func (c *Client) Connect(ctx context.Context) error {
 			// SaveRemoteConfigStatusFunc
 		},
 		PackagesStateProvider: c.packagesStateProvider,
-		Capabilities: protobufs.AgentCapabilities_AgentCapabilities_ReportsStatus |
-			protobufs.AgentCapabilities_AgentCapabilities_AcceptsPackages |
-			protobufs.AgentCapabilities_AgentCapabilities_ReportsPackageStatuses |
-			protobufs.AgentCapabilities_AgentCapabilities_AcceptsRestartCommand |
-			protobufs.AgentCapabilities_AgentCapabilities_ReportsEffectiveConfig |
-			protobufs.AgentCapabilities_AgentCapabilities_AcceptsRemoteConfig |
-			protobufs.AgentCapabilities_AgentCapabilities_ReportsRemoteConfig,
+		Capabilities:          capabilities,
 	}
 
 	// Start the embedded collector
