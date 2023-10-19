@@ -43,7 +43,6 @@ var (
 const capabilities = protobufs.AgentCapabilities_AgentCapabilities_ReportsStatus |
 	protobufs.AgentCapabilities_AgentCapabilities_AcceptsPackages |
 	protobufs.AgentCapabilities_AgentCapabilities_ReportsPackageStatuses |
-	protobufs.AgentCapabilities_AgentCapabilities_AcceptsRestartCommand |
 	protobufs.AgentCapabilities_AgentCapabilities_ReportsEffectiveConfig |
 	protobufs.AgentCapabilities_AgentCapabilities_AcceptsRemoteConfig |
 	protobufs.AgentCapabilities_AgentCapabilities_ReportsRemoteConfig
