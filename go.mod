@@ -5,26 +5,26 @@ go 1.20
 require (
 	github.com/google/uuid v1.3.1
 	github.com/mholt/archiver/v3 v3.5.1
-	github.com/observiq/bindplane-agent/exporter/azureblobexporter v1.37.0
-	github.com/observiq/bindplane-agent/exporter/googlecloudexporter v1.37.0
-	github.com/observiq/bindplane-agent/exporter/googlemanagedprometheusexporter v1.37.0
-	github.com/observiq/bindplane-agent/packagestate v1.37.0
-	github.com/observiq/bindplane-agent/processor/datapointcountprocessor v1.37.0
-	github.com/observiq/bindplane-agent/processor/logcountprocessor v1.37.0
-	github.com/observiq/bindplane-agent/processor/logdeduplicationprocessor v1.37.0
-	github.com/observiq/bindplane-agent/processor/maskprocessor v1.37.0
-	github.com/observiq/bindplane-agent/processor/metricextractprocessor v1.37.0
-	github.com/observiq/bindplane-agent/processor/metricstatsprocessor v1.37.0
-	github.com/observiq/bindplane-agent/processor/removeemptyvaluesprocessor v1.37.0
-	github.com/observiq/bindplane-agent/processor/resourceattributetransposerprocessor v1.37.0
-	github.com/observiq/bindplane-agent/processor/samplingprocessor v1.37.0
-	github.com/observiq/bindplane-agent/processor/spancountprocessor v1.37.0
-	github.com/observiq/bindplane-agent/processor/throughputmeasurementprocessor v1.37.0
-	github.com/observiq/bindplane-agent/receiver/azureblobrehydrationreceiver v1.37.0
-	github.com/observiq/bindplane-agent/receiver/m365receiver v1.37.0
-	github.com/observiq/bindplane-agent/receiver/pluginreceiver v1.37.0
-	github.com/observiq/bindplane-agent/receiver/routereceiver v1.37.0
-	github.com/observiq/bindplane-agent/receiver/sapnetweaverreceiver v1.37.0
+	github.com/observiq/bindplane-agent/exporter/azureblobexporter v1.38.0
+	github.com/observiq/bindplane-agent/exporter/googlecloudexporter v1.38.0
+	github.com/observiq/bindplane-agent/exporter/googlemanagedprometheusexporter v1.38.0
+	github.com/observiq/bindplane-agent/packagestate v1.38.0
+	github.com/observiq/bindplane-agent/processor/datapointcountprocessor v1.38.0
+	github.com/observiq/bindplane-agent/processor/logcountprocessor v1.38.0
+	github.com/observiq/bindplane-agent/processor/logdeduplicationprocessor v1.38.0
+	github.com/observiq/bindplane-agent/processor/maskprocessor v1.38.0
+	github.com/observiq/bindplane-agent/processor/metricextractprocessor v1.38.0
+	github.com/observiq/bindplane-agent/processor/metricstatsprocessor v1.38.0
+	github.com/observiq/bindplane-agent/processor/removeemptyvaluesprocessor v1.38.0
+	github.com/observiq/bindplane-agent/processor/resourceattributetransposerprocessor v1.38.0
+	github.com/observiq/bindplane-agent/processor/samplingprocessor v1.38.0
+	github.com/observiq/bindplane-agent/processor/spancountprocessor v1.38.0
+	github.com/observiq/bindplane-agent/processor/throughputmeasurementprocessor v1.38.0
+	github.com/observiq/bindplane-agent/receiver/azureblobrehydrationreceiver v1.38.0
+	github.com/observiq/bindplane-agent/receiver/m365receiver v1.38.0
+	github.com/observiq/bindplane-agent/receiver/pluginreceiver v1.38.0
+	github.com/observiq/bindplane-agent/receiver/routereceiver v1.38.0
+	github.com/observiq/bindplane-agent/receiver/sapnetweaverreceiver v1.38.0
 	github.com/oklog/ulid/v2 v2.1.0
 	github.com/open-telemetry/opamp-go v0.9.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/connector/countconnector v0.87.0
@@ -225,8 +225,8 @@ require (
 	github.com/kylelemons/godebug v1.1.0 // indirect
 	github.com/minio/asm2plan9s v0.0.0-20200509001527-cdd76441f9d8 // indirect
 	github.com/minio/c2goasm v0.0.0-20190812172519-36a3d3bbc4f3 // indirect
-	github.com/observiq/bindplane-agent/counter v1.37.0 // indirect
-	github.com/observiq/bindplane-agent/expr v1.37.0 // indirect
+	github.com/observiq/bindplane-agent/counter v1.38.0 // indirect
+	github.com/observiq/bindplane-agent/expr v1.38.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlemanagedprometheusexporter v0.87.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/internal/kafka v0.87.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/processor/servicegraphprocessor v0.87.0 // indirect
@@ -258,8 +258,8 @@ require (
 	go.opentelemetry.io/otel/exporters/stdout/stdoutmetric v0.42.0 // indirect
 	go.opentelemetry.io/otel/exporters/stdout/stdouttrace v1.19.0 // indirect
 	go.opentelemetry.io/proto/otlp v1.0.0 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20230913181813-007df8e322eb // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20230920204549-e6e6cdab5c13 // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20231002182017-d307bd883b97 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20231009173412-8bfb1ae86b6c // indirect
 	gopkg.in/zorkian/go-datadog-api.v2 v2.30.0 // indirect
 	sigs.k8s.io/controller-runtime v0.16.2 // indirect
 )
@@ -288,13 +288,13 @@ require (
 )
 
 require (
-	cloud.google.com/go v0.110.7 // indirect
+	cloud.google.com/go v0.110.8 // indirect
 	cloud.google.com/go/compute v1.23.0 // indirect
 	cloud.google.com/go/compute/metadata v0.2.4-0.20230617002413-005d2dfb6b68 // indirect
-	cloud.google.com/go/iam v1.1.1 // indirect
-	cloud.google.com/go/logging v1.7.0 // indirect
+	cloud.google.com/go/iam v1.1.2 // indirect
+	cloud.google.com/go/logging v1.8.1 // indirect
 	cloud.google.com/go/longrunning v0.5.1 // indirect
-	cloud.google.com/go/monitoring v1.15.1 // indirect
+	cloud.google.com/go/monitoring v1.16.0 // indirect
 	cloud.google.com/go/pubsub v1.33.0 // indirect
 	cloud.google.com/go/spanner v1.50.0 // indirect
 	cloud.google.com/go/trace v1.10.1 // indirect
@@ -612,9 +612,9 @@ require (
 	golang.org/x/tools v0.14.0 // indirect
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
 	gonum.org/v1/gonum v0.14.0 // indirect
-	google.golang.org/api v0.146.0 // indirect
+	google.golang.org/api v0.147.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
-	google.golang.org/genproto v0.0.0-20230913181813-007df8e322eb // indirect
+	google.golang.org/genproto v0.0.0-20231002182017-d307bd883b97 // indirect
 	google.golang.org/grpc v1.58.2 // indirect
 	google.golang.org/protobuf v1.31.0 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
