@@ -118,7 +118,7 @@ func TestLoadStatuses(t *testing.T) {
 				assert.Equal(t, agentHash, actual.Packages[pkgName].GetAgentHasHash())
 				assert.Equal(t, serverVersion, actual.Packages[pkgName].GetServerOfferedVersion())
 				assert.Equal(t, serverHash, actual.Packages[pkgName].GetServerOfferedHash())
-				assert.Equal(t, protobufs.PackageStatus_InstallPending, actual.Packages[pkgName].GetStatus())
+				assert.Equal(t, protobufs.PackageStatusEnum_PackageStatusEnum_InstallPending, actual.Packages[pkgName].GetStatus())
 				assert.Equal(t, errMsg, actual.Packages[pkgName].GetErrorMessage())
 			},
 		},
@@ -160,7 +160,7 @@ func TestSaveStatuses(t *testing.T) {
 						AgentHasHash:         agentHash,
 						ServerOfferedVersion: serverVersion,
 						ServerOfferedHash:    serverHash,
-						Status:               protobufs.PackageStatus_InstallPending,
+						Status:               protobufs.PackageStatusEnum_PackageStatusEnum_InstallPending,
 						ErrorMessage:         errMsg,
 					},
 				}
@@ -186,7 +186,7 @@ func TestSaveStatuses(t *testing.T) {
 				assert.Equal(t, agentHash, fileStates.PackageStates[pkgName].AgentHash)
 				assert.Equal(t, serverVersion, fileStates.PackageStates[pkgName].ServerVersion)
 				assert.Equal(t, serverHash, fileStates.PackageStates[pkgName].ServerHash)
-				assert.Equal(t, protobufs.PackageStatus_InstallPending, fileStates.PackageStates[pkgName].Status)
+				assert.Equal(t, protobufs.PackageStatusEnum_PackageStatusEnum_InstallPending, fileStates.PackageStates[pkgName].Status)
 				assert.Equal(t, errMsg, fileStates.PackageStates[pkgName].ErrorMessage)
 			},
 		},
@@ -210,7 +210,7 @@ func TestSaveStatuses(t *testing.T) {
 						AgentHasHash:         agentHash,
 						ServerOfferedVersion: serverVersion,
 						ServerOfferedHash:    serverHash,
-						Status:               protobufs.PackageStatus_InstallPending,
+						Status:               protobufs.PackageStatusEnum_PackageStatusEnum_InstallPending,
 						ErrorMessage:         errMsg,
 					},
 				}
@@ -236,7 +236,7 @@ func TestSaveStatuses(t *testing.T) {
 				assert.Equal(t, agentHash, fileStates.PackageStates[pkgName].AgentHash)
 				assert.Equal(t, serverVersion, fileStates.PackageStates[pkgName].ServerVersion)
 				assert.Equal(t, serverHash, fileStates.PackageStates[pkgName].ServerHash)
-				assert.Equal(t, protobufs.PackageStatus_InstallPending, fileStates.PackageStates[pkgName].Status)
+				assert.Equal(t, protobufs.PackageStatusEnum_PackageStatusEnum_InstallPending, fileStates.PackageStates[pkgName].Status)
 				assert.Equal(t, errMsg, fileStates.PackageStates[pkgName].ErrorMessage)
 			},
 		},

@@ -129,7 +129,7 @@ func TestUpdaterUpdate(t *testing.T) {
 		svc.On("Stop").Times(1).Return(nil)
 		rollbacker.On("AppendAction", action.NewServiceStopAction(svc)).Times(1).Return()
 		rollbacker.On("Backup").Times(1).Return(err)
-		monitor.On("SetState", packagestate.CollectorPackageName, protobufs.PackageStatus_InstallFailed, err).Times(1).Return(nil)
+		monitor.On("SetState", packagestate.CollectorPackageName, protobufs.PackageStatusEnum_PackageStatusEnum_InstallFailed, err).Times(1).Return(nil)
 		rollbacker.On("Rollback").Times(1).Return()
 
 		err = updater.Update()
@@ -158,7 +158,7 @@ func TestUpdaterUpdate(t *testing.T) {
 		svc.On("Stop").Times(1).Return(nil)
 		rollbacker.On("AppendAction", action.NewServiceStopAction(svc)).Times(1).Return()
 		rollbacker.On("Backup").Times(1).Return(err)
-		monitor.On("SetState", packagestate.CollectorPackageName, protobufs.PackageStatus_InstallFailed, err).Times(1).Return(errors.New("insufficient permissions"))
+		monitor.On("SetState", packagestate.CollectorPackageName, protobufs.PackageStatusEnum_PackageStatusEnum_InstallFailed, err).Times(1).Return(errors.New("insufficient permissions"))
 		rollbacker.On("Rollback").Times(1).Return()
 
 		err = updater.Update()
@@ -188,7 +188,7 @@ func TestUpdaterUpdate(t *testing.T) {
 		rollbacker.On("AppendAction", action.NewServiceStopAction(svc)).Times(1).Return()
 		rollbacker.On("Backup").Times(1).Return(nil)
 		installer.On("Install", rollbacker).Times(1).Return(err)
-		monitor.On("SetState", packagestate.CollectorPackageName, protobufs.PackageStatus_InstallFailed, err).Times(1).Return(nil)
+		monitor.On("SetState", packagestate.CollectorPackageName, protobufs.PackageStatusEnum_PackageStatusEnum_InstallFailed, err).Times(1).Return(nil)
 		rollbacker.On("Rollback").Times(1).Return()
 
 		err = updater.Update()
@@ -218,7 +218,7 @@ func TestUpdaterUpdate(t *testing.T) {
 		rollbacker.On("AppendAction", action.NewServiceStopAction(svc)).Times(1).Return()
 		rollbacker.On("Backup").Times(1).Return(nil)
 		installer.On("Install", rollbacker).Times(1).Return(err)
-		monitor.On("SetState", packagestate.CollectorPackageName, protobufs.PackageStatus_InstallFailed, err).Times(1).Return(errors.New("insufficient permissions"))
+		monitor.On("SetState", packagestate.CollectorPackageName, protobufs.PackageStatusEnum_PackageStatusEnum_InstallFailed, err).Times(1).Return(errors.New("insufficient permissions"))
 		rollbacker.On("Rollback").Times(1).Return()
 
 		err = updater.Update()
@@ -249,7 +249,7 @@ func TestUpdaterUpdate(t *testing.T) {
 		rollbacker.On("Backup").Times(1).Return(nil)
 		installer.On("Install", rollbacker).Times(1).Return(nil)
 		monitor.On("MonitorForSuccess", mock.Anything, packagestate.CollectorPackageName).Times(1).Return(err)
-		monitor.On("SetState", packagestate.CollectorPackageName, protobufs.PackageStatus_InstallFailed, err).Times(1).Return(nil)
+		monitor.On("SetState", packagestate.CollectorPackageName, protobufs.PackageStatusEnum_PackageStatusEnum_InstallFailed, err).Times(1).Return(nil)
 		rollbacker.On("Rollback").Times(1).Return()
 
 		err = updater.Update()
@@ -280,7 +280,7 @@ func TestUpdaterUpdate(t *testing.T) {
 		rollbacker.On("Backup").Times(1).Return(nil)
 		installer.On("Install", rollbacker).Times(1).Return(nil)
 		monitor.On("MonitorForSuccess", mock.Anything, packagestate.CollectorPackageName).Times(1).Return(err)
-		monitor.On("SetState", packagestate.CollectorPackageName, protobufs.PackageStatus_InstallFailed, err).Times(1).Return(errors.New("insufficient permissions"))
+		monitor.On("SetState", packagestate.CollectorPackageName, protobufs.PackageStatusEnum_PackageStatusEnum_InstallFailed, err).Times(1).Return(errors.New("insufficient permissions"))
 		rollbacker.On("Rollback").Times(1).Return()
 
 		err = updater.Update()

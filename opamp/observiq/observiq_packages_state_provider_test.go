@@ -196,7 +196,7 @@ func TestCreatePackage(t *testing.T) {
 					logger: logger,
 				}
 
-				err := p.CreatePackage("name", protobufs.PackageAvailable_TopLevelPackage)
+				err := p.CreatePackage("name", protobufs.PackageType_PackageType_TopLevel)
 
 				assert.ErrorContains(t, err, "method not implemented")
 			},
@@ -313,7 +313,7 @@ func TestLastReportedStatuses(t *testing.T) {
 				assert.Nil(t, actual.Packages[pkgName].GetAgentHasHash())
 				assert.Equal(t, "", actual.Packages[pkgName].GetServerOfferedVersion())
 				assert.Nil(t, actual.Packages[pkgName].GetServerOfferedHash())
-				assert.Equal(t, protobufs.PackageStatus_Installed, actual.Packages[pkgName].GetStatus())
+				assert.Equal(t, protobufs.PackageStatusEnum_PackageStatusEnum_Installed, actual.Packages[pkgName].GetStatus())
 				assert.Equal(t, "", actual.Packages[pkgName].GetErrorMessage())
 			},
 		},
@@ -340,7 +340,7 @@ func TestLastReportedStatuses(t *testing.T) {
 				assert.Nil(t, actual.Packages[pkgName].GetAgentHasHash())
 				assert.Equal(t, "", actual.Packages[pkgName].GetServerOfferedVersion())
 				assert.Nil(t, actual.Packages[pkgName].GetServerOfferedHash())
-				assert.Equal(t, protobufs.PackageStatus_Installed, actual.Packages[pkgName].GetStatus())
+				assert.Equal(t, protobufs.PackageStatusEnum_PackageStatusEnum_Installed, actual.Packages[pkgName].GetStatus())
 				assert.Equal(t, "", actual.Packages[pkgName].GetErrorMessage())
 			},
 		},
@@ -355,7 +355,7 @@ func TestLastReportedStatuses(t *testing.T) {
 							AgentHasHash:         []byte("hash1"),
 							ServerOfferedVersion: "2.0",
 							ServerOfferedHash:    []byte("hash2"),
-							Status:               protobufs.PackageStatus_InstallPending,
+							Status:               protobufs.PackageStatusEnum_PackageStatusEnum_InstallPending,
 							ErrorMessage:         "bad",
 						},
 					},
@@ -412,7 +412,7 @@ func TestSetLastReportedStatuses(t *testing.T) {
 							AgentHasHash:         agentHash,
 							ServerOfferedVersion: serverVersion,
 							ServerOfferedHash:    serverHash,
-							Status:               protobufs.PackageStatus_InstallPending,
+							Status:               protobufs.PackageStatusEnum_PackageStatusEnum_InstallPending,
 							ErrorMessage:         errMsg,
 						},
 					},
@@ -443,7 +443,7 @@ func TestSetLastReportedStatuses(t *testing.T) {
 							AgentHasHash:         agentHash,
 							ServerOfferedVersion: serverVersion,
 							ServerOfferedHash:    serverHash,
-							Status:               protobufs.PackageStatus_InstallPending,
+							Status:               protobufs.PackageStatusEnum_PackageStatusEnum_InstallPending,
 							ErrorMessage:         errMsg,
 						},
 					},

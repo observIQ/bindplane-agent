@@ -84,7 +84,7 @@ func (p *packagesStateProvider) SetPackageState(_ string, _ types.PackageState) 
 }
 
 // CreatePackage not implemented so returns an error with this info
-func (p *packagesStateProvider) CreatePackage(_ string, _ protobufs.PackageAvailable_PackageType) error {
+func (p *packagesStateProvider) CreatePackage(_ string, _ protobufs.PackageType) error {
 	p.logger.Debug("Create package")
 
 	return errors.New("method not implemented: PackageStateProvider CreatePackage")
@@ -119,7 +119,7 @@ func (p *packagesStateProvider) LastReportedStatuses() (*protobufs.PackageStatus
 		packagestate.CollectorPackageName: {
 			Name:            packagestate.CollectorPackageName,
 			AgentHasVersion: version.Version(),
-			Status:          protobufs.PackageStatus_Installed,
+			Status:          protobufs.PackageStatusEnum_PackageStatusEnum_Installed,
 		},
 	}
 	packageStatuses := &protobufs.PackageStatuses{
