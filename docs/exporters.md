@@ -13,6 +13,7 @@ Below is a list of supported exporters with links to their documentation pages.
 | Azure Blob Exporter                                               | [azureblobexporter](../exporter/azureblobexporter/README.md) |
 | Azure Monitor Exporter                                            | [azuremonitorexporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.88.0/exporter/azuremonitorexporter/README.md) |
 | Carbon Exporter                                                   | [carbonexporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.88.0/exporter/carbonexporter/README.md) |
+| ClickHouse Exporter                                               | [clickhouseexporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.88.0/exporter/clickhouseexporter/README.md) |
 | Coralogix Exporter                                                | [coralogixexporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.88.0/exporter/coralogixexporter/README.md) |
 | Datadog Exporter                                                  | [datadogexporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.88.0/exporter/datadogexporter/README.md) |
 | Dynatrace Exporter                                                | [dynatraceexporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.88.0/exporter/dynatraceexporter/README.md) |
