@@ -39,7 +39,7 @@ jobs:
           go install github.com/uw-labs/lichen@v0.1.7
           lichen --config=./license.yaml $(find dist/collector_* dist/updater_*)
   build_windows:
-    runs-on: windows-2022-8-cores
+    runs-on: ubuntu-20.04
     steps:
       - name: Checkout Sources
         uses: actions/checkout@v3
