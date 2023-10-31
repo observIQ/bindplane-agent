@@ -42,7 +42,7 @@ func TestCollectorMonitorSetState(t *testing.T) {
 					},
 				}
 
-				err := collectorMonitor.SetState("my_package", protobufs.PackageStatus_Installed, nil)
+				err := collectorMonitor.SetState("my_package", protobufs.PackageStatusEnum_PackageStatusEnum_Installed, nil)
 				assert.Error(t, err)
 			},
 		},
@@ -58,7 +58,7 @@ func TestCollectorMonitorSetState(t *testing.T) {
 							AgentHasHash:         []byte("hash1"),
 							ServerOfferedVersion: "1.2",
 							ServerOfferedHash:    []byte("hash2"),
-							Status:               protobufs.PackageStatus_Installed,
+							Status:               protobufs.PackageStatusEnum_PackageStatusEnum_Installed,
 						},
 					},
 				}
@@ -76,13 +76,13 @@ func TestCollectorMonitorSetState(t *testing.T) {
 								AgentHasHash:         []byte("hash1"),
 								ServerOfferedVersion: "1.2",
 								ServerOfferedHash:    []byte("hash2"),
-								Status:               protobufs.PackageStatus_InstallPending,
+								Status:               protobufs.PackageStatusEnum_PackageStatusEnum_InstallPending,
 							},
 						},
 					},
 				}
 
-				err := collectorMonitor.SetState("my_package", protobufs.PackageStatus_Installed, nil)
+				err := collectorMonitor.SetState("my_package", protobufs.PackageStatusEnum_PackageStatusEnum_Installed, nil)
 				assert.NoError(t, err)
 				assert.Equal(t, expectedStatus, collectorMonitor.currentStatus)
 			},
@@ -101,7 +101,7 @@ func TestCollectorMonitorSetState(t *testing.T) {
 							AgentHasHash:         []byte("hash1"),
 							ServerOfferedVersion: "1.2",
 							ServerOfferedHash:    []byte("hash2"),
-							Status:               protobufs.PackageStatus_InstallFailed,
+							Status:               protobufs.PackageStatusEnum_PackageStatusEnum_InstallFailed,
 							ErrorMessage:         statusErr.Error(),
 						},
 					},
@@ -120,13 +120,13 @@ func TestCollectorMonitorSetState(t *testing.T) {
 								AgentHasHash:         []byte("hash1"),
 								ServerOfferedVersion: "1.2",
 								ServerOfferedHash:    []byte("hash2"),
-								Status:               protobufs.PackageStatus_InstallPending,
+								Status:               protobufs.PackageStatusEnum_PackageStatusEnum_InstallPending,
 							},
 						},
 					},
 				}
 
-				err := collectorMonitor.SetState("my_package", protobufs.PackageStatus_InstallFailed, statusErr)
+				err := collectorMonitor.SetState("my_package", protobufs.PackageStatusEnum_PackageStatusEnum_InstallFailed, statusErr)
 				assert.NoError(t, err)
 				assert.Equal(t, expectedStatus, collectorMonitor.currentStatus)
 			},
@@ -144,7 +144,7 @@ func TestCollectorMonitorSetState(t *testing.T) {
 							AgentHasHash:         []byte("hash1"),
 							ServerOfferedVersion: "1.2",
 							ServerOfferedHash:    []byte("hash2"),
-							Status:               protobufs.PackageStatus_Installed,
+							Status:               protobufs.PackageStatusEnum_PackageStatusEnum_Installed,
 						},
 					},
 				}
@@ -162,13 +162,13 @@ func TestCollectorMonitorSetState(t *testing.T) {
 								AgentHasHash:         []byte("hash1"),
 								ServerOfferedVersion: "1.2",
 								ServerOfferedHash:    []byte("hash2"),
-								Status:               protobufs.PackageStatus_InstallPending,
+								Status:               protobufs.PackageStatusEnum_PackageStatusEnum_InstallPending,
 							},
 						},
 					},
 				}
 
-				err := collectorMonitor.SetState("my_package", protobufs.PackageStatus_Installed, nil)
+				err := collectorMonitor.SetState("my_package", protobufs.PackageStatusEnum_PackageStatusEnum_Installed, nil)
 				assert.ErrorIs(t, err, expectedErr)
 				assert.Equal(t, expectedStatus, collectorMonitor.currentStatus)
 			},
@@ -208,7 +208,7 @@ func TestCollectorMonitorMonitorForSuccess(t *testing.T) {
 					Packages: map[string]*protobufs.PackageStatus{
 						pgkName: {
 							Name:   pgkName,
-							Status: protobufs.PackageStatus_InstallFailed,
+							Status: protobufs.PackageStatusEnum_PackageStatusEnum_InstallFailed,
 						},
 					},
 				}
@@ -232,7 +232,7 @@ func TestCollectorMonitorMonitorForSuccess(t *testing.T) {
 					Packages: map[string]*protobufs.PackageStatus{
 						pgkName: {
 							Name:   pgkName,
-							Status: protobufs.PackageStatus_Installed,
+							Status: protobufs.PackageStatusEnum_PackageStatusEnum_Installed,
 						},
 					},
 				}
@@ -256,7 +256,7 @@ func TestCollectorMonitorMonitorForSuccess(t *testing.T) {
 					Packages: map[string]*protobufs.PackageStatus{
 						pgkName: {
 							Name:   pgkName,
-							Status: protobufs.PackageStatus_Installed,
+							Status: protobufs.PackageStatusEnum_PackageStatusEnum_Installed,
 						},
 					},
 				}
@@ -281,7 +281,7 @@ func TestCollectorMonitorMonitorForSuccess(t *testing.T) {
 					Packages: map[string]*protobufs.PackageStatus{
 						pgkName: {
 							Name:   pgkName,
-							Status: protobufs.PackageStatus_Installed,
+							Status: protobufs.PackageStatusEnum_PackageStatusEnum_Installed,
 						},
 					},
 				}
@@ -309,7 +309,7 @@ func TestCollectorMonitorMonitorForSuccess(t *testing.T) {
 					Packages: map[string]*protobufs.PackageStatus{
 						pgkName: {
 							Name:   pgkName,
-							Status: protobufs.PackageStatus_Installed,
+							Status: protobufs.PackageStatusEnum_PackageStatusEnum_Installed,
 						},
 					},
 				}
@@ -334,7 +334,7 @@ func TestCollectorMonitorMonitorForSuccess(t *testing.T) {
 					Packages: map[string]*protobufs.PackageStatus{
 						pgkName: {
 							Name:   pgkName,
-							Status: protobufs.PackageStatus_InstallPending,
+							Status: protobufs.PackageStatusEnum_PackageStatusEnum_InstallPending,
 						},
 					},
 				}
@@ -342,7 +342,7 @@ func TestCollectorMonitorMonitorForSuccess(t *testing.T) {
 					Packages: map[string]*protobufs.PackageStatus{
 						pgkName: {
 							Name:   pgkName,
-							Status: protobufs.PackageStatus_Installed,
+							Status: protobufs.PackageStatusEnum_PackageStatusEnum_Installed,
 						},
 					},
 				}

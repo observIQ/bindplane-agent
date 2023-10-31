@@ -29,11 +29,11 @@ func (_m *MockMonitor) MonitorForSuccess(ctx context.Context, packageName string
 }
 
 // SetState provides a mock function with given fields: packageName, status, statusErr
-func (_m *MockMonitor) SetState(packageName string, status protobufs.PackageStatus_Status, statusErr error) error {
+func (_m *MockMonitor) SetState(packageName string, status protobufs.PackageStatusEnum, statusErr error) error {
 	ret := _m.Called(packageName, status, statusErr)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(string, protobufs.PackageStatus_Status, error) error); ok {
+	if rf, ok := ret.Get(0).(func(string, protobufs.PackageStatusEnum, error) error); ok {
 		r0 = rf(packageName, status, statusErr)
 	} else {
 		r0 = ret.Error(0)

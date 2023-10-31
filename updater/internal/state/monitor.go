@@ -38,7 +38,7 @@ var (
 type Monitor interface {
 	// SetState sets the state for the package.
 	// If passed in statusErr is not nil it will record the error as the message
-	SetState(packageName string, status protobufs.PackageStatus_Status, statusErr error) error
+	SetState(packageName string, status protobufs.PackageStatusEnum, statusErr error) error
 
 	// MonitorForSuccess will periodically check the state of the package. It will keep checking until the context is canceled or a failed/success state is detected.
 	// It will return an error if status is Failed or if the context times out.
@@ -73,7 +73,7 @@ func NewCollectorMonitor(logger *zap.Logger, installDir string) (Monitor, error)
 }
 
 // SetState sets the status on the specified package and saves it to the package status file
-func (c *CollectorMonitor) SetState(packageName string, status protobufs.PackageStatus_Status, statusErr error) error {
+func (c *CollectorMonitor) SetState(packageName string, status protobufs.PackageStatusEnum, statusErr error) error {
 	// Verify we have package by that name
 	targetPackage, ok := c.currentStatus.GetPackages()[packageName]
 	if !ok {
@@ -121,9 +121,9 @@ func (c *CollectorMonitor) MonitorForSuccess(ctx context.Context, packageName st
 				}
 
 				switch targetPackage.GetStatus() {
-				case protobufs.PackageStatus_InstallFailed:
+				case protobufs.PackageStatusEnum_PackageStatusEnum_InstallFailed:
 					return ErrFailedStatus
-				case protobufs.PackageStatus_Installed:
+				case protobufs.PackageStatusEnum_PackageStatusEnum_Installed:
 					// Install successful
 					return nil
 				default:

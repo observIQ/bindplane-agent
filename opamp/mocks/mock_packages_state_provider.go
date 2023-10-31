@@ -45,11 +45,11 @@ func (_m *MockPackagesStateProvider) AllPackagesHash() ([]byte, error) {
 }
 
 // CreatePackage provides a mock function with given fields: packageName, typ
-func (_m *MockPackagesStateProvider) CreatePackage(packageName string, typ protobufs.PackageAvailable_PackageType) error {
+func (_m *MockPackagesStateProvider) CreatePackage(packageName string, typ protobufs.PackageType) error {
 	ret := _m.Called(packageName, typ)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(string, protobufs.PackageAvailable_PackageType) error); ok {
+	if rf, ok := ret.Get(0).(func(string, protobufs.PackageType) error); ok {
 		r0 = rf(packageName, typ)
 	} else {
 		r0 = ret.Error(0)
