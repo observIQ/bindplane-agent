@@ -137,25 +137,6 @@ func newRehydrationReceiver(id component.ID, logger *zap.Logger, cfg *Config) (*
 	}, nil
 }
 
-func getStorageClient(ctx context.Context, host component.Host, storageID *component.ID, componentID component.ID, componentType component.DataType) (storage.Client, error) {
-	if storageID == nil {
-		return storage.NewNopClient(), nil
-	}
-
-	extension, ok := host.GetExtensions()[*storageID]
-	if !ok {
-		return nil, fmt.Errorf("storage extension '%s' not found", storageID)
-	}
-
-	storageExtension, ok := extension.(storage.Extension)
-	if !ok {
-		return nil, fmt.Errorf("non-storage extension '%s' found", storageID)
-	}
-
-	return storageExtension.GetClient(ctx, component.KindReceiver, componentID, string(componentType))
-
-}
-
 // Start starts the rehydration receiver
 func (r *rehydrationReceiver) Start(ctx context.Context, host component.Host) error {
 
@@ -408,4 +389,23 @@ func gzipDecompress(contents []byte) ([]byte, error) {
 	}
 
 	return result, nil
+}
+
+// getStorageClient gets the storage client for this receiver, taking into account the component ID and data type.
+func getStorageClient(ctx context.Context, host component.Host, storageID *component.ID, componentID component.ID, componentType component.DataType) (storage.Client, error) {
+	if storageID == nil {
+		return storage.NewNopClient(), nil
+	}
+
+	extension, ok := host.GetExtensions()[*storageID]
+	if !ok {
+		return nil, fmt.Errorf("storage extension '%s' not found", storageID)
+	}
+
+	storageExtension, ok := extension.(storage.Extension)
+	if !ok {
+		return nil, fmt.Errorf("non-storage extension '%s' found", storageID)
+	}
+
+	return storageExtension.GetClient(ctx, component.KindReceiver, componentID, string(componentType))
 }
