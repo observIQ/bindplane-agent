@@ -23,7 +23,7 @@ msiexec /i "https://github.com/observIQ/bindplane-agent/releases/latest/download
 sudo sh -c "$(curl -fsSlL https://github.com/observiq/bindplane-agent/releases/latest/download/install_unix.sh)" install_unix.sh
 ```
 
-For more details on installation, see our [Linux](/docs/installation-linux.md), [Windows](/docs/installation-windows.md), and [Mac](/docs/installation-mac.md) installation guides. For Kubernetes, visit our [Kubernetes repo](https://github.com/observIQ/observiq-otel-collector-k8s).
+For more details on installation, see our [Linux](/docs/installation-linux.md), [Windows](/docs/installation-windows.md), and [Mac](/docs/installation-mac.md) installation guides.
 
 ## Setting up pre-requisites and authentication credentials
 
