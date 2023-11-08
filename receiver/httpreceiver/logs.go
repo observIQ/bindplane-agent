@@ -19,11 +19,13 @@ import (
 	"context"
 	"crypto/tls"
 	"encoding/json"
+	"errors"
 	"io"
 	"net"
 	"net/http"
 	"sync"
 	"time"
+	"unicode"
 
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/config/configtls"
@@ -217,18 +219,36 @@ func (r *httpLogsReceiver) processLogs(now pcommon.Timestamp, logs []map[string]
 
 // parsePayload transforms the payload into []map[string]interface structure
 func parsePayload(payload []byte) ([]map[string]interface{}, error) {
-	rawLogsArray := []json.RawMessage{}
-	rawLogObject := json.RawMessage{}
-	if err := json.Unmarshal(payload, &rawLogsArray); err != nil {
-		if err.Error() == "json: cannot unmarshal object into Go value of type []json.RawMessage" {
-			if err = json.Unmarshal(payload, &rawLogObject); err != nil {
-				return nil, err
-			}
-			return parseJSONObject(rawLogObject)
+	firstChar := seekFirstNonWhitespace(string(payload))
+	switch firstChar {
+	case "{":
+		rawLogObject := json.RawMessage{}
+		if err := json.Unmarshal(payload, &rawLogObject); err != nil {
+			return nil, err
 		}
-		return nil, err
+		return parseJSONObject(payload)
+	case "[":
+		rawLogsArray := []json.RawMessage{}
+		if err := json.Unmarshal(payload, &rawLogsArray); err != nil {
+			return nil, err
+		}
+		return parseJSONArray(rawLogsArray)
+	default:
+		return nil, errors.New("unsupported payload format, expected either a JSON object or array")
 	}
-	return parseJSONArray(rawLogsArray)
+}
+
+// seekFirstNonWhitespace finds the first non whitespace character of the string
+func seekFirstNonWhitespace(s string) string {
+	firstChar := ""
+	for _, r := range s {
+		if unicode.IsSpace(r) {
+			continue
+		}
+		firstChar = string(r)
+		break
+	}
+	return firstChar
 }
 
 func parseJSONObject(rawLog json.RawMessage) ([]map[string]interface{}, error) {
