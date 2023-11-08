@@ -222,11 +222,11 @@ func parsePayload(payload []byte) ([]map[string]any, error) {
 	firstChar := seekFirstNonWhitespace(string(payload))
 	switch firstChar {
 	case "{":
-		rawLogObject := json.RawMessage{}
+		rawLogObject := map[string]any{}
 		if err := json.Unmarshal(payload, &rawLogObject); err != nil {
 			return nil, err
 		}
-		return parseJSONObject(payload)
+		return []map[string]interface{}{rawLogObject}, nil
 	case "[":
 		rawLogsArray := []json.RawMessage{}
 		if err := json.Unmarshal(payload, &rawLogsArray); err != nil {
@@ -251,15 +251,7 @@ func seekFirstNonWhitespace(s string) string {
 	return firstChar
 }
 
-func parseJSONObject(rawLog json.RawMessage) ([]map[string]any, error) {
-	var logs []map[string]any
-	var log map[string]any
-	if err := json.Unmarshal(rawLog, &log); err != nil {
-		return nil, err
-	}
-	return append(logs, log), nil
-}
-
+// parseJSONArray parses a []json.RawMessage into an array of map[string]any
 func parseJSONArray(rawLogs []json.RawMessage) ([]map[string]any, error) {
 	logs := make([]map[string]any, 0, len(rawLogs))
 	for _, l := range rawLogs {
