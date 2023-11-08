@@ -76,7 +76,7 @@ func TestPayloadToLogRecord(t *testing.T) {
 				logRecord := scopeLogs.LogRecords().AppendEmpty()
 				logRecord.SetObservedTimestamp(pcommon.NewTimestampFromTime(time.Now()))
 
-				var log map[string]interface{}
+				var log map[string]any
 				require.NoError(t, json.Unmarshal(rawLog, &log))
 				require.NoError(t, logRecord.Body().SetEmptyMap().FromRaw(log))
 
@@ -124,7 +124,7 @@ func expectedLogs(t *testing.T, payload string) plog.Logs {
 
 		logRecord.SetObservedTimestamp(pcommon.NewTimestampFromTime(time.Now()))
 
-		var log map[string]interface{}
+		var log map[string]any
 		require.NoError(t, json.Unmarshal(l, &log))
 		require.NoError(t, logRecord.Body().SetEmptyMap().FromRaw(log))
 	}

@@ -199,7 +199,7 @@ func (r *httpLogsReceiver) handleRequest(rw http.ResponseWriter, req *http.Reque
 }
 
 // processLogs transforms the parsed payload into plog.Logs
-func (r *httpLogsReceiver) processLogs(now pcommon.Timestamp, logs []map[string]interface{}) plog.Logs {
+func (r *httpLogsReceiver) processLogs(now pcommon.Timestamp, logs []map[string]any) plog.Logs {
 	pLogs := plog.NewLogs()
 	resourceLogs := pLogs.ResourceLogs().AppendEmpty()
 	scopeLogs := resourceLogs.ScopeLogs().AppendEmpty()
@@ -217,8 +217,8 @@ func (r *httpLogsReceiver) processLogs(now pcommon.Timestamp, logs []map[string]
 	return pLogs
 }
 
-// parsePayload transforms the payload into []map[string]interface structure
-func parsePayload(payload []byte) ([]map[string]interface{}, error) {
+// parsePayload transforms the payload into []map[string]any structure
+func parsePayload(payload []byte) ([]map[string]any, error) {
 	firstChar := seekFirstNonWhitespace(string(payload))
 	switch firstChar {
 	case "{":
@@ -251,22 +251,22 @@ func seekFirstNonWhitespace(s string) string {
 	return firstChar
 }
 
-func parseJSONObject(rawLog json.RawMessage) ([]map[string]interface{}, error) {
-	var logs []map[string]interface{}
-	var log map[string]interface{}
+func parseJSONObject(rawLog json.RawMessage) ([]map[string]any, error) {
+	var logs []map[string]any
+	var log map[string]any
 	if err := json.Unmarshal(rawLog, &log); err != nil {
 		return nil, err
 	}
 	return append(logs, log), nil
 }
 
-func parseJSONArray(rawLogs []json.RawMessage) ([]map[string]interface{}, error) {
-	logs := make([]map[string]interface{}, 0, len(rawLogs))
+func parseJSONArray(rawLogs []json.RawMessage) ([]map[string]any, error) {
+	logs := make([]map[string]any, 0, len(rawLogs))
 	for _, l := range rawLogs {
 		if len(l) == 0 {
 			continue
 		}
-		var log map[string]interface{}
+		var log map[string]any
 		if err := json.Unmarshal(l, &log); err != nil {
 			return nil, err
 		}
