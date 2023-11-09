@@ -15,20 +15,17 @@
 package httpreceiver
 
 import (
-	"compress/gzip"
 	"context"
-	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"io"
-	"net"
 	"net/http"
 	"sync"
 	"time"
 	"unicode"
 
 	"go.opentelemetry.io/collector/component"
-	"go.opentelemetry.io/collector/config/configtls"
+	"go.opentelemetry.io/collector/config/confighttp"
 	"go.opentelemetry.io/collector/consumer"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/plog"
@@ -37,41 +34,25 @@ import (
 )
 
 type httpLogsReceiver struct {
-	address  string
-	path     string
-	server   *http.Server
-	tls      *configtls.TLSServerSetting
-	consumer consumer.Logs
-	wg       *sync.WaitGroup
-	logger   *zap.Logger
+	path              string
+	serverSettings    *confighttp.HTTPServerSettings
+	telemetrySettings component.TelemetrySettings
+	server            *http.Server
+	consumer          consumer.Logs
+	wg                *sync.WaitGroup
+	logger            *zap.Logger
 }
 
 // newHTTPLogsReceiver returns a newly configured httpLogsReceiver
 func newHTTPLogsReceiver(params receiver.CreateSettings, cfg *Config, consumer consumer.Logs) (*httpLogsReceiver, error) {
-	var TLSConfig *tls.Config
-	var err error
-	if cfg.TLS != nil {
-		TLSConfig, err = cfg.TLS.LoadTLSConfig()
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	r := &httpLogsReceiver{
-		address:  cfg.Endpoint,
-		path:     cfg.Path,
-		tls:      cfg.TLS,
-		consumer: consumer,
-		wg:       &sync.WaitGroup{},
-		logger:   params.Logger,
-	}
-	s := &http.Server{
-		TLSConfig:         TLSConfig,
-		Handler:           http.HandlerFunc(r.handleRequest),
-		ReadHeaderTimeout: 20 * time.Second,
-	}
-	r.server = s
-	return r, nil
+	return &httpLogsReceiver{
+		path:              cfg.Path,
+		serverSettings:    cfg.ServerSettings,
+		telemetrySettings: params.TelemetrySettings,
+		consumer:          consumer,
+		wg:                &sync.WaitGroup{},
+		logger:            params.Logger,
+	}, nil
 }
 
 // Start calls startListening
@@ -80,11 +61,15 @@ func (r *httpLogsReceiver) Start(ctx context.Context, host component.Host) error
 }
 
 // startListening starts serve on the server using TLS depending on receiver configuration
-func (r *httpLogsReceiver) startListening(ctx context.Context, host component.Host) error {
+func (r *httpLogsReceiver) startListening(_ context.Context, host component.Host) error {
 	r.logger.Debug("starting receiver HTTP server")
+	var err error
+	r.server, err = r.serverSettings.ToServer(host, r.telemetrySettings, r)
+	if err != nil {
+		return err
+	}
 
-	var lc net.ListenConfig
-	listener, err := lc.Listen(ctx, "tcp", r.address)
+	listener, err := r.serverSettings.ToListener()
 	if err != nil {
 		return err
 	}
@@ -93,14 +78,14 @@ func (r *httpLogsReceiver) startListening(ctx context.Context, host component.Ho
 	go func() {
 		defer r.wg.Done()
 
-		if r.tls != nil {
+		if r.serverSettings.TLSSetting != nil {
 			r.logger.Debug("starting ServeTLS",
-				zap.String("address", r.address),
-				zap.String("cert_file", r.tls.CertFile),
-				zap.String("key_file", r.tls.KeyFile),
+				zap.String("address", r.serverSettings.Endpoint),
+				zap.String("cert_file", r.serverSettings.TLSSetting.CertFile),
+				zap.String("key_file", r.serverSettings.TLSSetting.KeyFile),
 			)
 
-			err := r.server.ServeTLS(listener, r.tls.CertFile, r.tls.KeyFile)
+			err := r.server.ServeTLS(listener, r.serverSettings.TLSSetting.CertFile, r.serverSettings.TLSSetting.KeyFile)
 			r.logger.Debug("ServeTLS done")
 			if err != http.ErrServerClosed {
 				r.logger.Error("ServeTLS failed", zap.Error(err))
@@ -108,7 +93,7 @@ func (r *httpLogsReceiver) startListening(ctx context.Context, host component.Ho
 			}
 		} else {
 			r.logger.Debug("starting to serve",
-				zap.String("address", r.address),
+				zap.String("address", r.serverSettings.Endpoint),
 			)
 
 			err := r.server.Serve(listener)
@@ -142,7 +127,7 @@ func (r *httpLogsReceiver) shutdownListener(ctx context.Context) error {
 }
 
 // handleRequest is the function the server uses for requests; calls ConsumeLogs
-func (r *httpLogsReceiver) handleRequest(rw http.ResponseWriter, req *http.Request) {
+func (r *httpLogsReceiver) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	// path was configured && this req.URL does not match it
 	if r.path != "" && req.URL.Path != r.path {
 		rw.WriteHeader(http.StatusNotFound)
@@ -151,40 +136,19 @@ func (r *httpLogsReceiver) handleRequest(rw http.ResponseWriter, req *http.Reque
 	}
 
 	// read in request body
-	var payload []byte
-	if req.Header.Get("Content-Encoding") == "gzip" {
-		r.logger.Debug("req header has Content-Encoding set to gzip")
-		reader, err := gzip.NewReader(req.Body)
-		if err != nil {
-			rw.WriteHeader(http.StatusUnprocessableEntity)
-			r.logger.Debug("got payload with gzip compression but failed to read", zap.Error(err))
-			return
-		}
-		defer reader.Close()
-
-		// read the decompressed response body
-		payload, err = io.ReadAll(reader)
-		if err != nil {
-			rw.WriteHeader(http.StatusUnprocessableEntity)
-			r.logger.Debug("got payload with gzip compression but failed to read uncompressed payload", zap.Error(err))
-			return
-		}
-	} else {
-		r.logger.Debug("req header does not have Content-Encoding set to gzip")
-		var err error
-		payload, err = io.ReadAll(req.Body)
-		if err != nil {
-			rw.WriteHeader(http.StatusUnprocessableEntity)
-			r.logger.Debug("failed to read logs payload", zap.Error(err), zap.String("remote", req.RemoteAddr))
-			return
-		}
+	r.logger.Debug("reading in request body")
+	payload, err := io.ReadAll(req.Body)
+	if err != nil {
+		rw.WriteHeader(http.StatusUnprocessableEntity)
+		r.logger.Debug("failed to read logs payload", zap.Error(err), zap.String("remote", req.RemoteAddr))
+		return
 	}
 
 	// parse []byte into map structure
 	logs, err := parsePayload(payload)
 	if err != nil {
 		rw.WriteHeader(http.StatusUnprocessableEntity)
-		r.logger.Error("failed to convert log request payload to maps", zap.Error(err))
+		r.logger.Error("failed to convert log request payload to maps", zap.Error(err), zap.String("payload", string(payload)))
 		return
 	}
 
@@ -226,7 +190,7 @@ func parsePayload(payload []byte) ([]map[string]any, error) {
 		if err := json.Unmarshal(payload, &rawLogObject); err != nil {
 			return nil, err
 		}
-		return []map[string]interface{}{rawLogObject}, nil
+		return []map[string]any{rawLogObject}, nil
 	case "[":
 		rawLogsArray := []json.RawMessage{}
 		if err := json.Unmarshal(payload, &rawLogsArray); err != nil {

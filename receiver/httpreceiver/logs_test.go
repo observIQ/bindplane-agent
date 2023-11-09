@@ -16,7 +16,6 @@ package httpreceiver
 
 import (
 	"bytes"
-	"compress/gzip"
 	"encoding/json"
 	"errors"
 	"io"
@@ -30,6 +29,7 @@ import (
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest/plogtest"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"go.opentelemetry.io/collector/config/confighttp"
 	"go.opentelemetry.io/collector/config/configtls"
 	"go.opentelemetry.io/collector/consumer"
 	"go.opentelemetry.io/collector/consumer/consumertest"
@@ -88,9 +88,11 @@ func TestPayloadToLogRecord(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.desc, func(t *testing.T) {
 			r := newReceiver(t, &Config{
-				Endpoint: "localhost:12345",
-				Path:     "",
-				TLS:      &configtls.TLSServerSetting{},
+				Path: "",
+				ServerSettings: &confighttp.HTTPServerSettings{
+					Endpoint:   "localhost:12345",
+					TLSSetting: &configtls.TLSServerSetting{},
+				},
 			}, &consumertest.LogsSink{})
 			var logs plog.Logs
 			raw, err := parsePayload([]byte(tc.payload))
@@ -133,7 +135,7 @@ func expectedLogs(t *testing.T, payload string) plog.Logs {
 }
 
 // tests handleRequest()
-func TestHandleRequest(t *testing.T) {
+func TestServeHTTP(t *testing.T) {
 	testCases := []struct {
 		desc               string
 		cfg                *Config
@@ -145,9 +147,11 @@ func TestHandleRequest(t *testing.T) {
 		{
 			desc: "simple",
 			cfg: &Config{
-				Endpoint: "localhost:12345",
-				Path:     "",
-				TLS:      &configtls.TLSServerSetting{},
+				Path: "",
+				ServerSettings: &confighttp.HTTPServerSettings{
+					Endpoint:   "localhost:12345",
+					TLSSetting: &configtls.TLSServerSetting{},
+				},
 			},
 			request: &http.Request{
 				Method: "POST",
@@ -165,9 +169,11 @@ func TestHandleRequest(t *testing.T) {
 		{
 			desc: "with path",
 			cfg: &Config{
-				Endpoint: "localhost:12345",
-				Path:     "/logs",
-				TLS:      &configtls.TLSServerSetting{},
+				Path: "/logs",
+				ServerSettings: &confighttp.HTTPServerSettings{
+					Endpoint:   "localhost:12345",
+					TLSSetting: &configtls.TLSServerSetting{},
+				},
 			},
 			request: &http.Request{
 				Method: "POST",
@@ -187,9 +193,11 @@ func TestHandleRequest(t *testing.T) {
 		{
 			desc: "bad path",
 			cfg: &Config{
-				Endpoint: "localhost:12345",
-				Path:     "/logs",
-				TLS:      &configtls.TLSServerSetting{},
+				Path: "/logs",
+				ServerSettings: &confighttp.HTTPServerSettings{
+					Endpoint:   "localhost:12345",
+					TLSSetting: &configtls.TLSServerSetting{},
+				},
 			},
 			request: &http.Request{
 				Method: "POST",
@@ -207,55 +215,13 @@ func TestHandleRequest(t *testing.T) {
 			consumerFailure:    false,
 		},
 		{
-			desc: "with gzip",
-			cfg: &Config{
-				Endpoint: "localhost:12345",
-				Path:     "/logs",
-				TLS:      &configtls.TLSServerSetting{},
-			},
-			request: &http.Request{
-				Method: "POST",
-				URL: &url.URL{
-					Path: "/logs",
-				},
-				Header: map[string][]string{
-					textproto.CanonicalMIMEHeaderKey("Content-Encoding"): {"gzip"},
-					textproto.CanonicalMIMEHeaderKey("Content-Type"):     {"application/json"},
-				},
-				Body: io.NopCloser(bytes.NewBufferString(gzipMessage(`[{"message": "2023/11/06 08:09:10 Generic event", "status": "info", "timestamp": 1699276151086, "hostname": "Dakotas-MBP-2.hsd1.mi.comcast.net", "service": "custom_file", "ddsource": "my_app", "ddtags": "filename:dd-log-file.log"}]`))),
-			},
-			expectedStatusCode: http.StatusOK,
-			logExpected:        true,
-			consumerFailure:    false,
-		},
-		{
-			desc: "bad gzip",
-			cfg: &Config{
-				Endpoint: "localhost:12345",
-				Path:     "/logs",
-				TLS:      &configtls.TLSServerSetting{},
-			},
-			request: &http.Request{
-				Method: "POST",
-				URL: &url.URL{
-					Path: "/logs",
-				},
-				Header: map[string][]string{
-					textproto.CanonicalMIMEHeaderKey("Content-Encoding"): {"gzip"},
-					textproto.CanonicalMIMEHeaderKey("Content-Type"):     {"application/json"},
-				},
-				Body: io.NopCloser(bytes.NewBufferString(`[{"message": "2023/11/06 08:09:10 Generic event", "status": "info", "timestamp": 1699276151086, "hostname": "Dakotas-MBP-2.hsd1.mi.comcast.net", "service": "custom_file", "ddsource": "my_app", "ddtags": "filename:dd-log-file.log"}]`)),
-			},
-			expectedStatusCode: http.StatusUnprocessableEntity,
-			logExpected:        false,
-			consumerFailure:    false,
-		},
-		{
 			desc: "bad json, parse fails",
 			cfg: &Config{
-				Endpoint: "localhost:12345",
-				Path:     "/logs",
-				TLS:      &configtls.TLSServerSetting{},
+				Path: "/logs",
+				ServerSettings: &confighttp.HTTPServerSettings{
+					Endpoint:   "localhost:12345",
+					TLSSetting: &configtls.TLSServerSetting{},
+				},
 			},
 			request: &http.Request{
 				Method: "POST",
@@ -275,9 +241,11 @@ func TestHandleRequest(t *testing.T) {
 		{
 			desc: "consumer fails",
 			cfg: &Config{
-				Endpoint: "localhost:12345",
-				Path:     "/logs",
-				TLS:      &configtls.TLSServerSetting{},
+				Path: "/logs",
+				ServerSettings: &confighttp.HTTPServerSettings{
+					Endpoint:   "localhost:12345",
+					TLSSetting: &configtls.TLSServerSetting{},
+				},
 			},
 			request: &http.Request{
 				Method: "POST",
@@ -297,9 +265,11 @@ func TestHandleRequest(t *testing.T) {
 		{
 			desc: "connectivity test",
 			cfg: &Config{
-				Endpoint: "localhost:12345",
-				Path:     "/logs",
-				TLS:      &configtls.TLSServerSetting{},
+				Path: "/logs",
+				ServerSettings: &confighttp.HTTPServerSettings{
+					Endpoint:   "localhost:12345",
+					TLSSetting: &configtls.TLSServerSetting{},
+				},
 			},
 			request: &http.Request{
 				Method: "POST",
@@ -319,9 +289,11 @@ func TestHandleRequest(t *testing.T) {
 		{
 			desc: "simple; json object",
 			cfg: &Config{
-				Endpoint: "localhost:12345",
-				Path:     "",
-				TLS:      &configtls.TLSServerSetting{},
+				Path: "",
+				ServerSettings: &confighttp.HTTPServerSettings{
+					Endpoint:   "localhost:12345",
+					TLSSetting: &configtls.TLSServerSetting{},
+				},
 			},
 			request: &http.Request{
 				Method: "POST",
@@ -349,7 +321,7 @@ func TestHandleRequest(t *testing.T) {
 
 			r := newReceiver(t, tc.cfg, consumer)
 			rec := httptest.NewRecorder()
-			r.handleRequest(rec, tc.request)
+			r.ServeHTTP(rec, tc.request)
 
 			assert.Equal(t, tc.expectedStatusCode, rec.Code, "status codes are not equal")
 			if !tc.consumerFailure {
@@ -369,15 +341,4 @@ func newReceiver(t *testing.T, cfg *Config, c consumer.Logs) *httpLogsReceiver {
 	r, err := newHTTPLogsReceiver(s, cfg, c)
 	require.NoError(t, err)
 	return r
-}
-
-func gzipMessage(message string) string {
-	var b bytes.Buffer
-	w := gzip.NewWriter(&b)
-	_, err := w.Write([]byte(message))
-	if err != nil {
-		panic(err)
-	}
-	w.Close()
-	return b.String()
 }

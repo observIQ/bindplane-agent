@@ -19,6 +19,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/component"
+	"go.opentelemetry.io/collector/config/confighttp"
 	"go.opentelemetry.io/collector/config/configtls"
 )
 
@@ -31,18 +32,22 @@ func TestValidate(t *testing.T) {
 		{
 			desc: "pass simple",
 			config: Config{
-				Endpoint: "localhost:12345",
+				ServerSettings: &confighttp.HTTPServerSettings{
+					Endpoint: "localhost:12345",
+				},
 			},
 		},
 		{
 			desc: "pass complex",
 			config: Config{
-				Endpoint: "localhost:12345",
-				Path:     "/api/v2/logs",
-				TLS: &configtls.TLSServerSetting{
-					TLSSetting: configtls.TLSSetting{
-						CertFile: "some_cert_file",
-						KeyFile:  "some_key_file",
+				Path: "/api/v2/logs",
+				ServerSettings: &confighttp.HTTPServerSettings{
+					Endpoint: "localhost:12345",
+					TLSSetting: &configtls.TLSServerSetting{
+						TLSSetting: configtls.TLSSetting{
+							CertFile: "some_cert_file",
+							KeyFile:  "some_key_file",
+						},
 					},
 				},
 			},
@@ -52,10 +57,12 @@ func TestValidate(t *testing.T) {
 			expectedErr: errNoEndpoint,
 			config: Config{
 				Path: "/api/v2/logs",
-				TLS: &configtls.TLSServerSetting{
-					TLSSetting: configtls.TLSSetting{
-						CertFile: "some_cert_file",
-						KeyFile:  "some_key_file",
+				ServerSettings: &confighttp.HTTPServerSettings{
+					TLSSetting: &configtls.TLSServerSetting{
+						TLSSetting: configtls.TLSSetting{
+							CertFile: "some_cert_file",
+							KeyFile:  "some_key_file",
+						},
 					},
 				},
 			},
@@ -64,12 +71,14 @@ func TestValidate(t *testing.T) {
 			desc:        "fail bad endpoint",
 			expectedErr: errBadEndpoint,
 			config: Config{
-				Endpoint: "localhost12345",
-				Path:     "/api/v2/logs",
-				TLS: &configtls.TLSServerSetting{
-					TLSSetting: configtls.TLSSetting{
-						CertFile: "some_cert_file",
-						KeyFile:  "some_key_file",
+				Path: "/api/v2/logs",
+				ServerSettings: &confighttp.HTTPServerSettings{
+					Endpoint: "localhost12345",
+					TLSSetting: &configtls.TLSServerSetting{
+						TLSSetting: configtls.TLSSetting{
+							CertFile: "some_cert_file",
+							KeyFile:  "some_key_file",
+						},
 					},
 				},
 			},
@@ -78,11 +87,13 @@ func TestValidate(t *testing.T) {
 			desc:        "fail tls but no CertFile",
 			expectedErr: errNoCert,
 			config: Config{
-				Endpoint: "localhost:12345",
-				Path:     "/api/v2/logs",
-				TLS: &configtls.TLSServerSetting{
-					TLSSetting: configtls.TLSSetting{
-						KeyFile: "some_key_file",
+				Path: "/api/v2/logs",
+				ServerSettings: &confighttp.HTTPServerSettings{
+					Endpoint: "localhost:12345",
+					TLSSetting: &configtls.TLSServerSetting{
+						TLSSetting: configtls.TLSSetting{
+							KeyFile: "some_key_file",
+						},
 					},
 				},
 			},
@@ -91,11 +102,13 @@ func TestValidate(t *testing.T) {
 			desc:        "fail tls but no KeyFile",
 			expectedErr: errNoKey,
 			config: Config{
-				Endpoint: "localhost:12345",
-				Path:     "/api/v2/logs",
-				TLS: &configtls.TLSServerSetting{
-					TLSSetting: configtls.TLSSetting{
-						CertFile: "some_cert_file",
+				Path: "/api/v2/logs",
+				ServerSettings: &confighttp.HTTPServerSettings{
+					Endpoint: "localhost:12345",
+					TLSSetting: &configtls.TLSServerSetting{
+						TLSSetting: configtls.TLSSetting{
+							CertFile: "some_cert_file",
+						},
 					},
 				},
 			},
@@ -104,8 +117,10 @@ func TestValidate(t *testing.T) {
 			desc:        "fail bad path",
 			expectedErr: errBadPath,
 			config: Config{
-				Endpoint: "localhost:12345",
-				Path:     "/api , /v2//",
+				Path: "/api , /v2//",
+				ServerSettings: &confighttp.HTTPServerSettings{
+					Endpoint: "localhost:12345",
+				},
 			},
 		},
 	}

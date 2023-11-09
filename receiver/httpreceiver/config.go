@@ -20,15 +20,14 @@ import (
 	"net"
 	"path"
 
-	"go.opentelemetry.io/collector/config/configtls"
+	"go.opentelemetry.io/collector/config/confighttp"
 	"go.uber.org/multierr"
 )
 
 // Config defines the configuration for an HTTP receiver
 type Config struct {
-	Endpoint string                      `mapstructure:"endpoint"`
-	Path     string                      `mapstructure:"path"`
-	TLS      *configtls.TLSServerSetting `mapstructure:"tls"`
+	Path           string                         `mapstructure:"path"`
+	ServerSettings *confighttp.HTTPServerSettings `mapstructure:"server"`
 }
 
 var (
@@ -41,19 +40,19 @@ var (
 
 // Validate ensures an HTTP receiver config is correct
 func (c *Config) Validate() error {
-	if c.Endpoint == "" {
+	if c.ServerSettings.Endpoint == "" {
 		return errNoEndpoint
 	}
 
 	var errs error
-	if _, _, err := net.SplitHostPort(c.Endpoint); err != nil {
+	if _, _, err := net.SplitHostPort(c.ServerSettings.Endpoint); err != nil {
 		errs = multierr.Append(errs, errBadEndpoint)
 	}
-	if c.TLS != nil {
-		if c.TLS.CertFile == "" {
+	if c.ServerSettings.TLSSetting != nil {
+		if c.ServerSettings.TLSSetting.CertFile == "" && c.ServerSettings.TLSSetting.CertPem == "" {
 			errs = multierr.Append(errs, errNoCert)
 		}
-		if c.TLS.KeyFile == "" {
+		if c.ServerSettings.TLSSetting.KeyFile == "" && c.ServerSettings.TLSSetting.KeyPem == "" {
 			errs = multierr.Append(errs, errNoKey)
 		}
 	}
