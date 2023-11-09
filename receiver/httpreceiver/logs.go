@@ -18,6 +18,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"sync"
@@ -39,7 +40,7 @@ type httpLogsReceiver struct {
 	telemetrySettings component.TelemetrySettings
 	server            *http.Server
 	consumer          consumer.Logs
-	wg                *sync.WaitGroup
+	wg                sync.WaitGroup
 	logger            *zap.Logger
 }
 
@@ -50,28 +51,27 @@ func newHTTPLogsReceiver(params receiver.CreateSettings, cfg *Config, consumer c
 		serverSettings:    cfg.ServerSettings,
 		telemetrySettings: params.TelemetrySettings,
 		consumer:          consumer,
-		wg:                &sync.WaitGroup{},
 		logger:            params.Logger,
 	}, nil
 }
 
 // Start calls startListening
-func (r *httpLogsReceiver) Start(ctx context.Context, host component.Host) error {
-	return r.startListening(ctx, host)
+func (r *httpLogsReceiver) Start(_ context.Context, host component.Host) error {
+	return r.startListening(host)
 }
 
 // startListening starts serve on the server using TLS depending on receiver configuration
-func (r *httpLogsReceiver) startListening(_ context.Context, host component.Host) error {
+func (r *httpLogsReceiver) startListening(host component.Host) error {
 	r.logger.Debug("starting receiver HTTP server")
 	var err error
 	r.server, err = r.serverSettings.ToServer(host, r.telemetrySettings, r)
 	if err != nil {
-		return err
+		return fmt.Errorf("to server: %w", err)
 	}
 
 	listener, err := r.serverSettings.ToListener()
 	if err != nil {
-		return err
+		return fmt.Errorf("to listener: %w", err)
 	}
 
 	r.wg.Add(1)
@@ -140,7 +140,7 @@ func (r *httpLogsReceiver) ServeHTTP(rw http.ResponseWriter, req *http.Request) 
 	payload, err := io.ReadAll(req.Body)
 	if err != nil {
 		rw.WriteHeader(http.StatusUnprocessableEntity)
-		r.logger.Debug("failed to read logs payload", zap.Error(err), zap.String("remote", req.RemoteAddr))
+		r.logger.Error("failed to read logs payload", zap.Error(err), zap.String("remote", req.RemoteAddr))
 		return
 	}
 

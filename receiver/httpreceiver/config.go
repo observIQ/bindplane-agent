@@ -21,7 +21,6 @@ import (
 	"path"
 
 	"go.opentelemetry.io/collector/config/confighttp"
-	"go.uber.org/multierr"
 )
 
 // Config defines the configuration for an HTTP receiver
@@ -44,24 +43,23 @@ func (c *Config) Validate() error {
 		return errNoEndpoint
 	}
 
-	var errs error
 	if _, _, err := net.SplitHostPort(c.ServerSettings.Endpoint); err != nil {
-		errs = multierr.Append(errs, errBadEndpoint)
+		return errBadEndpoint
 	}
 	if c.ServerSettings.TLSSetting != nil {
 		if c.ServerSettings.TLSSetting.CertFile == "" && c.ServerSettings.TLSSetting.CertPem == "" {
-			errs = multierr.Append(errs, errNoCert)
+			return errNoCert
 		}
 		if c.ServerSettings.TLSSetting.KeyFile == "" && c.ServerSettings.TLSSetting.KeyPem == "" {
-			errs = multierr.Append(errs, errNoKey)
+			return errNoKey
 		}
 	}
 	if c.Path != "" {
 		clean := path.Clean(c.Path)
 		if c.Path != clean {
-			errs = multierr.Append(errs, errBadPath)
+			return errBadPath
 		}
 	}
 
-	return errs
+	return nil
 }
