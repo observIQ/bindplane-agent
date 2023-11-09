@@ -18,18 +18,17 @@ This receiver is capable of collecting logs for a variety of services, serving a
 ## Configuration
 | Field                | Type      | Default          | Required | Description                                                                                                                                                                            |
 |----------------------|-----------|------------------|----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| endpoint             |  string   |                  | `true`   | The hostname and port the receiver should listen on for logs being sent as HTTP POST requests.                                                                                         |
 | path                 |  string   |                  | `false`  | Specifies a path the receiver should be listening to for logs. Useful when the log source also sends other data to the endpoint, such as metrics.                                      |
-| server.endpoint      |  string   |                  | `true`   | The hostname and port the receiver should listen on for logs being sent as HTTP POST requests.                                                                                         |
-| server.tls.key_file  |  string   |                  | `false`  | Configure the receiver to use TLS.                                                                                                                                                     |
-| server.tls.cert_file |  string   |                  | `false`  | Configure the receiver to use TLS.                                                                                                                                                     |
+| tls.key_file         |  string   |                  | `false`  | Configure the receiver to use TLS.                                                                                                                                                     |
+| tls.cert_file        |  string   |                  | `false`  | Configure the receiver to use TLS.                                                                                                                                                     |
 
 ### Example Configuration
 ```yaml
 receivers:
   http:
+    endpoint: "localhost:12345"
     path: "/api/v2/logs"
-    server:
-      endpoint: "localhost:12345"
 exporters:
   googlecloud:
     project: my-gcp-project
@@ -45,12 +44,11 @@ service:
 ```yaml
 receivers:
   http:
+    endpoint: "0.0.0.0:12345"
     path: "/logs"
-    server:
-      endpoint: "0.0.0.0:12345"
-      tls:
-        key_file: "certs/server.key"
-        cert_file: "certs/server.crt"
+    tls:
+      key_file: "certs/server.key"
+      cert_file: "certs/server.crt"
 exporters:
   googlecloud:
     project: my-gcp-project
