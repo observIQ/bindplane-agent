@@ -33,17 +33,17 @@ func newExporter(cfg *Config, params exporter.CreateSettings) (*chronicleExporte
 	case cfg.Creds != "":
 		creds, err = google.CredentialsFromJSON(context.Background(), []byte(cfg.CredsFilePath), scope)
 		if err != nil {
-			return nil, fmt.Errorf("failed to obtain credentials from JSON: %w", err)
+			return nil, fmt.Errorf("obtain credentials from JSON: %w", err)
 		}
 	case cfg.CredsFilePath != "":
 		credsData, err := os.ReadFile(cfg.CredsFilePath)
 		if err != nil {
-			return nil, fmt.Errorf("failed to read credentials file: %w", err)
+			return nil, fmt.Errorf("read credentials file: %w", err)
 		}
 
 		creds, err = google.CredentialsFromJSON(context.Background(), credsData, scope)
 		if err != nil {
-			return nil, fmt.Errorf("failed to obtain credentials from JSON: %w", err)
+			return nil, fmt.Errorf("obtain credentials from JSON: %w", err)
 		}
 	default:
 		return nil, fmt.Errorf("no credentials provided")
@@ -68,7 +68,7 @@ func (ce *chronicleExporter) Capabilities() consumer.Capabilities {
 func (ce *chronicleExporter) logsDataPusher(ctx context.Context, ld plog.Logs) error {
 	udmData, err := ce.marshaler.MarshalRawLogs(ld)
 	if err != nil {
-		return fmt.Errorf("failed to marshal logs: %w", err)
+		return fmt.Errorf("marshal logs: %w", err)
 	}
 
 	return ce.uploadToChronicle(ctx, udmData)
@@ -77,14 +77,14 @@ func (ce *chronicleExporter) logsDataPusher(ctx context.Context, ld plog.Logs) e
 func (ce *chronicleExporter) uploadToChronicle(ctx context.Context, data []byte) error {
 	request, err := http.NewRequestWithContext(ctx, "POST", ce.endpoint, bytes.NewBuffer(data))
 	if err != nil {
-		return fmt.Errorf("failed to create request: %w", err)
+		return fmt.Errorf("create request: %w", err)
 	}
 
 	request.Header.Set("Content-Type", "application/json")
 
 	resp, err := ce.httpClient.Do(request)
 	if err != nil {
-		return fmt.Errorf("failed to send request to Chronicle: %w", err)
+		return fmt.Errorf("send request to Chronicle: %w", err)
 	}
 	defer resp.Body.Close()
 

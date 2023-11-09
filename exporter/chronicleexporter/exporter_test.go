@@ -46,7 +46,7 @@ func TestLogsDataPusher(t *testing.T) {
 			expectedErr: "",
 		},
 		{
-			desc: "failed to create request",
+			desc: "create request",
 			setupExporter: func() *chronicleExporter {
 				// Return an exporter with an invalid endpoint to trigger request creation failure
 				return &chronicleExporter{
@@ -61,10 +61,10 @@ func TestLogsDataPusher(t *testing.T) {
 				marshaler.On("MarshalRawLogs", mock.Anything).Return([]byte("mock data"), nil)
 				exporter.marshaler = marshaler
 			},
-			expectedErr: "failed to create request",
+			expectedErr: "create request",
 		},
 		{
-			desc: "failed to send request to Chronicle",
+			desc: "send request to Chronicle",
 			setupExporter: func() *chronicleExporter {
 				exporter := &chronicleExporter{
 					endpoint:   regions[cfg.Region],
@@ -82,7 +82,7 @@ func TestLogsDataPusher(t *testing.T) {
 				marshaller.On("MarshalRawLogs", mock.Anything).Return([]byte("mock data"), nil)
 				exporter.marshaler = marshaller
 			},
-			expectedErr: "failed to send request to Chronicle",
+			expectedErr: "send request to Chronicle",
 		},
 		{
 			desc: "marshaling logs fails",
@@ -101,7 +101,7 @@ func TestLogsDataPusher(t *testing.T) {
 				marshaller.On("MarshalRawLogs", mock.Anything).Return(nil, errors.New("marshaling error"))
 				exporter.marshaler = marshaller
 			},
-			expectedErr: "failed to marshal logs",
+			expectedErr: "marshal logs",
 		},
 		{
 			desc: "received non-OK response from Chronicle",

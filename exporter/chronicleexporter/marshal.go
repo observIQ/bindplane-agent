@@ -114,7 +114,7 @@ func (ce *marshaler) getTopLevelFieldAsString(logRecord plog.LogRecord, field st
 		attributes := logRecord.Attributes().AsRaw()
 		bytes, err := json.Marshal(attributes)
 		if err != nil {
-			return "", fmt.Errorf("failed to marshal attributes: %w", err)
+			return "", fmt.Errorf("marshal attributes: %w", err)
 		}
 		return string(bytes), nil
 	case "body":
@@ -125,7 +125,7 @@ func (ce *marshaler) getTopLevelFieldAsString(logRecord plog.LogRecord, field st
 			bodyMap := logRecord.Body().Map().AsRaw()
 			bytes, err := json.Marshal(bodyMap)
 			if err != nil {
-				return "", fmt.Errorf("failed to marshal body map: %w", err)
+				return "", fmt.Errorf("marshal body map: %w", err)
 			}
 			return string(bytes), nil
 		default:
@@ -160,7 +160,7 @@ func extractNestedValue(logMap map[string]any, keys []string) (string, error) {
 	for i, key := range keys {
 		value, ok := logMap[key]
 		if !ok {
-			return "", fmt.Errorf("failed to find key '%s' in log map", key)
+			return "", fmt.Errorf("couldn't find key '%s' in log map", key)
 		}
 
 		if i == len(keys)-1 {
