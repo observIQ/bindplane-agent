@@ -44,11 +44,6 @@ func newMarshaler(cfg Config) *marshaler {
 }
 
 func (ce *marshaler) MarshalRawLogs(ld plog.Logs) ([]byte, error) {
-	if ce.cfg.RawLogField == "" {
-		plogMarshaller := &plog.JSONMarshaler{}
-		return plogMarshaller.MarshalLogs(ld)
-	}
-
 	rawLogs, err := ce.extractRawLogs(ld)
 	if err != nil {
 		return nil, fmt.Errorf("extract raw logs: %w", err)
@@ -80,9 +75,27 @@ func (ce *marshaler) extractRawLogs(ld plog.Logs) ([]entry, error) {
 			scopeLog := resourceLog.ScopeLogs().At(j)
 			for k := 0; k < scopeLog.LogRecords().Len(); k++ {
 				logRecord := scopeLog.LogRecords().At(k)
-				rawLog, err := ce.getRawField(logRecord)
-				if err != nil {
-					return nil, fmt.Errorf("get raw field: %w", err)
+
+				var rawLog string
+				var err error
+				if ce.cfg.RawLogField == "" {
+					body := logRecord.Body().Str()
+					entireLogRecord := map[string]any{
+						"body":       body,
+						"attributes": logRecord.Attributes().AsRaw(),
+					}
+
+					bytesLogRecord, err := json.Marshal(entireLogRecord)
+					if err != nil {
+						return nil, fmt.Errorf("marshal log record: %w", err)
+					}
+
+					rawLog = string(bytesLogRecord)
+				} else {
+					rawLog, err = ce.getRawField(logRecord)
+					if err != nil {
+						return nil, fmt.Errorf("get raw field: %w", err)
+					}
 				}
 
 				entries = append(entries, entry{

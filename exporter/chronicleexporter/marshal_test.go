@@ -164,6 +164,15 @@ func TestMarshalRawLogs(t *testing.T) {
 			logType:      "test_log_type",
 			rawLogField:  `body["event"]["details"]["username"]`,
 		},
+		{
+			name: "No rawLogField specified",
+			logRecords: []plog.LogRecord{
+				mockLogRecord(t, "Test log without raw field", map[string]any{"key1": "value1"}),
+			},
+			expectedJSON: `{"custumer_id":"test_customer_id","entries":[{"log_text":"{\"attributes\":{\"key1\":\"value1\"},\"body\":\"Test log without raw field\"}","ts_rfc3339":"2023-01-02T03:04:05.000000006Z"}],"log_type":"test_log_type"}`,
+			logType:      "test_log_type",
+			rawLogField:  "", // No rawLogField specified
+		},
 	}
 
 	for _, tt := range tests {
