@@ -44,7 +44,7 @@ type Config struct {
 	CredsFilePath string `mapstructure:"creds_file_path"`
 
 	// Creds are the Google credentials JSON file.
-	Creds string `mapstructure:"creds_file_path"`
+	Creds string `mapstructure:"creds"`
 
 	// LogType is the type of log that will be sent to Chronicle.
 	LogType string `mapstructure:"log_type"`
