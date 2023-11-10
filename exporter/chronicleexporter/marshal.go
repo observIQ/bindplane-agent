@@ -68,7 +68,7 @@ func (ce *marshaler) MarshalRawLogs(ld plog.Logs) ([]byte, error) {
 
 type entry struct {
 	LogText   string `json:"log_text"`
-	Timestamp string `json:"timestamp"`
+	Timestamp string `json:"ts_rfc3339"`
 }
 
 func (ce *marshaler) extractRawLogs(ld plog.Logs) ([]entry, error) {

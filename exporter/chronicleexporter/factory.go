@@ -35,7 +35,7 @@ type Factory struct {
 // NewFactory creates a new Chronicle exporter factory.
 func NewFactory() exporter.Factory {
 	return exporter.NewFactory(
-		TypeStr,
+		metadata.Type,
 		createDefaultConfig,
 		exporter.WithLogs(createLogsExporter, metadata.LogsStability))
 }
