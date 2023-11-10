@@ -30,6 +30,7 @@ Below is a list of supported receivers with links to their documentation pages.
 | Fluentd Forward Receiver                   | [fluentforwardreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.88.0/receiver/fluentforwardreceiver/README.md)                   |
 | Google Cloud Pub/Sub Receiver              | [googlecloudpubsubreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.88.0/receiver/googlecloudpubsubreceiver/README.md)           |
 | Google Cloud Spanner Receiver              | [googlecloudspannerreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.88.0/receiver/googlecloudspannerreceiver/README.md)         |
+| HTTP Log Receiver                          | [httpreceiver](../receiver/httpreceiver/README.md)                                                                                                                 |
 | Host Metrics Receiver                      | [hostmetricsreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.88.0/receiver/hostmetricsreceiver/README.md)                       |
 | InfluxDB Receiver                          | [influxdbreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.88.0/receiver/influxdbreceiver/README.md)                             |
 | Jaeger Receiver                            | [jaegerreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.88.0/receiver/jaegerreceiver/README.md)                                 |
