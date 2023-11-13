@@ -227,7 +227,7 @@ require (
 	github.com/prometheus/prometheus v0.47.2 // indirect
 	github.com/prometheus/statsd_exporter v0.22.7 // indirect
 	github.com/scaleway/scaleway-sdk-go v1.0.0-beta.20 // indirect
-	github.com/shirou/gopsutil/v3 v3.23.9 // indirect
+	github.com/shirou/gopsutil/v3 v3.23.10 // indirect
 	github.com/sijms/go-ora/v2 v2.7.19 // indirect
 	github.com/sirupsen/logrus v1.9.0 // indirect
 	github.com/snowflakedb/gosnowflake v1.6.25 // indirect
