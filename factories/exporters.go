@@ -67,6 +67,7 @@ var defaultExporters = []exporter.Factory{
 	azureblobexporter.NewFactory(),
 	azuremonitorexporter.NewFactory(),
 	carbonexporter.NewFactory(),
+	chronicleexporter.NewFactory(),
 	clickhouseexporter.NewFactory(),
 	coralogixexporter.NewFactory(),
 	datadogexporter.NewFactory(),
@@ -95,5 +96,4 @@ var defaultExporters = []exporter.Factory{
 	splunkhecexporter.NewFactory(),
 	sumologicexporter.NewFactory(),
 	zipkinexporter.NewFactory(),
-	chronicleexporter.NewFactory(),
 }

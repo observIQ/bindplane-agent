@@ -42,7 +42,7 @@ func TestLogsDataPusher(t *testing.T) {
 			desc: "successful push to Chronicle",
 			setupExporter: func() *chronicleExporter {
 				exporter := &chronicleExporter{
-					endpoint:   regions[cfg.Region],
+					endpoint:   baseEndpoint,
 					cfg:        &cfg,
 					logger:     zap.NewNop(),
 					httpClient: http.DefaultClient,
@@ -51,7 +51,7 @@ func TestLogsDataPusher(t *testing.T) {
 				return exporter
 			},
 			setupMocks: func(exporter *chronicleExporter) {
-				httpmock.RegisterResponder("POST", endpoint, httpmock.NewStringResponder(http.StatusOK, ""))
+				httpmock.RegisterResponder("POST", baseEndpoint, httpmock.NewStringResponder(http.StatusOK, ""))
 
 				marshaller := mocks.NewMockMarshaler(t)
 				marshaller.On("MarshalRawLogs", mock.Anything).Return([]byte("mock data"), nil)
@@ -63,7 +63,7 @@ func TestLogsDataPusher(t *testing.T) {
 			desc: "send request to Chronicle",
 			setupExporter: func() *chronicleExporter {
 				exporter := &chronicleExporter{
-					endpoint:   regions[cfg.Region],
+					endpoint:   baseEndpoint,
 					cfg:        &cfg,
 					logger:     zap.NewNop(),
 					httpClient: http.DefaultClient,
@@ -73,7 +73,7 @@ func TestLogsDataPusher(t *testing.T) {
 			},
 			setupMocks: func(exporter *chronicleExporter) {
 				// Register a responder that returns an error to simulate sending request failure
-				httpmock.RegisterResponder("POST", endpoint, httpmock.NewErrorResponder(errors.New("network error")))
+				httpmock.RegisterResponder("POST", baseEndpoint, httpmock.NewErrorResponder(errors.New("network error")))
 				marshaller := mocks.NewMockMarshaler(t)
 				marshaller.On("MarshalRawLogs", mock.Anything).Return([]byte("mock data"), nil)
 				exporter.marshaler = marshaller
@@ -84,7 +84,7 @@ func TestLogsDataPusher(t *testing.T) {
 			desc: "marshaling logs fails",
 			setupExporter: func() *chronicleExporter {
 				exporter := &chronicleExporter{
-					endpoint:   regions[cfg.Region],
+					endpoint:   baseEndpoint,
 					cfg:        &cfg,
 					logger:     zap.NewNop(),
 					httpClient: http.DefaultClient,
@@ -103,7 +103,7 @@ func TestLogsDataPusher(t *testing.T) {
 			desc: "received non-OK response from Chronicle",
 			setupExporter: func() *chronicleExporter {
 				exporter := &chronicleExporter{
-					endpoint:   regions[cfg.Region],
+					endpoint:   baseEndpoint,
 					cfg:        &cfg,
 					logger:     zap.NewNop(),
 					httpClient: http.DefaultClient,
@@ -113,7 +113,7 @@ func TestLogsDataPusher(t *testing.T) {
 			},
 			setupMocks: func(exporter *chronicleExporter) {
 				// Mock a non-OK HTTP response
-				httpmock.RegisterResponder("POST", endpoint, httpmock.NewStringResponder(http.StatusInternalServerError, "Internal Server Error"))
+				httpmock.RegisterResponder("POST", baseEndpoint, httpmock.NewStringResponder(http.StatusInternalServerError, "Internal Server Error"))
 
 				marshaller := mocks.NewMockMarshaler(t)
 				marshaller.On("MarshalRawLogs", mock.Anything).Return([]byte("mock data"), nil)
@@ -145,9 +145,49 @@ func TestLogsDataPusher(t *testing.T) {
 			// Verify the expected number of calls were made
 			if tc.expectedErr == "" {
 				info := httpmock.GetCallCountInfo()
-				expectedMethod := "POST " + endpoint
+				expectedMethod := "POST " + baseEndpoint
 				require.Equal(t, 1, info[expectedMethod], "Expected number of calls to %s is not met", expectedMethod)
 			}
+		})
+	}
+}
+func TestBuildEndpoint(t *testing.T) {
+	testCases := []struct {
+		name             string
+		cfg              Config
+		expectedEndpoint string
+	}{
+		{
+			name:             "Europe Multi-Region",
+			cfg:              Config{Region: "Europe Multi-Region"},
+			expectedEndpoint: "https://europe-backstory.googleapis.com/v2/unstructuredlogentries:batchCreate",
+		},
+		{
+			name:             "Frankfurt",
+			cfg:              Config{Region: "Frankfurt"},
+			expectedEndpoint: "https://europe-west3-backstory.googleapis.com/v2/unstructuredlogentries:batchCreate",
+		},
+		{
+			name:             "London",
+			cfg:              Config{Region: "London"},
+			expectedEndpoint: "http://europe-west2-backstory.googleapis.com/v2/unstructuredlogentries:batchCreate",
+		},
+		{
+			name:             "Singapore",
+			cfg:              Config{Region: "Singapore"},
+			expectedEndpoint: "https://asia-southeast1-backstory.googleapis.com/v2/unstructuredlogentries:batchCreate",
+		},
+		{
+			name:             "default case (no region)",
+			cfg:              Config{},
+			expectedEndpoint: "https://malachiteingestion-pa.googleapis.com/v2/unstructuredlogentries:batchCreate",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			endpoint := buildEndpoint(&tc.cfg)
+			require.Equal(t, tc.expectedEndpoint, endpoint, "Endpoint does not match for test case: %s", tc.name)
 		})
 	}
 }

@@ -31,7 +31,9 @@ import (
 
 const scope = "https://www.googleapis.com/auth/malachite-ingestion"
 
-const endpoint = "https://malachiteingestion-pa.googleapis.com/v2/unstructuredlogentries:batchCreate"
+const baseEndpoint = "https://malachiteingestion-pa.googleapis.com"
+
+const apiTarget = "/v2/unstructuredlogentries:batchCreate"
 
 type chronicleExporter struct {
 	cfg        *Config
@@ -57,11 +59,6 @@ func newExporter(cfg *Config, params exporter.CreateSettings) (*chronicleExporte
 			return nil, fmt.Errorf("read credentials file: %w", err)
 		}
 
-		scopes := []string{scope}
-		if cfg.Region != "" {
-			scopes = append(scopes, regions[cfg.Region])
-		}
-
 		creds, err = google.CredentialsFromJSON(context.Background(), credsData, scope)
 		if err != nil {
 			return nil, fmt.Errorf("obtain credentials from JSON: %w", err)
@@ -74,12 +71,19 @@ func newExporter(cfg *Config, params exporter.CreateSettings) (*chronicleExporte
 	httpClient := oauth2.NewClient(context.Background(), creds.TokenSource)
 
 	return &chronicleExporter{
-		endpoint:   regions[cfg.Region],
+		endpoint:   buildEndpoint(cfg),
 		cfg:        cfg,
 		logger:     params.Logger,
 		httpClient: httpClient,
 		marshaler:  newMarshaler(*cfg),
 	}, nil
+}
+
+func buildEndpoint(cfg *Config) string {
+	if cfg.Region != "" && regions[cfg.Region] != "" {
+		return fmt.Sprintf("%s%s", regions[cfg.Region], apiTarget)
+	}
+	return fmt.Sprintf("%s%s", baseEndpoint, apiTarget)
 }
 
 func (ce *chronicleExporter) Capabilities() consumer.Capabilities {
@@ -96,7 +100,7 @@ func (ce *chronicleExporter) logsDataPusher(ctx context.Context, ld plog.Logs) e
 }
 
 func (ce *chronicleExporter) uploadToChronicle(ctx context.Context, data []byte) error {
-	request, err := http.NewRequestWithContext(ctx, "POST", endpoint, bytes.NewBuffer(data))
+	request, err := http.NewRequestWithContext(ctx, "POST", ce.endpoint, bytes.NewBuffer(data))
 	if err != nil {
 		return fmt.Errorf("create request: %w", err)
 	}

@@ -20,6 +20,8 @@ import (
 	"go.opentelemetry.io/collector/exporter/exporterhelper"
 )
 
+// Alternative regional endpoints for Chronicle.
+// https://cloud.google.com/chronicle/docs/reference/search-api#regional_endpoints
 var regions = map[string]string{
 	"Europe Multi-Region":        "https://europe-backstory.googleapis.com",
 	"Frankfurt":                  "https://europe-west3-backstory.googleapis.com",
