@@ -51,31 +51,13 @@ func TestLogsDataPusher(t *testing.T) {
 				return exporter
 			},
 			setupMocks: func(exporter *chronicleExporter) {
-				httpmock.RegisterResponder("POST", exporter.endpoint, httpmock.NewStringResponder(http.StatusOK, ""))
+				httpmock.RegisterResponder("POST", endpoint, httpmock.NewStringResponder(http.StatusOK, ""))
 
 				marshaller := mocks.NewMockMarshaler(t)
 				marshaller.On("MarshalRawLogs", mock.Anything).Return([]byte("mock data"), nil)
 				exporter.marshaler = marshaller
 			},
 			expectedErr: "",
-		},
-		{
-			desc: "create request",
-			setupExporter: func() *chronicleExporter {
-				// Return an exporter with an invalid endpoint to trigger request creation failure
-				return &chronicleExporter{
-					endpoint:   ":%", // Invalid URL
-					cfg:        &cfg,
-					logger:     zap.NewNop(),
-					httpClient: http.DefaultClient,
-				}
-			},
-			setupMocks: func(exporter *chronicleExporter) {
-				marshaler := mocks.NewMockMarshaler(t)
-				marshaler.On("MarshalRawLogs", mock.Anything).Return([]byte("mock data"), nil)
-				exporter.marshaler = marshaler
-			},
-			expectedErr: "create request",
 		},
 		{
 			desc: "send request to Chronicle",
@@ -91,7 +73,7 @@ func TestLogsDataPusher(t *testing.T) {
 			},
 			setupMocks: func(exporter *chronicleExporter) {
 				// Register a responder that returns an error to simulate sending request failure
-				httpmock.RegisterResponder("POST", exporter.endpoint, httpmock.NewErrorResponder(errors.New("network error")))
+				httpmock.RegisterResponder("POST", endpoint, httpmock.NewErrorResponder(errors.New("network error")))
 				marshaller := mocks.NewMockMarshaler(t)
 				marshaller.On("MarshalRawLogs", mock.Anything).Return([]byte("mock data"), nil)
 				exporter.marshaler = marshaller
@@ -131,7 +113,7 @@ func TestLogsDataPusher(t *testing.T) {
 			},
 			setupMocks: func(exporter *chronicleExporter) {
 				// Mock a non-OK HTTP response
-				httpmock.RegisterResponder("POST", exporter.endpoint, httpmock.NewStringResponder(http.StatusInternalServerError, "Internal Server Error"))
+				httpmock.RegisterResponder("POST", endpoint, httpmock.NewStringResponder(http.StatusInternalServerError, "Internal Server Error"))
 
 				marshaller := mocks.NewMockMarshaler(t)
 				marshaller.On("MarshalRawLogs", mock.Anything).Return([]byte("mock data"), nil)
@@ -163,7 +145,7 @@ func TestLogsDataPusher(t *testing.T) {
 			// Verify the expected number of calls were made
 			if tc.expectedErr == "" {
 				info := httpmock.GetCallCountInfo()
-				expectedMethod := "POST " + exporter.endpoint
+				expectedMethod := "POST " + endpoint
 				require.Equal(t, 1, info[expectedMethod], "Expected number of calls to %s is not met", expectedMethod)
 			}
 		})

@@ -66,12 +66,10 @@ func (cfg *Config) Validate() error {
 		return errors.New("log_type is required")
 	}
 
-	if cfg.Region == "" {
-		return errors.New("region is required")
-	}
-
-	if _, ok := regions[cfg.Region]; !ok {
-		return errors.New("region is invalid")
+	if cfg.Region != "" {
+		if _, ok := regions[cfg.Region]; !ok {
+			return errors.New("region is invalid")
+		}
 	}
 
 	return nil

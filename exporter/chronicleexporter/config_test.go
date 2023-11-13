@@ -43,14 +43,6 @@ func TestConfigValidate(t *testing.T) {
 			expectedErr: "log_type is required",
 		},
 		{
-			desc: "Region is empty",
-			config: &Config{
-				Creds:   "creds_example",
-				LogType: "log_type_example",
-			},
-			expectedErr: "region is required",
-		},
-		{
 			desc: "Region is invalid",
 			config: &Config{
 				Region:  "Invalid Region",

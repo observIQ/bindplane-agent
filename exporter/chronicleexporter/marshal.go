@@ -55,7 +55,7 @@ func (ce *marshaler) MarshalRawLogs(ld plog.Logs) ([]byte, error) {
 	}
 
 	if ce.cfg.CustomerID != "" {
-		rawLogData["custumer_id"] = ce.cfg.CustomerID
+		rawLogData["customer_id"] = ce.cfg.CustomerID
 	}
 
 	return json.Marshal(rawLogData)

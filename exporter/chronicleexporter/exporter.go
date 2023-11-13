@@ -31,6 +31,8 @@ import (
 
 const scope = "https://www.googleapis.com/auth/malachite-ingestion"
 
+const endpoint = "https://malachiteingestion-pa.googleapis.com/v2/unstructuredlogentries:batchCreate"
+
 type chronicleExporter struct {
 	cfg        *Config
 	logger     *zap.Logger
@@ -53,6 +55,11 @@ func newExporter(cfg *Config, params exporter.CreateSettings) (*chronicleExporte
 		credsData, err := os.ReadFile(cfg.CredsFilePath)
 		if err != nil {
 			return nil, fmt.Errorf("read credentials file: %w", err)
+		}
+
+		scopes := []string{scope}
+		if cfg.Region != "" {
+			scopes = append(scopes, regions[cfg.Region])
 		}
 
 		creds, err = google.CredentialsFromJSON(context.Background(), credsData, scope)
@@ -89,7 +96,7 @@ func (ce *chronicleExporter) logsDataPusher(ctx context.Context, ld plog.Logs) e
 }
 
 func (ce *chronicleExporter) uploadToChronicle(ctx context.Context, data []byte) error {
-	request, err := http.NewRequestWithContext(ctx, "POST", ce.endpoint, bytes.NewBuffer(data))
+	request, err := http.NewRequestWithContext(ctx, "POST", endpoint, bytes.NewBuffer(data))
 	if err != nil {
 		return fmt.Errorf("create request: %w", err)
 	}
@@ -103,6 +110,14 @@ func (ce *chronicleExporter) uploadToChronicle(ctx context.Context, data []byte)
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
+		respBody := []byte{}
+		_, err := resp.Body.Read(respBody)
+		if err != nil {
+			ce.logger.Warn("Failed to read response body", zap.Error(err))
+		} else {
+			ce.logger.Warn("Received non-OK response from Chronicle", zap.String("status", resp.Status), zap.ByteString("body", respBody))
+		}
+
 		return fmt.Errorf("received non-OK response from Chronicle: %s", resp.Status)
 	}
 
