@@ -17,7 +17,6 @@ package chronicleexporter
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"testing"
 	"time"
 
@@ -127,10 +126,10 @@ func TestMarshalRawLogs(t *testing.T) {
 			logRecords: []plog.LogRecord{
 				mockLogRecord(t, "Test body", map[string]any{"key1": "value1"}),
 			},
-			expectedJSON: `{"entries":[null],"log_type":"test_log_type"}`,
+			expectedJSON: `{"customer_id":"test_customer_id","entries":[],"log_type":"test_log_type"}`,
 			logType:      "test_log_type",
 			rawLogField:  `attributes["missing"]`,
-			errExpected:  errors.New("extract raw logs: get raw field: failed to find key 'missing' in log map"),
+			// No error expected because the record will be dropped.
 		},
 		{
 			name: "Nested body field",

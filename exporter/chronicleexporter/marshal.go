@@ -26,6 +26,7 @@ import (
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/plog"
+	"go.uber.org/zap"
 )
 
 // marshaler is an interface for marshalling logs.
@@ -99,7 +100,8 @@ func (m *marshaler) extractRawLogs(ctx context.Context, ld plog.Logs) ([]entry, 
 				} else {
 					rawLog, err = m.getRawField(ctx, logRecord, scopeLog.Scope(), resourceLog.Resource())
 					if err != nil {
-						return nil, fmt.Errorf("get raw field: %w", err)
+						m.teleSettings.Logger.Error("Error getting raw field", zap.Error(err))
+						continue
 					}
 				}
 
