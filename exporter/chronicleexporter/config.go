@@ -60,8 +60,8 @@ type Config struct {
 
 // Validate checks if the configuration is valid.
 func (cfg *Config) Validate() error {
-	if cfg.CredsFilePath == "" && cfg.Creds == "" {
-		return errors.New("either creds_file_path or creds is required")
+	if cfg.CredsFilePath != "" && cfg.Creds != "" {
+		return errors.New("can only specify creds_file_path or creds")
 	}
 
 	if cfg.LogType == "" {

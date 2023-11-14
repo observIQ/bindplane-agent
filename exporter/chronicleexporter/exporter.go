@@ -18,6 +18,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 
@@ -64,7 +65,10 @@ func newExporter(cfg *Config, params exporter.CreateSettings) (*chronicleExporte
 			return nil, fmt.Errorf("obtain credentials from JSON: %w", err)
 		}
 	default:
-		return nil, fmt.Errorf("no credentials provided")
+		creds, err = google.FindDefaultCredentials(context.Background(), scope)
+		if err != nil {
+			return nil, fmt.Errorf("find default credentials: %w", err)
+		}
 	}
 
 	// Use the credentials to create an HTTP client
@@ -116,8 +120,7 @@ func (ce *chronicleExporter) uploadToChronicle(ctx context.Context, data []byte)
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		respBody := []byte{}
-		_, err := resp.Body.Read(respBody)
+		respBody, err := io.ReadAll(resp.Body)
 		if err != nil {
 			ce.logger.Warn("Failed to read response body", zap.Error(err))
 		} else {

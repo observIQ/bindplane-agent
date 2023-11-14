@@ -14,5 +14,5 @@
 
 //go:generate mdatagen metadata.yaml
 
-// Package chronicleexporter stores OpenTelemetry data as a Chronicle exporter.
+// Package chronicleexporter exports OpenTelemetry data to Chronicle.
 package chronicleexporter // import "github.com/observiq/bindplane-agent/exporter/azureblobexporter"

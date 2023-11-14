@@ -20,17 +20,9 @@ import (
 
 	"github.com/observiq/bindplane-agent/exporter/chronicleexporter/internal/metadata"
 	"go.opentelemetry.io/collector/component"
-	"go.opentelemetry.io/collector/consumer/consumererror"
 	"go.opentelemetry.io/collector/exporter"
 	"go.opentelemetry.io/collector/exporter/exporterhelper"
 )
-
-// TypeStr for the exporter type.
-const TypeStr = "chronicle"
-
-// Factory is the factory for the Chronicle exporter.
-type Factory struct {
-}
 
 // NewFactory creates a new Chronicle exporter factory.
 func NewFactory() exporter.Factory {
@@ -57,12 +49,7 @@ func createLogsExporter(
 ) (exporter.Logs, error) {
 	chronicleCfg, ok := cfg.(*Config)
 	if !ok {
-		return nil, consumererror.NewPermanent(errors.New("invalid config type"))
-	}
-
-	// Validate the config
-	if err := chronicleCfg.Validate(); err != nil {
-		return nil, err
+		return nil, errors.New("invalid config type")
 	}
 
 	exp, err := newExporter(chronicleCfg, params)

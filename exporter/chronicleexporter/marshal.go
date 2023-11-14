@@ -49,7 +49,7 @@ func (ce *marshaler) MarshalRawLogs(ld plog.Logs) ([]byte, error) {
 		return nil, fmt.Errorf("extract raw logs: %w", err)
 	}
 
-	rawLogData := map[string]interface{}{
+	rawLogData := map[string]any{
 		"entries":  rawLogs,
 		"log_type": ce.cfg.LogType,
 	}
@@ -163,6 +163,8 @@ func (ce *marshaler) getTopLevelFieldAsString(logRecord plog.LogRecord, field st
 	}
 }
 
+var re = regexp.MustCompile(`\["(.*?)"\]`)
+
 func parseLogField(field string) (string, []string, error) {
 	parts := strings.SplitN(field, `["`, 2)
 
@@ -170,7 +172,6 @@ func parseLogField(field string) (string, []string, error) {
 		return parts[0], nil, nil
 	}
 
-	re := regexp.MustCompile(`\["(.*?)"\]`)
 	matches := re.FindAllStringSubmatch(field, -1)
 
 	keys := make([]string, len(matches))
