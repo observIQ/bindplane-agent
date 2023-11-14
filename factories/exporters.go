@@ -16,6 +16,7 @@ package factories
 
 import (
 	"github.com/observiq/bindplane-agent/exporter/azureblobexporter"
+	"github.com/observiq/bindplane-agent/exporter/chronicleexporter"
 	"github.com/observiq/bindplane-agent/exporter/googlecloudexporter"
 	"github.com/observiq/bindplane-agent/exporter/googlemanagedprometheusexporter"
 	"github.com/observiq/bindplane-agent/internal/version"
@@ -66,6 +67,7 @@ var defaultExporters = []exporter.Factory{
 	azureblobexporter.NewFactory(),
 	azuremonitorexporter.NewFactory(),
 	carbonexporter.NewFactory(),
+	chronicleexporter.NewFactory(),
 	clickhouseexporter.NewFactory(),
 	coralogixexporter.NewFactory(),
 	datadogexporter.NewFactory(),

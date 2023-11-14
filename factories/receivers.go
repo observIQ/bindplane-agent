@@ -16,6 +16,7 @@ package factories
 
 import (
 	"github.com/observiq/bindplane-agent/receiver/azureblobrehydrationreceiver"
+	"github.com/observiq/bindplane-agent/receiver/httpreceiver"
 	"github.com/observiq/bindplane-agent/receiver/m365receiver"
 	"github.com/observiq/bindplane-agent/receiver/pluginreceiver"
 	"github.com/observiq/bindplane-agent/receiver/routereceiver"
@@ -115,6 +116,7 @@ var defaultReceivers = []receiver.Factory{
 	googlecloudpubsubreceiver.NewFactory(),
 	googlecloudspannerreceiver.NewFactory(),
 	hostmetricsreceiver.NewFactory(),
+	httpreceiver.NewFactory(),
 	iisreceiver.NewFactory(),
 	influxdbreceiver.NewFactory(),
 	jaegerreceiver.NewFactory(),
