@@ -21,7 +21,7 @@ updates:
       - dependency-name: "github.com/open-telemetry/opentelemetry-collector*"
       - dependency-name: "go.opentelemetry.io/collector*"
   - package-ecosystem: "gomod"
-    directory: "processor/throughputmeasurementprocessor/"
+    directory: "/processor/throughputmeasurementprocessor/"
     schedule:
       interval: "weekly"
     ignore:
@@ -32,7 +32,7 @@ updates:
       prefix: "deps"
       include: "scope"
   - package-ecosystem: "gomod"
-    directory: "processor/samplingprocessor/"
+    directory: "/processor/samplingprocessor/"
     schedule:
       interval: "weekly"
     ignore:
@@ -43,7 +43,7 @@ updates:
       prefix: "deps"
       include: "scope"
   - package-ecosystem: "gomod"
-    directory: "processor/logcountprocessor/"
+    directory: "/processor/logcountprocessor/"
     schedule:
       interval: "weekly"
     ignore:
@@ -54,7 +54,7 @@ updates:
       prefix: "deps"
       include: "scope"
   - package-ecosystem: "gomod"
-    directory: "processor/logdeduplicationprocessor//"
+    directory: "/processor/logdeduplicationprocessor//"
     schedule:
       interval: "weekly"
     ignore:
@@ -65,7 +65,7 @@ updates:
       prefix: "deps"
       include: "scope"
   - package-ecosystem: "gomod"
-    directory: "processor/maskprocessor/"
+    directory: "/processor/maskprocessor/"
     schedule:
       interval: "weekly"
     ignore:
@@ -76,13 +76,79 @@ updates:
       prefix: "deps"
       include: "scope"
   - package-ecosystem: "gomod"
-    directory: "processor/metricextractprocessor/"
+    directory: "/processor/metricextractprocessor/"
     schedule:
       interval: "weekly"
     ignore:
       # Opentelemetry updates will be done manually
       - dependency-name: "github.com/open-telemetry/opentelemetry-collector*"
       - dependency-name: "go.opentelemetry.io/collector*"
+    commit-message:
+      prefix: "deps"
+      include: "scope"
+  - package-ecosystem: "gomod"
+    directory: "/processor/datapointcountprocessor/"
+    schedule:
+      interval: "weekly"
+    ignore:
+      # Opentelemetry updates will be done manually
+      - dependency-name: "github.com/open-telemetry/opentelemetry-collector*"
+      - dependency-name: "go.opentelemetry.io/collector*"
+    commit-message:
+      prefix: "deps"
+      include: "scope"
+  - package-ecosystem: "gomod"
+    directory: "/processor/spancountprocessor/"
+    schedule:
+      interval: "weekly"
+    ignore:
+      # Opentelemetry updates will be done manually
+      - dependency-name: "github.com/open-telemetry/opentelemetry-collector*"
+      - dependency-name: "go.opentelemetry.io/collector*"
+    commit-message:
+      prefix: "deps"
+      include: "scope"
+  - package-ecosystem: "gomod"
+    directory: "/processor/metricstatsprocessor/"
+    schedule:
+      interval: "weekly"
+    ignore:
+      # Opentelemetry updates will be done manually
+      - dependency-name: "github.com/open-telemetry/opentelemetry-collector*"
+      - dependency-name: "go.opentelemetry.io/collector*"
+    commit-message:
+      prefix: "deps"
+      include: "scope"
+  - package-ecosystem: "gomod"
+    directory: "/receiver/sapnetweaverreceiver"
+    schedule:
+      interval: "weekly"
+    ignore:
+      # Opentelemetry updates will be done manually
+      - dependency-name: "go.opentelemetry.io/collector*"
+      - dependency-name: "github.com/open-telemetry/opentelemetry-collector*"
+    commit-message:
+      prefix: "deps"
+      include: "scope"
+  - package-ecosystem: "gomod"
+    directory: "/receiver/azureblobrehydrationreceiver"
+    schedule:
+      interval: "weekly"
+    ignore:
+      # Opentelemetry updates will be done manually
+      - dependency-name: "go.opentelemetry.io/collector*"
+      - dependency-name: "github.com/open-telemetry/opentelemetry-collector*"
+    commit-message:
+      prefix: "deps"
+      include: "scope"
+  - package-ecosystem: "gomod"
+    directory: "/receiver/httpreceiver"
+    schedule:
+      interval: "weekly"
+    ignore:
+      # Opentelemetry updates will be done manually
+      - dependency-name: "go.opentelemetry.io/collector*"
+      - dependency-name: "github.com/open-telemetry/opentelemetry-collector*"
     commit-message:
       prefix: "deps"
       include: "scope"
@@ -132,6 +198,39 @@ updates:
       include: "scope"
   - package-ecosystem: "gomod"
     directory: "/exporter/googlecloudexporter"
+    schedule:
+      interval: "weekly"
+    ignore:
+      # Opentelemetry updates will be done manually
+      - dependency-name: "github.com/open-telemetry/opentelemetry-collector*"
+      - dependency-name: "go.opentelemetry.io/collector*"
+    commit-message:
+      prefix: "deps"
+      include: "scope"
+  - package-ecosystem: "gomod"
+    directory: "/exporter/chronicleexporter"
+    schedule:
+      interval: "weekly"
+    ignore:
+      # Opentelemetry updates will be done manually
+      - dependency-name: "github.com/open-telemetry/opentelemetry-collector*"
+      - dependency-name: "go.opentelemetry.io/collector*"
+    commit-message:
+      prefix: "deps"
+      include: "scope"
+  - package-ecosystem: "gomod"
+    directory: "/exporter/googlemanagedprometheusexporter"
+    schedule:
+      interval: "weekly"
+    ignore:
+      # Opentelemetry updates will be done manually
+      - dependency-name: "github.com/open-telemetry/opentelemetry-collector*"
+      - dependency-name: "go.opentelemetry.io/collector*"
+    commit-message:
+      prefix: "deps"
+      include: "scope"
+  - package-ecosystem: "gomod"
+    directory: "/exporter/azureblobexporter"
     schedule:
       interval: "weekly"
     ignore:
