@@ -79,7 +79,7 @@ func newExporter(cfg *Config, params exporter.CreateSettings) (*chronicleExporte
 		cfg:        cfg,
 		logger:     params.Logger,
 		httpClient: httpClient,
-		marshaler:  newMarshaler(*cfg),
+		marshaler:  newMarshaler(*cfg, params.TelemetrySettings),
 	}, nil
 }
 
@@ -97,7 +97,7 @@ func (ce *chronicleExporter) Capabilities() consumer.Capabilities {
 }
 
 func (ce *chronicleExporter) logsDataPusher(ctx context.Context, ld plog.Logs) error {
-	udmData, err := ce.marshaler.MarshalRawLogs(ld)
+	udmData, err := ce.marshaler.MarshalRawLogs(ctx, ld)
 	if err != nil {
 		return fmt.Errorf("marshal logs: %w", err)
 	}
@@ -126,7 +126,6 @@ func (ce *chronicleExporter) uploadToChronicle(ctx context.Context, data []byte)
 		} else {
 			ce.logger.Warn("Received non-OK response from Chronicle", zap.String("status", resp.Status), zap.ByteString("body", respBody))
 		}
-
 		return fmt.Errorf("received non-OK response from Chronicle: %s", resp.Status)
 	}
 

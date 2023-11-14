@@ -3,6 +3,8 @@
 package mocks
 
 import (
+	context "context"
+
 	mock "github.com/stretchr/testify/mock"
 	plog "go.opentelemetry.io/collector/pdata/plog"
 )
@@ -20,25 +22,25 @@ func (_m *MockMarshaler) EXPECT() *MockMarshaler_Expecter {
 	return &MockMarshaler_Expecter{mock: &_m.Mock}
 }
 
-// MarshalRawLogs provides a mock function with given fields: ld
-func (_m *MockMarshaler) MarshalRawLogs(ld plog.Logs) ([]byte, error) {
-	ret := _m.Called(ld)
+// MarshalRawLogs provides a mock function with given fields: ctx, ld
+func (_m *MockMarshaler) MarshalRawLogs(ctx context.Context, ld plog.Logs) ([]byte, error) {
+	ret := _m.Called(ctx, ld)
 
 	var r0 []byte
 	var r1 error
-	if rf, ok := ret.Get(0).(func(plog.Logs) ([]byte, error)); ok {
-		return rf(ld)
+	if rf, ok := ret.Get(0).(func(context.Context, plog.Logs) ([]byte, error)); ok {
+		return rf(ctx, ld)
 	}
-	if rf, ok := ret.Get(0).(func(plog.Logs) []byte); ok {
-		r0 = rf(ld)
+	if rf, ok := ret.Get(0).(func(context.Context, plog.Logs) []byte); ok {
+		r0 = rf(ctx, ld)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]byte)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(plog.Logs) error); ok {
-		r1 = rf(ld)
+	if rf, ok := ret.Get(1).(func(context.Context, plog.Logs) error); ok {
+		r1 = rf(ctx, ld)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -52,14 +54,15 @@ type MockMarshaler_MarshalRawLogs_Call struct {
 }
 
 // MarshalRawLogs is a helper method to define mock.On call
+//   - ctx context.Context
 //   - ld plog.Logs
-func (_e *MockMarshaler_Expecter) MarshalRawLogs(ld interface{}) *MockMarshaler_MarshalRawLogs_Call {
-	return &MockMarshaler_MarshalRawLogs_Call{Call: _e.mock.On("MarshalRawLogs", ld)}
+func (_e *MockMarshaler_Expecter) MarshalRawLogs(ctx interface{}, ld interface{}) *MockMarshaler_MarshalRawLogs_Call {
+	return &MockMarshaler_MarshalRawLogs_Call{Call: _e.mock.On("MarshalRawLogs", ctx, ld)}
 }
 
-func (_c *MockMarshaler_MarshalRawLogs_Call) Run(run func(ld plog.Logs)) *MockMarshaler_MarshalRawLogs_Call {
+func (_c *MockMarshaler_MarshalRawLogs_Call) Run(run func(ctx context.Context, ld plog.Logs)) *MockMarshaler_MarshalRawLogs_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(plog.Logs))
+		run(args[0].(context.Context), args[1].(plog.Logs))
 	})
 	return _c
 }
@@ -69,7 +72,7 @@ func (_c *MockMarshaler_MarshalRawLogs_Call) Return(_a0 []byte, _a1 error) *Mock
 	return _c
 }
 
-func (_c *MockMarshaler_MarshalRawLogs_Call) RunAndReturn(run func(plog.Logs) ([]byte, error)) *MockMarshaler_MarshalRawLogs_Call {
+func (_c *MockMarshaler_MarshalRawLogs_Call) RunAndReturn(run func(context.Context, plog.Logs) ([]byte, error)) *MockMarshaler_MarshalRawLogs_Call {
 	_c.Call.Return(run)
 	return _c
 }

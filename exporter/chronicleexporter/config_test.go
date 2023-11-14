@@ -27,12 +27,14 @@ func TestConfigValidate(t *testing.T) {
 		expectedErr string
 	}{
 		{
-			desc: "Both creds_file_path and creds are empty",
+			desc: "Both creds_file_path and creds are set",
 			config: &Config{
-				Region:  "United States Multi-Region",
-				LogType: "log_type_example",
+				CredsFilePath: "/path/to/creds_file",
+				Creds:         "creds_example",
+				Region:        "United States Multi-Region",
+				LogType:       "log_type_example",
 			},
-			expectedErr: "either creds_file_path or creds is required",
+			expectedErr: "can only specify creds_file_path or creds",
 		},
 		{
 			desc: "LogType is empty",
@@ -66,6 +68,16 @@ func TestConfigValidate(t *testing.T) {
 				Region:        "United States Multi-Region",
 				CredsFilePath: "/path/to/creds_file",
 				LogType:       "log_type_example",
+			},
+			expectedErr: "",
+		},
+		{
+			desc: "Valid config with raw log field",
+			config: &Config{
+				Region:        "United States Multi-Region",
+				CredsFilePath: "/path/to/creds_file",
+				LogType:       "log_type_example",
+				RawLogField:   `body["field"]`,
 			},
 			expectedErr: "",
 		},

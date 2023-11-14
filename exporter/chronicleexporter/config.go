@@ -16,8 +16,12 @@ package chronicleexporter
 
 import (
 	"errors"
+	"fmt"
 
+	"github.com/observiq/bindplane-agent/expr"
+	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/exporter/exporterhelper"
+	"go.uber.org/zap"
 )
 
 // Alternative regional endpoints for Chronicle.
@@ -71,6 +75,15 @@ func (cfg *Config) Validate() error {
 	if cfg.Region != "" {
 		if _, ok := regions[cfg.Region]; !ok {
 			return errors.New("region is invalid")
+		}
+	}
+
+	if cfg.RawLogField != "" {
+		_, err := expr.NewOTTLLogRecordExpression(cfg.RawLogField, component.TelemetrySettings{
+			Logger: zap.NewNop(),
+		})
+		if err != nil {
+			return fmt.Errorf("raw_log_field is invalid: %s", err)
 		}
 	}
 

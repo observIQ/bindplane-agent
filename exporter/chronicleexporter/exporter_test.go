@@ -54,7 +54,7 @@ func TestLogsDataPusher(t *testing.T) {
 				httpmock.RegisterResponder("POST", baseEndpoint, httpmock.NewStringResponder(http.StatusOK, ""))
 
 				marshaller := mocks.NewMockMarshaler(t)
-				marshaller.On("MarshalRawLogs", mock.Anything).Return([]byte("mock data"), nil)
+				marshaller.On("MarshalRawLogs", mock.Anything, mock.Anything).Return([]byte("mock data"), nil)
 				exporter.marshaler = marshaller
 			},
 			expectedErr: "",
@@ -75,7 +75,7 @@ func TestLogsDataPusher(t *testing.T) {
 				// Register a responder that returns an error to simulate sending request failure
 				httpmock.RegisterResponder("POST", baseEndpoint, httpmock.NewErrorResponder(errors.New("network error")))
 				marshaller := mocks.NewMockMarshaler(t)
-				marshaller.On("MarshalRawLogs", mock.Anything).Return([]byte("mock data"), nil)
+				marshaller.On("MarshalRawLogs", mock.Anything, mock.Anything).Return([]byte("mock data"), nil)
 				exporter.marshaler = marshaller
 			},
 			expectedErr: "send request to Chronicle",
@@ -94,7 +94,7 @@ func TestLogsDataPusher(t *testing.T) {
 			},
 			setupMocks: func(exporter *chronicleExporter) {
 				marshaller := mocks.NewMockMarshaler(t)
-				marshaller.On("MarshalRawLogs", mock.Anything).Return(nil, errors.New("marshaling error"))
+				marshaller.On("MarshalRawLogs", mock.Anything, mock.Anything).Return(nil, errors.New("marshaling error"))
 				exporter.marshaler = marshaller
 			},
 			expectedErr: "marshal logs",
@@ -116,7 +116,7 @@ func TestLogsDataPusher(t *testing.T) {
 				httpmock.RegisterResponder("POST", baseEndpoint, httpmock.NewStringResponder(http.StatusInternalServerError, "Internal Server Error"))
 
 				marshaller := mocks.NewMockMarshaler(t)
-				marshaller.On("MarshalRawLogs", mock.Anything).Return([]byte("mock data"), nil)
+				marshaller.On("MarshalRawLogs", mock.Anything, mock.Anything).Return([]byte("mock data"), nil)
 				exporter.marshaler = marshaller
 			},
 			expectedErr: "received non-OK response from Chronicle: 500",

@@ -15,13 +15,15 @@
 package chronicleexporter
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"regexp"
-	"strings"
 	"time"
 
+	"github.com/observiq/bindplane-agent/expr"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/ottl/contexts/ottllog"
+	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/plog"
 )
@@ -30,32 +32,34 @@ import (
 //
 //go:generate mockery --name logMarshaler --output ./internal/mocks --with-expecter --filename mock_marshaler.go --structname MockMarshaler
 type logMarshaler interface {
-	MarshalRawLogs(ld plog.Logs) ([]byte, error)
+	MarshalRawLogs(ctx context.Context, ld plog.Logs) ([]byte, error)
 }
 
 type marshaler struct {
-	cfg Config
+	cfg          Config
+	teleSettings component.TelemetrySettings
 }
 
-func newMarshaler(cfg Config) *marshaler {
+func newMarshaler(cfg Config, teleSettings component.TelemetrySettings) *marshaler {
 	return &marshaler{
-		cfg: cfg,
+		cfg:          cfg,
+		teleSettings: teleSettings,
 	}
 }
 
-func (ce *marshaler) MarshalRawLogs(ld plog.Logs) ([]byte, error) {
-	rawLogs, err := ce.extractRawLogs(ld)
+func (m *marshaler) MarshalRawLogs(ctx context.Context, ld plog.Logs) ([]byte, error) {
+	rawLogs, err := m.extractRawLogs(ctx, ld)
 	if err != nil {
 		return nil, fmt.Errorf("extract raw logs: %w", err)
 	}
 
 	rawLogData := map[string]any{
 		"entries":  rawLogs,
-		"log_type": ce.cfg.LogType,
+		"log_type": m.cfg.LogType,
 	}
 
-	if ce.cfg.CustomerID != "" {
-		rawLogData["customer_id"] = ce.cfg.CustomerID
+	if m.cfg.CustomerID != "" {
+		rawLogData["customer_id"] = m.cfg.CustomerID
 	}
 
 	return json.Marshal(rawLogData)
@@ -66,7 +70,7 @@ type entry struct {
 	Timestamp string `json:"ts_rfc3339"`
 }
 
-func (ce *marshaler) extractRawLogs(ld plog.Logs) ([]entry, error) {
+func (m *marshaler) extractRawLogs(ctx context.Context, ld plog.Logs) ([]entry, error) {
 	entries := []entry{}
 
 	for i := 0; i < ld.ResourceLogs().Len(); i++ {
@@ -78,11 +82,12 @@ func (ce *marshaler) extractRawLogs(ld plog.Logs) ([]entry, error) {
 
 				var rawLog string
 				var err error
-				if ce.cfg.RawLogField == "" {
+				if m.cfg.RawLogField == "" {
 					body := logRecord.Body().Str()
 					entireLogRecord := map[string]any{
-						"body":       body,
-						"attributes": logRecord.Attributes().AsRaw(),
+						"body":                body,
+						"attributes":          logRecord.Attributes().AsRaw(),
+						"resource_attributes": resourceLog.Resource().Attributes().AsRaw(),
 					}
 
 					bytesLogRecord, err := json.Marshal(entireLogRecord)
@@ -92,7 +97,7 @@ func (ce *marshaler) extractRawLogs(ld plog.Logs) ([]entry, error) {
 
 					rawLog = string(bytesLogRecord)
 				} else {
-					rawLog, err = ce.getRawField(logRecord)
+					rawLog, err = m.getRawField(ctx, logRecord, scopeLog.Scope(), resourceLog.Resource())
 					if err != nil {
 						return nil, fmt.Errorf("get raw field: %w", err)
 					}
@@ -109,33 +114,37 @@ func (ce *marshaler) extractRawLogs(ld plog.Logs) ([]entry, error) {
 	return entries, nil
 }
 
-func (ce *marshaler) getRawField(logRecord plog.LogRecord) (string, error) {
-	topLevelField, nestedFields, err := parseLogField(ce.cfg.RawLogField)
+func (m *marshaler) getRawField(ctx context.Context, logRecord plog.LogRecord, scope pcommon.InstrumentationScope, resource pcommon.Resource) (string, error) {
+	lrExpr, err := expr.NewOTTLLogRecordExpression(m.cfg.RawLogField, m.teleSettings)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("raw_log_field is invalid: %s", err)
+	}
+	tCtx := ottllog.NewTransformContext(logRecord, scope, resource)
+
+	lrExprResult, err := lrExpr.Execute(ctx, tCtx)
+	if err != nil {
+		return "", fmt.Errorf("execute log record expression: %w", err)
 	}
 
-	if len(nestedFields) == 0 {
-		return ce.getTopLevelFieldAsString(logRecord, topLevelField)
+	if lrExprResult == nil {
+		return "", fmt.Errorf("log record expression result is nil")
 	}
 
-	var logMap map[string]any
-	switch topLevelField {
-	case "attributes":
-		logMap = logRecord.Attributes().AsRaw()
-	case "body":
-		if logRecord.Body().Type() != pcommon.ValueTypeMap {
-			return "", errors.New("body is not a map")
+	switch lrExprResult.(type) {
+	case string:
+		return lrExprResult.(string), nil
+	case pcommon.Map:
+		bytes, err := json.Marshal(lrExprResult.(pcommon.Map).AsRaw())
+		if err != nil {
+			return "", fmt.Errorf("marshal log record expression result: %w", err)
 		}
-		logMap = logRecord.Body().Map().AsRaw()
-	default:
-		return "", fmt.Errorf("unsupported top level field: %s", topLevelField)
+		return string(bytes), nil
 	}
 
-	return extractNestedValue(logMap, nestedFields)
+	return "", fmt.Errorf("unsupported log record expression result type: %T", lrExprResult)
 }
 
-func (ce *marshaler) getTopLevelFieldAsString(logRecord plog.LogRecord, field string) (string, error) {
+func (m *marshaler) getTopLevelFieldAsString(logRecord plog.LogRecord, field string) (string, error) {
 	switch field {
 	case "attributes":
 		attributes := logRecord.Attributes().AsRaw()
@@ -161,49 +170,4 @@ func (ce *marshaler) getTopLevelFieldAsString(logRecord plog.LogRecord, field st
 	default:
 		return "", fmt.Errorf("unsupported top level field: %s", field)
 	}
-}
-
-var re = regexp.MustCompile(`\["(.*?)"\]`)
-
-func parseLogField(field string) (string, []string, error) {
-	parts := strings.SplitN(field, `["`, 2)
-
-	if len(parts) == 1 {
-		return parts[0], nil, nil
-	}
-
-	matches := re.FindAllStringSubmatch(field, -1)
-
-	keys := make([]string, len(matches))
-	for i, match := range matches {
-		if len(match) > 1 {
-			keys[i] = match[1]
-		}
-	}
-
-	return parts[0], keys, nil
-}
-
-func extractNestedValue(logMap map[string]any, keys []string) (string, error) {
-	for i, key := range keys {
-		value, ok := logMap[key]
-		if !ok {
-			return "", fmt.Errorf("couldn't find key '%s' in log map", key)
-		}
-
-		if i == len(keys)-1 {
-			if strVal, ok := value.(string); ok {
-				return strVal, nil
-			}
-			return "", errors.New("final value is not a string")
-		}
-
-		nextMap, ok := value.(map[string]any)
-		if !ok {
-			return "", fmt.Errorf("value for key %s is not a map", key)
-		}
-		logMap = nextMap
-	}
-
-	return "", fmt.Errorf("failed to parse raw log field")
 }

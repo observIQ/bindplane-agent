@@ -15,6 +15,7 @@
 package chronicleexporter
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"testing"
@@ -22,6 +23,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/plog"
 	"go.uber.org/zap"
@@ -148,7 +150,7 @@ func TestMarshalRawLogs(t *testing.T) {
 			rawLogField:  "body",
 		},
 		{
-			name: "use Nested body field ",
+			name: "use Nested body field",
 			logRecords: []plog.LogRecord{
 				mockLogRecordWithNestedBody(map[string]any{
 					"event": map[string]any{
@@ -169,7 +171,7 @@ func TestMarshalRawLogs(t *testing.T) {
 			logRecords: []plog.LogRecord{
 				mockLogRecord(t, "Test log without raw field", map[string]any{"key1": "value1"}),
 			},
-			expectedJSON: `{"customer_id":"test_customer_id","entries":[{"log_text":"{\"attributes\":{\"key1\":\"value1\"},\"body\":\"Test log without raw field\"}","ts_rfc3339":"2023-01-02T03:04:05.000000006Z"}],"log_type":"test_log_type"}`,
+			expectedJSON: `{"customer_id":"test_customer_id","entries":[{"log_text":"{\"attributes\":{\"key1\":\"value1\"},\"body\":\"Test log without raw field\",\"resource_attributes\":{}}","ts_rfc3339":"2023-01-02T03:04:05.000000006Z"}],"log_type":"test_log_type"}`,
 			logType:      "test_log_type",
 			rawLogField:  "", // No rawLogField specified
 		},
@@ -181,11 +183,11 @@ func TestMarshalRawLogs(t *testing.T) {
 			ce := &chronicleExporter{
 				cfg:       cfg,
 				logger:    zap.NewNop(),
-				marshaler: &marshaler{cfg: *cfg},
+				marshaler: &marshaler{cfg: *cfg, teleSettings: component.TelemetrySettings{Logger: zap.NewNop()}},
 			}
 
 			logs := mockLogs(tt.logRecords...)
-			result, err := ce.marshaler.MarshalRawLogs(logs)
+			result, err := ce.marshaler.MarshalRawLogs(context.Background(), logs)
 			if tt.errExpected != nil {
 				require.Error(t, err, "MarshalRawLogs should return an error")
 				return
