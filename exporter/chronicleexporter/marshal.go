@@ -17,7 +17,6 @@ package chronicleexporter
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"time"
 
@@ -144,32 +143,4 @@ func (m *marshaler) getRawField(ctx context.Context, logRecord plog.LogRecord, s
 	}
 
 	return "", fmt.Errorf("unsupported log record expression result type: %T", lrExprResult)
-}
-
-func (m *marshaler) getTopLevelFieldAsString(logRecord plog.LogRecord, field string) (string, error) {
-	switch field {
-	case "attributes":
-		attributes := logRecord.Attributes().AsRaw()
-		bytes, err := json.Marshal(attributes)
-		if err != nil {
-			return "", fmt.Errorf("marshal attributes: %w", err)
-		}
-		return string(bytes), nil
-	case "body":
-		switch logRecord.Body().Type() {
-		case pcommon.ValueTypeStr:
-			return logRecord.Body().Str(), nil
-		case pcommon.ValueTypeMap:
-			bodyMap := logRecord.Body().Map().AsRaw()
-			bytes, err := json.Marshal(bodyMap)
-			if err != nil {
-				return "", fmt.Errorf("marshal body map: %w", err)
-			}
-			return string(bytes), nil
-		default:
-			return "", errors.New("unsupported body type")
-		}
-	default:
-		return "", fmt.Errorf("unsupported top level field: %s", field)
-	}
 }
