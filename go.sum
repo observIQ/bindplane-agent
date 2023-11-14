@@ -901,7 +901,6 @@ github.com/ionos-cloud/sdk-go/v6 v6.1.8 h1:493wE/BkZxJf7x79UCE0cYGPZoqQcPiEBALvt
 github.com/ionos-cloud/sdk-go/v6 v6.1.8/go.mod h1:EzEgRIDxBELvfoa/uBN0kOQaqovLjUWEB7iW4/Q+t4k=
 github.com/jaegertracing/jaeger v1.48.0 h1:YuKooQ7qJsjgxws9xuf8C/BLNTPx8qTAJz4wv7IHhSc=
 github.com/jaegertracing/jaeger v1.48.0/go.mod h1:BoAPkdCAIEuLsVz/EDhjXd+GSVpHtJhiGqWoFEvBCKg=
-github.com/jarcoal/httpmock v1.3.0 h1:2RJ8GP0IIaWwcC9Fp2BmVi8Kog3v2Hn7VXM3fTd+nuc=
 github.com/jarcoal/httpmock v1.3.1 h1:iUx3whfZWVf3jT01hQTO/Eo5sAYtB2/rqaUuOtpInww=
 github.com/jarcoal/httpmock v1.3.1/go.mod h1:3yb8rc4BI7TCBhFY8ng0gjuLKJNquuDNiPaZjnENuYg=
 github.com/jcmturner/aescts/v2 v2.0.0 h1:9YKLH6ey7H4eDBXW8khjYslgyqG2xZikXP0EQFKrle8=
@@ -1227,6 +1226,8 @@ github.com/open-telemetry/opentelemetry-collector-contrib/extension/oidcauthexte
 github.com/open-telemetry/opentelemetry-collector-contrib/extension/oidcauthextension v0.88.0/go.mod h1:IsUudpC5M/wCQAFPy+RulteVhxEM9p7S3WG1XSXcDGA=
 github.com/open-telemetry/opentelemetry-collector-contrib/extension/pprofextension v0.88.0 h1:52tD8EO8/tTsouMlRUlNfToPG7zPifJkbcsTmcCIScY=
 github.com/open-telemetry/opentelemetry-collector-contrib/extension/pprofextension v0.88.0/go.mod h1:qygQpMj8Xk4J9YQMgsvC5raRRfNqkkPJRFZ6ZFPL7MI=
+github.com/open-telemetry/opentelemetry-collector-contrib/extension/sigv4authextension v0.88.0 h1:aFKWSTCCDHAV/n8YTAu67qc6pk20wlVdVEKYzIXurAs=
+github.com/open-telemetry/opentelemetry-collector-contrib/extension/sigv4authextension v0.88.0/go.mod h1:X19k6oWZoSNSAvNRA9WMkJtD6jBpe/VdcB0pAQ6+74E=
 github.com/open-telemetry/opentelemetry-collector-contrib/extension/storage v0.88.0 h1:9gjzrpUlzGC5BebgO1cxb/9KQ9yuIIE6B+6wLySKVCQ=
 github.com/open-telemetry/opentelemetry-collector-contrib/extension/storage v0.88.0/go.mod h1:GXfK9q6RosmltLUcOdrQMS3hF1RYuwIgFTIa4RRR5J4=
 github.com/open-telemetry/opentelemetry-collector-contrib/internal/aws/awsutil v0.88.0 h1:vNHRuffjwVq/pW7kSunsVNoPCxpopz3ZHwVWxusvs74=
