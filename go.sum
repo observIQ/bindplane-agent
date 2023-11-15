@@ -1386,6 +1386,8 @@ github.com/open-telemetry/opentelemetry-collector-contrib/receiver/googlecloudsp
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/googlecloudspannerreceiver v0.88.0/go.mod h1:3mwbGot6VrAjeRIjZjq6EnmqbeHAhx6MxSD3drdawWU=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/hostmetricsreceiver v0.88.0 h1:RSwF2D9V4zJXyb/RIF4vCndJPF5y3QszS2/LM0ynSXM=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/hostmetricsreceiver v0.88.0/go.mod h1:PZ0Zvd0QgHa/O7/+vWZhwyaGaqKI84VWSao3rDR6zQ0=
+github.com/open-telemetry/opentelemetry-collector-contrib/receiver/httpcheckreceiver v0.88.0 h1:lcV8MgOmgPTZJ5XUhEexg05DGCI5MHEwRhnpJ/4Imf8=
+github.com/open-telemetry/opentelemetry-collector-contrib/receiver/httpcheckreceiver v0.88.0/go.mod h1:LAlw3wOJv0MOkPtUrpUcS9XPaxw8hlzsRPLPnB5Of4M=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/iisreceiver v0.88.0 h1:wLKkrPk9zrsP0Bw1XFLyiVmGFdqn8+tF4fCRLsUfgXo=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/iisreceiver v0.88.0/go.mod h1:isqP8uCl1XApqgNTM8fX1DBjbqusKz2GsUkjrQWGE1U=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/influxdbreceiver v0.88.0 h1:l71SO13+yuTA0YbDnPciJDsqH+8QISR0h5TOzZdYQK4=
