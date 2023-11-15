@@ -6,7 +6,7 @@ require (
 	github.com/google/uuid v1.4.0
 	github.com/mholt/archiver/v3 v3.5.1
 	github.com/observiq/bindplane-agent/exporter/azureblobexporter v1.40.0
-	github.com/observiq/bindplane-agent/exporter/chronicleexporter v0.0.0-00010101000000-000000000000
+	github.com/observiq/bindplane-agent/exporter/chronicleexporter v1.40.0
 	github.com/observiq/bindplane-agent/exporter/googlecloudexporter v1.40.0
 	github.com/observiq/bindplane-agent/exporter/googlemanagedprometheusexporter v1.40.0
 	github.com/observiq/bindplane-agent/packagestate v1.40.0
