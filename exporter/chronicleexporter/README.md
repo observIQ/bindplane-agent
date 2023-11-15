@@ -20,17 +20,14 @@ This exporter facilitates the sending of logs to Chronicle, which is a security 
 
 The exporter can be configured using the following fields:
 
-| Field              | Type   | Default | Required | Description                                                                                                                                                           |
-| ------------------ | ------ | ------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `region`           | string |         | `false`  | The region where the data will be sent, it must be one of the predefined regions. if no region is specfied defaults to `https://malachiteingestion-pa.googleapis.com` |
-| `creds_file_path`  | string |         | `true`   | The file path to the Google credentials JSON file.                                                                                                                    |
-| `creds`            | string |         | `true`   | The Google credentials JSON.                                                                                                                                          |
-| `log_type`         | string |         | `true`   | The type of log that will be sent.                                                                                                                                    |
-| `raw_log_field`    | string |         | `false`  | The field name for raw logs.                                                                                                                                          |
-| `customer_id`      | string |         | `false`  | The customer ID used for sending logs.                                                                                                                                |
-| `sending_queue`    | struct |         | `false`  | Configuration for the sending queue.                                                                                                                                  |
-| `retry_on_failure` | struct |         | `false`  | Configuration for retry logic on failure.                                                                                                                             |
-| `timeout_settings` | struct |         | `false`  | Configuration for timeout settings.                                                                                                                                   |
+| Field             | Type   | Default | Required | Description                                                                                                                                                           |
+| ----------------- | ------ | ------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `region`          | string |         | `false`  | The region where the data will be sent, it must be one of the predefined regions. if no region is specfied defaults to `https://malachiteingestion-pa.googleapis.com` |
+| `creds_file_path` | string |         | `true`   | The file path to the Google credentials JSON file.                                                                                                                    |
+| `creds`           | string |         | `true`   | The Google credentials JSON.                                                                                                                                          |
+| `log_type`        | string |         | `true`   | The type of log that will be sent.                                                                                                                                    |
+| `raw_log_field`   | string |         | `false`  | The field name for raw logs.                                                                                                                                          |
+| `customer_id`     | string |         | `false`  | The customer ID used for sending logs.                                                                                                                                |
 
 ### Regions
 
