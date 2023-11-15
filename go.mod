@@ -5,27 +5,28 @@ go 1.20
 require (
 	github.com/google/uuid v1.4.0
 	github.com/mholt/archiver/v3 v3.5.1
-	github.com/observiq/bindplane-agent/exporter/azureblobexporter v1.39.0
-	github.com/observiq/bindplane-agent/exporter/googlecloudexporter v1.39.0
-	github.com/observiq/bindplane-agent/exporter/googlemanagedprometheusexporter v1.39.0
-	github.com/observiq/bindplane-agent/packagestate v1.39.0
-	github.com/observiq/bindplane-agent/processor/datapointcountprocessor v1.39.0
-	github.com/observiq/bindplane-agent/processor/logcountprocessor v1.39.0
-	github.com/observiq/bindplane-agent/processor/logdeduplicationprocessor v1.39.0
-	github.com/observiq/bindplane-agent/processor/maskprocessor v1.39.0
-	github.com/observiq/bindplane-agent/processor/metricextractprocessor v1.39.0
-	github.com/observiq/bindplane-agent/processor/metricstatsprocessor v1.39.0
-	github.com/observiq/bindplane-agent/processor/removeemptyvaluesprocessor v1.39.0
-	github.com/observiq/bindplane-agent/processor/resourceattributetransposerprocessor v1.39.0
-	github.com/observiq/bindplane-agent/processor/samplingprocessor v1.39.0
-	github.com/observiq/bindplane-agent/processor/spancountprocessor v1.39.0
-	github.com/observiq/bindplane-agent/processor/throughputmeasurementprocessor v1.39.0
-	github.com/observiq/bindplane-agent/receiver/azureblobrehydrationreceiver v1.39.0
-	github.com/observiq/bindplane-agent/receiver/httpreceiver v1.39.0
-	github.com/observiq/bindplane-agent/receiver/m365receiver v1.39.0
-	github.com/observiq/bindplane-agent/receiver/pluginreceiver v1.39.0
-	github.com/observiq/bindplane-agent/receiver/routereceiver v1.39.0
-	github.com/observiq/bindplane-agent/receiver/sapnetweaverreceiver v1.39.0
+	github.com/observiq/bindplane-agent/exporter/azureblobexporter v1.39.1
+	github.com/observiq/bindplane-agent/exporter/googlecloudexporter v1.39.1
+	github.com/observiq/bindplane-agent/exporter/googlemanagedprometheusexporter v1.39.1
+	github.com/observiq/bindplane-agent/expr v1.39.1
+	github.com/observiq/bindplane-agent/packagestate v1.39.1
+	github.com/observiq/bindplane-agent/processor/datapointcountprocessor v1.39.1
+	github.com/observiq/bindplane-agent/processor/logcountprocessor v1.39.1
+	github.com/observiq/bindplane-agent/processor/logdeduplicationprocessor v1.39.1
+	github.com/observiq/bindplane-agent/processor/maskprocessor v1.39.1
+	github.com/observiq/bindplane-agent/processor/metricextractprocessor v1.39.1
+	github.com/observiq/bindplane-agent/processor/metricstatsprocessor v1.39.1
+	github.com/observiq/bindplane-agent/processor/removeemptyvaluesprocessor v1.39.1
+	github.com/observiq/bindplane-agent/processor/resourceattributetransposerprocessor v1.39.1
+	github.com/observiq/bindplane-agent/processor/samplingprocessor v1.39.1
+	github.com/observiq/bindplane-agent/processor/spancountprocessor v1.39.1
+	github.com/observiq/bindplane-agent/processor/throughputmeasurementprocessor v1.39.1
+	github.com/observiq/bindplane-agent/receiver/azureblobrehydrationreceiver v1.39.1
+	github.com/observiq/bindplane-agent/receiver/httpreceiver v1.39.1
+	github.com/observiq/bindplane-agent/receiver/m365receiver v1.39.1
+	github.com/observiq/bindplane-agent/receiver/pluginreceiver v1.39.1
+	github.com/observiq/bindplane-agent/receiver/routereceiver v1.39.1
+	github.com/observiq/bindplane-agent/receiver/sapnetweaverreceiver v1.39.1
 	github.com/oklog/ulid/v2 v2.1.0
 	github.com/open-telemetry/opamp-go v0.9.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/connector/countconnector v0.88.0
@@ -66,6 +67,7 @@ require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/extension/healthcheckextension v0.88.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/extension/oidcauthextension v0.88.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/extension/pprofextension v0.88.0
+	github.com/open-telemetry/opentelemetry-collector-contrib/extension/sigv4authextension v0.88.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/extension/storage v0.88.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/processor/attributesprocessor v0.88.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/processor/cumulativetodeltaprocessor v0.88.0
@@ -231,8 +233,7 @@ require (
 	github.com/kylelemons/godebug v1.1.0 // indirect
 	github.com/minio/asm2plan9s v0.0.0-20200509001527-cdd76441f9d8 // indirect
 	github.com/minio/c2goasm v0.0.0-20190812172519-36a3d3bbc4f3 // indirect
-	github.com/observiq/bindplane-agent/counter v1.39.0 // indirect
-	github.com/observiq/bindplane-agent/expr v1.39.0 // indirect
+	github.com/observiq/bindplane-agent/counter v1.39.1 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlemanagedprometheusexporter v0.88.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/internal/kafka v0.88.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/processor/servicegraphprocessor v0.88.0 // indirect
@@ -525,7 +526,7 @@ require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/batchperresourceattr v0.88.0 // indirect; indi72.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/batchpersignal v0.88.0 // indirect; indi72.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/experimentalmetricmetadata v0.88.0 // indirect; indi72.0
-	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/ottl v0.88.0 // indirect; indi72.0
+	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/ottl v0.88.0 // indi72.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/resourcetotelemetry v0.88.0 // indirect; indi72.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/stanza v0.88.0 // indirect; indi72.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/translator/jaeger v0.88.0 // indirect; indi72.0
@@ -614,7 +615,7 @@ require (
 	golang.org/x/exp v0.0.0-20230713183714-613f0c0eb8a1 // indirect
 	golang.org/x/mod v0.13.0 // indirect
 	golang.org/x/net v0.17.0 // indirect
-	golang.org/x/oauth2 v0.13.0 // indirect
+	golang.org/x/oauth2 v0.13.0
 	golang.org/x/sync v0.5.0 // indirect
 	golang.org/x/term v0.13.0 // indirect
 	golang.org/x/text v0.14.0 // indirect

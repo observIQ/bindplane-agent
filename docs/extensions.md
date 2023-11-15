@@ -11,4 +11,5 @@ Below is a list of supported extensions with links to their documentation pages.
 | Health Check Extension           | [healthcheckextension](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.88.0/extension/healthcheckextension/README.md) |
 | Memory Ballast Extension         | [ballastextension](https://github.com/open-telemetry/opentelemetry-collector/blob/v0.88.0/extension/ballastextension/README.md) |
 | Performance Profiler Extension   | [pprofextension](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.88.0/extension/pprofextension/README.md) |
+| Sigv4 Authenticator Extension    | [sigv4authextension](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.88.0/extension/sigv4authextension/README.md) |
 | zPages Extension                 | [zpagesextension](https://github.com/open-telemetry/opentelemetry-collector/blob/v0.88.0/extension/zpagesextension/README.md) |
