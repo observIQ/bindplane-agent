@@ -25,7 +25,9 @@ OIQ_OTEL_COLLECTOR_HOME=/opt/observiq-otel-collector
 OIQ_OTEL_COLLECTOR_STORAGE=/opt/observiq-otel-collector/storage
 HTTP_PROXY=
 HTTPS_PROXY=
-USER=root
+# set this to a user such as observiq-otel-collector, to run as that user
+# observiq-otel-collector user is created during installation
+USER=
 PIDFILE=/var/run/observiq-otel-collector.pid
 DEBUG=false
 RETVAL=0
