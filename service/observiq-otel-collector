@@ -48,7 +48,7 @@ start() {
     export HTTP_PROXY
     export HTTPS_PROXY
     if [ -n "$RUNUSER" ]; then
-      su -p $RUNUSER -c "$COMMAND" &
+      su -p "$RUNUSER" -c "$COMMAND" &
     else
       nohup "$COMMAND" &
     fi
