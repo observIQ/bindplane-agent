@@ -25,6 +25,7 @@ OIQ_OTEL_COLLECTOR_HOME=/opt/observiq-otel-collector
 OIQ_OTEL_COLLECTOR_STORAGE=/opt/observiq-otel-collector/storage
 HTTP_PROXY=
 HTTPS_PROXY=
+USER=root
 PIDFILE=/var/run/observiq-otel-collector.pid
 DEBUG=false
 RETVAL=0
@@ -36,20 +37,22 @@ start() {
   else
     echo " * Starting $PROGRAM"
     if [ $DEBUG ]; then
-      COMMAND='"/opt/observiq-otel-collector/observiq-otel-collector --config config.yaml" 1> /dev/null 2>> $OIQ_OTEL_COLLECTOR_HOME/log/error.log'
+      COMMAND="cd /opt/observiq-otel-collector/ && nohup /opt/observiq-otel-collector/observiq-otel-collector --config config.yaml 1> /dev/null 2>> $OIQ_OTEL_COLLECTOR_HOME/log/error.log"
     else
-      COMMAND='"/opt/observiq-otel-collector/observiq-otel-collector --config config.yaml" 1>> $OIQ_OTEL_COLLECTOR_HOME/log/error.log 2>&1'
+      COMMAND="cd /opt/observiq-otel-collector/ && nohup /opt/observiq-otel-collector/observiq-otel-collector --config config.yaml 1>> $OIQ_OTEL_COLLECTOR_HOME/log/error.log 2>&1"
     fi
     export OIQ_OTEL_COLLECTOR_HOME
     export OIQ_OTEL_COLLECTOR_STORAGE
     export HTTP_PROXY
     export HTTPS_PROXY
-    if [ -n "root" ]; then
-    su -p root -c "cd /opt/observiq-otel-collector/ && nohup $COMMAND &
+    if [ -n "$USER" ]; then
+      su -p $USER -c "$COMMAND" &
     else
-    nohup "cd /opt/observiq-otel-collector/ && nohup $COMMAND &
+      nohup "$COMMAND" &
     fi
     echo $! > $PIDFILE
+    # disabling shellcheck due to this being the one documented exception. See https://www.shellcheck.net/wiki/SC2320
+    # shellcheck disable=SC2320
     RETVAL=$?
     [ "$RETVAL" -eq 0 ] && touch $LOCKFILE
   fi
@@ -58,8 +61,8 @@ start() {
 stop() {
   if [ -f $PIDFILE ]; then
     PID=$(cat $PIDFILE);
-    printf " * Stopping $PROGRAM... "
-    kill $PID > /dev/null 2>&1
+    printf " * Stopping %s... " "$PROGRAM"
+    kill "$PID" > /dev/null 2>&1
     echo "stopped"
     rm $PIDFILE && rm -f $LOCKFILE
     RETVAL=0
@@ -71,6 +74,10 @@ stop() {
 
 pid_status() {
   if [ -e "$PIDFILE" ]; then
+    # disabling this shellcheck due to needing legacy support on some systems
+    # shellcheck disable=SC2006
+    # disabling this shellcheck due to incorrect detection
+    # shellcheck disable=SC2046
     echo " * $PROGRAM" is running, pid=`cat "$PIDFILE"`
     RETVAL=0
   else
@@ -80,10 +87,10 @@ pid_status() {
 }
 
 otel_status() {
-  if [ $PROC ]; then
+  if [ "$PROC" ]; then
     status_of_proc -p $PIDFILE "$PROGRAM" "$PROGRAM"
     RETVAL=$?
-  elif [ $STATUS ]; then
+  elif [ "$STATUS" ]; then
     status -p $PIDFILE $PROGRAM
     RETVAL=$?
   else
