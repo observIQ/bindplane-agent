@@ -3,7 +3,7 @@
 Below is a list of supported receivers with links to their documentation pages.
 
 | Name                                       | GitHub README                                                                                                                                                      |
-|--------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | Active Directory Domain Services Receiver  | [activedirectorydsreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.89.0/receiver/activedirectorydsreceiver/README.md)           |
 | Aerospike Receiver                         | [aerospikereceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.89.0/receiver/aerospikereceiver/README.md)                           |
 | Apache CouchDB Receiver                    | [couchdbreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.89.0/receiver/couchdbreceiver/README.md)                               |
@@ -31,17 +31,18 @@ Below is a list of supported receivers with links to their documentation pages.
 | Google Cloud Pub/Sub Receiver              | [googlecloudpubsubreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.89.0/receiver/googlecloudpubsubreceiver/README.md)           |
 | Google Cloud Spanner Receiver              | [googlecloudspannerreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.89.0/receiver/googlecloudspannerreceiver/README.md)         |
 | HTTP Log Receiver                          | [httpreceiver](../receiver/httpreceiver/README.md)                                                                                                                 |
-| Host Metrics Receiver                      | [hostmetricsreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.89.0/receiver/hostmetricsreceiver/README.md)                       |
-| InfluxDB Receiver                          | [influxdbreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.89.0/receiver/influxdbreceiver/README.md)                             |
-| Jaeger Receiver                            | [jaegerreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.89.0/receiver/jaegerreceiver/README.md)                                 |
-| JMX Receiver                               | [jmxreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.89.0/receiver/jmxreceiver/README.md)                                       |
-| journald Receiver                          | [journaldreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.89.0/receiver/journaldreceiver/README.md)                             |
-| Kubernetes Cluster Receiver                | [k8sclusterreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.89.0/receiver/k8sclusterreceiver/README.md)                         |
-| Kubernetes Events Receiver                 | [k8seventsreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.89.0/receiver/k8seventsreceiver/README.md)                           |
-| Kubernetes kubelet Stats Receiver          | [kubeletstatsreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.89.0/receiver/kubeletstatsreceiver/README.md)                     |
-| Kafka Receiver                             | [kafkareceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.89.0/receiver/kafkareceiver/README.md)                                   |
-| Kafka Metrics Receiver                     | [kafkametricsreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.89.0/receiver/kafkametricsreceiver/README.md)                     |
-| Memcached Receiver                         | [memcachedreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.89.0/receiver/memcachedreceiver/README.md)                           |
+| Host Metrics Receiver                      | [hostmetricsreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.88.0/receiver/hostmetricsreceiver/README.md)                       |
+| HTTP Check Receiver                        | [httpcheckreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.88.0/receiver/httpcheckreceiver/README.md)                           |
+| InfluxDB Receiver                          | [influxdbreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.88.0/receiver/influxdbreceiver/README.md)                             |
+| Jaeger Receiver                            | [jaegerreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.88.0/receiver/jaegerreceiver/README.md)                                 |
+| JMX Receiver                               | [jmxreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.88.0/receiver/jmxreceiver/README.md)                                       |
+| journald Receiver                          | [journaldreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.88.0/receiver/journaldreceiver/README.md)                             |
+| Kubernetes Cluster Receiver                | [k8sclusterreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.88.0/receiver/k8sclusterreceiver/README.md)                         |
+| Kubernetes Events Receiver                 | [k8seventsreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.88.0/receiver/k8seventsreceiver/README.md)                           |
+| Kubernetes kubelet Stats Receiver          | [kubeletstatsreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.88.0/receiver/kubeletstatsreceiver/README.md)                     |
+| Kafka Receiver                             | [kafkareceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.88.0/receiver/kafkareceiver/README.md)                                   |
+| Kafka Metrics Receiver                     | [kafkametricsreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.88.0/receiver/kafkametricsreceiver/README.md)                     |
+| Memcached Receiver                         | [memcachedreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.88.0/receiver/memcachedreceiver/README.md)                           |
 | Microsoft 365 Receiver                     | [m365receiver](../receiver/m365receiver/README.md)                                                                                                                 |
 | Microsoft IIS Receiver                     | [iisreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.89.0/receiver/iisreceiver/README.md)                                       |
 | Microsoft SQL Server Receiver              | [sqlserverreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.89.0/receiver/sqlserverreceiver/README.md)                           |

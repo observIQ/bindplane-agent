@@ -46,6 +46,7 @@ import (
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/googlecloudpubsubreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/googlecloudspannerreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/hostmetricsreceiver"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/httpcheckreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/iisreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/influxdbreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/jaegerreceiver"
@@ -116,6 +117,7 @@ var defaultReceivers = []receiver.Factory{
 	googlecloudpubsubreceiver.NewFactory(),
 	googlecloudspannerreceiver.NewFactory(),
 	hostmetricsreceiver.NewFactory(),
+	httpcheckreceiver.NewFactory(),
 	httpreceiver.NewFactory(),
 	iisreceiver.NewFactory(),
 	influxdbreceiver.NewFactory(),
