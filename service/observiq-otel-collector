@@ -36,9 +36,9 @@ start() {
   else
     echo " * Starting $PROGRAM"
     if [ $DEBUG ]; then
-    COMMAND=/opt/observiq-otel-collector/observiq-otel-collector --config config.yaml" 1> /dev/null 2>> $OIQ_OTEL_COLLECTOR_HOME/log/error.log
+      COMMAND='"/opt/observiq-otel-collector/observiq-otel-collector --config config.yaml" 1> /dev/null 2>> $OIQ_OTEL_COLLECTOR_HOME/log/error.log'
     else
-    COMMAND=/opt/observiq-otel-collector/observiq-otel-collector --config config.yaml" 1>> $OIQ_OTEL_COLLECTOR_HOME/log/error.log 2>&1
+      COMMAND='"/opt/observiq-otel-collector/observiq-otel-collector --config config.yaml" 1>> $OIQ_OTEL_COLLECTOR_HOME/log/error.log 2>&1'
     fi
     export OIQ_OTEL_COLLECTOR_HOME
     export OIQ_OTEL_COLLECTOR_STORAGE
