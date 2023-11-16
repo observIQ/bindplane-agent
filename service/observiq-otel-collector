@@ -27,7 +27,7 @@ HTTP_PROXY=
 HTTPS_PROXY=
 # set this to a user such as observiq-otel-collector, to run as that user
 # observiq-otel-collector user is created during installation
-USER=
+RUNUSER=
 PIDFILE=/var/run/observiq-otel-collector.pid
 DEBUG=false
 RETVAL=0
@@ -47,8 +47,8 @@ start() {
     export OIQ_OTEL_COLLECTOR_STORAGE
     export HTTP_PROXY
     export HTTPS_PROXY
-    if [ -n "$USER" ]; then
-      su -p $USER -c "$COMMAND" &
+    if [ -n "$RUNUSER" ]; then
+      su -p $RUNUSER -c "$COMMAND" &
     else
       nohup "$COMMAND" &
     fi
