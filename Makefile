@@ -84,11 +84,8 @@ build-windows-x86:
 # tool-related commands
 .PHONY: install-tools
 install-tools:
-# needed cmp for run in CI
-	go get -u github.com/google/go-cmp/cmp
 	go install github.com/client9/misspell/cmd/misspell@v0.3.4
 	go install github.com/google/addlicense@v1.1.1
-	go install github.com/goreleaser/goreleaser@v1.22.1
 	go install github.com/mgechev/revive@v1.3.4
 	go install github.com/open-telemetry/opentelemetry-collector-contrib/cmd/mdatagen@v0.89.0
 	go install github.com/securego/gosec/v2/cmd/gosec@v2.18.2
@@ -96,6 +93,7 @@ install-tools:
 	go install github.com/uw-labs/lichen@v0.1.7
 	go install github.com/vektra/mockery/v2@v2.37.1
 	go install golang.org/x/tools/cmd/goimports@latest
+	go install github.com/goreleaser/goreleaser@v1.22.1
 
 .PHONY: lint
 lint:
