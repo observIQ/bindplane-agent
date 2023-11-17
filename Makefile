@@ -84,6 +84,8 @@ build-windows-x86:
 # tool-related commands
 .PHONY: install-tools
 install-tools:
+# needed cmp for run in CI
+	go get -u github.com/google/go-cmp/cmp
 	go install github.com/client9/misspell/cmd/misspell@v0.3.4
 	go install github.com/google/addlicense@v1.1.1
 	go install github.com/goreleaser/goreleaser@v1.22.1
