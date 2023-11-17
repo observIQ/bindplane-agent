@@ -1,0 +1,124 @@
+#!/bin/sh
+# observIQ OTEL daemon
+# chkconfig: 2345 99 05
+# description: observIQ's distribution of the OpenTelemetry collector
+# processname: observiq-otel-collector
+# pidfile: /var/run/observiq-otel-collector.pid
+
+# Source function library.
+if [ -e /etc/init.d/functions ]; then
+  STATUS=true
+  . /etc/init.d/functions
+fi
+
+if [ -e /lib/lsb/init-functions ]; then
+  PROC=true
+  . /lib/lsb/init-functions
+fi
+
+# Pull in sysconfig settings
+[ -f /etc/sysconfig/observiq-otel-collector ] && . /etc/sysconfig/observiq-otel-collector
+
+PROGRAM=observiq-otel-collector
+LOCKFILE=/var/lock/$PROGRAM
+OIQ_OTEL_COLLECTOR_HOME=/opt/observiq-otel-collector
+OIQ_OTEL_COLLECTOR_STORAGE=/opt/observiq-otel-collector/storage
+HTTP_PROXY=
+HTTPS_PROXY=
+# set this to a user such as observiq-otel-collector, to run as that user
+# observiq-otel-collector user is created during installation
+# leave this variable empty to run as root (Default behavior)
+RUNUSER=
+PIDFILE=/var/run/observiq-otel-collector.pid
+DEBUG=false
+RETVAL=0
+start() {
+  if [ -f $PIDFILE ]; then
+    PID=$(cat $PIDFILE)
+    echo " * $PROGRAM already running: $PID"
+    RETVAL=2
+  else
+    echo " * Starting $PROGRAM"
+    if [ $DEBUG ]; then
+      COMMAND="cd /opt/observiq-otel-collector/ && nohup /opt/observiq-otel-collector/observiq-otel-collector --config config.yaml 1> /dev/null 2>> $OIQ_OTEL_COLLECTOR_HOME/log/error.log"
+    else
+      COMMAND="cd /opt/observiq-otel-collector/ && nohup /opt/observiq-otel-collector/observiq-otel-collector --config config.yaml 1>> $OIQ_OTEL_COLLECTOR_HOME/log/error.log 2>&1"
+    fi
+    export OIQ_OTEL_COLLECTOR_HOME
+    export OIQ_OTEL_COLLECTOR_STORAGE
+    export HTTP_PROXY
+    export HTTPS_PROXY
+    if [ -n "$RUNUSER" ]; then
+      su -p "$RUNUSER" -c "$COMMAND" &
+    else
+      nohup "$COMMAND" &
+    fi
+    echo $! > $PIDFILE
+    # disabling shellcheck due to this being the one documented exception. See https://www.shellcheck.net/wiki/SC2320
+    # shellcheck disable=SC2320
+    RETVAL=$?
+    [ "$RETVAL" -eq 0 ] && touch $LOCKFILE
+  fi
+}
+
+stop() {
+  if [ -f $PIDFILE ]; then
+    PID=$(cat $PIDFILE);
+    printf " * Stopping %s... " "$PROGRAM"
+    kill "$PID" > /dev/null 2>&1
+    echo "stopped"
+    rm $PIDFILE && rm -f $LOCKFILE
+    RETVAL=0
+  else
+    echo " * $PROGRAM is not running"
+    RETVAL=3
+  fi
+}
+
+pid_status() {
+  if [ -e "$PIDFILE" ]; then
+    # disabling this shellcheck due to needing legacy support on some systems
+    # shellcheck disable=SC2006
+    # disabling this shellcheck due to incorrect detection
+    # shellcheck disable=SC2046
+    echo " * $PROGRAM" is running, pid=`cat "$PIDFILE"`
+    RETVAL=0
+  else
+    echo " * $PROGRAM is not running"
+    RETVAL=1
+  fi
+}
+
+otel_status() {
+  if [ "$PROC" ]; then
+    status_of_proc -p $PIDFILE "$PROGRAM" "$PROGRAM"
+    RETVAL=$?
+  elif [ "$STATUS" ]; then
+    status -p $PIDFILE $PROGRAM
+    RETVAL=$?
+  else
+    pid_status
+  fi
+}
+
+case "$1" in
+  start)
+    start
+    ;;
+  stop)
+    stop
+    ;;
+  status)
+    otel_status
+    ;;
+  restart)
+    stop
+    start
+    ;;
+  *)
+    echo "Usage: {start|stop|status|restart}"
+    RETVAL=3
+    ;;
+esac
+
+exit $RETVAL
