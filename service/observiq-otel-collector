@@ -27,7 +27,7 @@ HTTP_PROXY=
 HTTPS_PROXY=
 # set this to a user such as observiq-otel-collector, to run as that user
 # observiq-otel-collector user is created during installation
-# leave this variable empty to run as root
+# leave this variable empty to run as root (Default behavior)
 RUNUSER=
 PIDFILE=/var/run/observiq-otel-collector.pid
 DEBUG=false
