@@ -703,8 +703,3 @@ replace github.com/mattn/go-ieproxy => github.com/mattn/go-ieproxy v0.0.1
 
 // openshift removed all tags from their repo, use the pseudoversion from the release-3.9 branch HEAD
 replace github.com/openshift/api v3.9.0+incompatible => github.com/openshift/api v0.0.0-20180801171038-322a19404e37
-
-// // v0.47.x and v0.48.x are incompatible, prefer to use v0.48.x
-// replace github.com/DataDog/datadog-agent/pkg/proto => github.com/DataDog/datadog-agent/pkg/proto v0.48.0-beta.1
-
-// replace github.com/DataDog/datadog-agent/pkg/trace => github.com/DataDog/datadog-agent/pkg/trace v0.48.0-beta.1
