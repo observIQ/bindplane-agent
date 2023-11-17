@@ -1,0 +1,154 @@
+name: pr_checks
+on:
+  pull_request:
+
+jobs:
+  setup-tools:
+    runs-on: "ubuntu-20.04"
+    steps:
+      - name: Checkout Sources
+        uses: actions/checkout@v4
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: "1.21"
+          check-latest: true
+      - name: Cache Tools
+        id: tool-cache
+        uses: actions/cache@v3
+        with:
+          path: /home/runner/go/bin
+          key: tooling-${{ runner.os }}-${{ hashFiles('./Makefile') }}
+      - name: Install Tools
+        if: steps.tool-cache.outputs.cache-hit != 'true'
+        run: make install-tools
+
+  check-fmt:
+    runs-on: "ubuntu-20.04"
+    needs: 
+      - setup-tools
+    steps:
+      - name: Checkout Sources
+        uses: actions/checkout@v4
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: "1.21"
+          check-latest: true
+      - name: Cache Tools
+        id: tool-cache
+        uses: actions/cache@v3
+        with:
+          path: /home/runner/go/bin
+          key: tooling-${{ runner.os }}-${{ hashFiles('./Makefile') }}
+      - name: Install Tools
+        if: steps.tool-cache.outputs.cache-hit != 'true'
+        run: make install-tools
+      - name: Check Formatting
+        run: make check-fmt
+
+  check-license:
+    runs-on: "ubuntu-20.04"
+    needs: 
+      - setup-tools
+    steps:
+      - name: Checkout Sources
+        uses: actions/checkout@v4
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: "1.21"
+          check-latest: true
+      - name: Cache Tools
+        id: tool-cache
+        uses: actions/cache@v3
+        with:
+          path: /home/runner/go/bin
+          key: tooling-${{ runner.os }}-${{ hashFiles('./Makefile') }}
+      - name: Install Tools
+        if: steps.tool-cache.outputs.cache-hit != 'true'
+        run: make install-tools
+      - name: Check License Headers
+        run: make check-license
+
+  gosec:
+    runs-on: ubuntu-20.04
+    needs: 
+      - setup-tools
+    steps:
+      - name: Checkout Source
+        uses: actions/checkout@v4
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: "1.21"
+          check-latest: true
+      - name: Cache Tools
+        id: tool-cache
+        uses: actions/cache@v3
+        with:
+          path: /home/runner/go/bin
+          key: tooling-${{ runner.os }}-${{ hashFiles('./Makefile') }}
+      - name: Install Tools
+        if: steps.tool-cache.outputs.cache-hit != 'true'
+        run: make install-tools
+      - name: Run Gosec Security Scanner
+        run: make gosec
+
+  misspell:
+    runs-on: "ubuntu-20.04"
+    needs: 
+      - setup-tools
+    steps:
+      - name: Checkout Sources
+        uses: actions/checkout@v4
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: "1.21"
+          check-latest: true
+      - name: Cache Tools
+        id: tool-cache
+        uses: actions/cache@v3
+        with:
+          path: /home/runner/go/bin
+          key: tooling-${{ runner.os }}-${{ hashFiles('./Makefile') }}
+      - name: Install Tools
+        if: steps.tool-cache.outputs.cache-hit != 'true'
+        run: make install-tools
+      - name: Check for Misspelled Words in Doc Files
+        run: make misspell
+
+# Below checks don't need to run `make install-tools`
+  lint:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout Sources
+        uses: actions/checkout@v4
+      - name: Run Revive Action by pulling pre-built image
+        uses: docker://morphy/revive-action:v2
+        with:
+          config: revive/config.toml
+
+
+  check-plugin-docs:
+    runs-on: "ubuntu-20.04"
+    steps:
+      - name: Checkout Sources
+        uses: actions/checkout@v4
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: "1.20"
+          check-latest: true
+      - name: Plugin Doc Generation
+        run: make create-plugin-docs
+      - name: Check Changed Plugin Docs
+        uses: tj-actions/verify-changed-files@v12
+        id: verify-changed-files
+        with:
+          files: |
+            docs/plugins
+      - name: Verify No Plugin Doc Changes
+        if: steps.verify-changed-files.outputs.files_changed == 'true'
+        run: exit 1
