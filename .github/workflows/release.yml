@@ -174,8 +174,15 @@ jobs:
         with:
           name: observiq-otel-collector-x86.msi
           path: observiq-otel-collector-x86.msi
-        # install tools for cosign
-      - name: Install Dependencies
+      # install tools for cosign
+      - name: Cache Tools
+        id: tool-cache
+        uses: actions/cache@v3
+        with:
+          path: /home/runner/go/bin
+          key: tooling-${{ runner.os }}-${{ hashFiles('./Makefile') }}
+      - name: Install Tools
+        if: steps.tool-cache.outputs.cache-hit != 'true'
         run: make install-tools
       - name: Build cosign key file
         run: 'echo "$COSIGN_PRIVATE_KEY" >> cosign.key'
