@@ -49,7 +49,7 @@ func NewSettings(configPaths []string, version string, loggingOpts []zap.Option,
 	}
 
 	return &otelcol.CollectorSettings{
-		Factories:               factories,
+		Factories:               func() (otelcol.Factories, error) { return factories, nil },
 		BuildInfo:               buildInfo,
 		LoggingOptions:          loggingOpts,
 		ConfigProvider:          provider,
