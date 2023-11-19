@@ -50,7 +50,7 @@ func newExporter(cfg *Config, params exporter.CreateSettings) (*chronicleExporte
 
 	switch {
 	case cfg.Creds != "":
-		creds, err = google.CredentialsFromJSON(context.Background(), []byte(cfg.CredsFilePath), scope)
+		creds, err = google.CredentialsFromJSON(context.Background(), []byte(cfg.Creds), scope)
 		if err != nil {
 			return nil, fmt.Errorf("obtain credentials from JSON: %w", err)
 		}
@@ -58,6 +58,10 @@ func newExporter(cfg *Config, params exporter.CreateSettings) (*chronicleExporte
 		credsData, err := os.ReadFile(cfg.CredsFilePath)
 		if err != nil {
 			return nil, fmt.Errorf("read credentials file: %w", err)
+		}
+
+		if len(credsData) == 0 {
+			return nil, fmt.Errorf("credentials file is empty")
 		}
 
 		creds, err = google.CredentialsFromJSON(context.Background(), credsData, scope)
@@ -124,7 +128,7 @@ func (ce *chronicleExporter) uploadToChronicle(ctx context.Context, data []byte)
 		if err != nil {
 			ce.logger.Warn("Failed to read response body", zap.Error(err))
 		} else {
-			ce.logger.Warn("Received non-OK response from Chronicle", zap.String("status", resp.Status), zap.ByteString("body", respBody))
+			ce.logger.Warn("Received non-OK response from Chronicle", zap.String("status", resp.Status), zap.ByteString("response", respBody))
 		}
 		return fmt.Errorf("received non-OK response from Chronicle: %s", resp.Status)
 	}
