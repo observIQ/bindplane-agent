@@ -1164,6 +1164,8 @@ github.com/open-telemetry/opentelemetry-collector-contrib/exporter/splunkhecexpo
 github.com/open-telemetry/opentelemetry-collector-contrib/exporter/splunkhecexporter v0.89.0/go.mod h1:07QDgwC8p6dni0rCHRywlCqXQHnbqV4jlL3QouVhfHc=
 github.com/open-telemetry/opentelemetry-collector-contrib/exporter/sumologicexporter v0.89.0 h1:zPj9/b11TO6yPI6S6EDjT9uHxiaL4QSkgg0cla5VKIA=
 github.com/open-telemetry/opentelemetry-collector-contrib/exporter/sumologicexporter v0.89.0/go.mod h1:LTSQWJsnxe/oQI9mAge0r3nxJ/FjaARk9BFjSoTTZU0=
+github.com/open-telemetry/opentelemetry-collector-contrib/exporter/syslogexporter v0.89.0 h1:3WlEFToTs6wQT9eweb3UVDpw2QqsysP6yES4abvz+Fo=
+github.com/open-telemetry/opentelemetry-collector-contrib/exporter/syslogexporter v0.89.0/go.mod h1:GimNj3/BbxSfM4clz9mucZnfbF48czQGe70N0PtEhHU=
 github.com/open-telemetry/opentelemetry-collector-contrib/exporter/zipkinexporter v0.89.0 h1:Izl57beJ9SM2Th6iyFrJe91aa/yuYu84zAQoGbSCvdQ=
 github.com/open-telemetry/opentelemetry-collector-contrib/exporter/zipkinexporter v0.89.0/go.mod h1:7MObspkTXwYcmRmjglUi50pZiKf/MzmQVOxTSz/g+aU=
 github.com/open-telemetry/opentelemetry-collector-contrib/extension/basicauthextension v0.89.0 h1:GZoQbb8+aMmzepN5qQtiTcrHfwoSsKB9mRmIpMfqhnU=
