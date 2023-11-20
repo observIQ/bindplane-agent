@@ -61,6 +61,7 @@ require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/signalfxexporter v0.89.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/splunkhecexporter v0.89.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/sumologicexporter v0.89.0
+	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/syslogexporter v0.89.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/zipkinexporter v0.89.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/extension/basicauthextension v0.89.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/extension/bearertokenauthextension v0.89.0
