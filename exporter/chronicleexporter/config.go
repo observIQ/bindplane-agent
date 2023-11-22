@@ -55,6 +55,9 @@ type Config struct {
 	// LogType is the type of log that will be sent to Chronicle.
 	LogType string `mapstructure:"log_type"`
 
+	// OverrideLogType is the field name that will be used to override the log type.
+	OverrideLogType bool `mapstructure:"override_log_type"`
+
 	// RawLogField is the field name that will be used to send raw logs to Chronicle.
 	RawLogField string `mapstructure:"raw_log_field"`
 
