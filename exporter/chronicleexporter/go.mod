@@ -12,13 +12,13 @@ require (
 	go.opentelemetry.io/collector/exporter v0.89.0
 	go.opentelemetry.io/collector/pdata v1.0.0-rcv0018
 	go.uber.org/zap v1.26.0
-	golang.org/x/oauth2 v0.11.0
+	golang.org/x/oauth2 v0.14.0
 )
 
 require (
 	cloud.google.com/go v0.26.0 // indirect
 	github.com/alecthomas/participle/v2 v2.1.0 // indirect
-	github.com/antonmedv/expr v1.15.3 // indirect
+	github.com/antonmedv/expr v1.15.4 // indirect
 	github.com/cenkalti/backoff/v4 v4.2.1 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/gobwas/glob v0.2.3 // indirect
