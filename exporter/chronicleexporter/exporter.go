@@ -110,7 +110,8 @@ func (ce *chronicleExporter) logsDataPusher(ctx context.Context, ld plog.Logs) e
 	for _, payload := range payloads {
 		data, err := json.Marshal(payload)
 		if err != nil {
-			return fmt.Errorf("marshal payload: %w", err)
+			ce.logger.Warn("Failed to marshal payload", zap.Error(err))
+			continue
 		}
 
 		if err := ce.uploadToChronicle(ctx, data); err != nil {

@@ -92,9 +92,16 @@ func (m *marshaler) extractRawLogs(ctx context.Context, ld plog.Logs) (map[strin
 					continue
 				}
 
+				var timestamp time.Time
+				if logRecord.Timestamp() != 0 {
+					timestamp = logRecord.Timestamp().AsTime()
+				} else {
+					timestamp = logRecord.ObservedTimestamp().AsTime()
+				}
+
 				entries[logType] = append(entries[logType], entry{
 					LogText:   rawLog,
-					Timestamp: logRecord.Timestamp().AsTime().Format(time.RFC3339Nano),
+					Timestamp: timestamp.Format(time.RFC3339Nano),
 				})
 			}
 		}
