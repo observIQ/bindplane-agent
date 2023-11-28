@@ -28,5 +28,9 @@ func SetFeatureFlags() error {
 	if err := featuregate.GlobalRegistry().Set("filelog.allowHeaderMetadataParsing", true); err != nil {
 		return fmt.Errorf("failed to enable filelog.allowHeaderMetadataParsing: %w", err)
 	}
+	if err := featuregate.GlobalRegistry().Set("filelog.mtimeSortType", true); err != nil {
+		return fmt.Errorf("failed to enable filelog.mtimeSortType: %w", err)
+	}
+
 	return nil
 }
