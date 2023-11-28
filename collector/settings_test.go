@@ -35,7 +35,9 @@ func TestNewSettings(t *testing.T) {
 	require.NoError(t, err)
 
 	// Make sure environment variable replacement is working
-	provider, err := settings.ConfigProvider.Get(context.Background(), settings.Factories)
+	factories, err := settings.Factories()
+	require.NoError(t, err)
+	provider, err := settings.ConfigProvider.Get(context.Background(), factories)
 	require.NoError(t, err)
 	receivcfg := provider.Receivers[component.NewID("filelog")]
 	config := receivcfg.(*filelogreceiver.FileLogConfig)
