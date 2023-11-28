@@ -18,6 +18,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -62,7 +63,7 @@ func newExporter(cfg *Config, params exporter.CreateSettings) (*chronicleExporte
 		}
 
 		if len(credsData) == 0 {
-			return nil, fmt.Errorf("credentials file is empty")
+			return nil, errors.New("credentials file is empty")
 		}
 
 		creds, err = google.CredentialsFromJSON(context.Background(), credsData, scope)
