@@ -17,6 +17,8 @@ package chronicleexporter
 import (
 	"bytes"
 	"context"
+	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -61,7 +63,7 @@ func newExporter(cfg *Config, params exporter.CreateSettings) (*chronicleExporte
 		}
 
 		if len(credsData) == 0 {
-			return nil, fmt.Errorf("credentials file is empty")
+			return nil, errors.New("credentials file is empty")
 		}
 
 		creds, err = google.CredentialsFromJSON(context.Background(), credsData, scope)
@@ -101,12 +103,24 @@ func (ce *chronicleExporter) Capabilities() consumer.Capabilities {
 }
 
 func (ce *chronicleExporter) logsDataPusher(ctx context.Context, ld plog.Logs) error {
-	udmData, err := ce.marshaler.MarshalRawLogs(ctx, ld)
+	payloads, err := ce.marshaler.MarshalRawLogs(ctx, ld)
 	if err != nil {
 		return fmt.Errorf("marshal logs: %w", err)
 	}
 
-	return ce.uploadToChronicle(ctx, udmData)
+	for _, payload := range payloads {
+		data, err := json.Marshal(payload)
+		if err != nil {
+			ce.logger.Warn("Failed to marshal payload", zap.Error(err))
+			continue
+		}
+
+		if err := ce.uploadToChronicle(ctx, data); err != nil {
+			return fmt.Errorf("upload to Chronicle: %w", err)
+		}
+	}
+
+	return nil
 }
 
 func (ce *chronicleExporter) uploadToChronicle(ctx context.Context, data []byte) error {
