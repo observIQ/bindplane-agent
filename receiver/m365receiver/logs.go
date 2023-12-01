@@ -136,7 +136,9 @@ func (l *m365LogsReceiver) Start(ctx context.Context, host component.Host) error
 
 func (l *m365LogsReceiver) Shutdown(ctx context.Context) error {
 	l.logger.Debug("shutting down logs receiver")
-	l.cancel()
+	if l.cancel != nil {
+		l.cancel()
+	}
 	l.wg.Wait()
 	return l.checkpoint(ctx)
 }
