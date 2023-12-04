@@ -287,6 +287,9 @@ func (l *m365LogsReceiver) transformLogs(now pcommon.Timestamp, audit *auditMeta
 
 // sets the checkpoint
 func (l *m365LogsReceiver) checkpoint(ctx context.Context) error {
+	if l.record == nil {
+		return nil
+	}
 	bytes, err := json.Marshal(l.record)
 	if err != nil {
 		return fmt.Errorf("unable to write checkpoint: %w", err)
