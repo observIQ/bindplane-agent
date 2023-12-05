@@ -35,6 +35,7 @@ var supportedLogTypes = map[string]string{
 	"windows_event.custom":      "WINEVTLOG",
 	"windows_event.application": "WINEVTLOG",
 	"windows_event.system":      "WINEVTLOG",
+	"sql_server":                "MICROSOFT_SQL",
 }
 
 type marshaler struct {
