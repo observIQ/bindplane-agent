@@ -47,7 +47,7 @@ type payload struct {
 	Entries    []entry `json:"entries"`
 	CustomerID string  `json:"customer_id"`
 	LogType    string  `json:"log_type"`
-	Namespace  string  `json:"namespace"`
+	Namespace  string  `json:"namespace,omitempty"`
 }
 
 type entry struct {
