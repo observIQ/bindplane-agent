@@ -56,15 +56,13 @@ The steps are as follows:
         go install github.com/open-telemetry/opentelemetry-collector-contrib/cmd/mdatagen@v0.90.1
     ``` 
 
-5. Run `make tidy`
+5. Run `make install-tools`
 
-6. Run `make install-tools`
+6. Run `make generate`
 
-7. Run `make generate`
+7. Run `make tidy`
 
-8. Run `make tidy`
-
-9. Run `make ci-checks`
+8. Run `make ci-checks`
 
 If all was successful, the repo has had it's OTEL dependencies updated to the latest version. 
 
