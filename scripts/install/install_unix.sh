@@ -474,7 +474,7 @@ connection_check()
         printf "%sDo you wish to continue installation?%s  " "$fg_yellow" "$reset"
         prompt "n"
         decrease_indent
-        read -n 1 -p "" input
+        read -r input
         printf "\\n"
         if [ "$input" = "y" ] || [ "$input" = "Y" ]; then
           info "Continuing installation."
