@@ -19,7 +19,8 @@ import (
 
 	"github.com/observiq/bindplane-agent/expr"
 	"go.opentelemetry.io/collector/component"
-	"go.opentelemetry.io/collector/config/confighttp"
+	"go.opentelemetry.io/collector/config/confignet"
+	"go.opentelemetry.io/collector/config/configtls"
 	"go.opentelemetry.io/collector/exporter/exporterhelper"
 	"go.uber.org/zap"
 )
@@ -53,16 +54,10 @@ type Config struct {
 
 // SyslogConfig defines configuration for the Chronicle forwarder connection.
 type SyslogConfig struct {
-	// Host is the Chronicle forwarder endpoint to send logs to.
-	Host string `mapstructure:"host"`
+	confignet.NetAddr `mapstructure:",squash"`
 
-	// port is the port to send logs to.
-	Port int `mapstructure:"port"`
-
-	// Network is the network protocol to use.
-	Network string `mapstructure:"network"`
-
-	confighttp.HTTPServerSettings `mapstructure:",squash"`
+	// TLSSetting struct exposes TLS client configuration.
+	TLSSetting *configtls.TLSClientSetting `mapstructure:"tls"`
 }
 
 // File defines configuration for sending to.
@@ -78,8 +73,8 @@ func (cfg *Config) Validate() error {
 	}
 
 	if cfg.ExportType == ExportTypeSyslog {
-		if cfg.Syslog.Host == "" || cfg.Syslog.Port <= 0 || cfg.Syslog.Network == "" {
-			return fmt.Errorf("incomplete syslog configuration: host, port, and network are required")
+		if cfg.Syslog.NetAddr.Endpoint == "" {
+			return fmt.Errorf("incomplete syslog configuration: endpoint is required")
 		}
 	}
 

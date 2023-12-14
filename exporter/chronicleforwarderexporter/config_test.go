@@ -18,6 +18,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"go.opentelemetry.io/collector/config/confignet"
 )
 
 func TestConfig_Validate(t *testing.T) {
@@ -31,9 +32,10 @@ func TestConfig_Validate(t *testing.T) {
 			cfg: Config{
 				ExportType: ExportTypeSyslog,
 				Syslog: SyslogConfig{
-					Host:    "localhost",
-					Port:    514,
-					Network: "tcp",
+					NetAddr: confignet.NetAddr{
+						Endpoint:  "localhost:514",
+						Transport: "tcp",
+					},
 				},
 			},
 			wantErr: false,
@@ -43,8 +45,10 @@ func TestConfig_Validate(t *testing.T) {
 			cfg: Config{
 				ExportType: ExportTypeSyslog,
 				Syslog: SyslogConfig{
-					Port:    514,
-					Network: "tcp",
+					NetAddr: confignet.NetAddr{
+						Endpoint:  "",
+						Transport: "tcp",
+					},
 				},
 			},
 			wantErr: true,

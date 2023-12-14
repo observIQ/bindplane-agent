@@ -18,6 +18,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"go.opentelemetry.io/collector/config/confignet"
 	"go.opentelemetry.io/collector/exporter/exporterhelper"
 )
 
@@ -28,9 +29,10 @@ func Test_createDefaultConfig(t *testing.T) {
 		RetrySettings:   exporterhelper.NewDefaultRetrySettings(),
 		ExportType:      ExportTypeSyslog,
 		Syslog: SyslogConfig{
-			Host:    "127.0.0.1",
-			Port:    10514,
-			Network: "tcp",
+			NetAddr: confignet.NetAddr{
+				Endpoint:  "127.0.0.1:10514",
+				Transport: "tcp",
+			},
 		},
 	}
 

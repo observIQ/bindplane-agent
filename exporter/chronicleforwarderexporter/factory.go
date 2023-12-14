@@ -20,6 +20,7 @@ import (
 
 	"github.com/observiq/bindplane-agent/exporter/chronicleforwarderexporter/internal/metadata"
 	"go.opentelemetry.io/collector/component"
+	"go.opentelemetry.io/collector/config/confignet"
 	"go.opentelemetry.io/collector/exporter"
 	"go.opentelemetry.io/collector/exporter/exporterhelper"
 )
@@ -40,9 +41,10 @@ func createDefaultConfig() component.Config {
 		RetrySettings:   exporterhelper.NewDefaultRetrySettings(),
 		ExportType:      ExportTypeSyslog,
 		Syslog: SyslogConfig{
-			Host:    "127.0.0.1",
-			Port:    10514,
-			Network: "tcp",
+			NetAddr: confignet.NetAddr{
+				Endpoint:  "127.0.0.1:10514",
+				Transport: "tcp",
+			},
 		},
 	}
 }

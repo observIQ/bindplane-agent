@@ -16,11 +16,15 @@ package chronicleforwarderexporter
 
 import (
 	"context"
+	"log"
+	"net"
+	"os"
 	"testing"
+	"time"
 
-	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
-	"go.opentelemetry.io/collector/pdata/plog"
+	"go.opentelemetry.io/collector/config/confignet"
+	"go.opentelemetry.io/collector/exporter"
 )
 
 func Test_exporter_Capabilities(t *testing.T) {
@@ -29,35 +33,98 @@ func Test_exporter_Capabilities(t *testing.T) {
 	require.False(t, capabilities.MutatesData)
 }
 
-// MockWriter is a mock implementation of io.Writer.
-type MockWriter struct {
-	mock.Mock
+func TestLogDataPushingFile(t *testing.T) {
+	// Open a temporary file for testing
+	f, err := os.CreateTemp("", "test")
+	require.NoError(t, err)
+	defer f.Close()
+	defer os.Remove(f.Name()) // Clean up the file afterwards
+
+	cfg := &Config{
+		ExportType: ExportTypeFile,
+		File: File{
+			Path: f.Name(),
+		},
+	}
+	exporter, _ := newExporter(cfg, exporter.CreateSettings{})
+
+	// Mock log data
+	ld := mockLogs(mockLogRecord(t, "test", map[string]any{"test": "test"}))
+
+	err = exporter.logsDataPusher(context.Background(), ld)
+	require.NoError(t, err)
+
+	// Read the contents of the file
+	content, err := os.ReadFile(f.Name())
+	require.NoError(t, err)
+
+	// Convert the content to a string and compare with the expected output
+	receivedData := string(content)
+	expectedData := "{\"attributes\":{\"test\":\"test\"},\"body\":\"test\",\"resource_attributes\":{}}\n"
+	require.Equal(t, expectedData, receivedData, "File content does not match expected output")
 }
 
-func (m *MockWriter) Write(p []byte) (n int, err error) {
-	args := m.Called(p)
-	return args.Int(0), args.Error(1)
-}
+func TestLogDataPushingNetwork(t *testing.T) {
+	// Channel to signal when log is received
+	logReceived := make(chan bool)
 
-func TestLogsDataPusher(t *testing.T) {
-	mockWriter := new(MockWriter)
-	exporter := &chronicleForwarderExporter{
-		writer: mockWriter,
-		marshaler: &marshaler{
-			cfg: Config{
-				ExportType: ExportTypeSyslog,
+	// Set up a mock Syslog server
+	ln, err := net.Listen("tcp", "localhost:0")
+	require.NoError(t, err)
+	defer ln.Close()
+
+	go func() {
+		for {
+			conn, err := ln.Accept()
+			if err != nil {
+				log.Println("Error accepting connection:", err)
+				return
+			}
+			go handleSyslogConnection(t, conn, logReceived)
+		}
+	}()
+
+	// Configure the exporter to use the mock Syslog server
+	cfg := &Config{
+		ExportType: ExportTypeSyslog,
+		Syslog: SyslogConfig{
+			NetAddr: confignet.NetAddr{
+				Endpoint:  ln.Addr().String(),
+				Transport: "tcp",
 			},
 		},
 	}
+	exporter, _ := newExporter(cfg, exporter.CreateSettings{})
 
-	mockWriter.On("Write", mock.Anything).Return(0, nil)
+	// Mock log data
+	ld := mockLogs(mockLogRecord(t, "test", map[string]any{"test": "test"}))
 
-	logs := mockLogs([]plog.LogRecord{
-		mockLogRecord(t, "Test body", map[string]any{"key1": "value1"}),
-	}...)
-
-	err := exporter.logsDataPusher(context.Background(), logs)
+	// Test log data pushing
+	err = exporter.logsDataPusher(context.Background(), ld)
 	require.NoError(t, err)
 
-	mockWriter.AssertExpectations(t)
+	select {
+	case <-logReceived:
+	case <-time.After(5 * time.Second):
+		t.Fatal("Timeout waiting for log to be received")
+	}
+}
+
+func handleSyslogConnection(t *testing.T, conn net.Conn, logReceived chan bool) {
+	defer conn.Close()
+
+	// Buffer to store the received data
+	buf := make([]byte, 1024)
+
+	// Read data from the connection
+	n, err := conn.Read(buf)
+	require.NoError(t, err)
+
+	// Extract the received message
+	receivedData := string(buf[:n])
+
+	require.Equal(t, "{\"attributes\":{\"test\":\"test\"},\"body\":\"test\",\"resource_attributes\":{}}\n", receivedData)
+
+	logReceived <- true
+	conn.Close()
 }

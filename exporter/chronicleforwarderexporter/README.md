@@ -35,7 +35,7 @@ The Chronicle Forwarder Exporter is designed for forwarding logs to a Chronicle 
 ### Syslog Configuration Example
 
 ```yaml
-chronicleforwarderexporter:
+chronicleforwarder:
   export_type: "syslog"
   syslog:
     host: "syslog.example.com"
@@ -46,7 +46,7 @@ chronicleforwarderexporter:
 ### File Configuration Example
 
 ```yaml
-chronicleforwarderexporter:
+chronicleforwarder:
   export_type: "file"
   file:
     path: "/path/to/logfile"
