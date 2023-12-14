@@ -73,7 +73,7 @@ printf() {
 }
 
 increase_indent() { indent="$INDENT_WIDTH$indent" ; }
-decrease_indent() { indent="${indent#*$INDENT_WIDTH}" ; }
+decrease_indent() { indent="${indent#*"$INDENT_WIDTH"}" ; }
 
 # Color functions reset only when given an argument
 bold() { command printf "$bold$*$(if [ -n "$1" ]; then command printf "$reset"; fi)" ; }
@@ -281,19 +281,18 @@ check_prereqs()
 # Test connection to BindPlane if it was specified
 connection_check()
 {
-  info "Help Me Obi-Wan Kenobi!"
-  if [ $check_bp_url == "true" ] ; then
+  if [ "$check_bp_url" = "true" ] ; then
     if [ -n "$opamp_endpoint" ]; then
-      HTTP_ENDPOINT="$(printf "${opamp_endpoint}" | sed 's#ws#http#' | sed 's#/v1/opamp$##')"
+      HTTP_ENDPOINT="$(echo "${opamp_endpoint}" | sed 's#ws#http#' | sed 's#/v1/opamp$##')"
       info "Testing connection to BindPlane: $fg_magenta$HTTP_ENDPOINT$reset..."
 
-      if curl -s ${HTTP_ENDPOINT} > /dev/null; then
+      if curl -s "${HTTP_ENDPOINT}" > /dev/null; then
         succeeded
       else
         failed
-        warn "Connection to BindPlane has failed. Do you wish to continue installation?"
+        warn "Connection to BindPlane has failed."
         increase_indent
-        printf "${fg_yellow}Do you wish to continue installation?${reset}  "
+        printf "%sDo you wish to continue installation?%s  " "$fg_yellow" "$reset"
         prompt "n"
         decrease_indent
         read -n 1 -p "" input
@@ -512,8 +511,8 @@ install_package()
   # Move files to install dir
   for f in $FILES
   do
-    rm -rf "$INSTALL_DIR/$f"
-    cp "$TMP_DIR/artifacts/$f" "$INSTALL_DIR/$f" || error_exit "$LINENO" "Failed to copy artifact $f to install dir"
+    rm -rf "$INSTALL_DIR/${f:?}"
+    cp "$TMP_DIR/artifacts/${f:?}" "$INSTALL_DIR/${f:?}" || error_exit "$LINENO" "Failed to copy artifact $f to install dir"
   done
   decrease_indent
   succeeded

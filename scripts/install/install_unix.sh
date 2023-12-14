@@ -75,7 +75,7 @@ printf() {
 }
 
 increase_indent() { indent="$INDENT_WIDTH$indent" ; }
-decrease_indent() { indent="${indent#*$INDENT_WIDTH}" ; }
+decrease_indent() { indent="${indent#*"$INDENT_WIDTH"}" ; }
 
 # Color functions reset only when given an argument
 bold() { command printf "$bold$*$(if [ -n "$1" ]; then command printf "$reset"; fi)" ; }
@@ -462,16 +462,16 @@ connection_check()
 {
   if [ -n "$check_bp_url" ] ; then
     if [ -n "$opamp_endpoint" ]; then
-      HTTP_ENDPOINT="$(printf "${opamp_endpoint}" | sed -z 's#ws#http#' | sed -z 's#/v1/opamp$##')"
+      HTTP_ENDPOINT="$(echo "${opamp_endpoint}" | sed -z 's#ws#http#' | sed -z 's#/v1/opamp$##')"
       info "Testing connection to BindPlane: $fg_magenta$HTTP_ENDPOINT$reset..."
 
-      if curl -s ${HTTP_ENDPOINT} > /dev/null; then
+      if curl -s "${HTTP_ENDPOINT}" > /dev/null; then
         succeeded
       else
         failed
-        warn "Connection to BindPlane has failed. Do you wish to continue installation?"
+        warn "Connection to BindPlane has failed."
         increase_indent
-        printf "${fg_yellow}Do you wish to continue installation?${reset}  "
+        printf "%sDo you wish to continue installation?%s  " "$fg_yellow" "$reset"
         prompt "n"
         decrease_indent
         read -n 1 -p "" input
