@@ -199,6 +199,11 @@ Usage:
     This parameter may also be provided through the SECRET_KEY environment variable.
     The '--endpoint' flag must be specified if this flag is specified.
 
+  $(fg_yellow '-c, --check-bp-url')
+    Check access to the BindPlane server URL.
+
+    This parameter will have the script check access to BindPlane based on the provided '--endpoint'
+
 EOF
   )
   info "$USAGE"
@@ -218,6 +223,7 @@ error_exit()
 {
   line_num=$(if [ -n "$1" ]; then command printf ":$1"; fi)
   error "ERROR ($SCRIPT_NAME$line_num): ${2:-Unknown Error}" >&2
+  shift 2
   if [ -n "$0" ]; then
     increase_indent
     error "$*"
@@ -270,6 +276,36 @@ check_prereqs()
   dependencies_check
   success "Prerequisite check complete!"
   decrease_indent
+}
+
+# Test connection to BindPlane if it was specified
+connection_check()
+{
+  info "Help Me Obi-Wan Kenobi!"
+  if [ $check_bp_url == "true" ] ; then
+    if [ -n "$opamp_endpoint" ]; then
+      HTTP_ENDPOINT="$(printf "${opamp_endpoint}" | sed 's#ws#http#' | sed 's#/v1/opamp$##')"
+      info "Testing connection to BindPlane: $fg_magenta$HTTP_ENDPOINT$reset..."
+
+      if curl -s ${HTTP_ENDPOINT} > /dev/null; then
+        succeeded
+      else
+        failed
+        warn "Connection to BindPlane has failed. Do you wish to continue installation?"
+        increase_indent
+        printf "${fg_yellow}Do you wish to continue installation?${reset}  "
+        prompt "n"
+        decrease_indent
+        read -n 1 -p "" input
+        printf "\\n"
+        if [ "$input" = "y" ] || [ "$input" = "Y" ]; then
+          info "Continuing installation."
+        else
+          error_exit "$LINENO" "Aborting due to user input after connectivity failure between this system and the BindPlane server."
+        fi
+      fi
+    fi
+  fi
 }
 
 # This will check if the operating system is supported.
@@ -649,6 +685,8 @@ main()
           opamp_labels=$2 ; shift 2 ;;
         -s|--secret-key)
           opamp_secret_key=$2 ; shift 2 ;;
+        -c|--check-bp-url)
+          check_bp_url="true" ; shift 1 ;;
         -b|--base-url)
           base_url=$2 ; shift 2 ;;
       --)
@@ -662,6 +700,7 @@ main()
     done
   fi
 
+  connection_check
   setup_installation
   install_package
   display_results
