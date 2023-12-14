@@ -99,17 +99,18 @@ func (ce *chronicleForwarderExporter) logsDataPusher(ctx context.Context, ld plo
 	return nil
 }
 
-func (s *chronicleForwarderExporter) send(msg string) error {
+func (ce *chronicleForwarderExporter) send(msg string) error {
 	if !strings.HasSuffix(msg, "\n") {
 		msg = fmt.Sprintf("%s%s", msg, "\n")
 	}
-	_, err := fmt.Fprint(s.writer, msg)
+	_, err := fmt.Fprint(ce.writer, msg)
 	return err
 }
 
-func (s *chronicleForwarderExporter) Shutdown(ctx context.Context) error {
-	if s.writer != nil {
-		if err := s.writer.(io.Closer).Close(); err != nil {
+// Shutdown stops the exporter and is invoked during shutdown.
+func (ce *chronicleForwarderExporter) Shutdown(_ context.Context) error {
+	if ce.writer != nil {
+		if err := ce.writer.(io.Closer).Close(); err != nil {
 			return fmt.Errorf("close writer: %w", err)
 		}
 	}

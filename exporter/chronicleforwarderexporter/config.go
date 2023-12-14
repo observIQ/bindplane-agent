@@ -71,6 +71,7 @@ type File struct {
 	Path string `mapstructure:"path"`
 }
 
+// Validate validates the Chronicle exporter configuration.
 func (cfg *Config) Validate() error {
 	if cfg.ExportType != ExportTypeSyslog && cfg.ExportType != ExportTypeFile {
 		return fmt.Errorf("export_type must be either 'syslog' or 'file'")
