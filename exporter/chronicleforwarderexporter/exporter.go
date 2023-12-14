@@ -67,7 +67,7 @@ func newExporter(cfg *Config, params exporter.CreateSettings) (*chronicleForward
 
 	case ExportTypeFile:
 		var err error
-		exporter.writer, err = os.OpenFile(cfg.File.Path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
+		exporter.writer, err = os.OpenFile(cfg.File.Path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
 		if err != nil {
 			return nil, fmt.Errorf("open file: %w", err)
 		}
