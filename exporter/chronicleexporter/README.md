@@ -45,9 +45,21 @@ For additional information on accessing Chronicle, see the [Chronicle documentat
 
 ## Example Configuration
 
+### Basic Configuration
+
 ```yaml
 chronicle:
   creds_file_path: "/path/to/google/creds.json"
-  log_type: "threat_detection"
+  log_type: "ABSOLUTE"
+  customer_id: "customer-123"
+```
+
+### Basic Configuration with Regional Endpoint
+
+```yaml
+chronicle:
+  endpoint: https://malachiteingestion-pa.googleapis.com
+  creds_file_path: "/path/to/google/creds.json"
+  log_type: "ONEPASSWORD"
   customer_id: "customer-123"
 ```
