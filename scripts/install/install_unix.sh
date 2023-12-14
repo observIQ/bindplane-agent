@@ -462,7 +462,7 @@ connection_check()
 {
   if [ -n "$check_bp_url" ] ; then
     if [ -n "$opamp_endpoint" ]; then
-      HTTP_ENDPOINT="$(echo "${opamp_endpoint}" | sed -z 's#ws#http#' | sed -z 's#/v1/opamp$##')"
+      HTTP_ENDPOINT="$(echo "${opamp_endpoint}" | sed -z 's#^ws#http#' | sed -z 's#/v1/opamp$##')"
       info "Testing connection to BindPlane: $fg_magenta$HTTP_ENDPOINT$reset..."
 
       if curl -s "${HTTP_ENDPOINT}" > /dev/null; then
