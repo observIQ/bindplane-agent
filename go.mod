@@ -7,6 +7,7 @@ require (
 	github.com/mholt/archiver/v3 v3.5.1
 	github.com/observiq/bindplane-agent/exporter/azureblobexporter v1.42.0
 	github.com/observiq/bindplane-agent/exporter/chronicleexporter v1.42.0
+	github.com/observiq/bindplane-agent/exporter/chronicleforwarderexporter v1.42.0
 	github.com/observiq/bindplane-agent/exporter/googlecloudexporter v1.42.0
 	github.com/observiq/bindplane-agent/exporter/googlemanagedprometheusexporter v1.42.0
 	github.com/observiq/bindplane-agent/packagestate v1.42.0
@@ -667,6 +668,8 @@ replace github.com/observiq/bindplane-agent/exporter/googlecloudexporter => ./ex
 replace github.com/observiq/bindplane-agent/exporter/azureblobexporter => ./exporter/azureblobexporter
 
 replace github.com/observiq/bindplane-agent/exporter/chronicleexporter => ./exporter/chronicleexporter
+
+replace github.com/observiq/bindplane-agent/exporter/chronicleforwarderexporter => ./exporter/chronicleforwarderexporter
 
 replace github.com/observiq/bindplane-agent/packagestate => ./packagestate
 
