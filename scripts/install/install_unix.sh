@@ -465,7 +465,7 @@ connection_check()
       HTTP_ENDPOINT="$(echo "${opamp_endpoint}" | sed -z 's#^ws#http#' | sed -z 's#/v1/opamp$##')"
       info "Testing connection to BindPlane: $fg_magenta$HTTP_ENDPOINT$reset..."
 
-      if curl -s "${HTTP_ENDPOINT}" > /dev/null; then
+      if curl --max-time 20 -s "${HTTP_ENDPOINT}" > /dev/null; then
         succeeded
       else
         failed
