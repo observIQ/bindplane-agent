@@ -16,6 +16,7 @@ builds:
       - windows
       - linux
       - darwin
+      - freebsd
     goarch:
       - amd64
       - arm64
@@ -35,6 +36,9 @@ builds:
         goarch: ppc64
       - goos: darwin
         goarch: ppc64le
+        goarch: "386"
+      - goos: freebsd
+        goarch: "386"
     ldflags:
       - -s -w
       - -X github.com/observiq/bindplane-agent/internal/version.version=v{{ .Version }}
@@ -52,6 +56,7 @@ builds:
       - windows
       - linux
       - darwin
+      - freebsd
     goarch:
       - amd64
       - arm64
@@ -71,6 +76,9 @@ builds:
         goarch: ppc64
       - goos: darwin
         goarch: ppc64le
+        goarch: "386"
+      - goos: freebsd
+        goarch: "386"
     ldflags:
       - -s -w
       - -X github.com/observiq/bindplane-agent/updater/internal/version.version=v{{ .Version }}
