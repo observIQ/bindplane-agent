@@ -12,17 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:build linux || darwin || windows
+//go:build freebsd
 
 package factories
 
 import (
 	"github.com/observiq/bindplane-agent/exporter/azureblobexporter"
 	"github.com/observiq/bindplane-agent/exporter/chronicleexporter"
-	"github.com/observiq/bindplane-agent/exporter/chronicleforwarderexporter"
 	"github.com/observiq/bindplane-agent/exporter/googlecloudexporter"
 	"github.com/observiq/bindplane-agent/exporter/googlemanagedprometheusexporter"
-	"github.com/observiq/bindplane-agent/exporter/snowflakeexporter"
 	"github.com/observiq/bindplane-agent/internal/version"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/alibabacloudlogserviceexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/awscloudwatchlogsexporter"
@@ -34,11 +32,13 @@ import (
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/carbonexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/clickhouseexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/coralogixexporter"
-	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/datadogexporter"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/dynatraceexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/elasticsearchexporter"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/f5cloudexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/fileexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlecloudpubsubexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/influxdbexporter"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/jaegerexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/kafkaexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/loadbalancingexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/logzioexporter"
@@ -53,8 +53,8 @@ import (
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/syslogexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/zipkinexporter"
 	"go.opentelemetry.io/collector/exporter"
+	"go.opentelemetry.io/collector/exporter/exportertest"
 	"go.opentelemetry.io/collector/exporter/loggingexporter"
-	"go.opentelemetry.io/collector/exporter/nopexporter"
 	"go.opentelemetry.io/collector/exporter/otlpexporter"
 	"go.opentelemetry.io/collector/exporter/otlphttpexporter"
 )
@@ -70,22 +70,23 @@ var defaultExporters = []exporter.Factory{
 	azuremonitorexporter.NewFactory(),
 	carbonexporter.NewFactory(),
 	chronicleexporter.NewFactory(),
-	chronicleforwarderexporter.NewFactory(),
 	clickhouseexporter.NewFactory(),
 	coralogixexporter.NewFactory(),
-	datadogexporter.NewFactory(),
+	dynatraceexporter.NewFactory(),
 	elasticsearchexporter.NewFactory(),
+	exportertest.NewNopFactory(),
+	f5cloudexporter.NewFactory(),
 	fileexporter.NewFactory(),
 	googlecloudexporter.NewFactory(version.Version()),
 	googlecloudpubsubexporter.NewFactory(),
 	googlemanagedprometheusexporter.NewFactory(version.Version()),
 	influxdbexporter.NewFactory(),
+	jaegerexporter.NewFactory(),
 	kafkaexporter.NewFactory(),
 	loadbalancingexporter.NewFactory(),
 	loggingexporter.NewFactory(),
 	logzioexporter.NewFactory(),
 	lokiexporter.NewFactory(),
-	nopexporter.NewFactory(),
 	opencensusexporter.NewFactory(),
 	otlpexporter.NewFactory(),
 	otlphttpexporter.NewFactory(),
@@ -93,7 +94,6 @@ var defaultExporters = []exporter.Factory{
 	prometheusremotewriteexporter.NewFactory(),
 	sapmexporter.NewFactory(),
 	signalfxexporter.NewFactory(),
-	snowflakeexporter.NewFactory(),
 	splunkhecexporter.NewFactory(),
 	sumologicexporter.NewFactory(),
 	syslogexporter.NewFactory(),
