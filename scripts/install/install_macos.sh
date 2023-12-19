@@ -272,6 +272,7 @@ check_prereqs()
 {
   banner "Checking Prerequisites"
   increase_indent
+  root_check
   os_check
   dependencies_check
   success "Prerequisite check complete!"
@@ -659,9 +660,7 @@ main()
   # (e.g. uninstall) can run
 
   observiq_banner
-
   check_prereqs
-  root_check  
 
   if [ $# -ge 1 ]; then
     while [ -n "$1" ]; do
