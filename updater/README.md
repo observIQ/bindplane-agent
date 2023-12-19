@@ -1,6 +1,6 @@
 # BindPlane Agent Updater
 
-The updater is a separate binary that runs as a separate process to update agent artifacts (including the agent itself) when managed by [BindPlane OP](https://github.com/observIQ/bindplane-op).
+The updater is a separate binary that runs as a separate process to update agent artifacts (including the agent itself) when managed by [BindPlane OP](https://observiq.com/).
 
 Because the updater interacts with the service manager, and may edit privileged files, it needs elevated privileges to run (root on Linux + macOS, administrative privileges on Windows).
 

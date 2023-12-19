@@ -2,7 +2,7 @@
 
 Supported pipelines: logs, metrics, traces
 
-This processor saves OTLP payloads into snapshots that can be reported to [BindPlane OP](https://github.com/observIQ/bindplane-op).
+This processor saves OTLP payloads into snapshots that can be reported to [BindPlane OP](https://observiq.com/).
 
 ## Configuration
 
