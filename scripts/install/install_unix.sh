@@ -730,6 +730,13 @@ uninstall()
 
 main()
 {
+  # We do these checks before we process arguments, because
+  # some of these options bail early, and we'd like to be sure that those commands
+  # (e.g. uninstall) can run
+
+  observiq_banner
+  check_prereqs
+
   if [ $# -ge 1 ]; then
     while [ -n "$1" ]; do
       case "$1" in
@@ -772,8 +779,6 @@ main()
     done
   fi
 
-  observiq_banner
-  check_prereqs
   setup_installation
   install_package
   display_results
