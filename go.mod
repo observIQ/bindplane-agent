@@ -166,7 +166,6 @@ require (
 	go.opentelemetry.io/collector/exporter/otlpexporter v0.91.0
 	go.opentelemetry.io/collector/exporter/otlphttpexporter v0.91.0
 	go.opentelemetry.io/collector/extension v0.91.0
-	go.opentelemetry.io/collector/extension/ballastextension v0.91.0
 	go.opentelemetry.io/collector/extension/zpagesextension v0.91.0
 	go.opentelemetry.io/collector/featuregate v1.0.0
 	go.opentelemetry.io/collector/otelcol v0.91.0
