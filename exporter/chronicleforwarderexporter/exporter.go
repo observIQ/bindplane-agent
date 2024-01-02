@@ -49,6 +49,7 @@ func newExporter(cfg *Config, params exporter.CreateSettings) (*chronicleForward
 func (ce *chronicleForwarderExporter) Capabilities() consumer.Capabilities {
 	return consumer.Capabilities{MutatesData: false}
 }
+
 func (ce *chronicleForwarderExporter) logsDataPusher(ctx context.Context, ld plog.Logs) error {
 	// Open connection or file before sending each payload
 	if err := ce.openWriter(); err != nil {
