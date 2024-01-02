@@ -41,7 +41,7 @@ func TestLogDataPushingFile(t *testing.T) {
 	defer os.Remove(f.Name()) // Clean up the file afterwards
 
 	cfg := &Config{
-		ExportType: ExportTypeFile,
+		ExportType: exportTypeFile,
 		File: File{
 			Path: f.Name(),
 		},
@@ -73,20 +73,28 @@ func TestLogDataPushingNetwork(t *testing.T) {
 	require.NoError(t, err)
 	defer ln.Close()
 
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
 	go func() {
 		for {
-			conn, err := ln.Accept()
-			if err != nil {
-				log.Println("Error accepting connection:", err)
+			select {
+			case <-ctx.Done():
 				return
+			default:
+				conn, err := ln.Accept()
+				if err != nil {
+					log.Println("Error accepting connection:", err)
+					return
+				}
+				go handleSyslogConnection(t, conn, logReceived)
 			}
-			go handleSyslogConnection(t, conn, logReceived)
 		}
 	}()
 
 	// Configure the exporter to use the mock Syslog server
 	cfg := &Config{
-		ExportType: ExportTypeSyslog,
+		ExportType: exportTypeSyslog,
 		Syslog: SyslogConfig{
 			NetAddr: confignet.NetAddr{
 				Endpoint:  ln.Addr().String(),

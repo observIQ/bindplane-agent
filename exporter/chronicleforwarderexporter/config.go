@@ -15,6 +15,7 @@
 package chronicleforwarderexporter
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/observiq/bindplane-agent/expr"
@@ -26,11 +27,11 @@ import (
 )
 
 const (
-	// ExportTypeSyslog is the syslog export type.
-	ExportTypeSyslog = "syslog"
+	// exportTypeSyslog is the syslog export type.
+	exportTypeSyslog = "syslog"
 
-	// ExportTypeFile is the file export type.
-	ExportTypeFile = "file"
+	// exportTypeFile is the file export type.
+	exportTypeFile = "file"
 )
 
 // Config defines configuration for the Chronicle exporter.
@@ -66,21 +67,37 @@ type File struct {
 	Path string `mapstructure:"path"`
 }
 
+// Validate validates the Syslog configuration.
+func (s *SyslogConfig) Validate() error {
+	if s.NetAddr.Endpoint == "" {
+		return errors.New("incomplete syslog configuration: endpoint is required")
+	}
+	return nil
+}
+
+// Validate validates the File configuration.
+func (f *File) Validate() error {
+	if f.Path == "" {
+		return errors.New("file path is required for file export type")
+	}
+	return nil
+}
+
 // Validate validates the Chronicle exporter configuration.
 func (cfg *Config) Validate() error {
-	if cfg.ExportType != ExportTypeSyslog && cfg.ExportType != ExportTypeFile {
-		return fmt.Errorf("export_type must be either 'syslog' or 'file'")
+	if cfg.ExportType != exportTypeSyslog && cfg.ExportType != exportTypeFile {
+		return errors.New("export_type must be either 'syslog' or 'file'")
 	}
 
-	if cfg.ExportType == ExportTypeSyslog {
-		if cfg.Syslog.NetAddr.Endpoint == "" {
-			return fmt.Errorf("incomplete syslog configuration: endpoint is required")
+	if cfg.ExportType == exportTypeSyslog {
+		if err := cfg.Syslog.Validate(); err != nil {
+			return err
 		}
 	}
 
-	if cfg.ExportType == ExportTypeFile {
-		if cfg.File.Path == "" {
-			return fmt.Errorf("file path is required for file export type")
+	if cfg.ExportType == exportTypeFile {
+		if err := cfg.File.Validate(); err != nil {
+			return err
 		}
 	}
 

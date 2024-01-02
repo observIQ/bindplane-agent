@@ -1,6 +1,6 @@
 # Chronicle Forwarder Exporter
 
-The Chronicle Forwarder Exporter is designed for forwarding logs to a Chronicle endpoint using either Syslog or File-based methods. This exporter supports customization of data export types and various configuration options to tailor the connection and data handling to specific needs.
+The Chronicle Forwarder Exporter is designed for forwarding logs to a Chronicle Forwarder endpoint using either Syslog or File-based methods. This exporter supports customization of data export types and various configuration options to tailor the connection and data handling to specific needs.
 
 ## Minimum Agent Versions
 

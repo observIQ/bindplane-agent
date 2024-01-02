@@ -39,7 +39,7 @@ func createDefaultConfig() component.Config {
 		TimeoutSettings: exporterhelper.NewDefaultTimeoutSettings(),
 		QueueSettings:   exporterhelper.NewDefaultQueueSettings(),
 		RetrySettings:   exporterhelper.NewDefaultRetrySettings(),
-		ExportType:      ExportTypeSyslog,
+		ExportType:      exportTypeSyslog,
 		Syslog: SyslogConfig{
 			NetAddr: confignet.NetAddr{
 				Endpoint:  "127.0.0.1:10514",

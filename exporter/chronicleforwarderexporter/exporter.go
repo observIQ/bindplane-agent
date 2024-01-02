@@ -17,6 +17,7 @@ package chronicleforwarderexporter
 import (
 	"context"
 	"crypto/tls"
+	"errors"
 	"fmt"
 	"io"
 	"net"
@@ -71,34 +72,39 @@ func (ce *chronicleForwarderExporter) logsDataPusher(ctx context.Context, ld plo
 
 func (ce *chronicleForwarderExporter) openWriter() error {
 	switch ce.cfg.ExportType {
-	case ExportTypeSyslog:
-		var conn net.Conn
-		var err error
-		if ce.cfg.Syslog.TLSSetting != nil {
-			tlsConfig, err := ce.cfg.Syslog.TLSSetting.LoadTLSConfig()
-			if err != nil {
-				return fmt.Errorf("load TLS config: %w", err)
-			}
-			conn, err = tls.Dial(ce.cfg.Syslog.NetAddr.Transport, ce.cfg.Syslog.NetAddr.Endpoint, tlsConfig)
-		} else {
-			conn, err = net.Dial(ce.cfg.Syslog.NetAddr.Transport, ce.cfg.Syslog.NetAddr.Endpoint)
-		}
-
-		if err != nil {
-			return fmt.Errorf("dial: %w", err)
-		}
-		ce.writer = conn
-
-	case ExportTypeFile:
-		var err error
-		ce.writer, err = os.OpenFile(ce.cfg.File.Path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
-		if err != nil {
-			return fmt.Errorf("open file: %w", err)
-		}
+	case exportTypeSyslog:
+		return ce.openSyslogWriter()
+	case exportTypeFile:
+		return ce.openFileWriter()
 	default:
-		return fmt.Errorf("unsupported export type")
+		return errors.New("unsupported export type")
 	}
-	return nil
+}
+
+func (ce *chronicleForwarderExporter) openFileWriter() error {
+	var err error
+	ce.writer, err = os.OpenFile(ce.cfg.File.Path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
+	return err
+}
+
+func (ce *chronicleForwarderExporter) openSyslogWriter() error {
+	var conn net.Conn
+	var err error
+	if ce.cfg.Syslog.TLSSetting != nil {
+		tlsConfig, err := ce.cfg.Syslog.TLSSetting.LoadTLSConfig()
+		if err != nil {
+			return fmt.Errorf("load TLS config: %w", err)
+		}
+		conn, err = tls.Dial(ce.cfg.Syslog.NetAddr.Transport, ce.cfg.Syslog.NetAddr.Endpoint, tlsConfig)
+	} else {
+		conn, err = net.Dial(ce.cfg.Syslog.NetAddr.Transport, ce.cfg.Syslog.NetAddr.Endpoint)
+	}
+
+	if err != nil {
+		return fmt.Errorf("dial: %w", err)
+	}
+	ce.writer = conn
+	return err
 }
 
 func (ce *chronicleForwarderExporter) send(msg string) error {

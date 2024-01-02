@@ -7,7 +7,7 @@ require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/ottl v0.91.0
 	github.com/stretchr/testify v1.8.4
 	go.opentelemetry.io/collector/component v0.91.0
-	go.opentelemetry.io/collector/config/configtls v0.90.0
+	go.opentelemetry.io/collector/config/configtls v0.91.0
 	go.opentelemetry.io/collector/consumer v0.91.0
 	go.opentelemetry.io/collector/exporter v0.91.0
 	go.opentelemetry.io/collector/pdata v1.0.0
@@ -16,7 +16,7 @@ require (
 
 require (
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
-	go.opentelemetry.io/collector/config/configopaque v0.90.0 // indirect
+	go.opentelemetry.io/collector/config/configopaque v0.91.0 // indirect
 )
 
 require (

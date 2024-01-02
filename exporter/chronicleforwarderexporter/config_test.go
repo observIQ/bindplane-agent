@@ -30,7 +30,7 @@ func TestConfig_Validate(t *testing.T) {
 		{
 			name: "Valid syslog config",
 			cfg: Config{
-				ExportType: ExportTypeSyslog,
+				ExportType: exportTypeSyslog,
 				Syslog: SyslogConfig{
 					NetAddr: confignet.NetAddr{
 						Endpoint:  "localhost:514",
@@ -43,7 +43,7 @@ func TestConfig_Validate(t *testing.T) {
 		{
 			name: "Invalid syslog config - missing host",
 			cfg: Config{
-				ExportType: ExportTypeSyslog,
+				ExportType: exportTypeSyslog,
 				Syslog: SyslogConfig{
 					NetAddr: confignet.NetAddr{
 						Endpoint:  "",
@@ -56,7 +56,7 @@ func TestConfig_Validate(t *testing.T) {
 		{
 			name: "Valid file config",
 			cfg: Config{
-				ExportType: ExportTypeFile,
+				ExportType: exportTypeFile,
 				File: File{
 					Path: "/path/to/file",
 				},
@@ -66,7 +66,7 @@ func TestConfig_Validate(t *testing.T) {
 		{
 			name: "Invalid file config - missing path",
 			cfg: Config{
-				ExportType: ExportTypeFile,
+				ExportType: exportTypeFile,
 				File:       File{},
 			},
 			wantErr: true,

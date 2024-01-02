@@ -120,12 +120,12 @@ go.opentelemetry.io/collector/component v0.91.0 h1:aBT1i2zGyfh9PalYJLfXVvQp+osHy
 go.opentelemetry.io/collector/component v0.91.0/go.mod h1:2KBHvjNFdU7oOjsObQeC4Ta2Ef607OISU5obznW00fw=
 go.opentelemetry.io/collector/config/confignet v0.91.0 h1:3huNXh04O3wXaN4qPhmmiefyz4dYbOlNcR/OKMByqig=
 go.opentelemetry.io/collector/config/confignet v0.91.0/go.mod h1:cpO8JYWGONaViOygKVw+Hd2UoBcn2cUiyi0WWeFTwJY=
-go.opentelemetry.io/collector/config/configopaque v0.90.0 h1:tnuwVWaKbPIhgLawcU4xnex53tJbQsecNq86eZRz1rE=
-go.opentelemetry.io/collector/config/configopaque v0.90.0/go.mod h1:TPCHaU+QXiEV+JXbgyr6mSErTI9chwQyasDVMdJr3eY=
+go.opentelemetry.io/collector/config/configopaque v0.91.0 h1:bQgJPyARbuXAsU2p6h2YbEm1kHb1stS6hg42ekyMZmI=
+go.opentelemetry.io/collector/config/configopaque v0.91.0/go.mod h1:TPCHaU+QXiEV+JXbgyr6mSErTI9chwQyasDVMdJr3eY=
 go.opentelemetry.io/collector/config/configtelemetry v0.91.0 h1:mEwvqrYfwUJ7LwYfpcF9M8z7LHFoYaKhEPhnERD/88E=
 go.opentelemetry.io/collector/config/configtelemetry v0.91.0/go.mod h1:+LAXM5WFMW/UbTlAuSs6L/W72WC+q8TBJt/6z39FPOU=
-go.opentelemetry.io/collector/config/configtls v0.90.0 h1:bsPZkh5ejlIk/XwLdzz91empM3STU8xr6yArqMVYxJ4=
-go.opentelemetry.io/collector/config/configtls v0.90.0/go.mod h1:eLLgpNPxHAtAynKCJN7p9O7GIDEIRKfjsFJs3BQazyg=
+go.opentelemetry.io/collector/config/configtls v0.91.0 h1:lZromNeOslPwyVlTPMOzF2q++SY+VONvfH3cDqA0kKk=
+go.opentelemetry.io/collector/config/configtls v0.91.0/go.mod h1:E+CW5gZoH8V3z5aSlZxwiof7GAcayzn1HRM+uRILLEI=
 go.opentelemetry.io/collector/confmap v0.91.0 h1:7U2MT+u74oEzq/WWrpXSLKB7nX5jPNC4drwtQdYfwKk=
 go.opentelemetry.io/collector/confmap v0.91.0/go.mod h1:uxV+fZ85kG31oovL6Cl3fAMQ3RRPwUvfAbbA9WT1Yhk=
 go.opentelemetry.io/collector/consumer v0.91.0 h1:0nU1lUe2S0b8iOmF3w3R/9Dt24n413thRTbXz/nJgrM=
