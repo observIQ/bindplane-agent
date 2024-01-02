@@ -74,6 +74,5 @@ func createLogsExporter(
 		exporterhelper.WithTimeout(forwarderCfg.TimeoutSettings),
 		exporterhelper.WithQueue(forwarderCfg.QueueSettings),
 		exporterhelper.WithRetry(forwarderCfg.RetrySettings),
-		exporterhelper.WithShutdown(exp.Shutdown),
 	)
 }

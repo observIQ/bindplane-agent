@@ -33,7 +33,6 @@ import (
 type chronicleForwarderExporter struct {
 	cfg       *Config
 	logger    *zap.Logger
-	writer    io.WriteCloser
 	marshaler logMarshaler
 	endpoint  string
 }
@@ -52,10 +51,11 @@ func (ce *chronicleForwarderExporter) Capabilities() consumer.Capabilities {
 
 func (ce *chronicleForwarderExporter) logsDataPusher(ctx context.Context, ld plog.Logs) error {
 	// Open connection or file before sending each payload
-	if err := ce.openWriter(); err != nil {
+	writer, err := ce.openWriter()
+	if err != nil {
 		return fmt.Errorf("open writer: %w", err)
 	}
-	defer ce.writer.Close()
+	defer writer.Close()
 
 	payloads, err := ce.marshaler.MarshalRawLogs(ctx, ld)
 	if err != nil {
@@ -63,7 +63,7 @@ func (ce *chronicleForwarderExporter) logsDataPusher(ctx context.Context, ld plo
 	}
 
 	for _, payload := range payloads {
-		if err := ce.send(payload); err != nil {
+		if err := ce.send(payload, writer); err != nil {
 			return fmt.Errorf("upload to Chronicle forwarder: %w", err)
 		}
 	}
@@ -71,30 +71,28 @@ func (ce *chronicleForwarderExporter) logsDataPusher(ctx context.Context, ld plo
 	return nil
 }
 
-func (ce *chronicleForwarderExporter) openWriter() error {
+func (ce *chronicleForwarderExporter) openWriter() (io.WriteCloser, error) {
 	switch ce.cfg.ExportType {
 	case exportTypeSyslog:
 		return ce.openSyslogWriter()
 	case exportTypeFile:
 		return ce.openFileWriter()
 	default:
-		return errors.New("unsupported export type")
+		return nil, errors.New("unsupported export type")
 	}
 }
 
-func (ce *chronicleForwarderExporter) openFileWriter() error {
-	var err error
-	ce.writer, err = os.OpenFile(ce.cfg.File.Path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
-	return err
+func (ce *chronicleForwarderExporter) openFileWriter() (io.WriteCloser, error) {
+	return os.OpenFile(ce.cfg.File.Path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
 }
 
-func (ce *chronicleForwarderExporter) openSyslogWriter() error {
+func (ce *chronicleForwarderExporter) openSyslogWriter() (io.WriteCloser, error) {
 	var conn net.Conn
 	var err error
 	if ce.cfg.Syslog.TLSSetting != nil {
 		tlsConfig, err := ce.cfg.Syslog.TLSSetting.LoadTLSConfig()
 		if err != nil {
-			return fmt.Errorf("load TLS config: %w", err)
+			return nil, fmt.Errorf("load TLS config: %w", err)
 		}
 		conn, err = tls.Dial(ce.cfg.Syslog.NetAddr.Transport, ce.cfg.Syslog.NetAddr.Endpoint, tlsConfig)
 	} else {
@@ -102,27 +100,16 @@ func (ce *chronicleForwarderExporter) openSyslogWriter() error {
 	}
 
 	if err != nil {
-		return fmt.Errorf("dial: %w", err)
+		return nil, fmt.Errorf("dial: %w", err)
 	}
-	ce.writer = conn
-	return err
+	return conn, nil
 }
 
-func (ce *chronicleForwarderExporter) send(msg string) error {
+func (ce *chronicleForwarderExporter) send(msg string, writer io.WriteCloser) error {
 	if !strings.HasSuffix(msg, "\n") {
 		msg = fmt.Sprintf("%s%s", msg, "\n")
 	}
 
-	_, err := io.WriteString(ce.writer, msg)
+	_, err := io.WriteString(writer, msg)
 	return err
-}
-
-// Shutdown stops the exporter and is invoked during shutdown.
-func (ce *chronicleForwarderExporter) Shutdown(_ context.Context) error {
-	if ce.writer != nil {
-		if err := ce.writer.Close(); err != nil {
-			return fmt.Errorf("close writer: %w", err)
-		}
-	}
-	return nil
 }
