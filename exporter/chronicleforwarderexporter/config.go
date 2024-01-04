@@ -36,7 +36,7 @@ const (
 
 // Config defines configuration for the Chronicle exporter.
 type Config struct {
-	exporterhelper.TimeoutSettings `mapstructure:",squash"` // squash ensures fields are correctly decoded in embedded struct.
+	exporterhelper.TimeoutSettings `mapstructure:",squash"`
 	exporterhelper.QueueSettings   `mapstructure:"sending_queue"`
 	exporterhelper.RetrySettings   `mapstructure:"retry_on_failure"`
 
@@ -67,16 +67,16 @@ type File struct {
 	Path string `mapstructure:"path"`
 }
 
-// Validate validates the Syslog configuration.
-func (s *SyslogConfig) Validate() error {
+// validate validates the Syslog configuration.
+func (s *SyslogConfig) validate() error {
 	if s.NetAddr.Endpoint == "" {
 		return errors.New("incomplete syslog configuration: endpoint is required")
 	}
 	return nil
 }
 
-// Validate validates the File configuration.
-func (f *File) Validate() error {
+// validate validates the File configuration.
+func (f *File) validate() error {
 	if f.Path == "" {
 		return errors.New("file path is required for file export type")
 	}
@@ -90,13 +90,13 @@ func (cfg *Config) Validate() error {
 	}
 
 	if cfg.ExportType == exportTypeSyslog {
-		if err := cfg.Syslog.Validate(); err != nil {
+		if err := cfg.Syslog.validate(); err != nil {
 			return err
 		}
 	}
 
 	if cfg.ExportType == exportTypeFile {
-		if err := cfg.File.Validate(); err != nil {
+		if err := cfg.File.validate(); err != nil {
 			return err
 		}
 	}
