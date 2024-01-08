@@ -674,6 +674,8 @@ replace github.com/observiq/bindplane-agent/exporter/chronicleexporter => ./expo
 
 replace github.com/observiq/bindplane-agent/exporter/chronicleforwarderexporter => ./exporter/chronicleforwarderexporter
 
+replace github.com/observiq/bindplane-agent/exporter/snowflakeexporter => ./exporter/snowflakeexporter
+
 replace github.com/observiq/bindplane-agent/packagestate => ./packagestate
 
 replace github.com/observiq/bindplane-agent/processor/metricstatsprocessor => ./processor/metricstatsprocessor
