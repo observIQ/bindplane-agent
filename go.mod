@@ -244,8 +244,8 @@ require (
 	github.com/matttproud/golang_protobuf_extensions/v2 v2.0.0 // indirect
 	github.com/minio/asm2plan9s v0.0.0-20200509001527-cdd76441f9d8 // indirect
 	github.com/minio/c2goasm v0.0.0-20190812172519-36a3d3bbc4f3 // indirect
-	github.com/observiq/bindplane-agent/counter v1.42.0 // indirect
-	github.com/observiq/bindplane-agent/expr v1.42.0 // indirect
+	github.com/observiq/bindplane-agent/counter v1.43.0 // indirect
+	github.com/observiq/bindplane-agent/expr v1.43.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlemanagedprometheusexporter v0.91.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/internal/collectd v0.91.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/internal/kafka v0.91.0 // indirect
