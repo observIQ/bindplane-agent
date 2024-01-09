@@ -23,13 +23,11 @@ import (
 	"github.com/open-telemetry/opentelemetry-collector-contrib/extension/sigv4authextension"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/extension/storage/filestorage"
 	"go.opentelemetry.io/collector/extension"
-	"go.opentelemetry.io/collector/extension/ballastextension"
 	"go.opentelemetry.io/collector/extension/extensiontest"
 	"go.opentelemetry.io/collector/extension/zpagesextension"
 )
 
 var defaultExtensions = []extension.Factory{
-	ballastextension.NewFactory(),
 	basicauthextension.NewFactory(),
 	bearertokenauthextension.NewFactory(),
 	extensiontest.NewNopFactory(),

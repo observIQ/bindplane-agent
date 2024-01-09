@@ -144,7 +144,7 @@ jobs:
       - name: Plugin Doc Generation
         run: make create-plugin-docs
       - name: Check Changed Plugin Docs
-        uses: tj-actions/verify-changed-files@v12
+        uses: tj-actions/verify-changed-files@v17
         id: verify-changed-files
         with:
           files: |
