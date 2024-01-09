@@ -20,9 +20,9 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/fs"
 	"net"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"go.opentelemetry.io/collector/consumer"
@@ -45,7 +45,7 @@ type chronicleForwarderExporter struct {
 type chronicleForwarderClient interface {
 	Dial(network string, address string) (net.Conn, error)
 	DialWithTLS(network string, addr string, config *tls.Config) (*tls.Conn, error)
-	OpenFile(name string, flag int, perm fs.FileMode) (*os.File, error)
+	OpenFile(name string) (*os.File, error)
 }
 
 type forwarderClient struct {
@@ -59,8 +59,9 @@ func (fc *forwarderClient) DialWithTLS(network string, addr string, config *tls.
 	return tls.Dial(network, addr, config)
 }
 
-func (fc *forwarderClient) OpenFile(name string, flag int, perm fs.FileMode) (*os.File, error) {
-	return os.OpenFile(name, flag, perm)
+func (fc *forwarderClient) OpenFile(name string) (*os.File, error) {
+	cleanPath := filepath.Clean(name)
+	return os.OpenFile(cleanPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
 }
 
 func newExporter(cfg *Config, params exporter.CreateSettings) (*chronicleForwarderExporter, error) {
@@ -110,7 +111,7 @@ func (ce *chronicleForwarderExporter) openWriter() (io.WriteCloser, error) {
 }
 
 func (ce *chronicleForwarderExporter) openFileWriter() (io.WriteCloser, error) {
-	return ce.OpenFile(ce.cfg.File.Path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
+	return ce.OpenFile(ce.cfg.File.Path)
 }
 
 func (ce *chronicleForwarderExporter) openSyslogWriter() (io.WriteCloser, error) {

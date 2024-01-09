@@ -3,7 +3,6 @@
 package mocks
 
 import (
-	fs "io/fs"
 	net "net"
 
 	mock "github.com/stretchr/testify/mock"
@@ -137,25 +136,25 @@ func (_c *MockForwarderClient_DialWithTLS_Call) RunAndReturn(run func(string, st
 	return _c
 }
 
-// OpenFile provides a mock function with given fields: name, flag, perm
-func (_m *MockForwarderClient) OpenFile(name string, flag int, perm fs.FileMode) (*os.File, error) {
-	ret := _m.Called(name, flag, perm)
+// OpenFile provides a mock function with given fields: name
+func (_m *MockForwarderClient) OpenFile(name string) (*os.File, error) {
+	ret := _m.Called(name)
 
 	var r0 *os.File
 	var r1 error
-	if rf, ok := ret.Get(0).(func(string, int, fs.FileMode) (*os.File, error)); ok {
-		return rf(name, flag, perm)
+	if rf, ok := ret.Get(0).(func(string) (*os.File, error)); ok {
+		return rf(name)
 	}
-	if rf, ok := ret.Get(0).(func(string, int, fs.FileMode) *os.File); ok {
-		r0 = rf(name, flag, perm)
+	if rf, ok := ret.Get(0).(func(string) *os.File); ok {
+		r0 = rf(name)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*os.File)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(string, int, fs.FileMode) error); ok {
-		r1 = rf(name, flag, perm)
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(name)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -170,15 +169,13 @@ type MockForwarderClient_OpenFile_Call struct {
 
 // OpenFile is a helper method to define mock.On call
 //   - name string
-//   - flag int
-//   - perm fs.FileMode
-func (_e *MockForwarderClient_Expecter) OpenFile(name interface{}, flag interface{}, perm interface{}) *MockForwarderClient_OpenFile_Call {
-	return &MockForwarderClient_OpenFile_Call{Call: _e.mock.On("OpenFile", name, flag, perm)}
+func (_e *MockForwarderClient_Expecter) OpenFile(name interface{}) *MockForwarderClient_OpenFile_Call {
+	return &MockForwarderClient_OpenFile_Call{Call: _e.mock.On("OpenFile", name)}
 }
 
-func (_c *MockForwarderClient_OpenFile_Call) Run(run func(name string, flag int, perm fs.FileMode)) *MockForwarderClient_OpenFile_Call {
+func (_c *MockForwarderClient_OpenFile_Call) Run(run func(name string)) *MockForwarderClient_OpenFile_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(string), args[1].(int), args[2].(fs.FileMode))
+		run(args[0].(string))
 	})
 	return _c
 }
@@ -188,7 +185,7 @@ func (_c *MockForwarderClient_OpenFile_Call) Return(_a0 *os.File, _a1 error) *Mo
 	return _c
 }
 
-func (_c *MockForwarderClient_OpenFile_Call) RunAndReturn(run func(string, int, fs.FileMode) (*os.File, error)) *MockForwarderClient_OpenFile_Call {
+func (_c *MockForwarderClient_OpenFile_Call) RunAndReturn(run func(string) (*os.File, error)) *MockForwarderClient_OpenFile_Call {
 	_c.Call.Return(run)
 	return _c
 }

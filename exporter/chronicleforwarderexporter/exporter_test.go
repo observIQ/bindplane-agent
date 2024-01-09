@@ -152,7 +152,7 @@ func TestOpenWriter(t *testing.T) {
 		{
 			name: "Successful File Open",
 			setupMock: func(mockClient *mocks.MockForwarderClient) {
-				mockClient.On("OpenFile", "testfile.log", mock.Anything, mock.Anything).Return(&os.File{}, nil)
+				mockClient.On("OpenFile", "testfile.log").Return(&os.File{}, nil)
 			},
 			expectedError: false,
 			cfg: Config{
@@ -165,7 +165,7 @@ func TestOpenWriter(t *testing.T) {
 		{
 			name: "File Open Error",
 			setupMock: func(mockClient *mocks.MockForwarderClient) {
-				mockClient.On("OpenFile", "invalidfile.log", mock.Anything, mock.Anything).Return(nil, errors.New("error opening file"))
+				mockClient.On("OpenFile", "invalidfile.log").Return(nil, errors.New("error opening file"))
 			},
 			expectedError: true,
 			cfg: Config{
