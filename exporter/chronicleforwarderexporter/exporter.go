@@ -42,7 +42,6 @@ type chronicleForwarderExporter struct {
 // chronicleForwarderClient is a client for creating connections to Chronicle forwarder. (created for overriding in tests)
 //
 //go:generate mockery --name chronicleForwarderClient --output ./internal/mocks --with-expecter --filename chronicle_forwarder_client.go --structname MockForwarderClient
-
 type chronicleForwarderClient interface {
 	Dial(network string, address string) (net.Conn, error)
 	DialWithTLS(network string, addr string, config *tls.Config) (*tls.Conn, error)
@@ -140,10 +139,6 @@ func (ce *chronicleForwarderExporter) openSyslogWriter() (io.WriteCloser, error)
 }
 
 func (ce *chronicleForwarderExporter) send(msg string, writer io.WriteCloser) error {
-	if writer == nil {
-		return errors.New("writer is empty")
-	}
-
 	if !strings.HasSuffix(msg, "\n") {
 		msg = fmt.Sprintf("%s%s", msg, "\n")
 	}
