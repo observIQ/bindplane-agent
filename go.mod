@@ -50,7 +50,6 @@ require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/fileexporter v0.91.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlecloudpubsubexporter v0.91.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/influxdbexporter v0.91.0
-	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/jaegerexporter v0.85.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/kafkaexporter v0.91.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/loadbalancingexporter v0.91.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/logzioexporter v0.91.0
