@@ -1158,8 +1158,6 @@ github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlemanaged
 github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlemanagedprometheusexporter v0.91.0/go.mod h1:tH7/vYZfRAKnavSaKiRlO1BMxvxEyyO+wtc0kR7AKDw=
 github.com/open-telemetry/opentelemetry-collector-contrib/exporter/influxdbexporter v0.91.0 h1:OZbTFhOOnVdIM1rrjx3vt++N3cRneGNlyvCKZ9D1p+o=
 github.com/open-telemetry/opentelemetry-collector-contrib/exporter/influxdbexporter v0.91.0/go.mod h1:c2Hp9U8tXbwNzcI8EmgHK3zNdJl8odpNNN9bjyXpoCY=
-github.com/open-telemetry/opentelemetry-collector-contrib/exporter/jaegerexporter v0.85.0 h1:NyqJDAgm3VC1UNrTW0gv2auQoTlaCEcit5c0On0oYG4=
-github.com/open-telemetry/opentelemetry-collector-contrib/exporter/jaegerexporter v0.85.0/go.mod h1:F8TX5dXc8VcF789x8UAu1fIWta16sGZMxhfGLNes+L8=
 github.com/open-telemetry/opentelemetry-collector-contrib/exporter/kafkaexporter v0.91.0 h1:iU2St2YduQzbuXu68gjFB0CpPoQmo7kvl97IThw4aRE=
 github.com/open-telemetry/opentelemetry-collector-contrib/exporter/kafkaexporter v0.91.0/go.mod h1:is8q/S2X5pXfqWbQhrygsXuIUKmRhmMIxGbK9hlhY3Q=
 github.com/open-telemetry/opentelemetry-collector-contrib/exporter/loadbalancingexporter v0.91.0 h1:e5lgKcjAYg3Ilm2Fo1rxXsmv2MfttiI1f4mxmzwZGek=
