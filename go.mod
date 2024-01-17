@@ -10,6 +10,7 @@ require (
 	github.com/observiq/bindplane-agent/exporter/chronicleforwarderexporter v1.45.0
 	github.com/observiq/bindplane-agent/exporter/googlecloudexporter v1.45.0
 	github.com/observiq/bindplane-agent/exporter/googlemanagedprometheusexporter v1.45.0
+	github.com/observiq/bindplane-agent/exporter/snowflakeexporter v1.45.0
 	github.com/observiq/bindplane-agent/packagestate v1.45.0
 	github.com/observiq/bindplane-agent/processor/datapointcountprocessor v1.45.0
 	github.com/observiq/bindplane-agent/processor/logcountprocessor v1.45.0
