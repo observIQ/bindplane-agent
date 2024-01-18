@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"fmt"
 
+	_ "github.com/snowflakedb/gosnowflake"
+
 	"github.com/observiq/bindplane-agent/exporter/snowflakeexporter/internal/utility"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/consumer"
@@ -15,15 +17,15 @@ import (
 
 const (
 	createTracesTableSnowflakeTemplate = `
-	CREATE TABLE IF NOT EXISTS %s (
+	CREATE TABLE IF NOT EXISTS "%s"."%s" (
 		"ResourceSchemaUrl" VARCHAR,
 		"ResourceDroppedAttributesCount" INT,
-		"ResourceAttributes" OBJECT,
+		"ResourceAttributes" VARIANT,
 		"ScopeSchemaUrl" VARCHAR,
 		"ScopeName" VARCHAR,
 		"ScopeVersion" VARCHAR,
 		"ScopeDroppedAttributesCount" INT,
-		"ScopeAttributes" OBJECT,
+		"ScopeAttributes" VARIANT,
 		"TraceId" BINARY,
 		"SpanId" BINARY,
 		"TraceState" VARCHAR,
@@ -31,14 +33,14 @@ const (
 		"Name" VARCHAR,
 		"Kind" VARCHAR,
 		"DroppedAttributesCount" INT,
-		"Attributes" OBJECT,
+		"Attributes" VARIANT,
 		"StatusMessage" VARCHAR,
 		"StatusCode" VARCHAR
 	);
 	`
 
 	insertIntoTracesTableSnowflakeTemplate = `
-	INSERT INTO %s (
+	INSERT INTO "%s"."%s" (
 		"ResourceSchemaUrl",
 		"ResourceDroppedAttributesCount",
 		"ResourceAttributes",
@@ -57,7 +59,15 @@ const (
 		"Attributes",
 		"StatusMessage",
 		"StatusCode"
-		) VALUES (
+		) SELECT
+			?,
+			?,
+			PARSE_JSON(?),
+			?,
+			?,
+			?,
+			?,
+			PARSE_JSON(?),
 			?,
 			?,
 			?,
@@ -65,18 +75,10 @@ const (
 			?,
 			?,
 			?,
-			?,
-			?,
-			?,
-			?,
-			?,
-			?,
-			?,
-			?,
-			?,
+			PARSE_JSON(?),
 			?,
 			?
-		);
+		;
 	`
 )
 
@@ -107,13 +109,15 @@ func (te *tracesExporter) start(ctx context.Context, _ component.Host) error {
 	)
 	db, err := utility.CreateNewDB(ctx, dsn)
 	if err != nil {
+		te.logger.Debug("CreateNewDB failed for traces", zap.String("dsn", dsn))
 		return fmt.Errorf("failed to create new database for traces: %w", err)
 	}
 	te.db = db
 
-	_, err = te.db.ExecContext(ctx, utility.RenderSQL(createTracesTableSnowflakeTemplate, te.cfg.Traces.Table))
+	err = utility.CreateTable(ctx, te.db, te.cfg.Database, te.cfg.Traces.Schema, te.cfg.Traces.Table, createTracesTableSnowflakeTemplate)
 	if err != nil {
-		return fmt.Errorf("failed to create table for traces: %w", err)
+		te.logger.Debug("CreateTable failed for traces", zap.String("database", te.cfg.Database), zap.String("schema", te.cfg.Traces.Schema), zap.String("table", te.cfg.Traces.Table))
+		return fmt.Errorf("failed to create traces table: %w", err)
 	}
 
 	return nil
@@ -128,19 +132,28 @@ func (te *tracesExporter) shutdown(_ context.Context) error {
 
 // entry function
 func (te *tracesExporter) tracesDataPusher(ctx context.Context, td ptrace.Traces) error {
+	te.logger.Debug("begin transaction")
 	tx, err := te.db.BeginTx(ctx, nil)
 	if err != nil {
 		return fmt.Errorf("failed to create transaction: %w", err)
 	}
 	defer tx.Rollback()
+
+	_, err = tx.ExecContext(ctx, fmt.Sprintf(`USE WAREHOUSE "%s";`, te.cfg.Warehouse))
+	if err != nil {
+		return fmt.Errorf("failed to call 'USE WAREHOUSE': %w", err)
+	}
+
 	if err := te.tracesTransaction(ctx, tx, td); err != nil {
+		te.logger.Debug("failed transaction", zap.Error(err))
 		return err
 	}
+	te.logger.Debug("successful transaction")
 	return tx.Commit()
 }
 
 func (te *tracesExporter) tracesTransaction(ctx context.Context, tx *sql.Tx, td ptrace.Traces) error {
-	stmt, err := tx.PrepareContext(ctx, utility.RenderSQL(insertIntoTracesTableSnowflakeTemplate, te.cfg.Traces.Table))
+	stmt, err := tx.PrepareContext(ctx, fmt.Sprintf(insertIntoTracesTableSnowflakeTemplate, te.cfg.Traces.Schema, te.cfg.Traces.Table))
 	if err != nil {
 		return fmt.Errorf("failed to prepare transaction context: %w", err)
 	}
@@ -152,7 +165,7 @@ func (te *tracesExporter) tracesTransaction(ctx context.Context, tx *sql.Tx, td 
 		res := resSpan.Resource()
 		resSchema := resSpan.SchemaUrl()
 		resDroppedAttrsCount := res.DroppedAttributesCount()
-		resAttrs := res.Attributes().AsRaw()
+		resAttrs := utility.ConvertAttributesToString(res.Attributes(), te.logger)
 		for j := 0; j < resSpan.ScopeSpans().Len(); j++ {
 			scopeSpan := resSpan.ScopeSpans().At(j)
 
@@ -160,7 +173,7 @@ func (te *tracesExporter) tracesTransaction(ctx context.Context, tx *sql.Tx, td 
 			scopeName := scopeSpan.Scope().Name()
 			scopeVersion := scopeSpan.Scope().Version()
 			scopeDroppedAttrsCount := scopeSpan.Scope().DroppedAttributesCount()
-			scopeAttrs := scopeSpan.Scope().Attributes().AsRaw()
+			scopeAttrs := utility.ConvertAttributesToString(scopeSpan.Scope().Attributes(), te.logger)
 			for k := 0; k < scopeSpan.Spans().Len(); k++ {
 				span := scopeSpan.Spans().At(k)
 
@@ -171,7 +184,7 @@ func (te *tracesExporter) tracesTransaction(ctx context.Context, tx *sql.Tx, td 
 				spanName := span.Name()
 				spanKind := span.Kind().String()
 				spanDroppedAttrsCount := span.DroppedAttributesCount()
-				spanAttrs := span.Attributes().AsRaw()
+				spanAttrs := utility.ConvertAttributesToString(span.Attributes(), te.logger)
 				spanStatusMessage := span.Status().Message()
 				spanStatusCode := span.Status().Code().String()
 

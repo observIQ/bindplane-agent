@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"fmt"
 
+	_ "github.com/snowflakedb/gosnowflake"
+
 	"github.com/observiq/bindplane-agent/exporter/snowflakeexporter/internal/utility"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/consumer"
