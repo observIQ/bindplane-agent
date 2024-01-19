@@ -1189,6 +1189,8 @@ github.com/open-telemetry/opentelemetry-collector-contrib/extension/bearertokena
 github.com/open-telemetry/opentelemetry-collector-contrib/extension/bearertokenauthextension v0.92.0/go.mod h1:YiXC5a/aV1w6PoQ7F8VxoamCi4nA2mGXbNJZoWiS1u4=
 github.com/open-telemetry/opentelemetry-collector-contrib/extension/healthcheckextension v0.92.0 h1:J3QTsQl/Ur1deyRwRuwfQ967ezKLZi4+HegcqEjwtN4=
 github.com/open-telemetry/opentelemetry-collector-contrib/extension/healthcheckextension v0.92.0/go.mod h1:NLpKrgr+S4HHxyWUWC098e40QvEa+4IBTwSwkinM2rk=
+github.com/open-telemetry/opentelemetry-collector-contrib/extension/oauth2clientauthextension v0.92.0 h1:zBMotu+8JuAwfKz+wAOdJ2hMDofQTul9FdW7noBkgAU=
+github.com/open-telemetry/opentelemetry-collector-contrib/extension/oauth2clientauthextension v0.92.0/go.mod h1:zQohNm3GYuQkuNvqNS4OafDeas76595qJGWQmiu8xxA=
 github.com/open-telemetry/opentelemetry-collector-contrib/extension/oidcauthextension v0.92.0 h1:x4KBrxyTi5cj10Z+FolIzmDQC304txG4L17Hw0Qqr6c=
 github.com/open-telemetry/opentelemetry-collector-contrib/extension/oidcauthextension v0.92.0/go.mod h1:PDEZyC05D5oRK6ieEBJ/WrWIiwnieppgPPA7idW0lOE=
 github.com/open-telemetry/opentelemetry-collector-contrib/extension/pprofextension v0.92.0 h1:UjQc8SnDLcj0wbIuPNB7N0Mcw1ZHlXSMeeypal5Bb5Q=
