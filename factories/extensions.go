@@ -18,6 +18,7 @@ import (
 	"github.com/open-telemetry/opentelemetry-collector-contrib/extension/basicauthextension"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/extension/bearertokenauthextension"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/extension/healthcheckextension"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/extension/oauth2clientauthextension"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/extension/oidcauthextension"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/extension/pprofextension"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/extension/sigv4authextension"
@@ -33,6 +34,7 @@ var defaultExtensions = []extension.Factory{
 	extensiontest.NewNopFactory(),
 	filestorage.NewFactory(),
 	healthcheckextension.NewFactory(),
+	oauth2clientauthextension.NewFactory(),
 	oidcauthextension.NewFactory(),
 	pprofextension.NewFactory(),
 	sigv4authextension.NewFactory(),
