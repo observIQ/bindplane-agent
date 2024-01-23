@@ -1,3 +1,17 @@
+// Copyright observIQ, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package snowflakeexporter
 
 import (
@@ -5,7 +19,7 @@ import (
 	"fmt"
 
 	"github.com/jmoiron/sqlx"
-	_ "github.com/snowflakedb/gosnowflake"
+	_ "github.com/snowflakedb/gosnowflake" // imports snowflake driver
 
 	"github.com/observiq/bindplane-agent/exporter/snowflakeexporter/internal/utility"
 	"go.opentelemetry.io/collector/component"
@@ -72,7 +86,7 @@ const (
 		:observedTimestamp,
 		:severityNumber,
 		:severityText,
-		:body
+		:body,
 		:attributes,
 		:droppedCount,
 		:flags,
@@ -101,14 +115,14 @@ func (le *logsExporter) Capabilities() consumer.Capabilities {
 }
 
 func (le *logsExporter) start(ctx context.Context, _ component.Host) error {
-	dsn := utility.BuildDSN(
+	dsn := utility.CreateDSN(
 		le.cfg.Username,
 		le.cfg.Password,
 		le.cfg.AccountIdentifier,
 		le.cfg.Database,
 		le.cfg.Logs.Schema,
 	)
-	db, err := utility.CreateNewDB(ctx, dsn)
+	db, err := utility.CreateDB(ctx, dsn)
 	if err != nil {
 		return fmt.Errorf("failed to create new database for logs: %w", err)
 	}
@@ -160,7 +174,7 @@ func (le *logsExporter) logsDataPusher(ctx context.Context, ld plog.Logs) error 
 					"body":              log.Body().AsString(),
 					"attributes":        utility.ConvertAttributesToString(log.Attributes(), le.logger),
 					"droppedCount":      log.DroppedAttributesCount(),
-					"flags":             int32(log.Flags()),
+					"flags":             log.Flags(),
 					"traceID":           utility.TraceIDToHexOrEmptyString(log.TraceID()),
 					"spanID":            utility.SpanIDToHexOrEmptyString(log.SpanID()),
 				})
@@ -168,7 +182,6 @@ func (le *logsExporter) logsDataPusher(ctx context.Context, ld plog.Logs) error 
 		}
 	}
 
-	le.logger.Debug("insert sql", zap.String("logs", le.insertSQL))
 	err := utility.BatchInsert(ctx, le.db, &logMaps, le.cfg.Warehouse, le.insertSQL)
 	if err != nil {
 		return fmt.Errorf("failed to insert log data: %w", err)

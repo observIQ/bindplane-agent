@@ -72,10 +72,7 @@ func (c *Config) Validate() error {
 		return err
 	}
 
-	if err := c.validateConnection(); err != nil {
-		return err
-	}
-	return nil
+	return c.validateConnection()
 }
 
 // validateTelemetry ensures at least 1 telemetry type is configured and sets default values if needed
@@ -118,14 +115,14 @@ func (c *Config) validateTelemetry() error {
 // validateConnection verifies that the exporter can connect to Snowflake and creates the telemetry schemas if needed
 func (c *Config) validateConnection() error {
 	// connect to snowflake
-	dsn := utility.BuildDSN(
+	dsn := utility.CreateDSN(
 		c.Username,
 		c.Password,
 		c.AccountIdentifier,
 		c.Database,
 		"",
 	)
-	db, err := utility.CreateNewDB(nil, dsn)
+	db, err := utility.CreateDB(nil, dsn)
 	if err != nil {
 		return fmt.Errorf("failed to validate connection: %w", err)
 	}
@@ -147,6 +144,5 @@ func (c *Config) validateConnection() error {
 		}
 	}
 
-	db.Close()
 	return nil
 }

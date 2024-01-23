@@ -1,3 +1,17 @@
+// Copyright observIQ, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package snowflakeexporter
 
 import (
@@ -6,7 +20,7 @@ import (
 
 	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
-	_ "github.com/snowflakedb/gosnowflake"
+	_ "github.com/snowflakedb/gosnowflake" // imports snowflake driver
 
 	"github.com/observiq/bindplane-agent/exporter/snowflakeexporter/internal/utility"
 	"go.opentelemetry.io/collector/component"
@@ -19,10 +33,10 @@ import (
 const (
 	createTracesTableSnowflakeTemplate = `
 	CREATE TABLE IF NOT EXISTS "%s"."%s" (
-		"ResourceSchemaUrl" VARCHAR,
+		"ResourceSchemaURL" VARCHAR,
 		"ResourceDroppedAttributesCount" INT,
 		"ResourceAttributes" VARIANT,
-		"ScopeSchemaUrl" VARCHAR,
+		"ScopeSchemaURL" VARCHAR,
 		"ScopeName" VARCHAR,
 		"ScopeVersion" VARCHAR,
 		"ScopeDroppedAttributesCount" INT,
@@ -30,7 +44,7 @@ const (
 		"TraceID" VARCHAR,
 		"SpanID" VARCHAR,
 		"TraceState" VARCHAR,
-		"ParentSpanId" BINARY,
+		"ParentSpanID" BINARY,
 		"Name" VARCHAR,
 		"Kind" VARCHAR,
 		"StartTime" TIMESTAMP_NTZ,
@@ -53,18 +67,18 @@ const (
 	insertIntoTracesTableSnowflakeTemplate = `
 	INSERT INTO "%s"."%s"
 	SELECT
-		Column1 AS "ResourceSchemaUrl",
+		Column1 AS "ResourceSchemaURL",
 		Column2 AS "ResourceDroppedAttributesCount",
 		PARSE_JSON(Column3) AS "ResourceAttributes",
-		Column4 AS "ScopeSchemaUrl",
+		Column4 AS "ScopeSchemaURL",
 		Column5 AS "ScopeName",
 		Column6 AS "ScopeVersion",
 		Column7 AS "ScopeDroppedAttributesCount",
 		PARSE_JSON(Column8) AS "ScopeAttributes",
-		Column9 AS "TraceId",
-		Column10 AS "SpanId",
+		Column9 AS "TraceID",
+		Column10 AS "SpanID",
 		Column11 AS "TraceState",
-		Column12 AS "ParentSpanId",
+		Column12 AS "ParentSpanID",
 		Column13 AS "Name",
 		Column14 AS "Kind",
 		Column15 AS "StartTime",
@@ -83,35 +97,35 @@ const (
 		ARRAY_CONSTRUCT(Column28) AS "LinkDroppedAttributesCount",
 		ARRAY_CONSTRUCT(Column29) AS "LinkAttributes"
 	FROM VALUES (
-		:resSchema,
-		:resDroppedAttrsCount,
-		:resAttrs,
-		:scopeSchema,
-		:scopeName,
-		:scopeVersion,
-		:scopeDroppedAttrsCount,
-		:scopeAttrs,
-		:spanTraceID,
-		:spanSpanID,
-		:spanTraceState,
-		:spanParentSpanID,
-		:spanName,
-		:spanKind,
-		:spanStartTime,
-		:spanEndTime,
-		:spanDroppedAttrsCount,
-		:spanAttrs,
-		:spanStatusMessage,
-		:spanStatusCode,
-		:spanEventTimes,
-		:spanEventNames,
-		:spanEventAttrs,
-		:spanEventDroppedAttrs,
-		:spanLinkTraceIDs,
-		:spanLinkSpanIDs,
-		:spanLinkTraceStates,
-		:spanLinkAttrs,
-		:spanLinkDroppedAttrs
+		:rSchema,
+		:rDroppedCount,
+		:rAttributes,
+		:sSchema,
+		:sName,
+		:sVersion,
+		:sDroppedCount,
+		:sAttributes,
+		:traceID,
+		:spanID,
+		:traceState,
+		:parentSpanID,
+		:name,
+		:kind,
+		:startTime,
+		:endTime,
+		:droppedCount,
+		:attributes,
+		:statusMessage,
+		:statusCode,
+		:eventTimes,
+		:eventNames,
+		:eventAttributes,
+		:eventDroppedCount,
+		:linkTraceIDs,
+		:linkSpanIDs,
+		:linkTraceStates,
+		:linkAttributes,
+		:linkDroppedCount
 	);`
 )
 
@@ -135,14 +149,14 @@ func (te *tracesExporter) Capabilities() consumer.Capabilities {
 }
 
 func (te *tracesExporter) start(ctx context.Context, _ component.Host) error {
-	dsn := utility.BuildDSN(
+	dsn := utility.CreateDSN(
 		te.cfg.Username,
 		te.cfg.Password,
 		te.cfg.AccountIdentifier,
 		te.cfg.Database,
 		te.cfg.Traces.Schema,
 	)
-	db, err := utility.CreateNewDB(ctx, dsn)
+	db, err := utility.CreateDB(ctx, dsn)
 	if err != nil {
 		te.logger.Debug("CreateNewDB failed for traces", zap.String("dsn", dsn))
 		return fmt.Errorf("failed to create new database for traces: %w", err)
@@ -170,68 +184,46 @@ func (te *tracesExporter) tracesDataPusher(ctx context.Context, td ptrace.Traces
 	te.logger.Debug("begin tracesDataPusher")
 	traceMaps := []map[string]any{}
 	for i := 0; i < td.ResourceSpans().Len(); i++ {
-		resSpan := td.ResourceSpans().At(i)
+		resourceSpan := td.ResourceSpans().At(i)
 
-		res := resSpan.Resource()
-		resSchema := resSpan.SchemaUrl()
-		resDroppedAttrsCount := res.DroppedAttributesCount()
-		resAttrs := utility.ConvertAttributesToString(res.Attributes(), te.logger)
-		for j := 0; j < resSpan.ScopeSpans().Len(); j++ {
-			scopeSpan := resSpan.ScopeSpans().At(j)
+		for j := 0; j < resourceSpan.ScopeSpans().Len(); j++ {
+			scopeSpan := resourceSpan.ScopeSpans().At(j)
 
-			scopeSchema := scopeSpan.SchemaUrl()
-			scopeName := scopeSpan.Scope().Name()
-			scopeVersion := scopeSpan.Scope().Version()
-			scopeDroppedAttrsCount := scopeSpan.Scope().DroppedAttributesCount()
-			scopeAttrs := utility.ConvertAttributesToString(scopeSpan.Scope().Attributes(), te.logger)
 			for k := 0; k < scopeSpan.Spans().Len(); k++ {
 				span := scopeSpan.Spans().At(k)
-
-				spanTraceID := utility.TraceIDToHexOrEmptyString(span.TraceID())
-				spanSpanID := utility.SpanIDToHexOrEmptyString(span.SpanID())
-				spanTraceState := span.TraceState().AsRaw()
-				spanParentSpanID := utility.SpanIDToHexOrEmptyString(span.ParentSpanID())
-				spanName := span.Name()
-				spanKind := span.Kind().String()
-				spanStartTime := span.StartTimestamp().AsTime()
-				spanEndTime := span.EndTimestamp().AsTime()
-				spanDroppedAttrsCount := span.DroppedAttributesCount()
-				spanAttrs := utility.ConvertAttributesToString(span.Attributes(), te.logger)
-				spanStatusMessage := span.Status().Message()
-				spanStatusCode := span.Status().Code().String()
-				eventTimes, eventNames, eventAttrs, eventDroppedAttrsCount := te.flattenEvents(span.Events())
-				linkTraceIDs, linkSpanIDs, linkTraceStates, linkAttrs, linkDroppedAttrsCount := te.flattenLinks(span.Links())
+				eTimes, eNames, eAttributes, eDroppedCount := flattenEvents(span.Events(), te.logger)
+				lTraceIDs, lSpanIDs, lTraceStates, lAttributes, lDroppedCount := flattenLinks(span.Links(), te.logger)
 
 				traceMaps = append(traceMaps, map[string]any{
-					"resSchema":              resSchema,
-					"resDroppedAttrsCount":   resDroppedAttrsCount,
-					"resAttrs":               resAttrs,
-					"scopeSchema":            scopeSchema,
-					"scopeName":              scopeName,
-					"scopeVersion":           scopeVersion,
-					"scopeDroppedAttrsCount": scopeDroppedAttrsCount,
-					"scopeAttrs":             scopeAttrs,
-					"spanTraceID":            spanTraceID,
-					"spanSpanID":             spanSpanID,
-					"spanTraceState":         spanTraceState,
-					"spanParentSpanID":       spanParentSpanID,
-					"spanName":               spanName,
-					"spanKind":               spanKind,
-					"spanStartTime":          spanStartTime,
-					"spanEndTime":            spanEndTime,
-					"spanDroppedAttrsCount":  spanDroppedAttrsCount,
-					"spanAttrs":              spanAttrs,
-					"spanStatusMessage":      spanStatusMessage,
-					"spanStatusCode":         spanStatusCode,
-					"spanEventTimes":         eventTimes,
-					"spanEventNames":         eventNames,
-					"spanEventAttrs":         eventAttrs,
-					"spanEventDroppedAttrs":  eventDroppedAttrsCount,
-					"spanLinkTraceIDs":       linkTraceIDs,
-					"spanLinkSpanIDs":        linkSpanIDs,
-					"spanLinkTraceStates":    linkTraceStates,
-					"spanLinkAttrs":          linkAttrs,
-					"spanLinkDroppedAttrs":   linkDroppedAttrsCount,
+					"rSchema":           resourceSpan.SchemaUrl(),
+					"rDroppedCount":     resourceSpan.Resource().DroppedAttributesCount(),
+					"rAttributes":       utility.ConvertAttributesToString(resourceSpan.Resource().Attributes(), te.logger),
+					"sSchema":           scopeSpan.SchemaUrl(),
+					"sName":             scopeSpan.Scope().Name(),
+					"sVersion":          scopeSpan.Scope().Version(),
+					"sDroppedCount":     scopeSpan.Scope().DroppedAttributesCount(),
+					"sAttributes":       utility.ConvertAttributesToString(scopeSpan.Scope().Attributes(), te.logger),
+					"traceID":           utility.TraceIDToHexOrEmptyString(span.TraceID()),
+					"spanID":            utility.SpanIDToHexOrEmptyString(span.SpanID()),
+					"traceState":        span.TraceState().AsRaw(),
+					"parentSpanID":      utility.SpanIDToHexOrEmptyString(span.ParentSpanID()),
+					"name":              span.Name(),
+					"kind":              span.Kind().String(),
+					"startTime":         span.StartTimestamp().AsTime(),
+					"endTime":           span.EndTimestamp().AsTime(),
+					"droppedCount":      span.DroppedAttributesCount(),
+					"attributes":        utility.ConvertAttributesToString(span.Attributes(), te.logger),
+					"statusMessage":     span.Status().Message(),
+					"statusCode":        span.Status().Code().String(),
+					"eventTimes":        eTimes,
+					"eventNames":        eNames,
+					"eventAttributes":   eAttributes,
+					"eventDroppedCount": eDroppedCount,
+					"linkTraceIDs":      lTraceIDs,
+					"linkSpanIDs":       lSpanIDs,
+					"linkTraceStates":   lTraceStates,
+					"linkAttributes":    lAttributes,
+					"linkDroppedCount":  lDroppedCount,
 				})
 			}
 		}
@@ -245,7 +237,7 @@ func (te *tracesExporter) tracesDataPusher(ctx context.Context, td ptrace.Traces
 	return nil
 }
 
-func (te *tracesExporter) flattenEvents(e ptrace.SpanEventSlice) (pq.StringArray, pq.StringArray, pq.StringArray, pq.Int32Array) {
+func flattenEvents(e ptrace.SpanEventSlice, l *zap.Logger) (pq.StringArray, pq.StringArray, pq.StringArray, pq.Int32Array) {
 	times := pq.StringArray{}
 	names := pq.StringArray{}
 	attrs := pq.StringArray{}
@@ -254,26 +246,26 @@ func (te *tracesExporter) flattenEvents(e ptrace.SpanEventSlice) (pq.StringArray
 	for i := 0; i < e.Len(); i++ {
 		times = append(times, e.At(i).Timestamp().AsTime().String())
 		names = append(names, e.At(i).Name())
-		attrs = append(attrs, utility.ConvertAttributesToString(e.At(i).Attributes(), te.logger))
+		attrs = append(attrs, utility.ConvertAttributesToString(e.At(i).Attributes(), l))
 		droppedCount = append(droppedCount, int32(e.At(i).DroppedAttributesCount()))
 	}
 
 	return times, names, attrs, droppedCount
 }
 
-func (te *tracesExporter) flattenLinks(l ptrace.SpanLinkSlice) (pq.StringArray, pq.StringArray, pq.StringArray, pq.StringArray, pq.Int32Array) {
+func flattenLinks(li ptrace.SpanLinkSlice, l *zap.Logger) (pq.StringArray, pq.StringArray, pq.StringArray, pq.StringArray, pq.Int32Array) {
 	traceIDs := pq.StringArray{}
 	spanIDs := pq.StringArray{}
 	traceStates := pq.StringArray{}
 	attrs := pq.StringArray{}
 	droppedCount := pq.Int32Array{}
 
-	for i := 0; i < l.Len(); i++ {
-		traceIDs = append(traceIDs, utility.TraceIDToHexOrEmptyString(l.At(i).TraceID()))
-		spanIDs = append(spanIDs, utility.SpanIDToHexOrEmptyString(l.At(i).SpanID()))
-		traceStates = append(traceStates, l.At(i).TraceState().AsRaw())
-		attrs = append(attrs, utility.ConvertAttributesToString(l.At(i).Attributes(), te.logger))
-		droppedCount = append(droppedCount, int32(l.At(i).DroppedAttributesCount()))
+	for i := 0; i < li.Len(); i++ {
+		traceIDs = append(traceIDs, utility.TraceIDToHexOrEmptyString(li.At(i).TraceID()))
+		spanIDs = append(spanIDs, utility.SpanIDToHexOrEmptyString(li.At(i).SpanID()))
+		traceStates = append(traceStates, li.At(i).TraceState().AsRaw())
+		attrs = append(attrs, utility.ConvertAttributesToString(li.At(i).Attributes(), l))
+		droppedCount = append(droppedCount, int32(li.At(i).DroppedAttributesCount()))
 	}
 
 	return traceIDs, spanIDs, traceStates, attrs, droppedCount
