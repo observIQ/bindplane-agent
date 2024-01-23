@@ -45,13 +45,21 @@ build-binaries: agent updater
 build-all: build-linux build-darwin build-windows
 
 .PHONY: build-linux
-build-linux: build-linux-amd64 build-linux-arm64 build-linux-arm
+build-linux: build-linux-amd64 build-linux-arm64 build-linux-arm build-linux-ppc64 build-linux-ppc64le
 
 .PHONY: build-darwin
 build-darwin: build-darwin-amd64 build-darwin-arm64
 
 .PHONY: build-windows
 build-windows: build-windows-amd64 build-windows-x86
+
+.PHONY: build-linux-ppc64
+build-linux-ppc64:
+	GOOS=linux GOARCH=ppc64 $(MAKE) build-binaries -j2
+
+.PHONY: build-linux-ppc64le
+build-linux-ppc64le:
+	GOOS=linux GOARCH=ppc64le $(MAKE) build-binaries -j2
 
 .PHONY: build-linux-amd64
 build-linux-amd64:
