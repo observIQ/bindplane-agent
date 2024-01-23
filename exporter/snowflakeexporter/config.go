@@ -15,11 +15,11 @@
 package snowflakeexporter
 
 import (
-	"context"
 	"errors"
 	"fmt"
 
 	"github.com/observiq/bindplane-agent/exporter/snowflakeexporter/internal/utility"
+	"go.opentelemetry.io/collector/exporter/exporterhelper"
 )
 
 const (
@@ -31,6 +31,8 @@ const (
 
 // Config is the config for the Snowflake exporter
 type Config struct {
+	exporterhelper.TimeoutSettings `mapstructure:",squash"`
+
 	AccountIdentifier string `mapstructure:"account_identifier"`
 	Username          string `mapstructure:"username"`
 	Password          string `mapstructure:"password"`
@@ -123,7 +125,7 @@ func (c *Config) validateConnection() error {
 		c.Database,
 		"",
 	)
-	db, err := utility.CreateNewDB(context.TODO(), dsn)
+	db, err := utility.CreateNewDB(nil, dsn)
 	if err != nil {
 		return fmt.Errorf("failed to validate connection: %w", err)
 	}

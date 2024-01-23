@@ -105,6 +105,37 @@ TRACES
 KeyValue{
     Key string
     Value AnyValue{
-        interface bullshit
+        interface
+    }
+}
+
+LOGS
+[]*ResourceLogs{
+    SchemaURL string
+    DeprecatedScopeLogs []*scopeLogs
+    Resource {
+        DroppedAttributesCount uint32
+        Attributes []KeyValue
+    }
+    ScopeLogs {
+        SchemaUrl string
+        Scope v11.InstrumentationScope{
+            Name string
+            Version string
+            DroppedAttributesCount uint32
+            Attributes []v11.KeyValue
+        }
+        LogRecords []*LogRecord {
+            TimeUnixNano uint64
+            ObservedTimeUnixNano uint64
+            SeverityNumber SeverityNumber
+            SeverityText string
+            Body AnyValue
+            Attributes []KeyValue
+            DroppedAttributesCount uint32
+            Flags uint32
+            TraceID Byte
+            SpanID Byte
+        }
     }
 }

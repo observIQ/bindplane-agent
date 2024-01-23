@@ -3,6 +3,7 @@ module github.com/observiq/bindplane-agent/exporter/snowflakeexporter
 go 1.20
 
 require (
+	github.com/jmoiron/sqlx v1.3.5
 	github.com/snowflakedb/gosnowflake v1.7.2
 	go.opentelemetry.io/collector/component v0.91.0
 	go.opentelemetry.io/collector/consumer v0.91.0

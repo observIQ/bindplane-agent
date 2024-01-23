@@ -38,7 +38,9 @@ func NewFactory() exporter.Factory {
 
 // createDefaultConfig creates the default configuration for the exporter
 func createDefaultConfig() component.Config {
-	return &Config{}
+	return &Config{
+		TimeoutSettings: exporterhelper.NewDefaultTimeoutSettings(),
+	}
 }
 
 // createLogsExporter creates a new log exporter based on the config
@@ -65,6 +67,7 @@ func createLogsExporter(
 		exporterhelper.WithStart(e.start),
 		exporterhelper.WithShutdown(e.shutdown),
 		exporterhelper.WithCapabilities(e.Capabilities()),
+		exporterhelper.WithTimeout(e.cfg.TimeoutSettings),
 	)
 }
 
@@ -92,5 +95,6 @@ func createTracesExporter(
 		exporterhelper.WithStart(e.start),
 		exporterhelper.WithShutdown(e.shutdown),
 		exporterhelper.WithCapabilities(e.Capabilities()),
+		exporterhelper.WithTimeout(e.cfg.TimeoutSettings),
 	)
 }
