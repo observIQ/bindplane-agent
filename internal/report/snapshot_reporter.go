@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"net/http"
 	"sync"
+	"time"
 
 	"github.com/observiq/bindplane-agent/internal/report/snapshot"
 	"go.opentelemetry.io/collector/pdata/plog"
@@ -42,6 +43,14 @@ type snapshotConfig struct {
 
 	// PipelineType will be "logs", "metrics", or "traces"
 	PipelineType string `yaml:"pipeline_type"`
+
+	// SearchQuery is an optional query string that will filter telemetry
+	// such that only telemetry containing the string is reported.
+	SearchQuery *string `yaml:"search_query"`
+
+	// MinimumTimestamp is the minimum timestamp used to filter telemetry such that only telemetry
+	// with a timestamp higher than specified will be reported.
+	MinimumTimestamp *time.Time `yaml:"minimum_timestamp"`
 }
 
 // endpointConfig is the configuration of a specific endpoint and full headers to include
