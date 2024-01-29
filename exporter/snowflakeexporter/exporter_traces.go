@@ -35,12 +35,12 @@ const (
 	CREATE TABLE IF NOT EXISTS "%s"."%s" (
 		"ResourceSchemaURL" VARCHAR,
 		"ResourceDroppedAttributesCount" INT,
-		"ResourceAttributes" VARIANT,
+		"ResourceAttributes" VARCHAR,
 		"ScopeSchemaURL" VARCHAR,
 		"ScopeName" VARCHAR,
 		"ScopeVersion" VARCHAR,
 		"ScopeDroppedAttributesCount" INT,
-		"ScopeAttributes" VARIANT,
+		"ScopeAttributes" VARCHAR,
 		"TraceID" VARCHAR,
 		"SpanID" VARCHAR,
 		"TraceState" VARCHAR,
@@ -50,53 +50,52 @@ const (
 		"StartTime" TIMESTAMP_NTZ,
 		"EndTime" TIMESTAMP_NTZ,
 		"DroppedAttributesCount" INT,
-		"Attributes" VARIANT,
+		"Attributes" VARCHAR,
 		"StatusMessage" VARCHAR,
 		"StatusCode" VARCHAR,
-		"EventTimes" ARRAY,
-		"EventNames" ARRAY,
-		"EventAttributes" ARRAY,
-		"EventDroppedAttributesCount" ARRAY,
-		"LinkTraceID" ARRAY,
-		"LinkSpanID" ARRAY,
-		"LinkTraceState" ARRAY,
-		"LinkDroppedAttributesCount" ARRAY,
-		"LinkAttributes" ARRAY
+		"EventTimes" VARCHAR,
+		"EventNames" VARCHAR,
+		"EventDroppedAttributesCount" VARCHAR,
+		"EventAttributes" VARCHAR,
+		"LinkTraceID" VARCHAR,
+		"LinkSpanID" VARCHAR,
+		"LinkTraceState" VARCHAR,
+		"LinkDroppedAttributesCount" VARCHAR,
+		"LinkAttributes" VARCHAR
 	);`
 
 	insertIntoTracesTableSnowflakeTemplate = `
-	INSERT INTO "%s"."%s"
-	SELECT
-		Column1 AS "ResourceSchemaURL",
-		Column2 AS "ResourceDroppedAttributesCount",
-		PARSE_JSON(Column3) AS "ResourceAttributes",
-		Column4 AS "ScopeSchemaURL",
-		Column5 AS "ScopeName",
-		Column6 AS "ScopeVersion",
-		Column7 AS "ScopeDroppedAttributesCount",
-		PARSE_JSON(Column8) AS "ScopeAttributes",
-		Column9 AS "TraceID",
-		Column10 AS "SpanID",
-		Column11 AS "TraceState",
-		Column12 AS "ParentSpanID",
-		Column13 AS "Name",
-		Column14 AS "Kind",
-		Column15 AS "StartTime",
-		Column16 AS "EndTime",
-		Column17 AS "DroppedAttributesCount",
-		PARSE_JSON(Column18) AS "Attributes",
-		Column19 AS "StatusMessage",
-		Column20 AS "StatusCode",
-		ARRAY_CONSTRUCT(Column21) AS "EventTimes",
-		ARRAY_CONSTRUCT(Column22) AS "EventNames",
-		ARRAY_CONSTRUCT(Column23) AS "EventAttributes",
-		ARRAY_CONSTRUCT(Column24) AS "EventDroppedAttributesCount",
-		ARRAY_CONSTRUCT(Column25) AS "LinkTraceID",
-		ARRAY_CONSTRUCT(Column26) AS "LinkSpanID",
-		ARRAY_CONSTRUCT(Column27) AS "LinkTraceState",
-		ARRAY_CONSTRUCT(Column28) AS "LinkDroppedAttributesCount",
-		ARRAY_CONSTRUCT(Column29) AS "LinkAttributes"
-	FROM VALUES (
+	INSERT INTO "%s"."%s" (
+		"ResourceSchemaURL",
+		"ResourceDroppedAttributesCount",
+		"ResourceAttributes",
+		"ScopeSchemaURL",
+		"ScopeName",
+		"ScopeVersion",
+		"ScopeDroppedAttributesCount",
+		"ScopeAttributes",
+		"TraceID",
+		"SpanID",
+		"TraceState",
+		"ParentSpanID",
+		"Name",
+		"Kind",
+		"StartTime",
+		"EndTime",
+		"DroppedAttributesCount",
+		"Attributes",
+		"StatusMessage",
+		"StatusCode",
+		"EventTimes",
+		"EventNames",
+		"EventDroppedAttributesCount",
+		"EventAttributes",
+		"LinkTraceID",
+		"LinkSpanID",
+		"LinkTraceState",
+		"LinkDroppedAttributesCount",
+		"LinkAttributes"
+	) VALUES (
 		:rSchema,
 		:rDroppedCount,
 		:rAttributes,
@@ -119,13 +118,13 @@ const (
 		:statusCode,
 		:eventTimes,
 		:eventNames,
-		:eventAttributes,
 		:eventDroppedCount,
+		:eventAttributes,
 		:linkTraceIDs,
 		:linkSpanIDs,
 		:linkTraceStates,
-		:linkAttributes,
-		:linkDroppedCount
+		:linkDroppedCount,
+		:linkAttributes
 	);`
 )
 
@@ -217,19 +216,19 @@ func (te *tracesExporter) tracesDataPusher(ctx context.Context, td ptrace.Traces
 					"statusCode":        span.Status().Code().String(),
 					"eventTimes":        eTimes,
 					"eventNames":        eNames,
-					"eventAttributes":   eAttributes,
 					"eventDroppedCount": eDroppedCount,
+					"eventAttributes":   eAttributes,
 					"linkTraceIDs":      lTraceIDs,
 					"linkSpanIDs":       lSpanIDs,
 					"linkTraceStates":   lTraceStates,
-					"linkAttributes":    lAttributes,
 					"linkDroppedCount":  lDroppedCount,
+					"linkAttributes":    lAttributes,
 				})
 			}
 		}
 	}
 
-	err := utility.BatchInsert(ctx, te.db, &traceMaps, te.cfg.Warehouse, te.insertSQL)
+	err := utility.BatchInsert(ctx, te.db, traceMaps, te.cfg.Warehouse, te.insertSQL)
 	if err != nil {
 		return fmt.Errorf("failed to insert trace data: %w", err)
 	}

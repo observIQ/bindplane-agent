@@ -34,18 +34,18 @@ const (
 	CREATE TABLE IF NOT EXISTS "%s"."%s" (
 		"ResourceSchemaURL" VARCHAR,
 		"ResourceDroppedAttributesCount" INT,
-		"ResourceAttributes" VARIANT,
-		"ScopeSchemaUrl" VARCHAR,
+		"ResourceAttributes" VARCHAR,
+		"ScopeSchemaURL" VARCHAR,
 		"ScopeName" VARCHAR,
 		"ScopeVersion" VARCHAR,
 		"ScopeDroppedAttributesCount" INT,
-		"ScopeAttributes" VARIANT,
+		"ScopeAttributes" VARCHAR,
 		"Timestamp" TIMESTAMP_NTZ,
 		"ObservedTimestamp" TIMESTAMP_NTZ,
 		"SeverityNumber" VARCHAR,
 		"SeverityText" VARCHAR,
 		"Body" VARCHAR,
-		"Attributes" VARIANT,
+		"Attributes" VARCHAR,
 		"DroppedAttributesCount" INT,
 		"Flags" INT,
 		"TraceID" VARCHAR,
@@ -53,27 +53,26 @@ const (
 	);`
 
 	insertIntoLogsTableSnowflakeTemplate = `
-	INSERT INTO "%s"."%s"
-	SELECT
-		Column1 AS "ResourceSchemaURL",
-		Column2 AS "ResourceDroppedAttributesCount",
-		PARSE_JSON(Column3) AS "ResourceAttributes",
-		Column4 AS "ScopeSchemaURL",
-		Column5 AS "ScopeName",
-		Column6 AS "ScopeVersion",
-		Column7 AS "ScopeDroppedAttributesCount",
-		PARSE_JSON(Column8) AS "ScopeAttributes",
-		Column9 AS "Timestamp",
-		Column10 AS "ObservedTimestamp",
-		Column11 AS "SeverityNumber",
-		Column12 AS "SeverityText",
-		Column13 AS "Body",
-		PARSE_JSON(Column14) AS "Attributes",
-		Column15 AS "DroppedAttributesCount",
-		Column16 AS "Flags",
-		Column17 AS "TraceID",
-		Column18 AS "SpanID"
-	FROM VALUES (
+	INSERT INTO "%s"."%s" (
+		"ResourceSchemaURL",
+		"ResourceDroppedAttributesCount",
+		"ResourceAttributes",
+		"ScopeSchemaURL",
+		"ScopeName",
+		"ScopeVersion",
+		"ScopeDroppedAttributesCount",
+		"ScopeAttributes",
+		"Timestamp",
+		"ObservedTimestamp",
+		"SeverityNumber",
+		"SeverityText",
+		"Body",
+		"Attributes",
+		"DroppedAttributesCount",
+		"Flags",
+		"TraceID",
+		"SpanID"
+	) VALUES (
 		:rSchema,
 		:rDroppedCount,
 		:rAttributes,
@@ -182,7 +181,7 @@ func (le *logsExporter) logsDataPusher(ctx context.Context, ld plog.Logs) error 
 		}
 	}
 
-	err := utility.BatchInsert(ctx, le.db, &logMaps, le.cfg.Warehouse, le.insertSQL)
+	err := utility.BatchInsert(ctx, le.db, logMaps, le.cfg.Warehouse, le.insertSQL)
 	if err != nil {
 		return fmt.Errorf("failed to insert log data: %w", err)
 	}

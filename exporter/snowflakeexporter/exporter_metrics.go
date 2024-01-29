@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"sync"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/observiq/bindplane-agent/exporter/snowflakeexporter/internal/metrics"
@@ -93,25 +94,21 @@ func (me *metricsExporter) metricsDataPusher(ctx context.Context, md pmetric.Met
 		}
 	}
 
-	// wg := &sync.WaitGroup{}
-	// errorChan := make(chan error, 0)
-	// for _, v := range me.models {
-	// 	wg.Add(1)
-	// 	go func(m metricModel) {
-	// 		defer wg.Done()
-	// 		errorChan <- m.BatchInsert(ctx)
-	// 	}(v)
-	// }
-	// wg.Wait()
-
-	// var errs error
-	// for e := range errorChan {
-	// 	errors.Join(errs, e)
-	// }
+	wg := &sync.WaitGroup{}
+	errorChan := make(chan error, len(me.models))
+	for _, v := range me.models {
+		wg.Add(1)
+		go func(m metricModel) {
+			defer wg.Done()
+			errorChan <- m.BatchInsert(ctx)
+		}(v)
+	}
+	wg.Wait()
+	close(errorChan)
 
 	var errs error
-	for _, v := range me.models {
-		errors.Join(errs, v.BatchInsert(ctx))
+	for e := range errorChan {
+		errors.Join(errs, e)
 	}
 
 	return errs

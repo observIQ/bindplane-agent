@@ -23,9 +23,11 @@ import (
 	"net/url"
 
 	"github.com/jmoiron/sqlx"
+	"github.com/lib/pq"
 	_ "github.com/snowflakedb/gosnowflake" // imports snowflake driver
 
 	"go.opentelemetry.io/collector/pdata/pcommon"
+	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.uber.org/zap"
 )
 
@@ -64,6 +66,32 @@ func SpanIDToHexOrEmptyString(id pcommon.SpanID) string {
 		return ""
 	}
 	return hex.EncodeToString(id[:])
+}
+
+// FlattenExemplars will flatten the given exemplars into slices of the individual fields
+func FlattenExemplars(exemplars pmetric.ExemplarSlice, l zap.Logger) (pq.StringArray, pq.StringArray, pq.StringArray, pq.StringArray, pq.Float64Array) {
+	attributes := pq.StringArray{}
+	timestamps := pq.StringArray{}
+	traceIDs := pq.StringArray{}
+	spanIDs := pq.StringArray{}
+	values := pq.Float64Array{}
+
+	for i := 0; i < exemplars.Len(); i++ {
+		e := exemplars.At(i)
+		attributes = append(attributes, ConvertAttributesToString(e.FilteredAttributes(), &l))
+		timestamps = append(timestamps, e.Timestamp().String())
+		traceIDs = append(traceIDs, TraceIDToHexOrEmptyString(e.TraceID()))
+		spanIDs = append(spanIDs, SpanIDToHexOrEmptyString(e.SpanID()))
+
+		// convert Int value to Float64 so that values can be combined and still inserted as an array
+		if e.ValueType() == pmetric.ExemplarValueTypeInt {
+			values = append(values, float64(e.IntValue()))
+		} else {
+			values = append(values, e.DoubleValue())
+		}
+	}
+
+	return attributes, timestamps, traceIDs, spanIDs, values
 }
 
 /* SQL Helper Functions */
@@ -130,7 +158,7 @@ func CreateTable(ctx context.Context, db *sqlx.DB, database, schema, table, temp
 }
 
 // BatchInsert creates a new transaction using the given DB to insert the given data
-func BatchInsert(ctx context.Context, db *sqlx.DB, data *[]map[string]any, warehouse, insertSQL string) error {
+func BatchInsert(ctx context.Context, db *sqlx.DB, data []map[string]any, warehouse, insertSQL string) error {
 	// create TX
 	tx, err := db.BeginTxx(ctx, nil)
 	if err != nil {
@@ -145,8 +173,8 @@ func BatchInsert(ctx context.Context, db *sqlx.DB, data *[]map[string]any, wareh
 	}
 
 	// execute insert
-	fmt.Printf("size of data: %d\n", len(*data))
-	_, err = tx.NamedExecContext(ctx, insertSQL, *data)
+	fmt.Printf("data size: %d\n", len(data))
+	_, err = tx.NamedExecContext(ctx, insertSQL, data)
 	if err != nil {
 		return fmt.Errorf("failed to execute batch insert: %w", err)
 	}

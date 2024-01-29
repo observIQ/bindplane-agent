@@ -11,51 +11,59 @@ import (
 )
 
 const (
-	// TODO: exemplars???
 	CreateSumMetricTableTemplate = `
 	CREATE TABLE IF NOT EXISTS "%s"."%s_sum" (
 		"ResourceSchemaURL" VARCHAR,
 		"ResourceDroppedAttributesCount" INT,
-		"ResourceAttributes" VARIANT,
-		"ScopeSchemaUrl" VARCHAR,
+		"ResourceAttributes" VARCHAR,
+		"ScopeSchemaURL" VARCHAR,
 		"ScopeName" VARCHAR,
 		"ScopeVersion" VARCHAR,
 		"ScopeDroppedAttributesCount" INT,
-		"ScopeAttributes" VARIANT,
+		"ScopeAttributes" VARCHAR,
 		"MetricName" VARCHAR,
 		"MetricDescription" VARCHAR,
 		"MetricUnit" VARCHAR,
 		"AggregationTemporality" VARCHAR,
 		"IsMonotonic" BOOLEAN,
-		"Attributes" VARIANT,
+		"Attributes" VARCHAR,
 		"StartTimestamp" TIMESTAMP_NTZ,
 		"Timestamp" TIMESTAMP_NTZ,
 		"Value" NUMBER,
-		"Flags" INT
+		"Flags" INT,
+		"ExemplarAttributes" VARCHAR,
+		"ExemplarTimestamps" VARCHAR,
+		"ExemplarTraceIDs" VARCHAR,
+		"ExemplarSpanIDs" VARCHAR,
+		"ExemplarValues" VARCHAR
 	);`
 
 	insertIntoSumMetricTableTemplate = `
-	INSERT INTO "%s"."%s_sum"
-	SELECT
-		Column1 AS "ResourceSchemaURL",
-		Column2 AS "ResourceDroppedAttributesCount",
-		PARSE_JSON(Column3) AS "ResourceAttributes",
-		Column4 AS "ScopeSchemaURL",
-		Column5 AS "ScopeName",
-		Column6 AS "ScopeVersion",
-		Column7 AS "ScopeDroppedAttributesCount",
-		PARSE_JSON(Column8) AS "ScopeAttributes",
-		Column9 AS "MetricName",
-		Column10 AS "MetricDescription",
-		Column11 AS "MetricUnit",
-		Column12 AS "AggregationTemporality",
-		Column13 AS "IsMonotonic",
-		PARSE_JSON(Column14) AS "Attributes",
-		Column15 AS "StartTimestamp",
-		Column16 AS "Timestamp",
-		Column17 AS "Value",
-		Column18 AS "Flags"
-	FROM VALUES (
+	INSERT INTO "%s"."%s_sum" (
+		"ResourceSchemaURL",
+		"ResourceDroppedAttributesCount",
+		"ResourceAttributes",
+		"ScopeSchemaURL",
+		"ScopeName",
+		"ScopeVersion",
+		"ScopeDroppedAttributesCount",
+		"ScopeAttributes",
+		"MetricName",
+		"MetricDescription",
+		"MetricUnit",
+		"AggregationTemporality",
+		"IsMonotonic",
+		"Attributes",
+		"StartTimestamp",
+		"Timestamp",
+		"Value",
+		"Flags",
+		"ExemplarAttributes",
+		"ExemplarTimestamps",
+		"ExemplarTraceIDs",
+		"ExemplarSpanIDs",
+		"ExemplarValues"
+	) VALUES (
 		:rSchema,
 		:rDroppedCount,
 		:rAttributes,
@@ -73,7 +81,12 @@ const (
 		:startTimestamp,
 		:timestamp,
 		:value,
-		:flags
+		:flags,
+		:eAttributes,
+		:eTimestamps,
+		:eTraceIDs,
+		:eSpanIDs,
+		:eValues
 	);`
 )
 
@@ -135,6 +148,8 @@ func (sm *SumModel) BatchInsert(ctx context.Context) error {
 				value = dp.DoubleValue()
 			}
 
+			eAttributes, eTimestamps, eTraceIDs, eSpanIDs, eValues := utility.FlattenExemplars(dp.Exemplars(), *sm.logger)
+
 			sumMaps = append(sumMaps, map[string]any{
 				"rSchema":        s.resource.SchemaUrl(),
 				"rDroppedCount":  s.resource.Resource().DroppedAttributesCount(),
@@ -154,12 +169,17 @@ func (sm *SumModel) BatchInsert(ctx context.Context) error {
 				"timestamp":      dp.Timestamp().AsTime(),
 				"value":          value,
 				"flags":          dp.Flags(),
+				"eAttributes":    eAttributes,
+				"eTimestamps":    eTimestamps,
+				"eTraceIDs":      eTraceIDs,
+				"eSpanIDs":       eSpanIDs,
+				"eValues":        eValues,
 			})
 		}
 	}
 
 	sm.logger.Debug("SumModel calling utility.batchInsert")
-	err := utility.BatchInsert(ctx, sm.db, &sumMaps, sm.warehouse, sm.insertSQL)
+	err := utility.BatchInsert(ctx, sm.db, sumMaps, sm.warehouse, sm.insertSQL)
 	if err != nil {
 		return fmt.Errorf("failed to insert sum metric data: %w", err)
 	}

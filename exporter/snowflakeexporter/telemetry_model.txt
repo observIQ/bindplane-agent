@@ -257,3 +257,11 @@ Summary {
         }
     }
 }
+
+Exemplar {
+    FilteredAttributes []KeyValue
+    TimeUnixNano uint64
+    Value isExemplar_Value (interface)
+    SpanId Byte
+    TraceId Byte
+}
