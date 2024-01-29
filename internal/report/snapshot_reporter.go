@@ -105,6 +105,9 @@ func (s *SnapshotReporter) Report(cfg any) error {
 
 	// Gather payload
 	payload, err := s.prepRequestPayload(ssCfg.Processor, ssCfg.PipelineType)
+	if err != nil {
+		return fmt.Errorf("prep request payload: %w", err)
+	}
 
 	// Compress
 	compressedPayload, err := compress(payload)
