@@ -10,6 +10,7 @@ require (
 	github.com/observiq/bindplane-agent/exporter/chronicleforwarderexporter v1.44.0
 	github.com/observiq/bindplane-agent/exporter/googlecloudexporter v1.44.0
 	github.com/observiq/bindplane-agent/exporter/googlemanagedprometheusexporter v1.44.0
+	github.com/observiq/bindplane-agent/extension/statusextension v1.44.0
 	github.com/observiq/bindplane-agent/packagestate v1.44.0
 	github.com/observiq/bindplane-agent/processor/datapointcountprocessor v1.44.0
 	github.com/observiq/bindplane-agent/processor/logcountprocessor v1.44.0
@@ -157,8 +158,8 @@ require (
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.8.4
 	go.opencensus.io v0.24.0
-	go.opentelemetry.io/collector/component v0.92.0
-	go.opentelemetry.io/collector/confmap v0.92.0
+	go.opentelemetry.io/collector/component v0.93.0
+	go.opentelemetry.io/collector/confmap v0.93.0
 	go.opentelemetry.io/collector/connector v0.92.0
 	go.opentelemetry.io/collector/connector/forwardconnector v0.92.0
 	go.opentelemetry.io/collector/consumer v0.92.0
@@ -166,7 +167,7 @@ require (
 	go.opentelemetry.io/collector/exporter/loggingexporter v0.92.0
 	go.opentelemetry.io/collector/exporter/otlpexporter v0.92.0
 	go.opentelemetry.io/collector/exporter/otlphttpexporter v0.92.0
-	go.opentelemetry.io/collector/extension v0.92.0
+	go.opentelemetry.io/collector/extension v0.93.0
 	go.opentelemetry.io/collector/extension/zpagesextension v0.92.0
 	go.opentelemetry.io/collector/featuregate v1.0.1
 	go.opentelemetry.io/collector/otelcol v0.92.0
@@ -243,7 +244,6 @@ require (
 	github.com/knadh/koanf/v2 v2.0.1 // indirect
 	github.com/kylelemons/godebug v1.1.0 // indirect
 	github.com/lestrrat-go/strftime v1.0.6 // indirect
-	github.com/matttproud/golang_protobuf_extensions/v2 v2.0.0 // indirect
 	github.com/microsoft/go-mssqldb v1.6.0 // indirect
 	github.com/minio/asm2plan9s v0.0.0-20200509001527-cdd76441f9d8 // indirect
 	github.com/minio/c2goasm v0.0.0-20190812172519-36a3d3bbc4f3 // indirect
@@ -273,7 +273,7 @@ require (
 	go.opentelemetry.io/collector/config/confignet v0.92.0 // indirect
 	go.opentelemetry.io/collector/config/configopaque v0.92.0 // indirect
 	go.opentelemetry.io/collector/config/configretry v0.92.0 // indirect
-	go.opentelemetry.io/collector/config/configtelemetry v0.92.0 // indirect
+	go.opentelemetry.io/collector/config/configtelemetry v0.93.0 // indirect
 	go.opentelemetry.io/collector/config/configtls v0.92.0 // indirect
 	go.opentelemetry.io/collector/config/internal v0.92.0 // indirect
 	go.opentelemetry.io/collector/extension/auth v0.92.0 // indirect
@@ -421,7 +421,7 @@ require (
 	github.com/go-kit/kit v0.13.0 // indirect
 	github.com/go-kit/log v0.2.1 // indirect
 	github.com/go-logfmt/logfmt v0.6.0 // indirect
-	github.com/go-logr/logr v1.3.0 // indirect
+	github.com/go-logr/logr v1.4.1 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-ole/go-ole v1.2.6 // indirect
 	github.com/go-openapi/jsonpointer v0.20.0 // indirect
@@ -508,7 +508,7 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
 	github.com/mitchellh/hashstructure v1.1.0 // indirect
 	github.com/mitchellh/hashstructure/v2 v2.0.2 // indirect
-	github.com/mitchellh/mapstructure v1.5.1-0.20220423185008-bf980b35cac4 // indirect
+	github.com/mitchellh/mapstructure v1.5.1-0.20231216201459-8508981c8b6c // indirect
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect
 	github.com/moby/sys/mountinfo v0.6.2 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
@@ -570,7 +570,7 @@ require (
 	github.com/pquerna/cachecontrol v0.1.0 // indirect
 	github.com/prometheus/client_golang v1.18.0 // indirect
 	github.com/prometheus/client_model v0.5.0 // indirect
-	github.com/prometheus/common v0.45.0 // indirect
+	github.com/prometheus/common v0.46.0 // indirect
 	github.com/prometheus/common/sigv4 v0.1.0 // indirect
 	github.com/prometheus/procfs v0.12.0 // indirect
 	github.com/prometheus/prometheus v0.48.1 // indirect
@@ -616,18 +616,18 @@ require (
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.46.1 // indirect
 	go.opentelemetry.io/contrib/propagators/b3 v1.21.1 // indirect
 	go.opentelemetry.io/contrib/zpages v0.46.1 // indirect
-	go.opentelemetry.io/otel v1.21.0 // indirect
-	go.opentelemetry.io/otel/exporters/prometheus v0.44.1-0.20231201153405-6027c1ae76f2 // indirect
-	go.opentelemetry.io/otel/metric v1.21.0 // indirect
-	go.opentelemetry.io/otel/sdk v1.21.0 // indirect
-	go.opentelemetry.io/otel/sdk/metric v1.21.0 // indirect
-	go.opentelemetry.io/otel/trace v1.21.0 // indirect
+	go.opentelemetry.io/otel v1.22.0 // indirect
+	go.opentelemetry.io/otel/exporters/prometheus v0.45.0 // indirect
+	go.opentelemetry.io/otel/metric v1.22.0 // indirect
+	go.opentelemetry.io/otel/sdk v1.22.0 // indirect
+	go.opentelemetry.io/otel/sdk/metric v1.22.0 // indirect
+	go.opentelemetry.io/otel/trace v1.22.0 // indirect
 	go.uber.org/atomic v1.11.0 // indirect
 	golang.org/x/crypto v0.18.0 // indirect
 	golang.org/x/exp v0.0.0-20240103183307-be819d1f06fc // indirect
 	golang.org/x/mod v0.14.0 // indirect
 	golang.org/x/net v0.20.0 // indirect
-	golang.org/x/oauth2 v0.15.0 // indirect
+	golang.org/x/oauth2 v0.16.0 // indirect
 	golang.org/x/sync v0.5.0 // indirect
 	golang.org/x/term v0.16.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
@@ -706,6 +706,8 @@ replace github.com/observiq/bindplane-agent/exporter/googlemanagedprometheusexpo
 replace github.com/observiq/bindplane-agent/receiver/azureblobrehydrationreceiver => ./receiver/azureblobrehydrationreceiver
 
 replace github.com/observiq/bindplane-agent/receiver/httpreceiver => ./receiver/httpreceiver
+
+replace github.com/observiq/bindplane-agent/extension/statusextension => ./extension/statusextension
 
 // Does not build with windows and only used in configschema executable
 // Relevant issue https://github.com/mattn/go-ieproxy/issues/45

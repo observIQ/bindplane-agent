@@ -15,6 +15,7 @@
 package factories
 
 import (
+	"github.com/observiq/bindplane-agent/extension/statusextension"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/extension/basicauthextension"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/extension/bearertokenauthextension"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/extension/healthcheckextension"
@@ -38,5 +39,6 @@ var defaultExtensions = []extension.Factory{
 	oidcauthextension.NewFactory(),
 	pprofextension.NewFactory(),
 	sigv4authextension.NewFactory(),
+	statusextension.NewFactory(),
 	zpagesextension.NewFactory(),
 }

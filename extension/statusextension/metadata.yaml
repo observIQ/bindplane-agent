@@ -1,0 +1,8 @@
+type: status
+
+status:
+  class: extension
+  stability:
+    beta: [extension]
+  distributions: [observiq]
+
