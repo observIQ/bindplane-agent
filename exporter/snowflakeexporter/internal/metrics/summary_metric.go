@@ -5,14 +5,15 @@ import (
 	"fmt"
 
 	"github.com/jmoiron/sqlx"
+	"github.com/lib/pq"
 	"github.com/observiq/bindplane-agent/exporter/snowflakeexporter/internal/utility"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.uber.org/zap"
 )
 
 const (
-	CreateSumMetricTableTemplate = `
-	CREATE TABLE IF NOT EXISTS "%s"."%s_sum" (
+	CreateSummaryMetricTableTemplate = `
+	CREATE TABLE IF NOT EXISTS "%s"."%s_summary" (
 		"ResourceSchemaURL" VARCHAR,
 		"ResourceDroppedAttributesCount" INT,
 		"ResourceAttributes" VARCHAR,
@@ -24,22 +25,18 @@ const (
 		"MetricName" VARCHAR,
 		"MetricDescription" VARCHAR,
 		"MetricUnit" VARCHAR,
-		"AggregationTemporality" VARCHAR,
-		"IsMonotonic" BOOLEAN,
 		"Attributes" VARCHAR,
 		"StartTimestamp" TIMESTAMP_NTZ,
 		"Timestamp" TIMESTAMP_NTZ,
-		"Value" NUMBER,
+		"Count" INT,
+		"Sum" NUMBER,
 		"Flags" INT,
-		"ExemplarAttributes" VARCHAR,
-		"ExemplarTimestamps" VARCHAR,
-		"ExemplarTraceIDs" VARCHAR,
-		"ExemplarSpanIDs" VARCHAR,
-		"ExemplarValues" VARCHAR
+		"Quantiles" VARCHAR,
+		"Values" VARCHAR
 	);`
 
-	insertIntoSumMetricTableTemplate = `
-	INSERT INTO "%s"."%s_sum" (
+	insertIntoSummaryMetricTableTemplate = `
+	INSERT INTO "%s"."%s_summary" (
 		"ResourceSchemaURL",
 		"ResourceDroppedAttributesCount",
 		"ResourceAttributes",
@@ -51,18 +48,14 @@ const (
 		"MetricName",
 		"MetricDescription",
 		"MetricUnit",
-		"AggregationTemporality",
-		"IsMonotonic",
 		"Attributes",
 		"StartTimestamp",
 		"Timestamp",
-		"Value",
+		"Count",
+		"Sum",
 		"Flags",
-		"ExemplarAttributes",
-		"ExemplarTimestamps",
-		"ExemplarTraceIDs",
-		"ExemplarSpanIDs",
-		"ExemplarValues"
+		"Quantiles",
+		"Values"
 	) VALUES (
 		:rSchema,
 		:rDroppedCount,
@@ -75,82 +68,66 @@ const (
 		:mName,
 		:mDescription,
 		:mUnit,
-		:aggTemp,
-		:monotonic,
 		:attributes,
 		:startTimestamp,
 		:timestamp,
-		:value,
+		:count,
+		:sum,
 		:flags,
-		:eAttributes,
-		:eTimestamps,
-		:eTraceIDs,
-		:eSpanIDs,
-		:eValues
+		:quantiles,
+		:values
 	);`
 )
 
-// SumModel implements the MetricModel for sum metrics
-type SumModel struct {
+type SummaryModel struct {
 	logger    *zap.Logger
 	db        *sqlx.DB
-	sums      []*sumData
+	summaries []*summaryData
 	warehouse string
 	insertSQL string
 }
 
-type sumData struct {
+type summaryData struct {
 	resource pmetric.ResourceMetrics
 	scope    pmetric.ScopeMetrics
 	metric   pmetric.Metric
-	sum      pmetric.Sum
+	summary  pmetric.Summary
 }
 
-// NewSumModel returns a new SumModel to be used for sending sum metrics to Snowflake
-func NewSumModel(logger *zap.Logger, db *sqlx.DB, warehouse, schema, table string) *SumModel {
-	return &SumModel{
+func NewSummaryModel(logger *zap.Logger, db *sqlx.DB, warehouse, schema, table string) *SummaryModel {
+	return &SummaryModel{
 		logger:    logger,
 		db:        db,
-		sums:      []*sumData{},
 		warehouse: warehouse,
-		insertSQL: fmt.Sprintf(insertIntoSumMetricTableTemplate, schema, table),
+		insertSQL: fmt.Sprintf(insertIntoSummaryMetricTableTemplate, schema, table),
 	}
 }
 
-// AddMetric adds a new sum metric to be inserted
-func (sm *SumModel) AddMetric(r pmetric.ResourceMetrics, s pmetric.ScopeMetrics, m pmetric.Metric) {
-	sm.sums = append(sm.sums, &sumData{
+func (sm *SummaryModel) AddMetric(r pmetric.ResourceMetrics, s pmetric.ScopeMetrics, m pmetric.Metric) {
+	sm.summaries = append(sm.summaries, &summaryData{
 		resource: r,
 		scope:    s,
 		metric:   m,
-		sum:      m.Sum(),
+		summary:  m.Summary(),
 	})
 }
 
-// BatchInsert inserts all stored sum metrics
-func (sm *SumModel) BatchInsert(ctx context.Context) error {
+func (sm *SummaryModel) BatchInsert(ctx context.Context) error {
 	sm.logger.Debug("starting SumModel BatchInsert")
-	if len(sm.sums) == 0 {
+	if len(sm.summaries) == 0 {
 		sm.logger.Debug("end SumModel BatchInsert: no sum metrics to insert")
 		return nil
 	}
 
-	sumMaps := []map[string]any{}
+	summaryMaps := []map[string]any{}
 
-	for _, s := range sm.sums {
-		for i := 0; i < s.sum.DataPoints().Len(); i++ {
-			dp := s.sum.DataPoints().At(i)
+	for _, s := range sm.summaries {
+		for i := 0; i < s.summary.DataPoints().Len(); i++ {
+			dp := s.summary.DataPoints().At(i)
 
-			var value any
-			if dp.ValueType() == pmetric.NumberDataPointValueTypeInt {
-				value = dp.IntValue()
-			} else {
-				value = dp.DoubleValue()
-			}
+			quantiles, values := flattenQuantileValues(dp.QuantileValues())
 
-			eAttributes, eTimestamps, eTraceIDs, eSpanIDs, eValues := utility.FlattenExemplars(dp.Exemplars(), sm.logger)
-
-			sumMaps = append(sumMaps, map[string]any{
+			summaryMaps = append(summaryMaps, map[string]any{
 				"rSchema":        s.resource.SchemaUrl(),
 				"rDroppedCount":  s.resource.Resource().DroppedAttributesCount(),
 				"rAttributes":    utility.ConvertAttributesToString(s.resource.Resource().Attributes(), sm.logger),
@@ -162,27 +139,35 @@ func (sm *SumModel) BatchInsert(ctx context.Context) error {
 				"mName":          s.metric.Name(),
 				"mDescription":   s.metric.Description(),
 				"mUnit":          s.metric.Unit(),
-				"aggTemp":        s.sum.AggregationTemporality().String(),
-				"monotonic":      s.sum.IsMonotonic(),
 				"attributes":     utility.ConvertAttributesToString(dp.Attributes(), sm.logger),
 				"startTimestamp": dp.StartTimestamp().AsTime(),
 				"timestamp":      dp.Timestamp().AsTime(),
-				"value":          value,
+				"count":          dp.Count(),
+				"sum":            dp.Sum(),
 				"flags":          dp.Flags(),
-				"eAttributes":    eAttributes,
-				"eTimestamps":    eTimestamps,
-				"eTraceIDs":      eTraceIDs,
-				"eSpanIDs":       eSpanIDs,
-				"eValues":        eValues,
+				"quantiles":      quantiles,
+				"values":         values,
 			})
 		}
 	}
 
-	sm.logger.Debug("SumModel calling utility.batchInsert")
-	err := utility.BatchInsert(ctx, sm.db, sumMaps, sm.warehouse, sm.insertSQL)
+	sm.logger.Debug("SummaryModel calling utility.batchInsert")
+	err := utility.BatchInsert(ctx, sm.db, summaryMaps, sm.warehouse, sm.insertSQL)
 	if err != nil {
-		return fmt.Errorf("failed to insert sum metric data: %w", err)
+		return fmt.Errorf("failed to insert summary metric data: %w", err)
 	}
-	sm.logger.Debug("end SumModel BatchInsert: successful insert")
+	sm.logger.Debug("end SummaryModel BatchInsert: successful insert")
 	return nil
+}
+
+func flattenQuantileValues(qv pmetric.SummaryDataPointValueAtQuantileSlice) (pq.Float64Array, pq.Float64Array) {
+	quantiles := pq.Float64Array{}
+	values := pq.Float64Array{}
+
+	for i := 0; i < qv.Len(); i++ {
+		quantiles = append(quantiles, qv.At(i).Quantile())
+		values = append(values, qv.At(i).Value())
+	}
+
+	return quantiles, values
 }

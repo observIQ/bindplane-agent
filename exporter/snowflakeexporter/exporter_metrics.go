@@ -17,7 +17,7 @@ import (
 )
 
 type metricModel interface {
-	AddMetric(r pmetric.ResourceMetrics, s pmetric.ScopeMetrics, m pmetric.Metric, d any)
+	AddMetric(r pmetric.ResourceMetrics, s pmetric.ScopeMetrics, m pmetric.Metric)
 	BatchInsert(ctx context.Context) error
 }
 
@@ -54,19 +54,33 @@ func (me *metricsExporter) start(ctx context.Context, _ component.Host) error {
 	}
 	me.db = db
 
-	// TODO: init more metric models
+	// init metric models
 	me.models["sums"] = metrics.NewSumModel(me.logger, me.db, me.cfg.Warehouse, me.cfg.Metrics.Schema, me.cfg.Metrics.Table)
 	me.models["gauges"] = metrics.NewGaugeModel(me.logger, me.db, me.cfg.Warehouse, me.cfg.Metrics.Schema, me.cfg.Metrics.Table)
+	me.models["histograms"] = metrics.NewHistogramModel(me.logger, me.db, me.cfg.Warehouse, me.cfg.Metrics.Schema, me.cfg.Metrics.Table)
+	me.models["exponentialHistograms"] = metrics.NewExponentialHistogramModel(me.logger, me.db, me.cfg.Warehouse, me.cfg.Metrics.Schema, me.cfg.Metrics.Table)
+	me.models["summaries"] = metrics.NewSummaryModel(me.logger, me.db, me.cfg.Warehouse, me.cfg.Metrics.Schema, me.cfg.Metrics.Table)
 
-	// TODO: create more metric tables
+	// create metric tables
 	err = utility.CreateTable(ctx, me.db, me.cfg.Database, me.cfg.Metrics.Schema, me.cfg.Metrics.Table, metrics.CreateSumMetricTableTemplate)
 	if err != nil {
 		return fmt.Errorf("failed to create sum metrics table: %w", err)
 	}
-
 	err = utility.CreateTable(ctx, me.db, me.cfg.Database, me.cfg.Metrics.Schema, me.cfg.Metrics.Table, metrics.CreateGaugeMetricTableTemplate)
 	if err != nil {
 		return fmt.Errorf("failed to create gauge metrics table: %w", err)
+	}
+	err = utility.CreateTable(ctx, me.db, me.cfg.Database, me.cfg.Metrics.Schema, me.cfg.Metrics.Table, metrics.CreateHistogramMetricTableTemplate)
+	if err != nil {
+		return fmt.Errorf("failed to create histogram metrics table: %w", err)
+	}
+	err = utility.CreateTable(ctx, me.db, me.cfg.Database, me.cfg.Metrics.Schema, me.cfg.Metrics.Table, metrics.CreateExponentialHistogramMetricTableTemplate)
+	if err != nil {
+		return fmt.Errorf("failed to create exponential histogram metrics table: %w", err)
+	}
+	err = utility.CreateTable(ctx, me.db, me.cfg.Database, me.cfg.Metrics.Schema, me.cfg.Metrics.Table, metrics.CreateSummaryMetricTableTemplate)
+	if err != nil {
+		return fmt.Errorf("failed to create summary metrics table: %w", err)
 	}
 	return nil
 }
@@ -81,6 +95,7 @@ func (me *metricsExporter) shutdown(_ context.Context) error {
 func (me *metricsExporter) metricsDataPusher(ctx context.Context, md pmetric.Metrics) error {
 	me.logger.Debug("begin metricsDataPusher")
 
+	// loop through metrics and add to corresponding metric model
 	for i := 0; i < md.ResourceMetrics().Len(); i++ {
 		resourceMetric := md.ResourceMetrics().At(i)
 
@@ -90,12 +105,17 @@ func (me *metricsExporter) metricsDataPusher(ctx context.Context, md pmetric.Met
 			for k := 0; k < scopeMetric.Metrics().Len(); k++ {
 				metric := scopeMetric.Metrics().At(k)
 
-				// TODO: add more metrics types
 				switch metric.Type() {
 				case pmetric.MetricTypeSum:
-					me.models["sums"].AddMetric(resourceMetric, scopeMetric, metric, metric.Sum())
+					me.models["sums"].AddMetric(resourceMetric, scopeMetric, metric)
 				case pmetric.MetricTypeGauge:
-					me.models["gauges"].AddMetric(resourceMetric, scopeMetric, metric, metric.Gauge())
+					me.models["gauges"].AddMetric(resourceMetric, scopeMetric, metric)
+				case pmetric.MetricTypeHistogram:
+					me.models["histograms"].AddMetric(resourceMetric, scopeMetric, metric)
+				case pmetric.MetricTypeExponentialHistogram:
+					me.models["exponentialHistograms"].AddMetric(resourceMetric, scopeMetric, metric)
+				case pmetric.MetricTypeSummary:
+					me.models["summaries"].AddMetric(resourceMetric, scopeMetric, metric)
 				default:
 					me.logger.Warn("unsupported metric type", zap.String("type", metric.Type().String()))
 				}
@@ -103,6 +123,7 @@ func (me *metricsExporter) metricsDataPusher(ctx context.Context, md pmetric.Met
 		}
 	}
 
+	// call BatchInsert for all metric models
 	wg := &sync.WaitGroup{}
 	errorChan := make(chan error, len(me.models))
 	for _, v := range me.models {
@@ -115,6 +136,7 @@ func (me *metricsExporter) metricsDataPusher(ctx context.Context, md pmetric.Met
 	wg.Wait()
 	close(errorChan)
 
+	// return any errors
 	var errs error
 	for e := range errorChan {
 		errors.Join(errs, e)

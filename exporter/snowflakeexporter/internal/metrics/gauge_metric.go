@@ -108,12 +108,12 @@ func NewGaugeModel(logger *zap.Logger, db *sqlx.DB, warehouse, schema, table str
 	}
 }
 
-func (gm *GaugeModel) AddMetric(r pmetric.ResourceMetrics, s pmetric.ScopeMetrics, m pmetric.Metric, d any) {
+func (gm *GaugeModel) AddMetric(r pmetric.ResourceMetrics, s pmetric.ScopeMetrics, m pmetric.Metric) {
 	gm.gauges = append(gm.gauges, &gaugeData{
 		resource: r,
 		scope:    s,
 		metric:   m,
-		gauge:    d.(pmetric.Gauge),
+		gauge:    m.Gauge(),
 	})
 }
 
@@ -136,7 +136,7 @@ func (gm *GaugeModel) BatchInsert(ctx context.Context) error {
 				value = dp.DoubleValue()
 			}
 
-			eAttributes, eTimestamps, eTraceIDs, eSpanIDs, eValues := utility.FlattenExemplars(dp.Exemplars(), *gm.logger)
+			eAttributes, eTimestamps, eTraceIDs, eSpanIDs, eValues := utility.FlattenExemplars(dp.Exemplars(), gm.logger)
 
 			gaugeMaps = append(gaugeMaps, map[string]any{
 				"rSchema":        g.resource.SchemaUrl(),

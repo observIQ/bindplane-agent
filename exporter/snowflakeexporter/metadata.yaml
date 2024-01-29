@@ -1,4 +1,4 @@
-type: snowflakeexporter
+type: snowflake
 
 status:
   class: exporter

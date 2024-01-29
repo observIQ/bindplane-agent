@@ -69,7 +69,7 @@ func SpanIDToHexOrEmptyString(id pcommon.SpanID) string {
 }
 
 // FlattenExemplars will flatten the given exemplars into slices of the individual fields
-func FlattenExemplars(exemplars pmetric.ExemplarSlice, l zap.Logger) (pq.StringArray, pq.StringArray, pq.StringArray, pq.StringArray, pq.Float64Array) {
+func FlattenExemplars(exemplars pmetric.ExemplarSlice, l *zap.Logger) (pq.StringArray, pq.StringArray, pq.StringArray, pq.StringArray, pq.Float64Array) {
 	attributes := pq.StringArray{}
 	timestamps := pq.StringArray{}
 	traceIDs := pq.StringArray{}
@@ -78,7 +78,7 @@ func FlattenExemplars(exemplars pmetric.ExemplarSlice, l zap.Logger) (pq.StringA
 
 	for i := 0; i < exemplars.Len(); i++ {
 		e := exemplars.At(i)
-		attributes = append(attributes, ConvertAttributesToString(e.FilteredAttributes(), &l))
+		attributes = append(attributes, ConvertAttributesToString(e.FilteredAttributes(), l))
 		timestamps = append(timestamps, e.Timestamp().String())
 		traceIDs = append(traceIDs, TraceIDToHexOrEmptyString(e.TraceID()))
 		spanIDs = append(spanIDs, SpanIDToHexOrEmptyString(e.SpanID()))
@@ -173,7 +173,6 @@ func BatchInsert(ctx context.Context, db *sqlx.DB, data []map[string]any, wareho
 	}
 
 	// execute insert
-	fmt.Printf("data size: %d\n", len(data))
 	_, err = tx.NamedExecContext(ctx, insertSQL, data)
 	if err != nil {
 		return fmt.Errorf("failed to execute batch insert: %w", err)
