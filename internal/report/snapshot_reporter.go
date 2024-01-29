@@ -104,7 +104,7 @@ func (s *SnapshotReporter) Report(cfg any) error {
 	}
 
 	// Gather payload
-	payload, err := s.prepRequestPayload(ssCfg.Processor, ssCfg.PipelineType)
+	payload, err := s.prepRequestPayload(ssCfg.Processor, ssCfg.PipelineType, ssCfg.SearchQuery, ssCfg.MinimumTimestamp)
 	if err != nil {
 		return fmt.Errorf("prep request payload: %w", err)
 	}
@@ -201,7 +201,7 @@ func (s *SnapshotReporter) SaveMetrics(componentID string, md pmetric.Metrics) {
 }
 
 // prepRequestPayload based on the pipelineType will return a marshaled proto of the OTLP data types for the componentID
-func (s *SnapshotReporter) prepRequestPayload(componentID, pipelineType string) (payload []byte, err error) {
+func (s *SnapshotReporter) prepRequestPayload(componentID, pipelineType string, searchQuery *string, minimumTimestamp *time.Time) (payload []byte, err error) {
 	switch pipelineType {
 	case "logs":
 		s.logLock.Lock()
@@ -211,7 +211,7 @@ func (s *SnapshotReporter) prepRequestPayload(componentID, pipelineType string) 
 			return []byte{}, nil
 		}
 
-		payload, err = buffer.ConstructPayload()
+		payload, err = buffer.ConstructPayload(searchQuery, minimumTimestamp)
 	case "metrics":
 		s.metricLock.Lock()
 		buffer, ok := s.metricBuffers[componentID]
