@@ -44,7 +44,7 @@ type snapshotConfig struct {
 	// PipelineType will be "logs", "metrics", or "traces"
 	PipelineType string `yaml:"pipeline_type"`
 
-	// SearchQuery is an optional wuery string that will filter telemetry
+	// SearchQuery is an optional query string that will filter telemetry
 	// such that only telemetry containing the string is reported.
 	SearchQuery *string `yaml:"search_query"`
 
