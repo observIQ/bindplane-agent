@@ -124,7 +124,7 @@ func (le *logsExporter) start(ctx context.Context, _ component.Host) error {
 	)
 	db, err := utility.CreateDB(ctx, dsn)
 	if err != nil {
-		return fmt.Errorf("failed to create new database for logs: %w", err)
+		return fmt.Errorf("failed to create new db connection for logs: %w", err)
 	}
 	le.db = db
 

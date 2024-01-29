@@ -29,6 +29,9 @@ import (
 	"go.uber.org/zap"
 )
 
+// DriverName allows use of mocking by changing
+var DriverName = "snowflake"
+
 // ConvertAttributesToString converts the pcommon.Map into a JSON string representation
 // this is due to a bug/lacking feature with the snowflake driver that prevents maps from being inserted into VARIANT & OBJECT columns
 // github issue: https://github.com/snowflakedb/gosnowflake/issues/217
@@ -64,9 +67,6 @@ func SpanIDToHexOrEmptyString(id pcommon.SpanID) string {
 }
 
 /* SQL Helper Functions */
-
-// DriverName allows use of mocking by changing
-var DriverName = "snowflake"
 
 // CreateDSN creates a DSN for connecting to Snowflake with the given config
 // TODO add functionality for additional query params
@@ -145,6 +145,7 @@ func BatchInsert(ctx context.Context, db *sqlx.DB, data *[]map[string]any, wareh
 	}
 
 	// execute insert
+	fmt.Printf("size of data: %d\n", len(*data))
 	_, err = tx.NamedExecContext(ctx, insertSQL, *data)
 	if err != nil {
 		return fmt.Errorf("failed to execute batch insert: %w", err)

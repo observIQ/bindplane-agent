@@ -139,3 +139,121 @@ LOGS
         }
     }
 }
+
+METRICS
+[]*ResourceMetrics {
+    DeprecatedScopeMetrics []*ScopeMetrics
+    Resource {
+        DroppedAttributesCount uint32
+        Attributes []KeyValue
+    }
+    SchemaURL string
+    ScopeMetrics []*ScopeMetrics {
+        SchemaUrl string
+        Scope v11.InstrumentationScope{
+            Name string
+            Version string
+            DroppedAttributesCount uint32
+            Attributes []v11.KeyValue
+        }
+        Metrics []*Metrics {
+            Name string
+            Description string
+            Unit string
+            Data isMetric_Data(interface)
+        }
+    }
+}
+
+type isMetric_Data interface {
+    isMetric_Data()
+}
+
+// possible structs for the isMetric_Data interface
+type Metric_Gauge struct {
+	Gauge *Gauge `protobuf:"bytes,5,opt,name=gauge,proto3,oneof" json:"gauge,omitempty"`
+}
+type Metric_Sum struct {
+	Sum *Sum `protobuf:"bytes,7,opt,name=sum,proto3,oneof" json:"sum,omitempty"`
+}
+type Metric_Histogram struct {
+	Histogram *Histogram `protobuf:"bytes,9,opt,name=histogram,proto3,oneof" json:"histogram,omitempty"`
+}
+type Metric_ExponentialHistogram struct {
+	ExponentialHistogram *ExponentialHistogram `protobuf:"bytes,10,opt,name=exponential_histogram,json=exponentialHistogram,proto3,oneof" json:"exponential_histogram,omitempty"`
+}
+type Metric_Summary struct {
+	Summary *Summary `protobuf:"bytes,11,opt,name=summary,proto3,oneof" json:"summary,omitempty"`
+}
+
+Gauge {
+    DataPoints []*NumberDataPoint {
+        Attributes []KeyValue
+        StartTimeUnixNano uint64
+        TimeUnixNano uint64
+        Value float64/int
+        Exemplars []Exemplar
+        Flags uint32
+    }
+}
+
+Sum {
+    IsMonotonic bool
+    DataPoints []*NumberDataPoint
+    AggregationTemporality AggregationTemporality
+}
+
+Histogram {
+    AggregationTemporality AggregationTemporality
+    DataPoints []*HistogramDataPoint {
+        Attributes []KeyValue
+        StartTimeUnixNano uint64
+        TimeUnixNano uint64
+        Count uint64
+        Sum_ isHistogramDataPoint_Sum_ (interface)
+        BucketCounts []uint64
+        ExplicitBounds []float64
+        Exemplars []Exemplar 
+        Flags uint32
+        Min_ isHistogramDataPoint_Min_ (interface)
+        Max_ isHistogramDataPoint_Max_ (interface)
+    }
+}
+
+ExponentialHistogram {
+    AggregationTemporality AggregationTemporality
+    DataPoints []*ExponentialHistogramDataPoint {
+        Attributes []KeyValue
+        StartTimeUnixNano uint64
+        TimeUnixNano uint64
+        Count uint64
+        Sum_ isExponentialHistogramDataPoint_Sum_ (interface)
+        Scale int32
+        ZeroCount uint64
+        Positive ExponentialHistogramDataPoint_Buckets
+        Negative ExponentialHistogramDataPoint_Buckets {
+            Offset int32
+            BucketCounts []uint64
+        }
+        Flags uint32
+        Exemplars []Exemplar
+        Min_ isExponentialHistogramDataPoint_Min_ (interface)
+        Max_ isExponentialHistogramDataPoint_Max_ (interface)
+        ZeroThreshold float64
+    }
+}
+
+Summary {
+    DataPoints []*SummaryDataPoint {
+        Attributes []KeyValue
+        StartTimeUnixNano uint64
+        TimeUnixNano uint64
+        Count uint64
+        Sum float64
+        Flags uint32
+        QuantileValues []*SummaryDataPoint_ValueAtQuantile {
+            Quantile float64
+            Value float64
+        }
+    }
+}
