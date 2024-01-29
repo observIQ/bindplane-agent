@@ -94,12 +94,12 @@ const (
 type SumModel struct {
 	logger    *zap.Logger
 	db        *sqlx.DB
-	sums      []*data
+	sums      []*sumData
 	warehouse string
 	insertSQL string
 }
 
-type data struct {
+type sumData struct {
 	resource pmetric.ResourceMetrics
 	scope    pmetric.ScopeMetrics
 	metric   pmetric.Metric
@@ -111,7 +111,7 @@ func NewSumModel(logger *zap.Logger, db *sqlx.DB, warehouse, schema, table strin
 	return &SumModel{
 		logger:    logger,
 		db:        db,
-		sums:      []*data{},
+		sums:      []*sumData{},
 		warehouse: warehouse,
 		insertSQL: fmt.Sprintf(insertIntoSumMetricTableTemplate, schema, table),
 	}
@@ -119,7 +119,7 @@ func NewSumModel(logger *zap.Logger, db *sqlx.DB, warehouse, schema, table strin
 
 // AddMetric adds a new sum metric to be inserted
 func (sm *SumModel) AddMetric(r pmetric.ResourceMetrics, s pmetric.ScopeMetrics, m pmetric.Metric, d any) {
-	sm.sums = append(sm.sums, &data{
+	sm.sums = append(sm.sums, &sumData{
 		resource: r,
 		scope:    s,
 		metric:   m,

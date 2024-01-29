@@ -56,11 +56,17 @@ func (me *metricsExporter) start(ctx context.Context, _ component.Host) error {
 
 	// TODO: init more metric models
 	me.models["sums"] = metrics.NewSumModel(me.logger, me.db, me.cfg.Warehouse, me.cfg.Metrics.Schema, me.cfg.Metrics.Table)
+	me.models["gauges"] = metrics.NewGaugeModel(me.logger, me.db, me.cfg.Warehouse, me.cfg.Metrics.Schema, me.cfg.Metrics.Table)
 
 	// TODO: create more metric tables
 	err = utility.CreateTable(ctx, me.db, me.cfg.Database, me.cfg.Metrics.Schema, me.cfg.Metrics.Table, metrics.CreateSumMetricTableTemplate)
 	if err != nil {
 		return fmt.Errorf("failed to create sum metrics table: %w", err)
+	}
+
+	err = utility.CreateTable(ctx, me.db, me.cfg.Database, me.cfg.Metrics.Schema, me.cfg.Metrics.Table, metrics.CreateGaugeMetricTableTemplate)
+	if err != nil {
+		return fmt.Errorf("failed to create gauge metrics table: %w", err)
 	}
 	return nil
 }
@@ -84,9 +90,12 @@ func (me *metricsExporter) metricsDataPusher(ctx context.Context, md pmetric.Met
 			for k := 0; k < scopeMetric.Metrics().Len(); k++ {
 				metric := scopeMetric.Metrics().At(k)
 
+				// TODO: add more metrics types
 				switch metric.Type() {
 				case pmetric.MetricTypeSum:
 					me.models["sums"].AddMetric(resourceMetric, scopeMetric, metric, metric.Sum())
+				case pmetric.MetricTypeGauge:
+					me.models["gauges"].AddMetric(resourceMetric, scopeMetric, metric, metric.Gauge())
 				default:
 					me.logger.Warn("unsupported metric type", zap.String("type", metric.Type().String()))
 				}
