@@ -256,6 +256,7 @@ dockers:
       - config/example.yaml
       - config/logging.stdout.yaml
       - LICENSE
+      - release_deps/opentelemetry-java-contrib-jmx-metrics.jar
   - id: ubuntu-arm64
     goos: linux
     goarch: arm64

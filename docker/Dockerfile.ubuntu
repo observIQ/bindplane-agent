@@ -13,16 +13,6 @@
 # limitations under the License.
 
 
-# JMX stage downloads the opentelemetry-jmx-metrics.jar used by JMX receivers
-#
-FROM curlimages/curl:7.82.0 as jmxjar
-ARG JMX_JAR_VERSION=v1.15.0
-USER root
-RUN curl -L \
-    --output /opentelemetry-java-contrib-jmx-metrics.jar \
-    "https://github.com/open-telemetry/opentelemetry-java-contrib/releases/download/${JMX_JAR_VERSION}/opentelemetry-jmx-metrics.jar"
-
-
 # eclipse-temurn stage provides the Java runtime used by JMX receivers.
 # It is a replacement for the openjdk image, which is considered deprecated.
 #
@@ -66,7 +56,7 @@ RUN mkdir /licenses
 COPY LICENSE /licenses/observiq-otel-collector.license
 
 COPY observiq-otel-collector /collector/observiq-otel-collector
-COPY --from=jmxjar /opentelemetry-java-contrib-jmx-metrics.jar /opt/opentelemetry-java-contrib-jmx-metrics.jar
+COPY opentelemetry-java-contrib-jmx-metrics.jar /opt/opentelemetry-java-contrib-jmx-metrics.jar
 COPY plugins /etc/otel/plugins
 
 COPY config/logging.stdout.yaml /etc/otel/logging.yaml
