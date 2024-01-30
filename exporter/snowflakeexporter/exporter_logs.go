@@ -119,13 +119,17 @@ func (le *logsExporter) start(ctx context.Context, _ component.Host) error {
 		le.cfg.Password,
 		le.cfg.AccountIdentifier,
 		le.cfg.Database,
-		le.cfg.Logs.Schema,
 	)
 	db, err := utility.CreateDB(ctx, dsn)
 	if err != nil {
 		return fmt.Errorf("failed to create new db connection for logs: %w", err)
 	}
 	le.db = db
+
+	err = utility.CreateSchema(ctx, le.db, le.cfg.Logs.Schema)
+	if err != nil {
+		return fmt.Errorf("failed to create logs schema: %w", err)
+	}
 
 	err = utility.CreateTable(ctx, le.db, le.cfg.Database, le.cfg.Logs.Schema, le.cfg.Logs.Table, createLogsTableSnowflakeTemplate)
 	if err != nil {

@@ -153,7 +153,6 @@ func (te *tracesExporter) start(ctx context.Context, _ component.Host) error {
 		te.cfg.Password,
 		te.cfg.AccountIdentifier,
 		te.cfg.Database,
-		te.cfg.Traces.Schema,
 	)
 	db, err := utility.CreateDB(ctx, dsn)
 	if err != nil {
@@ -161,6 +160,11 @@ func (te *tracesExporter) start(ctx context.Context, _ component.Host) error {
 		return fmt.Errorf("failed to create new database for traces: %w", err)
 	}
 	te.db = db
+
+	err = utility.CreateSchema(ctx, te.db, te.cfg.Traces.Schema)
+	if err != nil {
+		return fmt.Errorf("failed to create traces schema: %w", err)
+	}
 
 	err = utility.CreateTable(ctx, te.db, te.cfg.Database, te.cfg.Traces.Schema, te.cfg.Traces.Table, createTracesTableSnowflakeTemplate)
 	if err != nil {

@@ -98,19 +98,12 @@ func FlattenExemplars(exemplars pmetric.ExemplarSlice, l *zap.Logger) (pq.String
 
 // CreateDSN creates a DSN for connecting to Snowflake with the given config
 // TODO add functionality for additional query params
-func CreateDSN(username, password, accountID, database, schema string) string {
-	var dsn string
+func CreateDSN(username, password, accountID, database string) string {
 	usernameEsc := url.QueryEscape(username)
 	passwordEsc := url.QueryEscape(password)
 	accountIDEsc := url.QueryEscape(accountID)
 	databaseEsc := url.QueryEscape(database)
-	if schema != "" {
-		dsn = fmt.Sprintf(`%s:%s@%s/"%s"`, usernameEsc, passwordEsc, accountIDEsc, databaseEsc)
-	} else {
-		schemaEsc := url.QueryEscape(schema)
-		dsn = fmt.Sprintf(`%s:%s@%s/"%s"/"%s"`, usernameEsc, passwordEsc, accountIDEsc, databaseEsc, schemaEsc)
-	}
-	return dsn
+	return fmt.Sprintf(`%s:%s@%s/"%s"`, usernameEsc, passwordEsc, accountIDEsc, databaseEsc)
 }
 
 // CreateDB calls Open() using driverName and the given dsn and then calls Ping()
@@ -134,8 +127,8 @@ func CreateDB(ctx context.Context, dsn string) (*sqlx.DB, error) {
 }
 
 // CreateSchema ensures the given schema exists using the given *sql.DB
-func CreateSchema(db *sqlx.DB, schema string) error {
-	_, err := db.Exec(fmt.Sprintf(`CREATE SCHEMA IF NOT EXISTS "%s";`, schema))
+func CreateSchema(ctx context.Context, db *sqlx.DB, schema string) error {
+	_, err := db.ExecContext(ctx, fmt.Sprintf(`CREATE SCHEMA IF NOT EXISTS "%s";`, schema))
 	if err != nil {
 		return fmt.Errorf("failed to create schema '%s': %w", schema, err)
 	}

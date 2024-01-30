@@ -46,13 +46,17 @@ func (me *metricsExporter) start(ctx context.Context, _ component.Host) error {
 		me.cfg.Password,
 		me.cfg.AccountIdentifier,
 		me.cfg.Database,
-		me.cfg.Metrics.Schema,
 	)
 	db, err := utility.CreateDB(ctx, dsn)
 	if err != nil {
 		return fmt.Errorf("failed to create new db connection for metrics: %w", err)
 	}
 	me.db = db
+
+	err = utility.CreateSchema(ctx, me.db, me.cfg.Metrics.Schema)
+	if err != nil {
+		return fmt.Errorf("failed to create metrics schema: %w", err)
+	}
 
 	// init metric models
 	me.models["sums"] = metrics.NewSumModel(me.logger, me.db, me.cfg.Warehouse, me.cfg.Metrics.Schema, me.cfg.Metrics.Table)

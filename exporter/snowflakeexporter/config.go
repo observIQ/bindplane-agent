@@ -16,9 +16,8 @@ package snowflakeexporter
 
 import (
 	"errors"
-	"fmt"
 
-	"github.com/observiq/bindplane-agent/exporter/snowflakeexporter/internal/utility"
+	"go.opentelemetry.io/collector/config/configretry"
 	"go.opentelemetry.io/collector/exporter/exporterhelper"
 )
 
@@ -32,6 +31,8 @@ const (
 // Config is the config for the Snowflake exporter
 type Config struct {
 	exporterhelper.TimeoutSettings `mapstructure:",squash"`
+	exporterhelper.QueueSettings   `mapstructure:"sending_queue"`
+	configretry.BackOffConfig      `mapstructure:"retry_on_failure"`
 
 	AccountIdentifier string `mapstructure:"account_identifier"`
 	Username          string `mapstructure:"username"`
@@ -68,11 +69,7 @@ func (c *Config) Validate() error {
 		return errors.New("warehouse is required")
 	}
 
-	if err := c.validateTelemetry(); err != nil {
-		return err
-	}
-
-	return c.validateConnection()
+	return c.validateTelemetry()
 }
 
 // validateTelemetry ensures at least 1 telemetry type is configured and sets default values if needed
@@ -109,40 +106,5 @@ func (c *Config) validateTelemetry() error {
 	if noTelemetry {
 		return errors.New("no telemetry type configured for exporter")
 	}
-	return nil
-}
-
-// validateConnection verifies that the exporter can connect to Snowflake and creates the telemetry schemas if needed
-func (c *Config) validateConnection() error {
-	// connect to snowflake
-	dsn := utility.CreateDSN(
-		c.Username,
-		c.Password,
-		c.AccountIdentifier,
-		c.Database,
-		"",
-	)
-	db, err := utility.CreateDB(nil, dsn)
-	if err != nil {
-		return fmt.Errorf("failed to validate connection: %w", err)
-	}
-
-	// create schemas if they don't already exist
-	if c.Logs != nil {
-		if err = utility.CreateSchema(db, c.Logs.Schema); err != nil {
-			return err
-		}
-	}
-	if c.Metrics != nil {
-		if err = utility.CreateSchema(db, c.Metrics.Schema); err != nil {
-			return err
-		}
-	}
-	if c.Traces != nil {
-		if err = utility.CreateSchema(db, c.Traces.Schema); err != nil {
-			return err
-		}
-	}
-
 	return nil
 }

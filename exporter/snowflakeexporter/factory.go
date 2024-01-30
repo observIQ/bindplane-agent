@@ -21,6 +21,7 @@ import (
 
 	"github.com/observiq/bindplane-agent/exporter/snowflakeexporter/internal/metadata"
 	"go.opentelemetry.io/collector/component"
+	"go.opentelemetry.io/collector/config/configretry"
 	"go.opentelemetry.io/collector/exporter"
 	"go.opentelemetry.io/collector/exporter/exporterhelper"
 )
@@ -40,6 +41,8 @@ func NewFactory() exporter.Factory {
 func createDefaultConfig() component.Config {
 	return &Config{
 		TimeoutSettings: exporterhelper.NewDefaultTimeoutSettings(),
+		QueueSettings:   exporterhelper.NewDefaultQueueSettings(),
+		BackOffConfig:   configretry.NewDefaultBackOffConfig(),
 	}
 }
 
@@ -68,6 +71,8 @@ func createLogsExporter(
 		exporterhelper.WithShutdown(e.shutdown),
 		exporterhelper.WithCapabilities(e.Capabilities()),
 		exporterhelper.WithTimeout(e.cfg.TimeoutSettings),
+		exporterhelper.WithQueue(e.cfg.QueueSettings),
+		exporterhelper.WithRetry(e.cfg.BackOffConfig),
 	)
 }
 
@@ -96,6 +101,8 @@ func createMetricsExporter(
 		exporterhelper.WithShutdown(e.shutdown),
 		exporterhelper.WithCapabilities(e.Capabilities()),
 		exporterhelper.WithTimeout(e.cfg.TimeoutSettings),
+		exporterhelper.WithQueue(e.cfg.QueueSettings),
+		exporterhelper.WithRetry(e.cfg.BackOffConfig),
 	)
 }
 
@@ -124,5 +131,7 @@ func createTracesExporter(
 		exporterhelper.WithShutdown(e.shutdown),
 		exporterhelper.WithCapabilities(e.Capabilities()),
 		exporterhelper.WithTimeout(e.cfg.TimeoutSettings),
+		exporterhelper.WithQueue(e.cfg.QueueSettings),
+		exporterhelper.WithRetry(e.cfg.BackOffConfig),
 	)
 }
