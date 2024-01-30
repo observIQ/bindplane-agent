@@ -77,8 +77,6 @@ func TestFilterLogs(t *testing.T) {
 
 			logsOut := filterLogs(logsIn, tc.query, tc.minTimestamp)
 
-			// golden.WriteLogs(t, tc.expectedFileOut, logsOut)
-
 			expectedLogsOut, err := golden.ReadLogs(tc.expectedFileOut)
 			require.NoError(t, err)
 			require.Equal(t, expectedLogsOut, logsOut)
