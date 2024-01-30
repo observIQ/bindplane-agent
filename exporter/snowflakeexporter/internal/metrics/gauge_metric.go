@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/jmoiron/sqlx"
+	"github.com/observiq/bindplane-agent/exporter/snowflakeexporter/internal/database"
 	"github.com/observiq/bindplane-agent/exporter/snowflakeexporter/internal/utility"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.uber.org/zap"
@@ -86,7 +86,6 @@ const (
 
 type GaugeModel struct {
 	logger    *zap.Logger
-	db        *sqlx.DB
 	gauges    []*gaugeData
 	warehouse string
 	insertSQL string
@@ -99,10 +98,9 @@ type gaugeData struct {
 	gauge    pmetric.Gauge
 }
 
-func NewGaugeModel(logger *zap.Logger, db *sqlx.DB, warehouse, schema, table string) *GaugeModel {
+func NewGaugeModel(logger *zap.Logger, warehouse, schema, table string) *GaugeModel {
 	return &GaugeModel{
 		logger:    logger,
-		db:        db,
 		warehouse: warehouse,
 		insertSQL: fmt.Sprintf(insertIntoGaugeMetricTableTemplate, schema, table),
 	}
@@ -117,7 +115,7 @@ func (gm *GaugeModel) AddMetric(r pmetric.ResourceMetrics, s pmetric.ScopeMetric
 	})
 }
 
-func (gm *GaugeModel) BatchInsert(ctx context.Context) error {
+func (gm *GaugeModel) BatchInsert(ctx context.Context, db database.Database) error {
 	gm.logger.Debug("starting GaugeModel BatchInsert")
 	if len(gm.gauges) == 0 {
 		gm.logger.Debug("end GaugeModel BatchInsert: no gauge metrics to insert")
@@ -165,7 +163,7 @@ func (gm *GaugeModel) BatchInsert(ctx context.Context) error {
 	}
 
 	gm.logger.Debug("GaugeModel calling utility.batchInsert")
-	err := utility.BatchInsert(ctx, gm.db, gaugeMaps, gm.warehouse, gm.insertSQL)
+	err := db.BatchInsert(ctx, gaugeMaps, gm.warehouse, gm.insertSQL)
 	if err != nil {
 		return fmt.Errorf("failed to insert gauge metric data: %w", err)
 	}

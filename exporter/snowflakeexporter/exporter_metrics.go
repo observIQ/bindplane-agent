@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/jmoiron/sqlx"
+	"github.com/observiq/bindplane-agent/exporter/snowflakeexporter/internal/database"
 	"github.com/observiq/bindplane-agent/exporter/snowflakeexporter/internal/metrics"
 	"github.com/observiq/bindplane-agent/exporter/snowflakeexporter/internal/utility"
 	"go.opentelemetry.io/collector/component"
@@ -18,20 +18,38 @@ import (
 
 type metricModel interface {
 	AddMetric(r pmetric.ResourceMetrics, s pmetric.ScopeMetrics, m pmetric.Metric)
-	BatchInsert(ctx context.Context) error
+	BatchInsert(ctx context.Context, db database.Database) error
 }
 
 type metricsExporter struct {
 	cfg    *Config
 	logger *zap.Logger
-	db     *sqlx.DB
+	db     database.Database
 	models map[string]metricModel
 }
 
-func newMetricsExporter(c *Config, params exporter.CreateSettings) (*metricsExporter, error) {
+func newMetricsExporter(
+	ctx context.Context,
+	c *Config,
+	params exporter.CreateSettings,
+	newDatabase func(ctx context.Context, dsn string) (database.Database, error),
+) (*metricsExporter, error) {
+	dsn := utility.CreateDSN(
+		c.Username,
+		c.Password,
+		c.AccountIdentifier,
+		c.Database,
+	)
+
+	db, err := newDatabase(ctx, dsn)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create new database connection for metrics: %w", err)
+	}
+
 	return &metricsExporter{
 		cfg:    c,
 		logger: params.Logger,
+		db:     db,
 		models: map[string]metricModel{},
 	}, nil
 }
@@ -41,48 +59,36 @@ func (me *metricsExporter) Capabilities() consumer.Capabilities {
 }
 
 func (me *metricsExporter) start(ctx context.Context, _ component.Host) error {
-	dsn := utility.CreateDSN(
-		me.cfg.Username,
-		me.cfg.Password,
-		me.cfg.AccountIdentifier,
-		me.cfg.Database,
-	)
-	db, err := utility.CreateDB(ctx, dsn)
-	if err != nil {
-		return fmt.Errorf("failed to create new db connection for metrics: %w", err)
-	}
-	me.db = db
-
-	err = utility.CreateSchema(ctx, me.db, me.cfg.Metrics.Schema)
+	err := me.db.CreateSchema(ctx, me.cfg.Metrics.Schema)
 	if err != nil {
 		return fmt.Errorf("failed to create metrics schema: %w", err)
 	}
 
 	// init metric models
-	me.models["sums"] = metrics.NewSumModel(me.logger, me.db, me.cfg.Warehouse, me.cfg.Metrics.Schema, me.cfg.Metrics.Table)
-	me.models["gauges"] = metrics.NewGaugeModel(me.logger, me.db, me.cfg.Warehouse, me.cfg.Metrics.Schema, me.cfg.Metrics.Table)
-	me.models["histograms"] = metrics.NewHistogramModel(me.logger, me.db, me.cfg.Warehouse, me.cfg.Metrics.Schema, me.cfg.Metrics.Table)
-	me.models["exponentialHistograms"] = metrics.NewExponentialHistogramModel(me.logger, me.db, me.cfg.Warehouse, me.cfg.Metrics.Schema, me.cfg.Metrics.Table)
-	me.models["summaries"] = metrics.NewSummaryModel(me.logger, me.db, me.cfg.Warehouse, me.cfg.Metrics.Schema, me.cfg.Metrics.Table)
+	me.models["sums"] = metrics.NewSumModel(me.logger, me.cfg.Warehouse, me.cfg.Metrics.Schema, me.cfg.Metrics.Table)
+	me.models["gauges"] = metrics.NewGaugeModel(me.logger, me.cfg.Warehouse, me.cfg.Metrics.Schema, me.cfg.Metrics.Table)
+	me.models["histograms"] = metrics.NewHistogramModel(me.logger, me.cfg.Warehouse, me.cfg.Metrics.Schema, me.cfg.Metrics.Table)
+	me.models["exponentialHistograms"] = metrics.NewExponentialHistogramModel(me.logger, me.cfg.Warehouse, me.cfg.Metrics.Schema, me.cfg.Metrics.Table)
+	me.models["summaries"] = metrics.NewSummaryModel(me.logger, me.cfg.Warehouse, me.cfg.Metrics.Schema, me.cfg.Metrics.Table)
 
 	// create metric tables
-	err = utility.CreateTable(ctx, me.db, me.cfg.Database, me.cfg.Metrics.Schema, me.cfg.Metrics.Table, metrics.CreateSumMetricTableTemplate)
+	err = me.db.CreateTable(ctx, me.cfg.Database, me.cfg.Metrics.Schema, me.cfg.Metrics.Table, metrics.CreateSumMetricTableTemplate)
 	if err != nil {
 		return fmt.Errorf("failed to create sum metrics table: %w", err)
 	}
-	err = utility.CreateTable(ctx, me.db, me.cfg.Database, me.cfg.Metrics.Schema, me.cfg.Metrics.Table, metrics.CreateGaugeMetricTableTemplate)
+	err = me.db.CreateTable(ctx, me.cfg.Database, me.cfg.Metrics.Schema, me.cfg.Metrics.Table, metrics.CreateGaugeMetricTableTemplate)
 	if err != nil {
 		return fmt.Errorf("failed to create gauge metrics table: %w", err)
 	}
-	err = utility.CreateTable(ctx, me.db, me.cfg.Database, me.cfg.Metrics.Schema, me.cfg.Metrics.Table, metrics.CreateHistogramMetricTableTemplate)
+	err = me.db.CreateTable(ctx, me.cfg.Database, me.cfg.Metrics.Schema, me.cfg.Metrics.Table, metrics.CreateHistogramMetricTableTemplate)
 	if err != nil {
 		return fmt.Errorf("failed to create histogram metrics table: %w", err)
 	}
-	err = utility.CreateTable(ctx, me.db, me.cfg.Database, me.cfg.Metrics.Schema, me.cfg.Metrics.Table, metrics.CreateExponentialHistogramMetricTableTemplate)
+	err = me.db.CreateTable(ctx, me.cfg.Database, me.cfg.Metrics.Schema, me.cfg.Metrics.Table, metrics.CreateExponentialHistogramMetricTableTemplate)
 	if err != nil {
 		return fmt.Errorf("failed to create exponential histogram metrics table: %w", err)
 	}
-	err = utility.CreateTable(ctx, me.db, me.cfg.Database, me.cfg.Metrics.Schema, me.cfg.Metrics.Table, metrics.CreateSummaryMetricTableTemplate)
+	err = me.db.CreateTable(ctx, me.cfg.Database, me.cfg.Metrics.Schema, me.cfg.Metrics.Table, metrics.CreateSummaryMetricTableTemplate)
 	if err != nil {
 		return fmt.Errorf("failed to create summary metrics table: %w", err)
 	}
@@ -134,7 +140,7 @@ func (me *metricsExporter) metricsDataPusher(ctx context.Context, md pmetric.Met
 		wg.Add(1)
 		go func(m metricModel) {
 			defer wg.Done()
-			errorChan <- m.BatchInsert(ctx)
+			errorChan <- m.BatchInsert(ctx, me.db)
 		}(v)
 	}
 	wg.Wait()

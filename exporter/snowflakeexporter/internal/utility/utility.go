@@ -16,23 +16,27 @@
 package utility
 
 import (
-	"context"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"net/url"
 
-	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
-	_ "github.com/snowflakedb/gosnowflake" // imports snowflake driver
 
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.uber.org/zap"
 )
 
-// DriverName allows use of mocking by changing
-var DriverName = "snowflake"
+// CreateDSN creates a DSN for connecting to Snowflake with the given config
+// TODO add functionality for additional query params
+func CreateDSN(username, password, accountID, database string) string {
+	usernameEsc := url.QueryEscape(username)
+	passwordEsc := url.QueryEscape(password)
+	accountIDEsc := url.QueryEscape(accountID)
+	databaseEsc := url.QueryEscape(database)
+	return fmt.Sprintf(`%s:%s@%s/"%s"`, usernameEsc, passwordEsc, accountIDEsc, databaseEsc)
+}
 
 // ConvertAttributesToString converts the pcommon.Map into a JSON string representation
 // this is due to a bug/lacking feature with the snowflake driver that prevents maps from being inserted into VARIANT & OBJECT columns
@@ -92,84 +96,4 @@ func FlattenExemplars(exemplars pmetric.ExemplarSlice, l *zap.Logger) (pq.String
 	}
 
 	return attributes, timestamps, traceIDs, spanIDs, values
-}
-
-/* SQL Helper Functions */
-
-// CreateDSN creates a DSN for connecting to Snowflake with the given config
-// TODO add functionality for additional query params
-func CreateDSN(username, password, accountID, database string) string {
-	usernameEsc := url.QueryEscape(username)
-	passwordEsc := url.QueryEscape(password)
-	accountIDEsc := url.QueryEscape(accountID)
-	databaseEsc := url.QueryEscape(database)
-	return fmt.Sprintf(`%s:%s@%s/"%s"`, usernameEsc, passwordEsc, accountIDEsc, databaseEsc)
-}
-
-// CreateDB calls Open() using driverName and the given dsn and then calls Ping()
-func CreateDB(ctx context.Context, dsn string) (*sqlx.DB, error) {
-	db, err := sqlx.Open(DriverName, dsn)
-	if err != nil {
-		return nil, fmt.Errorf("failed to open database: %w", err)
-	}
-
-	if ctx == nil {
-		if err = db.Ping(); err != nil {
-			return nil, fmt.Errorf("failed to ping database: %w", err)
-		}
-	} else {
-		if err = db.PingContext(ctx); err != nil {
-			return nil, fmt.Errorf("failed to ping database: %w", err)
-		}
-	}
-
-	return db, nil
-}
-
-// CreateSchema ensures the given schema exists using the given *sql.DB
-func CreateSchema(ctx context.Context, db *sqlx.DB, schema string) error {
-	_, err := db.ExecContext(ctx, fmt.Sprintf(`CREATE SCHEMA IF NOT EXISTS "%s";`, schema))
-	if err != nil {
-		return fmt.Errorf("failed to create schema '%s': %w", schema, err)
-	}
-	return nil
-}
-
-// CreateTable ensures the given table exists using the given database arguments
-func CreateTable(ctx context.Context, db *sqlx.DB, database, schema, table, template string) error {
-	_, err := db.ExecContext(ctx, fmt.Sprintf(`USE SCHEMA "%s"."%s";`, database, schema))
-	if err != nil {
-		return fmt.Errorf("failed to call 'USE SCHEMA': %w", err)
-	}
-
-	_, err = db.ExecContext(ctx, fmt.Sprintf(template, schema, table))
-	if err != nil {
-		return fmt.Errorf("failed to create table: %w", err)
-	}
-
-	return nil
-}
-
-// BatchInsert creates a new transaction using the given DB to insert the given data
-func BatchInsert(ctx context.Context, db *sqlx.DB, data []map[string]any, warehouse, insertSQL string) error {
-	// create TX
-	tx, err := db.BeginTxx(ctx, nil)
-	if err != nil {
-		return fmt.Errorf("failed to create transaction: %w", err)
-	}
-	defer tx.Rollback()
-
-	// set warehouse
-	_, err = tx.ExecContext(ctx, fmt.Sprintf(`USE WAREHOUSE "%s";`, warehouse))
-	if err != nil {
-		return fmt.Errorf("failed to set warehouse as '%s' for transaction: %w", warehouse, err)
-	}
-
-	// execute insert
-	_, err = tx.NamedExecContext(ctx, insertSQL, data)
-	if err != nil {
-		return fmt.Errorf("failed to execute batch insert: %w", err)
-	}
-
-	return tx.Commit()
 }

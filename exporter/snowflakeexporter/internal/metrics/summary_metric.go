@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
+	"github.com/observiq/bindplane-agent/exporter/snowflakeexporter/internal/database"
 	"github.com/observiq/bindplane-agent/exporter/snowflakeexporter/internal/utility"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.uber.org/zap"
@@ -81,7 +81,6 @@ const (
 
 type SummaryModel struct {
 	logger    *zap.Logger
-	db        *sqlx.DB
 	summaries []*summaryData
 	warehouse string
 	insertSQL string
@@ -94,10 +93,9 @@ type summaryData struct {
 	summary  pmetric.Summary
 }
 
-func NewSummaryModel(logger *zap.Logger, db *sqlx.DB, warehouse, schema, table string) *SummaryModel {
+func NewSummaryModel(logger *zap.Logger, warehouse, schema, table string) *SummaryModel {
 	return &SummaryModel{
 		logger:    logger,
-		db:        db,
 		warehouse: warehouse,
 		insertSQL: fmt.Sprintf(insertIntoSummaryMetricTableTemplate, schema, table),
 	}
@@ -112,7 +110,7 @@ func (sm *SummaryModel) AddMetric(r pmetric.ResourceMetrics, s pmetric.ScopeMetr
 	})
 }
 
-func (sm *SummaryModel) BatchInsert(ctx context.Context) error {
+func (sm *SummaryModel) BatchInsert(ctx context.Context, db database.Database) error {
 	sm.logger.Debug("starting SumModel BatchInsert")
 	if len(sm.summaries) == 0 {
 		sm.logger.Debug("end SumModel BatchInsert: no sum metrics to insert")
@@ -152,7 +150,7 @@ func (sm *SummaryModel) BatchInsert(ctx context.Context) error {
 	}
 
 	sm.logger.Debug("SummaryModel calling utility.batchInsert")
-	err := utility.BatchInsert(ctx, sm.db, summaryMaps, sm.warehouse, sm.insertSQL)
+	err := db.BatchInsert(ctx, summaryMaps, sm.warehouse, sm.insertSQL)
 	if err != nil {
 		return fmt.Errorf("failed to insert summary metric data: %w", err)
 	}

@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/jmoiron/sqlx"
+	"github.com/observiq/bindplane-agent/exporter/snowflakeexporter/internal/database"
 	"github.com/observiq/bindplane-agent/exporter/snowflakeexporter/internal/utility"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.uber.org/zap"
@@ -117,7 +117,6 @@ const (
 
 type ExponentialHistogramModel struct {
 	logger                *zap.Logger
-	db                    *sqlx.DB
 	exponentialHistograms []*exponentialHistogramData
 	warehouse             string
 	insertSQL             string
@@ -130,10 +129,9 @@ type exponentialHistogramData struct {
 	exponentialHistogram pmetric.ExponentialHistogram
 }
 
-func NewExponentialHistogramModel(logger *zap.Logger, db *sqlx.DB, warehouse, schema, table string) *ExponentialHistogramModel {
+func NewExponentialHistogramModel(logger *zap.Logger, warehouse, schema, table string) *ExponentialHistogramModel {
 	return &ExponentialHistogramModel{
 		logger:    logger,
-		db:        db,
 		warehouse: warehouse,
 		insertSQL: fmt.Sprintf(insertIntoExponentialHistogramMetricTableTemplate, schema, table),
 	}
@@ -148,7 +146,7 @@ func (ehm *ExponentialHistogramModel) AddMetric(r pmetric.ResourceMetrics, s pme
 	})
 }
 
-func (ehm *ExponentialHistogramModel) BatchInsert(ctx context.Context) error {
+func (ehm *ExponentialHistogramModel) BatchInsert(ctx context.Context, db database.Database) error {
 	ehm.logger.Debug("starting ExponentialHistogramModel BatchInsert")
 	if len(ehm.exponentialHistograms) == 0 {
 		ehm.logger.Debug("end ExponentialHistogramModel BatchInsert: no exponential histogram metrics to insert")
@@ -199,7 +197,7 @@ func (ehm *ExponentialHistogramModel) BatchInsert(ctx context.Context) error {
 	}
 
 	ehm.logger.Debug("ExponentialHistogramModel calling utility.batchInsert")
-	err := utility.BatchInsert(ctx, ehm.db, exponentialHistogramMaps, ehm.warehouse, ehm.insertSQL)
+	err := db.BatchInsert(ctx, exponentialHistogramMaps, ehm.warehouse, ehm.insertSQL)
 	if err != nil {
 		return fmt.Errorf("failed to insert exponential histogram metric data: %w", err)
 	}

@@ -19,6 +19,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/observiq/bindplane-agent/exporter/snowflakeexporter/internal/database"
 	"github.com/observiq/bindplane-agent/exporter/snowflakeexporter/internal/metadata"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/config/configretry"
@@ -57,7 +58,7 @@ func createLogsExporter(
 		return nil, errors.New("invalid config type")
 	}
 
-	e, err := newLogsExporter(c, params)
+	e, err := newLogsExporter(ctx, c, params, database.CreateSnowflakeDatabase)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create logs exporter: %w", err)
 	}
@@ -87,7 +88,7 @@ func createMetricsExporter(
 		return nil, errors.New("invalid config type")
 	}
 
-	e, err := newMetricsExporter(c, params)
+	e, err := newMetricsExporter(ctx, c, params, database.CreateSnowflakeDatabase)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create metrics exporter: %w", err)
 	}
@@ -117,7 +118,7 @@ func createTracesExporter(
 		return nil, errors.New("invalid config type")
 	}
 
-	e, err := newTracesExporter(c, params)
+	e, err := newTracesExporter(ctx, c, params, database.CreateSnowflakeDatabase)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create traces exporter: %w", err)
 	}

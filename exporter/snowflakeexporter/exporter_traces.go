@@ -18,10 +18,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
-	_ "github.com/snowflakedb/gosnowflake" // imports snowflake driver
-
+	"github.com/observiq/bindplane-agent/exporter/snowflakeexporter/internal/database"
 	"github.com/observiq/bindplane-agent/exporter/snowflakeexporter/internal/utility"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/consumer"
@@ -131,14 +129,32 @@ const (
 type tracesExporter struct {
 	cfg       *Config
 	logger    *zap.Logger
-	db        *sqlx.DB
+	db        database.Database
 	insertSQL string
 }
 
-func newTracesExporter(c *Config, params exporter.CreateSettings) (*tracesExporter, error) {
+func newTracesExporter(
+	ctx context.Context,
+	c *Config,
+	params exporter.CreateSettings,
+	newDatabase func(ctx context.Context, dsn string) (database.Database, error),
+) (*tracesExporter, error) {
+	dsn := utility.CreateDSN(
+		c.Username,
+		c.Password,
+		c.AccountIdentifier,
+		c.Database,
+	)
+
+	db, err := newDatabase(ctx, dsn)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create new database connection for traces: %w", err)
+	}
+
 	return &tracesExporter{
 		cfg:       c,
 		logger:    params.Logger,
+		db:        db,
 		insertSQL: fmt.Sprintf(insertIntoTracesTableSnowflakeTemplate, c.Traces.Schema, c.Traces.Table),
 	}, nil
 }
@@ -148,27 +164,13 @@ func (te *tracesExporter) Capabilities() consumer.Capabilities {
 }
 
 func (te *tracesExporter) start(ctx context.Context, _ component.Host) error {
-	dsn := utility.CreateDSN(
-		te.cfg.Username,
-		te.cfg.Password,
-		te.cfg.AccountIdentifier,
-		te.cfg.Database,
-	)
-	db, err := utility.CreateDB(ctx, dsn)
-	if err != nil {
-		te.logger.Debug("CreateNewDB failed for traces", zap.String("dsn", dsn))
-		return fmt.Errorf("failed to create new database for traces: %w", err)
-	}
-	te.db = db
-
-	err = utility.CreateSchema(ctx, te.db, te.cfg.Traces.Schema)
+	err := te.db.CreateSchema(ctx, te.cfg.Traces.Schema)
 	if err != nil {
 		return fmt.Errorf("failed to create traces schema: %w", err)
 	}
 
-	err = utility.CreateTable(ctx, te.db, te.cfg.Database, te.cfg.Traces.Schema, te.cfg.Traces.Table, createTracesTableSnowflakeTemplate)
+	err = te.db.CreateTable(ctx, te.cfg.Database, te.cfg.Traces.Schema, te.cfg.Traces.Table, createTracesTableSnowflakeTemplate)
 	if err != nil {
-		te.logger.Debug("CreateTable failed for traces", zap.String("database", te.cfg.Database), zap.String("schema", te.cfg.Traces.Schema), zap.String("table", te.cfg.Traces.Table))
 		return fmt.Errorf("failed to create traces table: %w", err)
 	}
 
@@ -232,7 +234,7 @@ func (te *tracesExporter) tracesDataPusher(ctx context.Context, td ptrace.Traces
 		}
 	}
 
-	err := utility.BatchInsert(ctx, te.db, traceMaps, te.cfg.Warehouse, te.insertSQL)
+	err := te.db.BatchInsert(ctx, traceMaps, te.cfg.Warehouse, te.insertSQL)
 	if err != nil {
 		return fmt.Errorf("failed to insert trace data: %w", err)
 	}

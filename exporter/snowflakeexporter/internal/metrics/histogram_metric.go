@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/jmoiron/sqlx"
+	"github.com/observiq/bindplane-agent/exporter/snowflakeexporter/internal/database"
 	"github.com/observiq/bindplane-agent/exporter/snowflakeexporter/internal/utility"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.uber.org/zap"
@@ -102,7 +102,6 @@ const (
 
 type HistogramModel struct {
 	logger     *zap.Logger
-	db         *sqlx.DB
 	histograms []*histogramData
 	warehouse  string
 	insertSQL  string
@@ -115,10 +114,9 @@ type histogramData struct {
 	histogram pmetric.Histogram
 }
 
-func NewHistogramModel(logger *zap.Logger, db *sqlx.DB, warehouse, schema, table string) *HistogramModel {
+func NewHistogramModel(logger *zap.Logger, warehouse, schema, table string) *HistogramModel {
 	return &HistogramModel{
 		logger:    logger,
-		db:        db,
 		warehouse: warehouse,
 		insertSQL: fmt.Sprintf(insertIntoHistogramMeticTableTemplate, schema, table),
 	}
@@ -133,7 +131,7 @@ func (hm *HistogramModel) AddMetric(r pmetric.ResourceMetrics, s pmetric.ScopeMe
 	})
 }
 
-func (hm *HistogramModel) BatchInsert(ctx context.Context) error {
+func (hm *HistogramModel) BatchInsert(ctx context.Context, db database.Database) error {
 	hm.logger.Debug("starting HistogramModel BatchInsert")
 	if len(hm.histograms) == 0 {
 		hm.logger.Debug("end HistogramModel BatchInsert: no histogram metrics to insert")
@@ -179,7 +177,7 @@ func (hm *HistogramModel) BatchInsert(ctx context.Context) error {
 	}
 
 	hm.logger.Debug("HistogramModel calling utility.batchInsert")
-	err := utility.BatchInsert(ctx, hm.db, histogramMaps, hm.warehouse, hm.insertSQL)
+	err := db.BatchInsert(ctx, histogramMaps, hm.warehouse, hm.insertSQL)
 	if err != nil {
 		return fmt.Errorf("failed to insert histogram metric data: %w", err)
 	}
