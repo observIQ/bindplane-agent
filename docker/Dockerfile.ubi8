@@ -55,7 +55,7 @@ RUN mkdir /licenses
 COPY LICENSE /licenses/observiq-otel-collector.license
 
 COPY observiq-otel-collector /collector/observiq-otel-collector
-COPY opentelemetry-java-contrib-jmx-metrics.jar /opt/opentelemetry-java-contrib-jmx-metrics.jar
+COPY release_deps/opentelemetry-java-contrib-jmx-metrics.jar /opt/opentelemetry-java-contrib-jmx-metrics.jar
 COPY plugins /etc/otel/plugins
 
 COPY config/logging.stdout.yaml /etc/otel/logging.yaml
