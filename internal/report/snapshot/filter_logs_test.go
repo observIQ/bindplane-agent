@@ -20,6 +20,7 @@ import (
 	"time"
 
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest/plogtest"
 	"github.com/stretchr/testify/require"
 )
 
@@ -93,7 +94,9 @@ func TestFilterLogs(t *testing.T) {
 
 			expectedLogsOut, err := golden.ReadLogs(tc.expectedFileOut)
 			require.NoError(t, err)
-			require.Equal(t, expectedLogsOut, logsOut)
+
+			err = plogtest.CompareLogs(expectedLogsOut, logsOut)
+			require.NoError(t, err)
 		})
 	}
 }
