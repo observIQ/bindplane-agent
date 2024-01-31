@@ -1,0 +1,74 @@
+resourceMetrics:
+  - resource:
+      attributes:
+        - key: host.name
+          value:
+            stringValue: Brandons-MBP
+        - key: os.type
+          value:
+            stringValue: darwin
+    scopeMetrics:
+      - metrics:
+          - description: Filesystem bytes used.
+            name: system.filesystem.usage
+            sum:
+              dataPoints:
+                - asInt: "342134198272"
+                  attributes:
+                    - key: device
+                      value:
+                        stringValue: /dev/disk3s5
+                    - key: mode
+                      value:
+                        stringValue: rw
+                    - key: mountpoint
+                      value:
+                        stringValue: /System/Volumes/Data
+                    - key: state
+                      value:
+                        stringValue: free
+                    - key: type
+                      value:
+                        stringValue: apfs
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "0"
+                  attributes:
+                    - key: device
+                      value:
+                        stringValue: /dev/disk3s5
+                    - key: mode
+                      value:
+                        stringValue: rw
+                    - key: mountpoint
+                      value:
+                        stringValue: /System/Volumes/Data
+                    - key: state
+                      value:
+                        stringValue: reserved
+                    - key: type
+                      value:
+                        stringValue: apfs
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+                - asInt: "152250597376"
+                  attributes:
+                    - key: device
+                      value:
+                        stringValue: /dev/disk3s5
+                    - key: mode
+                      value:
+                        stringValue: rw
+                    - key: mountpoint
+                      value:
+                        stringValue: /System/Volumes/Data
+                    - key: state
+                      value:
+                        stringValue: used
+                    - key: type
+                      value:
+                        stringValue: apfs
+                  startTimeUnixNano: "1000000"
+                  timeUnixNano: "2000000"
+            unit: By
+        scope: {}
