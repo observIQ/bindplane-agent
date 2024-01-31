@@ -23,9 +23,9 @@ import (
 
 // filterLogs filters the logs by the given query and timestamp.
 // The returned payload cannot be assumed to be a copy, so it should not be modified.
-func filterLogs(logs plog.Logs, query *string, minTimestamp *time.Time) plog.Logs {
+func filterLogs(logs plog.Logs, searchQuery *string, minimumTimestamp *time.Time) plog.Logs {
 	// No filters specified, filtered logs are trivially the same as input logs
-	if query == nil && minTimestamp == nil {
+	if searchQuery == nil && minimumTimestamp == nil {
 		return logs
 	}
 
@@ -33,7 +33,7 @@ func filterLogs(logs plog.Logs, query *string, minTimestamp *time.Time) plog.Log
 
 	resourceLogs := logs.ResourceLogs()
 	for i := 0; i < resourceLogs.Len(); i++ {
-		filteredResourceLogs := filterResourceLogs(resourceLogs.At(i), query, minTimestamp)
+		filteredResourceLogs := filterResourceLogs(resourceLogs.At(i), searchQuery, minimumTimestamp)
 
 		// Don't append empty resource logs
 		if filteredResourceLogs.ScopeLogs().Len() != 0 {
@@ -44,7 +44,7 @@ func filterLogs(logs plog.Logs, query *string, minTimestamp *time.Time) plog.Log
 	return filteredLogs
 }
 
-func filterResourceLogs(resourceLog plog.ResourceLogs, query *string, minTimestamp *time.Time) plog.ResourceLogs {
+func filterResourceLogs(resourceLog plog.ResourceLogs, searchQuery *string, minimumTimestamp *time.Time) plog.ResourceLogs {
 	filteredResourceLogs := plog.NewResourceLogs()
 
 	// Copy old resource to filtered resource
@@ -53,13 +53,13 @@ func filterResourceLogs(resourceLog plog.ResourceLogs, query *string, minTimesta
 
 	// Apply query to resource
 	queryMatchesResource := true // default to true if no query specified
-	if query != nil {
-		queryMatchesResource = queryMatchesMap(resource.Attributes(), *query)
+	if searchQuery != nil {
+		queryMatchesResource = queryMatchesMap(resource.Attributes(), *searchQuery)
 	}
 
 	scopeLogs := resourceLog.ScopeLogs()
 	for i := 0; i < scopeLogs.Len(); i++ {
-		filteredScopeLogs := filterScopeLogs(resourceLog.ScopeLogs().At(i), queryMatchesResource, query, minTimestamp)
+		filteredScopeLogs := filterScopeLogs(resourceLog.ScopeLogs().At(i), queryMatchesResource, searchQuery, minimumTimestamp)
 
 		// Don't append empty scope logs
 		if filteredScopeLogs.LogRecords().Len() != 0 {
@@ -72,12 +72,12 @@ func filterResourceLogs(resourceLog plog.ResourceLogs, query *string, minTimesta
 
 // filterScopeLogs filters out logs that do not match the query and minTimestamp, returning a new plog.ScopeLogs without the filtered records.
 // queryMatchesResource indicates if the query string matches the resource associated with this ScopeLogs.
-func filterScopeLogs(scopeLogs plog.ScopeLogs, queryMatchesResource bool, query *string, minTimestamp *time.Time) plog.ScopeLogs {
+func filterScopeLogs(scopeLogs plog.ScopeLogs, queryMatchesResource bool, searchQuery *string, minimumTimestamp *time.Time) plog.ScopeLogs {
 	filteredLogRecords := plog.NewScopeLogs()
 	logRecords := scopeLogs.LogRecords()
 	for i := 0; i < logRecords.Len(); i++ {
 		log := logRecords.At(i)
-		if logMatches(log, queryMatchesResource, query, minTimestamp) {
+		if logMatches(log, queryMatchesResource, searchQuery, minimumTimestamp) {
 			log.CopyTo(filteredLogRecords.LogRecords().AppendEmpty())
 		}
 	}
@@ -86,16 +86,16 @@ func filterScopeLogs(scopeLogs plog.ScopeLogs, queryMatchesResource bool, query 
 }
 
 // logMatches returns true if the query matches either the resource or log record, AND the min timestamp.
-func logMatches(l plog.LogRecord, queryMatchesResource bool, query *string, minTimestamp *time.Time) bool {
+func logMatches(l plog.LogRecord, queryMatchesResource bool, searchQuery *string, minimumTimestamp *time.Time) bool {
 	queryMatchesLog := true // default to true if no query specified
 	// Skip this check if we already know the query matches the resource
-	if !queryMatchesResource && query != nil {
-		queryMatchesLog = logMatchesQuery(l, *query)
+	if !queryMatchesResource && searchQuery != nil {
+		queryMatchesLog = logMatchesQuery(l, *searchQuery)
 	}
 
 	timestampMatches := true // default to true if no timestamp specified
-	if minTimestamp != nil {
-		timestampMatches = logMatchesTimestamp(l, *minTimestamp)
+	if minimumTimestamp != nil {
+		timestampMatches = logMatchesTimestamp(l, *minimumTimestamp)
 	}
 
 	queryMatches := queryMatchesResource || queryMatchesLog
@@ -104,17 +104,17 @@ func logMatches(l plog.LogRecord, queryMatchesResource bool, query *string, minT
 }
 
 // logMatchesTimestamp determines if the log came after the provided timestamp
-func logMatchesTimestamp(l plog.LogRecord, minTime time.Time) bool {
-	return l.ObservedTimestamp() >= pcommon.NewTimestampFromTime(minTime)
+func logMatchesTimestamp(l plog.LogRecord, minimumTimestamp time.Time) bool {
+	return l.ObservedTimestamp() >= pcommon.NewTimestampFromTime(minimumTimestamp)
 }
 
 // logMatchesQuery determines if the given log record matches the given query string
-func logMatchesQuery(l plog.LogRecord, query string) bool {
-	if queryMatchesMap(l.Attributes(), query) {
+func logMatchesQuery(l plog.LogRecord, searchQuery string) bool {
+	if queryMatchesMap(l.Attributes(), searchQuery) {
 		return true
 	}
 
-	if queryMatchesValue(l.Body(), query) {
+	if queryMatchesValue(l.Body(), searchQuery) {
 		return true
 	}
 
