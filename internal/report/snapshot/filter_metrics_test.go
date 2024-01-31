@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest/pmetrictest"
 	"github.com/stretchr/testify/require"
 )
 
@@ -76,7 +77,9 @@ func TestFilterMetrics(t *testing.T) {
 
 			expectedMetricsOut, err := golden.ReadMetrics(tc.expectedFileOut)
 			require.NoError(t, err)
-			require.Equal(t, expectedMetricsOut, metricsOut)
+
+			err = pmetrictest.CompareMetrics(expectedMetricsOut, metricsOut)
+			require.NoError(t, err)
 		})
 	}
 }
