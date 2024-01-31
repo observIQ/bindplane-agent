@@ -13,61 +13,26 @@ resourceMetrics:
             name: system.filesystem.usage
             sum:
               dataPoints:
-                - asInt: "342134198272"
+                - asInt: "8717185024"
                   attributes:
                     - key: device
                       value:
-                        stringValue: /dev/disk3s5
+                        stringValue: /dev/disk4s1
+                    - key: extra-sum-attr-key
+                      value:
+                        stringValue: extra-sum-attr-value
                     - key: mode
                       value:
                         stringValue: rw
                     - key: mountpoint
                       value:
-                        stringValue: /System/Volumes/Data
+                        stringValue: /Volumes/transfer
                     - key: state
                       value:
                         stringValue: free
                     - key: type
                       value:
-                        stringValue: apfs
-                  startTimeUnixNano: "1000000"
-                  timeUnixNano: "2000000"
-                - asInt: "0"
-                  attributes:
-                    - key: device
-                      value:
-                        stringValue: /dev/disk3s5
-                    - key: mode
-                      value:
-                        stringValue: rw
-                    - key: mountpoint
-                      value:
-                        stringValue: /System/Volumes/Data
-                    - key: state
-                      value:
-                        stringValue: reserved
-                    - key: type
-                      value:
-                        stringValue: apfs
-                  startTimeUnixNano: "1000000"
-                  timeUnixNano: "2000000"
-                - asInt: "152250597376"
-                  attributes:
-                    - key: device
-                      value:
-                        stringValue: /dev/disk3s5
-                    - key: mode
-                      value:
-                        stringValue: rw
-                    - key: mountpoint
-                      value:
-                        stringValue: /System/Volumes/Data
-                    - key: state
-                      value:
-                        stringValue: used
-                    - key: type
-                      value:
-                        stringValue: apfs
+                        stringValue: hfs
                   startTimeUnixNano: "1000000"
                   timeUnixNano: "2000000"
             unit: By

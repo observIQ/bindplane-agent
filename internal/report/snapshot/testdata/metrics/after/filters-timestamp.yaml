@@ -13,27 +13,24 @@ resourceMetrics:
             name: system.filesystem.usage
             sum:
               dataPoints:
-                - asInt: "8717185024"
+                - asInt: "220672"
                   attributes:
                     - key: device
                       value:
-                        stringValue: /dev/disk4s1
-                    - key: extra-sum-attr-key
-                      value:
-                        stringValue: extra-sum-attr-value
+                        stringValue: devfs
                     - key: mode
                       value:
                         stringValue: rw
                     - key: mountpoint
                       value:
-                        stringValue: /Volumes/transfer
+                        stringValue: /dev
                     - key: state
                       value:
-                        stringValue: free
+                        stringValue: used
                     - key: type
                       value:
-                        stringValue: hfs
+                        stringValue: devfs
                   startTimeUnixNano: "1000000"
-                  timeUnixNano: "2000000"
+                  timeUnixNano: "3000000"
             unit: By
         scope: {}

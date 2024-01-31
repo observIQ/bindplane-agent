@@ -502,6 +502,9 @@ resourceMetrics:
                   timeUnixNano: "2000000"
                 - asInt: "8717185024"
                   attributes:
+                    - key: extra-sum-attr-key
+                      value:
+                        stringValue: extra-sum-attr-value
                     - key: device
                       value:
                         stringValue: /dev/disk4s1
@@ -670,7 +673,7 @@ resourceMetrics:
                       value:
                         stringValue: devfs
                   startTimeUnixNano: "1000000"
-                  timeUnixNano: "2000000"
+                  timeUnixNano: "3000000"
                 - asInt: "0"
                   attributes:
                     - key: device

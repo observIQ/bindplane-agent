@@ -40,15 +40,15 @@ func TestFilterMetrics(t *testing.T) {
 			expectedFileOut: filepath.Join(filteredMetricsDir, "matches-attr-key-gauge.yaml"),
 		},
 		{
-			name:            "Matches attribute (sum)",
+			name:            "Matches attribute value (sum)",
 			fileIn:          filepath.Join(unfilteredMetricsDir, "host-metrics.yaml"),
-			query:           asPtr("/dev/disk3s5"),
+			query:           asPtr("extra-sum-attr-value"),
 			expectedFileOut: filepath.Join(filteredMetricsDir, "matches-attr-val-sum.yaml"),
 		},
 		{
 			name:            "Matches attribute key (sum)",
 			fileIn:          filepath.Join(unfilteredMetricsDir, "host-metrics.yaml"),
-			query:           asPtr("mountpoint"),
+			query:           asPtr("extra-sum-attr-key"),
 			expectedFileOut: filepath.Join(filteredMetricsDir, "matches-attr-key-sum.yaml"),
 		},
 		{
@@ -62,6 +62,22 @@ func TestFilterMetrics(t *testing.T) {
 			fileIn:          filepath.Join(unfilteredMetricsDir, "host-metrics.yaml"),
 			query:           asPtr("extra-resource-attr-value"),
 			expectedFileOut: filepath.Join(filteredMetricsDir, "matches-resource-attr-val.yaml"),
+		},
+		{
+			name:            "Matches metric name",
+			fileIn:          filepath.Join(unfilteredMetricsDir, "host-metrics.yaml"),
+			query:           asPtr("system.cpu.load_average.1m"),
+			expectedFileOut: filepath.Join(filteredMetricsDir, "matches-metric-name.yaml"),
+		},
+		{
+			name:   "Filters older than minimum timestamp",
+			fileIn: filepath.Join(unfilteredMetricsDir, "host-metrics.yaml"),
+			query:  asPtr("/dev"),
+			// note when regenning goldens. golden.WriteMetrics
+			// completely obliterates timestamps, so the regenerated golden will have the wrong timestamp.
+			// You'll have to manually fix that.
+			minTimestamp:    asPtr(time.Unix(0, 3000000)),
+			expectedFileOut: filepath.Join(filteredMetricsDir, "filters-timestamp.yaml"),
 		},
 	}
 
