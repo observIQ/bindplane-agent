@@ -6,20 +6,21 @@ import (
 	"testing"
 	"time"
 
+	"github.com/lib/pq"
 	"github.com/observiq/bindplane-agent/exporter/snowflakeexporter/internal/database"
 	"github.com/observiq/bindplane-agent/exporter/snowflakeexporter/internal/database/mocks"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/exporter/exportertest"
-	"go.opentelemetry.io/collector/pdata/plog"
+	"go.opentelemetry.io/collector/pdata/ptrace"
 )
 
-func TestNewLogsExporter(t *testing.T) {
+func TestNewTracesExporter(t *testing.T) {
 	c := &Config{
 		AccountIdentifier: "id",
 		Username:          "user",
 		Password:          "pass",
 		Database:          "db",
-		Logs: &TelemetryConfig{
+		Traces: &TelemetryConfig{
 			Schema: "schema",
 			Table:  "table",
 		},
@@ -44,13 +45,13 @@ func TestNewLogsExporter(t *testing.T) {
 			newDatabase: func(_ context.Context, _ string) (database.Database, error) {
 				return nil, fmt.Errorf("fail")
 			},
-			expectedErr: fmt.Errorf("failed to create new database connection for logs: fail"),
+			expectedErr: fmt.Errorf("failed to create new database connection for traces: fail"),
 		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.desc, func(t *testing.T) {
-			exp, err := newLogsExporter(
+			exp, err := newTracesExporter(
 				tc.ctx,
 				c,
 				exportertest.NewNopCreateSettings(),
@@ -68,19 +69,19 @@ func TestNewLogsExporter(t *testing.T) {
 	}
 }
 
-func TestLogsCapabilities(t *testing.T) {
-	e := &logsExporter{}
+func TestTracesCapabilities(t *testing.T) {
+	e := &tracesExporter{}
 	c := e.Capabilities()
 	require.False(t, c.MutatesData)
 }
 
-func TestLogsStart(t *testing.T) {
+func TestTracesStart(t *testing.T) {
 	c := &Config{
 		AccountIdentifier: "id",
 		Username:          "user",
 		Password:          "pass",
 		Database:          "db",
-		Logs: &TelemetryConfig{
+		Traces: &TelemetryConfig{
 			Schema: "schema",
 			Table:  "table",
 		},
@@ -97,46 +98,46 @@ func TestLogsStart(t *testing.T) {
 			ctx:  context.Background(),
 			mockGen: func(t *testing.T, ctx context.Context, c *Config) *mocks.MockDatabase {
 				m := mocks.NewMockDatabase(t)
-				m.On("CreateSchema", ctx, c.Logs.Schema).Return(nil)
-				m.On("CreateTable", ctx, c.Database, c.Logs.Schema, c.Logs.Table, createLogsTableSnowflakeTemplate).Return(nil)
+				m.On("CreateSchema", ctx, c.Traces.Schema).Return(nil)
+				m.On("CreateTable", ctx, c.Database, c.Traces.Schema, c.Traces.Table, createTracesTableSnowflakeTemplate).Return(nil)
 				return m
 			},
 		},
 		{
-			desc:        "Fail CreateSchema",
-			ctx:         context.Background(),
-			expectedErr: fmt.Errorf("failed to create logs schema: fail"),
+			desc: "Fail CreateSchema",
+			ctx:  context.Background(),
 			mockGen: func(t *testing.T, ctx context.Context, c *Config) *mocks.MockDatabase {
 				m := mocks.NewMockDatabase(t)
-				m.On("CreateSchema", ctx, c.Logs.Schema).Return(fmt.Errorf("fail"))
+				m.On("CreateSchema", ctx, c.Traces.Schema).Return(fmt.Errorf("fail"))
 				return m
 			},
+			expectedErr: fmt.Errorf("failed to create traces schema: fail"),
 		},
 		{
-			desc:        "Fail CreateTable",
-			ctx:         context.Background(),
-			expectedErr: fmt.Errorf("failed to create logs table: fail"),
+			desc: "Fail CreateTable",
+			ctx:  context.Background(),
 			mockGen: func(t *testing.T, ctx context.Context, c *Config) *mocks.MockDatabase {
 				m := mocks.NewMockDatabase(t)
-				m.On("CreateSchema", ctx, c.Logs.Schema).Return(nil)
-				m.On("CreateTable", ctx, c.Database, c.Logs.Schema, c.Logs.Table, createLogsTableSnowflakeTemplate).Return(fmt.Errorf("fail"))
+				m.On("CreateSchema", ctx, c.Traces.Schema).Return(nil)
+				m.On("CreateTable", ctx, c.Database, c.Traces.Schema, c.Traces.Table, createTracesTableSnowflakeTemplate).Return(fmt.Errorf("fail"))
 				return m
 			},
+			expectedErr: fmt.Errorf("failed to create traces table: fail"),
 		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.desc, func(t *testing.T) {
-			logsExp, err := newLogsExporter(
+			tracesExp, err := newTracesExporter(
 				tc.ctx,
 				c,
 				exportertest.NewNopCreateSettings(),
 				func(ctx context.Context, dsn string) (database.Database, error) { return nil, nil },
 			)
 			require.NoError(t, err)
-			logsExp.db = tc.mockGen(t, tc.ctx, c)
+			tracesExp.db = tc.mockGen(t, tc.ctx, c)
 
-			err = logsExp.start(tc.ctx, nil)
+			err = tracesExp.start(tc.ctx, nil)
 			if tc.expectedErr == nil {
 				require.NoError(t, err)
 			} else {
@@ -146,10 +147,10 @@ func TestLogsStart(t *testing.T) {
 	}
 }
 
-func TestLogsShutdown(t *testing.T) {
+func TestTracesShutdown(t *testing.T) {
 	// no db
 	ctx := context.Background()
-	e := &logsExporter{}
+	e := &tracesExporter{}
 	require.NoError(t, e.shutdown(ctx))
 
 	// db & error
@@ -160,13 +161,13 @@ func TestLogsShutdown(t *testing.T) {
 	require.ErrorContains(t, e.shutdown(ctx), "fail")
 }
 
-func TestLogsDataPusher(t *testing.T) {
+func TestTracesDataPusher(t *testing.T) {
 	c := &Config{
 		AccountIdentifier: "id",
 		Username:          "user",
 		Password:          "pass",
 		Database:          "db",
-		Logs: &TelemetryConfig{
+		Traces: &TelemetryConfig{
 			Schema: "schema",
 			Table:  "table",
 		},
@@ -175,48 +176,48 @@ func TestLogsDataPusher(t *testing.T) {
 	testCases := []struct {
 		desc        string
 		ctx         context.Context
-		logGen      func(t *testing.T) plog.Logs
+		traceGen    func(t *testing.T) ptrace.Traces
 		mapGen      func(t *testing.T) []map[string]any
 		mockGen     func(t *testing.T, ctx context.Context, warehouse, sql string, data []map[string]any) *mocks.MockDatabase
 		expectedErr error
 	}{
 		{
-			desc:   "Simple pass",
-			ctx:    context.Background(),
-			logGen: generateLogData1,
-			mapGen: generateLogMaps1,
+			desc:     "Simple pass",
+			ctx:      context.Background(),
+			traceGen: generateTraceData1,
+			mapGen:   generateTraceMaps1,
 			mockGen: func(t *testing.T, ctx context.Context, warehouse, sql string, data []map[string]any) *mocks.MockDatabase {
-				mock := mocks.NewMockDatabase(t)
-				mock.On("BatchInsert", ctx, data, warehouse, sql).Return(nil)
-				return mock
+				m := mocks.NewMockDatabase(t)
+				m.On("BatchInsert", ctx, data, warehouse, sql).Return(nil)
+				return m
 			},
 		},
 		{
-			desc:   "Simple fail",
-			ctx:    context.Background(),
-			logGen: generateLogData1,
-			mapGen: generateLogMaps1,
+			desc:     "Simple fail",
+			ctx:      context.Background(),
+			traceGen: generateTraceData1,
+			mapGen:   generateTraceMaps1,
 			mockGen: func(t *testing.T, ctx context.Context, warehouse, sql string, data []map[string]any) *mocks.MockDatabase {
-				mock := mocks.NewMockDatabase(t)
-				mock.On("BatchInsert", ctx, data, warehouse, sql).Return(fmt.Errorf("fail"))
-				return mock
+				m := mocks.NewMockDatabase(t)
+				m.On("BatchInsert", ctx, data, warehouse, sql).Return(fmt.Errorf("fail"))
+				return m
 			},
-			expectedErr: fmt.Errorf("failed to insert log data: fail"),
+			expectedErr: fmt.Errorf("failed to insert trace data: fail"),
 		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.desc, func(t *testing.T) {
-			logsExp, err := newLogsExporter(
+			tracesExp, err := newTracesExporter(
 				tc.ctx,
 				c,
 				exportertest.NewNopCreateSettings(),
 				func(ctx context.Context, dsn string) (database.Database, error) { return nil, nil },
 			)
 			require.NoError(t, err)
-			logsExp.db = tc.mockGen(t, tc.ctx, c.Warehouse, logsExp.insertSQL, tc.mapGen(t))
+			tracesExp.db = tc.mockGen(t, tc.ctx, c.Warehouse, tracesExp.insertSQL, tc.mapGen(t))
 
-			err = logsExp.logsDataPusher(tc.ctx, tc.logGen(t))
+			err = tracesExp.tracesDataPusher(tc.ctx, tc.traceGen(t))
 			if tc.expectedErr == nil {
 				require.NoError(t, err)
 			} else {
@@ -226,20 +227,20 @@ func TestLogsDataPusher(t *testing.T) {
 	}
 }
 
-func generateLogData1(t *testing.T) plog.Logs {
-	logs := plog.NewLogs()
-	rLogs := logs.ResourceLogs().AppendEmpty()
-	rLogs.SetSchemaUrl("resource_schema_url")
-	sLogs := rLogs.ScopeLogs().AppendEmpty()
-	sLogs.SetSchemaUrl("scope_schema_url")
+func generateTraceData1(t *testing.T) ptrace.Traces {
+	traces := ptrace.NewTraces()
+	rSpan := traces.ResourceSpans().AppendEmpty()
+	rSpan.SetSchemaUrl("resource_schema_url")
+	sSpan := rSpan.ScopeSpans().AppendEmpty()
+	sSpan.SetSchemaUrl("scope_schema_url")
 	for i := 0; i < 3; i++ {
-		lr := sLogs.LogRecords().AppendEmpty()
-		lr.Body().SetStr(fmt.Sprintf("log_body_%d", i))
+		s := sSpan.Spans().AppendEmpty()
+		s.SetName(fmt.Sprintf("span_%d", i))
 	}
-	return logs
+	return traces
 }
 
-func generateLogMaps1(t *testing.T) []map[string]any {
+func generateTraceMaps1(t *testing.T) []map[string]any {
 	return []map[string]any{
 		{
 			"rSchema":           "resource_schema_url",
@@ -250,16 +251,27 @@ func generateLogMaps1(t *testing.T) []map[string]any {
 			"sVersion":          "",
 			"sDroppedCount":     uint32(0),
 			"sAttributes":       "{}",
-			"timestamp":         time.Unix(0, int64(0)).UTC(),
-			"observedTimestamp": time.Unix(0, int64(0)).UTC(),
-			"severityNumber":    "Unspecified",
-			"severityText":      "",
-			"body":              "log_body_0",
-			"attributes":        "{}",
-			"droppedCount":      uint32(0),
-			"flags":             plog.LogRecordFlags(0),
 			"traceID":           "",
 			"spanID":            "",
+			"traceState":        "",
+			"parentSpanID":      "",
+			"name":              "span_0",
+			"kind":              "Unspecified",
+			"startTime":         time.Unix(0, int64(0)).UTC(),
+			"endTime":           time.Unix(0, int64(0)).UTC(),
+			"droppedCount":      uint32(0),
+			"attributes":        "{}",
+			"statusMessage":     "",
+			"statusCode":        "Unset",
+			"eventTimes":        pq.StringArray{},
+			"eventNames":        pq.StringArray{},
+			"eventDroppedCount": pq.Int32Array{},
+			"eventAttributes":   pq.StringArray{},
+			"linkTraceIDs":      pq.StringArray{},
+			"linkSpanIDs":       pq.StringArray{},
+			"linkTraceStates":   pq.StringArray{},
+			"linkDroppedCount":  pq.Int32Array{},
+			"linkAttributes":    pq.StringArray{},
 		},
 		{
 			"rSchema":           "resource_schema_url",
@@ -270,16 +282,27 @@ func generateLogMaps1(t *testing.T) []map[string]any {
 			"sVersion":          "",
 			"sDroppedCount":     uint32(0),
 			"sAttributes":       "{}",
-			"timestamp":         time.Unix(0, int64(0)).UTC(),
-			"observedTimestamp": time.Unix(0, int64(0)).UTC(),
-			"severityNumber":    "Unspecified",
-			"severityText":      "",
-			"body":              "log_body_1",
-			"attributes":        "{}",
-			"droppedCount":      uint32(0),
-			"flags":             plog.LogRecordFlags(0),
 			"traceID":           "",
 			"spanID":            "",
+			"traceState":        "",
+			"parentSpanID":      "",
+			"name":              "span_1",
+			"kind":              "Unspecified",
+			"startTime":         time.Unix(0, int64(0)).UTC(),
+			"endTime":           time.Unix(0, int64(0)).UTC(),
+			"droppedCount":      uint32(0),
+			"attributes":        "{}",
+			"statusMessage":     "",
+			"statusCode":        "Unset",
+			"eventTimes":        pq.StringArray{},
+			"eventNames":        pq.StringArray{},
+			"eventDroppedCount": pq.Int32Array{},
+			"eventAttributes":   pq.StringArray{},
+			"linkTraceIDs":      pq.StringArray{},
+			"linkSpanIDs":       pq.StringArray{},
+			"linkTraceStates":   pq.StringArray{},
+			"linkDroppedCount":  pq.Int32Array{},
+			"linkAttributes":    pq.StringArray{},
 		},
 		{
 			"rSchema":           "resource_schema_url",
@@ -290,16 +313,27 @@ func generateLogMaps1(t *testing.T) []map[string]any {
 			"sVersion":          "",
 			"sDroppedCount":     uint32(0),
 			"sAttributes":       "{}",
-			"timestamp":         time.Unix(0, int64(0)).UTC(),
-			"observedTimestamp": time.Unix(0, int64(0)).UTC(),
-			"severityNumber":    "Unspecified",
-			"severityText":      "",
-			"body":              "log_body_2",
-			"attributes":        "{}",
-			"droppedCount":      uint32(0),
-			"flags":             plog.LogRecordFlags(0),
 			"traceID":           "",
 			"spanID":            "",
+			"traceState":        "",
+			"parentSpanID":      "",
+			"name":              "span_2",
+			"kind":              "Unspecified",
+			"startTime":         time.Unix(0, int64(0)).UTC(),
+			"endTime":           time.Unix(0, int64(0)).UTC(),
+			"droppedCount":      uint32(0),
+			"attributes":        "{}",
+			"statusMessage":     "",
+			"statusCode":        "Unset",
+			"eventTimes":        pq.StringArray{},
+			"eventNames":        pq.StringArray{},
+			"eventDroppedCount": pq.Int32Array{},
+			"eventAttributes":   pq.StringArray{},
+			"linkTraceIDs":      pq.StringArray{},
+			"linkSpanIDs":       pq.StringArray{},
+			"linkTraceStates":   pq.StringArray{},
+			"linkDroppedCount":  pq.Int32Array{},
+			"linkAttributes":    pq.StringArray{},
 		},
 	}
 }
