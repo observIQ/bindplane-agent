@@ -39,7 +39,6 @@ func queryMatchesValue(v pcommon.Value, query string) bool {
 	}
 }
 
-// func matchesAttributes(l plog.LogRecord, search string) {}
 func queryMatchesMap(m pcommon.Map, query string) bool {
 	matches := false
 
