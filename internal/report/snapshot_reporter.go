@@ -229,7 +229,7 @@ func (s *SnapshotReporter) prepRequestPayload(componentID, pipelineType string, 
 			return []byte{}, nil
 		}
 
-		payload, err = buffer.ConstructPayload()
+		payload, err = buffer.ConstructPayload(searchQuery, minimumTimestamp)
 	}
 
 	return
