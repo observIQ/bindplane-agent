@@ -220,7 +220,7 @@ func (s *SnapshotReporter) prepRequestPayload(componentID, pipelineType string, 
 			return []byte{}, nil
 		}
 
-		payload, err = buffer.ConstructPayload()
+		payload, err = buffer.ConstructPayload(searchQuery, minimumTimestamp)
 	case "traces":
 		s.traceLock.Lock()
 		buffer, ok := s.traceBuffers[componentID]
