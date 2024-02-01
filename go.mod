@@ -71,6 +71,8 @@ require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/extension/pprofextension v0.92.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/extension/sigv4authextension v0.92.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/extension/storage v0.92.0
+	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden v0.92.0
+	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest v0.92.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/processor/attributesprocessor v0.92.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/processor/cumulativetodeltaprocessor v0.92.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/processor/deltatorateprocessor v0.92.0

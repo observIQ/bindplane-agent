@@ -1247,9 +1247,11 @@ github.com/open-telemetry/opentelemetry-collector-contrib/pkg/batchpersignal v0.
 github.com/open-telemetry/opentelemetry-collector-contrib/pkg/experimentalmetricmetadata v0.92.0 h1:pAQ2hR1HehpP120nc9/Rz03uAq4LG7/4lWhNlV82Zbk=
 github.com/open-telemetry/opentelemetry-collector-contrib/pkg/experimentalmetricmetadata v0.92.0/go.mod h1:uT9LHFq5KlHZHQ7MSk4TNOiUh0VhS1RE1ecDRB/LCmA=
 github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden v0.92.0 h1:4lzyQkopk+TXphviuNbpLrwhOxa14Jw7i3SjzD2XjqQ=
+github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden v0.92.0/go.mod h1:LsOAEpDF3VbzNFJwp7CR4vFYJuulIPOSVSPe91huVKY=
 github.com/open-telemetry/opentelemetry-collector-contrib/pkg/ottl v0.92.0 h1:hYDw9amC8zJl9uik4zkaPqPHogZ7PMhoY5qaBwMSRQ4=
 github.com/open-telemetry/opentelemetry-collector-contrib/pkg/ottl v0.92.0/go.mod h1:6V4eg/9WNeiAJ1bqUyHE7t5wP03L/1ecB1dRk7jWm0Q=
 github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest v0.92.0 h1:2cjUFC0jNSqAYcO+ZWUQ8sqPZdAX03Bd90SpsGcnrNY=
+github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest v0.92.0/go.mod h1:SOBg+bs2hOmckkRr/yURA78AuMePwRYIpao4EmI6xdw=
 github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatautil v0.92.0 h1:sqs1y0Exyxons2mWMAmBSdcdl2UizUgOmoibEBRX/4I=
 github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatautil v0.92.0/go.mod h1:me0dUlXvkVpDA6bN2z+qAggsXqOBEcm/dFFPw2mp7n8=
 github.com/open-telemetry/opentelemetry-collector-contrib/pkg/resourcetotelemetry v0.92.0 h1:WSWc/55tE3tHQpWZFjkeokZNUwjyZTqyPcUaXx3tuWg=
