@@ -29,98 +29,98 @@ var filteredMetricsDir = filepath.Join("testdata", "metrics", "after")
 
 func TestFilterMetrics(t *testing.T) {
 	testCases := []struct {
-		name            string
-		fileIn          string
-		query           *string
-		minTimestamp    *time.Time
-		expectedFileOut string
+		name             string
+		fileIn           string
+		searchQuery      *string
+		minimumTimestamp *time.Time
+		expectedFileOut  string
 	}{
 		{
 			name:            "Matches attribute value (gauge)",
 			fileIn:          filepath.Join(unfilteredMetricsDir, "host-metrics.yaml"),
-			query:           asPtr("cool-attribute-value"),
+			searchQuery:     asPtr("cool-attribute-value"),
 			expectedFileOut: filepath.Join(filteredMetricsDir, "matches-attr-val-gauge.yaml"),
 		},
 		{
 			name:            "Matches attribute key (gauge)",
 			fileIn:          filepath.Join(unfilteredMetricsDir, "host-metrics.yaml"),
-			query:           asPtr("cool-attribute-key"),
+			searchQuery:     asPtr("cool-attribute-key"),
 			expectedFileOut: filepath.Join(filteredMetricsDir, "matches-attr-key-gauge.yaml"),
 		},
 		{
 			name:            "Matches attribute value (sum)",
 			fileIn:          filepath.Join(unfilteredMetricsDir, "host-metrics.yaml"),
-			query:           asPtr("extra-sum-attr-value"),
+			searchQuery:     asPtr("extra-sum-attr-value"),
 			expectedFileOut: filepath.Join(filteredMetricsDir, "matches-attr-val-sum.yaml"),
 		},
 		{
 			name:            "Matches attribute key (sum)",
 			fileIn:          filepath.Join(unfilteredMetricsDir, "host-metrics.yaml"),
-			query:           asPtr("extra-sum-attr-key"),
+			searchQuery:     asPtr("extra-sum-attr-key"),
 			expectedFileOut: filepath.Join(filteredMetricsDir, "matches-attr-key-sum.yaml"),
 		},
 		{
 			name:            "Matches resource attribute key",
 			fileIn:          filepath.Join(unfilteredMetricsDir, "host-metrics.yaml"),
-			query:           asPtr("extra-resource-attr-key"),
+			searchQuery:     asPtr("extra-resource-attr-key"),
 			expectedFileOut: filepath.Join(filteredMetricsDir, "matches-resource-attr-key.yaml"),
 		},
 		{
 			name:            "Matches resource attribute value",
 			fileIn:          filepath.Join(unfilteredMetricsDir, "host-metrics.yaml"),
-			query:           asPtr("extra-resource-attr-value"),
+			searchQuery:     asPtr("extra-resource-attr-value"),
 			expectedFileOut: filepath.Join(filteredMetricsDir, "matches-resource-attr-val.yaml"),
 		},
 		{
 			name:            "Matches metric name",
 			fileIn:          filepath.Join(unfilteredMetricsDir, "host-metrics.yaml"),
-			query:           asPtr("system.cpu.load_average.1m"),
+			searchQuery:     asPtr("system.cpu.load_average.1m"),
 			expectedFileOut: filepath.Join(filteredMetricsDir, "matches-metric-name.yaml"),
 		},
 		{
-			name:   "Filters older than minimum timestamp",
-			fileIn: filepath.Join(unfilteredMetricsDir, "host-metrics.yaml"),
-			query:  asPtr("/dev"),
+			name:        "Filters older than minimum timestamp",
+			fileIn:      filepath.Join(unfilteredMetricsDir, "host-metrics.yaml"),
+			searchQuery: asPtr("/dev"),
 			// note when regenning goldens. golden.WriteMetrics
 			// completely obliterates timestamps, so the regenerated golden will have the wrong timestamp.
 			// You'll have to manually fix that.
-			minTimestamp:    asPtr(time.Unix(0, 3000000)),
-			expectedFileOut: filepath.Join(filteredMetricsDir, "filters-timestamp.yaml"),
+			minimumTimestamp: asPtr(time.Unix(0, 3000000)),
+			expectedFileOut:  filepath.Join(filteredMetricsDir, "filters-timestamp.yaml"),
 		},
 		{
 			name:            "Matches attribute value (histogram)",
 			fileIn:          filepath.Join(unfilteredMetricsDir, "histogram.yaml"),
-			query:           asPtr("dev-2"),
+			searchQuery:     asPtr("dev-2"),
 			expectedFileOut: filepath.Join(filteredMetricsDir, "matches-attr-val-histogram.yaml"),
 		},
 		{
 			name:            "Matches attribute key (histogram)",
 			fileIn:          filepath.Join(unfilteredMetricsDir, "histogram.yaml"),
-			query:           asPtr("prod-machine"),
+			searchQuery:     asPtr("prod-machine"),
 			expectedFileOut: filepath.Join(filteredMetricsDir, "matches-attr-key-histogram.yaml"),
 		},
 		{
 			name:            "Matches attribute value (exponential histogram)",
 			fileIn:          filepath.Join(unfilteredMetricsDir, "exp-histogram.yaml"),
-			query:           asPtr("dev-2"),
+			searchQuery:     asPtr("dev-2"),
 			expectedFileOut: filepath.Join(filteredMetricsDir, "matches-attr-val-exp-histogram.yaml"),
 		},
 		{
 			name:            "Matches attribute key (exponential histogram)",
 			fileIn:          filepath.Join(unfilteredMetricsDir, "exp-histogram.yaml"),
-			query:           asPtr("prod-machine"),
+			searchQuery:     asPtr("prod-machine"),
 			expectedFileOut: filepath.Join(filteredMetricsDir, "matches-attr-key-exp-histogram.yaml"),
 		},
 		{
 			name:            "Matches attribute value (summary)",
 			fileIn:          filepath.Join(unfilteredMetricsDir, "summary.yaml"),
-			query:           asPtr("dev-2"),
+			searchQuery:     asPtr("dev-2"),
 			expectedFileOut: filepath.Join(filteredMetricsDir, "matches-attr-val-summary.yaml"),
 		},
 		{
 			name:            "Matches attribute key (summary)",
 			fileIn:          filepath.Join(unfilteredMetricsDir, "summary.yaml"),
-			query:           asPtr("prod-machine"),
+			searchQuery:     asPtr("prod-machine"),
 			expectedFileOut: filepath.Join(filteredMetricsDir, "matches-attr-key-summary.yaml"),
 		},
 	}
@@ -130,7 +130,7 @@ func TestFilterMetrics(t *testing.T) {
 			metricsIn, err := golden.ReadMetrics(tc.fileIn)
 			require.NoError(t, err)
 
-			metricsOut := filterMetrics(metricsIn, tc.query, tc.minTimestamp)
+			metricsOut := filterMetrics(metricsIn, tc.searchQuery, tc.minimumTimestamp)
 
 			expectedMetricsOut, err := golden.ReadMetrics(tc.expectedFileOut)
 			require.NoError(t, err)
