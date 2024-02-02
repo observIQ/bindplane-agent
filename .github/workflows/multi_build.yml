@@ -7,7 +7,7 @@ on:
 
 jobs:
   build_linux:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest-4-cores
     steps:
       - name: Checkout Sources
         uses: actions/checkout@v4
@@ -23,7 +23,7 @@ jobs:
           go install github.com/uw-labs/lichen@v0.1.7
           lichen --config=./license.yaml $(find dist/collector_* dist/updater_*)
   build_darwin:
-    runs-on: macos-11
+    runs-on: macos-14
     steps:
       - name: Checkout Sources
         uses: actions/checkout@v4
