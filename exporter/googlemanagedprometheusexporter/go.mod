@@ -10,7 +10,7 @@ require (
 	go.opentelemetry.io/collector/exporter v0.92.0
 	go.opentelemetry.io/collector/pdata v1.0.1
 	go.uber.org/zap v1.26.0
-	google.golang.org/api v0.160.0
+	google.golang.org/api v0.161.0
 )
 
 require (
