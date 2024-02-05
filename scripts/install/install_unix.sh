@@ -355,6 +355,13 @@ set_os_arch()
     x86_64)
       os_arch="amd64"
       ;;
+    # experimental PowerPC arch support for collector
+    ppc64)
+      os_arch="ppc64"
+      ;;
+    ppc64le)
+      os_arch="ppc64le"
+      ;;
     # armv6/32bit. These are what raspberry pi can return, which is the main reason we support 32-bit arm
     arm|armv6l|armv7l)
       os_arch="arm"
@@ -533,7 +540,7 @@ os_arch_check()
   info "Checking for valid operating system architecture..."
   arch=$(uname -m)
   case "$arch" in 
-    x86_64|aarch64|arm64|aarch64_be|armv8b|armv8l|arm|armv6l|armv7l)
+    x86_64|aarch64|ppc64|ppc64le|arm64|aarch64_be|armv8b|armv8l|arm|armv6l|armv7l)
       succeeded
       ;;
     *)

@@ -21,15 +21,25 @@ builds:
       - arm64
       - arm
       - "386"
+      - ppc64
+      - ppc64le
     ignore:
       - goos: windows
         goarch: arm
       - goos: windows
         goarch: arm64
+      - goos: windows
+        goarch: ppc64
+      - goos: windows
+        goarch: ppc64le
       - goos: linux
         goarch: "386"
       - goos: darwin
         goarch: "386"
+      - goos: darwin
+        goarch: ppc64
+      - goos: darwin
+        goarch: ppc64le
     ldflags:
       - -s -w
       - -X github.com/observiq/bindplane-agent/internal/version.version=v{{ .Version }}
@@ -52,15 +62,25 @@ builds:
       - arm64
       - arm
       - "386"
+      - ppc64
+      - ppc64le
     ignore:
       - goos: windows
         goarch: arm
       - goos: windows
         goarch: arm64
+      - goos: windows
+        goarch: ppc64
+      - goos: windows
+        goarch: ppc64le
       - goos: linux
         goarch: "386"
       - goos: darwin
         goarch: "386"
+      - goos: darwin
+        goarch: ppc64
+      - goos: darwin
+        goarch: ppc64le
     ldflags:
       - -s -w
       - -X github.com/observiq/bindplane-agent/updater/internal/version.version=v{{ .Version }}
@@ -236,6 +256,7 @@ dockers:
       - config/example.yaml
       - config/logging.stdout.yaml
       - LICENSE
+      - release_deps/opentelemetry-java-contrib-jmx-metrics.jar
   - id: ubuntu-arm64
     goos: linux
     goarch: arm64
@@ -280,6 +301,7 @@ dockers:
       - config/example.yaml
       - config/logging.stdout.yaml
       - LICENSE
+      - release_deps/opentelemetry-java-contrib-jmx-metrics.jar
 
   - id: ubi8-amd64
     goos: linux
@@ -307,6 +329,7 @@ dockers:
       - config/example.yaml
       - config/logging.stdout.yaml
       - LICENSE
+      - release_deps/opentelemetry-java-contrib-jmx-metrics.jar
   - id: ubi8-arm64
     goos: linux
     goarch: arm64
@@ -333,6 +356,7 @@ dockers:
       - config/example.yaml
       - config/logging.stdout.yaml
       - LICENSE
+      - release_deps/opentelemetry-java-contrib-jmx-metrics.jar
 
 docker_manifests:
   - name_template: "observiq/observiq-otel-collector:latest"
