@@ -11,7 +11,7 @@ jobs:
       - name: Checkout Sources
         uses: actions/checkout@v4
       - name: Setup Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v5
         with:
           go-version: "1.20"
           check-latest: true
@@ -59,7 +59,7 @@ jobs:
         run: go-msi.exe make -m observiq-otel-collector.msi --version ${{ github.ref_name }} --arch amd64
         working-directory: C:/build
       - name: "Upload MSI"
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: observiq-otel-collector.msi
           path: C:/build/observiq-otel-collector.msi
@@ -71,7 +71,7 @@ jobs:
       - name: Checkout Sources
         uses: actions/checkout@v4
       - name: Setup Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v5
         with:
           go-version: "1.20"
           check-latest: true
@@ -120,7 +120,7 @@ jobs:
         run: go-msi.exe make -m observiq-otel-collector-x86.msi --version ${{ github.ref_name }} --arch 386
         working-directory: C:/build
       - name: "Upload MSI"
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: observiq-otel-collector-x86.msi
           path: C:/build/observiq-otel-collector-x86.msi
@@ -137,7 +137,7 @@ jobs:
           # For goreleaser
           fetch-depth: 0
       - name: Set up Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v5
         with:
           go-version: "1.20"
           check-latest: true
@@ -165,12 +165,12 @@ jobs:
           username: _json_key
           password: ${{ secrets.ORG_OBSERVIQ_PUBLIC_GCR_JSON_KEY }}
       - name: Retrieve Windows 64-bit MSI Installer
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: observiq-otel-collector.msi
           path: observiq-otel-collector.msi
       - name: Retrieve Windows 32-bit MSI Installer
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: observiq-otel-collector-x86.msi
           path: observiq-otel-collector-x86.msi
