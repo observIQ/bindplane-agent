@@ -84,7 +84,7 @@ func TestDownloadFile(t *testing.T) {
 	t.Run("Server returns 404", func(t *testing.T) {
 		tmpDir := t.TempDir()
 
-		s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 			w.WriteHeader(http.StatusNotFound)
 		}))
 		defer s.Close()
@@ -242,7 +242,7 @@ func TestDownloadAndVerifyExtraction(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			tmpDir := t.TempDir()
 
-			s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				archiveBytes, err := os.ReadFile(tc.archivePath)
 				if err != nil {
 					t.Errorf("Failed to open archive for sending over http: %s", err)
@@ -292,7 +292,7 @@ func TestDownloadAndVerifyExtraction(t *testing.T) {
 func TestDownloadAndVerifyHTTPFailure(t *testing.T) {
 	tmpDir := t.TempDir()
 
-	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusForbidden)
 	}))
 	defer s.Close()

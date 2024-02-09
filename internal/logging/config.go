@@ -94,7 +94,7 @@ func (l *LoggerConfig) Options() ([]zap.Option, error) {
 		return nil, err
 	}
 
-	opt := zap.WrapCore(func(c zapcore.Core) zapcore.Core {
+	opt := zap.WrapCore(func(_ zapcore.Core) zapcore.Core {
 		return core
 	})
 
