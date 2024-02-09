@@ -60,7 +60,7 @@ func Test_processTraces(t *testing.T) {
 		{
 			desc:       "disabled",
 			enabled:    false,
-			setupMocks: func(m *mocks.MockSnapshotter) {},
+			setupMocks: func(_ *mocks.MockSnapshotter) {},
 		},
 		{
 			desc:    "enabled",
@@ -99,7 +99,7 @@ func Test_processLogs(t *testing.T) {
 		{
 			desc:       "disabled",
 			enabled:    false,
-			setupMocks: func(m *mocks.MockSnapshotter) {},
+			setupMocks: func(_ *mocks.MockSnapshotter) {},
 		},
 		{
 			desc:    "enabled",
@@ -138,7 +138,7 @@ func Test_processMetrics(t *testing.T) {
 		{
 			desc:       "disabled",
 			enabled:    false,
-			setupMocks: func(m *mocks.MockSnapshotter) {},
+			setupMocks: func(_ *mocks.MockSnapshotter) {},
 		},
 		{
 			desc:    "enabled",

@@ -529,7 +529,7 @@ func TestApplyConfigChanges(t *testing.T) {
 				assert.NoError(t, err)
 
 				manager := NewAgentConfigManager(zap.NewNop())
-				mangedConfig, err := opamp.NewManagedConfig(configPath, func(data []byte) (changed bool, err error) {
+				mangedConfig, err := opamp.NewManagedConfig(configPath, func(_ []byte) (changed bool, err error) {
 					return false, expectedError
 				}, true)
 				assert.NoError(t, err)
