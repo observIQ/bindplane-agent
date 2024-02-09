@@ -40,7 +40,7 @@ func NewSettings(configPaths []string, version string, loggingOpts []zap.Option,
 		ResolverSettings: confmap.ResolverSettings{
 			URIs:       configPaths,
 			Providers:  map[string]confmap.Provider{fmp.Scheme(): fmp},
-			Converters: []confmap.Converter{expandconverter.New()},
+			Converters: []confmap.Converter{expandconverter.New(confmap.ConverterSettings{})},
 		},
 	}
 	provider, err := otelcol.NewConfigProvider(configProviderSettings)

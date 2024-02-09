@@ -31,9 +31,6 @@ func SetFeatureFlags() error {
 	if err := featuregate.GlobalRegistry().Set("filelog.mtimeSortType", true); err != nil {
 		return fmt.Errorf("failed to enable filelog.mtimeSortType: %w", err)
 	}
-	if err := featuregate.GlobalRegistry().Set("telemetry.useOtelForInternalMetrics", false); err != nil {
-		return fmt.Errorf("failed to disable telemetry.useOtelForInternalMetrics: %w", err)
-	}
 
 	return nil
 }
