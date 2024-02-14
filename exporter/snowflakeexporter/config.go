@@ -16,12 +16,15 @@ package snowflakeexporter
 
 import (
 	"errors"
+	"fmt"
 
+	"github.com/snowflakedb/gosnowflake"
 	"go.opentelemetry.io/collector/config/configretry"
 	"go.opentelemetry.io/collector/exporter/exporterhelper"
 )
 
 const (
+	defaultDatabase      = "bpop"
 	defaultLogsSchema    = "logs"
 	defaultMetricsSchema = "metrics"
 	defaultTracesSchema  = "traces"
@@ -34,21 +37,26 @@ type Config struct {
 	exporterhelper.QueueSettings   `mapstructure:"sending_queue"`
 	configretry.BackOffConfig      `mapstructure:"retry_on_failure"`
 
-	AccountIdentifier string `mapstructure:"account_identifier"`
-	Username          string `mapstructure:"username"`
-	Password          string `mapstructure:"password"`
-	Database          string `mapstructure:"database"`
-	Warehouse         string `mapstructure:"warehouse"`
+	AccountIdentifier string             `mapstructure:"account_identifier"`
+	Username          string             `mapstructure:"username"`
+	Password          string             `mapstructure:"password"`
+	Warehouse         string             `mapstructure:"warehouse"`
+	Role              string             `mapstructure:"role,omitempty"`
+	Database          string             `mapstructure:"database,omitempty"`
+	Parameters        map[string]*string `mapstructure:"parameters,omitempty"`
 
-	Logs    *TelemetryConfig `mapstructure:"logs,omitempty"`
-	Metrics *TelemetryConfig `mapstructure:"metrics,omitempty"`
-	Traces  *TelemetryConfig `mapstructure:"traces,omitempty"`
+	Logs    TelemetryConfig `mapstructure:"logs"`
+	Metrics TelemetryConfig `mapstructure:"metrics"`
+	Traces  TelemetryConfig `mapstructure:"traces"`
+
+	DSN string
 }
 
 // TelemetryConfig is a config used by each telemetry type
 type TelemetryConfig struct {
-	Schema string `mapstructure:"schema,omitempty"`
-	Table  string `mapstructure:"table,omitempty"`
+	Enabled bool   `mapstructure:"enabled"`
+	Schema  string `mapstructure:"schema,omitempty"`
+	Table   string `mapstructure:"table,omitempty"`
 }
 
 // Validate ensures the config is correct
@@ -62,21 +70,43 @@ func (c *Config) Validate() error {
 	if c.Password == "" {
 		return errors.New("password is required")
 	}
-	if c.Database == "" {
-		return errors.New("database is required")
-	}
 	if c.Warehouse == "" {
 		return errors.New("warehouse is required")
 	}
+	if c.Database == "" {
+		c.Database = defaultDatabase
+	}
 
-	return c.validateTelemetry()
+	if err := c.validateTelemetry(); err != nil {
+		return err
+	}
+
+	sf := gosnowflake.Config{}
+
+	sf.User = c.Username
+	sf.Password = c.Password
+	sf.Account = c.AccountIdentifier
+	if c.Parameters != nil {
+		sf.Params = c.Parameters
+	}
+
+	dsn, err := gosnowflake.DSN(&sf)
+	if err != nil {
+		return fmt.Errorf("failed to build DSN: %w", err)
+	}
+
+	c.DSN = dsn
+
+	return nil
 }
 
 // validateTelemetry ensures at least 1 telemetry type is configured and sets default values if needed
 func (c *Config) validateTelemetry() error {
-	var noTelemetry = true
-	if c.Logs != nil {
-		noTelemetry = false
+	if !c.Logs.Enabled && !c.Metrics.Enabled && !c.Traces.Enabled {
+		return errors.New("no telemetry type configured for exporter")
+	}
+
+	if c.Logs.Enabled {
 		if c.Logs.Schema == "" {
 			c.Logs.Schema = defaultLogsSchema
 		}
@@ -84,8 +114,7 @@ func (c *Config) validateTelemetry() error {
 			c.Logs.Table = defaultTable
 		}
 	}
-	if c.Metrics != nil {
-		noTelemetry = false
+	if c.Metrics.Enabled {
 		if c.Metrics.Schema == "" {
 			c.Metrics.Schema = defaultMetricsSchema
 		}
@@ -93,8 +122,7 @@ func (c *Config) validateTelemetry() error {
 			c.Metrics.Table = defaultTable
 		}
 	}
-	if c.Traces != nil {
-		noTelemetry = false
+	if c.Traces.Enabled {
 		if c.Traces.Schema == "" {
 			c.Traces.Schema = defaultTracesSchema
 		}
@@ -103,8 +131,5 @@ func (c *Config) validateTelemetry() error {
 		}
 	}
 
-	if noTelemetry {
-		return errors.New("no telemetry type configured for exporter")
-	}
 	return nil
 }

@@ -1,3 +1,17 @@
+// Copyright observIQ, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package snowflakeexporter
 
 import (
@@ -14,34 +28,46 @@ import (
 )
 
 func TestNewLogsExporter(t *testing.T) {
-	c := &Config{
-		AccountIdentifier: "id",
-		Username:          "user",
-		Password:          "pass",
-		Database:          "db",
-		Logs: &TelemetryConfig{
-			Schema: "schema",
-			Table:  "table",
-		},
-	}
-
 	testCases := []struct {
 		desc        string
 		ctx         context.Context
-		newDatabase func(ctx context.Context, dsn string) (database.Database, error)
+		c           *Config
+		newDatabase func(_ string) (database.Database, error)
 		expectedErr error
 	}{
 		{
-			desc: "Simple pass",
+			desc: "pass",
 			ctx:  context.Background(),
-			newDatabase: func(_ context.Context, _ string) (database.Database, error) {
+			c: &Config{
+				AccountIdentifier: "id",
+				Username:          "user",
+				Password:          "pass",
+				Database:          "db",
+				Logs: TelemetryConfig{
+					Enabled: true,
+					Schema:  "schema",
+					Table:   "table",
+				},
+			},
+			newDatabase: func(_ string) (database.Database, error) {
 				return mocks.NewMockDatabase(t), nil
 			},
 		},
 		{
-			desc: "Fail newDatabase",
+			desc: "fail newDatabase",
 			ctx:  context.Background(),
-			newDatabase: func(_ context.Context, _ string) (database.Database, error) {
+			c: &Config{
+				AccountIdentifier: "id",
+				Username:          "user",
+				Password:          "pass",
+				Database:          "db",
+				Logs: TelemetryConfig{
+					Enabled: true,
+					Schema:  "schema",
+					Table:   "table",
+				},
+			},
+			newDatabase: func(_ string) (database.Database, error) {
 				return nil, fmt.Errorf("fail")
 			},
 			expectedErr: fmt.Errorf("failed to create new database connection for logs: fail"),
@@ -52,7 +78,7 @@ func TestNewLogsExporter(t *testing.T) {
 		t.Run(tc.desc, func(t *testing.T) {
 			exp, err := newLogsExporter(
 				tc.ctx,
-				c,
+				tc.c,
 				exportertest.NewNopCreateSettings(),
 				tc.newDatabase,
 			)
@@ -80,46 +106,61 @@ func TestLogsStart(t *testing.T) {
 		Username:          "user",
 		Password:          "pass",
 		Database:          "db",
-		Logs: &TelemetryConfig{
-			Schema: "schema",
-			Table:  "table",
+		Warehouse:         "wh",
+		Logs: TelemetryConfig{
+			Enabled: true,
+			Schema:  "schema",
+			Table:   "table",
 		},
 	}
 
 	testCases := []struct {
 		desc        string
 		ctx         context.Context
-		mockGen     func(t *testing.T, ctx context.Context, c *Config) *mocks.MockDatabase
+		mockGen     func(t *testing.T, ctx context.Context) *mocks.MockDatabase
 		expectedErr error
 	}{
 		{
-			desc: "Simple pass",
+			desc: "pass",
 			ctx:  context.Background(),
-			mockGen: func(t *testing.T, ctx context.Context, c *Config) *mocks.MockDatabase {
+			mockGen: func(t *testing.T, ctx context.Context) *mocks.MockDatabase {
 				m := mocks.NewMockDatabase(t)
+				m.On("InitDatabaseConn", ctx, c.Role, c.Database, c.Warehouse).Return(nil)
 				m.On("CreateSchema", ctx, c.Logs.Schema).Return(nil)
-				m.On("CreateTable", ctx, c.Database, c.Logs.Schema, c.Logs.Table, createLogsTableSnowflakeTemplate).Return(nil)
+				m.On("CreateTable", ctx, c.Logs.Table, createLogsTableSnowflakeTemplate).Return(nil)
 				return m
 			},
 		},
 		{
-			desc:        "Fail CreateSchema",
+			desc:        "fail InitDatabaseConn",
+			ctx:         context.Background(),
+			expectedErr: fmt.Errorf("failed to initialize database connection for logs: fail"),
+			mockGen: func(t *testing.T, ctx context.Context) *mocks.MockDatabase {
+				m := mocks.NewMockDatabase(t)
+				m.On("InitDatabaseConn", ctx, c.Role, c.Database, c.Warehouse).Return(fmt.Errorf("fail"))
+				return m
+			},
+		},
+		{
+			desc:        "fail CreateSchema",
 			ctx:         context.Background(),
 			expectedErr: fmt.Errorf("failed to create logs schema: fail"),
-			mockGen: func(t *testing.T, ctx context.Context, c *Config) *mocks.MockDatabase {
+			mockGen: func(t *testing.T, ctx context.Context) *mocks.MockDatabase {
 				m := mocks.NewMockDatabase(t)
+				m.On("InitDatabaseConn", ctx, c.Role, c.Database, c.Warehouse).Return(nil)
 				m.On("CreateSchema", ctx, c.Logs.Schema).Return(fmt.Errorf("fail"))
 				return m
 			},
 		},
 		{
-			desc:        "Fail CreateTable",
+			desc:        "fail CreateTable",
 			ctx:         context.Background(),
 			expectedErr: fmt.Errorf("failed to create logs table: fail"),
-			mockGen: func(t *testing.T, ctx context.Context, c *Config) *mocks.MockDatabase {
+			mockGen: func(t *testing.T, ctx context.Context) *mocks.MockDatabase {
 				m := mocks.NewMockDatabase(t)
+				m.On("InitDatabaseConn", ctx, c.Role, c.Database, c.Warehouse).Return(nil)
 				m.On("CreateSchema", ctx, c.Logs.Schema).Return(nil)
-				m.On("CreateTable", ctx, c.Database, c.Logs.Schema, c.Logs.Table, createLogsTableSnowflakeTemplate).Return(fmt.Errorf("fail"))
+				m.On("CreateTable", ctx, c.Logs.Table, createLogsTableSnowflakeTemplate).Return(fmt.Errorf("fail"))
 				return m
 			},
 		},
@@ -131,10 +172,10 @@ func TestLogsStart(t *testing.T) {
 				tc.ctx,
 				c,
 				exportertest.NewNopCreateSettings(),
-				func(ctx context.Context, dsn string) (database.Database, error) { return nil, nil },
+				func(_ string) (database.Database, error) { return nil, nil },
 			)
 			require.NoError(t, err)
-			logsExp.db = tc.mockGen(t, tc.ctx, c)
+			logsExp.db = tc.mockGen(t, tc.ctx)
 
 			err = logsExp.start(tc.ctx, nil)
 			if tc.expectedErr == nil {
@@ -165,40 +206,39 @@ func TestLogsDataPusher(t *testing.T) {
 		AccountIdentifier: "id",
 		Username:          "user",
 		Password:          "pass",
+		Warehouse:         "wh",
 		Database:          "db",
-		Logs: &TelemetryConfig{
-			Schema: "schema",
-			Table:  "table",
+		Logs: TelemetryConfig{
+			Enabled: true,
+			Schema:  "schema",
+			Table:   "table",
 		},
 	}
 
 	testCases := []struct {
 		desc        string
 		ctx         context.Context
-		logGen      func(t *testing.T) plog.Logs
-		mapGen      func(t *testing.T) []map[string]any
-		mockGen     func(t *testing.T, ctx context.Context, warehouse, sql string, data []map[string]any) *mocks.MockDatabase
+		logGen      func() plog.Logs
+		mockGen     func(t *testing.T, ctx context.Context, sql string) *mocks.MockDatabase
 		expectedErr error
 	}{
 		{
-			desc:   "Simple pass",
+			desc:   "pass",
 			ctx:    context.Background(),
-			logGen: generateLogData1,
-			mapGen: generateLogMaps1,
-			mockGen: func(t *testing.T, ctx context.Context, warehouse, sql string, data []map[string]any) *mocks.MockDatabase {
+			logGen: generateLogs,
+			mockGen: func(t *testing.T, ctx context.Context, sql string) *mocks.MockDatabase {
 				mock := mocks.NewMockDatabase(t)
-				mock.On("BatchInsert", ctx, data, warehouse, sql).Return(nil)
+				mock.On("BatchInsert", ctx, expectedLogMaps(), sql).Return(nil)
 				return mock
 			},
 		},
 		{
-			desc:   "Simple fail",
+			desc:   "fail BatchInsert",
 			ctx:    context.Background(),
-			logGen: generateLogData1,
-			mapGen: generateLogMaps1,
-			mockGen: func(t *testing.T, ctx context.Context, warehouse, sql string, data []map[string]any) *mocks.MockDatabase {
+			logGen: generateLogs,
+			mockGen: func(t *testing.T, ctx context.Context, sql string) *mocks.MockDatabase {
 				mock := mocks.NewMockDatabase(t)
-				mock.On("BatchInsert", ctx, data, warehouse, sql).Return(fmt.Errorf("fail"))
+				mock.On("BatchInsert", ctx, expectedLogMaps(), sql).Return(fmt.Errorf("fail"))
 				return mock
 			},
 			expectedErr: fmt.Errorf("failed to insert log data: fail"),
@@ -211,12 +251,12 @@ func TestLogsDataPusher(t *testing.T) {
 				tc.ctx,
 				c,
 				exportertest.NewNopCreateSettings(),
-				func(ctx context.Context, dsn string) (database.Database, error) { return nil, nil },
+				func(_ string) (database.Database, error) { return nil, nil },
 			)
 			require.NoError(t, err)
-			logsExp.db = tc.mockGen(t, tc.ctx, c.Warehouse, logsExp.insertSQL, tc.mapGen(t))
+			logsExp.db = tc.mockGen(t, tc.ctx, logsExp.insertSQL)
 
-			err = logsExp.logsDataPusher(tc.ctx, tc.logGen(t))
+			err = logsExp.logsDataPusher(tc.ctx, tc.logGen())
 			if tc.expectedErr == nil {
 				require.NoError(t, err)
 			} else {
@@ -226,7 +266,7 @@ func TestLogsDataPusher(t *testing.T) {
 	}
 }
 
-func generateLogData1(t *testing.T) plog.Logs {
+func generateLogs() plog.Logs {
 	logs := plog.NewLogs()
 	rLogs := logs.ResourceLogs().AppendEmpty()
 	rLogs.SetSchemaUrl("resource_schema_url")
@@ -239,7 +279,7 @@ func generateLogData1(t *testing.T) plog.Logs {
 	return logs
 }
 
-func generateLogMaps1(t *testing.T) []map[string]any {
+func expectedLogMaps() []map[string]any {
 	return []map[string]any{
 		{
 			"rSchema":           "resource_schema_url",

@@ -58,6 +58,10 @@ func createLogsExporter(
 		return nil, errors.New("invalid config type")
 	}
 
+	if !c.Logs.Enabled {
+		return nil, errors.New("logs must be enabled")
+	}
+
 	e, err := newLogsExporter(ctx, c, params, database.CreateSnowflakeDatabase)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create logs exporter: %w", err)
@@ -88,6 +92,10 @@ func createMetricsExporter(
 		return nil, errors.New("invalid config type")
 	}
 
+	if !c.Metrics.Enabled {
+		return nil, errors.New("metrics must be enabled")
+	}
+
 	e, err := newMetricsExporter(ctx, c, params, database.CreateSnowflakeDatabase)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create metrics exporter: %w", err)
@@ -116,6 +124,10 @@ func createTracesExporter(
 	c, ok := cfg.(*Config)
 	if !ok {
 		return nil, errors.New("invalid config type")
+	}
+
+	if !c.Traces.Enabled {
+		return nil, fmt.Errorf("traces must be enabled")
 	}
 
 	e, err := newTracesExporter(ctx, c, params, database.CreateSnowflakeDatabase)

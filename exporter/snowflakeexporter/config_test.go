@@ -1,3 +1,17 @@
+// Copyright observIQ, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package snowflakeexporter
 
 import (
@@ -19,11 +33,9 @@ func TestConfigValidate(t *testing.T) {
 				AccountIdentifier: "accountID",
 				Username:          "username",
 				Password:          "password",
-				Database:          "database",
 				Warehouse:         "warehouse",
-				Metrics: &TelemetryConfig{
-					Schema: "schema",
-					Table:  "table",
+				Metrics: TelemetryConfig{
+					Enabled: true,
 				},
 			},
 		},
@@ -34,8 +46,8 @@ func TestConfigValidate(t *testing.T) {
 				Password:  "pass",
 				Database:  "db",
 				Warehouse: "wh",
-				Metrics: &TelemetryConfig{
-					Schema: "",
+				Metrics: TelemetryConfig{
+					Enabled: true,
 				},
 			},
 			expectedErr: errors.New("account_identifier is required"),
@@ -47,8 +59,8 @@ func TestConfigValidate(t *testing.T) {
 				Password:          "pass",
 				Database:          "db",
 				Warehouse:         "wh",
-				Metrics: &TelemetryConfig{
-					Schema: "",
+				Metrics: TelemetryConfig{
+					Enabled: true,
 				},
 			},
 			expectedErr: errors.New("username is required"),
@@ -60,24 +72,11 @@ func TestConfigValidate(t *testing.T) {
 				Username:          "user",
 				Database:          "db",
 				Warehouse:         "wh",
-				Metrics: &TelemetryConfig{
-					Schema: "",
+				Metrics: TelemetryConfig{
+					Enabled: true,
 				},
 			},
 			expectedErr: errors.New("password is required"),
-		},
-		{
-			desc: "Missing database",
-			cfg: &Config{
-				AccountIdentifier: "id",
-				Username:          "user",
-				Password:          "pass",
-				Warehouse:         "wh",
-				Metrics: &TelemetryConfig{
-					Schema: "",
-				},
-			},
-			expectedErr: errors.New("database is required"),
 		},
 		{
 			desc: "Missing warehouse",
@@ -86,8 +85,8 @@ func TestConfigValidate(t *testing.T) {
 				Username:          "user",
 				Password:          "pass",
 				Database:          "db",
-				Metrics: &TelemetryConfig{
-					Schema: "",
+				Metrics: TelemetryConfig{
+					Enabled: true,
 				},
 			},
 			expectedErr: errors.New("warehouse is required"),
@@ -100,8 +99,8 @@ func TestConfigValidate(t *testing.T) {
 				Password:          "pass",
 				Database:          "db",
 				Warehouse:         "wh",
-				Logs: &TelemetryConfig{
-					Schema: "",
+				Logs: TelemetryConfig{
+					Enabled: true,
 				},
 			},
 		},
@@ -113,8 +112,8 @@ func TestConfigValidate(t *testing.T) {
 				Password:          "pass",
 				Database:          "db",
 				Warehouse:         "wh",
-				Metrics: &TelemetryConfig{
-					Schema: "",
+				Metrics: TelemetryConfig{
+					Enabled: true,
 				},
 			},
 		},
@@ -126,8 +125,29 @@ func TestConfigValidate(t *testing.T) {
 				Password:          "pass",
 				Database:          "db",
 				Warehouse:         "wh",
-				Traces: &TelemetryConfig{
-					Schema: "",
+				Traces: TelemetryConfig{
+					Enabled: true,
+				},
+			},
+		},
+		{
+			desc: "Partial telemetry cfgs",
+			cfg: &Config{
+				AccountIdentifier: "id",
+				Username:          "user",
+				Password:          "pass",
+				Warehouse:         "wh",
+				Role:              "role",
+				Logs: TelemetryConfig{
+					Enabled: true,
+					Table:   "lt",
+				},
+				Metrics: TelemetryConfig{
+					Enabled: true,
+					Schema:  "ms",
+				},
+				Traces: TelemetryConfig{
+					Enabled: true,
 				},
 			},
 		},

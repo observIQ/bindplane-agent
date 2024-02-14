@@ -1,3 +1,17 @@
+// Copyright observIQ, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package metrics
 
 import (
@@ -12,8 +26,9 @@ import (
 )
 
 const (
+	// CreateSummaryMetricTableTemplate is SQL to create a table for summary metrics in Snowflake
 	CreateSummaryMetricTableTemplate = `
-	CREATE TABLE IF NOT EXISTS "%s"."%s_summary" (
+	CREATE TABLE IF NOT EXISTS "%s_summary" (
 		"ResourceSchemaURL" VARCHAR,
 		"ResourceDroppedAttributesCount" INT,
 		"ResourceAttributes" VARCHAR,
@@ -36,7 +51,7 @@ const (
 	);`
 
 	insertIntoSummaryMetricTableTemplate = `
-	INSERT INTO "%s"."%s_summary" (
+	INSERT INTO "%s_summary" (
 		"ResourceSchemaURL",
 		"ResourceDroppedAttributesCount",
 		"ResourceAttributes",
@@ -79,10 +94,10 @@ const (
 	);`
 )
 
+// SummaryModel implements MetricModel
 type SummaryModel struct {
 	logger    *zap.Logger
 	summaries []*summaryData
-	warehouse string
 	insertSQL string
 }
 
@@ -93,14 +108,15 @@ type summaryData struct {
 	summary  pmetric.Summary
 }
 
-func NewSummaryModel(logger *zap.Logger, warehouse, schema, table string) *SummaryModel {
+// NewSummaryModel returns a newly created SummaryModel
+func NewSummaryModel(logger *zap.Logger, table string) *SummaryModel {
 	return &SummaryModel{
 		logger:    logger,
-		warehouse: warehouse,
-		insertSQL: fmt.Sprintf(insertIntoSummaryMetricTableTemplate, schema, table),
+		insertSQL: fmt.Sprintf(insertIntoSummaryMetricTableTemplate, table),
 	}
 }
 
+// AddMetric will add a new summary metric to this model
 func (sm *SummaryModel) AddMetric(r pmetric.ResourceMetrics, s pmetric.ScopeMetrics, m pmetric.Metric) {
 	sm.summaries = append(sm.summaries, &summaryData{
 		resource: r,
@@ -110,6 +126,7 @@ func (sm *SummaryModel) AddMetric(r pmetric.ResourceMetrics, s pmetric.ScopeMetr
 	})
 }
 
+// BatchInsert will insert the available summary metrics and their data points into Snowflake
 func (sm *SummaryModel) BatchInsert(ctx context.Context, db database.Database) error {
 	sm.logger.Debug("starting SumModel BatchInsert")
 	if len(sm.summaries) == 0 {
@@ -150,7 +167,7 @@ func (sm *SummaryModel) BatchInsert(ctx context.Context, db database.Database) e
 	}
 
 	sm.logger.Debug("SummaryModel calling utility.batchInsert")
-	err := db.BatchInsert(ctx, summaryMaps, sm.warehouse, sm.insertSQL)
+	err := db.BatchInsert(ctx, summaryMaps, sm.insertSQL)
 	if err != nil {
 		return fmt.Errorf("failed to insert summary metric data: %w", err)
 	}

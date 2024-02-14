@@ -29,7 +29,7 @@ import (
 
 const (
 	createLogsTableSnowflakeTemplate = `
-	CREATE TABLE IF NOT EXISTS "%s"."%s" (
+	CREATE TABLE IF NOT EXISTS "%s" (
 		"ResourceSchemaURL" VARCHAR,
 		"ResourceDroppedAttributesCount" INT,
 		"ResourceAttributes" VARCHAR,
@@ -51,7 +51,7 @@ const (
 	);`
 
 	insertIntoLogsTableSnowflakeTemplate = `
-	INSERT INTO "%s"."%s" (
+	INSERT INTO "%s" (
 		"ResourceSchemaURL",
 		"ResourceDroppedAttributesCount",
 		"ResourceAttributes",
@@ -100,28 +100,21 @@ type logsExporter struct {
 }
 
 func newLogsExporter(
-	ctx context.Context,
-	c *Config,
+	_ context.Context,
+	cfg *Config,
 	params exporter.CreateSettings,
-	newDatabase func(ctx context.Context, dsn string) (database.Database, error),
+	newDatabase func(dsn string) (database.Database, error),
 ) (*logsExporter, error) {
-	dsn := utility.CreateDSN(
-		c.Username,
-		c.Password,
-		c.AccountIdentifier,
-		c.Database,
-	)
-
-	db, err := newDatabase(ctx, dsn)
+	db, err := newDatabase(cfg.DSN)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create new database connection for logs: %w", err)
 	}
 
 	return &logsExporter{
-		cfg:       c,
+		cfg:       cfg,
 		logger:    params.Logger,
 		db:        db,
-		insertSQL: fmt.Sprintf(insertIntoLogsTableSnowflakeTemplate, c.Logs.Schema, c.Logs.Table),
+		insertSQL: fmt.Sprintf(insertIntoLogsTableSnowflakeTemplate, cfg.Logs.Table),
 	}, nil
 }
 
@@ -130,12 +123,17 @@ func (le *logsExporter) Capabilities() consumer.Capabilities {
 }
 
 func (le *logsExporter) start(ctx context.Context, _ component.Host) error {
-	err := le.db.CreateSchema(ctx, le.cfg.Logs.Schema)
+	err := le.db.InitDatabaseConn(ctx, le.cfg.Role, le.cfg.Database, le.cfg.Warehouse)
+	if err != nil {
+		return fmt.Errorf("failed to initialize database connection for logs: %w", err)
+	}
+
+	err = le.db.CreateSchema(ctx, le.cfg.Logs.Schema)
 	if err != nil {
 		return fmt.Errorf("failed to create logs schema: %w", err)
 	}
 
-	err = le.db.CreateTable(ctx, le.cfg.Database, le.cfg.Logs.Schema, le.cfg.Logs.Table, createLogsTableSnowflakeTemplate)
+	err = le.db.CreateTable(ctx, le.cfg.Logs.Table, createLogsTableSnowflakeTemplate)
 	if err != nil {
 		return fmt.Errorf("failed to create logs table: %w", err)
 	}
@@ -150,7 +148,6 @@ func (le *logsExporter) shutdown(_ context.Context) error {
 	return nil
 }
 
-// entry function
 func (le *logsExporter) logsDataPusher(ctx context.Context, ld plog.Logs) error {
 	le.logger.Debug("begin logsDataPusher")
 	logMaps := []map[string]any{}
@@ -188,7 +185,7 @@ func (le *logsExporter) logsDataPusher(ctx context.Context, ld plog.Logs) error 
 		}
 	}
 
-	err := le.db.BatchInsert(ctx, logMaps, le.cfg.Warehouse, le.insertSQL)
+	err := le.db.BatchInsert(ctx, logMaps, le.insertSQL)
 	if err != nil {
 		return fmt.Errorf("failed to insert log data: %w", err)
 	}

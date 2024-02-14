@@ -30,7 +30,7 @@ import (
 
 const (
 	createTracesTableSnowflakeTemplate = `
-	CREATE TABLE IF NOT EXISTS "%s"."%s" (
+	CREATE TABLE IF NOT EXISTS "%s" (
 		"ResourceSchemaURL" VARCHAR,
 		"ResourceDroppedAttributesCount" INT,
 		"ResourceAttributes" VARCHAR,
@@ -63,7 +63,7 @@ const (
 	);`
 
 	insertIntoTracesTableSnowflakeTemplate = `
-	INSERT INTO "%s"."%s" (
+	INSERT INTO "%s" (
 		"ResourceSchemaURL",
 		"ResourceDroppedAttributesCount",
 		"ResourceAttributes",
@@ -134,28 +134,21 @@ type tracesExporter struct {
 }
 
 func newTracesExporter(
-	ctx context.Context,
-	c *Config,
+	_ context.Context,
+	cfg *Config,
 	params exporter.CreateSettings,
-	newDatabase func(ctx context.Context, dsn string) (database.Database, error),
+	newDatabase func(dsn string) (database.Database, error),
 ) (*tracesExporter, error) {
-	dsn := utility.CreateDSN(
-		c.Username,
-		c.Password,
-		c.AccountIdentifier,
-		c.Database,
-	)
-
-	db, err := newDatabase(ctx, dsn)
+	db, err := newDatabase(cfg.DSN)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create new database connection for traces: %w", err)
 	}
 
 	return &tracesExporter{
-		cfg:       c,
+		cfg:       cfg,
 		logger:    params.Logger,
 		db:        db,
-		insertSQL: fmt.Sprintf(insertIntoTracesTableSnowflakeTemplate, c.Traces.Schema, c.Traces.Table),
+		insertSQL: fmt.Sprintf(insertIntoTracesTableSnowflakeTemplate, cfg.Traces.Table),
 	}, nil
 }
 
@@ -164,12 +157,17 @@ func (te *tracesExporter) Capabilities() consumer.Capabilities {
 }
 
 func (te *tracesExporter) start(ctx context.Context, _ component.Host) error {
-	err := te.db.CreateSchema(ctx, te.cfg.Traces.Schema)
+	err := te.db.InitDatabaseConn(ctx, te.cfg.Role, te.cfg.Database, te.cfg.Warehouse)
+	if err != nil {
+		return fmt.Errorf("failed to initialize database connection for traces: %w", err)
+	}
+
+	err = te.db.CreateSchema(ctx, te.cfg.Traces.Schema)
 	if err != nil {
 		return fmt.Errorf("failed to create traces schema: %w", err)
 	}
 
-	err = te.db.CreateTable(ctx, te.cfg.Database, te.cfg.Traces.Schema, te.cfg.Traces.Table, createTracesTableSnowflakeTemplate)
+	err = te.db.CreateTable(ctx, te.cfg.Traces.Table, createTracesTableSnowflakeTemplate)
 	if err != nil {
 		return fmt.Errorf("failed to create traces table: %w", err)
 	}
@@ -184,7 +182,6 @@ func (te *tracesExporter) shutdown(_ context.Context) error {
 	return nil
 }
 
-// entry function
 func (te *tracesExporter) tracesDataPusher(ctx context.Context, td ptrace.Traces) error {
 	te.logger.Debug("begin tracesDataPusher")
 	traceMaps := []map[string]any{}
@@ -234,7 +231,7 @@ func (te *tracesExporter) tracesDataPusher(ctx context.Context, td ptrace.Traces
 		}
 	}
 
-	err := te.db.BatchInsert(ctx, traceMaps, te.cfg.Warehouse, te.insertSQL)
+	err := te.db.BatchInsert(ctx, traceMaps, te.insertSQL)
 	if err != nil {
 		return fmt.Errorf("failed to insert trace data: %w", err)
 	}

@@ -1,3 +1,17 @@
+// Copyright observIQ, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package metrics
 
 import (
@@ -11,8 +25,9 @@ import (
 )
 
 const (
+	// CreateSumMetricTableTemplate is SQL to create a table for sum metrics in Snowflake
 	CreateSumMetricTableTemplate = `
-	CREATE TABLE IF NOT EXISTS "%s"."%s_sum" (
+	CREATE TABLE IF NOT EXISTS "%s_sum" (
 		"ResourceSchemaURL" VARCHAR,
 		"ResourceDroppedAttributesCount" INT,
 		"ResourceAttributes" VARCHAR,
@@ -39,7 +54,7 @@ const (
 	);`
 
 	insertIntoSumMetricTableTemplate = `
-	INSERT INTO "%s"."%s_sum" (
+	INSERT INTO "%s_sum" (
 		"ResourceSchemaURL",
 		"ResourceDroppedAttributesCount",
 		"ResourceAttributes",
@@ -90,11 +105,10 @@ const (
 	);`
 )
 
-// SumModel implements the MetricModel for sum metrics
+// SumModel implements MetricModel
 type SumModel struct {
 	logger    *zap.Logger
 	sums      []*sumData
-	warehouse string
 	insertSQL string
 }
 
@@ -105,17 +119,16 @@ type sumData struct {
 	sum      pmetric.Sum
 }
 
-// NewSumModel returns a new SumModel to be used for sending sum metrics to Snowflake
-func NewSumModel(logger *zap.Logger, warehouse, schema, table string) *SumModel {
+// NewSumModel returns a newly created SumModel
+func NewSumModel(logger *zap.Logger, table string) *SumModel {
 	return &SumModel{
 		logger:    logger,
 		sums:      []*sumData{},
-		warehouse: warehouse,
-		insertSQL: fmt.Sprintf(insertIntoSumMetricTableTemplate, schema, table),
+		insertSQL: fmt.Sprintf(insertIntoSumMetricTableTemplate, table),
 	}
 }
 
-// AddMetric adds a new sum metric to be inserted
+// AddMetric will add a new sum metric to this model
 func (sm *SumModel) AddMetric(r pmetric.ResourceMetrics, s pmetric.ScopeMetrics, m pmetric.Metric) {
 	sm.sums = append(sm.sums, &sumData{
 		resource: r,
@@ -125,7 +138,7 @@ func (sm *SumModel) AddMetric(r pmetric.ResourceMetrics, s pmetric.ScopeMetrics,
 	})
 }
 
-// BatchInsert inserts all stored sum metrics
+// BatchInsert will insert the available sum metrics and their data points into Snowflake
 func (sm *SumModel) BatchInsert(ctx context.Context, db database.Database) error {
 	sm.logger.Debug("starting SumModel BatchInsert")
 	if len(sm.sums) == 0 {
@@ -177,7 +190,7 @@ func (sm *SumModel) BatchInsert(ctx context.Context, db database.Database) error
 	}
 
 	sm.logger.Debug("SumModel calling utility.batchInsert")
-	err := db.BatchInsert(ctx, sumMaps, sm.warehouse, sm.insertSQL)
+	err := db.BatchInsert(ctx, sumMaps, sm.insertSQL)
 	if err != nil {
 		return fmt.Errorf("failed to insert sum metric data: %w", err)
 	}

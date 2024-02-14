@@ -1,3 +1,17 @@
+// Copyright observIQ, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package metrics
 
 import (
@@ -11,8 +25,9 @@ import (
 )
 
 const (
+	// CreateExponentialHistogramMetricTableTemplate is SQL to create a table for exponential histogram metrics in Snowflake
 	CreateExponentialHistogramMetricTableTemplate = `
-	CREATE TABLE IF NOT EXISTS "%s"."%s_exponential_histogram" (
+	CREATE TABLE IF NOT EXISTS "%s_exponential_histogram" (
 		"ResourceSchemaURL" VARCHAR,
 		"ResourceDroppedAttributesCount" INT,
 		"ResourceAttributes" VARCHAR,
@@ -48,7 +63,7 @@ const (
 	);`
 
 	insertIntoExponentialHistogramMetricTableTemplate = `
-	INSERT INTO "%s"."%s_exponential_histogram" (
+	INSERT INTO "%s_exponential_histogram" (
 		"ResourceSchemaURL",
 		"ResourceDroppedAttributesCount",
 		"ResourceAttributes",
@@ -60,6 +75,7 @@ const (
 		"MetricName",
 		"MetricDescription",
 		"MetricUnit",
+		"AggregationTemporality",
 		"Attributes",
 		"StartTimestamp",
 		"Timestamp",
@@ -92,6 +108,7 @@ const (
 		:mName,
 		:mDescription,
 		:mUnit,
+		:aggTemp,
 		:attributes,
 		:startTimestamp,
 		:timestamp,
@@ -115,10 +132,10 @@ const (
 	);`
 )
 
+// ExponentialHistogramModel implements MetricModel
 type ExponentialHistogramModel struct {
 	logger                *zap.Logger
 	exponentialHistograms []*exponentialHistogramData
-	warehouse             string
 	insertSQL             string
 }
 
@@ -129,14 +146,15 @@ type exponentialHistogramData struct {
 	exponentialHistogram pmetric.ExponentialHistogram
 }
 
-func NewExponentialHistogramModel(logger *zap.Logger, warehouse, schema, table string) *ExponentialHistogramModel {
+// NewExponentialHistogramModel returns a newly created ExponentialHistogramModel
+func NewExponentialHistogramModel(logger *zap.Logger, table string) *ExponentialHistogramModel {
 	return &ExponentialHistogramModel{
 		logger:    logger,
-		warehouse: warehouse,
-		insertSQL: fmt.Sprintf(insertIntoExponentialHistogramMetricTableTemplate, schema, table),
+		insertSQL: fmt.Sprintf(insertIntoExponentialHistogramMetricTableTemplate, table),
 	}
 }
 
+// AddMetric will add a new exponential histogram metric to this model
 func (ehm *ExponentialHistogramModel) AddMetric(r pmetric.ResourceMetrics, s pmetric.ScopeMetrics, m pmetric.Metric) {
 	ehm.exponentialHistograms = append(ehm.exponentialHistograms, &exponentialHistogramData{
 		resource:             r,
@@ -146,6 +164,7 @@ func (ehm *ExponentialHistogramModel) AddMetric(r pmetric.ResourceMetrics, s pme
 	})
 }
 
+// BatchInsert will insert the available exponential histogram metrics and their data points into Snowflake
 func (ehm *ExponentialHistogramModel) BatchInsert(ctx context.Context, db database.Database) error {
 	ehm.logger.Debug("starting ExponentialHistogramModel BatchInsert")
 	if len(ehm.exponentialHistograms) == 0 {
@@ -172,6 +191,7 @@ func (ehm *ExponentialHistogramModel) BatchInsert(ctx context.Context, db databa
 				"mName":                eh.metric.Name(),
 				"mDescription":         eh.metric.Description(),
 				"mUnit":                eh.metric.Unit(),
+				"aggTemp":              eh.exponentialHistogram.AggregationTemporality().String(),
 				"attributes":           utility.ConvertAttributesToString(dp.Attributes(), ehm.logger),
 				"startTimestamp":       dp.Timestamp().AsTime(),
 				"timestamp":            dp.Timestamp().AsTime(),
@@ -184,9 +204,9 @@ func (ehm *ExponentialHistogramModel) BatchInsert(ctx context.Context, db databa
 				"min":                  dp.Min(),
 				"max":                  dp.Max(),
 				"positiveOffset":       dp.Positive().Offset(),
-				"positiveBucketCounts": dp.Positive().BucketCounts(),
+				"positiveBucketCounts": dp.Positive().BucketCounts().AsRaw(),
 				"negativeOffset":       dp.Negative().Offset(),
-				"negativeBucketCounts": dp.Negative().BucketCounts(),
+				"negativeBucketCounts": dp.Negative().BucketCounts().AsRaw(),
 				"eAttributes":          eAttributes,
 				"eTimestamps":          eTimestamps,
 				"eTraceIDs":            eTraceIDs,
@@ -197,7 +217,7 @@ func (ehm *ExponentialHistogramModel) BatchInsert(ctx context.Context, db databa
 	}
 
 	ehm.logger.Debug("ExponentialHistogramModel calling utility.batchInsert")
-	err := db.BatchInsert(ctx, exponentialHistogramMaps, ehm.warehouse, ehm.insertSQL)
+	err := db.BatchInsert(ctx, exponentialHistogramMaps, ehm.insertSQL)
 	if err != nil {
 		return fmt.Errorf("failed to insert exponential histogram metric data: %w", err)
 	}

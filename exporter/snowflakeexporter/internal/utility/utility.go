@@ -13,13 +13,11 @@
 // limitations under the License.
 
 // Package utility provides utility functions for the snowflakeexporter package to consolidate code
-package utility
+package utility // "github.com/observiq/bindplane-agent/exporter/snowflakeexporter/internal/utility"
 
 import (
 	"encoding/hex"
 	"encoding/json"
-	"fmt"
-	"net/url"
 
 	"github.com/lib/pq"
 
@@ -27,16 +25,6 @@ import (
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.uber.org/zap"
 )
-
-// CreateDSN creates a DSN for connecting to Snowflake with the given config
-// TODO add functionality for additional query params
-func CreateDSN(username, password, accountID, database string) string {
-	usernameEsc := url.QueryEscape(username)
-	passwordEsc := url.QueryEscape(password)
-	accountIDEsc := url.QueryEscape(accountID)
-	databaseEsc := url.QueryEscape(database)
-	return fmt.Sprintf(`%s:%s@%s/"%s"`, usernameEsc, passwordEsc, accountIDEsc, databaseEsc)
-}
 
 // ConvertAttributesToString converts the pcommon.Map into a JSON string representation
 // this is due to a bug/lacking feature with the snowflake driver that prevents maps from being inserted into VARIANT & OBJECT columns

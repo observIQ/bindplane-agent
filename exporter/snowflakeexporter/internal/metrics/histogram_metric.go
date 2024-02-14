@@ -1,3 +1,17 @@
+// Copyright observIQ, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package metrics
 
 import (
@@ -11,8 +25,9 @@ import (
 )
 
 const (
+	// CreateHistogramMetricTableTemplate is SQL to create a table for histogram metrics in Snowflake
 	CreateHistogramMetricTableTemplate = `
-	CREATE TABLE IF NOT EXISTS "%s"."%s_histogram" (
+	CREATE TABLE IF NOT EXISTS "%s_histogram" (
 		"ResourceSchemaURL" VARCHAR,
 		"ResourceDroppedAttributesCount" INT,
 		"ResourceAttributes" VARCHAR,
@@ -43,7 +58,7 @@ const (
 	);`
 
 	insertIntoHistogramMeticTableTemplate = `
-	INSERT INTO "%s"."%s_histogram" (
+	INSERT INTO "%s_histogram" (
 		"ResourceSchemaURL",
 		"ResourceDroppedAttributesCount",
 		"ResourceAttributes",
@@ -55,6 +70,7 @@ const (
 		"MetricName",
 		"MetricDescription",
 		"MetricUnit",
+		"AggregationTemporality",
 		"Attributes",
 		"StartTimestamp",
 		"Timestamp",
@@ -82,6 +98,7 @@ const (
 		:mName,
 		:mDescription,
 		:mUnit,
+		:aggTemp,
 		:attributes,
 		:startTimestamp,
 		:timestamp,
@@ -100,10 +117,10 @@ const (
 	);`
 )
 
+// HistogramModel implements MetricModel
 type HistogramModel struct {
 	logger     *zap.Logger
 	histograms []*histogramData
-	warehouse  string
 	insertSQL  string
 }
 
@@ -114,14 +131,15 @@ type histogramData struct {
 	histogram pmetric.Histogram
 }
 
-func NewHistogramModel(logger *zap.Logger, warehouse, schema, table string) *HistogramModel {
+// NewHistogramModel returns a newly created HistogramModel
+func NewHistogramModel(logger *zap.Logger, table string) *HistogramModel {
 	return &HistogramModel{
 		logger:    logger,
-		warehouse: warehouse,
-		insertSQL: fmt.Sprintf(insertIntoHistogramMeticTableTemplate, schema, table),
+		insertSQL: fmt.Sprintf(insertIntoHistogramMeticTableTemplate, table),
 	}
 }
 
+// AddMetric will add a new histogram metric to this model
 func (hm *HistogramModel) AddMetric(r pmetric.ResourceMetrics, s pmetric.ScopeMetrics, m pmetric.Metric) {
 	hm.histograms = append(hm.histograms, &histogramData{
 		resource:  r,
@@ -131,6 +149,7 @@ func (hm *HistogramModel) AddMetric(r pmetric.ResourceMetrics, s pmetric.ScopeMe
 	})
 }
 
+// BatchInsert will insert the available histogram metrics and their data points into Snowflake
 func (hm *HistogramModel) BatchInsert(ctx context.Context, db database.Database) error {
 	hm.logger.Debug("starting HistogramModel BatchInsert")
 	if len(hm.histograms) == 0 {
@@ -157,6 +176,7 @@ func (hm *HistogramModel) BatchInsert(ctx context.Context, db database.Database)
 				"mName":          h.metric.Name(),
 				"mDescription":   h.metric.Description(),
 				"mUnit":          h.metric.Unit(),
+				"aggTemp":        h.histogram.AggregationTemporality().String(),
 				"attributes":     utility.ConvertAttributesToString(dp.Attributes(), hm.logger),
 				"startTimestamp": dp.Timestamp().AsTime(),
 				"timestamp":      dp.Timestamp().AsTime(),
@@ -166,7 +186,7 @@ func (hm *HistogramModel) BatchInsert(ctx context.Context, db database.Database)
 				"min":            dp.Min(),
 				"max":            dp.Max(),
 				"bucketCounts":   dp.BucketCounts().AsRaw(),
-				"explicitBounds": dp.ExplicitBounds(),
+				"explicitBounds": dp.ExplicitBounds().AsRaw(),
 				"eAttributes":    eAttributes,
 				"eTimestamps":    eTimestamps,
 				"eTraceIDs":      eTraceIDs,
@@ -177,7 +197,7 @@ func (hm *HistogramModel) BatchInsert(ctx context.Context, db database.Database)
 	}
 
 	hm.logger.Debug("HistogramModel calling utility.batchInsert")
-	err := db.BatchInsert(ctx, histogramMaps, hm.warehouse, hm.insertSQL)
+	err := db.BatchInsert(ctx, histogramMaps, hm.insertSQL)
 	if err != nil {
 		return fmt.Errorf("failed to insert histogram metric data: %w", err)
 	}

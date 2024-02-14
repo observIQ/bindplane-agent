@@ -1,3 +1,17 @@
+// Copyright observIQ, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package metrics
 
 import (
@@ -11,8 +25,9 @@ import (
 )
 
 const (
+	// CreateGaugeMetricTableTemplate is SQL to create a table for gauge metrics in Snowflake
 	CreateGaugeMetricTableTemplate = `
-	CREATE TABLE IF NOT EXISTS "%s"."%s_gauge" (
+	CREATE TABLE IF NOT EXISTS "%s_gauge" (
 		"ResourceSchemaURL" VARCHAR,
 		"ResourceDroppedAttributesCount" INT,
 		"ResourceAttributes" VARCHAR,
@@ -37,7 +52,7 @@ const (
 	);`
 
 	insertIntoGaugeMetricTableTemplate = `
-	INSERT INTO "%s"."%s_gauge" (
+	INSERT INTO "%s_gauge" (
 		"ResourceSchemaURL",
 		"ResourceDroppedAttributesCount",
 		"ResourceAttributes",
@@ -84,10 +99,10 @@ const (
 	);`
 )
 
+// GaugeModel implements MetricModel
 type GaugeModel struct {
 	logger    *zap.Logger
 	gauges    []*gaugeData
-	warehouse string
 	insertSQL string
 }
 
@@ -98,14 +113,15 @@ type gaugeData struct {
 	gauge    pmetric.Gauge
 }
 
-func NewGaugeModel(logger *zap.Logger, warehouse, schema, table string) *GaugeModel {
+// NewGaugeModel returns a newly created GaugeModel
+func NewGaugeModel(logger *zap.Logger, table string) *GaugeModel {
 	return &GaugeModel{
 		logger:    logger,
-		warehouse: warehouse,
-		insertSQL: fmt.Sprintf(insertIntoGaugeMetricTableTemplate, schema, table),
+		insertSQL: fmt.Sprintf(insertIntoGaugeMetricTableTemplate, table),
 	}
 }
 
+// AddMetric will add a new gauge metric to this model
 func (gm *GaugeModel) AddMetric(r pmetric.ResourceMetrics, s pmetric.ScopeMetrics, m pmetric.Metric) {
 	gm.gauges = append(gm.gauges, &gaugeData{
 		resource: r,
@@ -115,6 +131,7 @@ func (gm *GaugeModel) AddMetric(r pmetric.ResourceMetrics, s pmetric.ScopeMetric
 	})
 }
 
+// BatchInsert will insert the available gauge metrics nad their data points into Snowflake
 func (gm *GaugeModel) BatchInsert(ctx context.Context, db database.Database) error {
 	gm.logger.Debug("starting GaugeModel BatchInsert")
 	if len(gm.gauges) == 0 {
@@ -163,7 +180,7 @@ func (gm *GaugeModel) BatchInsert(ctx context.Context, db database.Database) err
 	}
 
 	gm.logger.Debug("GaugeModel calling utility.batchInsert")
-	err := db.BatchInsert(ctx, gaugeMaps, gm.warehouse, gm.insertSQL)
+	err := db.BatchInsert(ctx, gaugeMaps, gm.insertSQL)
 	if err != nil {
 		return fmt.Errorf("failed to insert gauge metric data: %w", err)
 	}
