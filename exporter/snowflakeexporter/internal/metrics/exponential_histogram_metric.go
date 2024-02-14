@@ -62,6 +62,7 @@ const (
 		"ExemplarValues" VARCHAR
 	);`
 
+	// InsertIntoExponentialHistogramMetricTableTemplate is SQL to insert a data point into the exponential histogram table
 	InsertIntoExponentialHistogramMetricTableTemplate = `
 	INSERT INTO "%s"."%s"."%s_exponential_histogram" (
 		"ResourceSchemaURL",

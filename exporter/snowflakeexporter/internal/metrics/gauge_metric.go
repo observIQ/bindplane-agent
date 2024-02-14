@@ -51,6 +51,7 @@ const (
 		"ExemplarValues" VARCHAR
 	);`
 
+	// InsertIntoGaugeMetricTableTemplate is SQL to insert a data point into the gauge table
 	InsertIntoGaugeMetricTableTemplate = `
 	INSERT INTO "%s"."%s"."%s_gauge" (
 		"ResourceSchemaURL",

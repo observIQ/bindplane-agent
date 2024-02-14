@@ -49,7 +49,7 @@ func TestInitDatabaseConn(t *testing.T) {
 			ctx:      context.Background(),
 			role:     "role",
 			database: "",
-			setExpectations: func(m sqlmock.Sqlmock, role, database string) {
+			setExpectations: func(m sqlmock.Sqlmock, role, _ string) {
 				m.ExpectExec(fmt.Sprintf(`USE ROLE "%s";`, role)).WithoutArgs().WillReturnResult(sqlmock.NewResult(0, 0)).WillReturnError(fmt.Errorf("fail"))
 			},
 			expectedErr: fmt.Errorf("failed to call 'USE ROLE \"role\";': fail"),
@@ -237,7 +237,7 @@ func TestBatchInsert(t *testing.T) {
 			desc: "fail BeginTxx",
 			ctx:  context.Background(),
 			data: []map[string]any{},
-			setExpectations: func(m sqlmock.Sqlmock, insert string) {
+			setExpectations: func(m sqlmock.Sqlmock, _ string) {
 				m.ExpectBegin().WillReturnError(fmt.Errorf("fail"))
 			},
 			expectedErr: fmt.Errorf("failed to create transaction: fail"),
@@ -246,7 +246,7 @@ func TestBatchInsert(t *testing.T) {
 			desc: "fail USE WAREHOUSE stmt",
 			ctx:  context.Background(),
 			data: []map[string]any{},
-			setExpectations: func(m sqlmock.Sqlmock, insert string) {
+			setExpectations: func(m sqlmock.Sqlmock, _ string) {
 				m.ExpectBegin().WillReturnError(nil)
 				m.ExpectExec(`USE WAREHOUSE "wh";`).WithoutArgs().WillReturnResult(sqlmock.NewResult(0, 0)).WillReturnError(fmt.Errorf("fail"))
 				m.ExpectRollback()

@@ -49,7 +49,7 @@ func TestHistogramBatchInsert(t *testing.T) {
 			desc:         "no data",
 			ctx:          context.Background(),
 			histogramGen: func() []*histogramData { return []*histogramData{} },
-			mockGen:      func(t *testing.T, ctx context.Context, sql string) *mocks.MockDatabase { return nil },
+			mockGen:      func(_ *testing.T, _ context.Context, _ string) *mocks.MockDatabase { return nil },
 		},
 		{
 			desc:         "fail batchInsert",

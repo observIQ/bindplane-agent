@@ -53,6 +53,7 @@ const (
 		"ExemplarValues" VARCHAR
 	);`
 
+	// InsertIntoSumMetricTableTemplate is SQL to insert a data point into the sum table
 	InsertIntoSumMetricTableTemplate = `
 	INSERT INTO "%s"."%s"."%s_sum" (
 		"ResourceSchemaURL",

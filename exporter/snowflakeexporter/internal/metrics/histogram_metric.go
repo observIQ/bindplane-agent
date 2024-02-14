@@ -57,7 +57,8 @@ const (
 		"ExemplarValues" VARCHAR
 	);`
 
-	InsertIntoHistogramMeticTableTemplate = `
+	// InsertIntoHistogramMetricTableTemplate is SQL to insert a data point into the histogram table
+	InsertIntoHistogramMetricTableTemplate = `
 	INSERT INTO "%s"."%s"."%s_histogram" (
 		"ResourceSchemaURL",
 		"ResourceDroppedAttributesCount",

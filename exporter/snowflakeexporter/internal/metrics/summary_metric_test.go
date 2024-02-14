@@ -49,7 +49,7 @@ func TestSummaryBatchInsert(t *testing.T) {
 			desc:       "no data",
 			ctx:        context.Background(),
 			summaryGen: func() []*summaryData { return []*summaryData{} },
-			mockGen:    func(t *testing.T, ctx context.Context, sql string) *mocks.MockDatabase { return nil },
+			mockGen:    func(_ *testing.T, _ context.Context, _ string) *mocks.MockDatabase { return nil },
 		},
 		{
 			desc:       "fail BatchInsert",

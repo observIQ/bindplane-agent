@@ -144,7 +144,7 @@ func (me *metricsExporter) filterMetrics(md pmetric.Metrics) map[string]metricMo
 	m["sums"] = metrics.NewSumModel(me.logger, fmt.Sprintf(metrics.InsertIntoSumMetricTableTemplate, me.cfg.Database, me.cfg.Metrics.Schema, me.cfg.Metrics.Table))
 	m["gauges"] = metrics.NewGaugeModel(me.logger, fmt.Sprintf(metrics.InsertIntoGaugeMetricTableTemplate, me.cfg.Database, me.cfg.Metrics.Schema, me.cfg.Metrics.Table))
 	m["summaries"] = metrics.NewSummaryModel(me.logger, fmt.Sprintf(metrics.InsertIntoSummaryMetricTableTemplate, me.cfg.Database, me.cfg.Metrics.Schema, me.cfg.Metrics.Table))
-	m["histograms"] = metrics.NewHistogramModel(me.logger, fmt.Sprintf(metrics.InsertIntoHistogramMeticTableTemplate, me.cfg.Database, me.cfg.Metrics.Schema, me.cfg.Metrics.Table))
+	m["histograms"] = metrics.NewHistogramModel(me.logger, fmt.Sprintf(metrics.InsertIntoHistogramMetricTableTemplate, me.cfg.Database, me.cfg.Metrics.Schema, me.cfg.Metrics.Table))
 	m["exponentialHistograms"] = metrics.NewExponentialHistogramModel(me.logger, fmt.Sprintf(metrics.InsertIntoExponentialHistogramMetricTableTemplate, me.cfg.Database, me.cfg.Metrics.Schema, me.cfg.Metrics.Table))
 
 	// loop through metrics and add to corresponding metric model

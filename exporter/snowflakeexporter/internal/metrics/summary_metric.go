@@ -50,6 +50,7 @@ const (
 		"Values" VARCHAR
 	);`
 
+	// InsertIntoSummaryMetricTableTemplate is SQL to insert a data point into the summary table
 	InsertIntoSummaryMetricTableTemplate = `
 	INSERT INTO "%s"."%s"."%s_summary" (
 		"ResourceSchemaURL",
