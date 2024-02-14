@@ -27,30 +27,32 @@ import (
 //
 //go:generate mockery --name Database --filename mock_database.go --structname MockDatabase
 type Database interface {
-	InitDatabaseConn(ctx context.Context, role, database, warehouse string) error
+	InitDatabaseConn(ctx context.Context, roles string) error
 	CreateSchema(ctx context.Context, schema string) error
-	CreateTable(ctx context.Context, table, template string) error
-	BatchInsert(ctx context.Context, data []map[string]any, insertSQL string) error
+	CreateTable(ctx context.Context, sql string) error
+	BatchInsert(ctx context.Context, data []map[string]any, sql string) error
 	Close() error
 }
 
 // Snowflake implements the Database type
 type Snowflake struct {
-	db *sqlx.DB
+	db        *sqlx.DB
+	warehouse string
+	database  string
 }
 
 // CreateSnowflakeDatabase calls Open() using driverName and the given dsn and then calls Ping()
-func CreateSnowflakeDatabase(dsn string) (Database, error) {
-	db, err := sqlx.Open("snowflake", dsn)
+func CreateSnowflakeDatabase(dsn, wh, db string) (Database, error) {
+	dbx, err := sqlx.Open("snowflake", dsn)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open database: %w", err)
 	}
 
-	return &Snowflake{db: db}, nil
+	return &Snowflake{db: dbx, warehouse: wh, database: db}, nil
 }
 
 // InitDatabaseConn initializes the Snowflake connection by ensuring the correct role is used, database exists and is used by the connection, and that the warehouse will be used.
-func (s *Snowflake) InitDatabaseConn(ctx context.Context, role, database, warehouse string) error {
+func (s *Snowflake) InitDatabaseConn(ctx context.Context, role string) error {
 	if role != "" {
 		_, err := s.db.ExecContext(ctx, fmt.Sprintf(`USE ROLE "%s";`, role))
 		if err != nil {
@@ -58,19 +60,14 @@ func (s *Snowflake) InitDatabaseConn(ctx context.Context, role, database, wareho
 		}
 	}
 
-	_, err := s.db.ExecContext(ctx, fmt.Sprintf(`CREATE DATABASE IF NOT EXISTS "%s";`, database))
+	_, err := s.db.ExecContext(ctx, fmt.Sprintf(`CREATE DATABASE IF NOT EXISTS "%s";`, s.database))
 	if err != nil {
 		return fmt.Errorf("failed to create new database: %w", err)
 	}
 
-	_, err = s.db.ExecContext(ctx, fmt.Sprintf(`USE DATABASE "%s";`, database))
+	_, err = s.db.ExecContext(ctx, fmt.Sprintf(`USE DATABASE "%s";`, s.database))
 	if err != nil {
-		return fmt.Errorf("failed to call 'USE DATABASE \"%s\";': %w", database, err)
-	}
-
-	_, err = s.db.ExecContext(ctx, fmt.Sprintf(`USE WAREHOUSE "%s";`, warehouse))
-	if err != nil {
-		return fmt.Errorf("failed to call 'USE WAREHOUSE \"%s\";': %w", warehouse, err)
+		return fmt.Errorf("failed to call 'USE DATABASE \"%s\";': %w", s.database, err)
 	}
 
 	return nil
@@ -78,12 +75,12 @@ func (s *Snowflake) InitDatabaseConn(ctx context.Context, role, database, wareho
 
 // CreateSchema ensures the given schema exists using the given *sql.DB
 func (s *Snowflake) CreateSchema(ctx context.Context, schema string) error {
-	_, err := s.db.ExecContext(ctx, fmt.Sprintf(`CREATE SCHEMA IF NOT EXISTS "%s";`, schema))
+	_, err := s.db.ExecContext(ctx, fmt.Sprintf(`CREATE SCHEMA IF NOT EXISTS "%s"."%s";`, s.database, schema))
 	if err != nil {
 		return fmt.Errorf("failed to create schema '%s': %w", schema, err)
 	}
 
-	_, err = s.db.ExecContext(ctx, fmt.Sprintf(`USE SCHEMA "%s";`, schema))
+	_, err = s.db.ExecContext(ctx, fmt.Sprintf(`USE SCHEMA "%s"."%s";`, s.database, schema))
 	if err != nil {
 		return fmt.Errorf("failed to call 'USE SCHEMA \"%s\";': %w", schema, err)
 	}
@@ -91,8 +88,8 @@ func (s *Snowflake) CreateSchema(ctx context.Context, schema string) error {
 }
 
 // CreateTable ensures the given table exists using the given database arguments
-func (s *Snowflake) CreateTable(ctx context.Context, table, template string) error {
-	_, err := s.db.ExecContext(ctx, fmt.Sprintf(template, table))
+func (s *Snowflake) CreateTable(ctx context.Context, sql string) error {
+	_, err := s.db.ExecContext(ctx, sql)
 	if err != nil {
 		return fmt.Errorf("failed to create table: %w", err)
 	}
@@ -101,7 +98,7 @@ func (s *Snowflake) CreateTable(ctx context.Context, table, template string) err
 }
 
 // BatchInsert creates a new transaction using the given DB to insert the given data
-func (s *Snowflake) BatchInsert(ctx context.Context, data []map[string]any, insertSQL string) error {
+func (s *Snowflake) BatchInsert(ctx context.Context, data []map[string]any, sql string) error {
 	// create TX
 	tx, err := s.db.BeginTxx(ctx, nil)
 	if err != nil {
@@ -109,7 +106,12 @@ func (s *Snowflake) BatchInsert(ctx context.Context, data []map[string]any, inse
 	}
 	defer tx.Rollback()
 
-	_, err = tx.NamedExecContext(ctx, insertSQL, data)
+	_, err = tx.ExecContext(ctx, fmt.Sprintf(`USE WAREHOUSE "%s";`, s.warehouse))
+	if err != nil {
+		return fmt.Errorf("failed to call 'USE WAREHOUSE \"%s\";': %w", s.warehouse, err)
+	}
+
+	_, err = tx.NamedExecContext(ctx, sql, data)
 	if err != nil {
 		return fmt.Errorf("failed to execute batch insert: %w", err)
 	}

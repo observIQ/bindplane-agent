@@ -27,7 +27,7 @@ import (
 const (
 	// CreateHistogramMetricTableTemplate is SQL to create a table for histogram metrics in Snowflake
 	CreateHistogramMetricTableTemplate = `
-	CREATE TABLE IF NOT EXISTS "%s_histogram" (
+	CREATE TABLE IF NOT EXISTS "%s"."%s"."%s_histogram" (
 		"ResourceSchemaURL" VARCHAR,
 		"ResourceDroppedAttributesCount" INT,
 		"ResourceAttributes" VARCHAR,
@@ -57,8 +57,8 @@ const (
 		"ExemplarValues" VARCHAR
 	);`
 
-	insertIntoHistogramMeticTableTemplate = `
-	INSERT INTO "%s_histogram" (
+	InsertIntoHistogramMeticTableTemplate = `
+	INSERT INTO "%s"."%s"."%s_histogram" (
 		"ResourceSchemaURL",
 		"ResourceDroppedAttributesCount",
 		"ResourceAttributes",
@@ -132,10 +132,10 @@ type histogramData struct {
 }
 
 // NewHistogramModel returns a newly created HistogramModel
-func NewHistogramModel(logger *zap.Logger, table string) *HistogramModel {
+func NewHistogramModel(logger *zap.Logger, sql string) *HistogramModel {
 	return &HistogramModel{
 		logger:    logger,
-		insertSQL: fmt.Sprintf(insertIntoHistogramMeticTableTemplate, table),
+		insertSQL: sql,
 	}
 }
 

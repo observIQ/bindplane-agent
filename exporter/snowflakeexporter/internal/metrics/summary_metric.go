@@ -28,7 +28,7 @@ import (
 const (
 	// CreateSummaryMetricTableTemplate is SQL to create a table for summary metrics in Snowflake
 	CreateSummaryMetricTableTemplate = `
-	CREATE TABLE IF NOT EXISTS "%s_summary" (
+	CREATE TABLE IF NOT EXISTS "%s"."%s"."%s_summary" (
 		"ResourceSchemaURL" VARCHAR,
 		"ResourceDroppedAttributesCount" INT,
 		"ResourceAttributes" VARCHAR,
@@ -50,8 +50,8 @@ const (
 		"Values" VARCHAR
 	);`
 
-	insertIntoSummaryMetricTableTemplate = `
-	INSERT INTO "%s_summary" (
+	InsertIntoSummaryMetricTableTemplate = `
+	INSERT INTO "%s"."%s"."%s_summary" (
 		"ResourceSchemaURL",
 		"ResourceDroppedAttributesCount",
 		"ResourceAttributes",
@@ -109,10 +109,10 @@ type summaryData struct {
 }
 
 // NewSummaryModel returns a newly created SummaryModel
-func NewSummaryModel(logger *zap.Logger, table string) *SummaryModel {
+func NewSummaryModel(logger *zap.Logger, sql string) *SummaryModel {
 	return &SummaryModel{
 		logger:    logger,
-		insertSQL: fmt.Sprintf(insertIntoSummaryMetricTableTemplate, table),
+		insertSQL: sql,
 	}
 }
 

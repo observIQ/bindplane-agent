@@ -30,72 +30,52 @@ func TestInitDatabaseConn(t *testing.T) {
 		ctx             context.Context
 		role            string
 		database        string
-		warehouse       string
-		setExpectations func(m sqlmock.Sqlmock, role, database, warehouse string)
+		setExpectations func(m sqlmock.Sqlmock, role, database string)
 		expectedErr     error
 	}{
 		{
-			desc:      "pass",
-			ctx:       context.Background(),
-			role:      "role",
-			database:  "db",
-			warehouse: "wh",
-			setExpectations: func(m sqlmock.Sqlmock, role, database, warehouse string) {
+			desc:     "pass",
+			ctx:      context.Background(),
+			role:     "role",
+			database: "db",
+			setExpectations: func(m sqlmock.Sqlmock, role, database string) {
 				m.ExpectExec(fmt.Sprintf(`USE ROLE "%s";`, role)).WithoutArgs().WillReturnResult(sqlmock.NewResult(0, 0)).WillReturnError(nil)
 				m.ExpectExec(fmt.Sprintf(`CREATE DATABASE IF NOT EXISTS "%s";`, database)).WithoutArgs().WillReturnResult(sqlmock.NewResult(0, 0)).WillReturnError(nil)
 				m.ExpectExec(fmt.Sprintf(`USE DATABASE "%s";`, database)).WithoutArgs().WillReturnResult(sqlmock.NewResult(0, 0)).WillReturnError(nil)
-				m.ExpectExec(fmt.Sprintf(`USE WAREHOUSE "%s";`, warehouse)).WithoutArgs().WillReturnResult(sqlmock.NewResult(0, 0)).WillReturnError(nil)
 			},
 		},
 		{
-			desc:      "fail USE ROLE stmt",
-			ctx:       context.Background(),
-			role:      "role",
-			database:  "",
-			warehouse: "",
-			setExpectations: func(m sqlmock.Sqlmock, role, database, warehouse string) {
+			desc:     "fail USE ROLE stmt",
+			ctx:      context.Background(),
+			role:     "role",
+			database: "",
+			setExpectations: func(m sqlmock.Sqlmock, role, database string) {
 				m.ExpectExec(fmt.Sprintf(`USE ROLE "%s";`, role)).WithoutArgs().WillReturnResult(sqlmock.NewResult(0, 0)).WillReturnError(fmt.Errorf("fail"))
 			},
 			expectedErr: fmt.Errorf("failed to call 'USE ROLE \"role\";': fail"),
 		},
 		{
-			desc:      "fail CREATE DATABASE stmt",
-			ctx:       context.Background(),
-			role:      "role",
-			database:  "db",
-			warehouse: "",
-			setExpectations: func(m sqlmock.Sqlmock, role, database, warehouse string) {
+			desc:     "fail CREATE DATABASE stmt",
+			ctx:      context.Background(),
+			role:     "role",
+			database: "db",
+			setExpectations: func(m sqlmock.Sqlmock, role, database string) {
 				m.ExpectExec(fmt.Sprintf(`USE ROLE "%s";`, role)).WithoutArgs().WillReturnResult(sqlmock.NewResult(0, 0)).WillReturnError(nil)
 				m.ExpectExec(fmt.Sprintf(`CREATE DATABASE IF NOT EXISTS "%s";`, database)).WithoutArgs().WillReturnResult(sqlmock.NewResult(0, 0)).WillReturnError(fmt.Errorf("fail"))
 			},
 			expectedErr: fmt.Errorf("failed to create new database: fail"),
 		},
 		{
-			desc:      "fail USE DATABASE stmt",
-			ctx:       context.Background(),
-			role:      "role",
-			database:  "db",
-			warehouse: "",
-			setExpectations: func(m sqlmock.Sqlmock, role, database, warehouse string) {
+			desc:     "fail USE DATABASE stmt",
+			ctx:      context.Background(),
+			role:     "role",
+			database: "db",
+			setExpectations: func(m sqlmock.Sqlmock, role, database string) {
 				m.ExpectExec(fmt.Sprintf(`USE ROLE "%s";`, role)).WithoutArgs().WillReturnResult(sqlmock.NewResult(0, 0)).WillReturnError(nil)
 				m.ExpectExec(fmt.Sprintf(`CREATE DATABASE IF NOT EXISTS "%s";`, database)).WithoutArgs().WillReturnResult(sqlmock.NewResult(0, 0)).WillReturnError(nil)
 				m.ExpectExec(fmt.Sprintf(`USE DATABASE "%s"`, database)).WithoutArgs().WillReturnResult(sqlmock.NewResult(0, 0)).WillReturnError(fmt.Errorf("fail"))
 			},
 			expectedErr: fmt.Errorf("failed to call 'USE DATABASE \"db\";': fail"),
-		},
-		{
-			desc:      "fail USE WAREHOUSE stmt",
-			ctx:       context.Background(),
-			role:      "role",
-			database:  "db",
-			warehouse: "wh",
-			setExpectations: func(m sqlmock.Sqlmock, role, database, warehouse string) {
-				m.ExpectExec(fmt.Sprintf(`USE ROLE "%s";`, role)).WithoutArgs().WillReturnResult(sqlmock.NewResult(0, 0)).WillReturnError(nil)
-				m.ExpectExec(fmt.Sprintf(`CREATE DATABASE IF NOT EXISTS "%s";`, database)).WithoutArgs().WillReturnResult(sqlmock.NewResult(0, 0)).WillReturnError(nil)
-				m.ExpectExec(fmt.Sprintf(`USE DATABASE "%s"`, database)).WithoutArgs().WillReturnResult(sqlmock.NewResult(0, 0)).WillReturnError(nil)
-				m.ExpectExec(fmt.Sprintf(`USE WAREHOUSE "%s";`, warehouse)).WithoutArgs().WillReturnResult(sqlmock.NewResult(0, 0)).WillReturnError(fmt.Errorf("fail"))
-			},
-			expectedErr: fmt.Errorf("failed to call 'USE WAREHOUSE \"wh\";': fail"),
 		},
 	}
 
@@ -104,10 +84,10 @@ func TestInitDatabaseConn(t *testing.T) {
 			db, mock := NewMock(t)
 			defer db.Close()
 
-			tc.setExpectations(mock, tc.role, tc.database, tc.warehouse)
+			tc.setExpectations(mock, tc.role, tc.database)
 
-			s := &Snowflake{db: db}
-			err := s.InitDatabaseConn(tc.ctx, tc.role, tc.database, tc.warehouse)
+			s := &Snowflake{db: db, warehouse: "", database: tc.database}
+			err := s.InitDatabaseConn(tc.ctx, tc.role)
 
 			if tc.expectedErr == nil {
 				require.NoError(t, err)
@@ -125,34 +105,38 @@ func TestCreateSchema(t *testing.T) {
 		desc            string
 		ctx             context.Context
 		schema          string
-		setExpectations func(m sqlmock.Sqlmock, schema string)
+		database        string
+		setExpectations func(m sqlmock.Sqlmock, schema, database string)
 		expectedErr     error
 	}{
 		{
-			desc:   "pass",
-			ctx:    context.Background(),
-			schema: "schema",
-			setExpectations: func(m sqlmock.Sqlmock, schema string) {
-				m.ExpectExec(fmt.Sprintf(`CREATE SCHEMA IF NOT EXISTS "%s";`, schema)).WithoutArgs().WillReturnResult(sqlmock.NewResult(0, 0)).WillReturnError(nil)
-				m.ExpectExec(fmt.Sprintf(`USE SCHEMA "%s";`, schema)).WithoutArgs().WillReturnResult(sqlmock.NewResult(0, 0)).WillReturnError(nil)
+			desc:     "pass",
+			ctx:      context.Background(),
+			schema:   "schema",
+			database: "db",
+			setExpectations: func(m sqlmock.Sqlmock, schema, database string) {
+				m.ExpectExec(fmt.Sprintf(`CREATE SCHEMA IF NOT EXISTS "%s"."%s";`, database, schema)).WithoutArgs().WillReturnResult(sqlmock.NewResult(0, 0)).WillReturnError(nil)
+				m.ExpectExec(fmt.Sprintf(`USE SCHEMA "%s"."%s";`, database, schema)).WithoutArgs().WillReturnResult(sqlmock.NewResult(0, 0)).WillReturnError(nil)
 			},
 		},
 		{
-			desc:   "fail CREATE SCHEMA stmt",
-			ctx:    context.Background(),
-			schema: "schema",
-			setExpectations: func(m sqlmock.Sqlmock, schema string) {
-				m.ExpectExec(fmt.Sprintf(`CREATE SCHEMA IF NOT EXISTS "%s";`, schema)).WithoutArgs().WillReturnResult(sqlmock.NewResult(0, 0)).WillReturnError(fmt.Errorf("fail"))
+			desc:     "fail CREATE SCHEMA stmt",
+			ctx:      context.Background(),
+			schema:   "schema",
+			database: "db",
+			setExpectations: func(m sqlmock.Sqlmock, schema, database string) {
+				m.ExpectExec(fmt.Sprintf(`CREATE SCHEMA IF NOT EXISTS "%s"."%s";`, database, schema)).WithoutArgs().WillReturnResult(sqlmock.NewResult(0, 0)).WillReturnError(fmt.Errorf("fail"))
 			},
 			expectedErr: fmt.Errorf("failed to create schema 'schema': fail"),
 		},
 		{
-			desc:   "fail USE SCHEMA stmt",
-			ctx:    context.Background(),
-			schema: "schema",
-			setExpectations: func(m sqlmock.Sqlmock, schema string) {
-				m.ExpectExec(fmt.Sprintf(`CREATE SCHEMA IF NOT EXISTS "%s";`, schema)).WithoutArgs().WillReturnResult(sqlmock.NewResult(0, 0)).WillReturnError(nil)
-				m.ExpectExec(fmt.Sprintf(`USE SCHEMA "%s";`, schema)).WithoutArgs().WillReturnResult(sqlmock.NewResult(0, 0)).WillReturnError(fmt.Errorf("fail"))
+			desc:     "fail USE SCHEMA stmt",
+			ctx:      context.Background(),
+			schema:   "schema",
+			database: "db",
+			setExpectations: func(m sqlmock.Sqlmock, schema, database string) {
+				m.ExpectExec(fmt.Sprintf(`CREATE SCHEMA IF NOT EXISTS "%s"."%s";`, database, schema)).WithoutArgs().WillReturnResult(sqlmock.NewResult(0, 0)).WillReturnError(nil)
+				m.ExpectExec(fmt.Sprintf(`USE SCHEMA "%s"."%s";`, database, schema)).WithoutArgs().WillReturnResult(sqlmock.NewResult(0, 0)).WillReturnError(fmt.Errorf("fail"))
 			},
 			expectedErr: fmt.Errorf("failed to call 'USE SCHEMA \"schema\";': fail"),
 		},
@@ -163,9 +147,9 @@ func TestCreateSchema(t *testing.T) {
 			db, mock := NewMock(t)
 			defer db.Close()
 
-			tc.setExpectations(mock, tc.schema)
+			tc.setExpectations(mock, tc.schema, tc.database)
 
-			s := &Snowflake{db: db}
+			s := &Snowflake{db: db, warehouse: "", database: tc.database}
 			err := s.CreateSchema(tc.ctx, tc.schema)
 
 			if tc.expectedErr == nil {
@@ -180,29 +164,25 @@ func TestCreateSchema(t *testing.T) {
 }
 
 func TestCreateTable(t *testing.T) {
-	template := `CREATE TABLE "%s";`
+	sql := `CREATE TABLE "test";`
 	testCases := []struct {
 		desc            string
 		ctx             context.Context
-		table           string
-		setExpectations func(m sqlmock.Sqlmock, table string)
+		setExpectations func(m sqlmock.Sqlmock, sql string)
 		expectedErr     error
 	}{
 		{
-			desc:  "pass",
-			ctx:   context.Background(),
-			table: "table",
-			setExpectations: func(m sqlmock.Sqlmock, table string) {
-				m.ExpectExec(fmt.Sprintf(template, table)).WithoutArgs().WillReturnResult(sqlmock.NewResult(0, 0)).WillReturnError(nil)
+			desc: "pass",
+			ctx:  context.Background(),
+			setExpectations: func(m sqlmock.Sqlmock, sql string) {
+				m.ExpectExec(sql).WithoutArgs().WillReturnResult(sqlmock.NewResult(0, 0)).WillReturnError(nil)
 			},
 		},
 		{
 			desc: "fail CRATE TABLE stmt",
 			ctx:  context.Background(),
-
-			table: "table",
-			setExpectations: func(m sqlmock.Sqlmock, table string) {
-				m.ExpectExec(fmt.Sprintf(template, table)).WithoutArgs().WillReturnResult(sqlmock.NewResult(0, 0)).WillReturnError(fmt.Errorf("fail"))
+			setExpectations: func(m sqlmock.Sqlmock, sql string) {
+				m.ExpectExec(sql).WithoutArgs().WillReturnResult(sqlmock.NewResult(0, 0)).WillReturnError(fmt.Errorf("fail"))
 			},
 			expectedErr: fmt.Errorf("failed to create table: fail"),
 		},
@@ -213,10 +193,10 @@ func TestCreateTable(t *testing.T) {
 			db, mock := NewMock(t)
 			defer db.Close()
 
-			tc.setExpectations(mock, tc.table)
+			tc.setExpectations(mock, sql)
 
 			s := &Snowflake{db: db}
-			err := s.CreateTable(tc.ctx, tc.table, template)
+			err := s.CreateTable(tc.ctx, sql)
 
 			if tc.expectedErr == nil {
 				require.NoError(t, err)
@@ -234,7 +214,6 @@ func TestBatchInsert(t *testing.T) {
 		desc            string
 		ctx             context.Context
 		data            []map[string]any
-		insert          string
 		setExpectations func(m sqlmock.Sqlmock, insert string)
 		expectedErr     error
 	}{
@@ -247,22 +226,32 @@ func TestBatchInsert(t *testing.T) {
 					"map1key2": "2",
 				},
 			},
-			insert: "insert",
 			setExpectations: func(m sqlmock.Sqlmock, insert string) {
 				m.ExpectBegin().WillReturnError(nil)
+				m.ExpectExec(`USE WAREHOUSE "wh";`).WithoutArgs().WillReturnResult(sqlmock.NewResult(0, 0)).WillReturnError(nil)
 				m.ExpectExec(insert).WithoutArgs().WillReturnResult(sqlmock.NewResult(0, 0)).WillReturnError(nil)
 				m.ExpectCommit()
 			},
 		},
 		{
-			desc:   "fail BeginTxx",
-			ctx:    context.Background(),
-			data:   []map[string]any{},
-			insert: "insert",
+			desc: "fail BeginTxx",
+			ctx:  context.Background(),
+			data: []map[string]any{},
 			setExpectations: func(m sqlmock.Sqlmock, insert string) {
 				m.ExpectBegin().WillReturnError(fmt.Errorf("fail"))
 			},
 			expectedErr: fmt.Errorf("failed to create transaction: fail"),
+		},
+		{
+			desc: "fail USE WAREHOUSE stmt",
+			ctx:  context.Background(),
+			data: []map[string]any{},
+			setExpectations: func(m sqlmock.Sqlmock, insert string) {
+				m.ExpectBegin().WillReturnError(nil)
+				m.ExpectExec(`USE WAREHOUSE "wh";`).WithoutArgs().WillReturnResult(sqlmock.NewResult(0, 0)).WillReturnError(fmt.Errorf("fail"))
+				m.ExpectRollback()
+			},
+			expectedErr: fmt.Errorf("failed to call 'USE WAREHOUSE \"wh\";': fail"),
 		},
 		{
 			desc: "fail insert stmt",
@@ -273,9 +262,9 @@ func TestBatchInsert(t *testing.T) {
 					"map1key2": "2",
 				},
 			},
-			insert: "insert",
 			setExpectations: func(m sqlmock.Sqlmock, insert string) {
 				m.ExpectBegin().WillReturnError(nil)
+				m.ExpectExec(`USE WAREHOUSE "wh";`).WithoutArgs().WillReturnResult(sqlmock.NewResult(0, 0)).WillReturnError(nil)
 				m.ExpectExec(insert).WithoutArgs().WillReturnResult(sqlmock.NewResult(0, 0)).WillReturnError(fmt.Errorf("fail"))
 				m.ExpectRollback()
 			},
@@ -288,10 +277,10 @@ func TestBatchInsert(t *testing.T) {
 			db, mock := NewMock(t)
 			defer db.Close()
 
-			tc.setExpectations(mock, tc.insert)
+			tc.setExpectations(mock, "insert")
 
-			s := &Snowflake{db: db}
-			err := s.BatchInsert(tc.ctx, tc.data, tc.insert)
+			s := &Snowflake{db: db, warehouse: "wh", database: ""}
+			err := s.BatchInsert(tc.ctx, tc.data, "insert")
 
 			if tc.expectedErr == nil {
 				require.NoError(t, err)

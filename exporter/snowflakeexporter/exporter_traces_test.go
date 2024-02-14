@@ -33,7 +33,7 @@ func TestNewTracesExporter(t *testing.T) {
 		desc        string
 		ctx         context.Context
 		c           *Config
-		newDatabase func(_ string) (database.Database, error)
+		newDatabase func(_, _, _ string) (database.Database, error)
 		expectedErr error
 	}{
 		{
@@ -50,7 +50,7 @@ func TestNewTracesExporter(t *testing.T) {
 					Table:   "table",
 				},
 			},
-			newDatabase: func(_ string) (database.Database, error) {
+			newDatabase: func(_, _, _ string) (database.Database, error) {
 				return mocks.NewMockDatabase(t), nil
 			},
 		},
@@ -68,7 +68,7 @@ func TestNewTracesExporter(t *testing.T) {
 					Table:   "table",
 				},
 			},
-			newDatabase: func(_ string) (database.Database, error) {
+			newDatabase: func(_, _, _ string) (database.Database, error) {
 				return nil, fmt.Errorf("fail")
 			},
 			expectedErr: fmt.Errorf("failed to create new database connection for traces: fail"),
@@ -126,9 +126,9 @@ func TestTracesStart(t *testing.T) {
 			ctx:  context.Background(),
 			mockGen: func(t *testing.T, ctx context.Context) *mocks.MockDatabase {
 				m := mocks.NewMockDatabase(t)
-				m.On("InitDatabaseConn", ctx, c.Role, c.Database, c.Warehouse).Return(nil)
+				m.On("InitDatabaseConn", ctx, c.Role).Return(nil)
 				m.On("CreateSchema", ctx, c.Traces.Schema).Return(nil)
-				m.On("CreateTable", ctx, c.Traces.Table, createTracesTableSnowflakeTemplate).Return(nil)
+				m.On("CreateTable", ctx, fmt.Sprintf(createTracesTableSnowflakeTemplate, c.Database, c.Traces.Schema, c.Traces.Table)).Return(nil)
 				return m
 			},
 		},
@@ -137,7 +137,7 @@ func TestTracesStart(t *testing.T) {
 			ctx:  context.Background(),
 			mockGen: func(t *testing.T, ctx context.Context) *mocks.MockDatabase {
 				m := mocks.NewMockDatabase(t)
-				m.On("InitDatabaseConn", ctx, c.Role, c.Database, c.Warehouse).Return(fmt.Errorf("fail"))
+				m.On("InitDatabaseConn", ctx, c.Role).Return(fmt.Errorf("fail"))
 				return m
 			},
 			expectedErr: fmt.Errorf("failed to initialize database connection for traces: fail"),
@@ -147,7 +147,7 @@ func TestTracesStart(t *testing.T) {
 			ctx:  context.Background(),
 			mockGen: func(t *testing.T, ctx context.Context) *mocks.MockDatabase {
 				m := mocks.NewMockDatabase(t)
-				m.On("InitDatabaseConn", ctx, c.Role, c.Database, c.Warehouse).Return(nil)
+				m.On("InitDatabaseConn", ctx, c.Role).Return(nil)
 				m.On("CreateSchema", ctx, c.Traces.Schema).Return(fmt.Errorf("fail"))
 				return m
 			},
@@ -158,9 +158,9 @@ func TestTracesStart(t *testing.T) {
 			ctx:  context.Background(),
 			mockGen: func(t *testing.T, ctx context.Context) *mocks.MockDatabase {
 				m := mocks.NewMockDatabase(t)
-				m.On("InitDatabaseConn", ctx, c.Role, c.Database, c.Warehouse).Return(nil)
+				m.On("InitDatabaseConn", ctx, c.Role).Return(nil)
 				m.On("CreateSchema", ctx, c.Traces.Schema).Return(nil)
-				m.On("CreateTable", ctx, c.Traces.Table, createTracesTableSnowflakeTemplate).Return(fmt.Errorf("fail"))
+				m.On("CreateTable", ctx, fmt.Sprintf(createTracesTableSnowflakeTemplate, c.Database, c.Traces.Schema, c.Traces.Table)).Return(fmt.Errorf("fail"))
 				return m
 			},
 			expectedErr: fmt.Errorf("failed to create traces table: fail"),
@@ -173,7 +173,7 @@ func TestTracesStart(t *testing.T) {
 				tc.ctx,
 				c,
 				exportertest.NewNopCreateSettings(),
-				func(_ string) (database.Database, error) { return nil, nil },
+				func(_, _, _ string) (database.Database, error) { return nil, nil },
 			)
 			require.NoError(t, err)
 			tracesExp.db = tc.mockGen(t, tc.ctx)
@@ -261,7 +261,7 @@ func TestTracesDataPusher(t *testing.T) {
 				tc.ctx,
 				c,
 				exportertest.NewNopCreateSettings(),
-				func(_ string) (database.Database, error) { return nil, nil },
+				func(_, _, _ string) (database.Database, error) { return nil, nil },
 			)
 			require.NoError(t, err)
 			tracesExp.db = tc.mockGen(t, tc.ctx, tracesExp.insertSQL)

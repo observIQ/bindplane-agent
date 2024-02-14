@@ -27,7 +27,7 @@ import (
 const (
 	// CreateGaugeMetricTableTemplate is SQL to create a table for gauge metrics in Snowflake
 	CreateGaugeMetricTableTemplate = `
-	CREATE TABLE IF NOT EXISTS "%s_gauge" (
+	CREATE TABLE IF NOT EXISTS "%s"."%s"."%s_gauge" (
 		"ResourceSchemaURL" VARCHAR,
 		"ResourceDroppedAttributesCount" INT,
 		"ResourceAttributes" VARCHAR,
@@ -51,8 +51,8 @@ const (
 		"ExemplarValues" VARCHAR
 	);`
 
-	insertIntoGaugeMetricTableTemplate = `
-	INSERT INTO "%s_gauge" (
+	InsertIntoGaugeMetricTableTemplate = `
+	INSERT INTO "%s"."%s"."%s_gauge" (
 		"ResourceSchemaURL",
 		"ResourceDroppedAttributesCount",
 		"ResourceAttributes",
@@ -114,10 +114,10 @@ type gaugeData struct {
 }
 
 // NewGaugeModel returns a newly created GaugeModel
-func NewGaugeModel(logger *zap.Logger, table string) *GaugeModel {
+func NewGaugeModel(logger *zap.Logger, sql string) *GaugeModel {
 	return &GaugeModel{
 		logger:    logger,
-		insertSQL: fmt.Sprintf(insertIntoGaugeMetricTableTemplate, table),
+		insertSQL: sql,
 	}
 }
 

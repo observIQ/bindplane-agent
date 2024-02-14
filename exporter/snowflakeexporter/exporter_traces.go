@@ -30,7 +30,7 @@ import (
 
 const (
 	createTracesTableSnowflakeTemplate = `
-	CREATE TABLE IF NOT EXISTS "%s" (
+	CREATE TABLE IF NOT EXISTS "%s"."%s"."%s" (
 		"ResourceSchemaURL" VARCHAR,
 		"ResourceDroppedAttributesCount" INT,
 		"ResourceAttributes" VARCHAR,
@@ -63,7 +63,7 @@ const (
 	);`
 
 	insertIntoTracesTableSnowflakeTemplate = `
-	INSERT INTO "%s" (
+	INSERT INTO "%s"."%s"."%s" (
 		"ResourceSchemaURL",
 		"ResourceDroppedAttributesCount",
 		"ResourceAttributes",
@@ -137,9 +137,9 @@ func newTracesExporter(
 	_ context.Context,
 	cfg *Config,
 	params exporter.CreateSettings,
-	newDatabase func(dsn string) (database.Database, error),
+	newDatabase func(dsn, wh, db string) (database.Database, error),
 ) (*tracesExporter, error) {
-	db, err := newDatabase(cfg.DSN)
+	db, err := newDatabase(cfg.DSN, cfg.Warehouse, cfg.Database)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create new database connection for traces: %w", err)
 	}
@@ -148,7 +148,7 @@ func newTracesExporter(
 		cfg:       cfg,
 		logger:    params.Logger,
 		db:        db,
-		insertSQL: fmt.Sprintf(insertIntoTracesTableSnowflakeTemplate, cfg.Traces.Table),
+		insertSQL: fmt.Sprintf(insertIntoTracesTableSnowflakeTemplate, cfg.Database, cfg.Traces.Schema, cfg.Traces.Table),
 	}, nil
 }
 
@@ -157,7 +157,7 @@ func (te *tracesExporter) Capabilities() consumer.Capabilities {
 }
 
 func (te *tracesExporter) start(ctx context.Context, _ component.Host) error {
-	err := te.db.InitDatabaseConn(ctx, te.cfg.Role, te.cfg.Database, te.cfg.Warehouse)
+	err := te.db.InitDatabaseConn(ctx, te.cfg.Role)
 	if err != nil {
 		return fmt.Errorf("failed to initialize database connection for traces: %w", err)
 	}
@@ -167,7 +167,7 @@ func (te *tracesExporter) start(ctx context.Context, _ component.Host) error {
 		return fmt.Errorf("failed to create traces schema: %w", err)
 	}
 
-	err = te.db.CreateTable(ctx, te.cfg.Traces.Table, createTracesTableSnowflakeTemplate)
+	err = te.db.CreateTable(ctx, fmt.Sprintf(createTracesTableSnowflakeTemplate, te.cfg.Database, te.cfg.Traces.Schema, te.cfg.Traces.Table))
 	if err != nil {
 		return fmt.Errorf("failed to create traces table: %w", err)
 	}

@@ -31,7 +31,7 @@ func TestNewMetricsExporter(t *testing.T) {
 		desc        string
 		ctx         context.Context
 		c           *Config
-		newDatabase func(_ string) (database.Database, error)
+		newDatabase func(_, _, _ string) (database.Database, error)
 		expectedErr error
 	}{
 		{
@@ -48,7 +48,7 @@ func TestNewMetricsExporter(t *testing.T) {
 					Table:   "table",
 				},
 			},
-			newDatabase: func(_ string) (database.Database, error) {
+			newDatabase: func(_, _, _ string) (database.Database, error) {
 				return mocks.NewMockDatabase(t), nil
 			},
 		},
@@ -66,7 +66,7 @@ func TestNewMetricsExporter(t *testing.T) {
 					Table:   "table",
 				},
 			},
-			newDatabase: func(_ string) (database.Database, error) {
+			newDatabase: func(_, _, _ string) (database.Database, error) {
 				return nil, fmt.Errorf("fail")
 			},
 			expectedErr: fmt.Errorf("failed to create new database connection for metrics: fail"),
@@ -124,13 +124,13 @@ func TestMetricsStart(t *testing.T) {
 			ctx:  context.Background(),
 			mockGen: func(t *testing.T, ctx context.Context) *mocks.MockDatabase {
 				m := mocks.NewMockDatabase(t)
-				m.On("InitDatabaseConn", ctx, c.Role, c.Database, c.Warehouse).Return(nil)
+				m.On("InitDatabaseConn", ctx, c.Role).Return(nil)
 				m.On("CreateSchema", ctx, c.Metrics.Schema).Return(nil)
-				m.On("CreateTable", ctx, c.Metrics.Table, metrics.CreateSumMetricTableTemplate).Return(nil)
-				m.On("CreateTable", ctx, c.Metrics.Table, metrics.CreateGaugeMetricTableTemplate).Return(nil)
-				m.On("CreateTable", ctx, c.Metrics.Table, metrics.CreateSummaryMetricTableTemplate).Return(nil)
-				m.On("CreateTable", ctx, c.Metrics.Table, metrics.CreateHistogramMetricTableTemplate).Return(nil)
-				m.On("CreateTable", ctx, c.Metrics.Table, metrics.CreateExponentialHistogramMetricTableTemplate).Return(nil)
+				m.On("CreateTable", ctx, fmt.Sprintf(metrics.CreateSumMetricTableTemplate, c.Database, c.Metrics.Schema, c.Metrics.Table)).Return(nil)
+				m.On("CreateTable", ctx, fmt.Sprintf(metrics.CreateGaugeMetricTableTemplate, c.Database, c.Metrics.Schema, c.Metrics.Table)).Return(nil)
+				m.On("CreateTable", ctx, fmt.Sprintf(metrics.CreateSummaryMetricTableTemplate, c.Database, c.Metrics.Schema, c.Metrics.Table)).Return(nil)
+				m.On("CreateTable", ctx, fmt.Sprintf(metrics.CreateHistogramMetricTableTemplate, c.Database, c.Metrics.Schema, c.Metrics.Table)).Return(nil)
+				m.On("CreateTable", ctx, fmt.Sprintf(metrics.CreateExponentialHistogramMetricTableTemplate, c.Database, c.Metrics.Schema, c.Metrics.Table)).Return(nil)
 				return m
 			},
 		},
@@ -139,7 +139,7 @@ func TestMetricsStart(t *testing.T) {
 			ctx:  context.Background(),
 			mockGen: func(t *testing.T, ctx context.Context) *mocks.MockDatabase {
 				m := mocks.NewMockDatabase(t)
-				m.On("InitDatabaseConn", ctx, c.Role, c.Database, c.Warehouse).Return(fmt.Errorf("fail"))
+				m.On("InitDatabaseConn", ctx, c.Role).Return(fmt.Errorf("fail"))
 				return m
 			},
 			expectedErr: fmt.Errorf("failed to initialize database connection for metrics: fail"),
@@ -149,7 +149,7 @@ func TestMetricsStart(t *testing.T) {
 			ctx:  context.Background(),
 			mockGen: func(t *testing.T, ctx context.Context) *mocks.MockDatabase {
 				m := mocks.NewMockDatabase(t)
-				m.On("InitDatabaseConn", ctx, c.Role, c.Database, c.Warehouse).Return(nil)
+				m.On("InitDatabaseConn", ctx, c.Role).Return(nil)
 				m.On("CreateSchema", ctx, c.Metrics.Schema).Return(fmt.Errorf("fail"))
 				return m
 			},
@@ -160,9 +160,9 @@ func TestMetricsStart(t *testing.T) {
 			ctx:  context.Background(),
 			mockGen: func(t *testing.T, ctx context.Context) *mocks.MockDatabase {
 				m := mocks.NewMockDatabase(t)
-				m.On("InitDatabaseConn", ctx, c.Role, c.Database, c.Warehouse).Return(nil)
+				m.On("InitDatabaseConn", ctx, c.Role).Return(nil)
 				m.On("CreateSchema", ctx, c.Metrics.Schema).Return(nil)
-				m.On("CreateTable", ctx, c.Metrics.Table, metrics.CreateSumMetricTableTemplate).Return(fmt.Errorf("fail"))
+				m.On("CreateTable", ctx, fmt.Sprintf(metrics.CreateSumMetricTableTemplate, c.Database, c.Metrics.Schema, c.Metrics.Table)).Return(fmt.Errorf("fail"))
 				return m
 			},
 			expectedErr: fmt.Errorf("failed to create sum metrics table: fail"),
@@ -172,10 +172,10 @@ func TestMetricsStart(t *testing.T) {
 			ctx:  context.Background(),
 			mockGen: func(t *testing.T, ctx context.Context) *mocks.MockDatabase {
 				m := mocks.NewMockDatabase(t)
-				m.On("InitDatabaseConn", ctx, c.Role, c.Database, c.Warehouse).Return(nil)
+				m.On("InitDatabaseConn", ctx, c.Role).Return(nil)
 				m.On("CreateSchema", ctx, c.Metrics.Schema).Return(nil)
-				m.On("CreateTable", ctx, c.Metrics.Table, metrics.CreateSumMetricTableTemplate).Return(nil)
-				m.On("CreateTable", ctx, c.Metrics.Table, metrics.CreateGaugeMetricTableTemplate).Return(fmt.Errorf("fail"))
+				m.On("CreateTable", ctx, fmt.Sprintf(metrics.CreateSumMetricTableTemplate, c.Database, c.Metrics.Schema, c.Metrics.Table)).Return(nil)
+				m.On("CreateTable", ctx, fmt.Sprintf(metrics.CreateGaugeMetricTableTemplate, c.Database, c.Metrics.Schema, c.Metrics.Table)).Return(fmt.Errorf("fail"))
 				return m
 			},
 			expectedErr: fmt.Errorf("failed to create gauge metrics table: fail"),
@@ -185,11 +185,11 @@ func TestMetricsStart(t *testing.T) {
 			ctx:  context.Background(),
 			mockGen: func(t *testing.T, ctx context.Context) *mocks.MockDatabase {
 				m := mocks.NewMockDatabase(t)
-				m.On("InitDatabaseConn", ctx, c.Role, c.Database, c.Warehouse).Return(nil)
+				m.On("InitDatabaseConn", ctx, c.Role).Return(nil)
 				m.On("CreateSchema", ctx, c.Metrics.Schema).Return(nil)
-				m.On("CreateTable", ctx, c.Metrics.Table, metrics.CreateSumMetricTableTemplate).Return(nil)
-				m.On("CreateTable", ctx, c.Metrics.Table, metrics.CreateGaugeMetricTableTemplate).Return(nil)
-				m.On("CreateTable", ctx, c.Metrics.Table, metrics.CreateSummaryMetricTableTemplate).Return(fmt.Errorf("fail"))
+				m.On("CreateTable", ctx, fmt.Sprintf(metrics.CreateSumMetricTableTemplate, c.Database, c.Metrics.Schema, c.Metrics.Table)).Return(nil)
+				m.On("CreateTable", ctx, fmt.Sprintf(metrics.CreateGaugeMetricTableTemplate, c.Database, c.Metrics.Schema, c.Metrics.Table)).Return(nil)
+				m.On("CreateTable", ctx, fmt.Sprintf(metrics.CreateSummaryMetricTableTemplate, c.Database, c.Metrics.Schema, c.Metrics.Table)).Return(fmt.Errorf("fail"))
 				return m
 			},
 			expectedErr: fmt.Errorf("failed to create summary metrics table: fail"),
@@ -199,12 +199,12 @@ func TestMetricsStart(t *testing.T) {
 			ctx:  context.Background(),
 			mockGen: func(t *testing.T, ctx context.Context) *mocks.MockDatabase {
 				m := mocks.NewMockDatabase(t)
-				m.On("InitDatabaseConn", ctx, c.Role, c.Database, c.Warehouse).Return(nil)
+				m.On("InitDatabaseConn", ctx, c.Role).Return(nil)
 				m.On("CreateSchema", ctx, c.Metrics.Schema).Return(nil)
-				m.On("CreateTable", ctx, c.Metrics.Table, metrics.CreateSumMetricTableTemplate).Return(nil)
-				m.On("CreateTable", ctx, c.Metrics.Table, metrics.CreateGaugeMetricTableTemplate).Return(nil)
-				m.On("CreateTable", ctx, c.Metrics.Table, metrics.CreateSummaryMetricTableTemplate).Return(nil)
-				m.On("CreateTable", ctx, c.Metrics.Table, metrics.CreateHistogramMetricTableTemplate).Return(fmt.Errorf("fail"))
+				m.On("CreateTable", ctx, fmt.Sprintf(metrics.CreateSumMetricTableTemplate, c.Database, c.Metrics.Schema, c.Metrics.Table)).Return(nil)
+				m.On("CreateTable", ctx, fmt.Sprintf(metrics.CreateGaugeMetricTableTemplate, c.Database, c.Metrics.Schema, c.Metrics.Table)).Return(nil)
+				m.On("CreateTable", ctx, fmt.Sprintf(metrics.CreateSummaryMetricTableTemplate, c.Database, c.Metrics.Schema, c.Metrics.Table)).Return(nil)
+				m.On("CreateTable", ctx, fmt.Sprintf(metrics.CreateHistogramMetricTableTemplate, c.Database, c.Metrics.Schema, c.Metrics.Table)).Return(fmt.Errorf("fail"))
 				return m
 			},
 			expectedErr: fmt.Errorf("failed to create histogram metrics table: fail"),
@@ -214,13 +214,13 @@ func TestMetricsStart(t *testing.T) {
 			ctx:  context.Background(),
 			mockGen: func(t *testing.T, ctx context.Context) *mocks.MockDatabase {
 				m := mocks.NewMockDatabase(t)
-				m.On("InitDatabaseConn", ctx, c.Role, c.Database, c.Warehouse).Return(nil)
+				m.On("InitDatabaseConn", ctx, c.Role).Return(nil)
 				m.On("CreateSchema", ctx, c.Metrics.Schema).Return(nil)
-				m.On("CreateTable", ctx, c.Metrics.Table, metrics.CreateSumMetricTableTemplate).Return(nil)
-				m.On("CreateTable", ctx, c.Metrics.Table, metrics.CreateGaugeMetricTableTemplate).Return(nil)
-				m.On("CreateTable", ctx, c.Metrics.Table, metrics.CreateSummaryMetricTableTemplate).Return(nil)
-				m.On("CreateTable", ctx, c.Metrics.Table, metrics.CreateHistogramMetricTableTemplate).Return(nil)
-				m.On("CreateTable", ctx, c.Metrics.Table, metrics.CreateExponentialHistogramMetricTableTemplate).Return(fmt.Errorf("fail"))
+				m.On("CreateTable", ctx, fmt.Sprintf(metrics.CreateSumMetricTableTemplate, c.Database, c.Metrics.Schema, c.Metrics.Table)).Return(nil)
+				m.On("CreateTable", ctx, fmt.Sprintf(metrics.CreateGaugeMetricTableTemplate, c.Database, c.Metrics.Schema, c.Metrics.Table)).Return(nil)
+				m.On("CreateTable", ctx, fmt.Sprintf(metrics.CreateSummaryMetricTableTemplate, c.Database, c.Metrics.Schema, c.Metrics.Table)).Return(nil)
+				m.On("CreateTable", ctx, fmt.Sprintf(metrics.CreateHistogramMetricTableTemplate, c.Database, c.Metrics.Schema, c.Metrics.Table)).Return(nil)
+				m.On("CreateTable", ctx, fmt.Sprintf(metrics.CreateExponentialHistogramMetricTableTemplate, c.Database, c.Metrics.Schema, c.Metrics.Table)).Return(fmt.Errorf("fail"))
 				return m
 			},
 			expectedErr: fmt.Errorf("failed to create exponential histogram metrics table: fail"),
@@ -233,7 +233,7 @@ func TestMetricsStart(t *testing.T) {
 				tc.ctx,
 				c,
 				exportertest.NewNopCreateSettings(),
-				func(_ string) (database.Database, error) { return nil, nil },
+				func(_, _, _ string) (database.Database, error) { return nil, nil },
 			)
 			require.NoError(t, err)
 			metricsExp.db = tc.mockGen(t, tc.ctx)

@@ -32,7 +32,7 @@ func TestNewLogsExporter(t *testing.T) {
 		desc        string
 		ctx         context.Context
 		c           *Config
-		newDatabase func(_ string) (database.Database, error)
+		newDatabase func(_, _, _ string) (database.Database, error)
 		expectedErr error
 	}{
 		{
@@ -49,7 +49,7 @@ func TestNewLogsExporter(t *testing.T) {
 					Table:   "table",
 				},
 			},
-			newDatabase: func(_ string) (database.Database, error) {
+			newDatabase: func(_, _, _ string) (database.Database, error) {
 				return mocks.NewMockDatabase(t), nil
 			},
 		},
@@ -67,7 +67,7 @@ func TestNewLogsExporter(t *testing.T) {
 					Table:   "table",
 				},
 			},
-			newDatabase: func(_ string) (database.Database, error) {
+			newDatabase: func(_, _, _ string) (database.Database, error) {
 				return nil, fmt.Errorf("fail")
 			},
 			expectedErr: fmt.Errorf("failed to create new database connection for logs: fail"),
@@ -125,9 +125,9 @@ func TestLogsStart(t *testing.T) {
 			ctx:  context.Background(),
 			mockGen: func(t *testing.T, ctx context.Context) *mocks.MockDatabase {
 				m := mocks.NewMockDatabase(t)
-				m.On("InitDatabaseConn", ctx, c.Role, c.Database, c.Warehouse).Return(nil)
+				m.On("InitDatabaseConn", ctx, c.Role).Return(nil)
 				m.On("CreateSchema", ctx, c.Logs.Schema).Return(nil)
-				m.On("CreateTable", ctx, c.Logs.Table, createLogsTableSnowflakeTemplate).Return(nil)
+				m.On("CreateTable", ctx, fmt.Sprintf(createLogsTableSnowflakeTemplate, c.Database, c.Logs.Schema, c.Logs.Table)).Return(nil)
 				return m
 			},
 		},
@@ -137,7 +137,7 @@ func TestLogsStart(t *testing.T) {
 			expectedErr: fmt.Errorf("failed to initialize database connection for logs: fail"),
 			mockGen: func(t *testing.T, ctx context.Context) *mocks.MockDatabase {
 				m := mocks.NewMockDatabase(t)
-				m.On("InitDatabaseConn", ctx, c.Role, c.Database, c.Warehouse).Return(fmt.Errorf("fail"))
+				m.On("InitDatabaseConn", ctx, c.Role).Return(fmt.Errorf("fail"))
 				return m
 			},
 		},
@@ -147,7 +147,7 @@ func TestLogsStart(t *testing.T) {
 			expectedErr: fmt.Errorf("failed to create logs schema: fail"),
 			mockGen: func(t *testing.T, ctx context.Context) *mocks.MockDatabase {
 				m := mocks.NewMockDatabase(t)
-				m.On("InitDatabaseConn", ctx, c.Role, c.Database, c.Warehouse).Return(nil)
+				m.On("InitDatabaseConn", ctx, c.Role).Return(nil)
 				m.On("CreateSchema", ctx, c.Logs.Schema).Return(fmt.Errorf("fail"))
 				return m
 			},
@@ -158,9 +158,9 @@ func TestLogsStart(t *testing.T) {
 			expectedErr: fmt.Errorf("failed to create logs table: fail"),
 			mockGen: func(t *testing.T, ctx context.Context) *mocks.MockDatabase {
 				m := mocks.NewMockDatabase(t)
-				m.On("InitDatabaseConn", ctx, c.Role, c.Database, c.Warehouse).Return(nil)
+				m.On("InitDatabaseConn", ctx, c.Role).Return(nil)
 				m.On("CreateSchema", ctx, c.Logs.Schema).Return(nil)
-				m.On("CreateTable", ctx, c.Logs.Table, createLogsTableSnowflakeTemplate).Return(fmt.Errorf("fail"))
+				m.On("CreateTable", ctx, fmt.Sprintf(createLogsTableSnowflakeTemplate, c.Database, c.Logs.Schema, c.Logs.Table)).Return(fmt.Errorf("fail"))
 				return m
 			},
 		},
@@ -172,7 +172,7 @@ func TestLogsStart(t *testing.T) {
 				tc.ctx,
 				c,
 				exportertest.NewNopCreateSettings(),
-				func(_ string) (database.Database, error) { return nil, nil },
+				func(_, _, _ string) (database.Database, error) { return nil, nil },
 			)
 			require.NoError(t, err)
 			logsExp.db = tc.mockGen(t, tc.ctx)
@@ -251,7 +251,7 @@ func TestLogsDataPusher(t *testing.T) {
 				tc.ctx,
 				c,
 				exportertest.NewNopCreateSettings(),
-				func(_ string) (database.Database, error) { return nil, nil },
+				func(_, _, _ string) (database.Database, error) { return nil, nil },
 			)
 			require.NoError(t, err)
 			logsExp.db = tc.mockGen(t, tc.ctx, logsExp.insertSQL)

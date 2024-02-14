@@ -28,8 +28,6 @@ import (
 )
 
 func TestSumBatchInsert(t *testing.T) {
-	table := "sum"
-
 	testCases := []struct {
 		desc        string
 		ctx         context.Context
@@ -68,7 +66,7 @@ func TestSumBatchInsert(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.desc, func(t *testing.T) {
-			sum := NewSumModel(zap.NewNop(), table)
+			sum := NewSumModel(zap.NewNop(), "insert")
 			sum.sums = tc.sumGen()
 
 			mockDB := tc.mockGen(t, tc.ctx, sum.insertSQL)

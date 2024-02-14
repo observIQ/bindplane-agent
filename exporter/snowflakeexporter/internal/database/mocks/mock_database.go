@@ -13,13 +13,13 @@ type MockDatabase struct {
 	mock.Mock
 }
 
-// BatchInsert provides a mock function with given fields: ctx, data, insertSQL
-func (_m *MockDatabase) BatchInsert(ctx context.Context, data []map[string]interface{}, insertSQL string) error {
-	ret := _m.Called(ctx, data, insertSQL)
+// BatchInsert provides a mock function with given fields: ctx, data, sql
+func (_m *MockDatabase) BatchInsert(ctx context.Context, data []map[string]interface{}, sql string) error {
+	ret := _m.Called(ctx, data, sql)
 
 	var r0 error
 	if rf, ok := ret.Get(0).(func(context.Context, []map[string]interface{}, string) error); ok {
-		r0 = rf(ctx, data, insertSQL)
+		r0 = rf(ctx, data, sql)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -55,13 +55,13 @@ func (_m *MockDatabase) CreateSchema(ctx context.Context, schema string) error {
 	return r0
 }
 
-// CreateTable provides a mock function with given fields: ctx, table, template
-func (_m *MockDatabase) CreateTable(ctx context.Context, table string, template string) error {
-	ret := _m.Called(ctx, table, template)
+// CreateTable provides a mock function with given fields: ctx, sql
+func (_m *MockDatabase) CreateTable(ctx context.Context, sql string) error {
+	ret := _m.Called(ctx, sql)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, string) error); ok {
-		r0 = rf(ctx, table, template)
+	if rf, ok := ret.Get(0).(func(context.Context, string) error); ok {
+		r0 = rf(ctx, sql)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -69,13 +69,13 @@ func (_m *MockDatabase) CreateTable(ctx context.Context, table string, template 
 	return r0
 }
 
-// InitDatabaseConn provides a mock function with given fields: ctx, role, _a2, warehouse
-func (_m *MockDatabase) InitDatabaseConn(ctx context.Context, role string, _a2 string, warehouse string) error {
-	ret := _m.Called(ctx, role, _a2, warehouse)
+// InitDatabaseConn provides a mock function with given fields: ctx, roles
+func (_m *MockDatabase) InitDatabaseConn(ctx context.Context, roles string) error {
+	ret := _m.Called(ctx, roles)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, string, string) error); ok {
-		r0 = rf(ctx, role, _a2, warehouse)
+	if rf, ok := ret.Get(0).(func(context.Context, string) error); ok {
+		r0 = rf(ctx, roles)
 	} else {
 		r0 = ret.Error(0)
 	}

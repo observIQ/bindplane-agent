@@ -28,8 +28,6 @@ import (
 )
 
 func TestGaugeMetricBatchInsert(t *testing.T) {
-	table := "gauge"
-
 	testCases := []struct {
 		desc        string
 		ctx         context.Context
@@ -68,7 +66,7 @@ func TestGaugeMetricBatchInsert(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.desc, func(t *testing.T) {
-			g := NewGaugeModel(zap.NewNop(), table)
+			g := NewGaugeModel(zap.NewNop(), "insert")
 			g.gauges = tc.gaugeGen()
 
 			mockDB := tc.mockGen(t, tc.ctx, g.insertSQL)

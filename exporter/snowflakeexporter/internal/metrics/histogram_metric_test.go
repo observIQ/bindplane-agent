@@ -28,8 +28,6 @@ import (
 )
 
 func TestHistogramBatchInsert(t *testing.T) {
-	table := "histogram"
-
 	testCases := []struct {
 		desc         string
 		ctx          context.Context
@@ -68,7 +66,7 @@ func TestHistogramBatchInsert(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.desc, func(t *testing.T) {
-			histogram := NewHistogramModel(zap.NewNop(), table)
+			histogram := NewHistogramModel(zap.NewNop(), "insert")
 			histogram.histograms = tc.histogramGen()
 
 			mockDB := tc.mockGen(t, tc.ctx, histogram.insertSQL)

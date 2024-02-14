@@ -29,7 +29,7 @@ import (
 
 const (
 	createLogsTableSnowflakeTemplate = `
-	CREATE TABLE IF NOT EXISTS "%s" (
+	CREATE TABLE IF NOT EXISTS "%s"."%s"."%s" (
 		"ResourceSchemaURL" VARCHAR,
 		"ResourceDroppedAttributesCount" INT,
 		"ResourceAttributes" VARCHAR,
@@ -51,7 +51,7 @@ const (
 	);`
 
 	insertIntoLogsTableSnowflakeTemplate = `
-	INSERT INTO "%s" (
+	INSERT INTO "%s"."%s"."%s" (
 		"ResourceSchemaURL",
 		"ResourceDroppedAttributesCount",
 		"ResourceAttributes",
@@ -103,9 +103,9 @@ func newLogsExporter(
 	_ context.Context,
 	cfg *Config,
 	params exporter.CreateSettings,
-	newDatabase func(dsn string) (database.Database, error),
+	newDatabase func(dsn, wh, db string) (database.Database, error),
 ) (*logsExporter, error) {
-	db, err := newDatabase(cfg.DSN)
+	db, err := newDatabase(cfg.DSN, cfg.Warehouse, cfg.Database)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create new database connection for logs: %w", err)
 	}
@@ -114,7 +114,7 @@ func newLogsExporter(
 		cfg:       cfg,
 		logger:    params.Logger,
 		db:        db,
-		insertSQL: fmt.Sprintf(insertIntoLogsTableSnowflakeTemplate, cfg.Logs.Table),
+		insertSQL: fmt.Sprintf(insertIntoLogsTableSnowflakeTemplate, cfg.Database, cfg.Logs.Schema, cfg.Logs.Table),
 	}, nil
 }
 
@@ -123,7 +123,7 @@ func (le *logsExporter) Capabilities() consumer.Capabilities {
 }
 
 func (le *logsExporter) start(ctx context.Context, _ component.Host) error {
-	err := le.db.InitDatabaseConn(ctx, le.cfg.Role, le.cfg.Database, le.cfg.Warehouse)
+	err := le.db.InitDatabaseConn(ctx, le.cfg.Role)
 	if err != nil {
 		return fmt.Errorf("failed to initialize database connection for logs: %w", err)
 	}
@@ -133,7 +133,7 @@ func (le *logsExporter) start(ctx context.Context, _ component.Host) error {
 		return fmt.Errorf("failed to create logs schema: %w", err)
 	}
 
-	err = le.db.CreateTable(ctx, le.cfg.Logs.Table, createLogsTableSnowflakeTemplate)
+	err = le.db.CreateTable(ctx, fmt.Sprintf(createLogsTableSnowflakeTemplate, le.cfg.Database, le.cfg.Logs.Schema, le.cfg.Logs.Table))
 	if err != nil {
 		return fmt.Errorf("failed to create logs table: %w", err)
 	}

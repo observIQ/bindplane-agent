@@ -27,7 +27,7 @@ import (
 const (
 	// CreateSumMetricTableTemplate is SQL to create a table for sum metrics in Snowflake
 	CreateSumMetricTableTemplate = `
-	CREATE TABLE IF NOT EXISTS "%s_sum" (
+	CREATE TABLE IF NOT EXISTS "%s"."%s"."%s_sum" (
 		"ResourceSchemaURL" VARCHAR,
 		"ResourceDroppedAttributesCount" INT,
 		"ResourceAttributes" VARCHAR,
@@ -53,8 +53,8 @@ const (
 		"ExemplarValues" VARCHAR
 	);`
 
-	insertIntoSumMetricTableTemplate = `
-	INSERT INTO "%s_sum" (
+	InsertIntoSumMetricTableTemplate = `
+	INSERT INTO "%s"."%s"."%s_sum" (
 		"ResourceSchemaURL",
 		"ResourceDroppedAttributesCount",
 		"ResourceAttributes",
@@ -120,11 +120,11 @@ type sumData struct {
 }
 
 // NewSumModel returns a newly created SumModel
-func NewSumModel(logger *zap.Logger, table string) *SumModel {
+func NewSumModel(logger *zap.Logger, sql string) *SumModel {
 	return &SumModel{
 		logger:    logger,
 		sums:      []*sumData{},
-		insertSQL: fmt.Sprintf(insertIntoSumMetricTableTemplate, table),
+		insertSQL: sql,
 	}
 }
 

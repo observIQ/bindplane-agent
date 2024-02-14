@@ -28,8 +28,6 @@ import (
 )
 
 func TestSummaryBatchInsert(t *testing.T) {
-	table := "summary"
-
 	testCases := []struct {
 		desc        string
 		ctx         context.Context
@@ -68,7 +66,7 @@ func TestSummaryBatchInsert(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.desc, func(t *testing.T) {
-			summary := NewSummaryModel(zap.NewNop(), table)
+			summary := NewSummaryModel(zap.NewNop(), "insert")
 			summary.summaries = tc.summaryGen()
 
 			mockDB := tc.mockGen(t, tc.ctx, summary.insertSQL)

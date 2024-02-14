@@ -27,7 +27,7 @@ import (
 const (
 	// CreateExponentialHistogramMetricTableTemplate is SQL to create a table for exponential histogram metrics in Snowflake
 	CreateExponentialHistogramMetricTableTemplate = `
-	CREATE TABLE IF NOT EXISTS "%s_exponential_histogram" (
+	CREATE TABLE IF NOT EXISTS "%s"."%s"."%s_exponential_histogram" (
 		"ResourceSchemaURL" VARCHAR,
 		"ResourceDroppedAttributesCount" INT,
 		"ResourceAttributes" VARCHAR,
@@ -62,8 +62,8 @@ const (
 		"ExemplarValues" VARCHAR
 	);`
 
-	insertIntoExponentialHistogramMetricTableTemplate = `
-	INSERT INTO "%s_exponential_histogram" (
+	InsertIntoExponentialHistogramMetricTableTemplate = `
+	INSERT INTO "%s"."%s"."%s_exponential_histogram" (
 		"ResourceSchemaURL",
 		"ResourceDroppedAttributesCount",
 		"ResourceAttributes",
@@ -147,10 +147,10 @@ type exponentialHistogramData struct {
 }
 
 // NewExponentialHistogramModel returns a newly created ExponentialHistogramModel
-func NewExponentialHistogramModel(logger *zap.Logger, table string) *ExponentialHistogramModel {
+func NewExponentialHistogramModel(logger *zap.Logger, sql string) *ExponentialHistogramModel {
 	return &ExponentialHistogramModel{
 		logger:    logger,
-		insertSQL: fmt.Sprintf(insertIntoExponentialHistogramMetricTableTemplate, table),
+		insertSQL: sql,
 	}
 }
 

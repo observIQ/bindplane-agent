@@ -28,8 +28,6 @@ import (
 )
 
 func TestExponentialHistogramBatchInsert(t *testing.T) {
-	table := "ehm"
-
 	testCases := []struct {
 		desc        string
 		ctx         context.Context
@@ -68,7 +66,7 @@ func TestExponentialHistogramBatchInsert(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.desc, func(t *testing.T) {
-			ehm := NewExponentialHistogramModel(zap.NewNop(), table)
+			ehm := NewExponentialHistogramModel(zap.NewNop(), "insert")
 			ehm.exponentialHistograms = tc.ehmGen()
 
 			mockDB := tc.mockGen(t, tc.ctx, ehm.insertSQL)
