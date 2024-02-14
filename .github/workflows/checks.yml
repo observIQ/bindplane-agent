@@ -119,18 +119,31 @@ jobs:
       - name: Check for Misspelled Words in Doc Files
         run: make misspell
 
-# Below checks don't need to run `make install-tools`
   lint:
     runs-on: ubuntu-20.04
+    needs:
+      - setup-tools
     steps:
       - name: Checkout Sources
         uses: actions/checkout@v4
-      - name: Run Revive Action by pulling pre-built image
-        uses: docker://morphy/revive-action:v2
+      - name: Setup Go
+        uses: actions/setup-go@v5
         with:
-          config: revive/config.toml
+          go-version: "1.21"
+          check-latest: true
+      - name: Cache Tools
+        id: tool-cache
+        uses: actions/cache@v3
+        with:
+          path: /home/runner/go/bin
+          key: tooling-${{ runner.os }}-${{ hashFiles('./Makefile') }}
+      - name: Install Tools
+        if: steps.tool-cache.outputs.cache-hit != 'true'
+        run: make install-tools
+      - name: Run Revive Linter
+        run: make lint
 
-
+# Below checks don't need to run `make install-tools`
   check-plugin-docs:
     runs-on: "ubuntu-20.04"
     steps:
