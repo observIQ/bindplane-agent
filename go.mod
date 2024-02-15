@@ -14,6 +14,7 @@ require (
 	github.com/observiq/bindplane-agent/processor/datapointcountprocessor v1.45.0
 	github.com/observiq/bindplane-agent/processor/logcountprocessor v1.45.0
 	github.com/observiq/bindplane-agent/processor/logdeduplicationprocessor v1.45.0
+	github.com/observiq/bindplane-agent/processor/lookupprocessor v1.45.0
 	github.com/observiq/bindplane-agent/processor/maskprocessor v1.45.0
 	github.com/observiq/bindplane-agent/processor/metricextractprocessor v1.45.0
 	github.com/observiq/bindplane-agent/processor/metricstatsprocessor v1.45.0
@@ -694,6 +695,8 @@ replace github.com/observiq/bindplane-agent/processor/logdeduplicationprocessor 
 replace github.com/observiq/bindplane-agent/processor/spancountprocessor => ./processor/spancountprocessor
 
 replace github.com/observiq/bindplane-agent/processor/datapointcountprocessor => ./processor/datapointcountprocessor
+
+replace github.com/observiq/bindplane-agent/processor/lookupprocessor => ./processor/lookupprocessor
 
 replace github.com/observiq/bindplane-agent/expr => ./expr
 
