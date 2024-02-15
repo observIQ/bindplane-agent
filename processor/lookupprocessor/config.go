@@ -20,12 +20,12 @@ import (
 )
 
 const (
-	// BodyContext is the context for the body of the telemetry
-	BodyContext = "body"
-	// AttributesContext is the context for the attributes of the telemetry
-	AttributesContext = "attributes"
-	// ResourceContext is the context for the resource of the telemetry
-	ResourceContext = "resource"
+	// bodyContext is the context for the body of the telemetry
+	bodyContext = "body"
+	// attributesContext is the context for the attributes of the telemetry
+	attributesContext = "attributes"
+	// resourceContext is the context for the resource of the telemetry
+	resourceContext = "resource"
 )
 
 var (
@@ -61,7 +61,7 @@ func (cfg Config) Validate() error {
 	}
 
 	switch cfg.Context {
-	case BodyContext, AttributesContext, ResourceContext:
+	case bodyContext, attributesContext, resourceContext:
 	default:
 		return errInvalidContext
 	}

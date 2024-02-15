@@ -16,6 +16,7 @@ package lookupprocessor
 
 import (
 	"context"
+	"sync"
 	"time"
 
 	"go.opentelemetry.io/collector/component"
@@ -33,6 +34,7 @@ type lookupProcessor struct {
 	context string
 	field   string
 	cancel  context.CancelFunc
+	wg      *sync.WaitGroup
 }
 
 // newLookupProcessor creates a new lookupProcessor
@@ -42,6 +44,7 @@ func newLookupProcessor(cfg *Config, logger *zap.Logger) *lookupProcessor {
 		csvFile: NewCSVFile(cfg.CSV, cfg.Field),
 		context: cfg.Context,
 		field:   cfg.Field,
+		wg:      &sync.WaitGroup{},
 	}
 }
 
@@ -49,6 +52,8 @@ func newLookupProcessor(cfg *Config, logger *zap.Logger) *lookupProcessor {
 func (p *lookupProcessor) start(_ context.Context, _ component.Host) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	p.cancel = cancel
+
+	p.wg.Add(1)
 	go p.loadCSV(ctx)
 
 	return nil
@@ -57,6 +62,7 @@ func (p *lookupProcessor) start(_ context.Context, _ component.Host) error {
 // shutdown stops the processor
 func (p *lookupProcessor) shutdown(context.Context) error {
 	p.cancel()
+	p.wg.Wait()
 	return nil
 }
 
@@ -64,6 +70,7 @@ func (p *lookupProcessor) shutdown(context.Context) error {
 func (p *lookupProcessor) loadCSV(ctx context.Context) {
 	ticker := time.NewTicker(1 * time.Minute)
 	defer ticker.Stop()
+	defer p.wg.Done()
 
 	for {
 		err := p.csvFile.Load()
@@ -82,11 +89,11 @@ func (p *lookupProcessor) loadCSV(ctx context.Context) {
 // processLogs processes incoming logs
 func (p *lookupProcessor) processLogs(_ context.Context, ld plog.Logs) (plog.Logs, error) {
 	switch p.context {
-	case BodyContext:
+	case bodyContext:
 		return p.processLogsWithBodyContext(ld)
-	case AttributesContext:
+	case attributesContext:
 		return p.processLogsWithAttributesContext(ld)
-	case ResourceContext:
+	case resourceContext:
 		return p.processLogsWithResourceContext(ld)
 	default:
 		return ld, errInvalidContext
@@ -145,9 +152,9 @@ func (p *lookupProcessor) processLogsWithBodyContext(ld plog.Logs) (plog.Logs, e
 // processTraces processes incoming traces
 func (p *lookupProcessor) processTraces(_ context.Context, td ptrace.Traces) (ptrace.Traces, error) {
 	switch p.context {
-	case AttributesContext:
+	case attributesContext:
 		return p.processTracesWithAttributesContext(td)
-	case ResourceContext:
+	case resourceContext:
 		return p.processTracesWithResourceContext(td)
 	default:
 		return td, errInvalidContext
@@ -185,9 +192,9 @@ func (p *lookupProcessor) processTracesWithAttributesContext(td ptrace.Traces) (
 // processMetrics processes incoming metrics
 func (p *lookupProcessor) processMetrics(_ context.Context, md pmetric.Metrics) (pmetric.Metrics, error) {
 	switch p.context {
-	case AttributesContext:
+	case attributesContext:
 		return p.processMetricsWithAttributesContext(md)
-	case ResourceContext:
+	case resourceContext:
 		return p.processMetricsWithResourceContext(md)
 	default:
 		return md, errInvalidContext

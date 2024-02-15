@@ -39,7 +39,7 @@ func TestProcessLogs(t *testing.T) {
 	}{
 		{
 			name:    "logs with resource context",
-			context: ResourceContext,
+			context: resourceContext,
 			field:   "ip",
 			csvContents: map[string]any{
 				"ip":     "0.0.0.0",
@@ -63,7 +63,7 @@ func TestProcessLogs(t *testing.T) {
 		},
 		{
 			name:    "logs with attributes context",
-			context: AttributesContext,
+			context: attributesContext,
 			field:   "ip",
 			csvContents: map[string]any{
 				"ip":     "0.0.0.0",
@@ -91,7 +91,7 @@ func TestProcessLogs(t *testing.T) {
 		},
 		{
 			name:    "logs with body context",
-			context: BodyContext,
+			context: bodyContext,
 			field:   "ip",
 			csvContents: map[string]any{
 				"ip":     "0.0.0.0",
@@ -151,7 +151,7 @@ func TestProcessTraces(t *testing.T) {
 	}{
 		{
 			name:    "traces with resource context",
-			context: ResourceContext,
+			context: resourceContext,
 			field:   "ip",
 			csvContents: map[string]any{
 				"ip":     "0.0.0.0",
@@ -175,7 +175,7 @@ func TestProcessTraces(t *testing.T) {
 		},
 		{
 			name:    "traces with attributes context",
-			context: AttributesContext,
+			context: attributesContext,
 			field:   "ip",
 			csvContents: map[string]any{
 				"ip":     "0.0.0.0",
@@ -203,7 +203,7 @@ func TestProcessTraces(t *testing.T) {
 		},
 		{
 			name:    "traces with body context",
-			context: BodyContext,
+			context: bodyContext,
 			field:   "ip",
 			csvContents: map[string]any{
 				"ip":     "0.0.0.0",
@@ -251,7 +251,7 @@ func TestProcessMetrics(t *testing.T) {
 	}{
 		{
 			name:    "metrics with resource context",
-			context: ResourceContext,
+			context: resourceContext,
 			field:   "ip",
 			csvContents: map[string]any{
 				"ip":     "0.0.0.0",
@@ -275,7 +275,7 @@ func TestProcessMetrics(t *testing.T) {
 		},
 		{
 			name:    "sum metrics with attributes context",
-			context: AttributesContext,
+			context: attributesContext,
 			field:   "ip",
 			csvContents: map[string]any{
 				"ip":     "0.0.0.0",
@@ -306,7 +306,7 @@ func TestProcessMetrics(t *testing.T) {
 		},
 		{
 			name:    "gauge metrics with attributes context",
-			context: AttributesContext,
+			context: attributesContext,
 			field:   "ip",
 			csvContents: map[string]any{
 				"ip":     "0.0.0.0",
@@ -337,7 +337,7 @@ func TestProcessMetrics(t *testing.T) {
 		},
 		{
 			name:    "metrics with body context",
-			context: BodyContext,
+			context: bodyContext,
 			field:   "ip",
 			csvContents: map[string]any{
 				"ip":     "0.0.0.0",
