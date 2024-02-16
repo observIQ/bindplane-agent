@@ -76,6 +76,8 @@ func (p *lookupProcessor) loadCSV(ctx context.Context) {
 		err := p.csvFile.Load()
 		if err != nil {
 			p.logger.Error("failed to load csv", zap.Error(err))
+		} else {
+			p.logger.Debug("csv loaded")
 		}
 
 		select {

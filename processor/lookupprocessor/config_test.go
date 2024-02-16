@@ -58,7 +58,7 @@ func TestValidate(t *testing.T) {
 		},
 		{
 			name: "valid resource context",
-			cfg:  Config{CSV: "csv", Context: "resource", Field: "field"},
+			cfg:  Config{CSV: "csv", Context: "resource.attributes", Field: "field"},
 			err:  nil,
 		},
 	}

@@ -25,7 +25,7 @@ const (
 	// attributesContext is the context for the attributes of the telemetry
 	attributesContext = "attributes"
 	// resourceContext is the context for the resource of the telemetry
-	resourceContext = "resource"
+	resourceContext = "resource.attributes"
 )
 
 var (
