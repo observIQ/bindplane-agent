@@ -152,7 +152,7 @@ func (gm *GaugeModel) BatchInsert(ctx context.Context, db database.Database) err
 				value = dp.DoubleValue()
 			}
 
-			eAttributes, eTimestamps, eTraceIDs, eSpanIDs, eValues := utility.FlattenExemplars(dp.Exemplars(), gm.logger)
+			eAttributes, eTimestamps, eTraceIDs, eSpanIDs, eValues := utility.FlattenExemplars(dp.Exemplars())
 
 			gaugeMaps = append(gaugeMaps, map[string]any{
 				"rSchema":        g.resource.SchemaUrl(),

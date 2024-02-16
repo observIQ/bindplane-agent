@@ -20,8 +20,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/lib/pq"
 	"github.com/observiq/bindplane-agent/exporter/snowflakeexporter/internal/database/mocks"
+	"github.com/observiq/bindplane-agent/exporter/snowflakeexporter/internal/utility"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.uber.org/zap"
@@ -116,8 +116,8 @@ func expectedSummaryMaps() []map[string]any {
 			"count":          uint64(1),
 			"sum":            float64(2.03),
 			"flags":          pmetric.DataPointFlags(0),
-			"quantiles":      pq.Float64Array{0},
-			"values":         pq.Float64Array{1.7},
+			"quantiles":      utility.Array{float64(0)},
+			"values":         utility.Array{1.7},
 		},
 		{
 			"rSchema":        "resource_test_metrics",
@@ -137,8 +137,8 @@ func expectedSummaryMaps() []map[string]any {
 			"count":          uint64(2),
 			"sum":            float64(3.03),
 			"flags":          pmetric.DataPointFlags(1),
-			"quantiles":      pq.Float64Array{1},
-			"values":         pq.Float64Array{2.7},
+			"quantiles":      utility.Array{float64(1)},
+			"values":         utility.Array{2.7},
 		},
 	}
 }

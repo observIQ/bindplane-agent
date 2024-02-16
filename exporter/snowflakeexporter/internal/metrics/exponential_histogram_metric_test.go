@@ -20,8 +20,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/lib/pq"
 	"github.com/observiq/bindplane-agent/exporter/snowflakeexporter/internal/database/mocks"
+	"github.com/observiq/bindplane-agent/exporter/snowflakeexporter/internal/utility"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.uber.org/zap"
@@ -126,11 +126,11 @@ func expectedEHMMaps() []map[string]any {
 			"positiveBucketCounts": []uint64{0, 1, 2, 3, 4},
 			"negativeOffset":       int32(1),
 			"negativeBucketCounts": []uint64{5, 6, 7, 8, 0},
-			"eAttributes":          pq.StringArray{"{\"a1\":\"exemplar attribute\",\"a2\":\"0\"}", "{\"a1\":\"exemplar attribute\",\"a2\":\"1\"}"},
-			"eTimestamps":          pq.StringArray{time.Unix(0, int64(0)).UTC().String(), time.Unix(0, int64(0)).UTC().String()},
-			"eTraceIDs":            pq.StringArray{"", ""},
-			"eSpanIDs":             pq.StringArray{"", ""},
-			"eValues":              pq.Float64Array{2.1, 3.1},
+			"eAttributes":          utility.Array{map[string]any{"a1": "exemplar attribute", "a2": int64(0)}, map[string]any{"a1": "exemplar attribute", "a2": int64(1)}, map[string]any{}},
+			"eTimestamps":          utility.Array{time.Unix(0, int64(0)).UTC(), time.Unix(0, int64(0)).UTC(), time.Unix(0, int64(0)).UTC()},
+			"eTraceIDs":            utility.Array{"", "", ""},
+			"eSpanIDs":             utility.Array{"", "", ""},
+			"eValues":              utility.Array{2.1, 3.1, int64(3)},
 		},
 		{
 			"rSchema":              "resource_test_metrics",
@@ -160,11 +160,11 @@ func expectedEHMMaps() []map[string]any {
 			"positiveBucketCounts": []uint64{1, 1, 2, 3, 4},
 			"negativeOffset":       int32(2),
 			"negativeBucketCounts": []uint64{5, 6, 7, 8, 1},
-			"eAttributes":          pq.StringArray{"{\"a1\":\"exemplar attribute\",\"a2\":\"0\"}", "{\"a1\":\"exemplar attribute\",\"a2\":\"1\"}"},
-			"eTimestamps":          pq.StringArray{time.Unix(0, int64(0)).UTC().String(), time.Unix(0, int64(0)).UTC().String()},
-			"eTraceIDs":            pq.StringArray{"", ""},
-			"eSpanIDs":             pq.StringArray{"", ""},
-			"eValues":              pq.Float64Array{2.1, 3.1},
+			"eAttributes":          utility.Array{map[string]any{"a1": "exemplar attribute", "a2": int64(0)}, map[string]any{"a1": "exemplar attribute", "a2": int64(1)}, map[string]any{}},
+			"eTimestamps":          utility.Array{time.Unix(0, int64(0)).UTC(), time.Unix(0, int64(0)).UTC(), time.Unix(0, int64(0)).UTC()},
+			"eTraceIDs":            utility.Array{"", "", ""},
+			"eSpanIDs":             utility.Array{"", "", ""},
+			"eValues":              utility.Array{2.1, 3.1, int64(3)},
 		},
 		{
 			"rSchema":              "resource_test_metrics",
@@ -194,11 +194,11 @@ func expectedEHMMaps() []map[string]any {
 			"positiveBucketCounts": []uint64{2, 1, 2, 3, 4},
 			"negativeOffset":       int32(3),
 			"negativeBucketCounts": []uint64{5, 6, 7, 8, 2},
-			"eAttributes":          pq.StringArray{"{\"a1\":\"exemplar attribute\",\"a2\":\"0\"}", "{\"a1\":\"exemplar attribute\",\"a2\":\"1\"}"},
-			"eTimestamps":          pq.StringArray{time.Unix(0, int64(0)).UTC().String(), time.Unix(0, int64(0)).UTC().String()},
-			"eTraceIDs":            pq.StringArray{"", ""},
-			"eSpanIDs":             pq.StringArray{"", ""},
-			"eValues":              pq.Float64Array{2.1, 3.1},
+			"eAttributes":          utility.Array{map[string]any{"a1": "exemplar attribute", "a2": int64(0)}, map[string]any{"a1": "exemplar attribute", "a2": int64(1)}, map[string]any{}},
+			"eTimestamps":          utility.Array{time.Unix(0, int64(0)).UTC(), time.Unix(0, int64(0)).UTC(), time.Unix(0, int64(0)).UTC()},
+			"eTraceIDs":            utility.Array{"", "", ""},
+			"eSpanIDs":             utility.Array{"", "", ""},
+			"eValues":              utility.Array{2.1, 3.1, int64(3)},
 		},
 	}
 }

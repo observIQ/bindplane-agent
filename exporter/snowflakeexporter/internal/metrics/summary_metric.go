@@ -18,7 +18,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/lib/pq"
 	"github.com/observiq/bindplane-agent/exporter/snowflakeexporter/internal/database"
 	"github.com/observiq/bindplane-agent/exporter/snowflakeexporter/internal/utility"
 	"go.opentelemetry.io/collector/pdata/pmetric"
@@ -176,9 +175,9 @@ func (sm *SummaryModel) BatchInsert(ctx context.Context, db database.Database) e
 	return nil
 }
 
-func flattenQuantileValues(qv pmetric.SummaryDataPointValueAtQuantileSlice) (pq.Float64Array, pq.Float64Array) {
-	quantiles := pq.Float64Array{}
-	values := pq.Float64Array{}
+func flattenQuantileValues(qv pmetric.SummaryDataPointValueAtQuantileSlice) (utility.Array, utility.Array) {
+	quantiles := utility.Array{}
+	values := utility.Array{}
 
 	for i := 0; i < qv.Len(); i++ {
 		quantiles = append(quantiles, qv.At(i).Quantile())

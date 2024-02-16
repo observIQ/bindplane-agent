@@ -178,7 +178,7 @@ func (ehm *ExponentialHistogramModel) BatchInsert(ctx context.Context, db databa
 		for i := 0; i < eh.exponentialHistogram.DataPoints().Len(); i++ {
 			dp := eh.exponentialHistogram.DataPoints().At(i)
 
-			eAttributes, eTimestamps, eTraceIDs, eSpanIDs, eValues := utility.FlattenExemplars(dp.Exemplars(), ehm.logger)
+			eAttributes, eTimestamps, eTraceIDs, eSpanIDs, eValues := utility.FlattenExemplars(dp.Exemplars())
 
 			exponentialHistogramMaps = append(exponentialHistogramMaps, map[string]any{
 				"rSchema":              eh.resource.SchemaUrl(),

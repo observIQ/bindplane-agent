@@ -16,15 +16,29 @@
 package utility // "github.com/observiq/bindplane-agent/exporter/snowflakeexporter/internal/utility"
 
 import (
+	"database/sql/driver"
 	"encoding/hex"
 	"encoding/json"
-
-	"github.com/lib/pq"
 
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.uber.org/zap"
 )
+
+// Array implements driver.Valuer interface allowing arrays to be sent to Snowflake
+type Array []any
+
+// Value marshals the underlying array and then casts to a string value so it can be viewed in Snowflake
+func (a Array) Value() (driver.Value, error) {
+	if a == nil {
+		return nil, nil
+	}
+	bytes, err := json.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return string(bytes), nil
+}
 
 // ConvertAttributesToString converts the pcommon.Map into a JSON string representation
 // this is due to a bug/lacking feature with the snowflake driver that prevents maps from being inserted into VARIANT & OBJECT columns
@@ -45,6 +59,7 @@ func ConvertAttributesToString(attributes pcommon.Map, logger *zap.Logger) strin
 }
 
 // TraceIDToHexOrEmptyString returns a string representation of the TraceID in hex
+// Same implementation as "github.com/open-telemetry/opentelemetry-collector-contrib/internal/coreinternal/traceutil"
 func TraceIDToHexOrEmptyString(id pcommon.TraceID) string {
 	if id.IsEmpty() {
 		return ""
@@ -53,6 +68,7 @@ func TraceIDToHexOrEmptyString(id pcommon.TraceID) string {
 }
 
 // SpanIDToHexOrEmptyString returns a string representation of the SpanID in hex
+// Same implementation as "github.com/open-telemetry/opentelemetry-collector-contrib/internal/coreinternal/traceutil"
 func SpanIDToHexOrEmptyString(id pcommon.SpanID) string {
 	if id.IsEmpty() {
 		return ""
@@ -61,23 +77,22 @@ func SpanIDToHexOrEmptyString(id pcommon.SpanID) string {
 }
 
 // FlattenExemplars will flatten the given exemplars into slices of the individual fields
-func FlattenExemplars(exemplars pmetric.ExemplarSlice, l *zap.Logger) (pq.StringArray, pq.StringArray, pq.StringArray, pq.StringArray, pq.Float64Array) {
-	attributes := pq.StringArray{}
-	timestamps := pq.StringArray{}
-	traceIDs := pq.StringArray{}
-	spanIDs := pq.StringArray{}
-	values := pq.Float64Array{}
+func FlattenExemplars(exemplars pmetric.ExemplarSlice) (Array, Array, Array, Array, Array) {
+	attributes := Array{}
+	timestamps := Array{}
+	traceIDs := Array{}
+	spanIDs := Array{}
+	values := Array{}
 
 	for i := 0; i < exemplars.Len(); i++ {
 		e := exemplars.At(i)
-		attributes = append(attributes, ConvertAttributesToString(e.FilteredAttributes(), l))
-		timestamps = append(timestamps, e.Timestamp().String())
+		attributes = append(attributes, e.FilteredAttributes().AsRaw())
+		timestamps = append(timestamps, e.Timestamp().AsTime())
 		traceIDs = append(traceIDs, TraceIDToHexOrEmptyString(e.TraceID()))
 		spanIDs = append(spanIDs, SpanIDToHexOrEmptyString(e.SpanID()))
 
-		// convert Int value to Float64 so that values can be combined and still inserted as an array
 		if e.ValueType() == pmetric.ExemplarValueTypeInt {
-			values = append(values, float64(e.IntValue()))
+			values = append(values, e.IntValue())
 		} else {
 			values = append(values, e.DoubleValue())
 		}

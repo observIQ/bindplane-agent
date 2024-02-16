@@ -43,9 +43,8 @@ func TestNewMetricsExporter(t *testing.T) {
 				Password:          "pass",
 				Database:          "db",
 				Metrics: TelemetryConfig{
-					Enabled: true,
-					Schema:  "schema",
-					Table:   "table",
+					Schema: "schema",
+					Table:  "table",
 				},
 			},
 			newDatabase: func(_, _, _ string) (database.Database, error) {
@@ -61,9 +60,8 @@ func TestNewMetricsExporter(t *testing.T) {
 				Password:          "pass",
 				Database:          "db",
 				Metrics: TelemetryConfig{
-					Enabled: true,
-					Schema:  "schema",
-					Table:   "table",
+					Schema: "schema",
+					Table:  "table",
 				},
 			},
 			newDatabase: func(_, _, _ string) (database.Database, error) {
@@ -107,9 +105,8 @@ func TestMetricsStart(t *testing.T) {
 		Database:          "db",
 		Warehouse:         "wh",
 		Metrics: TelemetryConfig{
-			Enabled: true,
-			Schema:  "schema",
-			Table:   "table",
+			Schema: "schema",
+			Table:  "table",
 		},
 	}
 

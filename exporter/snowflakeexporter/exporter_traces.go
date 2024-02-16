@@ -18,7 +18,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/lib/pq"
 	"github.com/observiq/bindplane-agent/exporter/snowflakeexporter/internal/database"
 	"github.com/observiq/bindplane-agent/exporter/snowflakeexporter/internal/utility"
 	"go.opentelemetry.io/collector/component"
@@ -139,7 +138,7 @@ func newTracesExporter(
 	params exporter.CreateSettings,
 	newDatabase func(dsn, wh, db string) (database.Database, error),
 ) (*tracesExporter, error) {
-	db, err := newDatabase(cfg.DSN, cfg.Warehouse, cfg.Database)
+	db, err := newDatabase(cfg.dsn, cfg.Warehouse, cfg.Database)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create new database connection for traces: %w", err)
 	}
@@ -184,7 +183,7 @@ func (te *tracesExporter) shutdown(_ context.Context) error {
 
 func (te *tracesExporter) tracesDataPusher(ctx context.Context, td ptrace.Traces) error {
 	te.logger.Debug("begin tracesDataPusher")
-	traceMaps := []map[string]any{}
+	traceMaps := make([]map[string]any, 0, td.SpanCount())
 	for i := 0; i < td.ResourceSpans().Len(); i++ {
 		resourceSpan := td.ResourceSpans().At(i)
 
@@ -193,8 +192,8 @@ func (te *tracesExporter) tracesDataPusher(ctx context.Context, td ptrace.Traces
 
 			for k := 0; k < scopeSpan.Spans().Len(); k++ {
 				span := scopeSpan.Spans().At(k)
-				eTimes, eNames, eAttributes, eDroppedCount := flattenEvents(span.Events(), te.logger)
-				lTraceIDs, lSpanIDs, lTraceStates, lAttributes, lDroppedCount := flattenLinks(span.Links(), te.logger)
+				eTimes, eNames, eAttributes, eDroppedCount := flattenEvents(span.Events())
+				lTraceIDs, lSpanIDs, lTraceStates, lAttributes, lDroppedCount := flattenLinks(span.Links())
 
 				traceMaps = append(traceMaps, map[string]any{
 					"rSchema":           resourceSpan.SchemaUrl(),
@@ -239,36 +238,36 @@ func (te *tracesExporter) tracesDataPusher(ctx context.Context, td ptrace.Traces
 	return nil
 }
 
-func flattenEvents(e ptrace.SpanEventSlice, l *zap.Logger) (pq.StringArray, pq.StringArray, pq.StringArray, pq.Int32Array) {
-	times := pq.StringArray{}
-	names := pq.StringArray{}
-	attrs := pq.StringArray{}
-	droppedCount := pq.Int32Array{}
+func flattenEvents(e ptrace.SpanEventSlice) (utility.Array, utility.Array, utility.Array, utility.Array) {
+	times := utility.Array{}
+	names := utility.Array{}
+	attrs := utility.Array{}
+	dropped := utility.Array{}
 
 	for i := 0; i < e.Len(); i++ {
-		times = append(times, e.At(i).Timestamp().AsTime().String())
+		times = append(times, e.At(i).Timestamp().AsTime())
 		names = append(names, e.At(i).Name())
-		attrs = append(attrs, utility.ConvertAttributesToString(e.At(i).Attributes(), l))
-		droppedCount = append(droppedCount, int32(e.At(i).DroppedAttributesCount()))
+		attrs = append(attrs, e.At(i).Attributes().AsRaw())
+		dropped = append(dropped, e.At(i).DroppedAttributesCount())
 	}
 
-	return times, names, attrs, droppedCount
+	return times, names, attrs, dropped
 }
 
-func flattenLinks(li ptrace.SpanLinkSlice, l *zap.Logger) (pq.StringArray, pq.StringArray, pq.StringArray, pq.StringArray, pq.Int32Array) {
-	traceIDs := pq.StringArray{}
-	spanIDs := pq.StringArray{}
-	traceStates := pq.StringArray{}
-	attrs := pq.StringArray{}
-	droppedCount := pq.Int32Array{}
+func flattenLinks(li ptrace.SpanLinkSlice) (utility.Array, utility.Array, utility.Array, utility.Array, utility.Array) {
+	traceIDs := utility.Array{}
+	spanIDs := utility.Array{}
+	traceStates := utility.Array{}
+	attrs := utility.Array{}
+	dropped := utility.Array{}
 
 	for i := 0; i < li.Len(); i++ {
 		traceIDs = append(traceIDs, utility.TraceIDToHexOrEmptyString(li.At(i).TraceID()))
 		spanIDs = append(spanIDs, utility.SpanIDToHexOrEmptyString(li.At(i).SpanID()))
 		traceStates = append(traceStates, li.At(i).TraceState().AsRaw())
-		attrs = append(attrs, utility.ConvertAttributesToString(li.At(i).Attributes(), l))
-		droppedCount = append(droppedCount, int32(li.At(i).DroppedAttributesCount()))
+		attrs = append(attrs, li.At(i).Attributes().AsRaw())
+		dropped = append(dropped, li.At(i).DroppedAttributesCount())
 	}
 
-	return traceIDs, spanIDs, traceStates, attrs, droppedCount
+	return traceIDs, spanIDs, traceStates, attrs, dropped
 }

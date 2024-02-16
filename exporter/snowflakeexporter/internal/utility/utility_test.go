@@ -47,3 +47,75 @@ func TestConvertAttributesToString(t *testing.T) {
 		})
 	}
 }
+
+func TestTraceIDToHexOrEmptyString(t *testing.T) {
+	testCases := []struct {
+		desc     string
+		id       pcommon.TraceID
+		expected string
+	}{
+		{
+			desc:     "simple",
+			id:       pcommon.TraceID([16]byte{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1}),
+			expected: "00000000000000000000000000000001",
+		},
+		{
+			desc:     "max",
+			id:       pcommon.TraceID([16]byte{255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255}),
+			expected: "ffffffffffffffffffffffffffffffff",
+		},
+		{
+			desc:     "empty",
+			id:       pcommon.TraceID([16]byte{}),
+			expected: "",
+		},
+		{
+			desc:     "something unique",
+			id:       pcommon.TraceID([16]byte{21, 3, 64, 221, 101, 39, 92, 168, 81, 131, 248, 12, 43, 199, 124, 211}),
+			expected: "150340dd65275ca85183f80c2bc77cd3",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.desc, func(t *testing.T) {
+			result := TraceIDToHexOrEmptyString(tc.id)
+			require.Equal(t, tc.expected, result)
+		})
+	}
+}
+
+func TestSpanIdToHexOrEmptyString(t *testing.T) {
+	testCases := []struct {
+		desc     string
+		id       pcommon.SpanID
+		expected string
+	}{
+		{
+			desc:     "simple",
+			id:       pcommon.SpanID([8]byte{0, 0, 0, 0, 0, 0, 0, 1}),
+			expected: "0000000000000001",
+		},
+		{
+			desc:     "max",
+			id:       pcommon.SpanID([8]byte{255, 255, 255, 255, 255, 255, 255, 255}),
+			expected: "ffffffffffffffff",
+		},
+		{
+			desc:     "empty",
+			id:       pcommon.SpanID([8]byte{}),
+			expected: "",
+		},
+		{
+			desc:     "something unique",
+			id:       pcommon.SpanID([8]byte{64, 39, 92, 112, 43, 199, 124, 211}),
+			expected: "40275c702bc77cd3",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.desc, func(t *testing.T) {
+			result := SpanIDToHexOrEmptyString(tc.id)
+			require.Equal(t, tc.expected, result)
+		})
+	}
+}

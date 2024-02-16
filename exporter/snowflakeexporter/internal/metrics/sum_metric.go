@@ -160,7 +160,7 @@ func (sm *SumModel) BatchInsert(ctx context.Context, db database.Database) error
 				value = dp.DoubleValue()
 			}
 
-			eAttributes, eTimestamps, eTraceIDs, eSpanIDs, eValues := utility.FlattenExemplars(dp.Exemplars(), sm.logger)
+			eAttributes, eTimestamps, eTraceIDs, eSpanIDs, eValues := utility.FlattenExemplars(dp.Exemplars())
 
 			sumMaps = append(sumMaps, map[string]any{
 				"rSchema":        s.resource.SchemaUrl(),

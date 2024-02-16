@@ -28,15 +28,12 @@ func TestConfigValidate(t *testing.T) {
 		expectedErr error
 	}{
 		{
-			desc: "Simple metrics pass",
+			desc: "default pass",
 			cfg: &Config{
 				AccountIdentifier: "accountID",
 				Username:          "username",
 				Password:          "password",
 				Warehouse:         "warehouse",
-				Metrics: TelemetryConfig{
-					Enabled: true,
-				},
 			},
 		},
 		{
@@ -46,9 +43,6 @@ func TestConfigValidate(t *testing.T) {
 				Password:  "pass",
 				Database:  "db",
 				Warehouse: "wh",
-				Metrics: TelemetryConfig{
-					Enabled: true,
-				},
 			},
 			expectedErr: errors.New("account_identifier is required"),
 		},
@@ -59,9 +53,6 @@ func TestConfigValidate(t *testing.T) {
 				Password:          "pass",
 				Database:          "db",
 				Warehouse:         "wh",
-				Metrics: TelemetryConfig{
-					Enabled: true,
-				},
 			},
 			expectedErr: errors.New("username is required"),
 		},
@@ -72,9 +63,6 @@ func TestConfigValidate(t *testing.T) {
 				Username:          "user",
 				Database:          "db",
 				Warehouse:         "wh",
-				Metrics: TelemetryConfig{
-					Enabled: true,
-				},
 			},
 			expectedErr: errors.New("password is required"),
 		},
@@ -85,50 +73,8 @@ func TestConfigValidate(t *testing.T) {
 				Username:          "user",
 				Password:          "pass",
 				Database:          "db",
-				Metrics: TelemetryConfig{
-					Enabled: true,
-				},
 			},
 			expectedErr: errors.New("warehouse is required"),
-		},
-		{
-			desc: "Default logs cfg",
-			cfg: &Config{
-				AccountIdentifier: "id",
-				Username:          "user",
-				Password:          "pass",
-				Database:          "db",
-				Warehouse:         "wh",
-				Logs: TelemetryConfig{
-					Enabled: true,
-				},
-			},
-		},
-		{
-			desc: "Default metrics cfg",
-			cfg: &Config{
-				AccountIdentifier: "id",
-				Username:          "user",
-				Password:          "pass",
-				Database:          "db",
-				Warehouse:         "wh",
-				Metrics: TelemetryConfig{
-					Enabled: true,
-				},
-			},
-		},
-		{
-			desc: "Default traces cfg",
-			cfg: &Config{
-				AccountIdentifier: "id",
-				Username:          "user",
-				Password:          "pass",
-				Database:          "db",
-				Warehouse:         "wh",
-				Traces: TelemetryConfig{
-					Enabled: true,
-				},
-			},
 		},
 		{
 			desc: "Partial telemetry cfgs",
@@ -139,28 +85,16 @@ func TestConfigValidate(t *testing.T) {
 				Warehouse:         "wh",
 				Role:              "role",
 				Logs: TelemetryConfig{
-					Enabled: true,
-					Table:   "lt",
+					Table: "lt",
 				},
 				Metrics: TelemetryConfig{
-					Enabled: true,
-					Schema:  "ms",
+					Schema: "ms",
 				},
 				Traces: TelemetryConfig{
-					Enabled: true,
+					Schema: "ts",
+					Table:  "tt",
 				},
 			},
-		},
-		{
-			desc: "No telemetry configured",
-			cfg: &Config{
-				AccountIdentifier: "id",
-				Username:          "user",
-				Password:          "pass",
-				Database:          "db",
-				Warehouse:         "wh",
-			},
-			expectedErr: errors.New("no telemetry type configured for exporter"),
 		},
 	}
 

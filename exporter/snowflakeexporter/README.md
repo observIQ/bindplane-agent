@@ -34,15 +34,12 @@ The exporter can be configured using the following fields:
 | password | string | | `true` | The password for the account the exporter will use to authenticate with Snowflake. |
 | warehouse | string | | `true` | The Snowflake data warehouse that should be used for storing data. |
 | role | string | | `false` | The Snowflake role that the exporter should use to have the correct permissions. Only necessary if the default role of the given user is not the necessary role. |
-| database | string | `bpop` | `false` | The database in Snowflake that the exporter will store telemetry data in. Will create it if it doesn't exist. |
+| database | string | `otlp` | `false` | The database in Snowflake that the exporter will store telemetry data in. Will create it if it doesn't exist. |
 | parameters | map | | `false` | A map of optional connection parameters that may be used for connecting with Snowflake. |
-| logs.enabled | bool | | `true` | Tells the exporter whether or not logs will be sent to Snowflake. |
 | logs.schema | string | `logs` | `false` | The name of the schema to use to store the log table in. |
 | logs.table | string | `data` | `false` | The name of the table that logs will be stored in. |
-| metrics.enabled | bool | | `true` | Tells the exporter whether or not metrics will be sent to Snowflake. |
 | metrics.schema | string | `metrics` | `false` | The name of the schema to use to store the metric tables in. |
 | metrics.table | string | `data` | `false` | The prefix to use for the tables that metrics will be stored in. |
-| traces.enabled | bool | | `true` | Tells the exporter whether or not traces will be sent to Snowflake. |
 | traces.schema | string | `traces` | `false` | The name of the schema to use to store the trace table in. |
 | traces.table | string | `data` | `false` | The name of the table that traces will be stored in. |
 
@@ -127,7 +124,9 @@ For more information on Snowflake's various privileges and subsequent commands, 
 
 ## Example Configurations
 
-### Basic Configuration With Defaults
+### Basic Configuration With Default Schemas & Tables
+
+This configuration includes only the required fields. It will use the default database, `otlp`, and use the default schema and table names for whichever telemetry pipelines it is included in.
 
 ```yaml
 snowflake:
@@ -135,15 +134,11 @@ snowflake:
     username: "bp_agent"
     password: "password"
     warehouse: "TEST"
-    logs:
-        enabled: true
-    metrics:
-        enabled: true
-    traces:
-        enabled: true
 ```
 
-### Full Configuration
+### Full Custom Configuration
+
+This configuration includes all fields specific to this exporter. Custom database, schema, and table names will be used.
 
 ```yaml
 snowflake:
@@ -154,20 +149,19 @@ snowflake:
     role: "SYSADMIN"
     database: "db"
     logs:
-        enabled: true
         schema: "file_logs"
         table: "log_data"
     metrics:
-        enabled: true
         schema: "host_metrics"
         table: "metric_data"
     traces:
-        enabled: true
         schema: "my_traces"
         table: "trace_data"
 ```
 
 ### Basic Configuration With Exporter Helpers
+
+This configuration uses some of the exporter helper configuration options and some non-default schemas and tables.
 
 ```yaml
 snowflake:
@@ -176,11 +170,12 @@ snowflake:
     password: "password"
     warehouse: "TEST"
     logs:
-        enabled: true
+        schema: "file_logs"
     metrics:
-        enabled: true
+        table: "host_metrics"
     traces:
-        enabled: true
+        schema: "my_traces"
+        table: "trace_data"
     timeout: 10s
     retry_on_failure:
         enabled: true

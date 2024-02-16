@@ -46,7 +46,7 @@ func newMetricsExporter(
 	params exporter.CreateSettings,
 	newDatabase func(dsn, wh, db string) (database.Database, error),
 ) (*metricsExporter, error) {
-	db, err := newDatabase(cfg.DSN, cfg.Warehouse, cfg.Database)
+	db, err := newDatabase(cfg.dsn, cfg.Warehouse, cfg.Database)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create new database connection for metrics: %w", err)
 	}
@@ -73,23 +73,35 @@ func (me *metricsExporter) start(ctx context.Context, _ component.Host) error {
 		return fmt.Errorf("failed to create metrics schema: %w", err)
 	}
 
-	// create metric tables
-	err = me.db.CreateTable(ctx, fmt.Sprintf(metrics.CreateSumMetricTableTemplate, me.cfg.Database, me.cfg.Metrics.Schema, me.cfg.Metrics.Table))
+	err = me.createMetricTables(ctx)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (me *metricsExporter) createMetricTables(ctx context.Context) error {
+	err := me.db.CreateTable(ctx, fmt.Sprintf(metrics.CreateSumMetricTableTemplate, me.cfg.Database, me.cfg.Metrics.Schema, me.cfg.Metrics.Table))
 	if err != nil {
 		return fmt.Errorf("failed to create sum metrics table: %w", err)
 	}
+
 	err = me.db.CreateTable(ctx, fmt.Sprintf(metrics.CreateGaugeMetricTableTemplate, me.cfg.Database, me.cfg.Metrics.Schema, me.cfg.Metrics.Table))
 	if err != nil {
 		return fmt.Errorf("failed to create gauge metrics table: %w", err)
 	}
+
 	err = me.db.CreateTable(ctx, fmt.Sprintf(metrics.CreateSummaryMetricTableTemplate, me.cfg.Database, me.cfg.Metrics.Schema, me.cfg.Metrics.Table))
 	if err != nil {
 		return fmt.Errorf("failed to create summary metrics table: %w", err)
 	}
+
 	err = me.db.CreateTable(ctx, fmt.Sprintf(metrics.CreateHistogramMetricTableTemplate, me.cfg.Database, me.cfg.Metrics.Schema, me.cfg.Metrics.Table))
 	if err != nil {
 		return fmt.Errorf("failed to create histogram metrics table: %w", err)
 	}
+
 	err = me.db.CreateTable(ctx, fmt.Sprintf(metrics.CreateExponentialHistogramMetricTableTemplate, me.cfg.Database, me.cfg.Metrics.Schema, me.cfg.Metrics.Table))
 	if err != nil {
 		return fmt.Errorf("failed to create exponential histogram metrics table: %w", err)
@@ -138,14 +150,7 @@ func (me *metricsExporter) metricsDataPusher(ctx context.Context, md pmetric.Met
 }
 
 func (me *metricsExporter) filterMetrics(md pmetric.Metrics) map[string]metricModel {
-	m := map[string]metricModel{}
-
-	// init models
-	m["sums"] = metrics.NewSumModel(me.logger, fmt.Sprintf(metrics.InsertIntoSumMetricTableTemplate, me.cfg.Database, me.cfg.Metrics.Schema, me.cfg.Metrics.Table))
-	m["gauges"] = metrics.NewGaugeModel(me.logger, fmt.Sprintf(metrics.InsertIntoGaugeMetricTableTemplate, me.cfg.Database, me.cfg.Metrics.Schema, me.cfg.Metrics.Table))
-	m["summaries"] = metrics.NewSummaryModel(me.logger, fmt.Sprintf(metrics.InsertIntoSummaryMetricTableTemplate, me.cfg.Database, me.cfg.Metrics.Schema, me.cfg.Metrics.Table))
-	m["histograms"] = metrics.NewHistogramModel(me.logger, fmt.Sprintf(metrics.InsertIntoHistogramMetricTableTemplate, me.cfg.Database, me.cfg.Metrics.Schema, me.cfg.Metrics.Table))
-	m["exponentialHistograms"] = metrics.NewExponentialHistogramModel(me.logger, fmt.Sprintf(metrics.InsertIntoExponentialHistogramMetricTableTemplate, me.cfg.Database, me.cfg.Metrics.Schema, me.cfg.Metrics.Table))
+	m := me.newMetricModels()
 
 	// loop through metrics and add to corresponding metric model
 	for i := 0; i < md.ResourceMetrics().Len(); i++ {
@@ -175,5 +180,15 @@ func (me *metricsExporter) filterMetrics(md pmetric.Metrics) map[string]metricMo
 		}
 	}
 
+	return m
+}
+
+func (me *metricsExporter) newMetricModels() map[string]metricModel {
+	m := map[string]metricModel{}
+	m["sums"] = metrics.NewSumModel(me.logger, fmt.Sprintf(metrics.InsertIntoSumMetricTableTemplate, me.cfg.Database, me.cfg.Metrics.Schema, me.cfg.Metrics.Table))
+	m["gauges"] = metrics.NewGaugeModel(me.logger, fmt.Sprintf(metrics.InsertIntoGaugeMetricTableTemplate, me.cfg.Database, me.cfg.Metrics.Schema, me.cfg.Metrics.Table))
+	m["summaries"] = metrics.NewSummaryModel(me.logger, fmt.Sprintf(metrics.InsertIntoSummaryMetricTableTemplate, me.cfg.Database, me.cfg.Metrics.Schema, me.cfg.Metrics.Table))
+	m["histograms"] = metrics.NewHistogramModel(me.logger, fmt.Sprintf(metrics.InsertIntoHistogramMetricTableTemplate, me.cfg.Database, me.cfg.Metrics.Schema, me.cfg.Metrics.Table))
+	m["exponentialHistograms"] = metrics.NewExponentialHistogramModel(me.logger, fmt.Sprintf(metrics.InsertIntoExponentialHistogramMetricTableTemplate, me.cfg.Database, me.cfg.Metrics.Schema, me.cfg.Metrics.Table))
 	return m
 }

@@ -148,4 +148,7 @@ func generateExemplars(es pmetric.ExemplarSlice) {
 		e.SetDoubleValue(float64(i) + 2.1)
 		e.FilteredAttributes().FromRaw(map[string]any{"a1": "exemplar attribute", "a2": i})
 	}
+
+	e := es.AppendEmpty()
+	e.SetIntValue(3)
 }

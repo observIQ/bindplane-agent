@@ -44,9 +44,8 @@ func TestNewLogsExporter(t *testing.T) {
 				Password:          "pass",
 				Database:          "db",
 				Logs: TelemetryConfig{
-					Enabled: true,
-					Schema:  "schema",
-					Table:   "table",
+					Schema: "schema",
+					Table:  "table",
 				},
 			},
 			newDatabase: func(_, _, _ string) (database.Database, error) {
@@ -62,9 +61,8 @@ func TestNewLogsExporter(t *testing.T) {
 				Password:          "pass",
 				Database:          "db",
 				Logs: TelemetryConfig{
-					Enabled: true,
-					Schema:  "schema",
-					Table:   "table",
+					Schema: "schema",
+					Table:  "table",
 				},
 			},
 			newDatabase: func(_, _, _ string) (database.Database, error) {
@@ -108,9 +106,8 @@ func TestLogsStart(t *testing.T) {
 		Database:          "db",
 		Warehouse:         "wh",
 		Logs: TelemetryConfig{
-			Enabled: true,
-			Schema:  "schema",
-			Table:   "table",
+			Schema: "schema",
+			Table:  "table",
 		},
 	}
 
@@ -209,9 +206,8 @@ func TestLogsDataPusher(t *testing.T) {
 		Warehouse:         "wh",
 		Database:          "db",
 		Logs: TelemetryConfig{
-			Enabled: true,
-			Schema:  "schema",
-			Table:   "table",
+			Schema: "schema",
+			Table:  "table",
 		},
 	}
 

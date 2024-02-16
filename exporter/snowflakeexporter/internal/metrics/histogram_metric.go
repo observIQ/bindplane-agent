@@ -163,7 +163,7 @@ func (hm *HistogramModel) BatchInsert(ctx context.Context, db database.Database)
 		for i := 0; i < h.histogram.DataPoints().Len(); i++ {
 			dp := h.histogram.DataPoints().At(i)
 
-			eAttributes, eTimestamps, eTraceIDs, eSpanIDs, eValues := utility.FlattenExemplars(dp.Exemplars(), hm.logger)
+			eAttributes, eTimestamps, eTraceIDs, eSpanIDs, eValues := utility.FlattenExemplars(dp.Exemplars())
 
 			histogramMaps = append(histogramMaps, map[string]any{
 				"rSchema":        h.resource.SchemaUrl(),

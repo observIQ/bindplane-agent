@@ -105,7 +105,7 @@ func newLogsExporter(
 	params exporter.CreateSettings,
 	newDatabase func(dsn, wh, db string) (database.Database, error),
 ) (*logsExporter, error) {
-	db, err := newDatabase(cfg.DSN, cfg.Warehouse, cfg.Database)
+	db, err := newDatabase(cfg.dsn, cfg.Warehouse, cfg.Database)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create new database connection for logs: %w", err)
 	}
@@ -150,7 +150,7 @@ func (le *logsExporter) shutdown(_ context.Context) error {
 
 func (le *logsExporter) logsDataPusher(ctx context.Context, ld plog.Logs) error {
 	le.logger.Debug("begin logsDataPusher")
-	logMaps := []map[string]any{}
+	logMaps := make([]map[string]any, 0, ld.LogRecordCount())
 
 	for i := 0; i < ld.ResourceLogs().Len(); i++ {
 		resourceLog := ld.ResourceLogs().At(i)

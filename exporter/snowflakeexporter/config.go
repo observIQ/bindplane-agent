@@ -24,7 +24,7 @@ import (
 )
 
 const (
-	defaultDatabase      = "bpop"
+	defaultDatabase      = "otlp"
 	defaultLogsSchema    = "logs"
 	defaultMetricsSchema = "metrics"
 	defaultTracesSchema  = "traces"
@@ -41,22 +41,21 @@ type Config struct {
 	Username          string             `mapstructure:"username"`
 	Password          string             `mapstructure:"password"`
 	Warehouse         string             `mapstructure:"warehouse"`
-	Role              string             `mapstructure:"role,omitempty"`
-	Database          string             `mapstructure:"database,omitempty"`
-	Parameters        map[string]*string `mapstructure:"parameters,omitempty"`
+	Role              string             `mapstructure:"role"`
+	Database          string             `mapstructure:"database"`
+	Parameters        map[string]*string `mapstructure:"parameters"`
 
 	Logs    TelemetryConfig `mapstructure:"logs"`
 	Metrics TelemetryConfig `mapstructure:"metrics"`
 	Traces  TelemetryConfig `mapstructure:"traces"`
 
-	DSN string
+	dsn string
 }
 
 // TelemetryConfig is a config used by each telemetry type
 type TelemetryConfig struct {
-	Enabled bool   `mapstructure:"enabled"`
-	Schema  string `mapstructure:"schema,omitempty"`
-	Table   string `mapstructure:"table,omitempty"`
+	Schema string `mapstructure:"schema,omitempty"`
+	Table  string `mapstructure:"table,omitempty"`
 }
 
 // Validate ensures the config is correct
@@ -95,40 +94,30 @@ func (c *Config) Validate() error {
 		return fmt.Errorf("failed to build DSN: %w", err)
 	}
 
-	c.DSN = dsn
+	c.dsn = dsn
 
 	return nil
 }
 
 // validateTelemetry ensures at least 1 telemetry type is configured and sets default values if needed
 func (c *Config) validateTelemetry() error {
-	if !c.Logs.Enabled && !c.Metrics.Enabled && !c.Traces.Enabled {
-		return errors.New("no telemetry type configured for exporter")
+	if c.Logs.Schema == "" {
+		c.Logs.Schema = defaultLogsSchema
 	}
-
-	if c.Logs.Enabled {
-		if c.Logs.Schema == "" {
-			c.Logs.Schema = defaultLogsSchema
-		}
-		if c.Logs.Table == "" {
-			c.Logs.Table = defaultTable
-		}
+	if c.Logs.Table == "" {
+		c.Logs.Table = defaultTable
 	}
-	if c.Metrics.Enabled {
-		if c.Metrics.Schema == "" {
-			c.Metrics.Schema = defaultMetricsSchema
-		}
-		if c.Metrics.Table == "" {
-			c.Metrics.Table = defaultTable
-		}
+	if c.Metrics.Schema == "" {
+		c.Metrics.Schema = defaultMetricsSchema
 	}
-	if c.Traces.Enabled {
-		if c.Traces.Schema == "" {
-			c.Traces.Schema = defaultTracesSchema
-		}
-		if c.Traces.Table == "" {
-			c.Traces.Table = defaultTable
-		}
+	if c.Metrics.Table == "" {
+		c.Metrics.Table = defaultTable
+	}
+	if c.Traces.Schema == "" {
+		c.Traces.Schema = defaultTracesSchema
+	}
+	if c.Traces.Table == "" {
+		c.Traces.Table = defaultTable
 	}
 
 	return nil
