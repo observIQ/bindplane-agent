@@ -43,19 +43,13 @@ func (a Array) Value() (driver.Value, error) {
 // ConvertAttributesToString converts the pcommon.Map into a JSON string representation
 // this is due to a bug/lacking feature with the snowflake driver that prevents maps from being inserted into VARIANT & OBJECT columns
 // github issue: https://github.com/snowflakedb/gosnowflake/issues/217
-func ConvertAttributesToString(attributes pcommon.Map, logger *zap.Logger) string {
-	m := make(map[string]string, attributes.Len())
-	attributes.Range(func(k string, v pcommon.Value) bool {
-		m[k] = v.AsString()
-		return true
-	})
-
-	j, err := json.Marshal(m)
+func ConvertAttributesToString(m pcommon.Map, logger *zap.Logger) string {
+	bytes, err := json.Marshal(m.AsRaw())
 	if err != nil {
 		logger.Warn("failed to marshal attribute map", zap.Error(err), zap.Any("map", m))
 		return ""
 	}
-	return string(j)
+	return string(bytes)
 }
 
 // TraceIDToHexOrEmptyString returns a string representation of the TraceID in hex

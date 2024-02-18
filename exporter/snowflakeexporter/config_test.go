@@ -34,15 +34,41 @@ func TestConfigValidate(t *testing.T) {
 				Username:          "username",
 				Password:          "password",
 				Warehouse:         "warehouse",
+				Database:          defaultDatabase,
+				Logs: TelemetryConfig{
+					Schema: defaultLogsSchema,
+					Table:  defaultTable,
+				},
+				Metrics: TelemetryConfig{
+					Schema: defaultMetricsSchema,
+					Table:  defaultTable,
+				},
+				Traces: TelemetryConfig{
+					Schema: defaultTracesSchema,
+					Table:  defaultTable,
+				},
 			},
 		},
 		{
 			desc: "Missing account identifier",
 			cfg: &Config{
-				Username:  "user",
-				Password:  "pass",
-				Database:  "db",
-				Warehouse: "wh",
+				AccountIdentifier: "",
+				Username:          "user",
+				Password:          "pass",
+				Warehouse:         "wh",
+				Database:          defaultDatabase,
+				Logs: TelemetryConfig{
+					Schema: defaultLogsSchema,
+					Table:  defaultTable,
+				},
+				Metrics: TelemetryConfig{
+					Schema: defaultMetricsSchema,
+					Table:  defaultTable,
+				},
+				Traces: TelemetryConfig{
+					Schema: defaultTracesSchema,
+					Table:  defaultTable,
+				},
 			},
 			expectedErr: errors.New("account_identifier is required"),
 		},
@@ -50,9 +76,22 @@ func TestConfigValidate(t *testing.T) {
 			desc: "Missing username",
 			cfg: &Config{
 				AccountIdentifier: "id",
+				Username:          "",
 				Password:          "pass",
-				Database:          "db",
 				Warehouse:         "wh",
+				Database:          defaultDatabase,
+				Logs: TelemetryConfig{
+					Schema: defaultLogsSchema,
+					Table:  defaultTable,
+				},
+				Metrics: TelemetryConfig{
+					Schema: defaultMetricsSchema,
+					Table:  defaultTable,
+				},
+				Traces: TelemetryConfig{
+					Schema: defaultTracesSchema,
+					Table:  defaultTable,
+				},
 			},
 			expectedErr: errors.New("username is required"),
 		},
@@ -61,8 +100,21 @@ func TestConfigValidate(t *testing.T) {
 			cfg: &Config{
 				AccountIdentifier: "id",
 				Username:          "user",
-				Database:          "db",
+				Password:          "",
 				Warehouse:         "wh",
+				Database:          defaultDatabase,
+				Logs: TelemetryConfig{
+					Schema: defaultLogsSchema,
+					Table:  defaultTable,
+				},
+				Metrics: TelemetryConfig{
+					Schema: defaultMetricsSchema,
+					Table:  defaultTable,
+				},
+				Traces: TelemetryConfig{
+					Schema: defaultTracesSchema,
+					Table:  defaultTable,
+				},
 			},
 			expectedErr: errors.New("password is required"),
 		},
@@ -72,29 +124,183 @@ func TestConfigValidate(t *testing.T) {
 				AccountIdentifier: "id",
 				Username:          "user",
 				Password:          "pass",
-				Database:          "db",
+				Warehouse:         "",
+				Database:          defaultDatabase,
+				Logs: TelemetryConfig{
+					Schema: defaultLogsSchema,
+					Table:  defaultTable,
+				},
+				Metrics: TelemetryConfig{
+					Schema: defaultMetricsSchema,
+					Table:  defaultTable,
+				},
+				Traces: TelemetryConfig{
+					Schema: defaultTracesSchema,
+					Table:  defaultTable,
+				},
 			},
 			expectedErr: errors.New("warehouse is required"),
 		},
 		{
-			desc: "Partial telemetry cfgs",
+			desc: "empty database",
 			cfg: &Config{
-				AccountIdentifier: "id",
-				Username:          "user",
-				Password:          "pass",
-				Warehouse:         "wh",
-				Role:              "role",
+				AccountIdentifier: "accountID",
+				Username:          "username",
+				Password:          "password",
+				Warehouse:         "warehouse",
+				Database:          "",
 				Logs: TelemetryConfig{
-					Table: "lt",
+					Schema: defaultLogsSchema,
+					Table:  defaultTable,
 				},
 				Metrics: TelemetryConfig{
-					Schema: "ms",
+					Schema: defaultMetricsSchema,
+					Table:  defaultTable,
 				},
 				Traces: TelemetryConfig{
-					Schema: "ts",
-					Table:  "tt",
+					Schema: defaultTracesSchema,
+					Table:  defaultTable,
 				},
 			},
+			expectedErr: errors.New("database cannot be set as empty"),
+		},
+		{
+			desc: "empty logs schema",
+			cfg: &Config{
+				AccountIdentifier: "accountID",
+				Username:          "username",
+				Password:          "password",
+				Warehouse:         "warehouse",
+				Database:          defaultDatabase,
+				Logs: TelemetryConfig{
+					Schema: "",
+					Table:  defaultTable,
+				},
+				Metrics: TelemetryConfig{
+					Schema: defaultMetricsSchema,
+					Table:  defaultTable,
+				},
+				Traces: TelemetryConfig{
+					Schema: defaultTracesSchema,
+					Table:  defaultTable,
+				},
+			},
+			expectedErr: errors.New("logs schema cannot be set as empty"),
+		},
+		{
+			desc: "empty logs table",
+			cfg: &Config{
+				AccountIdentifier: "accountID",
+				Username:          "username",
+				Password:          "password",
+				Warehouse:         "warehouse",
+				Database:          defaultDatabase,
+				Logs: TelemetryConfig{
+					Schema: defaultLogsSchema,
+					Table:  "",
+				},
+				Metrics: TelemetryConfig{
+					Schema: defaultMetricsSchema,
+					Table:  defaultTable,
+				},
+				Traces: TelemetryConfig{
+					Schema: defaultTracesSchema,
+					Table:  defaultTable,
+				},
+			},
+			expectedErr: errors.New("logs table cannot be set as empty"),
+		},
+		{
+			desc: "empty metrics schema",
+			cfg: &Config{
+				AccountIdentifier: "accountID",
+				Username:          "username",
+				Password:          "password",
+				Warehouse:         "warehouse",
+				Database:          defaultDatabase,
+				Logs: TelemetryConfig{
+					Schema: defaultLogsSchema,
+					Table:  defaultTable,
+				},
+				Metrics: TelemetryConfig{
+					Schema: "",
+					Table:  defaultTable,
+				},
+				Traces: TelemetryConfig{
+					Schema: defaultTracesSchema,
+					Table:  defaultTable,
+				},
+			},
+			expectedErr: errors.New("metrics schema cannot be set as empty"),
+		},
+		{
+			desc: "empty metrics table",
+			cfg: &Config{
+				AccountIdentifier: "accountID",
+				Username:          "username",
+				Password:          "password",
+				Warehouse:         "warehouse",
+				Database:          defaultDatabase,
+				Logs: TelemetryConfig{
+					Schema: defaultLogsSchema,
+					Table:  defaultTable,
+				},
+				Metrics: TelemetryConfig{
+					Schema: defaultMetricsSchema,
+					Table:  "",
+				},
+				Traces: TelemetryConfig{
+					Schema: defaultTracesSchema,
+					Table:  defaultTable,
+				},
+			},
+			expectedErr: errors.New("metrics table cannot be set as empty"),
+		},
+		{
+			desc: "empty traces schema",
+			cfg: &Config{
+				AccountIdentifier: "accountID",
+				Username:          "username",
+				Password:          "password",
+				Warehouse:         "warehouse",
+				Database:          defaultDatabase,
+				Logs: TelemetryConfig{
+					Schema: defaultLogsSchema,
+					Table:  defaultTable,
+				},
+				Metrics: TelemetryConfig{
+					Schema: defaultMetricsSchema,
+					Table:  defaultTable,
+				},
+				Traces: TelemetryConfig{
+					Schema: "",
+					Table:  defaultTable,
+				},
+			},
+			expectedErr: errors.New("traces schema cannot be set as empty"),
+		},
+		{
+			desc: "empty traces table",
+			cfg: &Config{
+				AccountIdentifier: "accountID",
+				Username:          "username",
+				Password:          "password",
+				Warehouse:         "warehouse",
+				Database:          defaultDatabase,
+				Logs: TelemetryConfig{
+					Schema: defaultLogsSchema,
+					Table:  defaultTable,
+				},
+				Metrics: TelemetryConfig{
+					Schema: defaultMetricsSchema,
+					Table:  defaultTable,
+				},
+				Traces: TelemetryConfig{
+					Schema: defaultTracesSchema,
+					Table:  "",
+				},
+			},
+			expectedErr: errors.New("traces table cannot be set as empty"),
 		},
 	}
 

@@ -24,26 +24,37 @@ import (
 
 func TestConvertAttributesToString(t *testing.T) {
 	testCases := []struct {
-		desc       string
-		attributes map[string]any
-		expected   string
+		desc     string
+		m        map[string]any
+		expected string
 	}{
 		{
 			desc: "simple",
-			attributes: map[string]any{
+			m: map[string]any{
 				"k1": "v1",
 				"k2": "v2",
 			},
-			expected: "{\"k1\":\"v1\",\"k2\":\"v2\"}",
+			expected: `{"k1":"v1","k2":"v2"}`,
+		},
+		{
+			desc: "nested map",
+			m: map[string]any{
+				"k1": "v1",
+				"k2": map[string]any{
+					"k2a": "v2a",
+					"k2b": "v2b",
+				},
+			},
+			expected: `{"k1":"v1","k2":{"k2a":"v2a","k2b":"v2b"}}`,
 		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.desc, func(t *testing.T) {
 			m := pcommon.NewMap()
-			require.NoError(t, m.FromRaw(tc.attributes))
-			attributeString := ConvertAttributesToString(m, zap.NewNop())
-			require.Equal(t, tc.expected, attributeString)
+			require.NoError(t, m.FromRaw(tc.m))
+			result := ConvertAttributesToString(m, zap.NewNop())
+			require.Equal(t, tc.expected, result)
 		})
 	}
 }

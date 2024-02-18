@@ -44,6 +44,19 @@ func createDefaultConfig() component.Config {
 		TimeoutSettings: exporterhelper.NewDefaultTimeoutSettings(),
 		QueueSettings:   exporterhelper.NewDefaultQueueSettings(),
 		BackOffConfig:   configretry.NewDefaultBackOffConfig(),
+		Database:        defaultDatabase,
+		Logs: TelemetryConfig{
+			Schema: defaultLogsSchema,
+			Table:  defaultTable,
+		},
+		Metrics: TelemetryConfig{
+			Schema: defaultMetricsSchema,
+			Table:  defaultTable,
+		},
+		Traces: TelemetryConfig{
+			Schema: defaultTracesSchema,
+			Table:  defaultTable,
+		},
 	}
 }
 

@@ -54,8 +54,8 @@ type Config struct {
 
 // TelemetryConfig is a config used by each telemetry type
 type TelemetryConfig struct {
-	Schema string `mapstructure:"schema,omitempty"`
-	Table  string `mapstructure:"table,omitempty"`
+	Schema string `mapstructure:"schema"`
+	Table  string `mapstructure:"table"`
 }
 
 // Validate ensures the config is correct
@@ -73,13 +73,31 @@ func (c *Config) Validate() error {
 		return errors.New("warehouse is required")
 	}
 	if c.Database == "" {
-		c.Database = defaultDatabase
+		return errors.New("database cannot be set as empty")
+	}
+	if c.Logs.Schema == "" {
+		return errors.New("logs schema cannot be set as empty")
+	}
+	if c.Logs.Table == "" {
+		return errors.New("logs table cannot be set as empty")
+	}
+	if c.Metrics.Schema == "" {
+		return errors.New("metrics schema cannot be set as empty")
+	}
+	if c.Metrics.Table == "" {
+		return errors.New("metrics table cannot be set as empty")
+	}
+	if c.Traces.Schema == "" {
+		return errors.New("traces schema cannot be set as empty")
+	}
+	if c.Traces.Table == "" {
+		return errors.New("traces table cannot be set as empty")
 	}
 
-	if err := c.validateTelemetry(); err != nil {
-		return err
-	}
+	return c.buildSnowflakeDSN()
+}
 
+func (c *Config) buildSnowflakeDSN() error {
 	sf := gosnowflake.Config{}
 
 	sf.User = c.Username
@@ -95,30 +113,5 @@ func (c *Config) Validate() error {
 	}
 
 	c.dsn = dsn
-
-	return nil
-}
-
-// validateTelemetry ensures at least 1 telemetry type is configured and sets default values if needed
-func (c *Config) validateTelemetry() error {
-	if c.Logs.Schema == "" {
-		c.Logs.Schema = defaultLogsSchema
-	}
-	if c.Logs.Table == "" {
-		c.Logs.Table = defaultTable
-	}
-	if c.Metrics.Schema == "" {
-		c.Metrics.Schema = defaultMetricsSchema
-	}
-	if c.Metrics.Table == "" {
-		c.Metrics.Table = defaultTable
-	}
-	if c.Traces.Schema == "" {
-		c.Traces.Schema = defaultTracesSchema
-	}
-	if c.Traces.Table == "" {
-		c.Traces.Table = defaultTable
-	}
-
 	return nil
 }
