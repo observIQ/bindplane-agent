@@ -1,6 +1,8 @@
 module github.com/observiq/bindplane-agent
 
-go 1.20
+go 1.21
+
+toolchain go1.21.6
 
 require (
 	github.com/google/uuid v1.6.0
@@ -615,12 +617,12 @@ require (
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.48.0 // indirect
 	go.opentelemetry.io/contrib/propagators/b3 v1.22.0 // indirect
 	go.opentelemetry.io/contrib/zpages v0.47.0 // indirect
-	go.opentelemetry.io/otel v1.23.0 // indirect
+	go.opentelemetry.io/otel v1.23.1 // indirect
 	go.opentelemetry.io/otel/exporters/prometheus v0.45.1 // indirect
-	go.opentelemetry.io/otel/metric v1.23.0 // indirect
+	go.opentelemetry.io/otel/metric v1.23.1 // indirect
 	go.opentelemetry.io/otel/sdk v1.23.0 // indirect
 	go.opentelemetry.io/otel/sdk/metric v1.23.0 // indirect
-	go.opentelemetry.io/otel/trace v1.23.0 // indirect
+	go.opentelemetry.io/otel/trace v1.23.1 // indirect
 	go.uber.org/atomic v1.11.0 // indirect
 	golang.org/x/crypto v0.18.0 // indirect
 	golang.org/x/exp v0.0.0-20240119083558-1b970713d09a // indirect
@@ -716,3 +718,8 @@ replace github.com/mattn/go-ieproxy => github.com/mattn/go-ieproxy v0.0.1
 
 // openshift removed all tags from their repo, use the pseudoversion from the release-3.9 branch HEAD
 replace github.com/openshift/api v3.9.0+incompatible => github.com/openshift/api v0.0.0-20180801171038-322a19404e37
+
+// For testing, do not commit
+replace github.com/open-telemetry/opentelemetry-collector-contrib/internal/coreinternal v0.94.0 => github.com/open-telemetry/opentelemetry-collector-contrib/internal/coreinternal v0.94.1-0.20240216142834-a852c864b14c
+
+replace github.com/open-telemetry/opentelemetry-collector-contrib/pkg/ottl v0.94.0 => github.com/open-telemetry/opentelemetry-collector-contrib/pkg/ottl v0.94.1-0.20240216142834-a852c864b14c
