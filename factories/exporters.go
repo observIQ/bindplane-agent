@@ -20,6 +20,7 @@ import (
 	"github.com/observiq/bindplane-agent/exporter/chronicleforwarderexporter"
 	"github.com/observiq/bindplane-agent/exporter/googlecloudexporter"
 	"github.com/observiq/bindplane-agent/exporter/googlemanagedprometheusexporter"
+	"github.com/observiq/bindplane-agent/exporter/snowflakeexporter"
 	"github.com/observiq/bindplane-agent/internal/version"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/alibabacloudlogserviceexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/awscloudwatchlogsexporter"
@@ -94,6 +95,7 @@ var defaultExporters = []exporter.Factory{
 	prometheusremotewriteexporter.NewFactory(),
 	sapmexporter.NewFactory(),
 	signalfxexporter.NewFactory(),
+	snowflakeexporter.NewFactory(),
 	splunkhecexporter.NewFactory(),
 	sumologicexporter.NewFactory(),
 	syslogexporter.NewFactory(),

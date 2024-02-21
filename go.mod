@@ -10,6 +10,7 @@ require (
 	github.com/observiq/bindplane-agent/exporter/chronicleforwarderexporter v1.45.0
 	github.com/observiq/bindplane-agent/exporter/googlecloudexporter v1.45.0
 	github.com/observiq/bindplane-agent/exporter/googlemanagedprometheusexporter v1.45.0
+	github.com/observiq/bindplane-agent/exporter/snowflakeexporter v1.45.0
 	github.com/observiq/bindplane-agent/packagestate v1.45.0
 	github.com/observiq/bindplane-agent/processor/datapointcountprocessor v1.45.0
 	github.com/observiq/bindplane-agent/processor/logcountprocessor v1.45.0
@@ -242,6 +243,7 @@ require (
 	github.com/hetznercloud/hcloud-go/v2 v2.4.0 // indirect
 	github.com/influxdata/influxdb-observability/otel2influx v0.5.8 // indirect
 	github.com/jcmturner/goidentity/v6 v6.0.1 // indirect
+	github.com/jmoiron/sqlx v1.3.5 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.5 // indirect
 	github.com/knadh/koanf/v2 v2.0.2 // indirect
 	github.com/kylelemons/godebug v1.1.0 // indirect
@@ -673,6 +675,8 @@ replace github.com/observiq/bindplane-agent/exporter/azureblobexporter => ./expo
 replace github.com/observiq/bindplane-agent/exporter/chronicleexporter => ./exporter/chronicleexporter
 
 replace github.com/observiq/bindplane-agent/exporter/chronicleforwarderexporter => ./exporter/chronicleforwarderexporter
+
+replace github.com/observiq/bindplane-agent/exporter/snowflakeexporter => ./exporter/snowflakeexporter
 
 replace github.com/observiq/bindplane-agent/packagestate => ./packagestate
 
