@@ -103,9 +103,14 @@ func (c *Config) buildSnowflakeDSN() error {
 	sf.User = c.Username
 	sf.Password = c.Password
 	sf.Account = c.AccountIdentifier
+
 	if c.Parameters != nil {
 		sf.Params = c.Parameters
+	} else {
+		sf.Params = map[string]*string{}
 	}
+	t := "true"
+	sf.Params["client_session_keep_alive"] = &t // to prevent auth token expiration after ~4 hours
 
 	dsn, err := gosnowflake.DSN(&sf)
 	if err != nil {

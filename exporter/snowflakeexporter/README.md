@@ -35,7 +35,7 @@ The exporter can be configured using the following fields:
 | warehouse | string | | `true` | The Snowflake data warehouse that should be used for storing data. |
 | role | string | | `false` | The Snowflake role that the exporter should use to have the correct permissions. Only necessary if the default role of the given user is not the necessary role. |
 | database | string | `otlp` | `false` | The database in Snowflake that the exporter will store telemetry data in. Will create it if it doesn't exist. |
-| parameters | map | | `false` | A map of optional connection parameters that may be used for connecting with Snowflake. |
+| parameters | map | | `false` | A map of optional connection parameters that may be used for connecting with Snowflake. The exporter uses `client_session_keep_alive` by default. For more information, see this [Snowflake documentation](https://docs.snowflake.com/en/sql-reference/parameters) |
 | logs.schema | string | `logs` | `false` | The name of the schema to use to store the log table in. |
 | logs.table | string | `data` | `false` | The name of the table that logs will be stored in. |
 | metrics.schema | string | `metrics` | `false` | The name of the schema to use to store the metric tables in. |
@@ -44,6 +44,8 @@ The exporter can be configured using the following fields:
 | traces.table | string | `data` | `false` | The name of the table that traces will be stored in. |
 
 This exporter can also be configured to use "Retry on Failure", "Sending Queue", and "Timeout". More information about these options can be found [here](https://github.com/open-telemetry/opentelemetry-collector/blob/main/exporter/exporterhelper/README.md) and examples in the configurations below.
+
+The exporter performs best when used in conjunction with the [Batch processor](https://github.com/open-telemetry/opentelemetry-collector/blob/main/processor/batchprocessor/README.md). 
 
 ### Metrics
 
