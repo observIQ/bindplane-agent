@@ -1,8 +1,6 @@
 module github.com/observiq/bindplane-agent/expr
 
-go 1.21
-
-toolchain go1.21.6
+go 1.20
 
 require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/ottl v0.95.0

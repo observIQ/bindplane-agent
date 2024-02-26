@@ -1,8 +1,6 @@
 module github.com/observiq/bindplane-agent/exporter/chronicleexporter
 
-go 1.21
-
-toolchain go1.21.6
+go 1.20
 
 require (
 	github.com/jarcoal/httpmock v1.3.1
