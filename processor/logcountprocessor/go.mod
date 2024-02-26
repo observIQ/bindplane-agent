@@ -1,6 +1,8 @@
 module github.com/observiq/bindplane-agent/processor/logcountprocessor
 
-go 1.20
+go 1.21
+
+toolchain go1.21.6
 
 require (
 	github.com/observiq/bindplane-agent/counter v1.45.0
