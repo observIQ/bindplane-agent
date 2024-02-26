@@ -20,7 +20,6 @@ builds:
       - amd64
       - arm64
       - arm
-      - "386"
       - ppc64
       - ppc64le
     ignore:
@@ -32,10 +31,6 @@ builds:
         goarch: ppc64
       - goos: windows
         goarch: ppc64le
-      - goos: linux
-        goarch: "386"
-      - goos: darwin
-        goarch: "386"
       - goos: darwin
         goarch: ppc64
       - goos: darwin
@@ -61,7 +56,6 @@ builds:
       - amd64
       - arm64
       - arm
-      - "386"
       - ppc64
       - ppc64le
     ignore:
@@ -73,10 +67,6 @@ builds:
         goarch: ppc64
       - goos: windows
         goarch: ppc64le
-      - goos: linux
-        goarch: "386"
-      - goos: darwin
-        goarch: "386"
       - goos: darwin
         goarch: ppc64
       - goos: darwin
