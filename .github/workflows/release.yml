@@ -11,11 +11,11 @@ jobs:
       - name: Checkout Sources
         uses: actions/checkout@v4
       - name: Setup Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v5
         with:
-          go-version: "1.20"
+          go-version: "1.21"
           check-latest: true
-          cache-dependency-path: '**/go.sum'
+          cache-dependency-path: "**/go.sum"
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v5
         with:
@@ -59,76 +59,15 @@ jobs:
         run: go-msi.exe make -m observiq-otel-collector.msi --version ${{ github.ref_name }} --arch amd64
         working-directory: C:/build
       - name: "Upload MSI"
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: observiq-otel-collector.msi
           path: C:/build/observiq-otel-collector.msi
           # Short lived because Go Releaser will upload the msi to a release (github release, gcs, etc)
           retention-days: 1
-  build-32bit-msi:
-    runs-on: windows-2022
-    steps:
-      - name: Checkout Sources
-        uses: actions/checkout@v4
-      - name: Setup Go
-        uses: actions/setup-go@v4
-        with:
-          go-version: "1.20"
-          check-latest: true
-          cache-dependency-path: '**/go.sum'
-      - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v5
-        with:
-          # either 'goreleaser' (default) or 'goreleaser-pro'
-          distribution: goreleaser-pro
-          version: "v1.22.1"
-          args: build --single-target --skip=validate --clean
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GORELEASER_KEY: ${{ secrets.GORELEASER_KEY }}
-          GOARCH: "386"
-      - name: Copy Windows Collector Binary
-        run: cp dist/windows_386/collector_windows_386/observiq-otel-collector.exe windows/observiq-otel-collector.exe
-      - name: Copy Windows Updater Binary
-        run: cp dist/windows_386/updater_windows_386/updater.exe windows/updater.exe
-      - name: Copy Plugins to MSI Build Directory
-        run: cp -r release_deps/plugins windows/
-      - name: Copy Example Config
-        run: cp config/example.yaml windows/config.yaml
-      - name: Copy Logging Config
-        run: cp config/logging.yaml windows/logging.yaml
-      - name: Copy JMX Receiver Jar
-        run: cp release_deps/opentelemetry-java-contrib-jmx-metrics.jar windows/opentelemetry-java-contrib-jmx-metrics.jar
-      - name: Copy LICENSE
-        run: cp LICENSE windows/LICENSE
-      - name: Copy VERSION file
-        run: cp release_deps/VERSION.txt windows/VERSION.txt
-      # HACK: Copy build directory to C drive to avoid this error, since there must be a relative path from the tempdir that go-msi uses
-      # for the MSI to build properly
-      - name: Copy Build Dir
-        run: |
-          cp -r windows C:/build
-          echo "C:/build" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
-      # Installs go-msi and wix.
-      - name: Install Build Tools
-        run: |
-          curl -f -L -o go-msi.exe https://github.com/observIQ/go-msi/releases/download/v2.2.0/go-msi.exe
-          curl -f -L -o wix310-binaries.zip http://wixtoolset.org/downloads/v3.10.3.3007/wix310-binaries.zip
-          unzip wix310-binaries.zip
-        working-directory: C:/build
-      - name: "Build MSI from Tagged Release"
-        run: go-msi.exe make -m observiq-otel-collector-x86.msi --version ${{ github.ref_name }} --arch 386
-        working-directory: C:/build
-      - name: "Upload MSI"
-        uses: actions/upload-artifact@v3
-        with:
-          name: observiq-otel-collector-x86.msi
-          path: C:/build/observiq-otel-collector-x86.msi
-          # Short lived because Go Releaser will upload the msi to a release (github release, gcs, etc)
-          retention-days: 1
 
   release:
-    needs: [build-64bit-msi, build-32bit-msi]
+    needs: [build-64bit-msi]
     runs-on: ubuntu-latest-4-cores
     steps:
       - name: Checkout Repo
@@ -137,11 +76,11 @@ jobs:
           # For goreleaser
           fetch-depth: 0
       - name: Set up Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v5
         with:
-          go-version: "1.20"
+          go-version: "1.21"
           check-latest: true
-          cache-dependency-path: '**/go.sum'
+          cache-dependency-path: "**/go.sum"
       - name: Set up Docker Buildx
         id: buildx
         uses: docker/setup-buildx-action@v2
@@ -165,15 +104,10 @@ jobs:
           username: _json_key
           password: ${{ secrets.ORG_OBSERVIQ_PUBLIC_GCR_JSON_KEY }}
       - name: Retrieve Windows 64-bit MSI Installer
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: observiq-otel-collector.msi
           path: observiq-otel-collector.msi
-      - name: Retrieve Windows 32-bit MSI Installer
-        uses: actions/download-artifact@v3
-        with:
-          name: observiq-otel-collector-x86.msi
-          path: observiq-otel-collector-x86.msi
       - name: Install cosign
         run: go install github.com/sigstore/cosign/cmd/cosign@v1.13.1
       - name: Build cosign key file
@@ -193,11 +127,10 @@ jobs:
           COSIGN_PWD: ${{ secrets.ORG_COSIGN_PWD }}
       # Create artifact bundle and upload to release
       - name: Create artifact archive
-        run : |
+        run: |
           mkdir artifacts
           cp ./scripts/install/*.sh ./artifacts
           cp ./observiq-otel-collector.msi/observiq-otel-collector.msi ./artifacts
-          cp ./observiq-otel-collector-x86.msi/observiq-otel-collector-x86.msi ./artifacts
           cp ./dist/*tar.gz ./artifacts
           cp ./dist/*zip ./artifacts
           cp ./dist/*.rpm ./artifacts
@@ -208,7 +141,7 @@ jobs:
         uses: AButler/upload-release-assets@v2.0
         with:
           repo-token: ${{ secrets.ORG_GORELEASER_GITHUB_TOKEN }}
-          files: 'observiq-otel-collector-${{ github.ref_name }}-artifacts.tar.gz'
+          files: "observiq-otel-collector-${{ github.ref_name }}-artifacts.tar.gz"
           release-tag: ${{ github.ref_name }}
       # Trigger installation tests in otel-collector-installer-testing
       - name: Trigger Installation Testing

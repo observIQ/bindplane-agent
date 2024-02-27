@@ -4,12 +4,12 @@ go 1.20
 
 require (
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51
-	github.com/observiq/bindplane-agent/packagestate v1.44.0
+	github.com/observiq/bindplane-agent/packagestate v1.45.0
 	github.com/open-telemetry/opamp-go v0.9.0
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.8.4
-	go.uber.org/zap v1.26.0
-	golang.org/x/sys v0.16.0
+	go.uber.org/zap v1.27.0
+	golang.org/x/sys v0.17.0
 )
 
 require (

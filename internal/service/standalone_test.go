@@ -106,7 +106,7 @@ func TestStandaloneCollectorService(t *testing.T) {
 
 		col.On("Run", ctx).Return(nil)
 		col.On("Status").Return((<-chan *collector.Status)(make(chan *collector.Status))).Maybe()
-		col.On("Stop", mock.Anything).Run(func(args mock.Arguments) { time.Sleep(100 * time.Second) }).Maybe()
+		col.On("Stop", mock.Anything).Run(func(_ mock.Arguments) { time.Sleep(100 * time.Second) }).Maybe()
 
 		srv := NewStandaloneCollectorService(col)
 

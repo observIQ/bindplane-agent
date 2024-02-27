@@ -51,7 +51,7 @@ build-linux: build-linux-amd64 build-linux-arm64 build-linux-arm build-linux-ppc
 build-darwin: build-darwin-amd64 build-darwin-arm64
 
 .PHONY: build-windows
-build-windows: build-windows-amd64 build-windows-x86
+build-windows: build-windows-amd64
 
 .PHONY: build-linux-ppc64
 build-linux-ppc64:
@@ -85,17 +85,13 @@ build-darwin-arm64:
 build-windows-amd64:
 	GOOS=windows GOARCH=amd64 $(MAKE) build-binaries -j2
 
-.PHONY: build-windows-x86
-build-windows-x86:
-	GOOS=windows GOARCH=386 $(MAKE) build-binaries -j2
-
 # tool-related commands
 .PHONY: install-tools
 install-tools:
 	go install github.com/client9/misspell/cmd/misspell@v0.3.4
 	go install github.com/google/addlicense@v1.1.1
-	go install github.com/mgechev/revive@v1.3.4
-	go install github.com/open-telemetry/opentelemetry-collector-contrib/cmd/mdatagen@v0.92.0
+	go install github.com/mgechev/revive@v1.3.7
+	go install github.com/open-telemetry/opentelemetry-collector-contrib/cmd/mdatagen@v0.95.0
 	go install github.com/securego/gosec/v2/cmd/gosec@v2.18.2
 # update cosign in release.yml when updating this version
 	go install github.com/sigstore/cosign/cmd/cosign@v1.13.1

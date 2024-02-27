@@ -119,7 +119,7 @@ func TestRollbackerRollback(t *testing.T) {
 		for i := 0; i < 10; i++ {
 			actionNum := i
 			action := action_mocks.NewMockRollbackableAction(t)
-			action.On("Rollback").Run(func(args mock.Arguments) {
+			action.On("Rollback").Run(func(_ mock.Arguments) {
 				// Rollback should be done in reverse order; So action 0
 				// should be done last (10th action, seq == 9), while
 				// the last action (action 9) should be done first (seq == 0)
@@ -145,7 +145,7 @@ func TestRollbackerRollback(t *testing.T) {
 			actionNum := i
 			action := action_mocks.NewMockRollbackableAction(t)
 
-			call := action.On("Rollback").Run(func(args mock.Arguments) {
+			call := action.On("Rollback").Run(func(_ mock.Arguments) {
 				// Rollback should be done in reverse order; So action 0
 				// should be done last (10th action, seq == 9), while
 				// the last action (action 9) should be done first (seq == 0)

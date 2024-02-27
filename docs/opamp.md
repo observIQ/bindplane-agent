@@ -14,7 +14,7 @@ The agent can be configured to read its connection config from a `manager.yaml` 
 | :--------  | :------: | :------------------------------------------------------------------------- |
 | endpoint   | X        | The API endpoint to communicate with the server via websocket              |
 | secret_key |          | The Secret Key defined for the server to be used for authorization         |
-| agent_id   | X        | A [ULID](https://github.com/ulid/spec) used to uniquely identify the agent |
+| agent_id   |          | A [ULID](https://github.com/ulid/spec) used to uniquely identify the agent |
 | labels     |          | A comma separated list of labels in the form `label=value`                 |
 | agent_name |          | Human readable name for the agent                                          |
 | tls_config |          | See [tls config](#tls-config) section                                      |

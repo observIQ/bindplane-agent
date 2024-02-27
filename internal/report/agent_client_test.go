@@ -55,7 +55,7 @@ func TestAgentClientDo(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.desc, func(t *testing.T) {
-			s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			s := httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, r *http.Request) {
 				headerID := r.Header.Get("Agent-ID")
 				require.Equal(t, tc.agentID, headerID)
 
