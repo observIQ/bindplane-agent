@@ -18,7 +18,7 @@ import (
 	"context"
 	"errors"
 
-	"github.com/bindplane-agent/receiver/telemetrygeneratorreceiver/internal/metadata"
+	"github.com/observiq/bindplane-agent/receiver/telemetrygeneratorreceiver/internal/metadata"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/consumer"
 	"go.opentelemetry.io/collector/receiver"
@@ -57,31 +57,31 @@ func createDefaultConfig() component.Config {
 }
 
 // createMetricsReceiver creates a metrics receiver
-func createMetricsReceiver(_ context.Context, params receiver.CreateSettings, conf component.Config, con consumer.Metrics) (receiver.Metrics, error) {
+func createMetricsReceiver(_ context.Context, params receiver.CreateSettings, conf component.Config, nextConsumer consumer.Metrics) (receiver.Metrics, error) {
 	cfg, ok := conf.(*Config)
 	if !ok {
 		return nil, errImproperCfgType
 	}
 
-	return newMetricsReceiver(params.ID, params.Logger, cfg, con)
+	return newMetricsReceiver(params.ID, params.Logger, cfg, nextConsumer)
 }
 
 // createLogsReceiver creates a logs receiver
-func createLogsReceiver(_ context.Context, params receiver.CreateSettings, conf component.Config, con consumer.Logs) (receiver.Logs, error) {
+func createLogsReceiver(_ context.Context, params receiver.CreateSettings, conf component.Config, nextConsumer consumer.Logs) (receiver.Logs, error) {
 	cfg, ok := conf.(*Config)
 	if !ok {
 		return nil, errImproperCfgType
 	}
 
-	return newLogsReceiver(params.ID, params.Logger, cfg, con)
+	return newLogsReceiver(params.ID, params.Logger, cfg, nextConsumer)
 }
 
 // createTracesReceiver creates a traces receiver
-func createTracesReceiver(_ context.Context, params receiver.CreateSettings, conf component.Config, con consumer.Traces) (receiver.Traces, error) {
+func createTracesReceiver(_ context.Context, params receiver.CreateSettings, conf component.Config, nextConsumer consumer.Traces) (receiver.Traces, error) {
 	cfg, ok := conf.(*Config)
 	if !ok {
 		return nil, errImproperCfgType
 	}
 
-	return newTracesReceiver(params.ID, params.Logger, cfg, con)
+	return newTracesReceiver(params.ID, params.Logger, cfg, nextConsumer)
 }

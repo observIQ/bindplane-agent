@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Package telemetrygeneratorreceiver generates telemetry for testing purposes
 package telemetrygeneratorreceiver //import "github.com/observiq/bindplane-agent/receiver/telemetrygeneratorreceiver"
 
 import (
@@ -20,12 +21,13 @@ import (
 	"go.opentelemetry.io/collector/component"
 )
 
-// Config is the configuration for the azure blob rehydration receiver
+// Config is the configuration for the telemetry generator receiver
 type Config struct {
 	PayloadsPerSecond int               `mapstructure:"payloads_per_second"`
 	Generators        []GeneratorConfig `mapstructure:"generators"`
 }
 
+// GeneratorConfig is the configuration for a single generator
 type GeneratorConfig struct {
 	// Type of generator to use, either "logs", "metrics", or "traces"
 	Type component.DataType `mapstructure:"type"`
@@ -56,6 +58,7 @@ func (c *Config) Validate() error {
 	return nil
 }
 
+// Validate validates the generator config
 func (g *GeneratorConfig) Validate() error {
 	if g.Type == "" {
 		return errors.New("type must be set")

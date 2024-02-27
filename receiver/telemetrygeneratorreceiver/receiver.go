@@ -16,11 +16,15 @@ package telemetrygeneratorreceiver //import "github.com/observiq/bindplane-agent
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"time"
 
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/consumer"
+	"go.opentelemetry.io/collector/pdata/pcommon"
+	"go.opentelemetry.io/collector/pdata/plog"
+
 	"go.uber.org/zap"
 )
 
@@ -33,9 +37,22 @@ type telemetryGeneratorReceiver struct {
 	ctx                context.Context
 	cancelFunc         context.CancelCauseFunc
 }
+type logsGeneratorReceiver struct {
+	telemetryGeneratorReceiver
+	nextConsumer consumer.Logs
+}
+type metricsGeneratorReceiver struct {
+	telemetryGeneratorReceiver
+	nextConsumer consumer.Metrics
+}
+
+type tracesGeneratorReceiver struct {
+	telemetryGeneratorReceiver
+	nextConsumer consumer.Traces
+}
 
 // newMetricsReceiver creates a new metrics specific receiver.
-func newMetricsReceiver(id component.ID, logger *zap.Logger, cfg *Config, nextConsumer consumer.Metrics) (*telemetryGeneratorReceiver, error) {
+func newMetricsReceiver(id component.ID, logger *zap.Logger, cfg *Config, nextConsumer consumer.Metrics) (*metricsGeneratorReceiver, error) {
 	r, err := newTelemetryGeneratorReceiver(id, logger, cfg)
 	if err != nil {
 		return nil, err
@@ -43,11 +60,15 @@ func newMetricsReceiver(id component.ID, logger *zap.Logger, cfg *Config, nextCo
 
 	r.supportedTelemetry = component.DataTypeMetrics
 
-	return r, nil
+	mr := &metricsGeneratorReceiver{
+		telemetryGeneratorReceiver: r,
+		nextConsumer:               nextConsumer,
+	}
+	return mr, nil
 }
 
 // newLogsReceiver creates a new logs specific receiver.
-func newLogsReceiver(id component.ID, logger *zap.Logger, cfg *Config, nextConsumer consumer.Logs) (*telemetryGeneratorReceiver, error) {
+func newLogsReceiver(id component.ID, logger *zap.Logger, cfg *Config, nextConsumer consumer.Logs) (*logsGeneratorReceiver, error) {
 	r, err := newTelemetryGeneratorReceiver(id, logger, cfg)
 	if err != nil {
 		return nil, err
@@ -55,26 +76,33 @@ func newLogsReceiver(id component.ID, logger *zap.Logger, cfg *Config, nextConsu
 
 	r.supportedTelemetry = component.DataTypeLogs
 
-	return r, nil
+	lr := &logsGeneratorReceiver{
+		telemetryGeneratorReceiver: r,
+		nextConsumer:               nextConsumer,
+	}
+	return lr, nil
 }
 
 // newTracesReceiver creates a new traces specific receiver.
-func newTracesReceiver(id component.ID, logger *zap.Logger, cfg *Config, nextConsumer consumer.Traces) (*telemetryGeneratorReceiver, error) {
+func newTracesReceiver(id component.ID, logger *zap.Logger, cfg *Config, nextConsumer consumer.Traces) (*tracesGeneratorReceiver, error) {
 	r, err := newTelemetryGeneratorReceiver(id, logger, cfg)
 	if err != nil {
 		return nil, err
 	}
 
 	r.supportedTelemetry = component.DataTypeTraces
-	return r, nil
+	tr := &tracesGeneratorReceiver{
+		telemetryGeneratorReceiver: r,
+		nextConsumer:               nextConsumer,
+	}
+	return tr, nil
 }
 
 // newTelemetryGeneratorReceiver creates a new rehydration receiver
-func newTelemetryGeneratorReceiver(id component.ID, logger *zap.Logger, cfg *Config) (*telemetryGeneratorReceiver, error) {
-
+func newTelemetryGeneratorReceiver(id component.ID, logger *zap.Logger, cfg *Config) (telemetryGeneratorReceiver, error) {
 	ctx, cancel := context.WithCancelCause(context.Background())
 
-	return &telemetryGeneratorReceiver{
+	return telemetryGeneratorReceiver{
 		logger:     logger,
 		id:         id,
 		cfg:        cfg,
@@ -84,14 +112,7 @@ func newTelemetryGeneratorReceiver(id component.ID, logger *zap.Logger, cfg *Con
 	}, nil
 }
 
-// Start starts the telemetryGeneratorReceiver receiver
-func (r *telemetryGeneratorReceiver) Start(ctx context.Context, host component.Host) error {
-
-	go r.scrape()
-	return nil
-}
-
-// Shutdown shuts down the rehydration receiver
+// Shutdown shuts down the telemetry generator receiver
 func (r *telemetryGeneratorReceiver) Shutdown(ctx context.Context) error {
 	r.cancelFunc(errors.New("shutdown"))
 	var err error
@@ -104,27 +125,135 @@ func (r *telemetryGeneratorReceiver) Shutdown(ctx context.Context) error {
 	return err
 }
 
-// scrape
-func (r *telemetryGeneratorReceiver) scrape() {
-	defer close(r.doneChan)
+// Start starts the logsGeneratorReceiver receiver
+func (r *logsGeneratorReceiver) Start(ctx context.Context, _ component.Host) error {
 
-	ticker := time.NewTicker(time.Second / time.Duration(r.cfg.PayloadsPerSecond))
-	defer ticker.Stop()
+	go func() {
+		defer close(r.doneChan)
 
-	// Call once before the loop to ensure we do a collection before the first ticker
-	r.generateTelemetry()
-	for {
-		select {
-		case <-r.ctx.Done():
-			return
-		case <-ticker.C:
-			r.generateTelemetry()
+		ticker := time.NewTicker(time.Second / time.Duration(r.cfg.PayloadsPerSecond))
+		defer ticker.Stop()
+
+		// Call once before the loop to ensure we do a collection before the first ticker
+		r.generateTelemetry()
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-r.ctx.Done():
+				return
+			case <-ticker.C:
+				r.generateTelemetry()
+			}
 		}
-	}
+	}()
+	return nil
 }
 
 // generateTelemetry
-func (r *telemetryGeneratorReceiver) generateTelemetry() {
+func (r *logsGeneratorReceiver) generateTelemetry() {
 
+	// Loop through the generators and generate telemetry
+
+	logs := plog.NewLogs()
+	for _, g := range r.cfg.Generators {
+		if g.Type != component.DataTypeLogs {
+			continue
+		}
+		resourceLogs := logs.ResourceLogs().AppendEmpty()
+		// Add resource attributes
+		for k, v := range g.ResourceAttributes {
+			resourceLogs.Resource().Attributes().PutStr(k, v)
+		}
+		scopeLogs := resourceLogs.ScopeLogs().AppendEmpty()
+		// Generate logs
+		logRecord := scopeLogs.LogRecords().AppendEmpty()
+		for k, v := range g.Attributes {
+			logRecord.Attributes().PutStr(k, v)
+			logRecord.SetTimestamp(pcommon.NewTimestampFromTime(time.Now()))
+		}
+		for k, v := range g.AdditionalConfig {
+			switch k {
+			case "body":
+				// parses body string and sets that as log body, but uses string if parsing fails
+				parsedBody := map[string]any{}
+				if err := json.Unmarshal([]byte(v.(string)), &parsedBody); err != nil {
+					r.logger.Warn("unable to unmarshal log body", zap.Error(err))
+					logRecord.Body().SetStr(v.(string))
+				} else {
+					if err := logRecord.Body().SetEmptyMap().FromRaw(parsedBody); err != nil {
+						r.logger.Warn("failed to set body to parsed value", zap.Error(err))
+						logRecord.Body().SetStr(v.(string))
+					}
+				}
+				logRecord.Body().SetStr(v.(string))
+			case "severity":
+				logRecord.SetSeverityNumber(plog.SeverityNumber(v.(int)))
+			}
+		}
+	}
+	// Send logs to the next consumer
+	r.nextConsumer.ConsumeLogs(r.ctx, logs)
+
+	return
+}
+
+// Start starts the metricsGeneratorReceiver receiver
+func (r *metricsGeneratorReceiver) Start(ctx context.Context, _ component.Host) error {
+
+	go func() {
+		defer close(r.doneChan)
+
+		ticker := time.NewTicker(time.Second / time.Duration(r.cfg.PayloadsPerSecond))
+		defer ticker.Stop()
+
+		// Call once before the loop to ensure we do a collection before the first ticker
+		r.generateTelemetry()
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-r.ctx.Done():
+				return
+			case <-ticker.C:
+				r.generateTelemetry()
+			}
+		}
+	}()
+	return nil
+}
+
+// generateTelemetry
+func (r *metricsGeneratorReceiver) generateTelemetry() {
+	return
+}
+
+// Start starts the tracesGeneratorReceiver receiver
+func (r *tracesGeneratorReceiver) Start(ctx context.Context, _ component.Host) error {
+
+	go func() {
+		defer close(r.doneChan)
+
+		ticker := time.NewTicker(time.Second / time.Duration(r.cfg.PayloadsPerSecond))
+		defer ticker.Stop()
+
+		// Call once before the loop to ensure we do a collection before the first ticker
+		r.generateTelemetry()
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-r.ctx.Done():
+				return
+			case <-ticker.C:
+				r.generateTelemetry()
+			}
+		}
+	}()
+	return nil
+}
+
+// generateTelemetry
+func (r *tracesGeneratorReceiver) generateTelemetry() {
 	return
 }
