@@ -676,6 +676,8 @@ replace github.com/observiq/bindplane-agent/receiver/routereceiver => ./receiver
 
 replace github.com/observiq/bindplane-agent/receiver/sapnetweaverreceiver => ./receiver/sapnetweaverreceiver
 
+replace github.com/observiq/bindplane-agent/receiver/telemetrygeneratorreceiver => ./receiver/telemetrygeneratorreceiver
+
 replace github.com/observiq/bindplane-agent/exporter/googlecloudexporter => ./exporter/googlecloudexporter
 
 replace github.com/observiq/bindplane-agent/exporter/azureblobexporter => ./exporter/azureblobexporter

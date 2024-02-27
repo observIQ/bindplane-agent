@@ -21,6 +21,7 @@ import (
 	"github.com/observiq/bindplane-agent/receiver/pluginreceiver"
 	"github.com/observiq/bindplane-agent/receiver/routereceiver"
 	"github.com/observiq/bindplane-agent/receiver/sapnetweaverreceiver"
+	"github.com/observiq/bindplane-agent/receiver/telemetrygeneratorreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/activedirectorydsreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/aerospikereceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/apachereceiver"
@@ -157,6 +158,7 @@ var defaultReceivers = []receiver.Factory{
 	statsdreceiver.NewFactory(),
 	syslogreceiver.NewFactory(),
 	tcplogreceiver.NewFactory(),
+	telemetrygeneratorreceiver.NewFactory(),
 	udplogreceiver.NewFactory(),
 	vcenterreceiver.NewFactory(),
 	windowseventlogreceiver.NewFactory(),
