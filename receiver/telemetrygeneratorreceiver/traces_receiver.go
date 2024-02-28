@@ -45,7 +45,7 @@ func newTracesReceiver(ctx context.Context, logger *zap.Logger, cfg *Config, nex
 	return tr, nil
 }
 
-// TODO implement generate for metrics
+// TODO implement initializeMetrics
 func (r *tracesGeneratorReceiver) initializeMetrics() {
 }
 

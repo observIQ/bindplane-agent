@@ -47,11 +47,11 @@ func newMetricsReceiver(ctx context.Context, logger *zap.Logger, cfg *Config, ne
 	return mr, nil
 }
 
-// TODO implement generate for metrics
+// TODO implement
 func (r *metricsGeneratorReceiver) initializeMetrics() {
 }
 
-// TODO implement
+// TODO implement generate for metrics
 func (r *metricsGeneratorReceiver) generate() error {
 	return nil
 }

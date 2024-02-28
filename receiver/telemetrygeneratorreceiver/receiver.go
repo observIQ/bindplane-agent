@@ -37,7 +37,7 @@ type telemetryGeneratorReceiver struct {
 	generator          generator
 }
 
-// newTelemetryGeneratorReceiver creates a new rehydration receiver
+// newTelemetryGeneratorReceiver creates a new telemetry generator receiver
 func newTelemetryGeneratorReceiver(ctx context.Context, logger *zap.Logger, cfg *Config, g generator) (telemetryGeneratorReceiver, error) {
 	ctx, cancel := context.WithCancelCause(ctx)
 
@@ -64,7 +64,7 @@ func (r *telemetryGeneratorReceiver) Shutdown(ctx context.Context) error {
 	return err
 }
 
-// Start starts the logsGeneratorReceiver receiver
+// Start starts the telemetryGeneratorReceiver receiver
 func (r *telemetryGeneratorReceiver) Start(ctx context.Context, _ component.Host) error {
 
 	go func() {
@@ -73,8 +73,10 @@ func (r *telemetryGeneratorReceiver) Start(ctx context.Context, _ component.Host
 		ticker := time.NewTicker(time.Second / time.Duration(r.cfg.PayloadsPerSecond))
 		defer ticker.Stop()
 
-		// Call once before the loop to ensure we do a collection before the first ticker
-		r.generator.generate()
+		err := r.generator.generate()
+		if err != nil {
+			r.logger.Error("Error generating telemetry", zap.Error(err))
+		}
 		for {
 			select {
 			case <-ctx.Done():
@@ -82,7 +84,11 @@ func (r *telemetryGeneratorReceiver) Start(ctx context.Context, _ component.Host
 			case <-r.ctx.Done():
 				return
 			case <-ticker.C:
-				r.generator.generate()
+
+				err = r.generator.generate()
+				if err != nil {
+					r.logger.Error("Error generating telemetry", zap.Error(err))
+				}
 			}
 		}
 	}()
