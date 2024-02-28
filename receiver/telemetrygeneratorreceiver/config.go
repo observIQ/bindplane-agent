@@ -68,6 +68,28 @@ func (g *GeneratorConfig) Validate() error {
 		return errors.New("type must be one of logs, metrics, or traces")
 	}
 
-	// TODO add severity and body validation
+	// severity and body validation
+	if g.Type == component.DataTypeLogs {
+		if body, ok := g.AdditionalConfig["body"]; ok {
+
+			// check if body is a valid string or map
+			// if not, return an error
+			_, ok := body.(string)
+			if !ok {
+				_, ok := body.(map[string]any)
+				if !ok {
+					return errors.New("body must be a string or a map")
+				}
+			}
+		}
+
+		// if severity is set, it must be a valid severity
+		if severity, ok := g.AdditionalConfig["severity"]; ok {
+			if _, ok := severity.(int); !ok {
+				return errors.New("severity must be an integer")
+			}
+		}
+	}
+
 	return nil
 }

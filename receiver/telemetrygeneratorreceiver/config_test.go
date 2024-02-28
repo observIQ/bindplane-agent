@@ -114,6 +114,77 @@ func TestValidate(t *testing.T) {
 				},
 			},
 		},
+		{
+			desc:        "invalid body type",
+			errExpected: true,
+			errText:     "body must be a string or a map",
+			payloads:    10,
+			generators: []GeneratorConfig{
+				{
+					Type: "logs",
+
+					AdditionalConfig: map[string]any{
+						"body": 1,
+					},
+				},
+			},
+		},
+		{
+			desc:     "string body type",
+			payloads: 10,
+			generators: []GeneratorConfig{
+				{
+					Type: "logs",
+
+					AdditionalConfig: map[string]any{
+						"body": `sdfsdf"dfsdf"fsd`,
+					},
+				},
+			},
+		},
+		{
+			desc:     "map body type",
+			payloads: 10,
+			generators: []GeneratorConfig{
+				{
+					Type: "logs",
+
+					AdditionalConfig: map[string]any{
+						"body": map[string]any{
+							"key": "value",
+						},
+					},
+				},
+			},
+		},
+		{
+			desc:     "valid severity",
+			payloads: 10,
+			generators: []GeneratorConfig{
+				{
+					Type: "logs",
+
+					AdditionalConfig: map[string]any{
+						"severity": 1,
+					},
+				},
+			},
+		},
+		{
+			desc:        "invalid severity",
+			payloads:    10,
+			errExpected: true,
+			errText:     "severity must be an integer",
+			generators: []GeneratorConfig{
+				{
+					Type: "logs",
+
+					AdditionalConfig: map[string]any{
+						"severity": "info",
+					},
+				},
+			},
+		},
 	}
 
 	for _, tc := range testCases {
