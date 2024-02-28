@@ -68,5 +68,6 @@ func (g *GeneratorConfig) Validate() error {
 		return errors.New("type must be one of logs, metrics, or traces")
 	}
 
+	// TODO add severity and body validation
 	return nil
 }

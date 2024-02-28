@@ -28,6 +28,9 @@ import (
 	"go.uber.org/zap"
 )
 
+type generator interface {
+	generate() error
+}
 type telemetryGeneratorReceiver struct {
 	logger             *zap.Logger
 	id                 component.ID
@@ -36,6 +39,7 @@ type telemetryGeneratorReceiver struct {
 	doneChan           chan struct{}
 	ctx                context.Context
 	cancelFunc         context.CancelCauseFunc
+	generator          generator
 }
 type logsGeneratorReceiver struct {
 	telemetryGeneratorReceiver
@@ -53,53 +57,59 @@ type tracesGeneratorReceiver struct {
 
 // newMetricsReceiver creates a new metrics specific receiver.
 func newMetricsReceiver(id component.ID, logger *zap.Logger, cfg *Config, nextConsumer consumer.Metrics) (*metricsGeneratorReceiver, error) {
-	r, err := newTelemetryGeneratorReceiver(id, logger, cfg)
+	mr := &metricsGeneratorReceiver{
+
+		nextConsumer: nextConsumer,
+	}
+	r, err := newTelemetryGeneratorReceiver(id, logger, cfg, mr)
 	if err != nil {
 		return nil, err
 	}
 
+	mr.telemetryGeneratorReceiver = r
+	mr.generator = mr
 	r.supportedTelemetry = component.DataTypeMetrics
 
-	mr := &metricsGeneratorReceiver{
-		telemetryGeneratorReceiver: r,
-		nextConsumer:               nextConsumer,
-	}
 	return mr, nil
 }
 
 // newLogsReceiver creates a new logs specific receiver.
 func newLogsReceiver(id component.ID, logger *zap.Logger, cfg *Config, nextConsumer consumer.Logs) (*logsGeneratorReceiver, error) {
-	r, err := newTelemetryGeneratorReceiver(id, logger, cfg)
+	lr := &logsGeneratorReceiver{
+		nextConsumer: nextConsumer,
+	}
+	r, err := newTelemetryGeneratorReceiver(id, logger, cfg, lr)
 	if err != nil {
 		return nil, err
 	}
 
+	lr.telemetryGeneratorReceiver = r
+	lr.generator = lr
 	r.supportedTelemetry = component.DataTypeLogs
 
-	lr := &logsGeneratorReceiver{
-		telemetryGeneratorReceiver: r,
-		nextConsumer:               nextConsumer,
-	}
 	return lr, nil
 }
 
 // newTracesReceiver creates a new traces specific receiver.
 func newTracesReceiver(id component.ID, logger *zap.Logger, cfg *Config, nextConsumer consumer.Traces) (*tracesGeneratorReceiver, error) {
-	r, err := newTelemetryGeneratorReceiver(id, logger, cfg)
+	tr := &tracesGeneratorReceiver{
+		nextConsumer: nextConsumer,
+	}
+
+	r, err := newTelemetryGeneratorReceiver(id, logger, cfg, tr)
 	if err != nil {
 		return nil, err
 	}
 
+	tr.telemetryGeneratorReceiver = r
+	tr.generator = tr
 	r.supportedTelemetry = component.DataTypeTraces
-	tr := &tracesGeneratorReceiver{
-		telemetryGeneratorReceiver: r,
-		nextConsumer:               nextConsumer,
-	}
+
 	return tr, nil
 }
 
 // newTelemetryGeneratorReceiver creates a new rehydration receiver
-func newTelemetryGeneratorReceiver(id component.ID, logger *zap.Logger, cfg *Config) (telemetryGeneratorReceiver, error) {
+func newTelemetryGeneratorReceiver(id component.ID, logger *zap.Logger, cfg *Config, g generator) (telemetryGeneratorReceiver, error) {
 	ctx, cancel := context.WithCancelCause(context.Background())
 
 	return telemetryGeneratorReceiver{
@@ -109,6 +119,7 @@ func newTelemetryGeneratorReceiver(id component.ID, logger *zap.Logger, cfg *Con
 		doneChan:   make(chan struct{}),
 		ctx:        ctx,
 		cancelFunc: cancel,
+		generator:  g,
 	}, nil
 }
 
@@ -126,7 +137,7 @@ func (r *telemetryGeneratorReceiver) Shutdown(ctx context.Context) error {
 }
 
 // Start starts the logsGeneratorReceiver receiver
-func (r *logsGeneratorReceiver) Start(ctx context.Context, _ component.Host) error {
+func (r *telemetryGeneratorReceiver) Start(ctx context.Context, _ component.Host) error {
 
 	go func() {
 		defer close(r.doneChan)
@@ -135,7 +146,7 @@ func (r *logsGeneratorReceiver) Start(ctx context.Context, _ component.Host) err
 		defer ticker.Stop()
 
 		// Call once before the loop to ensure we do a collection before the first ticker
-		r.generateTelemetry()
+		r.generator.generate()
 		for {
 			select {
 			case <-ctx.Done():
@@ -143,7 +154,7 @@ func (r *logsGeneratorReceiver) Start(ctx context.Context, _ component.Host) err
 			case <-r.ctx.Done():
 				return
 			case <-ticker.C:
-				r.generateTelemetry()
+				r.generator.generate()
 			}
 		}
 	}()
@@ -151,7 +162,7 @@ func (r *logsGeneratorReceiver) Start(ctx context.Context, _ component.Host) err
 }
 
 // generateTelemetry
-func (r *logsGeneratorReceiver) generateTelemetry() {
+func (r *logsGeneratorReceiver) generate() error {
 
 	// Loop through the generators and generate telemetry
 
@@ -193,67 +204,15 @@ func (r *logsGeneratorReceiver) generateTelemetry() {
 		}
 	}
 	// Send logs to the next consumer
-	r.nextConsumer.ConsumeLogs(r.ctx, logs)
-
-	return
+	return r.nextConsumer.ConsumeLogs(r.ctx, logs)
 }
 
-// Start starts the metricsGeneratorReceiver receiver
-func (r *metricsGeneratorReceiver) Start(ctx context.Context, _ component.Host) error {
-
-	go func() {
-		defer close(r.doneChan)
-
-		ticker := time.NewTicker(time.Second / time.Duration(r.cfg.PayloadsPerSecond))
-		defer ticker.Stop()
-
-		// Call once before the loop to ensure we do a collection before the first ticker
-		r.generateTelemetry()
-		for {
-			select {
-			case <-ctx.Done():
-				return
-			case <-r.ctx.Done():
-				return
-			case <-ticker.C:
-				r.generateTelemetry()
-			}
-		}
-	}()
+// TODO implement generate for metrics
+func (r *metricsGeneratorReceiver) generate() error {
 	return nil
 }
 
-// generateTelemetry
-func (r *metricsGeneratorReceiver) generateTelemetry() {
-	return
-}
-
-// Start starts the tracesGeneratorReceiver receiver
-func (r *tracesGeneratorReceiver) Start(ctx context.Context, _ component.Host) error {
-
-	go func() {
-		defer close(r.doneChan)
-
-		ticker := time.NewTicker(time.Second / time.Duration(r.cfg.PayloadsPerSecond))
-		defer ticker.Stop()
-
-		// Call once before the loop to ensure we do a collection before the first ticker
-		r.generateTelemetry()
-		for {
-			select {
-			case <-ctx.Done():
-				return
-			case <-r.ctx.Done():
-				return
-			case <-ticker.C:
-				r.generateTelemetry()
-			}
-		}
-	}()
+// TODO implement generate for traces
+func (r *tracesGeneratorReceiver) generate() error {
 	return nil
-}
-
-// generateTelemetry
-func (r *tracesGeneratorReceiver) generateTelemetry() {
-	return
 }
