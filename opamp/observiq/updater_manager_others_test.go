@@ -69,8 +69,6 @@ func TestStartAndMonitorUpdater(t *testing.T) {
 		{
 			desc: "Updater does not exist at path",
 			testFunc: func(t *testing.T) {
-				t.Parallel()
-
 				tmpDir := t.TempDir()
 				updateManager, err := newUpdaterManager(zap.NewNop(), tmpDir)
 				require.NoError(t, err)
@@ -86,8 +84,6 @@ func TestStartAndMonitorUpdater(t *testing.T) {
 		{
 			desc: "Updater is not executable",
 			testFunc: func(t *testing.T) {
-				t.Parallel()
-
 				tmpDir := t.TempDir()
 
 				updateManager, err := newUpdaterManager(zap.NewNop(), "./testdata")
@@ -105,8 +101,6 @@ func TestStartAndMonitorUpdater(t *testing.T) {
 		{
 			desc: "Updater exits quickly",
 			testFunc: func(t *testing.T) {
-				t.Parallel()
-
 				tmpDir := t.TempDir()
 
 				updateManager, err := newUpdaterManager(zap.NewNop(), "./testdata")
@@ -124,8 +118,6 @@ func TestStartAndMonitorUpdater(t *testing.T) {
 		{
 			desc: "Updater times out",
 			testFunc: func(t *testing.T) {
-				t.Parallel()
-
 				tmpDir := t.TempDir()
 
 				updateManager, err := newUpdaterManager(zap.NewNop(), "./testdata")

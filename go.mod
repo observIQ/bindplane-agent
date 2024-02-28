@@ -253,8 +253,8 @@ require (
 	github.com/kylelemons/godebug v1.1.0 // indirect
 	github.com/lestrrat-go/strftime v1.0.6 // indirect
 	github.com/microsoft/go-mssqldb v1.6.0 // indirect
-	github.com/observiq/bindplane-agent/counter v1.45.0 // indirect
-	github.com/observiq/bindplane-agent/expr v1.45.0 // indirect
+	github.com/observiq/bindplane-agent/counter v1.46.0 // indirect
+	github.com/observiq/bindplane-agent/expr v1.46.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlemanagedprometheusexporter v0.95.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/internal/collectd v0.95.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/internal/datadog v0.95.0 // indirect
