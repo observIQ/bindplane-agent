@@ -16,14 +16,10 @@ package telemetrygeneratorreceiver //import "github.com/observiq/bindplane-agent
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"time"
 
 	"go.opentelemetry.io/collector/component"
-	"go.opentelemetry.io/collector/consumer"
-	"go.opentelemetry.io/collector/pdata/pcommon"
-	"go.opentelemetry.io/collector/pdata/plog"
 
 	"go.uber.org/zap"
 )
@@ -41,76 +37,10 @@ type telemetryGeneratorReceiver struct {
 	cancelFunc         context.CancelCauseFunc
 	generator          generator
 }
-type logsGeneratorReceiver struct {
-	telemetryGeneratorReceiver
-	nextConsumer consumer.Logs
-}
-type metricsGeneratorReceiver struct {
-	telemetryGeneratorReceiver
-	nextConsumer consumer.Metrics
-}
-
-type tracesGeneratorReceiver struct {
-	telemetryGeneratorReceiver
-	nextConsumer consumer.Traces
-}
-
-// newMetricsReceiver creates a new metrics specific receiver.
-func newMetricsReceiver(id component.ID, logger *zap.Logger, cfg *Config, nextConsumer consumer.Metrics) (*metricsGeneratorReceiver, error) {
-	mr := &metricsGeneratorReceiver{
-
-		nextConsumer: nextConsumer,
-	}
-	r, err := newTelemetryGeneratorReceiver(id, logger, cfg, mr)
-	if err != nil {
-		return nil, err
-	}
-
-	mr.telemetryGeneratorReceiver = r
-	mr.generator = mr
-	r.supportedTelemetry = component.DataTypeMetrics
-
-	return mr, nil
-}
-
-// newLogsReceiver creates a new logs specific receiver.
-func newLogsReceiver(id component.ID, logger *zap.Logger, cfg *Config, nextConsumer consumer.Logs) (*logsGeneratorReceiver, error) {
-	lr := &logsGeneratorReceiver{
-		nextConsumer: nextConsumer,
-	}
-	r, err := newTelemetryGeneratorReceiver(id, logger, cfg, lr)
-	if err != nil {
-		return nil, err
-	}
-
-	lr.telemetryGeneratorReceiver = r
-	lr.generator = lr
-	r.supportedTelemetry = component.DataTypeLogs
-
-	return lr, nil
-}
-
-// newTracesReceiver creates a new traces specific receiver.
-func newTracesReceiver(id component.ID, logger *zap.Logger, cfg *Config, nextConsumer consumer.Traces) (*tracesGeneratorReceiver, error) {
-	tr := &tracesGeneratorReceiver{
-		nextConsumer: nextConsumer,
-	}
-
-	r, err := newTelemetryGeneratorReceiver(id, logger, cfg, tr)
-	if err != nil {
-		return nil, err
-	}
-
-	tr.telemetryGeneratorReceiver = r
-	tr.generator = tr
-	r.supportedTelemetry = component.DataTypeTraces
-
-	return tr, nil
-}
 
 // newTelemetryGeneratorReceiver creates a new rehydration receiver
-func newTelemetryGeneratorReceiver(id component.ID, logger *zap.Logger, cfg *Config, g generator) (telemetryGeneratorReceiver, error) {
-	ctx, cancel := context.WithCancelCause(context.Background())
+func newTelemetryGeneratorReceiver(ctx context.Context, id component.ID, logger *zap.Logger, cfg *Config, g generator) (telemetryGeneratorReceiver, error) {
+	ctx, cancel := context.WithCancelCause(ctx)
 
 	return telemetryGeneratorReceiver{
 		logger:     logger,
@@ -158,61 +88,5 @@ func (r *telemetryGeneratorReceiver) Start(ctx context.Context, _ component.Host
 			}
 		}
 	}()
-	return nil
-}
-
-// generateTelemetry
-func (r *logsGeneratorReceiver) generate() error {
-
-	// Loop through the generators and generate telemetry
-
-	logs := plog.NewLogs()
-	for _, g := range r.cfg.Generators {
-		if g.Type != component.DataTypeLogs {
-			continue
-		}
-		resourceLogs := logs.ResourceLogs().AppendEmpty()
-		// Add resource attributes
-		for k, v := range g.ResourceAttributes {
-			resourceLogs.Resource().Attributes().PutStr(k, v)
-		}
-		scopeLogs := resourceLogs.ScopeLogs().AppendEmpty()
-		// Generate logs
-		logRecord := scopeLogs.LogRecords().AppendEmpty()
-		for k, v := range g.Attributes {
-			logRecord.Attributes().PutStr(k, v)
-			logRecord.SetTimestamp(pcommon.NewTimestampFromTime(time.Now()))
-		}
-		for k, v := range g.AdditionalConfig {
-			switch k {
-			case "body":
-				// parses body string and sets that as log body, but uses string if parsing fails
-				parsedBody := map[string]any{}
-				if err := json.Unmarshal([]byte(v.(string)), &parsedBody); err != nil {
-					r.logger.Warn("unable to unmarshal log body", zap.Error(err))
-					logRecord.Body().SetStr(v.(string))
-				} else {
-					if err := logRecord.Body().SetEmptyMap().FromRaw(parsedBody); err != nil {
-						r.logger.Warn("failed to set body to parsed value", zap.Error(err))
-						logRecord.Body().SetStr(v.(string))
-					}
-				}
-				logRecord.Body().SetStr(v.(string))
-			case "severity":
-				logRecord.SetSeverityNumber(plog.SeverityNumber(v.(int)))
-			}
-		}
-	}
-	// Send logs to the next consumer
-	return r.nextConsumer.ConsumeLogs(r.ctx, logs)
-}
-
-// TODO implement generate for metrics
-func (r *metricsGeneratorReceiver) generate() error {
-	return nil
-}
-
-// TODO implement generate for traces
-func (r *tracesGeneratorReceiver) generate() error {
 	return nil
 }
