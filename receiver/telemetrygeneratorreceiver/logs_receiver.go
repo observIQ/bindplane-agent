@@ -32,11 +32,11 @@ type logsGeneratorReceiver struct {
 	logs         plog.Logs
 }
 
-func newLogsReceiver(ctx context.Context, id component.ID, logger *zap.Logger, cfg *Config, nextConsumer consumer.Logs) (*logsGeneratorReceiver, error) {
+func newLogsReceiver(ctx context.Context, logger *zap.Logger, cfg *Config, nextConsumer consumer.Logs) (*logsGeneratorReceiver, error) {
 	lr := &logsGeneratorReceiver{
 		nextConsumer: nextConsumer,
 	}
-	r, err := newTelemetryGeneratorReceiver(ctx, id, logger, cfg, lr)
+	r, err := newTelemetryGeneratorReceiver(ctx, logger, cfg, lr)
 	if err != nil {
 		return nil, err
 	}

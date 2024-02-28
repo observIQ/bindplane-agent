@@ -28,12 +28,12 @@ type metricsGeneratorReceiver struct {
 }
 
 // newMetricsReceiver creates a new metrics specific receiver.
-func newMetricsReceiver(ctx context.Context, id component.ID, logger *zap.Logger, cfg *Config, nextConsumer consumer.Metrics) (*metricsGeneratorReceiver, error) {
+func newMetricsReceiver(ctx context.Context, logger *zap.Logger, cfg *Config, nextConsumer consumer.Metrics) (*metricsGeneratorReceiver, error) {
 	mr := &metricsGeneratorReceiver{
 
 		nextConsumer: nextConsumer,
 	}
-	r, err := newTelemetryGeneratorReceiver(ctx, id, logger, cfg, mr)
+	r, err := newTelemetryGeneratorReceiver(ctx, logger, cfg, mr)
 	if err != nil {
 		return nil, err
 	}

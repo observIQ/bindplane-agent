@@ -29,7 +29,6 @@ type generator interface {
 }
 type telemetryGeneratorReceiver struct {
 	logger             *zap.Logger
-	id                 component.ID
 	cfg                *Config
 	supportedTelemetry component.DataType
 	doneChan           chan struct{}
@@ -39,12 +38,11 @@ type telemetryGeneratorReceiver struct {
 }
 
 // newTelemetryGeneratorReceiver creates a new rehydration receiver
-func newTelemetryGeneratorReceiver(ctx context.Context, id component.ID, logger *zap.Logger, cfg *Config, g generator) (telemetryGeneratorReceiver, error) {
+func newTelemetryGeneratorReceiver(ctx context.Context, logger *zap.Logger, cfg *Config, g generator) (telemetryGeneratorReceiver, error) {
 	ctx, cancel := context.WithCancelCause(ctx)
 
 	return telemetryGeneratorReceiver{
 		logger:     logger,
-		id:         id,
 		cfg:        cfg,
 		doneChan:   make(chan struct{}),
 		ctx:        ctx,
