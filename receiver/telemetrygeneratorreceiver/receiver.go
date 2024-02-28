@@ -24,8 +24,10 @@ import (
 	"go.uber.org/zap"
 )
 
-type generator interface {
-	generate() error
+// telemetryProducer is an interface for producing telemetry used by the specific receivers
+type telemetryProducer interface {
+	// produce should generate telemetry from each generator, update the timestamps to now, and send it to the next consumer
+	produce() error
 }
 type telemetryGeneratorReceiver struct {
 	logger             *zap.Logger
@@ -34,11 +36,11 @@ type telemetryGeneratorReceiver struct {
 	doneChan           chan struct{}
 	ctx                context.Context
 	cancelFunc         context.CancelCauseFunc
-	generator          generator
+	producer           telemetryProducer
 }
 
 // newTelemetryGeneratorReceiver creates a new telemetry generator receiver
-func newTelemetryGeneratorReceiver(ctx context.Context, logger *zap.Logger, cfg *Config, g generator) (telemetryGeneratorReceiver, error) {
+func newTelemetryGeneratorReceiver(ctx context.Context, logger *zap.Logger, cfg *Config, tp telemetryProducer) (telemetryGeneratorReceiver, error) {
 	ctx, cancel := context.WithCancelCause(ctx)
 
 	return telemetryGeneratorReceiver{
@@ -47,7 +49,7 @@ func newTelemetryGeneratorReceiver(ctx context.Context, logger *zap.Logger, cfg 
 		doneChan:   make(chan struct{}),
 		ctx:        ctx,
 		cancelFunc: cancel,
-		generator:  g,
+		producer:   tp,
 	}, nil
 }
 
@@ -73,7 +75,7 @@ func (r *telemetryGeneratorReceiver) Start(ctx context.Context, _ component.Host
 		ticker := time.NewTicker(time.Second / time.Duration(r.cfg.PayloadsPerSecond))
 		defer ticker.Stop()
 
-		err := r.generator.generate()
+		err := r.producer.produce()
 		if err != nil {
 			r.logger.Error("Error generating telemetry", zap.Error(err))
 		}
@@ -84,8 +86,7 @@ func (r *telemetryGeneratorReceiver) Start(ctx context.Context, _ component.Host
 			case <-r.ctx.Done():
 				return
 			case <-ticker.C:
-
-				err = r.generator.generate()
+				err = r.producer.produce()
 				if err != nil {
 					r.logger.Error("Error generating telemetry", zap.Error(err))
 				}

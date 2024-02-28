@@ -18,7 +18,6 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"go.opentelemetry.io/collector/component"
 )
 
 func Test_createDefaultConfig(t *testing.T) {
@@ -26,13 +25,7 @@ func Test_createDefaultConfig(t *testing.T) {
 		PayloadsPerSecond: 1,
 		Generators: []GeneratorConfig{
 			{
-				Type: component.DataTypeLogs,
-			},
-			{
-				Type: component.DataTypeMetrics,
-			},
-			{
-				Type: component.DataTypeTraces,
+				Type: GeneratorTypeLogs,
 			},
 		},
 	}

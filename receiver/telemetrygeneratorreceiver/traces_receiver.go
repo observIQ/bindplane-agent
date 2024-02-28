@@ -25,6 +25,7 @@ import (
 type tracesGeneratorReceiver struct {
 	telemetryGeneratorReceiver
 	nextConsumer consumer.Traces
+	generators   []generator
 }
 
 // newTracesReceiver creates a new traces specific receiver.
@@ -39,17 +40,14 @@ func newTracesReceiver(ctx context.Context, logger *zap.Logger, cfg *Config, nex
 	}
 
 	tr.telemetryGeneratorReceiver = r
-	tr.generator = tr
+	tr.producer = tr
 	r.supportedTelemetry = component.DataTypeTraces
+	tr.generators = newGenerators(cfg, logger, r.supportedTelemetry)
 
 	return tr, nil
 }
 
-// TODO implement initializeMetrics
-func (r *tracesGeneratorReceiver) initializeMetrics() {
-}
-
-// TODO implement generate for traces
-func (r *tracesGeneratorReceiver) generate() error {
+// TODO implement produce for traces
+func (r *tracesGeneratorReceiver) produce() error {
 	return nil
 }

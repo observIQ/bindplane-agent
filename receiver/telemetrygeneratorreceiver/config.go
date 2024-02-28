@@ -17,8 +17,7 @@ package telemetrygeneratorreceiver //import "github.com/observiq/bindplane-agent
 
 import (
 	"errors"
-
-	"go.opentelemetry.io/collector/component"
+	"fmt"
 )
 
 // Config is the configuration for the telemetry generator receiver
@@ -29,8 +28,8 @@ type Config struct {
 
 // GeneratorConfig is the configuration for a single generator
 type GeneratorConfig struct {
-	// Type of generator to use, either "logs", "metrics", or "traces"
-	Type component.DataType `mapstructure:"type"`
+	// Type of generator to use, either "logs", "host_metrics", or "windows_events"
+	Type GeneratorType `mapstructure:"type"`
 
 	// ResourceAttributes are additional key-value pairs to add to the resource attributes of telemetry.
 	ResourceAttributes map[string]string `mapstructure:"resource_attributes"`
@@ -64,12 +63,12 @@ func (g *GeneratorConfig) Validate() error {
 		return errors.New("type must be set")
 	}
 
-	if g.Type != component.DataTypeLogs && g.Type != component.DataTypeMetrics && g.Type != component.DataTypeTraces {
-		return errors.New("type must be one of logs, metrics, or traces")
+	if g.Type != GeneratorTypeLogs && g.Type != GeneratorTypeHostMetrics && g.Type != GeneratorTypeWindowsEvents {
+		return fmt.Errorf("type must be one of %s, %s, or %s", GeneratorTypeLogs, GeneratorTypeHostMetrics, GeneratorTypeWindowsEvents)
 	}
 
 	// severity and body validation
-	if g.Type == component.DataTypeLogs {
+	if g.Type == GeneratorTypeLogs {
 		if body, ok := g.AdditionalConfig["body"]; ok {
 
 			// check if body is a valid string or map

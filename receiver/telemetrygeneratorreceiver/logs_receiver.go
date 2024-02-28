@@ -16,12 +16,9 @@ package telemetrygeneratorreceiver //import "github.com/observiq/bindplane-agent
 
 import (
 	"context"
-	"encoding/json"
-	"time"
 
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/consumer" // newLogsReceiver creates a new logs specific receiver.
-	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/plog"
 	"go.uber.org/zap"
 )
@@ -29,7 +26,7 @@ import (
 type logsGeneratorReceiver struct {
 	telemetryGeneratorReceiver
 	nextConsumer consumer.Logs
-	logs         plog.Logs
+	generators   []generator
 }
 
 func newLogsReceiver(ctx context.Context, logger *zap.Logger, cfg *Config, nextConsumer consumer.Logs) (*logsGeneratorReceiver, error) {
@@ -42,67 +39,23 @@ func newLogsReceiver(ctx context.Context, logger *zap.Logger, cfg *Config, nextC
 	}
 
 	lr.telemetryGeneratorReceiver = r
-	lr.generator = lr
+	lr.producer = lr
 	r.supportedTelemetry = component.DataTypeLogs
 
-	lr.initializeLogs()
+	lr.generators = newGenerators(cfg, logger, r.supportedTelemetry)
 
 	return lr, nil
 }
 
-func (r *logsGeneratorReceiver) initializeLogs() {
-	r.logs = plog.NewLogs()
-	for _, g := range r.cfg.Generators {
-		if g.Type != component.DataTypeLogs {
-			continue
-		}
-		resourceLogs := r.logs.ResourceLogs().AppendEmpty()
-		// Add resource attributes
-		for k, v := range g.ResourceAttributes {
-			resourceLogs.Resource().Attributes().PutStr(k, v)
-		}
-		scopeLogs := resourceLogs.ScopeLogs().AppendEmpty()
-		// Generate logs
-		logRecord := scopeLogs.LogRecords().AppendEmpty()
-		for k, v := range g.Attributes {
-			logRecord.Attributes().PutStr(k, v)
-		}
-		for k, v := range g.AdditionalConfig {
-			switch k {
-			case "body":
-				// parses body string and sets that as log body, but uses string if parsing fails
-				parsedBody := map[string]any{}
-				if err := json.Unmarshal([]byte(v.(string)), &parsedBody); err != nil {
-					r.logger.Warn("unable to unmarshal log body", zap.Error(err))
-					logRecord.Body().SetStr(v.(string))
-				} else {
-					if err := logRecord.Body().SetEmptyMap().FromRaw(parsedBody); err != nil {
-						r.logger.Warn("failed to set body to parsed value", zap.Error(err))
-						logRecord.Body().SetStr(v.(string))
-					}
-				}
-				logRecord.Body().SetStr(v.(string))
-			case "severity":
-				logRecord.SetSeverityNumber(plog.SeverityNumber(v.(int)))
-			}
-		}
-	}
-}
-
 // generateTelemetry
-func (r *logsGeneratorReceiver) generate() error {
-
-	for i := 0; i < r.logs.ResourceLogs().Len(); i++ {
-		resourceLogs := r.logs.ResourceLogs().At(i)
-		for k := 0; k < resourceLogs.ScopeLogs().Len(); k++ {
-			scopeLogs := resourceLogs.ScopeLogs().At(k)
-			for j := 0; j < scopeLogs.LogRecords().Len(); j++ {
-				log := scopeLogs.LogRecords().At(j)
-				log.SetTimestamp(pcommon.NewTimestampFromTime(time.Now()))
-			}
+func (r *logsGeneratorReceiver) produce() error {
+	logs := plog.NewLogs()
+	for _, g := range r.generators {
+		l := g.GenerateLogs()
+		for i := 0; i < l.ResourceLogs().Len(); i++ {
+			src := l.ResourceLogs().At(i)
+			src.CopyTo(logs.ResourceLogs().AppendEmpty())
 		}
 	}
-
-	// Send logs to the next consumer
-	return r.nextConsumer.ConsumeLogs(r.ctx, r.logs)
+	return r.nextConsumer.ConsumeLogs(r.ctx, logs)
 }

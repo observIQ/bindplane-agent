@@ -25,12 +25,12 @@ import (
 type metricsGeneratorReceiver struct {
 	telemetryGeneratorReceiver
 	nextConsumer consumer.Metrics
+	generators   []generator
 }
 
 // newMetricsReceiver creates a new metrics specific receiver.
 func newMetricsReceiver(ctx context.Context, logger *zap.Logger, cfg *Config, nextConsumer consumer.Metrics) (*metricsGeneratorReceiver, error) {
 	mr := &metricsGeneratorReceiver{
-
 		nextConsumer: nextConsumer,
 	}
 	r, err := newTelemetryGeneratorReceiver(ctx, logger, cfg, mr)
@@ -39,10 +39,10 @@ func newMetricsReceiver(ctx context.Context, logger *zap.Logger, cfg *Config, ne
 	}
 
 	mr.telemetryGeneratorReceiver = r
-	mr.generator = mr
+	mr.producer = mr
 	r.supportedTelemetry = component.DataTypeMetrics
 
-	mr.initializeMetrics()
+	mr.generators = newGenerators(cfg, logger, r.supportedTelemetry)
 
 	return mr, nil
 }
@@ -51,7 +51,7 @@ func newMetricsReceiver(ctx context.Context, logger *zap.Logger, cfg *Config, ne
 func (r *metricsGeneratorReceiver) initializeMetrics() {
 }
 
-// TODO implement generate for metrics
-func (r *metricsGeneratorReceiver) generate() error {
+// TODO implement produce for metrics
+func (r *metricsGeneratorReceiver) produce() error {
 	return nil
 }

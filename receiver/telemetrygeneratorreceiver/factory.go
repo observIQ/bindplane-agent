@@ -44,13 +44,7 @@ func createDefaultConfig() component.Config {
 		PayloadsPerSecond: 1,
 		Generators: []GeneratorConfig{
 			{
-				Type: component.DataTypeLogs,
-			},
-			{
-				Type: component.DataTypeMetrics,
-			},
-			{
-				Type: component.DataTypeTraces,
+				Type: GeneratorTypeLogs,
 			},
 		},
 	}

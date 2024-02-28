@@ -34,7 +34,7 @@ func TestValidate(t *testing.T) {
 			payloads:    1,
 		},
 		{
-			desc:        "no telemetry type",
+			desc:        "no generator type",
 			errExpected: true,
 			payloads:    1,
 			errText:     "type must be set",
@@ -45,10 +45,10 @@ func TestValidate(t *testing.T) {
 			},
 		},
 		{
-			desc:        "invalid telemetry type",
+			desc:        "invalid generator type",
 			errExpected: true,
 			payloads:    1,
-			errText:     "type must be one of logs, metrics, or traces",
+			errText:     "type must be one of logs, host_metrics, or windows_events",
 			generators: []GeneratorConfig{
 				{
 					Type: "foo",
@@ -83,7 +83,7 @@ func TestValidate(t *testing.T) {
 					},
 				},
 				{
-					Type: "metrics",
+					Type: "host_metrics",
 					Attributes: map[string]string{
 						"metric_attr1": "metric_val1",
 						"metric_attr2": "metric_val2",
@@ -98,7 +98,7 @@ func TestValidate(t *testing.T) {
 					},
 				},
 				{
-					Type: "traces",
+					Type: "windows_events",
 					Attributes: map[string]string{
 						"trace_attr1": "trace_val1",
 						"trace_attr2": "trace_val2",
