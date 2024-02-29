@@ -39,7 +39,6 @@ func newMetricsReceiver(ctx context.Context, logger *zap.Logger, cfg *Config, ne
 	}
 
 	mr.telemetryGeneratorReceiver = r
-	mr.producer = mr
 	r.supportedTelemetry = component.DataTypeMetrics
 
 	mr.generators = newGenerators(cfg, logger, r.supportedTelemetry)

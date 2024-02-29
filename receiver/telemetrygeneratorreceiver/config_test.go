@@ -26,7 +26,7 @@ func TestValidate(t *testing.T) {
 		errExpected bool
 		errText     string
 		payloads    int
-		generators  []GeneratorConfig
+		generators  []*GeneratorConfig
 	}{
 		{
 			desc:        "expected case, correct",
@@ -38,7 +38,7 @@ func TestValidate(t *testing.T) {
 			errExpected: true,
 			payloads:    1,
 			errText:     "type must be set",
-			generators: []GeneratorConfig{
+			generators: []*GeneratorConfig{
 				{
 					Type: "",
 				},
@@ -49,7 +49,7 @@ func TestValidate(t *testing.T) {
 			errExpected: true,
 			payloads:    1,
 			errText:     "type must be one of logs, host_metrics, or windows_events",
-			generators: []GeneratorConfig{
+			generators: []*GeneratorConfig{
 				{
 					Type: "foo",
 				},
@@ -66,7 +66,7 @@ func TestValidate(t *testing.T) {
 			errExpected: false,
 			errText:     "payloads_per_second must be at least 1",
 			payloads:    10,
-			generators: []GeneratorConfig{
+			generators: []*GeneratorConfig{
 				{
 					Type: "logs",
 					Attributes: map[string]string{
@@ -119,7 +119,7 @@ func TestValidate(t *testing.T) {
 			errExpected: true,
 			errText:     "body must be a string or a map",
 			payloads:    10,
-			generators: []GeneratorConfig{
+			generators: []*GeneratorConfig{
 				{
 					Type: "logs",
 
@@ -132,7 +132,7 @@ func TestValidate(t *testing.T) {
 		{
 			desc:     "string body type",
 			payloads: 10,
-			generators: []GeneratorConfig{
+			generators: []*GeneratorConfig{
 				{
 					Type: "logs",
 
@@ -145,7 +145,7 @@ func TestValidate(t *testing.T) {
 		{
 			desc:     "map body type",
 			payloads: 10,
-			generators: []GeneratorConfig{
+			generators: []*GeneratorConfig{
 				{
 					Type: "logs",
 
@@ -160,7 +160,7 @@ func TestValidate(t *testing.T) {
 		{
 			desc:     "valid severity",
 			payloads: 10,
-			generators: []GeneratorConfig{
+			generators: []*GeneratorConfig{
 				{
 					Type: "logs",
 
@@ -175,7 +175,7 @@ func TestValidate(t *testing.T) {
 			payloads:    10,
 			errExpected: true,
 			errText:     "severity must be an integer",
-			generators: []GeneratorConfig{
+			generators: []*GeneratorConfig{
 				{
 					Type: "logs",
 

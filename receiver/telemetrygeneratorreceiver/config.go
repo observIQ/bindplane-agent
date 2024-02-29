@@ -22,8 +22,8 @@ import (
 
 // Config is the configuration for the telemetry generator receiver
 type Config struct {
-	PayloadsPerSecond int               `mapstructure:"payloads_per_second"`
-	Generators        []GeneratorConfig `mapstructure:"generators"`
+	PayloadsPerSecond int                `mapstructure:"payloads_per_second"`
+	Generators        []*GeneratorConfig `mapstructure:"generators"`
 }
 
 // GeneratorConfig is the configuration for a single generator

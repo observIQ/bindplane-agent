@@ -27,42 +27,42 @@ import (
 )
 
 type logsGenerator struct {
-	g      GeneratorConfig
+	cfg    *GeneratorConfig
 	logs   plog.Logs
 	logger *zap.Logger
 }
 
-func newLogsGenerator(cfg GeneratorConfig, logger *zap.Logger) generator {
+func newLogsGenerator(cfg *GeneratorConfig, logger *zap.Logger) generator {
 	return &logsGenerator{
-		g:      cfg,
+		cfg:    cfg,
 		logger: logger,
 		logs:   plog.NewLogs(),
 	}
 }
 
-func (r *logsGenerator) initialize() {
-	resourceLogs := r.logs.ResourceLogs().AppendEmpty()
+func (g *logsGenerator) initialize() {
+	resourceLogs := g.logs.ResourceLogs().AppendEmpty()
 	// Add resource attributes
-	for k, v := range r.g.ResourceAttributes {
+	for k, v := range g.cfg.ResourceAttributes {
 		resourceLogs.Resource().Attributes().PutStr(k, v)
 	}
 	scopeLogs := resourceLogs.ScopeLogs().AppendEmpty()
 	// Generate logs
 	logRecord := scopeLogs.LogRecords().AppendEmpty()
-	for k, v := range r.g.Attributes {
+	for k, v := range g.cfg.Attributes {
 		logRecord.Attributes().PutStr(k, v)
 	}
-	for k, v := range r.g.AdditionalConfig {
+	for k, v := range g.cfg.AdditionalConfig {
 		switch k {
 		case "body":
 			// parses body string and sets that as log body, but uses string if parsing fails
 			parsedBody := map[string]any{}
 			if err := json.Unmarshal([]byte(v.(string)), &parsedBody); err != nil {
-				r.logger.Warn("unable to unmarshal log body", zap.Error(err))
+				g.logger.Warn("unable to unmarshal log body", zap.Error(err))
 				logRecord.Body().SetStr(v.(string))
 			} else {
 				if err := logRecord.Body().SetEmptyMap().FromRaw(parsedBody); err != nil {
-					r.logger.Warn("failed to set body to parsed value", zap.Error(err))
+					g.logger.Warn("failed to set body to parsed value", zap.Error(err))
 					logRecord.Body().SetStr(v.(string))
 				}
 			}

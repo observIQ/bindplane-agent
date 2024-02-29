@@ -22,11 +22,17 @@ import (
 	"go.uber.org/zap"
 )
 
+// GeneratorType is the type of generator to use, either "logs", "host_metrics", or "windows_events"
 type GeneratorType = string
 
 const (
-	GeneratorTypeLogs          GeneratorType = "logs"
-	GeneratorTypeHostMetrics   GeneratorType = "host_metrics"
+	// GeneratorTypeLogs is the generator type for logs
+	GeneratorTypeLogs GeneratorType = "logs"
+
+	// GeneratorTypeHostMetrics is the generator type for host metrics
+	GeneratorTypeHostMetrics GeneratorType = "host_metrics"
+
+	// GeneratorTypeWindowsEvents is the generator type for windows events
 	GeneratorTypeWindowsEvents GeneratorType = "windows_events"
 )
 

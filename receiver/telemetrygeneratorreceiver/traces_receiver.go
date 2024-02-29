@@ -40,7 +40,6 @@ func newTracesReceiver(ctx context.Context, logger *zap.Logger, cfg *Config, nex
 	}
 
 	tr.telemetryGeneratorReceiver = r
-	tr.producer = tr
 	r.supportedTelemetry = component.DataTypeTraces
 	tr.generators = newGenerators(cfg, logger, r.supportedTelemetry)
 

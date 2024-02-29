@@ -23,7 +23,7 @@ import (
 func Test_createDefaultConfig(t *testing.T) {
 	expectedCfg := &Config{
 		PayloadsPerSecond: 1,
-		Generators: []GeneratorConfig{
+		Generators: []*GeneratorConfig{
 			{
 				Type: GeneratorTypeLogs,
 			},
