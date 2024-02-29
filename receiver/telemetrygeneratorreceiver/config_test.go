@@ -48,7 +48,7 @@ func TestValidate(t *testing.T) {
 			desc:        "invalid generator type",
 			errExpected: true,
 			payloads:    1,
-			errText:     "type must be one of logs, host_metrics, or windows_events",
+			errText:     "invalid generator type: foo",
 			generators: []GeneratorConfig{
 				{
 					Type: "foo",
@@ -117,7 +117,7 @@ func TestValidate(t *testing.T) {
 		{
 			desc:        "invalid body type",
 			errExpected: true,
-			errText:     "body must be a string or a map",
+			errText:     "body must be a string",
 			payloads:    10,
 			generators: []GeneratorConfig{
 				{
@@ -143,8 +143,10 @@ func TestValidate(t *testing.T) {
 			},
 		},
 		{
-			desc:     "map body type",
-			payloads: 10,
+			desc:        "map body type",
+			payloads:    10,
+			errExpected: true,
+			errText:     "body must be a string",
 			generators: []GeneratorConfig{
 				{
 					Type: "logs",

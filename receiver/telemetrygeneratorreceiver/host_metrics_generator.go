@@ -15,10 +15,7 @@
 package telemetrygeneratorreceiver //import "github.com/observiq/bindplane-agent/receiver/telemetrygeneratorreceiver"
 
 import (
-	"go.opentelemetry.io/collector/component"
-	"go.opentelemetry.io/collector/pdata/plog"
 	"go.opentelemetry.io/collector/pdata/pmetric"
-	"go.opentelemetry.io/collector/pdata/ptrace"
 	"go.uber.org/zap"
 )
 
@@ -27,29 +24,13 @@ type hostMetricsGenerator struct {
 	logger *zap.Logger
 }
 
-func newHostMetricsGenerator(cfg GeneratorConfig, logger *zap.Logger) generator {
+func newHostMetricsGenerator(cfg GeneratorConfig, logger *zap.Logger) metricGenerator {
 	return &hostMetricsGenerator{
 		cfg:    cfg,
 		logger: logger,
 	}
 }
 
-func (g *hostMetricsGenerator) initialize() {
-
-}
-
-func (g *hostMetricsGenerator) SupportsType(t component.Type) bool {
-	return t == component.DataTypeMetrics
-}
-
-func (g *hostMetricsGenerator) GenerateMetrics() pmetric.Metrics {
+func (g *hostMetricsGenerator) generateMetrics() pmetric.Metrics {
 	return pmetric.NewMetrics()
-}
-
-func (g *hostMetricsGenerator) GenerateLogs() plog.Logs {
-	return plog.NewLogs()
-}
-
-func (g *hostMetricsGenerator) GenerateTraces() ptrace.Traces {
-	return ptrace.NewTraces()
 }

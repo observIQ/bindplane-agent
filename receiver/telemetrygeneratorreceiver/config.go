@@ -18,6 +18,8 @@ package telemetrygeneratorreceiver //import "github.com/observiq/bindplane-agent
 import (
 	"errors"
 	"fmt"
+
+	"go.opentelemetry.io/collector/pdata/pcommon"
 )
 
 // Config is the configuration for the telemetry generator receiver
@@ -77,6 +79,12 @@ func (g *GeneratorConfig) Validate() error {
 }
 
 func validateLogGeneratorConfig(g *GeneratorConfig) error {
+
+	err := pcommon.NewMap().FromRaw(g.Attributes)
+	if err != nil {
+		return fmt.Errorf("error in attributes config: %s", err)
+	}
+
 	// severity and body validation
 	if body, ok := g.AdditionalConfig["body"]; ok {
 		// check if body is a valid string or map

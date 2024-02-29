@@ -15,10 +15,7 @@
 package telemetrygeneratorreceiver //import "github.com/observiq/bindplane-agent/receiver/telemetrygeneratorreceiver"
 
 import (
-	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/pdata/plog"
-	"go.opentelemetry.io/collector/pdata/pmetric"
-	"go.opentelemetry.io/collector/pdata/ptrace"
 	"go.uber.org/zap"
 )
 
@@ -27,29 +24,13 @@ type windowsEventsMetricsGenerator struct {
 	logger *zap.Logger
 }
 
-func newWindowsEventsGenerator(cfg GeneratorConfig, logger *zap.Logger) generator {
+func newWindowsEventsGenerator(cfg GeneratorConfig, logger *zap.Logger) logGenerator {
 	return &windowsEventsMetricsGenerator{
 		cfg:    cfg,
 		logger: logger,
 	}
 }
 
-func (g *windowsEventsMetricsGenerator) initialize() {
-
-}
-
-func (g *windowsEventsMetricsGenerator) SupportsType(t component.Type) bool {
-	return t == component.DataTypeLogs
-}
-
-func (g *windowsEventsMetricsGenerator) GenerateMetrics() pmetric.Metrics {
-	return pmetric.NewMetrics()
-}
-
-func (g *windowsEventsMetricsGenerator) GenerateLogs() plog.Logs {
+func (g *windowsEventsMetricsGenerator) generateLogs() plog.Logs {
 	return plog.NewLogs()
-}
-
-func (g *windowsEventsMetricsGenerator) GenerateTraces() ptrace.Traces {
-	return ptrace.NewTraces()
 }

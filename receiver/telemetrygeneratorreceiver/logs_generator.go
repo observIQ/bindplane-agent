@@ -17,58 +17,38 @@ package telemetrygeneratorreceiver //import "github.com/observiq/bindplane-agent
 import (
 	"time"
 
-	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/plog"
-	"go.opentelemetry.io/collector/pdata/pmetric"
-	"go.opentelemetry.io/collector/pdata/ptrace"
 	"go.uber.org/zap"
 )
 
-type logsGenerator struct {
+type defaultLogGenerator struct {
 	cfg    GeneratorConfig
 	logs   plog.Logs
 	logger *zap.Logger
 }
 
-func newLogsGenerator(cfg GeneratorConfig, logger *zap.Logger) generator {
-	return &logsGenerator{
+func newLogsGenerator(cfg GeneratorConfig, logger *zap.Logger) logGenerator {
+	lg := &defaultLogGenerator{
 		cfg:    cfg,
 		logger: logger,
 		logs:   plog.NewLogs(),
 	}
-}
 
-func (g *logsGenerator) initialize() {
-	resourceLogs := g.logs.ResourceLogs().AppendEmpty()
+	resourceLogs := lg.logs.ResourceLogs().AppendEmpty()
 	// Add resource attributes
-	for k, v := range g.cfg.ResourceAttributes {
+	for k, v := range lg.cfg.ResourceAttributes {
 		resourceLogs.Resource().Attributes().PutStr(k, v)
 	}
 	scopeLogs := resourceLogs.ScopeLogs().AppendEmpty()
-	// Generate logs
 	logRecord := scopeLogs.LogRecords().AppendEmpty()
-	for k, v := range g.cfg.Attributes {
-		if strVal, ok := v.(string); ok {
-			logRecord.Attributes().PutStr(k, strVal)
-			continue
-		}
-		if intVal, ok := v.(int64); ok {
-			logRecord.Attributes().PutInt(k, intVal)
-			continue
-		}
-		if boolVal, ok := v.(bool); ok {
-			logRecord.Attributes().PutBool(k, boolVal)
-			continue
-		}
-		if floatVal, ok := v.(float64); ok {
-			logRecord.Attributes().PutDouble(k, floatVal)
-			continue
-		}
-		g.logger.Warn("unknown attribute type", zap.Any("value", v))
 
+	err := logRecord.Attributes().FromRaw(lg.cfg.Attributes)
+	if err != nil {
+		// validation should catch this error
+		logger.Warn("Error adding attributes", zap.Error(err))
 	}
-	for k, v := range g.cfg.AdditionalConfig {
+	for k, v := range lg.cfg.AdditionalConfig {
 		switch k {
 		case "body":
 			// validation already proves this is a string
@@ -78,18 +58,10 @@ func (g *logsGenerator) initialize() {
 			logRecord.SetSeverityNumber(plog.SeverityNumber(v.(int)))
 		}
 	}
-
+	return lg
 }
 
-func (g *logsGenerator) SupportsType(t component.Type) bool {
-	return t == component.DataTypeLogs
-}
-
-func (g *logsGenerator) GenerateMetrics() pmetric.Metrics {
-	return pmetric.NewMetrics()
-}
-
-func (g *logsGenerator) GenerateLogs() plog.Logs {
+func (g *defaultLogGenerator) generateLogs() plog.Logs {
 	for i := 0; i < g.logs.ResourceLogs().Len(); i++ {
 		resourceLogs := g.logs.ResourceLogs().At(i)
 		for k := 0; k < resourceLogs.ScopeLogs().Len(); k++ {
@@ -101,8 +73,4 @@ func (g *logsGenerator) GenerateLogs() plog.Logs {
 		}
 	}
 	return g.logs
-}
-
-func (g *logsGenerator) GenerateTraces() ptrace.Traces {
-	return ptrace.NewTraces()
 }

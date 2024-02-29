@@ -25,7 +25,7 @@ import (
 type metricsGeneratorReceiver struct {
 	telemetryGeneratorReceiver
 	nextConsumer consumer.Metrics
-	generators   []generator
+	generators   []metricGenerator
 }
 
 // newMetricsReceiver creates a new metrics specific receiver.
@@ -41,7 +41,7 @@ func newMetricsReceiver(ctx context.Context, logger *zap.Logger, cfg *Config, ne
 	mr.telemetryGeneratorReceiver = r
 	r.supportedTelemetry = component.DataTypeMetrics
 
-	mr.generators = newGenerators(cfg, logger, r.supportedTelemetry)
+	mr.generators = newMetricsGenerators(cfg, logger)
 
 	return mr, nil
 }

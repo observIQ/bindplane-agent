@@ -26,7 +26,7 @@ import (
 type logsGeneratorReceiver struct {
 	telemetryGeneratorReceiver
 	nextConsumer consumer.Logs
-	generators   []generator
+	generators   []logGenerator
 }
 
 func newLogsReceiver(ctx context.Context, logger *zap.Logger, cfg *Config, nextConsumer consumer.Logs) (*logsGeneratorReceiver, error) {
@@ -41,7 +41,7 @@ func newLogsReceiver(ctx context.Context, logger *zap.Logger, cfg *Config, nextC
 	lr.telemetryGeneratorReceiver = r
 	r.supportedTelemetry = component.DataTypeLogs
 
-	lr.generators = newGenerators(cfg, logger, r.supportedTelemetry)
+	lr.generators = newLogsGenerators(cfg, logger)
 
 	return lr, nil
 }
@@ -50,7 +50,7 @@ func newLogsReceiver(ctx context.Context, logger *zap.Logger, cfg *Config, nextC
 func (r *logsGeneratorReceiver) produce() error {
 	logs := plog.NewLogs()
 	for _, g := range r.generators {
-		l := g.GenerateLogs()
+		l := g.generateLogs()
 		for i := 0; i < l.ResourceLogs().Len(); i++ {
 			src := l.ResourceLogs().At(i)
 			src.CopyTo(logs.ResourceLogs().AppendEmpty())

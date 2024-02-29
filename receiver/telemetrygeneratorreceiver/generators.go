@@ -15,7 +15,6 @@
 package telemetrygeneratorreceiver //import "github.com/observiq/bindplane-agent/receiver/telemetrygeneratorreceiver"
 
 import (
-	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/pdata/plog"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.opentelemetry.io/collector/pdata/ptrace"
@@ -36,40 +35,45 @@ const (
 	generatorTypeWindowsEvents generatorType = "windows_events"
 )
 
-type generator interface {
-	// SupportsType returns true if the generator supports the given component type, either metrics, logs, or traces.
-	SupportsType(component.Type) bool
-
-	// GenerateMetrics returns a set of generated metrics
-	GenerateMetrics() pmetric.Metrics
-
-	// GenerateLogs returns a set of generated logs
-	GenerateLogs() plog.Logs
-
-	// GenerateTraces returns a set of generated traces
-	GenerateTraces() ptrace.Traces
-
-	// initialize must called when the generator is created. It is used to prevent the need to
-	// recreate the telemetry every generation cycle
-	initialize()
+type metricGenerator interface {
+	// generateMetrics returns a set of generated metrics
+	generateMetrics() pmetric.Metrics
 }
 
-func newGenerators(cfg *Config, logger *zap.Logger, supportedType component.DataType) []generator {
-	var generators []generator
+type logGenerator interface {
+	// generateLogs returns a set of generated logs
+	generateLogs() plog.Logs
+}
+
+type traceGenerator interface {
+	// generateTraces returns a set of generated traces
+	generateTraces() ptrace.Traces
+}
+
+func newLogsGenerators(cfg *Config, logger *zap.Logger) []logGenerator {
+	var generators []logGenerator
 	for _, gen := range cfg.Generators {
-		var newGenerator generator
 		switch gen.Type {
 		case generatorTypeLogs:
-			newGenerator = newLogsGenerator(gen, logger)
-		case generatorTypeHostMetrics:
-			newGenerator = newHostMetricsGenerator(gen, logger)
+			generators = append(generators, newLogsGenerator(gen, logger))
 		case generatorTypeWindowsEvents:
-			newGenerator = newWindowsEventsGenerator(gen, logger)
-		}
-		if newGenerator != nil && newGenerator.SupportsType(supportedType) {
-			newGenerator.initialize()
-			generators = append(generators, newGenerator)
+			generators = append(generators, newWindowsEventsGenerator(gen, logger))
 		}
 	}
 	return generators
+}
+
+func newMetricsGenerators(cfg *Config, logger *zap.Logger) []metricGenerator {
+	var generators []metricGenerator
+	for _, gen := range cfg.Generators {
+		switch gen.Type {
+		case generatorTypeLogs:
+			generators = append(generators, newHostMetricsGenerator(gen, logger))
+		}
+	}
+	return generators
+}
+
+func newTraceGenerators(_ *Config, _ *zap.Logger) []traceGenerator {
+	return nil
 }
