@@ -42,11 +42,6 @@ func NewFactory() receiver.Factory {
 func createDefaultConfig() component.Config {
 	return &Config{
 		PayloadsPerSecond: 1,
-		Generators: []*GeneratorConfig{
-			{
-				Type: GeneratorTypeLogs,
-			},
-		},
 	}
 }
 

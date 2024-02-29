@@ -22,20 +22,20 @@ import (
 
 // Config is the configuration for the telemetry generator receiver
 type Config struct {
-	PayloadsPerSecond int                `mapstructure:"payloads_per_second"`
-	Generators        []*GeneratorConfig `mapstructure:"generators"`
+	PayloadsPerSecond int               `mapstructure:"payloads_per_second"`
+	Generators        []GeneratorConfig `mapstructure:"generators"`
 }
 
 // GeneratorConfig is the configuration for a single generator
 type GeneratorConfig struct {
 	// Type of generator to use, either "logs", "host_metrics", or "windows_events"
-	Type GeneratorType `mapstructure:"type"`
+	Type generatorType `mapstructure:"type"`
 
 	// ResourceAttributes are additional key-value pairs to add to the resource attributes of telemetry.
 	ResourceAttributes map[string]string `mapstructure:"resource_attributes"`
 
 	// Attributes are Additional key-value pairs to add to the telemetry attributes
-	Attributes map[string]string `mapstructure:"attributes"`
+	Attributes map[string]any `mapstructure:"attributes"`
 
 	// AdditionalConfig are any additional config that a generator might need.
 	AdditionalConfig map[string]any `mapstructure:"additional_config"`
@@ -63,32 +63,43 @@ func (g *GeneratorConfig) Validate() error {
 		return errors.New("type must be set")
 	}
 
-	if g.Type != GeneratorTypeLogs && g.Type != GeneratorTypeHostMetrics && g.Type != GeneratorTypeWindowsEvents {
-		return fmt.Errorf("type must be one of %s, %s, or %s", GeneratorTypeLogs, GeneratorTypeHostMetrics, GeneratorTypeWindowsEvents)
-	}
+	switch g.Type {
+	case generatorTypeLogs:
+		return validateLogGeneratorConfig(g)
+	case generatorTypeHostMetrics:
+		return validateHostMetricsGeneratorConfig(g)
+	case generatorTypeWindowsEvents:
+		return validateWindowsEventsGeneratorConfig(g)
 
+	default:
+		return fmt.Errorf("invalid generator type: %s", g.Type)
+	}
+}
+
+func validateLogGeneratorConfig(g *GeneratorConfig) error {
 	// severity and body validation
-	if g.Type == GeneratorTypeLogs {
-		if body, ok := g.AdditionalConfig["body"]; ok {
-
-			// check if body is a valid string or map
-			// if not, return an error
-			_, ok := body.(string)
-			if !ok {
-				_, ok := body.(map[string]any)
-				if !ok {
-					return errors.New("body must be a string or a map")
-				}
-			}
-		}
-
-		// if severity is set, it must be a valid severity
-		if severity, ok := g.AdditionalConfig["severity"]; ok {
-			if _, ok := severity.(int); !ok {
-				return errors.New("severity must be an integer")
-			}
+	if body, ok := g.AdditionalConfig["body"]; ok {
+		// check if body is a valid string or map
+		// if not, return an error
+		_, ok := body.(string)
+		if !ok {
+			return errors.New("body must be a string")
 		}
 	}
 
+	// if severity is set, it must be a valid severity
+	if severity, ok := g.AdditionalConfig["severity"]; ok {
+		if _, ok := severity.(int); !ok {
+			return errors.New("severity must be an integer")
+		}
+	}
+	return nil
+}
+
+func validateHostMetricsGeneratorConfig(_ *GeneratorConfig) error {
+	return nil
+}
+
+func validateWindowsEventsGeneratorConfig(_ *GeneratorConfig) error {
 	return nil
 }

@@ -23,11 +23,11 @@ import (
 )
 
 type windowsEventsMetricsGenerator struct {
-	cfg    *GeneratorConfig
+	cfg    GeneratorConfig
 	logger *zap.Logger
 }
 
-func newWindowsEventsGenerator(cfg *GeneratorConfig, logger *zap.Logger) generator {
+func newWindowsEventsGenerator(cfg GeneratorConfig, logger *zap.Logger) generator {
 	return &windowsEventsMetricsGenerator{
 		cfg:    cfg,
 		logger: logger,

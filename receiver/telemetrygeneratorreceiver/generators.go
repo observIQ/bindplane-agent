@@ -22,25 +22,31 @@ import (
 	"go.uber.org/zap"
 )
 
-// GeneratorType is the type of generator to use, either "logs", "host_metrics", or "windows_events"
-type GeneratorType = string
+// generatorType is the type of generator to use, either "logs", "host_metrics", or "windows_events"
+type generatorType string
 
 const (
-	// GeneratorTypeLogs is the generator type for logs
-	GeneratorTypeLogs GeneratorType = "logs"
+	// generatorTypeLogs is the generator type for logs
+	generatorTypeLogs generatorType = "logs"
 
-	// GeneratorTypeHostMetrics is the generator type for host metrics
-	GeneratorTypeHostMetrics GeneratorType = "host_metrics"
+	// generatorTypeHostMetrics is the generator type for host metrics
+	generatorTypeHostMetrics generatorType = "host_metrics"
 
-	// GeneratorTypeWindowsEvents is the generator type for windows events
-	GeneratorTypeWindowsEvents GeneratorType = "windows_events"
+	// generatorTypeWindowsEvents is the generator type for windows events
+	generatorTypeWindowsEvents generatorType = "windows_events"
 )
 
 type generator interface {
 	// SupportsType returns true if the generator supports the given component type, either metrics, logs, or traces.
 	SupportsType(component.Type) bool
+
+	// GenerateMetrics returns a set of generated metrics
 	GenerateMetrics() pmetric.Metrics
+
+	// GenerateLogs returns a set of generated logs
 	GenerateLogs() plog.Logs
+
+	// GenerateTraces returns a set of generated traces
 	GenerateTraces() ptrace.Traces
 
 	// initialize must called when the generator is created. It is used to prevent the need to
@@ -53,11 +59,11 @@ func newGenerators(cfg *Config, logger *zap.Logger, supportedType component.Data
 	for _, gen := range cfg.Generators {
 		var newGenerator generator
 		switch gen.Type {
-		case GeneratorTypeLogs:
+		case generatorTypeLogs:
 			newGenerator = newLogsGenerator(gen, logger)
-		case GeneratorTypeHostMetrics:
+		case generatorTypeHostMetrics:
 			newGenerator = newHostMetricsGenerator(gen, logger)
-		case GeneratorTypeWindowsEvents:
+		case generatorTypeWindowsEvents:
 			newGenerator = newWindowsEventsGenerator(gen, logger)
 		}
 		if newGenerator != nil && newGenerator.SupportsType(supportedType) {

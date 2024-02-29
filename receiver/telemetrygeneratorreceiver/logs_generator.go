@@ -15,7 +15,6 @@
 package telemetrygeneratorreceiver //import "github.com/observiq/bindplane-agent/receiver/telemetrygeneratorreceiver"
 
 import (
-	"encoding/json"
 	"time"
 
 	"go.opentelemetry.io/collector/component"
@@ -27,12 +26,12 @@ import (
 )
 
 type logsGenerator struct {
-	cfg    *GeneratorConfig
+	cfg    GeneratorConfig
 	logs   plog.Logs
 	logger *zap.Logger
 }
 
-func newLogsGenerator(cfg *GeneratorConfig, logger *zap.Logger) generator {
+func newLogsGenerator(cfg GeneratorConfig, logger *zap.Logger) generator {
 	return &logsGenerator{
 		cfg:    cfg,
 		logger: logger,
@@ -50,24 +49,32 @@ func (g *logsGenerator) initialize() {
 	// Generate logs
 	logRecord := scopeLogs.LogRecords().AppendEmpty()
 	for k, v := range g.cfg.Attributes {
-		logRecord.Attributes().PutStr(k, v)
+		if strVal, ok := v.(string); ok {
+			logRecord.Attributes().PutStr(k, strVal)
+			continue
+		}
+		if intVal, ok := v.(int64); ok {
+			logRecord.Attributes().PutInt(k, intVal)
+			continue
+		}
+		if boolVal, ok := v.(bool); ok {
+			logRecord.Attributes().PutBool(k, boolVal)
+			continue
+		}
+		if floatVal, ok := v.(float64); ok {
+			logRecord.Attributes().PutDouble(k, floatVal)
+			continue
+		}
+		g.logger.Warn("unknown attribute type", zap.Any("value", v))
+
 	}
 	for k, v := range g.cfg.AdditionalConfig {
 		switch k {
 		case "body":
-			// parses body string and sets that as log body, but uses string if parsing fails
-			parsedBody := map[string]any{}
-			if err := json.Unmarshal([]byte(v.(string)), &parsedBody); err != nil {
-				g.logger.Warn("unable to unmarshal log body", zap.Error(err))
-				logRecord.Body().SetStr(v.(string))
-			} else {
-				if err := logRecord.Body().SetEmptyMap().FromRaw(parsedBody); err != nil {
-					g.logger.Warn("failed to set body to parsed value", zap.Error(err))
-					logRecord.Body().SetStr(v.(string))
-				}
-			}
+			// validation already proves this is a string
 			logRecord.Body().SetStr(v.(string))
 		case "severity":
+			// validation already proves this is an int
 			logRecord.SetSeverityNumber(plog.SeverityNumber(v.(int)))
 		}
 	}

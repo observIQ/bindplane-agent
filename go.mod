@@ -1,36 +1,37 @@
 module github.com/observiq/bindplane-agent
 
-go 1.21.6
+go 1.21
+
+toolchain go1.21.6
 
 require (
 	github.com/google/uuid v1.6.0
 	github.com/mholt/archiver/v3 v3.5.1
-	github.com/observiq/bindplane-agent/exporter/azureblobexporter v1.45.0
-	github.com/observiq/bindplane-agent/exporter/chronicleexporter v1.45.0
-	github.com/observiq/bindplane-agent/exporter/chronicleforwarderexporter v1.45.0
-	github.com/observiq/bindplane-agent/exporter/googlecloudexporter v1.45.0
-	github.com/observiq/bindplane-agent/exporter/googlemanagedprometheusexporter v1.45.0
-	github.com/observiq/bindplane-agent/exporter/snowflakeexporter v1.45.0
-	github.com/observiq/bindplane-agent/packagestate v1.45.0
-	github.com/observiq/bindplane-agent/processor/datapointcountprocessor v1.45.0
-	github.com/observiq/bindplane-agent/processor/logcountprocessor v1.45.0
-	github.com/observiq/bindplane-agent/processor/logdeduplicationprocessor v1.45.0
-	github.com/observiq/bindplane-agent/processor/lookupprocessor v1.45.0
-	github.com/observiq/bindplane-agent/processor/maskprocessor v1.45.0
-	github.com/observiq/bindplane-agent/processor/metricextractprocessor v1.45.0
-	github.com/observiq/bindplane-agent/processor/metricstatsprocessor v1.45.0
-	github.com/observiq/bindplane-agent/processor/removeemptyvaluesprocessor v1.45.0
-	github.com/observiq/bindplane-agent/processor/resourceattributetransposerprocessor v1.45.0
-	github.com/observiq/bindplane-agent/processor/samplingprocessor v1.45.0
-	github.com/observiq/bindplane-agent/processor/spancountprocessor v1.45.0
-	github.com/observiq/bindplane-agent/processor/throughputmeasurementprocessor v1.45.0
-	github.com/observiq/bindplane-agent/receiver/azureblobrehydrationreceiver v1.45.0
-	github.com/observiq/bindplane-agent/receiver/httpreceiver v1.45.0
-	github.com/observiq/bindplane-agent/receiver/m365receiver v1.45.0
-	github.com/observiq/bindplane-agent/receiver/pluginreceiver v1.45.0
+	github.com/observiq/bindplane-agent/exporter/azureblobexporter v1.46.0
+	github.com/observiq/bindplane-agent/exporter/chronicleexporter v1.46.0
+	github.com/observiq/bindplane-agent/exporter/chronicleforwarderexporter v1.46.0
+	github.com/observiq/bindplane-agent/exporter/googlecloudexporter v1.46.0
+	github.com/observiq/bindplane-agent/exporter/googlemanagedprometheusexporter v1.46.0
+	github.com/observiq/bindplane-agent/exporter/snowflakeexporter v1.46.0
+	github.com/observiq/bindplane-agent/packagestate v1.46.0
+	github.com/observiq/bindplane-agent/processor/datapointcountprocessor v1.46.0
+	github.com/observiq/bindplane-agent/processor/logcountprocessor v1.46.0
+	github.com/observiq/bindplane-agent/processor/logdeduplicationprocessor v1.46.0
+	github.com/observiq/bindplane-agent/processor/lookupprocessor v1.46.0
+	github.com/observiq/bindplane-agent/processor/maskprocessor v1.46.0
+	github.com/observiq/bindplane-agent/processor/metricextractprocessor v1.46.0
+	github.com/observiq/bindplane-agent/processor/metricstatsprocessor v1.46.0
+	github.com/observiq/bindplane-agent/processor/removeemptyvaluesprocessor v1.46.0
+	github.com/observiq/bindplane-agent/processor/resourceattributetransposerprocessor v1.46.0
+	github.com/observiq/bindplane-agent/processor/samplingprocessor v1.46.0
+	github.com/observiq/bindplane-agent/processor/spancountprocessor v1.46.0
+	github.com/observiq/bindplane-agent/processor/throughputmeasurementprocessor v1.46.0
+	github.com/observiq/bindplane-agent/receiver/azureblobrehydrationreceiver v1.46.0
+	github.com/observiq/bindplane-agent/receiver/httpreceiver v1.46.0
+	github.com/observiq/bindplane-agent/receiver/m365receiver v1.46.0
+	github.com/observiq/bindplane-agent/receiver/pluginreceiver v1.46.0
 	github.com/observiq/bindplane-agent/receiver/routereceiver v1.46.0
-	github.com/observiq/bindplane-agent/receiver/sapnetweaverreceiver v1.45.0
-	github.com/observiq/bindplane-agent/receiver/telemetrygeneratorreceiver v0.0.0-00010101000000-000000000000
+	github.com/observiq/bindplane-agent/receiver/sapnetweaverreceiver v1.46.0
 	github.com/oklog/ulid/v2 v2.1.0
 	github.com/open-telemetry/opamp-go v0.9.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/connector/countconnector v0.95.0

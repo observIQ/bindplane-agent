@@ -67,7 +67,7 @@ func (r *telemetryGeneratorReceiver) Shutdown(ctx context.Context) error {
 }
 
 // Start starts the telemetryGeneratorReceiver receiver
-func (r *telemetryGeneratorReceiver) Start(ctx context.Context, _ component.Host) error {
+func (r *telemetryGeneratorReceiver) Start(_ context.Context, _ component.Host) error {
 
 	go func() {
 		defer close(r.doneChan)
@@ -81,8 +81,6 @@ func (r *telemetryGeneratorReceiver) Start(ctx context.Context, _ component.Host
 		}
 		for {
 			select {
-			case <-ctx.Done():
-				return
 			case <-r.ctx.Done():
 				return
 			case <-ticker.C:

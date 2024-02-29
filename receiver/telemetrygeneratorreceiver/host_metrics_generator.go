@@ -23,11 +23,11 @@ import (
 )
 
 type hostMetricsGenerator struct {
-	cfg    *GeneratorConfig
+	cfg    GeneratorConfig
 	logger *zap.Logger
 }
 
-func newHostMetricsGenerator(cfg *GeneratorConfig, logger *zap.Logger) generator {
+func newHostMetricsGenerator(cfg GeneratorConfig, logger *zap.Logger) generator {
 	return &hostMetricsGenerator{
 		cfg:    cfg,
 		logger: logger,
