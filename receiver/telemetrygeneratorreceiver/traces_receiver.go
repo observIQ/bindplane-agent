@@ -29,21 +29,18 @@ type tracesGeneratorReceiver struct {
 }
 
 // newTracesReceiver creates a new traces specific receiver.
-func newTracesReceiver(ctx context.Context, logger *zap.Logger, cfg *Config, nextConsumer consumer.Traces) (*tracesGeneratorReceiver, error) {
+func newTracesReceiver(ctx context.Context, logger *zap.Logger, cfg *Config, nextConsumer consumer.Traces) *tracesGeneratorReceiver {
 	tr := &tracesGeneratorReceiver{
 		nextConsumer: nextConsumer,
 	}
 
-	r, err := newTelemetryGeneratorReceiver(ctx, logger, cfg, tr)
-	if err != nil {
-		return nil, err
-	}
+	r := newTelemetryGeneratorReceiver(ctx, logger, cfg, tr)
 
 	tr.telemetryGeneratorReceiver = r
 	r.supportedTelemetry = component.DataTypeTraces
 	tr.generators = newTraceGenerators(cfg, logger)
 
-	return tr, nil
+	return tr
 }
 
 // TODO implement produce for traces

@@ -40,7 +40,7 @@ type telemetryGeneratorReceiver struct {
 }
 
 // newTelemetryGeneratorReceiver creates a new telemetry generator receiver
-func newTelemetryGeneratorReceiver(ctx context.Context, logger *zap.Logger, cfg *Config, tp telemetryProducer) (telemetryGeneratorReceiver, error) {
+func newTelemetryGeneratorReceiver(ctx context.Context, logger *zap.Logger, cfg *Config, tp telemetryProducer) telemetryGeneratorReceiver {
 	ctx, cancel := context.WithCancelCause(ctx)
 
 	return telemetryGeneratorReceiver{
@@ -50,7 +50,7 @@ func newTelemetryGeneratorReceiver(ctx context.Context, logger *zap.Logger, cfg 
 		ctx:        ctx,
 		cancelFunc: cancel,
 		producer:   tp,
-	}, nil
+	}
 }
 
 // Shutdown shuts down the telemetry generator receiver

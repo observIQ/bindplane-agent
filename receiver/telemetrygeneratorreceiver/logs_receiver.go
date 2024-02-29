@@ -18,7 +18,7 @@ import (
 	"context"
 
 	"go.opentelemetry.io/collector/component"
-	"go.opentelemetry.io/collector/consumer" // newLogsReceiver creates a new logs specific receiver.
+	"go.opentelemetry.io/collector/consumer"
 	"go.opentelemetry.io/collector/pdata/plog"
 	"go.uber.org/zap"
 )
@@ -29,21 +29,19 @@ type logsGeneratorReceiver struct {
 	generators   []logGenerator
 }
 
-func newLogsReceiver(ctx context.Context, logger *zap.Logger, cfg *Config, nextConsumer consumer.Logs) (*logsGeneratorReceiver, error) {
+// newLogsReceiver creates a new logs specific receiver.
+func newLogsReceiver(ctx context.Context, logger *zap.Logger, cfg *Config, nextConsumer consumer.Logs) *logsGeneratorReceiver {
 	lr := &logsGeneratorReceiver{
 		nextConsumer: nextConsumer,
 	}
-	r, err := newTelemetryGeneratorReceiver(ctx, logger, cfg, lr)
-	if err != nil {
-		return nil, err
-	}
+	r := newTelemetryGeneratorReceiver(ctx, logger, cfg, lr)
 
 	lr.telemetryGeneratorReceiver = r
 	r.supportedTelemetry = component.DataTypeLogs
 
 	lr.generators = newLogsGenerators(cfg, logger)
 
-	return lr, nil
+	return lr
 }
 
 // generateTelemetry
