@@ -22,6 +22,8 @@ import (
 	"go.uber.org/zap"
 )
 
+// defaultLogGenerator is a generator for logs. It generates a stream of logs based on the configuration provided,
+// each log identical save for the timestamp.
 type defaultLogGenerator struct {
 	cfg    GeneratorConfig
 	logs   plog.Logs

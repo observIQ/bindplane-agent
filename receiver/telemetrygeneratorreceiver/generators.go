@@ -50,6 +50,7 @@ type traceGenerator interface {
 	generateTraces() ptrace.Traces
 }
 
+// newLogsGenerators creates and returns a slice of logGenerator instances based on the provided configuration and logger.
 func newLogsGenerators(cfg *Config, logger *zap.Logger) []logGenerator {
 	var generators []logGenerator
 	for _, gen := range cfg.Generators {
@@ -63,6 +64,7 @@ func newLogsGenerators(cfg *Config, logger *zap.Logger) []logGenerator {
 	return generators
 }
 
+// newMetricsGenerators creates a slice of metricGenerator based on the provided configuration and logger.
 func newMetricsGenerators(cfg *Config, logger *zap.Logger) []metricGenerator {
 	var generators []metricGenerator
 	for _, gen := range cfg.Generators {

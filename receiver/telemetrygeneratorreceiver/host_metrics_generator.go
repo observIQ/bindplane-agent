@@ -19,6 +19,8 @@ import (
 	"go.uber.org/zap"
 )
 
+// hostMetricsGenerator is a generator for host metrics. It generates a sampling of host metrics
+// emulating the Host Metrics receiver: github.com/open-telemetry/opentelemetry-collector-contrib/receiver/hostmetricsreceiver
 type hostMetricsGenerator struct {
 	cfg    GeneratorConfig
 	logger *zap.Logger

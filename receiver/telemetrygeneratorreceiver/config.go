@@ -20,6 +20,7 @@ import (
 	"fmt"
 
 	"go.opentelemetry.io/collector/pdata/pcommon"
+	"go.opentelemetry.io/collector/pdata/plog"
 )
 
 // Config is the configuration for the telemetry generator receiver
@@ -79,7 +80,6 @@ func (g *GeneratorConfig) Validate() error {
 }
 
 func validateLogGeneratorConfig(g *GeneratorConfig) error {
-
 	err := pcommon.NewMap().FromRaw(g.Attributes)
 	if err != nil {
 		return fmt.Errorf("error in attributes config: %s", err)
@@ -87,8 +87,7 @@ func validateLogGeneratorConfig(g *GeneratorConfig) error {
 
 	// severity and body validation
 	if body, ok := g.AdditionalConfig["body"]; ok {
-		// check if body is a valid string or map
-		// if not, return an error
+		// check if body is a valid string, if not, return an error
 		_, ok := body.(string)
 		if !ok {
 			return errors.New("body must be a string")
@@ -97,8 +96,13 @@ func validateLogGeneratorConfig(g *GeneratorConfig) error {
 
 	// if severity is set, it must be a valid severity
 	if severity, ok := g.AdditionalConfig["severity"]; ok {
-		if _, ok := severity.(int); !ok {
+		severityVal, ok := severity.(int)
+		if !ok {
 			return errors.New("severity must be an integer")
+		}
+		sn := plog.SeverityNumber(severityVal)
+		if sn.String() == "" {
+			return fmt.Errorf("invalid severity: %d", severityVal)
 		}
 	}
 	return nil

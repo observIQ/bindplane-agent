@@ -187,6 +187,21 @@ func TestValidate(t *testing.T) {
 				},
 			},
 		},
+		{
+			desc:        "out of range severity",
+			payloads:    10,
+			errExpected: true,
+			errText:     "invalid severity: 100",
+			generators: []GeneratorConfig{
+				{
+					Type: "logs",
+
+					AdditionalConfig: map[string]any{
+						"severity": 100,
+					},
+				},
+			},
+		},
 	}
 
 	for _, tc := range testCases {
