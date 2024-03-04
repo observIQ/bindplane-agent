@@ -5,6 +5,16 @@
 # processname: observiq-otel-collector
 # pidfile: /var/run/observiq-otel-collector.pid
 
+### BEGIN INIT INFO
+# Provides: observiq-otel-collector
+# Required-Start: 
+# Required-Stop: 
+# Should-Start: 
+# Default-Start: 3 5
+# Default-Stop: 0 1 2 6  
+# Description: Start the observiq-otel-collector service
+### END INIT INFO
+
 # Source function library.
 # RHEL
 if [ -e /etc/init.d/functions ]; then
