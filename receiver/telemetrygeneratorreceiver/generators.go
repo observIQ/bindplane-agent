@@ -33,6 +33,9 @@ const (
 
 	// generatorTypeWindowsEvents is the generator type for windows events
 	generatorTypeWindowsEvents generatorType = "windows_events"
+
+	// generatorTypeOTLP is the generator type for OTLP
+	generatorTypeOTLP generatorType = "otlp"
 )
 
 type metricGenerator interface {
