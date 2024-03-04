@@ -87,10 +87,13 @@ start() {
 
     # NOTE: startproc return 0, even if service is
     # already running to match LSB spec.
-    startproc -p $PIDFILE -t 1 $PROGRAM
+    $START_CMD
+    RETVAL=$?
+    echo $(pidof $BINARY) > $PIDFILE
+    echo "RETVAL: $RETVAL"
 
     # Remember status and be verbose
-    rc_status -v
+    rc_status -v $RETVAL
   fi
 }
 
@@ -107,7 +110,6 @@ stop() {
   elif [ $RCSTATUS ]; then
       ## Stop daemon with killproc(8) and if this fails
       ## set echo the echo return value.
-
       killproc -p $PIDFILE -TERM $BINARY
 
       # Remember status and be verbose
@@ -153,6 +155,7 @@ pid_status() {
 }
 
 otel_status() {
+  echo -n "Status of $0"
   if [ $STATUS ]; then
     status -p $PIDFILE $PROGRAM
     RETVAL=$?
