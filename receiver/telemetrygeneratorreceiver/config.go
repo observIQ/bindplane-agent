@@ -35,7 +35,7 @@ type GeneratorConfig struct {
 	Type generatorType `mapstructure:"type"`
 
 	// ResourceAttributes are additional key-value pairs to add to the resource attributes of telemetry.
-	ResourceAttributes map[string]string `mapstructure:"resource_attributes"`
+	ResourceAttributes map[string]any `mapstructure:"resource_attributes"`
 
 	// Attributes are Additional key-value pairs to add to the telemetry attributes
 	Attributes map[string]any `mapstructure:"attributes"`
@@ -62,9 +62,6 @@ func (c *Config) Validate() error {
 
 // Validate validates the generator config
 func (g *GeneratorConfig) Validate() error {
-	if g.Type == "" {
-		return errors.New("type must be set")
-	}
 
 	switch g.Type {
 	case generatorTypeLogs:

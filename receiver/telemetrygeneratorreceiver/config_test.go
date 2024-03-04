@@ -37,7 +37,7 @@ func TestValidate(t *testing.T) {
 			desc:        "no generator type",
 			errExpected: true,
 			payloads:    1,
-			errText:     "type must be set",
+			errText:     "invalid generator type: ",
 			generators: []GeneratorConfig{
 				{
 					Type: "",
@@ -73,7 +73,7 @@ func TestValidate(t *testing.T) {
 						"log_attr1": "log_val1",
 						"log_attr2": "log_val2",
 					},
-					ResourceAttributes: map[string]string{
+					ResourceAttributes: map[string]any{
 						"log_attr1": "log_val1",
 						"log_attr2": "log_val2",
 					},
@@ -88,7 +88,7 @@ func TestValidate(t *testing.T) {
 						"metric_attr1": "metric_val1",
 						"metric_attr2": "metric_val2",
 					},
-					ResourceAttributes: map[string]string{
+					ResourceAttributes: map[string]any{
 						"metric_attr1": "metric_val1",
 						"metric_attr2": "metric_val2",
 					},
@@ -103,7 +103,7 @@ func TestValidate(t *testing.T) {
 						"trace_attr1": "trace_val1",
 						"trace_attr2": "trace_val2",
 					},
-					ResourceAttributes: map[string]string{
+					ResourceAttributes: map[string]any{
 						"trace_attr1": "trace_val1",
 						"trace_attr2": "trace_val2",
 					},

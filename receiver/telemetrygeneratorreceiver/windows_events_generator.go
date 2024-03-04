@@ -21,7 +21,6 @@ import (
 
 // windowsEventsMetricsGenerator is a generator for Windows Event Log metrics. It generates a sampling of Windows Event Log metrics
 // emulating the Windows Event Log receiver: github.com/open-telemetry/opentelemetry-collector-contrib/receiver/windowseventlogreceiver
-
 type windowsEventsMetricsGenerator struct {
 	cfg    GeneratorConfig
 	logger *zap.Logger

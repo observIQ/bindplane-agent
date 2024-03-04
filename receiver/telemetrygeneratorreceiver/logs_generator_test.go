@@ -40,7 +40,7 @@ func TestLogsGenerator(t *testing.T) {
 			name: "one key value pair",
 			cfg: GeneratorConfig{
 				Type: generatorTypeLogs,
-				ResourceAttributes: map[string]string{
+				ResourceAttributes: map[string]any{
 					"res_key": "res_value",
 				},
 				Attributes: map[string]any{
@@ -56,7 +56,7 @@ func TestLogsGenerator(t *testing.T) {
 			name: "two key value pair",
 			cfg: GeneratorConfig{
 				Type: generatorTypeLogs,
-				ResourceAttributes: map[string]string{
+				ResourceAttributes: map[string]any{
 					"res_key1": "res_value1",
 					"res_key2": "res_value2",
 				},
@@ -74,7 +74,7 @@ func TestLogsGenerator(t *testing.T) {
 			name: "non string values",
 			cfg: GeneratorConfig{
 				Type: generatorTypeLogs,
-				ResourceAttributes: map[string]string{
+				ResourceAttributes: map[string]any{
 					"res_key1": "res_value1",
 					"res_key2": "res_value2",
 				},
@@ -94,7 +94,7 @@ func TestLogsGenerator(t *testing.T) {
 			name: "empty values",
 			cfg: GeneratorConfig{
 				Type: generatorTypeLogs,
-				ResourceAttributes: map[string]string{
+				ResourceAttributes: map[string]any{
 					"res_key1": "",
 					"res_key2": "",
 				},

@@ -22,9 +22,9 @@ This receiver is used to generate synthetic telemetry for testing and configurat
 | Field                | Type      | Default          | Required | Description  |
 |----------------------|-----------|------------------|----------|--------------|
 | type                 |  string   |                  | `true`   | The type of generator to use. Currently only `logs` is supported.  |
-| resource_attributes  |  map      |                  | `false`  | A map of resource attributes to be included in the generated telemetry.   |
-| attributes           |  map      |                  | `false`  | A map of attributes to be included in the generated telemetry.   |
-| additional_config    |  map      |                  | `false`  | A map of additional configuration options to be included in the generated telemetry. |
+| resource_attributes  |  map      |                  | `false`  | A map of resource attributes to be included in the generated telemetry. Values can be `any`.   |
+| attributes           |  map      |                  | `false`  | A map of attributes to be included in the generated telemetry. Values can be `any`.  |
+| additional_config    |  map      |                  | `false`  | A map of additional configuration options to be included in the generated telemetry. Values can be `any`.|
 
 ### Log Generator Configuration
 | Field                | Type      | Default | Required | Description |

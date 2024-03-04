@@ -37,15 +37,18 @@ func newLogsGenerator(cfg GeneratorConfig, logger *zap.Logger) logGenerator {
 		logs:   plog.NewLogs(),
 	}
 
-	resourceLogs := lg.logs.ResourceLogs().AppendEmpty()
 	// Add resource attributes
-	for k, v := range lg.cfg.ResourceAttributes {
-		resourceLogs.Resource().Attributes().PutStr(k, v)
+	resourceLogs := lg.logs.ResourceLogs().AppendEmpty()
+	err := resourceLogs.Resource().Attributes().FromRaw(lg.cfg.ResourceAttributes)
+	if err != nil {
+		// validation should catch this error
+		logger.Warn("Error adding resource attributes", zap.Error(err))
 	}
+
 	scopeLogs := resourceLogs.ScopeLogs().AppendEmpty()
 	logRecord := scopeLogs.LogRecords().AppendEmpty()
 
-	err := logRecord.Attributes().FromRaw(lg.cfg.Attributes)
+	err = logRecord.Attributes().FromRaw(lg.cfg.Attributes)
 	if err != nil {
 		// validation should catch this error
 		logger.Warn("Error adding attributes", zap.Error(err))

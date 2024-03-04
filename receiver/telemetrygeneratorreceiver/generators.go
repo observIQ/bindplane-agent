@@ -69,7 +69,7 @@ func newMetricsGenerators(cfg *Config, logger *zap.Logger) []metricGenerator {
 	var generators []metricGenerator
 	for _, gen := range cfg.Generators {
 		switch gen.Type {
-		case generatorTypeLogs:
+		case generatorTypeHostMetrics:
 			generators = append(generators, newHostMetricsGenerator(gen, logger))
 		}
 	}
