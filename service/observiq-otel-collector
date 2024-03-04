@@ -6,94 +6,170 @@
 # pidfile: /var/run/observiq-otel-collector.pid
 
 # Source function library.
+# RHEL
 if [ -e /etc/init.d/functions ]; then
   STATUS=true
   . /etc/init.d/functions
 fi
+# SUSE
+if [ -e /etc/rc.status ]; then
+  RCSTATUS=true
+  # Shell functions sourced from /etc/rc.status:
+  #      rc_check         check and set local and overall rc status
+  #      rc_status        check and set local and overall rc status
+  #      rc_status -v     ditto but be verbose in local rc status
+  #      rc_status -v -r  ditto and clear the local rc status
+  #      rc_failed        set local and overall rc status to failed
+  #      rc_failed <num>  set local and overall rc status to <num><num>
+  #      rc_reset         clear local rc status (overall remains)
+  #      rc_exit          exit appropriate to overall rc status
+  . /etc/rc.status
 
+  # First reset status of this service
+  rc_reset
+fi
+# LSB Capable
 if [ -e /lib/lsb/init-functions ]; then
   PROC=true
   . /lib/lsb/init-functions
 fi
 
+# Return values acc. to LSB for all commands but status:
+# 0 - success
+# 1 - generic or unspecified error
+# 2 - invalid or excess argument(s)
+# 3 - unimplemented feature (e.g. "reload")
+# 4 - insufficient privilege
+# 5 - program is not installed
+# 6 - program is not configured
+# 7 - program is not running
+#
+# Note that, for LSB, starting an already running service, stopping
+# or restarting a not-running service as well as the restart
+# with force-reload (in case signalling is not supported) are
+# considered a success.
+
 # Pull in sysconfig settings
 [ -f /etc/sysconfig/observiq-otel-collector ] && . /etc/sysconfig/observiq-otel-collector
 
-PROGRAM=observiq-otel-collector
-LOCKFILE=/var/lock/$PROGRAM
+BINARY=observiq-otel-collector
+PROGRAM=/opt/observiq-otel-collector/$BINARY
+START_CMD="nohup /opt/observiq-otel-collector/$BINARY > /dev/null 2>&1 &"
+LOCKFILE=/var/lock/$BINARY
 OIQ_OTEL_COLLECTOR_HOME=/opt/observiq-otel-collector
 OIQ_OTEL_COLLECTOR_STORAGE=/opt/observiq-otel-collector/storage
-HTTP_PROXY=
-HTTPS_PROXY=
-# set this to a user such as observiq-otel-collector, to run as that user
-# observiq-otel-collector user is created during installation
-# leave this variable empty to run as root (Default behavior)
-RUNUSER=
-PIDFILE=/var/run/observiq-otel-collector.pid
+PIDFILE=/var/run/$BINARY.pid
 DEBUG=false
 RETVAL=0
 start() {
-  if [ -f $PIDFILE ]; then
-    PID=$(cat $PIDFILE)
-    echo " * $PROGRAM already running: $PID"
-    RETVAL=2
-  else
-    echo " * Starting $PROGRAM"
-    if [ $DEBUG ]; then
-      COMMAND="cd /opt/observiq-otel-collector/ && nohup /opt/observiq-otel-collector/observiq-otel-collector --config config.yaml 1> /dev/null 2>> $OIQ_OTEL_COLLECTOR_HOME/log/error.log"
-    else
-      COMMAND="cd /opt/observiq-otel-collector/ && nohup /opt/observiq-otel-collector/observiq-otel-collector --config config.yaml 1>> $OIQ_OTEL_COLLECTOR_HOME/log/error.log 2>&1"
-    fi
-    export OIQ_OTEL_COLLECTOR_HOME
-    export OIQ_OTEL_COLLECTOR_STORAGE
-    export HTTP_PROXY
-    export HTTPS_PROXY
-    if [ -n "$RUNUSER" ]; then
-      su -p "$RUNUSER" -c "$COMMAND" &
-    else
-      nohup "$COMMAND" &
-    fi
-    echo $! > $PIDFILE
-    # disabling shellcheck due to this being the one documented exception. See https://www.shellcheck.net/wiki/SC2320
-    # shellcheck disable=SC2320
+  [ -x $PROGRAM ] || exit 5
+
+  export PROGRAM
+  export LOCKFILE
+  export PIDFILE
+  export OIQ_OTEL_COLLECTOR_HOME
+  export OIQ_OTEL_COLLECTOR_STORAGE
+
+  echo -n $"Starting $0: "
+
+  # RHEL
+  if [ $STATUS ]; then
+    umask 077
+
+    daemon --pidfile="$PIDFILE" "$START_CMD"
     RETVAL=$?
-    [ "$RETVAL" -eq 0 ] && touch $LOCKFILE
+    echo $(pidof $BINARY) > $PIDFILE
+    [ $RETVAL -eq 0 ] && touch $LOCKFILE
+  # SUSE
+  elif [ $RCSTATUS ]; then
+    ## Start daemon with startproc(8). If this fails
+    ## the echo return value is set appropriate.
+
+    # NOTE: startproc return 0, even if service is
+    # already running to match LSB spec.
+    startproc -p $PIDFILE -t 1 $PROGRAM --daemon
+
+    # Remember status and be verbose
+    rc_status -v
   fi
 }
 
 stop() {
-  if [ -f $PIDFILE ]; then
-    PID=$(cat $PIDFILE);
-    printf " * Stopping %s... " "$PROGRAM"
-    kill "$PID" > /dev/null 2>&1
-    echo "stopped"
-    rm $PIDFILE && rm -f $LOCKFILE
-    RETVAL=0
-  else
-    echo " * $PROGRAM is not running"
-    RETVAL=3
+  echo -n $"Shutting down $0: "
+  # RHEL
+  if [ $STATUS ]; then
+      killproc -p "$PIDFILE" $PROGRAM
+      RETVAL=$?
+      echo
+      [ $RETVAL -eq 0 ] && rm -f $LOCKFILE
+      return $RETVAL
+  # SUSE
+  elif [ $RCSTATUS ]; then
+      ## Stop daemon with killproc(8) and if this fails
+      ## set echo the echo return value.
+
+      killproc -p $PIDFILE -TERM $BINARY
+
+      # Remember status and be verbose
+      rc_status -v
   fi
+}
+
+# Currently unimplemented
+reload() {
+  # RHEL
+  #if [ $STATUS ]; then
+  # SUSE
+  #elif [ $RCSTATUS ]; then
+  #fi
+  RETVAL=3
+}
+
+# Currently unimplemented
+force_reload() {
+  # RHEL
+  #if [ $STATUS ]; then
+  # SUSE
+  #elif [ $RCSTATUS ]; then
+  #fi
+  RETVAL=3
+}
+
+pid_not_running() {
+  echo " * $PROGRAM is not running"
+  RETVAL=7
 }
 
 pid_status() {
   if [ -e "$PIDFILE" ]; then
-    # disabling this shellcheck due to needing legacy support on some systems
-    # shellcheck disable=SC2006
-    # disabling this shellcheck due to incorrect detection
-    # shellcheck disable=SC2046
-    echo " * $PROGRAM" is running, pid=`cat "$PIDFILE"`
-    RETVAL=0
+    if ps -p $(cat "$PIDFILE") > /dev/null; then
+      echo " * $PROGRAM" is running, pid=`cat "$PIDFILE"`
+     else
+      pid_not_running
+    fi
   else
-    echo " * $PROGRAM is not running"
-    RETVAL=1
+    pid_not_running
   fi
 }
 
 otel_status() {
-  if [ "$PROC" ]; then
+  if [ $PROC ]; then
     status_of_proc -p $PIDFILE "$PROGRAM" "$PROGRAM"
     RETVAL=$?
-  elif [ "$STATUS" ]; then
+  elif [ $RCSTATUS ]; then
+    ## Check status with checkproc(8), if process is running
+    ## checkproc will return with exit status 0.
+
+    # Status has a slightly different for the status command:
+    # 0 - service running
+    # 1 - service dead, but /var/run/  pid  file exists
+    # 2 - service dead, but /var/lock/ lock file exists
+    # 3 - service not running
+
+    # NOTE: checkproc returns LSB compliant status values.
+    checkproc -p $PIDFILE $PROGRAM
+    rc_status -v
+  elif [ $STATUS ]; then
     status -p $PIDFILE $PROGRAM
     RETVAL=$?
   else
@@ -101,24 +177,50 @@ otel_status() {
   fi
 }
 
+cd $OIQ_OTEL_COLLECTOR_HOME
 case "$1" in
+  # Start the service
   start)
     start
     ;;
+  # Stop the service
   stop)
     stop
     ;;
+  # Get the status of the service
   status)
     otel_status
     ;;
+  # Restart the service by stop, then restart
   restart)
     stop
     start
     ;;
+  # Not currently implemented, but should reload the config file
+  reload)
+    echo "Reload is not currently implemented for $0"
+    exit 3
+    ;;
+  # Not currently implemented, but should reload the config file.
+  # If it fails, restart
+  force-reload)
+    echo "Reload is not currently implemented for $0, redirecting to restart"
+    restart
+    ;;
+  # Conditionally restart the service (only if running already)
+  condrestart|try-restart)
+    otel_status >/dev/null 2>&1 || exit 0
+    restart
+    ;;
   *)
-    echo "Usage: {start|stop|status|restart}"
+    echo $"Usage: $0 {start|stop|restart|condrestart|try-restart|reload|force-reload|status}"
     RETVAL=3
     ;;
 esac
+cd $OLDPWD
+
+if [ $RCSTATUS ]; then
+  rc_exit
+fi
 
 exit $RETVAL
