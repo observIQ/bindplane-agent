@@ -87,13 +87,12 @@ start() {
 
     # NOTE: startproc return 0, even if service is
     # already running to match LSB spec.
-    $START_CMD
-    RETVAL=$?
-    echo $(pidof $BINARY) > $PIDFILE
-    echo "RETVAL: $RETVAL"
+    nohup $PROGRAM --config config.yaml > /dev/null 2>&1 &
 
     # Remember status and be verbose
-    rc_status -v $RETVAL
+    rc_status -v
+
+    echo $(pidof $BINARY) > $PIDFILE
   fi
 }
 
@@ -146,7 +145,7 @@ pid_status() {
   if [ -e "$PIDFILE" ]; then
     if ps -p $(cat "$PIDFILE") > /dev/null; then
       echo " * $PROGRAM" is running, pid=`cat "$PIDFILE"`
-     else
+    else
       pid_not_running
     fi
   else
@@ -155,7 +154,12 @@ pid_status() {
 }
 
 otel_status() {
-  echo -n "Status of $0"
+  if [ -e "$PIDFILE" ]; then
+    echo -n "Status of $0 ($(cat "$PIDFILE"))"
+  else
+    echo -n "Status of $0 (no pidfile found)"
+  fi
+
   if [ $STATUS ]; then
     status -p $PIDFILE $PROGRAM
     RETVAL=$?
