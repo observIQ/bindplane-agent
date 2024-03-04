@@ -87,7 +87,7 @@ start() {
 
     # NOTE: startproc return 0, even if service is
     # already running to match LSB spec.
-    startproc -p $PIDFILE -t 1 $PROGRAM --daemon
+    startproc -p $PIDFILE -t 1 $PROGRAM
 
     # Remember status and be verbose
     rc_status -v
@@ -153,8 +153,8 @@ pid_status() {
 }
 
 otel_status() {
-  if [ $PROC ]; then
-    status_of_proc -p $PIDFILE "$PROGRAM" "$PROGRAM"
+  if [ $STATUS ]; then
+    status -p $PIDFILE $PROGRAM
     RETVAL=$?
   elif [ $RCSTATUS ]; then
     ## Check status with checkproc(8), if process is running
@@ -169,8 +169,8 @@ otel_status() {
     # NOTE: checkproc returns LSB compliant status values.
     checkproc -p $PIDFILE $PROGRAM
     rc_status -v
-  elif [ $STATUS ]; then
-    status -p $PIDFILE $PROGRAM
+  elif [ $PROC ]; then
+    status_of_proc -p $PIDFILE "$PROGRAM" "$PROGRAM"
     RETVAL=$?
   else
     pid_status
