@@ -30,7 +30,7 @@ require (
 	github.com/observiq/bindplane-agent/receiver/pluginreceiver v1.46.0
 	github.com/observiq/bindplane-agent/receiver/routereceiver v1.46.0
 	github.com/observiq/bindplane-agent/receiver/sapnetweaverreceiver v1.46.0
-	github.com/observiq/bindplane-agent/receiver/telemetrygeneratorreceiver v0.0.0-00010101000000-000000000000
+	github.com/observiq/bindplane-agent/receiver/telemetrygeneratorreceiver v1.46.0
 	github.com/oklog/ulid/v2 v2.1.0
 	github.com/open-telemetry/opamp-go v0.9.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/connector/countconnector v0.95.0
