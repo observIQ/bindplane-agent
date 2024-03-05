@@ -18,6 +18,7 @@ import (
 	"context"
 
 	"go.opentelemetry.io/collector/consumer"
+	"go.opentelemetry.io/collector/pdata/ptrace"
 	"go.uber.org/zap"
 )
 
@@ -43,5 +44,13 @@ func newTracesReceiver(ctx context.Context, logger *zap.Logger, cfg *Config, nex
 
 // TODO implement produce for traces
 func (r *tracesGeneratorReceiver) produce() error {
-	return nil
+	traces := ptrace.NewTraces()
+	for _, g := range r.generators {
+		t := g.generateTraces()
+		for i := 0; i < t.ResourceSpans().Len(); i++ {
+			src := t.ResourceSpans().At(i)
+			src.CopyTo(traces.ResourceSpans().AppendEmpty())
+		}
+	}
+	return r.nextConsumer.ConsumeTraces(r.ctx, traces)
 }

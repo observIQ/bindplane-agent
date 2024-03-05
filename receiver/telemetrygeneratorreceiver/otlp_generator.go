@@ -25,10 +25,10 @@ import (
 	"go.uber.org/zap"
 )
 
-// otlpLogGenerator is a replay generator for logs, metrics, and traces.
+// otlpGenerator is a replay generator for logs, metrics, and traces.
 // It generates a stream of telemetry based on the json embedded in the configuration,
 // each record identical save for the timestamp.
-type otlpLogGenerator struct {
+type otlpGenerator struct {
 	cfg           GeneratorConfig
 	logger        *zap.Logger
 	telemetryType component.DataType
@@ -38,16 +38,17 @@ type otlpLogGenerator struct {
 	tracesStart   time.Time
 }
 
-func newOtlpGenerator(cfg GeneratorConfig, logger *zap.Logger) *otlpLogGenerator {
-	lg := &otlpLogGenerator{
-		cfg:    cfg,
-		logger: logger,
-		logs:   plog.NewLogs(),
+func newOtlpGenerator(cfg GeneratorConfig, logger *zap.Logger) *otlpGenerator {
+	lg := &otlpGenerator{
+		cfg:     cfg,
+		logger:  logger,
+		logs:    plog.NewLogs(),
+		metrics: pmetric.NewMetrics(),
+		traces:  ptrace.NewTraces(),
 	}
 
 	// validation already proves this exists, is a string, and a component.DataType
 	lg.telemetryType = component.Type(lg.cfg.AdditionalConfig["telemetry_type"].(string))
-
 	jsonBytes := []byte(lg.cfg.AdditionalConfig["otlp_json"].(string))
 
 	var err error
@@ -64,43 +65,63 @@ func newOtlpGenerator(cfg GeneratorConfig, logger *zap.Logger) *otlpLogGenerator
 		lg.metrics, err = marshaler.UnmarshalMetrics(jsonBytes)
 		// validation should catch this error
 		if err != nil {
-			logger.Warn("error unmarshalling otlp metrics json: %s", zap.Error(err))
+			logger.Warn("error unmarshalling otlp metrics json", zap.Error(err))
 		}
 	case component.DataTypeTraces:
 		marshaler := ptrace.JSONUnmarshaler{}
 		lg.traces, err = marshaler.UnmarshalTraces(jsonBytes)
 		// validation should catch this error
 		if err != nil {
-			logger.Warn("error unmarshalling otlp traces json: %s", zap.Error(err))
+			logger.Warn("error unmarshalling otlp traces json", zap.Error(err))
 		}
-		lg.tracesStart = findFirstTraceStartTime(lg.traces)
+		lg.tracesStart = lg.findLastTraceEndTime(lg.traces)
 	}
 
 	return lg
 }
 
-func findFirstTraceStartTime(traces ptrace.Traces) time.Time {
-	var timeZero time.Time
+func (g *otlpGenerator) findLastTraceEndTime(traces ptrace.Traces) time.Time {
+	// First find the span with the last end time
+	var timeMax time.Time
 	for i := 0; i < traces.ResourceSpans().Len(); i++ {
 		resourceSpans := traces.ResourceSpans().At(i)
 		for k := 0; k < resourceSpans.ScopeSpans().Len(); k++ {
 			scopeSpans := resourceSpans.ScopeSpans().At(k)
 			for j := 0; j < scopeSpans.Spans().Len(); j++ {
 				span := scopeSpans.Spans().At(j)
-				if span.StartTimestamp().AsTime().Before(timeZero) {
-					timeZero = span.StartTimestamp().AsTime()
+				if span.EndTimestamp().AsTime().After(timeMax) {
+					timeMax = span.EndTimestamp().AsTime()
 					continue
 				}
-				if timeZero.IsZero() {
-					timeZero = span.StartTimestamp().AsTime()
+				if timeMax.IsZero() {
+					timeMax = span.EndTimestamp().AsTime()
 				}
 			}
 		}
 	}
-	return timeZero
+
+	// Now adjust the start and end times of all spans to be relative to the current time
+	now := time.Now().UTC()
+	for i := 0; i < g.traces.ResourceSpans().Len(); i++ {
+		resourceSpans := g.traces.ResourceSpans().At(i)
+		for k := 0; k < resourceSpans.ScopeSpans().Len(); k++ {
+			scopeSpans := resourceSpans.ScopeSpans().At(k)
+			for j := 0; j < scopeSpans.Spans().Len(); j++ {
+				span := scopeSpans.Spans().At(j)
+
+				delta := timeMax.Sub(span.EndTimestamp().AsTime())
+				spanDuration := span.EndTimestamp().AsTime().Sub(span.StartTimestamp().AsTime())
+				endTime := now
+				span.SetEndTimestamp(pcommon.NewTimestampFromTime(endTime.Add(delta)))
+				span.SetStartTimestamp(pcommon.NewTimestampFromTime(endTime.Add(-spanDuration)))
+			}
+		}
+	}
+	// return the current time we used as a baseline to adjust the spans
+	return now
 }
 
-func (g *otlpLogGenerator) generateLogs() plog.Logs {
+func (g *otlpGenerator) generateLogs() plog.Logs {
 	for i := 0; i < g.logs.ResourceLogs().Len(); i++ {
 		resourceLogs := g.logs.ResourceLogs().At(i)
 		for k := 0; k < resourceLogs.ScopeLogs().Len(); k++ {
@@ -114,7 +135,7 @@ func (g *otlpLogGenerator) generateLogs() plog.Logs {
 	return g.logs
 }
 
-func (g *otlpLogGenerator) generateMetrics() pmetric.Metrics {
+func (g *otlpGenerator) generateMetrics() pmetric.Metrics {
 	for i := 0; i < g.metrics.ResourceMetrics().Len(); i++ {
 		resourceMetrics := g.metrics.ResourceMetrics().At(i)
 		for k := 0; k < resourceMetrics.ScopeMetrics().Len(); k++ {
@@ -160,22 +181,27 @@ func (g *otlpLogGenerator) generateMetrics() pmetric.Metrics {
 // for each span, span.StartTimestamp = span.StartTimestamp + delta
 // for each span, span.EndTimestamp = span.StartTimestamp + original span length
 
-func (g *otlpLogGenerator) generateTraces() ptrace.Traces {
-
-	delta := time.Now().Sub(g.tracesStart)
-
+func (g *otlpGenerator) generateTraces() ptrace.Traces {
+	// calculate the time since the last baseline time we used to adjust the spans
+	timeSince := time.Now().UTC().Sub(g.tracesStart)
+	// add the time since to the start and end times of all spans
 	for i := 0; i < g.traces.ResourceSpans().Len(); i++ {
 		resourceSpans := g.traces.ResourceSpans().At(i)
 		for k := 0; k < resourceSpans.ScopeSpans().Len(); k++ {
 			scopeSpans := resourceSpans.ScopeSpans().At(k)
 			for j := 0; j < scopeSpans.Spans().Len(); j++ {
 				span := scopeSpans.Spans().At(j)
-				spanDuration := span.EndTimestamp().AsTime().Sub(span.StartTimestamp().AsTime())
-				span.SetStartTimestamp(pcommon.NewTimestampFromTime(span.StartTimestamp().AsTime().Add(delta)))
-				span.SetEndTimestamp(pcommon.NewTimestampFromTime(span.StartTimestamp().AsTime().Add(spanDuration)))
+
+				startTime := span.StartTimestamp().AsTime().Add(timeSince)
+				span.SetStartTimestamp(pcommon.NewTimestampFromTime(startTime))
+
+				endTime := span.EndTimestamp().AsTime().Add(timeSince)
+				span.SetEndTimestamp(pcommon.NewTimestampFromTime(endTime))
 			}
 		}
 	}
+	// update the baseline time to the current time
+	g.tracesStart = time.Now().UTC()
 
 	return g.traces
 }

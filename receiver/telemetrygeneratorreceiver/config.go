@@ -129,15 +129,15 @@ func validateOTLPGenerator(cfg *GeneratorConfig) error {
 		return fmt.Errorf("invalid telemetry type: %s", telemetryType)
 	}
 
+	// validate the otlp json
 	otlpJSON, ok := cfg.AdditionalConfig["otlp_json"]
 	if !ok {
 		return errors.New("otlp_json must be set")
 	}
 
-	// validate the otlp json
 	otlpJSONStr, ok := otlpJSON.(string)
 	if !ok {
-		return fmt.Errorf("otlp_json must be a string")
+		return fmt.Errorf("otlp_json must be a string %v", otlpJSON)
 	}
 
 	jsonBytes := []byte(otlpJSONStr)

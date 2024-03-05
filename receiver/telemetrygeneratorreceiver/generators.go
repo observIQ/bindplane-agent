@@ -62,6 +62,9 @@ func newLogsGenerators(cfg *Config, logger *zap.Logger) []logGenerator {
 			generators = append(generators, newLogsGenerator(gen, logger))
 		case generatorTypeWindowsEvents:
 			generators = append(generators, newWindowsEventsGenerator(gen, logger))
+		case generatorTypeOTLP:
+			generators = append(generators, newOtlpGenerator(gen, logger))
+
 		}
 	}
 	return generators
@@ -74,11 +77,21 @@ func newMetricsGenerators(cfg *Config, logger *zap.Logger) []metricGenerator {
 		switch gen.Type {
 		case generatorTypeHostMetrics:
 			generators = append(generators, newHostMetricsGenerator(gen, logger))
+		case generatorTypeOTLP:
+			generators = append(generators, newOtlpGenerator(gen, logger))
 		}
+
 	}
 	return generators
 }
 
-func newTraceGenerators(_ *Config, _ *zap.Logger) []traceGenerator {
-	return nil
+func newTraceGenerators(cfg *Config, logger *zap.Logger) []traceGenerator {
+	var generators []traceGenerator
+	for _, gen := range cfg.Generators {
+		switch gen.Type {
+		case generatorTypeOTLP:
+			generators = append(generators, newOtlpGenerator(gen, logger))
+		}
+	}
+	return generators
 }
