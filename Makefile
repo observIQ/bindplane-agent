@@ -205,6 +205,8 @@ release-prep:
 	@cp service/com.observiq.collector.plist release_deps/com.observiq.collector.plist
 	@jq ".files[] | select(.service != null)" windows/wix.json >> release_deps/windows_service.json
 	@cp service/observiq-otel-collector.service release_deps/observiq-otel-collector.service
+	@cp service/observiq-otel-collector release_deps/observiq-otel-collector
+	@cp -r ./service/sysconfig release_deps/
 
 # Build and sign, skip release and ignore dirty git tree
 .PHONY: release-test
