@@ -74,17 +74,20 @@ func newOtlpGenerator(cfg GeneratorConfig, logger *zap.Logger) *otlpGenerator {
 		if err != nil {
 			logger.Warn("error unmarshalling otlp traces json", zap.Error(err))
 		}
-		lg.tracesStart = lg.findLastTraceEndTime(lg.traces)
+		lg.findLastTraceEndTime()
 	}
 
 	return lg
 }
 
-func (g *otlpGenerator) findLastTraceEndTime(traces ptrace.Traces) time.Time {
+// getCurrentTime is a variable that holds the current time function. It is used to mock time in tests.
+var getCurrentTime = func() time.Time { return time.Now().UTC() }
+
+func (g *otlpGenerator) findLastTraceEndTime() {
 	// First find the span with the last end time
 	var timeMax time.Time
-	for i := 0; i < traces.ResourceSpans().Len(); i++ {
-		resourceSpans := traces.ResourceSpans().At(i)
+	for i := 0; i < g.traces.ResourceSpans().Len(); i++ {
+		resourceSpans := g.traces.ResourceSpans().At(i)
 		for k := 0; k < resourceSpans.ScopeSpans().Len(); k++ {
 			scopeSpans := resourceSpans.ScopeSpans().At(k)
 			for j := 0; j < scopeSpans.Spans().Len(); j++ {
@@ -101,7 +104,7 @@ func (g *otlpGenerator) findLastTraceEndTime(traces ptrace.Traces) time.Time {
 	}
 
 	// Now adjust the start and end times of all spans to be relative to the current time
-	now := time.Now().UTC()
+	now := getCurrentTime()
 	for i := 0; i < g.traces.ResourceSpans().Len(); i++ {
 		resourceSpans := g.traces.ResourceSpans().At(i)
 		for k := 0; k < resourceSpans.ScopeSpans().Len(); k++ {
@@ -118,7 +121,7 @@ func (g *otlpGenerator) findLastTraceEndTime(traces ptrace.Traces) time.Time {
 		}
 	}
 	// return the current time we used as a baseline to adjust the spans
-	return now
+	g.tracesStart = now
 }
 
 func (g *otlpGenerator) generateLogs() plog.Logs {
@@ -128,7 +131,7 @@ func (g *otlpGenerator) generateLogs() plog.Logs {
 			scopeLogs := resourceLogs.ScopeLogs().At(k)
 			for j := 0; j < scopeLogs.LogRecords().Len(); j++ {
 				log := scopeLogs.LogRecords().At(j)
-				log.SetTimestamp(pcommon.NewTimestampFromTime(time.Now()))
+				log.SetTimestamp(pcommon.NewTimestampFromTime(getCurrentTime()))
 			}
 		}
 	}
@@ -146,27 +149,27 @@ func (g *otlpGenerator) generateMetrics() pmetric.Metrics {
 				case pmetric.MetricTypeSum:
 					dps := metric.Sum().DataPoints()
 					for l := 0; l < dps.Len(); l++ {
-						dps.At(l).SetTimestamp(pcommon.NewTimestampFromTime(time.Now()))
+						dps.At(l).SetTimestamp(pcommon.NewTimestampFromTime(getCurrentTime()))
 					}
 				case pmetric.MetricTypeGauge:
 					dps := metric.Gauge().DataPoints()
 					for l := 0; l < dps.Len(); l++ {
-						dps.At(l).SetTimestamp(pcommon.NewTimestampFromTime(time.Now()))
+						dps.At(l).SetTimestamp(pcommon.NewTimestampFromTime(getCurrentTime()))
 					}
 				case pmetric.MetricTypeSummary:
 					dps := metric.Summary().DataPoints()
 					for l := 0; l < dps.Len(); l++ {
-						dps.At(l).SetTimestamp(pcommon.NewTimestampFromTime(time.Now()))
+						dps.At(l).SetTimestamp(pcommon.NewTimestampFromTime(getCurrentTime()))
 					}
 				case pmetric.MetricTypeHistogram:
 					dps := metric.Histogram().DataPoints()
 					for l := 0; l < dps.Len(); l++ {
-						dps.At(l).SetTimestamp(pcommon.NewTimestampFromTime(time.Now()))
+						dps.At(l).SetTimestamp(pcommon.NewTimestampFromTime(getCurrentTime()))
 					}
 				case pmetric.MetricTypeExponentialHistogram:
 					dps := metric.ExponentialHistogram().DataPoints()
 					for l := 0; l < dps.Len(); l++ {
-						dps.At(l).SetTimestamp(pcommon.NewTimestampFromTime(time.Now()))
+						dps.At(l).SetTimestamp(pcommon.NewTimestampFromTime(getCurrentTime()))
 					}
 				}
 			}
@@ -177,13 +180,13 @@ func (g *otlpGenerator) generateMetrics() pmetric.Metrics {
 }
 
 // find the first trace start time, timeZero
-// delta := time.Now() - timeZero
+// delta := getCurrentTime() - timeZero
 // for each span, span.StartTimestamp = span.StartTimestamp + delta
 // for each span, span.EndTimestamp = span.StartTimestamp + original span length
 
 func (g *otlpGenerator) generateTraces() ptrace.Traces {
 	// calculate the time since the last baseline time we used to adjust the spans
-	timeSince := time.Now().UTC().Sub(g.tracesStart)
+	timeSince := getCurrentTime().Sub(g.tracesStart)
 	// add the time since to the start and end times of all spans
 	for i := 0; i < g.traces.ResourceSpans().Len(); i++ {
 		resourceSpans := g.traces.ResourceSpans().At(i)
@@ -201,7 +204,7 @@ func (g *otlpGenerator) generateTraces() ptrace.Traces {
 		}
 	}
 	// update the baseline time to the current time
-	g.tracesStart = time.Now().UTC()
+	g.tracesStart = getCurrentTime()
 
 	return g.traces
 }
