@@ -73,7 +73,7 @@ fi
 # Helper Functions
 printf() {
   if command -v sed >/dev/null; then
-    command printf -- "$@" | sed -E "$sed_ignore s/^/$indent/g"  # Ignore sole reset characters if defined
+    command printf -- "$@" | sed -r "$sed_ignore s/^/$indent/g"  # Ignore sole reset characters if defined
   else
     # Ignore $* suggestion as this breaks the output
     # shellcheck disable=SC2145
@@ -601,7 +601,7 @@ latest_version()
 {
   curl -sSL -H"Accept: application/vnd.github.v3+json" https://api.github.com/repos/observIQ/observiq-otel-collector/releases/latest | \
     grep "\"tag_name\"" | \
-    sed -E 's/ *"tag_name": "v([0-9]+\.[0-9]+\.[0-9+])",/\1/'
+    sed -r 's/ *"tag_name": "v([0-9]+\.[0-9]+\.[0-9+])",/\1/'
 }
 
 # This will install the package by downloading the archived agent,
