@@ -30,13 +30,12 @@ type telemetryProducer interface {
 	produce() error
 }
 type telemetryGeneratorReceiver struct {
-	logger             *zap.Logger
-	cfg                *Config
-	supportedTelemetry component.DataType
-	doneChan           chan struct{}
-	ctx                context.Context
-	cancelFunc         context.CancelCauseFunc
-	producer           telemetryProducer
+	logger     *zap.Logger
+	cfg        *Config
+	doneChan   chan struct{}
+	ctx        context.Context
+	cancelFunc context.CancelCauseFunc
+	producer   telemetryProducer
 }
 
 // newTelemetryGeneratorReceiver creates a new telemetry generator receiver

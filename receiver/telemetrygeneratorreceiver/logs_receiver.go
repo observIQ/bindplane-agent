@@ -17,7 +17,6 @@ package telemetrygeneratorreceiver //import "github.com/observiq/bindplane-agent
 import (
 	"context"
 
-	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/consumer"
 	"go.opentelemetry.io/collector/pdata/plog"
 	"go.uber.org/zap"
@@ -37,7 +36,6 @@ func newLogsReceiver(ctx context.Context, logger *zap.Logger, cfg *Config, nextC
 	r := newTelemetryGeneratorReceiver(ctx, logger, cfg, lr)
 
 	lr.telemetryGeneratorReceiver = r
-	r.supportedTelemetry = component.DataTypeLogs
 
 	lr.generators = newLogsGenerators(cfg, logger)
 
