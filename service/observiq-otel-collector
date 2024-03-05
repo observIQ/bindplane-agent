@@ -62,14 +62,6 @@ fi
 # Pull in sysconfig settings
 [ -f /etc/sysconfig/observiq-otel-collector ] && . /etc/sysconfig/observiq-otel-collector
 
-BINARY=observiq-otel-collector
-PROGRAM=/opt/observiq-otel-collector/$BINARY
-START_CMD="nohup /opt/observiq-otel-collector/$BINARY > /dev/null 2>&1 &"
-LOCKFILE=/var/lock/$BINARY
-OIQ_OTEL_COLLECTOR_HOME=/opt/observiq-otel-collector
-OIQ_OTEL_COLLECTOR_STORAGE=/opt/observiq-otel-collector/storage
-PIDFILE=/var/run/$BINARY.pid
-DEBUG=false
 RETVAL=0
 start() {
   [ -x $PROGRAM ] || exit 5
