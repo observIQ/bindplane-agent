@@ -147,19 +147,19 @@ func validateOTLPGenerator(cfg *GeneratorConfig) error {
 		marshaler := plog.JSONUnmarshaler{}
 		_, err := marshaler.UnmarshalLogs(jsonBytes)
 		if err != nil {
-			return fmt.Errorf("error unmarshalling otlp logs json: %s", err)
+			return fmt.Errorf("error unmarshalling otlp logs json: %w", err)
 		}
 	case component.DataTypeMetrics:
 		marshaler := pmetric.JSONUnmarshaler{}
 		_, err := marshaler.UnmarshalMetrics(jsonBytes)
 		if err != nil {
-			return fmt.Errorf("error unmarshalling otlp metrics json: %s", err)
+			return fmt.Errorf("error unmarshalling otlp metrics json: %w", err)
 		}
 	case component.DataTypeTraces:
 		marshaler := ptrace.JSONUnmarshaler{}
 		_, err := marshaler.UnmarshalTraces(jsonBytes)
 		if err != nil {
-			return fmt.Errorf("error unmarshalling otlp traces json: %s", err)
+			return fmt.Errorf("error unmarshalling otlp traces json: %w", err)
 		}
 
 	}

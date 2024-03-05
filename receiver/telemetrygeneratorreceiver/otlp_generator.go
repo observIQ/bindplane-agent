@@ -74,7 +74,8 @@ func newOtlpGenerator(cfg GeneratorConfig, logger *zap.Logger) *otlpGenerator {
 		if err != nil {
 			logger.Warn("error unmarshalling otlp traces json", zap.Error(err))
 		}
-		lg.findLastTraceEndTime()
+		lastEndTime := findLastTraceEndTime(lg.traces)
+		lg.adjustTraceTimes(lastEndTime)
 	}
 
 	return lg
@@ -83,26 +84,29 @@ func newOtlpGenerator(cfg GeneratorConfig, logger *zap.Logger) *otlpGenerator {
 // getCurrentTime is a variable that holds the current time function. It is used to mock time in tests.
 var getCurrentTime = func() time.Time { return time.Now().UTC() }
 
-func (g *otlpGenerator) findLastTraceEndTime() {
+func findLastTraceEndTime(traces ptrace.Traces) time.Time {
 	// First find the span with the last end time
-	var timeMax time.Time
-	for i := 0; i < g.traces.ResourceSpans().Len(); i++ {
-		resourceSpans := g.traces.ResourceSpans().At(i)
+	var maxTime time.Time
+	for i := 0; i < traces.ResourceSpans().Len(); i++ {
+		resourceSpans := traces.ResourceSpans().At(i)
 		for k := 0; k < resourceSpans.ScopeSpans().Len(); k++ {
 			scopeSpans := resourceSpans.ScopeSpans().At(k)
 			for j := 0; j < scopeSpans.Spans().Len(); j++ {
 				span := scopeSpans.Spans().At(j)
-				if span.EndTimestamp().AsTime().After(timeMax) {
-					timeMax = span.EndTimestamp().AsTime()
+				if span.EndTimestamp().AsTime().After(maxTime) {
+					maxTime = span.EndTimestamp().AsTime()
 					continue
 				}
-				if timeMax.IsZero() {
-					timeMax = span.EndTimestamp().AsTime()
+				if maxTime.IsZero() {
+					maxTime = span.EndTimestamp().AsTime()
 				}
 			}
 		}
 	}
+	return maxTime
+}
 
+func (g *otlpGenerator) adjustTraceTimes(maxTime time.Time) {
 	// Now adjust the start and end times of all spans to be relative to the current time
 	now := getCurrentTime()
 	for i := 0; i < g.traces.ResourceSpans().Len(); i++ {
@@ -111,8 +115,7 @@ func (g *otlpGenerator) findLastTraceEndTime() {
 			scopeSpans := resourceSpans.ScopeSpans().At(k)
 			for j := 0; j < scopeSpans.Spans().Len(); j++ {
 				span := scopeSpans.Spans().At(j)
-
-				delta := timeMax.Sub(span.EndTimestamp().AsTime())
+				delta := maxTime.Sub(span.EndTimestamp().AsTime())
 				spanDuration := span.EndTimestamp().AsTime().Sub(span.StartTimestamp().AsTime())
 				endTime := now
 				span.SetEndTimestamp(pcommon.NewTimestampFromTime(endTime.Add(delta)))
@@ -120,7 +123,7 @@ func (g *otlpGenerator) findLastTraceEndTime() {
 			}
 		}
 	}
-	// return the current time we used as a baseline to adjust the spans
+	// save the current time we used as a baseline to adjust the spans
 	g.tracesStart = now
 }
 
@@ -186,7 +189,8 @@ func (g *otlpGenerator) generateMetrics() pmetric.Metrics {
 
 func (g *otlpGenerator) generateTraces() ptrace.Traces {
 	// calculate the time since the last baseline time we used to adjust the spans
-	timeSince := getCurrentTime().Sub(g.tracesStart)
+	now := getCurrentTime()
+	timeSince := now.Sub(g.tracesStart)
 	// add the time since to the start and end times of all spans
 	for i := 0; i < g.traces.ResourceSpans().Len(); i++ {
 		resourceSpans := g.traces.ResourceSpans().At(i)
@@ -204,7 +208,7 @@ func (g *otlpGenerator) generateTraces() ptrace.Traces {
 		}
 	}
 	// update the baseline time to the current time
-	g.tracesStart = getCurrentTime()
+	g.tracesStart = now
 
 	return g.traces
 }
