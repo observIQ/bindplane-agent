@@ -171,7 +171,7 @@ func (l linuxService) uninstall() error {
 		//#nosec G204 -- serviceName is not determined by user input
 		cmd := exec.Command(l.serviceCmdName, "disable", l.serviceName)
 		if err := cmd.Run(); err != nil {
-			return fmt.Errorf("enabling unit file failed: %w", err)
+			return fmt.Errorf("failed to disable unit: %w", err)
 		}
 
 		if err := os.Remove(l.installedServiceFilePath); err != nil {
