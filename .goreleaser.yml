@@ -112,7 +112,7 @@ archives:
         dst: "install"
         strip_parent: true
       - src: release_deps/sysconfig/observiq-otel-collector
-        dst: "install"
+        dst: "install/sysconfig"
         strip_parent: true
     format_overrides:
       - goos: windows
