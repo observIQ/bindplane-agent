@@ -1,8 +1,6 @@
 module github.com/observiq/bindplane-agent
 
-go 1.21
-
-toolchain go1.21.6
+go 1.21.6
 
 require (
 	github.com/google/uuid v1.6.0
@@ -32,6 +30,7 @@ require (
 	github.com/observiq/bindplane-agent/receiver/pluginreceiver v1.46.0
 	github.com/observiq/bindplane-agent/receiver/routereceiver v1.46.0
 	github.com/observiq/bindplane-agent/receiver/sapnetweaverreceiver v1.46.0
+	github.com/observiq/bindplane-agent/receiver/telemetrygeneratorreceiver v1.46.0
 	github.com/oklog/ulid/v2 v2.1.0
 	github.com/open-telemetry/opamp-go v0.9.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/connector/countconnector v0.95.0
@@ -675,6 +674,8 @@ replace github.com/observiq/bindplane-agent/receiver/m365receiver => ./receiver/
 replace github.com/observiq/bindplane-agent/receiver/routereceiver => ./receiver/routereceiver
 
 replace github.com/observiq/bindplane-agent/receiver/sapnetweaverreceiver => ./receiver/sapnetweaverreceiver
+
+replace github.com/observiq/bindplane-agent/receiver/telemetrygeneratorreceiver => ./receiver/telemetrygeneratorreceiver
 
 replace github.com/observiq/bindplane-agent/exporter/googlecloudexporter => ./exporter/googlecloudexporter
 
