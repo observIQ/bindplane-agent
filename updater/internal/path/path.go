@@ -15,7 +15,10 @@
 // Package path contains helper functions, some OS specific, for getting paths involved in updating.
 package path
 
-import "path/filepath"
+import (
+	"os/exec"
+	"path/filepath"
+)
 
 // TempDir gets the path to the "tmp" dir, used for staging updates & backups
 func TempDir(installDir string) string {
@@ -61,4 +64,34 @@ func LatestJMXJarFile(latestDir string) string {
 // SpecialJMXJarFile returns the full path to the JMX Jar on linux and darwin installs
 func SpecialJMXJarFile(installDir string) string {
 	return filepath.Join(SpecialJarDir(installDir), "opentelemetry-java-contrib-jmx-metrics.jar")
+}
+
+func LinuxServiceCmdName() string {
+	var path string
+	var err error
+	path, err = exec.LookPath("systemctl")
+	if err != nil {
+		path, err = exec.LookPath("service")
+	}
+	if err != nil {
+		// Defaulting to systemctl in the most common path
+		// This replicates prior behavior where
+		path = "/usr/bin/systemctl"
+	}
+	_, filename := filepath.Split(path)
+	return filename
+}
+
+func LinuxServiceFilePath() string {
+	var path string
+	var err error
+	path, err = exec.LookPath("/usr/lib/systemd/system/observiq-otel-collector.service")
+	if err != nil {
+		path, err = exec.LookPath("/etc/init.d/observiq-otel-collector")
+	}
+	if err != nil {
+		// Defaulting to systemctl in the most common path
+		path = "/usr/lib/systemd/system/observiq-otel-collector.service"
+	}
+	return path
 }

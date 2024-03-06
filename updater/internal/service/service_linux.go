@@ -29,9 +29,6 @@ import (
 	"go.uber.org/zap"
 )
 
-const linuxServiceName = "observiq-otel-collector"
-const linuxServiceFilePath = "/usr/lib/systemd/system/observiq-otel-collector.service"
-
 // Option is an extra option for creating a Service
 type Option func(linuxSvc *linuxService)
 
@@ -44,10 +41,12 @@ func WithServiceFile(svcFilePath string) Option {
 
 // NewService returns an instance of the Service interface for managing the observiq-otel-collector service on the current OS.
 func NewService(logger *zap.Logger, installDir string, opts ...Option) Service {
+	_, svcFileName := filepath.Split(path.LinuxServiceFilePath())
 	linuxSvc := &linuxService{
-		newServiceFilePath:       filepath.Join(path.ServiceFileDir(installDir), "observiq-otel-collector.service"),
-		serviceName:              linuxServiceName,
-		installedServiceFilePath: linuxServiceFilePath,
+		newServiceFilePath:       filepath.Join(path.ServiceFileDir(installDir), svcFileName),
+		serviceName:              svcFileName,
+		serviceCmdName:           path.LinuxServiceCmdName(),
+		installedServiceFilePath: path.LinuxServiceFilePath(),
 		installDir:               installDir,
 		logger:                   logger.Named("linux-service"),
 	}
@@ -63,7 +62,8 @@ type linuxService struct {
 	// newServiceFilePath is the file path to the new unit file
 	newServiceFilePath string
 	// serviceName is the name of the service
-	serviceName string
+	serviceName    string
+	serviceCmdName string
 	// installedServiceFilePath is the file path to the installed unit file
 	installedServiceFilePath string
 	installDir               string
@@ -72,20 +72,38 @@ type linuxService struct {
 
 // Start the service
 func (l linuxService) Start() error {
-	//#nosec G204 -- serviceName is not determined by user input
-	cmd := exec.Command("systemctl", "start", l.serviceName)
-	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("running systemctl failed: %w", err)
+	var cmd *exec.Cmd
+	if l.serviceCmdName == "service" {
+		//#nosec G204 -- serviceName is not determined by user input
+		cmd = exec.Command(l.serviceCmdName, l.serviceName, "start")
+		if err := cmd.Run(); err != nil {
+			return fmt.Errorf("running service failed: %w", err)
+		}
+	} else {
+		//#nosec G204 -- serviceName is not determined by user input
+		cmd = exec.Command(l.serviceCmdName, "start", l.serviceName)
+		if err := cmd.Run(); err != nil {
+			return fmt.Errorf("running systemctl failed: %w", err)
+		}
 	}
 	return nil
 }
 
 // Stop the service
 func (l linuxService) Stop() error {
-	//#nosec G204 -- serviceName is not determined by user input
-	cmd := exec.Command("systemctl", "stop", l.serviceName)
-	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("running systemctl failed: %w", err)
+	var cmd *exec.Cmd
+	if l.serviceCmdName == "service" {
+		//#nosec G204 -- serviceName is not determined by user input
+		cmd = exec.Command(l.serviceCmdName, l.serviceName, "stop")
+		if err := cmd.Run(); err != nil {
+			return fmt.Errorf("running service failed: %w", err)
+		}
+	} else {
+		//#nosec G204 -- serviceName is not determined by user input
+		cmd = exec.Command(l.serviceCmdName, "stop", l.serviceName)
+		if err := cmd.Run(); err != nil {
+			return fmt.Errorf("running systemctl failed: %w", err)
+		}
 	}
 	return nil
 }
@@ -118,15 +136,24 @@ func (l linuxService) install() error {
 		return fmt.Errorf("failed to copy service file: %w", err)
 	}
 
-	cmd := exec.Command("systemctl", "daemon-reload")
-	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("reloading systemctl failed: %w", err)
-	}
+	if l.serviceCmdName == "service" {
+		//#nosec G204 -- serviceName is not determined by user input
+		cmd := exec.Command("chkconfig", "on", l.serviceName)
+		if err := cmd.Run(); err != nil {
+			return fmt.Errorf("chkconfig on failed: %w", err)
+		}
+	} else {
+		//#nosec G204 -- serviceName is not determined by user input
+		cmd := exec.Command(l.serviceCmdName, "daemon-reload")
+		if err := cmd.Run(); err != nil {
+			return fmt.Errorf("reloading systemctl failed: %w", err)
+		}
 
-	//#nosec G204 -- serviceName is not determined by user input
-	cmd = exec.Command("systemctl", "enable", l.serviceName)
-	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("enabling unit file failed: %w", err)
+		//#nosec G204 -- serviceName is not determined by user input
+		cmd = exec.Command(l.serviceCmdName, "enable", l.serviceName)
+		if err := cmd.Run(); err != nil {
+			return fmt.Errorf("enabling unit file failed: %w", err)
+		}
 	}
 
 	return nil
@@ -134,19 +161,28 @@ func (l linuxService) install() error {
 
 // uninstalls the service
 func (l linuxService) uninstall() error {
-	//#nosec G204 -- serviceName is not determined by user input
-	cmd := exec.Command("systemctl", "disable", l.serviceName)
-	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("failed to disable unit: %w", err)
-	}
+	if l.serviceCmdName == "service" {
+		//#nosec G204 -- serviceName is not determined by user input
+		cmd := exec.Command("chkconfig", "off", l.serviceName)
+		if err := cmd.Run(); err != nil {
+			return fmt.Errorf("chkconfig on failed: %w", err)
+		}
+	} else {
+		//#nosec G204 -- serviceName is not determined by user input
+		cmd := exec.Command(l.serviceCmdName, "disable", l.serviceName)
+		if err := cmd.Run(); err != nil {
+			return fmt.Errorf("enabling unit file failed: %w", err)
+		}
 
-	if err := os.Remove(l.installedServiceFilePath); err != nil {
-		return fmt.Errorf("failed to remove service file: %w", err)
-	}
+		if err := os.Remove(l.installedServiceFilePath); err != nil {
+			return fmt.Errorf("failed to remove service file: %w", err)
+		}
 
-	cmd = exec.Command("systemctl", "daemon-reload")
-	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("reloading systemctl failed: %w", err)
+		//#nosec G204 -- serviceName is not determined by user input
+		cmd = exec.Command(l.serviceCmdName, "daemon-reload")
+		if err := cmd.Run(); err != nil {
+			return fmt.Errorf("reloading systemctl failed: %w", err)
+		}
 	}
 
 	return nil
