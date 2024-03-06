@@ -66,6 +66,8 @@ func SpecialJMXJarFile(installDir string) string {
 	return filepath.Join(SpecialJarDir(installDir), "opentelemetry-java-contrib-jmx-metrics.jar")
 }
 
+// LinuxServiceCmdName returns the filename of the service command available
+// on this Linux OS. Will be one of systemctl and service
 func LinuxServiceCmdName() string {
 	var path string
 	var err error
@@ -82,6 +84,7 @@ func LinuxServiceCmdName() string {
 	return filename
 }
 
+// LinuxServiceFilePath returns the full path to the service file
 func LinuxServiceFilePath() string {
 	var path string
 	var err error
