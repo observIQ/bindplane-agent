@@ -1,6 +1,8 @@
 # Configuration file for the observiq-otel-collector service.
-
 # These variables control the behavior of the observiq-otel-collector
+# Disabling the following for shellcheck, because they aren't relevant
+# to this file
+# shellcheck disable=SC2148,SC2034
 
 # Environment variables
 BINARY=observiq-otel-collector

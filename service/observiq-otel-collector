@@ -19,6 +19,7 @@
 # RHEL
 if [ -e /etc/init.d/functions ]; then
   STATUS=true
+  # shellcheck disable=SC1091
   . /etc/init.d/functions
 fi
 # SUSE
@@ -33,6 +34,7 @@ if [ -e /etc/rc.status ]; then
   #      rc_failed <num>  set local and overall rc status to <num><num>
   #      rc_reset         clear local rc status (overall remains)
   #      rc_exit          exit appropriate to overall rc status
+  # shellcheck disable=SC1091
   . /etc/rc.status
 
   # First reset status of this service
@@ -41,6 +43,7 @@ fi
 # LSB Capable
 if [ -e /lib/lsb/init-functions ]; then
   PROC=true
+  # shellcheck disable=SC1091
   . /lib/lsb/init-functions
 fi
 
@@ -60,52 +63,57 @@ fi
 # considered a success.
 
 # Pull in sysconfig settings
+# shellcheck disable=SC1091
 [ -f /etc/sysconfig/observiq-otel-collector ] && . /etc/sysconfig/observiq-otel-collector
 
 RETVAL=0
 start() {
-  [ -x $PROGRAM ] || exit 5
+  [ -x "$PROGRAM" ] || exit 5
 
-  echo -n $"Starting $0: "
+  # shellcheck disable=SC3037
+  echo -n "Starting $0: "
 
   # RHEL
-  if [ $STATUS ]; then
+  if [ "$STATUS" ]; then
     umask 077
 
     daemon --pidfile="$PIDFILE" "$START_CMD"
     RETVAL=$?
-    echo $(pidof $BINARY) > $PIDFILE
-    [ $RETVAL -eq 0 ] && touch $LOCKFILE
+    # shellcheck disable=SC2005
+    echo "$(pidof "$BINARY")" > "$PIDFILE"
+    [ "$RETVAL" -eq 0 ] && touch "$LOCKFILE"
   # SUSE
-  elif [ $RCSTATUS ]; then
+  elif [ "$RCSTATUS" ]; then
     ## Start daemon with startproc(8). If this fails
     ## the echo return value is set appropriate.
 
     # NOTE: startproc return 0, even if service is
     # already running to match LSB spec.
-    nohup $PROGRAM --config config.yaml > /dev/null 2>&1 &
+    nohup "$PROGRAM" --config config.yaml > /dev/null 2>&1 &
 
     # Remember status and be verbose
     rc_status -v
 
-    echo $(pidof $BINARY) > $PIDFILE
+    # shellcheck disable=SC2005
+    echo "$(pidof "$BINARY")" > "$PIDFILE"
   fi
 }
 
 stop() {
-  echo -n $"Shutting down $0: "
+  # shellcheck disable=SC3037
+  echo -n "Shutting down $0: "
   # RHEL
-  if [ $STATUS ]; then
-      killproc -p "$PIDFILE" $PROGRAM
+  if [ "$STATUS" ]; then
+      killproc -p "$PIDFILE" "$PROGRAM"
       RETVAL=$?
       echo
-      [ $RETVAL -eq 0 ] && rm -f $LOCKFILE
-      return $RETVAL
+      [ "$RETVAL" -eq 0 ] && rm -f "$LOCKFILE"
+      return "$RETVAL"
   # SUSE
-  elif [ $RCSTATUS ]; then
+  elif [ "$RCSTATUS" ]; then
       ## Stop daemon with killproc(8) and if this fails
       ## set echo the echo return value.
-      killproc -p $PIDFILE -TERM $BINARY
+      killproc -p "$PIDFILE" -TERM "$BINARY"
 
       # Remember status and be verbose
       rc_status -v
@@ -119,6 +127,7 @@ reload() {
   # SUSE
   #elif [ $RCSTATUS ]; then
   #fi
+  echo "Reload is not currently implemented for $0"
   RETVAL=3
 }
 
@@ -129,7 +138,8 @@ force_reload() {
   # SUSE
   #elif [ $RCSTATUS ]; then
   #fi
-  RETVAL=3
+  echo "Reload is not currently implemented for $0, redirecting to restart"
+  restart
 }
 
 pid_not_running() {
@@ -139,8 +149,8 @@ pid_not_running() {
 
 pid_status() {
   if [ -e "$PIDFILE" ]; then
-    if ps -p $(cat "$PIDFILE") > /dev/null; then
-      echo " * $PROGRAM" is running, pid=`cat "$PIDFILE"`
+    if ps -p "$(cat "$PIDFILE")" > /dev/null; then
+      echo " * $PROGRAM" is running, pid="$(cat "$PIDFILE")"
     else
       pid_not_running
     fi
@@ -151,15 +161,17 @@ pid_status() {
 
 otel_status() {
   if [ -e "$PIDFILE" ]; then
+    # shellcheck disable=SC3037
     echo -n "Status of $0 ($(cat "$PIDFILE"))"
   else
+    # shellcheck disable=SC3037
     echo -n "Status of $0 (no pidfile found)"
   fi
 
-  if [ $STATUS ]; then
-    status -p $PIDFILE $PROGRAM
+  if [ "$STATUS" ]; then
+    status -p "$PIDFILE" "$PROGRAM"
     RETVAL=$?
-  elif [ $RCSTATUS ]; then
+  elif [ "$RCSTATUS" ]; then
     ## Check status with checkproc(8), if process is running
     ## checkproc will return with exit status 0.
 
@@ -170,17 +182,17 @@ otel_status() {
     # 3 - service not running
 
     # NOTE: checkproc returns LSB compliant status values.
-    checkproc -p $PIDFILE $PROGRAM
+    checkproc -p "$PIDFILE" "$PROGRAM"
     rc_status -v
-  elif [ $PROC ]; then
-    status_of_proc -p $PIDFILE "$PROGRAM" "$PROGRAM"
+  elif [ "$PROC" ]; then
+    status_of_proc -p "$PIDFILE" "$PROGRAM" "$PROGRAM"
     RETVAL=$?
   else
     pid_status
   fi
 }
 
-cd $OIQ_OTEL_COLLECTOR_HOME
+cd "$OIQ_OTEL_COLLECTOR_HOME" || exit 1
 case "$1" in
   # Start the service
   start)
@@ -201,14 +213,12 @@ case "$1" in
     ;;
   # Not currently implemented, but should reload the config file
   reload)
-    echo "Reload is not currently implemented for $0"
-    exit 3
+    reload
     ;;
   # Not currently implemented, but should reload the config file.
   # If it fails, restart
   force-reload)
-    echo "Reload is not currently implemented for $0, redirecting to restart"
-    restart
+    force_reload
     ;;
   # Conditionally restart the service (only if running already)
   condrestart|try-restart)
@@ -216,14 +226,14 @@ case "$1" in
     restart
     ;;
   *)
-    echo $"Usage: $0 {start|stop|restart|condrestart|try-restart|reload|force-reload|status}"
+    echo "Usage: $0 {start|stop|restart|condrestart|try-restart|reload|force-reload|status}"
     RETVAL=3
     ;;
 esac
-cd $OLDPWD
+cd "$OLDPWD" || exit 1
 
-if [ $RCSTATUS ]; then
+if [ "$RCSTATUS" ]; then
   rc_exit
 fi
 
-exit $RETVAL
+exit "$RETVAL"
