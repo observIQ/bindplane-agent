@@ -87,16 +87,13 @@ func newOtlpGenerator(cfg GeneratorConfig, logger *zap.Logger) *otlpGenerator {
 	return lg
 }
 
-// timeStamped is convenience interface for updating the timestamps of logs & metrics in a generic way
-type timeStamped interface {
-	Timestamp() pcommon.Timestamp
-	SetTimestamp(pcommon.Timestamp)
-}
+// logRecordUpdater is a function that updates the timestamp of a log record
+// since we need to iterate through the logs and metrics in three different places
+type logRecordUpdater func(dp plog.LogRecord)
 
-type timeStampUpdater func(dp timeStamped)
-
-// generic function to update the timestamps of all logs using the provided updater
-func (g *otlpGenerator) updateLogTimes(updater timeStampUpdater) {
+// generic function to update the timestamps of all log records using the provided updater,
+// or in the case of findLastLogTime, to find the most recent timestamp.
+func (g *otlpGenerator) updateLogTimes(updater logRecordUpdater) {
 	for i := 0; i < g.logs.ResourceLogs().Len(); i++ {
 		resourceLogs := g.logs.ResourceLogs().At(i)
 		for k := 0; k < resourceLogs.ScopeLogs().Len(); k++ {
@@ -111,13 +108,13 @@ func (g *otlpGenerator) updateLogTimes(updater timeStampUpdater) {
 
 // findLastLogTime finds the log with the most recent timestamp
 func (g *otlpGenerator) findLastLogTime() time.Time {
-	maxTime := &time.Time{}
-	g.updateLogTimes(func(ts timeStamped) {
-		if t := ts.Timestamp().AsTime(); t.After(*maxTime) {
-			*maxTime = t
+	maxTime := time.Time{}
+	g.updateLogTimes(func(log plog.LogRecord) {
+		if t := log.Timestamp().AsTime(); t.After(maxTime) {
+			maxTime = t
 		}
 	})
-	return *maxTime
+	return maxTime
 }
 
 // adjustTraceTimes changes the log timestamp to be relative to the current time, placing
@@ -126,9 +123,9 @@ func (g *otlpGenerator) adjustLogTimes() {
 	now := getCurrentTime()
 	maxTime := g.findLastLogTime()
 
-	g.updateLogTimes(func(ts timeStamped) {
-		delta := maxTime.Sub(ts.Timestamp().AsTime())
-		ts.SetTimestamp(pcommon.NewTimestampFromTime(now.Add(-delta)))
+	g.updateLogTimes(func(log plog.LogRecord) {
+		delta := maxTime.Sub(log.Timestamp().AsTime())
+		log.SetTimestamp(pcommon.NewTimestampFromTime(now.Add(-delta)))
 	})
 	g.logsStart = now
 }
@@ -138,15 +135,25 @@ func (g *otlpGenerator) adjustLogTimes() {
 func (g *otlpGenerator) generateLogs() plog.Logs {
 	now := getCurrentTime()
 	timeSince := now.Sub(g.logsStart)
-	g.updateLogTimes(func(ts timeStamped) {
-		timeStamp := ts.Timestamp().AsTime().Add(timeSince)
-		ts.SetTimestamp(pcommon.NewTimestampFromTime(timeStamp))
+	g.updateLogTimes(func(log plog.LogRecord) {
+		timeStamp := log.Timestamp().AsTime().Add(timeSince)
+		log.SetTimestamp(pcommon.NewTimestampFromTime(timeStamp))
 	})
 	g.logsStart = now
 	return g.logs
 }
 
-func (g *otlpGenerator) updateMetricTimes(updater timeStampUpdater) {
+// timeStamped is convenience interface for updating the timestamps of metric datapoints in a generic way,
+// since all metric datapoint types duck-type to this interface.
+type timeStamped interface {
+	Timestamp() pcommon.Timestamp
+	SetTimestamp(pcommon.Timestamp)
+}
+
+type dataPointUpdater func(dp timeStamped)
+
+// updateMetricTimes updates the timestamps of all metrics using the provided updater
+func (g *otlpGenerator) updateMetricTimes(updater dataPointUpdater) {
 	for i := 0; i < g.metrics.ResourceMetrics().Len(); i++ {
 		resourceMetrics := g.metrics.ResourceMetrics().At(i)
 		for k := 0; k < resourceMetrics.ScopeMetrics().Len(); k++ {
@@ -185,16 +192,19 @@ func (g *otlpGenerator) updateMetricTimes(updater timeStampUpdater) {
 	}
 }
 
+// findLastMetricTime finds the datapoint with the most recent timestamp
 func (g *otlpGenerator) findLastMetricTime() time.Time {
-	maxTime := &time.Time{}
+	maxTime := time.Time{}
 	g.updateMetricTimes(func(ts timeStamped) {
-		if t := ts.Timestamp().AsTime(); t.After(*maxTime) {
-			*maxTime = t
+		if t := ts.Timestamp().AsTime(); t.After(maxTime) {
+			maxTime = t
 		}
 	})
-	return *maxTime
+	return maxTime
 }
 
+// adjustMetricTimes changes the metric timestamps to be relative to the current time, placing
+// the metric with timestamp maxTime at the current time.
 func (g *otlpGenerator) adjustMetricTimes() {
 	now := getCurrentTime()
 	maxTime := g.findLastMetricTime()
@@ -205,6 +215,8 @@ func (g *otlpGenerator) adjustMetricTimes() {
 	g.metricsStart = now
 }
 
+// generateMetrics generates a new set of metrics with updated timestamps, adding the time
+// since the last set of metrics was generated to the timestamps.
 func (g *otlpGenerator) generateMetrics() pmetric.Metrics {
 	// calculate the time since the last baseline time we used to adjust the metrics
 	now := getCurrentTime()
@@ -219,16 +231,12 @@ func (g *otlpGenerator) generateMetrics() pmetric.Metrics {
 	return g.metrics
 }
 
-type timeStampedSpan interface {
-	StartTimestamp() pcommon.Timestamp
-	EndTimestamp() pcommon.Timestamp
-	SetStartTimestamp(pcommon.Timestamp)
-	SetEndTimestamp(pcommon.Timestamp)
-}
+// Since we need to iterate through the traces in three different places, we define a function type
+// to update the timestamps of spans.
+type spanUpdater func(dp ptrace.Span)
 
-type timeStampedSpanUpdater func(dp timeStampedSpan)
-
-func (g *otlpGenerator) updateTraceTimes(updater timeStampedSpanUpdater) {
+// updateTraceTimes updates the timestamps of all spans using the provided updater
+func (g *otlpGenerator) updateTraceTimes(updater spanUpdater) {
 	for i := 0; i < g.traces.ResourceSpans().Len(); i++ {
 		resourceSpans := g.traces.ResourceSpans().At(i)
 		for k := 0; k < resourceSpans.ScopeSpans().Len(); k++ {
@@ -243,16 +251,16 @@ func (g *otlpGenerator) updateTraceTimes(updater timeStampedSpanUpdater) {
 
 // findLastTraceEndTime finds the span with the last end time
 func (g *otlpGenerator) findLastTraceEndTime() time.Time {
-	maxTime := &time.Time{}
+	maxTime := time.Time{}
 
-	g.updateTraceTimes(func(dp timeStampedSpan) {
-		end := dp.EndTimestamp().AsTime()
-		if end.After(*maxTime) {
-			*maxTime = end
+	g.updateTraceTimes(func(span ptrace.Span) {
+		end := span.EndTimestamp().AsTime()
+		if end.After(maxTime) {
+			maxTime = end
 		}
 	})
 
-	return *maxTime
+	return maxTime
 }
 
 // adjustTraceTimes changes the start and end times of all spans to be relative to the current time, placing
@@ -261,16 +269,16 @@ func (g *otlpGenerator) adjustTraceTimes() {
 	now := getCurrentTime()
 	maxTime := g.findLastTraceEndTime()
 
-	g.updateTraceTimes(func(ts timeStampedSpan) {
+	g.updateTraceTimes(func(span ptrace.Span) {
 		// delta is the duration in the past this span's end time is before the maxTime
-		delta := maxTime.Sub(ts.EndTimestamp().AsTime())
+		delta := maxTime.Sub(span.EndTimestamp().AsTime())
 		// spanDuration is the length of the span
-		spanDuration := ts.EndTimestamp().AsTime().Sub(ts.StartTimestamp().AsTime())
+		spanDuration := span.EndTimestamp().AsTime().Sub(span.StartTimestamp().AsTime())
 		// move each span's end time by delta
 		endTime := now.Add(-delta)
-		ts.SetEndTimestamp(pcommon.NewTimestampFromTime(endTime))
+		span.SetEndTimestamp(pcommon.NewTimestampFromTime(endTime))
 		// set the start time to be the end time minus the original span duration
-		ts.SetStartTimestamp(pcommon.NewTimestampFromTime(endTime.Add(-spanDuration)))
+		span.SetStartTimestamp(pcommon.NewTimestampFromTime(endTime.Add(-spanDuration)))
 	})
 
 	// save the current time we used as a baseline to adjust the spans
@@ -282,12 +290,12 @@ func (g *otlpGenerator) generateTraces() ptrace.Traces {
 	now := getCurrentTime()
 	timeSince := now.Sub(g.tracesStart)
 	// add the time since to the start and end times of all spans
-	g.updateTraceTimes(func(ts timeStampedSpan) {
-		startTime := ts.StartTimestamp().AsTime().Add(timeSince)
-		ts.SetStartTimestamp(pcommon.NewTimestampFromTime(startTime))
+	g.updateTraceTimes(func(span ptrace.Span) {
+		startTime := span.StartTimestamp().AsTime().Add(timeSince)
+		span.SetStartTimestamp(pcommon.NewTimestampFromTime(startTime))
 
-		endTime := ts.EndTimestamp().AsTime().Add(timeSince)
-		ts.SetEndTimestamp(pcommon.NewTimestampFromTime(endTime))
+		endTime := span.EndTimestamp().AsTime().Add(timeSince)
+		span.SetEndTimestamp(pcommon.NewTimestampFromTime(endTime))
 	})
 
 	// update the baseline time to the current time

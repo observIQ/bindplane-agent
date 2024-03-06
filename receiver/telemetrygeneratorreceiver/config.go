@@ -150,21 +150,30 @@ func validateOTLPGenerator(cfg *GeneratorConfig) error {
 	switch dataType {
 	case component.DataTypeLogs:
 		marshaler := plog.JSONUnmarshaler{}
-		_, err := marshaler.UnmarshalLogs(jsonBytes)
+		logs, err := marshaler.UnmarshalLogs(jsonBytes)
 		if err != nil {
-			return fmt.Errorf("error unmarshalling otlp logs json: %w", err)
+			return fmt.Errorf("error unmarshalling logs from otlp_json: %w", err)
+		}
+		if logs.LogRecordCount() == 0 {
+			return errors.New("no log records found in otlp_json")
 		}
 	case component.DataTypeMetrics:
 		marshaler := pmetric.JSONUnmarshaler{}
-		_, err := marshaler.UnmarshalMetrics(jsonBytes)
+		metrics, err := marshaler.UnmarshalMetrics(jsonBytes)
 		if err != nil {
-			return fmt.Errorf("error unmarshalling otlp metrics json: %w", err)
+			return fmt.Errorf("error unmarshalling metrics from otlp_json: %w", err)
+		}
+		if metrics.DataPointCount() == 0 {
+			return errors.New("no metric data points found in otlp_json")
 		}
 	case component.DataTypeTraces:
 		marshaler := ptrace.JSONUnmarshaler{}
-		_, err := marshaler.UnmarshalTraces(jsonBytes)
+		traces, err := marshaler.UnmarshalTraces(jsonBytes)
 		if err != nil {
-			return fmt.Errorf("error unmarshalling otlp traces json: %w", err)
+			return fmt.Errorf("error unmarshalling traces from otlp_json: %w", err)
+		}
+		if traces.SpanCount() == 0 {
+			return errors.New("no trace spans found in otlp_json")
 		}
 
 	}
