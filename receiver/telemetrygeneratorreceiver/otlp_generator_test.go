@@ -878,52 +878,45 @@ func TestOTLPGenerator_Traces(t *testing.T) {
 
 			g := newOtlpGenerator(tc.cfg, zap.NewNop())
 			traces := g.generateTraces()
-			// clearTimeStamps(traces)
-
 			// golden.WriteTraces(t, tc.expectedFile, traces)
 			expectedTraces, err := golden.ReadTraces(tc.expectedFile)
 			require.NoError(t, err)
-			// unmarshaler := &ptrace.JSONMarshaler{}
-			// fileBytes, _ := unmarshaler.MarshalTraces(traces)
 
-			// os.WriteFile(filepath.Join(expectedOTLPDir, "bpop_traces.json"), fileBytes, 0600)
-			// clearTimeStamps(expectedLogs)
 			err = ptracetest.CompareTraces(expectedTraces, traces)
 			require.NoError(t, err)
-
-			// require.NoError(t, err)
-			// require.NotNil(t, config)
-
 		})
 	}
 }
 
 func Test_findLastTraceEndTime(t *testing.T) {
-
 	tests := []struct {
-		name           string
-		traceFile      string
-		expectedTime   time.Time
-		getCurrentTime func() time.Time
+		name         string
+		traceFile    string
+		expectedTime time.Time
 	}{
 
 		{
 			name:         "Traces 1",
 			traceFile:    filepath.Join(expectedOTLPDir, "traces", "bpop_traces.yaml"),
-			expectedTime: time.Date(2024, time.February, 1, 12, 44, 6, 622353875, time.UTC),
+			expectedTime: time.Date(2024, time.February, 1, 12, 44, 5, 999459125, time.UTC),
 		},
 		{
 			name:         "Traces 2",
 			traceFile:    filepath.Join(expectedOTLPDir, "traces", "bpop_traces2.yaml"),
-			expectedTime: time.Date(2024, time.February, 1, 12, 44, 6, 622224928, time.UTC),
+			expectedTime: time.Date(2024, time.February, 1, 12, 44, 5, 999459839, time.UTC),
 		},
 	}
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			getCurrentTime = tc.getCurrentTime
 			traces, err := golden.ReadTraces(tc.traceFile)
 			require.NoError(t, err)
-			lastTime := findLastTraceEndTime(traces)
+			g := &otlpGenerator{
+				cfg:    GeneratorConfig{Type: generatorTypeOTLP, AdditionalConfig: map[string]any{"telemetry_type": "traces"}},
+				logger: zap.NewNop(),
+				traces: traces,
+			}
+
+			lastTime := g.findLastTraceEndTime()
 			require.Equal(t, tc.expectedTime, lastTime)
 		})
 	}
