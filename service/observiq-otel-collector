@@ -66,12 +66,6 @@ RETVAL=0
 start() {
   [ -x $PROGRAM ] || exit 5
 
-  export PROGRAM
-  export LOCKFILE
-  export PIDFILE
-  export OIQ_OTEL_COLLECTOR_HOME
-  export OIQ_OTEL_COLLECTOR_STORAGE
-
   echo -n $"Starting $0: "
 
   # RHEL
