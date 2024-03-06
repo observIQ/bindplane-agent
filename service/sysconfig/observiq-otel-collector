@@ -1,8 +1,6 @@
 # Configuration file for the observiq-otel-collector service.
 
-# The server keys are automatically generated if they ommited
-# to change the automatic creation uncomment the approprite 
-# line.
+# These variables control the behavior of the observiq-otel-collector
 
 # Environment variables
 BINARY=observiq-otel-collector

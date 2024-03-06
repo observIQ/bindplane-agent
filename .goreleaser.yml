@@ -211,7 +211,7 @@ nfpms:
           group: root
       - src: service/sysconfig/observiq-otel-collector
         dst: /etc/sysconfig/observiq-otel-collector
-        type: config|noreplace
+        type: config
         file_info:
           mode: 0644
           owner: root
