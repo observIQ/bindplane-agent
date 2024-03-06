@@ -202,6 +202,152 @@ func TestValidate(t *testing.T) {
 				},
 			},
 		},
+		{
+			desc:        "invalid attributes",
+			payloads:    1,
+			errExpected: true,
+			errText:     "error in attributes config: <Invalid value type struct {}>",
+			generators: []GeneratorConfig{
+				{
+					Type: "logs",
+					Attributes: map[string]any{
+						"attr_key1": struct{}{},
+					},
+				},
+			},
+		},
+		{
+			desc:        "invalid resource_attributes",
+			payloads:    1,
+			errExpected: true,
+			errText:     "error in resource_attributes config: <Invalid value type struct {}>",
+			generators: []GeneratorConfig{
+				{
+					Type: "logs",
+					ResourceAttributes: map[string]any{
+						"attr_key1": struct{}{},
+					},
+				},
+			},
+		},
+		{
+			desc:        "otlp - no type",
+			payloads:    10,
+			errExpected: true,
+			errText:     "telemetry_type must be set",
+			generators: []GeneratorConfig{
+				{
+					Type: "otlp",
+					AdditionalConfig: map[string]any{
+						"otlp_json": "json",
+					},
+				},
+			},
+		},
+		{
+			desc:        "otlp - telemetry_type not string",
+			payloads:    10,
+			errExpected: true,
+			errText:     "invalid telemetry type: 1",
+			generators: []GeneratorConfig{
+				{
+					Type: "otlp",
+					AdditionalConfig: map[string]any{
+						"otlp_json":      "json",
+						"telemetry_type": 1,
+					},
+				},
+			},
+		},
+		{
+			desc:        "otlp - bad telemetry_type ",
+			payloads:    10,
+			errExpected: true,
+			errText:     "invalid telemetry type: bad",
+			generators: []GeneratorConfig{
+				{
+					Type: "otlp",
+					AdditionalConfig: map[string]any{
+						"otlp_json":      "json",
+						"telemetry_type": "bad",
+					},
+				},
+			},
+		},
+		{
+			desc:        "otlp - no otlp_json",
+			payloads:    10,
+			errExpected: true,
+			errText:     "otlp_json must be set",
+			generators: []GeneratorConfig{
+				{
+					Type: "otlp",
+					AdditionalConfig: map[string]any{
+						"telemetry_type": "logs",
+					},
+				},
+			},
+		},
+		{
+			desc:        "otlp - otlp_json not string",
+			payloads:    10,
+			errExpected: true,
+			errText:     "otlp_json must be a string, got: 1",
+			generators: []GeneratorConfig{
+				{
+					Type: "otlp",
+					AdditionalConfig: map[string]any{
+						"telemetry_type": "logs",
+						"otlp_json":      1,
+					},
+				},
+			},
+		},
+		{
+			desc:        "otlp - malformed otlp_json logs",
+			payloads:    10,
+			errExpected: true,
+			errText:     "error unmarshalling otlp logs json: skipThreeBytes: expect ull, error found in #2 byte of ...|not json|..., bigger context ...|not json|...",
+			generators: []GeneratorConfig{
+				{
+					Type: "otlp",
+					AdditionalConfig: map[string]any{
+						"telemetry_type": "logs",
+						"otlp_json":      "not json",
+					},
+				},
+			},
+		},
+		{
+			desc:        "otlp - malformed otlp_json metrics",
+			payloads:    10,
+			errExpected: true,
+			errText:     "error unmarshalling otlp metrics json: ReadObjectCB: expect \" after {, but found n, error found in #2 byte of ...|{not json}|..., bigger context ...|{not json}|...",
+			generators: []GeneratorConfig{
+				{
+					Type: "otlp",
+					AdditionalConfig: map[string]any{
+						"telemetry_type": "metrics",
+						"otlp_json":      "{not json}",
+					},
+				},
+			},
+		},
+		{
+			desc:        "otlp - malformed otlp_json traces",
+			payloads:    10,
+			errExpected: true,
+			errText:     "error unmarshalling otlp traces json: ReadObjectCB: expect { or n, but found ?, error found in #1 byte of ...|?(not json)|..., bigger context ...|?(not json)|...",
+			generators: []GeneratorConfig{
+				{
+					Type: "otlp",
+					AdditionalConfig: map[string]any{
+						"telemetry_type": "traces",
+						"otlp_json":      "?(not json)",
+					},
+				},
+			},
+		},
 	}
 
 	for _, tc := range testCases {

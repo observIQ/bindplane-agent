@@ -87,6 +87,7 @@ func newOtlpGenerator(cfg GeneratorConfig, logger *zap.Logger) *otlpGenerator {
 	return lg
 }
 
+// timeStamped is convenience interface for updating the timestamps of logs & metrics in a generic way
 type timeStamped interface {
 	Timestamp() pcommon.Timestamp
 	SetTimestamp(pcommon.Timestamp)

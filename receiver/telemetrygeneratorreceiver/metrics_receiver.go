@@ -42,7 +42,7 @@ func newMetricsReceiver(ctx context.Context, logger *zap.Logger, cfg *Config, ne
 	return mr
 }
 
-// TODO implement produce for metrics
+// produce generates metrics from each generator and sends them to the next consumer
 func (r *metricsGeneratorReceiver) produce() error {
 	metrics := pmetric.NewMetrics()
 	for _, g := range r.generators {

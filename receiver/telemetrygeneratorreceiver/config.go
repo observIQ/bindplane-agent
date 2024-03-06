@@ -87,7 +87,10 @@ func validateLogGeneratorConfig(g *GeneratorConfig) error {
 		return fmt.Errorf("error in attributes config: %s", err)
 	}
 
-	// TODO validate ResourceAttributes
+	err = pcommon.NewMap().FromRaw(g.ResourceAttributes)
+	if err != nil {
+		return fmt.Errorf("error in resource_attributes config: %s", err)
+	}
 
 	// severity and body validation
 	if body, ok := g.AdditionalConfig["body"]; ok {
@@ -122,10 +125,12 @@ func validateOTLPGenerator(cfg *GeneratorConfig) error {
 	// validate the telemetry type
 	telemetryTypeStr, ok := telemetryType.(string)
 	if !ok {
-		return fmt.Errorf("invalid telemetry type: %s", telemetryType)
+		return fmt.Errorf("invalid telemetry type: %v", telemetryType)
 	}
 	dataType := component.DataType(telemetryTypeStr)
-	if dataType.String() == "" {
+	switch dataType {
+	case component.DataTypeLogs, component.DataTypeMetrics, component.DataTypeTraces:
+	default:
 		return fmt.Errorf("invalid telemetry type: %s", telemetryType)
 	}
 
@@ -137,7 +142,7 @@ func validateOTLPGenerator(cfg *GeneratorConfig) error {
 
 	otlpJSONStr, ok := otlpJSON.(string)
 	if !ok {
-		return fmt.Errorf("otlp_json must be a string %v", otlpJSON)
+		return fmt.Errorf("otlp_json must be a string, got: %v", otlpJSON)
 	}
 
 	jsonBytes := []byte(otlpJSONStr)

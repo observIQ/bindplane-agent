@@ -42,7 +42,7 @@ func newTracesReceiver(ctx context.Context, logger *zap.Logger, cfg *Config, nex
 	return tr
 }
 
-// TODO implement produce for traces
+// produce generates traces from each generator and sends them to the next consumer
 func (r *tracesGeneratorReceiver) produce() error {
 	traces := ptrace.NewTraces()
 	for _, g := range r.generators {
