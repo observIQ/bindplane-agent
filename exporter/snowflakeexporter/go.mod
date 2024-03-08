@@ -11,6 +11,7 @@ require (
 	github.com/stretchr/testify v1.8.4
 	go.opentelemetry.io/collector/component v0.96.0
 	go.opentelemetry.io/collector/config/configretry v0.96.0
+	go.opentelemetry.io/collector/confmap v0.96.0
 	go.opentelemetry.io/collector/consumer v0.96.0
 	go.opentelemetry.io/collector/exporter v0.96.0
 	go.opentelemetry.io/collector/pdata v1.3.0
@@ -82,7 +83,6 @@ require (
 	github.com/zeebo/xxh3 v1.0.2 // indirect
 	go.opentelemetry.io/collector v0.96.0 // indirect
 	go.opentelemetry.io/collector/config/configtelemetry v0.96.0 // indirect
-	go.opentelemetry.io/collector/confmap v0.96.0 // indirect
 	go.opentelemetry.io/collector/extension v0.96.0 // indirect
 	go.opentelemetry.io/collector/receiver v0.96.0 // indirect
 	go.opentelemetry.io/otel v1.24.0 // indirect
