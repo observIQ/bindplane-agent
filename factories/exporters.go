@@ -35,7 +35,6 @@ import (
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/datadogexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/dynatraceexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/elasticsearchexporter"
-	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/f5cloudexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/fileexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlecloudpubsubexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/influxdbexporter"
@@ -77,7 +76,6 @@ var defaultExporters = []exporter.Factory{
 	dynatraceexporter.NewFactory(),
 	elasticsearchexporter.NewFactory(),
 	exportertest.NewNopFactory(),
-	f5cloudexporter.NewFactory(),
 	fileexporter.NewFactory(),
 	googlecloudexporter.NewFactory(version.Version()),
 	googlecloudpubsubexporter.NewFactory(),
