@@ -1137,6 +1137,8 @@ github.com/nxadm/tail v1.4.8 h1:nPr65rt6Y5JFSKQO7qToXr7pePgD6Gwiw05lkbyAQTE=
 github.com/nxadm/tail v1.4.8/go.mod h1:+ncqLTQzXmGhMZNUePPaPqPvBxHAIsmXswZKocGu+AU=
 github.com/oapi-codegen/runtime v1.0.0 h1:P4rqFX5fMFWqRzY9M/3YF9+aPSPPB06IzP2P7oOxrWo=
 github.com/oapi-codegen/runtime v1.0.0/go.mod h1:LmCUMQuPB4M/nLXilQXhHw+BLZdDb18B34OO356yJ/A=
+github.com/observiq/opentelemetry-collector-contrib/pkg/ottl v0.0.0-20240308164912-e4593622db2a h1:QZUx3Noj9z+0CXfqkG7pC4oIJIbq6C/fk3nfO4scgCE=
+github.com/observiq/opentelemetry-collector-contrib/pkg/ottl v0.0.0-20240308164912-e4593622db2a/go.mod h1:GxkZncXE27WmKiuI2TgR9+P/btT8sSPvY3zezKa5JEs=
 github.com/oklog/oklog v0.3.2/go.mod h1:FCV+B7mhrz4o+ueLpx+KqkyXRGMWOYEvfiXtdGtbWGs=
 github.com/oklog/run v1.0.0/go.mod h1:dlhp/R75TPv97u0XWUtDeV/lRKWPKSdTuV0TZvrmrQA=
 github.com/oklog/ulid v1.3.1 h1:EGfNDEx6MqHz8B3uNV6QAib1UR2Lm97sHi3ocA6ESJ4=
@@ -1308,8 +1310,6 @@ github.com/open-telemetry/opentelemetry-collector-contrib/pkg/experimentalmetric
 github.com/open-telemetry/opentelemetry-collector-contrib/pkg/experimentalmetricmetadata v0.96.0/go.mod h1:vqvbP5KNv8u/j99bcrJutCgthUIEP/Ntob5DLVmesZs=
 github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden v0.96.0 h1:6xhEYeFRjui33hCCP8tD9B2R2VCGNdNrzi+pivp0osk=
 github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden v0.96.0/go.mod h1:7CDMyrWBi/iST+UVvheDNjZX8VWyboTJqkXHz7gpLDI=
-github.com/open-telemetry/opentelemetry-collector-contrib/pkg/ottl v0.96.0 h1:nVptseHpC27Zq7Fq9yF7WOgNHrCntwQ9syRI217C3sk=
-github.com/open-telemetry/opentelemetry-collector-contrib/pkg/ottl v0.96.0/go.mod h1:GxkZncXE27WmKiuI2TgR9+P/btT8sSPvY3zezKa5JEs=
 github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest v0.96.0 h1:iynLFjnG869r53AIhiavbEVMZoPqCba7Mijm+9MRdOo=
 github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest v0.96.0/go.mod h1:FuTdjIZj7Un07dcbJs06IF1DJiYfpQkc4oklhNWE8fg=
 github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatautil v0.96.0 h1:nzAR1IjPcbgLNFmJElLPyRlLOfijAkQcWo4L9CXixu4=
