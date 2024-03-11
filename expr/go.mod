@@ -6,7 +6,7 @@ toolchain go1.21.6
 
 require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/ottl v0.96.0
-	github.com/stretchr/testify v1.8.4
+	github.com/stretchr/testify v1.9.0
 	go.opentelemetry.io/collector/component v0.96.0
 	go.opentelemetry.io/collector/pdata v1.3.0
 )
