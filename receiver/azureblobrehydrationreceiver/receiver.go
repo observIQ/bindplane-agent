@@ -174,7 +174,7 @@ func (r *rehydrationReceiver) Shutdown(ctx context.Context) error {
 	return err
 }
 
-// emptyPollLimit is the number of sequential empty polling cycles that can
+// emptyPollLimit is the number of consecutive empty polling cycles that can
 // occur before we stop polling.
 const emptyPollLimit = 3
 
@@ -433,7 +433,7 @@ func getStorageClient(ctx context.Context, host component.Host, storageID *compo
 
 // checkBlobCount checks the number of blobs rehydrated and the current state of the
 // empty counter. If zero blobs were rehydrated increment the counter.
-// If there were blobs rehydrated reset the counter as we want to count number of zeros in a row.
+// If there were blobs rehydrated reset the counter as we want to track consecutive zero sized polls.
 func checkBlobCount(numBlobsRehydrated, emptyBlobsCounter int) int {
 	switch {
 	case emptyBlobsCounter == emptyPollLimit: // If we are at the limit return the limit
