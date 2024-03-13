@@ -180,7 +180,98 @@ func validateOTLPGenerator(cfg *GeneratorConfig) error {
 	return nil
 }
 
-func validateHostMetricsGeneratorConfig(_ *GeneratorConfig) error {
+func validateHostMetricsGeneratorConfig(g *GeneratorConfig) error {
+	err := pcommon.NewMap().FromRaw(g.Attributes)
+	if err != nil {
+		return fmt.Errorf("error in attributes config: %s", err)
+	}
+
+	err = pcommon.NewMap().FromRaw(g.ResourceAttributes)
+	if err != nil {
+		return fmt.Errorf("error in resource_attributes config: %s", err)
+	}
+
+	// validate individual metrics
+	metrics, ok := g.AdditionalConfig["metrics"]
+	if !ok {
+		return errors.New("metrics must be set")
+	}
+	// check that the metricsArray is a valid array of maps[string]any
+	// Because of the way the config is unmarshaled, we have to use the `[]any` type
+	// and then cast to the correct type
+	metricsArray, ok := metrics.([]any)
+	if !ok {
+		return errors.New("metrics must be an array of maps")
+	}
+	for _, m := range metricsArray {
+		metric, ok := m.(map[string]any)
+		if !ok {
+			return errors.New("each metric must be a map")
+		}
+		// check that the metric has a name
+		name, ok := metric["name"]
+		if !ok {
+			return errors.New("each metric must have a name")
+		}
+		// check that the metric has a type
+		metricType, ok := metric["type"]
+		if !ok {
+			return fmt.Errorf("metric %s missing type", name)
+		}
+		// check that the metric type is valid
+		metricTypeStr, ok := metricType.(string)
+		if !ok {
+			return fmt.Errorf("metric %s has invalid metric type: %v", name, metricType)
+		}
+		switch metricTypeStr {
+		case "Gauge", "Sum":
+		default:
+			return fmt.Errorf("metric %s has invalid metric type: %s", name, metricTypeStr)
+		}
+		// check that the metric has a value_min
+		valMin, ok := metric["value_min"]
+		if !ok {
+			return fmt.Errorf("metric %s missing value_min", name)
+		}
+		// check that the value_min is a valid int
+		if _, ok = valMin.(int); !ok {
+			return fmt.Errorf("metric %s has invalid value_min: %v", name, valMin)
+		}
+		// check that the metric has a value_max
+		valMax, ok := metric["value_max"]
+		if !ok {
+			return fmt.Errorf("metric %s missing value_max", name)
+		}
+		// check that the value_max is a valid int
+		if _, ok = valMax.(int); !ok {
+			return fmt.Errorf("metric %s has invalid value_max: %v", name, valMax)
+		}
+		// check that the metric has a unit
+		unit, ok := metric["unit"]
+		if !ok {
+			return fmt.Errorf("metric %s missing unit", name)
+		}
+		// check that the unit is a valid string
+		unitStr, ok := unit.(string)
+		if !ok {
+			return fmt.Errorf("metric %s has invalid unit: %v", name, unit)
+		}
+		switch unitStr {
+		case "By", "by", "1", "s", "{thread}", "{errors}", "{packets}", "{entries}", "{connections}", "{faults}", "{operations}", "{processes}":
+		default:
+			return fmt.Errorf("metric %s has invalid unit: %s", name, unitStr)
+		}
+
+		// attributes are optional
+		if attr, ok := metric["attributes"]; ok {
+			attributes := attr.(map[string]any)
+			err = pcommon.NewMap().FromRaw(attributes)
+			if err != nil {
+				return fmt.Errorf("error in attributes config for metric %s: %w", name, err)
+			}
+		}
+	}
+
 	return nil
 }
 
