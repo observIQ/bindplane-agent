@@ -73,6 +73,9 @@ start() {
   # shellcheck disable=SC3037
   echo -n "Starting $0: "
 
+  # truncate the pid file, just in case
+  : > $PIDFILE
+
   # RHEL
   if [ "$STATUS" ]; then
     umask 077
@@ -104,7 +107,7 @@ stop() {
   echo -n "Shutting down $0: "
   # RHEL
   if [ "$STATUS" ]; then
-      killproc -p "$PIDFILE" "$PROGRAM"
+      killproc -t30 -p "$PIDFILE" "$BINARY"
       RETVAL=$?
       echo
       [ "$RETVAL" -eq 0 ] && rm -f "$LOCKFILE"
@@ -113,7 +116,7 @@ stop() {
   elif [ "$RCSTATUS" ]; then
       ## Stop daemon with killproc(8) and if this fails
       ## set echo the echo return value.
-      killproc -p "$PIDFILE" -TERM "$BINARY"
+      killproc -t30 -p "$PIDFILE" "$BINARY"
 
       # Remember status and be verbose
       rc_status -v
