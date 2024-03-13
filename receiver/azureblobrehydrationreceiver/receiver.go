@@ -201,7 +201,7 @@ func (r *rehydrationReceiver) scrape() {
 			// Polling for blobs has egress charges so we want to stop polling
 			// after we stop finding blobs.
 			if emptyBlobCounter == emptyPollLimit {
-				continue
+				return
 			}
 
 			numBlobsRehydrated := r.rehydrateBlobs(checkpoint, marker)
@@ -438,7 +438,7 @@ func checkBlobCount(numBlobsRehydrated, emptyBlobsCounter int) int {
 	switch {
 	case emptyBlobsCounter == emptyPollLimit: // If we are at the limit return the limit
 		return emptyPollLimit
-	case numBlobsRehydrated == 0: // If we no blobs rehydrated increment by one
+	case numBlobsRehydrated == 0: // If no blobs were rehydrated then increment the empty blobs counter
 		return emptyBlobsCounter + 1
 	default: // Default case is numBlobsRehydrated > 0 so reset emptyBlobsCounter to 0
 		return 0
