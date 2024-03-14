@@ -74,7 +74,7 @@ start() {
   echo -n "Starting $0: "
 
   # truncate the pid file, just in case
-  : > $PIDFILE
+  : > "$PIDFILE"
 
   # RHEL
   if [ "$STATUS" ]; then
