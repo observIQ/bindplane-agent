@@ -48,7 +48,11 @@ func newHostMetricsGenerator(cfg GeneratorConfig, logger *zap.Logger) metricGene
 	// Load up Resources attributes
 
 	newResource := g.metrics.ResourceMetrics().AppendEmpty()
-	newResource.Resource().Attributes().FromRaw(cfg.ResourceAttributes)
+	err := newResource.Resource().Attributes().FromRaw(cfg.ResourceAttributes)
+	if err != nil {
+		// should be caught in validation
+		logger.Error("Error setting resource attributes in host_metrics", zap.Error(err))
+	}
 
 	metrics := cfg.AdditionalConfig["metrics"].([]any)
 	newScope := newResource.ScopeMetrics().AppendEmpty()
@@ -78,7 +82,12 @@ func newHostMetricsGenerator(cfg GeneratorConfig, logger *zap.Logger) metricGene
 			dp := newMetric.Gauge().DataPoints().AppendEmpty()
 			dp.SetTimestamp(pcommon.NewTimestampFromTime(getCurrentTime()))
 			dp.SetStartTimestamp(pcommon.NewTimestampFromTime(getCurrentTime()))
-			dp.Attributes().FromRaw(attributes)
+
+			err = dp.Attributes().FromRaw(attributes)
+			if err != nil {
+				// should be caught in validation
+				logger.Error("Error setting attributes in host_metrics", zap.String("name", name), zap.Error(err))
+			}
 
 			// All the host metric Gauges are float64
 			g.dataPointUpdaters = append(g.dataPointUpdaters, func() { dp.SetDoubleValue(getRandomFloat64(valueMin, valueMax)) })
@@ -87,7 +96,11 @@ func newHostMetricsGenerator(cfg GeneratorConfig, logger *zap.Logger) metricGene
 			dp := newMetric.Sum().DataPoints().AppendEmpty()
 			dp.SetTimestamp(pcommon.NewTimestampFromTime(getCurrentTime()))
 			dp.SetStartTimestamp(pcommon.NewTimestampFromTime(getCurrentTime()))
-			dp.Attributes().FromRaw(attributes)
+			err = dp.Attributes().FromRaw(attributes)
+			if err != nil {
+				// should be caught in validation
+				logger.Error("Error setting attributes in host_metrics", zap.String("name", name), zap.Error(err))
+			}
 			switch unit {
 			case "s":
 				g.dataPointUpdaters = append(g.dataPointUpdaters, func() { dp.SetDoubleValue(float64(math.Trunc(getRandomFloat64(valueMin, valueMax)*100)) / 100) })
@@ -104,6 +117,7 @@ func newHostMetricsGenerator(cfg GeneratorConfig, logger *zap.Logger) metricGene
 
 // this is a variable so that it can be overridden in tests
 var getRandomFloat64 = func(value_min, value_max int) float64 {
+	// #nosec G404 - we don't need a cryptographically strong random number generator here
 	return rand.Float64()*(float64(value_max)-float64(value_min)) + float64(value_min)
 }
 
