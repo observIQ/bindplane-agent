@@ -16,7 +16,6 @@
 package path
 
 import (
-	"os/exec"
 	"path/filepath"
 )
 
@@ -64,37 +63,4 @@ func LatestJMXJarFile(latestDir string) string {
 // SpecialJMXJarFile returns the full path to the JMX Jar on linux and darwin installs
 func SpecialJMXJarFile(installDir string) string {
 	return filepath.Join(SpecialJarDir(installDir), "opentelemetry-java-contrib-jmx-metrics.jar")
-}
-
-// LinuxServiceCmdName returns the filename of the service command available
-// on this Linux OS. Will be one of systemctl and service
-func LinuxServiceCmdName() string {
-	var path string
-	var err error
-	path, err = exec.LookPath("systemctl")
-	if err != nil {
-		path, err = exec.LookPath("service")
-	}
-	if err != nil {
-		// Defaulting to systemctl in the most common path
-		// This replicates prior behavior where
-		path = "/usr/bin/systemctl"
-	}
-	_, filename := filepath.Split(path)
-	return filename
-}
-
-// LinuxServiceFilePath returns the full path to the service file
-func LinuxServiceFilePath() string {
-	var path string
-	var err error
-	path, err = exec.LookPath("/usr/lib/systemd/system/observiq-otel-collector.service")
-	if err != nil {
-		path, err = exec.LookPath("/etc/init.d/observiq-otel-collector")
-	}
-	if err != nil {
-		// Defaulting to systemctl in the most common path
-		path = "/usr/lib/systemd/system/observiq-otel-collector.service"
-	}
-	return path
 }
