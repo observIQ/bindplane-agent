@@ -80,7 +80,7 @@ func NewService(logger *zap.Logger, installDir string, opts ...Option) Service {
 
 type linuxService interface {
 	Service
-	setNewSvcFile(string) error
+	setNewSvcFile(string)
 }
 
 type linuxSystemdService struct {
@@ -199,10 +199,8 @@ func (l linuxSystemdService) Backup() error {
 	return nil
 }
 
-func (l *linuxSystemdService) setNewSvcFile(newFilePath string) error {
+func (l *linuxSystemdService) setNewSvcFile(newFilePath string) {
 	l.newServiceFilePath = newFilePath
-
-	return nil
 }
 
 type linuxSysVService struct {
@@ -305,8 +303,6 @@ func (l linuxSysVService) Backup() error {
 	return nil
 }
 
-func (l *linuxSysVService) setNewSvcFile(newFilePath string) error {
+func (l *linuxSysVService) setNewSvcFile(newFilePath string) {
 	l.newServiceFilePath = newFilePath
-
-	return nil
 }
