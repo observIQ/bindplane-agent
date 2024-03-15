@@ -73,15 +73,14 @@ start() {
   # shellcheck disable=SC3037
   echo -n "Starting $0: "
 
-  # truncate the pid file, just in case
-  : > "$PIDFILE"
-
   # RHEL
   if [ "$STATUS" ]; then
     umask 077
 
     daemon --pidfile="$PIDFILE" "$START_CMD"
     RETVAL=$?
+    # truncate the pid file, just in case
+    : > "$PIDFILE"
     # shellcheck disable=SC2005
     echo "$(pidof "$BINARY")" > "$PIDFILE"
     [ "$RETVAL" -eq 0 ] && touch "$LOCKFILE"
@@ -97,6 +96,8 @@ start() {
     # Remember status and be verbose
     rc_status -v
 
+    # truncate the pid file, just in case
+    : > "$PIDFILE"
     # shellcheck disable=SC2005
     echo "$(pidof "$BINARY")" > "$PIDFILE"
   fi
