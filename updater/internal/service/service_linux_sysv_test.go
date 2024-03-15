@@ -13,7 +13,7 @@
 // limitations under the License.
 
 // an elevated user is needed to run the service tests
-//go:build linux && integration
+//go:build linux && integration_sysv
 
 package service
 
