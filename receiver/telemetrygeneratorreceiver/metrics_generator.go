@@ -18,6 +18,7 @@ import (
 	"math"
 	"math/rand"
 
+	"github.com/mitchellh/mapstructure"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/plog"
 	"go.opentelemetry.io/collector/pdata/pmetric"
@@ -25,13 +26,24 @@ import (
 	"go.uber.org/zap"
 )
 
-// hostMetricsGenerator is a generator for host metrics. It generates a sampling of host metrics
-// emulating the Host Metrics receiver: github.com/open-telemetry/opentelemetry-collector-contrib/receiver/hostmetricsreceiver
+// metricsGenerator is a generator for metrics. It generates a sampling of metrics
+// based on the configuration provided, adjusting the values & times of the metrics
+// with each generation.
 type metricsGenerator struct {
 	otlpGenerator
 	// dataPointUpdaters is a list of functions that update the data points with new values
 	// for each batch of metrics that are generated
 	dataPointUpdaters []func()
+}
+
+// metric is a convenience struct for unmarshalling the metrics config
+type metric struct {
+	Name       string         `mapstructure:"name"`
+	Type       string         `mapstructure:"type"`
+	ValueMin   int64          `mapstructure:"value_min"`
+	ValueMax   int64          `mapstructure:"value_max"`
+	Unit       string         `mapstructure:"unit"`
+	Attributes map[string]any `mapstructure:"attributes"`
 }
 
 func newMetricsGenerator(cfg GeneratorConfig, logger *zap.Logger) metricGenerator {
@@ -45,67 +57,73 @@ func newMetricsGenerator(cfg GeneratorConfig, logger *zap.Logger) metricGenerato
 			traces:  ptrace.NewTraces(),
 		},
 	}
-	// Load up Resources attributes
 
 	newResource := g.metrics.ResourceMetrics().AppendEmpty()
-	err := newResource.Resource().Attributes().FromRaw(cfg.ResourceAttributes)
+
+	// Load up Resources attributes
+	resourceMap := pcommon.NewMap()
+	err := resourceMap.FromRaw(cfg.ResourceAttributes)
 	if err != nil {
 		// should be caught in validation
 		logger.Error("Error setting resource attributes in host_metrics", zap.Error(err))
+	} else {
+		resourceMap.CopyTo(newResource.Resource().Attributes())
 	}
 
 	metrics := cfg.AdditionalConfig["metrics"].([]any)
 	newScope := newResource.ScopeMetrics().AppendEmpty()
+
 	for _, m := range metrics {
-		metric := m.(map[string]any)
-		var attributes map[string]any
-		// attributes are optional
-		if attr, ok := metric["attributes"]; ok {
-			attributes = attr.(map[string]any)
+		var metric metric
+		err := mapstructure.Decode(m, &metric)
+		if err != nil {
+			// this should be caught in validation
+			logger.Error("Error decoding metric", zap.Error(err))
+			continue
 		}
 
-		metricType := metric["type"].(string)
-
-		name := metric["name"].(string)
-		valueMin := metric["value_min"].(int)
-		valueMax := metric["value_max"].(int)
-		unit := metric["unit"].(string)
-
 		newMetric := newScope.Metrics().AppendEmpty()
-		newMetric.SetUnit(unit)
-		newMetric.SetName(name)
+
+		newMetric.SetUnit(metric.Unit)
+		newMetric.SetName(metric.Name)
 
 		// all the host metrics are either sums or gauges
-		switch metricType {
+		switch metric.Type {
 		case "Gauge":
 			newMetric.SetEmptyGauge()
 			dp := newMetric.Gauge().DataPoints().AppendEmpty()
+
 			dp.SetTimestamp(pcommon.NewTimestampFromTime(getCurrentTime()))
 			dp.SetStartTimestamp(pcommon.NewTimestampFromTime(getCurrentTime()))
 
-			err = dp.Attributes().FromRaw(attributes)
+			err = dp.Attributes().FromRaw(metric.Attributes)
 			if err != nil {
 				// should be caught in validation
-				logger.Error("Error setting attributes in host_metrics", zap.String("name", name), zap.Error(err))
+				logger.Error("Error setting attributes in host_metrics", zap.String("name", metric.Name), zap.Error(err))
 			}
 
 			// All the host metric Gauges are float64
-			g.dataPointUpdaters = append(g.dataPointUpdaters, func() { dp.SetDoubleValue(getRandomFloat64(valueMin, valueMax)) })
+			g.dataPointUpdaters = append(g.dataPointUpdaters, func() { dp.SetDoubleValue(getRandomFloat64(metric.ValueMin, metric.ValueMax)) })
 		case "Sum":
 			newMetric.SetEmptySum()
 			dp := newMetric.Sum().DataPoints().AppendEmpty()
+
 			dp.SetTimestamp(pcommon.NewTimestampFromTime(getCurrentTime()))
 			dp.SetStartTimestamp(pcommon.NewTimestampFromTime(getCurrentTime()))
-			err = dp.Attributes().FromRaw(attributes)
+
+			err = dp.Attributes().FromRaw(metric.Attributes)
 			if err != nil {
 				// should be caught in validation
-				logger.Error("Error setting attributes in host_metrics", zap.String("name", name), zap.Error(err))
+				logger.Error("Error setting attributes in host_metrics", zap.String("name", metric.Name), zap.Error(err))
 			}
-			switch unit {
+
+			switch metric.Unit {
 			case "s":
-				g.dataPointUpdaters = append(g.dataPointUpdaters, func() { dp.SetDoubleValue(float64(math.Trunc(getRandomFloat64(valueMin, valueMax)*100)) / 100) })
+				g.dataPointUpdaters = append(g.dataPointUpdaters, func() {
+					dp.SetDoubleValue(float64(math.Trunc(getRandomFloat64(metric.ValueMin, metric.ValueMax)*100)) / 100)
+				})
 			default:
-				g.dataPointUpdaters = append(g.dataPointUpdaters, func() { dp.SetIntValue(int64(getRandomFloat64(valueMin, valueMax))) })
+				g.dataPointUpdaters = append(g.dataPointUpdaters, func() { dp.SetIntValue(int64(getRandomFloat64(metric.ValueMin, metric.ValueMax))) })
 			}
 		}
 	}
@@ -116,7 +134,7 @@ func newMetricsGenerator(cfg GeneratorConfig, logger *zap.Logger) metricGenerato
 }
 
 // this is a variable so that it can be overridden in tests
-var getRandomFloat64 = func(value_min, value_max int) float64 {
+var getRandomFloat64 = func(value_min, value_max int64) float64 {
 	// #nosec G404 - we don't need a cryptographically strong random number generator here
 	return rand.Float64()*(float64(value_max)-float64(value_min)) + float64(value_min)
 }

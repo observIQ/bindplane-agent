@@ -15,13 +15,10 @@
 package telemetrygeneratorreceiver
 
 import (
-	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 )
-
-var expectedHostMetricsDir = filepath.Join("testdata", "expected_metrics")
 
 func TestHostMetricsDefaultConfig(t *testing.T) {
 
@@ -36,8 +33,11 @@ func TestHostMetricsDefaultConfig(t *testing.T) {
 			"host.name": "2ed77de7e4c1",
 			"os.type":   "linux",
 		},
-		AdditionalConfig: defaultConfig.AdditionalConfig,
 	}
-	err := cfg.Validate()
+
+	cfg, err := fillHostMetricsConfig(cfg)
+	require.NoError(t, err)
+
+	err = cfg.Validate()
 	require.NoError(t, err)
 }

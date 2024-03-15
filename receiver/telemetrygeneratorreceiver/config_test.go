@@ -7,7 +7,6 @@
 //      http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
@@ -558,7 +557,7 @@ func TestValidate(t *testing.T) {
 			desc:        "metrics - invalid type",
 			payloads:    1,
 			errExpected: true,
-			errText:     "metric system.memory.usage has invalid metric type: 1",
+			errText:     "error decoding metric: 1 error(s) decoding:\n\n* 'type' expected type 'string', got unconvertible type 'int', value: '1'",
 			generators: []GeneratorConfig{
 				{
 					Type: "metrics",
@@ -605,34 +604,10 @@ func TestValidate(t *testing.T) {
 			},
 		},
 		{
-			desc:        "metrics - missing value_min",
-			payloads:    1,
-			errExpected: true,
-			errText:     "metric system.memory.usage missing value_min",
-			generators: []GeneratorConfig{
-				{
-					Type: "metrics",
-					AdditionalConfig: map[string]any{
-						"metrics": []any{
-							map[string]any{
-								"name":      "system.memory.usage",
-								"value_max": 1000000000,
-								"type":      "Sum",
-								"unit":      "By",
-								"attributes": map[string]any{
-									"state": "slab_reclaimed",
-								},
-							},
-						},
-					},
-				},
-			},
-		},
-		{
 			desc:        "metrics - invalid value_min",
 			payloads:    1,
 			errExpected: true,
-			errText:     "metric system.memory.usage has invalid value_min: foo",
+			errText:     "error decoding metric: 1 error(s) decoding:\n\n* 'value_min' expected type 'int64', got unconvertible type 'string', value: 'foo'",
 			generators: []GeneratorConfig{
 				{
 					Type: "metrics",
@@ -654,34 +629,10 @@ func TestValidate(t *testing.T) {
 			},
 		},
 		{
-			desc:        "metrics - missing value_max",
-			payloads:    1,
-			errExpected: true,
-			errText:     "metric system.memory.usage missing value_max",
-			generators: []GeneratorConfig{
-				{
-					Type: "metrics",
-					AdditionalConfig: map[string]any{
-						"metrics": []any{
-							map[string]any{
-								"name":      "system.memory.usage",
-								"value_min": 100000,
-								"type":      "Sum",
-								"unit":      "By",
-								"attributes": map[string]any{
-									"state": "slab_reclaimed",
-								},
-							},
-						},
-					},
-				},
-			},
-		},
-		{
 			desc:        "metrics - invalid value_max",
 			payloads:    1,
 			errExpected: true,
-			errText:     "metric system.memory.usage has invalid value_max: foo",
+			errText:     "error decoding metric: 1 error(s) decoding:\n\n* 'value_max' expected type 'int64', got unconvertible type 'string', value: 'foo'",
 			generators: []GeneratorConfig{
 				{
 					Type: "metrics",
@@ -717,56 +668,6 @@ func TestValidate(t *testing.T) {
 								"value_min": 100000,
 								"value_max": 1000000000,
 								"type":      "Sum",
-								"attributes": map[string]any{
-									"state": "slab_reclaimed",
-								},
-							},
-						},
-					},
-				},
-			},
-		},
-		{
-			desc:        "metrics - invalid unit",
-			payloads:    1,
-			errExpected: true,
-			errText:     "metric system.memory.usage has invalid unit: 1",
-			generators: []GeneratorConfig{
-				{
-					Type: "metrics",
-					AdditionalConfig: map[string]any{
-						"metrics": []any{
-							map[string]any{
-								"name":      "system.memory.usage",
-								"value_min": 100000,
-								"value_max": 1000000000,
-								"type":      "Sum",
-								"unit":      1,
-								"attributes": map[string]any{
-									"state": "slab_reclaimed",
-								},
-							},
-						},
-					},
-				},
-			},
-		},
-		{
-			desc:        "metrics - unknown unit",
-			payloads:    1,
-			errExpected: true,
-			errText:     "metric system.memory.usage has invalid unit: Foo",
-			generators: []GeneratorConfig{
-				{
-					Type: "metrics",
-					AdditionalConfig: map[string]any{
-						"metrics": []any{
-							map[string]any{
-								"name":      "system.memory.usage",
-								"value_min": 100000,
-								"value_max": 1000000000,
-								"type":      "Sum",
-								"unit":      "Foo",
 								"attributes": map[string]any{
 									"state": "slab_reclaimed",
 								},

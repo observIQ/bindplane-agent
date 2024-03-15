@@ -38,7 +38,7 @@ func TestMetricsGenerator(t *testing.T) {
 			name: "default",
 			cfg: GeneratorConfig{
 
-				Type: "host_metrics",
+				Type: "metrics",
 				ResourceAttributes: map[string]any{
 					"host.name": "2ed77de7e4c1",
 					"os.type":   "linux",
@@ -81,12 +81,12 @@ func TestMetricsGenerator(t *testing.T) {
 					},
 				},
 			},
-			expectedFile: filepath.Join(expectedHostMetricsDir, "metrics.yaml"),
+			expectedFile: filepath.Join(expectedMetricsDir, "metrics.yaml"),
 		},
 	}
 
 	for _, tc := range test {
-		getRandomFloat64 = func(_, _ int) float64 {
+		getRandomFloat64 = func(_, _ int64) float64 {
 			return 0
 		}
 		getCurrentTime = func() time.Time {
