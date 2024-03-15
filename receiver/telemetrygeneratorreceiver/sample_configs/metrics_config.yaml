@@ -1,7 +1,7 @@
 telemetrygeneratorreceiver:
     payloads_per_second: 1
     generators:
-        - type: host_metrics
+        - type: metrics
           resource_attributes:
             host.name: 2ed77de7e4c1
             os.type: linux          

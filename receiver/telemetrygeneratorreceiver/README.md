@@ -18,7 +18,7 @@ This receiver is used to generate synthetic telemetry for testing and configurat
 ### Common Generator Configuration
 | Field                | Type      | Default          | Required | Description  |
 |----------------------|-----------|------------------|----------|--------------|
-| type                 |  string   |                  | `true`   | The type of generator to use. Currently `logs`, `otlp`, and `host_metrics` are supported.  |
+| type                 |  string   |                  | `true`   | The type of generator to use. Currently `logs`, `otlp`, `metrics`, and `host_metrics` are supported.  |
 | resource_attributes  |  map      |                  | `false`  | A map of resource attributes to be included in the generated telemetry. Values can be `any`.   |
 | attributes           |  map      |                  | `false`  | A map of attributes to be included in the generated telemetry. Values can be `any`.  |
 | additional_config    |  map      |                  | `false`  | A map of additional configuration options to be included in the generated telemetry. Values can be `any`.|
@@ -78,16 +78,16 @@ telemetrygeneratorreceiver:
 			otlp_json:      `{"resourceMetrics":[{"resource":{},"scopeMetrics":[{"scope":{},"metrics":[{"exponentialHistogram":{"dataPoints":[{"attributes":[{"key":"prod-machine","value":{"stringValue":"prod-1"}}],"count":"4","positive":{},"negative":{},"min":0,"max":100}]}}]}]}]}`,
 ```
 
-### Host Metrics Generator
+### Metrics Generator
 
-The host metrics generator creates synthetic host metrics. The generator can be configured to create metrics with arbitrary names, values, and attributes. The generator can be configured to create metrics with a random value between a minimum and maximum value, or a constant value by setting `value_max = value_min`. For `Sum` metrics with unit `s` and `Gauge` metrics, the generator will create a random `float` value. For all other `Sum` metrics, the generator will create a random `int` value.
+The metrics generator creates synthetic metrics. The generator can be configured to create metrics with arbitrary names, values, and attributes. The generator can be configured to create metrics with a random value between a minimum and maximum value, or a constant value by setting `value_max = value_min`. For `Sum` metrics with unit `s` and `Gauge` metrics, the generator will create a random `float` value. For all other `Sum` metrics, the generator will create a random `int` value.
 
 #### additional_config:
 
 | Field                | Type      | Default          | Required | Description  |
 |----------------------|-----------|------------------|----------|--------------|
 | telemetry_type       |  string   |                  | `true`   | The type of telemetry to replay: `logs`, `metrics`, or `traces`.  |
-| metrics           |  array   |                  | `true`  | A list of host metrics to generate|
+| metrics           |  array   |                  | `true`  | A list of metrics to generate|
 
 #### metrics:
 
@@ -106,7 +106,7 @@ The host metrics generator creates synthetic host metrics. The generator can be 
 telemetrygeneratorreceiver:
     payloads_per_second: 1
     generators:
-        - type: host_metrics
+        - type: metrics
           resource_attributes:
             host.name: 2ed77de7e4c1
             os.type: linux          
@@ -139,3 +139,19 @@ telemetrygeneratorreceiver:
                   state: reserved
                   type: ext4                    
 ```
+
+
+### Host Metrics Generator
+
+The host metrics generator creates synthetic host metrics, from a list of pre-defined metrics. The metrics resource attributes can be set in the `resource_attributes` section of the generator configuration.
+
+#### Example Configuration
+```yaml
+telemetrygeneratorreceiver:
+    payloads_per_second: 1
+    generators:
+        - type: host_metrics
+          resource_attributes:
+            host.name: 2ed77de7e4c1
+            os.type: linux   
+```       

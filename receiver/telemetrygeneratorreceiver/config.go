@@ -69,6 +69,8 @@ func (g *GeneratorConfig) Validate() error {
 	switch g.Type {
 	case generatorTypeLogs:
 		return validateLogGeneratorConfig(g)
+	case generatorTypeMetrics:
+		return validateMetricsGeneratorConfig(g)
 	case generatorTypeHostMetrics:
 		return validateHostMetricsGeneratorConfig(g)
 	case generatorTypeWindowsEvents:
@@ -180,7 +182,7 @@ func validateOTLPGenerator(cfg *GeneratorConfig) error {
 	return nil
 }
 
-func validateHostMetricsGeneratorConfig(g *GeneratorConfig) error {
+func validateMetricsGeneratorConfig(g *GeneratorConfig) error {
 	err := pcommon.NewMap().FromRaw(g.Attributes)
 	if err != nil {
 		return fmt.Errorf("error in attributes config: %s", err)
@@ -272,6 +274,14 @@ func validateHostMetricsGeneratorConfig(g *GeneratorConfig) error {
 		}
 	}
 
+	return nil
+}
+
+func validateHostMetricsGeneratorConfig(g *GeneratorConfig) error {
+	err := pcommon.NewMap().FromRaw(g.ResourceAttributes)
+	if err != nil {
+		return fmt.Errorf("error in resource_attributes config: %s", err)
+	}
 	return nil
 }
 

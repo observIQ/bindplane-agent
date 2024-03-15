@@ -395,12 +395,12 @@ func TestValidate(t *testing.T) {
 			},
 		},
 		{
-			desc:        "host metrics - valid config",
+			desc:        "metrics - valid config",
 			payloads:    1,
 			errExpected: false,
 			generators: []GeneratorConfig{
 				{
-					Type: "host_metrics",
+					Type: "metrics",
 					AdditionalConfig: map[string]any{
 						"metrics": []any{
 							map[string]any{
@@ -429,13 +429,13 @@ func TestValidate(t *testing.T) {
 			},
 		},
 		{
-			desc:        "host metrics - invalid attributes",
+			desc:        "metrics - invalid attributes",
 			payloads:    1,
 			errExpected: true,
 			errText:     "error in attributes config: <Invalid value type struct {}>",
 			generators: []GeneratorConfig{
 				{
-					Type: "host_metrics",
+					Type: "metrics",
 					Attributes: map[string]any{
 						"attr_key1": struct{}{},
 					},
@@ -443,13 +443,13 @@ func TestValidate(t *testing.T) {
 			},
 		},
 		{
-			desc:        "host metrics - invalid resource attributes",
+			desc:        "metrics - invalid resource attributes",
 			payloads:    1,
 			errExpected: true,
 			errText:     "error in resource_attributes config: <Invalid value type struct {}>",
 			generators: []GeneratorConfig{
 				{
-					Type: "host_metrics",
+					Type: "metrics",
 					ResourceAttributes: map[string]any{
 						"attr_key1": struct{}{},
 					},
@@ -457,24 +457,24 @@ func TestValidate(t *testing.T) {
 			},
 		},
 		{
-			desc:        "host metrics - no metrics",
+			desc:        "metrics - no metrics",
 			payloads:    1,
 			errExpected: true,
 			errText:     "metrics must be set",
 			generators: []GeneratorConfig{
 				{
-					Type: "host_metrics",
+					Type: "metrics",
 				},
 			},
 		},
 		{
-			desc:        "host metrics - metrics not array",
+			desc:        "metrics - metrics not array",
 			payloads:    1,
 			errExpected: true,
 			errText:     "metrics must be an array of maps",
 			generators: []GeneratorConfig{
 				{
-					Type: "host_metrics",
+					Type: "metrics",
 					AdditionalConfig: map[string]any{
 						"metrics": map[string]any{
 							"name":      "system.memory.usage",
@@ -491,13 +491,13 @@ func TestValidate(t *testing.T) {
 			},
 		},
 		{
-			desc:        "host metrics - metric not map",
+			desc:        "metrics - metric not map",
 			payloads:    1,
 			errExpected: true,
 			errText:     "each metric must be a map",
 			generators: []GeneratorConfig{
 				{
-					Type: "host_metrics",
+					Type: "metrics",
 					AdditionalConfig: map[string]any{
 						"metrics": []any{
 							1,
@@ -507,13 +507,13 @@ func TestValidate(t *testing.T) {
 			},
 		},
 		{
-			desc:        "host metrics - missing name",
+			desc:        "metrics - missing name",
 			payloads:    1,
 			errExpected: true,
 			errText:     "each metric must have a name",
 			generators: []GeneratorConfig{
 				{
-					Type: "host_metrics",
+					Type: "metrics",
 					AdditionalConfig: map[string]any{
 						"metrics": []any{
 							map[string]any{
@@ -531,13 +531,13 @@ func TestValidate(t *testing.T) {
 			},
 		},
 		{
-			desc:        "host metrics - missing type",
+			desc:        "metrics - missing type",
 			payloads:    1,
 			errExpected: true,
 			errText:     "metric system.memory.usage missing type",
 			generators: []GeneratorConfig{
 				{
-					Type: "host_metrics",
+					Type: "metrics",
 					AdditionalConfig: map[string]any{
 						"metrics": []any{
 							map[string]any{
@@ -555,13 +555,13 @@ func TestValidate(t *testing.T) {
 			},
 		},
 		{
-			desc:        "host metrics - invalid type",
+			desc:        "metrics - invalid type",
 			payloads:    1,
 			errExpected: true,
 			errText:     "metric system.memory.usage has invalid metric type: 1",
 			generators: []GeneratorConfig{
 				{
-					Type: "host_metrics",
+					Type: "metrics",
 					AdditionalConfig: map[string]any{
 						"metrics": []any{
 							map[string]any{
@@ -580,13 +580,13 @@ func TestValidate(t *testing.T) {
 			},
 		},
 		{
-			desc:        "host metrics - unknown type",
+			desc:        "metrics - unknown type",
 			payloads:    1,
 			errExpected: true,
 			errText:     "metric system.memory.usage has invalid metric type: Foo",
 			generators: []GeneratorConfig{
 				{
-					Type: "host_metrics",
+					Type: "metrics",
 					AdditionalConfig: map[string]any{
 						"metrics": []any{
 							map[string]any{
@@ -605,13 +605,13 @@ func TestValidate(t *testing.T) {
 			},
 		},
 		{
-			desc:        "host metrics - missing value_min",
+			desc:        "metrics - missing value_min",
 			payloads:    1,
 			errExpected: true,
 			errText:     "metric system.memory.usage missing value_min",
 			generators: []GeneratorConfig{
 				{
-					Type: "host_metrics",
+					Type: "metrics",
 					AdditionalConfig: map[string]any{
 						"metrics": []any{
 							map[string]any{
@@ -629,13 +629,13 @@ func TestValidate(t *testing.T) {
 			},
 		},
 		{
-			desc:        "host metrics - invalid value_min",
+			desc:        "metrics - invalid value_min",
 			payloads:    1,
 			errExpected: true,
 			errText:     "metric system.memory.usage has invalid value_min: foo",
 			generators: []GeneratorConfig{
 				{
-					Type: "host_metrics",
+					Type: "metrics",
 					AdditionalConfig: map[string]any{
 						"metrics": []any{
 							map[string]any{
@@ -654,13 +654,13 @@ func TestValidate(t *testing.T) {
 			},
 		},
 		{
-			desc:        "host metrics - missing value_max",
+			desc:        "metrics - missing value_max",
 			payloads:    1,
 			errExpected: true,
 			errText:     "metric system.memory.usage missing value_max",
 			generators: []GeneratorConfig{
 				{
-					Type: "host_metrics",
+					Type: "metrics",
 					AdditionalConfig: map[string]any{
 						"metrics": []any{
 							map[string]any{
@@ -678,13 +678,13 @@ func TestValidate(t *testing.T) {
 			},
 		},
 		{
-			desc:        "host metrics - invalid value_max",
+			desc:        "metrics - invalid value_max",
 			payloads:    1,
 			errExpected: true,
 			errText:     "metric system.memory.usage has invalid value_max: foo",
 			generators: []GeneratorConfig{
 				{
-					Type: "host_metrics",
+					Type: "metrics",
 					AdditionalConfig: map[string]any{
 						"metrics": []any{
 							map[string]any{
@@ -703,13 +703,13 @@ func TestValidate(t *testing.T) {
 			},
 		},
 		{
-			desc:        "host metrics - missing unit",
+			desc:        "metrics - missing unit",
 			payloads:    1,
 			errExpected: true,
 			errText:     "metric system.memory.usage missing unit",
 			generators: []GeneratorConfig{
 				{
-					Type: "host_metrics",
+					Type: "metrics",
 					AdditionalConfig: map[string]any{
 						"metrics": []any{
 							map[string]any{
@@ -727,13 +727,13 @@ func TestValidate(t *testing.T) {
 			},
 		},
 		{
-			desc:        "host metrics - invalid unit",
+			desc:        "metrics - invalid unit",
 			payloads:    1,
 			errExpected: true,
 			errText:     "metric system.memory.usage has invalid unit: 1",
 			generators: []GeneratorConfig{
 				{
-					Type: "host_metrics",
+					Type: "metrics",
 					AdditionalConfig: map[string]any{
 						"metrics": []any{
 							map[string]any{
@@ -752,13 +752,13 @@ func TestValidate(t *testing.T) {
 			},
 		},
 		{
-			desc:        "host metrics - unknown unit",
+			desc:        "metrics - unknown unit",
 			payloads:    1,
 			errExpected: true,
 			errText:     "metric system.memory.usage has invalid unit: Foo",
 			generators: []GeneratorConfig{
 				{
-					Type: "host_metrics",
+					Type: "metrics",
 					AdditionalConfig: map[string]any{
 						"metrics": []any{
 							map[string]any{
@@ -777,13 +777,13 @@ func TestValidate(t *testing.T) {
 			},
 		},
 		{
-			desc:        "host metrics - invalid attributes",
+			desc:        "metrics - invalid attributes",
 			payloads:    1,
 			errExpected: true,
 			errText:     "error in attributes config for metric system.memory.usage: <Invalid value type struct {}>",
 			generators: []GeneratorConfig{
 				{
-					Type: "host_metrics",
+					Type: "metrics",
 					AdditionalConfig: map[string]any{
 						"metrics": []any{
 							map[string]any{
@@ -797,6 +797,34 @@ func TestValidate(t *testing.T) {
 								},
 							},
 						},
+					},
+				},
+			},
+		},
+		{
+			desc:        "host metrics - invalid attributes",
+			payloads:    1,
+			errExpected: true,
+			errText:     "error in resource_attributes config: <Invalid value type struct {}>",
+			generators: []GeneratorConfig{
+				{
+					Type: "host_metrics",
+					ResourceAttributes: map[string]any{
+						"state": struct{}{},
+					},
+				},
+			},
+		},
+		{
+			desc:        "host metrics - valid config",
+			payloads:    1,
+			errExpected: false,
+			generators: []GeneratorConfig{
+				{
+					Type: "host_metrics",
+					ResourceAttributes: map[string]any{
+						"host.name": "2ed77de7e4c1",
+						"os.type":   "linux",
 					},
 				},
 			},
