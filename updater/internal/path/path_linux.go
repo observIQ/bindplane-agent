@@ -24,8 +24,10 @@ import (
 // LinuxInstallDir is the install directory of the collector on linux.
 const LinuxInstallDir = "/opt/observiq-otel-collector"
 
-// File paths for service depending on which type of service
+// SystemdFilePath is the path for systemd service
 const SystemdFilePath = "/usr/lib/systemd/system/observiq-otel-collector.service"
+
+// SysVFilePath is the path for sysv service
 const SysVFilePath = "/etc/init.d/observiq-otel-collector"
 
 // InstallDir returns the filepath to the install directory
@@ -56,7 +58,9 @@ func LinuxServiceCmdName() string {
 func LinuxServiceFilePath() string {
 	if LinuxServiceCmdName() == "systemctl" {
 		return SystemdFilePath
-	} else {
+	} else if LinuxServiceCmdName() == "systemctl" {
 		return SysVFilePath
 	}
+
+	return SystemdFilePath
 }
