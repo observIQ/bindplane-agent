@@ -44,30 +44,26 @@ func WithServiceFile(svcFilePath string) Option {
 // NewService returns an instance of the Service interface for managing the observiq-otel-collector service on the current OS.
 func NewService(logger *zap.Logger, installDir string, opts ...Option) Service {
 	// Get some information from the environment
-	serviceCmdName := path.LinuxServiceCmdName()
-	serviceFilePath := path.LinuxServiceFilePath()
-	_, svcFileName := filepath.Split(serviceFilePath)
+	_, svcFileName := filepath.Split(path.LinuxServiceFilePath())
 
 	var linuxSvc linuxService
 
 	// Base struct choice on
-	if serviceCmdName == "service" {
+	if path.LinuxServiceCmdName() == "systemctl" {
 		linuxSvc = &linuxSystemdService{
 			newServiceFilePath:       filepath.Join(path.ServiceFileDir(installDir), svcFileName),
 			serviceName:              svcFileName,
-			serviceCmdName:           serviceCmdName,
-			installedServiceFilePath: serviceFilePath,
+			installedServiceFilePath: path.SystemdFilePath,
 			installDir:               installDir,
-			logger:                   logger.Named("linux-service"),
+			logger:                   logger.Named("linux-systemd-service"),
 		}
 	} else {
 		linuxSvc = &linuxSysVService{
 			newServiceFilePath:       filepath.Join(path.ServiceFileDir(installDir), svcFileName),
 			serviceName:              svcFileName,
-			serviceCmdName:           serviceCmdName,
-			installedServiceFilePath: serviceFilePath,
+			installedServiceFilePath: path.SysVFilePath,
 			installDir:               installDir,
-			logger:                   logger.Named("linux-service"),
+			logger:                   logger.Named("linux-sysv-service"),
 		}
 	}
 
@@ -87,8 +83,7 @@ type linuxSystemdService struct {
 	// newServiceFilePath is the file path to the new unit file
 	newServiceFilePath string
 	// serviceName is the name of the service
-	serviceName    string
-	serviceCmdName string
+	serviceName string
 	// installedServiceFilePath is the file path to the installed unit file
 	installedServiceFilePath string
 	installDir               string
@@ -98,7 +93,7 @@ type linuxSystemdService struct {
 // Start the service
 func (l linuxSystemdService) Start() error {
 	//#nosec G204 -- serviceName is not determined by user input
-	cmd := exec.Command(l.serviceCmdName, "start", l.serviceName)
+	cmd := exec.Command("systemctl", "start", l.serviceName)
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("running systemctl failed: %w", err)
 	}
@@ -108,7 +103,7 @@ func (l linuxSystemdService) Start() error {
 // Stop the service
 func (l linuxSystemdService) Stop() error {
 	//#nosec G204 -- serviceName is not determined by user input
-	cmd := exec.Command(l.serviceCmdName, "stop", l.serviceName)
+	cmd := exec.Command("systemctl", "stop", l.serviceName)
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("running systemctl failed: %w", err)
 	}
@@ -144,13 +139,13 @@ func (l linuxSystemdService) install() error {
 	}
 
 	//#nosec G204 -- serviceName is not determined by user input
-	cmd := exec.Command(l.serviceCmdName, "daemon-reload")
+	cmd := exec.Command("systemctl", "daemon-reload")
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("reloading systemctl failed: %w", err)
 	}
 
 	//#nosec G204 -- serviceName is not determined by user input
-	cmd = exec.Command(l.serviceCmdName, "enable", l.serviceName)
+	cmd = exec.Command("systemctl", "enable", l.serviceName)
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("enabling unit file failed: %w", err)
 	}
@@ -161,7 +156,7 @@ func (l linuxSystemdService) install() error {
 // uninstalls the service
 func (l linuxSystemdService) uninstall() error {
 	//#nosec G204 -- serviceName is not determined by user input
-	cmd := exec.Command(l.serviceCmdName, "disable", l.serviceName)
+	cmd := exec.Command("systemctl", "disable", l.serviceName)
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("failed to disable unit: %w", err)
 	}
@@ -171,7 +166,7 @@ func (l linuxSystemdService) uninstall() error {
 	}
 
 	//#nosec G204 -- serviceName is not determined by user input
-	cmd = exec.Command(l.serviceCmdName, "daemon-reload")
+	cmd = exec.Command("systemctl", "daemon-reload")
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("reloading systemctl failed: %w", err)
 	}
@@ -207,8 +202,7 @@ type linuxSysVService struct {
 	// newServiceFilePath is the file path to the new unit file
 	newServiceFilePath string
 	// serviceName is the name of the service
-	serviceName    string
-	serviceCmdName string
+	serviceName string
 	// installedServiceFilePath is the file path to the installed unit file
 	installedServiceFilePath string
 	installDir               string
@@ -218,7 +212,7 @@ type linuxSysVService struct {
 // Start the service
 func (l linuxSysVService) Start() error {
 	//#nosec G204 -- serviceName is not determined by user input
-	cmd := exec.Command(l.serviceCmdName, l.serviceName, "start")
+	cmd := exec.Command("service", l.serviceName, "start")
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("running service failed: %w", err)
 	}
@@ -228,7 +222,7 @@ func (l linuxSysVService) Start() error {
 // Stop the service
 func (l linuxSysVService) Stop() error {
 	//#nosec G204 -- serviceName is not determined by user input
-	cmd := exec.Command(l.serviceCmdName, l.serviceName, "stop")
+	cmd := exec.Command("service", l.serviceName, "stop")
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("running service failed: %w", err)
 	}

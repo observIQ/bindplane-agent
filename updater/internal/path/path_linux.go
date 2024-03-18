@@ -24,6 +24,10 @@ import (
 // LinuxInstallDir is the install directory of the collector on linux.
 const LinuxInstallDir = "/opt/observiq-otel-collector"
 
+// File paths for service depending on which type of service
+const SystemdFilePath = "/usr/lib/systemd/system/observiq-otel-collector.service"
+const SysVFilePath = "/etc/init.d/observiq-otel-collector"
+
 // InstallDir returns the filepath to the install directory
 func InstallDir(_ *zap.Logger) (string, error) {
 	return LinuxInstallDir, nil
@@ -40,7 +44,8 @@ func LinuxServiceCmdName() string {
 	}
 	if err != nil {
 		// Defaulting to systemctl in the most common path
-		// This replicates prior behavior where
+		// This replicates prior behavior where this was
+		// a static define
 		path = "/usr/bin/systemctl"
 	}
 	_, filename := filepath.Split(path)
@@ -49,15 +54,9 @@ func LinuxServiceCmdName() string {
 
 // LinuxServiceFilePath returns the full path to the service file
 func LinuxServiceFilePath() string {
-	var path string
-	var err error
-	path, err = exec.LookPath("/usr/lib/systemd/system/observiq-otel-collector.service")
-	if err != nil {
-		path, err = exec.LookPath("/etc/init.d/observiq-otel-collector")
+	if LinuxServiceCmdName() == "systemctl" {
+		return SystemdFilePath
+	} else {
+		return SysVFilePath
 	}
-	if err != nil {
-		// Defaulting to systemctl in the most common path
-		path = "/usr/lib/systemd/system/observiq-otel-collector.service"
-	}
-	return path
 }
