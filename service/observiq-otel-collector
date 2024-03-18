@@ -108,7 +108,7 @@ stop() {
   echo -n "Shutting down $0: "
   # RHEL
   if [ "$STATUS" ]; then
-      killproc -t30 -p "$PIDFILE" "$BINARY"
+      killproc -p "$PIDFILE" -d30 "$BINARY"
       RETVAL=$?
       echo
       [ "$RETVAL" -eq 0 ] && rm -f "$LOCKFILE"
