@@ -37,7 +37,6 @@ func TestLinuxSysVServiceInstall(t *testing.T) {
 		l := &linuxSysVService{
 			newServiceFilePath:       filepath.Join("testdata", "linux-service"),
 			serviceName:              "linux-service",
-			serviceCmdName:           "service",
 			installedServiceFilePath: installedServicePath,
 			logger:                   zaptest.NewLogger(t),
 		}
@@ -64,7 +63,6 @@ func TestLinuxSysVServiceInstall(t *testing.T) {
 		l := &linuxSysVService{
 			newServiceFilePath:       filepath.Join("testdata", "linux-service"),
 			serviceName:              "linux-service",
-			serviceCmdName:           "service",
 			installedServiceFilePath: installedServicePath,
 			logger:                   zaptest.NewLogger(t),
 		}
@@ -101,7 +99,6 @@ func TestLinuxSysVServiceInstall(t *testing.T) {
 		l := &linuxSysVService{
 			newServiceFilePath:       filepath.Join("testdata", "does-not-exist.service"),
 			serviceName:              "linux-service",
-			serviceCmdName:           "service",
 			installedServiceFilePath: installedServicePath,
 			logger:                   zaptest.NewLogger(t),
 		}
@@ -118,7 +115,6 @@ func TestLinuxSysVServiceInstall(t *testing.T) {
 		l := &linuxSysVService{
 			newServiceFilePath:       filepath.Join("testdata", "linux-service"),
 			serviceName:              "linux-service",
-			serviceCmdName:           "service",
 			installedServiceFilePath: installedServicePath,
 			logger:                   zaptest.NewLogger(t),
 		}
@@ -135,7 +131,6 @@ func TestLinuxSysVServiceInstall(t *testing.T) {
 		l := &linuxSysVService{
 			newServiceFilePath:       filepath.Join("testdata", "linux-service"),
 			serviceName:              "linux-service",
-			serviceCmdName:           "service",
 			installedServiceFilePath: installedServicePath,
 			logger:                   zaptest.NewLogger(t),
 		}
@@ -152,7 +147,6 @@ func TestLinuxSysVServiceInstall(t *testing.T) {
 		l := &linuxSysVService{
 			newServiceFilePath:       filepath.Join("testdata", "linux-service"),
 			serviceName:              "linux-service",
-			serviceCmdName:           "service",
 			installedServiceFilePath: installedServicePath,
 			logger:                   zaptest.NewLogger(t),
 		}
@@ -168,7 +162,6 @@ func TestLinuxSysVServiceInstall(t *testing.T) {
 		l := &linuxSysVService{
 			newServiceFilePath:       filepath.Join("testdata", "linux-service"),
 			serviceName:              "linux-service",
-			serviceCmdName:           "service",
 			installedServiceFilePath: installedServicePath,
 			logger:                   zaptest.NewLogger(t),
 		}
@@ -192,7 +185,6 @@ func TestLinuxSysVServiceInstall(t *testing.T) {
 			newServiceFilePath:       newServiceFile,
 			installedServiceFilePath: installedServicePath,
 			serviceName:              "linux-service",
-			serviceCmdName:           "service",
 			installDir:               installDir,
 			logger:                   zaptest.NewLogger(t),
 		}
@@ -227,7 +219,6 @@ func TestLinuxSysVServiceInstall(t *testing.T) {
 			newServiceFilePath:       newServiceFile,
 			installedServiceFilePath: installedServicePath,
 			serviceName:              "linux-service",
-			serviceCmdName:           "service",
 			installDir:               installDir,
 			logger:                   zaptest.NewLogger(t),
 		}
@@ -249,7 +240,6 @@ func TestLinuxSysVServiceInstall(t *testing.T) {
 			newServiceFilePath:       newServiceFile,
 			installedServiceFilePath: installedServicePath,
 			serviceName:              "linux-service",
-			serviceCmdName:           "service",
 			installDir:               installDir,
 			logger:                   zaptest.NewLogger(t),
 		}
