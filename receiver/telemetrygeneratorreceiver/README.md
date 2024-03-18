@@ -155,3 +155,14 @@ telemetrygeneratorreceiver:
             host.name: 2ed77de7e4c1
             os.type: linux   
 ```       
+### Windows Events Generator
+
+The Windows Events Generator replays a sample of recorded Windows Event Log data. It has no additional configuration, and will ignore `resource_attributes` and `attributes` fields.
+
+#### Example Configuration
+```yaml
+telemetrygeneratorreceiver:
+    payloads_per_second: 1
+    generators:
+        - type: windows_events          
+```       
