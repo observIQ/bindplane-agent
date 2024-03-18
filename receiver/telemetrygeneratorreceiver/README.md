@@ -18,7 +18,7 @@ This receiver is used to generate synthetic telemetry for testing and configurat
 ### Common Generator Configuration
 | Field                | Type      | Default          | Required | Description  |
 |----------------------|-----------|------------------|----------|--------------|
-| type                 |  string   |                  | `true`   | The type of generator to use. Currently `logs`, `otlp`, `metrics`, and `host_metrics` are supported.  |
+| type                 |  string   |                  | `true`   | The type of generator to use. Currently `logs`, `otlp`, `metrics`, `host_metrics`, and `windows_events` are supported.  |
 | resource_attributes  |  map      |                  | `false`  | A map of resource attributes to be included in the generated telemetry. Values can be `any`.   |
 | attributes           |  map      |                  | `false`  | A map of attributes to be included in the generated telemetry. Values can be `any`.  |
 | additional_config    |  map      |                  | `false`  | A map of additional configuration options to be included in the generated telemetry. Values can be `any`.|
