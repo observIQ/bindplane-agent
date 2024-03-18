@@ -65,6 +65,9 @@ type Config struct {
 
 	// Compression is the compression type that will be used to send logs to Chronicle.
 	Compression string `mapstructure:"compression"`
+
+	// Compression is the compression type that will be used to send logs to Chronicle.
+	IngestionLabels map[string]string `mapstructure:"ingestion_labels"`
 }
 
 // Validate checks if the configuration is valid.
