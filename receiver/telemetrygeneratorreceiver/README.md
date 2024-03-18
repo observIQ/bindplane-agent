@@ -58,7 +58,7 @@ telemetrygeneratorreceiver:
 
 ### OTLP Replay Generator
 
-The OTLP Replay Generator replays JSON-formatted telemetry from the variable `otlp_json`. It adjusts the timestamps of the telemetry relative the current time, with the most recent record moved to the current time, and the previous records the same relative duration in the past. The `otlp_json` variable should be valid OTLP, such as the JSON created by `plog.JSONMarshaler`,`ptrace.JSONMarshaler`, or `pmetric.JSONMarshaler`. The `otlp_json` variable is set in the `additional_config` section of the generator configuration.
+The OTLP Replay Generator replays JSON-formatted telemetry from the variable `otlp_json`. It adjusts the timestamps of the telemetry relative the current time, with the most recent record moved to the current time, and the previous records the same relative duration in the past. The `otlp_json` variable should be valid OTLP, such as the JSON created by `plog.JSONMarshaler`,`ptrace.JSONMarshaler`, or `pmetric.JSONMarshaler`. The `otlp_json` variable is set in the `additional_config` section of the generator configuration. The `attributes` and `resource_attributes` fields are ignored.
 
 #### additional_config:
 
