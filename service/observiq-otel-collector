@@ -101,6 +101,7 @@ start() {
     # shellcheck disable=SC2005
     echo "$(pidof "$BINARY")" > "$PIDFILE"
   fi
+  echo
 }
 
 stop() {
@@ -122,6 +123,7 @@ stop() {
       # Remember status and be verbose
       rc_status -v
   fi
+  echo
 }
 
 # Currently unimplemented
@@ -194,6 +196,7 @@ otel_status() {
   else
     pid_status
   fi
+  echo
 }
 
 cd "$OIQ_OTEL_COLLECTOR_HOME" || exit 1
