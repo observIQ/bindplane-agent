@@ -166,10 +166,10 @@ pid_status() {
 otel_status() {
   if [ -e "$PIDFILE" ]; then
     # shellcheck disable=SC3037
-    echo -n "Status of $0 ($(cat "$PIDFILE"))"
+    echo -n "Status of $0 ($(cat "$PIDFILE")) "
   else
     # shellcheck disable=SC3037
-    echo -n "Status of $0 (no pidfile found)"
+    echo -n "Status of $0 (no pidfile found) "
   fi
 
   if [ "$STATUS" ]; then
