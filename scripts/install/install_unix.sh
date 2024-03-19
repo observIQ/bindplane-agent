@@ -653,7 +653,7 @@ install_package()
       # We'll want to restart, which will start it if it wasn't running already,
       # and restart in the case that this was an upgrade on a running agent.
       info "Restarting service..."
-      systemctl restart observiq-otel-collector
+      systemctl restart observiq-otel-collector > /dev/null 2>&1 || error_exit "$LINENO" "Failed to restart service"
       succeeded
     else
       info "Enabling service..."
@@ -665,12 +665,12 @@ install_package()
       # The service is running.
       # We'll want to restart.
       info "Restarting service..."
-      service observiq-otel-collector restart
+      service observiq-otel-collector restart > /dev/null 2>&1 || error_exit "$LINENO" "Failed to restart service"
       succeeded
     else
       info "Enabling and starting service..."
-      chkconfig observiq-otel-collector on
-      service observiq-otel-collector start
+      chkconfig observiq-otel-collector on > /dev/null 2>&1 || error_exit "$LINENO" "Failed to enable service"
+      service observiq-otel-collector start > /dev/null 2>&1 || error_exit "$LINENO" "Failed to start service"
       succeeded
     fi
   fi
