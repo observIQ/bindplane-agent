@@ -647,7 +647,7 @@ install_package()
     succeeded
   fi
 
-  if [ $SVC_PRE == "systemctl" ]; then
+  if [ "$SVC_PRE" = "systemctl" ]; then
     if [ "$(systemctl is-enabled observiq-otel-collector)" = "enabled" ]; then
       # The unit is already enabled; It may be running, too, if this was an upgrade.
       # We'll want to restart, which will start it if it wasn't running already,
@@ -661,6 +661,7 @@ install_package()
       succeeded
     fi
   else
+    # shellcheck disable=SC3010
     if [[ $(service observiq-otel-collector status) = *running* ]]; then
       # The service is running.
       # We'll want to restart.
@@ -723,7 +724,7 @@ display_results()
     increase_indent
     info "Agent Home:         $(fg_cyan "/opt/observiq-otel-collector")$(reset)"
     info "Agent Config:       $(fg_cyan "/opt/observiq-otel-collector/config.yaml")$(reset)"
-    if [ $SVC_PRE == "systemctl" ]; then
+    if [ "$SVC_PRE" = "systemctl" ]; then
       info "Start Command:      $(fg_cyan "sudo systemctl start observiq-otel-collector")$(reset)"
       info "Stop Command:       $(fg_cyan "sudo systemctl stop observiq-otel-collector")$(reset)"
     else
@@ -777,7 +778,7 @@ uninstall()
   root_check
   succeeded
 
-  if [ $SVC_PRE == "systemctl" ]; then
+  if [ "$SVC_PRE" = "systemctl" ]; then
     info "Stopping service..."
     systemctl stop observiq-otel-collector > /dev/null || error_exit "$LINENO" "Failed to stop service"
     succeeded
