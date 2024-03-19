@@ -56,9 +56,9 @@ func LinuxServiceCmdName() string {
 
 // LinuxServiceFilePath returns the full path to the service file
 func LinuxServiceFilePath() string {
-	if LinuxServiceCmdName() == "systemctl" {
-		return SystemdFilePath
-	} else if LinuxServiceCmdName() == "systemctl" {
+        serviceCmd := LinuxServiceCmdName()
+	
+	if serviceCmd == "service" {
 		return SysVFilePath
 	}
 
