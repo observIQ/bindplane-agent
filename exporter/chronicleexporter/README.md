@@ -74,3 +74,15 @@ chronicle:
   log_type: "ONEPASSWORD"
   customer_id: "customer-123"
 ```
+
+### Configuration with Ingestion Labels
+
+```yaml
+chronicle:
+  creds_file_path: "/path/to/google/creds.json"
+  log_type: ""
+  customer_id: "customer-123"
+  ingestion_labels: 
+    env: dev
+    zone: USA
+```

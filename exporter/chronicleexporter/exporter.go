@@ -124,7 +124,6 @@ func (ce *chronicleExporter) logsDataPusher(ctx context.Context, ld plog.Logs) e
 			continue
 		}
 
-		ce.logger.Debug("Sending payload to Chronicle", zap.ByteString("payload", data))
 		if err := ce.uploadToChronicle(ctx, data); err != nil {
 			return fmt.Errorf("upload to Chronicle: %w", err)
 		}
