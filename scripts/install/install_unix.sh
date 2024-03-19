@@ -661,19 +661,21 @@ install_package()
       succeeded
     fi
   else
-    # shellcheck disable=SC3010
-    if [[ $(service observiq-otel-collector status) = *running* ]]; then
-      # The service is running.
-      # We'll want to restart.
-      info "Restarting service..."
-      service observiq-otel-collector restart > /dev/null 2>&1 || error_exit "$LINENO" "Failed to restart service"
-      succeeded
-    else
-      info "Enabling and starting service..."
-      chkconfig observiq-otel-collector on > /dev/null 2>&1 || error_exit "$LINENO" "Failed to enable service"
-      service observiq-otel-collector start > /dev/null 2>&1 || error_exit "$LINENO" "Failed to start service"
-      succeeded
-    fi
+    case "$(service observiq-otel-collector status)" in
+      *running*)
+        # The service is running.
+        # We'll want to restart.
+        info "Restarting service..."
+        service observiq-otel-collector restart > /dev/null 2>&1 || error_exit "$LINENO" "Failed to restart service"
+        succeeded
+        ;;
+      *)
+        info "Enabling and starting service..."
+        chkconfig observiq-otel-collector on > /dev/null 2>&1 || error_exit "$LINENO" "Failed to enable service"
+        service observiq-otel-collector start > /dev/null 2>&1 || error_exit "$LINENO" "Failed to start service"
+        succeeded
+        ;;
+    esac
   fi
 
   success "BindPlane Agent installation complete!"
