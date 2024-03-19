@@ -242,7 +242,8 @@ func (l linuxSysVService) install() error {
 		}
 	}()
 
-	outFile, err := os.OpenFile(l.installedServiceFilePath, os.O_CREATE|os.O_WRONLY, 0600)
+	//#nosec G302 -- File permissions for the service file match install script and other installed services
+	outFile, err := os.OpenFile(l.installedServiceFilePath, os.O_CREATE|os.O_WRONLY, 0755)
 	if err != nil {
 		return fmt.Errorf("failed to open output file: %w", err)
 	}
@@ -271,7 +272,11 @@ func (l linuxSysVService) uninstall() error {
 	//#nosec G204 -- serviceName is not determined by user input
 	cmd := exec.Command("chkconfig", l.serviceName, "off")
 	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("chkconfig on failed: %w", err)
+		return fmt.Errorf("chkconfig off failed: %w", err)
+	}
+
+	if err := os.Remove(l.installedServiceFilePath); err != nil {
+		return fmt.Errorf("failed to remove service file: %w", err)
 	}
 
 	return nil

@@ -136,7 +136,7 @@ func TestLinuxSysVServiceInstall(t *testing.T) {
 		}
 
 		err := l.uninstall()
-		require.ErrorContains(t, err, "failed to disable unit")
+		require.ErrorContains(t, err, "chkconfig off failed:")
 		requireSysVServiceEnabledStatus(t, false)
 	})
 
@@ -280,16 +280,18 @@ func requireSysVServiceEnabledStatus(t *testing.T, enabled bool) {
 	cmd := exec.Command("chkconfig", "linux-service")
 	err := cmd.Run()
 
-	eErr, ok := err.(*exec.ExitError)
 	if enabled {
 		// If the service should be enabled, then we expect a 0 exit code, so no error is given
-		require.Equal(t, 0, eErr.ExitCode(), "unexpected exit code when asserting service is enabled: %d", eErr.ExitCode())
+		require.NoError(t, err)
 		return
 	}
 
+	eErr, ok := err.(*exec.ExitError)
 	require.True(t, ok, "chkconfig exited with non-ExitError: %s", eErr)
 	require.Equal(t, exitCodeServiceDisabled, eErr.ExitCode(), "unexpected exit code when asserting service is enabled: %d", eErr.ExitCode())
 }
+
+const exitCodeServiceInactive = 3
 
 func requireSysVServiceRunningStatus(t *testing.T, running bool) {
 	cmd := exec.Command("service", "linux-service", "status")
