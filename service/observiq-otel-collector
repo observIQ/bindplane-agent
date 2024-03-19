@@ -216,6 +216,8 @@ case "$1" in
   # Restart the service by stop, then restart
   restart)
     stop
+    # sleep for 1 second to prevent false starts leaving us in a bad state
+    sleep 1
     start
     ;;
   # Not currently implemented, but should reload the config file
