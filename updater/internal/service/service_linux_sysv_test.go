@@ -265,7 +265,7 @@ func uninstallSysVService(t *testing.T, installedPath, serviceName string) {
 	cmd := exec.Command("service", serviceName, "stop")
 	_ = cmd.Run()
 
-	cmd = exec.Command("chkconfig", "off", serviceName)
+	cmd = exec.Command("chkconfig", serviceName, "off")
 	_ = cmd.Run()
 
 	err := os.RemoveAll(installedPath)

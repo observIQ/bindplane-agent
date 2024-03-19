@@ -258,7 +258,7 @@ func (l linuxSysVService) install() error {
 	}
 
 	//#nosec G204 -- serviceName is not determined by user input
-	cmd := exec.Command("chkconfig", "on", l.serviceName)
+	cmd := exec.Command("chkconfig", l.serviceName, "on")
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("chkconfig on failed: %w", err)
 	}
@@ -269,7 +269,7 @@ func (l linuxSysVService) install() error {
 // uninstalls the service
 func (l linuxSysVService) uninstall() error {
 	//#nosec G204 -- serviceName is not determined by user input
-	cmd := exec.Command("chkconfig", "off", l.serviceName)
+	cmd := exec.Command("chkconfig", l.serviceName, "off")
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("chkconfig on failed: %w", err)
 	}
