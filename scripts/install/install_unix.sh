@@ -19,11 +19,18 @@ set -e
 PACKAGE_NAME="observiq-otel-collector"
 DOWNLOAD_BASE="https://github.com/observIQ/bindplane-agent/releases/download"
 
+# Determine if we need service or systemctl for prereqs
+if command -v systemctl > /dev/null 2>&1; then
+  SVC_PRE=systemctl
+elif command -v service > /dev/null 2>&1; then
+  SVC_PRE=service
+fi
+
 # Script Constants
 COLLECTOR_USER="observiq-otel-collector"
 TMP_DIR=${TMPDIR:-"/tmp"} # Allow this to be overriden by cannonical TMPDIR env var
 MANAGEMENT_YML_PATH="/opt/observiq-otel-collector/manager.yaml"
-PREREQS="curl printf systemctl sed uname cut"
+PREREQS="curl printf $SVC_PRE sed uname cut"
 SCRIPT_NAME="$0"
 INDENT_WIDTH='  '
 indent=""
@@ -66,7 +73,7 @@ fi
 # Helper Functions
 printf() {
   if command -v sed >/dev/null; then
-    command printf -- "$@" | sed -E "$sed_ignore s/^/$indent/g"  # Ignore sole reset characters if defined
+    command printf -- "$@" | sed -r "$sed_ignore s/^/$indent/g"  # Ignore sole reset characters if defined
   else
     # Ignore $* suggestion as this breaks the output
     # shellcheck disable=SC2145
@@ -594,7 +601,7 @@ latest_version()
 {
   curl -sSL -H"Accept: application/vnd.github.v3+json" https://api.github.com/repos/observIQ/observiq-otel-collector/releases/latest | \
     grep "\"tag_name\"" | \
-    sed -E 's/ *"tag_name": "v([0-9]+\.[0-9]+\.[0-9+])",/\1/'
+    sed -r 's/ *"tag_name": "v([0-9]+\.[0-9]+\.[0-9+])",/\1/'
 }
 
 # This will install the package by downloading the archived agent,
@@ -640,17 +647,35 @@ install_package()
     succeeded
   fi
 
-  if [ "$(systemctl is-enabled observiq-otel-collector)" = "enabled" ]; then
-    # The unit is already enabled; It may be running, too, if this was an upgrade.
-    # We'll want to restart, which will start it if it wasn't running already,
-    # and restart in the case that this was an upgrade on a running agent.
-    info "Restarting service..."
-    systemctl restart observiq-otel-collector
-    succeeded
+  if [ "$SVC_PRE" = "systemctl" ]; then
+    if [ "$(systemctl is-enabled observiq-otel-collector)" = "enabled" ]; then
+      # The unit is already enabled; It may be running, too, if this was an upgrade.
+      # We'll want to restart, which will start it if it wasn't running already,
+      # and restart in the case that this was an upgrade on a running agent.
+      info "Restarting service..."
+      systemctl restart observiq-otel-collector > /dev/null 2>&1 || error_exit "$LINENO" "Failed to restart service"
+      succeeded
+    else
+      info "Enabling service..."
+      systemctl enable --now observiq-otel-collector > /dev/null 2>&1 || error_exit "$LINENO" "Failed to enable service"
+      succeeded
+    fi
   else
-    info "Enabling service..."
-    systemctl enable --now observiq-otel-collector > /dev/null 2>&1 || error_exit "$LINENO" "Failed to enable service"
-    succeeded
+    case "$(service observiq-otel-collector status)" in
+      *running*)
+        # The service is running.
+        # We'll want to restart.
+        info "Restarting service..."
+        service observiq-otel-collector restart > /dev/null 2>&1 || error_exit "$LINENO" "Failed to restart service"
+        succeeded
+        ;;
+      *)
+        info "Enabling and starting service..."
+        chkconfig observiq-otel-collector on > /dev/null 2>&1 || error_exit "$LINENO" "Failed to enable service"
+        service observiq-otel-collector start > /dev/null 2>&1 || error_exit "$LINENO" "Failed to start service"
+        succeeded
+        ;;
+    esac
   fi
 
   success "BindPlane Agent installation complete!"
@@ -701,8 +726,13 @@ display_results()
     increase_indent
     info "Agent Home:         $(fg_cyan "/opt/observiq-otel-collector")$(reset)"
     info "Agent Config:       $(fg_cyan "/opt/observiq-otel-collector/config.yaml")$(reset)"
-    info "Start Command:      $(fg_cyan "sudo systemctl start observiq-otel-collector")$(reset)"
-    info "Stop Command:       $(fg_cyan "sudo systemctl stop observiq-otel-collector")$(reset)"
+    if [ "$SVC_PRE" = "systemctl" ]; then
+      info "Start Command:      $(fg_cyan "sudo systemctl start observiq-otel-collector")$(reset)"
+      info "Stop Command:       $(fg_cyan "sudo systemctl stop observiq-otel-collector")$(reset)"
+    else
+      info "Start Command:      $(fg_cyan "sudo service observiq-otel-collector start")$(reset)"
+      info "Stop Command:       $(fg_cyan "sudo service observiq-otel-collector stop")$(reset)"
+    fi
     info "Logs Command:       $(fg_cyan "sudo tail -F /opt/observiq-otel-collector/log/collector.log")$(reset)"
     decrease_indent
 
@@ -750,13 +780,24 @@ uninstall()
   root_check
   succeeded
 
-  info "Stopping service..."
-  systemctl stop observiq-otel-collector > /dev/null || error_exit "$LINENO" "Failed to stop service"
-  succeeded
+  if [ "$SVC_PRE" = "systemctl" ]; then
+    info "Stopping service..."
+    systemctl stop observiq-otel-collector > /dev/null || error_exit "$LINENO" "Failed to stop service"
+    succeeded
 
-  info "Disabling service..."
-  systemctl disable observiq-otel-collector > /dev/null 2>&1 || error_exit "$LINENO" "Failed to disable service"
-  succeeded
+    info "Disabling service..."
+    systemctl disable observiq-otel-collector > /dev/null 2>&1 || error_exit "$LINENO" "Failed to disable service"
+    succeeded
+  else
+    info "Stopping service..."
+    service observiq-otel-collector stop
+    succeeded
+
+    info "Disabling service..."
+    chkconfig observiq-otel-collector on
+    # rm -f /etc/init.d/observiq-otel-collector
+    succeeded
+  fi
 
   info "Removing any existing manager.yaml..."
   rm -f "$MANAGEMENT_YML_PATH"

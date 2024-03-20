@@ -13,7 +13,7 @@
 // limitations under the License.
 
 // an elevated user is needed to run the service tests
-//go:build linux && integration
+//go:build linux && integration_sysv
 
 package service
 
@@ -29,13 +29,13 @@ import (
 )
 
 // NOTE: These tests must run as root in order to pass
-func TestLinuxServiceInstall(t *testing.T) {
-	t.Run("Test install + uninstall", func(t *testing.T) {
-		installedServicePath := "/usr/lib/systemd/system/linux-service.service"
-		uninstallService(t, installedServicePath, "linux-service")
+func TestLinuxSysVServiceInstall(t *testing.T) {
+	t.Run("Test SysV install + uninstall", func(t *testing.T) {
+		installedServicePath := "/etc/init.d/linux-service"
+		uninstallSysVService(t, installedServicePath, "linux-service")
 
-		l := &linuxService{
-			newServiceFilePath:       filepath.Join("testdata", "linux-service.service"),
+		l := &linuxSysVService{
+			newServiceFilePath:       filepath.Join("testdata", "linux-service"),
 			serviceName:              "linux-service",
 			installedServiceFilePath: installedServicePath,
 			logger:                   zaptest.NewLogger(t),
@@ -46,22 +46,22 @@ func TestLinuxServiceInstall(t *testing.T) {
 		require.FileExists(t, installedServicePath)
 
 		//We want to check that the service was actually loaded
-		requireServiceLoadedStatus(t, true)
+		requireSysVServiceEnabledStatus(t, true)
 
 		err = l.uninstall()
 		require.NoError(t, err)
 		require.NoFileExists(t, installedServicePath)
 
 		//Make sure the service is no longer listed
-		requireServiceLoadedStatus(t, false)
+		requireSysVServiceEnabledStatus(t, false)
 	})
 
-	t.Run("Test stop + start", func(t *testing.T) {
-		installedServicePath := "/usr/lib/systemd/system/linux-service.service"
-		uninstallService(t, installedServicePath, "linux-service")
+	t.Run("Test SysV stop + start", func(t *testing.T) {
+		installedServicePath := "/etc/init.d/linux-service"
+		uninstallSysVService(t, installedServicePath, "linux-service")
 
-		l := &linuxService{
-			newServiceFilePath:       filepath.Join("testdata", "linux-service.service"),
+		l := &linuxSysVService{
+			newServiceFilePath:       filepath.Join("testdata", "linux-service"),
 			serviceName:              "linux-service",
 			installedServiceFilePath: installedServicePath,
 			logger:                   zaptest.NewLogger(t),
@@ -72,31 +72,31 @@ func TestLinuxServiceInstall(t *testing.T) {
 		require.FileExists(t, installedServicePath)
 
 		// We want to check that the service was actually loaded
-		requireServiceLoadedStatus(t, true)
+		requireSysVServiceEnabledStatus(t, true)
 
 		err = l.Start()
 		require.NoError(t, err)
 
-		requireServiceRunningStatus(t, true)
+		requireSysVServiceRunningStatus(t, true)
 
 		err = l.Stop()
 		require.NoError(t, err)
 
-		requireServiceRunningStatus(t, false)
+		requireSysVServiceRunningStatus(t, false)
 
 		err = l.uninstall()
 		require.NoError(t, err)
 		require.NoFileExists(t, installedServicePath)
 
 		// Make sure the service is no longer listed
-		requireServiceLoadedStatus(t, false)
+		requireSysVServiceEnabledStatus(t, false)
 	})
 
-	t.Run("Test invalid path for input file", func(t *testing.T) {
-		installedServicePath := "/usr/lib/systemd/system/linux-service.service"
-		uninstallService(t, installedServicePath, "linux-service")
+	t.Run("Test SysV invalid path for input file", func(t *testing.T) {
+		installedServicePath := "/etc/init.d/linux-service"
+		uninstallSysVService(t, installedServicePath, "linux-service")
 
-		l := &linuxService{
+		l := &linuxSysVService{
 			newServiceFilePath:       filepath.Join("testdata", "does-not-exist.service"),
 			serviceName:              "linux-service",
 			installedServiceFilePath: installedServicePath,
@@ -105,15 +105,15 @@ func TestLinuxServiceInstall(t *testing.T) {
 
 		err := l.install()
 		require.ErrorContains(t, err, "failed to open input file")
-		requireServiceLoadedStatus(t, false)
+		requireSysVServiceEnabledStatus(t, false)
 	})
 
-	t.Run("Test invalid path for output file for install", func(t *testing.T) {
-		installedServicePath := "/usr/lib/systemd/system/dir-does-not-exist/linux-service.service"
-		uninstallService(t, installedServicePath, "linux-service")
+	t.Run("Test SysV invalid path for output file for install", func(t *testing.T) {
+		installedServicePath := "/usr/lib/SysV/system/dir-does-not-exist/linux-service"
+		uninstallSysVService(t, installedServicePath, "linux-service")
 
-		l := &linuxService{
-			newServiceFilePath:       filepath.Join("testdata", "linux-service.service"),
+		l := &linuxSysVService{
+			newServiceFilePath:       filepath.Join("testdata", "linux-service"),
 			serviceName:              "linux-service",
 			installedServiceFilePath: installedServicePath,
 			logger:                   zaptest.NewLogger(t),
@@ -121,67 +121,67 @@ func TestLinuxServiceInstall(t *testing.T) {
 
 		err := l.install()
 		require.ErrorContains(t, err, "failed to open output file")
-		requireServiceLoadedStatus(t, false)
+		requireSysVServiceEnabledStatus(t, false)
 	})
 
-	t.Run("Uninstall fails if not installed", func(t *testing.T) {
-		installedServicePath := "/usr/lib/systemd/system/linux-service.service"
-		uninstallService(t, installedServicePath, "linux-service")
+	t.Run("Uninstall SysV fails if not installed", func(t *testing.T) {
+		installedServicePath := "/etc/init.d/linux-service"
+		uninstallSysVService(t, installedServicePath, "linux-service")
 
-		l := &linuxService{
-			newServiceFilePath:       filepath.Join("testdata", "linux-service.service"),
+		l := &linuxSysVService{
+			newServiceFilePath:       filepath.Join("testdata", "linux-service"),
 			serviceName:              "linux-service",
 			installedServiceFilePath: installedServicePath,
 			logger:                   zaptest.NewLogger(t),
 		}
 
 		err := l.uninstall()
-		require.ErrorContains(t, err, "failed to disable unit")
-		requireServiceLoadedStatus(t, false)
+		require.ErrorContains(t, err, "chkconfig off failed:")
+		requireSysVServiceEnabledStatus(t, false)
 	})
 
-	t.Run("Start fails if service not found", func(t *testing.T) {
-		installedServicePath := "/usr/lib/systemd/system/linux-service.service"
-		uninstallService(t, installedServicePath, "linux-service")
+	t.Run("Start SysV fails if service not found", func(t *testing.T) {
+		installedServicePath := "/etc/init.d/linux-service"
+		uninstallSysVService(t, installedServicePath, "linux-service")
 
-		l := &linuxService{
-			newServiceFilePath:       filepath.Join("testdata", "linux-service.service"),
+		l := &linuxSysVService{
+			newServiceFilePath:       filepath.Join("testdata", "linux-service"),
 			serviceName:              "linux-service",
 			installedServiceFilePath: installedServicePath,
 			logger:                   zaptest.NewLogger(t),
 		}
 
 		err := l.Start()
-		require.ErrorContains(t, err, "running systemctl failed")
+		require.ErrorContains(t, err, "running service failed")
 	})
 
-	t.Run("Stop fails if service not found", func(t *testing.T) {
-		installedServicePath := "/usr/lib/systemd/system/linux-service.service"
-		uninstallService(t, installedServicePath, "linux-service")
+	t.Run("Stop SysV fails if service not found", func(t *testing.T) {
+		installedServicePath := "/etc/init.d/linux-service"
+		uninstallSysVService(t, installedServicePath, "linux-service")
 
-		l := &linuxService{
-			newServiceFilePath:       filepath.Join("testdata", "linux-service.service"),
+		l := &linuxSysVService{
+			newServiceFilePath:       filepath.Join("testdata", "linux-service"),
 			serviceName:              "linux-service",
 			installedServiceFilePath: installedServicePath,
 			logger:                   zaptest.NewLogger(t),
 		}
 
 		err := l.Stop()
-		require.ErrorContains(t, err, "running systemctl failed")
+		require.ErrorContains(t, err, "running service failed")
 	})
 
-	t.Run("Backup installed service succeeds", func(t *testing.T) {
-		installedServicePath := "/usr/lib/systemd/system/linux-service.service"
-		uninstallService(t, installedServicePath, "linux-service")
+	t.Run("Backup SysV installed service succeeds", func(t *testing.T) {
+		installedServicePath := "/etc/init.d/linux-service"
+		uninstallSysVService(t, installedServicePath, "linux-service")
 
-		newServiceFile := filepath.Join("testdata", "linux-service.service")
+		newServiceFile := filepath.Join("testdata", "linux-service")
 		serviceFileContents, err := os.ReadFile(newServiceFile)
 		require.NoError(t, err)
 
 		installDir := t.TempDir()
 		require.NoError(t, os.MkdirAll(path.BackupDir(installDir), 0775))
 
-		d := &linuxService{
+		d := &linuxSysVService{
 			newServiceFilePath:       newServiceFile,
 			installedServiceFilePath: installedServicePath,
 			serviceName:              "linux-service",
@@ -194,7 +194,7 @@ func TestLinuxServiceInstall(t *testing.T) {
 		require.FileExists(t, installedServicePath)
 
 		// We want to check that the service was actually loaded
-		requireServiceLoadedStatus(t, true)
+		requireSysVServiceEnabledStatus(t, true)
 
 		err = d.Backup()
 		require.NoError(t, err)
@@ -206,16 +206,16 @@ func TestLinuxServiceInstall(t *testing.T) {
 		require.NoError(t, d.uninstall())
 	})
 
-	t.Run("Backup installed service fails if not installed", func(t *testing.T) {
-		installedServicePath := "/usr/lib/systemd/system/linux-service.service"
-		uninstallService(t, installedServicePath, "linux-service")
+	t.Run("Backup SysV installed service fails if not installed", func(t *testing.T) {
+		installedServicePath := "/etc/init.d/linux-service"
+		uninstallSysVService(t, installedServicePath, "linux-service")
 
-		newServiceFile := filepath.Join("testdata", "linux-service.service")
+		newServiceFile := filepath.Join("testdata", "linux-service")
 
 		installDir := t.TempDir()
 		require.NoError(t, os.MkdirAll(path.BackupDir(installDir), 0775))
 
-		d := &linuxService{
+		d := &linuxSysVService{
 			newServiceFilePath:       newServiceFile,
 			installedServiceFilePath: installedServicePath,
 			serviceName:              "linux-service",
@@ -227,16 +227,16 @@ func TestLinuxServiceInstall(t *testing.T) {
 		require.ErrorContains(t, err, "failed to copy service file")
 	})
 
-	t.Run("Backup installed service fails if output file already exists", func(t *testing.T) {
-		installedServicePath := "/usr/lib/systemd/system/linux-service.service"
-		uninstallService(t, installedServicePath, "linux-service")
+	t.Run("Backup SysV installed service fails if output file already exists", func(t *testing.T) {
+		installedServicePath := "/etc/init.d/linux-service"
+		uninstallSysVService(t, installedServicePath, "linux-service")
 
-		newServiceFile := filepath.Join("testdata", "linux-service.service")
+		newServiceFile := filepath.Join("testdata", "linux-service")
 
 		installDir := t.TempDir()
 		require.NoError(t, os.MkdirAll(path.BackupDir(installDir), 0775))
 
-		d := &linuxService{
+		d := &linuxSysVService{
 			newServiceFilePath:       newServiceFile,
 			installedServiceFilePath: installedServicePath,
 			serviceName:              "linux-service",
@@ -249,7 +249,7 @@ func TestLinuxServiceInstall(t *testing.T) {
 		require.FileExists(t, installedServicePath)
 
 		// We want to check that the service was actually loaded
-		requireServiceLoadedStatus(t, true)
+		requireSysVServiceEnabledStatus(t, true)
 
 		// Write the backup file before creating it; Backup should
 		// not ever overwrite an existing file
@@ -260,53 +260,50 @@ func TestLinuxServiceInstall(t *testing.T) {
 	})
 }
 
-// uninstallService is a helper that uninstalls the service manually for test setup, in case it is somehow leftover.
-func uninstallService(t *testing.T, installedPath, serviceName string) {
-	cmd := exec.Command("systemctl", "stop", serviceName)
+// uninstallSysVService is a helper that uninstalls the service manually for test setup, in case it is somehow leftover.
+func uninstallSysVService(t *testing.T, installedPath, serviceName string) {
+	cmd := exec.Command("service", serviceName, "stop")
 	_ = cmd.Run()
 
-	cmd = exec.Command("systemctl", "disable", serviceName)
+	cmd = exec.Command("chkconfig", serviceName, "off")
 	_ = cmd.Run()
 
 	err := os.RemoveAll(installedPath)
 	require.NoError(t, err)
-
-	cmd = exec.Command("systemctl", "daemon-reload")
-	_ = cmd.Run()
 }
 
-const exitCodeServiceNotFound = 4
-const exitCodeServiceInactive = 3
+const exitCodeServiceDisabled = 1
 
-func requireServiceLoadedStatus(t *testing.T, loaded bool) {
+func requireSysVServiceEnabledStatus(t *testing.T, enabled bool) {
 	t.Helper()
 
-	cmd := exec.Command("systemctl", "status", "linux-service")
-	err := cmd.Run()
-	require.Error(t, err, "expected non-zero exit code from 'systemctl status linux-service'")
-
-	eErr, ok := err.(*exec.ExitError)
-	if loaded {
-		// If the service should be loaded, then we expect a 0 exit code, so no error is given
-		require.Equal(t, exitCodeServiceInactive, eErr.ExitCode(), "unexpected exit code when asserting service is unloaded: %d", eErr.ExitCode())
-		return
-	}
-
-	require.True(t, ok, "systemctl status exited with non-ExitError: %s", eErr)
-	require.Equal(t, exitCodeServiceNotFound, eErr.ExitCode(), "unexpected exit code when asserting service is unloaded: %d", eErr.ExitCode())
-}
-
-func requireServiceRunningStatus(t *testing.T, running bool) {
-	cmd := exec.Command("systemctl", "status", "linux-service")
+	cmd := exec.Command("chkconfig", "linux-service")
 	err := cmd.Run()
 
-	if running {
-		// exit code 0 indicates service is loaded & running
+	if enabled {
+		// If the service should be enabled, then we expect a 0 exit code, so no error is given
 		require.NoError(t, err)
 		return
 	}
 
 	eErr, ok := err.(*exec.ExitError)
-	require.True(t, ok, "systemctl status exited with non-ExitError: %s", eErr)
+	require.True(t, ok, "chkconfig exited with non-ExitError: %s", eErr)
+	require.Equal(t, exitCodeServiceDisabled, eErr.ExitCode(), "unexpected exit code when asserting service is enabled: %d", eErr.ExitCode())
+}
+
+const exitCodeServiceInactive = 3
+
+func requireSysVServiceRunningStatus(t *testing.T, running bool) {
+	cmd := exec.Command("service", "linux-service", "status")
+	err := cmd.Run()
+
+	if running {
+		// exit code 0 indicates service is running
+		require.NoError(t, err)
+		return
+	}
+
+	eErr, ok := err.(*exec.ExitError)
+	require.True(t, ok, "service status exited with non-ExitError: %s", eErr)
 	require.Equal(t, exitCodeServiceInactive, eErr.ExitCode(), "unexpected exit code when asserting service is not running: %d", eErr.ExitCode())
 }

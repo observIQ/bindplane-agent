@@ -15,7 +15,9 @@
 // Package path contains helper functions, some OS specific, for getting paths involved in updating.
 package path
 
-import "path/filepath"
+import (
+	"path/filepath"
+)
 
 // TempDir gets the path to the "tmp" dir, used for staging updates & backups
 func TempDir(installDir string) string {
