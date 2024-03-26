@@ -34,7 +34,7 @@ import (
 const logTypeField = `attributes["log_type"]`
 
 // This is a specific collector ID for Chronicle. It's used to identify bindplane agents in Chronicle.
-const collectorID = "aaaa1111-aaaa-1111-aaaa-1111aaaa1111"
+var collectorID = uuid.MustParse("aaaa1111-aaaa-1111-aaaa-1111aaaa1111")
 
 var supportedLogTypes = map[string]string{
 	"windows_event.security":    "WINEVTLOG",
@@ -59,11 +59,6 @@ type protoMarshaler struct {
 }
 
 func newProtoMarshaler(cfg Config, teleSettings component.TelemetrySettings, labels []*api.Label) (*protoMarshaler, error) {
-	col, err := uuid.Parse(collectorID)
-	if err != nil {
-		return nil, fmt.Errorf("parse collector ID: %w", err)
-	}
-
 	CustomerID, err := uuid.Parse(cfg.CustomerID)
 	if err != nil {
 		return nil, fmt.Errorf("parse customer ID: %w", err)
@@ -75,7 +70,7 @@ func newProtoMarshaler(cfg Config, teleSettings component.TelemetrySettings, lab
 		teleSettings: teleSettings,
 		labels:       labels,
 		customerID:   CustomerID[:],
-		collectorID:  col[:],
+		collectorID:  collectorID[:],
 	}, nil
 }
 
