@@ -914,8 +914,8 @@ github.com/ionos-cloud/sdk-go/v6 v6.1.9 h1:Iq3VIXzeEbc8EbButuACgfLMiY5TPVWUPNrF+
 github.com/ionos-cloud/sdk-go/v6 v6.1.9/go.mod h1:EzEgRIDxBELvfoa/uBN0kOQaqovLjUWEB7iW4/Q+t4k=
 github.com/jaegertracing/jaeger v1.54.0 h1:BfQiFxrE/2Fw+qU24qjSuUGsgJQLwKHi1TXBy6J3qKo=
 github.com/jaegertracing/jaeger v1.54.0/go.mod h1:wNmtyrAJ/sJAgOvC9BltyKErJY8glTHCvWLTsvhaqkY=
-github.com/jarcoal/httpmock v1.3.1 h1:iUx3whfZWVf3jT01hQTO/Eo5sAYtB2/rqaUuOtpInww=
-github.com/jarcoal/httpmock v1.3.1/go.mod h1:3yb8rc4BI7TCBhFY8ng0gjuLKJNquuDNiPaZjnENuYg=
+github.com/jarcoal/httpmock v1.3.0 h1:2RJ8GP0IIaWwcC9Fp2BmVi8Kog3v2Hn7VXM3fTd+nuc=
+github.com/jarcoal/httpmock v1.3.0/go.mod h1:3yb8rc4BI7TCBhFY8ng0gjuLKJNquuDNiPaZjnENuYg=
 github.com/jcmturner/aescts/v2 v2.0.0 h1:9YKLH6ey7H4eDBXW8khjYslgyqG2xZikXP0EQFKrle8=
 github.com/jcmturner/aescts/v2 v2.0.0/go.mod h1:AiaICIRyfYg35RUkr8yESTqvSy7csK90qZ5xfvvsoNs=
 github.com/jcmturner/dnsutils/v2 v2.0.0 h1:lltnkeZGL0wILNvrNiVCR6Ro5PGU/SeBvVO/8c/iPbo=
