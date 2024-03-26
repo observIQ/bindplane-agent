@@ -17,6 +17,11 @@
 set -e
 
 manage_systemd_service() {
+  # Ensure sysv script isn't present, and if it is remove it
+  if [ -f /etc/init.d/observiq-otel-collector ]; then
+    rm -f /etc/init.d/observiq-otel-collector
+  fi
+
   systemctl daemon-reload
 
   echo "configured systemd service"
