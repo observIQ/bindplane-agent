@@ -20,14 +20,15 @@ import (
 	"testing"
 
 	"github.com/golang/mock/gomock"
-	"github.com/observiq/bindplane-agent/exporter/chronicleexporter/protos/generated"
-	"github.com/observiq/bindplane-agent/exporter/chronicleexporter/protos/generated/mocks"
+	"github.com/observiq/bindplane-agent/exporter/chronicleexporter/protos/api"
+	"github.com/observiq/bindplane-agent/exporter/chronicleexporter/protos/api/mocks"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 )
 
 func TestLogsDataPusher(t *testing.T) {
+
 	// Set up configuration, logger, and context
 	cfg := Config{Endpoint: baseEndpoint}
 	ctx := context.Background()
@@ -43,7 +44,7 @@ func TestLogsDataPusher(t *testing.T) {
 			setupExporter: func() *chronicleExporter {
 				mockClient := mocks.NewMockIngestionServiceV2Client(gomock.NewController(t))
 				marshaller := NewMockMarshaler(t)
-				marshaller.On("MarshalRawLogs", mock.Anything, mock.Anything).Return([]*generated.BatchCreateLogsRequest{{}}, nil)
+				marshaller.On("MarshalRawLogs", mock.Anything, mock.Anything).Return([]*api.BatchCreateLogsRequest{{}}, nil)
 				return &chronicleExporter{
 					cfg:       &cfg,
 					logger:    zap.NewNop(),
@@ -52,7 +53,7 @@ func TestLogsDataPusher(t *testing.T) {
 				}
 			},
 			setupMocks: func(mockClient *mocks.MockIngestionServiceV2Client) {
-				mockClient.EXPECT().BatchCreateLogs(gomock.Any(), gomock.Any(), gomock.Any()).Return(&generated.BatchCreateLogsResponse{}, nil)
+				mockClient.EXPECT().BatchCreateLogs(gomock.Any(), gomock.Any(), gomock.Any()).Return(&api.BatchCreateLogsResponse{}, nil)
 			},
 			expectedErr: "",
 		},
@@ -61,7 +62,7 @@ func TestLogsDataPusher(t *testing.T) {
 			setupExporter: func() *chronicleExporter {
 				mockClient := mocks.NewMockIngestionServiceV2Client(gomock.NewController(t))
 				marshaller := NewMockMarshaler(t)
-				marshaller.On("MarshalRawLogs", mock.Anything, mock.Anything).Return([]*generated.BatchCreateLogsRequest{{}}, nil)
+				marshaller.On("MarshalRawLogs", mock.Anything, mock.Anything).Return([]*api.BatchCreateLogsRequest{{}}, nil)
 				return &chronicleExporter{
 					cfg:       &cfg,
 					logger:    zap.NewNop(),
@@ -100,7 +101,7 @@ func TestLogsDataPusher(t *testing.T) {
 				mockClient := mocks.NewMockIngestionServiceV2Client(gomock.NewController(t))
 				marshaller := NewMockMarshaler(t)
 				// Return an empty slice to simulate no logs to push
-				marshaller.On("MarshalRawLogs", mock.Anything, mock.Anything).Return([]*generated.BatchCreateLogsRequest{}, nil)
+				marshaller.On("MarshalRawLogs", mock.Anything, mock.Anything).Return([]*api.BatchCreateLogsRequest{}, nil)
 				return &chronicleExporter{
 					cfg:       &cfg,
 					logger:    zap.NewNop(),

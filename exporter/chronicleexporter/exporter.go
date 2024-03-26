@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/observiq/bindplane-agent/exporter/chronicleexporter/protos/generated"
+	"github.com/observiq/bindplane-agent/exporter/chronicleexporter/protos/api"
 	"go.opentelemetry.io/collector/consumer"
 	"go.opentelemetry.io/collector/exporter"
 	"go.opentelemetry.io/collector/pdata/plog"
@@ -39,7 +39,7 @@ const baseEndpoint = "malachiteingestion-pa.googleapis.com"
 type chronicleExporter struct {
 	cfg       *Config
 	logger    *zap.Logger
-	client    generated.IngestionServiceV2Client
+	client    api.IngestionServiceV2Client
 	marshaler logMarshaler
 }
 
@@ -69,7 +69,7 @@ func newExporter(cfg *Config, params exporter.CreateSettings) (*chronicleExporte
 	return &chronicleExporter{
 		cfg:       cfg,
 		logger:    params.Logger,
-		client:    generated.NewIngestionServiceV2Client(conn),
+		client:    api.NewIngestionServiceV2Client(conn),
 		marshaler: marshaller,
 	}, nil
 }
@@ -94,10 +94,10 @@ func loadGoogleCredentials(cfg *Config) (*google.Credentials, error) {
 	}
 }
 
-func buildLabels(cfg *Config) []*generated.Label {
-	labels := make([]*generated.Label, 0, len(cfg.IngestionLabels))
+func buildLabels(cfg *Config) []*api.Label {
+	labels := make([]*api.Label, 0, len(cfg.IngestionLabels))
 	for k, v := range cfg.IngestionLabels {
-		labels = append(labels, &generated.Label{
+		labels = append(labels, &api.Label{
 			Key:   k,
 			Value: v,
 		})
@@ -124,7 +124,7 @@ func (ce *chronicleExporter) logsDataPusher(ctx context.Context, ld plog.Logs) e
 	return nil
 }
 
-func (ce *chronicleExporter) uploadToChronicle(ctx context.Context, request *generated.BatchCreateLogsRequest) error {
+func (ce *chronicleExporter) uploadToChronicle(ctx context.Context, request *api.BatchCreateLogsRequest) error {
 	_, err := ce.client.BatchCreateLogs(ctx, request, ce.buildOptions()...)
 	if err != nil {
 		return fmt.Errorf("upload logs to chronicle: %w", err)

@@ -3,7 +3,7 @@ syntax = "proto3";
 
 package malachite.ingestion.v2;
 
-option go_package = "github.com/exporter/chronicleexporter/proto/generated";
+option go_package = "github.com/exporter/chronicleexporter/proto/api";
 
 // Information about the source collection point.
 // In the future we can extend this message to include additional metadata

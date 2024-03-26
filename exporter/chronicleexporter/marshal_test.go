@@ -20,7 +20,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/observiq/bindplane-agent/exporter/chronicleexporter/protos/generated"
+	"github.com/observiq/bindplane-agent/exporter/chronicleexporter/protos/api"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/pdata/plog"
@@ -35,9 +35,9 @@ func TestProtoMarshaler_MarshalRawLogs(t *testing.T) {
 	tests := []struct {
 		name         string
 		cfg          Config
-		labels       []*generated.Label
+		labels       []*api.Label
 		logRecords   func() plog.Logs
-		expectations func(t *testing.T, requests []*generated.BatchCreateLogsRequest)
+		expectations func(t *testing.T, requests []*api.BatchCreateLogsRequest)
 	}{
 		{
 			name: "Single log record with expected data",
@@ -47,13 +47,13 @@ func TestProtoMarshaler_MarshalRawLogs(t *testing.T) {
 				RawLogField:     "body",
 				OverrideLogType: false,
 			},
-			labels: []*generated.Label{
+			labels: []*api.Label{
 				{Key: "env", Value: "prod"},
 			},
 			logRecords: func() plog.Logs {
 				return mockLogs(mockLogRecord("Test log message", map[string]any{"log_type": "WINEVTLOG"}))
 			},
-			expectations: func(t *testing.T, requests []*generated.BatchCreateLogsRequest) {
+			expectations: func(t *testing.T, requests []*api.BatchCreateLogsRequest) {
 				require.Len(t, requests, 1)
 				batch := requests[0].Batch
 				require.Equal(t, "WINEVTLOG", batch.LogType)
@@ -76,7 +76,7 @@ func TestProtoMarshaler_MarshalRawLogs(t *testing.T) {
 				RawLogField:     "body",
 				OverrideLogType: false,
 			},
-			labels: []*generated.Label{
+			labels: []*api.Label{
 				{Key: "env", Value: "staging"},
 			},
 			logRecords: func() plog.Logs {
@@ -87,7 +87,7 @@ func TestProtoMarshaler_MarshalRawLogs(t *testing.T) {
 				record2.Body().SetStr("Second log message")
 				return logs
 			},
-			expectations: func(t *testing.T, requests []*generated.BatchCreateLogsRequest) {
+			expectations: func(t *testing.T, requests []*api.BatchCreateLogsRequest) {
 				require.Len(t, requests, 1, "Expected a single batch request")
 				batch := requests[0].Batch
 				require.Len(t, batch.Entries, 2, "Expected two log entries in the batch")
@@ -105,11 +105,11 @@ func TestProtoMarshaler_MarshalRawLogs(t *testing.T) {
 				RawLogField:     "attributes",
 				OverrideLogType: false,
 			},
-			labels: []*generated.Label{},
+			labels: []*api.Label{},
 			logRecords: func() plog.Logs {
 				return mockLogs(mockLogRecord("", map[string]any{"key1": "value1", "log_type": "WINEVTLOG"}))
 			},
-			expectations: func(t *testing.T, requests []*generated.BatchCreateLogsRequest) {
+			expectations: func(t *testing.T, requests []*api.BatchCreateLogsRequest) {
 				require.Len(t, requests, 1)
 				batch := requests[0].Batch
 				require.Len(t, batch.Entries, 1)
@@ -128,11 +128,11 @@ func TestProtoMarshaler_MarshalRawLogs(t *testing.T) {
 				RawLogField:     "body",
 				OverrideLogType: false,
 			},
-			labels: []*generated.Label{},
+			labels: []*api.Label{},
 			logRecords: func() plog.Logs {
 				return plog.NewLogs() // No log records added
 			},
-			expectations: func(t *testing.T, requests []*generated.BatchCreateLogsRequest) {
+			expectations: func(t *testing.T, requests []*api.BatchCreateLogsRequest) {
 				require.Len(t, requests, 0, "Expected no requests due to no log records")
 			},
 		},
@@ -144,11 +144,11 @@ func TestProtoMarshaler_MarshalRawLogs(t *testing.T) {
 				RawLogField:     "body",
 				OverrideLogType: true,
 			},
-			labels: []*generated.Label{},
+			labels: []*api.Label{},
 			logRecords: func() plog.Logs {
 				return mockLogs(mockLogRecord("Log with overridden type", map[string]any{"log_type": "windows_event.custom"}))
 			},
-			expectations: func(t *testing.T, requests []*generated.BatchCreateLogsRequest) {
+			expectations: func(t *testing.T, requests []*api.BatchCreateLogsRequest) {
 				require.Len(t, requests, 1)
 				batch := requests[0].Batch
 				require.Equal(t, "WINEVTLOG", batch.LogType, "Expected log type to be overridden by attribute")

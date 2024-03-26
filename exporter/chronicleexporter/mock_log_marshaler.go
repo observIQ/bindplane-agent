@@ -5,7 +5,7 @@ package chronicleexporter
 import (
 	context "context"
 
-	generated "github.com/observiq/bindplane-agent/exporter/chronicleexporter/protos/generated"
+	api "github.com/observiq/bindplane-agent/exporter/chronicleexporter/protos/api"
 	mock "github.com/stretchr/testify/mock"
 
 	plog "go.opentelemetry.io/collector/pdata/plog"
@@ -17,23 +17,23 @@ type MockMarshaler struct {
 }
 
 // MarshalRawLogs provides a mock function with given fields: ctx, ld
-func (_m *MockMarshaler) MarshalRawLogs(ctx context.Context, ld plog.Logs) ([]*generated.BatchCreateLogsRequest, error) {
+func (_m *MockMarshaler) MarshalRawLogs(ctx context.Context, ld plog.Logs) ([]*api.BatchCreateLogsRequest, error) {
 	ret := _m.Called(ctx, ld)
 
 	if len(ret) == 0 {
 		panic("no return value specified for MarshalRawLogs")
 	}
 
-	var r0 []*generated.BatchCreateLogsRequest
+	var r0 []*api.BatchCreateLogsRequest
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, plog.Logs) ([]*generated.BatchCreateLogsRequest, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, plog.Logs) ([]*api.BatchCreateLogsRequest, error)); ok {
 		return rf(ctx, ld)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, plog.Logs) []*generated.BatchCreateLogsRequest); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, plog.Logs) []*api.BatchCreateLogsRequest); ok {
 		r0 = rf(ctx, ld)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]*generated.BatchCreateLogsRequest)
+			r0 = ret.Get(0).([]*api.BatchCreateLogsRequest)
 		}
 	}
 

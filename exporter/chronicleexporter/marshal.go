@@ -21,7 +21,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/observiq/bindplane-agent/exporter/chronicleexporter/protos/generated"
+	"github.com/observiq/bindplane-agent/exporter/chronicleexporter/protos/api"
 	"github.com/observiq/bindplane-agent/expr"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/ottl/contexts/ottllog"
 	"go.opentelemetry.io/collector/component"
@@ -33,6 +33,7 @@ import (
 
 const logTypeField = `attributes["log_type"]`
 
+// This is a specific collector ID for Chronicle. It's used to identify bindplane agents in Chronicle.
 const collectorID = "aaaa1111-aaaa-1111-aaaa-1111aaaa1111"
 
 var supportedLogTypes = map[string]string{
@@ -45,19 +46,19 @@ var supportedLogTypes = map[string]string{
 
 //go:generate mockery --name logMarshaler --filename mock_log_marshaler.go --structname MockMarshaler --inpackage
 type logMarshaler interface {
-	MarshalRawLogs(ctx context.Context, ld plog.Logs) ([]*generated.BatchCreateLogsRequest, error)
+	MarshalRawLogs(ctx context.Context, ld plog.Logs) ([]*api.BatchCreateLogsRequest, error)
 }
 
 type protoMarshaler struct {
 	cfg          Config
 	teleSettings component.TelemetrySettings
-	labels       []*generated.Label
+	labels       []*api.Label
 	startTime    time.Time
 	customerID   []byte
 	collectorID  []byte
 }
 
-func newProtoMarshaler(cfg Config, teleSettings component.TelemetrySettings, labels []*generated.Label) (*protoMarshaler, error) {
+func newProtoMarshaler(cfg Config, teleSettings component.TelemetrySettings, labels []*api.Label) (*protoMarshaler, error) {
 	col, err := uuid.Parse(collectorID)
 	if err != nil {
 		return nil, fmt.Errorf("parse collector ID: %w", err)
@@ -69,7 +70,7 @@ func newProtoMarshaler(cfg Config, teleSettings component.TelemetrySettings, lab
 	}
 
 	return &protoMarshaler{
-		startTime:    time.Now(),
+		startTime:    time.Now().UTC(),
 		cfg:          cfg,
 		teleSettings: teleSettings,
 		labels:       labels,
@@ -78,7 +79,7 @@ func newProtoMarshaler(cfg Config, teleSettings component.TelemetrySettings, lab
 	}, nil
 }
 
-func (m *protoMarshaler) MarshalRawLogs(ctx context.Context, ld plog.Logs) ([]*generated.BatchCreateLogsRequest, error) {
+func (m *protoMarshaler) MarshalRawLogs(ctx context.Context, ld plog.Logs) ([]*api.BatchCreateLogsRequest, error) {
 	rawLogs, err := m.extractRawLogs(ctx, ld)
 	if err != nil {
 		return nil, fmt.Errorf("extract raw logs: %w", err)
@@ -87,8 +88,8 @@ func (m *protoMarshaler) MarshalRawLogs(ctx context.Context, ld plog.Logs) ([]*g
 	return m.constructPayloads(rawLogs), nil
 }
 
-func (m *protoMarshaler) extractRawLogs(ctx context.Context, ld plog.Logs) (map[string][]*generated.LogEntry, error) {
-	entries := make(map[string][]*generated.LogEntry)
+func (m *protoMarshaler) extractRawLogs(ctx context.Context, ld plog.Logs) (map[string][]*api.LogEntry, error) {
+	entries := make(map[string][]*api.LogEntry)
 
 	for i := 0; i < ld.ResourceLogs().Len(); i++ {
 		resourceLog := ld.ResourceLogs().At(i)
@@ -113,9 +114,9 @@ func (m *protoMarshaler) extractRawLogs(ctx context.Context, ld plog.Logs) (map[
 					timestamp = logRecord.ObservedTimestamp().AsTime()
 				}
 
-				entry := &generated.LogEntry{
-					Timestamp:      timestamppb.New(timestamp),
-					CollectionTime: timestamppb.New(logRecord.ObservedTimestamp().AsTime()),
+				entry := &api.LogEntry{
+					Timestamp:      timestamppb.New(timestamp.UTC()),
+					CollectionTime: timestamppb.New(logRecord.ObservedTimestamp().AsTime().UTC()),
 					Data:           []byte(rawLog),
 				}
 				entries[logType] = append(entries[logType], entry)
@@ -203,16 +204,16 @@ func (m *protoMarshaler) getRawField(ctx context.Context, field string, logRecor
 	}
 }
 
-func (m *protoMarshaler) constructPayloads(rawLogs map[string][]*generated.LogEntry) []*generated.BatchCreateLogsRequest {
-	payloads := make([]*generated.BatchCreateLogsRequest, 0, len(rawLogs))
+func (m *protoMarshaler) constructPayloads(rawLogs map[string][]*api.LogEntry) []*api.BatchCreateLogsRequest {
+	payloads := make([]*api.BatchCreateLogsRequest, 0, len(rawLogs))
 	for logType, entries := range rawLogs {
 		if len(entries) > 0 {
-			payloads = append(payloads, &generated.BatchCreateLogsRequest{
-				Batch: &generated.LogEntryBatch{
+			payloads = append(payloads, &api.BatchCreateLogsRequest{
+				Batch: &api.LogEntryBatch{
 					StartTime: timestamppb.New(m.startTime),
 					Entries:   entries,
 					LogType:   logType,
-					Source: &generated.EventSource{
+					Source: &api.EventSource{
 						CollectorId: m.collectorID,
 						CustomerId:  m.customerID,
 						Labels:      m.labels,
