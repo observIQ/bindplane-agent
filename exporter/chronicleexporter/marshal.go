@@ -65,7 +65,7 @@ func newProtoMarshaler(cfg Config, teleSettings component.TelemetrySettings, lab
 	}
 
 	return &protoMarshaler{
-		startTime:    time.Now().UTC(),
+		startTime:    time.Now(),
 		cfg:          cfg,
 		teleSettings: teleSettings,
 		labels:       labels,
@@ -110,8 +110,8 @@ func (m *protoMarshaler) extractRawLogs(ctx context.Context, ld plog.Logs) (map[
 				}
 
 				entry := &api.LogEntry{
-					Timestamp:      timestamppb.New(timestamp.UTC()),
-					CollectionTime: timestamppb.New(logRecord.ObservedTimestamp().AsTime().UTC()),
+					Timestamp:      timestamppb.New(timestamp),
+					CollectionTime: timestamppb.New(logRecord.ObservedTimestamp().AsTime()),
 					Data:           []byte(rawLog),
 				}
 				entries[logType] = append(entries[logType], entry)

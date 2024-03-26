@@ -65,7 +65,7 @@ func TestProtoMarshaler_MarshalRawLogs(t *testing.T) {
 				require.Equal(t, expectedLogData, logDataAsString)
 
 				require.NotNil(t, batch.StartTime)
-				require.True(t, timestamppb.New(startTime).AsTime().Before(batch.StartTime.AsTime()), "Start time should be set correctly")
+				require.True(t, timestamppb.New(startTime).AsTime().Equal(batch.StartTime.AsTime()), "Start time should be set correctly")
 			},
 		},
 		{
@@ -158,7 +158,9 @@ func TestProtoMarshaler_MarshalRawLogs(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+
 			marshaler, err := newProtoMarshaler(tt.cfg, component.TelemetrySettings{Logger: logger}, tt.labels)
+			marshaler.startTime = startTime
 			require.NoError(t, err)
 
 			logs := tt.logRecords()
