@@ -17,11 +17,11 @@
 set -e
 
 manage_systemd_service() {
-    systemctl daemon-reload
+  systemctl daemon-reload
 
-    echo "configured systemd service"
+  echo "configured systemd service"
 
-    cat << EOF
+  cat << EOF
 
 The "observiq-otel-collector" service has been configured!
 
@@ -50,10 +50,19 @@ If you have any other questions please contact us at support@observiq.com
 EOF
 }
 
+manage_sysv_service() {
+  chmod 755 /etc/init.d/observiq-otel-collector
+  chmod 644 /etc/sysconfig/observiq-otel-collector
+  echo "configured sysv service"
+}
+
 init_type() {
-  systemd_test="$(systemctl 2>/dev/null || : 2>&1)"
-  if command printf "$systemd_test" | grep -q '\-.mount'; then
+  # Determine if we need service or systemctl for prereqs
+  if command -v systemctl > /dev/null 2>&1; then
     command printf "systemd"
+    return
+  elif command -v service > /dev/null 2>&1; then
+    command printf "service"
     return
   fi
 
@@ -66,6 +75,9 @@ manage_service() {
   case "$service_type" in
     systemd)
       manage_systemd_service
+      ;;
+    service)
+      manage_sysv_service
       ;;
     *)
       echo "could not detect init system, skipping service configuration"

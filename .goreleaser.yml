@@ -108,6 +108,12 @@ archives:
       - src: release_deps/observiq-otel-collector.service
         dst: "install"
         strip_parent: true
+      - src: release_deps/observiq-otel-collector
+        dst: "install"
+        strip_parent: true
+      - src: release_deps/sysconfig/observiq-otel-collector
+        dst: "install/sysconfig"
+        strip_parent: true
     format_overrides:
       - goos: windows
         format: zip
@@ -192,6 +198,20 @@ nfpms:
       - src: service/observiq-otel-collector.service
         dst: /usr/lib/systemd/system/observiq-otel-collector.service
         type: config|noreplace
+        file_info:
+          mode: 0644
+          owner: root
+          group: root
+      - src: service/observiq-otel-collector
+        dst: /etc/init.d/observiq-otel-collector
+        type: config|noreplace
+        file_info:
+          mode: 0755
+          owner: root
+          group: root
+      - src: service/sysconfig/observiq-otel-collector
+        dst: /etc/sysconfig/observiq-otel-collector
+        type: config
         file_info:
           mode: 0644
           owner: root

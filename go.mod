@@ -5,32 +5,32 @@ go 1.21.6
 require (
 	github.com/google/uuid v1.6.0
 	github.com/mholt/archiver/v3 v3.5.1
-	github.com/observiq/bindplane-agent/exporter/azureblobexporter v1.46.0
-	github.com/observiq/bindplane-agent/exporter/chronicleexporter v1.46.0
-	github.com/observiq/bindplane-agent/exporter/chronicleforwarderexporter v1.46.0
-	github.com/observiq/bindplane-agent/exporter/googlecloudexporter v1.46.0
-	github.com/observiq/bindplane-agent/exporter/googlemanagedprometheusexporter v1.46.0
-	github.com/observiq/bindplane-agent/exporter/snowflakeexporter v1.46.0
-	github.com/observiq/bindplane-agent/packagestate v1.46.0
-	github.com/observiq/bindplane-agent/processor/datapointcountprocessor v1.46.0
-	github.com/observiq/bindplane-agent/processor/logcountprocessor v1.46.0
-	github.com/observiq/bindplane-agent/processor/logdeduplicationprocessor v1.46.0
-	github.com/observiq/bindplane-agent/processor/lookupprocessor v1.46.0
-	github.com/observiq/bindplane-agent/processor/maskprocessor v1.46.0
-	github.com/observiq/bindplane-agent/processor/metricextractprocessor v1.46.0
-	github.com/observiq/bindplane-agent/processor/metricstatsprocessor v1.46.0
-	github.com/observiq/bindplane-agent/processor/removeemptyvaluesprocessor v1.46.0
-	github.com/observiq/bindplane-agent/processor/resourceattributetransposerprocessor v1.46.0
-	github.com/observiq/bindplane-agent/processor/samplingprocessor v1.46.0
-	github.com/observiq/bindplane-agent/processor/spancountprocessor v1.46.0
-	github.com/observiq/bindplane-agent/processor/throughputmeasurementprocessor v1.46.0
-	github.com/observiq/bindplane-agent/receiver/azureblobrehydrationreceiver v1.46.0
-	github.com/observiq/bindplane-agent/receiver/httpreceiver v1.46.0
-	github.com/observiq/bindplane-agent/receiver/m365receiver v1.46.0
-	github.com/observiq/bindplane-agent/receiver/pluginreceiver v1.46.0
-	github.com/observiq/bindplane-agent/receiver/routereceiver v1.46.0
-	github.com/observiq/bindplane-agent/receiver/sapnetweaverreceiver v1.46.0
-	github.com/observiq/bindplane-agent/receiver/telemetrygeneratorreceiver v1.46.0
+	github.com/observiq/bindplane-agent/exporter/azureblobexporter v1.47.0
+	github.com/observiq/bindplane-agent/exporter/chronicleexporter v1.47.0
+	github.com/observiq/bindplane-agent/exporter/chronicleforwarderexporter v1.47.0
+	github.com/observiq/bindplane-agent/exporter/googlecloudexporter v1.47.0
+	github.com/observiq/bindplane-agent/exporter/googlemanagedprometheusexporter v1.47.0
+	github.com/observiq/bindplane-agent/exporter/snowflakeexporter v1.47.0
+	github.com/observiq/bindplane-agent/packagestate v1.47.0
+	github.com/observiq/bindplane-agent/processor/datapointcountprocessor v1.47.0
+	github.com/observiq/bindplane-agent/processor/logcountprocessor v1.47.0
+	github.com/observiq/bindplane-agent/processor/logdeduplicationprocessor v1.47.0
+	github.com/observiq/bindplane-agent/processor/lookupprocessor v1.47.0
+	github.com/observiq/bindplane-agent/processor/maskprocessor v1.47.0
+	github.com/observiq/bindplane-agent/processor/metricextractprocessor v1.47.0
+	github.com/observiq/bindplane-agent/processor/metricstatsprocessor v1.47.0
+	github.com/observiq/bindplane-agent/processor/removeemptyvaluesprocessor v1.47.0
+	github.com/observiq/bindplane-agent/processor/resourceattributetransposerprocessor v1.47.0
+	github.com/observiq/bindplane-agent/processor/samplingprocessor v1.47.0
+	github.com/observiq/bindplane-agent/processor/spancountprocessor v1.47.0
+	github.com/observiq/bindplane-agent/processor/throughputmeasurementprocessor v1.47.0
+	github.com/observiq/bindplane-agent/receiver/azureblobrehydrationreceiver v1.47.0
+	github.com/observiq/bindplane-agent/receiver/httpreceiver v1.47.0
+	github.com/observiq/bindplane-agent/receiver/m365receiver v1.47.0
+	github.com/observiq/bindplane-agent/receiver/pluginreceiver v1.47.0
+	github.com/observiq/bindplane-agent/receiver/routereceiver v1.47.0
+	github.com/observiq/bindplane-agent/receiver/sapnetweaverreceiver v1.47.0
+	github.com/observiq/bindplane-agent/receiver/telemetrygeneratorreceiver v1.47.0
 	github.com/oklog/ulid/v2 v2.1.0
 	github.com/open-telemetry/opamp-go v0.9.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/connector/countconnector v0.96.0
@@ -251,8 +251,8 @@ require (
 	github.com/kylelemons/godebug v1.1.0 // indirect
 	github.com/lestrrat-go/strftime v1.0.6 // indirect
 	github.com/microsoft/go-mssqldb v1.7.0 // indirect
-	github.com/observiq/bindplane-agent/counter v1.46.0 // indirect
-	github.com/observiq/bindplane-agent/expr v1.46.0 // indirect
+	github.com/observiq/bindplane-agent/counter v1.47.0 // indirect
+	github.com/observiq/bindplane-agent/expr v1.47.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlemanagedprometheusexporter v0.96.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/internal/collectd v0.96.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/internal/datadog v0.96.0 // indirect
@@ -297,8 +297,8 @@ require (
 	go.opentelemetry.io/otel/exporters/stdout/stdoutmetric v1.24.0 // indirect
 	go.opentelemetry.io/otel/exporters/stdout/stdouttrace v1.24.0 // indirect
 	go.opentelemetry.io/proto/otlp v1.1.0 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20240205150955-31a09d347014 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20240304161311-37d4d3c04a78 // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20240311132316-a219d84964c2 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20240314234333-6e1732d8331c // indirect
 	gopkg.in/zorkian/go-datadog-api.v2 v2.30.0 // indirect
 	sigs.k8s.io/controller-runtime v0.17.2 // indirect
 )
@@ -455,7 +455,7 @@ require (
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/gofuzz v1.2.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.3.2 // indirect
-	github.com/googleapis/gax-go/v2 v2.12.2 // indirect
+	github.com/googleapis/gax-go/v2 v2.12.3 // indirect
 	github.com/gophercloud/gophercloud v1.7.0 // indirect
 	github.com/gorilla/mux v1.8.1 // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect
@@ -641,11 +641,11 @@ require (
 	golang.org/x/tools v0.17.0 // indirect
 	golang.org/x/xerrors v0.0.0-20231012003039-104605ab7028 // indirect
 	gonum.org/v1/gonum v0.14.0 // indirect
-	google.golang.org/api v0.169.0 // indirect
+	google.golang.org/api v0.171.0 // indirect
 	google.golang.org/appengine v1.6.8 // indirect
 	google.golang.org/genproto v0.0.0-20240205150955-31a09d347014 // indirect
-	google.golang.org/grpc v1.62.0 // indirect
-	google.golang.org/protobuf v1.32.0 // indirect
+	google.golang.org/grpc v1.62.1 // indirect
+	google.golang.org/protobuf v1.33.0 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/square/go-jose.v2 v2.5.1 // indirect
