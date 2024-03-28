@@ -10,7 +10,7 @@
 
 </center>
 
-BindPlane Agent is observIQ’s distribution of the [OpenTelemetry collector](https://github.com/open-telemetry/opentelemetry-collector). It provides a simple and unified solution to collect, refine, and ship telemetry data anywhere.
+The BindPlane Agent is observIQ’s distribution of the [OpenTelemetry collector](https://github.com/open-telemetry/opentelemetry-collector). It’s the first distribution to implement the [Open Agent Management Protocol](https://opentelemetry.io/docs/specs/opamp/) (OpAMP) and is designed to be fully managed with [BindPlane OP](https://observiq.com/). To get started, follow our [Quickstart Guide](https://observiq.com/docs/getting-started/quickstart-guide).
 
 ## Benefits
 
@@ -63,11 +63,11 @@ For more installation information see [installing on macOS](/docs/installation-m
 
 Now that the agent is installed it is collecting basic metrics about the host machine printing them to the log. If you want to further configure your agent you may do so by editing the config file. To find your config file based on your OS reference the table below:
 
-| OS | Default Location |
-| :--- | :---- |
-| Linux | /opt/observiq-otel-collector/config.yaml |
+| OS      | Default Location                                              |
+|:--------|:--------------------------------------------------------------|
+| Linux   | /opt/observiq-otel-collector/config.yaml                      |
 | Windows | C:\Program Files\observIQ OpenTelemetry Collector\config.yaml |
-| macOS | /opt/observiq-otel-collector/config.yaml |
+| macOS   | /opt/observiq-otel-collector/config.yaml                      |
 
 For more information on configuration see the [Configuration section](#configuration).
 
