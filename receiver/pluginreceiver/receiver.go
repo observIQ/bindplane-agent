@@ -41,6 +41,7 @@ type Receiver struct {
 	serviceErrChan chan error
 }
 
+// NewReceiver creates a new plugin receiver
 func NewReceiver(
 	plugin *Plugin,
 	renderedConfig *RenderedConfig,
