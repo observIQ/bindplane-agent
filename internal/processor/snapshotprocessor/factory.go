@@ -23,9 +23,9 @@ import (
 	"go.opentelemetry.io/collector/processor/processorhelper"
 )
 
-const (
-	typeStr = "snapshotprocessor"
+var componentType = component.MustNewType("snapshotprocessor")
 
+const (
 	stability = component.StabilityLevelAlpha
 )
 
@@ -34,7 +34,7 @@ var consumerCapabilities = consumer.Capabilities{MutatesData: false}
 // NewFactory creates a new ProcessorFactory with default configuration
 func NewFactory() processor.Factory {
 	return processor.NewFactory(
-		typeStr,
+		componentType,
 		createDefaultConfig,
 		processor.WithTraces(createTracesProcessor, stability),
 		processor.WithLogs(createLogsProcessor, stability),

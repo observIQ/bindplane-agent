@@ -39,7 +39,11 @@ func TestNewSettings(t *testing.T) {
 	require.NoError(t, err)
 	provider, err := settings.ConfigProvider.Get(context.Background(), factories)
 	require.NoError(t, err)
-	receivcfg := provider.Receivers[component.NewID("filelog")]
+
+	filelogType, err := component.NewType("filelog")
+	require.NoError(t, err)
+
+	receivcfg := provider.Receivers[component.NewID(filelogType)]
 	config := receivcfg.(*filelogreceiver.FileLogConfig)
 	actualConfVal := config.InputConfig.Include[0]
 	require.Equal(t, "./test.log", actualConfVal)

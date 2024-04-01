@@ -81,7 +81,7 @@ func Test_processTraces(t *testing.T) {
 				logger:      zap.NewNop(),
 				enabled:     tc.enabled,
 				snapShotter: mockSnapshotter,
-				processorID: typeStr,
+				processorID: componentType.String(),
 			}
 
 			td := ptrace.NewTraces()
@@ -120,7 +120,7 @@ func Test_processLogs(t *testing.T) {
 				logger:      zap.NewNop(),
 				enabled:     tc.enabled,
 				snapShotter: mockSnapshotter,
-				processorID: typeStr,
+				processorID: componentType.String(),
 			}
 
 			ld := plog.NewLogs()
@@ -159,7 +159,7 @@ func Test_processMetrics(t *testing.T) {
 				logger:      zap.NewNop(),
 				enabled:     tc.enabled,
 				snapShotter: mockSnapshotter,
-				processorID: typeStr,
+				processorID: componentType.String(),
 			}
 
 			md := pmetric.NewMetrics()

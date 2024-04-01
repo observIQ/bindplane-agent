@@ -35,7 +35,7 @@ func NewSettings(configPaths []string, version string, loggingOpts []zap.Option,
 		Version:     version,
 	}
 
-	fmp := fileprovider.New()
+	fmp := fileprovider.NewWithSettings(confmap.ProviderSettings{})
 	configProviderSettings := otelcol.ConfigProviderSettings{
 		ResolverSettings: confmap.ResolverSettings{
 			URIs:       configPaths,

@@ -29,7 +29,7 @@ import (
 var gmpFactory = gmp.NewFactory()
 
 // componentType is the type of the google managed prometheus exporter
-var componentType = component.MustNewType("chronicle")
+var componentType = component.MustNewType("googlemanagedprometheus")
 
 const (
 	// The stability level of the exporter. Matches the current exporter in contrib

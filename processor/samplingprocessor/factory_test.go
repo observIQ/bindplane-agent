@@ -22,7 +22,7 @@ import (
 
 func TestNewFactory(t *testing.T) {
 	factory := NewFactory()
-	require.Equal(t, typeStr, string(factory.Type()))
+	require.Equal(t, componentType, factory.Type())
 
 	expectedCfg := &Config{
 		DropRatio: 0.5,

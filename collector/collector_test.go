@@ -26,7 +26,7 @@ import (
 	"go.opentelemetry.io/collector/receiver"
 )
 
-const slowShutdownTypestr = "slowshutdown"
+var slowShutdownType = component.MustNewType("slowshutdown")
 
 func TestCollectorRunValid(t *testing.T) {
 	ctx := context.Background()
@@ -157,7 +157,7 @@ func TestCollectorStopContextTimeout(t *testing.T) {
 	require.NoError(t, err)
 
 	concreteCol := col.(*collector)
-	concreteCol.factories.Receivers[slowShutdownTypestr] = slowShutdownReceiverFactory()
+	concreteCol.factories.Receivers[slowShutdownType] = slowShutdownReceiverFactory()
 
 	err = col.Run(context.Background())
 	require.NoError(t, err)
@@ -197,7 +197,7 @@ func TestCollectorRestartContextTimeout(t *testing.T) {
 	})
 
 	concreteCol := col.(*collector)
-	concreteCol.factories.Receivers[slowShutdownTypestr] = slowShutdownReceiverFactory()
+	concreteCol.factories.Receivers[slowShutdownType] = slowShutdownReceiverFactory()
 
 	err = col.Run(context.Background())
 	require.NoError(t, err)
@@ -238,7 +238,7 @@ func TestCollectorRestartContextTimeout(t *testing.T) {
 
 // slowShutdownReceiver only shutsdown if the shutdown context is cancelled.
 func slowShutdownReceiverFactory() receiver.Factory {
-	return receiver.NewFactory(slowShutdownTypestr,
+	return receiver.NewFactory(slowShutdownType,
 		func() component.Config { return &struct{}{} },
 		receiver.WithLogs(createLogsSlowShutdownReceiverReceiver, component.StabilityLevelDevelopment),
 	)
