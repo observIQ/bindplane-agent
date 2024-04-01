@@ -28,7 +28,7 @@ import (
 // gmpFactory is the factory used to create the underlying google managed prometheus exporter
 var gmpFactory = gmp.NewFactory()
 
-// typeStr is the type of the google managed prometheus exporter
+// componentType is the type of the google managed prometheus exporter
 var componentType = component.MustNewType("chronicle")
 
 const (
