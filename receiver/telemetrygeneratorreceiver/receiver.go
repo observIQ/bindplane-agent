@@ -39,7 +39,7 @@ type telemetryGeneratorReceiver struct {
 }
 
 // newTelemetryGeneratorReceiver creates a new telemetry generator receiver
-func newTelemetryGeneratorReceiver(ctx context.Context, logger *zap.Logger, cfg *Config, tp telemetryProducer) telemetryGeneratorReceiver {
+func newTelemetryGeneratorReceiver(_ context.Context, logger *zap.Logger, cfg *Config, tp telemetryProducer) telemetryGeneratorReceiver {
 	return telemetryGeneratorReceiver{
 		logger:   logger,
 		cfg:      cfg,
