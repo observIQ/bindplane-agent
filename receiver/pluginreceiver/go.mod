@@ -242,7 +242,7 @@ require (
 	github.com/prometheus/procfs v0.13.0 // indirect
 	github.com/prometheus/prometheus v0.50.1 // indirect
 	github.com/scaleway/scaleway-sdk-go v1.0.0-beta.22 // indirect
-	github.com/shirou/gopsutil/v3 v3.24.2 // indirect
+	github.com/shirou/gopsutil/v3 v3.24.3 // indirect
 	github.com/sijms/go-ora/v2 v2.8.10 // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
 	github.com/snowflakedb/gosnowflake v1.9.0 // indirect
