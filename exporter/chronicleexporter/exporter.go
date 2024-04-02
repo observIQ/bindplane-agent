@@ -19,7 +19,9 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"time"
 
+	"github.com/google/uuid"
 	"github.com/observiq/bindplane-agent/exporter/chronicleexporter/protos/api"
 	"go.opentelemetry.io/collector/consumer"
 	"go.opentelemetry.io/collector/exporter"
@@ -37,13 +39,17 @@ const scope = "https://www.googleapis.com/auth/malachite-ingestion"
 const baseEndpoint = "malachiteingestion-pa.googleapis.com"
 
 type chronicleExporter struct {
-	cfg       *Config
-	logger    *zap.Logger
-	client    api.IngestionServiceV2Client
-	marshaler logMarshaler
+	cfg                     *Config
+	logger                  *zap.Logger
+	client                  api.IngestionServiceV2Client
+	marshaler               logMarshaler
+	metrics                 *exporterMetrics
+	collectorID, exporterID string
+
+	cancel context.CancelFunc
 }
 
-func newExporter(cfg *Config, params exporter.CreateSettings) (*chronicleExporter, error) {
+func newExporter(cfg *Config, params exporter.CreateSettings, collectorID, exporterID string) (*chronicleExporter, error) {
 	creds, err := loadGoogleCredentials(cfg)
 	if err != nil {
 		return nil, fmt.Errorf("load Google credentials: %w", err)
@@ -61,17 +67,38 @@ func newExporter(cfg *Config, params exporter.CreateSettings) (*chronicleExporte
 		return nil, fmt.Errorf("dial: %w", err)
 	}
 
-	marshaller, err := newProtoMarshaler(*cfg, params.TelemetrySettings, buildLabels(cfg))
+	customerID, err := uuid.Parse(cfg.CustomerID)
+	if err != nil {
+		return nil, fmt.Errorf("parse customer ID: %w", err)
+	}
+
+	marshaller, err := newProtoMarshaler(*cfg, params.TelemetrySettings, buildLabels(cfg), customerID[:])
 	if err != nil {
 		return nil, fmt.Errorf("create proto marshaller: %w", err)
 	}
 
-	return &chronicleExporter{
-		cfg:       cfg,
-		logger:    params.Logger,
-		client:    api.NewIngestionServiceV2Client(conn),
-		marshaler: marshaller,
-	}, nil
+	uuidCID, err := uuid.Parse(collectorID)
+	if err != nil {
+		return nil, fmt.Errorf("parse collector ID: %w", err)
+	}
+
+	ctx, cancel := context.WithCancel(context.Background())
+	exp := &chronicleExporter{
+		cfg:         cfg,
+		logger:      params.Logger,
+		metrics:     newExporterMetrics(uuidCID[:], customerID[:], exporterID, cfg.Namespace),
+		client:      api.NewIngestionServiceV2Client(conn),
+		marshaler:   marshaller,
+		collectorID: collectorID,
+		exporterID:  exporterID,
+		cancel:      cancel,
+	}
+
+	if cfg.CollectHostMetrics {
+		go exp.startHostMetricsCollection(ctx)
+	}
+
+	return exp, nil
 }
 
 func loadGoogleCredentials(cfg *Config) (*google.Credentials, error) {
@@ -125,11 +152,15 @@ func (ce *chronicleExporter) logsDataPusher(ctx context.Context, ld plog.Logs) e
 }
 
 func (ce *chronicleExporter) uploadToChronicle(ctx context.Context, request *api.BatchCreateLogsRequest) error {
+	totalLogs := int64(len(request.GetBatch().GetEntries()))
+
 	_, err := ce.client.BatchCreateLogs(ctx, request, ce.buildOptions()...)
 	if err != nil {
 		return fmt.Errorf("upload logs to chronicle: %w", err)
 	}
 
+	ce.metrics.addSentLogs(totalLogs)
+	ce.metrics.updateLastSuccessfulUpload()
 	return nil
 }
 
@@ -141,4 +172,28 @@ func (ce *chronicleExporter) buildOptions() []grpc.CallOption {
 	}
 
 	return opts
+}
+
+func (ce *chronicleExporter) startHostMetricsCollection(ctx context.Context) {
+	ticker := time.NewTicker(5 * time.Minute)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case <-ticker.C:
+			err := ce.metrics.collectHostMetrics()
+			if err != nil {
+				ce.logger.Error("Failed to collect host metrics", zap.Error(err))
+			}
+			request := ce.metrics.getAndReset()
+			ce.client.BatchCreateEvents(ctx, request, ce.buildOptions()...)
+		}
+	}
+}
+
+func (ce *chronicleExporter) Shutdown(context.Context) error {
+	ce.cancel()
+	return nil
 }
