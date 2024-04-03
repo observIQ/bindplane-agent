@@ -23,6 +23,7 @@ import (
 	"net/http"
 	"net/url"
 	"sync"
+	"time"
 
 	"github.com/observiq/bindplane-agent/collector"
 	"github.com/observiq/bindplane-agent/internal/report"
@@ -38,6 +39,11 @@ import (
 var (
 	// ErrUnsupportedURL is error returned when creating a client with an unsupported URL scheme
 	ErrUnsupportedURL = errors.New("unsupported URL")
+)
+
+const (
+	// AgentHeartBeatInterval is the interval at which the agent sends heart
+	AgentHeartBeatInterval = 1 * time.Minute
 )
 
 const capabilities = protobufs.AgentCapabilities_AgentCapabilities_ReportsStatus |
@@ -240,6 +246,8 @@ func (c *Client) Connect(ctx context.Context) error {
 		c.tryToFailPackageInstall(fmt.Sprintf("OpAMP client failed to start: %s", err.Error()), false)
 	}
 
+	c.startHeartBeat(ctx)
+
 	return err
 }
 
@@ -247,7 +255,6 @@ func (c *Client) Connect(ctx context.Context) error {
 func (c *Client) Disconnect(ctx context.Context) error {
 	// Ensure we're no longer monitoring the collector as we shutdown to avoid error messages due to shutdown
 	c.stopCollectorMonitoring()
-
 	c.safeSetDisconnecting(true)
 	c.collector.Stop(ctx)
 	return c.opampClient.Stop(ctx)
@@ -693,4 +700,25 @@ func (c *Client) safeGetDisconnecting() bool {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 	return c.disconnecting
+}
+
+func (c *Client) startHeartBeat(ctx context.Context) {
+	c.logger.Debug("Starting heartbeat")
+	go func() {
+		agentHeartBeatTicker := time.NewTicker(AgentHeartBeatInterval)
+		defer agentHeartBeatTicker.Stop()
+
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-agentHeartBeatTicker.C:
+				if err := c.opampClient.SetHealth(&protobufs.AgentHealth{Healthy: true}); err != nil {
+					c.logger.Error("Failed to send heartbeat", zap.Error(err))
+				} else {
+					c.logger.Debug("Heartbeat sent successfully")
+				}
+			}
+		}
+	}()
 }
