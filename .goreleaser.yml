@@ -526,7 +526,7 @@ checksum:
   name_template: "{{ .ProjectName }}-v{{ .Version }}-SHA256SUMS"
   algorithm: sha256
   extra_files:
-    - glob: "./observiq-otel-collector.msi*"
+    - glob: "./observiq-otel-collector.msi"
 
 # https://goreleaser.com/customization/sign/
 signs:
