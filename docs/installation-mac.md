@@ -10,7 +10,7 @@ To install using the installation script, you may run:
 sudo sh -c "$(curl -fsSlL https://github.com/observiq/bindplane-agent/releases/latest/download/install_macos.sh)" install_macos.sh
 ```
 
-Installation artifacts are signed information on verifying the signature can be found at [Verifying Artifact Signatures](../verify-signature.md).
+Installation artifacts are signed. Information on verifying the signature can be found at [Verifying Artifact Signatures](./verify-signature.md).
 
 #### Managed Mode
 

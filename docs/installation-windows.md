@@ -11,7 +11,7 @@ Alternately, for an interactive installation [download the latest MSI](https://g
 
 After downloading the MSI, simply double click it to open the installation wizard. Follow the instructions to configure and install the agent.
 
-Installation artifacts are signed information on verifying the signature can be found at [Verifying Artifact Signatures](../verify-signature.md).
+Installation artifacts are signed. Information on verifying the signature can be found at [Verifying Artifact Signatures](./verify-signature.md).
 
 ### Managed Mode
 
