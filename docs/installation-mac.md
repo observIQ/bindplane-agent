@@ -1,7 +1,7 @@
 # macOS Installation
 
 ### Installing
-The agent may be installed through a shell script.w
+The agent may be installed through a shell script.
 
 This script may also be used to update an existing installation.
 
