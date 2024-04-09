@@ -1,7 +1,7 @@
 # macOS Installation
 
 ### Installing
-The agent may be installed through a shell script.
+The agent may be installed through a shell script.w
 
 This script may also be used to update an existing installation.
 
@@ -9,6 +9,8 @@ To install using the installation script, you may run:
 ```sh
 sudo sh -c "$(curl -fsSlL https://github.com/observiq/bindplane-agent/releases/latest/download/install_macos.sh)" install_macos.sh
 ```
+
+Installation artifacts are signed information on verifying the signature can be found at [Verifying Artifact Signatures](../verify-signature.md).
 
 #### Managed Mode
 

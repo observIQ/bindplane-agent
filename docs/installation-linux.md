@@ -4,6 +4,8 @@
 
 Installation is done through deb and rpm packages. Installing the agent will also install the `observiq-otel-collector` service on systemd systems.
 
+Installation artifacts are signed information on verifying the signature can be found at [Verifying Artifact Signatures](../verify-signature.md).
+
 ### Install/Update script
 The agent may be installed through a shell script which will automatically determine which package to install.
 
