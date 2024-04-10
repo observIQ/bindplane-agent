@@ -44,6 +44,9 @@ type Config struct {
 	// Default value of false
 	DeleteOnRead bool `mapstructure:"delete_on_read"`
 
+	// RoleArn the role ARN to be assumed
+	RoleArn string `mapstructure:"role_arn"`
+
 	// PollInterval is the interval at which the Azure API is scanned for blobs.
 	// Default value of 1m
 	PollInterval time.Duration `mapstructure:"poll_interval"`
