@@ -1,0 +1,6 @@
+type: awss3rehydration
+
+status:
+  class: receiver
+  stability:
+    alpha: [metrics, logs, traces]
