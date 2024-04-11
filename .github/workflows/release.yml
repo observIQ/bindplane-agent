@@ -116,7 +116,7 @@ jobs:
         env:
           COSIGN_PRIVATE_KEY: ${{secrets.ORG_COSIGN_PRIVATE_KEY}}
       - name: Sign MSI
-        run: cosign sign-blob --key=cosign.key --output-signature ./observiq-otel-collector.msi.sig ./observiq-otel-collector.msi
+        run: cosign sign-blob --key=cosign.key --output-signature ./observiq-otel-collector.msi/observiq-otel-collector.msi.sig ./observiq-otel-collector.msi/observiq-otel-collector.msi
         shell: bash
         env:
           COSIGN_PASSWORD: ${{ secrets.ORG_COSIGN_PWD }}

@@ -543,7 +543,7 @@ release:
   # publish to a prerelease first
   prerelease: "true"
   extra_files:
-    - glob: "./observiq-otel-collector*.msi"
+    - glob: "./observiq-otel-collector.msi.*"
     - glob: "./scripts/install/install_unix.sh"
     - glob: "./scripts/install/install_macos.sh"
 
