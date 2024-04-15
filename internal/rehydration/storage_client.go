@@ -32,6 +32,9 @@ type CheckpointStorer interface {
 	// LoadCheckPoint loads a checkpoint for the passed in key.
 	// If no checkpoint is found return an empty one
 	LoadCheckPoint(ctx context.Context, key string) (*CheckPoint, error)
+
+	// Close closes the storage client
+	Close(ctx context.Context) error
 }
 
 // NopStorage a nop implementation of CheckpointStorer
@@ -42,7 +45,7 @@ func NewNopStorage() *NopStorage {
 	return &NopStorage{}
 }
 
-// SaveCheckpoint return nil
+// SaveCheckpoint returns nil
 func (n *NopStorage) SaveCheckpoint(_ context.Context, _ string, _ *CheckPoint) error {
 	return nil
 }
@@ -50,6 +53,11 @@ func (n *NopStorage) SaveCheckpoint(_ context.Context, _ string, _ *CheckPoint) 
 // LoadCheckPoint returns and empty checkpoint
 func (n *NopStorage) LoadCheckPoint(_ context.Context, _ string) (*CheckPoint, error) {
 	return &CheckPoint{}, nil
+}
+
+// Close returns nil
+func (n *NopStorage) Close(_ context.Context) error {
+	return nil
 }
 
 // CheckpointStorage is checkpoint storer backed by a storage extension
@@ -108,4 +116,9 @@ func (c *CheckpointStorage) LoadCheckPoint(ctx context.Context, key string) (*Ch
 	}
 
 	return checkpoint, nil
+}
+
+// Close closes the checkpoint storage
+func (c *CheckpointStorage) Close(ctx context.Context) error {
+	return c.storageClient.Close(ctx)
 }

@@ -1,6 +1,6 @@
 module github.com/observiq/bindplane-agent
 
-go 1.21.6
+go 1.22.0
 
 require (
 	github.com/google/uuid v1.6.0
@@ -24,6 +24,7 @@ require (
 	github.com/observiq/bindplane-agent/processor/samplingprocessor v1.49.0
 	github.com/observiq/bindplane-agent/processor/spancountprocessor v1.49.0
 	github.com/observiq/bindplane-agent/processor/throughputmeasurementprocessor v1.49.0
+	github.com/observiq/bindplane-agent/receiver/awss3rehydrationreceiver v1.49.0
 	github.com/observiq/bindplane-agent/receiver/azureblobrehydrationreceiver v1.49.0
 	github.com/observiq/bindplane-agent/receiver/httpreceiver v1.49.0
 	github.com/observiq/bindplane-agent/receiver/m365receiver v1.49.0
@@ -226,6 +227,7 @@ require (
 	github.com/IBM/sarama v1.43.1 // indirect
 	github.com/JohnCGriffin/overflow v0.0.0-20211019200055-46fa312c352c // indirect
 	github.com/apache/arrow/go/v15 v15.0.0 // indirect
+	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.11.59 // indirect
 	github.com/aws/aws-sdk-go-v2/service/servicediscovery v1.29.5 // indirect
 	github.com/blang/semver/v4 v4.0.0 // indirect
 	github.com/cihub/seelog v0.0.0-20170130134532-f561c5e57575 // indirect
@@ -259,6 +261,7 @@ require (
 	github.com/microsoft/go-mssqldb v1.7.0 // indirect
 	github.com/observiq/bindplane-agent/counter v1.49.0 // indirect
 	github.com/observiq/bindplane-agent/expr v1.49.0 // indirect
+	github.com/observiq/bindplane-agent/internal/rehydration v0.0.0-00010101000000-000000000000 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlemanagedprometheusexporter v0.98.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/internal/collectd v0.98.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/internal/datadog v0.98.0 // indirect
@@ -376,13 +379,12 @@ require (
 	github.com/antonmedv/expr v1.15.5 // indirect
 	github.com/apache/thrift v0.20.0 // indirect
 	github.com/armon/go-metrics v0.4.1 // indirect
-	github.com/aws/aws-sdk-go v1.51.17
+	github.com/aws/aws-sdk-go v1.51.21 // indirect
 	github.com/aws/aws-sdk-go-v2 v1.26.1 // indirect
 	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.6.2 // indirect
 	github.com/aws/aws-sdk-go-v2/config v1.27.11 // indirect
 	github.com/aws/aws-sdk-go-v2/credentials v1.17.11 // indirect
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.16.1 // indirect
-	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.11.59 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/configsources v1.3.5 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.6.5 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/ini v1.8.0 // indirect
@@ -627,10 +629,10 @@ require (
 	go.opentelemetry.io/contrib/zpages v0.50.0 // indirect
 	go.opentelemetry.io/otel v1.25.0 // indirect
 	go.opentelemetry.io/otel/exporters/prometheus v0.47.0 // indirect
-	go.opentelemetry.io/otel/metric v1.25.0
+	go.opentelemetry.io/otel/metric v1.25.0 // indirect
 	go.opentelemetry.io/otel/sdk v1.25.0 // indirect
 	go.opentelemetry.io/otel/sdk/metric v1.25.0 // indirect
-	go.opentelemetry.io/otel/trace v1.25.0
+	go.opentelemetry.io/otel/trace v1.25.0 // indirect
 	go.uber.org/atomic v1.11.0 // indirect
 	golang.org/x/crypto v0.22.0 // indirect
 	golang.org/x/exp v0.0.0-20240205201215-2c58cdc269a3 // indirect
@@ -719,6 +721,12 @@ replace github.com/observiq/bindplane-agent/exporter/googlemanagedprometheusexpo
 replace github.com/observiq/bindplane-agent/receiver/azureblobrehydrationreceiver => ./receiver/azureblobrehydrationreceiver
 
 replace github.com/observiq/bindplane-agent/receiver/httpreceiver => ./receiver/httpreceiver
+
+replace github.com/observiq/bindplane-agent/receiver/awss3rehydrationreceiver => ./receiver/awss3rehydrationreceiver
+
+replace github.com/observiq/bindplane-agent/internal/rehydration => ./internal/rehydration
+
+replace github.com/observiq/bindplane-agent/internal/testutils => ./internal/testutils
 
 // Does not build with windows and only used in configschema executable
 // Relevant issue https://github.com/mattn/go-ieproxy/issues/45

@@ -50,33 +50,30 @@ func createDefaultConfig() component.Config {
 
 // createMetricsReceiver creates a metrics receiver
 func createMetricsReceiver(_ context.Context, params receiver.CreateSettings, conf component.Config, con consumer.Metrics) (receiver.Metrics, error) {
-	// cfg, ok := conf.(*Config)
-	// if !ok {
-	// 	return nil, errImproperCfgType
-	// }
+	cfg, ok := conf.(*Config)
+	if !ok {
+		return nil, errImproperCfgType
+	}
 
-	//return newMetricsReceiver(params.ID, params.Logger, cfg, con)
-	return nil, nil
+	return newMetricsReceiver(params.ID, params.Logger, cfg, con)
 }
 
 // createLogsReceiver creates a logs receiver
 func createLogsReceiver(_ context.Context, params receiver.CreateSettings, conf component.Config, con consumer.Logs) (receiver.Logs, error) {
-	// cfg, ok := conf.(*Config)
-	// if !ok {
-	// 	return nil, errImproperCfgType
-	// }
+	cfg, ok := conf.(*Config)
+	if !ok {
+		return nil, errImproperCfgType
+	}
 
-	//return newLogsReceiver(params.ID, params.Logger, cfg, con)
-	return nil, nil
+	return newLogsReceiver(params.ID, params.Logger, cfg, con)
 }
 
 // createTracesReceiver creates a traces receiver
 func createTracesReceiver(_ context.Context, params receiver.CreateSettings, conf component.Config, con consumer.Traces) (receiver.Traces, error) {
-	// cfg, ok := conf.(*Config)
-	// if !ok {
-	// 	return nil, errImproperCfgType
-	// }
+	cfg, ok := conf.(*Config)
+	if !ok {
+		return nil, errImproperCfgType
+	}
 
-	//return newTracesReceiver(params.ID, params.Logger, cfg, con)
-	return nil, nil
+	return newTracesReceiver(params.ID, params.Logger, cfg, con)
 }

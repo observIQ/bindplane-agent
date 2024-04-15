@@ -20,10 +20,10 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/observiq/bindplane-agent/internal/rehydration"
 	"github.com/observiq/bindplane-agent/receiver/awss3rehydrationreceiver/internal/s3"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/consumer"
-	"go.opentelemetry.io/collector/extension/experimental/storage"
 	"go.uber.org/zap"
 )
 
@@ -40,7 +40,8 @@ type rehydrationReceiver struct {
 	cfg                *Config
 	awsClient          s3.S3Client
 	supportedTelemetry component.DataType
-	storageClient      storage.Client
+	consumer           rehydration.Consumer
+	checkpointStore    rehydration.CheckpointStorer
 
 	startingTime time.Time
 	endingTime   time.Time
@@ -59,7 +60,7 @@ func newMetricsReceiver(id component.ID, logger *zap.Logger, cfg *Config, nextCo
 	}
 
 	r.supportedTelemetry = component.DataTypeMetrics
-	// r.consumer = newMetricsConsumer(nextConsumer)
+	r.consumer = rehydration.NewMetricsConsumer(nextConsumer)
 
 	return r, nil
 }
@@ -72,7 +73,7 @@ func newLogsReceiver(id component.ID, logger *zap.Logger, cfg *Config, nextConsu
 	}
 
 	r.supportedTelemetry = component.DataTypeLogs
-	// r.consumer = newLogsConsumer(nextConsumer)
+	r.consumer = rehydration.NewLogsConsumer(nextConsumer)
 
 	return r, nil
 }
@@ -85,7 +86,7 @@ func newTracesReceiver(id component.ID, logger *zap.Logger, cfg *Config, nextCon
 	}
 
 	r.supportedTelemetry = component.DataTypeTraces
-	// r.consumer = newTracesConsumer(nextConsumer)
+	r.consumer = rehydration.NewTracesConsumer(nextConsumer)
 
 	return r, nil
 }
@@ -109,33 +110,33 @@ func newRehydrationReceiver(id component.ID, logger *zap.Logger, cfg *Config) (*
 	ctx, cancel := context.WithCancelCause(context.Background())
 
 	return &rehydrationReceiver{
-		logger:        logger,
-		id:            id,
-		cfg:           cfg,
-		awsClient:     awsClient,
-		doneChan:      make(chan struct{}),
-		storageClient: storage.NewNopClient(),
-		startingTime:  startingTime,
-		endingTime:    endingTime,
-		ctx:           ctx,
-		cancelFunc:    cancel,
+		logger:          logger,
+		id:              id,
+		cfg:             cfg,
+		awsClient:       awsClient,
+		doneChan:        make(chan struct{}),
+		checkpointStore: rehydration.NewNopStorage(),
+		startingTime:    startingTime,
+		endingTime:      endingTime,
+		ctx:             ctx,
+		cancelFunc:      cancel,
 	}, nil
 }
 
 // Start starts the rehydration receiver
 func (r *rehydrationReceiver) Start(ctx context.Context, host component.Host) error {
 
-	// if r.cfg.StorageID != nil {
-	// 	storageClient, err := getStorageClient(ctx, host, r.cfg.StorageID, r.id, r.supportedTelemetry)
-	// 	if err != nil {
-	// 		return fmt.Errorf("getStorageClient: %w", err)
-	// 	}
+	if r.cfg.StorageID != nil {
+		checkpointStore, err := rehydration.NewCheckpointStorage(ctx, host, *r.cfg.StorageID, r.id, r.supportedTelemetry)
+		if err != nil {
+			return fmt.Errorf("NewCheckpointStorage: %w", err)
+		}
 
-	// 	r.storageClient = storageClient
-	// }
+		r.checkpointStore = checkpointStore
+	}
 
-	// r.started = true
-	// go r.scrape()
+	r.started = true
+	go r.scrape()
 	return nil
 }
 
@@ -153,7 +154,84 @@ func (r *rehydrationReceiver) Shutdown(ctx context.Context) error {
 		}
 	}
 
-	err = errors.Join(err, r.storageClient.Close(ctx))
+	err = errors.Join(err, r.checkpointStore.Close(ctx))
 
 	return err
+}
+
+// emptyPollLimit is the number of consecutive empty polling cycles that can
+// occur before we stop polling.
+const emptyPollLimit = 3
+
+// scrape scrapes the Azure api on interval
+func (r *rehydrationReceiver) scrape() {
+	defer close(r.doneChan)
+	ticker := time.NewTicker(r.cfg.PollInterval)
+	defer ticker.Stop()
+
+	var marker *string
+
+	// load the previous checkpoint. If not exist should return zero value for time
+	checkpoint, err := r.checkpointStore.LoadCheckPoint(r.ctx, checkpointStorageKey)
+	if err != nil {
+		r.logger.Warn("Error loading checkpoint, continuing without a previous checkpoint", zap.Error(err))
+		checkpoint = rehydration.NewCheckpoint()
+	}
+
+	// Call once before the loop to ensure we do a collection before the first ticker
+	numBlobsRehydrated := r.rehydrate(checkpoint, marker)
+	emptyEntityCounter := checkEntityCount(numBlobsRehydrated, 0)
+
+	for {
+		select {
+		case <-r.ctx.Done():
+			return
+		case <-ticker.C:
+			// Polling for blobs has egress charges so we want to stop polling
+			// after we stop finding blobs.
+			if emptyEntityCounter == emptyPollLimit {
+				return
+			}
+
+			numBlobsRehydrated := r.rehydrate(checkpoint, marker)
+			emptyEntityCounter = checkEntityCount(numBlobsRehydrated, emptyEntityCounter)
+		}
+	}
+}
+
+func (r *rehydrationReceiver) rehydrate(checkpoint *rehydration.CheckPoint, marker *string) (numEntitiesRehydrated int) {
+	rehydrateCtx, cancel := context.WithTimeout(r.ctx, r.cfg.PollTimeout)
+	defer cancel()
+
+	var prefix *string
+	if r.cfg.S3Prefix != "" {
+		prefix = &r.cfg.S3Prefix
+	}
+
+	objects, nextMarker, err := r.awsClient.ListObjects(rehydrateCtx, r.cfg.S3Bucket, prefix, marker)
+	if err != nil {
+		r.logger.Error("Failed to list objects", zap.Error(err))
+		return
+	}
+
+	marker = nextMarker
+
+	for _, object := range objects {
+		r.logger.Info("Object", zap.String("name", object.Name))
+	}
+	return
+}
+
+// checkEntityCount checks the number of entities rehydrated and the current state of the
+// empty counter. If zero entities were rehydrated increment the counter.
+// If there were entities rehydrated reset the counter as we want to track consecutive zero sized polls.
+func checkEntityCount(numEntitiesRehydrated, emptyEntityCounter int) int {
+	switch {
+	case emptyEntityCounter == emptyPollLimit: // If we are at the limit return the limit
+		return emptyPollLimit
+	case numEntitiesRehydrated == 0: // If no entities were rehydrated then increment the empty entities counter
+		return emptyEntityCounter + 1
+	default: // Default case is numEntitiesRehydrated > 0 so reset emptyEntityCounter to 0
+		return 0
+	}
 }
