@@ -52,7 +52,6 @@ import (
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/syslogexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/zipkinexporter"
 	"go.opentelemetry.io/collector/exporter"
-	"go.opentelemetry.io/collector/exporter/exportertest"
 	"go.opentelemetry.io/collector/exporter/loggingexporter"
 	"go.opentelemetry.io/collector/exporter/nopexporter"
 	"go.opentelemetry.io/collector/exporter/otlpexporter"
@@ -76,7 +75,6 @@ var defaultExporters = []exporter.Factory{
 	datadogexporter.NewFactory(),
 	dynatraceexporter.NewFactory(),
 	elasticsearchexporter.NewFactory(),
-	exportertest.NewNopFactory(),
 	fileexporter.NewFactory(),
 	googlecloudexporter.NewFactory(version.Version()),
 	googlecloudpubsubexporter.NewFactory(),
