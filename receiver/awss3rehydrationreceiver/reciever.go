@@ -93,7 +93,10 @@ func newTracesReceiver(id component.ID, logger *zap.Logger, cfg *Config, nextCon
 
 // newRehydrationReceiver creates a new rehydration receiver
 func newRehydrationReceiver(id component.ID, logger *zap.Logger, cfg *Config) (*rehydrationReceiver, error) {
-	awsClient := newAWSS3Client(cfg.Region, cfg.RoleArn)
+	awsClient, err := newAWSS3Client(cfg.Region, cfg.RoleArn)
+	if err != nil {
+		return nil, fmt.Errorf("new aws s3 client: %w", err)
+	}
 
 	// We should not get an error for either of these time parsings as we check in config validate.
 	// Doing error checking anyways just in case.

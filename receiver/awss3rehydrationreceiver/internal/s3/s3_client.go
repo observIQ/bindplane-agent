@@ -18,11 +18,11 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/credentials/stscreds"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/feature/s3/manager"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 )
 
 // ObjectInfo contains necessary info to process S3 objects
@@ -47,29 +47,25 @@ type S3Client interface {
 
 // AWSClient is an implementation of the S3Client for AWS
 type AWSClient struct {
-	sessionCfg *aws.Config
+	sessionCfg aws.Config
 	roleArn    string
 }
 
 // NewAWSClient creates a new AWS Client
-func NewAWSClient(region, roleArn string) S3Client {
-	sessionConfig := &aws.Config{
-		Region: aws.String(region),
+func NewAWSClient(region, roleArn string) (S3Client, error) {
+	cfg, err := config.LoadDefaultConfig(context.Background(), config.WithRegion(region))
+	if err != nil {
+		return nil, err
 	}
 
 	return &AWSClient{
-		sessionCfg: sessionConfig,
+		sessionCfg: cfg,
 		roleArn:    roleArn,
-	}
+	}, nil
 }
 
 func (a *AWSClient) ListObjects(ctx context.Context, bucket string, prefix, continuationToken *string) ([]*ObjectInfo, *string, error) {
-	sess, err := getSession(a.sessionCfg, a.roleArn)
-	if err != nil {
-		return nil, nil, fmt.Errorf("get session: %w", err)
-	}
-
-	svc := s3.New(sess)
+	svc := s3.NewFromConfig(a.sessionCfg)
 
 	input := &s3.ListObjectsV2Input{
 		Bucket:            aws.String(bucket),
@@ -77,7 +73,7 @@ func (a *AWSClient) ListObjects(ctx context.Context, bucket string, prefix, cont
 		Prefix:            prefix,
 	}
 
-	output, err := svc.ListObjectsV2WithContext(ctx, input)
+	output, err := svc.ListObjectsV2(ctx, input)
 	if err != nil {
 		return nil, nil, fmt.Errorf("list objects: %w", err)
 	}
@@ -103,20 +99,17 @@ func (a *AWSClient) ListObjects(ctx context.Context, bucket string, prefix, cont
 
 // DownloadObject downloads the contents of the object.
 func (a *AWSClient) DownloadObject(ctx context.Context, bucket, key string, buf []byte) (int64, error) {
-	sess, err := getSession(a.sessionCfg, a.roleArn)
-	if err != nil {
-		return 0, fmt.Errorf("get session: %w", err)
-	}
+	client := s3.NewFromConfig(a.sessionCfg)
 
-	downloader := s3manager.NewDownloader(sess)
+	downloader := manager.NewDownloader(client)
 
 	input := &s3.GetObjectInput{
 		Bucket: aws.String(bucket),
 		Key:    aws.String(key),
 	}
 
-	buffer := aws.NewWriteAtBuffer(buf)
-	n, err := downloader.DownloadWithContext(ctx, buffer, input)
+	buffer := manager.NewWriteAtBuffer(buf)
+	n, err := downloader.Download(ctx, buffer, input)
 	if err != nil {
 		return 0, fmt.Errorf("download: %w", err)
 	}
@@ -126,42 +119,26 @@ func (a *AWSClient) DownloadObject(ctx context.Context, bucket, key string, buf 
 
 // DeleteObjects deletes the keys in the specified bucket
 func (a *AWSClient) DeleteObjects(ctx context.Context, bucket string, keys []string) error {
-	sess, err := getSession(a.sessionCfg, a.roleArn)
-	if err != nil {
-		return fmt.Errorf("get session: %w", err)
-	}
+	client := s3.NewFromConfig(a.sessionCfg)
 
-	deleter := s3manager.NewBatchDelete(sess, func(bd *s3manager.BatchDelete) { bd.BatchSize = len(keys) })
-
-	objects := make([]s3manager.BatchDeleteObject, len(keys))
+	objects := make([]types.ObjectIdentifier, len(keys))
 	for i, key := range keys {
-		objects[i] = s3manager.BatchDeleteObject{
-			Object: &s3.DeleteObjectInput{
-				Bucket: aws.String(bucket),
-				Key:    aws.String(key),
-			},
+		objects[i] = types.ObjectIdentifier{
+			Key: aws.String(key),
 		}
 	}
 
-	if err := deleter.Delete(ctx, &s3manager.DeleteObjectsIterator{
-		Objects: objects,
-	}); err != nil {
+	params := &s3.DeleteObjectsInput{
+		Bucket: aws.String(bucket),
+		Delete: &types.Delete{
+			Objects: objects,
+		},
+	}
+
+	_, err := client.DeleteObjects(ctx, params)
+	if err != nil {
 		return fmt.Errorf("delete: %w", err)
 	}
 
 	return nil
-}
-
-func getSession(sessionConfig *aws.Config, roleArn string) (*session.Session, error) {
-	sess, err := session.NewSession(sessionConfig)
-	if err != nil {
-		return nil, fmt.Errorf("new session: %w", err)
-	}
-
-	if roleArn != "" {
-		credentials := stscreds.NewCredentials(sess, roleArn)
-		sess.Config.Credentials = credentials
-	}
-
-	return sess, nil
 }
