@@ -169,6 +169,7 @@ require (
 	go.opentelemetry.io/collector/consumer v0.98.0
 	go.opentelemetry.io/collector/exporter v0.98.0
 	go.opentelemetry.io/collector/exporter/loggingexporter v0.98.0
+	go.opentelemetry.io/collector/exporter/nopexporter v0.98.0
 	go.opentelemetry.io/collector/exporter/otlpexporter v0.98.0
 	go.opentelemetry.io/collector/exporter/otlphttpexporter v0.98.0
 	go.opentelemetry.io/collector/extension v0.98.0
