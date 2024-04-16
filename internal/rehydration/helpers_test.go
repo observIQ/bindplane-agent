@@ -15,6 +15,8 @@
 package rehydration //import "github.com/observiq/bindplane-agent/internal/rehydration"
 
 import (
+	"bytes"
+	"compress/gzip"
 	"errors"
 	"testing"
 	"time"
@@ -106,4 +108,74 @@ func TestParseEntityPath(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestIsInTimeRange(t *testing.T) {
+	testcases := []struct {
+		name         string
+		entityTime   time.Time
+		startingTime time.Time
+		endingTime   time.Time
+		expected     bool
+	}{
+		{
+			name:         "Entity time is equal to starting time",
+			entityTime:   time.Date(2024, time.January, 01, 12, 00, 00, 00, time.UTC),
+			startingTime: time.Date(2024, time.January, 01, 12, 00, 00, 00, time.UTC),
+			endingTime:   time.Date(2024, time.January, 01, 13, 00, 00, 00, time.UTC),
+			expected:     true,
+		},
+		{
+			name:         "Entity time is equal to ending time",
+			entityTime:   time.Date(2024, time.January, 01, 13, 00, 00, 00, time.UTC),
+			startingTime: time.Date(2024, time.January, 01, 12, 00, 00, 00, time.UTC),
+			endingTime:   time.Date(2024, time.January, 01, 13, 00, 00, 00, time.UTC),
+			expected:     true,
+		},
+		{
+			name:         "Entity time is between starting and ending time",
+			entityTime:   time.Date(2024, time.January, 01, 12, 30, 00, 00, time.UTC),
+			startingTime: time.Date(2024, time.January, 01, 12, 00, 00, 00, time.UTC),
+			endingTime:   time.Date(2024, time.January, 01, 13, 00, 00, 00, time.UTC),
+			expected:     true,
+		},
+		{
+			name:         "Entity time is before starting time",
+			entityTime:   time.Date(2024, time.January, 01, 11, 00, 00, 00, time.UTC),
+			startingTime: time.Date(2024, time.January, 01, 12, 00, 00, 00, time.UTC),
+			endingTime:   time.Date(2024, time.January, 01, 13, 00, 00, 00, time.UTC),
+			expected:     false,
+		},
+		{
+			name:         "Entity time is after ending time",
+			entityTime:   time.Date(2024, time.January, 01, 14, 00, 00, 00, time.UTC),
+			startingTime: time.Date(2024, time.January, 01, 12, 00, 00, 00, time.UTC),
+			endingTime:   time.Date(2024, time.January, 01, 13, 00, 00, 00, time.UTC),
+			expected:     false,
+		},
+	}
+
+	for _, tc := range testcases {
+		t.Run(tc.name, func(t *testing.T) {
+			actual := IsInTimeRange(tc.entityTime, tc.startingTime, tc.endingTime)
+			require.Equal(t, tc.expected, actual)
+		})
+	}
+}
+
+func TestGzipDecompress(t *testing.T) {
+	raw := []byte{31, 139, 8, 0, 0, 0, 0, 0, 0, 255, 0, 99}
+
+	var buf bytes.Buffer
+	writer := gzip.NewWriter(&buf)
+
+	_, err := writer.Write(raw)
+	require.NoError(t, err)
+
+	err = writer.Close()
+	require.NoError(t, err)
+
+	result, err := GzipDecompress(buf.Bytes())
+	require.NoError(t, err)
+	require.Equal(t, raw, result)
 }
