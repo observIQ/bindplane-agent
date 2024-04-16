@@ -18,6 +18,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"path/filepath"
 	"time"
 
 	"github.com/observiq/bindplane-agent/internal/rehydration"
@@ -100,12 +101,12 @@ func newRehydrationReceiver(id component.ID, logger *zap.Logger, cfg *Config) (*
 
 	// We should not get an error for either of these time parsings as we check in config validate.
 	// Doing error checking anyways just in case.
-	startingTime, err := time.Parse(timeFormat, cfg.StartingTime)
+	startingTime, err := time.Parse(rehydration.TimeFormat, cfg.StartingTime)
 	if err != nil {
 		return nil, fmt.Errorf("invalid starting_time timestamp: %w", err)
 	}
 
-	endingTime, err := time.Parse(timeFormat, cfg.EndingTime)
+	endingTime, err := time.Parse(rehydration.TimeFormat, cfg.EndingTime)
 	if err != nil {
 		return nil, fmt.Errorf("invalid ending_time timestamp: %w", err)
 	}
@@ -219,10 +220,81 @@ func (r *rehydrationReceiver) rehydrate(checkpoint *rehydration.CheckPoint, mark
 
 	marker = nextMarker
 
+	processedObjectNames := make([]string, 0, len(objects))
+
 	for _, object := range objects {
 		r.logger.Info("Object", zap.String("name", object.Name))
+		objectTime, telemetryType, err := rehydration.ParseEntityPath(object.Name)
+		switch {
+		case errors.Is(err, rehydration.ErrInvalidEntityPath):
+			r.logger.Debug("Skipping Object, non-matching entity path", zap.String("object", object.Name))
+		case err != nil:
+			r.logger.Error("Error processing object path", zap.String("object", object.Name), zap.Error(err))
+		case checkpoint.ShouldParse(*objectTime, object.Name):
+			// if the object is not in the specified time range or not of the telemetry type supported by this receiver
+			// then skip consuming it.
+			if rehydration.IsInTimeRange(*objectTime, r.startingTime, r.endingTime) || telemetryType != r.supportedTelemetry {
+				continue
+			}
+
+			// Process and consume the object at the given path
+			if err := r.processObject(object); err != nil {
+				r.logger.Error("Error consuming object", zap.String("object", object.Name), zap.Error(err))
+				continue
+			}
+
+			checkpoint.UpdateCheckpoint(*objectTime, object.Name)
+			if err := r.checkpointStore.SaveCheckpoint(r.ctx, checkpointStorageKey, checkpoint); err != nil {
+				r.logger.Error("Error while saving checkpoint", zap.Error(err))
+			}
+
+			// keep track of object names for number processed and deleting
+			processedObjectNames = append(processedObjectNames, object.Name)
+		}
 	}
+
+	numEntitiesRehydrated = len(processedObjectNames)
+
+	// Delete objects
+	if r.cfg.DeleteOnRead {
+		if err := r.awsClient.DeleteObjects(r.ctx, r.cfg.S3Bucket, processedObjectNames); err != nil {
+			r.logger.Error("Error while attempting to delete objects", zap.Error(err))
+		}
+	}
+
 	return
+}
+
+// processObject does the following:
+// 1. Downloads the object
+// 2. Decompresses the object if applicable
+// 3. Pass the object to the consumer
+func (r *rehydrationReceiver) processObject(object *s3.ObjectInfo) error {
+	objectBuffer := make([]byte, object.Size)
+
+	size, err := r.awsClient.DownloadObject(r.ctx, r.cfg.S3Bucket, object.Name, objectBuffer)
+	if err != nil {
+		return fmt.Errorf("download object: %w", err)
+	}
+
+	ext := filepath.Ext(object.Name)
+	switch {
+	case ext == ".gz":
+		objectBuffer, err = rehydration.GzipDecompress(objectBuffer[:size])
+		if err != nil {
+			return fmt.Errorf("gzip: %w", err)
+		}
+	case ext == ".json":
+		// Do nothing for json files
+	default:
+		return fmt.Errorf("unsupported file type: %s", ext)
+	}
+
+	if err := r.consumer.Consume(r.ctx, objectBuffer); err != nil {
+		return fmt.Errorf("consume: %w", err)
+	}
+
+	return nil
 }
 
 // checkEntityCount checks the number of entities rehydrated and the current state of the

@@ -28,7 +28,7 @@ import (
 // ObjectInfo contains necessary info to process S3 objects
 type ObjectInfo struct {
 	Name string
-	size int64
+	Size int64
 }
 
 // S3Client provides a client for S3 object operations
@@ -90,7 +90,7 @@ func (a *AWSClient) ListObjects(ctx context.Context, bucket string, prefix, cont
 
 		objects[i] = &ObjectInfo{
 			Name: *object.Key,
-			size: *object.Size,
+			Size: *object.Size,
 		}
 	}
 

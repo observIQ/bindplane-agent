@@ -28,7 +28,7 @@ import (
 //
 //go:generate mockery --name Consumer --inpackage --with-expecter --filename mock_consumer.go --structname MockConsumer
 type Consumer interface {
-	// Consume consumes blob contents at the path and unmarshals it.
+	// Consume consumes entity contents at the path and unmarshals it.
 	Consume(ctx context.Context, entityContent []byte) error
 }
 

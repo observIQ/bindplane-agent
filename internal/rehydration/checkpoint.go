@@ -21,7 +21,7 @@ import (
 // CheckPoint is the checkpoint used with a storage extension to
 // keep track of what's been rehydrated.
 type CheckPoint struct {
-	// LastTs is the time created from the folder path of the last consumed blob
+	// LastTs is the time created from the folder path of the last consumed entity
 	LastTs time.Time `json:"last_ts"`
 
 	// ParsedEntities is a lookup of all entities that were parsed in the LastTs path
@@ -39,12 +39,12 @@ func NewCheckpoint() *CheckPoint {
 // ShouldParse returns true if the entity should be parsed based on it's time and name.
 // A value of false will be returned for entities that have a time before the LastTs or who's
 // name is already tracked as parsed.
-func (c *CheckPoint) ShouldParse(blobTime time.Time, blobName string) bool {
-	if blobTime.Before(c.LastTs) {
+func (c *CheckPoint) ShouldParse(entityTime time.Time, entityName string) bool {
+	if entityTime.Before(c.LastTs) {
 		return false
 	}
 
-	_, ok := c.ParsedEntities[blobName]
+	_, ok := c.ParsedEntities[entityName]
 	return !ok
 }
 
