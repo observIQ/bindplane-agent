@@ -15,15 +15,10 @@
 package azureblobrehydrationreceiver //import "github.com/observiq/bindplane-agent/receiver/azureblobrehydrationreceiver"
 
 import (
-	"bytes"
-	"compress/gzip"
 	"context"
 	"errors"
 	"fmt"
-	"io"
 	"path/filepath"
-	"regexp"
-	"strings"
 	"time"
 
 	"github.com/observiq/bindplane-agent/internal/rehydration"
@@ -237,7 +232,7 @@ func (r *rehydrationReceiver) rehydrateBlobs(checkpoint *rehydration.CheckPoint,
 
 	// Go through each blob and parse it's path to determine if we should consume it or not
 	for _, blob := range blobs {
-		blobTime, telemetryType, err := parseBlobPath(blob.Name)
+		blobTime, telemetryType, err := rehydration.ParseEntityPath(blob.Name)
 		switch {
 		case errors.Is(err, errInvalidBlobPath):
 			r.logger.Debug("Skipping Blob, non-matching blob path", zap.String("blob", blob.Name))
@@ -246,7 +241,7 @@ func (r *rehydrationReceiver) rehydrateBlobs(checkpoint *rehydration.CheckPoint,
 		case checkpoint.ShouldParse(*blobTime, blob.Name):
 			// if the blob is not in the specified time range or not of the telemetry type supported by this receiver
 			// then skip consuming it.
-			if !r.isInTimeRange(*blobTime) || telemetryType != r.supportedTelemetry {
+			if !rehydration.IsInTimeRange(*blobTime, r.startingTime, r.endingTime) || telemetryType != r.supportedTelemetry {
 				continue
 			}
 
@@ -276,64 +271,6 @@ func (r *rehydrationReceiver) rehydrateBlobs(checkpoint *rehydration.CheckPoint,
 	return
 }
 
-// strings that indicate what type of telemetry is in a blob
-const (
-	metricBlobSignifier = "metrics_"
-	logsBlobSignifier   = "logs_"
-	tracesBlobSignifier = "traces_"
-)
-
-// blobNameRegex is the regex used to detect if a blob matches the expected path
-var blobNameRegex = regexp.MustCompile(`^(?:[^/]*/)?year=(\d{4})/month=(\d{2})/day=(\d{2})/hour=(\d{2})/(?:minute=(\d{2})/)?([^/].*)$`)
-
-// parseBlobPath returns true if the blob is within the existing time range
-func parseBlobPath(blobName string) (blobTime *time.Time, telemetryType component.DataType, err error) {
-	matches := blobNameRegex.FindStringSubmatch(blobName)
-	if matches == nil {
-		err = errInvalidBlobPath
-		return
-	}
-
-	year := matches[1]
-	month := matches[2]
-	day := matches[3]
-	hour := matches[4]
-
-	minute := "00"
-	if matches[5] != "" {
-		minute = matches[5]
-	}
-
-	lastPart := matches[6]
-
-	timeString := fmt.Sprintf("%s-%s-%sT%s:%s", year, month, day, hour, minute)
-
-	// Parse the expected format
-	parsedTime, timeErr := time.Parse(rehydration.TimeFormat, timeString)
-	if timeErr != nil {
-		err = fmt.Errorf("parse blob time: %w", timeErr)
-		return
-	}
-	blobTime = &parsedTime
-
-	switch {
-	case strings.Contains(lastPart, metricBlobSignifier):
-		telemetryType = component.DataTypeMetrics
-	case strings.Contains(lastPart, logsBlobSignifier):
-		telemetryType = component.DataTypeLogs
-	case strings.Contains(lastPart, tracesBlobSignifier):
-		telemetryType = component.DataTypeTraces
-	}
-
-	return
-}
-
-// isInTimeRange returns true if startingTime <= blobTime <= endingTime
-func (r *rehydrationReceiver) isInTimeRange(blobTime time.Time) bool {
-	return (blobTime.Equal(r.startingTime) || blobTime.After(r.startingTime)) &&
-		(blobTime.Equal(r.endingTime) || blobTime.Before(r.endingTime))
-}
-
 // processBlob does the following:
 // 1. Downloads the blob
 // 2. Decompresses the blob if applicable
@@ -351,7 +288,7 @@ func (r *rehydrationReceiver) processBlob(blob *azureblob.BlobInfo) error {
 	ext := filepath.Ext(blob.Name)
 	switch {
 	case ext == ".gz":
-		blobBuffer, err = gzipDecompress(blobBuffer[:size])
+		blobBuffer, err = rehydration.GzipDecompress(blobBuffer[:size])
 		if err != nil {
 			return fmt.Errorf("gzip: %w", err)
 		}
@@ -365,25 +302,6 @@ func (r *rehydrationReceiver) processBlob(blob *azureblob.BlobInfo) error {
 		return fmt.Errorf("consume: %w", err)
 	}
 	return nil
-}
-
-// gzipDecompress does a gzip decompression on the passed in contents
-func gzipDecompress(contents []byte) ([]byte, error) {
-	gr, err := gzip.NewReader(bytes.NewBuffer(contents))
-	if err != nil {
-		return nil, fmt.Errorf("new reader: %w", err)
-	}
-
-	result, err := io.ReadAll(gr)
-	if err != nil {
-		return nil, fmt.Errorf("decompression: %w", err)
-	}
-
-	if err := gr.Close(); err != nil {
-		return nil, fmt.Errorf("reader close: %w", err)
-	}
-
-	return result, nil
 }
 
 // checkBlobCount checks the number of blobs rehydrated and the current state of the
