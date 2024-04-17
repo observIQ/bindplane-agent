@@ -48,7 +48,7 @@ currently supported log types are:
 - sql_server
 
 
-If the `attributes["chronicle_log_type"]` field is present in the log, we will use it's value in the payload instead of the automatic detection or the `log_type` in the config.
+If the `attributes["chronicle_log_type"]` field is present in the log, we will use its value in the payload instead of the automatic detection or the `log_type` in the config.
 
 ## Credentials
 
