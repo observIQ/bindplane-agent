@@ -223,7 +223,7 @@ func (r *rehydrationReceiver) rehydrate(checkpoint *rehydration.CheckPoint, mark
 	processedObjectNames := make([]string, 0, len(objects))
 
 	for _, object := range objects {
-		r.logger.Info("Object", zap.String("name", object.Name))
+		r.logger.Debug("Object", zap.String("name", object.Name))
 		objectTime, telemetryType, err := rehydration.ParseEntityPath(object.Name)
 		switch {
 		case errors.Is(err, rehydration.ErrInvalidEntityPath):
@@ -233,7 +233,7 @@ func (r *rehydrationReceiver) rehydrate(checkpoint *rehydration.CheckPoint, mark
 		case checkpoint.ShouldParse(*objectTime, object.Name):
 			// if the object is not in the specified time range or not of the telemetry type supported by this receiver
 			// then skip consuming it.
-			if rehydration.IsInTimeRange(*objectTime, r.startingTime, r.endingTime) || telemetryType != r.supportedTelemetry {
+			if !rehydration.IsInTimeRange(*objectTime, r.startingTime, r.endingTime) || telemetryType != r.supportedTelemetry {
 				continue
 			}
 
