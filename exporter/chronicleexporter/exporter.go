@@ -188,7 +188,10 @@ func (ce *chronicleExporter) startHostMetricsCollection(ctx context.Context) {
 				ce.logger.Error("Failed to collect host metrics", zap.Error(err))
 			}
 			request := ce.metrics.getAndReset()
-			ce.client.BatchCreateEvents(ctx, request, ce.buildOptions()...)
+			_, err = ce.client.BatchCreateEvents(ctx, request, ce.buildOptions()...)
+			if err != nil {
+				ce.logger.Error("Failed to upload host metrics", zap.Error(err))
+			}
 		}
 	}
 }
