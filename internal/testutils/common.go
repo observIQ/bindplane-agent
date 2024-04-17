@@ -16,6 +16,8 @@
 package testutils //import "github.com/observiq/bindplane-agent/internal/testutils"
 
 import (
+	"bytes"
+	"compress/gzip"
 	"testing"
 	"time"
 
@@ -91,4 +93,20 @@ func GenerateTestTraces(t *testing.T) (td ptrace.Traces, jsonBytes []byte) {
 	require.NoError(t, err)
 
 	return td, jsonBytes
+}
+
+// GZipCompressData compresses data for testing
+func GZipCompressData(t *testing.T, input []byte) []byte {
+	t.Helper()
+
+	var buf bytes.Buffer
+	writer := gzip.NewWriter(&buf)
+
+	_, err := writer.Write(input)
+	require.NoError(t, err)
+
+	err = writer.Close()
+	require.NoError(t, err)
+
+	return buf.Bytes()
 }

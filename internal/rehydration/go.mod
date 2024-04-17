@@ -1,11 +1,11 @@
 module github.com/observiq/bindplane-agent/internal/rehydration
 
-go 1.22.0
+go 1.21
 
-replace github.com/observiq/bindplane-agent/internal/testutils => ../testutils
+toolchain go1.22.0
 
 require (
-	github.com/observiq/bindplane-agent/internal/testutils v0.0.0-00010101000000-000000000000
+	github.com/observiq/bindplane-agent/internal/testutils v1.49.0
 	github.com/stretchr/testify v1.9.0
 	go.opentelemetry.io/collector/component v0.98.0
 	go.opentelemetry.io/collector/consumer v0.98.0
@@ -43,3 +43,5 @@ require (
 	google.golang.org/protobuf v1.33.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
+
+replace github.com/observiq/bindplane-agent/internal/testutils => ../testutils

@@ -256,7 +256,7 @@ func (r *rehydrationReceiver) rehydrate(checkpoint *rehydration.CheckPoint, mark
 	numEntitiesRehydrated = len(processedObjectNames)
 
 	// Delete objects
-	if r.cfg.DeleteOnRead {
+	if r.cfg.DeleteOnRead && len(processedObjectNames) > 0 {
 		if err := r.awsClient.DeleteObjects(r.ctx, r.cfg.S3Bucket, processedObjectNames); err != nil {
 			r.logger.Error("Error while attempting to delete objects", zap.Error(err))
 		}

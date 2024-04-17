@@ -1,13 +1,16 @@
 module github.com/observiq/bindplane-agent/receiver/awss3rehydrationreceiver
 
-go 1.22.0
+go 1.21
+
+toolchain go1.22.0
 
 require (
 	github.com/aws/aws-sdk-go-v2 v1.26.1
 	github.com/aws/aws-sdk-go-v2/config v1.27.11
 	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.16.15
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.53.1
-	github.com/observiq/bindplane-agent/internal/rehydration v0.0.0-00010101000000-000000000000
+	github.com/observiq/bindplane-agent/internal/rehydration v1.49.0
+	github.com/observiq/bindplane-agent/internal/testutils v1.49.0
 	github.com/stretchr/testify v1.9.0
 	go.opentelemetry.io/collector/component v0.98.0
 	go.opentelemetry.io/collector/confmap v0.98.0

@@ -1,6 +1,6 @@
 module github.com/observiq/bindplane-agent
 
-go 1.22.0
+go 1.21.6
 
 require (
 	github.com/google/uuid v1.6.0
@@ -261,7 +261,7 @@ require (
 	github.com/microsoft/go-mssqldb v1.7.0 // indirect
 	github.com/observiq/bindplane-agent/counter v1.49.0 // indirect
 	github.com/observiq/bindplane-agent/expr v1.49.0 // indirect
-	github.com/observiq/bindplane-agent/internal/rehydration v0.0.0-00010101000000-000000000000 // indirect
+	github.com/observiq/bindplane-agent/internal/rehydration v1.49.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlemanagedprometheusexporter v0.98.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/internal/collectd v0.98.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/internal/datadog v0.98.0 // indirect
