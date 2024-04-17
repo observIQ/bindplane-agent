@@ -18,7 +18,6 @@ import (
 	"bytes"
 	"compress/gzip"
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -31,7 +30,6 @@ import (
 	"github.com/observiq/bindplane-agent/receiver/azureblobrehydrationreceiver/internal/azureblob"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/consumer"
-	"go.opentelemetry.io/collector/extension/experimental/storage"
 	"go.uber.org/zap"
 )
 
@@ -54,7 +52,7 @@ type rehydrationReceiver struct {
 	azureClient        azureblob.BlobClient
 	supportedTelemetry component.DataType
 	consumer           blobConsumer
-	storageClient      storage.Client
+	checkpointStore    rehydration.CheckpointStorer
 
 	startingTime time.Time
 	endingTime   time.Time
@@ -126,16 +124,16 @@ func newRehydrationReceiver(id component.ID, logger *zap.Logger, cfg *Config) (*
 	ctx, cancel := context.WithCancelCause(context.Background())
 
 	return &rehydrationReceiver{
-		logger:        logger,
-		id:            id,
-		cfg:           cfg,
-		azureClient:   azureClient,
-		doneChan:      make(chan struct{}),
-		storageClient: storage.NewNopClient(),
-		startingTime:  startingTime,
-		endingTime:    endingTime,
-		ctx:           ctx,
-		cancelFunc:    cancel,
+		logger:          logger,
+		id:              id,
+		cfg:             cfg,
+		azureClient:     azureClient,
+		doneChan:        make(chan struct{}),
+		checkpointStore: rehydration.NewNopStorage(),
+		startingTime:    startingTime,
+		endingTime:      endingTime,
+		ctx:             ctx,
+		cancelFunc:      cancel,
 	}, nil
 }
 
@@ -143,12 +141,12 @@ func newRehydrationReceiver(id component.ID, logger *zap.Logger, cfg *Config) (*
 func (r *rehydrationReceiver) Start(ctx context.Context, host component.Host) error {
 
 	if r.cfg.StorageID != nil {
-		storageClient, err := getStorageClient(ctx, host, r.cfg.StorageID, r.id, r.supportedTelemetry)
+		checkpointStore, err := rehydration.NewCheckpointStorage(ctx, host, *r.cfg.StorageID, r.id, r.supportedTelemetry)
 		if err != nil {
-			return fmt.Errorf("getStorageClient: %w", err)
+			return fmt.Errorf("NewCheckpointStorage: %w", err)
 		}
 
-		r.storageClient = storageClient
+		r.checkpointStore = checkpointStore
 	}
 
 	r.started = true
@@ -170,7 +168,7 @@ func (r *rehydrationReceiver) Shutdown(ctx context.Context) error {
 		}
 	}
 
-	err = errors.Join(err, r.storageClient.Close(ctx))
+	err = errors.Join(err, r.checkpointStore.Close(ctx))
 
 	return err
 }
@@ -188,7 +186,11 @@ func (r *rehydrationReceiver) scrape() {
 	var marker *string
 
 	// load the previous checkpoint. If not exist should return zero value for time
-	checkpoint := r.loadCheckpoint(r.ctx)
+	checkpoint, err := r.checkpointStore.LoadCheckPoint(r.ctx, checkpointStorageKey)
+	if err != nil {
+		r.logger.Warn("Error loading checkpoint, continuing without a previous checkpoint", zap.Error(err))
+		checkpoint = rehydration.NewCheckpoint()
+	}
 
 	// Call once before the loop to ensure we do a collection before the first ticker
 	numBlobsRehydrated := r.rehydrateBlobs(checkpoint, marker)
@@ -215,7 +217,7 @@ func (r *rehydrationReceiver) scrape() {
 // time range then the blobs will be downloaded and rehydrated.
 // The passed in checkpoint and marker will be updated and should be used in the next iteration.
 // The count of blobs processed will be returned
-func (r *rehydrationReceiver) rehydrateBlobs(checkpoint *rehydrationCheckpoint, marker *string) (numBlobsRehydrated int) {
+func (r *rehydrationReceiver) rehydrateBlobs(checkpoint *rehydration.CheckPoint, marker *string) (numBlobsRehydrated int) {
 	var prefix *string
 	if r.cfg.RootFolder != "" {
 		prefix = &r.cfg.RootFolder
@@ -258,7 +260,7 @@ func (r *rehydrationReceiver) rehydrateBlobs(checkpoint *rehydrationCheckpoint, 
 
 			// Update and save the checkpoint with the most recently processed blob
 			checkpoint.UpdateCheckpoint(*blobTime, blob.Name)
-			if err := r.saveCheckpoint(r.ctx, checkpoint); err != nil {
+			if err := r.checkpointStore.SaveCheckpoint(r.ctx, checkpointStorageKey, checkpoint); err != nil {
 				r.logger.Error("Error while saving checkpoint", zap.Error(err))
 			}
 
@@ -272,38 +274,6 @@ func (r *rehydrationReceiver) rehydrateBlobs(checkpoint *rehydrationCheckpoint, 
 	}
 
 	return
-}
-
-// saveCheckpoint saves the checkpoint to keep place in rehydration effort
-func (r *rehydrationReceiver) saveCheckpoint(ctx context.Context, checkpoint *rehydrationCheckpoint) error {
-	data, err := json.Marshal(checkpoint)
-	if err != nil {
-		return fmt.Errorf("marshal checkpoint: %w", err)
-	}
-
-	return r.storageClient.Set(ctx, checkpointStorageKey, data)
-}
-
-// loadCheckpoint loads a checkpoint timestamp to be used to keep place in rehydration effort
-func (r *rehydrationReceiver) loadCheckpoint(ctx context.Context) *rehydrationCheckpoint {
-	checkpoint := newCheckpoint()
-
-	data, err := r.storageClient.Get(ctx, checkpointStorageKey)
-	if err != nil {
-		r.logger.Info("Unable to load checkpoint from storage client, continuing without a previous checkpoint", zap.Error(err))
-		return checkpoint
-	}
-
-	if data == nil {
-		return checkpoint
-	}
-
-	if err := json.Unmarshal(data, checkpoint); err != nil {
-		r.logger.Error("Error while decoding the stored checkpoint, continuing without a checkpoint", zap.Error(err))
-		return checkpoint
-	}
-
-	return checkpoint
 }
 
 // strings that indicate what type of telemetry is in a blob
@@ -414,25 +384,6 @@ func gzipDecompress(contents []byte) ([]byte, error) {
 	}
 
 	return result, nil
-}
-
-// getStorageClient gets the storage client for this receiver, taking into account the component ID and data type.
-func getStorageClient(ctx context.Context, host component.Host, storageID *component.ID, componentID component.ID, componentType component.DataType) (storage.Client, error) {
-	if storageID == nil {
-		return storage.NewNopClient(), nil
-	}
-
-	extension, ok := host.GetExtensions()[*storageID]
-	if !ok {
-		return nil, fmt.Errorf("storage extension '%s' not found", storageID)
-	}
-
-	storageExtension, ok := extension.(storage.Extension)
-	if !ok {
-		return nil, fmt.Errorf("non-storage extension '%s' found", storageID)
-	}
-
-	return storageExtension.GetClient(ctx, component.KindReceiver, componentID, componentType.String())
 }
 
 // checkBlobCount checks the number of blobs rehydrated and the current state of the
