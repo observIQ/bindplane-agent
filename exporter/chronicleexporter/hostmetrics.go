@@ -44,6 +44,7 @@ func (cm *exporterMetrics) getAndReset() *api.BatchCreateEventsRequest {
 	cm.mutex.Lock()
 	defer cm.mutex.Unlock()
 
+	now := timestamppb.Now()
 	batchID := uuid.New()
 	source := &api.EventSource{
 		CollectorId: chronicleCollectorID[:],
@@ -59,8 +60,8 @@ func (cm *exporterMetrics) getAndReset() *api.BatchCreateEventsRequest {
 			StartTime: cm.startTime,
 			Events: []*api.Event{
 				{
-					Timestamp:      timestamppb.Now(),
-					CollectionTime: timestamppb.Now(),
+					Timestamp:      now,
+					CollectionTime: now,
 					Source:         source,
 					Payload: &api.Event_AgentStats{
 						AgentStats: cm.stats,

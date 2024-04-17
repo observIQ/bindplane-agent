@@ -34,7 +34,7 @@ The exporter can be configured using the following fields:
 | `namespace`            | string            |                                        | `false`  | User-configured environment namespace to identify the data domain the logs originated from. |
 | `compression`          | string            | `none`                                 | `false`  | The compression type to use when sending logs. valid values are `none` and `gzip`           |
 | `ingestion_labels`     | map[string]string |                                        | `false`  | Key-value pairs of labels to be applied to the logs when sent to chronicle.                 |
-| `collect_host_metrics` | bool              | `true`                                 | `false`  | Enables collecting metrics about the collector's process and log ingestion metrics          |
+| `collect_agent_metrics` | bool              | `true`                                 | `false`  | Enables collecting metrics about the agent's process and log ingestion metrics          |
 
 ### Log Type
 

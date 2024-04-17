@@ -94,7 +94,7 @@ func newExporter(cfg *Config, params exporter.CreateSettings, collectorID, expor
 		cancel:      cancel,
 	}
 
-	if cfg.CollectHostMetrics {
+	if cfg.CollectAgentMetrics {
 		go exp.startHostMetricsCollection(ctx)
 	}
 

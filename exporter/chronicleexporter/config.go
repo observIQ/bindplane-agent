@@ -68,7 +68,7 @@ type Config struct {
 	// IngestionLabels are the labels that will be attached to logs when sent to Chronicle.
 	IngestionLabels map[string]string `mapstructure:"ingestion_labels"`
 
-	CollectHostMetrics bool `mapstructure:"collect_host_metrics"`
+	CollectAgentMetrics bool `mapstructure:"collect_agent_metrics"`
 }
 
 // Validate checks if the configuration is valid.
