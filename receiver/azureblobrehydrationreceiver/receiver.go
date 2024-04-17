@@ -27,6 +27,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/observiq/bindplane-agent/internal/rehydration"
 	"github.com/observiq/bindplane-agent/receiver/azureblobrehydrationreceiver/internal/azureblob"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/consumer"
@@ -112,12 +113,12 @@ func newRehydrationReceiver(id component.ID, logger *zap.Logger, cfg *Config) (*
 
 	// We should not get an error for either of these time parsings as we check in config validate.
 	// Doing error checking anyways just in case.
-	startingTime, err := time.Parse(timeFormat, cfg.StartingTime)
+	startingTime, err := time.Parse(rehydration.TimeFormat, cfg.StartingTime)
 	if err != nil {
 		return nil, fmt.Errorf("invalid starting_time timestamp: %w", err)
 	}
 
-	endingTime, err := time.Parse(timeFormat, cfg.EndingTime)
+	endingTime, err := time.Parse(rehydration.TimeFormat, cfg.EndingTime)
 	if err != nil {
 		return nil, fmt.Errorf("invalid ending_time timestamp: %w", err)
 	}
@@ -338,7 +339,7 @@ func parseBlobPath(blobName string) (blobTime *time.Time, telemetryType componen
 	timeString := fmt.Sprintf("%s-%s-%sT%s:%s", year, month, day, hour, minute)
 
 	// Parse the expected format
-	parsedTime, timeErr := time.Parse(timeFormat, timeString)
+	parsedTime, timeErr := time.Parse(rehydration.TimeFormat, timeString)
 	if timeErr != nil {
 		err = fmt.Errorf("parse blob time: %w", timeErr)
 		return

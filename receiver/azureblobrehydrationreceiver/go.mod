@@ -6,6 +6,7 @@ toolchain go1.21.6
 
 require (
 	github.com/Azure/azure-sdk-for-go/sdk/storage/azblob v1.3.1
+	github.com/observiq/bindplane-agent/internal/rehydration v1.49.0
 	github.com/stretchr/testify v1.9.0
 	go.opentelemetry.io/collector/component v0.98.0
 	go.opentelemetry.io/collector/confmap v0.98.0
@@ -58,3 +59,7 @@ require (
 	google.golang.org/protobuf v1.33.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
+
+replace github.com/observiq/bindplane-agent/internal/rehydration => ../../internal/rehydration
+
+replace github.com/observiq/bindplane-agent/internal/testutils => ../../internal/testutils
