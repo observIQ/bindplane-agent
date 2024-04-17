@@ -23,6 +23,7 @@ import (
 	"go.opentelemetry.io/collector/component"
 )
 
+// Config the configuration for the rehydration receiver
 type Config struct {
 	// Region AWS region
 	Region string `mapstructure:"region"`
@@ -57,6 +58,7 @@ type Config struct {
 	StorageID *component.ID `mapstructure:"storage"`
 }
 
+// Validate the configuration
 func (c *Config) Validate() error {
 	if c.Region == "" {
 		return errors.New("region is required")

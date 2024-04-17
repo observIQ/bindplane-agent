@@ -12,7 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package s3 //import "github.com/observiq/bindplane-agent/receiver/awss3rehydrationreceiver/internal/s3"
+// Package aws provides an S3 client for AWS
+package aws //import "github.com/observiq/bindplane-agent/receiver/awss3rehydrationreceiver/internal/aws"
 
 import (
 	"context"
@@ -45,8 +46,8 @@ type S3Client interface {
 	DeleteObjects(ctx context.Context, bucket string, keys []string) error
 }
 
-// AWSClient is an implementation of the S3Client for AWS
-type AWSClient struct {
+// DefaultClient is an implementation of the S3Client for AWS
+type DefaultClient struct {
 	sessionCfg aws.Config
 	roleArn    string
 }
@@ -58,13 +59,14 @@ func NewAWSClient(region, roleArn string) (S3Client, error) {
 		return nil, err
 	}
 
-	return &AWSClient{
+	return &DefaultClient{
 		sessionCfg: cfg,
 		roleArn:    roleArn,
 	}, nil
 }
 
-func (a *AWSClient) ListObjects(ctx context.Context, bucket string, prefix, continuationToken *string) ([]*ObjectInfo, *string, error) {
+// ListObjects list all the objects in the bucket with the given prefix. Uses the continuationToken from the last request for paging.
+func (a *DefaultClient) ListObjects(ctx context.Context, bucket string, prefix, continuationToken *string) ([]*ObjectInfo, *string, error) {
 	svc := s3.NewFromConfig(a.sessionCfg)
 
 	input := &s3.ListObjectsV2Input{
@@ -98,7 +100,7 @@ func (a *AWSClient) ListObjects(ctx context.Context, bucket string, prefix, cont
 }
 
 // DownloadObject downloads the contents of the object.
-func (a *AWSClient) DownloadObject(ctx context.Context, bucket, key string, buf []byte) (int64, error) {
+func (a *DefaultClient) DownloadObject(ctx context.Context, bucket, key string, buf []byte) (int64, error) {
 	client := s3.NewFromConfig(a.sessionCfg)
 
 	downloader := manager.NewDownloader(client)
@@ -118,7 +120,7 @@ func (a *AWSClient) DownloadObject(ctx context.Context, bucket, key string, buf 
 }
 
 // DeleteObjects deletes the keys in the specified bucket
-func (a *AWSClient) DeleteObjects(ctx context.Context, bucket string, keys []string) error {
+func (a *DefaultClient) DeleteObjects(ctx context.Context, bucket string, keys []string) error {
 	client := s3.NewFromConfig(a.sessionCfg)
 
 	objects := make([]types.ObjectIdentifier, len(keys))

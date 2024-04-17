@@ -22,7 +22,7 @@ import (
 	"time"
 
 	"github.com/observiq/bindplane-agent/internal/rehydration"
-	"github.com/observiq/bindplane-agent/receiver/awss3rehydrationreceiver/internal/s3"
+	"github.com/observiq/bindplane-agent/receiver/awss3rehydrationreceiver/internal/aws"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/consumer"
 	"go.uber.org/zap"
@@ -33,13 +33,13 @@ const checkpointStorageKey = "aws_s3_checkpoint"
 
 // newAWSS3Client is the function used to create new AWS S3 clients.
 // Meant to be overwritten for tests
-var newAWSS3Client = s3.NewAWSClient
+var newAWSS3Client = aws.NewAWSClient
 
 type rehydrationReceiver struct {
 	logger             *zap.Logger
 	id                 component.ID
 	cfg                *Config
-	awsClient          s3.S3Client
+	awsClient          aws.S3Client
 	supportedTelemetry component.DataType
 	consumer           rehydration.Consumer
 	checkpointStore    rehydration.CheckpointStorer
@@ -269,7 +269,7 @@ func (r *rehydrationReceiver) rehydrate(checkpoint *rehydration.CheckPoint, mark
 // 1. Downloads the object
 // 2. Decompresses the object if applicable
 // 3. Pass the object to the consumer
-func (r *rehydrationReceiver) processObject(object *s3.ObjectInfo) error {
+func (r *rehydrationReceiver) processObject(object *aws.ObjectInfo) error {
 	objectBuffer := make([]byte, object.Size)
 
 	size, err := r.awsClient.DownloadObject(r.ctx, r.cfg.S3Bucket, object.Name, objectBuffer)

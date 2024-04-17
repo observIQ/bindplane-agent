@@ -22,8 +22,8 @@ import (
 
 	"github.com/observiq/bindplane-agent/internal/rehydration"
 	"github.com/observiq/bindplane-agent/internal/testutils"
-	"github.com/observiq/bindplane-agent/receiver/awss3rehydrationreceiver/internal/s3"
-	"github.com/observiq/bindplane-agent/receiver/awss3rehydrationreceiver/internal/s3/mocks"
+	"github.com/observiq/bindplane-agent/receiver/awss3rehydrationreceiver/internal/aws"
+	"github.com/observiq/bindplane-agent/receiver/awss3rehydrationreceiver/internal/aws/mocks"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/component"
@@ -117,7 +117,7 @@ func Test_fullRehydration(t *testing.T) {
 
 		// Setup mocks
 		mockClient := setNewAWSClient(t)
-		mockClient.EXPECT().ListObjects(mock.Anything, cfg.S3Bucket, (*string)(nil), (*string)(nil)).Times(3).Return([]*s3.ObjectInfo{}, nil, nil).
+		mockClient.EXPECT().ListObjects(mock.Anything, cfg.S3Bucket, (*string)(nil), (*string)(nil)).Times(3).Return([]*aws.ObjectInfo{}, nil, nil).
 			Run(func(_ mock.Arguments) {
 				listCounter.Add(1)
 			})
@@ -138,7 +138,7 @@ func Test_fullRehydration(t *testing.T) {
 		metrics, jsonBytes := testutils.GenerateTestMetrics(t)
 		expectedBuffSize := int64(len(jsonBytes))
 
-		returnedBlobInfo := []*s3.ObjectInfo{
+		returnedBlobInfo := []*aws.ObjectInfo{
 			{
 				Name: "year=2023/month=10/day=02/hour=17/minute=05/blobmetrics_12345.json",
 				Size: expectedBuffSize,
@@ -179,7 +179,7 @@ func Test_fullRehydration(t *testing.T) {
 		traces, jsonBytes := testutils.GenerateTestTraces(t)
 		expectedBuffSize := int64(len(jsonBytes))
 
-		returnedBlobInfo := []*s3.ObjectInfo{
+		returnedBlobInfo := []*aws.ObjectInfo{
 			{
 				Name: "year=2023/month=10/day=02/hour=17/minute=05/blobtraces_12345.json",
 				Size: expectedBuffSize,
@@ -220,7 +220,7 @@ func Test_fullRehydration(t *testing.T) {
 		logs, jsonBytes := testutils.GenerateTestLogs(t)
 		expectedBuffSize := int64(len(jsonBytes))
 
-		returnedBlobInfo := []*s3.ObjectInfo{
+		returnedBlobInfo := []*aws.ObjectInfo{
 			{
 				Name: "year=2023/month=10/day=02/hour=17/minute=05/bloblogs_12345.json",
 				Size: expectedBuffSize,
@@ -262,7 +262,7 @@ func Test_fullRehydration(t *testing.T) {
 		compressedBytes := testutils.GZipCompressData(t, jsonBytes)
 		expectedBuffSize := int64(len(compressedBytes))
 
-		returnedBlobInfo := []*s3.ObjectInfo{
+		returnedBlobInfo := []*aws.ObjectInfo{
 			{
 				Name: "year=2023/month=10/day=02/hour=17/minute=05/bloblogs_12345.json.gz",
 				Size: expectedBuffSize,
@@ -308,7 +308,7 @@ func Test_fullRehydration(t *testing.T) {
 		logs, jsonBytes := testutils.GenerateTestLogs(t)
 		expectedBuffSize := int64(len(jsonBytes))
 
-		returnedBlobInfo := []*s3.ObjectInfo{
+		returnedBlobInfo := []*aws.ObjectInfo{
 			{
 				Name: "year=2023/month=10/day=02/hour=17/minute=05/bloblogs_12345.json",
 				Size: expectedBuffSize,
@@ -351,7 +351,7 @@ func Test_fullRehydration(t *testing.T) {
 		logs, jsonBytes := testutils.GenerateTestLogs(t)
 		expectedBuffSize := int64(len(jsonBytes))
 
-		returnedBlobInfo := []*s3.ObjectInfo{
+		returnedBlobInfo := []*aws.ObjectInfo{
 			{
 				Name: "year=2022/month=10/day=02/hour=17/minute=05/bloblogs_12345.json", // Out of time range
 			},
@@ -415,7 +415,7 @@ func setNewAWSClient(t *testing.T) *mocks.MockS3Client {
 
 	mockClient := mocks.NewMockS3Client(t)
 
-	newAWSS3Client = func(_, _ string) (s3.S3Client, error) {
+	newAWSS3Client = func(_, _ string) (aws.S3Client, error) {
 		return mockClient, nil
 	}
 
