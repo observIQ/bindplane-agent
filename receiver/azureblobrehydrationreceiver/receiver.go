@@ -51,7 +51,7 @@ type rehydrationReceiver struct {
 	cfg                *Config
 	azureClient        azureblob.BlobClient
 	supportedTelemetry component.DataType
-	consumer           blobConsumer
+	consumer           rehydration.Consumer
 	checkpointStore    rehydration.CheckpointStorer
 
 	startingTime time.Time
@@ -71,7 +71,7 @@ func newMetricsReceiver(id component.ID, logger *zap.Logger, cfg *Config, nextCo
 	}
 
 	r.supportedTelemetry = component.DataTypeMetrics
-	r.consumer = newMetricsConsumer(nextConsumer)
+	r.consumer = rehydration.NewMetricsConsumer(nextConsumer)
 
 	return r, nil
 }
@@ -84,7 +84,7 @@ func newLogsReceiver(id component.ID, logger *zap.Logger, cfg *Config, nextConsu
 	}
 
 	r.supportedTelemetry = component.DataTypeLogs
-	r.consumer = newLogsConsumer(nextConsumer)
+	r.consumer = rehydration.NewLogsConsumer(nextConsumer)
 
 	return r, nil
 }
@@ -97,7 +97,7 @@ func newTracesReceiver(id component.ID, logger *zap.Logger, cfg *Config, nextCon
 	}
 
 	r.supportedTelemetry = component.DataTypeTraces
-	r.consumer = newTracesConsumer(nextConsumer)
+	r.consumer = rehydration.NewTracesConsumer(nextConsumer)
 
 	return r, nil
 }

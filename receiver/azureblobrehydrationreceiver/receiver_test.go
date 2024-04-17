@@ -23,6 +23,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/observiq/bindplane-agent/internal/rehydration"
 	"github.com/observiq/bindplane-agent/receiver/azureblobrehydrationreceiver/internal/azureblob"
 	blobmocks "github.com/observiq/bindplane-agent/receiver/azureblobrehydrationreceiver/internal/azureblob/mocks"
 	"github.com/observiq/bindplane-agent/receiver/azureblobrehydrationreceiver/internal/mocks"
@@ -53,7 +54,7 @@ func Test_newMetricsReceiver(t *testing.T) {
 	require.Equal(t, id, r.id)
 	require.Equal(t, mockClient, r.azureClient)
 	require.Equal(t, component.DataTypeMetrics, r.supportedTelemetry)
-	require.IsType(t, &metricsConsumer{}, r.consumer)
+	require.IsType(t, &rehydration.MetricsConsumer{}, r.consumer)
 }
 
 func Test_newLogsReceiver(t *testing.T) {
@@ -75,7 +76,7 @@ func Test_newLogsReceiver(t *testing.T) {
 	require.Equal(t, id, r.id)
 	require.Equal(t, mockClient, r.azureClient)
 	require.Equal(t, component.DataTypeLogs, r.supportedTelemetry)
-	require.IsType(t, &logsConsumer{}, r.consumer)
+	require.IsType(t, &rehydration.LogsConsumer{}, r.consumer)
 }
 
 func Test_newTracesReceiver(t *testing.T) {
@@ -97,7 +98,7 @@ func Test_newTracesReceiver(t *testing.T) {
 	require.Equal(t, id, r.id)
 	require.Equal(t, mockClient, r.azureClient)
 	require.Equal(t, component.DataTypeTraces, r.supportedTelemetry)
-	require.IsType(t, &tracesConsumer{}, r.consumer)
+	require.IsType(t, &rehydration.TracesConsumer{}, r.consumer)
 }
 
 func Test_fullRehydration(t *testing.T) {
