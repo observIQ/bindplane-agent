@@ -28,9 +28,6 @@ import (
 	"go.uber.org/zap"
 )
 
-// checkpointStorageKey is the key used for storing the checkpoint
-const checkpointStorageKey = "aws_s3_checkpoint"
-
 // newAWSS3Client is the function used to create new AWS S3 clients.
 // Meant to be overwritten for tests
 var newAWSS3Client = aws.NewAWSClient
@@ -176,7 +173,7 @@ func (r *rehydrationReceiver) scrape() {
 	var marker *string
 
 	// load the previous checkpoint. If not exist should return zero value for time
-	checkpoint, err := r.checkpointStore.LoadCheckPoint(r.ctx, checkpointStorageKey)
+	checkpoint, err := r.checkpointStore.LoadCheckPoint(r.ctx, r.checkpointKey())
 	if err != nil {
 		r.logger.Warn("Error loading checkpoint, continuing without a previous checkpoint", zap.Error(err))
 		checkpoint = rehydration.NewCheckpoint()
@@ -244,7 +241,7 @@ func (r *rehydrationReceiver) rehydrate(checkpoint *rehydration.CheckPoint, mark
 			}
 
 			checkpoint.UpdateCheckpoint(*objectTime, object.Name)
-			if err := r.checkpointStore.SaveCheckpoint(r.ctx, checkpointStorageKey, checkpoint); err != nil {
+			if err := r.checkpointStore.SaveCheckpoint(r.ctx, r.checkpointKey(), checkpoint); err != nil {
 				r.logger.Error("Error while saving checkpoint", zap.Error(err))
 			}
 
@@ -295,6 +292,14 @@ func (r *rehydrationReceiver) processObject(object *aws.ObjectInfo) error {
 	}
 
 	return nil
+}
+
+// checkpointStorageKey is the key used for storing the checkpoint
+const checkpointStorageKey = "aws_s3_checkpoint"
+
+// checkpointKey returns the key used for storing the checkpoint
+func (r *rehydrationReceiver) checkpointKey() string {
+	return fmt.Sprintf("%s_%s_%s", checkpointStorageKey, r.id, r.supportedTelemetry.String())
 }
 
 // checkEntityCount checks the number of entities rehydrated and the current state of the
