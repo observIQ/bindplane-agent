@@ -68,6 +68,7 @@ type Config struct {
 	// IngestionLabels are the labels that will be attached to logs when sent to Chronicle.
 	IngestionLabels map[string]string `mapstructure:"ingestion_labels"`
 
+	// CollectAgentMetrics is a flag that determines whether or not to collect agent metrics.
 	CollectAgentMetrics bool `mapstructure:"collect_agent_metrics"`
 }
 

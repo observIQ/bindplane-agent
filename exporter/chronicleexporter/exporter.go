@@ -19,6 +19,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"sync"
 	"time"
 
 	"github.com/google/uuid"
@@ -45,6 +46,7 @@ type chronicleExporter struct {
 	marshaler               logMarshaler
 	metrics                 *exporterMetrics
 	collectorID, exporterID string
+	wg                      sync.WaitGroup
 
 	cancel context.CancelFunc
 }
@@ -178,6 +180,9 @@ func (ce *chronicleExporter) startHostMetricsCollection(ctx context.Context) {
 	ticker := time.NewTicker(5 * time.Minute)
 	defer ticker.Stop()
 
+	ce.wg.Add(1)
+	defer ce.wg.Done()
+
 	for {
 		select {
 		case <-ctx.Done():
@@ -198,5 +203,6 @@ func (ce *chronicleExporter) startHostMetricsCollection(ctx context.Context) {
 
 func (ce *chronicleExporter) Shutdown(context.Context) error {
 	ce.cancel()
+	ce.wg.Wait()
 	return nil
 }
