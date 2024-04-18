@@ -28,14 +28,6 @@ import (
 	"go.uber.org/zap"
 )
 
-const (
-	// checkpointStorageKey the key used for storing the checkpoint
-	checkpointStorageKey = "azure_blob_checkpoint"
-)
-
-// errInvalidBlobPath is the error for invalid blob path
-var errInvalidBlobPath = errors.New("invalid blob path")
-
 // newAzureBlobClient is the function use to create new Azure Blob Clients.
 // Meant to be overwritten for tests
 var newAzureBlobClient = azureblob.NewAzureBlobClient
@@ -181,7 +173,7 @@ func (r *rehydrationReceiver) scrape() {
 	var marker *string
 
 	// load the previous checkpoint. If not exist should return zero value for time
-	checkpoint, err := r.checkpointStore.LoadCheckPoint(r.ctx, checkpointStorageKey)
+	checkpoint, err := r.checkpointStore.LoadCheckPoint(r.ctx, r.checkpointKey())
 	if err != nil {
 		r.logger.Warn("Error loading checkpoint, continuing without a previous checkpoint", zap.Error(err))
 		checkpoint = rehydration.NewCheckpoint()
@@ -234,7 +226,7 @@ func (r *rehydrationReceiver) rehydrateBlobs(checkpoint *rehydration.CheckPoint,
 	for _, blob := range blobs {
 		blobTime, telemetryType, err := rehydration.ParseEntityPath(blob.Name)
 		switch {
-		case errors.Is(err, errInvalidBlobPath):
+		case errors.Is(err, rehydration.ErrInvalidEntityPath):
 			r.logger.Debug("Skipping Blob, non-matching blob path", zap.String("blob", blob.Name))
 		case err != nil:
 			r.logger.Error("Error processing blob path", zap.String("blob", blob.Name), zap.Error(err))
@@ -255,7 +247,7 @@ func (r *rehydrationReceiver) rehydrateBlobs(checkpoint *rehydration.CheckPoint,
 
 			// Update and save the checkpoint with the most recently processed blob
 			checkpoint.UpdateCheckpoint(*blobTime, blob.Name)
-			if err := r.checkpointStore.SaveCheckpoint(r.ctx, checkpointStorageKey, checkpoint); err != nil {
+			if err := r.checkpointStore.SaveCheckpoint(r.ctx, r.checkpointKey(), checkpoint); err != nil {
 				r.logger.Error("Error while saving checkpoint", zap.Error(err))
 			}
 
@@ -302,6 +294,14 @@ func (r *rehydrationReceiver) processBlob(blob *azureblob.BlobInfo) error {
 		return fmt.Errorf("consume: %w", err)
 	}
 	return nil
+}
+
+// checkpointStorageKey the key used for storing the checkpoint
+const checkpointStorageKey = "azure_blob_checkpoint"
+
+// checkpointKey returns the key used for storing the checkpoint
+func (r *rehydrationReceiver) checkpointKey() string {
+	return fmt.Sprintf("%s_%s_%s", checkpointStorageKey, r.id, r.supportedTelemetry.String())
 }
 
 // checkBlobCount checks the number of blobs rehydrated and the current state of the
