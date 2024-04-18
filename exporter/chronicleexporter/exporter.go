@@ -97,6 +97,7 @@ func newExporter(cfg *Config, params exporter.CreateSettings, collectorID, expor
 	}
 
 	if cfg.CollectAgentMetrics {
+		exp.wg.Add(1)
 		go exp.startHostMetricsCollection(ctx)
 	}
 
@@ -180,7 +181,6 @@ func (ce *chronicleExporter) startHostMetricsCollection(ctx context.Context) {
 	ticker := time.NewTicker(5 * time.Minute)
 	defer ticker.Stop()
 
-	ce.wg.Add(1)
 	defer ce.wg.Done()
 
 	for {
