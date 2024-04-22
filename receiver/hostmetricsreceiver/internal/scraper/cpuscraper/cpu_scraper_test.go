@@ -342,7 +342,11 @@ func assertCPUMetricValid(t *testing.T, metric pmetric.Metric, startTime pcommon
 	if startTime != 0 {
 		internal.AssertSumMetricStartTimeEquals(t, metric, startTime)
 	}
-	assert.GreaterOrEqual(t, metric.Sum().DataPoints().Len(), 4*runtime.NumCPU())
+	cpuUtilizationStates := []string{"user", "system", "idle", "interrupt"}
+
+	// CPU time is not per-CPU, just assert we collected at least one metric for each state
+	assert.GreaterOrEqual(t, metric.Sum().DataPoints().Len(), len(cpuUtilizationStates))
+
 	internal.AssertSumMetricHasAttribute(t, metric, 0, "cpu")
 	internal.AssertSumMetricHasAttributeValue(t, metric, 0, "state",
 		pcommon.NewValueStr(metadata.AttributeStateUser.String()))
