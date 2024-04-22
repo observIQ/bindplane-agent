@@ -60,7 +60,8 @@ func (s *scraper) start(ctx context.Context, _ component.Host) error {
 func (s *scraper) scrape(ctx context.Context) (pmetric.Metrics, error) {
 	ctx = context.WithValue(ctx, common.EnvKey, s.config.EnvMap)
 	now := pcommon.NewTimestampFromTime(s.now())
-	cpuTimes, err := s.times(ctx, true /*percpu=*/)
+	// Set percpu=false for Windows 7 x86 compatibility
+	cpuTimes, err := s.times(ctx, false /*percpu=*/)
 	if err != nil {
 		return pmetric.NewMetrics(), scrapererror.NewPartialScrapeError(err, metricsLen)
 	}
