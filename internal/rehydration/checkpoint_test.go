@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package azureblobrehydrationreceiver //import "github.com/observiq/bindplane-agent/receiver/azureblobrehydrationreceiver"
+package rehydration //import "github.com/observiq/bindplane-agent/internal/rehydration"
 
 import (
 	"testing"
@@ -22,37 +22,37 @@ import (
 )
 
 func Test_rehydrationCheckpoint(t *testing.T) {
-	checkpoint := newCheckpoint()
+	checkpoint := NewCheckpoint()
 
 	time1 := time.Now()
 	time2 := time1.Add(time.Hour)
 	time3 := time1.Add(-time.Hour)
 
-	blobOne, blobTwo := "one", "two"
+	entityOne, entityTwo := "one", "two"
 
 	// Ensure returns true from a new check point
-	require.True(t, checkpoint.ShouldParse(time1, blobOne))
-	require.True(t, checkpoint.ShouldParse(time1, blobTwo))
+	require.True(t, checkpoint.ShouldParse(time1, entityOne))
+	require.True(t, checkpoint.ShouldParse(time1, entityTwo))
 
 	// Update checkpoint
-	checkpoint.UpdateCheckpoint(time1, blobOne)
+	checkpoint.UpdateCheckpoint(time1, entityOne)
 
 	// Validate state was updated correctly
 	require.True(t, checkpoint.LastTs.Equal(time1))
-	require.Contains(t, checkpoint.ParsedBlobs, blobOne)
+	require.Contains(t, checkpoint.ParsedEntities, entityOne)
 
 	// Redo checks with updated checkpoint
 
-	// Should pass as blob has not been seen
-	require.True(t, checkpoint.ShouldParse(time1, blobTwo))
+	// Should pass as entity has not been seen
+	require.True(t, checkpoint.ShouldParse(time1, entityTwo))
 
-	// Should fail due to blob being seen
-	require.False(t, checkpoint.ShouldParse(time1, blobOne))
+	// Should fail due to entity being seen
+	require.False(t, checkpoint.ShouldParse(time1, entityOne))
 
 	// Should fail due to time being before last
-	require.False(t, checkpoint.ShouldParse(time3, blobTwo))
+	require.False(t, checkpoint.ShouldParse(time3, entityTwo))
 
-	// Should pass as time is after and blob is not seen
-	require.True(t, checkpoint.ShouldParse(time2, blobTwo))
+	// Should pass as time is after and entity is not seen
+	require.True(t, checkpoint.ShouldParse(time2, entityTwo))
 
 }

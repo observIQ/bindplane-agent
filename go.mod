@@ -5,32 +5,33 @@ go 1.21.6
 require (
 	github.com/google/uuid v1.6.0
 	github.com/mholt/archiver/v3 v3.5.1
-	github.com/observiq/bindplane-agent/exporter/azureblobexporter v1.48.0
-	github.com/observiq/bindplane-agent/exporter/chronicleexporter v1.48.0
-	github.com/observiq/bindplane-agent/exporter/chronicleforwarderexporter v1.48.0
-	github.com/observiq/bindplane-agent/exporter/googlecloudexporter v1.48.0
-	github.com/observiq/bindplane-agent/exporter/googlemanagedprometheusexporter v1.48.0
-	github.com/observiq/bindplane-agent/exporter/snowflakeexporter v1.48.0
-	github.com/observiq/bindplane-agent/packagestate v1.48.0
-	github.com/observiq/bindplane-agent/processor/datapointcountprocessor v1.48.0
-	github.com/observiq/bindplane-agent/processor/logcountprocessor v1.48.0
-	github.com/observiq/bindplane-agent/processor/logdeduplicationprocessor v1.48.0
-	github.com/observiq/bindplane-agent/processor/lookupprocessor v1.48.0
-	github.com/observiq/bindplane-agent/processor/maskprocessor v1.48.0
-	github.com/observiq/bindplane-agent/processor/metricextractprocessor v1.48.0
-	github.com/observiq/bindplane-agent/processor/metricstatsprocessor v1.48.0
-	github.com/observiq/bindplane-agent/processor/removeemptyvaluesprocessor v1.48.0
-	github.com/observiq/bindplane-agent/processor/resourceattributetransposerprocessor v1.48.0
-	github.com/observiq/bindplane-agent/processor/samplingprocessor v1.48.0
-	github.com/observiq/bindplane-agent/processor/spancountprocessor v1.48.0
-	github.com/observiq/bindplane-agent/processor/throughputmeasurementprocessor v1.48.0
-	github.com/observiq/bindplane-agent/receiver/azureblobrehydrationreceiver v1.48.0
-	github.com/observiq/bindplane-agent/receiver/httpreceiver v1.48.0
-	github.com/observiq/bindplane-agent/receiver/m365receiver v1.48.0
-	github.com/observiq/bindplane-agent/receiver/pluginreceiver v1.48.0
-	github.com/observiq/bindplane-agent/receiver/routereceiver v1.48.0
-	github.com/observiq/bindplane-agent/receiver/sapnetweaverreceiver v1.48.0
-	github.com/observiq/bindplane-agent/receiver/telemetrygeneratorreceiver v1.48.0
+	github.com/observiq/bindplane-agent/exporter/azureblobexporter v1.49.0
+	github.com/observiq/bindplane-agent/exporter/chronicleexporter v1.49.0
+	github.com/observiq/bindplane-agent/exporter/chronicleforwarderexporter v1.49.0
+	github.com/observiq/bindplane-agent/exporter/googlecloudexporter v1.49.0
+	github.com/observiq/bindplane-agent/exporter/googlemanagedprometheusexporter v1.49.0
+	github.com/observiq/bindplane-agent/exporter/snowflakeexporter v1.49.0
+	github.com/observiq/bindplane-agent/packagestate v1.49.0
+	github.com/observiq/bindplane-agent/processor/datapointcountprocessor v1.49.0
+	github.com/observiq/bindplane-agent/processor/logcountprocessor v1.49.0
+	github.com/observiq/bindplane-agent/processor/logdeduplicationprocessor v1.49.0
+	github.com/observiq/bindplane-agent/processor/lookupprocessor v1.49.0
+	github.com/observiq/bindplane-agent/processor/maskprocessor v1.49.0
+	github.com/observiq/bindplane-agent/processor/metricextractprocessor v1.49.0
+	github.com/observiq/bindplane-agent/processor/metricstatsprocessor v1.49.0
+	github.com/observiq/bindplane-agent/processor/removeemptyvaluesprocessor v1.49.0
+	github.com/observiq/bindplane-agent/processor/resourceattributetransposerprocessor v1.49.0
+	github.com/observiq/bindplane-agent/processor/samplingprocessor v1.49.0
+	github.com/observiq/bindplane-agent/processor/spancountprocessor v1.49.0
+	github.com/observiq/bindplane-agent/processor/throughputmeasurementprocessor v1.49.0
+	github.com/observiq/bindplane-agent/receiver/awss3rehydrationreceiver v1.49.0
+	github.com/observiq/bindplane-agent/receiver/azureblobrehydrationreceiver v1.49.0
+	github.com/observiq/bindplane-agent/receiver/httpreceiver v1.49.0
+	github.com/observiq/bindplane-agent/receiver/m365receiver v1.49.0
+	github.com/observiq/bindplane-agent/receiver/pluginreceiver v1.49.0
+	github.com/observiq/bindplane-agent/receiver/routereceiver v1.49.0
+	github.com/observiq/bindplane-agent/receiver/sapnetweaverreceiver v1.49.0
+	github.com/observiq/bindplane-agent/receiver/telemetrygeneratorreceiver v1.49.0
 	github.com/oklog/ulid/v2 v2.1.0
 	github.com/open-telemetry/opamp-go v0.9.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/connector/countconnector v0.98.0
@@ -169,6 +170,7 @@ require (
 	go.opentelemetry.io/collector/consumer v0.98.0
 	go.opentelemetry.io/collector/exporter v0.98.0
 	go.opentelemetry.io/collector/exporter/loggingexporter v0.98.0
+	go.opentelemetry.io/collector/exporter/nopexporter v0.98.0
 	go.opentelemetry.io/collector/exporter/otlpexporter v0.98.0
 	go.opentelemetry.io/collector/exporter/otlphttpexporter v0.98.0
 	go.opentelemetry.io/collector/extension v0.98.0
@@ -225,6 +227,7 @@ require (
 	github.com/IBM/sarama v1.43.1 // indirect
 	github.com/JohnCGriffin/overflow v0.0.0-20211019200055-46fa312c352c // indirect
 	github.com/apache/arrow/go/v15 v15.0.0 // indirect
+	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.16.15 // indirect
 	github.com/aws/aws-sdk-go-v2/service/servicediscovery v1.29.5 // indirect
 	github.com/blang/semver/v4 v4.0.0 // indirect
 	github.com/cihub/seelog v0.0.0-20170130134532-f561c5e57575 // indirect
@@ -256,8 +259,9 @@ require (
 	github.com/kylelemons/godebug v1.1.0 // indirect
 	github.com/lestrrat-go/strftime v1.0.6 // indirect
 	github.com/microsoft/go-mssqldb v1.7.0 // indirect
-	github.com/observiq/bindplane-agent/counter v1.48.0 // indirect
-	github.com/observiq/bindplane-agent/expr v1.48.0 // indirect
+	github.com/observiq/bindplane-agent/counter v1.49.0 // indirect
+	github.com/observiq/bindplane-agent/expr v1.49.0 // indirect
+	github.com/observiq/bindplane-agent/internal/rehydration v1.49.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlemanagedprometheusexporter v0.98.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/internal/collectd v0.98.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/internal/datadog v0.98.0 // indirect
@@ -322,8 +326,8 @@ require (
 require (
 	github.com/99designs/go-keychain v0.0.0-20191008050251-8e49817e8af4 // indirect
 	github.com/99designs/keyring v1.2.2 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/v4a v1.0.23 // indirect
-	github.com/aws/aws-sdk-go-v2/service/internal/checksum v1.1.26 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/v4a v1.3.5 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/checksum v1.3.7 // indirect
 	github.com/danieljoos/wincred v1.1.2 // indirect
 	github.com/dvsekhvalnov/jose2go v1.6.0 // indirect
 	github.com/godbus/dbus v0.0.0-20190726142602-4481cbc300e2 // indirect
@@ -375,21 +379,20 @@ require (
 	github.com/antonmedv/expr v1.15.5 // indirect
 	github.com/apache/thrift v0.20.0 // indirect
 	github.com/armon/go-metrics v0.4.1 // indirect
-	github.com/aws/aws-sdk-go v1.51.17 // indirect
+	github.com/aws/aws-sdk-go v1.51.21 // indirect
 	github.com/aws/aws-sdk-go-v2 v1.26.1 // indirect
 	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.6.2 // indirect
 	github.com/aws/aws-sdk-go-v2/config v1.27.11 // indirect
 	github.com/aws/aws-sdk-go-v2/credentials v1.17.11 // indirect
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.16.1 // indirect
-	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.11.59 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/configsources v1.3.5 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.6.5 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/ini v1.8.0 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.11.2 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.11.7 // indirect
-	github.com/aws/aws-sdk-go-v2/service/internal/s3shared v1.14.0 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/s3shared v1.17.5 // indirect
 	github.com/aws/aws-sdk-go-v2/service/kinesis v1.27.4 // indirect
-	github.com/aws/aws-sdk-go-v2/service/s3 v1.31.0 // indirect
+	github.com/aws/aws-sdk-go-v2/service/s3 v1.53.1 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sso v1.20.5 // indirect
 	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.23.4 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sts v1.28.6 // indirect
@@ -635,7 +638,7 @@ require (
 	golang.org/x/exp v0.0.0-20240205201215-2c58cdc269a3 // indirect
 	golang.org/x/mod v0.16.0 // indirect
 	golang.org/x/net v0.24.0 // indirect
-	golang.org/x/oauth2 v0.18.0 // indirect
+	golang.org/x/oauth2 v0.19.0 // indirect
 	golang.org/x/sync v0.6.0 // indirect
 	golang.org/x/term v0.19.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
@@ -644,7 +647,6 @@ require (
 	golang.org/x/xerrors v0.0.0-20231012003039-104605ab7028 // indirect
 	gonum.org/v1/gonum v0.15.0 // indirect
 	google.golang.org/api v0.172.0 // indirect
-	google.golang.org/appengine v1.6.8 // indirect
 	google.golang.org/genproto v0.0.0-20240227224415-6ceb2ff114de // indirect
 	google.golang.org/grpc v1.63.2 // indirect
 	google.golang.org/protobuf v1.33.0 // indirect
@@ -719,6 +721,12 @@ replace github.com/observiq/bindplane-agent/receiver/azureblobrehydrationreceive
 
 replace github.com/observiq/bindplane-agent/receiver/httpreceiver => ./receiver/httpreceiver
 
+replace github.com/observiq/bindplane-agent/receiver/awss3rehydrationreceiver => ./receiver/awss3rehydrationreceiver
+
+replace github.com/observiq/bindplane-agent/internal/rehydration => ./internal/rehydration
+
+replace github.com/observiq/bindplane-agent/internal/testutils => ./internal/testutils
+
 // Does not build with windows and only used in configschema executable
 // Relevant issue https://github.com/mattn/go-ieproxy/issues/45
 replace github.com/mattn/go-ieproxy => github.com/mattn/go-ieproxy v0.0.1
@@ -727,8 +735,3 @@ replace github.com/mattn/go-ieproxy => github.com/mattn/go-ieproxy v0.0.1
 
 // openshift removed all tags from their repo, use the pseudoversion from the release-3.9 branch HEAD
 replace github.com/openshift/api v3.9.0+incompatible => github.com/openshift/api v0.0.0-20180801171038-322a19404e37
-
-// Replace statement to add ParseXML converter to ottl.
-// We will want to remove this once ParseXML is upstreamed
-// See https://github.com/open-telemetry/opentelemetry-collector-contrib/pull/31487
-replace github.com/open-telemetry/opentelemetry-collector-contrib/pkg/ottl v0.96.0 => github.com/observiq/opentelemetry-collector-contrib/pkg/ottl v0.0.0-20240308164912-e4593622db2a

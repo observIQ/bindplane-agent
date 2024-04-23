@@ -12,21 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package azureblobrehydrationreceiver //import "github.com/observiq/bindplane-agent/receiver/azureblobrehydrationreceiver"
+package rehydration //import "github.com/observiq/bindplane-agent/internal/rehydration"
 
 import (
 	"context"
 	"testing"
 
+	"github.com/observiq/bindplane-agent/internal/testutils"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/consumer/consumertest"
 )
 
 func Test_metricsConsumer(t *testing.T) {
 	testConsumer := &consumertest.MetricsSink{}
-	con := newMetricsConsumer(testConsumer)
+	con := NewMetricsConsumer(testConsumer)
 
-	metrics, jsonBytes := generateTestMetrics(t)
+	metrics, jsonBytes := testutils.GenerateTestMetrics(t)
 
 	err := con.Consume(context.Background(), jsonBytes)
 	require.NoError(t, err)
@@ -40,9 +41,9 @@ func Test_metricsConsumer(t *testing.T) {
 
 func Test_logsConsumer(t *testing.T) {
 	testConsumer := &consumertest.LogsSink{}
-	con := newLogsConsumer(testConsumer)
+	con := NewLogsConsumer(testConsumer)
 
-	logs, jsonBytes := generateTestLogs(t)
+	logs, jsonBytes := testutils.GenerateTestLogs(t)
 
 	err := con.Consume(context.Background(), jsonBytes)
 	require.NoError(t, err)
@@ -56,9 +57,9 @@ func Test_logsConsumer(t *testing.T) {
 
 func Test_tracesConsumer(t *testing.T) {
 	testConsumer := &consumertest.TracesSink{}
-	con := newTracesConsumer(testConsumer)
+	con := NewTracesConsumer(testConsumer)
 
-	traces, jsonBytes := generateTestTraces(t)
+	traces, jsonBytes := testutils.GenerateTestTraces(t)
 
 	err := con.Consume(context.Background(), jsonBytes)
 	require.NoError(t, err)

@@ -15,6 +15,7 @@
 package factories
 
 import (
+	"github.com/observiq/bindplane-agent/receiver/awss3rehydrationreceiver"
 	"github.com/observiq/bindplane-agent/receiver/azureblobrehydrationreceiver"
 	"github.com/observiq/bindplane-agent/receiver/httpreceiver"
 	"github.com/observiq/bindplane-agent/receiver/m365receiver"
@@ -100,6 +101,7 @@ var defaultReceivers = []receiver.Factory{
 	awscontainerinsightreceiver.NewFactory(),
 	awsecscontainermetricsreceiver.NewFactory(),
 	awsfirehosereceiver.NewFactory(),
+	awss3rehydrationreceiver.NewFactory(),
 	awsxrayreceiver.NewFactory(),
 	azureblobreceiver.NewFactory(),
 	azureblobrehydrationreceiver.NewFactory(),
