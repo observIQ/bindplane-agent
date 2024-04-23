@@ -243,8 +243,6 @@ release:
 	@set -e; for dir in $(ALL_MODULES); do \
 	  if [ $${dir} == \. ]; then \
 	  	continue; \
-	  elif [[ $${dir} =~ ^\./internal ]]; then \
-	  	continue; \
 	  else \
 	    echo "$${dir}" | sed -e "s+^./++" -e 's+$$+/$(version)+' | awk '{print $1}' | git tag $$(cat)  ; \
 	  fi; \
