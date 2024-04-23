@@ -709,6 +709,8 @@ replace github.com/observiq/bindplane-agent/receiver/azureblobrehydrationreceive
 
 replace github.com/observiq/bindplane-agent/receiver/httpreceiver => ./receiver/httpreceiver
 
+replace github.com/open-telemetry/opentelemetry-collector-contrib/receiver/hostmetricsreceiver => github.com/observiq/opentelemetry-collector-contrib/receiver/hostmetricsreceiver v0.0.0-20240423164804-f40db8ca6d54
+
 // Does not build with windows and only used in configschema executable
 // Relevant issue https://github.com/mattn/go-ieproxy/issues/45
 replace github.com/mattn/go-ieproxy => github.com/mattn/go-ieproxy v0.0.1
