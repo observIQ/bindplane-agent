@@ -1,8 +1,6 @@
 module github.com/observiq/bindplane-agent/internal/rehydration
 
-go 1.21
-
-toolchain go1.22.0
+go 1.21.9
 
 require (
 	github.com/observiq/bindplane-agent/internal/testutils v1.50.0

@@ -1,6 +1,6 @@
 module github.com/observiq/bindplane-agent/updater
 
-go 1.20
+go 1.21.9
 
 require (
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51
