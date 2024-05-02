@@ -12,20 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Package bindplaneextension provides an extension that facilitates communication with BindPlane
 package bindplaneextension
 
-import (
-	"context"
-
-	"go.opentelemetry.io/collector/component"
-)
-
-type bindplaneExtension struct{}
-
-func (bindplaneExtension) Start(_ context.Context, _ component.Host) error {
-	return nil
-}
-
-func (bindplaneExtension) Shutdown(_ context.Context) error {
-	return nil
-}
+//go:generate mdatagen metadata.yaml
