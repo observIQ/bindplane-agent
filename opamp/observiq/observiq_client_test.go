@@ -52,7 +52,7 @@ func TestNewClient(t *testing.T) {
 			desc: "Bad URL Scheme",
 			config: opamp.Config{
 				Endpoint: "http://localhost:1234",
-				AgentID:  "b24181a8-bc16-4ec1-b3af-ca6f7b669af8",
+				AgentID:  testAgentID,
 			},
 			expectedErr: ErrUnsupportedURL,
 		},
@@ -60,7 +60,7 @@ func TestNewClient(t *testing.T) {
 			desc: "Invalid Endpoint",
 			config: opamp.Config{
 				Endpoint: "\t\t\t",
-				AgentID:  "b24181a8-bc16-4ec1-b3af-ca6f7b669af8",
+				AgentID:  testAgentID,
 			},
 			expectedErr: errors.New("net/url: invalid control character in URL"),
 		},
@@ -68,7 +68,7 @@ func TestNewClient(t *testing.T) {
 			desc: "Bad TLS Config",
 			config: opamp.Config{
 				Endpoint: "ws://localhost:1234",
-				AgentID:  "b24181a8-bc16-4ec1-b3af-ca6f7b669af8",
+				AgentID:  testAgentID,
 				TLS: &opamp.TLSConfig{
 					CAFile: &badCAFile,
 				},
@@ -79,7 +79,7 @@ func TestNewClient(t *testing.T) {
 			desc: "Valid Config",
 			config: opamp.Config{
 				Endpoint:  "ws://localhost:1234",
-				AgentID:   "b24181a8-bc16-4ec1-b3af-ca6f7b669af8",
+				AgentID:   testAgentID,
 				SecretKey: &secretKey,
 			},
 			expectedErr: nil,
@@ -294,7 +294,7 @@ func TestClientConnect(t *testing.T) {
 				c := &Client{
 					opampClient:   mockOpAmpClient,
 					logger:        zap.NewNop(),
-					ident:         &identity{agentID: "a69dcef0-0261-4f4f-9ac0-a483af42a6ba"},
+					ident:         &identity{agentID: testAgentID},
 					configManager: nil,
 					collector:     mockCollector,
 					currentConfig: opamp.Config{
@@ -346,7 +346,7 @@ func TestClientConnect(t *testing.T) {
 				c := &Client{
 					opampClient:   mockOpAmpClient,
 					logger:        zap.NewNop(),
-					ident:         &identity{agentID: "a69dcef0-0261-4f4f-9ac0-a483af42a6ba"},
+					ident:         &identity{agentID: testAgentID},
 					configManager: nil,
 					collector:     mockCollector,
 					currentConfig: opamp.Config{
@@ -384,7 +384,7 @@ func TestClientConnect(t *testing.T) {
 					opampClient: mockOpAmpClient,
 					logger:      zap.NewNop(),
 					ident: &identity{
-						agentID:  "a69dcef0-0261-4f4f-9ac0-a483af42a6ba",
+						agentID:  testAgentID,
 						hostname: "my.localnet",
 					},
 					configManager: nil,
@@ -402,12 +402,12 @@ func TestClientConnect(t *testing.T) {
 						"Authorization":  []string{fmt.Sprintf("Secret-Key %s", c.currentConfig.GetSecretKey())},
 						"User-Agent":     []string{fmt.Sprintf("observiq-otel-collector/%s", version.Version())},
 						"OpAMP-Version":  []string{opamp.Version()},
-						"Agent-ID":       []string{c.ident.agentID},
+						"Agent-ID":       []string{c.ident.agentID.String()},
 						"Agent-Version":  []string{version.Version()},
 						"Agent-Hostname": []string{c.ident.hostname},
 					},
 					TLSConfig:   nil,
-					InstanceUid: c.ident.agentID,
+					InstanceUid: c.ident.agentID.OpAMPInstanceUID(),
 					Callbacks: types.CallbacksStruct{
 						OnConnectFunc:          c.onConnectHandler,
 						OnConnectFailedFunc:    c.onConnectFailedHandler,
