@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:build freebsd
+//go:build freebsd || openbsd || netbsd
 
 package service
 
@@ -29,37 +29,37 @@ import (
 	"go.uber.org/zap"
 )
 
-const linuxServiceName = "observiq-otel-collector"
-const linuxServiceFilePath = "/usr/lib/systemd/system/observiq-otel-collector.service"
+const bsdUnixServiceName = "observiq-otel-collector"
+const bsdUnixServiceFilePath = "/usr/lib/systemd/system/observiq-otel-collector.service"
 
 // Option is an extra option for creating a Service
-type Option func(linuxSvc *linuxService)
+type Option func(bsdUnixSvc *bsdUnixService)
 
 // WithServiceFile returns an option setting the service file to use when updating using the service
 func WithServiceFile(svcFilePath string) Option {
-	return func(linuxSvc *linuxService) {
-		linuxSvc.newServiceFilePath = svcFilePath
+	return func(bsdUnixSvc *bsdUnixService) {
+		bsdUnixSvc.newServiceFilePath = svcFilePath
 	}
 }
 
 // NewService returns an instance of the Service interface for managing the observiq-otel-collector service on the current OS.
 func NewService(logger *zap.Logger, installDir string, opts ...Option) Service {
-	linuxSvc := &linuxService{
-		newServiceFilePath:       filepath.Join(path.ServiceFileDir(installDir), "observiq-otel-collector.service"),
-		serviceName:              linuxServiceName,
-		installedServiceFilePath: linuxServiceFilePath,
+	bsdUnixSvc := &bsdUnixService{
+		newServiceFilePath:       filepath.Join(path.ServiceFileDir(installDir), "observiq-otel-collector.rc"),
+		serviceName:              bsdUnixServiceName,
+		installedServiceFilePath: bsdUnixServiceFilePath,
 		installDir:               installDir,
-		logger:                   logger.Named("linux-service"),
+		logger:                   logger.Named("bsdUnix-service"),
 	}
 
 	for _, opt := range opts {
-		opt(linuxSvc)
+		opt(bsdUnixSvc)
 	}
 
-	return linuxSvc
+	return bsdUnixSvc
 }
 
-type linuxService struct {
+type bsdUnixService struct {
 	// newServiceFilePath is the file path to the new unit file
 	newServiceFilePath string
 	// serviceName is the name of the service
@@ -71,27 +71,27 @@ type linuxService struct {
 }
 
 // Start the service
-func (l linuxService) Start() error {
+func (l bsdUnixService) Start() error {
 	//#nosec G204 -- serviceName is not determined by user input
-	cmd := exec.Command("systemctl", "start", l.serviceName)
+	cmd := exec.Command("service", l.serviceName, "start")
 	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("running systemctl failed: %w", err)
+		return fmt.Errorf("running service failed: %w", err)
 	}
 	return nil
 }
 
 // Stop the service
-func (l linuxService) Stop() error {
+func (l bsdUnixService) Stop() error {
 	//#nosec G204 -- serviceName is not determined by user input
-	cmd := exec.Command("systemctl", "stop", l.serviceName)
+	cmd := exec.Command("service", l.serviceName, "stop")
 	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("running systemctl failed: %w", err)
+		return fmt.Errorf("running service failed: %w", err)
 	}
 	return nil
 }
 
 // installs the service
-func (l linuxService) install() error {
+func (l bsdUnixService) install() error {
 	inFile, err := os.Open(l.newServiceFilePath)
 	if err != nil {
 		return fmt.Errorf("failed to open input file: %w", err)
@@ -118,41 +118,36 @@ func (l linuxService) install() error {
 		return fmt.Errorf("failed to copy service file: %w", err)
 	}
 
-	cmd := exec.Command("systemctl", "daemon-reload")
-	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("reloading systemctl failed: %w", err)
-	}
-
 	//#nosec G204 -- serviceName is not determined by user input
-	cmd = exec.Command("systemctl", "enable", l.serviceName)
+	cmd = exec.Command("service", l.serviceName, "enable")
 	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("enabling unit file failed: %w", err)
+		return fmt.Errorf("enabling service file failed: %w", err)
 	}
 
 	return nil
 }
 
 // uninstalls the service
-func (l linuxService) uninstall() error {
+func (l bsdUnixService) uninstall() error {
 	//#nosec G204 -- serviceName is not determined by user input
-	cmd := exec.Command("systemctl", "disable", l.serviceName)
+	cmd := exec.Command("service", l.serviceName, "disable")
 	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("failed to disable unit: %w", err)
+		return fmt.Errorf("failed to disable service: %w", err)
 	}
 
 	if err := os.Remove(l.installedServiceFilePath); err != nil {
 		return fmt.Errorf("failed to remove service file: %w", err)
 	}
 
-	cmd = exec.Command("systemctl", "daemon-reload")
+	cmd = exec.Command("service", "daemon-reload")
 	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("reloading systemctl failed: %w", err)
+		return fmt.Errorf("reloading service failed: %w", err)
 	}
 
 	return nil
 }
 
-func (l linuxService) Update() error {
+func (l bsdUnixService) Update() error {
 	if err := l.uninstall(); err != nil {
 		return fmt.Errorf("failed to uninstall old service: %w", err)
 	}
@@ -164,7 +159,7 @@ func (l linuxService) Update() error {
 	return nil
 }
 
-func (l linuxService) Backup() error {
+func (l bsdUnixService) Backup() error {
 	if err := file.CopyFileNoOverwrite(l.logger.Named("copy-file"), l.installedServiceFilePath, path.BackupServiceFile(l.installDir)); err != nil {
 		return fmt.Errorf("failed to copy service file: %w", err)
 	}

@@ -48,13 +48,22 @@ build-all: build-linux build-darwin build-windows
 build-linux: build-linux-amd64 build-linux-arm64 build-linux-arm build-linux-ppc64 build-linux-ppc64le
 
 .PHONY: build-unix
-build-unix: build-darwin build-freebsd
+build-unix: build-darwin build-bsd
+
+.PHONY: build-bsd
+build-bsd: build-freebsd build-openbsd build-netbsd
 
 .PHONY: build-darwin
 build-darwin: build-darwin-amd64 build-darwin-arm64
 
 .PHONY: build-freebsd
 build-freebsd: build-freebsd-amd64 build-freebsd-arm build-freebsd-arm64
+
+.PHONY: build-openbsd
+build-openbsd: build-openbsd-amd64 build-openbsd-arm build-openbsd-arm64
+
+.PHONY: build-netbsd
+build-netbsd: build-netbsd-amd64 build-netbsd-arm
 
 .PHONY: build-windows
 build-windows: build-windows-amd64
@@ -98,6 +107,26 @@ build-freebsd-arm:
 .PHONY: build-freebsd-arm64
 build-freebsd-arm64:
 	GOOS=freebsd GOARCH=arm64 $(MAKE) build-binaries -j2
+
+.PHONY: build-openbsd-amd64
+build-openbsd-amd64:
+	GOOS=openbsd GOARCH=amd64 $(MAKE) build-binaries -j2
+
+.PHONY: build-openbsd-arm
+build-openbsd-arm:
+	GOOS=openbsd GOARCH=arm $(MAKE) build-binaries -j2
+
+.PHONY: build-openbsd-arm64
+build-openbsd-arm64:
+	GOOS=openbsd GOARCH=arm64 $(MAKE) build-binaries -j2
+
+.PHONY: build-netbsd-amd64
+build-netbsd-amd64:
+	GOOS=netbsd GOARCH=amd64 $(MAKE) build-binaries -j2
+
+.PHONY: build-netbsd-arm
+build-netbsd-arm:
+	GOOS=netbsd GOARCH=arm $(MAKE) build-binaries -j2
 
 .PHONY: build-windows-amd64
 build-windows-amd64:

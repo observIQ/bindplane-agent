@@ -12,14 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//go:build freebsd || openbsd || netbsd
+
 package path
 
 import "go.uber.org/zap"
 
-// LinuxInstallDir is the install directory of the collector on linux.
-const LinuxInstallDir = "/opt/observiq-otel-collector"
+// BSDInstallDir is the install directory of the collector on BSD Unix.
+const BSDInstallDir = "/opt/observiq-otel-collector"
 
 // InstallDir returns the filepath to the install directory
 func InstallDir(_ *zap.Logger) (string, error) {
-	return LinuxInstallDir, nil
+	return BSDInstallDir, nil
 }

@@ -13,7 +13,7 @@
 // limitations under the License.
 
 // an elevated user is needed to run the service tests
-//go:build freebsd && integration
+//go:build (freebsd || openbsd || netbsd) && integration
 
 package service
 
@@ -29,14 +29,14 @@ import (
 )
 
 // NOTE: These tests must run as root in order to pass
-func TestLinuxServiceInstall(t *testing.T) {
+func TestBSDServiceInstall(t *testing.T) {
 	t.Run("Test install + uninstall", func(t *testing.T) {
-		installedServicePath := "/usr/lib/systemd/system/linux-service.service"
-		uninstallService(t, installedServicePath, "linux-service")
+		installedServicePath := "/usr/lib/systemd/system/bsd-service.service"
+		uninstallService(t, installedServicePath, "bsd-service")
 
-		l := &linuxService{
-			newServiceFilePath:       filepath.Join("testdata", "linux-service.service"),
-			serviceName:              "linux-service",
+		l := &bsdService{
+			newServiceFilePath:       filepath.Join("testdata", "bsd-service.service"),
+			serviceName:              "bsd-service",
 			installedServiceFilePath: installedServicePath,
 			logger:                   zaptest.NewLogger(t),
 		}
@@ -57,12 +57,12 @@ func TestLinuxServiceInstall(t *testing.T) {
 	})
 
 	t.Run("Test stop + start", func(t *testing.T) {
-		installedServicePath := "/usr/lib/systemd/system/linux-service.service"
-		uninstallService(t, installedServicePath, "linux-service")
+		installedServicePath := "/usr/lib/systemd/system/bsd-service.service"
+		uninstallService(t, installedServicePath, "bsd-service")
 
-		l := &linuxService{
-			newServiceFilePath:       filepath.Join("testdata", "linux-service.service"),
-			serviceName:              "linux-service",
+		l := &bsdService{
+			newServiceFilePath:       filepath.Join("testdata", "bsd-service.service"),
+			serviceName:              "bsd-service",
 			installedServiceFilePath: installedServicePath,
 			logger:                   zaptest.NewLogger(t),
 		}
@@ -93,12 +93,12 @@ func TestLinuxServiceInstall(t *testing.T) {
 	})
 
 	t.Run("Test invalid path for input file", func(t *testing.T) {
-		installedServicePath := "/usr/lib/systemd/system/linux-service.service"
-		uninstallService(t, installedServicePath, "linux-service")
+		installedServicePath := "/usr/lib/systemd/system/bsd-service.service"
+		uninstallService(t, installedServicePath, "bsd-service")
 
-		l := &linuxService{
+		l := &bsdService{
 			newServiceFilePath:       filepath.Join("testdata", "does-not-exist.service"),
-			serviceName:              "linux-service",
+			serviceName:              "bsd-service",
 			installedServiceFilePath: installedServicePath,
 			logger:                   zaptest.NewLogger(t),
 		}
@@ -109,12 +109,12 @@ func TestLinuxServiceInstall(t *testing.T) {
 	})
 
 	t.Run("Test invalid path for output file for install", func(t *testing.T) {
-		installedServicePath := "/usr/lib/systemd/system/dir-does-not-exist/linux-service.service"
-		uninstallService(t, installedServicePath, "linux-service")
+		installedServicePath := "/usr/lib/systemd/system/dir-does-not-exist/bsd-service.service"
+		uninstallService(t, installedServicePath, "bsd-service")
 
-		l := &linuxService{
-			newServiceFilePath:       filepath.Join("testdata", "linux-service.service"),
-			serviceName:              "linux-service",
+		l := &bsdService{
+			newServiceFilePath:       filepath.Join("testdata", "bsd-service.service"),
+			serviceName:              "bsd-service",
 			installedServiceFilePath: installedServicePath,
 			logger:                   zaptest.NewLogger(t),
 		}
@@ -125,12 +125,12 @@ func TestLinuxServiceInstall(t *testing.T) {
 	})
 
 	t.Run("Uninstall fails if not installed", func(t *testing.T) {
-		installedServicePath := "/usr/lib/systemd/system/linux-service.service"
-		uninstallService(t, installedServicePath, "linux-service")
+		installedServicePath := "/usr/lib/systemd/system/bsd-service.service"
+		uninstallService(t, installedServicePath, "bsd-service")
 
-		l := &linuxService{
-			newServiceFilePath:       filepath.Join("testdata", "linux-service.service"),
-			serviceName:              "linux-service",
+		l := &bsdService{
+			newServiceFilePath:       filepath.Join("testdata", "bsd-service.service"),
+			serviceName:              "bsd-service",
 			installedServiceFilePath: installedServicePath,
 			logger:                   zaptest.NewLogger(t),
 		}
@@ -141,12 +141,12 @@ func TestLinuxServiceInstall(t *testing.T) {
 	})
 
 	t.Run("Start fails if service not found", func(t *testing.T) {
-		installedServicePath := "/usr/lib/systemd/system/linux-service.service"
-		uninstallService(t, installedServicePath, "linux-service")
+		installedServicePath := "/usr/lib/systemd/system/bsd-service.service"
+		uninstallService(t, installedServicePath, "bsd-service")
 
-		l := &linuxService{
-			newServiceFilePath:       filepath.Join("testdata", "linux-service.service"),
-			serviceName:              "linux-service",
+		l := &bsdService{
+			newServiceFilePath:       filepath.Join("testdata", "bsd-service.service"),
+			serviceName:              "bsd-service",
 			installedServiceFilePath: installedServicePath,
 			logger:                   zaptest.NewLogger(t),
 		}
@@ -156,12 +156,12 @@ func TestLinuxServiceInstall(t *testing.T) {
 	})
 
 	t.Run("Stop fails if service not found", func(t *testing.T) {
-		installedServicePath := "/usr/lib/systemd/system/linux-service.service"
-		uninstallService(t, installedServicePath, "linux-service")
+		installedServicePath := "/usr/lib/systemd/system/bsd-service.service"
+		uninstallService(t, installedServicePath, "bsd-service")
 
-		l := &linuxService{
-			newServiceFilePath:       filepath.Join("testdata", "linux-service.service"),
-			serviceName:              "linux-service",
+		l := &bsdService{
+			newServiceFilePath:       filepath.Join("testdata", "bsd-service.service"),
+			serviceName:              "bsd-service",
 			installedServiceFilePath: installedServicePath,
 			logger:                   zaptest.NewLogger(t),
 		}
@@ -171,20 +171,20 @@ func TestLinuxServiceInstall(t *testing.T) {
 	})
 
 	t.Run("Backup installed service succeeds", func(t *testing.T) {
-		installedServicePath := "/usr/lib/systemd/system/linux-service.service"
-		uninstallService(t, installedServicePath, "linux-service")
+		installedServicePath := "/usr/lib/systemd/system/bsd-service.service"
+		uninstallService(t, installedServicePath, "bsd-service")
 
-		newServiceFile := filepath.Join("testdata", "linux-service.service")
+		newServiceFile := filepath.Join("testdata", "bsd-service.service")
 		serviceFileContents, err := os.ReadFile(newServiceFile)
 		require.NoError(t, err)
 
 		installDir := t.TempDir()
 		require.NoError(t, os.MkdirAll(path.BackupDir(installDir), 0775))
 
-		d := &linuxService{
+		d := &bsdService{
 			newServiceFilePath:       newServiceFile,
 			installedServiceFilePath: installedServicePath,
-			serviceName:              "linux-service",
+			serviceName:              "bsd-service",
 			installDir:               installDir,
 			logger:                   zaptest.NewLogger(t),
 		}
@@ -207,18 +207,18 @@ func TestLinuxServiceInstall(t *testing.T) {
 	})
 
 	t.Run("Backup installed service fails if not installed", func(t *testing.T) {
-		installedServicePath := "/usr/lib/systemd/system/linux-service.service"
-		uninstallService(t, installedServicePath, "linux-service")
+		installedServicePath := "/usr/lib/systemd/system/bsd-service.service"
+		uninstallService(t, installedServicePath, "bsd-service")
 
-		newServiceFile := filepath.Join("testdata", "linux-service.service")
+		newServiceFile := filepath.Join("testdata", "bsd-service.service")
 
 		installDir := t.TempDir()
 		require.NoError(t, os.MkdirAll(path.BackupDir(installDir), 0775))
 
-		d := &linuxService{
+		d := &bsdService{
 			newServiceFilePath:       newServiceFile,
 			installedServiceFilePath: installedServicePath,
-			serviceName:              "linux-service",
+			serviceName:              "bsd-service",
 			installDir:               installDir,
 			logger:                   zaptest.NewLogger(t),
 		}
@@ -228,18 +228,18 @@ func TestLinuxServiceInstall(t *testing.T) {
 	})
 
 	t.Run("Backup installed service fails if output file already exists", func(t *testing.T) {
-		installedServicePath := "/usr/lib/systemd/system/linux-service.service"
-		uninstallService(t, installedServicePath, "linux-service")
+		installedServicePath := "/usr/lib/systemd/system/bsd-service.service"
+		uninstallService(t, installedServicePath, "bsd-service")
 
-		newServiceFile := filepath.Join("testdata", "linux-service.service")
+		newServiceFile := filepath.Join("testdata", "bsd-service.service")
 
 		installDir := t.TempDir()
 		require.NoError(t, os.MkdirAll(path.BackupDir(installDir), 0775))
 
-		d := &linuxService{
+		d := &bsdService{
 			newServiceFilePath:       newServiceFile,
 			installedServiceFilePath: installedServicePath,
-			serviceName:              "linux-service",
+			serviceName:              "bsd-service",
 			installDir:               installDir,
 			logger:                   zaptest.NewLogger(t),
 		}
@@ -281,9 +281,9 @@ const exitCodeServiceInactive = 3
 func requireServiceLoadedStatus(t *testing.T, loaded bool) {
 	t.Helper()
 
-	cmd := exec.Command("systemctl", "status", "linux-service")
+	cmd := exec.Command("systemctl", "status", "bsd-service")
 	err := cmd.Run()
-	require.Error(t, err, "expected non-zero exit code from 'systemctl status linux-service'")
+	require.Error(t, err, "expected non-zero exit code from 'systemctl status bsd-service'")
 
 	eErr, ok := err.(*exec.ExitError)
 	if loaded {
@@ -297,7 +297,7 @@ func requireServiceLoadedStatus(t *testing.T, loaded bool) {
 }
 
 func requireServiceRunningStatus(t *testing.T, running bool) {
-	cmd := exec.Command("systemctl", "status", "linux-service")
+	cmd := exec.Command("systemctl", "status", "bsd-service")
 	err := cmd.Run()
 
 	if running {

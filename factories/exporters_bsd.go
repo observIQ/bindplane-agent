@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:build freebsd
+//go:build freebsd || openbsd || netbsd
 
 package factories
 
@@ -32,13 +32,10 @@ import (
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/carbonexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/clickhouseexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/coralogixexporter"
-	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/dynatraceexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/elasticsearchexporter"
-	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/f5cloudexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/fileexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlecloudpubsubexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/influxdbexporter"
-	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/jaegerexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/kafkaexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/loadbalancingexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/logzioexporter"
@@ -72,16 +69,13 @@ var defaultExporters = []exporter.Factory{
 	chronicleexporter.NewFactory(),
 	clickhouseexporter.NewFactory(),
 	coralogixexporter.NewFactory(),
-	dynatraceexporter.NewFactory(),
 	elasticsearchexporter.NewFactory(),
 	exportertest.NewNopFactory(),
-	f5cloudexporter.NewFactory(),
 	fileexporter.NewFactory(),
 	googlecloudexporter.NewFactory(version.Version()),
 	googlecloudpubsubexporter.NewFactory(),
 	googlemanagedprometheusexporter.NewFactory(version.Version()),
 	influxdbexporter.NewFactory(),
-	jaegerexporter.NewFactory(),
 	kafkaexporter.NewFactory(),
 	loadbalancingexporter.NewFactory(),
 	loggingexporter.NewFactory(),

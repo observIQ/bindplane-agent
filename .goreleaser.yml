@@ -17,6 +17,8 @@ builds:
       - linux
       - darwin
       - freebsd
+      - openbsd
+      - netbsd
     goarch:
       - amd64
       - arm64
@@ -36,9 +38,16 @@ builds:
         goarch: ppc64
       - goos: darwin
         goarch: ppc64le
+      - goos: darwin
         goarch: "386"
       - goos: freebsd
         goarch: "386"
+      - goos: openbsd
+        goarch: "386"
+      - goos: netbsd
+        goarch: "386"
+      - goos: netbsd
+        goarch: "arm64"
     ldflags:
       - -s -w
       - -X github.com/observiq/bindplane-agent/internal/version.version=v{{ .Version }}
@@ -57,6 +66,8 @@ builds:
       - linux
       - darwin
       - freebsd
+      - openbsd
+      - netbsd
     goarch:
       - amd64
       - arm64
@@ -76,9 +87,16 @@ builds:
         goarch: ppc64
       - goos: darwin
         goarch: ppc64le
+      - goos: darwin
         goarch: "386"
       - goos: freebsd
         goarch: "386"
+      - goos: openbsd
+        goarch: "386"
+      - goos: netbsd
+        goarch: "386"
+      - goos: netbsd
+        goarch: "arm64"
     ldflags:
       - -s -w
       - -X github.com/observiq/bindplane-agent/updater/internal/version.version=v{{ .Version }}
