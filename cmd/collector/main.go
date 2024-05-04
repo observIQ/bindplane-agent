@@ -179,9 +179,14 @@ func checkManagerConfig(configPath *string) error {
 			return statErr
 		}
 
-		newConfig.AgentID, ok = os.LookupEnv(agentIDENV)
-		if !ok {
-			newConfig.AgentID = ulid.Make().String()
+		if envString, ok := os.LookupEnv(agentIDENV); ok {
+			var err error
+			newConfig.AgentID, err = opamp.ParseAgentID(envString)
+			if err != nil {
+				return fmt.Errorf("invalid agent ID in env %q: %w", agentIDENV, err)
+			}
+		} else {
+			newConfig.AgentID = opamp.AgentID(ulid.Make())
 		}
 
 		if sk, ok := os.LookupEnv(secretkeyENV); ok {
@@ -231,12 +236,12 @@ func ensureIdentity(configPath string) error {
 		return fmt.Errorf("unable to interpret config file: %w", err)
 	}
 
-	// If the AgentID is not a ULID (legacy ID or empty) then we need to generate a ULID as the AgentID.
-	if _, err := ulid.Parse(candidateConfig.AgentID); err == nil {
+	// If the AgentID is empty then we need to generate a new ID as the AgentID.
+	if candidateConfig.AgentID != opamp.EmptyAgentID {
 		return nil
 	}
 
-	candidateConfig.AgentID = ulid.Make().String()
+	candidateConfig.AgentID = opamp.AgentID(ulid.Make())
 	newBytes, err := yaml.Marshal(candidateConfig)
 	if err != nil {
 		return fmt.Errorf("failed to marshal sanitized config: %w", err)

@@ -25,7 +25,7 @@ import (
 
 // identity contains identifying information about the Collector
 type identity struct {
-	agentID     string
+	agentID     opamp.AgentID
 	agentName   *string
 	serviceName string
 	version     string
@@ -92,7 +92,7 @@ func (i identity) Copy() *identity {
 
 func (i *identity) ToAgentDescription() *protobufs.AgentDescription {
 	identifyingAttributes := []*protobufs.KeyValue{
-		opamp.StringKeyValue("service.instance.id", i.agentID),
+		opamp.StringKeyValue("service.instance.id", i.agentID.String()),
 		opamp.StringKeyValue("service.name", i.serviceName),
 		opamp.StringKeyValue("service.version", i.version),
 	}

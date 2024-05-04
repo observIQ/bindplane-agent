@@ -22,6 +22,8 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/oklog/ulid/v2"
+	"github.com/open-telemetry/opamp-go/client/types"
 	"gopkg.in/yaml.v3"
 )
 
@@ -45,11 +47,69 @@ var (
 	errInvalidCAFile = "failed to read TLS CA file"
 )
 
+// AgentID represents the ID of the agent
+type AgentID ulid.ULID
+
+// EmptyAgentID represents an empty/unset agent ID.
+var EmptyAgentID = AgentID{}
+
+// ParseAgentID parses an agent ID from the given string
+func ParseAgentID(s string) (AgentID, error) {
+	u, err := ulid.Parse(s)
+	if err != nil {
+		return AgentID{}, err
+	}
+
+	return AgentID(u), nil
+}
+
+// String returns a string representation of the agent ID
+func (a AgentID) String() string {
+	return ulid.ULID(a).String()
+}
+
+// OpAMPInstanceUID returns the opamp representation of the agent ID
+func (a AgentID) OpAMPInstanceUID() types.InstanceUid {
+	return types.InstanceUid(a)
+}
+
+// MarshalYAML implements the yaml.Marshaler interface
+func (a AgentID) MarshalYAML() (any, error) {
+	return a.String(), nil
+}
+
+// UnmarshalYAML implements the yaml.Unmarshaler interface
+func (a *AgentID) UnmarshalYAML(unmarshal func(any) error) error {
+	var s string
+
+	err := unmarshal(&s)
+	if err != nil {
+		return err
+	}
+
+	if s == "" {
+		// Empty string = keep the 0 value
+		return nil
+	}
+
+	u, err := ParseAgentID(s)
+	if err != nil {
+		// In order to maintain backwards compatability, we don't error here.
+		// Instead, in main, we will regenerate a new agent ID
+		*a = EmptyAgentID
+		return nil
+	}
+
+	*a = AgentID(u)
+
+	return nil
+}
+
 // Config contains the configuration for the collector to communicate with an OpAmp enabled platform.
 type Config struct {
 	Endpoint  string     `yaml:"endpoint"`
 	SecretKey *string    `yaml:"secret_key,omitempty"`
-	AgentID   string     `yaml:"agent_id"`
+	AgentID   AgentID    `yaml:"agent_id"`
 	TLS       *TLSConfig `yaml:"tls_config,omitempty"`
 
 	// Updatable fields

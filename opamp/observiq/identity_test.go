@@ -19,11 +19,14 @@ import (
 	"testing"
 
 	"github.com/observiq/bindplane-agent/opamp"
+	"github.com/oklog/ulid/v2"
 	"github.com/open-telemetry/opamp-go/protobufs"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 )
+
+var testAgentID = opamp.AgentID(ulid.MustParse("01HX2DWEQZ045KQR3VG0EYEZ94"))
 
 func Test_newIdentity(t *testing.T) {
 	secretKeyContents := "b92222ee-a1fc-4bb1-98db-26de3448541b"
@@ -33,7 +36,7 @@ func Test_newIdentity(t *testing.T) {
 	cfg := opamp.Config{
 		Endpoint:  "ws://localhost:1234",
 		SecretKey: &secretKeyContents,
-		AgentID:   "8321f735-a52c-4f49-aca9-66f9266c5fe5",
+		AgentID:   testAgentID,
 		Labels:    &labelsContents,
 		AgentName: &agentNameContents,
 	}
@@ -70,7 +73,7 @@ func TestToAgentDescription(t *testing.T) {
 		{
 			desc: "Missing Agent Name and labels",
 			ident: &identity{
-				agentID:     "4322d8d1-f3e0-46db-b68d-b01a4689ef19",
+				agentID:     testAgentID,
 				agentName:   nil,
 				serviceName: "com.observiq.collector",
 				version:     "v1.2.3",
@@ -83,7 +86,7 @@ func TestToAgentDescription(t *testing.T) {
 			},
 			expected: &protobufs.AgentDescription{
 				IdentifyingAttributes: []*protobufs.KeyValue{
-					opamp.StringKeyValue("service.instance.id", "4322d8d1-f3e0-46db-b68d-b01a4689ef19"),
+					opamp.StringKeyValue("service.instance.id", testAgentID.String()),
 					opamp.StringKeyValue("service.name", "com.observiq.collector"),
 					opamp.StringKeyValue("service.version", "v1.2.3"),
 					opamp.StringKeyValue("service.instance.name", "my-linux-box"),
@@ -100,7 +103,7 @@ func TestToAgentDescription(t *testing.T) {
 		{
 			desc: "With Agent Name and labels",
 			ident: &identity{
-				agentID:     "4322d8d1-f3e0-46db-b68d-b01a4689ef19",
+				agentID:     testAgentID,
 				agentName:   &agentNameContents,
 				serviceName: "com.observiq.collector",
 				version:     "v1.2.3",
@@ -113,7 +116,7 @@ func TestToAgentDescription(t *testing.T) {
 			},
 			expected: &protobufs.AgentDescription{
 				IdentifyingAttributes: []*protobufs.KeyValue{
-					opamp.StringKeyValue("service.instance.id", "4322d8d1-f3e0-46db-b68d-b01a4689ef19"),
+					opamp.StringKeyValue("service.instance.id", testAgentID.String()),
 					opamp.StringKeyValue("service.name", "com.observiq.collector"),
 					opamp.StringKeyValue("service.version", "v1.2.3"),
 					opamp.StringKeyValue("service.instance.name", agentNameContents),
@@ -142,7 +145,7 @@ func Test_identityCopy(t *testing.T) {
 	labelsContents := "one=foo,two=bar"
 	agentNameContents := "My Agent"
 	ident := &identity{
-		agentID:     "4322d8d1-f3e0-46db-b68d-b01a4689ef19",
+		agentID:     testAgentID,
 		agentName:   &agentNameContents,
 		serviceName: "com.observiq.collector",
 		version:     "v1.2.3",

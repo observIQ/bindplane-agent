@@ -105,7 +105,7 @@ func NewClient(args *NewClientArgs) (opamp.Client, error) {
 	}
 
 	reportManager := report.GetManager()
-	if err := reportManager.SetClient(report.NewAgentClient(args.Config.AgentID, args.Config.SecretKey, tlsCfg)); err != nil {
+	if err := reportManager.SetClient(report.NewAgentClient(args.Config.AgentID.String(), args.Config.SecretKey, tlsCfg)); err != nil {
 		// Error should never happen as we only error if a nil client is sent
 		return nil, fmt.Errorf("failed to set client on report manager: %w", err)
 	}
@@ -200,12 +200,12 @@ func (c *Client) Connect(ctx context.Context) error {
 			"Authorization":  []string{fmt.Sprintf("Secret-Key %s", c.currentConfig.GetSecretKey())},
 			"User-Agent":     []string{fmt.Sprintf("observiq-otel-collector/%s", version.Version())},
 			"OpAMP-Version":  []string{opamp.Version()},
-			"Agent-ID":       []string{c.ident.agentID},
+			"Agent-ID":       []string{c.ident.agentID.String()},
 			"Agent-Version":  []string{version.Version()},
 			"Agent-Hostname": []string{c.ident.hostname},
 		},
 		TLSConfig:   tlsCfg,
-		InstanceUid: c.ident.agentID,
+		InstanceUid: c.ident.agentID.OpAMPInstanceUID(),
 		Callbacks: types.CallbacksStruct{
 			OnConnectFunc:          c.onConnectHandler,
 			OnConnectFailedFunc:    c.onConnectFailedHandler,
