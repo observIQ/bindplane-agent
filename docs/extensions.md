@@ -8,7 +8,7 @@ Below is a list of supported extensions with links to their documentation pages.
 | Authenticator - Bearer Extension          | [bearertokenauthextension](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.99.0/extension/bearertokenauthextension/README.md)   |
 | Authenticator - OAuth2 Client Credentials | [oauth2clientauthextension](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.99.0/extension/oauth2clientauthextension/README.md) |
 | Authenticator - OIDC Extension            | [oidcauthextension](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.99.0/extension/oidcauthextension/README.md)                 |
-| BindPlane                                 | [bindplaneextension](../extension/bindplaneextension/README.md)                                                                                           |
+| BindPlane Extension                       | [bindplaneextension](../extension/bindplaneextension/README.md)                                                                                           |
 | File Storage Extension                    | [filestorage](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.99.0/extension/storage/filestorage/README.md)                     |
 | Health Check Extension                    | [healthcheckextension](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.99.0/extension/healthcheckextension/README.md)           |
 | Performance Profiler Extension            | [pprofextension](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.99.0/extension/pprofextension/README.md)                       |
