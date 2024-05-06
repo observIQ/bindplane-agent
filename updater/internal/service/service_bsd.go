@@ -119,7 +119,7 @@ func (l bsdUnixService) install() error {
 	}
 
 	//#nosec G204 -- serviceName is not determined by user input
-	cmd = exec.Command("service", l.serviceName, "enable")
+	cmd := exec.Command("service", l.serviceName, "enable")
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("enabling service file failed: %w", err)
 	}
