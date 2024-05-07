@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:build !aix
+//go:build aix
 
 package factories
 
@@ -53,13 +53,11 @@ import (
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/httpcheckreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/iisreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/influxdbreceiver"
-	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/jaegerreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/jmxreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/journaldreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/k8sclusterreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/k8seventsreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/kafkametricsreceiver"
-	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/kafkareceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/kubeletstatsreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/memcachedreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/mongodbatlasreceiver"
@@ -69,13 +67,10 @@ import (
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/opencensusreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/podmanreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/postgresqlreceiver"
-	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/prometheusreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/rabbitmqreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/redisreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/riakreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/saphanareceiver"
-	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/sapmreceiver"
-	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/simpleprometheusreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/snmpreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/splunkhecreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/sqlqueryreceiver"
@@ -87,7 +82,6 @@ import (
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/vcenterreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/windowseventlogreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/windowsperfcountersreceiver"
-	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/zipkinreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/zookeeperreceiver"
 	"go.opentelemetry.io/collector/receiver"
 	"go.opentelemetry.io/collector/receiver/otlpreceiver"
@@ -126,13 +120,13 @@ var defaultReceivers = []receiver.Factory{
 	httpreceiver.NewFactory(),
 	iisreceiver.NewFactory(),
 	influxdbreceiver.NewFactory(),
-	jaegerreceiver.NewFactory(),
+	//jaegerreceiver.NewFactory(),
 	jmxreceiver.NewFactory(),
 	journaldreceiver.NewFactory(),
 	k8sclusterreceiver.NewFactory(),
 	k8seventsreceiver.NewFactory(),
 	kafkametricsreceiver.NewFactory(),
-	kafkareceiver.NewFactory(),
+	//kafkareceiver.NewFactory(),
 	kubeletstatsreceiver.NewFactory(),
 	m365receiver.NewFactory(),
 	memcachedreceiver.NewFactory(),
@@ -145,16 +139,16 @@ var defaultReceivers = []receiver.Factory{
 	pluginreceiver.NewFactory(),
 	podmanreceiver.NewFactory(),
 	postgresqlreceiver.NewFactory(),
-	prometheusreceiver.NewFactory(),
+	//prometheusreceiver.NewFactory(),
 	rabbitmqreceiver.NewFactory(),
 	receivertest.NewNopFactory(),
 	redisreceiver.NewFactory(),
 	riakreceiver.NewFactory(),
 	routereceiver.NewFactory(),
 	saphanareceiver.NewFactory(),
-	sapmreceiver.NewFactory(),
+	//sapmreceiver.NewFactory(),
 	sapnetweaverreceiver.NewFactory(),
-	simpleprometheusreceiver.NewFactory(),
+	//simpleprometheusreceiver.NewFactory(),
 	snmpreceiver.NewFactory(),
 	splunkhecreceiver.NewFactory(),
 	sqlqueryreceiver.NewFactory(),
@@ -167,6 +161,6 @@ var defaultReceivers = []receiver.Factory{
 	vcenterreceiver.NewFactory(),
 	windowseventlogreceiver.NewFactory(),
 	windowsperfcountersreceiver.NewFactory(),
-	zipkinreceiver.NewFactory(),
+	//zipkinreceiver.NewFactory(),
 	zookeeperreceiver.NewFactory(),
 }

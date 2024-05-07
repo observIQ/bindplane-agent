@@ -19,6 +19,7 @@ builds:
       - freebsd
       - openbsd
       - netbsd
+      - aix
     goarch:
       - amd64
       - arm64
@@ -42,6 +43,12 @@ builds:
         goarch: "arm"
       - goos: netbsd
         goarch: "arm64"
+      - goos: aix
+        goarch: "arm64"
+      - goos: aix
+        goarch: "arm"
+      - goos: aix
+        goarch: "amd64"
     ldflags:
       - -s -w
       - -X github.com/observiq/bindplane-agent/internal/version.version=v{{ .Version }}
@@ -62,6 +69,7 @@ builds:
       - freebsd
       - openbsd
       - netbsd
+      - aix
     goarch:
       - amd64
       - arm64
@@ -85,6 +93,12 @@ builds:
         goarch: "arm"
       - goos: netbsd
         goarch: "arm64"
+      - goos: aix
+        goarch: "arm64"
+      - goos: aix
+        goarch: "arm"
+      - goos: aix
+        goarch: "amd64"
     ldflags:
       - -s -w
       - -X github.com/observiq/bindplane-agent/updater/internal/version.version=v{{ .Version }}
