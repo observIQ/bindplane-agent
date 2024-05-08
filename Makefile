@@ -54,7 +54,7 @@ build-unix: build-darwin build-bsd build-aix
 build-bsd: build-freebsd build-openbsd build-netbsd
 
 .PHONY: build-aix
-build-aix: build-aix-ppc64 build-aix-ppc64le
+build-aix: build-aix-ppc64
 
 .PHONY: build-darwin
 build-darwin: build-darwin-amd64 build-darwin-arm64
@@ -74,10 +74,6 @@ build-windows: build-windows-amd64
 .PHONY: build-aix-ppc64
 build-aix-ppc64:
 	GOOS=aix GOARCH=ppc64 $(MAKE) build-binaries -j2
-
-.PHONY: build-aix-ppc64le
-build-aix-ppc64le:
-	GOOS=aix GOARCH=ppc64le $(MAKE) build-binaries -j2
 
 .PHONY: build-linux-ppc64
 build-linux-ppc64:

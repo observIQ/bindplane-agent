@@ -40,15 +40,25 @@ builds:
       - goos: darwin
         goarch: ppc64le
       - goos: netbsd
-        goarch: "arm"
+        goarch: arm
       - goos: netbsd
-        goarch: "arm64"
+        goarch: arm64
+      - goos: openbsd
+        goarch: arm
+      - goos: openbsd
+        goarch: arm64
+      - goos: openbsd
+        goarch: ppc64
+      - goos: openbsd
+        goarch: ppc64le
       - goos: aix
-        goarch: "arm64"
+        goarch: arm64
       - goos: aix
-        goarch: "arm"
+        goarch: arm
       - goos: aix
-        goarch: "amd64"
+        goarch: amd64
+      - goos: aix
+        goarch: ppc64le
     ldflags:
       - -s -w
       - -X github.com/observiq/bindplane-agent/internal/version.version=v{{ .Version }}
@@ -90,15 +100,29 @@ builds:
       - goos: darwin
         goarch: ppc64le
       - goos: netbsd
-        goarch: "arm"
+        goarch: arm
       - goos: netbsd
-        goarch: "arm64"
+        goarch: arm64
+      - goos: netbsd
+        goarch: ppc64
+      - goos: netbsd
+        goarch: ppc64le
+      - goos: openbsd
+        goarch: arm
+      - goos: openbsd
+        goarch: arm64
+      - goos: openbsd
+        goarch: ppc64
+      - goos: openbsd
+        goarch: ppc64le
       - goos: aix
-        goarch: "arm64"
+        goarch: arm64
       - goos: aix
-        goarch: "arm"
+        goarch: arm
       - goos: aix
-        goarch: "amd64"
+        goarch: amd64
+      - goos: aix
+        goarch: ppc64le
     ldflags:
       - -s -w
       - -X github.com/observiq/bindplane-agent/updater/internal/version.version=v{{ .Version }}
