@@ -17,7 +17,7 @@ builds:
       - linux
       - darwin
       - freebsd
-      - openbsd
+      # - openbsd
       - netbsd
       - aix
       - solaris
@@ -95,7 +95,7 @@ builds:
       - linux
       - darwin
       - freebsd
-      - openbsd
+      # - openbsd
       - netbsd
       - aix
       - solaris
