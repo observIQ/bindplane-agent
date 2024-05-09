@@ -20,6 +20,8 @@ builds:
       - openbsd
       - netbsd
       - aix
+      - solaris
+      - illumos
     goarch:
       - amd64
       - arm64
@@ -58,6 +60,22 @@ builds:
       - goos: aix
         goarch: amd64
       - goos: aix
+        goarch: ppc64le
+      - goos: solaris
+        goarch: arm
+      - goos: solaris
+        goarch: arm64
+      - goos: solaris
+        goarch: ppc64
+      - goos: solaris
+        goarch: ppc64le
+      - goos: illumos
+        goarch: arm
+      - goos: illumos
+        goarch: arm64
+      - goos: illumos
+        goarch: ppc64
+      - goos: illumos
         goarch: ppc64le
     ldflags:
       - -s -w
@@ -80,6 +98,8 @@ builds:
       - openbsd
       - netbsd
       - aix
+      - solaris
+      - illumos
     goarch:
       - amd64
       - arm64
@@ -122,6 +142,22 @@ builds:
       - goos: aix
         goarch: amd64
       - goos: aix
+        goarch: ppc64le
+      - goos: solaris
+        goarch: arm
+      - goos: solaris
+        goarch: arm64
+      - goos: solaris
+        goarch: ppc64
+      - goos: solaris
+        goarch: ppc64le
+      - goos: illumos
+        goarch: arm
+      - goos: illumos
+        goarch: arm64
+      - goos: illumos
+        goarch: ppc64
+      - goos: illumos
         goarch: ppc64le
     ldflags:
       - -s -w
