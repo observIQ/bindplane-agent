@@ -13,7 +13,7 @@
 // limitations under the License.
 
 // an elevated user is needed to run the service tests
-//go:build aix && integration
+//go:build aix && integration_aix
 
 package service
 
@@ -29,42 +29,36 @@ import (
 )
 
 // NOTE: These tests must run as root in order to pass
-func TestBSDServiceInstall(t *testing.T) {
+func TestaixUnixServiceInstall(t *testing.T) {
 	t.Run("Test install + uninstall", func(t *testing.T) {
-		installedServicePath := "/usr/lib/systemd/system/bsd-service.service"
-		uninstallService(t, installedServicePath, "bsd-service")
+		uninstallService(t, installedServicePath, "aix-service")
 
-		l := &bsdService{
-			newServiceFilePath:       filepath.Join("testdata", "bsd-service.service"),
-			serviceName:              "bsd-service",
-			installedServiceFilePath: installedServicePath,
-			logger:                   zaptest.NewLogger(t),
+		l := &aixUnixService{
+			serviceName:       "aix-service",
+			serviceIdentifier: "aix_svc",
+			logger:            zaptest.NewLogger(t),
 		}
 
 		err := l.install()
 		require.NoError(t, err)
-		require.FileExists(t, installedServicePath)
 
 		//We want to check that the service was actually loaded
 		requireServiceLoadedStatus(t, true)
 
 		err = l.uninstall()
 		require.NoError(t, err)
-		require.NoFileExists(t, installedServicePath)
 
 		//Make sure the service is no longer listed
 		requireServiceLoadedStatus(t, false)
 	})
 
 	t.Run("Test stop + start", func(t *testing.T) {
-		installedServicePath := "/usr/lib/systemd/system/bsd-service.service"
-		uninstallService(t, installedServicePath, "bsd-service")
+		uninstallService(t, installedServicePath, "aix-service")
 
-		l := &bsdService{
-			newServiceFilePath:       filepath.Join("testdata", "bsd-service.service"),
-			serviceName:              "bsd-service",
-			installedServiceFilePath: installedServicePath,
-			logger:                   zaptest.NewLogger(t),
+		l := &aixUnixService{
+			serviceName:       "aix-service",
+			serviceIdentifier: "aix_svc",
+			logger:            zaptest.NewLogger(t),
 		}
 
 		err := l.install()
@@ -93,14 +87,13 @@ func TestBSDServiceInstall(t *testing.T) {
 	})
 
 	t.Run("Test invalid path for input file", func(t *testing.T) {
-		installedServicePath := "/usr/lib/systemd/system/bsd-service.service"
-		uninstallService(t, installedServicePath, "bsd-service")
+		installedServicePath := "/usr/lib/systemd/system/aix-service.service"
+		uninstallService(t, installedServicePath, "aix-service")
 
-		l := &bsdService{
-			newServiceFilePath:       filepath.Join("testdata", "does-not-exist.service"),
-			serviceName:              "bsd-service",
-			installedServiceFilePath: installedServicePath,
-			logger:                   zaptest.NewLogger(t),
+		l := &aixUnixService{
+			serviceName:       "aix-service",
+			serviceIdentifier: "aix_svc",
+			logger:            zaptest.NewLogger(t),
 		}
 
 		err := l.install()
@@ -109,14 +102,13 @@ func TestBSDServiceInstall(t *testing.T) {
 	})
 
 	t.Run("Test invalid path for output file for install", func(t *testing.T) {
-		installedServicePath := "/usr/lib/systemd/system/dir-does-not-exist/bsd-service.service"
-		uninstallService(t, installedServicePath, "bsd-service")
+		installedServicePath := "/usr/lib/systemd/system/dir-does-not-exist/aix-service.service"
+		uninstallService(t, installedServicePath, "aix-service")
 
-		l := &bsdService{
-			newServiceFilePath:       filepath.Join("testdata", "bsd-service.service"),
-			serviceName:              "bsd-service",
-			installedServiceFilePath: installedServicePath,
-			logger:                   zaptest.NewLogger(t),
+		l := &aixUnixService{
+			serviceName:       "aix-service",
+			serviceIdentifier: "aix_svc",
+			logger:            zaptest.NewLogger(t),
 		}
 
 		err := l.install()
@@ -125,14 +117,13 @@ func TestBSDServiceInstall(t *testing.T) {
 	})
 
 	t.Run("Uninstall fails if not installed", func(t *testing.T) {
-		installedServicePath := "/usr/lib/systemd/system/bsd-service.service"
-		uninstallService(t, installedServicePath, "bsd-service")
+		installedServicePath := "/usr/lib/systemd/system/aix-service.service"
+		uninstallService(t, installedServicePath, "aix-service")
 
-		l := &bsdService{
-			newServiceFilePath:       filepath.Join("testdata", "bsd-service.service"),
-			serviceName:              "bsd-service",
-			installedServiceFilePath: installedServicePath,
-			logger:                   zaptest.NewLogger(t),
+		l := &aixUnixService{
+			serviceName:       "aix-service",
+			serviceIdentifier: "aix_svc",
+			logger:            zaptest.NewLogger(t),
 		}
 
 		err := l.uninstall()
@@ -141,14 +132,13 @@ func TestBSDServiceInstall(t *testing.T) {
 	})
 
 	t.Run("Start fails if service not found", func(t *testing.T) {
-		installedServicePath := "/usr/lib/systemd/system/bsd-service.service"
-		uninstallService(t, installedServicePath, "bsd-service")
+		installedServicePath := "/usr/lib/systemd/system/aix-service.service"
+		uninstallService(t, installedServicePath, "aix-service")
 
-		l := &bsdService{
-			newServiceFilePath:       filepath.Join("testdata", "bsd-service.service"),
-			serviceName:              "bsd-service",
-			installedServiceFilePath: installedServicePath,
-			logger:                   zaptest.NewLogger(t),
+		l := &aixUnixService{
+			serviceName:       "aix-service",
+			serviceIdentifier: "aix_svc",
+			logger:            zaptest.NewLogger(t),
 		}
 
 		err := l.Start()
@@ -156,14 +146,13 @@ func TestBSDServiceInstall(t *testing.T) {
 	})
 
 	t.Run("Stop fails if service not found", func(t *testing.T) {
-		installedServicePath := "/usr/lib/systemd/system/bsd-service.service"
-		uninstallService(t, installedServicePath, "bsd-service")
+		installedServicePath := "/usr/lib/systemd/system/aix-service.service"
+		uninstallService(t, installedServicePath, "aix-service")
 
-		l := &bsdService{
-			newServiceFilePath:       filepath.Join("testdata", "bsd-service.service"),
-			serviceName:              "bsd-service",
-			installedServiceFilePath: installedServicePath,
-			logger:                   zaptest.NewLogger(t),
+		l := &aixUnixService{
+			serviceName:       "aix-service",
+			serviceIdentifier: "aix_svc",
+			logger:            zaptest.NewLogger(t),
 		}
 
 		err := l.Stop()
@@ -171,22 +160,20 @@ func TestBSDServiceInstall(t *testing.T) {
 	})
 
 	t.Run("Backup installed service succeeds", func(t *testing.T) {
-		installedServicePath := "/usr/lib/systemd/system/bsd-service.service"
-		uninstallService(t, installedServicePath, "bsd-service")
+		installedServicePath := "/usr/lib/systemd/system/aix-service.service"
+		uninstallService(t, installedServicePath, "aix-service")
 
-		newServiceFile := filepath.Join("testdata", "bsd-service.service")
+		newServiceFile := filepath.Join("testdata", "aix-service.service")
 		serviceFileContents, err := os.ReadFile(newServiceFile)
 		require.NoError(t, err)
 
 		installDir := t.TempDir()
 		require.NoError(t, os.MkdirAll(path.BackupDir(installDir), 0775))
 
-		d := &bsdService{
-			newServiceFilePath:       newServiceFile,
-			installedServiceFilePath: installedServicePath,
-			serviceName:              "bsd-service",
-			installDir:               installDir,
-			logger:                   zaptest.NewLogger(t),
+		d := &aixUnixService{
+			serviceName:       "aix-service",
+			serviceIdentifier: "aix_svc",
+			logger:            zaptest.NewLogger(t),
 		}
 
 		err = d.install()
@@ -207,20 +194,18 @@ func TestBSDServiceInstall(t *testing.T) {
 	})
 
 	t.Run("Backup installed service fails if not installed", func(t *testing.T) {
-		installedServicePath := "/usr/lib/systemd/system/bsd-service.service"
-		uninstallService(t, installedServicePath, "bsd-service")
+		installedServicePath := "/usr/lib/systemd/system/aix-service.service"
+		uninstallService(t, installedServicePath, "aix-service")
 
-		newServiceFile := filepath.Join("testdata", "bsd-service.service")
+		newServiceFile := filepath.Join("testdata", "aix-service.service")
 
 		installDir := t.TempDir()
 		require.NoError(t, os.MkdirAll(path.BackupDir(installDir), 0775))
 
-		d := &bsdService{
-			newServiceFilePath:       newServiceFile,
-			installedServiceFilePath: installedServicePath,
-			serviceName:              "bsd-service",
-			installDir:               installDir,
-			logger:                   zaptest.NewLogger(t),
+		d := &aixUnixService{
+			serviceName:       "aix-service",
+			serviceIdentifier: "aix_svc",
+			logger:            zaptest.NewLogger(t),
 		}
 
 		err := d.Backup()
@@ -228,20 +213,18 @@ func TestBSDServiceInstall(t *testing.T) {
 	})
 
 	t.Run("Backup installed service fails if output file already exists", func(t *testing.T) {
-		installedServicePath := "/usr/lib/systemd/system/bsd-service.service"
-		uninstallService(t, installedServicePath, "bsd-service")
+		installedServicePath := "/usr/lib/systemd/system/aix-service.service"
+		uninstallService(t, installedServicePath, "aix-service")
 
-		newServiceFile := filepath.Join("testdata", "bsd-service.service")
+		newServiceFile := filepath.Join("testdata", "aix-service.service")
 
 		installDir := t.TempDir()
 		require.NoError(t, os.MkdirAll(path.BackupDir(installDir), 0775))
 
-		d := &bsdService{
-			newServiceFilePath:       newServiceFile,
-			installedServiceFilePath: installedServicePath,
-			serviceName:              "bsd-service",
-			installDir:               installDir,
-			logger:                   zaptest.NewLogger(t),
+		d := &aixUnixService{
+			serviceName:       "aix-service",
+			serviceIdentifier: "aix_svc",
+			logger:            zaptest.NewLogger(t),
 		}
 
 		err := d.install()
@@ -262,33 +245,22 @@ func TestBSDServiceInstall(t *testing.T) {
 
 // uninstallService is a helper that uninstalls the service manually for test setup, in case it is somehow leftover.
 func uninstallService(t *testing.T, installedPath, serviceName string) {
-	cmd := exec.Command("systemctl", "stop", serviceName)
-	_ = cmd.Run()
-
-	cmd = exec.Command("systemctl", "disable", serviceName)
-	_ = cmd.Run()
-
-	err := os.RemoveAll(installedPath)
-	require.NoError(t, err)
-
-	cmd = exec.Command("systemctl", "daemon-reload")
-	_ = cmd.Run()
 }
 
-const exitCodeServiceNotFound = 4
-const exitCodeServiceInactive = 3
+const exitCodeServiceNotFound = 1
+const exitCodeServiceInactive = 0
 
 func requireServiceLoadedStatus(t *testing.T, loaded bool) {
 	t.Helper()
 
-	cmd := exec.Command("systemctl", "status", "bsd-service")
+	cmd := exec.Command("lssrc", "-s", "aix-service")
 	err := cmd.Run()
-	require.Error(t, err, "expected non-zero exit code from 'systemctl status bsd-service'")
+	require.Error(t, err, "expected non-zero exit code from 'lssrc -s aix-service'")
 
 	eErr, ok := err.(*exec.ExitError)
 	if loaded {
 		// If the service should be loaded, then we expect a 0 exit code, so no error is given
-		require.Equal(t, exitCodeServiceInactive, eErr.ExitCode(), "unexpected exit code when asserting service is unloaded: %d", eErr.ExitCode())
+		require.Equal(t, exitCodeServiceInactive, eErr.ExitCode(), "unexpected exit code when asserting service is loaded: %d", eErr.ExitCode())
 		return
 	}
 
@@ -297,7 +269,7 @@ func requireServiceLoadedStatus(t *testing.T, loaded bool) {
 }
 
 func requireServiceRunningStatus(t *testing.T, running bool) {
-	cmd := exec.Command("systemctl", "status", "bsd-service")
+	cmd := exec.Command("systemctl", "status", "aix-service")
 	err := cmd.Run()
 
 	if running {

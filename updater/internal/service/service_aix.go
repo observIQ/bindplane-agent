@@ -18,62 +18,47 @@ package service
 
 import (
 	"fmt"
-	"io"
-	"log"
-	"os"
 	"os/exec"
-	"path/filepath"
 
-	"github.com/observiq/bindplane-agent/updater/internal/file"
-	"github.com/observiq/bindplane-agent/updater/internal/path"
 	"go.uber.org/zap"
 )
 
-const bsdUnixServiceName = "observiq-otel-collector"
-const bsdUnixServiceFilePath = "/usr/lib/systemd/system/observiq-otel-collector.service"
+const aixUnixServiceIdentifier = "oiqcollector"
+const aixUnixServiceName = "observiq-otel-collector"
 
 // Option is an extra option for creating a Service
-type Option func(bsdUnixSvc *bsdUnixService)
-
-// WithServiceFile returns an option setting the service file to use when updating using the service
-func WithServiceFile(svcFilePath string) Option {
-	return func(bsdUnixSvc *bsdUnixService) {
-		bsdUnixSvc.newServiceFilePath = svcFilePath
-	}
-}
+type Option func(aixUnixSvc *aixUnixService)
 
 // NewService returns an instance of the Service interface for managing the observiq-otel-collector service on the current OS.
 func NewService(logger *zap.Logger, installDir string, opts ...Option) Service {
-	bsdUnixSvc := &bsdUnixService{
-		newServiceFilePath:       filepath.Join(path.ServiceFileDir(installDir), "observiq-otel-collector.rc"),
-		serviceName:              bsdUnixServiceName,
-		installedServiceFilePath: bsdUnixServiceFilePath,
-		installDir:               installDir,
-		logger:                   logger.Named("bsdUnix-service"),
+	aixUnixSvc := &aixUnixService{
+		serviceName:       aixUnixServiceName,
+		serviceIdentifier: aixUnixServiceIdentifier,
+		installDir:        installDir,
+		logger:            logger.Named("aixUnix-service"),
 	}
 
 	for _, opt := range opts {
-		opt(bsdUnixSvc)
+		opt(aixUnixSvc)
 	}
 
-	return bsdUnixSvc
+	return aixUnixSvc
 }
 
-type bsdUnixService struct {
-	// newServiceFilePath is the file path to the new unit file
-	newServiceFilePath string
+type aixUnixService struct {
 	// serviceName is the name of the service
 	serviceName string
-	// installedServiceFilePath is the file path to the installed unit file
-	installedServiceFilePath string
-	installDir               string
-	logger                   *zap.Logger
+	// serviceName is the name of the service
+	serviceIdentifier string
+	installDir        string
+	logger            *zap.Logger
 }
 
 // Start the service
-func (l bsdUnixService) Start() error {
+func (l aixUnixService) Start() error {
+	// startsrc -s observiq-otel-collector -a start -e "$(cat /opt/observiq-otel-collector/observiq-otel-collector.env)"
 	//#nosec G204 -- serviceName is not determined by user input
-	cmd := exec.Command("service", l.serviceName, "start")
+	cmd := exec.Command("startsrc", "-s", l.serviceName, "-a start -e \"$(cat /opt/observiq-otel-collector/observiq-otel-collector.env)\"")
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("running service failed: %w", err)
 	}
@@ -81,45 +66,28 @@ func (l bsdUnixService) Start() error {
 }
 
 // Stop the service
-func (l bsdUnixService) Stop() error {
+func (l aixUnixService) Stop() error {
+	// stopsrc -s observiq-otel-collector
 	//#nosec G204 -- serviceName is not determined by user input
-	cmd := exec.Command("service", l.serviceName, "stop")
+	cmd := exec.Command("stopsrc", "-s", l.serviceName)
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("running service failed: %w", err)
 	}
+
 	return nil
 }
 
 // installs the service
-func (l bsdUnixService) install() error {
-	inFile, err := os.Open(l.newServiceFilePath)
-	if err != nil {
-		return fmt.Errorf("failed to open input file: %w", err)
-	}
-	defer func() {
-		err := inFile.Close()
-		if err != nil {
-			log.Default().Printf("Service Install: Failed to close input file: %s", err)
-		}
-	}()
-
-	outFile, err := os.OpenFile(l.installedServiceFilePath, os.O_CREATE|os.O_WRONLY, 0600)
-	if err != nil {
-		return fmt.Errorf("failed to open output file: %w", err)
-	}
-	defer func() {
-		err := outFile.Close()
-		if err != nil {
-			log.Default().Printf("Service Install: Failed to close output file: %s", err)
-		}
-	}()
-
-	if _, err := io.Copy(outFile, inFile); err != nil {
-		return fmt.Errorf("failed to copy service file: %w", err)
-	}
-
+func (l aixUnixService) install() error {
+	// mkssys -s observiq-otel-collector -p /opt/observiq-otel-collector/observiq-otel-collector -u $(id -u observiq-otel-collector) -S -n15 -f9 -a '--config config.yaml --manager manager.yaml --logging logging.yaml'
 	//#nosec G204 -- serviceName is not determined by user input
-	cmd := exec.Command("service", l.serviceName, "enable")
+	cmd := exec.Command("mkssys", "-s", l.serviceName, "-p /opt/observiq-otel-collector/observiq-otel-collector -u $(id -u observiq-otel-collector) -S -n15 -f9 -a '--config config.yaml --manager manager.yaml --logging logging.yaml'")
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("enabling service file failed: %w", err)
+	}
+	// mkitab 'oiqcollector:23456789:respawn:startsrc -s observiq-otel-collector -a start -e "$(cat /opt/observiq-otel-collector/observiq-otel-collector.env)"'
+	//#nosec G204 -- serviceName is not determined by user input
+	cmd := exec.Command("mkitab", "'oiqcollector:23456789:respawn:startsrc -s", l.serviceName, "-a start -e \"$(cat /opt/observiq-otel-collector/observiq-otel-collector.env)\"'")
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("enabling service file failed: %w", err)
 	}
@@ -128,18 +96,17 @@ func (l bsdUnixService) install() error {
 }
 
 // uninstalls the service
-func (l bsdUnixService) uninstall() error {
+func (l aixUnixService) uninstall() error {
+	// stopsrc -s observiq-otel-collector
 	//#nosec G204 -- serviceName is not determined by user input
-	cmd := exec.Command("service", l.serviceName, "disable")
+	cmd := exec.Command("stopsrc", "-s", l.serviceName)
 	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("failed to disable service: %w", err)
+		return fmt.Errorf("running service failed: %w", err)
 	}
 
-	if err := os.Remove(l.installedServiceFilePath); err != nil {
-		return fmt.Errorf("failed to remove service file: %w", err)
-	}
-
-	cmd = exec.Command("service", "daemon-reload")
+	// rmitab oiqcollector
+	//#nosec G204 -- serviceIdentifier is not determined by user input
+	cmd = exec.Command("rmitab", l.serviceIdentifier)
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("reloading service failed: %w", err)
 	}
@@ -147,7 +114,7 @@ func (l bsdUnixService) uninstall() error {
 	return nil
 }
 
-func (l bsdUnixService) Update() error {
+func (l aixUnixService) Update() error {
 	if err := l.uninstall(); err != nil {
 		return fmt.Errorf("failed to uninstall old service: %w", err)
 	}
@@ -159,10 +126,6 @@ func (l bsdUnixService) Update() error {
 	return nil
 }
 
-func (l bsdUnixService) Backup() error {
-	if err := file.CopyFileNoOverwrite(l.logger.Named("copy-file"), l.installedServiceFilePath, path.BackupServiceFile(l.installDir)); err != nil {
-		return fmt.Errorf("failed to copy service file: %w", err)
-	}
-
+func (l aixUnixService) Backup() error {
 	return nil
 }
