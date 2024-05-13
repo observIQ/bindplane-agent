@@ -29,6 +29,13 @@ const aixUnixServiceName = "observiq-otel-collector"
 // Option is an extra option for creating a Service
 type Option func(aixUnixSvc *aixUnixService)
 
+// WithServiceFile returns an option setting the service file to use when updating using the service
+func WithServiceFile(svcFilePath string) Option {
+	return func(aixUnixSvc *aixUnixService) {
+		// Do nothing
+	}
+}
+
 // NewService returns an instance of the Service interface for managing the observiq-otel-collector service on the current OS.
 func NewService(logger *zap.Logger, installDir string, opts ...Option) Service {
 	aixUnixSvc := &aixUnixService{
@@ -46,6 +53,8 @@ func NewService(logger *zap.Logger, installDir string, opts ...Option) Service {
 }
 
 type aixUnixService struct {
+	// newServiceFilePath a useless stub to please service_action.go
+	newServiceFilePath string
 	// serviceName is the name of the service
 	serviceName string
 	// serviceName is the name of the service
@@ -87,7 +96,7 @@ func (l aixUnixService) install() error {
 	}
 	// mkitab 'oiqcollector:23456789:respawn:startsrc -s observiq-otel-collector -a start -e "$(cat /opt/observiq-otel-collector/observiq-otel-collector.env)"'
 	//#nosec G204 -- serviceName is not determined by user input
-	cmd := exec.Command("mkitab", "'oiqcollector:23456789:respawn:startsrc -s", l.serviceName, "-a start -e \"$(cat /opt/observiq-otel-collector/observiq-otel-collector.env)\"'")
+	cmd = exec.Command("mkitab", "'oiqcollector:23456789:respawn:startsrc -s", l.serviceName, "-a start -e \"$(cat /opt/observiq-otel-collector/observiq-otel-collector.env)\"'")
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("enabling service file failed: %w", err)
 	}

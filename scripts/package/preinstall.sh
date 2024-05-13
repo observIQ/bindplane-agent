@@ -18,16 +18,30 @@ set -e
 
 username="observiq-otel-collector"
 
-if getent group "$username" > /dev/null 2>&1; then
-    echo "Group ${username} already exists."
-else
-    groupadd "$username"
-fi
+if [ "$(uname -s)" == AIX ]; then
+    if lsgroup observiq-otel-collector > /dev/null 2>&1; then
+        echo "Group ${username} already exists."
+    else
+        groupadd "$username"
+    fi
 
-if id "$username" > /dev/null 2>&1; then
-    echo "User ${username} already exists"
-    exit 0
+    if id "$username" > /dev/null 2>&1; then
+        echo "User ${username} already exists"
+        exit 0
+    else
+        useradd -g "$username" -s $(which false) "$username"
+    fi
 else
-    useradd --shell /sbin/nologin --system "$username" -g "$username"
-fi
+    if getent group "$username" > /dev/null 2>&1; then
+        echo "Group ${username} already exists."
+    else
+        groupadd "$username"
+    fi
 
+    if id "$username" > /dev/null 2>&1; then
+        echo "User ${username} already exists"
+        exit 0
+    else
+        useradd --shell /sbin/nologin --system "$username" -g "$username"
+    fi
+fi

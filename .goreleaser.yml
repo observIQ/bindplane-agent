@@ -17,7 +17,7 @@ builds:
       - linux
       - darwin
       - freebsd
-      # - openbsd
+      - openbsd
       - netbsd
       - aix
       - solaris
@@ -95,7 +95,7 @@ builds:
       - linux
       - darwin
       - freebsd
-      # - openbsd
+      - openbsd
       - netbsd
       - aix
       - solaris
@@ -202,6 +202,9 @@ archives:
       - src: release_deps/sysconfig/observiq-otel-collector
         dst: "install/sysconfig"
         strip_parent: true
+      - src: release_deps/observiq-otel-collector.aix.env
+        dst: "install/observiq-otel-collector.aix.env"
+        strip_parent: true
     format_overrides:
       - goos: windows
         format: zip
@@ -290,6 +293,8 @@ nfpms:
           mode: 0644
           owner: root
           group: root
+      # This file will be unused on modern systemd Linux or on AIX
+      # The postinstall.sh file removes this if it isn't needed
       - src: service/observiq-otel-collector
         dst: /etc/init.d/observiq-otel-collector
         type: config|noreplace
@@ -297,8 +302,19 @@ nfpms:
           mode: 0755
           owner: root
           group: root
+      # This file will be unused on older Linux using sysv/init.d/rc.d or on AIX
+      # The postinstall.sh file removes this if it isn't needed
       - src: service/sysconfig/observiq-otel-collector
         dst: /etc/sysconfig/observiq-otel-collector
+        type: config
+        file_info:
+          mode: 0644
+          owner: root
+          group: root
+      # This file will be unused if/until nfpm & goreleaser get updated to support AIX rpm files
+      # The postinstall.sh file removes this on Linux
+      - src: service/observiq-otel-collector.aix.env
+        dst: /opt/observiq-otel-collector/observiq-otel-collector.aix.env
         type: config
         file_info:
           mode: 0644

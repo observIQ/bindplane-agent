@@ -21,6 +21,10 @@ manage_systemd_service() {
   if [ -f /etc/init.d/observiq-otel-collector ]; then
     rm -f /etc/init.d/observiq-otel-collector
   fi
+  # Ensure aix env vars file isn't present, and if it is remove it
+  if [ -f /opt/observiq-otel-collector/observiq-otel-collector.aix.env ]; then
+    rm -f /opt/observiq-otel-collector/observiq-otel-collector.aix.env
+  fi
 
   systemctl daemon-reload
 
@@ -56,9 +60,103 @@ EOF
 }
 
 manage_sysv_service() {
+  # Ensure systemd script isn't present, and if it is remove it
+  if [ -f /usr/lib/systemd/system/observiq-otel-collector.service ]; then
+    rm -f /usr/lib/systemd/system/observiq-otel-collector.service
+  fi
+  # Ensure aix env vars file isn't present, and if it is remove it
+  if [ -f /opt/observiq-otel-collector/observiq-otel-collector.aix.env ]; then
+    rm -f /opt/observiq-otel-collector/observiq-otel-collector.aix.env
+  fi
+
   chmod 755 /etc/init.d/observiq-otel-collector
   chmod 644 /etc/sysconfig/observiq-otel-collector
   echo "configured sysv service"
+
+  cat << EOF
+
+The "observiq-otel-collector" service has been configured!
+
+The collector's config file can be found here: 
+  /opt/observiq-otel-collector/config.yaml
+
+To view logs from the collector, run:
+  sudo tail -F /opt/observiq-otel-collector/log/collector.log
+
+For more information on configuring the collector, see the docs:
+  https://github.com/observIQ/bindplane-agent/tree/main#observiq-opentelemetry-collector
+
+To stop the observiq-otel-collector service, run:
+  sudo service observiq-otel-collector stop
+
+To start the observiq-otel-collector service, run:
+  sudo service observiq-otel-collector start
+
+To restart the observiq-otel-collector service, run:
+  sudo service observiq-otel-collector restart
+
+To enable the service on startup, run:
+  sudo service observiq-otel-collector enable
+
+If you have any other questions please contact us at support@observiq.com
+EOF
+}
+
+manage_aix_service() {
+  # Ensure sysv script isn't present, and if it is remove it
+  if [ -f /etc/init.d/observiq-otel-collector ]; then
+    rm -f /etc/init.d/observiq-otel-collector
+  fi
+  # Ensure systemd script isn't present, and if it is remove it
+  if [ -f /usr/lib/systemd/system/observiq-otel-collector.service ]; then
+    rm -f /usr/lib/systemd/system/observiq-otel-collector.service
+  fi
+
+  # Add the service, removing it if it already exists in order
+  # to make sure we have the most recent version
+  if lssrc -s observiq-otel-collector > /dev/null 2>&1; then
+    rmssys -s observiq-otel-collector
+  else
+    mkssys -s observiq-otel-collector -p /opt/observiq-otel-collector/observiq-otel-collector -u $(id -u observiq-otel-collector) -S -n15 -f9 -a '--config config.yaml --manager manager.yaml --logging logging.yaml'
+  fi
+
+  # Install the service to start on boot
+  # Removing it if it exists, in order to have the most recent version
+  if lsitab oiqcollector > /dev/null 2>&1; then
+    rmitab oiqcollector
+  else
+    mkitab 'oiqcollector:23456789:respawn:startsrc -s observiq-otel-collector -a start -e "$(cat /opt/observiq-otel-collector/observiq-otel-collector.aix.env)"'
+  fi
+
+  echo "configured aix mkssys service"
+
+  cat << EOF
+
+The "observiq-otel-collector" service has been configured!
+
+The collector's config file can be found here: 
+  /opt/observiq-otel-collector/config.yaml
+
+To view logs from the collector, run:
+  sudo tail -F /opt/observiq-otel-collector/log/collector.log
+
+For more information on configuring the collector, see the docs:
+  https://github.com/observIQ/bindplane-agent/tree/main#observiq-opentelemetry-collector
+
+To stop the observiq-otel-collector service, run:
+  sudo stopsrc -s observiq-otel-collector
+
+To start the observiq-otel-collector service, run:
+  sudo startsrc -s observiq-otel-collector -a start -e "$(cat /opt/observiq-otel-collector/observiq-otel-collector.aix.env)"
+
+To restart the observiq-otel-collector service, run:
+  sudo stopsrc -s observiq-otel-collector && sudo startsrc -s observiq-otel-collector -a start -e "$(cat /opt/observiq-otel-collector/observiq-otel-collector.aix.env)"
+
+To enable the service on startup, run:
+  sudo mkitab 'oiqcollector:23456789:respawn:startsrc -s observiq-otel-collector -a start -e "$(cat /opt/observiq-otel-collector/observiq-otel-collector.aix.env)"'
+
+If you have any other questions please contact us at support@observiq.com
+EOF
 }
 
 init_type() {
@@ -68,6 +166,9 @@ init_type() {
     return
   elif command -v service > /dev/null 2>&1; then
     command printf "service"
+    return
+  elif command -v mkssys > /dev/null 2>&1; then
+    command printf "mkssys"
     return
   fi
 
@@ -83,6 +184,9 @@ manage_service() {
       ;;
     service)
       manage_sysv_service
+      ;;
+    mkssys)
+      manage_aix_service
       ;;
     *)
       echo "could not detect init system, skipping service configuration"
