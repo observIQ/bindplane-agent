@@ -787,8 +787,8 @@ install_aix()
   zcat "$out_file_path" | tar -Uxvf - -C /opt/observiq-otel-collector > /dev/null 2>&1
 
   # Move files to appropriate locations
-  mv /opt/observiq-otel-collector/opentelemetry-java-contrib-jmx-metrics.jar /opt/opentelemetry-java-contrib-jmx-metrics.jar > /dev/null 2>&1
-  mv /opt/observiq-otel-collector/install/observiq-otel-collector.aix.env /etc/observiq-otel-collector.aix.env > /dev/null 2>&1
+  mv /opt/observiq-otel-collector/opentelemetry-java-contrib-jmx-metrics.jar /opt/ > /dev/null 2>&1
+  mv /opt/observiq-otel-collector/install/observiq-otel-collector.aix.env /etc/ > /dev/null 2>&1
 
   # Set ownership
   chown -R "$COLLECTOR_USER":"$COLLECTOR_USER" /opt/observiq-otel-collector > /dev/null 2>&1

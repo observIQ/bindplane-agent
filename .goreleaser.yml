@@ -314,7 +314,7 @@ nfpms:
       # This file will be unused if/until nfpm & goreleaser get updated to support AIX rpm files
       # The postinstall.sh file removes this on Linux
       - src: service/observiq-otel-collector.aix.env
-        dst: /opt/observiq-otel-collector/observiq-otel-collector.aix.env
+        dst: /etc/observiq-otel-collector.aix.env
         type: config
         file_info:
           mode: 0644
