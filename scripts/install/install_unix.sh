@@ -45,6 +45,7 @@ fi
 # out_file_path is the full path to the downloaded package (e.g. "/tmp/observiq-otel-collector_{os}_amd64.deb")
 out_file_path="unknown"
 os="unknown"
+os_arch="unknown"
 
 # Colors
 num_colors=$(tput colors 2>/dev/null)
@@ -323,9 +324,9 @@ setup_installation()
 
 set_file_name() {
   if [ -z "$version" ] ; then
-    package_file_name="${PACKAGE_NAME}_${os}_${arch}.${package_type}"
+    package_file_name="${PACKAGE_NAME}_${os}_${os_arch}.${package_type}"
   else
-    package_file_name="${PACKAGE_NAME}_v${version}_${os}_${arch}.${package_type}"
+    package_file_name="${PACKAGE_NAME}_v${version}_${os}_${os_arch}.${package_type}"
   fi
     out_file_path="$TMP_DIR/$package_file_name"
 }
@@ -361,7 +362,6 @@ set_proxy()
 
 set_os_arch()
 {
-  os_arch=$(uname -m)
   case "$os_arch" in 
     # arm64 strings. These are from https://stackoverflow.com/questions/45125516/possible-values-for-uname-m
     aarch64|arm64|aarch64_be|armv8b|armv8l)
@@ -376,6 +376,15 @@ set_os_arch()
       ;;
     ppc64le)
       os_arch="ppc64le"
+      ;;
+    powerpc)
+      if [ "$(uname -s)" = "AIX" ] && command -v bootinfo > /dev/null && [ "$(bootinfo -y)" = "64" ]; then
+        os_arch="ppc64"
+      elif command -v bootinfo > /dev/null; then
+        error_exit "$LINENO" "Command 'bootinfo' not found, OS likely isn't AIX, but we expect it to be"
+      else
+        error_exit "$LINENO" "uname returned arch of 'powerpc', but OS is either not AIX or not 64 bit. 'uname -s': $(uname -s), 'bootinfo -y': $(bootinfo -y)"
+      fi
       ;;
     # armv6/32bit. These are what raspberry pi can return, which is the main reason we support 32-bit arm
     arm|armv6l|armv7l)
@@ -561,14 +570,18 @@ os_check()
 os_arch_check()
 {
   info "Checking for valid operating system architecture..."
-  arch=$(uname -m)
-  case "$arch" in 
-    x86_64|aarch64|ppc64|ppc64le|arm64|aarch64_be|armv8b|armv8l|arm|armv6l|armv7l)
+  if [ "$(uname -s)" = "AIX" ]; then
+    os_arch=$(uname -p)
+  else
+    os_arch=$(uname -m)
+  fi
+  case "$os_arch" in 
+    x86_64|aarch64|powerpc|ppc64|ppc64le|arm64|aarch64_be|armv8b|armv8l|arm|armv6l|armv7l)
       succeeded
       ;;
     *)
       failed
-      error_exit "$LINENO" "The operating system architecture $(fg_yellow "$arch") is not supported by this script."
+      error_exit "$LINENO" "The operating system architecture $(fg_yellow "$os_arch") is not supported by this script."
       ;;
   esac
 }
@@ -614,7 +627,7 @@ package_type_check()
     && command -v mkitab > /dev/null 2>&1 \
     && command -v rmitab > /dev/null 2>&1 \
     && command -v lsitab > /dev/null 2>&1; then
-      succeed
+      succeeded
   elif command -v rpm > /dev/null 2>&1; then
       succeeded
   else
@@ -753,7 +766,7 @@ install_package()
     esac
   else
     # This is an error state that should never be reached
-    error_exit "Found an invalid SVC_PRE value in install_package()"
+    error_exit "$LINENO" "Found an invalid SVC_PRE value in install_package()"
   fi
 
   success "BindPlane Agent installation complete!"
@@ -764,8 +777,8 @@ install_package()
 install_aix()
 {
   # Create the observiq-otel-collector user and group. Group must be first.
-  mkgroup observiq-otel-collector > /dev/null 2>&1
-  useradd -d /opt/observiq-otel-collector -g observiq-otel-collector -s "$(which bash)" observiq-otel-collector > /dev/null 2>&1
+  mkgroup "$COLLECTOR_USER" > /dev/null 2>&1
+  useradd -d /opt/observiq-otel-collector -g "$COLLECTOR_USER" -s "$(which bash)" "$COLLECTOR_USER" > /dev/null 2>&1
 
   # Create the install directory
   mkdir -p /opt/observiq-otel-collector > /dev/null 2>&1
@@ -778,9 +791,9 @@ install_aix()
   mv /opt/observiq-otel-collector/install/observiq-otel-collector.aix.env /etc/observiq-otel-collector.aix.env > /dev/null 2>&1
 
   # Set ownership
-  chown -R observiq-otel-collector:observiq-otel-collector /opt/observiq-otel-collector > /dev/null 2>&1
-  chown observiq-otel-collector:observiq-otel-collector /opt/opentelemetry-java-contrib-jmx-metrics.jar > /dev/null 2>&1
-  chown observiq-otel-collector:observiq-otel-collector /etc/observiq-otel-collector.aix.env > /dev/null 2>&1
+  chown -R "$COLLECTOR_USER":"$COLLECTOR_USER" /opt/observiq-otel-collector > /dev/null 2>&1
+  chown "$COLLECTOR_USER":"$COLLECTOR_USER" /opt/opentelemetry-java-contrib-jmx-metrics.jar > /dev/null 2>&1
+  chown "$COLLECTOR_USER":"$COLLECTOR_USER" /etc/observiq-otel-collector.aix.env > /dev/null 2>&1
 }
 
 install_package_file()
@@ -951,6 +964,19 @@ uninstall()
   banner "$(fg_green Uninstallation Complete!)"
 }
 
+check_aix_name_length()
+{
+  aix_name_size="$(lsattr -El sys0 -a max_logname | cut -d" " -f 2)"
+  if [ "$aix_name_size" -lt 24 ]; then
+    error "$LINENO" "Current system will result in '3004-694 Error adding Name is too long.' when attempting to create group and user"
+    error "Current max: $aix_name_size"
+    error "Please raise your limit to 24 characters or greater by issuing these command:"
+    error "    chdev -lsys0 -a max_logname=<NUM>"
+    error "and then rebooting the system before attempting to run this script again"
+    error_exit "Reference: https://www.ibm.com/support/pages/aix-security-change-maximum-length-user-name-group-name-or-password"
+  fi
+}
+
 main()
 {
   # We do these checks before we process arguments, because
@@ -1002,6 +1028,11 @@ main()
         ;;
       esac
     done
+  fi
+
+  # AIX needs a special check
+  if [ "$os" = "aix" ]; then
+    check_aix_name_length
   fi
 
   connection_check
