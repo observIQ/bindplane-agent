@@ -140,13 +140,18 @@ fmt:
 
 .PHONY: tidy
 tidy:
-	$(MAKE) for-all CMD="go mod tidy -compat=1.20"
+	$(MAKE) for-all CMD="go mod tidy -compat=1.21"
 
 .PHONY: gosec
 gosec:
-	gosec -exclude-dir=updater -exclude-dir=receiver/sapnetweaverreceiver  ./...
+	gosec \
+	  -exclude-dir=updater \
+	  -exclude-dir=receiver/sapnetweaverreceiver \
+	  -exclude-dir=extension/bindplaneextension \
+	  ./...
 # exclude the testdata dir; it contains a go program for testing.
 	cd updater; gosec -exclude-dir internal/service/testdata ./...
+	cd extension/bindplaneextension; gosec ./...
 
 # This target performs all checks that CI will do (excluding the build itself)
 .PHONY: ci-checks
