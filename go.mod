@@ -291,7 +291,7 @@ require (
 	github.com/go-jose/go-jose/v4 v4.0.1 // indirect
 	github.com/go-viper/mapstructure/v2 v2.0.0-alpha.1 // indirect
 	github.com/goccy/go-json v0.10.2 // indirect
-	github.com/golang-jwt/jwt/v5 v5.2.0 // indirect
+	github.com/golang-jwt/jwt/v5 v5.2.1 // indirect
 	github.com/golang/mock v1.6.0 // indirect
 	github.com/google/gnostic-models v0.6.8 // indirect
 	github.com/google/s2a-go v0.1.7 // indirect
@@ -491,7 +491,6 @@ require (
 	github.com/euank/go-kmsg-parser v2.0.0+incompatible // indirect
 	github.com/fatih/color v1.15.0 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
-	github.com/form3tech-oss/jwt-go v3.2.5+incompatible // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.2 // indirect
 	github.com/go-kit/kit v0.13.0 // indirect
@@ -656,7 +655,7 @@ require (
 	github.com/signalfx/sapm-proto v0.14.0 // indirect
 	github.com/sijms/go-ora/v2 v2.8.14 // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
-	github.com/snowflakedb/gosnowflake v1.9.0 // indirect
+	github.com/snowflakedb/gosnowflake v1.10.0 // indirect
 	github.com/soheilhy/cmux v0.1.5 // indirect
 	github.com/spf13/cobra v1.8.0 // indirect
 	github.com/stretchr/objx v0.5.2 // indirect
