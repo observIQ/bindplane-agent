@@ -18,6 +18,7 @@ import (
 	"bytes"
 	"compress/gzip"
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"sync"
@@ -49,6 +50,9 @@ type snapshotRequest struct {
 	// MinimumTimestamp is the minimum timestamp used to filter telemetry such that only telemetry
 	// with a timestamp higher than specified will be reported.
 	MinimumTimestamp *time.Time `yaml:"minimum_timestamp"`
+
+	// SessionID is the identifier that the response should use to match the request with the response.
+	SessionID string `yaml:"session_id"`
 }
 
 const (
@@ -145,32 +149,54 @@ func (sp *snapshotProcessor) processSnapshotRequest(cm *protobufs.CustomMessage)
 		return
 	}
 
-	var reportMsg []byte
+	var report snapshotReport
 	switch req.PipelineType {
 	case "logs":
-		reportMsg, err = sp.logBuffer.ConstructPayload(req.SearchQuery, req.MinimumTimestamp)
+		telemetryPayload, err := sp.logBuffer.ConstructPayload(req.SearchQuery, req.MinimumTimestamp)
+		if err != nil {
+			sp.logger.Error("Failed to construct snapshot payload.", zap.Error(err))
+			return
+		}
+
+		report = logsReport(req.SessionID, telemetryPayload)
+
 	case "metrics":
-		reportMsg, err = sp.metricBuffer.ConstructPayload(req.SearchQuery, req.MinimumTimestamp)
+		telemetryPayload, err := sp.metricBuffer.ConstructPayload(req.SearchQuery, req.MinimumTimestamp)
+		if err != nil {
+			sp.logger.Error("Failed to metrics snapshot payload.", zap.Error(err))
+			return
+		}
+
+		report = metricsReport(req.SessionID, telemetryPayload)
+
 	case "traces":
-		reportMsg, err = sp.traceBuffer.ConstructPayload(req.SearchQuery, req.MinimumTimestamp)
+		telemetryPayload, err := sp.traceBuffer.ConstructPayload(req.SearchQuery, req.MinimumTimestamp)
+		if err != nil {
+			sp.logger.Error("Failed to construct traces payload.", zap.Error(err))
+			return
+		}
+
+		report = tracesReport(req.SessionID, telemetryPayload)
+
 	default:
 		sp.logger.Error("Invalid pipeline type in snapshot request.", zap.String("PipelineType", req.PipelineType))
 		return
 	}
 
+	response, err := json.Marshal(report)
 	if err != nil {
-		sp.logger.Error("Failed to construct snapshot payload.", zap.Error(err))
+		sp.logger.Error("Could not marshal snapshot report.", zap.Error(err))
 		return
 	}
 
-	compressedMsg, err := compress(reportMsg)
+	compressedResponse, err := compress(response)
 	if err != nil {
 		sp.logger.Error("Failed to compress snapshot payload.", zap.Error(err))
 		return
 	}
 
 	for {
-		msgSendChan, err := sp.customCapabilityHandler.SendMessage(snapshotReportType, compressedMsg)
+		msgSendChan, err := sp.customCapabilityHandler.SendMessage(snapshotReportType, compressedResponse)
 		switch {
 		case err == nil: // Message is scheduled to send
 			return

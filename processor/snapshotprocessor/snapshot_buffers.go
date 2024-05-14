@@ -90,7 +90,7 @@ func (l *LogBuffer) Add(ld plog.Logs) {
 func (l *LogBuffer) ConstructPayload(searchQuery *string, minimumTimestamp *time.Time) ([]byte, error) {
 	l.mutex.Lock()
 	defer l.mutex.Unlock()
-	logsMarshaler := &plog.ProtoMarshaler{}
+	logsMarshaler := &plog.JSONMarshaler{}
 
 	payloadLogs := plog.NewLogs()
 	for _, ld := range l.buffer {
@@ -177,7 +177,7 @@ func (l *MetricBuffer) Add(md pmetric.Metrics) {
 func (l *MetricBuffer) ConstructPayload(searchQuery *string, minimumTimestamp *time.Time) ([]byte, error) {
 	l.mutex.Lock()
 	defer l.mutex.Unlock()
-	metricMarshaler := &pmetric.ProtoMarshaler{}
+	metricMarshaler := &pmetric.JSONMarshaler{}
 
 	payloadMetrics := pmetric.NewMetrics()
 	for _, md := range l.buffer {
@@ -264,7 +264,7 @@ func (l *TraceBuffer) Add(td ptrace.Traces) {
 func (l *TraceBuffer) ConstructPayload(searchQuery *string, minimumTimestamp *time.Time) ([]byte, error) {
 	l.mutex.Lock()
 	defer l.mutex.Unlock()
-	traceMarshaler := &ptrace.ProtoMarshaler{}
+	traceMarshaler := &ptrace.JSONMarshaler{}
 
 	payloadTraces := ptrace.NewTraces()
 	for _, md := range l.buffer {
