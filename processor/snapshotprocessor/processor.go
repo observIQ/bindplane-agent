@@ -22,7 +22,6 @@ import (
 	"errors"
 	"fmt"
 	"sync"
-	"time"
 
 	"github.com/open-telemetry/opamp-go/client/types"
 	"github.com/open-telemetry/opamp-go/protobufs"
@@ -34,26 +33,6 @@ import (
 	"go.uber.org/zap"
 	"gopkg.in/yaml.v3"
 )
-
-// snapshotRequest specifies what snapshots to collect
-type snapshotRequest struct {
-	// Processor is the full ComponentID of the snapshot processor
-	Processor component.ID `yaml:"processor"`
-
-	// PipelineType will be "logs", "metrics", or "traces"
-	PipelineType string `yaml:"pipeline_type"`
-
-	// SearchQuery is an optional query string that will filter telemetry
-	// such that only telemetry containing the string is reported.
-	SearchQuery *string `yaml:"search_query"`
-
-	// MinimumTimestamp is the minimum timestamp used to filter telemetry such that only telemetry
-	// with a timestamp higher than specified will be reported.
-	MinimumTimestamp *time.Time `yaml:"minimum_timestamp"`
-
-	// SessionID is the identifier that the response should use to match the request with the response.
-	SessionID string `yaml:"session_id"`
-}
 
 const (
 	snapshotCapability  = "com.bindplane.snapshot"
@@ -146,6 +125,7 @@ func (sp *snapshotProcessor) processSnapshotRequest(cm *protobufs.CustomMessage)
 	}
 
 	if req.Processor == sp.processorID {
+		// message is for a difference processor, skip.
 		return
 	}
 
