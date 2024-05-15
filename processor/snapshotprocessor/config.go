@@ -16,6 +16,8 @@
 package snapshotprocessor
 
 import (
+	"errors"
+
 	"go.opentelemetry.io/collector/component"
 )
 
@@ -28,16 +30,12 @@ type Config struct {
 	OpAMP   component.ID `mapstructure:"opamp"`
 }
 
-func (cfg Config) OpAMPExtensionID() component.ID {
-	var emptyID component.ID
-	if cfg.OpAMP != emptyID {
-		return cfg.OpAMP
-	}
-
-	return defaultOpAMPExtensionID
-}
-
 // Validate validates the processor configuration
 func (cfg Config) Validate() error {
+	var emptyID component.ID
+	if cfg.OpAMP != emptyID {
+		return errors.New("`opamp` must be specified")
+	}
+
 	return nil
 }

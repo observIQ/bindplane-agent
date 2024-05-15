@@ -64,7 +64,7 @@ func newSnapshotProcessor(logger *zap.Logger, cfg *Config, processorID component
 
 		enabled:          cfg.Enabled,
 		processorID:      processorID,
-		opampExtensionID: cfg.OpAMPExtensionID(),
+		opampExtensionID: cfg.OpAMP,
 
 		logBuffer:    NewLogBuffer(100),
 		metricBuffer: NewMetricBuffer(100),
