@@ -55,7 +55,8 @@ func createTracesProcessor(
 	nextConsumer consumer.Traces,
 ) (processor.Traces, error) {
 	oCfg := cfg.(*Config)
-	sp := newSnapshotProcessor(set.Logger, oCfg, set.ID)
+	sp := createOrGetProcessor(set, oCfg)
+
 	return processorhelper.NewTracesProcessor(
 		ctx,
 		set,
@@ -74,7 +75,8 @@ func createLogsProcessor(
 	nextConsumer consumer.Logs,
 ) (processor.Logs, error) {
 	oCfg := cfg.(*Config)
-	sp := newSnapshotProcessor(set.Logger, oCfg, set.ID)
+	sp := createOrGetProcessor(set, oCfg)
+
 	return processorhelper.NewLogsProcessor(
 		ctx,
 		set,
@@ -93,7 +95,8 @@ func createMetricsProcessor(
 	nextConsumer consumer.Metrics,
 ) (processor.Metrics, error) {
 	oCfg := cfg.(*Config)
-	sp := newSnapshotProcessor(set.Logger, oCfg, set.ID)
+	sp := createOrGetProcessor(set, oCfg)
+
 	return processorhelper.NewMetricsProcessor(
 		ctx,
 		set,
@@ -104,3 +107,20 @@ func createMetricsProcessor(
 		processorhelper.WithStart(sp.start),
 	)
 }
+
+func createOrGetProcessor(set processor.CreateSettings, cfg *Config) *snapshotProcessor {
+	var sp *snapshotProcessor
+	if p, ok := processors[set.ID]; ok {
+		sp = p
+	} else {
+		sp = newSnapshotProcessor(set.Logger, cfg, set.ID)
+		processors[set.ID] = sp
+	}
+
+	return sp
+}
+
+// processors is a map of component.ID to an instance of snapshot processor.
+// It is used so that only one instance of a particular snapshot processor exists, even if it's included
+// across multiple pipelines/signal types.
+var processors = map[component.ID]*snapshotProcessor{}
