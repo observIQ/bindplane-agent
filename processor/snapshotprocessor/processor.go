@@ -125,7 +125,7 @@ func (sp *snapshotProcessor) processSnapshotRequest(cm *protobufs.CustomMessage)
 		return
 	}
 
-	if req.Processor == sp.processorID {
+	if req.Processor != sp.processorID {
 		// // message is for a difference processor, skip.
 		// sp.logger.Info("processor ID did not match", zap.Stringer("request_id", req.Processor), zap.Stringer("processor_id", sp.processorID))
 		return
