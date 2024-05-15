@@ -105,6 +105,7 @@ func (sp *snapshotProcessor) processOpAMPMessages(o opampextension.CustomCapabil
 		case msg := <-o.Message():
 			switch msg.Type {
 			case snapshotRequestType:
+				sp.logger.Info("got snapshot request message")
 				sp.processSnapshotRequest(msg)
 			default:
 				sp.logger.Warn("Received message of unknown type.", zap.String("messageType", msg.Type))
@@ -126,6 +127,7 @@ func (sp *snapshotProcessor) processSnapshotRequest(cm *protobufs.CustomMessage)
 
 	if req.Processor == sp.processorID {
 		// message is for a difference processor, skip.
+		sp.logger.Info("processor ID did not mathc", zap.String("request_id", req.PipelineType), zap.Stringer("processor_id", sp.processorID))
 		return
 	}
 
@@ -162,6 +164,8 @@ func (sp *snapshotProcessor) processSnapshotRequest(cm *protobufs.CustomMessage)
 		sp.logger.Error("Invalid pipeline type in snapshot request.", zap.String("PipelineType", req.PipelineType))
 		return
 	}
+
+	sp.logger.Info("responding to report request", zap.String("session", req.SessionID))
 
 	response, err := json.Marshal(report)
 	if err != nil {
