@@ -126,10 +126,12 @@ func (sp *snapshotProcessor) processSnapshotRequest(cm *protobufs.CustomMessage)
 	}
 
 	if req.Processor == sp.processorID {
-		// message is for a difference processor, skip.
-		sp.logger.Info("processor ID did not mathc", zap.String("request_id", req.PipelineType), zap.Stringer("processor_id", sp.processorID))
+		// // message is for a difference processor, skip.
+		// sp.logger.Info("processor ID did not match", zap.Stringer("request_id", req.Processor), zap.Stringer("processor_id", sp.processorID))
 		return
 	}
+
+	sp.logger.Info("Processor ID on snapshot message matched", zap.Stringer("processor_id", req.Processor))
 
 	var report snapshotReport
 	switch req.PipelineType {
