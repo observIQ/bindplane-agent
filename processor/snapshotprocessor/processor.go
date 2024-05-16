@@ -22,7 +22,9 @@ import (
 	"errors"
 	"fmt"
 	"sync"
+	"sync/atomic"
 
+	"github.com/observiq/bindplane-agent/internal/report/snapshot"
 	"github.com/open-telemetry/opamp-go/client/types"
 	"github.com/open-telemetry/opamp-go/protobufs"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/extension/opampextension"
@@ -49,10 +51,12 @@ type snapshotProcessor struct {
 
 	customCapabilityHandler opampextension.CustomCapabilityHandler
 
-	logBuffer    *LogBuffer
-	metricBuffer *MetricBuffer
-	traceBuffer  *TraceBuffer
+	logBuffer    *snapshot.LogBuffer
+	metricBuffer *snapshot.MetricBuffer
+	traceBuffer  *snapshot.TraceBuffer
 
+	started  *atomic.Bool
+	stopped  *atomic.Bool
 	doneChan chan struct{}
 	wg       *sync.WaitGroup
 }
@@ -66,16 +70,23 @@ func newSnapshotProcessor(logger *zap.Logger, cfg *Config, processorID component
 		processorID:      processorID,
 		opampExtensionID: cfg.OpAMP,
 
-		logBuffer:    NewLogBuffer(100),
-		metricBuffer: NewMetricBuffer(100),
-		traceBuffer:  NewTraceBuffer(100),
+		logBuffer:    snapshot.NewLogBuffer(100),
+		metricBuffer: snapshot.NewMetricBuffer(100),
+		traceBuffer:  snapshot.NewTraceBuffer(100),
 
+		started:  &atomic.Bool{},
+		stopped:  &atomic.Bool{},
 		doneChan: make(chan struct{}),
 		wg:       &sync.WaitGroup{},
 	}
 }
 
 func (sp *snapshotProcessor) start(_ context.Context, host component.Host) error {
+	if sp.started.Swap(true) {
+		// Start logic should only be run once
+		return nil
+	}
+
 	ext, ok := host.GetExtensions()[sp.opampExtensionID]
 	if !ok {
 		return fmt.Errorf("opamp extension %q does not exist", sp.opampExtensionID)
@@ -230,6 +241,11 @@ func (sp *snapshotProcessor) processMetrics(_ context.Context, md pmetric.Metric
 }
 
 func (sp *snapshotProcessor) stop(ctx context.Context) error {
+	if sp.stopped.Swap(true) {
+		// Stop logic should only be run once
+		return nil
+	}
+
 	if sp.customCapabilityHandler != nil {
 		sp.customCapabilityHandler.Unregister()
 	}
