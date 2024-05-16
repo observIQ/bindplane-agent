@@ -33,7 +33,7 @@ type Config struct {
 // Validate validates the processor configuration
 func (cfg Config) Validate() error {
 	var emptyID component.ID
-	if cfg.OpAMP != emptyID {
+	if cfg.OpAMP == emptyID {
 		return errors.New("`opamp` must be specified")
 	}
 
