@@ -3,7 +3,7 @@ module github.com/observiq/bindplane-agent/processor/snapshotprocessor
 go 1.21.9
 
 require (
-	github.com/observiq/bindplane-agent v1.51.0
+	github.com/observiq/bindplane-agent/internal/report v1.52.0
 	github.com/open-telemetry/opamp-go v0.14.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/extension/opampextension v0.100.0
 	github.com/stretchr/testify v1.9.0
@@ -60,3 +60,5 @@ require (
 	google.golang.org/grpc v1.63.2 // indirect
 	google.golang.org/protobuf v1.34.1 // indirect
 )
+
+replace github.com/observiq/bindplane-agent/internal/report => ../../internal/report

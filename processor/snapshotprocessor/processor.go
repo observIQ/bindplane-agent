@@ -147,7 +147,7 @@ func (sp *snapshotProcessor) processSnapshotRequest(cm *protobufs.CustomMessage)
 	var report snapshotReport
 	switch req.PipelineType {
 	case "logs":
-		telemetryPayload, err := sp.logBuffer.ConstructPayload(req.SearchQuery, req.MinimumTimestamp)
+		telemetryPayload, err := sp.logBuffer.ConstructPayload(&plog.JSONMarshaler{}, req.SearchQuery, req.MinimumTimestamp)
 		if err != nil {
 			sp.logger.Error("Failed to construct snapshot payload.", zap.Error(err))
 			return
@@ -156,7 +156,7 @@ func (sp *snapshotProcessor) processSnapshotRequest(cm *protobufs.CustomMessage)
 		report = logsReport(req.SessionID, telemetryPayload)
 
 	case "metrics":
-		telemetryPayload, err := sp.metricBuffer.ConstructPayload(req.SearchQuery, req.MinimumTimestamp)
+		telemetryPayload, err := sp.metricBuffer.ConstructPayload(&pmetric.JSONMarshaler{}, req.SearchQuery, req.MinimumTimestamp)
 		if err != nil {
 			sp.logger.Error("Failed to metrics snapshot payload.", zap.Error(err))
 			return
@@ -165,7 +165,7 @@ func (sp *snapshotProcessor) processSnapshotRequest(cm *protobufs.CustomMessage)
 		report = metricsReport(req.SessionID, telemetryPayload)
 
 	case "traces":
-		telemetryPayload, err := sp.traceBuffer.ConstructPayload(req.SearchQuery, req.MinimumTimestamp)
+		telemetryPayload, err := sp.traceBuffer.ConstructPayload(&ptrace.JSONMarshaler{}, req.SearchQuery, req.MinimumTimestamp)
 		if err != nil {
 			sp.logger.Error("Failed to construct traces payload.", zap.Error(err))
 			return

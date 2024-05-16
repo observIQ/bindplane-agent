@@ -211,7 +211,7 @@ func (s *SnapshotReporter) prepRequestPayload(componentID, pipelineType string, 
 			return []byte{}, nil
 		}
 
-		payload, err = buffer.ConstructPayload(searchQuery, minimumTimestamp)
+		payload, err = buffer.ConstructPayload(&plog.ProtoMarshaler{}, searchQuery, minimumTimestamp)
 	case "metrics":
 		s.metricLock.Lock()
 		buffer, ok := s.metricBuffers[componentID]
@@ -220,7 +220,7 @@ func (s *SnapshotReporter) prepRequestPayload(componentID, pipelineType string, 
 			return []byte{}, nil
 		}
 
-		payload, err = buffer.ConstructPayload(searchQuery, minimumTimestamp)
+		payload, err = buffer.ConstructPayload(&pmetric.ProtoMarshaler{}, searchQuery, minimumTimestamp)
 	case "traces":
 		s.traceLock.Lock()
 		buffer, ok := s.traceBuffers[componentID]
@@ -229,7 +229,7 @@ func (s *SnapshotReporter) prepRequestPayload(componentID, pipelineType string, 
 			return []byte{}, nil
 		}
 
-		payload, err = buffer.ConstructPayload(searchQuery, minimumTimestamp)
+		payload, err = buffer.ConstructPayload(&ptrace.ProtoMarshaler{}, searchQuery, minimumTimestamp)
 	}
 
 	return
