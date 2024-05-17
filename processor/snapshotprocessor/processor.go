@@ -197,8 +197,6 @@ func (sp *snapshotProcessor) processSnapshotRequest(cm *protobufs.CustomMessage)
 		switch {
 		case err == nil: // Message is scheduled to send
 			sp.logger.Info("Message scheduled")
-			<-msgSendChan
-			sp.logger.Info("Message sent")
 			return
 
 		case errors.Is(err, types.ErrCustomMessagePending):
