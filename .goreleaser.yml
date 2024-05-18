@@ -16,6 +16,12 @@ builds:
       - windows
       - linux
       - darwin
+      - freebsd
+      - openbsd
+      - netbsd
+      - aix
+      - solaris
+      - illumos
     goarch:
       - amd64
       - arm64
@@ -34,6 +40,42 @@ builds:
       - goos: darwin
         goarch: ppc64
       - goos: darwin
+        goarch: ppc64le
+      - goos: netbsd
+        goarch: arm
+      - goos: netbsd
+        goarch: arm64
+      - goos: openbsd
+        goarch: arm
+      - goos: openbsd
+        goarch: arm64
+      - goos: openbsd
+        goarch: ppc64
+      - goos: openbsd
+        goarch: ppc64le
+      - goos: aix
+        goarch: arm64
+      - goos: aix
+        goarch: arm
+      - goos: aix
+        goarch: amd64
+      - goos: aix
+        goarch: ppc64le
+      - goos: solaris
+        goarch: arm
+      - goos: solaris
+        goarch: arm64
+      - goos: solaris
+        goarch: ppc64
+      - goos: solaris
+        goarch: ppc64le
+      - goos: illumos
+        goarch: arm
+      - goos: illumos
+        goarch: arm64
+      - goos: illumos
+        goarch: ppc64
+      - goos: illumos
         goarch: ppc64le
     ldflags:
       - -s -w
@@ -52,6 +94,12 @@ builds:
       - windows
       - linux
       - darwin
+      - freebsd
+      - openbsd
+      - netbsd
+      - aix
+      - solaris
+      - illumos
     goarch:
       - amd64
       - arm64
@@ -70,6 +118,46 @@ builds:
       - goos: darwin
         goarch: ppc64
       - goos: darwin
+        goarch: ppc64le
+      - goos: netbsd
+        goarch: arm
+      - goos: netbsd
+        goarch: arm64
+      - goos: netbsd
+        goarch: ppc64
+      - goos: netbsd
+        goarch: ppc64le
+      - goos: openbsd
+        goarch: arm
+      - goos: openbsd
+        goarch: arm64
+      - goos: openbsd
+        goarch: ppc64
+      - goos: openbsd
+        goarch: ppc64le
+      - goos: aix
+        goarch: arm64
+      - goos: aix
+        goarch: arm
+      - goos: aix
+        goarch: amd64
+      - goos: aix
+        goarch: ppc64le
+      - goos: solaris
+        goarch: arm
+      - goos: solaris
+        goarch: arm64
+      - goos: solaris
+        goarch: ppc64
+      - goos: solaris
+        goarch: ppc64le
+      - goos: illumos
+        goarch: arm
+      - goos: illumos
+        goarch: arm64
+      - goos: illumos
+        goarch: ppc64
+      - goos: illumos
         goarch: ppc64le
     ldflags:
       - -s -w
@@ -113,6 +201,9 @@ archives:
         strip_parent: true
       - src: release_deps/sysconfig/observiq-otel-collector
         dst: "install/sysconfig"
+        strip_parent: true
+      - src: release_deps/observiq-otel-collector.aix.env
+        dst: "install/observiq-otel-collector.aix.env"
         strip_parent: true
     format_overrides:
       - goos: windows
@@ -202,6 +293,8 @@ nfpms:
           mode: 0644
           owner: root
           group: root
+      # This file will be unused on modern systemd Linux or on AIX
+      # The postinstall.sh file removes this if it isn't needed
       - src: service/observiq-otel-collector
         dst: /etc/init.d/observiq-otel-collector
         type: config|noreplace
@@ -209,8 +302,19 @@ nfpms:
           mode: 0755
           owner: root
           group: root
+      # This file will be unused on older Linux using sysv/init.d/rc.d or on AIX
+      # The postinstall.sh file removes this if it isn't needed
       - src: service/sysconfig/observiq-otel-collector
         dst: /etc/sysconfig/observiq-otel-collector
+        type: config
+        file_info:
+          mode: 0644
+          owner: root
+          group: root
+      # This file will be unused if/until nfpm & goreleaser get updated to support AIX rpm files
+      # The postinstall.sh file removes this on Linux
+      - src: service/observiq-otel-collector.aix.env
+        dst: /etc/observiq-otel-collector.aix.env
         type: config
         file_info:
           mode: 0644

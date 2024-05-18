@@ -5,17 +5,18 @@ receivers:
   # the agent is running on every minute.
   # For more information on configuring the hostmetrics receiver, refer to the documentation here:
   # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/hostmetricsreceiver
-  hostmetrics:
-    collection_interval: 1m
-    scrapers:
-      # Theses scrapers work on all operating systems
-      load:
-      filesystem:
-      memory:
-      network:
-      # Remove these scrapers for macOS agents as they are not supported and will generate errors in the logs
-      cpu:
-      disk:
+  # hostmetrics:
+  #   collection_interval: 1m
+  #   scrapers:
+  #     # Theses scrapers work on all operating systems
+  #     load:
+  #     filesystem:
+  #     memory:
+  #     network:
+  #     # Remove these scrapers for macOS agents as they are not supported and will generate errors in the logs
+  #     cpu:
+  #     disk:
+  nop:
 
   # The syslog receiver; this configuration will listen on every network interface on port 514
   # for UDP syslog messages using the rfc3164 protocol.
@@ -33,7 +34,8 @@ processors:
   # a certain time has passed or if a certain number of entries have been aggregated.
   # For more information on configuring the batch processor, refer to the documentation here:
   # https://github.com/open-telemetry/opentelemetry-collector/tree/main/processor/batchprocessor
-  batch:
+  # batch:
+  nop:
 
 # 'exporters' specify configurations for certain exporters.
 # See the README for more information on the exporters available for configuration.
@@ -41,19 +43,27 @@ exporters:
   # The logging exporter; This exporter logs to stdout.
   # For more information on configuring the logging exporter, refer to the documentation here:
   # https://github.com/open-telemetry/opentelemetry-collector/tree/main/exporter/loggingexporter
-  logging:
-    verbosity: detailed
+  # logging:
+  #   verbosity: detailed
+  nop:
 
 # 'service' specifies how to construct the data pipelines using the configurations above.
 service:
+  telemetry:
+    metrics:
+      level: none
   pipelines:
     # 'metrics' specifies a metrics pipeline; metrics are scraped using the 'hostmetrics' receiver,
     # which are aggregated into batches by the 'batch' processor,
     # and are exported using the 'logging' exporter, printing the metrics to stdout.
+    #metrics:
+    #  receivers: [hostmetrics]
+    #  processors: [batch]
+    #  exporters: [logging]
     metrics:
-      receivers: [hostmetrics]
-      processors: [batch]
-      exporters: [logging]
+      receivers: [nop]
+      processors: [nop]
+      exporters: [nop]
 
     # `logs` specifies the logging pipeline; logs are received using the 'syslog' receiver,
     # which are then aggregated into batches by the 'batch' processor,
@@ -64,3 +74,7 @@ service:
     #   receivers: [syslog]
     #   processors: [batch]
     #   exporters: [logging]
+    logs:
+      receivers: [nop]
+      processors: [nop]
+      exporters: [nop]

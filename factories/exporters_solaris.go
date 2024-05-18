@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:build linux || darwin || windows
+//go:build solaris || illumos
 
 package factories
 
@@ -34,7 +34,6 @@ import (
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/carbonexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/clickhouseexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/coralogixexporter"
-	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/datadogexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/elasticsearchexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/fileexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlecloudpubsubexporter"
@@ -73,7 +72,7 @@ var defaultExporters = []exporter.Factory{
 	chronicleforwarderexporter.NewFactory(),
 	clickhouseexporter.NewFactory(),
 	coralogixexporter.NewFactory(),
-	datadogexporter.NewFactory(),
+	// datadogexporter.NewFactory(),
 	elasticsearchexporter.NewFactory(),
 	fileexporter.NewFactory(),
 	googlecloudexporter.NewFactory(version.Version()),

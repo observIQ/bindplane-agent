@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:build linux || darwin || windows
+//go:build aix
 
 package factories
 
@@ -27,31 +27,20 @@ import (
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/alibabacloudlogserviceexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/awscloudwatchlogsexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/awsemfexporter"
-	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/awskinesisexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/awss3exporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/awsxrayexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/azuremonitorexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/carbonexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/clickhouseexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/coralogixexporter"
-	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/datadogexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/elasticsearchexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/fileexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlecloudpubsubexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/influxdbexporter"
-	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/kafkaexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/loadbalancingexporter"
-	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/logzioexporter"
-	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/lokiexporter"
-	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/opencensusexporter"
-	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/prometheusexporter"
-	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/prometheusremotewriteexporter"
-	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/sapmexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/signalfxexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/splunkhecexporter"
-	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/sumologicexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/syslogexporter"
-	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/zipkinexporter"
 	"go.opentelemetry.io/collector/exporter"
 	"go.opentelemetry.io/collector/exporter/loggingexporter"
 	"go.opentelemetry.io/collector/exporter/nopexporter"
@@ -63,7 +52,7 @@ var defaultExporters = []exporter.Factory{
 	alibabacloudlogserviceexporter.NewFactory(),
 	awscloudwatchlogsexporter.NewFactory(),
 	awsemfexporter.NewFactory(),
-	awskinesisexporter.NewFactory(),
+	// awskinesisexporter.NewFactory(),
 	awss3exporter.NewFactory(),
 	awsxrayexporter.NewFactory(),
 	azureblobexporter.NewFactory(),
@@ -73,29 +62,29 @@ var defaultExporters = []exporter.Factory{
 	chronicleforwarderexporter.NewFactory(),
 	clickhouseexporter.NewFactory(),
 	coralogixexporter.NewFactory(),
-	datadogexporter.NewFactory(),
+	// datadogexporter.NewFactory(),
 	elasticsearchexporter.NewFactory(),
 	fileexporter.NewFactory(),
 	googlecloudexporter.NewFactory(version.Version()),
 	googlecloudpubsubexporter.NewFactory(),
 	googlemanagedprometheusexporter.NewFactory(version.Version()),
 	influxdbexporter.NewFactory(),
-	kafkaexporter.NewFactory(),
+	// kafkaexporter.NewFactory(),
 	loadbalancingexporter.NewFactory(),
 	loggingexporter.NewFactory(),
-	logzioexporter.NewFactory(),
-	lokiexporter.NewFactory(),
+	// logzioexporter.NewFactory(),
+	// lokiexporter.NewFactory(),
 	nopexporter.NewFactory(),
-	opencensusexporter.NewFactory(),
+	// opencensusexporter.NewFactory(),
 	otlpexporter.NewFactory(),
 	otlphttpexporter.NewFactory(),
-	prometheusexporter.NewFactory(),
-	prometheusremotewriteexporter.NewFactory(),
-	sapmexporter.NewFactory(),
+	// prometheusexporter.NewFactory(),
+	// prometheusremotewriteexporter.NewFactory(),
+	// sapmexporter.NewFactory(),
 	signalfxexporter.NewFactory(),
 	snowflakeexporter.NewFactory(),
 	splunkhecexporter.NewFactory(),
-	sumologicexporter.NewFactory(),
+	// sumologicexporter.NewFactory(),
 	syslogexporter.NewFactory(),
-	zipkinexporter.NewFactory(),
+	// zipkinexporter.NewFactory(),
 }

@@ -47,11 +47,47 @@ build-all: build-linux build-darwin build-windows
 .PHONY: build-linux
 build-linux: build-linux-amd64 build-linux-arm64 build-linux-arm build-linux-ppc64 build-linux-ppc64le
 
+.PHONY: build-unix
+build-unix: build-darwin build-bsd build-aix build-solaris build-illumos
+
+.PHONY: build-bsd
+build-bsd: build-freebsd build-openbsd build-netbsd
+
+.PHONY: build-aix
+build-aix: build-aix-ppc64
+
+.PHONY: build-solaris
+build-solaris: build-solaris-amd64
+
+.PHONY: build-illumos
+build-illumos: build-illumos-amd64
+
 .PHONY: build-darwin
 build-darwin: build-darwin-amd64 build-darwin-arm64
 
+.PHONY: build-freebsd
+build-freebsd: build-freebsd-amd64 build-freebsd-arm build-freebsd-arm64
+
+.PHONY: build-openbsd
+build-openbsd: build-openbsd-amd64 build-openbsd-arm build-openbsd-arm64
+
+.PHONY: build-netbsd
+build-netbsd: build-netbsd-amd64 build-netbsd-arm
+
 .PHONY: build-windows
 build-windows: build-windows-amd64
+
+.PHONY: build-aix-ppc64
+build-aix-ppc64:
+	GOOS=aix GOARCH=ppc64 $(MAKE) build-binaries -j2
+
+.PHONY: build-solaris-amd64
+build-solaris-amd64:
+	GOOS=solaris GOARCH=amd64 $(MAKE) build-binaries -j2
+
+.PHONY: build-illumos-amd64
+build-illumos-amd64:
+	GOOS=illumos GOARCH=amd64 $(MAKE) build-binaries -j2
 
 .PHONY: build-linux-ppc64
 build-linux-ppc64:
@@ -80,6 +116,38 @@ build-darwin-amd64:
 .PHONY: build-darwin-arm64
 build-darwin-arm64:
 	GOOS=darwin GOARCH=arm64 $(MAKE) build-binaries -j2
+
+.PHONY: build-freebsd-amd64
+build-freebsd-amd64:
+	GOOS=freebsd GOARCH=amd64 $(MAKE) build-binaries -j2
+
+.PHONY: build-freebsd-arm
+build-freebsd-arm:
+	GOOS=freebsd GOARCH=arm $(MAKE) build-binaries -j2
+
+.PHONY: build-freebsd-arm64
+build-freebsd-arm64:
+	GOOS=freebsd GOARCH=arm64 $(MAKE) build-binaries -j2
+
+.PHONY: build-openbsd-amd64
+build-openbsd-amd64:
+	GOOS=openbsd GOARCH=amd64 $(MAKE) build-binaries -j2
+
+.PHONY: build-openbsd-arm
+build-openbsd-arm:
+	GOOS=openbsd GOARCH=arm $(MAKE) build-binaries -j2
+
+.PHONY: build-openbsd-arm64
+build-openbsd-arm64:
+	GOOS=openbsd GOARCH=arm64 $(MAKE) build-binaries -j2
+
+.PHONY: build-netbsd-amd64
+build-netbsd-amd64:
+	GOOS=netbsd GOARCH=amd64 $(MAKE) build-binaries -j2
+
+.PHONY: build-netbsd-arm
+build-netbsd-arm:
+	GOOS=netbsd GOARCH=arm $(MAKE) build-binaries -j2
 
 .PHONY: build-windows-amd64
 build-windows-amd64:
@@ -212,6 +280,7 @@ release-prep:
 	@jq ".files[] | select(.service != null)" windows/wix.json >> release_deps/windows_service.json
 	@cp service/observiq-otel-collector.service release_deps/observiq-otel-collector.service
 	@cp service/observiq-otel-collector release_deps/observiq-otel-collector
+	@cp service/observiq-otel-collector.aix.env release_deps/observiq-otel-collector.aix.env
 	@cp -r ./service/sysconfig release_deps/
 
 # Build and sign, skip release and ignore dirty git tree

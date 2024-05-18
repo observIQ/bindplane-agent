@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:build linux || darwin || windows
+//go:build freebsd || openbsd || netbsd
 
 package factories
 
@@ -22,7 +22,6 @@ import (
 	"github.com/observiq/bindplane-agent/exporter/chronicleforwarderexporter"
 	"github.com/observiq/bindplane-agent/exporter/googlecloudexporter"
 	"github.com/observiq/bindplane-agent/exporter/googlemanagedprometheusexporter"
-	"github.com/observiq/bindplane-agent/exporter/snowflakeexporter"
 	"github.com/observiq/bindplane-agent/internal/version"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/alibabacloudlogserviceexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/awscloudwatchlogsexporter"
@@ -34,7 +33,6 @@ import (
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/carbonexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/clickhouseexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/coralogixexporter"
-	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/datadogexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/elasticsearchexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/fileexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlecloudpubsubexporter"
@@ -49,7 +47,6 @@ import (
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/sapmexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/signalfxexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/splunkhecexporter"
-	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/sumologicexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/syslogexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/zipkinexporter"
 	"go.opentelemetry.io/collector/exporter"
@@ -73,7 +70,7 @@ var defaultExporters = []exporter.Factory{
 	chronicleforwarderexporter.NewFactory(),
 	clickhouseexporter.NewFactory(),
 	coralogixexporter.NewFactory(),
-	datadogexporter.NewFactory(),
+	//datadogexporter.NewFactory(),
 	elasticsearchexporter.NewFactory(),
 	fileexporter.NewFactory(),
 	googlecloudexporter.NewFactory(version.Version()),
@@ -93,9 +90,8 @@ var defaultExporters = []exporter.Factory{
 	prometheusremotewriteexporter.NewFactory(),
 	sapmexporter.NewFactory(),
 	signalfxexporter.NewFactory(),
-	snowflakeexporter.NewFactory(),
 	splunkhecexporter.NewFactory(),
-	sumologicexporter.NewFactory(),
+	//sumologicexporter.NewFactory(),
 	syslogexporter.NewFactory(),
 	zipkinexporter.NewFactory(),
 }
