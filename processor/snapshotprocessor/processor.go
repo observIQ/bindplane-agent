@@ -215,7 +215,7 @@ func (sp *snapshotProcessor) processTraces(_ context.Context, td ptrace.Traces) 
 	if sp.enabled {
 		newTraces := ptrace.NewTraces()
 		td.CopyTo(newTraces)
-		sp.traceBuffer.Add(td)
+		sp.traceBuffer.Add(newTraces)
 	}
 
 	return td, nil
@@ -225,7 +225,7 @@ func (sp *snapshotProcessor) processLogs(_ context.Context, ld plog.Logs) (plog.
 	if sp.enabled {
 		newLogs := plog.NewLogs()
 		ld.CopyTo(newLogs)
-		sp.logBuffer.Add(ld)
+		sp.logBuffer.Add(newLogs)
 	}
 
 	return ld, nil
@@ -235,7 +235,7 @@ func (sp *snapshotProcessor) processMetrics(_ context.Context, md pmetric.Metric
 	if sp.enabled {
 		newMetrics := pmetric.NewMetrics()
 		md.CopyTo(newMetrics)
-		sp.metricBuffer.Add(md)
+		sp.metricBuffer.Add(newMetrics)
 	}
 
 	return md, nil
