@@ -16,6 +16,7 @@ package snapshotprocessor
 
 import (
 	"context"
+	"fmt"
 
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/consumer"
@@ -112,8 +113,10 @@ func createMetricsProcessor(
 func createOrGetProcessor(set processor.CreateSettings, cfg *Config) *snapshotProcessor {
 	var sp *snapshotProcessor
 	if p, ok := processors[set.ID]; ok {
+		fmt.Printf("Found other snapshot processor with ID: %q\n", set.ID)
 		sp = p
 	} else {
+		fmt.Printf("Creating snapshot processor with ID: %q\n", set.ID)
 		sp = newSnapshotProcessor(set.Logger, cfg, set.ID)
 		processors[set.ID] = sp
 	}
