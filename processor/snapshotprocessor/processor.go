@@ -247,6 +247,8 @@ func (sp *snapshotProcessor) stop(ctx context.Context) error {
 		return nil
 	}
 
+	delete(processors, sp.processorID)
+
 	if sp.customCapabilityHandler != nil {
 		sp.customCapabilityHandler.Unregister()
 	}
@@ -266,8 +268,6 @@ func (sp *snapshotProcessor) stop(ctx context.Context) error {
 	case <-ctx.Done():
 		return ctx.Err()
 	}
-
-	sp.doneChan = nil
 
 	return nil
 }
