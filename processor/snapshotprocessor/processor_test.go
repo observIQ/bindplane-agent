@@ -111,13 +111,13 @@ func TestProcess_Metrics(t *testing.T) {
 
 	require.Equal(t, "com.bindplane.snapshot", mockOpamp.capability)
 
-	l, err := golden.ReadMetrics(filepath.Join("testdata", "metrics", "before", "host-metrics.yaml"))
+	m, err := golden.ReadMetrics(filepath.Join("testdata", "metrics", "before", "host-metrics.yaml"))
 	require.NoError(t, err)
 
-	require.NoError(t, p.ConsumeMetrics(context.Background(), l))
+	require.NoError(t, p.ConsumeMetrics(context.Background(), m))
 
 	require.Equal(t, 1, len(sink.AllMetrics()))
-	require.Equal(t, l, sink.AllMetrics()[0])
+	require.Equal(t, m, sink.AllMetrics()[0])
 
 	// Request buffer
 	reqPayload := fmt.Sprintf(`{"processor":%q,"pipeline_type":"metrics","session_id":"my-session-id"}`, pSet.ID)
@@ -175,13 +175,13 @@ func TestProcess_Traces(t *testing.T) {
 
 	require.Equal(t, "com.bindplane.snapshot", mockOpamp.capability)
 
-	l, err := golden.ReadTraces(filepath.Join("testdata", "traces", "before", "bindplane-traces.yaml"))
+	tr, err := golden.ReadTraces(filepath.Join("testdata", "traces", "before", "bindplane-traces.yaml"))
 	require.NoError(t, err)
 
-	require.NoError(t, p.ConsumeTraces(context.Background(), l))
+	require.NoError(t, p.ConsumeTraces(context.Background(), tr))
 
 	require.Equal(t, 1, len(sink.AllTraces()))
-	require.Equal(t, l, sink.AllTraces()[0])
+	require.Equal(t, tr, sink.AllTraces()[0])
 
 	// Request buffer
 	reqPayload := fmt.Sprintf(`{"processor":%q,"pipeline_type":"traces","session_id":"my-session-id"}`, pSet.ID)
