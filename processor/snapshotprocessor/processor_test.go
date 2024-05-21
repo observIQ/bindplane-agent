@@ -47,7 +47,7 @@ func TestProcess_Logs(t *testing.T) {
 
 	require.Equal(t, "com.bindplane.snapshot", mockOpamp.capability)
 
-	l, err := golden.ReadLogs(filepath.Join("testdata", "logs", "before", "w3c-logs.yaml"))
+	l, err := golden.ReadLogs(filepath.Join("testdata", "logs", "w3c-logs.yaml"))
 	require.NoError(t, err)
 
 	require.NoError(t, p.ConsumeLogs(context.Background(), l))
@@ -111,7 +111,7 @@ func TestProcess_Metrics(t *testing.T) {
 
 	require.Equal(t, "com.bindplane.snapshot", mockOpamp.capability)
 
-	m, err := golden.ReadMetrics(filepath.Join("testdata", "metrics", "before", "host-metrics.yaml"))
+	m, err := golden.ReadMetrics(filepath.Join("testdata", "metrics", "host-metrics.yaml"))
 	require.NoError(t, err)
 
 	require.NoError(t, p.ConsumeMetrics(context.Background(), m))
@@ -175,7 +175,7 @@ func TestProcess_Traces(t *testing.T) {
 
 	require.Equal(t, "com.bindplane.snapshot", mockOpamp.capability)
 
-	tr, err := golden.ReadTraces(filepath.Join("testdata", "traces", "before", "bindplane-traces.yaml"))
+	tr, err := golden.ReadTraces(filepath.Join("testdata", "traces", "bindplane-traces.yaml"))
 	require.NoError(t, err)
 
 	require.NoError(t, p.ConsumeTraces(context.Background(), tr))
