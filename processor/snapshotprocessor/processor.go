@@ -116,7 +116,7 @@ func (sp *snapshotProcessor) processOpAMPMessages(o opampextension.CustomCapabil
 		case msg := <-o.Message():
 			switch msg.Type {
 			case snapshotRequestType:
-				sp.logger.Info("got snapshot request message")
+				sp.logger.Debug("got snapshot request message")
 				sp.processSnapshotRequest(msg)
 			default:
 				sp.logger.Warn("Received message of unknown type.", zap.String("messageType", msg.Type))
@@ -138,11 +138,10 @@ func (sp *snapshotProcessor) processSnapshotRequest(cm *protobufs.CustomMessage)
 
 	if req.Processor != sp.processorID {
 		// // message is for a difference processor, skip.
-		// sp.logger.Info("processor ID did not match", zap.Stringer("request_id", req.Processor), zap.Stringer("processor_id", sp.processorID))
 		return
 	}
 
-	sp.logger.Info("Processor ID on snapshot message matched", zap.Stringer("processor_id", req.Processor))
+	sp.logger.Debug("Processor ID on snapshot message matched", zap.Stringer("processor_id", req.Processor))
 
 	var report snapshotReport
 	switch req.PipelineType {
@@ -196,7 +195,7 @@ func (sp *snapshotProcessor) processSnapshotRequest(cm *protobufs.CustomMessage)
 		msgSendChan, err := sp.customCapabilityHandler.SendMessage(snapshotReportType, compressedResponse)
 		switch {
 		case err == nil: // Message is scheduled to send
-			sp.logger.Info("Message scheduled")
+			sp.logger.Debug("Message scheduled")
 			return
 
 		case errors.Is(err, types.ErrCustomMessagePending):
