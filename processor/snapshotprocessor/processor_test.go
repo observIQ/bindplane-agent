@@ -9,7 +9,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	"sync/atomic"
+	"sync"
 	"testing"
 	"time"
 
@@ -68,7 +68,7 @@ func TestProcess_Logs(t *testing.T) {
 
 	// Wait for response
 	require.Eventually(t, func() bool {
-		return mockOpamp.gotMessage.Load()
+		return mockOpamp.GotMessage()
 	}, 5*time.Second, 100*time.Millisecond)
 
 	by, err := os.ReadFile(filepath.Join("testdata", "snapshot", "logs-report.json"))
@@ -132,7 +132,7 @@ func TestProcess_Metrics(t *testing.T) {
 
 	// Wait for response
 	require.Eventually(t, func() bool {
-		return mockOpamp.gotMessage.Load()
+		return mockOpamp.GotMessage()
 	}, 5*time.Second, 100*time.Millisecond)
 
 	by, err := os.ReadFile(filepath.Join("testdata", "snapshot", "metrics-report.json"))
@@ -196,7 +196,7 @@ func TestProcess_Traces(t *testing.T) {
 
 	// Wait for response
 	require.Eventually(t, func() bool {
-		return mockOpamp.gotMessage.Load()
+		return mockOpamp.GotMessage()
 	}, 5*time.Second, 100*time.Millisecond)
 
 	by, err := os.ReadFile(filepath.Join("testdata", "snapshot", "traces-report.json"))
@@ -228,10 +228,12 @@ func (nh *mockHost) GetExtensions() map[component.ID]component.Component {
 }
 
 type mockOpAMPExtension struct {
-	msgChan    chan *protobufs.CustomMessage
-	gotMessage atomic.Bool
+	msgChan chan *protobufs.CustomMessage
 
-	capability      string
+	capability string
+
+	gotMessageMux   sync.Mutex
+	gotMessage      bool
 	sentMessageType string
 	sentMessage     []byte
 }
@@ -254,13 +256,24 @@ func (m *mockOpAMPExtension) Message() <-chan *protobufs.CustomMessage {
 }
 
 func (m *mockOpAMPExtension) SendMessage(messageType string, message []byte) (messageSendingChannel chan struct{}, err error) {
-	if m.gotMessage.Swap(true) {
+	m.gotMessageMux.Lock()
+	defer m.gotMessageMux.Unlock()
+
+	if m.gotMessage {
 		return
 	}
+	m.gotMessage = true
 
 	m.sentMessageType = messageType
 	m.sentMessage = message
 	return
+}
+
+func (m *mockOpAMPExtension) GotMessage() bool {
+	m.gotMessageMux.Lock()
+	defer m.gotMessageMux.Unlock()
+
+	return m.gotMessage
 }
 
 func (m *mockOpAMPExtension) Unregister() {}
