@@ -237,14 +237,14 @@ type mockOpAMPExtension struct {
 }
 
 // Start implements component.Component::Start
-func (m *mockOpAMPExtension) Start(ctx context.Context, host component.Host) error {
+func (m *mockOpAMPExtension) Start(_ context.Context, _ component.Host) error {
 	return nil
 }
 
 // Shutdown implements component.Component::Shutdown
-func (m *mockOpAMPExtension) Shutdown(ctx context.Context) error { return nil }
+func (m *mockOpAMPExtension) Shutdown(_ context.Context) error { return nil }
 
-func (m *mockOpAMPExtension) Register(capability string, opts ...opampextension.CustomCapabilityRegisterOption) (handler opampextension.CustomCapabilityHandler, err error) {
+func (m *mockOpAMPExtension) Register(capability string, _ ...opampextension.CustomCapabilityRegisterOption) (handler opampextension.CustomCapabilityHandler, err error) {
 	m.capability = capability
 	return m, nil
 }

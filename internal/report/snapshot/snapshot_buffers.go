@@ -86,6 +86,7 @@ func (l *LogBuffer) Add(ld plog.Logs) {
 	}
 }
 
+// LogsMarshaller marshals logs to a byte representation
 type LogsMarshaller interface {
 	MarshalLogs(ld plog.Logs) ([]byte, error)
 }
@@ -176,6 +177,7 @@ func (l *MetricBuffer) Add(md pmetric.Metrics) {
 	}
 }
 
+// MetricsMarshaller marshals metrics to a byte representation
 type MetricsMarshaller interface {
 	MarshalMetrics(md pmetric.Metrics) ([]byte, error)
 }
@@ -266,6 +268,7 @@ func (l *TraceBuffer) Add(td ptrace.Traces) {
 	}
 }
 
+// TracesMarshaller marshals traces to a byte representation
 type TracesMarshaller interface {
 	MarshalTraces(md ptrace.Traces) ([]byte, error)
 }
