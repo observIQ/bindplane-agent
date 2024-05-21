@@ -28,6 +28,7 @@ func TestNewFactory(t *testing.T) {
 
 	expectedCfg := &Config{
 		Enabled: true,
+		OpAMP:   defaultOpAMPExtensionID,
 	}
 
 	cfg, ok := factory.CreateDefaultConfig().(*Config)

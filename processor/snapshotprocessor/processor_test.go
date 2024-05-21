@@ -19,8 +19,6 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/consumer/consumertest"
-	"go.opentelemetry.io/collector/pdata/pmetric"
-	"go.opentelemetry.io/collector/pdata/ptrace"
 	"go.opentelemetry.io/collector/processor/processortest"
 )
 
@@ -72,20 +70,6 @@ func TestProcess_Logs(t *testing.T) {
 	require.Eventually(t, func() bool {
 		return mockOpamp.gotMessage.Load()
 	}, 5*time.Second, 100*time.Millisecond)
-
-	// TEMP: Write golden file
-	// jsonLogs, err := (&plog.JSONMarshaler{}).MarshalLogs(l)
-	// require.NoError(t, err)
-
-	// sr := snapshotReport{
-	// 	SessionID:        "my-session-id",
-	// 	TelemetryType:    "logs",
-	// 	TelemetryPayload: jsonLogs,
-	// }
-
-	// srJson, err := json.Marshal(sr)
-	// err = os.WriteFile(filepath.Join("testdata", "snapshot", "logs-report.json"), srJson, 0666)
-	// require.NoError(t, err)
 
 	by, err := os.ReadFile(filepath.Join("testdata", "snapshot", "logs-report.json"))
 	require.NoError(t, err)
@@ -151,21 +135,6 @@ func TestProcess_Metrics(t *testing.T) {
 		return mockOpamp.gotMessage.Load()
 	}, 5*time.Second, 100*time.Millisecond)
 
-	// TEMP: Write golden file
-	jsonLogs, err := (&pmetric.JSONMarshaler{}).MarshalMetrics(l)
-	require.NoError(t, err)
-
-	sr := snapshotReport{
-		SessionID:        "my-session-id",
-		TelemetryType:    "metrics",
-		TelemetryPayload: jsonLogs,
-	}
-
-	srJson, err := json.Marshal(sr)
-	require.NoError(t, err)
-	err = os.WriteFile(filepath.Join("testdata", "snapshot", "metrics-report.json"), srJson, 0666)
-	require.NoError(t, err)
-
 	by, err := os.ReadFile(filepath.Join("testdata", "snapshot", "metrics-report.json"))
 	require.NoError(t, err)
 
@@ -229,21 +198,6 @@ func TestProcess_Traces(t *testing.T) {
 	require.Eventually(t, func() bool {
 		return mockOpamp.gotMessage.Load()
 	}, 5*time.Second, 100*time.Millisecond)
-
-	// TEMP: Write golden file
-	jsonLogs, err := (&ptrace.JSONMarshaler{}).MarshalTraces(l)
-	require.NoError(t, err)
-
-	sr := snapshotReport{
-		SessionID:        "my-session-id",
-		TelemetryType:    "traces",
-		TelemetryPayload: jsonLogs,
-	}
-
-	srJson, err := json.Marshal(sr)
-	require.NoError(t, err)
-	err = os.WriteFile(filepath.Join("testdata", "snapshot", "traces-report.json"), srJson, 0666)
-	require.NoError(t, err)
 
 	by, err := os.ReadFile(filepath.Join("testdata", "snapshot", "traces-report.json"))
 	require.NoError(t, err)

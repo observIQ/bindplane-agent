@@ -158,7 +158,7 @@ func (sp *snapshotProcessor) processSnapshotRequest(cm *protobufs.CustomMessage)
 	case "metrics":
 		telemetryPayload, err := sp.metricBuffer.ConstructPayload(&pmetric.JSONMarshaler{}, req.SearchQuery, req.MinimumTimestamp)
 		if err != nil {
-			sp.logger.Error("Failed to metrics snapshot payload.", zap.Error(err))
+			sp.logger.Error("Failed to construct metrics snapshot payload.", zap.Error(err))
 			return
 		}
 
