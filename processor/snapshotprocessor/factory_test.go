@@ -18,6 +18,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"go.opentelemetry.io/collector/component"
+	"go.opentelemetry.io/collector/processor/processortest"
 )
 
 func TestNewFactory(t *testing.T) {
@@ -31,4 +33,21 @@ func TestNewFactory(t *testing.T) {
 	cfg, ok := factory.CreateDefaultConfig().(*Config)
 	require.True(t, ok)
 	require.Equal(t, expectedCfg, cfg)
+}
+
+func TestCreateOrGetProcessorProcessor(t *testing.T) {
+	p1Settings := processortest.NewNopCreateSettings()
+	p1Settings.ID = component.MustNewIDWithName(componentType.String(), "proc1")
+
+	p1 := createOrGetProcessor(p1Settings, createDefaultConfig().(*Config))
+	p1Copy := createOrGetProcessor(p1Settings, createDefaultConfig().(*Config))
+
+	// p1 and p1Copy should be the same pointer
+	require.True(t, p1 == p1Copy, "p1 and p1Copy are not the same pointer")
+
+	p2Settings := processortest.NewNopCreateSettings()
+	p2Settings.ID = component.MustNewIDWithName(componentType.String(), "proc2")
+
+	p2 := createOrGetProcessor(p2Settings, createDefaultConfig().(*Config))
+	require.True(t, p2 != p1, "p2 and p1 are the same, but they should be different objects")
 }

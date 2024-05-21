@@ -17,9 +17,22 @@ package snapshotprocessor
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"go.opentelemetry.io/collector/component"
 )
 
 func TestConfigValidate(t *testing.T) {
-	assert.NoError(t, Config{}.Validate())
+	t.Run("Default config is valid", func(t *testing.T) {
+		err := createDefaultConfig().(*Config).Validate()
+		require.NoError(t, err)
+	})
+
+	t.Run("OpAMP ID must be specified", func(t *testing.T) {
+		var emptyID component.ID
+
+		cfg := createDefaultConfig().(*Config)
+		cfg.OpAMP = emptyID
+
+		require.ErrorContains(t, cfg.Validate(), "`opamp` must be specified")
+	})
 }
