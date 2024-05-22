@@ -9,8 +9,8 @@ The snapshot processor is used in custom distributions of the collector to provi
 
 ## How it works
 
-1. The user configured the processor in the pipeline.
-2. Whenever telemetry passes through the pipeline, it is copied and stored temporarily in an internal buffer.
+1. The user configures the processor in one or more pipelines.
+2. Whenever telemetry passes through the processor, it is copied and stored temporarily in an internal buffer.
 3. An OpAMP server is able to use a custom message to request the contents of the internal buffer, in order to view a snapshot of the telemetry flowing through the collector.
 
 ## Configuration
@@ -18,7 +18,7 @@ The snapshot processor is used in custom distributions of the collector to provi
 | Field   | Type   | Default | Required | Description                                                            |
 |---------|--------|---------|----------|------------------------------------------------------------------------|
 | enabled | bool   | `true`  | `false`  | Whether the snapshot processor is enabled or not.                      |
-| opamp   | string | `opamp` | `false`  | Specifies the name of the opamp extension for sending custom messages. |
+| opamp   | string | `opamp` | `true`   | Specifies the name of the opamp extension for sending custom messages. |
 
 
 ## Examples
