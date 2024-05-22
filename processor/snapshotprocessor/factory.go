@@ -16,6 +16,7 @@ package snapshotprocessor
 
 import (
 	"context"
+	"sync"
 
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/consumer"
@@ -110,6 +111,9 @@ func createMetricsProcessor(
 }
 
 func createOrGetProcessor(set processor.CreateSettings, cfg *Config) *snapshotProcessor {
+	processorsMux.Lock()
+	defer processorsMux.Unlock()
+
 	var sp *snapshotProcessor
 	if p, ok := processors[set.ID]; ok {
 		sp = p
@@ -121,7 +125,14 @@ func createOrGetProcessor(set processor.CreateSettings, cfg *Config) *snapshotPr
 	return sp
 }
 
+func unregisterProcessor(id component.ID) {
+	processorsMux.Lock()
+	defer processorsMux.Unlock()
+	delete(processors, id)
+}
+
 // processors is a map of component.ID to an instance of snapshot processor.
 // It is used so that only one instance of a particular snapshot processor exists, even if it's included
 // across multiple pipelines/signal types.
 var processors = map[component.ID]*snapshotProcessor{}
+var processorsMux = sync.Mutex{}
