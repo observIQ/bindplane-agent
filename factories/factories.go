@@ -16,10 +16,6 @@
 package factories
 
 import (
-	"fmt"
-
-	"github.com/observiq/bindplane-agent/internal/throughputwrapper"
-	"github.com/observiq/bindplane-agent/processor/throughputmeasurementprocessor"
 	"go.opentelemetry.io/collector/connector"
 	"go.opentelemetry.io/collector/exporter"
 	"go.opentelemetry.io/collector/extension"
@@ -34,19 +30,6 @@ func DefaultFactories() (otelcol.Factories, error) {
 	return combineFactories(defaultReceivers, defaultProcessors, defaultExporters, defaultExtensions, defaultConnectors)
 }
 
-// RegisterComponentTelemetry registers or re-registers components with telemetry so that any stale metrics are cleaned out.
-func RegisterComponentTelemetry() error {
-	if err := throughputmeasurementprocessor.RegisterMetricViews(); err != nil {
-		return fmt.Errorf("failed to register throughput measurement processor telemetry: %w", err)
-	}
-
-	if err := throughputwrapper.RegisterMetricViews(); err != nil {
-		return fmt.Errorf("failed to register throughput wrapper telemetry: %w", err)
-	}
-
-	return nil
-}
-
 // combineFactories combines the supplied factories into a single Factories struct.
 // Any errors encountered will also be combined into a single error.
 func combineFactories(receivers []receiver.Factory, processors []processor.Factory,
@@ -54,12 +37,7 @@ func combineFactories(receivers []receiver.Factory, processors []processor.Facto
 	connectors []connector.Factory) (otelcol.Factories, error) {
 	var errs []error
 
-	// Ensure component telemetry is registered at least once by having it in  this method
-	if err := RegisterComponentTelemetry(); err != nil {
-		errs = append(errs, err)
-	}
-
-	receiverMap, err := receiver.MakeFactoryMap(wrapReceivers(receivers)...)
+	receiverMap, err := receiver.MakeFactoryMap(receivers...)
 	if err != nil {
 		errs = append(errs, err)
 	}
@@ -91,14 +69,4 @@ func combineFactories(receivers []receiver.Factory, processors []processor.Facto
 		Extensions: extensionMap,
 		Connectors: connectorMap,
 	}, multierr.Combine(errs...)
-}
-
-func wrapReceivers(receivers []receiver.Factory) []receiver.Factory {
-	wrappedReceivers := make([]receiver.Factory, len(defaultReceivers))
-
-	for i, recv := range receivers {
-		wrappedReceivers[i] = throughputwrapper.WrapReceiverFactory(recv)
-	}
-
-	return wrappedReceivers
 }
