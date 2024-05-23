@@ -37,5 +37,7 @@ func defaultConfig() component.Config {
 }
 
 func createBindPlaneExtension(_ context.Context, _ extension.Settings, _ component.Config) (extension.Extension, error) {
-	return bindplaneExtension{}, nil
+	oCfg := cfg.(*Config)
+
+	return newBindplaneExtension(oCfg), nil
 }

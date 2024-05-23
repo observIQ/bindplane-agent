@@ -14,7 +14,13 @@
 
 package bindplaneextension
 
+import "go.opentelemetry.io/collector/component"
+
 // Config is the configuration for the bindplane extension
 type Config struct {
+	// Labels in "k1=v1,k2=v2" format
 	Labels string `mapstructure:"labels"`
+	// Component ID of the opamp extension. If not specified, then
+	// this extension will not generate any custom messages for throughput metrics.
+	OpAMP component.ID `mapstructure:"opamp"`
 }
