@@ -23,14 +23,18 @@ import (
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.opentelemetry.io/collector/pdata/ptrace"
 	"go.opentelemetry.io/collector/processor/processorhelper"
+	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/metric"
 	"go.uber.org/zap"
 )
+
+const processorAttributeName = "processor"
 
 type throughputMeasurementProcessor struct {
 	logger                              *zap.Logger
 	enabled                             bool
 	samplingCutOffRatio                 float64
+	attrSet                             attribute.Set
 	logSize, metricSize, traceSize      metric.Int64Counter
 	logCount, datapointCount, spanCount metric.Int64Counter
 	tracesSizer                         ptrace.Sizer
@@ -41,7 +45,6 @@ type throughputMeasurementProcessor struct {
 func newThroughputMeasurementProcessor(logger *zap.Logger, mp metric.MeterProvider, cfg *Config, processorID string) (*throughputMeasurementProcessor, error) {
 	meter := mp.Meter("github.com/observiq/bindplane-agent/processor/throughputmeasurementprocessor")
 
-	// TODO: Add attributes, desc, units
 	logSize, err := meter.Int64Counter(
 		processorhelper.BuildCustomMetricName(componentType.String(), "log_data_size"),
 		metric.WithDescription("Size of the log package passed to the processor"),
@@ -106,6 +109,7 @@ func newThroughputMeasurementProcessor(logger *zap.Logger, mp metric.MeterProvid
 		logCount:            logCount,
 		datapointCount:      datapointCount,
 		spanCount:           spanCount,
+		attrSet:             attribute.NewSet(attribute.String(processorAttributeName, processorID)),
 		tracesSizer:         &ptrace.ProtoMarshaler{},
 		metricsSizer:        &pmetric.ProtoMarshaler{},
 		logsSizer:           &plog.ProtoMarshaler{},
@@ -116,8 +120,8 @@ func (tmp *throughputMeasurementProcessor) processTraces(ctx context.Context, td
 	if tmp.enabled {
 		//#nosec G404 -- randomly generated number is not used for security purposes. It's ok if it's weak
 		if rand.Float64() <= tmp.samplingCutOffRatio {
-			tmp.traceSize.Add(ctx, int64(tmp.tracesSizer.TracesSize(td)))
-			tmp.spanCount.Add(ctx, int64(td.SpanCount()))
+			tmp.traceSize.Add(ctx, int64(tmp.tracesSizer.TracesSize(td)), metric.WithAttributeSet(tmp.attrSet))
+			tmp.spanCount.Add(ctx, int64(td.SpanCount()), metric.WithAttributeSet(tmp.attrSet))
 		}
 	}
 
@@ -128,8 +132,8 @@ func (tmp *throughputMeasurementProcessor) processLogs(ctx context.Context, ld p
 	if tmp.enabled {
 		//#nosec G404 -- randomly generated number is not used for security purposes. It's ok if it's weak
 		if rand.Float64() <= tmp.samplingCutOffRatio {
-			tmp.traceSize.Add(ctx, int64(tmp.logsSizer.LogsSize(ld)))
-			tmp.spanCount.Add(ctx, int64(ld.LogRecordCount()))
+			tmp.logSize.Add(ctx, int64(tmp.logsSizer.LogsSize(ld)), metric.WithAttributeSet(tmp.attrSet))
+			tmp.logCount.Add(ctx, int64(ld.LogRecordCount()), metric.WithAttributeSet(tmp.attrSet))
 		}
 	}
 
@@ -140,8 +144,8 @@ func (tmp *throughputMeasurementProcessor) processMetrics(ctx context.Context, m
 	if tmp.enabled {
 		//#nosec G404 -- randomly generated number is not used for security purposes. It's ok if it's weak
 		if rand.Float64() <= tmp.samplingCutOffRatio {
-			tmp.traceSize.Add(ctx, int64(tmp.metricsSizer.MetricsSize(md)))
-			tmp.spanCount.Add(ctx, int64(md.DataPointCount()))
+			tmp.metricSize.Add(ctx, int64(tmp.metricsSizer.MetricsSize(md)), metric.WithAttributeSet(tmp.attrSet))
+			tmp.datapointCount.Add(ctx, int64(md.DataPointCount()), metric.WithAttributeSet(tmp.attrSet))
 		}
 	}
 
