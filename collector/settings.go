@@ -35,12 +35,11 @@ func NewSettings(configPaths []string, version string, loggingOpts []zap.Option,
 		Version:     version,
 	}
 
-	fmp := fileprovider.NewWithSettings(confmap.ProviderSettings{})
 	configProviderSettings := otelcol.ConfigProviderSettings{
 		ResolverSettings: confmap.ResolverSettings{
-			URIs:       configPaths,
-			Providers:  map[string]confmap.Provider{fmp.Scheme(): fmp},
-			Converters: []confmap.Converter{expandconverter.New(confmap.ConverterSettings{})},
+			URIs:               configPaths,
+			ProviderFactories:  []confmap.ProviderFactory{fileprovider.NewFactory()},
+			ConverterFactories: []confmap.ConverterFactory{expandconverter.NewFactory()},
 		},
 	}
 	provider, err := otelcol.NewConfigProvider(configProviderSettings)
