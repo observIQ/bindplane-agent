@@ -6,11 +6,11 @@ require (
 	github.com/observiq/bindplane-agent/internal/report v1.52.0
 	github.com/open-telemetry/opamp-go v0.14.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/extension/opampextension v0.100.0
-	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden v0.100.0
+	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden v0.101.0
 	github.com/stretchr/testify v1.9.0
 	go.opentelemetry.io/collector/component v0.100.0
 	go.opentelemetry.io/collector/consumer v0.100.0
-	go.opentelemetry.io/collector/pdata v1.7.0
+	go.opentelemetry.io/collector/pdata v1.8.0
 	go.opentelemetry.io/collector/processor v0.100.0
 	go.uber.org/zap v1.27.0
 	gopkg.in/yaml.v3 v3.0.1
@@ -39,7 +39,7 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/oklog/ulid/v2 v2.1.0 // indirect
-	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatautil v0.100.0 // indirect
+	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatautil v0.101.0 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/power-devops/perfstat v0.0.0-20220216144756-c35f1ee13d7c // indirect
 	github.com/prometheus/client_golang v1.19.0 // indirect

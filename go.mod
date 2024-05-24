@@ -11,6 +11,7 @@ require (
 	github.com/observiq/bindplane-agent/exporter/googlecloudexporter v1.54.0
 	github.com/observiq/bindplane-agent/exporter/googlemanagedprometheusexporter v1.54.0
 	github.com/observiq/bindplane-agent/exporter/snowflakeexporter v1.54.0
+	github.com/observiq/bindplane-agent/internal/report v0.0.0-00010101000000-000000000000
 	github.com/observiq/bindplane-agent/packagestate v1.54.0
 	github.com/observiq/bindplane-agent/processor/datapointcountprocessor v1.54.0
 	github.com/observiq/bindplane-agent/processor/logcountprocessor v1.54.0
@@ -73,8 +74,6 @@ require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/extension/pprofextension v0.102.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/extension/sigv4authextension v0.102.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/extension/storage/filestorage v0.102.0
-	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden v0.102.0
-	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest v0.102.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/processor/attributesprocessor v0.102.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/processor/cumulativetodeltaprocessor v0.102.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/processor/deltatorateprocessor v0.102.0
