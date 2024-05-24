@@ -28,7 +28,7 @@ import (
 	"time"
 
 	"github.com/open-telemetry/opamp-go/protobufs"
-	"github.com/open-telemetry/opentelemetry-collector-contrib/extension/opampextension"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/extension/opampcustommessages"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/component"
@@ -260,7 +260,7 @@ func (m *mockOpAMPExtension) Start(_ context.Context, _ component.Host) error {
 // Shutdown implements component.Component::Shutdown
 func (m *mockOpAMPExtension) Shutdown(_ context.Context) error { return nil }
 
-func (m *mockOpAMPExtension) Register(capability string, _ ...opampextension.CustomCapabilityRegisterOption) (handler opampextension.CustomCapabilityHandler, err error) {
+func (m *mockOpAMPExtension) Register(capability string, _ ...opampcustommessages.CustomCapabilityRegisterOption) (handler opampcustommessages.CustomCapabilityHandler, err error) {
 	m.capability = capability
 	return m, nil
 }

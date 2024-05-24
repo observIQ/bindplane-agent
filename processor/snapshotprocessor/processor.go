@@ -27,7 +27,7 @@ import (
 	"github.com/observiq/bindplane-agent/internal/report/snapshot"
 	"github.com/open-telemetry/opamp-go/client/types"
 	"github.com/open-telemetry/opamp-go/protobufs"
-	"github.com/open-telemetry/opentelemetry-collector-contrib/extension/opampextension"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/extension/opampcustommessages"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/pdata/plog"
 	"go.opentelemetry.io/collector/pdata/pmetric"
@@ -49,7 +49,7 @@ type snapshotProcessor struct {
 	enabled          bool
 	opampExtensionID component.ID
 
-	customCapabilityHandler opampextension.CustomCapabilityHandler
+	customCapabilityHandler opampcustommessages.CustomCapabilityHandler
 
 	logBuffer    *snapshot.LogBuffer
 	metricBuffer *snapshot.MetricBuffer
@@ -92,7 +92,7 @@ func (sp *snapshotProcessor) start(_ context.Context, host component.Host) error
 		return fmt.Errorf("opamp extension %q does not exist", sp.opampExtensionID)
 	}
 
-	registry, ok := ext.(opampextension.CustomCapabilityRegistry)
+	registry, ok := ext.(opampcustommessages.CustomCapabilityRegistry)
 	if !ok {
 		return fmt.Errorf("extension %q is not an custom message registry", sp.opampExtensionID)
 	}
@@ -109,7 +109,7 @@ func (sp *snapshotProcessor) start(_ context.Context, host component.Host) error
 	return nil
 }
 
-func (sp *snapshotProcessor) processOpAMPMessages(o opampextension.CustomCapabilityHandler) {
+func (sp *snapshotProcessor) processOpAMPMessages(o opampcustommessages.CustomCapabilityHandler) {
 	defer sp.wg.Done()
 	for {
 		select {
