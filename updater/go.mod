@@ -4,7 +4,7 @@ go 1.21.9
 
 require (
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51
-	github.com/observiq/bindplane-agent/packagestate v1.52.0
+	github.com/observiq/bindplane-agent/packagestate v1.53.0
 	github.com/open-telemetry/opamp-go v0.9.0
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.9.0
