@@ -521,6 +521,7 @@ install_package()
   if [ ! -f "$INSTALL_DIR/config.yaml" ]; then
     info "Copying default config.yaml..."
     cp "$TMP_DIR/artifacts/config.yaml" "$INSTALL_DIR/config.yaml" || error_exit "$LINENO" "Failed to copy default config.yaml to install dir"
+    chmod 0600 "$INSTALL_DIR/config.yaml" || error_exit "$LINENO" "Failed to change permissions of config.yaml"
     succeeded
   fi
 
@@ -571,6 +572,13 @@ create_manager_yml()
   manager_yml_path="$1"
   if [ ! -f "$manager_yml_path" ]; then
     info "Creating manager yaml..."
+
+    # Note here: We create the file and change permissions of the file here BEFORE writing info to it
+    # We do this because the file may contain a secret key, so we want 0 window when the
+    # file is readable by anyone other than root
+    command printf '' >> "$manager_yml_path"
+    chmod 0600 "$manager_yml_path"
+
     command printf 'endpoint: "%s"\n' "$OPAMP_ENDPOINT" > "$manager_yml_path"
     [ -n "$OPAMP_LABELS" ] && command printf 'labels: "%s"\n' "$OPAMP_LABELS" >> "$manager_yml_path"
     [ -n "$OPAMP_SECRET_KEY" ] && command printf 'secret_key: "%s"\n' "$OPAMP_SECRET_KEY" >> "$manager_yml_path"
