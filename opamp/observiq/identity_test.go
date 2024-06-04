@@ -19,14 +19,21 @@ import (
 	"testing"
 
 	"github.com/observiq/bindplane-agent/opamp"
-	"github.com/oklog/ulid/v2"
 	"github.com/open-telemetry/opamp-go/protobufs"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 )
 
-var testAgentID = opamp.AgentID(ulid.MustParse("01HX2DWEQZ045KQR3VG0EYEZ94"))
+// Must is a helper function for tests that panics if there is an error creating the object of type T
+func Must[T any](t T, err error) T {
+	if err != nil {
+		panic(err)
+	}
+	return t
+}
+
+var testAgentID = Must(opamp.ParseAgentID("01HX2DWEQZ045KQR3VG0EYEZ94"))
 
 func Test_newIdentity(t *testing.T) {
 	secretKeyContents := "b92222ee-a1fc-4bb1-98db-26de3448541b"
