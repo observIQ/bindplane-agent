@@ -29,6 +29,14 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+// Must is a helper function for tests that panics if there is an error creating the object of type T
+func Must[T any](t T, err error) T {
+	if err != nil {
+		panic(err)
+	}
+	return t
+}
+
 func TestGetDefaultCollectorConfigPathENV(t *testing.T) {
 	fakeConfigPath := "./fake/path/config.yaml"
 
@@ -112,7 +120,7 @@ func TestCheckManagerConfigNoFile(t *testing.T) {
 	actual, _ := opamp.ParseConfig(manager)
 	expected := &opamp.Config{
 		Endpoint:  "0.0.0.0",
-		AgentID:   opamp.AgentID(ulid.MustParse("01HX2DWEQZ045KQR3VG0EYEZ94")),
+		AgentID:   Must(opamp.ParseAgentID("01HX2DWEQZ045KQR3VG0EYEZ94")),
 		AgentName: new(string),
 		SecretKey: new(string),
 		Labels:    new(string),
@@ -270,7 +278,7 @@ agent_id: %s
 
 	var config opamp.Config
 	require.NoError(t, yaml.Unmarshal(cfgBytes, &config))
-	require.Equal(t, config.AgentID, opamp.AgentID(id))
+	require.Equal(t, config.AgentID.String(), id.String())
 }
 
 // TestManagerConfigWillUpdateLegacyAgentID tests that if the agent ID is a Legacy ID (UUID format) it will overwrite with a new ULID

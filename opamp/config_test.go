@@ -22,13 +22,20 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/oklog/ulid/v2"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
+// Must is a helper function for tests that panics if there is an error creating the object of type T
+func Must[T any](t T, err error) T {
+	if err != nil {
+		panic(err)
+	}
+	return t
+}
+
 var testAgentIDString = "01HX2DWEQZ045KQR3VG0EYEZ94"
-var testAgentID = AgentID(ulid.MustParse(testAgentIDString))
+var testAgentID = Must(ParseAgentID(testAgentIDString))
 
 func TestToTLS(t *testing.T) {
 	invalidCAFile := "/some/bad/file-ca.crt"
@@ -679,7 +686,7 @@ func TestCmpUpdatableFields(t *testing.T) {
 			compare: Config{
 				Endpoint:  "ws://some.host.com",
 				SecretKey: nil,
-				AgentID:   AgentID(ulid.MustParse("01HX2ENEEG8ETYME7RZY9SWSAW")),
+				AgentID:   EmptyAgentID,
 				Labels:    &labelsOne,
 				AgentName: &nameOne,
 			},
