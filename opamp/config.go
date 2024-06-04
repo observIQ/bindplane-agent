@@ -22,6 +22,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/google/uuid"
 	"github.com/oklog/ulid/v2"
 	"github.com/open-telemetry/opamp-go/client/types"
 	"gopkg.in/yaml.v3"
@@ -47,30 +48,74 @@ var (
 	errInvalidCAFile = "failed to read TLS CA file"
 )
 
+type agentIDType string
+
+const (
+	agentIDTypeULID agentIDType = "ULID"
+	agentIDTypeUUID agentIDType = "UUID"
+)
+
+// TODO: Test me
 // AgentID represents the ID of the agent
-type AgentID ulid.ULID
+type AgentID struct {
+	by     [16]byte
+	idType agentIDType
+	orig   string
+}
 
 // EmptyAgentID represents an empty/unset agent ID.
 var EmptyAgentID = AgentID{}
 
 // ParseAgentID parses an agent ID from the given string
 func ParseAgentID(s string) (AgentID, error) {
-	u, err := ulid.Parse(s)
-	if err != nil {
-		return AgentID{}, err
-	}
+	switch len(s) {
+	case 26:
+		// length 26 strings can't be UUID, so they must be ULID
+		u, err := ulid.Parse(s)
+		if err != nil {
+			return AgentID{}, err
+		}
+		return AgentID{
+			by:     u,
+			idType: agentIDTypeULID,
+			orig:   s,
+		}, nil
 
-	return AgentID(u), nil
+	default:
+		// Try parsing as a UUID. There are a couple forms of UUID supported for parsing, so they may be a couple different
+		// lengths
+		u, err := uuid.Parse(s)
+		if err != nil {
+			return AgentID{}, err
+		}
+		return AgentID{
+			by:     u,
+			idType: agentIDTypeUUID,
+			orig:   s,
+		}, nil
+	}
+}
+
+func AgentIDFromUUID(u uuid.UUID) AgentID {
+	return AgentID{
+		by:     u,
+		idType: agentIDTypeUUID,
+		orig:   u.String(),
+	}
 }
 
 // String returns a string representation of the agent ID
 func (a AgentID) String() string {
-	return ulid.ULID(a).String()
+	return a.orig
 }
 
 // OpAMPInstanceUID returns the opamp representation of the agent ID
 func (a AgentID) OpAMPInstanceUID() types.InstanceUid {
-	return types.InstanceUid(a)
+	return types.InstanceUid(a.by)
+}
+
+func (a AgentID) Type() string {
+	return string(a.idType)
 }
 
 // MarshalYAML implements the yaml.Marshaler interface
