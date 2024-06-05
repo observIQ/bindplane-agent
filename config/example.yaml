@@ -1,30 +1,7 @@
 # 'receivers' specify configurations of receivers.
 # See the README for more information about the receivers available for configuration.
 receivers:
-  # The hostmetrics receiver; this configuration will get cpu load metrics about the machine
-  # the agent is running on every minute.
-  # For more information on configuring the hostmetrics receiver, refer to the documentation here:
-  # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/hostmetricsreceiver
-  hostmetrics:
-    collection_interval: 1m
-    scrapers:
-      # Theses scrapers work on all operating systems
-      load:
-      filesystem:
-      memory:
-      network:
-      # Remove these scrapers for macOS agents as they are not supported and will generate errors in the logs
-      cpu:
-      disk:
-
-  # The syslog receiver; this configuration will listen on every network interface on port 514
-  # for UDP syslog messages using the rfc3164 protocol.
-  # For more information on configuring the syslog receiver, refer to the documentation here:
-  # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/syslogreceiver
-  # syslog:
-  #   protocol: "rfc3164"
-  #   udp:
-  #     listen_address: 0.0.0.0:514
+  nop:
 
 # 'processors' specify configurations of processors.
 # See the README for more information about the processors available for configuration.
@@ -38,29 +15,18 @@ processors:
 # 'exporters' specify configurations for certain exporters.
 # See the README for more information on the exporters available for configuration.
 exporters:
-  # The logging exporter; This exporter logs to stdout.
-  # For more information on configuring the logging exporter, refer to the documentation here:
-  # https://github.com/open-telemetry/opentelemetry-collector/tree/main/exporter/loggingexporter
-  logging:
-    verbosity: detailed
+  nop:
 
 # 'service' specifies how to construct the data pipelines using the configurations above.
 service:
   pipelines:
-    # 'metrics' specifies a metrics pipeline; metrics are scraped using the 'hostmetrics' receiver,
-    # which are aggregated into batches by the 'batch' processor,
-    # and are exported using the 'logging' exporter, printing the metrics to stdout.
     metrics:
-      receivers: [hostmetrics]
+      receivers: [nop]
       processors: [batch]
-      exporters: [logging]
+      exporters: [nop]
 
-    # `logs` specifies the logging pipeline; logs are received using the 'syslog' receiver,
-    # which are then aggregated into batches by the 'batch' processor,
-    # and are exported using the 'logging' exporter, printing the logs to stdout.
-    # Both the batch configuration and logging configuration may be shared between the logs pipeline and
-    # the metrics pipeline, as shown in this example.
-    # logs:
-    #   receivers: [syslog]
-    #   processors: [batch]
-    #   exporters: [logging]
+  telemetry:
+    # Disable agents own telemetry to avoid port binding collisions for port 8888. BindPlane
+    # will enable metrics and configure the port when a configuration is pushed to the agent.
+    metrics:
+      level: none
