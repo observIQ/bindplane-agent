@@ -98,11 +98,6 @@ func (c *collector) Run(ctx context.Context) error {
 		return errors.New("service already running")
 	}
 
-	// Register component telemetry before running to ensure a clean state for this run
-	if err := factories.RegisterComponentTelemetry(); err != nil {
-		return fmt.Errorf("register component telemetry: %w", err)
-	}
-
 	// The OT collector only supports using settings once during the lifetime
 	// of a single collector instance. We must remake the settings on each startup.
 	settings, err := NewSettings(c.configPaths, c.version, c.loggingOpts, c.factories)
