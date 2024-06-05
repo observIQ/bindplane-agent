@@ -28,14 +28,9 @@ const (
 	measurementsV1               = "measurements.v1"
 )
 
-// MetricProvider is an interface that marks a component that can be queried for metrics
-type MetricProvider interface {
-	Metrics() pmetric.ResourceMetricsSlice
-}
-
 type bindplaneExtension struct {
 	cfg                     *Config
-	providers               map[component.ID]MetricProvider
+	providers               map[component.ID]ThroughputMetricProvider
 	customCapabilityHandler opampcustommessages.CustomCapabilityHandler
 }
 
