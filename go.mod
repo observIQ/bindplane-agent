@@ -33,7 +33,7 @@ require (
 	github.com/observiq/bindplane-agent/receiver/sapnetweaverreceiver v1.53.0
 	github.com/observiq/bindplane-agent/receiver/telemetrygeneratorreceiver v1.53.0
 	github.com/oklog/ulid/v2 v2.1.0
-	github.com/open-telemetry/opamp-go v0.9.0
+	github.com/open-telemetry/opamp-go v0.15.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/connector/countconnector v0.101.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/connector/servicegraphconnector v0.101.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/connector/spanmetricsconnector v0.101.0
@@ -537,7 +537,7 @@ require (
 	github.com/googleapis/gax-go/v2 v2.12.4 // indirect
 	github.com/gophercloud/gophercloud v1.8.0 // indirect
 	github.com/gorilla/mux v1.8.1 // indirect
-	github.com/gorilla/websocket v1.5.0 // indirect
+	github.com/gorilla/websocket v1.5.1 // indirect
 	github.com/gosnmp/gosnmp v1.37.0 // indirect
 	github.com/grafana/regexp v0.0.0-20221122212121-6b5c0a4cb7fd // indirect
 	github.com/grobie/gomemcache v0.0.0-20230213081705-239240bbc445 // indirect
@@ -808,3 +808,5 @@ replace github.com/mattn/go-ieproxy => github.com/mattn/go-ieproxy v0.0.1
 
 // openshift removed all tags from their repo, use the pseudoversion from the release-3.9 branch HEAD
 replace github.com/openshift/api v3.9.0+incompatible => github.com/openshift/api v0.0.0-20180801171038-322a19404e37
+
+replace github.com/open-telemetry/opamp-go v0.14.0 => github.com/tigrannajaryan/opamp-go v0.0.0-20240417173647-5fc4f1ccc923

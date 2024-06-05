@@ -105,7 +105,7 @@ func NewClient(args *NewClientArgs) (opamp.Client, error) {
 	}
 
 	reportManager := report.GetManager()
-	if err := reportManager.SetClient(report.NewAgentClient(args.Config.AgentID, args.Config.SecretKey, tlsCfg)); err != nil {
+	if err := reportManager.SetClient(report.NewAgentClient(args.Config.AgentID.String(), args.Config.SecretKey, tlsCfg)); err != nil {
 		// Error should never happen as we only error if a nil client is sent
 		return nil, fmt.Errorf("failed to set client on report manager: %w", err)
 	}
@@ -136,7 +136,8 @@ func NewClient(args *NewClientArgs) (opamp.Client, error) {
 	// Create collect client based on URL scheme
 	switch opampURL.Scheme {
 	case "ws", "wss":
-		observiqClient.opampClient = client.NewWebSocket(clientLogger.Sugar())
+		logger := newZapOpAMPLoggerAdapter(clientLogger)
+		observiqClient.opampClient = client.NewWebSocket(logger)
 	default:
 		return nil, ErrUnsupportedURL
 	}
@@ -196,15 +197,16 @@ func (c *Client) Connect(ctx context.Context) error {
 	settings := types.StartSettings{
 		OpAMPServerURL: c.currentConfig.Endpoint,
 		Header: http.Header{
-			"Authorization":  []string{fmt.Sprintf("Secret-Key %s", c.currentConfig.GetSecretKey())},
-			"User-Agent":     []string{fmt.Sprintf("observiq-otel-collector/%s", version.Version())},
-			"OpAMP-Version":  []string{opamp.Version()},
-			"Agent-ID":       []string{c.ident.agentID},
-			"Agent-Version":  []string{version.Version()},
-			"Agent-Hostname": []string{c.ident.hostname},
+			"Authorization":               []string{fmt.Sprintf("Secret-Key %s", c.currentConfig.GetSecretKey())},
+			"User-Agent":                  []string{fmt.Sprintf("observiq-otel-collector/%s", version.Version())},
+			"OpAMP-Version":               []string{opamp.Version()},
+			"Agent-ID":                    []string{c.ident.agentID.String()},
+			"Agent-Version":               []string{version.Version()},
+			"Agent-Hostname":              []string{c.ident.hostname},
+			"X-Bindplane-Agent-Id-Format": []string{c.ident.agentID.Type()},
 		},
 		TLSConfig:   tlsCfg,
-		InstanceUid: c.ident.agentID,
+		InstanceUid: c.ident.agentID.OpAMPInstanceUID(),
 		Callbacks: types.CallbacksStruct{
 			OnConnectFunc:          c.onConnectHandler,
 			OnConnectFailedFunc:    c.onConnectFailedHandler,
@@ -255,7 +257,7 @@ func (c *Client) Disconnect(ctx context.Context) error {
 
 // client callbacks
 
-func (c *Client) onConnectHandler() {
+func (c *Client) onConnectHandler(ctx context.Context) {
 	c.logger.Info("Successfully connected to server")
 
 	// See if we can retrieve the PackageStatuses where the collector package is in an installing state
@@ -287,7 +289,7 @@ func (c *Client) onConnectHandler() {
 	c.finishPackageInstall(pkgStatuses)
 }
 
-func (c *Client) onConnectFailedHandler(err error) {
+func (c *Client) onConnectFailedHandler(ctx context.Context, err error) {
 	c.logger.Error("Failed to connect to server", zap.Error(err))
 
 	// We are currently disconnecting so any Connection failed error is expected and should not affect an install
@@ -297,7 +299,7 @@ func (c *Client) onConnectFailedHandler(err error) {
 	}
 }
 
-func (c *Client) onErrorHandler(errResp *protobufs.ServerErrorResponse) {
+func (c *Client) onErrorHandler(ctx context.Context, errResp *protobufs.ServerErrorResponse) {
 	c.logger.Error("Server returned an error response", zap.String("Error", errResp.GetErrorMessage()))
 }
 
