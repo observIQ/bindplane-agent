@@ -42,16 +42,12 @@ func NewSettings(configPaths []string, version string, loggingOpts []zap.Option,
 			ConverterFactories: []confmap.ConverterFactory{expandconverter.NewFactory()},
 		},
 	}
-	provider, err := otelcol.NewConfigProvider(configProviderSettings)
-	if err != nil {
-		return nil, err
-	}
 
 	return &otelcol.CollectorSettings{
 		Factories:               func() (otelcol.Factories, error) { return factories, nil },
 		BuildInfo:               buildInfo,
 		LoggingOptions:          loggingOpts,
-		ConfigProvider:          provider,
+		ConfigProviderSettings:  configProviderSettings,
 		DisableGracefulShutdown: true,
 	}, nil
 }
