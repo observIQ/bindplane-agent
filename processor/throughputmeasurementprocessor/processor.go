@@ -20,6 +20,7 @@ import (
 	"math/rand"
 
 	"github.com/observiq/bindplane-agent/internal/measurements"
+	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/pdata/plog"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.opentelemetry.io/collector/pdata/ptrace"
@@ -32,6 +33,8 @@ type throughputMeasurementProcessor struct {
 	enabled             bool
 	measurements        *measurements.ThroughputMeasurements
 	samplingCutOffRatio float64
+	processorID         string
+	bindplane           component.ID
 }
 
 func newThroughputMeasurementProcessor(logger *zap.Logger, mp metric.MeterProvider, cfg *Config, processorID string) (*throughputMeasurementProcessor, error) {
@@ -45,7 +48,31 @@ func newThroughputMeasurementProcessor(logger *zap.Logger, mp metric.MeterProvid
 		enabled:             cfg.Enabled,
 		measurements:        measurements,
 		samplingCutOffRatio: cfg.SamplingRatio,
+		processorID:         processorID,
+		bindplane:           cfg.BindplaneExtension,
 	}, nil
+}
+
+func (tmp *throughputMeasurementProcessor) start(_ context.Context, host component.Host) error {
+	var emptyComponentID component.ID
+	if tmp.bindplane == emptyComponentID {
+		// No bindplane component referenced, so we won't register our measurements anywhere.
+		return nil
+	}
+
+	ext, ok := host.GetExtensions()[tmp.bindplane]
+	if !ok {
+		return fmt.Errorf("bindplane extension %q does not exist", tmp.bindplane)
+	}
+
+	registry, ok := ext.(measurements.ThroughputMeasurementsRegistry)
+	if !ok {
+		return fmt.Errorf("extension %q is not an throughput message registry", tmp.bindplane)
+	}
+
+	registry.RegisterThroughputMeasurements(tmp.processorID, tmp.measurements)
+
+	return nil
 }
 
 func (tmp *throughputMeasurementProcessor) processTraces(ctx context.Context, td ptrace.Traces) (ptrace.Traces, error) {

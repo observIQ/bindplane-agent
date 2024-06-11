@@ -152,7 +152,6 @@ func (b *bindplaneExtension) reportMetrics() error {
 }
 
 func (b *bindplaneExtension) Shutdown(ctx context.Context) error {
-
 	close(b.doneChan)
 
 	waitgroupDone := make(chan struct{})
@@ -166,6 +165,8 @@ func (b *bindplaneExtension) Shutdown(ctx context.Context) error {
 		return ctx.Err()
 	case <-waitgroupDone: // OK
 	}
+
+	b.customCapabilityHandler.Unregister()
 
 	return nil
 }
