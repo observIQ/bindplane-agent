@@ -49,17 +49,16 @@ func newBindplaneExtension(cfg *Config) *bindplaneExtension {
 
 func (b *bindplaneExtension) Start(_ context.Context, host component.Host) error {
 	var emptyComponentID component.ID
-	if b.cfg.OpAMP != emptyComponentID {
+
+	// Set up measurements if enabled
+	if b.cfg.OpAMP != emptyComponentID && b.cfg.MeasurementsInterval > 0 {
 		err := b.setupCustomCapabilities(host)
 		if err != nil {
 			return fmt.Errorf("setup capability handler: %w", err)
 		}
 
-		if b.cfg.MeasurementsInterval > 0 {
-			// Setup measurments if enabled
-			b.wg.Add(1)
-			go b.reportMetricsLoop()
-		}
+		b.wg.Add(1)
+		go b.reportMetricsLoop()
 	}
 
 	return nil
@@ -166,7 +165,9 @@ func (b *bindplaneExtension) Shutdown(ctx context.Context) error {
 	case <-waitgroupDone: // OK
 	}
 
-	b.customCapabilityHandler.Unregister()
+	if b.customCapabilityHandler != nil {
+		b.customCapabilityHandler.Unregister()
+	}
 
 	return nil
 }
