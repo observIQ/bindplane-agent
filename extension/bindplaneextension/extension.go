@@ -16,27 +16,34 @@ package bindplaneextension
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"math/rand"
+	"sync"
+	"time"
 
+	"github.com/golang/snappy"
+	"github.com/observiq/bindplane-agent/internal/measurements"
+	"github.com/open-telemetry/opamp-go/client/types"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/extension/opampcustommessages"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 )
 
-const (
-	reportMeasurementsCapability = "com.bindplane.measurements"
-	measurementsV1               = "measurements.v1"
-)
-
 type bindplaneExtension struct {
 	cfg                     *Config
-	providers               map[component.ID]ThroughputMetricProvider
+	measurements            *sync.Map
 	customCapabilityHandler opampcustommessages.CustomCapabilityHandler
+	doneChan                chan struct{}
+	wg                      *sync.WaitGroup
 }
 
 func newBindplaneExtension(cfg *Config) *bindplaneExtension {
 	return &bindplaneExtension{
-		cfg: cfg,
+		cfg:          cfg,
+		measurements: &sync.Map{},
+		doneChan:     make(chan struct{}),
+		wg:           &sync.WaitGroup{},
 	}
 }
 
@@ -47,9 +54,19 @@ func (b *bindplaneExtension) Start(_ context.Context, host component.Host) error
 		if err != nil {
 			return fmt.Errorf("setup capability handler: %w", err)
 		}
+
+		if b.cfg.MeasurementsInterval > 0 {
+			// Setup measurments if enabled
+			b.wg.Add(1)
+			go b.reportMetricsLoop()
+		}
 	}
 
 	return nil
+}
+
+func (b *bindplaneExtension) RegisterThroughputMeasurements(processorID string, measurements *measurements.ThroughputMeasurements) {
+	b.measurements.Store(processorID, measurements)
 }
 
 func (b *bindplaneExtension) setupCustomCapabilities(host component.Host) error {
@@ -68,6 +85,8 @@ func (b *bindplaneExtension) setupCustomCapabilities(host component.Host) error 
 	if err != nil {
 		return fmt.Errorf("register custom capability: %w", err)
 	}
+
+	return nil
 }
 
 func (b *bindplaneExtension) Dependencies() []component.ID {
@@ -79,20 +98,74 @@ func (b *bindplaneExtension) Dependencies() []component.ID {
 	return []component.ID{b.cfg.OpAMP}
 }
 
-func (bindplaneExtension) reportMetricsLoop(_ context.Context) {}
+func (b *bindplaneExtension) reportMetricsLoop() {
+	defer b.wg.Done()
 
-func (b *bindplaneExtension) reportMetrics() {
-	allMetrics := pmetric.NewMetrics()
-	rm := allMetrics.ResourceMetrics()
-	for _, m := range b.providers {
-		m := m.Metrics()
-		m.MoveAndAppendTo(rm)
+	// Add jitter to avoid potential resonance with other agents (random interval offset between 0 and 10 seconds)
+	jitter := time.Duration(rand.Float64() * 10 * float64(time.Second))
+	time.Sleep(jitter)
+
+	t := time.NewTicker(b.cfg.MeasurementsInterval)
+	defer t.Stop()
+
+	for {
+		select {
+		case <-t.C:
+			b.reportMetrics()
+		case <-b.doneChan:
+			return
+		}
 	}
-
-	//TODO: Shove metrics into custom message and shuttle over opamp
-	return
 }
 
-func (bindplaneExtension) Shutdown(_ context.Context) error {
+func (b *bindplaneExtension) reportMetrics() error {
+	m := pmetric.NewMetrics()
+	rm := m.ResourceMetrics().AppendEmpty()
+	sm := rm.ScopeMetrics().AppendEmpty()
+
+	b.measurements.Range(func(processor, value any) bool {
+		measurements := value.(*measurements.ThroughputMeasurements)
+		otlpMeasurements(measurements).MoveAndAppendTo(sm.Metrics())
+		return true
+	})
+
+	// Send metrics as snappy-encoded otlp proto
+	marshaller := pmetric.ProtoMarshaler{}
+	marshalled, err := marshaller.MarshalMetrics(m)
+	if err != nil {
+		return fmt.Errorf("marshal metrics: %w", err)
+	}
+
+	encoded := snappy.Encode(nil, marshalled)
+	for {
+		sendingChannel, err := b.customCapabilityHandler.SendMessage(reportMeasurementsType, encoded)
+		switch {
+		case err == nil:
+			return nil
+		case errors.Is(err, types.ErrCustomMessagePending):
+			<-sendingChannel
+			continue
+		default:
+			return fmt.Errorf("send custom message: %w", err)
+		}
+	}
+}
+
+func (b *bindplaneExtension) Shutdown(ctx context.Context) error {
+
+	close(b.doneChan)
+
+	waitgroupDone := make(chan struct{})
+	go func() {
+		defer close(waitgroupDone)
+		b.wg.Wait()
+	}()
+
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	case <-waitgroupDone: // OK
+	}
+
 	return nil
 }

@@ -14,7 +14,12 @@
 
 package bindplaneextension
 
-import "go.opentelemetry.io/collector/component"
+import (
+	"errors"
+	"time"
+
+	"go.opentelemetry.io/collector/component"
+)
 
 // Config is the configuration for the bindplane extension
 type Config struct {
@@ -23,4 +28,17 @@ type Config struct {
 	// Component ID of the opamp extension. If not specified, then
 	// this extension will not generate any custom messages for throughput metrics.
 	OpAMP component.ID `mapstructure:"opamp"`
+	// MeasurementsInterval is the interval on which to report measurements.
+	// Measurements reporting is disabled if this duration is 0.
+	MeasurementsInterval time.Duration `mapstructure:"measurements_interval"`
+	// ExtraMeasurementsLabels are labels to add to all measurements metrics
+	ExtraMeasurementsLabels map[string]string
+}
+
+func (c Config) Validate() error {
+	if c.MeasurementsInterval < 0 {
+		return errors.New("measurements interval must be postitive or 0")
+	}
+
+	return nil
 }

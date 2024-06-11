@@ -28,6 +28,9 @@ type Config struct {
 
 	// SamplingRatio is the ratio of payloads that are measured. Values between 0.0 and 1.0 are valid.
 	SamplingRatio float64 `mapstructure:"sampling_ratio"`
+
+	// Extra labels to add to measurements and associate with emitted metrics
+	ExtraLabels map[string]string `mapstructure:"extra_labels"`
 }
 
 // Validate validates the processor configuration

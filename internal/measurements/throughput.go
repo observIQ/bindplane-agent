@@ -21,9 +21,10 @@ type ThroughputMeasurementsRegistry interface {
 type ThroughputMeasurements struct {
 	logSize, metricSize, traceSize      *int64Counter
 	logCount, datapointCount, spanCount *int64Counter
+	attributes                          attribute.Set
 }
 
-func NewThroughputMetrics(mp metric.MeterProvider, processorID string) (*ThroughputMeasurements, error) {
+func NewThroughputMetrics(mp metric.MeterProvider, processorID string, extraAttributes map[string]string) (*ThroughputMeasurements, error) {
 	meter := mp.Meter("github.com/observiq/bindplane-agent/internal/measurements")
 
 	logSize, err := meter.Int64Counter(
@@ -80,7 +81,7 @@ func NewThroughputMetrics(mp metric.MeterProvider, processorID string) (*Through
 		return nil, fmt.Errorf("create trace_count counter: %w", err)
 	}
 
-	attrs := attribute.NewSet(attribute.String("processor", processorID))
+	attrs := createMeasurementsAttributeSet(processorID, extraAttributes)
 
 	return &ThroughputMeasurements{
 		logSize:        newInt64Counter(logSize, attrs),
@@ -89,6 +90,7 @@ func NewThroughputMetrics(mp metric.MeterProvider, processorID string) (*Through
 		datapointCount: newInt64Counter(datapointCount, attrs),
 		traceSize:      newInt64Counter(traceSize, attrs),
 		spanCount:      newInt64Counter(spanCount, attrs),
+		attributes:     attrs,
 	}, nil
 }
 
@@ -137,6 +139,10 @@ func (tm *ThroughputMeasurements) SpanCount() int64 {
 	return tm.spanCount.Val()
 }
 
+func (tm *ThroughputMeasurements) Attributes() attribute.Set {
+	return tm.attributes
+}
+
 // int64Counter combines a metric.Int64Counter with a atomic.Int64 so that the value of the counter may be
 // retrieved.
 // The value of the metric counter and val are not guaranteed to be synchronized, but will be eventually consistent.
@@ -164,4 +170,15 @@ func (i *int64Counter) Val() int64 {
 
 func metricName(metric string) string {
 	return fmt.Sprintf("otelcol_processor_throughputmeasurement_%s", metric)
+}
+
+func createMeasurementsAttributeSet(processorID string, extraAttributes map[string]string) attribute.Set {
+	attrs := make([]attribute.KeyValue, 0, len(extraAttributes)+1)
+
+	attrs = append(attrs, attribute.String("processor", processorID))
+	for k, v := range extraAttributes {
+		attrs = append(attrs, attribute.String(k, v))
+	}
+
+	return attribute.NewSet(attrs...)
 }
