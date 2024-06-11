@@ -7,7 +7,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/observiq/bindplane-agent/expr v1.53.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/ottl v0.102.0
-	github.com/shirou/gopsutil/v3 v3.24.4
+	github.com/shirou/gopsutil/v3 v3.24.5
 	github.com/stretchr/testify v1.9.0
 	go.opentelemetry.io/collector/component v0.102.1
 	go.opentelemetry.io/collector/config/configretry v0.102.1
