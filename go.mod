@@ -11,6 +11,7 @@ require (
 	github.com/observiq/bindplane-agent/exporter/googlecloudexporter v1.54.0
 	github.com/observiq/bindplane-agent/exporter/googlemanagedprometheusexporter v1.54.0
 	github.com/observiq/bindplane-agent/exporter/snowflakeexporter v1.54.0
+	github.com/observiq/bindplane-agent/internal/report v1.54.0
 	github.com/observiq/bindplane-agent/packagestate v1.54.0
 	github.com/observiq/bindplane-agent/processor/datapointcountprocessor v1.54.0
 	github.com/observiq/bindplane-agent/processor/logcountprocessor v1.54.0
@@ -73,8 +74,6 @@ require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/extension/pprofextension v0.102.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/extension/sigv4authextension v0.102.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/extension/storage/filestorage v0.102.0
-	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden v0.102.0
-	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest v0.102.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/processor/attributesprocessor v0.102.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/processor/cumulativetodeltaprocessor v0.102.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/processor/deltatorateprocessor v0.102.0
@@ -322,7 +321,7 @@ require (
 	github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826 // indirect
 	github.com/observiq/bindplane-agent/counter v1.54.0 // indirect
 	github.com/observiq/bindplane-agent/expr v1.54.0 // indirect
-	github.com/observiq/bindplane-agent/internal/rehydration v1.53.0 // indirect
+	github.com/observiq/bindplane-agent/internal/rehydration v1.54.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlemanagedprometheusexporter v0.102.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/extension/ackextension v0.102.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/extension/sumologicextension v0.102.0 // indirect
@@ -799,6 +798,8 @@ replace github.com/observiq/bindplane-agent/receiver/awss3rehydrationreceiver =>
 replace github.com/observiq/bindplane-agent/internal/rehydration => ./internal/rehydration
 
 replace github.com/observiq/bindplane-agent/internal/testutils => ./internal/testutils
+
+replace github.com/observiq/bindplane-agent/internal/report => ./internal/report
 
 // Does not build with windows and only used in configschema executable
 // Relevant issue https://github.com/mattn/go-ieproxy/issues/45
