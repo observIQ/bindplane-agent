@@ -44,6 +44,11 @@ func otlpMeasurements(tm *measurements.ThroughputMeasurements) pmetric.MetricSli
 }
 
 func setOTLPSum(m pmetric.Metric, name string, value int64, attrs pcommon.Map, now pcommon.Timestamp) {
+	if value == 0 {
+		// Ignore value if it's 0
+		return
+	}
+
 	m.SetName(name)
 	m.SetEmptySum()
 	s := m.Sum()
