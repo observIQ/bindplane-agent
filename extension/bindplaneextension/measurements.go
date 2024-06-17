@@ -1,6 +1,8 @@
 package bindplaneextension
 
 import (
+	"time"
+
 	"github.com/observiq/bindplane-agent/internal/measurements"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/pmetric"
@@ -28,18 +30,20 @@ func otlpMeasurements(tm *measurements.ThroughputMeasurements) pmetric.MetricSli
 		}
 	}
 
-	setOTLPSum(s.AppendEmpty(), "otelcol_processor_throughputmeasurement_log_data_size", tm.LogSize(), attrs)
-	setOTLPSum(s.AppendEmpty(), "otelcol_processor_throughputmeasurement_metric_data_size", tm.MetricSize(), attrs)
-	setOTLPSum(s.AppendEmpty(), "otelcol_processor_throughputmeasurement_trace_data_size", tm.TraceSize(), attrs)
+	ts := pcommon.NewTimestampFromTime(time.Now())
 
-	setOTLPSum(s.AppendEmpty(), "otelcol_processor_throughputmeasurement_log_count", tm.LogCount(), attrs)
-	setOTLPSum(s.AppendEmpty(), "otelcol_processor_throughputmeasurement_metric_count", tm.DatapointCount(), attrs)
-	setOTLPSum(s.AppendEmpty(), "otelcol_processor_throughputmeasurement_trace_count", tm.TraceSize(), attrs)
+	setOTLPSum(s.AppendEmpty(), "otelcol_processor_throughputmeasurement_log_data_size", tm.LogSize(), attrs, ts)
+	setOTLPSum(s.AppendEmpty(), "otelcol_processor_throughputmeasurement_metric_data_size", tm.MetricSize(), attrs, ts)
+	setOTLPSum(s.AppendEmpty(), "otelcol_processor_throughputmeasurement_trace_data_size", tm.TraceSize(), attrs, ts)
+
+	setOTLPSum(s.AppendEmpty(), "otelcol_processor_throughputmeasurement_log_count", tm.LogCount(), attrs, ts)
+	setOTLPSum(s.AppendEmpty(), "otelcol_processor_throughputmeasurement_metric_count", tm.DatapointCount(), attrs, ts)
+	setOTLPSum(s.AppendEmpty(), "otelcol_processor_throughputmeasurement_trace_count", tm.TraceSize(), attrs, ts)
 
 	return s
 }
 
-func setOTLPSum(m pmetric.Metric, name string, value int64, attrs pcommon.Map) {
+func setOTLPSum(m pmetric.Metric, name string, value int64, attrs pcommon.Map, now pcommon.Timestamp) {
 	m.SetName(name)
 	m.SetEmptySum()
 	s := m.Sum()
@@ -47,4 +51,5 @@ func setOTLPSum(m pmetric.Metric, name string, value int64, attrs pcommon.Map) {
 	dp := s.DataPoints().AppendEmpty()
 	dp.SetIntValue(value)
 	attrs.CopyTo(dp.Attributes())
+	dp.SetTimestamp(now)
 }
