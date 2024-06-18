@@ -14,6 +14,8 @@ builds:
     env:
       - CGO_ENABLED=0
     mod_timestamp: "{{ .CommitTimestamp }}"
+    tags:
+      - bindplane
     goos:
       - windows
       - linux

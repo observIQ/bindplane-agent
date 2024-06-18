@@ -1,4 +1,5 @@
-// go:build bindplane
+//go:build bindplane
+
 package collector
 
 import "github.com/observiq/bindplane-agent/internal/measurements"

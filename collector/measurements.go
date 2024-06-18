@@ -1,4 +1,5 @@
-// go:build !bindplane
+//go:build !bindplane
+
 package collector
 
 // ResetMeasurements resets the registered throughput measurements
