@@ -32,7 +32,7 @@ import (
 
 type bindplaneExtension struct {
 	cfg                     *Config
-	measurements            *sync.Map
+	ctmr                    *measurements.ConcreteThroughputMeasurementsRegistry
 	customCapabilityHandler opampcustommessages.CustomCapabilityHandler
 	doneChan                chan struct{}
 	wg                      *sync.WaitGroup
@@ -40,10 +40,10 @@ type bindplaneExtension struct {
 
 func newBindplaneExtension(cfg *Config) *bindplaneExtension {
 	return &bindplaneExtension{
-		cfg:          cfg,
-		measurements: &sync.Map{},
-		doneChan:     make(chan struct{}),
-		wg:           &sync.WaitGroup{},
+		cfg:      cfg,
+		ctmr:     measurements.NewConcreteThroughputMeasurementsRegistry(false),
+		doneChan: make(chan struct{}),
+		wg:       &sync.WaitGroup{},
 	}
 }
 
@@ -65,7 +65,7 @@ func (b *bindplaneExtension) Start(_ context.Context, host component.Host) error
 }
 
 func (b *bindplaneExtension) RegisterThroughputMeasurements(processorID string, measurements *measurements.ThroughputMeasurements) {
-	b.measurements.Store(processorID, measurements)
+	b.ctmr.RegisterThroughputMeasurements(processorID, measurements)
 }
 
 func (b *bindplaneExtension) setupCustomCapabilities(host component.Host) error {
@@ -80,7 +80,7 @@ func (b *bindplaneExtension) setupCustomCapabilities(host component.Host) error 
 	}
 
 	var err error
-	b.customCapabilityHandler, err = registry.Register(reportMeasurementsCapability)
+	b.customCapabilityHandler, err = registry.Register(measurements.ReportMeasurementsV1Capability)
 	if err != nil {
 		return fmt.Errorf("register custom capability: %w", err)
 	}
@@ -118,15 +118,7 @@ func (b *bindplaneExtension) reportMetricsLoop() {
 }
 
 func (b *bindplaneExtension) reportMetrics() error {
-	m := pmetric.NewMetrics()
-	rm := m.ResourceMetrics().AppendEmpty()
-	sm := rm.ScopeMetrics().AppendEmpty()
-
-	b.measurements.Range(func(processor, value any) bool {
-		measurements := value.(*measurements.ThroughputMeasurements)
-		otlpMeasurements(measurements).MoveAndAppendTo(sm.Metrics())
-		return true
-	})
+	m := b.ctmr.OTLPMeasurements()
 
 	// Send metrics as snappy-encoded otlp proto
 	marshaller := pmetric.ProtoMarshaler{}
@@ -137,7 +129,7 @@ func (b *bindplaneExtension) reportMetrics() error {
 
 	encoded := snappy.Encode(nil, marshalled)
 	for {
-		sendingChannel, err := b.customCapabilityHandler.SendMessage(reportMeasurementsType, encoded)
+		sendingChannel, err := b.customCapabilityHandler.SendMessage(measurements.ReportMeasurementsType, encoded)
 		switch {
 		case err == nil:
 			return nil

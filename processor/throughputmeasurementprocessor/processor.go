@@ -54,23 +54,15 @@ func newThroughputMeasurementProcessor(logger *zap.Logger, mp metric.MeterProvid
 }
 
 func (tmp *throughputMeasurementProcessor) start(_ context.Context, host component.Host) error {
-	var emptyComponentID component.ID
-	if tmp.bindplane == emptyComponentID {
-		// No bindplane component referenced, so we won't register our measurements anywhere.
-		return nil
+
+	registry, err := GetThroughputRegistry(host, tmp.bindplane)
+	if err != nil {
+		return fmt.Errorf("get throughput registry: %w", err)
 	}
 
-	ext, ok := host.GetExtensions()[tmp.bindplane]
-	if !ok {
-		return fmt.Errorf("bindplane extension %q does not exist", tmp.bindplane)
+	if registry != nil {
+		registry.RegisterThroughputMeasurements(tmp.processorID, tmp.measurements)
 	}
-
-	registry, ok := ext.(measurements.ThroughputMeasurementsRegistry)
-	if !ok {
-		return fmt.Errorf("extension %q is not an throughput message registry", tmp.bindplane)
-	}
-
-	registry.RegisterThroughputMeasurements(tmp.processorID, tmp.measurements)
 
 	return nil
 }

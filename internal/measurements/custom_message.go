@@ -1,20 +1,19 @@
-package bindplaneextension
+package measurements
 
 import (
 	"time"
 
-	"github.com/observiq/bindplane-agent/internal/measurements"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.opentelemetry.io/otel/attribute"
 )
 
 const (
-	reportMeasurementsCapability = "com.bindplane.measurements.v1"
-	reportMeasurementsType       = "reportMeasurements"
+	ReportMeasurementsV1Capability = "com.bindplane.measurements.v1"
+	ReportMeasurementsType         = "reportMeasurements"
 )
 
-func otlpMeasurements(tm *measurements.ThroughputMeasurements) pmetric.MetricSlice {
+func OTLPThroughputMeasurements(tm *ThroughputMeasurements, includeCountMetrics bool) pmetric.MetricSlice {
 	s := pmetric.NewMetricSlice()
 
 	attrs := pcommon.NewMap()
@@ -36,9 +35,11 @@ func otlpMeasurements(tm *measurements.ThroughputMeasurements) pmetric.MetricSli
 	setOTLPSum(s.AppendEmpty(), "otelcol_processor_throughputmeasurement_metric_data_size", tm.MetricSize(), attrs, ts)
 	setOTLPSum(s.AppendEmpty(), "otelcol_processor_throughputmeasurement_trace_data_size", tm.TraceSize(), attrs, ts)
 
-	setOTLPSum(s.AppendEmpty(), "otelcol_processor_throughputmeasurement_log_count", tm.LogCount(), attrs, ts)
-	setOTLPSum(s.AppendEmpty(), "otelcol_processor_throughputmeasurement_metric_count", tm.DatapointCount(), attrs, ts)
-	setOTLPSum(s.AppendEmpty(), "otelcol_processor_throughputmeasurement_trace_count", tm.TraceSize(), attrs, ts)
+	if includeCountMetrics {
+		setOTLPSum(s.AppendEmpty(), "otelcol_processor_throughputmeasurement_log_count", tm.LogCount(), attrs, ts)
+		setOTLPSum(s.AppendEmpty(), "otelcol_processor_throughputmeasurement_metric_count", tm.DatapointCount(), attrs, ts)
+		setOTLPSum(s.AppendEmpty(), "otelcol_processor_throughputmeasurement_trace_count", tm.TraceSize(), attrs, ts)
+	}
 
 	return s
 }

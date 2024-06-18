@@ -199,6 +199,8 @@ func (c *collector) Stop(ctx context.Context) {
 	close(shutdownCompleteChan)
 
 	c.svc = nil
+
+	ResetMeasurements()
 }
 
 // Restart will restart the collector. It will also reset the status channel.

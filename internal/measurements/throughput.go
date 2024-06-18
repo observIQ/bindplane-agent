@@ -3,6 +3,7 @@ package measurements
 import (
 	"context"
 	"fmt"
+	"sync"
 	"sync/atomic"
 
 	"go.opentelemetry.io/collector/pdata/plog"
@@ -181,4 +182,38 @@ func createMeasurementsAttributeSet(processorID string, extraAttributes map[stri
 	}
 
 	return attribute.NewSet(attrs...)
+}
+
+type ConcreteThroughputMeasurementsRegistry struct {
+	measurements     *sync.Map
+	emitCountMetrics bool
+}
+
+func NewConcreteThroughputMeasurementsRegistry(emitCountMetrics bool) *ConcreteThroughputMeasurementsRegistry {
+	return &ConcreteThroughputMeasurementsRegistry{
+		measurements:     &sync.Map{},
+		emitCountMetrics: emitCountMetrics,
+	}
+}
+
+func (ctmr *ConcreteThroughputMeasurementsRegistry) RegisterThroughputMeasurements(processorID string, measurements *ThroughputMeasurements) {
+	ctmr.measurements.Store(processorID, measurements)
+}
+
+func (ctmr *ConcreteThroughputMeasurementsRegistry) Reset() {
+	ctmr.measurements = &sync.Map{}
+}
+
+func (ctmr *ConcreteThroughputMeasurementsRegistry) OTLPMeasurements() pmetric.Metrics {
+	m := pmetric.NewMetrics()
+	rm := m.ResourceMetrics().AppendEmpty()
+	sm := rm.ScopeMetrics().AppendEmpty()
+
+	ctmr.measurements.Range(func(processor, value any) bool {
+		tm := value.(*ThroughputMeasurements)
+		OTLPThroughputMeasurements(tm, ctmr.emitCountMetrics).MoveAndAppendTo(sm.Metrics())
+		return true
+	})
+
+	return m
 }
