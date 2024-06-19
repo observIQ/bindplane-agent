@@ -28,14 +28,9 @@ import (
 	"go.uber.org/zap"
 )
 
+// MeasurementsReporter represents an object that reports throughput measurements as OTLP.
 type MeasurementsReporter interface {
 	OTLPMeasurements() pmetric.Metrics
-}
-
-type NoopMeasurementsReporter struct{}
-
-func (NoopMeasurementsReporter) OTLPMeasurements() pmetric.Metrics {
-	return pmetric.NewMetrics()
 }
 
 // measurementsSender is a struct that handles periodically sending measurements via a custom message to an OpAMP endpoint.

@@ -108,6 +108,8 @@ func (c Config) ToTLS() (*tls.Config, error) {
 	return tlsConfig, nil
 }
 
+// MeasurementsIntervalOrDefault returns the measurements interval that should be used, or
+// the default interval if BindPlane has not configured one.
 func (c Config) MeasurementsIntervalOrDefault() time.Duration {
 	if c.MeasurementsInterval == nil {
 		// default interval is 10 seconds

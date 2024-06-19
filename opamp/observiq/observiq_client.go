@@ -269,7 +269,7 @@ func (c *Client) Disconnect(ctx context.Context) error {
 
 // client callbacks
 
-func (c *Client) onConnectHandler(ctx context.Context) {
+func (c *Client) onConnectHandler(_ context.Context) {
 	c.logger.Info("Successfully connected to server")
 
 	// See if we can retrieve the PackageStatuses where the collector package is in an installing state
@@ -301,7 +301,7 @@ func (c *Client) onConnectHandler(ctx context.Context) {
 	c.finishPackageInstall(pkgStatuses)
 }
 
-func (c *Client) onConnectFailedHandler(ctx context.Context, err error) {
+func (c *Client) onConnectFailedHandler(_ context.Context, err error) {
 	c.logger.Error("Failed to connect to server", zap.Error(err))
 
 	// We are currently disconnecting so any Connection failed error is expected and should not affect an install
@@ -311,7 +311,7 @@ func (c *Client) onConnectFailedHandler(ctx context.Context, err error) {
 	}
 }
 
-func (c *Client) onErrorHandler(ctx context.Context, errResp *protobufs.ServerErrorResponse) {
+func (c *Client) onErrorHandler(_ context.Context, errResp *protobufs.ServerErrorResponse) {
 	c.logger.Error("Server returned an error response", zap.String("Error", errResp.GetErrorMessage()))
 }
 

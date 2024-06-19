@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Package measurements provides code to help manage throughput measurements for BindPlane and
+// the throughput measurement processor.
 package measurements
 
 import (
@@ -27,6 +29,8 @@ import (
 	"go.opentelemetry.io/otel/metric"
 )
 
+// ThroughputMeasurementsRegistry represents a registry for the throughputmeasurement processor to
+// register their ThroughputMeasurements.
 type ThroughputMeasurementsRegistry interface {
 	RegisterThroughputMeasurements(processorID string, measurements *ThroughputMeasurements)
 }
@@ -39,7 +43,8 @@ type ThroughputMeasurements struct {
 	attributes                          attribute.Set
 }
 
-func NewThroughputMetrics(mp metric.MeterProvider, processorID string, extraAttributes map[string]string) (*ThroughputMeasurements, error) {
+// NewThroughputMeasurements initializes a new ThroughputMeasurements, adding metrics for the measurements to the meter provider.
+func NewThroughputMeasurements(mp metric.MeterProvider, processorID string, extraAttributes map[string]string) (*ThroughputMeasurements, error) {
 	meter := mp.Meter("github.com/observiq/bindplane-agent/internal/measurements")
 
 	logSize, err := meter.Int64Counter(
@@ -109,6 +114,7 @@ func NewThroughputMetrics(mp metric.MeterProvider, processorID string, extraAttr
 	}, nil
 }
 
+// AddLogs records throughput metrics for the provided logs.
 func (tm *ThroughputMeasurements) AddLogs(ctx context.Context, l plog.Logs) {
 	sizer := plog.ProtoMarshaler{}
 
@@ -116,6 +122,7 @@ func (tm *ThroughputMeasurements) AddLogs(ctx context.Context, l plog.Logs) {
 	tm.logCount.Add(ctx, int64(l.LogRecordCount()))
 }
 
+// AddMetrics records throughput metrics for the provided metrics.
 func (tm *ThroughputMeasurements) AddMetrics(ctx context.Context, m pmetric.Metrics) {
 	sizer := pmetric.ProtoMarshaler{}
 
@@ -123,6 +130,7 @@ func (tm *ThroughputMeasurements) AddMetrics(ctx context.Context, m pmetric.Metr
 	tm.datapointCount.Add(ctx, int64(m.DataPointCount()))
 }
 
+// AddTraces records throughput metrics for the provided traces.
 func (tm *ThroughputMeasurements) AddTraces(ctx context.Context, t ptrace.Traces) {
 	sizer := ptrace.ProtoMarshaler{}
 
@@ -130,30 +138,37 @@ func (tm *ThroughputMeasurements) AddTraces(ctx context.Context, t ptrace.Traces
 	tm.spanCount.Add(ctx, int64(t.SpanCount()))
 }
 
+// LogSize returns the total size in bytes of all log payloads added to this ThroughputMeasurements.
 func (tm *ThroughputMeasurements) LogSize() int64 {
 	return tm.logSize.Val()
 }
 
+// MetricSize returns the total size in bytes of all metric payloads added to this ThroughputMeasurements.
 func (tm *ThroughputMeasurements) MetricSize() int64 {
 	return tm.metricSize.Val()
 }
 
+// TraceSize returns the total size in bytes of all trace payloads added to this ThroughputMeasurements.
 func (tm *ThroughputMeasurements) TraceSize() int64 {
 	return tm.traceSize.Val()
 }
 
+// LogCount return the total number of log records that have been added to this ThroughputMeasurements.
 func (tm *ThroughputMeasurements) LogCount() int64 {
 	return tm.logCount.Val()
 }
 
+// DatapointCount return the total number of datapoints that have been added to this ThroughputMeasurements.
 func (tm *ThroughputMeasurements) DatapointCount() int64 {
 	return tm.datapointCount.Val()
 }
 
+// SpanCount return the total number of spans that have been added to this ThroughputMeasurements.
 func (tm *ThroughputMeasurements) SpanCount() int64 {
 	return tm.spanCount.Val()
 }
 
+// Attributes returns the full set of attributes used on each metric for this ThroughputMeasurements.
 func (tm *ThroughputMeasurements) Attributes() attribute.Set {
 	return tm.attributes
 }
@@ -198,32 +213,37 @@ func createMeasurementsAttributeSet(processorID string, extraAttributes map[stri
 	return attribute.NewSet(attrs...)
 }
 
-type ConcreteThroughputMeasurementsRegistry struct {
+// ResettableThroughputMeasurementsRegistry is a concrete version of ThroughputMeasurementsRegistry that is able to be reset.
+type ResettableThroughputMeasurementsRegistry struct {
 	measurements     *sync.Map
 	emitCountMetrics bool
 }
 
-func NewConcreteThroughputMeasurementsRegistry(emitCountMetrics bool) *ConcreteThroughputMeasurementsRegistry {
-	return &ConcreteThroughputMeasurementsRegistry{
+// NewResettableThroughputMeasurementsRegistry creates a new ResettableThroughputMeasurementsRegistry
+func NewResettableThroughputMeasurementsRegistry(emitCountMetrics bool) *ResettableThroughputMeasurementsRegistry {
+	return &ResettableThroughputMeasurementsRegistry{
 		measurements:     &sync.Map{},
 		emitCountMetrics: emitCountMetrics,
 	}
 }
 
-func (ctmr *ConcreteThroughputMeasurementsRegistry) RegisterThroughputMeasurements(processorID string, measurements *ThroughputMeasurements) {
+// RegisterThroughputMeasurements registers the ThroughputMeasurements with the registry.
+func (ctmr *ResettableThroughputMeasurementsRegistry) RegisterThroughputMeasurements(processorID string, measurements *ThroughputMeasurements) {
 	ctmr.measurements.Store(processorID, measurements)
 }
 
-func (ctmr *ConcreteThroughputMeasurementsRegistry) Reset() {
+// Reset unregisters all throughput measurements in this registry
+func (ctmr *ResettableThroughputMeasurementsRegistry) Reset() {
 	ctmr.measurements = &sync.Map{}
 }
 
-func (ctmr *ConcreteThroughputMeasurementsRegistry) OTLPMeasurements() pmetric.Metrics {
+// OTLPMeasurements returns all the measurements in this registry as OTLP metrics.
+func (ctmr *ResettableThroughputMeasurementsRegistry) OTLPMeasurements() pmetric.Metrics {
 	m := pmetric.NewMetrics()
 	rm := m.ResourceMetrics().AppendEmpty()
 	sm := rm.ScopeMetrics().AppendEmpty()
 
-	ctmr.measurements.Range(func(processor, value any) bool {
+	ctmr.measurements.Range(func(_, value any) bool {
 		tm := value.(*ThroughputMeasurements)
 		OTLPThroughputMeasurements(tm, ctmr.emitCountMetrics).MoveAndAppendTo(sm.Metrics())
 		return true

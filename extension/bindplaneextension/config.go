@@ -35,6 +35,7 @@ type Config struct {
 	ExtraMeasurementsLabels map[string]string
 }
 
+// Validate returns an error if the config is invalid
 func (c Config) Validate() error {
 	if c.MeasurementsInterval < 0 {
 		return errors.New("measurements interval must be postitive or 0")
