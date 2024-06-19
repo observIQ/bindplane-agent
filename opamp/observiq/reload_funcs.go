@@ -21,6 +21,7 @@ import (
 	"path/filepath"
 
 	"github.com/observiq/bindplane-agent/internal/logging"
+	"github.com/observiq/bindplane-agent/internal/measurements"
 	"github.com/observiq/bindplane-agent/internal/report"
 	"github.com/observiq/bindplane-agent/opamp"
 	"go.uber.org/zap"
@@ -61,6 +62,7 @@ func managerReload(client *Client, managerConfigPath string) opamp.ReloadFunc {
 		// Updatable config fields
 		client.currentConfig.AgentName = newConfig.AgentName
 		client.currentConfig.Labels = newConfig.Labels
+		client.currentConfig.MeasurementsInterval = newConfig.MeasurementsInterval
 
 		// Update identity
 		client.ident.agentName = newConfig.AgentName
@@ -101,6 +103,9 @@ func managerReload(client *Client, managerConfigPath string) opamp.ReloadFunc {
 			return false, fmt.Errorf("failed to set agent description: %w ", err)
 		}
 
+		// Set new measurements interval
+		client.measurementsSender.SetInterval(client.currentConfig.MeasurementsIntervalOrDefault())
+
 		return true, nil
 	}
 }
@@ -129,6 +134,9 @@ func collectorReload(client *Client, collectorConfigPath string) opamp.ReloadFun
 
 		// Setup new monitoring after collector has been restarted
 		defer client.startCollectorMonitoring(context.Background())
+
+		// Reset measurements registry
+		measurements.BindplaneAgentThroughputMeasurementsRegistry.Reset()
 
 		// Reload collector
 		if err := client.collector.Restart(context.Background()); err != nil {

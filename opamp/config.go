@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"time"
 
 	"gopkg.in/yaml.v3"
 )
@@ -55,6 +56,8 @@ type Config struct {
 	// Updatable fields
 	Labels    *string `yaml:"labels,omitempty"`
 	AgentName *string `yaml:"agent_name,omitempty"`
+	// TODO: Extra labels for measurements?
+	MeasurementsInterval *time.Duration `yaml:"measurements_interval,omitempty"`
 }
 
 // TLSConfig represents the TLS config to connect to OpAmp server
@@ -103,6 +106,15 @@ func (c Config) ToTLS() (*tls.Config, error) {
 	}
 
 	return tlsConfig, nil
+}
+
+func (c Config) MeasurementsIntervalOrDefault() time.Duration {
+	if c.MeasurementsInterval == nil {
+		// default interval is 10 seconds
+		return 10 * time.Second
+	}
+
+	return *c.MeasurementsInterval
 }
 
 // ParseConfig given a configuration file location will parse the config

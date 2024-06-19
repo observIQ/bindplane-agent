@@ -22,9 +22,11 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"slices"
 	"sync"
 
 	"github.com/observiq/bindplane-agent/collector"
+	"github.com/observiq/bindplane-agent/internal/measurements"
 	"github.com/observiq/bindplane-agent/internal/report"
 	"github.com/observiq/bindplane-agent/internal/version"
 	"github.com/observiq/bindplane-agent/opamp"
@@ -63,6 +65,7 @@ type Client struct {
 	mutex                   sync.Mutex
 	updatingPackage         bool
 	reportManager           *report.Manager
+	measurementsSender      *measurementsSender
 
 	// To signal if we are disconnecting already and not take any actions on connection failures
 	disconnecting bool
@@ -82,10 +85,11 @@ type NewClientArgs struct {
 	Collector     collector.Collector
 	Version       string
 
-	TmpPath             string
-	ManagerConfigPath   string
-	CollectorConfigPath string
-	LoggerConfigPath    string
+	TmpPath              string
+	ManagerConfigPath    string
+	CollectorConfigPath  string
+	LoggerConfigPath     string
+	MeasurementsReporter MeasurementsReporter
 }
 
 // NewClient creates a new OpAmp client
@@ -141,6 +145,9 @@ func NewClient(args *NewClientArgs) (opamp.Client, error) {
 	default:
 		return nil, ErrUnsupportedURL
 	}
+
+	// Create measurements sender
+	observiqClient.measurementsSender = newMeasurementsSender(clientLogger, args.MeasurementsReporter, observiqClient.opampClient, args.Config.MeasurementsIntervalOrDefault())
 
 	return observiqClient, nil
 }
@@ -317,6 +324,13 @@ func (c *Client) onMessageFuncHandler(ctx context.Context, msg *types.MessageDat
 	if msg.PackagesAvailable != nil {
 		if err := c.onPackagesAvailableHandler(msg.PackagesAvailable); err != nil {
 			c.logger.Error("Error while processing Packages Available Change", zap.Error(err))
+		}
+	}
+	if msg.CustomCapabilities != nil {
+		if slices.Contains(msg.CustomCapabilities.Capabilities, measurements.ReportMeasurementsV1Capability) {
+			c.measurementsSender.Start()
+		} else {
+			c.measurementsSender.Stop()
 		}
 	}
 }
