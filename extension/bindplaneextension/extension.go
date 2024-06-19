@@ -18,7 +18,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"math/rand"
 	"sync"
 	"time"
 
@@ -102,10 +101,6 @@ func (b *bindplaneExtension) Dependencies() []component.ID {
 
 func (b *bindplaneExtension) reportMetricsLoop() {
 	defer b.wg.Done()
-
-	// Add jitter to avoid potential resonance with other agents (random interval offset between 0 and 10 seconds)
-	jitter := time.Duration(rand.Float64() * 10 * float64(time.Second))
-	time.Sleep(jitter)
 
 	t := time.NewTicker(b.cfg.MeasurementsInterval)
 	defer t.Stop()
