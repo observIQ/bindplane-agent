@@ -146,11 +146,14 @@ func NewClient(args *NewClientArgs) (opamp.Client, error) {
 		return nil, ErrUnsupportedURL
 	}
 
-	observiqClient.opampClient.SetCustomCapabilities(&protobufs.CustomCapabilities{
+	err = observiqClient.opampClient.SetCustomCapabilities(&protobufs.CustomCapabilities{
 		Capabilities: []string{
 			measurements.ReportMeasurementsV1Capability,
 		},
 	})
+	if err != nil {
+		return nil, fmt.Errorf("error setting custom capabilities: %w", err)
+	}
 
 	// Create measurements sender
 	observiqClient.measurementsSender = newMeasurementsSender(clientLogger, args.MeasurementsReporter, observiqClient.opampClient, args.Config.MeasurementsIntervalOrDefault())
