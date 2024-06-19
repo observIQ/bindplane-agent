@@ -38,7 +38,7 @@ type throughputMeasurementProcessor struct {
 }
 
 func newThroughputMeasurementProcessor(logger *zap.Logger, mp metric.MeterProvider, cfg *Config, processorID string) (*throughputMeasurementProcessor, error) {
-	measurements, err := measurements.NewThroughputMetrics(mp, processorID, cfg.ExtraLabels)
+	measurements, err := measurements.NewThroughputMeasurements(mp, processorID, cfg.ExtraLabels)
 	if err != nil {
 		return nil, fmt.Errorf("create throughput measurements: %w", err)
 	}
