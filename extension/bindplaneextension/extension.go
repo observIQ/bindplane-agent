@@ -28,20 +28,23 @@ import (
 	"github.com/open-telemetry/opentelemetry-collector-contrib/extension/opampcustommessages"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/pdata/pmetric"
+	"go.uber.org/zap"
 )
 
 type bindplaneExtension struct {
+	logger                  *zap.Logger
 	cfg                     *Config
-	ctmr                    *measurements.ConcreteThroughputMeasurementsRegistry
+	ctmr                    *measurements.ResettableThroughputMeasurementsRegistry
 	customCapabilityHandler opampcustommessages.CustomCapabilityHandler
 	doneChan                chan struct{}
 	wg                      *sync.WaitGroup
 }
 
-func newBindplaneExtension(cfg *Config) *bindplaneExtension {
+func newBindplaneExtension(logger *zap.Logger, cfg *Config) *bindplaneExtension {
 	return &bindplaneExtension{
+		logger:   logger,
 		cfg:      cfg,
-		ctmr:     measurements.NewConcreteThroughputMeasurementsRegistry(false),
+		ctmr:     measurements.NewResettableThroughputMeasurementsRegistry(false),
 		doneChan: make(chan struct{}),
 		wg:       &sync.WaitGroup{},
 	}
@@ -110,7 +113,10 @@ func (b *bindplaneExtension) reportMetricsLoop() {
 	for {
 		select {
 		case <-t.C:
-			b.reportMetrics()
+			err := b.reportMetrics()
+			if err != nil {
+				b.logger.Error("Failed to report throughput metrics.", zap.Error(err))
+			}
 		case <-b.doneChan:
 			return
 		}
