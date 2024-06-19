@@ -11,7 +11,7 @@ require (
 	github.com/observiq/bindplane-agent/exporter/googlecloudexporter v1.59.0
 	github.com/observiq/bindplane-agent/exporter/googlemanagedprometheusexporter v1.59.0
 	github.com/observiq/bindplane-agent/exporter/snowflakeexporter v1.59.0
-	github.com/observiq/bindplane-agent/internal/measurements v0.0.0-00010101000000-000000000000
+	github.com/observiq/bindplane-agent/internal/measurements v1.55.0
 	github.com/observiq/bindplane-agent/internal/report v1.59.0
 	github.com/observiq/bindplane-agent/packagestate v1.59.0
 	github.com/observiq/bindplane-agent/processor/datapointcountprocessor v1.59.0

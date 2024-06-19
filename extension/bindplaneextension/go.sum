@@ -50,8 +50,8 @@ github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 h1:C3w9PqII01/Oq
 github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822/go.mod h1:+n7T8mK8HuQTcFwEeznm/DIxMOiR9yIdICNftLE1DvQ=
 github.com/open-telemetry/opamp-go v0.14.0 h1:KoziIK+wsFojhUXNTkCSTnCPf0eCMqFAaccOs0HrWIY=
 github.com/open-telemetry/opamp-go v0.14.0/go.mod h1:XOGCigljsLSTZ8FfLwvat0M1QDj3conIIgRa77BWrKs=
-github.com/open-telemetry/opentelemetry-collector-contrib/extension/opampcustommessages v0.101.0 h1:Rpy8DtShnv9W0Q+YSQnxvTTcdzV4vsRcDZK/PiltzX0=
-github.com/open-telemetry/opentelemetry-collector-contrib/extension/opampcustommessages v0.101.0/go.mod h1:wSUXKiv5wIw35T9b1qpGYKolbUxldm+CGEixLQG97cQ=
+github.com/open-telemetry/opentelemetry-collector-contrib/extension/opampcustommessages v0.102.0 h1:POJgP7m+Jkc/i/BM77ip7VwZQs07vFnbgzHdtCQJig4=
+github.com/open-telemetry/opentelemetry-collector-contrib/extension/opampcustommessages v0.102.0/go.mod h1:wSUXKiv5wIw35T9b1qpGYKolbUxldm+CGEixLQG97cQ=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/prometheus/client_golang v1.19.1 h1:wZWJDwK+NameRJuPGDhlnFgx8e8HN3XHQeLaYJFJBOE=
