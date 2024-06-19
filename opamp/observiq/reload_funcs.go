@@ -21,7 +21,6 @@ import (
 	"path/filepath"
 
 	"github.com/observiq/bindplane-agent/internal/logging"
-	"github.com/observiq/bindplane-agent/internal/measurements"
 	"github.com/observiq/bindplane-agent/internal/report"
 	"github.com/observiq/bindplane-agent/opamp"
 	"go.uber.org/zap"
@@ -134,9 +133,6 @@ func collectorReload(client *Client, collectorConfigPath string) opamp.ReloadFun
 
 		// Setup new monitoring after collector has been restarted
 		defer client.startCollectorMonitoring(context.Background())
-
-		// Reset measurements registry
-		measurements.BindplaneAgentThroughputMeasurementsRegistry.Reset()
 
 		// Reload collector
 		if err := client.collector.Restart(context.Background()); err != nil {
