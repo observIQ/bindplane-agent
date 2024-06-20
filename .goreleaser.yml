@@ -741,6 +741,7 @@ release:
 
 # https://goreleaser.com/customization/changelog/
 changelog:
+  disable: false
   use: github
   sort: asc
   groups:
