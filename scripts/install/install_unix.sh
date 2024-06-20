@@ -24,23 +24,32 @@ if command -v systemctl > /dev/null 2>&1; then
   SVC_PRE=systemctl
 elif command -v service > /dev/null 2>&1; then
   SVC_PRE=service
+elif command -v mkssys > /dev/null 2>&1; then
+  SVC_PRE=mkssys
 fi
 
 # Script Constants
 COLLECTOR_USER="observiq-otel-collector"
 TMP_DIR=${TMPDIR:-"/tmp"} # Allow this to be overriden by cannonical TMPDIR env var
 MANAGEMENT_YML_PATH="/opt/observiq-otel-collector/manager.yaml"
-PREREQS="curl printf $SVC_PRE sed uname cut"
+PREREQS="curl printf $SVC_PRE sed uname cut tr tar sudo"
 SCRIPT_NAME="$0"
 INDENT_WIDTH='  '
 indent=""
 
-# out_file_path is the full path to the downloaded package (e.g. "/tmp/observiq-otel-collector_linux_amd64.deb")
+# Require bash for AIX to create a standardized environment
+if [ "$(uname -s)" != "AIX" ]; then
+  PREREQS="bash $PREREQS"
+fi
+
+# out_file_path is the full path to the downloaded package (e.g. "/tmp/observiq-otel-collector_{os}_amd64.deb")
 out_file_path="unknown"
+os="unknown"
+os_arch="unknown"
 
 # Colors
 num_colors=$(tput colors 2>/dev/null)
-if test -n "$num_colors" && test "$num_colors" -ge 8; then
+if [ "$(uname -s)" != AIX ] && test -n "$num_colors" && test "$num_colors" -ge 8; then
   bold="$(tput bold)"
   underline="$(tput smul)"
   # standout can be bold or reversed colors dependent on terminal
@@ -72,8 +81,8 @@ fi
 
 # Helper Functions
 printf() {
-  if command -v sed >/dev/null; then
-    command printf -- "$@" | sed -r "$sed_ignore s/^/$indent/g"  # Ignore sole reset characters if defined
+  if [ "$(uname -s)" != "AIX" ] && command -v sed >/dev/null; then
+    command printf -- "$@" | sed -n "$sed_ignore s/^/$indent/g"  # Ignore sole reset characters if defined
   else
     # Ignore $* suggestion as this breaks the output
     # shellcheck disable=SC2145
@@ -181,7 +190,7 @@ Usage:
       Example: '-l http://my.domain.org/observiq-otel-collector' will download from there.
 
   $(fg_yellow '-b, --base-url')
-      Defines the base of the download URL as '{base_url}/v{version}/{PACKAGE_NAME}_v{version}_linux_{os_arch}.{package_type}'.
+      Defines the base of the download URL as '{base_url}/v{version}/{PACKAGE_NAME}_v{version}_{os}_{os_arch}.{package_type}'.
       If not provided, this will default to '$DOWNLOAD_BASE'.
       Example: '-b http://my.domain.org/observiq-otel-collector/binaries' will be used as the base of the download URL.
 
@@ -315,9 +324,9 @@ setup_installation()
 
 set_file_name() {
   if [ -z "$version" ] ; then
-    package_file_name="${PACKAGE_NAME}_linux_${arch}.${package_type}"
+    package_file_name="${PACKAGE_NAME}_${os}_${os_arch}.${package_type}"
   else
-    package_file_name="${PACKAGE_NAME}_v${version}_linux_${arch}.${package_type}"
+    package_file_name="${PACKAGE_NAME}_v${version}_${os}_${os_arch}.${package_type}"
   fi
     out_file_path="$TMP_DIR/$package_file_name"
 }
@@ -353,7 +362,6 @@ set_proxy()
 
 set_os_arch()
 {
-  os_arch=$(uname -m)
   case "$os_arch" in 
     # arm64 strings. These are from https://stackoverflow.com/questions/45125516/possible-values-for-uname-m
     aarch64|arm64|aarch64_be|armv8b|armv8l)
@@ -369,6 +377,15 @@ set_os_arch()
     ppc64le)
       os_arch="ppc64le"
       ;;
+    powerpc)
+      if [ "$(uname -s)" = "AIX" ] && command -v bootinfo > /dev/null && [ "$(bootinfo -y)" = "64" ]; then
+        os_arch="ppc64"
+      elif command -v bootinfo > /dev/null; then
+        error_exit "$LINENO" "Command 'bootinfo' not found, OS likely isn't AIX, but we expect it to be"
+      else
+        error_exit "$LINENO" "uname returned arch of 'powerpc', but OS is either not AIX or not 64 bit. 'uname -s': $(uname -s), 'bootinfo -y': $(bootinfo -y)"
+      fi
+      ;;
     # armv6/32bit. These are what raspberry pi can return, which is the main reason we support 32-bit arm
     arm|armv6l|armv7l)
       os_arch="arm"
@@ -383,7 +400,7 @@ set_os_arch()
 set_package_type()
 {
   # if package_path is set get the file extension otherwise look at what's available on the system
-  if [ -n "$package_path" ]; then
+  if [ -n "$package_path" ] && [ "$(uname -s)" != "AIX" ]; then
     case "$package_path" in
       *.deb)
         package_type="deb"
@@ -398,10 +415,12 @@ set_package_type()
   else
     if command -v dpkg > /dev/null 2>&1; then
         package_type="deb"
+    elif command -v mkssys > /dev/null 2>&1; then
+        package_type="mkssys"
     elif command -v rpm > /dev/null 2>&1; then
         package_type="rpm"
     else
-        error_exit "$LINENO" "Could not find dpkg or rpm on the system"
+        error_exit "$LINENO" "Could not find mkssys, dpkg or rpm on the system"
     fi
   fi
 
@@ -430,7 +449,7 @@ set_download_urls()
       base_url=$DOWNLOAD_BASE
     fi
 
-    collector_download_url="$base_url/v$version/${PACKAGE_NAME}_v${version}_linux_${os_arch}.${package_type}"
+    collector_download_url="$base_url/v$version/${PACKAGE_NAME}_v${version}_${os}_${os_arch}.${package_type}"
   else
     collector_download_url="$url"
   fi
@@ -534,25 +553,35 @@ os_check()
     Linux)
       succeeded
       ;;
+    AIX)
+      succeeded
+      ;;
     *)
       failed
       error_exit "$LINENO" "The operating system $(fg_yellow "$os_type") is not supported by this script."
       ;;
   esac
+
+  # Create lowercase os variable
+  os=$(echo "$os_type" | tr '[:upper:]' '[:lower:]')
 }
 
 # This will check if the system architecture is supported.
 os_arch_check()
 {
   info "Checking for valid operating system architecture..."
-  arch=$(uname -m)
-  case "$arch" in 
-    x86_64|aarch64|ppc64|ppc64le|arm64|aarch64_be|armv8b|armv8l|arm|armv6l|armv7l)
+  if [ "$(uname -s)" = "AIX" ]; then
+    os_arch=$(uname -p)
+  else
+    os_arch=$(uname -m)
+  fi
+  case "$os_arch" in 
+    x86_64|aarch64|powerpc|ppc64|ppc64le|arm64|aarch64_be|armv8b|armv8l|arm|armv6l|armv7l)
       succeeded
       ;;
     *)
       failed
-      error_exit "$LINENO" "The operating system architecture $(fg_yellow "$arch") is not supported by this script."
+      error_exit "$LINENO" "The operating system architecture $(fg_yellow "$os_arch") is not supported by this script."
       ;;
   esac
 }
@@ -582,17 +611,32 @@ dependencies_check()
   succeeded
 }
 
-# This will check to ensure either dpkg or rpm is installedon the system
+# This will check to ensure either dpkg or rpm is installed on the system
 package_type_check()
 {
   info "Checking for package manager..."
   if command -v dpkg > /dev/null 2>&1; then
       succeeded
+  # Check ALL of the AIX commands needed
+  elif command -v mkssys > /dev/null 2>&1 \
+    && command -v mkgroup > /dev/null 2>&1 \
+    && command -v useradd > /dev/null 2>&1 \
+    && command -v startsrc > /dev/null 2>&1 \
+    && command -v stopsrc > /dev/null 2>&1 \
+    && command -v lssrc > /dev/null 2>&1 \
+    && command -v mkitab > /dev/null 2>&1 \
+    && command -v rmitab > /dev/null 2>&1 \
+    && command -v lsitab > /dev/null 2>&1; then
+      succeeded
   elif command -v rpm > /dev/null 2>&1; then
       succeeded
   else
       failed
-      error_exit "$LINENO" "Could not find dpkg or rpm on the system"
+      if [ "$(uname -s)" = "AIX" ]; then
+        error_exit "$LINENO" "Could not find AIX installation tools on the system"
+      else
+        error_exit "$LINENO" "Could not find dpkg or rpm on the system"
+      fi
   fi
 }
 
@@ -601,7 +645,7 @@ latest_version()
 {
   curl -sSL -H"Accept: application/vnd.github.v3+json" https://api.github.com/repos/observIQ/observiq-otel-collector/releases/latest | \
     grep "\"tag_name\"" | \
-    sed -r 's/ *"tag_name": "v([0-9]+\.[0-9]+\.[0-9+])",/\1/'
+    cut -d: -f2 | tr -d '"' | tr -d ' ' | tr -d ',' | tr -d 'v'
 }
 
 # This will install the package by downloading the archived agent,
@@ -634,10 +678,11 @@ install_package()
   # if target install directory doesn't exist and we're using dpkg ensure a clean state 
   # by checking for the package and running purge if it exists.
   if [ ! -d "/opt/observiq-otel-collector" ] && [ "$package_type" = "deb" ]; then
+    info "Running dpkg --purge to ensure a clean state"
     dpkg -s "observiq-otel-collector" > /dev/null 2>&1 && dpkg --purge "observiq-otel-collector" > /dev/null 2>&1
   fi
 
-  unpack_package || error_exit "$LINENO" "Failed to extract package"
+  install_package_file || error_exit "$LINENO" "Failed to extract package"
   succeeded
 
   # If an endpoint was specified, we need to write the manager.yaml
@@ -660,7 +705,7 @@ install_package()
       systemctl enable --now observiq-otel-collector > /dev/null 2>&1 || error_exit "$LINENO" "Failed to enable service"
       succeeded
     fi
-  else
+  elif [ "$SVC_PRE" = "service" ]; then
     case "$(service observiq-otel-collector status)" in
       *running*)
         # The service is running.
@@ -676,17 +721,89 @@ install_package()
         succeeded
         ;;
     esac
+  elif [ "$SVC_PRE" = "mkssys" ]; then
+    case "$(lssrc -s observiq-otel-collector | grep collector)" in
+      *active*)
+        # The service is running.
+        # We'll want to restart.
+        info "Restarting service..."
+        # AIX does not support service "restart", so stop and start instead
+        stopsrc -s observiq-otel-collector
+        # Start the service with the proper environment variables
+        startsrc -s observiq-otel-collector -a start -e "$(cat /etc/observiq-otel-collector.aix.env)"
+        succeeded
+        ;;
+      *inoperative*)
+        info "Starting service..."
+        # Start the service with the proper environment variables
+        startsrc -s observiq-otel-collector -a start -e "$(cat /etc/observiq-otel-collector.aix.env)"
+        succeeded
+        ;;
+      *)
+        info "Creating, enabling and starting service..."
+        # Add the service, removing it if it already exists in order
+        # to make sure we have the most recent version
+        if lssrc -s observiq-otel-collector > /dev/null 2>&1; then
+          rmssys -s observiq-otel-collector
+        else
+          mkssys -s observiq-otel-collector -p /opt/observiq-otel-collector/observiq-otel-collector -u "$(id -u observiq-otel-collector)" -S -n15 -f9 -a '--config config.yaml --manager manager.yaml --logging logging.yaml'
+        fi
+
+        # Install the service to start on boot
+        # Removing it if it exists, in order to have the most recent version
+        if lsitab oiqcollector > /dev/null 2>&1; then
+          rmitab oiqcollector
+        else
+          # shellcheck disable=SC2016
+          mkitab 'oiqcollector:23456789:respawn:startsrc -s observiq-otel-collector -a start -e "$(cat /etc/observiq-otel-collector.aix.env)"'
+        fi
+
+        # Start the service with the proper environment variables
+        startsrc -s observiq-otel-collector -a start -e "$(cat /etc/observiq-otel-collector.aix.env)"
+
+        succeeded
+        ;;
+    esac
+  else
+    # This is an error state that should never be reached
+    error_exit "$LINENO" "Found an invalid SVC_PRE value in install_package()"
   fi
 
   success "BindPlane Agent installation complete!"
   decrease_indent
 }
 
-unpack_package()
+# Install on AIX manually from tar.gz file
+install_aix()
+{
+  # Create the observiq-otel-collector user and group. Group must be first.
+  mkgroup "$COLLECTOR_USER" > /dev/null 2>&1
+  useradd -d /opt/observiq-otel-collector -g "$COLLECTOR_USER" -s "$(which bash)" "$COLLECTOR_USER" > /dev/null 2>&1
+
+  # Create the install directory
+  mkdir -p /opt/observiq-otel-collector > /dev/null 2>&1
+
+  # Extract 
+  zcat "$out_file_path" | tar -Uxvf - -C /opt/observiq-otel-collector > /dev/null 2>&1
+
+  # Move files to appropriate locations
+  mv /opt/observiq-otel-collector/opentelemetry-java-contrib-jmx-metrics.jar /opt/ > /dev/null 2>&1
+  mv /opt/observiq-otel-collector/install/observiq-otel-collector.aix.env /etc/ > /dev/null 2>&1
+
+  # Set ownership
+  chown -R "$COLLECTOR_USER":"$COLLECTOR_USER" /opt/observiq-otel-collector > /dev/null 2>&1
+  chown "$COLLECTOR_USER":"$COLLECTOR_USER" /opt/opentelemetry-java-contrib-jmx-metrics.jar > /dev/null 2>&1
+  chown "$COLLECTOR_USER":"$COLLECTOR_USER" /etc/observiq-otel-collector.aix.env > /dev/null 2>&1
+}
+
+install_package_file()
 {
   case "$package_type" in
     deb)
       dpkg --force-confold -i "$out_file_path" > /dev/null || error_exit "$LINENO" "Failed to unpack package"
+      ;;
+    mkssys)
+      install_aix
       ;;
     rpm)
       rpm -U "$out_file_path" > /dev/null || error_exit "$LINENO" "Failed to unpack package"
@@ -751,11 +868,22 @@ display_results()
     return 0
 }
 
+uninstall_aix()
+{
+  # Remove files
+  rm -rf /opt/observiq-otel-collector > /dev/null 2>&1
+  rm -f /opt/opentelemetry-java-contrib-jmx-metrics.jar > /dev/null 2>&1
+  rm -f /etc/observiq-otel-collector.aix.env > /dev/null 2>&1
+}
+
 uninstall_package()
 {
   case "$package_type" in
     deb)
       dpkg -r "observiq-otel-collector" > /dev/null 2>&1
+      ;;
+    mkssys)
+      uninstall_aix
       ;;
     rpm)
       rpm -e "observiq-otel-collector" > /dev/null 2>&1
@@ -788,7 +916,7 @@ uninstall()
     info "Disabling service..."
     systemctl disable observiq-otel-collector > /dev/null 2>&1 || error_exit "$LINENO" "Failed to disable service"
     succeeded
-  else
+  elif [ "$SVC_PRE" = "service" ]; then
     info "Stopping service..."
     service observiq-otel-collector stop
     succeeded
@@ -797,6 +925,31 @@ uninstall()
     chkconfig observiq-otel-collector on
     # rm -f /etc/init.d/observiq-otel-collector
     succeeded
+  elif [ "$SVC_PRE" = "mkssys" ]; then
+    # Using case here to bypass =~ missing in the POSIX standard
+    case "$(lssrc -s observiq-otel-collector | grep collector)" in
+      *active*)
+        # The service is running. Stop it before removing it.
+        info "Stopping service..."
+        stopsrc -s observiq-otel-collector
+        ;;
+    esac
+
+    # Remove the service
+    info "Disabling service..."
+    if lsitab oiqcollector > /dev/null 2>&1; then
+      # Removing start on boot for the service
+      rmitab oiqcollector
+    fi
+    if lssrc -s observiq-otel-collector > /dev/null 2>&1; then
+      # Removing actual service entry
+      rmssys -s observiq-otel-collector
+    fi
+
+    succeeded
+  else
+    # This is an error state that should never be reached
+    error_exit "Found an invalid SVC_PRE value in uninstall()"
   fi
 
   info "Removing any existing manager.yaml..."
@@ -809,6 +962,19 @@ uninstall()
   decrease_indent
 
   banner "$(fg_green Uninstallation Complete!)"
+}
+
+check_aix_name_length()
+{
+  aix_name_size="$(lsattr -El sys0 -a max_logname | cut -d" " -f 2)"
+  if [ "$aix_name_size" -lt 24 ]; then
+    error "$LINENO" "Current system will result in '3004-694 Error adding Name is too long.' when attempting to create group and user"
+    error "Current max: $aix_name_size"
+    error "Please raise your limit to 24 characters or greater by issuing these command:"
+    error "    chdev -lsys0 -a max_logname=<NUM>"
+    error "and then rebooting the system before attempting to run this script again"
+    error_exit "Reference: https://www.ibm.com/support/pages/aix-security-change-maximum-length-user-name-group-name-or-password"
+  fi
 }
 
 main()
@@ -862,6 +1028,11 @@ main()
         ;;
       esac
     done
+  fi
+
+  # AIX needs a special check
+  if [ "$os" = "aix" ]; then
+    check_aix_name_length
   fi
 
   connection_check
