@@ -219,7 +219,9 @@ release-prep:
 # Build and sign, skip release and ignore dirty git tree
 .PHONY: release-test
 release-test:
-	GORELEASER_CURRENT_TAG=$(shell git tag | grep -E -i '^v[0-9]+\.[0-9]+\.[0-9]+' | sort -r --version-sort | head -n1) goreleaser release --parallelism 4 --skip=publish --skip=validate --skip=sign --clean --snapshot
+# If there is no MSI in the root dir, we'll create a dummy one so that goreleaser can complete successfully
+	if [ ! -e "./observiq-otel-collector.msi" ]; then touch ./observiq-otel-collector.msi; fi
+	GORELEASER_CURRENT_TAG=$(VERSION) goreleaser release --parallelism 4 --skip=publish --skip=validate --skip=sign --clean --snapshot
 
 .PHONY: for-all
 for-all:
