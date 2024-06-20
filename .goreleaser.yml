@@ -1,3 +1,5 @@
+version: 2
+
 project_name: observiq-otel-collector
 
 before:
@@ -575,7 +577,7 @@ release:
 
 # https://goreleaser.com/customization/changelog/
 changelog:
-  skip: false
+  disable: false
   use: github
   sort: asc
   groups:
