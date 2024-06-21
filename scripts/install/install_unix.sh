@@ -807,8 +807,8 @@ install_aix()
   mkgroup "$COLLECTOR_USER" > /dev/null 2>&1
   useradd -d /opt/observiq-otel-collector -g "$COLLECTOR_USER" -s "$(which bash)" "$COLLECTOR_USER" > /dev/null 2>&1
 
-  # Create the install directory
-  mkdir -p /opt/observiq-otel-collector > /dev/null 2>&1
+  # Create the install & storage directories
+  mkdir -p /opt/observiq-otel-collector/storage > /dev/null 2>&1
 
   # Extract 
   zcat "$out_file_path" | tar -Uxvf - -C /opt/observiq-otel-collector > /dev/null 2>&1
