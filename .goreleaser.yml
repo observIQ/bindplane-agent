@@ -137,7 +137,7 @@ archives:
         dst: "install/sysconfig"
         strip_parent: true
       - src: release_deps/observiq-otel-collector.aix.env
-        dst: "install/observiq-otel-collector.aix.env"
+        dst: "install"
         strip_parent: true
     format_overrides:
       - goos: windows
