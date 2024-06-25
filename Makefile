@@ -97,7 +97,7 @@ install-tools:
 	cd $(TOOLS_MOD_DIR) && go install github.com/securego/gosec/v2/cmd/gosec
 # update cosign in release.yml when updating this version
 # update cosign in docs/verify-signature.md when updating this version
-	cd $(TOOLS_MOD_DIR) && go install github.com/sigstore/cosign/cmd/cosign
+	go install github.com/sigstore/cosign/cmd/cosign@v1.13.1
 	cd $(TOOLS_MOD_DIR) && go install github.com/uw-labs/lichen
 	cd $(TOOLS_MOD_DIR) && go install github.com/vektra/mockery/v2
 	cd $(TOOLS_MOD_DIR) && go install golang.org/x/tools/cmd/goimports
