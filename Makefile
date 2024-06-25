@@ -231,9 +231,11 @@ for-all:
 	@echo "running $${CMD} in root"
 	@$${CMD}
 	@set -e; for dir in $(ALL_MODULES); do \
-	  (cd "$${dir}" && \
-	  	echo "running $${CMD} in $${dir}" && \
-	 	$${CMD} ); \
+	  if [ $${dir} == internal/tools ]; then \
+	    continue; \
+	  else \
+	    (cd "$${dir}" && echo "running $${CMD} in $${dir}" && $${CMD} ); \
+	  fi \
 	done
 
 # Release a new version of the agent. This will also tag all submodules
