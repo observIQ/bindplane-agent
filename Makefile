@@ -7,6 +7,9 @@ ALL_MDATAGEN_MODULES := $(shell find . -type f -name "metadata.yaml" -exec dirna
 # All source code files
 ALL_SRC := $(shell find . -name '*.go' -o -name '*.sh' -o -name 'Dockerfile*' -type f | sort)
 
+# All directories that can be passed to 'test'
+TEST_MODULES := $(shell find . -type f -name "go.mod" -exec dirname {} \; | sort | grep -v internal/tools)
+
 OUTDIR=./dist
 GOOS ?= $(shell go env GOOS)
 GOARCH ?= $(shell go env GOARCH)
@@ -117,7 +120,7 @@ misspell-fix:
 
 .PHONY: test
 test:
-	$(MAKE) for-all CMD="go test -race ./..."
+	$(MAKE) for-all-test CMD="go test -race ./..."
 
 .PHONY: test-with-cover
 test-with-cover:
@@ -231,11 +234,19 @@ for-all:
 	@echo "running $${CMD} in root"
 	@$${CMD}
 	@set -e; for dir in $(ALL_MODULES); do \
-	  if [ $${dir} == internal/tools ]; then \
-	    continue; \
-	  else \
-	    (cd "$${dir}" && echo "running $${CMD} in $${dir}" && $${CMD} ); \
-	  fi \
+	  (cd "$${dir}" && \
+	  	echo "running $${CMD} in $${dir}" && \
+	 	$${CMD} ); \
+	done
+
+.PHONY: for-all-test
+for-all-test:
+	@echo "running $${CMD} in root"
+	@$${CMD}
+	@set -e; for dir in $(TEST_MODULES); do \
+	  (cd "$${dir}" && \
+	  	echo "running $${CMD} in $${dir}" && \
+	 	$${CMD} ); \
 	done
 
 # Release a new version of the agent. This will also tag all submodules
