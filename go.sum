@@ -2632,8 +2632,8 @@ go.opentelemetry.io/collector/extension/zpagesextension v0.102.1 h1:YV+ejCgOBJjA
 go.opentelemetry.io/collector/extension/zpagesextension v0.102.1/go.mod h1:/CZXg9/C64k85/k4bc7NFbCNP/MiPUZucbxPUN04ny4=
 go.opentelemetry.io/collector/featuregate v1.9.0 h1:mC4/HnR5cx/kkG1RKOQAvHxxg5Ktmd9gpFdttPEXQtA=
 go.opentelemetry.io/collector/featuregate v1.9.0/go.mod h1:PsOINaGgTiFc+Tzu2K/X2jP+Ngmlp7YKGV1XrnBkH7U=
-go.opentelemetry.io/collector/filter v0.102.0 h1:2K4Q/l4b+tglMAQmxpscuCr/juyozyPx17Q6Dfm2FwU=
-go.opentelemetry.io/collector/filter v0.102.0/go.mod h1:zDVjFCeeVct7hYwejzx+aRC1dbHaPsvv/Ob1SvCiQjE=
+go.opentelemetry.io/collector/filter v0.102.1 h1:qHVt97V3iCfAwzAzddbgWH9Xm5k2sGaU3hPRHB7uSwE=
+go.opentelemetry.io/collector/filter v0.102.1/go.mod h1:6vrr9XoD+fJekeTz5G01mCy6XqMBsARgbJruXcUnhQU=
 go.opentelemetry.io/collector/otelcol v0.102.1 h1:JdRG3ven+c5k703QpZG5bxJi4JJOnWaNP/EJvN+oYnI=
 go.opentelemetry.io/collector/otelcol v0.102.1/go.mod h1:kHf9KBXOLZXajR1On8XJbBBGcgh2I2+/mVVroPzOLJU=
 go.opentelemetry.io/collector/pdata v1.9.0 h1:qyXe3HEVYYxerIYu0rzgo1Tx2d1Zs6iF+TCckbHLFOw=

@@ -366,7 +366,7 @@ require (
 	go.opentelemetry.io/collector/confmap/provider/httpsprovider v0.102.1 // indirect
 	go.opentelemetry.io/collector/confmap/provider/yamlprovider v0.102.1 // indirect
 	go.opentelemetry.io/collector/extension/auth v0.102.1 // indirect
-	go.opentelemetry.io/collector/filter v0.102.0 // indirect
+	go.opentelemetry.io/collector/filter v0.102.1 // indirect
 	go.opentelemetry.io/collector/pdata/testdata v0.102.1 // indirect
 	go.opentelemetry.io/collector/service v0.102.1 // indirect
 	go.opentelemetry.io/contrib/config v0.7.0 // indirect
