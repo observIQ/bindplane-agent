@@ -13,6 +13,14 @@ import (
 	"go.opentelemetry.io/collector/extension/extensiontest"
 )
 
+func TestComponentFactoryType(t *testing.T) {
+	require.Equal(t, "bindplane", NewFactory().Type().String())
+}
+
+func TestComponentConfigStruct(t *testing.T) {
+	require.NoError(t, componenttest.CheckConfigStruct(NewFactory().CreateDefaultConfig()))
+}
+
 func TestComponentLifecycle(t *testing.T) {
 	factory := NewFactory()
 
@@ -21,7 +29,7 @@ func TestComponentLifecycle(t *testing.T) {
 	cfg := factory.CreateDefaultConfig()
 	sub, err := cm.Sub("tests::config")
 	require.NoError(t, err)
-	require.NoError(t, component.UnmarshalConfig(sub, cfg))
+	require.NoError(t, sub.Unmarshal(&cfg))
 	t.Run("shutdown", func(t *testing.T) {
 		e, err := factory.CreateExtension(context.Background(), extensiontest.NewNopCreateSettings(), cfg)
 		require.NoError(t, err)
