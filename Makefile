@@ -273,6 +273,7 @@ scan-licenses:
 .PHONY: generate
 generate:
 	$(MAKE) for-all CMD="go generate ./..."
+	$(MAKE) fmt
 
 .PHONY: create-plugin-docs
 create-plugin-docs:
