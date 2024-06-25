@@ -8,7 +8,7 @@ require (
 	github.com/goreleaser/goreleaser v1.22.1
 	github.com/mgechev/revive v1.3.7
 	github.com/open-telemetry/opentelemetry-collector-contrib/cmd/mdatagen v0.96.0
-	github.com/securego/gosec/v2 v2.20.0
+	github.com/securego/gosec/v2 v2.18.2
 	github.com/uw-labs/lichen v0.1.7
 	github.com/vektra/mockery/v2 v2.40.2
 	golang.org/x/tools v0.22.0
