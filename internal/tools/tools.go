@@ -11,9 +11,10 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//go:build tools
 
-// Package main exists to provide imports for tools used in development
-package main
+// Package tools exists to provide imports for tools used in development
+package tools
 
 import (
 	_ "github.com/client9/misspell/cmd/misspell"
