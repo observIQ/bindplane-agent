@@ -13,6 +13,8 @@ GOARCH ?= $(shell go env GOARCH)
 
 INTEGRATION_TEST_ARGS?=-tags integration
 
+TOOLS_MOD_DIR := ./internal/tools
+
 ifeq ($(GOOS), windows)
 EXT?=.exe
 else
@@ -88,18 +90,18 @@ build-windows-amd64:
 # tool-related commands
 .PHONY: install-tools
 install-tools:
-	go install github.com/client9/misspell/cmd/misspell@v0.3.4
-	go install github.com/google/addlicense@v1.1.1
-	go install github.com/mgechev/revive@v1.3.7
-	go install github.com/open-telemetry/opentelemetry-collector-contrib/cmd/mdatagen@v0.96.0
-	go install github.com/securego/gosec/v2/cmd/gosec@v2.18.2
+	cd $(TOOLS_MOD_DIR) && go install github.com/client9/misspell/cmd/misspell
+	cd $(TOOLS_MOD_DIR) && go install github.com/google/addlicense
+	cd $(TOOLS_MOD_DIR) && go install github.com/mgechev/revive
+	cd $(TOOLS_MOD_DIR) && go install go.opentelemetry.io/collector/cmd/mdatagen
+	cd $(TOOLS_MOD_DIR) && go install github.com/securego/gosec/v2/cmd/gosec
 # update cosign in release.yml when updating this version
 # update cosign in docs/verify-signature.md when updating this version
 	go install github.com/sigstore/cosign/cmd/cosign@v1.13.1
-	go install github.com/uw-labs/lichen@v0.1.7
-	go install github.com/vektra/mockery/v2@v2.42.0
-	go install golang.org/x/tools/cmd/goimports@latest
-	go install github.com/goreleaser/goreleaser@v1.22.1
+	cd $(TOOLS_MOD_DIR) && go install github.com/uw-labs/lichen
+	cd $(TOOLS_MOD_DIR) && go install github.com/vektra/mockery/v2
+	cd $(TOOLS_MOD_DIR) && go install golang.org/x/tools/cmd/goimports
+	cd $(TOOLS_MOD_DIR) && go install github.com/goreleaser/goreleaser
 
 .PHONY: lint
 lint:
@@ -148,10 +150,13 @@ gosec:
 	  -exclude-dir=updater \
 	  -exclude-dir=receiver/sapnetweaverreceiver \
 	  -exclude-dir=extension/bindplaneextension \
+	  -exclude-dir=processor/snapshotprocessor \
+	  -exclude-dir=internal/tools \
 	  ./...
 # exclude the testdata dir; it contains a go program for testing.
 	cd updater; gosec -exclude-dir internal/service/testdata ./...
 	cd extension/bindplaneextension; gosec ./...
+	cd processor/snapshotprocessor; gosec ./...
 
 # This target performs all checks that CI will do (excluding the build itself)
 .PHONY: ci-checks
@@ -217,7 +222,9 @@ release-prep:
 # Build and sign, skip release and ignore dirty git tree
 .PHONY: release-test
 release-test:
-	GORELEASER_CURRENT_TAG=$(shell git tag | grep -E -i '^v[0-9]+\.[0-9]+\.[0-9]+' | sort -r --version-sort | head -n1) goreleaser release --parallelism 4 --skip=publish --skip=validate --skip=sign --clean --snapshot
+# If there is no MSI in the root dir, we'll create a dummy one so that goreleaser can complete successfully
+	if [ ! -e "./observiq-otel-collector.msi" ]; then touch ./observiq-otel-collector.msi; fi
+	GORELEASER_CURRENT_TAG=$(VERSION) goreleaser release --parallelism 4 --skip=publish --skip=validate --skip=sign --clean --snapshot
 
 .PHONY: for-all
 for-all:
@@ -266,6 +273,7 @@ scan-licenses:
 .PHONY: generate
 generate:
 	$(MAKE) for-all CMD="go generate ./..."
+	$(MAKE) fmt
 
 .PHONY: create-plugin-docs
 create-plugin-docs:
