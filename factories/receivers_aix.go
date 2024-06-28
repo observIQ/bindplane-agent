@@ -21,20 +21,9 @@ import (
 	"github.com/observiq/bindplane-agent/receiver/sapnetweaverreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/collectdreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/filelogreceiver"
-	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/fluentforwardreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/hostmetricsreceiver"
-	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/influxdbreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/jmxreceiver"
-	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/memcachedreceiver"
-	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/mysqlreceiver"
-	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/nginxreceiver"
-	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/opencensusreceiver"
-	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/postgresqlreceiver"
-	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/rabbitmqreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/saphanareceiver"
-	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/snmpreceiver"
-	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/sqlqueryreceiver"
-	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/sqlserverreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/statsdreceiver"
 	"go.opentelemetry.io/collector/receiver"
 	"go.opentelemetry.io/collector/receiver/otlpreceiver"
@@ -47,23 +36,12 @@ import (
 var defaultReceivers = []receiver.Factory{
 	collectdreceiver.NewFactory(),
 	filelogreceiver.NewFactory(),
-	fluentforwardreceiver.NewFactory(),
 	hostmetricsreceiver.NewFactory(),
-	influxdbreceiver.NewFactory(),
 	jmxreceiver.NewFactory(),
-	memcachedreceiver.NewFactory(),
-	mysqlreceiver.NewFactory(),
-	nginxreceiver.NewFactory(),
-	opencensusreceiver.NewFactory(),
 	otlpreceiver.NewFactory(),
 	pluginreceiver.NewFactory(),
-	postgresqlreceiver.NewFactory(),
-	rabbitmqreceiver.NewFactory(),
 	receivertest.NewNopFactory(),
 	saphanareceiver.NewFactory(),
 	sapnetweaverreceiver.NewFactory(),
-	snmpreceiver.NewFactory(),
-	sqlqueryreceiver.NewFactory(),
-	sqlserverreceiver.NewFactory(),
 	statsdreceiver.NewFactory(),
 }
