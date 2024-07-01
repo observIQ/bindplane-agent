@@ -249,5 +249,11 @@ func (ctmr *ResettableThroughputMeasurementsRegistry) OTLPMeasurements() pmetric
 		return true
 	})
 
+	if m.DataPointCount() == 0 {
+		// If there are no datapoints in the metric,
+		// we don't want to have an empty ResourceMetrics in the metrics slice.
+		return pmetric.NewMetrics()
+	}
+
 	return m
 }

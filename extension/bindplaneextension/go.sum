@@ -52,6 +52,12 @@ github.com/open-telemetry/opamp-go v0.14.0 h1:KoziIK+wsFojhUXNTkCSTnCPf0eCMqFAac
 github.com/open-telemetry/opamp-go v0.14.0/go.mod h1:XOGCigljsLSTZ8FfLwvat0M1QDj3conIIgRa77BWrKs=
 github.com/open-telemetry/opentelemetry-collector-contrib/extension/opampcustommessages v0.102.0 h1:POJgP7m+Jkc/i/BM77ip7VwZQs07vFnbgzHdtCQJig4=
 github.com/open-telemetry/opentelemetry-collector-contrib/extension/opampcustommessages v0.102.0/go.mod h1:wSUXKiv5wIw35T9b1qpGYKolbUxldm+CGEixLQG97cQ=
+github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden v0.107.0 h1:Zo2UJk4AOxU5M6q3LNiFgTZfQicY9zz/BDqJWsmWzY4=
+github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden v0.107.0/go.mod h1:qj9lEtkVjQUzZ7FdJTeDqqTUq9xVU9kE4F8zZnHFB9M=
+github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest v0.107.0 h1:g1pkpFfe+dnhpfvo+f9yFIkbvTdiOvNmFOUFNzVAgvk=
+github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest v0.107.0/go.mod h1:oG/PliNiIOUHVARyDrFdvxFvG8DUPEjMGlmxjEqeoKM=
+github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatautil v0.107.0 h1:zTeRh4V3rMlXgNvfbDBnET6nvhOeZpYIbKTjVbSl9Ws=
+github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatautil v0.107.0/go.mod h1:/RtBag3LuHIkqN4bo8Erd3jCzA3gea70l9WyJ9TncXM=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/prometheus/client_golang v1.19.1 h1:wZWJDwK+NameRJuPGDhlnFgx8e8HN3XHQeLaYJFJBOE=
