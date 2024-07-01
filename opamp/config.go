@@ -54,9 +54,8 @@ type Config struct {
 	TLS       *TLSConfig `yaml:"tls_config,omitempty"`
 
 	// Updatable fields
-	Labels    *string `yaml:"labels,omitempty"`
-	AgentName *string `yaml:"agent_name,omitempty"`
-	// TODO: Extra labels for measurements?
+	Labels               *string        `yaml:"labels,omitempty"`
+	AgentName            *string        `yaml:"agent_name,omitempty"`
 	MeasurementsInterval *time.Duration `yaml:"measurements_interval,omitempty"`
 }
 
