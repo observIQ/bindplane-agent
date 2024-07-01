@@ -129,7 +129,6 @@ func (m *measurementsSender) loop() {
 				continue
 			}
 
-			// TODO: Make the same as bindplane metrics (share encoding and stuff)
 			// Send metrics as snappy-encoded otlp proto
 			marshaller := pmetric.ProtoMarshaler{}
 			marshalled, err := marshaller.MarshalMetrics(metrics)
@@ -149,7 +148,7 @@ func (m *measurementsSender) loop() {
 			for {
 				sendingChannel, err := m.opampClient.SendCustomMessage(cm)
 				switch {
-				case err == nil:
+				case err == nil: // OK
 				case errors.Is(err, types.ErrCustomMessagePending):
 					select {
 					case <-sendingChannel:
