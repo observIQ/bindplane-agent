@@ -536,7 +536,7 @@ func TestClient_onConnectHandler(t *testing.T) {
 					packagesStateProvider: mockStateProvider,
 				}
 
-				c.onConnectHandler()
+				c.onConnectHandler(context.Background())
 			},
 		},
 		{
@@ -555,7 +555,7 @@ func TestClient_onConnectHandler(t *testing.T) {
 					packagesStateProvider: mockStateProvider,
 				}
 
-				c.onConnectHandler()
+				c.onConnectHandler(context.Background())
 			},
 		},
 		{
@@ -590,7 +590,7 @@ func TestClient_onConnectHandler(t *testing.T) {
 					packagesStateProvider: mockStateProvider,
 				}
 
-				c.onConnectHandler()
+				c.onConnectHandler(context.Background())
 			},
 		},
 		{
@@ -638,7 +638,7 @@ func TestClient_onConnectHandler(t *testing.T) {
 					packagesStateProvider: mockStateProvider,
 				}
 
-				c.onConnectHandler()
+				c.onConnectHandler(context.Background())
 			},
 		},
 		{
@@ -690,7 +690,7 @@ func TestClient_onConnectHandler(t *testing.T) {
 					packagesStateProvider: mockStateProvider,
 				}
 
-				c.onConnectHandler()
+				c.onConnectHandler(context.Background())
 			},
 		},
 	}
@@ -718,7 +718,7 @@ func TestClient_onConnectFailedHandler(t *testing.T) {
 					packagesStateProvider: mockStateProvider,
 				}
 
-				c.onConnectFailedHandler(expectedErr)
+				c.onConnectFailedHandler(context.Background(), expectedErr)
 			},
 		},
 		{
@@ -737,7 +737,7 @@ func TestClient_onConnectFailedHandler(t *testing.T) {
 					packagesStateProvider: mockStateProvider,
 				}
 
-				c.onConnectFailedHandler(expectedErr)
+				c.onConnectFailedHandler(context.Background(), expectedErr)
 			},
 		},
 		{
@@ -751,7 +751,7 @@ func TestClient_onConnectFailedHandler(t *testing.T) {
 					disconnecting:         true,
 				}
 
-				c.onConnectFailedHandler(expectedErr)
+				c.onConnectFailedHandler(context.Background(), expectedErr)
 			},
 		},
 		{
@@ -786,7 +786,7 @@ func TestClient_onConnectFailedHandler(t *testing.T) {
 					packagesStateProvider: mockStateProvider,
 				}
 
-				c.onConnectFailedHandler(expectedErr)
+				c.onConnectFailedHandler(context.Background(), expectedErr)
 			},
 		},
 		{
@@ -837,7 +837,7 @@ func TestClient_onConnectFailedHandler(t *testing.T) {
 					packagesStateProvider: mockStateProvider,
 				}
 
-				c.onConnectFailedHandler(expectedErr)
+				c.onConnectFailedHandler(context.Background(), expectedErr)
 			},
 		},
 	}
