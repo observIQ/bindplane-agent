@@ -31,8 +31,6 @@ type Config struct {
 	// MeasurementsInterval is the interval on which to report measurements.
 	// Measurements reporting is disabled if this duration is 0.
 	MeasurementsInterval time.Duration `mapstructure:"measurements_interval"`
-	// ExtraMeasurementsLabels are labels to add to all measurements metrics
-	ExtraMeasurementsLabels map[string]string
 }
 
 // Validate returns an error if the config is invalid
