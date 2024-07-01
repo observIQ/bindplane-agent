@@ -41,7 +41,11 @@ func TestMeasurementsSender(t *testing.T) {
 		client := mocks.NewMockOpAMPClient(t)
 		client.On("SendCustomMessage", mock.Anything).Run(func(args mock.Arguments) {
 			cm := args.Get(0).(*protobufs.CustomMessage)
-			dataChan <- cm.Data
+			select {
+			case dataChan <- cm.Data:
+			default:
+			}
+
 		}).Return(make(chan struct{}), nil)
 
 		mp := metric.NewMeterProvider()
@@ -88,7 +92,10 @@ func TestMeasurementsSender(t *testing.T) {
 		client := mocks.NewMockOpAMPClient(t)
 		client.On("SendCustomMessage", mock.Anything).Run(func(args mock.Arguments) {
 			cm := args.Get(0).(*protobufs.CustomMessage)
-			dataChan <- cm.Data
+			select {
+			case dataChan <- cm.Data:
+			default:
+			}
 		}).Return(make(chan struct{}), nil)
 
 		mp := metric.NewMeterProvider()
