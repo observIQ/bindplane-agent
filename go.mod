@@ -191,7 +191,7 @@ require (
 )
 
 require (
-	cloud.google.com/go/auth v0.6.0 // indirect
+	cloud.google.com/go/auth v0.6.1 // indirect
 	cloud.google.com/go/auth/oauth2adapt v0.2.2 // indirect
 	filippo.io/edwards25519 v1.1.0 // indirect
 	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.12.0 // indirect
@@ -387,8 +387,8 @@ require (
 	go.opentelemetry.io/proto/otlp v1.2.0 // indirect
 	go.uber.org/dig v1.17.1 // indirect
 	go.uber.org/fx v1.18.2 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20240610135401-a8a62080eff3 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20240617180043-68d350f18fd4 // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20240617180043-68d350f18fd4 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20240624140628-dc46fd24d27d // indirect
 	gopkg.in/zorkian/go-datadog-api.v2 v2.30.0 // indirect
 	howett.net/plist v1.0.0 // indirect
 	sigs.k8s.io/controller-runtime v0.17.3 // indirect
@@ -723,8 +723,8 @@ require (
 	golang.org/x/tools v0.21.1-0.20240508182429-e35e4ccd0d2d // indirect
 	golang.org/x/xerrors v0.0.0-20231012003039-104605ab7028 // indirect
 	gonum.org/v1/gonum v0.15.0 // indirect
-	google.golang.org/api v0.186.0 // indirect
-	google.golang.org/genproto v0.0.0-20240617180043-68d350f18fd4 // indirect
+	google.golang.org/api v0.187.0 // indirect
+	google.golang.org/genproto v0.0.0-20240624140628-dc46fd24d27d // indirect
 	google.golang.org/grpc v1.64.0 // indirect
 	google.golang.org/protobuf v1.34.2 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
