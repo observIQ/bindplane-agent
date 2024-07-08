@@ -2,6 +2,8 @@ module github.com/observiq/bindplane-agent/internal/tools
 
 go 1.21.9
 
+toolchain go1.22.4
+
 require (
 	github.com/client9/misspell v0.3.4
 	github.com/google/addlicense v1.1.1
@@ -9,7 +11,7 @@ require (
 	github.com/mgechev/revive v1.3.7
 	github.com/securego/gosec/v2 v2.20.0
 	github.com/uw-labs/lichen v0.1.7
-	github.com/vektra/mockery/v2 v2.40.2
+	github.com/vektra/mockery/v2 v2.43.2
 	go.opentelemetry.io/collector/cmd/mdatagen v0.104.0
 	golang.org/x/tools v0.22.0
 )
