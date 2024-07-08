@@ -26,66 +26,17 @@ CURRENT_TAG := $(shell git tag --sort=v:refname --points-at HEAD | grep -E "v[0-
 # Version will be the tag pointing to the current commit, or the previous version tag if there is no such tag
 VERSION ?= $(if $(CURRENT_TAG),$(CURRENT_TAG),$(PREVIOUS_TAG))
 
-# Build binaries for current GOOS/GOARCH by default
-.DEFAULT_GOAL := build-binaries
-
-# Builds just the agent for current GOOS/GOARCH pair
 .PHONY: agent
 agent:
-	go build -ldflags "-s -w -X github.com/observiq/bindplane-agent/internal/version.version=$(VERSION)" -o $(OUTDIR)/collector_$(GOOS)_$(GOARCH)$(EXT) ./cmd/collector
+	build-observiq
 
-# Builds just the updater for current GOOS/GOARCH pair
-.PHONY: updater
-updater:
-	cd ./updater/; go build -ldflags "-s -w -X github.com/observiq/bindplane-agent/internal/version.version=$(VERSION)" -o ../$(OUTDIR)/updater_$(GOOS)_$(GOARCH)$(EXT) ./cmd/updater
+.PHONY: build-observiq
+build-observiq:
+	builder --config=./distros/observIQ/manifest.yaml
 
-# Builds the updater + agent for current GOOS/GOARCH pair
-.PHONY: build-binaries
-build-binaries: agent updater
-
-.PHONY: build-all
-build-all: build-linux build-darwin build-windows
-
-.PHONY: build-linux
-build-linux: build-linux-amd64 build-linux-arm64 build-linux-arm build-linux-ppc64 build-linux-ppc64le
-
-.PHONY: build-darwin
-build-darwin: build-darwin-amd64 build-darwin-arm64
-
-.PHONY: build-windows
-build-windows: build-windows-amd64
-
-.PHONY: build-linux-ppc64
-build-linux-ppc64:
-	GOOS=linux GOARCH=ppc64 $(MAKE) build-binaries -j2
-
-.PHONY: build-linux-ppc64le
-build-linux-ppc64le:
-	GOOS=linux GOARCH=ppc64le $(MAKE) build-binaries -j2
-
-.PHONY: build-linux-amd64
-build-linux-amd64:
-	GOOS=linux GOARCH=amd64 $(MAKE) build-binaries -j2
-
-.PHONY: build-linux-arm64
-build-linux-arm64:
-	GOOS=linux GOARCH=arm64 $(MAKE) build-binaries -j2
-
-.PHONY: build-linux-arm
-build-linux-arm:
-	GOOS=linux GOARCH=arm $(MAKE) build-binaries -j2
-
-.PHONY: build-darwin-amd64
-build-darwin-amd64:
-	GOOS=darwin GOARCH=amd64 $(MAKE) build-binaries -j2
-
-.PHONY: build-darwin-arm64
-build-darwin-arm64:
-	GOOS=darwin GOARCH=arm64 $(MAKE) build-binaries -j2
-
-.PHONY: build-windows-amd64
-build-windows-amd64:
-	GOOS=windows GOARCH=amd64 $(MAKE) build-binaries -j2
+.PHONY: build-minimal
+build-minimal:
+	builder--config=./distros/minimal/manifest.yaml
 
 # tool-related commands
 .PHONY: install-tools

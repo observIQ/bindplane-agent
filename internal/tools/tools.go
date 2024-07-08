@@ -24,6 +24,7 @@ import (
 	_ "github.com/securego/gosec/v2/cmd/gosec"
 	_ "github.com/uw-labs/lichen"
 	_ "github.com/vektra/mockery/v2"
+	_ "go.opentelemetry.io/collector/cmd/builder"
 	_ "go.opentelemetry.io/collector/cmd/mdatagen"
 	_ "golang.org/x/tools/cmd/goimports"
 )
