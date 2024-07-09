@@ -11,7 +11,7 @@ Log parser for macOS
 | enable_install_log | Enable to collect MacOS install logs | bool | `true` | false |  |
 | install_log_path | The absolute path to the Install log | []string | `[/var/log/install.log]` | false |  |
 | start_at | At startup, where to start reading logs from the file (`beginning` or `end`) | string | `end` | false | `beginning`, `end` |
-| offset_storage_dir | The directory that the offset storage file will be created | string | `$OIQ_OTEL_COLLECTOR_HOME/storage` | false |  |
+| offset_storage_dir | The directory that the offset storage file will be created | string | `${env:OIQ_OTEL_COLLECTOR_HOME}/storage` | false |  |
 
 ## Example Config:
 
@@ -27,5 +27,5 @@ receivers:
       enable_install_log: true
       install_log_path: [/var/log/install.log]
       start_at: end
-      offset_storage_dir: $OIQ_OTEL_COLLECTOR_HOME/storage
+      offset_storage_dir: ${env:OIQ_OTEL_COLLECTOR_HOME}/storage
 ```

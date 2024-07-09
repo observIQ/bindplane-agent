@@ -39,7 +39,7 @@ parameters:
   - name: offset_storage_dir
     description: The directory that the offset storage file will be created
     type: string
-    default: $OIQ_OTEL_COLLECTOR_HOME/storage
+    default: ${env:OIQ_OTEL_COLLECTOR_HOME}/storage
 template: |
   extensions:
     file_storage:
@@ -76,7 +76,7 @@ template: |
 
       - id: audit_regex_parser_session
         type: regex_parser
-        regex: '^(?P<timestamp>\w+ \w+\s{1,2}\d{1,2} \d{2}:\d{2}:\d{2} \d{4} [-+]\d{2}:\d{2})\nLENGTH: \D(?P<length>\d*)\D\n(SESSIONID:\[\d+\]\s+\D(?P<sessionid>[^\s]+|)\D[\n\s]+)?(ENTRYID:\[\d+\]\s+\D(?P<entryid>[^\s]+|)\D[\n\s]+)?(STATEMENT:\[\d+\]\s+\D(?P<statement>[^\s]+|)\D[\n\s]+)?(USERID:\[\d+\]\s+\D(?P<userid>[^\s]+|)\D[\n\s]+)?(USERHOST:\[\d+\]\s+\D(?P<userhost>[^\s]+|)\D[\n\s]+)?(TERMINAL:\[\d+\]\s+\D(?P<terminal>[\d\w[:ascii:]]+?|)\D[\n\s]+)?ACTION:\[\d+\]\s+\D(?P<action>[\d\w[:ascii:]]+?|)\D[\n\s]+(RETURNCODE:\[\d+\]\s+\D(?P<returncode>[^\s]+|)\D[\n\s]+)?(COMMENT\$TEXT:\[\d+\]\s+\D(?P<comment_text>[^"]+|)\D[\n\s]+)?(LOGOFF\$PREAD:\[\d+\]\s+\D(?P<logoff_pread>[^"]+|)\D[\n\s]+)?(LOGOFF\$LREAD:\[\d+\]\s+\D(?P<logoff_lread>[^"]+|)\D[\n\s]+)?(LOGOFF\$LWRITE:\[\d+\]\s+\D(?P<logoff_lwrite>[^"]+|)\D[\n\s]+)?(LOGOFF\$DEAD:\[\d+\]\s+\D(?P<logoff_dead>[^"]+|)\D[\n\s]+)?(OBJ\$CREATOR:\[\d+\]\s+\D(?P<obj_creator>[^"]+|)\D[\n\s]+)?(OBJ\$NAME:\[\d+\]\s+\D(?P<obj_name>[^"]+|)\D[\n\s]+)?(OBJ\$PRIVILEGES:\[\d+\]\s+\D(?P<obj_privileges>[^"]+|)\D[\n\s]+)?(AUTH\$GRANTEE:\[\d+\]\s+\D(?P<auth_grantee>[^"]+|)\D[\n\s]+)?(OS\$USERID:\[\d+\]\s+\D(?P<os_userid>[^\s]+|)\D[\n\s]+)?(DBID:\[\d+\]\s+\D(?P<dbid>[^\s]+|)\D[\n\s]+)?(SESSIONCPU:\[\d+\]\s+\D(?P<sessioncpu>\d+|)\D[\n\s]+)?(PRIV\$USED:\[\d+\]\s+\D(?P<priv_user>[^\s]+|)\D[\n\s]+)?'
+        regex: '^(?P<timestamp>\w+ \w+\s{1,2}\d{1,2} \d{2}:\d{2}:\d{2} \d{4} [-+]\d{2}:\d{2})\nLENGTH: \D(?P<length>\d*)\D\n(SESSIONID:\[\d+\]\s+\D(?P<sessionid>[^\s]+|)\D[\n\s]+)?(ENTRYID:\[\d+\]\s+\D(?P<entryid>[^\s]+|)\D[\n\s]+)?(STATEMENT:\[\d+\]\s+\D(?P<statement>[^\s]+|)\D[\n\s]+)?(USERID:\[\d+\]\s+\D(?P<userid>[^\s]+|)\D[\n\s]+)?(USERHOST:\[\d+\]\s+\D(?P<userhost>[^\s]+|)\D[\n\s]+)?(TERMINAL:\[\d+\]\s+\D(?P<terminal>[\d\w[:ascii:]]+?|)\D[\n\s]+)?ACTION:\[\d+\]\s+\D(?P<action>[\d\w[:ascii:]]+?|)\D[\n\s]+(RETURNCODE:\[\d+\]\s+\D(?P<returncode>[^\s]+|)\D[\n\s]+)?(COMMENT\$$TEXT:\[\d+\]\s+\D(?P<comment_text>[^"]+|)\D[\n\s]+)?(LOGOFF\$$PREAD:\[\d+\]\s+\D(?P<logoff_pread>[^"]+|)\D[\n\s]+)?(LOGOFF\$$LREAD:\[\d+\]\s+\D(?P<logoff_lread>[^"]+|)\D[\n\s]+)?(LOGOFF\$$LWRITE:\[\d+\]\s+\D(?P<logoff_lwrite>[^"]+|)\D[\n\s]+)?(LOGOFF\$$DEAD:\[\d+\]\s+\D(?P<logoff_dead>[^"]+|)\D[\n\s]+)?(OBJ\$$CREATOR:\[\d+\]\s+\D(?P<obj_creator>[^"]+|)\D[\n\s]+)?(OBJ\$$NAME:\[\d+\]\s+\D(?P<obj_name>[^"]+|)\D[\n\s]+)?(OBJ\$$PRIVILEGES:\[\d+\]\s+\D(?P<obj_privileges>[^"]+|)\D[\n\s]+)?(AUTH\$$GRANTEE:\[\d+\]\s+\D(?P<auth_grantee>[^"]+|)\D[\n\s]+)?(OS\$$USERID:\[\d+\]\s+\D(?P<os_userid>[^\s]+|)\D[\n\s]+)?(DBID:\[\d+\]\s+\D(?P<dbid>[^\s]+|)\D[\n\s]+)?(SESSIONCPU:\[\d+\]\s+\D(?P<sessioncpu>\d+|)\D[\n\s]+)?(PRIV\$$USED:\[\d+\]\s+\D(?P<priv_user>[^\s]+|)\D[\n\s]+)?'
         timestamp:
           parse_from: attributes.timestamp
           layout: '%a %h %g %H:%M:%S %Y %j'

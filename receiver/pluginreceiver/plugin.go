@@ -125,7 +125,10 @@ func checkExtensions(extensions map[string]any, pluginID string) error {
 				if s == "$" {
 					return "$"
 				}
-				return os.Getenv(s)
+
+				envVar := strings.TrimPrefix(s, "env:")
+
+				return os.Getenv(envVar)
 			}), 0750)
 			if err != nil {
 				return err
