@@ -1,6 +1,6 @@
 module github.com/observiq/bindplane-agent/internal/tools
 
-go 1.21.9
+go 1.22
 
 toolchain go1.22.4
 
