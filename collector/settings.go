@@ -20,7 +20,10 @@ import (
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/confmap"
 	"go.opentelemetry.io/collector/confmap/converter/expandconverter"
+	"go.opentelemetry.io/collector/confmap/provider/envprovider"
 	"go.opentelemetry.io/collector/confmap/provider/fileprovider"
+	"go.opentelemetry.io/collector/confmap/provider/httpsprovider"
+	"go.opentelemetry.io/collector/confmap/provider/yamlprovider"
 	"go.opentelemetry.io/collector/otelcol"
 	"go.uber.org/zap"
 )
@@ -37,8 +40,13 @@ func NewSettings(configPaths []string, version string, loggingOpts []zap.Option,
 
 	configProviderSettings := otelcol.ConfigProviderSettings{
 		ResolverSettings: confmap.ResolverSettings{
-			URIs:               configPaths,
-			ProviderFactories:  []confmap.ProviderFactory{fileprovider.NewFactory()},
+			URIs: configPaths,
+			ProviderFactories: []confmap.ProviderFactory{
+				fileprovider.NewFactory(),
+				envprovider.NewFactory(),
+				yamlprovider.NewFactory(),
+				httpsprovider.NewFactory(),
+			},
 			ConverterFactories: []confmap.ConverterFactory{expandconverter.NewFactory()},
 		},
 	}

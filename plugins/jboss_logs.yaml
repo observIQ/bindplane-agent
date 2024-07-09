@@ -5,7 +5,7 @@ parameters:
   - name: file_path
     description: The absolute path to the JBoss logs
     type: "[]string"
-    default: 
+    default:
       - "/usr/local/JBoss/EAP-*/*/log/server.log"
   - name: start_at
     description: At startup, where to start reading logs from the file (`beginning` or `end`)
@@ -21,7 +21,7 @@ parameters:
   - name: offset_storage_dir
     description: The directory that the offset storage file will be created
     type: string
-    default: $OIQ_OTEL_COLLECTOR_HOME/storage
+    default: ${env:OIQ_OTEL_COLLECTOR_HOME}/storage
 template: |
   extensions:
     file_storage:
@@ -55,4 +55,3 @@ template: |
       logs:
         receivers:
           - filelog
-

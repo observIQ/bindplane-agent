@@ -7,7 +7,7 @@ Steps for updating config file apache2.conf:
   1. Add the access Logformat and error ErrorLogFormat to the main apache configuration.
      On Debian based systems, this can be found in /etc/apache2/apache2.conf
   2. Modify CustomLog in sites-available configurations to use 'observiq' for the access log format.
-      ex: CustomLog ${APACHE_LOG_DIR}/access.log observiq
+      ex: CustomLog ${env:APACHE_LOG_DIR}/access.log observiq
   3. Restart Apache Http Server
 
 The 'observIQ' log format is defined for access logs and error logs as follows:

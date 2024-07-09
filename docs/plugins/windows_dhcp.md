@@ -8,7 +8,7 @@ Log parser for Windows DHCP
 |:-- |:-- |:-- |:-- |:-- |:-- |
 | file_path | <nil> | []string | `[C:/Windows/System32/dhcp/DhcpSrvLog-*.log]` | false |  |
 | start_at | <nil> | string | `end` | false | `beginning`, `end` |
-| offset_storage_dir | The directory that the offset storage file will be created | string | `$OIQ_OTEL_COLLECTOR_HOME/storage` | false |  |
+| offset_storage_dir | The directory that the offset storage file will be created | string | `${env:OIQ_OTEL_COLLECTOR_HOME}/storage` | false |  |
 
 ## Example Config:
 
@@ -21,5 +21,5 @@ receivers:
     parameters:
       file_path: [C:/Windows/System32/dhcp/DhcpSrvLog-*.log]
       start_at: end
-      offset_storage_dir: $OIQ_OTEL_COLLECTOR_HOME/storage
+      offset_storage_dir: ${env:OIQ_OTEL_COLLECTOR_HOME}/storage
 ```

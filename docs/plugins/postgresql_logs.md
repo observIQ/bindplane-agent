@@ -16,7 +16,7 @@ Slow query logging can be enabled via the following steps:
 |:-- |:-- |:-- |:-- |:-- |:-- |
 | postgresql_log_path | Path to the PostgreSQL log file | []string | `[/var/log/postgresql/postgresql*.log /var/lib/pgsql/data/log/postgresql*.log /var/lib/pgsql/*/data/log/postgresql*.log]` | false |  |
 | start_at | At startup, where to start reading logs from the file (`beginning` or `end`) | string | `end` | false | `beginning`, `end` |
-| offset_storage_dir | The directory that the offset storage file will be created | string | `$OIQ_OTEL_COLLECTOR_HOME/storage` | false |  |
+| offset_storage_dir | The directory that the offset storage file will be created | string | `${env:OIQ_OTEL_COLLECTOR_HOME}/storage` | false |  |
 
 ## Example Config:
 
@@ -29,5 +29,5 @@ receivers:
     parameters:
       postgresql_log_path: [/var/log/postgresql/postgresql*.log /var/lib/pgsql/data/log/postgresql*.log /var/lib/pgsql/*/data/log/postgresql*.log]
       start_at: end
-      offset_storage_dir: $OIQ_OTEL_COLLECTOR_HOME/storage
+      offset_storage_dir: ${env:OIQ_OTEL_COLLECTOR_HOME}/storage
 ```
