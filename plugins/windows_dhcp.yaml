@@ -4,7 +4,7 @@ description: Log parser for Windows DHCP
 parameters:
   - name: file_path
     type: "[]string"
-    default: 
+    default:
       - "C:/Windows/System32/dhcp/DhcpSrvLog-*.log"
   - name: start_at
     type: string
@@ -15,7 +15,7 @@ parameters:
   - name: offset_storage_dir
     description: The directory that the offset storage file will be created
     type: string
-    default: $OIQ_OTEL_COLLECTOR_HOME/storage
+    default: ${env:OIQ_OTEL_COLLECTOR_HOME}/storage
 template: |
   extensions:
     file_storage:
@@ -48,4 +48,4 @@ template: |
     pipelines:
       logs:
         receivers:
-          - filelog 
+          - filelog

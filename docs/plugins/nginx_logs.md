@@ -14,7 +14,7 @@ Log parser for NGINX
 | start_at | At startup, where to start reading logs from the file (`beginning` or `end`) | string | `end` | false | `beginning`, `end` |
 | encoding | Specify the encoding of the file(s) being read. In most cases, you can leave the default option selected | string | `utf-8` | false | `nop`, `utf-8`, `utf-16le`, `utf-16be`, `ascii`, `big5` |
 | data_flow | High mode keeps all entries, low mode filters out based on http request status | string | `high` | false | `high`, `low` |
-| offset_storage_dir | The directory that the offset storage file will be created | string | `$OIQ_OTEL_COLLECTOR_HOME/storage` | false |  |
+| offset_storage_dir | The directory that the offset storage file will be created | string | `${env:OIQ_OTEL_COLLECTOR_HOME}/storage` | false |  |
 
 ## Example Config:
 
@@ -33,5 +33,5 @@ receivers:
       start_at: end
       encoding: utf-8
       data_flow: high
-      offset_storage_dir: $OIQ_OTEL_COLLECTOR_HOME/storage
+      offset_storage_dir: ${env:OIQ_OTEL_COLLECTOR_HOME}/storage
 ```

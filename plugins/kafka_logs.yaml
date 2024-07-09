@@ -9,8 +9,8 @@ parameters:
   - name: server_log_path
     description: Apache Kafka server log path
     type: "[]string"
-    default: 
-    - "/home/kafka/kafka/logs/server.log*"
+    default:
+      - "/home/kafka/kafka/logs/server.log*"
   - name: enable_controller_log
     description: Enable to collect Apache Kafka controller logs
     type: bool
@@ -18,8 +18,8 @@ parameters:
   - name: controller_log_path
     description: Apache Kafka controller log path
     type: "[]string"
-    default: 
-    - "/home/kafka/kafka/logs/controller.log*"
+    default:
+      - "/home/kafka/kafka/logs/controller.log*"
   - name: enable_state_change_log
     description: Enable to collect Apache Kafka state change logs
     type: bool
@@ -27,8 +27,8 @@ parameters:
   - name: state_change_log_path
     description: Apache Kafka state-change log path
     type: "[]string"
-    default: 
-    - "/home/kafka/kafka/logs/state-change.log*"
+    default:
+      - "/home/kafka/kafka/logs/state-change.log*"
   - name: enable_log_cleaner_log
     description: Enable to collect Apache Kafka log cleaner logs
     type: bool
@@ -36,8 +36,8 @@ parameters:
   - name: log_cleaner_log_path
     description: Apache Kafka log-cleaner log path
     type: "[]string"
-    default: 
-    - "/home/kafka/kafka/logs/log-cleaner.log*"
+    default:
+      - "/home/kafka/kafka/logs/log-cleaner.log*"
   - name: start_at
     description: At startup, where to start reading logs from the file (`beginning` or `end`)
     type: string
@@ -52,7 +52,7 @@ parameters:
   - name: offset_storage_dir
     description: The directory that the offset storage file will be created
     type: string
-    default: $OIQ_OTEL_COLLECTOR_HOME/storage
+    default: ${env:OIQ_OTEL_COLLECTOR_HOME}/storage
 template: |
   extensions:
     file_storage:
@@ -206,4 +206,3 @@ template: |
           {{ if .enable_log_cleaner_log }}
           - filelog/cleaner
           {{ end }}
-          

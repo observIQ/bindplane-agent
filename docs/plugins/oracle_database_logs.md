@@ -13,7 +13,7 @@ Oracle Database
 | enable_listener_log | Enable to collect OracleDB listener logs | bool | `true` | false |  |
 | listener_log_path | Path to the listener log file | []string | `[/u01/app/oracle/product/*/dbhome_1/diag/tnslsnr/*/listener/alert/log.xml]` | false |  |
 | start_at | At startup, where to start reading logs from the file (`beginning` or `end`) | string | `end` | false | `beginning`, `end` |
-| offset_storage_dir | The directory that the offset storage file will be created | string | `$OIQ_OTEL_COLLECTOR_HOME/storage` | false |  |
+| offset_storage_dir | The directory that the offset storage file will be created | string | `${env:OIQ_OTEL_COLLECTOR_HOME}/storage` | false |  |
 
 ## Example Config:
 
@@ -31,5 +31,5 @@ receivers:
       enable_listener_log: true
       listener_log_path: [/u01/app/oracle/product/*/dbhome_1/diag/tnslsnr/*/listener/alert/log.xml]
       start_at: end
-      offset_storage_dir: $OIQ_OTEL_COLLECTOR_HOME/storage
+      offset_storage_dir: ${env:OIQ_OTEL_COLLECTOR_HOME}/storage
 ```

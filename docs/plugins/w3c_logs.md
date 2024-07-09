@@ -25,7 +25,7 @@ Log Parser for W3C
 | header | The W3C header which specifies the field names. Field names will be auto detected if unspecified. | string |  | false |  |
 | delimiter | Delimiter character used between fields (Defaults to a tab character) | string | `	` | false |  |
 | header_delimiter | Delimiter character used between header fields (Defaults to the value of 'delimiter') | string |  | false |  |
-| offset_storage_dir | The directory that the offset storage file will be created | string | `$OIQ_OTEL_COLLECTOR_HOME/storage` | false |  |
+| offset_storage_dir | The directory that the offset storage file will be created | string | `${env:OIQ_OTEL_COLLECTOR_HOME}/storage` | false |  |
 
 ## Example Config:
 
@@ -51,5 +51,5 @@ receivers:
       include_file_path: false
       include_file_name_resolved: false
       include_file_path_resolved: false
-      offset_storage_dir: $OIQ_OTEL_COLLECTOR_HOME/storage
+      offset_storage_dir: ${env:OIQ_OTEL_COLLECTOR_HOME}/storage
 ```

@@ -10,7 +10,7 @@ Log parser for SAP HANA
 | exclude | The directories to exclude for the SAP HANA trace logs. | []string | `[/usr/sap/*/HDB*/*/trace/nameserver_history*.trc /usr/sap/*/HDB*/*/trace/nameserver*loads*.trc /usr/sap/*/HDB*/*/trace/nameserver*unlaods*.trc /usr/sap/*/HDB*/*/trace/nameserver*executed_statements*.trc]` | false |  |
 | start_at | At startup, where to start reading logs from the file (`beginning` or `end`) | string | `end` | false | `beginning`, `end` |
 | timezone | Timezone to use when parsing the timestamp | timezone | `UTC` | false |  |
-| offset_storage_dir | The directory that the offset storage file will be created | string | `$OIQ_OTEL_COLLECTOR_HOME/storage` | false |  |
+| offset_storage_dir | The directory that the offset storage file will be created | string | `${env:OIQ_OTEL_COLLECTOR_HOME}/storage` | false |  |
 
 ## Example Config:
 
@@ -25,5 +25,5 @@ receivers:
       exclude: [/usr/sap/*/HDB*/*/trace/nameserver_history*.trc /usr/sap/*/HDB*/*/trace/nameserver*loads*.trc /usr/sap/*/HDB*/*/trace/nameserver*unlaods*.trc /usr/sap/*/HDB*/*/trace/nameserver*executed_statements*.trc]
       start_at: end
       timezone: UTC
-      offset_storage_dir: $OIQ_OTEL_COLLECTOR_HOME/storage
+      offset_storage_dir: ${env:OIQ_OTEL_COLLECTOR_HOME}/storage
 ```
