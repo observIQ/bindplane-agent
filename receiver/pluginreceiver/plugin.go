@@ -131,7 +131,7 @@ func checkExtensions(extensions map[string]any, pluginID string) error {
 			name := strings.ReplaceAll(pluginID, "/", "_")
 			storageDir := filepath.Join(expandedDir, name)
 
-			extensions[i] = map[string]any{"directory": cfg.Directory}
+			extensions[i] = map[string]any{"directory": storageDir}
 			err = os.MkdirAll(storageDir, 0750)
 			if err != nil {
 				return err
