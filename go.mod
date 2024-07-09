@@ -819,6 +819,6 @@ replace github.com/openshift/api v3.9.0+incompatible => github.com/openshift/api
 // Replace statement to add updates to the Windows Event Log receiver that aren't upstream yet
 // We will want to remove once changes are upstreamed and released
 // See https://github.com/open-telemetry/opentelemetry-collector-contrib/pull/33601
-replace github.com/open-telemetry/opentelemetry-collector-contrib/receiver/windowseventlogreceiver => github.com/observiq/opentelemetry-collector-contrib/receiver/windowseventlogreceiver v0.0.0-20240626145330-ed29be57a76f
+replace github.com/open-telemetry/opentelemetry-collector-contrib/receiver/windowseventlogreceiver => github.com/observiq/opentelemetry-collector-contrib/receiver/windowseventlogreceiver v0.0.0-20240709161651-04e85bb0051e
 
-replace github.com/open-telemetry/opentelemetry-collector-contrib/pkg/stanza => github.com/observiq/opentelemetry-collector-contrib/pkg/stanza v0.0.0-20240626145330-ed29be57a76f
+replace github.com/open-telemetry/opentelemetry-collector-contrib/pkg/stanza => github.com/observiq/opentelemetry-collector-contrib/pkg/stanza v0.0.0-20240709161651-04e85bb0051e
