@@ -14,7 +14,8 @@ jobs:
       - name: Install Go
         uses: actions/setup-go@v5
         with:
-          go-version-file: go.mod
+          go-version: "1.21"
+          check-latest: true
       - name: Build
         run: make build-linux
       - name: Scan Third Party Dependency Licenses
