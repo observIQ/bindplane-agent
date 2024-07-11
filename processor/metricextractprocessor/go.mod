@@ -3,7 +3,7 @@ module github.com/observiq/bindplane-agent/processor/metricextractprocessor
 go 1.21.9
 
 require (
-	github.com/observiq/bindplane-agent/expr v1.57.0
+	github.com/observiq/bindplane-agent/internal/expr v1.57.0
 	github.com/observiq/bindplane-agent/receiver/routereceiver v1.57.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/ottl v0.105.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest v0.105.0
@@ -65,4 +65,4 @@ require (
 
 replace github.com/observiq/bindplane-agent/receiver/routereceiver => ../../receiver/routereceiver
 
-replace github.com/observiq/bindplane-agent/expr => ../../expr
+replace github.com/observiq/bindplane-agent/internal/expr => ../../internal/expr

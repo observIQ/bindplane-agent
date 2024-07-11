@@ -26,17 +26,83 @@ CURRENT_TAG := $(shell git tag --sort=v:refname --points-at HEAD | grep -E "v[0-
 # Version will be the tag pointing to the current commit, or the previous version tag if there is no such tag
 VERSION ?= $(if $(CURRENT_TAG),$(CURRENT_TAG),$(PREVIOUS_TAG))
 
+# Build binaries for current GOOS/GOARCH by default
+.DEFAULT_GOAL := build-binaries
+
+# Builds just the agent for current GOOS/GOARCH pair
 .PHONY: agent
 agent:
-	build-observiq
-
-.PHONY: build-observiq
-build-observiq:
 	builder --config=./distros/observIQ/manifest.yaml
 
-.PHONY: build-minimal
-build-minimal:
-	builder--config=./distros/minimal/manifest.yaml
+# Builds just the updater for current GOOS/GOARCH pair
+# TODO:(dakota) Updater likely to change and so is this cmd
+.PHONY: updater
+updater:
+	cd ./updater/; go build -o ../$(OUTDIR)/updater_$(GOOS)_$(GOARCH)$(EXT) ./cmd/updater
+
+# Runs the supervisor invoking the agent build in /dist
+.PHONY: run-supervisor
+run-supervisor:
+	opampsupervisor --config ./local/supervisor-config.yaml
+
+# Ensures the supervisor and agent are stopped
+.PHONY: kill
+kill:
+	pkill -9 opampsupervisor || true
+	pkill -9 observiq-agent-distro || true
+
+# Stops processes and cleans up
+.PHONY: reset
+reset: kill
+	rm -f agent.log effective.yaml local/storage/*
+
+# Builds the updater + agent for current GOOS/GOARCH pair
+.PHONY: build-binaries
+build-binaries: agent updater
+
+.PHONY: build-all
+build-all: build-linux build-darwin build-windows
+
+.PHONY: build-linux
+build-linux: build-linux-amd64 build-linux-arm64 build-linux-arm build-linux-ppc64 build-linux-ppc64le
+
+.PHONY: build-darwin
+build-darwin: build-darwin-amd64 build-darwin-arm64
+
+.PHONY: build-windows
+build-windows: build-windows-amd64
+
+.PHONY: build-linux-ppc64
+build-linux-ppc64:
+	GOOS=linux GOARCH=ppc64 $(MAKE) build-binaries -j2
+
+.PHONY: build-linux-ppc64le
+build-linux-ppc64le:
+	GOOS=linux GOARCH=ppc64le $(MAKE) build-binaries -j2
+
+.PHONY: build-linux-amd64
+build-linux-amd64:
+	GOOS=linux GOARCH=amd64 $(MAKE) build-binaries -j2
+
+.PHONY: build-linux-arm64
+build-linux-arm64:
+	GOOS=linux GOARCH=arm64 $(MAKE) build-binaries -j2
+
+.PHONY: build-linux-arm
+build-linux-arm:
+	GOOS=linux GOARCH=arm $(MAKE) build-binaries -j2
+
+.PHONY: build-darwin-amd64
+build-darwin-amd64:
+	GOOS=darwin GOARCH=amd64 $(MAKE) build-binaries -j2
+
+.PHONY: build-darwin-arm64
+build-darwin-arm64:
+	GOOS=darwin GOARCH=arm64 $(MAKE) build-binaries -j2
+
+.PHONY: build-windows-amd64
+build-windows-amd64:
+	GOOS=windows GOARCH=amd64 $(MAKE) build-binaries -j2
 
 # tool-related commands
 .PHONY: install-tools
@@ -45,14 +111,16 @@ install-tools:
 	cd $(TOOLS_MOD_DIR) && go install github.com/google/addlicense
 	cd $(TOOLS_MOD_DIR) && go install github.com/mgechev/revive
 	cd $(TOOLS_MOD_DIR) && go install go.opentelemetry.io/collector/cmd/mdatagen
+	cd $(TOOLS_MOD_DIR) && go install go.opentelemetry.io/collector/cmd/builder
+	cd $(TOOLS_MOD_DIR) && go install github.com/open-telemetry/opentelemetry-collector-contrib/cmd/opampsupervisor
 	cd $(TOOLS_MOD_DIR) && go install github.com/securego/gosec/v2/cmd/gosec
-# update cosign in release.yml when updating this version
-# update cosign in docs/verify-signature.md when updating this version
-	go install github.com/sigstore/cosign/cmd/cosign@v1.13.1
 	cd $(TOOLS_MOD_DIR) && go install github.com/uw-labs/lichen
 	cd $(TOOLS_MOD_DIR) && go install github.com/vektra/mockery/v2
 	cd $(TOOLS_MOD_DIR) && go install golang.org/x/tools/cmd/goimports
 	cd $(TOOLS_MOD_DIR) && go install github.com/goreleaser/goreleaser
+# update cosign in release.yml when updating this version
+# update cosign in docs/verify-signature.md when updating this version
+	go install github.com/sigstore/cosign/cmd/cosign@v1.13.1
 
 .PHONY: lint
 lint:
@@ -97,18 +165,12 @@ tidy:
 
 .PHONY: gosec
 gosec:
-	gosec \
-	  -exclude-dir=updater \
-	  -exclude-dir=receiver/sapnetweaverreceiver \
-	  -exclude-dir=extension/bindplaneextension \
-	  -exclude-dir=processor/snapshotprocessor \
-	  -exclude-dir=internal/tools \
-	  ./...
-# exclude the testdata dir; it contains a go program for testing.
+	cd exporter; $(MAKE) -f "../Makefile" for-all CMD="gosec ./..."
+	cd processor; $(MAKE) -f "../Makefile" for-all CMD="gosec ./..."
+	cd internal; $(MAKE) -f "../Makefile" for-all CMD="gosec ./..."
+	cd extension; $(MAKE) -f "../Makefile" for-all CMD="gosec ./..."
+	cd receiver; $(MAKE) -f "../Makefile" for-all CMD="gosec ./..."
 	cd updater; gosec -exclude-dir internal/service/testdata ./...
-	cd extension/bindplaneextension; gosec ./...
-	cd processor/snapshotprocessor; gosec ./...
-	cd receiver/sapnetweaverreceiver; gosec ./...
 
 # This target performs all checks that CI will do (excluding the build itself)
 .PHONY: ci-checks
@@ -180,8 +242,6 @@ release-test:
 
 .PHONY: for-all
 for-all:
-	@echo "running $${CMD} in root"
-	@$${CMD}
 	@set -e; for dir in $(ALL_MODULES); do \
 	  (cd "$${dir}" && \
 	  	echo "running $${CMD} in $${dir}" && \
