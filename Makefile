@@ -32,7 +32,7 @@ VERSION ?= $(if $(CURRENT_TAG),$(CURRENT_TAG),$(PREVIOUS_TAG))
 # Builds just the agent for current GOOS/GOARCH pair
 .PHONY: agent
 agent:
-	builder --config=./distros/observIQ/manifest.yaml
+	builder --config=./distros/observIQ/manifest.yaml --name="observiq-agent-distro_$(GOOS)_$(GOARCH)$(EXT)"
 
 # Builds just the updater for current GOOS/GOARCH pair
 # TODO:(dakota) Updater likely to change and so is this cmd

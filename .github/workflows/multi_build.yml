@@ -52,7 +52,7 @@ jobs:
       - name: Scan Third Party Dependency Licenses
         run: |
           go install github.com/uw-labs/lichen@v0.1.7
-          lichen --config=./license.yaml $(find dist/collector_* dist/updater_*)
+          lichen --config=./license.yaml $(find dist/observiq-agent-distro_* dist/updater_*)
 
   build_darwin:
     runs-on: macos-14
@@ -80,7 +80,7 @@ jobs:
       - name: Scan Third Party Dependency Licenses
         run: |
           go install github.com/uw-labs/lichen@v0.1.7
-          lichen --config=./license.yaml $(find dist/collector_* dist/updater_*)
+          lichen --config=./license.yaml $(find dist/observiq-agent-distro_* dist/updater_*)
 
   build_windows:
     runs-on: ubuntu-20.04
@@ -108,4 +108,4 @@ jobs:
       - name: Scan Third Party Dependency Licenses
         run: |
           go install github.com/uw-labs/lichen@v0.1.7
-          lichen --config=./license.yaml dist/collector_windows_amd64.exe dist/updater_windows_amd64.exe
+          lichen --config=./license.yaml dist/observiq-agent-distro_windows_amd64.exe dist/updater_windows_amd64.exe
