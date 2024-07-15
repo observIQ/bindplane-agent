@@ -29,10 +29,17 @@ VERSION ?= $(if $(CURRENT_TAG),$(CURRENT_TAG),$(PREVIOUS_TAG))
 # Build binaries for current GOOS/GOARCH by default
 .DEFAULT_GOAL := build-binaries
 
-# Builds just the agent for current GOOS/GOARCH pair
+# Builds the agent for current GOOS/GOARCH pair
 .PHONY: agent
 agent:
-	builder --config=./distros/observIQ/manifest.yaml --name="observiq-agent-distro_$(GOOS)_$(GOARCH)$(EXT)"
+	builder --config="./distros/observIQ/manifest.yaml" --name="observiq-agent-distro_$(GOOS)_$(GOARCH)$(EXT)"
+
+# Builds a custom distro for the current GOOS/GOARCH pair using the manifest specified
+# DISTRO_NAME = name of the custom built distro; MANIFEST = path to the manifest file for the distro to be built
+# Usage: make distro DISTRO_NAME="my_distro" MANIFEST="./distros/custom/my_distro_manifest.yaml"
+.PHONY: distro
+distro:
+	builder --config="$(MANIFEST)" --name="$(DISTRO_NAME)_$(GOOS)_$(GOARCH)$(EXT)"
 
 # Builds just the updater for current GOOS/GOARCH pair
 # TODO:(dakota) Updater likely to change and so is this cmd
