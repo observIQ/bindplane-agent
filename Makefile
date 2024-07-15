@@ -1,11 +1,11 @@
 # All source code and documents, used when checking for misspellings
 ALLDOC := $(shell find . \( -name "*.md" -o -name "*.yaml" \) \
                                 -type f | sort)
-ALL_MODULES := $(shell find . -type f -name "go.mod" -exec dirname {} \; | sort )
+ALL_MODULES := $(shell find . -path ./builder -prune -o -type f -name "go.mod" -exec dirname {} \; | sort )
 ALL_MDATAGEN_MODULES := $(shell find . -type f -name "metadata.yaml" -exec dirname {} \; | sort )
 
 # All source code files
-ALL_SRC := $(shell find . -name '*.go' -o -name '*.sh' -o -name 'Dockerfile*' -type f | sort)
+ALL_SRC := $(shell find . -path ./builder -prune -o -name '*.go' -o -name '*.sh' -o -name 'Dockerfile*' -type f | sort)
 
 OUTDIR=./dist
 GOOS ?= $(shell go env GOOS)
@@ -32,14 +32,15 @@ VERSION ?= $(if $(CURRENT_TAG),$(CURRENT_TAG),$(PREVIOUS_TAG))
 # Builds the agent for current GOOS/GOARCH pair
 .PHONY: agent
 agent:
-	builder --config="./distros/observIQ/manifest.yaml" --name="observiq-agent-distro_$(GOOS)_$(GOARCH)$(EXT)"
+	builder --config="./manifests/observIQ/manifest.yaml"
+	mkdir -p $(OUTDIR)/collector_$(GOOS)_$(GOARCH); cp ./builder/observiq-otel-collector $(OUTDIR)/collector_$(GOOS)_$(GOARCH)/observiq-otel-collector$(EXT)
 
 # Builds a custom distro for the current GOOS/GOARCH pair using the manifest specified
-# DISTRO_NAME = name of the custom built distro; MANIFEST = path to the manifest file for the distro to be built
-# Usage: make distro DISTRO_NAME="my_distro" MANIFEST="./distros/custom/my_distro_manifest.yaml"
+# MANIFEST = path to the manifest file for the distro to be built
+# Usage: make distro MANIFEST="./manifests/custom/my_distro_manifest.yaml"
 .PHONY: distro
 distro:
-	builder --config="$(MANIFEST)" --name="$(DISTRO_NAME)_$(GOOS)_$(GOARCH)$(EXT)"
+	builder --config="$(MANIFEST)"
 
 # Builds just the updater for current GOOS/GOARCH pair
 # TODO:(dakota) Updater likely to change and so is this cmd
@@ -61,7 +62,7 @@ kill:
 # Stops processes and cleans up
 .PHONY: reset
 reset: kill
-	rm -f agent.log effective.yaml local/storage/*
+	rm -rf agent.log effective.yaml local/storage/* builder/
 
 # Builds the updater + agent for current GOOS/GOARCH pair
 .PHONY: build-binaries
@@ -230,7 +231,6 @@ release-prep:
 	@rm -rf release_deps
 	@mkdir release_deps
 	@echo 'v$(CURR_VERSION)' > release_deps/VERSION.txt
-	./buildscripts/download-dependencies.sh release_deps
 	@cp -r ./plugins release_deps/
 	@cp config/example.yaml release_deps/config.yaml
 	@cp config/logging.yaml release_deps/logging.yaml

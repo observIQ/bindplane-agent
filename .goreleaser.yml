@@ -3,15 +3,14 @@ project_name: observiq-otel-collector
 before:
   hooks:
     - make release-prep CURR_VERSION={{ .Version }}
+    - make build-all OUTDIR="tmp"
 
 # https://goreleaser.com/customization/build/
 builds:
+  # https://goreleaser.com/customization/builds/#import-pre-built-binaries
   - id: collector
+    builder: prebuilt
     binary: observiq-otel-collector
-    main: ./cmd/collector
-    env:
-      - CGO_ENABLED=0
-    mod_timestamp: "{{ .CommitTimestamp }}"
     goos:
       - windows
       - linux
@@ -35,12 +34,8 @@ builds:
         goarch: ppc64
       - goos: darwin
         goarch: ppc64le
-    ldflags:
-      - -s -w
-      - -X github.com/observiq/bindplane-agent/internal/version.version=v{{ .Version }}
-      - -X github.com/observiq/bindplane-agent/internal/version.gitHash={{ .FullCommit }}
-      - -X github.com/observiq/bindplane-agent/internal/version.date={{ .Date }}
-    no_unique_dist_dir: false
+    prebuilt:
+      path: tmp/collector_{{ .Os }}_{{ .Arch }}/observiq-otel-collector{{ .Ext }}
   - id: updater
     binary: updater
     dir: ./updater/

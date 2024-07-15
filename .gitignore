@@ -6,6 +6,7 @@ local
 .vscode
 .vagrant
 dist
+builder
 cosign.*
 gpg.*
 *.msi
