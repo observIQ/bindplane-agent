@@ -33,7 +33,7 @@ VERSION ?= $(if $(CURRENT_TAG),$(CURRENT_TAG),$(PREVIOUS_TAG))
 .PHONY: agent
 agent:
 	builder --config="./manifests/observIQ/manifest.yaml"
-	mkdir -p $(OUTDIR)/collector_$(GOOS)_$(GOARCH); cp ./builder/observiq-otel-collector $(OUTDIR)/collector_$(GOOS)_$(GOARCH)/observiq-otel-collector$(EXT)
+	mkdir -p $(OUTDIR); cp ./builder/observiq-otel-collector $(OUTDIR)/collector_$(GOOS)_$(GOARCH)$(EXT)
 
 # Builds a custom distro for the current GOOS/GOARCH pair using the manifest specified
 # MANIFEST = path to the manifest file for the distro to be built
@@ -46,6 +46,14 @@ distro:
 # TODO:(dakota) Updater likely to change and so is this cmd
 .PHONY: updater
 updater:
+	cd ./updater/; go build -ldflags "-s -w\
+		-X 'github.com/observiq/bindplane-agent/updater/internal/version.version=$(VERSION)'\
+		-X 'github.com/observiq/bindplane-agent/updater/internal/version.gitHash=$(shell git rev-parse HEAD)'\
+		-X 'github.com/observiq/bindplane-agent/updater/internal/version.date=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")'"\
+		-o ../$(OUTDIR)/updater_$(GOOS)_$(GOARCH)$(EXT) ./cmd/updater
+
+.PHONY: updater-local
+updater-local:
 	cd ./updater/; go build -o ../$(OUTDIR)/updater_$(GOOS)_$(GOARCH)$(EXT) ./cmd/updater
 
 # Runs the supervisor invoking the agent build in /dist
@@ -231,6 +239,7 @@ release-prep:
 	@rm -rf release_deps
 	@mkdir release_deps
 	@echo 'v$(CURR_VERSION)' > release_deps/VERSION.txt
+	./buildscripts/download-dependencies.sh release_deps
 	@cp -r ./plugins release_deps/
 	@cp config/example.yaml release_deps/config.yaml
 	@cp config/logging.yaml release_deps/logging.yaml
