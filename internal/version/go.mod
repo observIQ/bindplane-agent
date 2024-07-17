@@ -1,4 +1,4 @@
-module github.com/observiq/bindplane-agent/internal/counter
+module github.com/observiq/bindplane-agent/internal/version
 
 go 1.21.9
 

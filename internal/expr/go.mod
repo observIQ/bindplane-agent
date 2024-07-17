@@ -1,4 +1,4 @@
-module github.com/observiq/bindplane-agent/expr
+module github.com/observiq/bindplane-agent/internal/expr
 
 go 1.21.9
 

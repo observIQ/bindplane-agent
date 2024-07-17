@@ -12,7 +12,7 @@ capabilities:
   reports_remote_config: true
 
 agent:
-  executable: ./builder/observiq-otel-collector
+  executable: ./dist/collector_
 
 storage:
   directory: "./local/storage"
