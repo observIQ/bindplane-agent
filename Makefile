@@ -42,8 +42,7 @@ agent:
 distro:
 	builder --config="$(MANIFEST)"
 
-# Builds just the updater for current GOOS/GOARCH pair
-# TODO:(dakota) Updater likely to change and so is this cmd
+# Builds the updater for current GOOS/GOARCH pair && sets flags
 .PHONY: updater
 updater:
 	cd ./updater/; go build -ldflags "-s -w\
@@ -51,10 +50,6 @@ updater:
 		-X 'github.com/observiq/bindplane-agent/updater/internal/version.gitHash=$(shell git rev-parse HEAD)'\
 		-X 'github.com/observiq/bindplane-agent/updater/internal/version.date=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")'"\
 		-o ../$(OUTDIR)/updater_$(GOOS)_$(GOARCH)$(EXT) ./cmd/updater
-
-.PHONY: updater-local
-updater-local:
-	cd ./updater/; go build -o ../$(OUTDIR)/updater_$(GOOS)_$(GOARCH)$(EXT) ./cmd/updater
 
 # Runs the supervisor invoking the agent build in /dist
 .PHONY: run-supervisor
@@ -243,6 +238,7 @@ release-prep:
 	@cp -r ./plugins release_deps/
 	@cp config/example.yaml release_deps/config.yaml
 	@cp config/logging.yaml release_deps/logging.yaml
+	@cp config/supervisor-config.example.yaml release_deps/supervisor-config.yaml
 	@cp service/com.observiq.collector.plist release_deps/com.observiq.collector.plist
 	@jq ".files[] | select(.service != null)" windows/wix.json >> release_deps/windows_service.json
 	@cp service/observiq-otel-collector.service release_deps/observiq-otel-collector.service

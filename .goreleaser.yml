@@ -92,6 +92,12 @@ archives:
       - src: release_deps/VERSION.txt
         dst: "."
         strip_parent: true
+      - src: release_deps/supervisor-config.yaml
+        dst: "."
+        strip_parent: true
+      - src: release_deps/supervisor_bin/opampsupervisor_{{ .Os }}_{{ .Arch }}{{ .ArtifactExt }}
+        dst: "."
+        strip_parent: true
       - src: release_deps/com.observiq.collector.plist
         dst: "install"
         strip_parent: true
