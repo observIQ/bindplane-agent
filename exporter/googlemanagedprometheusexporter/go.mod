@@ -3,7 +3,7 @@ module github.com/observiq/bindplane-agent/exporter/googlemanagedprometheusexpor
 go 1.21.9
 
 require (
-	github.com/observiq/bindplane-agent/internal/version v1.56.0
+	github.com/observiq/bindplane-agent/internal/version v0.0.0-20240717125712-f9cdef5e8520
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlemanagedprometheusexporter v0.105.0
 	github.com/stretchr/testify v1.9.0
 	go.opentelemetry.io/collector/component v0.105.0
@@ -102,4 +102,5 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace github.com/observiq/bindplane-agent/internal/version v1.56.0 => ../../internal/version
+// Needed until 'version' package changes are included in a release
+replace github.com/observiq/bindplane-agent/internal/version v1.56.0 => github.com/observiq/bindplane-agent/internal/version v0.0.0-20240717125712-f9cdef5e8520
