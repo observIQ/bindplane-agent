@@ -12,12 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package version exposes data on the collector set at compile time
+// Package version exposes data on the collector
 package version
 
-// these will be replaced at link time by make.
 var (
-	version = "latest"  // Semantic version, or "latest" by default
+	version = "v2.0.0"
 	gitHash = "unknown" // Commit hash from which this build was generated
 	date    = "unknown" // Date the build was generated
 )
