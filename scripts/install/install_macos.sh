@@ -24,6 +24,7 @@ PREREQS="printf sed uname tr find grep"
 TMP_DIR="${TMPDIR:-"/tmp/"}observiq-otel-collector" # Allow this to be overriden by cannonical TMPDIR env var
 INSTALL_DIR="/opt/observiq-otel-collector"
 MANAGEMENT_YML_PATH="$INSTALL_DIR/manager.yaml"
+SUPERVISOR_YML_PATH="$INSTALL_DIR/supervisor-config.yaml"
 SCRIPT_NAME="$0"
 INDENT_WIDTH='  '
 indent=""
@@ -534,6 +535,7 @@ install_package()
   # If an endpoint was specified, we need to write the manager.yaml
   if [ -n "$OPAMP_ENDPOINT" ]; then
     create_manager_yml "$MANAGEMENT_YML_PATH"
+    create_supervisor_config "$SUPERVISOR_YML_PATH"
   fi
 
   # Install jmx jar
@@ -582,6 +584,38 @@ create_manager_yml()
     command printf 'endpoint: "%s"\n' "$OPAMP_ENDPOINT" > "$manager_yml_path"
     [ -n "$OPAMP_LABELS" ] && command printf 'labels: "%s"\n' "$OPAMP_LABELS" >> "$manager_yml_path"
     [ -n "$OPAMP_SECRET_KEY" ] && command printf 'secret_key: "%s"\n' "$OPAMP_SECRET_KEY" >> "$manager_yml_path"
+    succeeded
+  fi
+}
+
+
+create_supervisor_config()
+{
+  supervisor_yml_path="$1"
+  if [ ! -f "$supervisor_yml_path" ]; then
+    info "Creating supervisor config..."
+
+    # Note here: We create the file and change permissions of the file here BEFORE writing info to it
+    # We do this because the file may contain a secret key, so we want 0 window when the
+    # file is readable by anyone other than root
+    command printf '' >> "$supervisor_yml_path"
+    chmod 0600 "$supervisor_yml_path"
+
+    command printf 'server:\n' > "$supervisor_yml_path"
+    command printf '  endpoint: "%s"\n' "$OPAMP_ENDPOINT" >> "$supervisor_yml_path"
+    command printf '  headers:\n' >> "$supervisor_yml_path"
+    [ -n "$OPAMP_SECRET_KEY" ] && command printf '    Authorization: "Secret-Key %s"\n' "$OPAMP_SECRET_KEY" >> "$supervisor_yml_path"
+    [ -n "$OPAMP_LABELS" ] && command printf '    X-Bindplane-Attribute: "%s"\n' "$OPAMP_LABELS" >> "$supervisor_yml_path"
+    command printf '  tls:\n' >> "$supervisor_yml_path"
+    command printf '    insecure: true\n' >> "$supervisor_yml_path"
+    command printf '    insecure_skip_verify: true\n' >> "$supervisor_yml_path"
+    command printf 'capabilities:\n' >> "$supervisor_yml_path"
+    command printf '  accepts_remote_config: true\n' >> "$supervisor_yml_path"
+    command printf '  reports_remote_config: true\n' >> "$supervisor_yml_path"
+    command printf 'agent:\n' >> "$supervisor_yml_path"
+    command printf '  executable: "%s"\n' "$INSTALL_DIR/observiq-otel-collector" >> "$supervisor_yml_path"
+    command printf 'storage:\n' >> "$supervisor_yml_path"
+    command printf '  directory: "%s"\n' "$INSTALL_DIR/storage" >> "$supervisor_yml_path"
     succeeded
   fi
 }
