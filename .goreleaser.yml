@@ -70,6 +70,34 @@ builds:
         goarch: ppc64le
     prebuilt:
       path: tmp/updater_{{ .Os }}_{{ .Arch }}{{ .Ext }}
+  - id: supervisor
+    builder: prebuilt
+    binary: opampsupervisor
+    goos:
+      - windows
+      - linux
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+      - arm
+      - ppc64
+      - ppc64le
+    ignore:
+      - goos: windows
+        goarch: arm
+      - goos: windows
+        goarch: arm64
+      - goos: windows
+        goarch: ppc64
+      - goos: windows
+        goarch: ppc64le
+      - goos: darwin
+        goarch: ppc64
+      - goos: darwin
+        goarch: ppc64le
+    prebuilt:
+      path: release_deps/supervisor_bin/opampsupervisor_{{ .Os }}_{{ .Arch }}{{ .Ext }}
 
 # https://goreleaser.com/customization/archive/
 archives:
@@ -90,12 +118,6 @@ archives:
         dst: plugins
         strip_parent: true
       - src: release_deps/VERSION.txt
-        dst: "."
-        strip_parent: true
-      - src: release_deps/supervisor-config.yaml
-        dst: "."
-        strip_parent: true
-      - src: release_deps/supervisor_bin/opampsupervisor_{{ .Os }}_{{ .Arch }}{{ .ArtifactExt }}
         dst: "."
         strip_parent: true
       - src: release_deps/com.observiq.collector.plist
