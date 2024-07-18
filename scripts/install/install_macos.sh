@@ -179,7 +179,10 @@ Usage:
       Defines the base of the download URL as '{base_url}/v{version}/observiq-otel-collector-v{version}-darwin-{os_arch}.tar.gz'.
       If not provided, this will default to '$DOWNLOAD_BASE'.
       Example: '-b http://my.domain.org/observiq-otel-collector/binaries' will be used as the base of the download URL.
-   
+    
+  $(fg_yellow '-f, --file')
+      Install Agent from a local file instead of downloading from a URL.
+
   $(fg_yellow '-e, --endpoint')
       Defines the endpoint of an OpAMP compatible management server for this agent install.
       This parameter may also be provided through the ENDPOINT environment variable.
@@ -369,7 +372,14 @@ setup_installation()
   increase_indent
 
   set_os_arch
-  set_download_urls
+
+  if [ -z "$package_path" ]; then
+    set_download_urls
+    out_file_path="$TMP_DIR/observiq-otel-collector.tar.gz"
+  else 
+    out_file_path="$package_path"
+  fi
+
   set_opamp_endpoint
   set_opamp_labels
   set_opamp_secret_key
@@ -479,13 +489,15 @@ install_package()
   mkdir -p "$TMP_DIR/artifacts"
 
   # Download into tmp dir
-  info "Downloading tarball into temporary directory..."
-  curl -L "$collector_download_url" -o "$TMP_DIR/observiq-otel-collector.tar.gz" --progress-bar --fail || error_exit "$LINENO" "Failed to download package"
-  succeeded
+  if [ -z "$package_path" ]; then
+    info "Downloading tarball into temporary directory..."
+    curl -L "$collector_download_url" -o "$out_file_path" --progress-bar --fail || error_exit "$LINENO" "Failed to download package"
+    succeeded
+  fi
 
   # unpack
   info "Unpacking tarball..."
-  tar -xzf "$TMP_DIR/observiq-otel-collector.tar.gz" -C "$TMP_DIR/artifacts" || error_exit "$LINENO" "Failed to unack archive $TMP_DIR/observiq-otel-collector.tar.gz"
+  tar -xzf "$out_file_path" -C "$TMP_DIR/artifacts" || error_exit "$LINENO" "Failed to unpack archive $TMP_DIR/observiq-otel-collector.tar.gz"
   succeeded
 
   mkdir -p "$INSTALL_DIR" || error_exit "$LINENO" "Failed to create directory $INSTALL_DIR"
@@ -508,8 +520,8 @@ install_package()
   info "Copying artifacts to install directory..."
   increase_indent
 
-  # This find command gets a list of all artifacts paths except config.yaml, logging.yaml, or opentelemetry-java-contrib-jmx-metrics.jar
-  FILES=$(cd "$TMP_DIR/artifacts"; find "." -type f -not \( -name config.yaml -or -name logging.yaml -or -name opentelemetry-java-contrib-jmx-metrics.jar \))
+  # This find command gets a list of all artifacts paths except logging.yaml, or opentelemetry-java-contrib-jmx-metrics.jar
+  FILES=$(cd "$TMP_DIR/artifacts"; find "." -type f -not \( -name -or -name logging.yaml -or -name opentelemetry-java-contrib-jmx-metrics.jar \))
   # Move files to install dir
   for f in $FILES
   do
@@ -519,22 +531,14 @@ install_package()
   decrease_indent
   succeeded
 
-  if [ ! -f "$INSTALL_DIR/config.yaml" ]; then
-    info "Copying default config.yaml..."
-    cp "$TMP_DIR/artifacts/config.yaml" "$INSTALL_DIR/config.yaml" || error_exit "$LINENO" "Failed to copy default config.yaml to install dir"
-    chmod 0600 "$INSTALL_DIR/config.yaml" || error_exit "$LINENO" "Failed to change permissions of config.yaml"
-    succeeded
-  fi
-
   if [ ! -f "$INSTALL_DIR/logging.yaml" ]; then
     info "Copying default logging.yaml..."
     cp "$TMP_DIR/artifacts/logging.yaml" "$INSTALL_DIR/logging.yaml" || error_exit "$LINENO" "Failed to copy default logging.yaml to install dir"
     succeeded
   fi
 
-  # If an endpoint was specified, we need to write the manager.yaml
+  # If an endpoint was specified, we need to write the supervisor-config.yaml
   if [ -n "$OPAMP_ENDPOINT" ]; then
-    create_manager_yml "$MANAGEMENT_YML_PATH"
     create_supervisor_config "$SUPERVISOR_YML_PATH"
   fi
 
@@ -568,27 +572,6 @@ install_package()
   decrease_indent
 }
 
-# create_manager_yml creates the manager.yml at the specified path, containing opamp information.
-create_manager_yml()
-{
-  manager_yml_path="$1"
-  if [ ! -f "$manager_yml_path" ]; then
-    info "Creating manager yaml..."
-
-    # Note here: We create the file and change permissions of the file here BEFORE writing info to it
-    # We do this because the file may contain a secret key, so we want 0 window when the
-    # file is readable by anyone other than root
-    command printf '' >> "$manager_yml_path"
-    chmod 0600 "$manager_yml_path"
-
-    command printf 'endpoint: "%s"\n' "$OPAMP_ENDPOINT" > "$manager_yml_path"
-    [ -n "$OPAMP_LABELS" ] && command printf 'labels: "%s"\n' "$OPAMP_LABELS" >> "$manager_yml_path"
-    [ -n "$OPAMP_SECRET_KEY" ] && command printf 'secret_key: "%s"\n' "$OPAMP_SECRET_KEY" >> "$manager_yml_path"
-    succeeded
-  fi
-}
-
-
 create_supervisor_config()
 {
   supervisor_yml_path="$1"
@@ -613,6 +596,7 @@ create_supervisor_config()
     command printf '  accepts_remote_config: true\n' >> "$supervisor_yml_path"
     command printf '  reports_remote_config: true\n' >> "$supervisor_yml_path"
     command printf 'agent:\n' >> "$supervisor_yml_path"
+    # TODO(dakota): Add logging config option when supervisor suppports it
     command printf '  executable: "%s"\n' "$INSTALL_DIR/observiq-otel-collector" >> "$supervisor_yml_path"
     command printf 'storage:\n' >> "$supervisor_yml_path"
     command printf '  directory: "%s"\n' "$INSTALL_DIR/storage" >> "$supervisor_yml_path"
@@ -626,11 +610,11 @@ display_results()
 {
     banner 'Information'
     increase_indent
-    info "Agent Home:         $(fg_cyan "$INSTALL_DIR")$(reset)"
-    info "Agent Config:       $(fg_cyan "$INSTALL_DIR/config.yaml")$(reset)"
-    info "Start Command:      $(fg_cyan "sudo launchctl load /Library/LaunchDaemons/$SERVICE_NAME.plist")$(reset)"
-    info "Stop Command:       $(fg_cyan "sudo launchctl unload /Library/LaunchDaemons/$SERVICE_NAME.plist")$(reset)"
-    info "Logs Command:       $(fg_cyan "sudo tail -F $INSTALL_DIR/log/collector.log")$(reset)"
+    info "Agent Home:                    $(fg_cyan "$INSTALL_DIR")$(reset)"
+    info "Agent Config:                  $(fg_cyan "$INSTALL_DIR/effective.yaml")$(reset)"
+    info "Agent Logs Command:            $(fg_cyan "sudo tail -F $INSTALL_DIR/log/collector.log")$(reset)"
+    info "Supervisor Start Command:      $(fg_cyan "sudo launchctl load /Library/LaunchDaemons/$SERVICE_NAME.plist")$(reset)"
+    info "Supervisor Stop Command:       $(fg_cyan "sudo launchctl unload /Library/LaunchDaemons/$SERVICE_NAME.plist")$(reset)"
     decrease_indent
 
     banner 'Support'
@@ -665,14 +649,14 @@ uninstall()
   rm -f "/Library/LaunchDaemons/$SERVICE_NAME.plist" || error_exit "$LINENO" "Failed to remove service file /Library/LaunchDaemons/$SERVICE_NAME.plist"
   succeeded
 
-  info "Backing up config.yaml to config.bak.yaml"
-  cp "$INSTALL_DIR/config.yaml" "$INSTALL_DIR/config.bak.yaml" || error_exit "$LINENO" "Failed to backup config.yaml to config.bak.yaml"
+  info "Backing up effective.yaml to effective.bak.yaml"
+  cp "$INSTALL_DIR/effective.yaml" "$INSTALL_DIR/effective.bak.yaml" || error_exit "$LINENO" "Failed to backup effective.yaml to effective.bak.yaml"
   succeeded
 
   # Removes the whole install directory, including configs.
   info "Removing installed artifacts..."
-  # This find command gets a list of all artifacts paths except config.yaml or the root directory.
-  FILES=$(cd "$INSTALL_DIR"; find "." -not \( -name config.bak.yaml -or -name "." \))
+  # This find command gets a list of all artifacts paths except effective.yaml or the root directory.
+  FILES=$(cd "$INSTALL_DIR"; find "." -not \( -name effective.bak.yaml -or -name "." \))
   for f in $FILES
   do
     rm -rf "${INSTALL_DIR:?}/$f" || error_exit "$LINENO" "Failed to remove artifact ${INSTALL_DIR:?}/$f"
@@ -711,6 +695,8 @@ main()
           url=$2 ; shift 2 ;;
         -v|--version)
           version=$2 ; shift 2 ;;
+        -f|--file)
+          package_path=$2 ; shift 2 ;;
         -r|--uninstall)
           uninstall
           exit 0
