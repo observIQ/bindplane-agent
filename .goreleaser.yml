@@ -108,9 +108,6 @@ archives:
       - src: release_deps/opentelemetry-java-contrib-jmx-metrics.jar
         dst: "."
         strip_parent: true
-      - src: release_deps/config.yaml
-        dst: "."
-        strip_parent: true
       - src: release_deps/logging.yaml
         dst: "."
         strip_parent: true
