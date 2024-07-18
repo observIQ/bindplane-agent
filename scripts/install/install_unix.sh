@@ -29,7 +29,7 @@ fi
 # Script Constants
 COLLECTOR_USER="observiq-otel-collector"
 TMP_DIR=${TMPDIR:-"/tmp"} # Allow this to be overriden by cannonical TMPDIR env var
-MANAGEMENT_YML_PATH="/opt/observiq-otel-collector/manager.yaml"
+SUPERVISOR_YML_PATH="/opt/observiq-otel-collector/supervisor-config.yaml"
 PREREQS="curl printf $SVC_PRE sed uname cut"
 SCRIPT_NAME="$0"
 INDENT_WIDTH='  '
@@ -642,8 +642,8 @@ install_package()
 
   # If an endpoint was specified, we need to write the manager.yaml
   if [ -n "$OPAMP_ENDPOINT" ]; then
-    info "Creating manager yaml..."
-    create_manager_yml "$MANAGEMENT_YML_PATH"
+    info "Creating supervisor config..."
+    create_supervisor_config "$SUPERVISOR_YML_PATH"
     succeeded
   fi
 
@@ -699,23 +699,36 @@ unpack_package()
   return 0
 }
 
-# create_manager_yml creates the manager.yml at the specified path, containing opamp information.
-create_manager_yml()
+# create_supervisor_config creates the supervisor-config.yml at the specified path, containing opamp information.
+create_supervisor_config()
 {
-  manager_yml_path="$1"
-  if [ ! -f "$manager_yml_path" ]; then
+  supervisor_yml_path="$1"
+  if [ ! -f "$supervisor_yml_path" ]; then
+    info "Creating supervisor config..."
+
     # Note here: We create the file and change permissions of the file here BEFORE writing info to it
     # We do this because the file may contain a secret key, so we want 0 window when the
-    # file is readable by anyone other than the agent & root
-    command printf '' >> "$manager_yml_path"
+    # file is readable by anyone other than root
+    command printf '' >> "$supervisor_yml_path"
+    chmod 0600 "$supervisor_yml_path"
 
-    chgrp "$COLLECTOR_USER" "$manager_yml_path"
-    chown "$COLLECTOR_USER" "$manager_yml_path"
-    chmod 0640 "$manager_yml_path"
-
-    command printf 'endpoint: "%s"\n' "$OPAMP_ENDPOINT" > "$manager_yml_path"
-    [ -n "$OPAMP_LABELS" ] && command printf 'labels: "%s"\n' "$OPAMP_LABELS" >> "$manager_yml_path"
-    [ -n "$OPAMP_SECRET_KEY" ] && command printf 'secret_key: "%s"\n' "$OPAMP_SECRET_KEY" >> "$manager_yml_path"
+    command printf 'server:\n' > "$supervisor_yml_path"
+    command printf '  endpoint: "%s"\n' "$OPAMP_ENDPOINT" >> "$supervisor_yml_path"
+    command printf '  headers:\n' >> "$supervisor_yml_path"
+    [ -n "$OPAMP_SECRET_KEY" ] && command printf '    Authorization: "Secret-Key %s"\n' "$OPAMP_SECRET_KEY" >> "$supervisor_yml_path"
+    [ -n "$OPAMP_LABELS" ] && command printf '    X-Bindplane-Attribute: "%s"\n' "$OPAMP_LABELS" >> "$supervisor_yml_path"
+    command printf '  tls:\n' >> "$supervisor_yml_path"
+    command printf '    insecure: true\n' >> "$supervisor_yml_path"
+    command printf '    insecure_skip_verify: true\n' >> "$supervisor_yml_path"
+    command printf 'capabilities:\n' >> "$supervisor_yml_path"
+    command printf '  accepts_remote_config: true\n' >> "$supervisor_yml_path"
+    command printf '  reports_remote_config: true\n' >> "$supervisor_yml_path"
+    command printf 'agent:\n' >> "$supervisor_yml_path"
+    # TODO(dakota): Add logging config option when supervisor suppports it
+    command printf '  executable: "%s"\n' "/opt/observiq-otel-collector/observiq-otel-collector" >> "$supervisor_yml_path"
+    command printf 'storage:\n' >> "$supervisor_yml_path"
+    command printf '  directory: "%s"\n' "/opt/observiq-otel-collector/storage" >> "$supervisor_yml_path"
+    succeeded
   fi
 }
 
@@ -799,8 +812,8 @@ uninstall()
     succeeded
   fi
 
-  info "Removing any existing manager.yaml..."
-  rm -f "$MANAGEMENT_YML_PATH"
+  info "Removing any existing supervisor-config.yaml..."
+  rm -f "$SUPERVISOR_YML_PATH"
   succeeded
 
   info "Removing package..."
