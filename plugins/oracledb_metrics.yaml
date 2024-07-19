@@ -62,7 +62,7 @@ template: |
               data_type: sum
               description: The size of tablespaces in the database.
               metric_name: oracle.tablespace.size
-              monotonic: "false"
+              monotonic: false
               static_attributes:
                 db.system: oracle
                 state: free
@@ -77,7 +77,7 @@ template: |
               data_type: sum
               description: The size of tablespaces in the database.
               metric_name: oracle.tablespace.size
-              monotonic: "false"
+              monotonic: false
               static_attributes:
                 db.system: oracle
                 state: used
@@ -94,7 +94,7 @@ template: |
               data_type: sum
               description: The number of tablespaces in the database.
               metric_name: oracle.tablespace.count
-              monotonic: "false"
+              monotonic: false
               static_attributes:
                 db.system: oracle
               unit: "{tablespaces}"
@@ -108,7 +108,7 @@ template: |
               data_type: sum
               description: The number of seconds since the last RMAN backup.
               metric_name: oracle.backup.latest
-              monotonic: "true"
+              monotonic: true
               static_attributes:
                 db.system: oracle
               unit: s
@@ -123,7 +123,7 @@ template: |
               data_type: sum
               description: The current number of processes.
               metric_name: oracle.process.count
-              monotonic: "false"
+              monotonic: false
               static_attributes:
                 db.system: oracle
               unit: "{processes}"
@@ -136,7 +136,7 @@ template: |
               data_type: sum
               description: The maximum number of processes allowed.
               metric_name: oracle.process.limit
-              monotonic: "false"
+              monotonic: false
               static_attributes:
                 db.system: oracle
               unit: "{processes}"
@@ -149,7 +149,7 @@ template: |
               data_type: sum
               description: The current number of sessions.
               metric_name: oracle.session.count
-              monotonic: "false"
+              monotonic: false
               static_attributes:
                 db.system: oracle
               unit: "{sessions}"
@@ -162,7 +162,7 @@ template: |
               data_type: sum
               description: The maximum number of sessions allowed.
               metric_name: oracle.session.limit
-              monotonic: "false"
+              monotonic: false
               static_attributes:
                 db.system: oracle
               unit: "{sessions}"
@@ -193,7 +193,7 @@ template: |
               data_type: sum
               description: The programmable global area memory allocated by process.
               metric_name: oracle.process.pga_memory.size
-              monotonic: "false"
+              monotonic: false
               static_attributes:
                 db.system: oracle
                 state: used
@@ -208,7 +208,7 @@ template: |
               data_type: sum
               description: The programmable global area memory allocated by process.
               metric_name: oracle.process.pga_memory.size
-              monotonic: "false"
+              monotonic: false
               static_attributes:
                 db.system: oracle
                 state: free
@@ -225,7 +225,7 @@ template: |
               data_type: sum
               description: The number of wait events experienced.
               metric_name: oracle.wait.count
-              monotonic: "true"
+              monotonic: true
               static_attributes:
                 db.system: oracle
                 type: foreground
@@ -240,7 +240,7 @@ template: |
               data_type: sum
               description: The number of wait events experienced.
               metric_name: oracle.wait.count
-              monotonic: "true"
+              monotonic: true
               static_attributes:
                 db.system: oracle
                 type: background
@@ -255,7 +255,7 @@ template: |
               data_type: sum
               description: The amount of time waited for wait events.
               metric_name: oracle.wait.time
-              monotonic: "true"
+              monotonic: true
               static_attributes:
                 db.system: oracle
                 type: foreground
@@ -270,7 +270,7 @@ template: |
               data_type: sum
               description: The amount of time waited for wait events.
               metric_name: oracle.wait.time
-              monotonic: "true"
+              monotonic: true
               static_attributes:
                 db.system: oracle
                 type: background
@@ -285,7 +285,7 @@ template: |
               data_type: sum
               description: The number of timeouts for wait events.
               metric_name: oracle.wait.timeouts
-              monotonic: "true"
+              monotonic: true
               static_attributes:
                 db.system: oracle
                 type: foreground
@@ -300,7 +300,7 @@ template: |
               data_type: sum
               description: The number of timeouts for wait events.
               metric_name: oracle.wait.timeouts
-              monotonic: "true"
+              monotonic: true
               static_attributes:
                 db.system: oracle
                 type: background
@@ -370,7 +370,7 @@ template: |
               data_type: sum
               description: The total number of cursors.
               metric_name: oracle.cursor.count
-              monotonic: "true"
+              monotonic: true
               static_attributes:
                 db.system: oracle
               unit: "{cursors}"
@@ -383,7 +383,7 @@ template: |
               data_type: sum
               description: The current number of cursors.
               metric_name: oracle.cursor.current
-              monotonic: "false"
+              monotonic: false
               static_attributes:
                 db.system: oracle
               unit: "{cursors}"
@@ -396,7 +396,7 @@ template: |
               data_type: sum
               description: The total number of logons.
               metric_name: oracle.logon.count
-              monotonic: "true"
+              monotonic: true
               static_attributes:
                 db.system: oracle
               unit: "{logons}"
@@ -409,7 +409,7 @@ template: |
               data_type: sum
               description: The current number of logons.
               metric_name: oracle.logon.current
-              monotonic: "false"
+              monotonic: false
               static_attributes:
                 db.system: oracle
               unit: "{logons}"
@@ -422,7 +422,7 @@ template: |
               data_type: sum
               description: The total number of sorts.
               metric_name: oracle.sort.count
-              monotonic: "true"
+              monotonic: true
               static_attributes:
                 db.system: oracle
                 type: memory
@@ -436,7 +436,7 @@ template: |
               data_type: sum
               description: The total number of sorts.
               metric_name: oracle.sort.count
-              monotonic: "true"
+              monotonic: true
               static_attributes:
                 db.system: oracle
                 type: disk
@@ -450,7 +450,7 @@ template: |
               data_type: sum
               description: The total number of rows sorted.
               metric_name: oracle.sort.row.count
-              monotonic: "true"
+              monotonic: true
               static_attributes:
                 db.system: oracle
               unit: "{rows}"
@@ -463,7 +463,7 @@ template: |
               data_type: sum
               description: The number of physical disk operations.
               metric_name: oracle.disk.operation.count
-              monotonic: "true"
+              monotonic: true
               static_attributes:
                 db.system: oracle
                 direction: read
@@ -477,7 +477,7 @@ template: |
               data_type: sum
               description: The number of bytes affected by physical disk operations.
               metric_name: oracle.disk.operation.size
-              monotonic: "true"
+              monotonic: true
               static_attributes:
                 db.system: oracle
                 direction: read
@@ -491,7 +491,7 @@ template: |
               data_type: sum
               description: The number of physical disk operations.
               metric_name: oracle.disk.operation.count
-              monotonic: "true"
+              monotonic: true
               static_attributes:
                 db.system: oracle
                 direction: write
@@ -505,7 +505,7 @@ template: |
               data_type: sum
               description: The number of bytes affected by physical disk operations.
               metric_name: oracle.disk.operation.size
-              monotonic: "true"
+              monotonic: true
               static_attributes:
                 db.system: oracle
                 direction: write
@@ -519,7 +519,7 @@ template: |
               data_type: sum
               description: The total number of bytes communicated on the network.
               metric_name: oracle.network.data
-              monotonic: "true"
+              monotonic: true
               static_attributes:
                 db.system: oracle
                 direction: received
@@ -534,7 +534,7 @@ template: |
               data_type: sum
               description: The total number of bytes communicated on the network.
               metric_name: oracle.network.data
-              monotonic: "true"
+              monotonic: true
               static_attributes:
                 db.system: oracle
                 direction: sent
@@ -549,7 +549,7 @@ template: |
               data_type: sum
               description: The total number of bytes communicated on the network.
               metric_name: oracle.network.data
-              monotonic: "true"
+              monotonic: true
               static_attributes:
                 db.system: oracle
                 direction: received
@@ -564,7 +564,7 @@ template: |
               data_type: sum
               description: The total number of bytes communicated on the network.
               metric_name: oracle.network.data
-              monotonic: "true"
+              monotonic: true
               static_attributes:
                 db.system: oracle
                 direction: sent
@@ -579,7 +579,7 @@ template: |
               data_type: sum
               description: The total number of user calls such as login, parse, fetch, or execute.
               metric_name: oracle.user.calls
-              monotonic: "true"
+              monotonic: true
               static_attributes:
                 db.system: oracle
               unit: "{calls}"
@@ -592,7 +592,7 @@ template: |
               data_type: sum
               description: The total number of user transaction commits.
               metric_name: oracle.user.commits
-              monotonic: "true"
+              monotonic: true
               static_attributes:
                 db.system: oracle
               unit: "{commits}"
@@ -605,7 +605,7 @@ template: |
               data_type: sum
               description: The total number of times users manually issue the ROLLBACK statement or an error occurs during a user's transactions
               metric_name: oracle.user.rollbacks
-              monotonic: "true"
+              monotonic: true
               static_attributes:
                 db.system: oracle
               unit: "{rollbacks}"
