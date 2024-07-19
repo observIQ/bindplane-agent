@@ -5,10 +5,10 @@ go 1.21.9
 require (
 	github.com/observiq/bindplane-agent/internal/testutils v1.56.0
 	github.com/stretchr/testify v1.9.0
-	go.opentelemetry.io/collector/component v0.104.0
-	go.opentelemetry.io/collector/consumer v0.104.0
-	go.opentelemetry.io/collector/extension v0.104.0
-	go.opentelemetry.io/collector/pdata v1.11.0
+	go.opentelemetry.io/collector/component v0.105.0
+	go.opentelemetry.io/collector/consumer v0.105.0
+	go.opentelemetry.io/collector/extension v0.105.0
+	go.opentelemetry.io/collector/pdata v1.12.0
 )
 
 require (

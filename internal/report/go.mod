@@ -3,10 +3,10 @@ module github.com/observiq/bindplane-agent/internal/report
 go 1.21.9
 
 require (
-	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden v0.104.0
-	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest v0.104.0
+	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden v0.105.0
+	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest v0.105.0
 	github.com/stretchr/testify v1.9.0
-	go.opentelemetry.io/collector/pdata v1.11.0
+	go.opentelemetry.io/collector/pdata v1.12.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 

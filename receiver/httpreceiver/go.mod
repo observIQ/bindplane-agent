@@ -3,15 +3,15 @@ module github.com/observiq/bindplane-agent/receiver/httpreceiver
 go 1.21.9
 
 require (
-	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest v0.104.0
+	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest v0.105.0
 	github.com/stretchr/testify v1.9.0
-	go.opentelemetry.io/collector/component v0.104.0
-	go.opentelemetry.io/collector/config/confighttp v0.104.0
-	go.opentelemetry.io/collector/config/configtls v0.104.0
-	go.opentelemetry.io/collector/confmap v0.104.0
-	go.opentelemetry.io/collector/consumer v0.104.0
-	go.opentelemetry.io/collector/pdata v1.11.0
-	go.opentelemetry.io/collector/receiver v0.104.0
+	go.opentelemetry.io/collector/component v0.105.0
+	go.opentelemetry.io/collector/config/confighttp v0.105.0
+	go.opentelemetry.io/collector/config/configtls v0.105.0
+	go.opentelemetry.io/collector/confmap v0.105.0
+	go.opentelemetry.io/collector/consumer v0.105.0
+	go.opentelemetry.io/collector/pdata v1.12.0
+	go.opentelemetry.io/collector/receiver v0.105.0
 	go.uber.org/goleak v1.3.0
 	go.uber.org/zap v1.27.0
 )

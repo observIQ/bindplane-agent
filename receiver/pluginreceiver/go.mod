@@ -4,33 +4,33 @@ go 1.21.9
 
 require (
 	github.com/mitchellh/mapstructure v1.5.1-0.20231216201459-8508981c8b6c
-	github.com/open-telemetry/opentelemetry-collector-contrib/extension/storage/filestorage v0.104.0
-	github.com/open-telemetry/opentelemetry-collector-contrib/processor/filterprocessor v0.104.0
-	github.com/open-telemetry/opentelemetry-collector-contrib/processor/metricstransformprocessor v0.104.0
-	github.com/open-telemetry/opentelemetry-collector-contrib/processor/transformprocessor v0.104.0
-	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/filelogreceiver v0.104.0
-	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/journaldreceiver v0.104.0
-	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/prometheusreceiver v0.104.0
-	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/sqlqueryreceiver v0.104.0
-	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/syslogreceiver v0.104.0
-	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/tcplogreceiver v0.104.0
-	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/udplogreceiver v0.104.0
-	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/windowseventlogreceiver v0.104.0
+	github.com/open-telemetry/opentelemetry-collector-contrib/extension/storage/filestorage v0.105.0
+	github.com/open-telemetry/opentelemetry-collector-contrib/processor/filterprocessor v0.105.0
+	github.com/open-telemetry/opentelemetry-collector-contrib/processor/metricstransformprocessor v0.105.0
+	github.com/open-telemetry/opentelemetry-collector-contrib/processor/transformprocessor v0.105.0
+	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/filelogreceiver v0.105.0
+	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/journaldreceiver v0.105.0
+	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/prometheusreceiver v0.105.0
+	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/sqlqueryreceiver v0.105.0
+	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/syslogreceiver v0.105.0
+	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/tcplogreceiver v0.105.0
+	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/udplogreceiver v0.105.0
+	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/windowseventlogreceiver v0.105.0
 	github.com/stretchr/testify v1.9.0
-	go.opentelemetry.io/collector/component v0.104.0
-	go.opentelemetry.io/collector/confmap v0.104.0
-	go.opentelemetry.io/collector/confmap/converter/expandconverter v0.104.0
-	go.opentelemetry.io/collector/confmap/provider/envprovider v0.104.0
-	go.opentelemetry.io/collector/confmap/provider/fileprovider v0.104.0
-	go.opentelemetry.io/collector/confmap/provider/httpsprovider v0.104.0
-	go.opentelemetry.io/collector/confmap/provider/yamlprovider v0.104.0
-	go.opentelemetry.io/collector/consumer v0.104.0
-	go.opentelemetry.io/collector/exporter v0.104.0
-	go.opentelemetry.io/collector/extension v0.104.0
-	go.opentelemetry.io/collector/otelcol v0.104.0
-	go.opentelemetry.io/collector/pdata v1.11.0
-	go.opentelemetry.io/collector/processor v0.104.0
-	go.opentelemetry.io/collector/receiver v0.104.0
+	go.opentelemetry.io/collector/component v0.105.0
+	go.opentelemetry.io/collector/confmap v0.105.0
+	go.opentelemetry.io/collector/confmap/converter/expandconverter v0.105.0
+	go.opentelemetry.io/collector/confmap/provider/envprovider v0.105.0
+	go.opentelemetry.io/collector/confmap/provider/fileprovider v0.105.0
+	go.opentelemetry.io/collector/confmap/provider/httpsprovider v0.105.0
+	go.opentelemetry.io/collector/confmap/provider/yamlprovider v0.105.0
+	go.opentelemetry.io/collector/consumer v0.105.0
+	go.opentelemetry.io/collector/exporter v0.105.0
+	go.opentelemetry.io/collector/extension v0.105.0
+	go.opentelemetry.io/collector/otelcol v0.105.0
+	go.opentelemetry.io/collector/pdata v1.12.0
+	go.opentelemetry.io/collector/processor v0.105.0
+	go.opentelemetry.io/collector/receiver v0.105.0
 	go.uber.org/zap v1.27.0
 	gopkg.in/yaml.v2 v2.4.0
 )

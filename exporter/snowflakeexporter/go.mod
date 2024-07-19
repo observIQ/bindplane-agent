@@ -7,12 +7,12 @@ require (
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/snowflakedb/gosnowflake v1.10.1
 	github.com/stretchr/testify v1.9.0
-	go.opentelemetry.io/collector/component v0.104.0
-	go.opentelemetry.io/collector/config/configretry v1.11.0
-	go.opentelemetry.io/collector/confmap v0.104.0
-	go.opentelemetry.io/collector/consumer v0.104.0
-	go.opentelemetry.io/collector/exporter v0.104.0
-	go.opentelemetry.io/collector/pdata v1.11.0
+	go.opentelemetry.io/collector/component v0.105.0
+	go.opentelemetry.io/collector/config/configretry v0.105.0
+	go.opentelemetry.io/collector/confmap v0.105.0
+	go.opentelemetry.io/collector/consumer v0.105.0
+	go.opentelemetry.io/collector/exporter v0.105.0
+	go.opentelemetry.io/collector/pdata v1.12.0
 	go.uber.org/zap v1.27.0
 )
 

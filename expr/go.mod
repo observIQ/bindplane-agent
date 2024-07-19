@@ -3,10 +3,10 @@ module github.com/observiq/bindplane-agent/expr
 go 1.21.9
 
 require (
-	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/ottl v0.104.0
+	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/ottl v0.105.0
 	github.com/stretchr/testify v1.9.0
-	go.opentelemetry.io/collector/component v0.104.0
-	go.opentelemetry.io/collector/pdata v1.11.0
+	go.opentelemetry.io/collector/component v0.105.0
+	go.opentelemetry.io/collector/pdata v1.12.0
 )
 
 require (
