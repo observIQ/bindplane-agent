@@ -86,7 +86,7 @@ github.com/stretchr/testify v1.9.0 h1:HtqpIVDClZ4nwg75+f6Lvsy/wHu+3BoSGCbBAcpTsT
 github.com/stretchr/testify v1.9.0/go.mod h1:r2ic/lqez/lEtzL7wO/rwa5dbSLXVDPFyf8C91i36aY=
 github.com/yuin/goldmark v1.1.27/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 github.com/yuin/goldmark v1.2.1/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
-go.opentelemetry.io/collector v0.104.0 h1:R3zjM4O3K3+ttzsjPV75P80xalxRbwYTURlK0ys7uyo=
+go.opentelemetry.io/collector v0.105.0 h1:Qw/ONVMPT3aD8HjdDRcXCGoZrtSWH3jx4BkwAN1yrEM=
 go.opentelemetry.io/collector/component v0.105.0 h1:/OdkWHd1xTNX7JRq9iW3AFoJAnYUOGZZyOprNQkGoTI=
 go.opentelemetry.io/collector/component v0.105.0/go.mod h1:s8KoxOrhNIBzetkb0LHmzX1OI67DyZbaaUPOWIXS1mg=
 go.opentelemetry.io/collector/config/configtelemetry v0.105.0 h1:wEfUxAjjstp47aLr2s1cMZiH0dt+k42m6VC6HigqgJA=
@@ -107,8 +107,8 @@ go.opentelemetry.io/collector/pdata/pprofile v0.105.0 h1:C+Hd7CNcepL/364OBV9f4lH
 go.opentelemetry.io/collector/pdata/pprofile v0.105.0/go.mod h1:chr7lMJIzyXkccnPRkIPhyXtqLZLSReZYhwsggOGEfg=
 go.opentelemetry.io/collector/pdata/testdata v0.105.0 h1:5sPZzanR4nJR3sNQk3MTdArdEZCK0NRAfC29t0Dtf60=
 go.opentelemetry.io/collector/pdata/testdata v0.105.0/go.mod h1:NIfgaclQp/M1BZhgyc/7hDWD+/DumC/OMBQVI2KW+N0=
-go.opentelemetry.io/collector/receiver v0.104.0 h1:URL1ExkYYd+qbndm7CdGvI2mxzsv/pNfmwJ+1QSQ9/o=
-go.opentelemetry.io/collector/receiver v0.104.0/go.mod h1:+enTCZQLf6dRRANWvykXEzrlRw2JDppXJtoYWd/Dd54=
+go.opentelemetry.io/collector/receiver v0.105.0 h1:eZF97kMUnKJ20Uc4PaDlgLIGmaA8kyLqhH+vMXjh92U=
+go.opentelemetry.io/collector/receiver v0.105.0/go.mod h1:nGKDXLUGVHxMBJ5QLfsJ/bIhGvoMGqsN0pZtD5SC8sE=
 go.opentelemetry.io/otel v1.28.0 h1:/SqNcYk+idO0CxKEUOtKQClMK/MimZihKYMruSMViUo=
 go.opentelemetry.io/otel v1.28.0/go.mod h1:q68ijF8Fc8CnMHKyzqL6akLO46ePnjkgfIMIjUIX9z4=
 go.opentelemetry.io/otel/exporters/prometheus v0.50.0 h1:2Ewsda6hejmbhGFyUvWZjUThC98Cf8Zy6g0zkIimOng=
@@ -160,8 +160,8 @@ golang.org/x/xerrors v0.0.0-20190717185122-a985d3407aa7/go.mod h1:I/5z698sn9Ka8T
 golang.org/x/xerrors v0.0.0-20191011141410-1b5146add898/go.mod h1:I/5z698sn9Ka8TeJc9MKroUUfqBBauWjQqLJ2OPfmY0=
 golang.org/x/xerrors v0.0.0-20191204190536-9bdfabe68543/go.mod h1:I/5z698sn9Ka8TeJc9MKroUUfqBBauWjQqLJ2OPfmY0=
 golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1/go.mod h1:I/5z698sn9Ka8TeJc9MKroUUfqBBauWjQqLJ2OPfmY0=
-google.golang.org/genproto/googleapis/rpc v0.0.0-20240528184218-531527333157 h1:Zy9XzmMEflZ/MAaA7vNcoebnRAld7FsPW1EeBB7V0m8=
-google.golang.org/genproto/googleapis/rpc v0.0.0-20240528184218-531527333157/go.mod h1:EfXuqaE1J41VCDicxHzUDm+8rk+7ZdXzHV0IhO/I6s0=
+google.golang.org/genproto/googleapis/rpc v0.0.0-20240701130421-f6361c86f094 h1:BwIjyKYGsK9dMCBOorzRri8MQwmi7mT9rGHsCEinZkA=
+google.golang.org/genproto/googleapis/rpc v0.0.0-20240701130421-f6361c86f094/go.mod h1:Ue6ibwXGpU+dqIcODieyLOcgj7z8+IcskoNIgZxtrFY=
 google.golang.org/grpc v1.65.0 h1:bs/cUb4lp1G5iImFFd3u5ixQzweKizoZJAwBNLR42lc=
 google.golang.org/grpc v1.65.0/go.mod h1:WgYC2ypjlB0EiQi6wdKixMqukr6lBc0Vo+oOgjrM5ZQ=
 google.golang.org/protobuf v1.34.2 h1:6xV6lTsCfpGD21XK49h7MhtcApnLqkfYgPcdHftf6hg=
