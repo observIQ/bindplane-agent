@@ -704,7 +704,6 @@ create_supervisor_config()
 {
   supervisor_yml_path="$1"
   if [ ! -f "$supervisor_yml_path" ]; then
-    info "Creating supervisor config..."
 
     # Note here: We create the file and change permissions of the file here BEFORE writing info to it
     # We do this because the file may contain a secret key, so we want 0 window when the
@@ -728,7 +727,6 @@ create_supervisor_config()
     command printf '  executable: "%s"\n' "/opt/observiq-otel-collector/observiq-otel-collector" >> "$supervisor_yml_path"
     command printf 'storage:\n' >> "$supervisor_yml_path"
     command printf '  directory: "%s"\n' "/opt/observiq-otel-collector/storage" >> "$supervisor_yml_path"
-    succeeded
   fi
 }
 
