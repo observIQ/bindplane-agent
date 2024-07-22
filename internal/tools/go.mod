@@ -9,7 +9,7 @@ require (
 	github.com/google/addlicense v1.1.1
 	github.com/goreleaser/goreleaser v1.22.1
 	github.com/mgechev/revive v1.3.7
-	github.com/securego/gosec/v2 v2.18.2
+	github.com/securego/gosec/v2 v2.20.0
 	github.com/uw-labs/lichen v0.1.7
 	github.com/vektra/mockery/v2 v2.43.2
 	go.opentelemetry.io/collector/cmd/mdatagen v0.105.0
