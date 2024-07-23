@@ -85,6 +85,12 @@ Run `sudo systemctl edit observiq-otel-collector` and paste the following config
 User=observiq-otel-collector
 ```
 
+Reload Systemd:
+
+```shell
+sudo systemctl daemon-reload
+```
+
 Restart the agent for these changes to take effect.
 
 ## Restarting the Agent
