@@ -1,6 +1,8 @@
-FROM busybox as stage
+FROM alpine as stage
 
 RUN addgroup -S otel && adduser -S otel -G otel
+
+RUN apk update && apk add --no-cache ca-certificates
 
 RUN mkdir /licenses
 COPY LICENSE /licenses/observiq-otel-collector.license
@@ -13,17 +15,11 @@ FROM scratch
 
 COPY --from=stage /etc/passwd /etc/passwd
 COPY --from=stage /etc/group /etc/group
+COPY --from=stage /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 COPY --from=stage --chown=otel:otel /licenses /licenses
 COPY --from=stage --chown=otel:otel /etc/otel /etc/otel
 
 COPY observiq-otel-collector /collector/observiq-otel-collector
-#COPY plugins /etc/otel/plugins
-#COPY config/logging.stdout.yaml /etc/otel/logging.yaml
-#COPY config/example.yaml /etc/otel/config.yaml
-
-#COPY --from=builder /bin/chown /bin/chown
-#RUN /bin/chown -R otel:otel /licenses /collector /etc/otel
-#RUN rm /bin/chown
 
 USER otel
 WORKDIR /etc/otel
