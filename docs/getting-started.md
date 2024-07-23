@@ -67,6 +67,12 @@ Environment=GOOGLE_APPLICATION_CREDENTIALS=/opt/observiq-otel-collector/sa.json
  
 If an override is already in place, simply insert the Environment parameter into the existing Service section.
 
+Reload Systemd:
+
+```shell
+sudo systemctl daemon-reload
+```
+
 Restart the agent
 
 ```shell
