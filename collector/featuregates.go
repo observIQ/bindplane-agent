@@ -34,6 +34,9 @@ func SetFeatureFlags() error {
 	if err := featuregate.GlobalRegistry().Set("confmap.unifyEnvVarExpansion", false); err != nil {
 		return fmt.Errorf("failed to disable confmap.unifyEnvVarExpansion: %w", err)
 	}
+	if err := featuregate.GlobalRegistry().Set("confmap.strictlyTypedInput", false); err != nil {
+		return fmt.Errorf("failed to disable confmap.strictlyTypedInput: %w", err)
+	}
 
 	return nil
 }
