@@ -240,8 +240,9 @@ dockers:
       - "--label=version={{.Version}}"
       - "--platform=linux/amd64"
     extra_files:
-      - plugins
-      - config/example.yaml
+      - release_deps/VERSION.txt
+      - release_deps/plugins
+      - release_deps/config.yaml
       - config/logging.stdout.yaml
       - LICENSE
   - id: scratch-arm64
@@ -262,8 +263,9 @@ dockers:
       - "--label=version={{.Version}}"
       - "--platform=linux/arm64"
     extra_files:
-      - plugins
-      - config/example.yaml
+      - release_deps/VERSION.txt
+      - release_deps/plugins
+      - release_deps/config.yaml
       - config/logging.stdout.yaml
       - LICENSE
   - id: ubuntu-amd64
@@ -306,8 +308,9 @@ dockers:
       - "--label=version={{.Version}}"
       - "--platform=linux/amd64"
     extra_files:
-      - plugins
-      - config/example.yaml
+      - release_deps/VERSION.txt
+      - release_deps/plugins
+      - release_deps/config.yaml
       - config/logging.stdout.yaml
       - LICENSE
       - release_deps/opentelemetry-java-contrib-jmx-metrics.jar
@@ -351,8 +354,9 @@ dockers:
       - "--label=version={{.Version}}"
       - "--platform=linux/arm64"
     extra_files:
-      - plugins
-      - config/example.yaml
+      - release_deps/VERSION.txt
+      - release_deps/plugins
+      - release_deps/config.yaml
       - config/logging.stdout.yaml
       - LICENSE
       - release_deps/opentelemetry-java-contrib-jmx-metrics.jar
@@ -379,8 +383,9 @@ dockers:
       - "--label=version={{.Version}}"
       - "--platform=linux/amd64"
     extra_files:
-      - plugins
-      - config/example.yaml
+      - release_deps/VERSION.txt
+      - release_deps/plugins
+      - release_deps/config.yaml
       - config/logging.stdout.yaml
       - LICENSE
       - release_deps/opentelemetry-java-contrib-jmx-metrics.jar
@@ -406,8 +411,9 @@ dockers:
       - "--label=version={{.Version}}"
       - "--platform=linux/arm64"
     extra_files:
-      - plugins
-      - config/example.yaml
+      - release_deps/VERSION.txt
+      - release_deps/plugins
+      - release_deps/config.yaml
       - config/logging.stdout.yaml
       - LICENSE
       - release_deps/opentelemetry-java-contrib-jmx-metrics.jar
