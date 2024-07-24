@@ -4,7 +4,7 @@
 # Alpine is used to retrieve the CA certificates.
 FROM alpine as stage
 
-RUN addgroup -S otel && adduser -S otel -G otel
+RUN addgroup -S -g 10005 otel && adduser -S -u 10005 -G otel otel
 
 RUN apk update && apk add --no-cache ca-certificates
 
