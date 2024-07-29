@@ -32,7 +32,7 @@ VERSION ?= $(if $(CURRENT_TAG),$(CURRENT_TAG),$(PREVIOUS_TAG))
 # Builds the agent for current GOOS/GOARCH pair
 .PHONY: agent
 agent:
-	builder --config="./manifests/observIQ/manifest.yaml"
+	builder --config="./manifests/observIQ/manifest.yaml" --ldflags "-s -w -X github.com/observiq/bindplane-agent/internal/version.version=$(VERSION)"
 	mkdir -p $(OUTDIR); cp ./builder/observiq-otel-collector $(OUTDIR)/collector_$(GOOS)_$(GOARCH)$(EXT)
 
 # Builds a custom distro for the current GOOS/GOARCH pair using the manifest specified
@@ -128,7 +128,6 @@ install-tools:
 	cd $(TOOLS_MOD_DIR) && go install github.com/uw-labs/lichen
 	cd $(TOOLS_MOD_DIR) && go install github.com/vektra/mockery/v2
 	cd $(TOOLS_MOD_DIR) && go install golang.org/x/tools/cmd/goimports
-	cd $(TOOLS_MOD_DIR) && go install github.com/goreleaser/goreleaser
 # update cosign in release.yml when updating this version
 # update cosign in docs/verify-signature.md when updating this version
 	go install github.com/sigstore/cosign/cmd/cosign@v1.13.1

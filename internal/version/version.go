@@ -15,8 +15,9 @@
 // Package version exposes data on the collector
 package version
 
+// these will be replaced at link time by make
 var (
-	version = "v2.0.0"
+	version = "latest" // Semantic version, or "latest" by default
 )
 
 // Version returns the version of the collector.

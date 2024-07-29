@@ -156,13 +156,6 @@ nfpms:
           mode: 0755
           owner: observiq-otel-collector
           group: observiq-otel-collector
-      - src: release_deps/config.yaml
-        dst: /opt/observiq-otel-collector/config.yaml
-        file_info:
-          mode: 0640
-          owner: observiq-otel-collector
-          group: observiq-otel-collector
-        type: config|noreplace
       - src: release_deps/logging.yaml
         dst: /opt/observiq-otel-collector/logging.yaml
         file_info:

@@ -8,6 +8,9 @@ dist:
   output_path: ./builder
   otelcol_version: 0.104.0
 
+conf_resolver:
+  default_uri_scheme: "env"
+
 extensions:
   - gomod: go.opentelemetry.io/collector/extension/zpagesextension v0.104.0
   - gomod: go.opentelemetry.io/collector/extension/ballastextension v0.104.0
@@ -35,7 +38,8 @@ extensions:
   - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/extension/sigv4authextension v0.104.0
   - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/extension/storage/filestorage v0.104.0
   - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/extension/storage/dbstorage v0.104.0
-  - gomod: github.com/observiq/bindplane-agent/extension/bindplaneextension v0.0.0-20240506184251-96a885a6be99
+  - gomod: github.com/observiq/bindplane-agent/extension/bindplaneextension v1.56.0
+    path: "./extension/bindplaneextension"
 
 exporters:
   - gomod: go.opentelemetry.io/collector/exporter/debugexporter v0.104.0
@@ -77,18 +81,23 @@ exporters:
   - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/exporter/sapmexporter v0.104.0
   - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/exporter/sentryexporter v0.104.0
   - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/exporter/signalfxexporter v0.104.0
-  - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/exporter/skywalkingexporter v0.104.0
   - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/exporter/splunkhecexporter v0.104.0
   - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/exporter/sumologicexporter v0.104.0
   - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/exporter/syslogexporter v0.104.0
   - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/exporter/tencentcloudlogserviceexporter v0.104.0
   - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/exporter/zipkinexporter v0.104.0
-  - gomod: github.com/observiq/bindplane-agent/exporter/azureblobexporter v1.55.0
-  - gomod: github.com/observiq/bindplane-agent/exporter/chronicleexporter v1.55.0
-  - gomod: github.com/observiq/bindplane-agent/exporter/chronicleforwarderexporter v1.55.0
-  - gomod: github.com/observiq/bindplane-agent/exporter/googlecloudexporter v1.55.0
-  - gomod: github.com/observiq/bindplane-agent/exporter/googlemanagedprometheusexporter v1.55.0
-  - gomod: github.com/observiq/bindplane-agent/exporter/snowflakeexporter v1.55.0
+  - gomod: github.com/observiq/bindplane-agent/exporter/azureblobexporter v1.56.0
+    path: "./exporter/azureblobexporter"
+  - gomod: github.com/observiq/bindplane-agent/exporter/chronicleexporter v1.56.0
+    path: "./exporter/chronicleexporter"
+  - gomod: github.com/observiq/bindplane-agent/exporter/chronicleforwarderexporter v1.56.0
+    path: "./exporter/chronicleforwarderexporter"
+  - gomod: github.com/observiq/bindplane-agent/exporter/googlecloudexporter v1.56.0
+    path: "./exporter/googlecloudexporter"
+  - gomod: github.com/observiq/bindplane-agent/exporter/googlemanagedprometheusexporter v1.56.0
+    path: "./exporter/googlemanagedprometheusexporter"
+  - gomod: github.com/observiq/bindplane-agent/exporter/snowflakeexporter v1.56.0
+    path: "./exporter/snowflakeexporter"
 
 processors:
   - gomod: go.opentelemetry.io/collector/processor/batchprocessor v0.104.0
@@ -112,19 +121,32 @@ processors:
   - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/processor/sumologicprocessor v0.104.0
   - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/processor/tailsamplingprocessor v0.104.0
   - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/processor/transformprocessor v0.104.0
-  - gomod: github.com/observiq/bindplane-agent/processor/datapointcountprocessor v1.55.0
-  - gomod: github.com/observiq/bindplane-agent/processor/logcountprocessor v1.55.0
-  - gomod: github.com/observiq/bindplane-agent/processor/logdeduplicationprocessor v1.55.0
-  - gomod: github.com/observiq/bindplane-agent/processor/lookupprocessor v1.55.0
-  - gomod: github.com/observiq/bindplane-agent/processor/maskprocessor v1.55.0
-  - gomod: github.com/observiq/bindplane-agent/processor/metricextractprocessor v1.55.0
-  - gomod: github.com/observiq/bindplane-agent/processor/metricstatsprocessor v1.55.0
-  - gomod: github.com/observiq/bindplane-agent/processor/removeemptyvaluesprocessor v1.55.0
-  - gomod: github.com/observiq/bindplane-agent/processor/resourceattributetransposerprocessor v1.55.0
-  - gomod: github.com/observiq/bindplane-agent/processor/samplingprocessor v1.55.0
-  - gomod: github.com/observiq/bindplane-agent/processor/snapshotprocessor v1.55.0
-  - gomod: github.com/observiq/bindplane-agent/processor/spancountprocessor v1.55.0
-  - gomod: github.com/observiq/bindplane-agent/processor/throughputmeasurementprocessor v1.55.0
+  - gomod: github.com/observiq/bindplane-agent/processor/datapointcountprocessor v1.56.0
+    path: "./processor/datapointcountprocessor"
+  - gomod: github.com/observiq/bindplane-agent/processor/logcountprocessor v1.56.0
+    path: "./processor/logcountprocessor"
+  - gomod: github.com/observiq/bindplane-agent/processor/logdeduplicationprocessor v1.56.0
+    path: "./processor/logdeduplicationprocessor"
+  - gomod: github.com/observiq/bindplane-agent/processor/lookupprocessor v1.56.0
+    path: "./processor/lookupprocessor"
+  - gomod: github.com/observiq/bindplane-agent/processor/maskprocessor v1.56.0
+    path: "./processor/maskprocessor"
+  - gomod: github.com/observiq/bindplane-agent/processor/metricextractprocessor v1.56.0
+    path: "./processor/metricextractprocessor"
+  - gomod: github.com/observiq/bindplane-agent/processor/metricstatsprocessor v1.56.0
+    path: "./processor/metricstatsprocessor"
+  - gomod: github.com/observiq/bindplane-agent/processor/removeemptyvaluesprocessor v1.56.0
+    path: "./processor/removeemptyvaluesprocessor"
+  - gomod: github.com/observiq/bindplane-agent/processor/resourceattributetransposerprocessor v1.56.0
+    path: "./processor/resourceattributetransposerprocessor"
+  - gomod: github.com/observiq/bindplane-agent/processor/samplingprocessor v1.56.0
+    path: "./processor/samplingprocessor"
+  - gomod: github.com/observiq/bindplane-agent/processor/snapshotprocessor v1.56.0
+    path: "./processor/snapshotprocessor"
+  - gomod: github.com/observiq/bindplane-agent/processor/spancountprocessor v1.56.0
+    path: "./processor/spancountprocessor"
+  - gomod: github.com/observiq/bindplane-agent/processor/throughputmeasurementprocessor v1.56.0
+    path: "./processor/throughputmeasurementprocessor"
 
 receivers:
   - gomod: go.opentelemetry.io/collector/receiver/nopreceiver v0.104.0
@@ -193,10 +215,12 @@ receivers:
   - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/receiver/receivercreator v0.104.0
   - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/receiver/redisreceiver v0.104.0
   - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/receiver/riakreceiver v0.104.0
+  - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/receiver/saphanareceiver v0.104.0
   - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/receiver/sapmreceiver v0.104.0
   - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/receiver/signalfxreceiver v0.104.0
   - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/receiver/simpleprometheusreceiver v0.104.0
   - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/receiver/skywalkingreceiver v0.104.0
+  - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/receiver/snmpreceiver v0.104.0
   - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/receiver/snowflakereceiver v0.104.0
   - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/receiver/solacereceiver v0.104.0
   - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/receiver/splunkhecreceiver v0.104.0
@@ -209,20 +233,27 @@ receivers:
   - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/receiver/udplogreceiver v0.104.0
   - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/receiver/vcenterreceiver v0.104.0
   - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/receiver/wavefrontreceiver v0.104.0
-  - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/receiver/snmpreceiver v0.104.0
   - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/receiver/webhookeventreceiver v0.104.0
   - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/receiver/windowseventlogreceiver v0.104.0
   - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/receiver/windowsperfcountersreceiver v0.104.0
   - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/receiver/zipkinreceiver v0.104.0
   - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/receiver/zookeeperreceiver v0.104.0
-  - gomod: github.com/observiq/bindplane-agent/receiver/awss3rehydrationreceiver v1.55.0
-  - gomod: github.com/observiq/bindplane-agent/receiver/azureblobrehydrationreceiver v1.55.0
-  - gomod: github.com/observiq/bindplane-agent/receiver/httpreceiver v1.55.0
-  - gomod: github.com/observiq/bindplane-agent/receiver/m365receiver v1.55.0
-  - gomod: github.com/observiq/bindplane-agent/receiver/pluginreceiver v1.55.0
-  - gomod: github.com/observiq/bindplane-agent/receiver/routereceiver v1.55.0
-  - gomod: github.com/observiq/bindplane-agent/receiver/sapnetweaverreceiver v1.55.0
-  - gomod: github.com/observiq/bindplane-agent/receiver/telemetrygeneratorreceiver v1.55.0
+  - gomod: github.com/observiq/bindplane-agent/receiver/awss3rehydrationreceiver v1.56.0
+    path: "./receiver/awss3rehydrationreceiver"
+  - gomod: github.com/observiq/bindplane-agent/receiver/azureblobrehydrationreceiver v1.56.0
+    path: "./receiver/azureblobrehydrationreceiver"
+  - gomod: github.com/observiq/bindplane-agent/receiver/httpreceiver v1.56.0
+    path: "./receiver/httpreceiver"
+  - gomod: github.com/observiq/bindplane-agent/receiver/m365receiver v1.56.0
+    path: "./receiver/m365receiver"
+  - gomod: github.com/observiq/bindplane-agent/receiver/pluginreceiver v1.56.0
+    path: "./receiver/pluginreceiver"
+  - gomod: github.com/observiq/bindplane-agent/receiver/routereceiver v1.56.0
+    path: "./receiver/routereceiver"
+  - gomod: github.com/observiq/bindplane-agent/receiver/sapnetweaverreceiver v1.56.0
+    path: "./receiver/sapnetweaverreceiver"
+  - gomod: github.com/observiq/bindplane-agent/receiver/telemetrygeneratorreceiver v1.56.0
+    path: "./receiver/telemetrygeneratorreceiver"
 
 connectors:
   - gomod: go.opentelemetry.io/collector/connector/forwardconnector v0.104.0
@@ -245,6 +276,9 @@ replaces:
   - github.com/mattn/go-ieproxy => github.com/mattn/go-ieproxy v0.0.1
   # see https://github.com/openshift/api/pull/1515
   - github.com/openshift/api => github.com/openshift/api v0.0.0-20230726162818-81f778f3b3ec
+  # replace statements for internal imports
+  - github.com/observiq/bindplane-agent/internal/expr => ../internal/expr
+  - github.com/observiq/bindplane-agent/internal/counter => ../internal/counter
   # Replace these pakcages until factory changes are present in a release
-  - github.com/observiq/bindplane-agent/exporter/googlecloudexporter v1.55.0 => ../exporter/googlecloudexporter
-  - github.com/observiq/bindplane-agent/exporter/googlemanagedprometheusexporter v1.55.0 => ../exporter/googlemanagedprometheusexporter
+  # - github.com/observiq/bindplane-agent/exporter/googlecloudexporter v1.56.0 => ../exporter/googlecloudexporter
+  # - github.com/observiq/bindplane-agent/exporter/googlemanagedprometheusexporter v1.56.0 => ../exporter/googlemanagedprometheusexporter
