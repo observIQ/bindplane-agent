@@ -606,6 +606,15 @@ signs:
 docker_signs:
   - artifacts: all
     stdin: "{{ .Env.COSIGN_PWD }}"
+    args: [
+      # Default options
+      "sign",
+      "--key=cosign.key",
+      "${artifact}",
+      "--yes",
+      # Additional options
+      "--recursive"
+    ]
     output: true
 
 # https://goreleaser.com/customization/release/
