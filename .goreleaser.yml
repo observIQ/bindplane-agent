@@ -601,6 +601,13 @@ signs:
       ["sign-blob", "--key=cosign.key", "--output=${signature}", "${artifact}"]
     artifacts: all
 
+# https://goreleaser.com/customization/docker_sign/
+# Uses Cosign by default, signs images and manifests.
+docker_signs:
+  - artifacts: all
+    stdin: "{{ .Env.COSIGN_PWD }}"
+    output: true
+
 # https://goreleaser.com/customization/release/
 release:
   draft: false
