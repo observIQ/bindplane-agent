@@ -31,7 +31,7 @@ curl -fL -o "$DOWNLOAD_DIR/opentelemetry-java-contrib-jmx-metrics.jar" \
 # https://github.com/open-telemetry/opentelemetry-collector-contrib/issues/24293
 # download contrib repo and manually build supervisor repos
 echo "Cloning supervisor repo"
-SUPERVISOR_REPO="git@github.com:open-telemetry/opentelemetry-collector-contrib.git"
+SUPERVISOR_REPO="https://github.com/open-telemetry/opentelemetry-collector-contrib.git"
 PLATFORMS=("linux/amd64" "linux/arm64" "linux/arm" "linux/ppc64" "linux/ppc64le" "darwin/amd64" "darwin/arm64" "windows/amd64")
 
 mkdir "$DOWNLOAD_DIR/supervisor_bin"
