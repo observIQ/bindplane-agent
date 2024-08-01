@@ -11,7 +11,7 @@
     {
       "path": "opampsupervisor.exe",
       "service": {
-        "name": "opampsupervisor",
+        "name": "observiq-otel-collector",
         "start": "delayed",
         "display-name": "observIQ Distro for OpenTelemetry Collector",
         "description": "observIQ's distribution of the OpenTelemetry collector.",
