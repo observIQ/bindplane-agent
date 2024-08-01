@@ -253,7 +253,6 @@ dockers:
     extra_files:
       - release_deps/VERSION.txt
       - release_deps/plugins
-      - release_deps/config.yaml
       - config/logging.stdout.yaml
       - LICENSE
   - id: scratch-arm64
@@ -276,7 +275,6 @@ dockers:
     extra_files:
       - release_deps/VERSION.txt
       - release_deps/plugins
-      - release_deps/config.yaml
       - config/logging.stdout.yaml
       - LICENSE
   - id: ubuntu-amd64
@@ -321,7 +319,6 @@ dockers:
     extra_files:
       - release_deps/VERSION.txt
       - release_deps/plugins
-      - release_deps/config.yaml
       - config/logging.stdout.yaml
       - LICENSE
       - release_deps/opentelemetry-java-contrib-jmx-metrics.jar
@@ -367,7 +364,6 @@ dockers:
     extra_files:
       - release_deps/VERSION.txt
       - release_deps/plugins
-      - release_deps/config.yaml
       - config/logging.stdout.yaml
       - LICENSE
       - release_deps/opentelemetry-java-contrib-jmx-metrics.jar
@@ -396,7 +392,6 @@ dockers:
     extra_files:
       - release_deps/VERSION.txt
       - release_deps/plugins
-      - release_deps/config.yaml
       - config/logging.stdout.yaml
       - LICENSE
       - release_deps/opentelemetry-java-contrib-jmx-metrics.jar
@@ -424,7 +419,6 @@ dockers:
     extra_files:
       - release_deps/VERSION.txt
       - release_deps/plugins
-      - release_deps/config.yaml
       - config/logging.stdout.yaml
       - LICENSE
       - release_deps/opentelemetry-java-contrib-jmx-metrics.jar
