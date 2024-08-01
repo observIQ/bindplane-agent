@@ -40,10 +40,10 @@ set "acceptsRemoteCfgField=  accepts_remote_config: true"
 set "reportsRemoteCfgField=  reports_remote_config: true"
 
 set "agentField=agent:"
-set "executablePathField=  executable: "%agentBinary%""
+set "executablePathField=  executable: '%agentBinary%'"
 
 set "storageField=storage:"
-set "directoryField=  directory: "%install_dir%/storage""
+set "directoryField=  directory: '%install_dir%storage'"
 
 echo %serverField% >"%supervisorFile%"
 echo %endpointField% >>"%supervisorFile%"
