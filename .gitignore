@@ -26,5 +26,8 @@ release_deps
 collector*.yaml
 manager*.yaml
 logging*.yaml
-config.yaml
-storage
+
+#Supervisor & Builder Files
+builder
+agent*.log
+effective*.yaml

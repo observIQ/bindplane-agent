@@ -72,6 +72,8 @@ github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd h1:TRLaZ9cD/w
 github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd/go.mod h1:6dJC0mAP4ikYIbvyc7fijjWJddQyLn8Ig3JB5CqoB9Q=
 github.com/modern-go/reflect2 v1.0.2 h1:xBagoLtFs94CBntxluKeaWgTMpvLxC4ur3nMaC9Gz0M=
 github.com/modern-go/reflect2 v1.0.2/go.mod h1:yWuevngMOJpCy52FWWMvUC8ws7m/LJsjYzDa0/r8luk=
+github.com/observiq/bindplane-agent/expr v1.61.1 h1:8FWSnE7vp7rYrjSgZushyf9nfv14KaXbyP14fzKS1hI=
+github.com/observiq/bindplane-agent/expr v1.61.1/go.mod h1:S2ZVuT1qQd2laAGhLHqWl6ARAR5qhBIJ0XtrDJkRbZo=
 github.com/open-telemetry/opentelemetry-collector-contrib/internal/coreinternal v0.111.0 h1:Hh3Lt6GIw/jMfCSJ5XjBoZRmjZ1pbJJu6Xi7WrDTUi0=
 github.com/open-telemetry/opentelemetry-collector-contrib/internal/coreinternal v0.111.0/go.mod h1:rQ9lQhijXIJIT5UGuwiKoEcWW6bdWJ4fnO+PndfuYEw=
 github.com/open-telemetry/opentelemetry-collector-contrib/pkg/ottl v0.111.0 h1:W0SthymNSB2fzGuY2KUib6EVyj/uGO3hJvaM6nW0evE=
