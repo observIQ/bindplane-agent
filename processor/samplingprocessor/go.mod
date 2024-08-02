@@ -59,4 +59,4 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace github.com/observiq/bindplane-agent/expr => ../../expr
+replace github.com/observiq/bindplane-agent/internal/expr => ../../internal/expr

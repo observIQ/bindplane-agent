@@ -20,7 +20,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/observiq/bindplane-agent/expr"
+	"github.com/observiq/bindplane-agent/internal/expr"
 	"github.com/observiq/bindplane-agent/receiver/routereceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/ottl/contexts/ottllog"
 	"go.opentelemetry.io/collector/component"
