@@ -34,7 +34,7 @@ func TestCreateMetricExporterSuccess(t *testing.T) {
 	gmpFactory = exporter.NewFactory(
 		componentType,
 		gmpFactory.CreateDefaultConfig,
-		exporter.WithMetrics(func(_ context.Context, _ exporter.CreateSettings, _ component.Config) (exporter.Metrics, error) {
+		exporter.WithMetrics(func(_ context.Context, _ exporter.Settings, _ component.Config) (exporter.Metrics, error) {
 			return mockExporter, nil
 		}, stability),
 	)
