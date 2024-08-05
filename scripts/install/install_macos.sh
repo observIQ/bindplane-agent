@@ -612,7 +612,7 @@ display_results()
     increase_indent
     info "Agent Home:                    $(fg_cyan "$INSTALL_DIR")$(reset)"
     info "Agent Config:                  $(fg_cyan "$INSTALL_DIR/effective.yaml")$(reset)"
-    info "Agent Logs Command:            $(fg_cyan "sudo tail -F $INSTALL_DIR/log/collector.log")$(reset)"
+    info "Agent Logs Command:            $(fg_cyan "sudo tail -F $INSTALL_DIR/agent.log")$(reset)"
     info "Supervisor Start Command:      $(fg_cyan "sudo launchctl load /Library/LaunchDaemons/$SERVICE_NAME.plist")$(reset)"
     info "Supervisor Stop Command:       $(fg_cyan "sudo launchctl unload /Library/LaunchDaemons/$SERVICE_NAME.plist")$(reset)"
     decrease_indent
