@@ -47,7 +47,7 @@ func TestCreateMetricExporterSuccess(t *testing.T) {
 	factory := NewFactory(collectorVersion)
 	cfg := createDefaultConfig(collectorVersion)()
 	ctx := context.Background()
-	set := exportertest.NewNopCreateSettings()
+	set := exportertest.NewNopSettings()
 
 	testExporter, err := factory.CreateMetricsExporter(ctx, set, cfg)
 	require.NoError(t, err)
@@ -71,7 +71,7 @@ func TestCreateExporterFailure(t *testing.T) {
 	factory := NewFactory(collectorVersion)
 	cfg := createDefaultConfig(collectorVersion)()
 	ctx := context.Background()
-	set := exportertest.NewNopCreateSettings()
+	set := exportertest.NewNopSettings()
 
 	_, err := factory.CreateMetricsExporter(ctx, set, cfg)
 	require.Error(t, err)
