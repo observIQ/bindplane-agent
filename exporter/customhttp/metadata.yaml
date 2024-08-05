@@ -1,0 +1,6 @@
+type: customhttp
+
+status:
+  class: exporter
+  stability:   
+    beta: [logs]

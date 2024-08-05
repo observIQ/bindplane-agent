@@ -8,6 +8,7 @@ require (
 	github.com/observiq/bindplane-agent/exporter/azureblobexporter v1.57.0
 	github.com/observiq/bindplane-agent/exporter/chronicleexporter v1.57.0
 	github.com/observiq/bindplane-agent/exporter/chronicleforwarderexporter v1.57.0
+	github.com/observiq/bindplane-agent/exporter/customhttp v0.0.0-00010101000000-000000000000
 	github.com/observiq/bindplane-agent/exporter/googlecloudexporter v1.57.0
 	github.com/observiq/bindplane-agent/exporter/googlemanagedprometheusexporter v1.57.0
 	github.com/observiq/bindplane-agent/exporter/snowflakeexporter v1.57.0
@@ -401,7 +402,7 @@ require (
 	go.uber.org/dig v1.17.1 // indirect
 	go.uber.org/fx v1.18.2 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20240709173604-40e1e62336c5 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20240722135656-d784300faade // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20240730163845-b1a4ccb954bf // indirect
 	gopkg.in/zorkian/go-datadog-api.v2 v2.30.0 // indirect
 	howett.net/plist v1.0.0 // indirect
 	sigs.k8s.io/controller-runtime v0.17.3 // indirect
@@ -773,6 +774,8 @@ replace github.com/observiq/bindplane-agent/exporter/azureblobexporter => ./expo
 replace github.com/observiq/bindplane-agent/exporter/chronicleexporter => ./exporter/chronicleexporter
 
 replace github.com/observiq/bindplane-agent/exporter/chronicleforwarderexporter => ./exporter/chronicleforwarderexporter
+
+replace github.com/observiq/bindplane-agent/exporter/customhttp => ./exporter/customhttp
 
 replace github.com/observiq/bindplane-agent/exporter/snowflakeexporter => ./exporter/snowflakeexporter
 
