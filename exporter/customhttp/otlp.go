@@ -6,7 +6,6 @@ package customhttp // import "go.opentelemetry.io/collector/exporter/customhttp"
 import (
 	"bytes"
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -16,7 +15,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/gogo/protobuf/jsonpb"
+	jsoniter "github.com/json-iterator/go"
 	"go.uber.org/zap"
 	"google.golang.org/genproto/googleapis/rpc/status"
 	"google.golang.org/protobuf/proto"
@@ -25,6 +24,7 @@ import (
 	"go.opentelemetry.io/collector/consumer/consumererror"
 	"go.opentelemetry.io/collector/exporter"
 	"go.opentelemetry.io/collector/exporter/exporterhelper"
+	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/plog"
 	"go.opentelemetry.io/collector/pdata/plog/plogotlp"
 )
@@ -84,113 +84,66 @@ func (e *baseExporter) start(ctx context.Context, host component.Host) error {
 	return nil
 }
 
-var marshaler = &jsonpb.Marshaler{
-	// https://github.com/open-telemetry/opentelemetry-specification/pull/2758
-	EnumsAsInts: true,
-	// https://github.com/open-telemetry/opentelemetry-specification/pull/2829
-	OrigName: false,
+type logRecord struct {
+	TimeUnixNano pcommon.Timestamp `json:"timeUnixNano,omitempty"`
+
+	ObservedTimeUnixNano pcommon.Timestamp `json:"observedTimeUnixNano,omitempty"`
+
+	SeverityNumber plog.SeverityNumber `json:"severityNumber,omitempty"`
+
+	SeverityText string `json:"severityText,omitempty"`
+	// A value containing the body of the log record. Can be for example a human-readable
+	// string message (including multi-line) describing the event in a free form or it can
+	// be a structured data composed of arrays and maps of other values. [Optional].
+	Body string `json:"body"`
+
+	Attributes         map[string]any `json:"attributes"`
+	ResourceAttributes map[string]any `json:"resourceAttributes"`
+
+	DroppedAttributesCount uint32 `json:"droppedAttributesCount,omitempty"`
+
+	Flags plog.LogRecordFlags `json:"flags,omitempty"`
+
+	TraceId pcommon.TraceID `json:"traceId,omitempty"`
+
+	SpanId pcommon.SpanID `json:"spanId,omitempty"`
 }
 
 func (e *baseExporter) pushLogs(ctx context.Context, ld plog.Logs) error {
 
 	// distribute resource plog.Logs each log record, separate log records by newline
 
-	// var marshalledLogs []byte
-	// for i := 0; i < ld.ResourceLogs().Len(); i++ {
-	// 	rl := ld.ResourceLogs().At(i)
-	// 	resource := rl.Resource()
-	// 	for j := 0; j < rl.ScopeLogs().Len(); j++ {
-	// 		sl := rl.ScopeLogs().At(j)
-
-	// 		for k := 0; k < sl.LogRecords().Len(); k++ {
-	// 			log := sl.LogRecords().At(k)
-
-	// 			// There doesn't seem to be a good a way to crack into the
-	// 			// underlying struct of a log record or to just marshall
-	// 			// a single record.
-	// 			var buf bytes.Buffer
-	// 			if err := marshaler.Marshal(&buf, log); err != nil {
-	// 				return err
-	// 			}
-	// 			marshalledLogs = append(marshalledLogs, buf.Bytes()...)
-	// 		}
-	// 	}
-	// }
-
-	tr := plogotlp.NewExportRequestFromLogs(ld)
-
 	var err error
 	var request []byte
 	switch e.config.Encoding {
 	case EncodingJSON:
-		logs, err := tr.MarshalJSON()
-		if err != nil {
-			return consumererror.NewPermanent(err)
-		}
-		// unmarshal into a map and
-		var jsonVal map[string]any
-		if err = json.Unmarshal(logs, &jsonVal); err != nil {
-			return err
-		}
-		// top level should be a single key "resourceLogs"
-		// value should be an array
+		for i := 0; i < ld.ResourceLogs().Len(); i++ {
+			rl := ld.ResourceLogs().At(i)
+			resource := rl.Resource()
+			for j := 0; j < rl.ScopeLogs().Len(); j++ {
+				sl := rl.ScopeLogs().At(j)
 
-		resourceLogs, ok := jsonVal["resourceLogs"].([]any)
-		if !ok {
-			return errors.New("expected top level key 'resourceLogs' to be an array")
-		}
-		// iterate over the array and marshall each element
-		for _, rl := range resourceLogs {
-			resourceLog, ok := rl.(map[string]any)
-			if !ok {
-				return errors.New("expected resourceLog to be a map")
-			}
-			resource, ok := resourceLog["resource"]
-			if !ok {
-				return errors.New("expected resourceLog to have a 'resource' key")
-			}
-			sl, ok := resourceLog["scopeLogs"]
-			if !ok {
-				return errors.New("expected resourceLog to have a 'scopeLogs' key")
-			}
-			scopeLogs, ok := sl.([]any)
-			if !ok {
-				return errors.New("expected scopeLogs to be an array")
-			}
-			// iterate over the array and marshall each element
-			for _, sl := range scopeLogs {
-				scopeLog, ok := sl.(map[string]any)
-				if !ok {
-					return errors.New("expected scopeLog to be a map")
-				}
-				// get the logRecords
-				lr, ok := scopeLog["logRecords"]
-				if !ok {
-					return errors.New("expected scopeLog to have a 'logRecords' key")
-				}
-				logRecords, ok := lr.([]any)
-				if !ok {
-					return errors.New("expected logRecords to be an array")
-				}
-				// iterate over the array and marshall each element
-				for _, lr := range logRecords {
-					logRecord, ok := lr.(map[string]any)
-					if !ok {
-						return errors.New("expected logRecord to be a map")
+				for k := 0; k < sl.LogRecords().Len(); k++ {
+					log := sl.LogRecords().At(k)
+
+					newRecord := logRecord{
+						TimeUnixNano:           log.Timestamp(),
+						ObservedTimeUnixNano:   log.ObservedTimestamp(),
+						SeverityNumber:         log.SeverityNumber(),
+						SeverityText:           log.SeverityText(),
+						Body:                   log.Body().AsString(),
+						Attributes:             log.Attributes().AsRaw(),
+						ResourceAttributes:     resource.Attributes().AsRaw(),
+						DroppedAttributesCount: log.DroppedAttributesCount(),
+						Flags:                  log.Flags(),
+						TraceId:                log.TraceID(),
+						SpanId:                 log.SpanID(),
 					}
-					// add resource to the log
-					logRecord["resource"] = resource
-
-					// marshall the log
-					buf, err := json.Marshal(logRecord)
+					bytes, err := jsoniter.Marshal(newRecord)
 					if err != nil {
-						return err
+						return consumererror.NewPermanent(err)
 					}
-
-					// append the marshalled log to the request
-					request = append(request, buf...)
-
-					// append a newline
+					request = append(request, bytes...)
 					request = append(request, '\n')
 				}
 			}
