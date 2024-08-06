@@ -1876,6 +1876,8 @@ github.com/observiq/opentelemetry-collector-contrib/pkg/stanza v0.0.0-2024070916
 github.com/observiq/opentelemetry-collector-contrib/pkg/stanza v0.0.0-20240709161651-04e85bb0051e/go.mod h1:8DCdU7V1JdcnZtk3X1OvqI5wjpKiULf/wmqhLpsldAc=
 github.com/observiq/opentelemetry-collector-contrib/receiver/windowseventlogreceiver v0.0.0-20240709161651-04e85bb0051e h1:cAe+anvx2cu9ROul/6sj7tgztqxCdFfJEazi+d9VB1U=
 github.com/observiq/opentelemetry-collector-contrib/receiver/windowseventlogreceiver v0.0.0-20240709161651-04e85bb0051e/go.mod h1:sDYiy+GW/MOqeWdJjRnvfiSqu+EJFSRYfRsvvM4tH/g=
+github.com/observiq/opentelemetry-collector/component v0.0.0-20240806160157-9e07c6cb81cb h1:qPE7gOSSC8gskCLyDFgw8bmTamroCyMyNj0892rdp/g=
+github.com/observiq/opentelemetry-collector/component v0.0.0-20240806160157-9e07c6cb81cb/go.mod h1:KiVE/5ZayuLlDJTe7mHqHRCn/5LrmF99C7/mKe54mWA=
 github.com/oklog/run v1.0.0/go.mod h1:dlhp/R75TPv97u0XWUtDeV/lRKWPKSdTuV0TZvrmrQA=
 github.com/oklog/ulid v1.3.1 h1:EGfNDEx6MqHz8B3uNV6QAib1UR2Lm97sHi3ocA6ESJ4=
 github.com/oklog/ulid v1.3.1/go.mod h1:CirwcVhetQ6Lv90oh/F+FBtV6XMibvdAFo93nm5qn4U=
@@ -2588,8 +2590,6 @@ go.opentelemetry.io/collector v0.106.1 h1:ZSQMpFGzFP3RILe1/+K80kCCT2ahn3MKt5e3u0
 go.opentelemetry.io/collector v0.106.1/go.mod h1:1FabMxWLluLNcC0dq8cI01GaE6t6fYxE6Oxuf8u7AGQ=
 go.opentelemetry.io/collector/client v0.106.1 h1:aBasAp+t7F30lI+oQpT95ZgYMiNaUlYRlgyeEvEGwjk=
 go.opentelemetry.io/collector/client v0.106.1/go.mod h1:QEmOGAu/8vNn2lhwcLVI3iEUIoQlXNGWsdCfENN5qDc=
-go.opentelemetry.io/collector/component v0.106.1 h1:6Xp4tKqnd/JkJDG/C4p1hto+Y5zvk5FwqZIdMCPzZlA=
-go.opentelemetry.io/collector/component v0.106.1/go.mod h1:KiVE/5ZayuLlDJTe7mHqHRCn/5LrmF99C7/mKe54mWA=
 go.opentelemetry.io/collector/config/configauth v0.106.1 h1:ANwKV2vzJoAcif/T23s5AIlDt8kTa8bUMcSN6fYAruQ=
 go.opentelemetry.io/collector/config/configauth v0.106.1/go.mod h1:nBTtlQ2KoMnUEp1PXa6hMCwcJpJ59poUdKyDq1fO/R4=
 go.opentelemetry.io/collector/config/configcompression v1.12.0 h1:RxqSDVZPJyL7I3v+gdVDvnJ/9tV0ZWgraRDX/gaddfA=
