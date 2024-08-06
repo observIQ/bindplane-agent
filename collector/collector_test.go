@@ -244,7 +244,7 @@ func slowShutdownReceiverFactory() receiver.Factory {
 	)
 }
 
-func createLogsSlowShutdownReceiverReceiver(_ context.Context, _ receiver.CreateSettings, _ component.Config, _ consumer.Logs) (receiver.Logs, error) {
+func createLogsSlowShutdownReceiverReceiver(_ context.Context, _ receiver.Settings, _ component.Config, _ consumer.Logs) (receiver.Logs, error) {
 	return &slowShutdownReceiver{}, nil
 }
 

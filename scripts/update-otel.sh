@@ -45,17 +45,21 @@ do
 
         for mod in $OTEL_MODULES
         do
-            if case $mod in go.opentelemetry.io/collector/pdata*) ;; *) false;; esac; then
+            case $mod in 
+            go.opentelemetry.io/collector/pdata* | go.opentelemetry.io/collector/config/configtls* | go.opentelemetry.io/collector/config/configretry*)
                 # pdata package is versioned separately
                 echo "$local_mod: $mod@$PDATA_TARGET_VERSION"
                 go mod edit -require "$mod@$PDATA_TARGET_VERSION"
-            elif case $mod in github.com/open-telemetry/opentelemetry-collector-contrib*) ;; *) false;; esac; then
+                ;; 
+            github.com/open-telemetry/opentelemetry-collector-contrib*)
                 echo "$local_mod: $mod@$CONTRIB_TARGET_VERSION"
                 go mod edit -require "$mod@$CONTRIB_TARGET_VERSION"
-            else
+                ;;
+            *)
                 echo "$local_mod: $mod@$TARGET_VERSION"
                 go mod edit -require "$mod@$TARGET_VERSION"
-            fi;
+                ;;
+            esac;
         done
     )
 done
