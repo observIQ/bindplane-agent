@@ -833,3 +833,7 @@ replace github.com/openshift/api v3.9.0+incompatible => github.com/openshift/api
 replace github.com/open-telemetry/opentelemetry-collector-contrib/receiver/windowseventlogreceiver => github.com/observiq/opentelemetry-collector-contrib/receiver/windowseventlogreceiver v0.0.0-20240709161651-04e85bb0051e
 
 replace github.com/open-telemetry/opentelemetry-collector-contrib/pkg/stanza => github.com/observiq/opentelemetry-collector-contrib/pkg/stanza v0.0.0-20240709161651-04e85bb0051e
+
+// This fork removes the length restriction on component names.
+// See: https://github.com/open-telemetry/opentelemetry-collector/issues/10816
+replace go.opentelemetry.io/collector/component v0.106.1 => github.com/observiq/opentelemetry-collector/component v0.0.0-20240806160157-9e07c6cb81cb
