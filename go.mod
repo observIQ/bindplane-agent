@@ -5,34 +5,34 @@ go 1.21.9
 require (
 	github.com/google/uuid v1.6.0
 	github.com/mholt/archiver/v3 v3.5.1
-	github.com/observiq/bindplane-agent/exporter/azureblobexporter v1.57.0
-	github.com/observiq/bindplane-agent/exporter/chronicleexporter v1.57.0
-	github.com/observiq/bindplane-agent/exporter/chronicleforwarderexporter v1.57.0
-	github.com/observiq/bindplane-agent/exporter/googlecloudexporter v1.57.0
-	github.com/observiq/bindplane-agent/exporter/googlemanagedprometheusexporter v1.57.0
-	github.com/observiq/bindplane-agent/exporter/snowflakeexporter v1.57.0
-	github.com/observiq/bindplane-agent/internal/report v1.57.0
-	github.com/observiq/bindplane-agent/packagestate v1.57.0
-	github.com/observiq/bindplane-agent/processor/datapointcountprocessor v1.57.0
-	github.com/observiq/bindplane-agent/processor/logcountprocessor v1.57.0
-	github.com/observiq/bindplane-agent/processor/logdeduplicationprocessor v1.57.0
-	github.com/observiq/bindplane-agent/processor/lookupprocessor v1.57.0
-	github.com/observiq/bindplane-agent/processor/maskprocessor v1.57.0
-	github.com/observiq/bindplane-agent/processor/metricextractprocessor v1.57.0
-	github.com/observiq/bindplane-agent/processor/metricstatsprocessor v1.57.0
-	github.com/observiq/bindplane-agent/processor/removeemptyvaluesprocessor v1.57.0
-	github.com/observiq/bindplane-agent/processor/resourceattributetransposerprocessor v1.57.0
-	github.com/observiq/bindplane-agent/processor/samplingprocessor v1.57.0
-	github.com/observiq/bindplane-agent/processor/spancountprocessor v1.57.0
-	github.com/observiq/bindplane-agent/processor/throughputmeasurementprocessor v1.57.0
-	github.com/observiq/bindplane-agent/receiver/awss3rehydrationreceiver v1.57.0
-	github.com/observiq/bindplane-agent/receiver/azureblobrehydrationreceiver v1.57.0
-	github.com/observiq/bindplane-agent/receiver/httpreceiver v1.57.0
-	github.com/observiq/bindplane-agent/receiver/m365receiver v1.57.0
-	github.com/observiq/bindplane-agent/receiver/pluginreceiver v1.57.0
-	github.com/observiq/bindplane-agent/receiver/routereceiver v1.57.0
-	github.com/observiq/bindplane-agent/receiver/sapnetweaverreceiver v1.57.0
-	github.com/observiq/bindplane-agent/receiver/telemetrygeneratorreceiver v1.57.0
+	github.com/observiq/bindplane-agent/exporter/azureblobexporter v1.57.1
+	github.com/observiq/bindplane-agent/exporter/chronicleexporter v1.57.1
+	github.com/observiq/bindplane-agent/exporter/chronicleforwarderexporter v1.57.1
+	github.com/observiq/bindplane-agent/exporter/googlecloudexporter v1.57.1
+	github.com/observiq/bindplane-agent/exporter/googlemanagedprometheusexporter v1.57.1
+	github.com/observiq/bindplane-agent/exporter/snowflakeexporter v1.57.1
+	github.com/observiq/bindplane-agent/internal/report v1.57.1
+	github.com/observiq/bindplane-agent/packagestate v1.57.1
+	github.com/observiq/bindplane-agent/processor/datapointcountprocessor v1.57.1
+	github.com/observiq/bindplane-agent/processor/logcountprocessor v1.57.1
+	github.com/observiq/bindplane-agent/processor/logdeduplicationprocessor v1.57.1
+	github.com/observiq/bindplane-agent/processor/lookupprocessor v1.57.1
+	github.com/observiq/bindplane-agent/processor/maskprocessor v1.57.1
+	github.com/observiq/bindplane-agent/processor/metricextractprocessor v1.57.1
+	github.com/observiq/bindplane-agent/processor/metricstatsprocessor v1.57.1
+	github.com/observiq/bindplane-agent/processor/removeemptyvaluesprocessor v1.57.1
+	github.com/observiq/bindplane-agent/processor/resourceattributetransposerprocessor v1.57.1
+	github.com/observiq/bindplane-agent/processor/samplingprocessor v1.57.1
+	github.com/observiq/bindplane-agent/processor/spancountprocessor v1.57.1
+	github.com/observiq/bindplane-agent/processor/throughputmeasurementprocessor v1.57.1
+	github.com/observiq/bindplane-agent/receiver/awss3rehydrationreceiver v1.57.1
+	github.com/observiq/bindplane-agent/receiver/azureblobrehydrationreceiver v1.57.1
+	github.com/observiq/bindplane-agent/receiver/httpreceiver v1.57.1
+	github.com/observiq/bindplane-agent/receiver/m365receiver v1.57.1
+	github.com/observiq/bindplane-agent/receiver/pluginreceiver v1.57.1
+	github.com/observiq/bindplane-agent/receiver/routereceiver v1.57.1
+	github.com/observiq/bindplane-agent/receiver/sapnetweaverreceiver v1.57.1
+	github.com/observiq/bindplane-agent/receiver/telemetrygeneratorreceiver v1.57.1
 	github.com/oklog/ulid/v2 v2.1.0
 	github.com/open-telemetry/opamp-go v0.9.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/connector/countconnector v0.106.1
@@ -330,8 +330,8 @@ require (
 	github.com/mitchellh/go-ps v1.0.0 // indirect
 	github.com/moby/docker-image-spec v1.3.1 // indirect
 	github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826 // indirect
-	github.com/observiq/bindplane-agent/counter v1.57.0 // indirect
-	github.com/observiq/bindplane-agent/expr v1.57.0 // indirect
+	github.com/observiq/bindplane-agent/counter v1.57.1 // indirect
+	github.com/observiq/bindplane-agent/expr v1.57.1 // indirect
 	github.com/observiq/bindplane-agent/internal/rehydration v1.54.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlemanagedprometheusexporter v0.106.1 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/extension/ackextension v0.106.1 // indirect
