@@ -588,7 +588,7 @@ create_supervisor_config()
     command printf '  endpoint: "%s"\n' "$OPAMP_ENDPOINT" >> "$supervisor_yml_path"
     command printf '  headers:\n' >> "$supervisor_yml_path"
     [ -n "$OPAMP_SECRET_KEY" ] && command printf '    Authorization: "Secret-Key %s"\n' "$OPAMP_SECRET_KEY" >> "$supervisor_yml_path"
-    [ -n "$OPAMP_LABELS" ] && command printf '    X-Bindplane-Attribute: "%s"\n' "$OPAMP_LABELS" >> "$supervisor_yml_path"
+    # [ -n "$OPAMP_LABELS" ] && command printf '    X-Bindplane-Attribute: "%s"\n' "$OPAMP_LABELS" >> "$supervisor_yml_path"
     command printf '  tls:\n' >> "$supervisor_yml_path"
     command printf '    insecure: true\n' >> "$supervisor_yml_path"
     command printf '    insecure_skip_verify: true\n' >> "$supervisor_yml_path"
@@ -598,6 +598,9 @@ create_supervisor_config()
     command printf 'agent:\n' >> "$supervisor_yml_path"
     # TODO(dakota): Add logging config option when supervisor suppports it
     command printf '  executable: "%s"\n' "$INSTALL_DIR/observiq-otel-collector" >> "$supervisor_yml_path"
+    command printf '  description:\n' >> "$supervisor_yml_path"
+    command printf '    non_identifying_attributes:\n' >> "$supervisor_yml_path"
+    [ -n "$OPAMP_LABELS" ] && command printf '      service.labels: "%s"\n' "$OPAMP_LABELS" >> "$supervisor_yml_path"
     command printf 'storage:\n' >> "$supervisor_yml_path"
     command printf '  directory: "%s"\n' "$INSTALL_DIR/storage" >> "$supervisor_yml_path"
     succeeded
