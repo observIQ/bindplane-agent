@@ -15,7 +15,6 @@ import (
 	"strconv"
 	"time"
 
-	jsoniter "github.com/json-iterator/go"
 	"go.uber.org/zap"
 	"google.golang.org/genproto/googleapis/rpc/status"
 	"google.golang.org/protobuf/proto"
@@ -24,7 +23,6 @@ import (
 	"go.opentelemetry.io/collector/consumer/consumererror"
 	"go.opentelemetry.io/collector/exporter"
 	"go.opentelemetry.io/collector/exporter/exporterhelper"
-	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/plog"
 	"go.opentelemetry.io/collector/pdata/plog/plogotlp"
 )
@@ -84,31 +82,6 @@ func (e *baseExporter) start(ctx context.Context, host component.Host) error {
 	return nil
 }
 
-type logRecord struct {
-	TimeUnixNano pcommon.Timestamp `json:"timeUnixNano,omitempty"`
-
-	ObservedTimeUnixNano pcommon.Timestamp `json:"observedTimeUnixNano,omitempty"`
-
-	SeverityNumber plog.SeverityNumber `json:"severityNumber,omitempty"`
-
-	SeverityText string `json:"severityText,omitempty"`
-	// A value containing the body of the log record. Can be for example a human-readable
-	// string message (including multi-line) describing the event in a free form or it can
-	// be a structured data composed of arrays and maps of other values. [Optional].
-	Body string `json:"body"`
-
-	Attributes         map[string]any `json:"attributes"`
-	ResourceAttributes map[string]any `json:"resourceAttributes"`
-
-	DroppedAttributesCount uint32 `json:"droppedAttributesCount,omitempty"`
-
-	Flags plog.LogRecordFlags `json:"flags,omitempty"`
-
-	TraceId pcommon.TraceID `json:"traceId,omitempty"`
-
-	SpanId pcommon.SpanID `json:"spanId,omitempty"`
-}
-
 func (e *baseExporter) pushLogs(ctx context.Context, ld plog.Logs) error {
 
 	// distribute resource plog.Logs each log record, separate log records by newline
@@ -119,31 +92,11 @@ func (e *baseExporter) pushLogs(ctx context.Context, ld plog.Logs) error {
 	case EncodingJSON:
 		for i := 0; i < ld.ResourceLogs().Len(); i++ {
 			rl := ld.ResourceLogs().At(i)
-			resource := rl.Resource()
 			for j := 0; j < rl.ScopeLogs().Len(); j++ {
 				sl := rl.ScopeLogs().At(j)
-
 				for k := 0; k < sl.LogRecords().Len(); k++ {
 					log := sl.LogRecords().At(k)
-
-					newRecord := logRecord{
-						TimeUnixNano:           log.Timestamp(),
-						ObservedTimeUnixNano:   log.ObservedTimestamp(),
-						SeverityNumber:         log.SeverityNumber(),
-						SeverityText:           log.SeverityText(),
-						Body:                   log.Body().AsString(),
-						Attributes:             log.Attributes().AsRaw(),
-						ResourceAttributes:     resource.Attributes().AsRaw(),
-						DroppedAttributesCount: log.DroppedAttributesCount(),
-						Flags:                  log.Flags(),
-						TraceId:                log.TraceID(),
-						SpanId:                 log.SpanID(),
-					}
-					bytes, err := jsoniter.Marshal(newRecord)
-					if err != nil {
-						return consumererror.NewPermanent(err)
-					}
-					request = append(request, bytes...)
+					request = append(request, []byte(log.Body().AsString())...)
 					request = append(request, '\n')
 				}
 			}
