@@ -74,6 +74,4 @@ RUN chmod 0600 \
 USER otel
 WORKDIR /etc/otel
 
-# User should mount /etc/otel/config.yaml at runtime using docker volumes / k8s configmap unless
-# connecting to an OpAMP platform.
 ENTRYPOINT [ "/collector/opampsupervisor" ]

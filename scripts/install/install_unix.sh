@@ -715,7 +715,6 @@ create_supervisor_config()
     command printf '  endpoint: "%s"\n' "$OPAMP_ENDPOINT" >> "$supervisor_yml_path"
     command printf '  headers:\n' >> "$supervisor_yml_path"
     [ -n "$OPAMP_SECRET_KEY" ] && command printf '    Authorization: "Secret-Key %s"\n' "$OPAMP_SECRET_KEY" >> "$supervisor_yml_path"
-    [ -n "$OPAMP_LABELS" ] && command printf '    X-Bindplane-Attribute: "%s"\n' "$OPAMP_LABELS" >> "$supervisor_yml_path"
     command printf '  tls:\n' >> "$supervisor_yml_path"
     command printf '    insecure: true\n' >> "$supervisor_yml_path"
     command printf '    insecure_skip_verify: true\n' >> "$supervisor_yml_path"
@@ -725,6 +724,9 @@ create_supervisor_config()
     command printf 'agent:\n' >> "$supervisor_yml_path"
     # TODO(dakota): Add logging config option when supervisor suppports it
     command printf '  executable: "%s"\n' "/opt/observiq-otel-collector/observiq-otel-collector" >> "$supervisor_yml_path"
+    command printf '  description:\n' >> "$supervisor_yml_path"
+    command printf '    non_identifying_attributes:\n' >> "$supervisor_yml_path"
+    [ -n "$OPAMP_LABELS" ] && command printf '      service.labels: "%s"\n' "$OPAMP_LABELS" >> "$supervisor_yml_path"
     command printf 'storage:\n' >> "$supervisor_yml_path"
     command printf '  directory: "%s"\n' "/opt/observiq-otel-collector/storage" >> "$supervisor_yml_path"
   fi
@@ -737,14 +739,14 @@ display_results()
     increase_indent
     info "Agent Home:         $(fg_cyan "/opt/observiq-otel-collector")$(reset)"
     info "Agent Config:       $(fg_cyan "/opt/observiq-otel-collector/config.yaml")$(reset)"
+    info "Agent Logs Command:       $(fg_cyan "sudo tail -F /opt/observiq-otel-collector/agent.log")$(reset)"
     if [ "$SVC_PRE" = "systemctl" ]; then
-      info "Start Command:      $(fg_cyan "sudo systemctl start observiq-otel-collector")$(reset)"
-      info "Stop Command:       $(fg_cyan "sudo systemctl stop observiq-otel-collector")$(reset)"
+      info "Supervisor Start Command:      $(fg_cyan "sudo systemctl start observiq-otel-collector")$(reset)"
+      info "Supervisor Stop Command:       $(fg_cyan "sudo systemctl stop observiq-otel-collector")$(reset)"
     else
-      info "Start Command:      $(fg_cyan "sudo service observiq-otel-collector start")$(reset)"
-      info "Stop Command:       $(fg_cyan "sudo service observiq-otel-collector stop")$(reset)"
+      info "Supervisor Start Command:      $(fg_cyan "sudo service observiq-otel-collector start")$(reset)"
+      info "Supervisor Stop Command:       $(fg_cyan "sudo service observiq-otel-collector stop")$(reset)"
     fi
-    info "Logs Command:       $(fg_cyan "sudo tail -F /opt/observiq-otel-collector/log/collector.log")$(reset)"
     decrease_indent
 
     banner 'Support'
@@ -791,6 +793,16 @@ uninstall()
   root_check
   succeeded
 
+  if [ ! -f "/opt/observiq-otel-collector/observiq-otel-collector" ]; then
+    # If the agent binary is not present, we assume that the agent is not installed
+    # In this case, do nothing.
+    info "No install detected, skipping..."
+    decrease_indent
+    banner "$(fg_green Uninstallation Complete!)"
+    return 0
+  fi
+
+  # Handle services
   if [ "$SVC_PRE" = "systemctl" ]; then
     info "Stopping service..."
     systemctl stop observiq-otel-collector > /dev/null || error_exit "$LINENO" "Failed to stop service"
@@ -810,8 +822,19 @@ uninstall()
     succeeded
   fi
 
-  info "Removing any existing supervisor-config.yaml..."
-  rm -f "$SUPERVISOR_YML_PATH"
+  # Back up config
+  info "Backing up effective.yaml to effective.bak.yaml"
+  cp "/opt/observiq-otel-collector/effective.yaml" "/opt/observiq-otel-collector/effective.bak.yaml" || error_exit "$LINENO" "Failed to backup effective.yaml to effective.bak.yaml"
+  succeeded
+
+  # Removes whole install directory
+  info "Removing installed artifacts..."
+  # This find command gets a list of all artifacts paths except config.yaml or the root directory.
+  FILES=$(cd "/opt/observiq-otel-collector"; find "." -not \( -name effective.bak.yaml -or -name "." \))
+  for f in $FILES
+  do
+    rm -rf "/opt/observiq-otel-collector/$f" || error_exit "$LINENO" "Failed to remove artifact /opt/observiq-otel-collector/$f"
+  done
   succeeded
 
   info "Removing package..."
