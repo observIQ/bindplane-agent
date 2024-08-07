@@ -4,10 +4,8 @@ project_name: observiq-otel-collector
 
 before:
   hooks:
-    - cmd: make release-prep CURR_VERSION={{ .Version }}
-      output: true
-    - cmd: make build-all OUTDIR="tmp"
-      output: true
+    - make release-prep CURR_VERSION={{ .Version }}
+    - make build-all OUTDIR="tmp"
 
 after:
   hooks:
