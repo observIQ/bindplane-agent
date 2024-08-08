@@ -29,7 +29,8 @@ fi
 # Script Constants
 COLLECTOR_USER="observiq-otel-collector"
 TMP_DIR=${TMPDIR:-"/tmp"} # Allow this to be overriden by cannonical TMPDIR env var
-SUPERVISOR_YML_PATH="/opt/observiq-otel-collector/supervisor.yaml"
+INSTALL_DIR="/opt/observiq-otel-collector"
+SUPERVISOR_YML_PATH="$INSTALL_DIR/supervisor.yaml"
 PREREQS="curl printf $SVC_PRE sed uname cut"
 SCRIPT_NAME="$0"
 INDENT_WIDTH='  '
@@ -633,7 +634,7 @@ install_package()
   info "Installing package..."
   # if target install directory doesn't exist and we're using dpkg ensure a clean state 
   # by checking for the package and running purge if it exists.
-  if [ ! -d "/opt/observiq-otel-collector" ] && [ "$package_type" = "deb" ]; then
+  if [ ! -d "$INSTALL_DIR" ] && [ "$package_type" = "deb" ]; then
     dpkg -s "observiq-otel-collector" > /dev/null 2>&1 && dpkg --purge "observiq-otel-collector" > /dev/null 2>&1
   fi
 
@@ -724,12 +725,12 @@ create_supervisor_config()
     command printf '  reports_remote_config: true\n' >> "$supervisor_yml_path"
     command printf 'agent:\n' >> "$supervisor_yml_path"
     # TODO(dakota): Add logging config option when supervisor suppports it
-    command printf '  executable: "%s"\n' "/opt/observiq-otel-collector/observiq-otel-collector" >> "$supervisor_yml_path"
+    command printf '  executable: "%s"\n' "$INSTALL_DIR/observiq-otel-collector" >> "$supervisor_yml_path"
     command printf '  description:\n' >> "$supervisor_yml_path"
     command printf '    non_identifying_attributes:\n' >> "$supervisor_yml_path"
     [ -n "$OPAMP_LABELS" ] && command printf '      service.labels: "%s"\n' "$OPAMP_LABELS" >> "$supervisor_yml_path"
     command printf 'storage:\n' >> "$supervisor_yml_path"
-    command printf '  directory: "%s"\n' "/opt/observiq-otel-collector/supervisor_storage" >> "$supervisor_yml_path"
+    command printf '  directory: "%s"\n' "$INSTALL_DIR/supervisor_storage" >> "$supervisor_yml_path"
   fi
 }
 
@@ -738,9 +739,9 @@ display_results()
 {
     banner 'Information'
     increase_indent
-    info "Agent Home:         $(fg_cyan "/opt/observiq-otel-collector")$(reset)"
-    info "Agent Config:       $(fg_cyan "/opt/observiq-otel-collector/supervisor_storage/config.yaml")$(reset)"
-    info "Agent Logs Command:       $(fg_cyan "sudo tail -F /opt/observiq-otel-collector/supervisor_storage/agent.log")$(reset)"
+    info "Agent Home:         $(fg_cyan "$INSTALL_DIR")$(reset)"
+    info "Agent Config:       $(fg_cyan "$INSTALL_DIR/supervisor_storage/config.yaml")$(reset)"
+    info "Agent Logs Command:       $(fg_cyan "sudo tail -F $INSTALL_DIR/supervisor_storage/agent.log")$(reset)"
     if [ "$SVC_PRE" = "systemctl" ]; then
       info "Supervisor Start Command:      $(fg_cyan "sudo systemctl start observiq-otel-collector")$(reset)"
       info "Supervisor Stop Command:       $(fg_cyan "sudo systemctl stop observiq-otel-collector")$(reset)"
