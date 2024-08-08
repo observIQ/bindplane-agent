@@ -729,7 +729,7 @@ create_supervisor_config()
     command printf '    non_identifying_attributes:\n' >> "$supervisor_yml_path"
     [ -n "$OPAMP_LABELS" ] && command printf '      service.labels: "%s"\n' "$OPAMP_LABELS" >> "$supervisor_yml_path"
     command printf 'storage:\n' >> "$supervisor_yml_path"
-    command printf '  directory: "%s"\n' "/opt/observiq-otel-collector/storage" >> "$supervisor_yml_path"
+    command printf '  directory: "%s"\n' "/opt/observiq-otel-collector/supervisor_storage" >> "$supervisor_yml_path"
   fi
 }
 
@@ -739,8 +739,8 @@ display_results()
     banner 'Information'
     increase_indent
     info "Agent Home:         $(fg_cyan "/opt/observiq-otel-collector")$(reset)"
-    info "Agent Config:       $(fg_cyan "/opt/observiq-otel-collector/config.yaml")$(reset)"
-    info "Agent Logs Command:       $(fg_cyan "sudo tail -F /opt/observiq-otel-collector/agent.log")$(reset)"
+    info "Agent Config:       $(fg_cyan "/opt/observiq-otel-collector/supervisor_storage/config.yaml")$(reset)"
+    info "Agent Logs Command:       $(fg_cyan "sudo tail -F /opt/observiq-otel-collector/supervisor_storage/agent.log")$(reset)"
     if [ "$SVC_PRE" = "systemctl" ]; then
       info "Supervisor Start Command:      $(fg_cyan "sudo systemctl start observiq-otel-collector")$(reset)"
       info "Supervisor Stop Command:       $(fg_cyan "sudo systemctl stop observiq-otel-collector")$(reset)"
