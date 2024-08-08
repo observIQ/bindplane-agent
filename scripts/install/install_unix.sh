@@ -29,7 +29,7 @@ fi
 # Script Constants
 COLLECTOR_USER="observiq-otel-collector"
 TMP_DIR=${TMPDIR:-"/tmp"} # Allow this to be overriden by cannonical TMPDIR env var
-SUPERVISOR_YML_PATH="/opt/observiq-otel-collector/supervisor-config.yaml"
+SUPERVISOR_YML_PATH="/opt/observiq-otel-collector/supervisor.yaml"
 PREREQS="curl printf $SVC_PRE sed uname cut"
 SCRIPT_NAME="$0"
 INDENT_WIDTH='  '
@@ -699,7 +699,7 @@ unpack_package()
   return 0
 }
 
-# create_supervisor_config creates the supervisor-config.yml at the specified path, containing opamp information.
+# create_supervisor_config creates the supervisor.yml at the specified path, containing opamp information.
 create_supervisor_config()
 {
   supervisor_yml_path="$1"
@@ -764,87 +764,6 @@ display_results()
     return 0
 }
 
-uninstall_package()
-{
-  case "$package_type" in
-    deb)
-      dpkg -r "observiq-otel-collector" > /dev/null 2>&1
-      ;;
-    rpm)
-      rpm -e "observiq-otel-collector" > /dev/null 2>&1
-      ;;
-    *)
-      error "Unrecognized package type"
-      return 1
-      ;;
-  esac
-  return 0
-}
-
-uninstall()
-{
-  observiq_banner
-
-  set_package_type
-  banner "Uninstalling BindPlane Agent"
-  increase_indent
-
-  info "Checking permissions..."
-  root_check
-  succeeded
-
-  if [ ! -f "/opt/observiq-otel-collector/observiq-otel-collector" ]; then
-    # If the agent binary is not present, we assume that the agent is not installed
-    # In this case, do nothing.
-    info "No install detected, skipping..."
-    decrease_indent
-    banner "$(fg_green Uninstallation Complete!)"
-    return 0
-  fi
-
-  # Handle services
-  if [ "$SVC_PRE" = "systemctl" ]; then
-    info "Stopping service..."
-    systemctl stop observiq-otel-collector > /dev/null || error_exit "$LINENO" "Failed to stop service"
-    succeeded
-
-    info "Disabling service..."
-    systemctl disable observiq-otel-collector > /dev/null 2>&1 || error_exit "$LINENO" "Failed to disable service"
-    succeeded
-  else
-    info "Stopping service..."
-    service observiq-otel-collector stop
-    succeeded
-
-    info "Disabling service..."
-    chkconfig observiq-otel-collector on
-    # rm -f /etc/init.d/observiq-otel-collector
-    succeeded
-  fi
-
-  # Back up config
-  info "Backing up effective.yaml to effective.bak.yaml"
-  cp "/opt/observiq-otel-collector/effective.yaml" "/opt/observiq-otel-collector/effective.bak.yaml" || error_exit "$LINENO" "Failed to backup effective.yaml to effective.bak.yaml"
-  succeeded
-
-  # Removes whole install directory
-  info "Removing installed artifacts..."
-  # This find command gets a list of all artifacts paths except config.yaml or the root directory.
-  FILES=$(cd "/opt/observiq-otel-collector"; find "." -not \( -name effective.bak.yaml -or -name "." \))
-  for f in $FILES
-  do
-    rm -rf "/opt/observiq-otel-collector/$f" || error_exit "$LINENO" "Failed to remove artifact /opt/observiq-otel-collector/$f"
-  done
-  succeeded
-
-  info "Removing package..."
-  uninstall_package || error_exit "$LINENO" "Failed to remove package"
-  succeeded
-  decrease_indent
-
-  banner "$(fg_green Uninstallation Complete!)"
-}
-
 main()
 {
   # We do these checks before we process arguments, because
@@ -879,10 +798,6 @@ main()
           check_bp_url="true" ; shift 1 ;;
         -b|--base-url)
           base_url=$2 ; shift 2 ;;
-        -r|--uninstall)
-          uninstall
-          exit 0
-          ;;
         -h|--help)
           usage
           exit 0
