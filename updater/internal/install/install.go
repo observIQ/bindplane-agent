@@ -28,6 +28,7 @@ import (
 	"github.com/observiq/bindplane-agent/updater/internal/rollback"
 	"github.com/observiq/bindplane-agent/updater/internal/service"
 	"go.uber.org/zap"
+	"gopkg.in/yaml.v3"
 )
 
 // Installer is an interface that performs an Install of a new collector.
@@ -74,6 +75,12 @@ func (i archiveInstaller) Install(rb rollback.Rollbacker) error {
 		return fmt.Errorf("failed to install new files: %w", err)
 	}
 	i.logger.Debug("Install artifacts copied")
+
+	// translate manager.yaml into supervisor config
+	if err := translateManagerToSupervisor(i.logger, i.installDir, i.backupDir, rb); err != nil {
+		return fmt.Errorf("failed to translate manager config into supervisor config: %w", err)
+	}
+	i.logger.Debug("Translated config files")
 
 	// Update old service config to new service config
 	if err := i.svc.Update(); err != nil {
@@ -222,4 +229,130 @@ func skipConfigFiles(path string) bool {
 	}
 
 	return false
+}
+
+type Headers struct {
+	Authorization string `yaml:"Authorization"`
+}
+
+type TLS struct {
+	Insecure           bool `yaml:"insecure"`
+	InsecureSkipVerify bool `yaml:"insecure_skip_verify"`
+}
+
+type Server struct {
+	Endpoint string  `yaml:"endpoint"`
+	Headers  Headers `yaml:"headers"`
+	TLS      TLS     `yaml:"tls"`
+}
+
+type Capabilities struct {
+	AcceptsRemoteConfig bool `yaml:"accepts_remote_config"`
+	ReportsRemoteConfig bool `yaml:"reports_remote_config"`
+}
+
+type Agent struct {
+	Executable string `yaml:"executable"`
+}
+
+type Storage struct {
+	Directory string `yaml:"directory"`
+}
+
+type SupervisorConfig struct {
+	Server       Server       `yaml:"server"`
+	Capabilities Capabilities `yaml:"capabilities"`
+	Agent        Agent        `yaml:"agent"`
+	Storage      Storage      `yaml:"storage"`
+}
+
+func translateManagerToSupervisor(logger *zap.Logger, installDir, backupDir string, rb rollback.Rollbacker) error {
+	// Read in endpoint and secret-key values from manager.yaml
+	managerPath := filepath.Join(installDir, "manager.yaml")
+	data, err := os.ReadFile(managerPath)
+	if err != nil {
+		return fmt.Errorf("failed to read manager.yaml: %w", err)
+	}
+	var manager map[string]any
+	err = yaml.Unmarshal(data, &manager)
+	if err != nil {
+		return fmt.Errorf("failed to unmarshal manager yaml: %w", err)
+	}
+	var endpoint, secretKey string
+	var ok bool
+	if endpoint, ok = manager["endpoint"].(string); !ok {
+		return fmt.Errorf("failed to read in endpoint: %w", err)
+	}
+	if secretKey, ok = manager["secretKey"].(string); !ok {
+		return fmt.Errorf("failed to read in secret key: %w", err)
+	}
+	logger.Debug("successfully read in manager config values")
+
+	// Construct new supervisor config
+	supervisorCfg := SupervisorConfig{
+		Server: Server{
+			Endpoint: endpoint,
+			Headers: Headers{
+				Authorization: "Secret-Key " + secretKey,
+			},
+			TLS: TLS{
+				Insecure:           true,
+				InsecureSkipVerify: true,
+			},
+		},
+		Capabilities: Capabilities{
+			AcceptsRemoteConfig: true,
+			ReportsRemoteConfig: true,
+		},
+		Agent: Agent{
+			Executable: filepath.Join(installDir, "observiq-otel-collector"),
+		},
+		Storage: Storage{
+			// TODO: need to make this dir?
+			Directory: filepath.Join(installDir, "storage"),
+		},
+	}
+	supervisorYaml, err := yaml.Marshal(supervisorCfg)
+	if err != nil {
+		return fmt.Errorf("failed to marshal supervisor yaml: %w", err)
+	}
+
+	// Create supervisor.yaml and write to it
+	supervisorPath := filepath.Join(installDir, "supervisor.yaml")
+
+	// We create the action record here, because we want to record the file does not exist
+	// before we open the file (which will end up creating the file).
+	// Use CopyFileAction because rollback can be used to delete supervisor.yaml and restore manager.yaml
+	// without creating a new rollback action.
+	cfa, err := action.NewCopyFileAction(logger, managerPath, supervisorPath, backupDir)
+	if err != nil {
+		return fmt.Errorf("failed to create copy file action: %w", err)
+	}
+	// Record that we are performing copying the file.
+	// We record before we actually do the action here because the file may be partially written,
+	// and we will want to roll that back if that is the case.
+	rb.AppendAction(cfa)
+
+	supervisorFile, err := os.OpenFile(filepath.Clean(supervisorPath), os.O_CREATE|os.O_WRONLY, fs.FileMode(0600))
+	if err != nil {
+		return fmt.Errorf("failed to open supervisor config file: %w", err)
+	}
+	defer func() {
+		err := supervisorFile.Close()
+		if err != nil {
+			logger.Error("failed to close supervisor config file", zap.Error(err))
+		}
+	}()
+
+	_, err = supervisorFile.Write(supervisorYaml)
+	if err != nil {
+		return fmt.Errorf("failed to write supervisor config: %w", err)
+	}
+
+	// Delete manager.yaml
+	if err = os.Remove(managerPath); err != nil {
+		return fmt.Errorf("failed to delete manager config file: %w", err)
+	}
+
+	return nil
 }
