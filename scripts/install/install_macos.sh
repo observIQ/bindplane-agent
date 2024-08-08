@@ -23,7 +23,6 @@ DOWNLOAD_BASE="https://github.com/observIQ/bindplane-agent/releases/download"
 PREREQS="printf sed uname tr find grep"
 TMP_DIR="${TMPDIR:-"/tmp/"}observiq-otel-collector" # Allow this to be overriden by cannonical TMPDIR env var
 INSTALL_DIR="/opt/observiq-otel-collector"
-MANAGEMENT_YML_PATH="$INSTALL_DIR/manager.yaml"
 SUPERVISOR_YML_PATH="$INSTALL_DIR/supervisor-config.yaml"
 SCRIPT_NAME="$0"
 INDENT_WIDTH='  '
@@ -497,7 +496,7 @@ install_package()
 
   # unpack
   info "Unpacking tarball..."
-  tar -xzf "$out_file_path" -C "$TMP_DIR/artifacts" || error_exit "$LINENO" "Failed to unpack archive $TMP_DIR/observiq-otel-collector.tar.gz"
+  tar -xzf "$out_file_path" -C "$TMP_DIR/artifacts" || error_exit "$LINENO" "Failed to unpack archive $out_file_path"
   succeeded
 
   mkdir -p "$INSTALL_DIR" || error_exit "$LINENO" "Failed to create directory $INSTALL_DIR"
@@ -521,7 +520,7 @@ install_package()
   increase_indent
 
   # This find command gets a list of all artifacts paths except logging.yaml, or opentelemetry-java-contrib-jmx-metrics.jar
-  FILES=$(cd "$TMP_DIR/artifacts"; find "." -type f -not \( -name -or -name logging.yaml -or -name opentelemetry-java-contrib-jmx-metrics.jar \))
+  FILES=$(cd "$TMP_DIR/artifacts"; find "." -type f -not \( -name logging.yaml -or -name opentelemetry-java-contrib-jmx-metrics.jar \))
   # Move files to install dir
   for f in $FILES
   do
@@ -578,10 +577,11 @@ create_supervisor_config()
   if [ ! -f "$supervisor_yml_path" ]; then
     info "Creating supervisor config..."
 
-    # Note here: We create the file and change permissions of the file here BEFORE writing info to it
-    # We do this because the file may contain a secret key, so we want 0 window when the
-    # file is readable by anyone other than root
+        # Note here: We create the file and change permissions of the file here BEFORE writing info to it.
+    # We do this because the file contains the secret key.
+    # We do not want the file readable by anyone other than root/obseriq-otel-collector.
     command printf '' >> "$supervisor_yml_path"
+    chown observiq-otel-collector:observiq-otel-collector "$supervisor_yml_path"
     chmod 0600 "$supervisor_yml_path"
 
     command printf 'server:\n' > "$supervisor_yml_path"
@@ -602,7 +602,7 @@ create_supervisor_config()
     command printf '    non_identifying_attributes:\n' >> "$supervisor_yml_path"
     [ -n "$OPAMP_LABELS" ] && command printf '      service.labels: "%s"\n' "$OPAMP_LABELS" >> "$supervisor_yml_path"
     command printf 'storage:\n' >> "$supervisor_yml_path"
-    command printf '  directory: "%s"\n' "$INSTALL_DIR/storage" >> "$supervisor_yml_path"
+    command printf '  directory: "%s"\n' "$INSTALL_DIR/supervisor_storage" >> "$supervisor_yml_path"
     succeeded
   fi
 }
@@ -614,8 +614,8 @@ display_results()
     banner 'Information'
     increase_indent
     info "Agent Home:                    $(fg_cyan "$INSTALL_DIR")$(reset)"
-    info "Agent Config:                  $(fg_cyan "$INSTALL_DIR/effective.yaml")$(reset)"
-    info "Agent Logs Command:            $(fg_cyan "sudo tail -F $INSTALL_DIR/agent.log")$(reset)"
+    info "Agent Config:                  $(fg_cyan "$INSTALL_DIR/supervisor_storage/effective.yaml")$(reset)"
+    info "Agent Logs Command:            $(fg_cyan "sudo tail -F $INSTALL_DIR/supervisor_storage/agent.log")$(reset)"
     info "Supervisor Start Command:      $(fg_cyan "sudo launchctl load /Library/LaunchDaemons/$SERVICE_NAME.plist")$(reset)"
     info "Supervisor Stop Command:       $(fg_cyan "sudo launchctl unload /Library/LaunchDaemons/$SERVICE_NAME.plist")$(reset)"
     decrease_indent
@@ -652,14 +652,10 @@ uninstall()
   rm -f "/Library/LaunchDaemons/$SERVICE_NAME.plist" || error_exit "$LINENO" "Failed to remove service file /Library/LaunchDaemons/$SERVICE_NAME.plist"
   succeeded
 
-  info "Backing up effective.yaml to effective.bak.yaml"
-  cp "$INSTALL_DIR/effective.yaml" "$INSTALL_DIR/effective.bak.yaml" || error_exit "$LINENO" "Failed to backup effective.yaml to effective.bak.yaml"
-  succeeded
-
   # Removes the whole install directory, including configs.
   info "Removing installed artifacts..."
   # This find command gets a list of all artifacts paths except effective.yaml or the root directory.
-  FILES=$(cd "$INSTALL_DIR"; find "." -not \( -name effective.bak.yaml -or -name "." \))
+  FILES=$(cd "$INSTALL_DIR"; find "." -not \( -name "." \))
   for f in $FILES
   do
     rm -rf "${INSTALL_DIR:?}/$f" || error_exit "$LINENO" "Failed to remove artifact ${INSTALL_DIR:?}/$f"
