@@ -705,10 +705,11 @@ create_supervisor_config()
   supervisor_yml_path="$1"
   if [ ! -f "$supervisor_yml_path" ]; then
 
-    # Note here: We create the file and change permissions of the file here BEFORE writing info to it
-    # We do this because the file may contain a secret key, so we want 0 window when the
-    # file is readable by anyone other than root
+    # Note here: We create the file and change permissions of the file here BEFORE writing info to it.
+    # We do this because the file contains the secret key.
+    # We do not want the file readable by anyone other than root/obseriq-otel-collector.
     command printf '' >> "$supervisor_yml_path"
+    chown observiq-otel-collector:observiq-otel-collector "$supervisor_yml_path"
     chmod 0600 "$supervisor_yml_path"
 
     command printf 'server:\n' > "$supervisor_yml_path"
