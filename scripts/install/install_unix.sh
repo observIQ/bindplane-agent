@@ -29,7 +29,8 @@ fi
 # Script Constants
 COLLECTOR_USER="observiq-otel-collector"
 TMP_DIR=${TMPDIR:-"/tmp"} # Allow this to be overriden by cannonical TMPDIR env var
-MANAGEMENT_YML_PATH="/opt/observiq-otel-collector/manager.yaml"
+INSTALL_DIR="/opt/observiq-otel-collector"
+SUPERVISOR_YML_PATH="$INSTALL_DIR/supervisor.yaml"
 PREREQS="curl printf $SVC_PRE sed uname cut"
 SCRIPT_NAME="$0"
 INDENT_WIDTH='  '
@@ -633,7 +634,7 @@ install_package()
   info "Installing package..."
   # if target install directory doesn't exist and we're using dpkg ensure a clean state 
   # by checking for the package and running purge if it exists.
-  if [ ! -d "/opt/observiq-otel-collector" ] && [ "$package_type" = "deb" ]; then
+  if [ ! -d "$INSTALL_DIR" ] && [ "$package_type" = "deb" ]; then
     dpkg -s "observiq-otel-collector" > /dev/null 2>&1 && dpkg --purge "observiq-otel-collector" > /dev/null 2>&1
   fi
 
@@ -642,8 +643,8 @@ install_package()
 
   # If an endpoint was specified, we need to write the manager.yaml
   if [ -n "$OPAMP_ENDPOINT" ]; then
-    info "Creating manager yaml..."
-    create_manager_yml "$MANAGEMENT_YML_PATH"
+    info "Creating supervisor config..."
+    create_supervisor_config "$SUPERVISOR_YML_PATH"
     succeeded
   fi
 
@@ -699,23 +700,37 @@ unpack_package()
   return 0
 }
 
-# create_manager_yml creates the manager.yml at the specified path, containing opamp information.
-create_manager_yml()
+# create_supervisor_config creates the supervisor.yml at the specified path, containing opamp information.
+create_supervisor_config()
 {
-  manager_yml_path="$1"
-  if [ ! -f "$manager_yml_path" ]; then
-    # Note here: We create the file and change permissions of the file here BEFORE writing info to it
-    # We do this because the file may contain a secret key, so we want 0 window when the
-    # file is readable by anyone other than the agent & root
-    command printf '' >> "$manager_yml_path"
+  supervisor_yml_path="$1"
+  if [ ! -f "$supervisor_yml_path" ]; then
 
-    chgrp "$COLLECTOR_USER" "$manager_yml_path"
-    chown "$COLLECTOR_USER" "$manager_yml_path"
-    chmod 0640 "$manager_yml_path"
+    # Note here: We create the file and change permissions of the file here BEFORE writing info to it.
+    # We do this because the file contains the secret key.
+    # We do not want the file readable by anyone other than root/obseriq-otel-collector.
+    command printf '' >> "$supervisor_yml_path"
+    chown observiq-otel-collector:observiq-otel-collector "$supervisor_yml_path"
+    chmod 0600 "$supervisor_yml_path"
 
-    command printf 'endpoint: "%s"\n' "$OPAMP_ENDPOINT" > "$manager_yml_path"
-    [ -n "$OPAMP_LABELS" ] && command printf 'labels: "%s"\n' "$OPAMP_LABELS" >> "$manager_yml_path"
-    [ -n "$OPAMP_SECRET_KEY" ] && command printf 'secret_key: "%s"\n' "$OPAMP_SECRET_KEY" >> "$manager_yml_path"
+    command printf 'server:\n' > "$supervisor_yml_path"
+    command printf '  endpoint: "%s"\n' "$OPAMP_ENDPOINT" >> "$supervisor_yml_path"
+    command printf '  headers:\n' >> "$supervisor_yml_path"
+    [ -n "$OPAMP_SECRET_KEY" ] && command printf '    Authorization: "Secret-Key %s"\n' "$OPAMP_SECRET_KEY" >> "$supervisor_yml_path"
+    command printf '  tls:\n' >> "$supervisor_yml_path"
+    command printf '    insecure: true\n' >> "$supervisor_yml_path"
+    command printf '    insecure_skip_verify: true\n' >> "$supervisor_yml_path"
+    command printf 'capabilities:\n' >> "$supervisor_yml_path"
+    command printf '  accepts_remote_config: true\n' >> "$supervisor_yml_path"
+    command printf '  reports_remote_config: true\n' >> "$supervisor_yml_path"
+    command printf 'agent:\n' >> "$supervisor_yml_path"
+    # TODO(dakota): Add logging config option when supervisor suppports it
+    command printf '  executable: "%s"\n' "$INSTALL_DIR/observiq-otel-collector" >> "$supervisor_yml_path"
+    command printf '  description:\n' >> "$supervisor_yml_path"
+    command printf '    non_identifying_attributes:\n' >> "$supervisor_yml_path"
+    [ -n "$OPAMP_LABELS" ] && command printf '      service.labels: "%s"\n' "$OPAMP_LABELS" >> "$supervisor_yml_path"
+    command printf 'storage:\n' >> "$supervisor_yml_path"
+    command printf '  directory: "%s"\n' "$INSTALL_DIR/supervisor_storage" >> "$supervisor_yml_path"
   fi
 }
 
@@ -724,16 +739,16 @@ display_results()
 {
     banner 'Information'
     increase_indent
-    info "Agent Home:         $(fg_cyan "/opt/observiq-otel-collector")$(reset)"
-    info "Agent Config:       $(fg_cyan "/opt/observiq-otel-collector/config.yaml")$(reset)"
+    info "Agent Home:         $(fg_cyan "$INSTALL_DIR")$(reset)"
+    info "Agent Config:       $(fg_cyan "$INSTALL_DIR/supervisor_storage/config.yaml")$(reset)"
+    info "Agent Logs Command:       $(fg_cyan "sudo tail -F $INSTALL_DIR/supervisor_storage/agent.log")$(reset)"
     if [ "$SVC_PRE" = "systemctl" ]; then
-      info "Start Command:      $(fg_cyan "sudo systemctl start observiq-otel-collector")$(reset)"
-      info "Stop Command:       $(fg_cyan "sudo systemctl stop observiq-otel-collector")$(reset)"
+      info "Supervisor Start Command:      $(fg_cyan "sudo systemctl start observiq-otel-collector")$(reset)"
+      info "Supervisor Stop Command:       $(fg_cyan "sudo systemctl stop observiq-otel-collector")$(reset)"
     else
-      info "Start Command:      $(fg_cyan "sudo service observiq-otel-collector start")$(reset)"
-      info "Stop Command:       $(fg_cyan "sudo service observiq-otel-collector stop")$(reset)"
+      info "Supervisor Start Command:      $(fg_cyan "sudo service observiq-otel-collector start")$(reset)"
+      info "Supervisor Stop Command:       $(fg_cyan "sudo service observiq-otel-collector stop")$(reset)"
     fi
-    info "Logs Command:       $(fg_cyan "sudo tail -F /opt/observiq-otel-collector/log/collector.log")$(reset)"
     decrease_indent
 
     banner 'Support'
@@ -749,66 +764,6 @@ display_results()
 
     banner "$(fg_green Installation Complete!)"
     return 0
-}
-
-uninstall_package()
-{
-  case "$package_type" in
-    deb)
-      dpkg -r "observiq-otel-collector" > /dev/null 2>&1
-      ;;
-    rpm)
-      rpm -e "observiq-otel-collector" > /dev/null 2>&1
-      ;;
-    *)
-      error "Unrecognized package type"
-      return 1
-      ;;
-  esac
-  return 0
-}
-
-uninstall()
-{
-  observiq_banner
-
-  set_package_type
-  banner "Uninstalling BindPlane Agent"
-  increase_indent
-
-  info "Checking permissions..."
-  root_check
-  succeeded
-
-  if [ "$SVC_PRE" = "systemctl" ]; then
-    info "Stopping service..."
-    systemctl stop observiq-otel-collector > /dev/null || error_exit "$LINENO" "Failed to stop service"
-    succeeded
-
-    info "Disabling service..."
-    systemctl disable observiq-otel-collector > /dev/null 2>&1 || error_exit "$LINENO" "Failed to disable service"
-    succeeded
-  else
-    info "Stopping service..."
-    service observiq-otel-collector stop
-    succeeded
-
-    info "Disabling service..."
-    chkconfig observiq-otel-collector on
-    # rm -f /etc/init.d/observiq-otel-collector
-    succeeded
-  fi
-
-  info "Removing any existing manager.yaml..."
-  rm -f "$MANAGEMENT_YML_PATH"
-  succeeded
-
-  info "Removing package..."
-  uninstall_package || error_exit "$LINENO" "Failed to remove package"
-  succeeded
-  decrease_indent
-
-  banner "$(fg_green Uninstallation Complete!)"
 }
 
 main()
@@ -845,10 +800,6 @@ main()
           check_bp_url="true" ; shift 1 ;;
         -b|--base-url)
           base_url=$2 ; shift 2 ;;
-        -r|--uninstall)
-          uninstall
-          exit 0
-          ;;
         -h|--help)
           usage
           exit 0
