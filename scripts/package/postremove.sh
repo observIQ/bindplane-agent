@@ -29,16 +29,13 @@ uninstall_package()
 main()
 {
     # Removes whole install directory
-    info "Removing installed artifacts..."
+    printf "Removing installed artifacts..."
     # This find command gets a list of all artifacts paths except the root directory.
     FILES=$(cd "/opt/observiq-otel-collector"; find "." -not \( -name "." \))
     for f in $FILES
     do
-        rm -rf "/opt/observiq-otel-collector/$f" || {printf "Failed to remove artifact /opt/observiq-otel-collector/$f"; return;}
+        rm -rf "/opt/observiq-otel-collector/$f"
     done
-    succeeded
 
-    info "Removing package..."
-    uninstall_package()
-    succeeded
+    printf "Removing package..."
 }

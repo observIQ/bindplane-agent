@@ -99,8 +99,11 @@ finish_permissions() {
   # This prevents the service (running as root) from assigning ownership to
   # the root user. By doing so, we allow the user to switch to observiq-otel-collector
   # user for 'non root' installs.
-  touch /opt/observiq-otel-collector/log/collector.log
-  chown observiq-otel-collector:observiq-otel-collector /opt/observiq-otel-collector/log/collector.log
+  mkdir -p /opt/observiq-otel-collector/supervisor_storage
+  touch /opt/observiq-otel-collector/supervisor_storage/agent.log
+  touch /opt/observiq-otel-collector/supervisor_storage/effective.yaml
+  chown observiq-otel-collector:observiq-otel-collector /opt/observiq-otel-collector/supervisor_storage/agent.log
+  chown observiq-otel-collector:observiq-otel-collector /opt/observiq-otel-collector/supervisor_storage/effective.yaml
 }
 
 
