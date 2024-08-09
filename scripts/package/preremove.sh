@@ -15,23 +15,51 @@
 
 set -e
 
-# Determine if we need service or systemctl
-if command -v systemctl > /dev/null 2>&1; then
-  SVC_PRE=systemctl
-elif command -v service > /dev/null 2>&1; then
-  SVC_PRE=service
-fi
+handle_systemctl() {
+  systemctl stop observiq-otel-collector >/dev/null || {
+    printf 'failed to stop service'
+    return
+  }
+  systemctl disable observiq-otel-collector >/dev/null 2>&1 || {
+    printf 'failed to disable service'
+    return
+  }
+}
 
-if [ "$SVC_PRE" = "systemctl" ]; then
-    info "Stopping service..."
-    systemctl stop observiq-otel-collector > /dev/null || { printf 'failed to stop service'; return; }
+handle_service() {
+  service observiq-otel-collector stop || {
+    printf 'failed to stop service'
+    return
+  }
+  chkconfig observiq-otel-collector on >/dev/null 2>&1 || {
+    printf 'failed to disable service'
+    return
+  }
+}
 
-    info "Disabling service..."
-    systemctl disable observiq-otel-collector > /dev/null 2>&1 || { printf 'failed to disable service'; return; }
-else
-    info "Stopping service..."
-    service observiq-otel-collector stop || { printf 'failed to stop service'; return; }
+remove() {
+  # Determine if we need service or systemctl
+  if command -v systemctl >/dev/null 2>&1; then
+    handle_systemctl
+  elif command -v service >/dev/null 2>&1; then
+    handle_service
+  fi
+}
 
-    info "Disabling service..."
-    chkconfig observiq-otel-collector on > /dev/null 2>&1 || { printf 'failed to disable service'; return; }
-fi
+upgrade() {
+  return
+}
+
+action="$1"
+
+case "$action" in
+"0" | "remove")
+  remove
+  ;;
+"1" | "upgrade")
+  upgrade
+  ;;
+*)
+  remove
+  ;;
+esac

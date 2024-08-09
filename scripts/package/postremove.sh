@@ -15,27 +15,41 @@
 
 set -e
 
-uninstall_package()
-{
-    if command -v dpkg > /dev/null 2>&1; then
-        dpkg -r "observiq-otel-collector" > /dev/null 2>&1
-    elif command -v rpm > /dev/null 2>&1; then
-        rpm -e "observiq-otel-collector" > /dev/null 2>&1
-    else
-        printf "Could not find dpkg or rpm on the system"
-    fi
+remove() {
+  rm -f /usr/lib/systemd/system/observiq-otel-collector.service || {
+    printf 'failed to remove /usr/lib/systemd/system/observiq-otel-collector.service'
+    return
+  }
+  rm -f /etc/init.d/observiq-otel-collector || {
+    printf 'failed to remove /etc/init.d/observiq-otel-collector'
+    return
+  }
+  rm -f /etc/sysconfig/observiq-otel-collector || {
+    printf 'failed to remove /etc/sysconfig/observiq-otel-collector'
+    return
+  }
+  # remove the entire folder
+  # pkg manager will remove most files but this will delete the remaining
+  rm -rf /opt/observiq-otel-collector || {
+    printf 'failed to remove /opt/observiq-otel-collector'
+    return
+  }
 }
 
-main()
-{
-    # Removes whole install directory
-    printf "Removing installed artifacts..."
-    # This find command gets a list of all artifacts paths except the root directory.
-    FILES=$(cd "/opt/observiq-otel-collector"; find "." -not \( -name "." \))
-    for f in $FILES
-    do
-        rm -rf "/opt/observiq-otel-collector/$f"
-    done
-
-    printf "Removing package..."
+upgrade() {
+  return
 }
+
+action="$1"
+
+case "$action" in
+"0" | "remove")
+  remove
+  ;;
+"1" | "upgrade")
+  upgrade
+  ;;
+*)
+  remove
+  ;;
+esac

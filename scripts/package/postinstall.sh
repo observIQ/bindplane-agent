@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 set -e
 
 manage_systemd_service() {
@@ -26,7 +25,7 @@ manage_systemd_service() {
 
   echo "configured systemd service"
 
-  cat << EOF
+  cat <<EOF
 
 The "observiq-otel-collector" service has been configured!
 
@@ -63,10 +62,10 @@ manage_sysv_service() {
 
 init_type() {
   # Determine if we need service or systemctl for prereqs
-  if command -v systemctl > /dev/null 2>&1; then
+  if command -v systemctl >/dev/null 2>&1; then
     command printf "systemd"
     return
-  elif command -v service > /dev/null 2>&1; then
+  elif command -v service >/dev/null 2>&1; then
     command printf "service"
     return
   fi
@@ -78,14 +77,15 @@ init_type() {
 manage_service() {
   service_type="$(init_type)"
   case "$service_type" in
-    systemd)
-      manage_systemd_service
-      ;;
-    service)
-      manage_sysv_service
-      ;;
-    *)
-      echo "could not detect init system, skipping service configuration"
+  systemd)
+    manage_systemd_service
+    ;;
+  service)
+    manage_sysv_service
+    ;;
+  *)
+    echo "could not detect init system, skipping service configuration"
+    ;;
   esac
 }
 
@@ -106,6 +106,26 @@ finish_permissions() {
   chown observiq-otel-collector:observiq-otel-collector /opt/observiq-otel-collector/supervisor_storage/effective.yaml
 }
 
+install() {
+  finish_permissions
+  manage_service
+}
 
-finish_permissions
-manage_service
+# upgrade should perform the same actions as install
+upgrade() {
+  install
+}
+
+action="$1"
+
+case "$action" in
+"0" | "install")
+  install
+  ;;
+"1" | "upgrade")
+  upgrade
+  ;;
+*)
+  install
+  ;;
+esac
