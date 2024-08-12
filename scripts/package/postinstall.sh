@@ -30,10 +30,10 @@ manage_systemd_service() {
 The "observiq-otel-collector" service has been configured!
 
 The collector's config file can be found here: 
-  /opt/observiq-otel-collector/config.yaml
+  /opt/observiq-otel-collector/supervisor_storage/effective.yaml
 
 To view logs from the collector, run:
-  sudo tail -F /opt/observiq-otel-collector/log/collector.log
+  sudo tail -F /opt/observiq-otel-collector/supervisor_storage/agent.log
 
 For more information on configuring the collector, see the docs:
   https://github.com/observIQ/bindplane-agent/tree/main#observiq-opentelemetry-collector

@@ -200,12 +200,6 @@ nfpms:
           mode: 0750
           owner: observiq-otel-collector
           group: observiq-otel-collector
-      - dst: /opt/observiq-otel-collector/log
-        type: dir
-        file_info:
-          mode: 0750
-          owner: observiq-otel-collector
-          group: observiq-otel-collector
       - src: service/observiq-otel-collector.service
         dst: /usr/lib/systemd/system/observiq-otel-collector.service
         type: config|noreplace
