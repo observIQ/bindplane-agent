@@ -18,22 +18,18 @@ set -e
 handle_systemctl() {
   systemctl stop observiq-otel-collector >/dev/null || {
     printf 'failed to stop service'
-    return
   }
   systemctl disable observiq-otel-collector >/dev/null 2>&1 || {
     printf 'failed to disable service'
-    return
   }
 }
 
 handle_service() {
   service observiq-otel-collector stop || {
     printf 'failed to stop service'
-    return
   }
   chkconfig observiq-otel-collector on >/dev/null 2>&1 || {
     printf 'failed to disable service'
-    return
   }
 }
 

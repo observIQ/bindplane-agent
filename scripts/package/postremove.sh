@@ -18,21 +18,20 @@ set -e
 remove() {
   rm -f /usr/lib/systemd/system/observiq-otel-collector.service || {
     printf 'failed to remove /usr/lib/systemd/system/observiq-otel-collector.service'
-    return
   }
-  rm -f /etc/init.d/observiq-otel-collector || {
-    printf 'failed to remove /etc/init.d/observiq-otel-collector'
-    return
-  }
+
   rm -f /etc/sysconfig/observiq-otel-collector || {
     printf 'failed to remove /etc/sysconfig/observiq-otel-collector'
-    return
   }
+
+  rm -f /etc/init.d/observiq-otel-collector || {
+    printf 'failed to remove /etc/init.d/observiq-otel-collector'
+  }
+
   # remove the entire folder
   # pkg manager will remove most files but this will delete the remaining
   rm -rf /opt/observiq-otel-collector || {
     printf 'failed to remove /opt/observiq-otel-collector'
-    return
   }
 }
 
