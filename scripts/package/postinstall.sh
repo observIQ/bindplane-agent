@@ -94,16 +94,6 @@ finish_permissions() {
   # We also change the owner of the binary to observiq-otel-collector
   chown -R observiq-otel-collector:observiq-otel-collector /opt/observiq-otel-collector/observiq-otel-collector /opt/observiq-otel-collector/plugins/*
   chmod 0640 /opt/observiq-otel-collector/plugins/*
-
-  # Initialize the log file to ensure it is owned by observiq-otel-collector.
-  # This prevents the service (running as root) from assigning ownership to
-  # the root user. By doing so, we allow the user to switch to observiq-otel-collector
-  # user for 'non root' installs.
-  mkdir -p /opt/observiq-otel-collector/supervisor_storage
-  touch /opt/observiq-otel-collector/supervisor_storage/agent.log
-  touch /opt/observiq-otel-collector/supervisor_storage/effective.yaml
-  chown observiq-otel-collector:observiq-otel-collector /opt/observiq-otel-collector/supervisor_storage/agent.log
-  chown observiq-otel-collector:observiq-otel-collector /opt/observiq-otel-collector/supervisor_storage/effective.yaml
 }
 
 install() {
