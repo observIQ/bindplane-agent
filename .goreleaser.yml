@@ -156,6 +156,7 @@ nfpms:
           mode: 0755
           owner: observiq-otel-collector
           group: observiq-otel-collector
+      # TODO: (dakota) evaluate this file once supervisor has support for configuring agent logging
       - src: release_deps/logging.yaml
         dst: /opt/observiq-otel-collector/logging.yaml
         file_info:
@@ -200,6 +201,16 @@ nfpms:
           mode: 0750
           owner: observiq-otel-collector
           group: observiq-otel-collector
+      - dst: /opt/observiq-otel-collector/supervisor_storage
+        type: dir
+        file_info:
+          mode: 0750
+          owner: observiq-otel-collector
+          group: observiq-otel-collector
+      - dst: /opt/observiq-otel-collector/supervisor_storage/effective.yaml
+        type: ghost
+      - dst: /opt/observiq-otel-collector/supervisor_storage/agent.log
+        type: ghost
       - src: service/observiq-otel-collector.service
         dst: /usr/lib/systemd/system/observiq-otel-collector.service
         type: config|noreplace
