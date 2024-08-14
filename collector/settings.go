@@ -48,6 +48,7 @@ func NewSettings(configPaths []string, version string, loggingOpts []zap.Option,
 				httpsprovider.NewFactory(),
 			},
 			ConverterFactories: []confmap.ConverterFactory{expandconverter.NewFactory()},
+			DefaultScheme:      "env",
 		},
 	}
 
