@@ -19,7 +19,6 @@ import (
 
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/confmap"
-	"go.opentelemetry.io/collector/confmap/converter/expandconverter"
 	"go.opentelemetry.io/collector/confmap/provider/envprovider"
 	"go.opentelemetry.io/collector/confmap/provider/fileprovider"
 	"go.opentelemetry.io/collector/confmap/provider/httpsprovider"
@@ -104,7 +103,7 @@ func (r *RenderedConfig) GetConfigProviderSettings() (*otelcol.ConfigProviderSet
 				httpsprovider.NewFactory(),
 				envprovider.NewFactory(),
 			},
-			ConverterFactories: []confmap.ConverterFactory{expandconverter.NewFactory()},
+			ConverterFactories: []confmap.ConverterFactory{},
 			DefaultScheme:      "env",
 		},
 	}

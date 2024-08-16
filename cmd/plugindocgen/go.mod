@@ -51,7 +51,6 @@ require (
 	go.opentelemetry.io/collector/component/componentprofiles v0.107.0 // indirect
 	go.opentelemetry.io/collector/config/configtelemetry v0.107.0 // indirect
 	go.opentelemetry.io/collector/confmap v0.107.0 // indirect
-	go.opentelemetry.io/collector/confmap/converter/expandconverter v0.107.0 // indirect
 	go.opentelemetry.io/collector/confmap/provider/envprovider v0.107.0 // indirect
 	go.opentelemetry.io/collector/confmap/provider/fileprovider v0.107.0 // indirect
 	go.opentelemetry.io/collector/confmap/provider/httpsprovider v0.107.0 // indirect
