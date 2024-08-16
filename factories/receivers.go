@@ -19,6 +19,7 @@ import (
 	"github.com/observiq/bindplane-agent/receiver/azureblobrehydrationreceiver"
 	"github.com/observiq/bindplane-agent/receiver/httpreceiver"
 	"github.com/observiq/bindplane-agent/receiver/m365receiver"
+	"github.com/observiq/bindplane-agent/receiver/oktareceiver"
 	"github.com/observiq/bindplane-agent/receiver/pluginreceiver"
 	"github.com/observiq/bindplane-agent/receiver/routereceiver"
 	"github.com/observiq/bindplane-agent/receiver/sapnetweaverreceiver"
@@ -138,6 +139,7 @@ var defaultReceivers = []receiver.Factory{
 	mongodbreceiver.NewFactory(),
 	mysqlreceiver.NewFactory(),
 	nginxreceiver.NewFactory(),
+	oktareceiver.NewFactory(),
 	opencensusreceiver.NewFactory(),
 	otlpreceiver.NewFactory(),
 	pluginreceiver.NewFactory(),
