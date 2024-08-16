@@ -36,12 +36,12 @@ func NewFactory() receiver.Factory {
 
 func createLogsReceiver(
 	_ context.Context,
-	_ receiver.Settings,
+	params receiver.Settings,
 	rConf component.Config,
 	consumer consumer.Logs,
 ) (receiver.Logs, error) {
 	cfg := rConf.(*Config)
-	r, err := newOktaLogsReceiver(cfg, consumer)
+	r, err := newOktaLogsReceiver(cfg, params.Logger, consumer)
 	if err != nil {
 		return nil, fmt.Errorf("unable to create an Okta log receiver instance: %w", err)
 	}

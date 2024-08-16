@@ -16,12 +16,14 @@ package oktareceiver // import "github.com/observiq/bindplane-agent/receiver/okt
 
 import (
 	"errors"
+	"time"
 )
 
 // Config defines the configuration for an Okta receiver
 type Config struct {
-	Domain   string `mapstructure:"okta_domain"`
-	ApiToken string `mapstructure:"api_token"`
+	Domain       string        `mapstructure:"okta_domain"`
+	ApiToken     string        `mapstructure:"api_token"`
+	PollInterval time.Duration `mapstructure:"poll_interval"`
 }
 
 var (

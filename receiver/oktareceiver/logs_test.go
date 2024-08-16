@@ -16,25 +16,30 @@ package oktareceiver
 
 import (
 	"context"
+	"fmt"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/consumer"
 	"go.opentelemetry.io/collector/consumer/consumertest"
+	"go.uber.org/zap"
 )
 
 func TestShutdownNoServer(t *testing.T) {
 	// test that shutdown without a start does not error or panic
 	recv := newReceiver(t, &Config{
-		Domain:   "domain",
-		ApiToken: "apitoken",
+		Domain:       "example.okta.com",
+		ApiToken:     "12345",
+		PollInterval: time.Minute,
 	}, consumertest.NewNop())
 
 	require.NoError(t, recv.Shutdown(context.Background()))
 }
 
 func newReceiver(t *testing.T, cfg *Config, c consumer.Logs) *oktaLogsReceiver {
-	r, err := newOktaLogsReceiver(cfg, c)
+	fmt.Println("test:", cfg.PollInterval)
+	r, err := newOktaLogsReceiver(cfg, zap.NewNop(), c)
 	require.NoError(t, err)
 	return r
 }
