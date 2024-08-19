@@ -110,9 +110,6 @@ archives:
       - src: release_deps/opentelemetry-java-contrib-jmx-metrics.jar
         dst: "."
         strip_parent: true
-      - src: release_deps/logging.yaml
-        dst: "."
-        strip_parent: true
       - src: release_deps/plugins/*
         dst: plugins
         strip_parent: true
@@ -158,14 +155,6 @@ nfpms:
           mode: 0755
           owner: observiq-otel-collector
           group: observiq-otel-collector
-      # TODO: (dakota) evaluate this file once supervisor has support for configuring agent logging
-      - src: release_deps/logging.yaml
-        dst: /opt/observiq-otel-collector/logging.yaml
-        file_info:
-          mode: 0640
-          owner: observiq-otel-collector
-          group: observiq-otel-collector
-        type: config|noreplace
       - src: LICENSE
         dst: /opt/observiq-otel-collector/LICENSE
         file_info:
@@ -627,14 +616,14 @@ docker_signs:
   - artifacts: all
     stdin: "{{ .Env.COSIGN_PWD }}"
     args: [
-      # Default options
-      "sign",
-      "--key=cosign.key",
-      "${artifact}",
-      "--yes",
-      # Additional options
-      "--recursive"
-    ]
+        # Default options
+        "sign",
+        "--key=cosign.key",
+        "${artifact}",
+        "--yes",
+        # Additional options
+        "--recursive",
+      ]
     output: true
 
 # https://goreleaser.com/customization/release/
