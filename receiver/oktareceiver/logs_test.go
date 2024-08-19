@@ -16,7 +16,6 @@ package oktareceiver
 
 import (
 	"context"
-	"fmt"
 	"testing"
 	"time"
 
@@ -38,7 +37,6 @@ func TestShutdownNoServer(t *testing.T) {
 }
 
 func newReceiver(t *testing.T, cfg *Config, c consumer.Logs) *oktaLogsReceiver {
-	fmt.Println("test:", cfg.PollInterval)
 	r, err := newOktaLogsReceiver(cfg, zap.NewNop(), c)
 	require.NoError(t, err)
 	return r

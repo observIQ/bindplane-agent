@@ -16,14 +16,26 @@ package oktareceiver // import "github.com/observiq/bindplane-agent/receiver/okt
 
 import (
 	"errors"
+	"fmt"
 	"time"
 )
 
+// ISO 8601 Format
+var OktaTimeFormat = "2006-01-02T15:04:05Z"
+
 // Config defines the configuration for an Okta receiver
 type Config struct {
-	Domain       string        `mapstructure:"okta_domain"`
-	ApiToken     string        `mapstructure:"api_token"`
+	// Domain Okta Domain (ex: observiq.okta.com)
+	Domain string `mapstructure:"okta_domain"`
+
+	// ApiToken Okta Api Token
+	ApiToken string `mapstructure:"api_token"`
+
+	// PollInterval The interval at which the Okta API is scanned for Logs
 	PollInterval time.Duration `mapstructure:"poll_interval"`
+
+	// StartTime UTC Timestamp following format specified in OktaTimeFormat
+	StartTime string `mapstructure:"start_time"`
 }
 
 var (
@@ -39,6 +51,34 @@ func (c *Config) Validate() error {
 
 	if c.ApiToken == "" {
 		return errNoApiToken
+	}
+
+	err := validateStartTime(c.StartTime)
+	if err != nil {
+		return fmt.Errorf("start_time is invalid: %w", err)
+	}
+
+	return nil
+}
+
+// validateStartTime validates the passed in timestamp string
+// must be within the past 180 days and not in the future
+func validateStartTime(startTime string) error {
+	if startTime == "" {
+		return nil
+	}
+
+	parsedTime, err := time.Parse(OktaTimeFormat, startTime)
+	if err != nil {
+		return errors.New("invalid timestamp, must be in the format YYYY-MM-DDTHH:MM:SS")
+	}
+
+	now := time.Now()
+	time180DaysAgo := now.AddDate(0, 0, -180)
+
+	// Check if the time is in the valid range the past 180 days and before now
+	if parsedTime.Before(time180DaysAgo) || parsedTime.After(now) {
+		return errors.New("invalid timestamp, must be within the past 180 days and not in the future")
 	}
 
 	return nil

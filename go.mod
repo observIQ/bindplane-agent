@@ -342,6 +342,7 @@ require (
 	github.com/observiq/bindplane-agent/counter v1.59.0 // indirect
 	github.com/observiq/bindplane-agent/expr v1.59.0 // indirect
 	github.com/observiq/bindplane-agent/internal/rehydration v1.59.0 // indirect
+	github.com/okta/okta-sdk-golang/v2 v2.20.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlemanagedprometheusexporter v0.107.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/extension/ackextension v0.107.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/extension/sumologicextension v0.107.0 // indirect
