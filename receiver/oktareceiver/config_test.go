@@ -16,6 +16,7 @@ package oktareceiver
 
 import (
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/component"
@@ -35,6 +36,22 @@ func TestValidate(t *testing.T) {
 			},
 		},
 		{
+			desc: "pass with poll interval",
+			config: Config{
+				Domain:       "oktadomain.com",
+				ApiToken:     "dummyApiToken",
+				PollInterval: time.Second,
+			},
+		},
+		{
+			desc: "pass with poll interval zero value",
+			config: Config{
+				Domain:       "oktadomain.com",
+				ApiToken:     "dummyApiToken",
+				PollInterval: 0,
+			},
+		},
+		{
 			desc:        "fail no domain",
 			expectedErr: errNoDomain,
 			config: Config{
@@ -46,6 +63,16 @@ func TestValidate(t *testing.T) {
 			expectedErr: errNoApiToken,
 			config: Config{
 				Domain: "oktadomain.com",
+			},
+		},
+
+		{
+			desc:        "fail invalid poll interval",
+			expectedErr: errInvalidPollInterval,
+			config: Config{
+				Domain:       "oktadomain.com",
+				ApiToken:     "dummyApiToken",
+				PollInterval: 500 * time.Millisecond,
 			},
 		},
 	}

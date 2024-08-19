@@ -20,8 +20,12 @@ import (
 	"time"
 )
 
-// ISO 8601 Format
-var OktaTimeFormat = "2006-01-02T15:04:05Z"
+var (
+	defaultPollInterval = time.Minute
+
+	// ISO 8601 Format
+	OktaTimeFormat = "2006-01-02T15:04:05Z"
+)
 
 // Config defines the configuration for an Okta receiver
 type Config struct {
@@ -39,18 +43,24 @@ type Config struct {
 }
 
 var (
-	errNoDomain   = errors.New("a domain must be specified")
-	errNoApiToken = errors.New("an api token must be specified")
+	errNoDomain            = errors.New("a domain must be specified")
+	errNoApiToken          = errors.New("an api token must be specified")
+	errInvalidPollInterval = errors.New("poll interval is incorrect, it must be a duration greater than one second")
 )
 
 // Validate ensures an Okta receiver config is correct
 func (c *Config) Validate() error {
+	fmt.Println("Poll interval:", c.PollInterval)
 	if c.Domain == "" {
 		return errNoDomain
 	}
 
 	if c.ApiToken == "" {
 		return errNoApiToken
+	}
+
+	if c.PollInterval != 0 && c.PollInterval < time.Second {
+		return errInvalidPollInterval
 	}
 
 	err := validateStartTime(c.StartTime)

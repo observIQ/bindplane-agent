@@ -17,7 +17,6 @@ package oktareceiver
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/consumer"
@@ -51,7 +50,7 @@ func createLogsReceiver(
 
 func createDefaultConfig() component.Config {
 	c := &Config{
-		PollInterval: time.Minute,
+		PollInterval: defaultPollInterval,
 	}
 	return c
 }
