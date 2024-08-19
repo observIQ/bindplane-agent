@@ -56,7 +56,7 @@ type Config struct {
 	// Updatable fields
 	Labels                      *string           `yaml:"labels,omitempty"`
 	AgentName                   *string           `yaml:"agent_name,omitempty"`
-	MeasurementsInterval        *time.Duration    `yaml:"measurements_interval,omitempty"`
+	MeasurementsInterval        time.Duration     `yaml:"measurements_interval,omitempty"`
 	ExtraMeasurementsAttributes map[string]string `yaml:"extra_measurements_interval,omitempty"`
 }
 
@@ -106,17 +106,6 @@ func (c Config) ToTLS() (*tls.Config, error) {
 	}
 
 	return tlsConfig, nil
-}
-
-// MeasurementsIntervalOrDefault returns the measurements interval that should be used, or
-// the default interval if BindPlane has not configured one.
-func (c Config) MeasurementsIntervalOrDefault() time.Duration {
-	if c.MeasurementsInterval == nil {
-		// default interval is 10 seconds
-		return 10 * time.Second
-	}
-
-	return *c.MeasurementsInterval
 }
 
 // ParseConfig given a configuration file location will parse the config

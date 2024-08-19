@@ -160,7 +160,7 @@ func NewClient(args *NewClientArgs) (opamp.Client, error) {
 		clientLogger,
 		args.MeasurementsReporter,
 		observiqClient.opampClient,
-		args.Config.MeasurementsIntervalOrDefault(),
+		args.Config.MeasurementsInterval,
 		args.Config.ExtraMeasurementsAttributes,
 	)
 

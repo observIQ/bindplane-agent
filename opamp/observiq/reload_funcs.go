@@ -103,7 +103,7 @@ func managerReload(client *Client, managerConfigPath string) opamp.ReloadFunc {
 		}
 
 		// Set new measurements interval
-		client.measurementsSender.SetInterval(client.currentConfig.MeasurementsIntervalOrDefault())
+		client.measurementsSender.SetInterval(client.currentConfig.MeasurementsInterval)
 
 		return true, nil
 	}
