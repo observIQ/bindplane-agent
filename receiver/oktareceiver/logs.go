@@ -37,7 +37,6 @@ type oktaLogsReceiver struct {
 	wg            *sync.WaitGroup
 	logger        *zap.Logger
 	doneChan      chan bool
-	pollInterval  time.Duration
 	nextStartTime time.Time
 }
 
@@ -49,7 +48,6 @@ func newOktaLogsReceiver(cfg *Config, logger *zap.Logger, consumer consumer.Logs
 		wg:            &sync.WaitGroup{},
 		logger:        logger,
 		doneChan:      make(chan bool),
-		pollInterval:  cfg.PollInterval,
 		nextStartTime: time.Now().Add(-cfg.PollInterval),
 	}, nil
 }
@@ -63,10 +61,18 @@ func (r *oktaLogsReceiver) Start(ctx context.Context, host component.Host) error
 
 func (r *oktaLogsReceiver) startPolling(ctx context.Context) {
 	defer r.wg.Done()
-
-	fmt.Println(r.cfg.PollInterval)
 	t := time.NewTicker(r.cfg.PollInterval)
-	r.poll(ctx)
+
+	oktaCtx, client, err := okta.NewClient(
+		context.TODO(),
+		okta.WithOrgUrl("https://"+r.cfg.Domain),
+		okta.WithToken(r.cfg.ApiToken),
+	)
+	if err != nil {
+		panic(err)
+	}
+
+	r.poll(ctx, client, oktaCtx)
 	for {
 		select {
 		case <-ctx.Done():
@@ -74,7 +80,7 @@ func (r *oktaLogsReceiver) startPolling(ctx context.Context) {
 		case <-r.doneChan:
 			return
 		case <-t.C:
-			err := r.poll(ctx)
+			err := r.poll(ctx, client, oktaCtx)
 			if err != nil {
 				r.logger.Error("there was an error during the poll", zap.Error(err))
 			}
@@ -82,25 +88,27 @@ func (r *oktaLogsReceiver) startPolling(ctx context.Context) {
 	}
 }
 
-func (r *oktaLogsReceiver) poll(ctx context.Context) error {
+func (r *oktaLogsReceiver) poll(ctx context.Context, client *okta.Client, oktaCtx context.Context) error {
 	startTime := r.nextStartTime
 	endTime := time.Now()
-	err := r.pollForLogs(ctx, startTime, endTime)
+	err := r.pollForLogs(ctx, client, oktaCtx, startTime, endTime)
 	r.nextStartTime = endTime
 	return err
 }
 
-func (r *oktaLogsReceiver) pollForLogs(ctx context.Context, startTime, endTime time.Time) error {
+func (r *oktaLogsReceiver) pollForLogs(ctx context.Context, client *okta.Client, oktaCtx context.Context, startTime, endTime time.Time) error {
 	select {
-	// if done, we want to stop processing paginated stream of events
 	case _, ok := <-r.doneChan:
 		if !ok {
 			return nil
 		}
 	default:
-		logEvents := r.requestLogs()
+		fmt.Println("polling for logs: default")
+		logEvents := r.requestLogs(client, oktaCtx, startTime, endTime)
+		fmt.Println("received", len(logEvents), "logs")
 		observedTime := pcommon.NewTimestampFromTime(time.Now())
 		logs := r.processLogEvents(observedTime, logEvents)
+		fmt.Println("logRecordCount:", logs.LogRecordCount())
 		if logs.LogRecordCount() > 0 {
 			if err := r.consumer.ConsumeLogs(ctx, logs); err != nil {
 				r.logger.Error("unable to consume logs", zap.Error(err))
@@ -111,19 +119,24 @@ func (r *oktaLogsReceiver) pollForLogs(ctx context.Context, startTime, endTime t
 	return nil
 }
 
-func (r *oktaLogsReceiver) requestLogs() []*okta.LogEvent {
-	ctx, client, err := okta.NewClient(
-		context.TODO(),
-		okta.WithOrgUrl("https://"+r.cfg.Domain),
-		okta.WithToken(r.cfg.ApiToken),
-	)
+func (r *oktaLogsReceiver) requestLogs(client *okta.Client, ctx context.Context, startTime, endTime time.Time) []*okta.LogEvent {
+	qp := &query.Params{}
+
+	startTimeBytes, err := startTime.MarshalText()
 	if err != nil {
 		panic(err)
 	}
 
-	qp := &query.Params{}
-	qp.Limit = 1
+	endTimeBytes, err := endTime.MarshalText()
+	if err != nil {
+		panic(err)
+	}
+
+	qp.Since = string(startTimeBytes)
+	qp.Until = string(endTimeBytes)
+
 	logs, resp, err := client.LogEvent.GetLogs(ctx, qp)
+
 	if resp.StatusCode != 200 {
 		r.logger.Error("okta sdk GetLogs returned non-200 statuscode: " + strconv.Itoa(resp.StatusCode))
 	}
