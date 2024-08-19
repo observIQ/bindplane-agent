@@ -116,7 +116,7 @@ misspell-fix:
 
 .PHONY: test
 test:
-	$(MAKE) for-all CMD="go test -race ./..."
+	$(MAKE) for-all CMD="go test -ldflags="-extldflags='-ld_classic'" -race ./..."
 
 .PHONY: test-with-cover
 test-with-cover:

@@ -343,8 +343,10 @@ func (c *Client) onMessageFuncHandler(ctx context.Context, msg *types.MessageDat
 	}
 	if msg.CustomCapabilities != nil {
 		if slices.Contains(msg.CustomCapabilities.Capabilities, measurements.ReportMeasurementsV1Capability) {
+			c.logger.Info("Server supports custom message measurements, starting sender.")
 			c.measurementsSender.Start()
 		} else {
+			c.logger.Info("Server does not support custom message measurements, stopping sender.")
 			c.measurementsSender.Stop()
 		}
 	}
