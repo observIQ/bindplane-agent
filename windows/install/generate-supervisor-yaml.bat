@@ -21,7 +21,7 @@ if "%secret_key%"=="" (
     exit /b 0
 )
 
-set "supervisorFile=%install_dir%supervisor-config.yaml"
+set "supervisorFile=%install_dir%supervisor.yaml"
 set "agentBinary=%install_dir%observiq-otel-collector.exe"
 
 echo Writing manager yaml
@@ -45,7 +45,7 @@ set "nonIdentifyingAttributesField=    non_identifying_attributes:"
 set "serviceLabelsField=      service.labels: "%labels%""
 
 set "storageField=storage:"
-set "directoryField=  directory: '%install_dir%storage'"
+set "directoryField=  directory: '%install_dir%supervisor_storage"
 
 echo %serverField% >"%supervisorFile%"
 echo %endpointField% >>"%supervisorFile%"

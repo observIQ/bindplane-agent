@@ -15,7 +15,7 @@
         "start": "delayed",
         "display-name": "observIQ Distro for OpenTelemetry Collector",
         "description": "observIQ's distribution of the OpenTelemetry collector.",
-        "arguments": "--config &quot;[INSTALLDIR]supervisor-config.yaml&quot;"
+        "arguments": "--config &quot;[INSTALLDIR]supervisor.yaml&quot;"
       }
     },
     {
@@ -43,7 +43,7 @@
       "name": "plugins"
     },
     {
-      "name": "storage"
+      "name": "supervisor_storage"
     },
     {
       "name": "install"

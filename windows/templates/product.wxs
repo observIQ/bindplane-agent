@@ -204,10 +204,17 @@
 
       <CustomAction Id="CustomExecRemoveSupervisorYaml_set"
               Property="CustomExecRemoveSupervisorYaml"
-              Value="&quot;[CMDEXE]&quot; /C del &quot;[INSTALLDIR]supervisor-config.yaml&quot;"
+              Value="&quot;[CMDEXE]&quot; /C del &quot;[INSTALLDIR]supervisor.yaml&quot;"
               Execute="immediate"/>
 
       <CustomAction Id="CustomExecRemoveSupervisorYaml" BinaryKey="WixCA" DllEntry="WixQuietExec" Execute="deferred" Impersonate="no" Return="ignore" />
+
+      <CustomAction Id="CustomExecRemoveSupervisorStorage_set"
+            Property="CustomExecRemoveSupervisorStorage"
+            Value="&quot;[CMDEXE]&quot; \C del &quot;[INSTALLDIR]supervisor_storage&quot;"
+            Execute="immediate"/>
+
+      <CustomAction Id="CustomExecRemoveSupervisorStorage" BinaryKey="WixCA" DllEntry="WixQuietExec" Execute="deferred" Impersonate="no" Return="ignore" />
 
       <InstallExecuteSequence>
          {{range $i, $h := .Hooks}}
@@ -239,6 +246,14 @@
             <![CDATA[(VersionNT >= 603 OR VersionNT64 >= 603) and REMOVE="ALL" and not UPGRADINGPRODUCTCODE]]>
         </Custom>
         <Custom Action="CustomExecRemoveSupervisorYaml" Before="RemoveFiles" >
+            <![CDATA[(VersionNT >= 603 OR VersionNT64 >= 603) and REMOVE="ALL" and not UPGRADINGPRODUCTCODE]]>
+        </Custom>
+
+        <!-- Schedule the action that removes the supervisor_storage dir on final uninstall -->
+        <Custom Action="CustomExecRemoveSupervisorStorage_set" After="InstallInitialize" >
+            <![CDATA[(VersionNT >= 603 OR VersionNT64 >= 603) and REMOVE="ALL" and not UPGRADINGPRODUCTCODE]]>
+        </Custom>
+        <Custom Action="CustomExecRemoveSupervisorStorage" Before="RemoveFiles" >
             <![CDATA[(VersionNT >= 603 OR VersionNT64 >= 603) and REMOVE="ALL" and not UPGRADINGPRODUCTCODE]]>
         </Custom>
       </InstallExecuteSequence>
