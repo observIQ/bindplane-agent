@@ -32,7 +32,7 @@ type Config struct {
 	// Measurements reporting is disabled if this duration is 0.
 	MeasurementsInterval time.Duration `mapstructure:"measurements_interval"`
 	// ExtraMeasurementsAttributes are a map of key-value pairs to add to all reported measurements.
-	ExtraMeasurementsAttributes map[string]string `yaml:"extra_measurements_interval,omitempty"`
+	ExtraMeasurementsAttributes map[string]string `yaml:"extra_measurements_attributes,omitempty"`
 }
 
 // Validate returns an error if the config is invalid

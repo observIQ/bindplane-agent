@@ -28,6 +28,8 @@ import (
 	"go.uber.org/zap"
 )
 
+const maxSendRetries = 3
+
 // MeasurementsReporter represents an object that reports throughput measurements as OTLP.
 type MeasurementsReporter interface {
 	OTLPMeasurements(extraAttributes map[string]string) pmetric.Metrics
@@ -147,11 +149,17 @@ func (m *measurementsSender) loop() {
 				Data:       encoded,
 			}
 
-			for {
+			for i := 0; i < maxSendRetries; i++ {
 				sendingChannel, err := m.opampClient.SendCustomMessage(cm)
 				switch {
 				case err == nil: // OK
 				case errors.Is(err, types.ErrCustomMessagePending):
+					if i == maxSendRetries-1 {
+						// Bail out early, since we aren't going to try to send again
+						m.logger.Warn("Measurements were blocked by other custom messages, skipping...", zap.Int("retries", maxSendRetries))
+						break
+					}
+
 					select {
 					case <-sendingChannel:
 						continue
