@@ -227,7 +227,7 @@ func TestResettableThroughputMeasurementsRegistry(t *testing.T) {
 
 		reg.RegisterThroughputMeasurements("throughputmeasurement/1", tmp)
 
-		actualMetrics := reg.OTLPMeasurements()
+		actualMetrics := reg.OTLPMeasurements(nil)
 
 		expectedMetrics, err := golden.ReadMetrics(filepath.Join("testdata", "expected", "throughput_measurements_no_count.yaml"))
 		require.NoError(t, err)
@@ -259,7 +259,7 @@ func TestResettableThroughputMeasurementsRegistry(t *testing.T) {
 
 		reg.RegisterThroughputMeasurements("throughputmeasurement/1", tmp)
 
-		actualMetrics := reg.OTLPMeasurements()
+		actualMetrics := reg.OTLPMeasurements(nil)
 
 		expectedMetrics, err := golden.ReadMetrics(filepath.Join("testdata", "expected", "throughput_measurements_count.yaml"))
 		require.NoError(t, err)
@@ -293,7 +293,7 @@ func TestResettableThroughputMeasurementsRegistry(t *testing.T) {
 
 		reg.RegisterThroughputMeasurements("throughputmeasurement/1", tmp)
 
-		actualMetrics := reg.OTLPMeasurements()
+		actualMetrics := reg.OTLPMeasurements(nil)
 
 		expectedMetrics, err := golden.ReadMetrics(filepath.Join("testdata", "expected", "throughput_measurements_extra_attrs.yaml"))
 		require.NoError(t, err)
@@ -327,6 +327,6 @@ func TestResettableThroughputMeasurementsRegistry(t *testing.T) {
 
 		reg.Reset()
 
-		require.NoError(t, pmetrictest.CompareMetrics(pmetric.NewMetrics(), reg.OTLPMeasurements()))
+		require.NoError(t, pmetrictest.CompareMetrics(pmetric.NewMetrics(), reg.OTLPMeasurements(nil)))
 	})
 }

@@ -156,7 +156,13 @@ func NewClient(args *NewClientArgs) (opamp.Client, error) {
 	}
 
 	// Create measurements sender
-	observiqClient.measurementsSender = newMeasurementsSender(clientLogger, args.MeasurementsReporter, observiqClient.opampClient, args.Config.MeasurementsIntervalOrDefault())
+	observiqClient.measurementsSender = newMeasurementsSender(
+		clientLogger,
+		args.MeasurementsReporter,
+		observiqClient.opampClient,
+		args.Config.MeasurementsIntervalOrDefault(),
+		args.Config.ExtraMeasurementsAttributes,
+	)
 
 	return observiqClient, nil
 }

@@ -30,7 +30,7 @@ const (
 )
 
 // OTLPThroughputMeasurements converts a single ThroughputMeasurements to a pmetric.MetricSlice
-func OTLPThroughputMeasurements(tm *ThroughputMeasurements, includeCountMetrics bool) pmetric.MetricSlice {
+func OTLPThroughputMeasurements(tm *ThroughputMeasurements, includeCountMetrics bool, extraAttributes map[string]string) pmetric.MetricSlice {
 	s := pmetric.NewMetricSlice()
 
 	attrs := pcommon.NewMap()
@@ -44,6 +44,10 @@ func OTLPThroughputMeasurements(tm *ThroughputMeasurements, includeCountMetrics 
 			attrs.PutStr(string(kv.Key), kv.Value.AsString())
 		default: // Do nothing for non-string attributes; Attributes for throughput metrics can only be strings for now.
 		}
+	}
+
+	for k, v := range extraAttributes {
+		attrs.PutStr(k, v)
 	}
 
 	ts := pcommon.NewTimestampFromTime(time.Now())

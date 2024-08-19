@@ -238,14 +238,14 @@ func (ctmr *ResettableThroughputMeasurementsRegistry) Reset() {
 }
 
 // OTLPMeasurements returns all the measurements in this registry as OTLP metrics.
-func (ctmr *ResettableThroughputMeasurementsRegistry) OTLPMeasurements() pmetric.Metrics {
+func (ctmr *ResettableThroughputMeasurementsRegistry) OTLPMeasurements(extraAttributes map[string]string) pmetric.Metrics {
 	m := pmetric.NewMetrics()
 	rm := m.ResourceMetrics().AppendEmpty()
 	sm := rm.ScopeMetrics().AppendEmpty()
 
 	ctmr.measurements.Range(func(_, value any) bool {
 		tm := value.(*ThroughputMeasurements)
-		OTLPThroughputMeasurements(tm, ctmr.emitCountMetrics).MoveAndAppendTo(sm.Metrics())
+		OTLPThroughputMeasurements(tm, ctmr.emitCountMetrics, extraAttributes).MoveAndAppendTo(sm.Metrics())
 		return true
 	})
 

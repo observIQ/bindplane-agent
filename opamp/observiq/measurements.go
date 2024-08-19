@@ -30,15 +30,16 @@ import (
 
 // MeasurementsReporter represents an object that reports throughput measurements as OTLP.
 type MeasurementsReporter interface {
-	OTLPMeasurements() pmetric.Metrics
+	OTLPMeasurements(extraAttributes map[string]string) pmetric.Metrics
 }
 
 // measurementsSender is a struct that handles periodically sending measurements via a custom message to an OpAMP endpoint.
 type measurementsSender struct {
-	logger      *zap.Logger
-	reporter    MeasurementsReporter
-	opampClient client.OpAMPClient
-	interval    time.Duration
+	logger          *zap.Logger
+	reporter        MeasurementsReporter
+	opampClient     client.OpAMPClient
+	interval        time.Duration
+	extraAttributes map[string]string
 
 	changeIntervalChan chan time.Duration
 
@@ -48,12 +49,13 @@ type measurementsSender struct {
 	wg        *sync.WaitGroup
 }
 
-func newMeasurementsSender(l *zap.Logger, reporter MeasurementsReporter, opampClient client.OpAMPClient, interval time.Duration) *measurementsSender {
+func newMeasurementsSender(l *zap.Logger, reporter MeasurementsReporter, opampClient client.OpAMPClient, interval time.Duration, extraAttributes map[string]string) *measurementsSender {
 	return &measurementsSender{
-		logger:      l,
-		reporter:    reporter,
-		opampClient: opampClient,
-		interval:    interval,
+		logger:          l,
+		reporter:        reporter,
+		opampClient:     opampClient,
+		interval:        interval,
+		extraAttributes: extraAttributes,
 
 		changeIntervalChan: make(chan time.Duration, 1),
 		mux:                &sync.Mutex{},
@@ -123,7 +125,7 @@ func (m *measurementsSender) loop() {
 				continue
 			}
 
-			metrics := m.reporter.OTLPMeasurements()
+			metrics := m.reporter.OTLPMeasurements(m.extraAttributes)
 			if metrics.DataPointCount() == 0 {
 				// don't report empty payloads
 				continue

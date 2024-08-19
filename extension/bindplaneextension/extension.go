@@ -119,7 +119,7 @@ func (b *bindplaneExtension) reportMetricsLoop() {
 }
 
 func (b *bindplaneExtension) reportMetrics() error {
-	m := b.ctmr.OTLPMeasurements()
+	m := b.ctmr.OTLPMeasurements(b.cfg.ExtraMeasurementsAttributes)
 
 	// Send metrics as snappy-encoded otlp proto
 	marshaller := pmetric.ProtoMarshaler{}
