@@ -43,7 +43,8 @@ type measurementsSender struct {
 	interval        time.Duration
 	extraAttributes map[string]string
 
-	changeIntervalChan chan time.Duration
+	changeIntervalChan   chan time.Duration
+	changeAttributesChan chan map[string]string
 
 	mux       *sync.Mutex
 	isRunning bool
@@ -59,11 +60,12 @@ func newMeasurementsSender(l *zap.Logger, reporter MeasurementsReporter, opampCl
 		interval:        interval,
 		extraAttributes: extraAttributes,
 
-		changeIntervalChan: make(chan time.Duration, 1),
-		mux:                &sync.Mutex{},
-		isRunning:          false,
-		done:               make(chan struct{}),
-		wg:                 &sync.WaitGroup{},
+		changeIntervalChan:   make(chan time.Duration, 1),
+		changeAttributesChan: make(chan map[string]string, 1),
+		mux:                  &sync.Mutex{},
+		isRunning:            false,
+		done:                 make(chan struct{}),
+		wg:                   &sync.WaitGroup{},
 	}
 }
 
@@ -89,10 +91,16 @@ func (m *measurementsSender) Start() {
 func (m measurementsSender) SetInterval(d time.Duration) {
 	select {
 	case m.changeIntervalChan <- d:
-	default:
-		m.logger.Warn("Change interval chan was full, dropping change in reporting interval", zap.Duration("interval", d))
+	case <-m.done:
 	}
 
+}
+
+func (m measurementsSender) SetExtraAttributes(extraAttributes map[string]string) {
+	select {
+	case m.changeAttributesChan <- extraAttributes:
+	case <-m.done:
+	}
 }
 
 func (m *measurementsSender) Stop() {
@@ -119,6 +127,8 @@ func (m *measurementsSender) loop() {
 		case newInterval := <-m.changeIntervalChan:
 			m.interval = newInterval
 			t.SetInterval(newInterval)
+		case newAttributes := <-m.changeAttributesChan:
+			m.extraAttributes = newAttributes
 		case <-m.done:
 			return
 		case <-t.Chan():

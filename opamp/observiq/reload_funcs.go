@@ -103,8 +103,9 @@ func managerReload(client *Client, managerConfigPath string) opamp.ReloadFunc {
 			return false, fmt.Errorf("failed to set agent description: %w ", err)
 		}
 
-		// Set new measurements interval
+		// Set new measurements interval and attributes
 		client.measurementsSender.SetInterval(client.currentConfig.MeasurementsInterval)
+		client.measurementsSender.SetExtraAttributes(client.currentConfig.ExtraMeasurementsAttributes)
 
 		return true, nil
 	}
