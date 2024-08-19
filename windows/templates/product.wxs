@@ -211,7 +211,7 @@
 
       <CustomAction Id="CustomExecRemoveSupervisorStorage_set"
             Property="CustomExecRemoveSupervisorStorage"
-            Value="&quot;[CMDEXE]&quot; \C del &quot;[INSTALLDIR]supervisor_storage&quot;"
+            Value="&quot;[CMDEXE]&quot; \C del -r &quot;[INSTALLDIR]supervisor_storage&quot;"
             Execute="immediate"/>
 
       <CustomAction Id="CustomExecRemoveSupervisorStorage" BinaryKey="WixCA" DllEntry="WixQuietExec" Execute="deferred" Impersonate="no" Return="ignore" />
