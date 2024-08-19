@@ -39,6 +39,9 @@
       "name": "plugins"
     },
     {
+      "name": "storage"
+    },
+    {
       "name": "supervisor_storage"
     },
     {

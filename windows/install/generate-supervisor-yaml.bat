@@ -45,7 +45,7 @@ set "nonIdentifyingAttributesField=    non_identifying_attributes:"
 set "serviceLabelsField=      service.labels: "%labels%""
 
 set "storageField=storage:"
-set "directoryField=  directory: '%install_dir%supervisor_storage"
+set "directoryField=  directory: '%install_dir%supervisor_storage'"
 
 echo %serverField% >"%supervisorFile%"
 echo %endpointField% >>"%supervisorFile%"
