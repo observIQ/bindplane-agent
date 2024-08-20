@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 # Check if we are cleaning up
 if [ "$#" -eq 1 ] && [ "$1" == "--cleanup" ]; then
     find manifests -type f -name "manifest.yaml.bak" -exec rm {} \;
@@ -38,6 +37,7 @@ find manifests -type f -name "manifest.yaml" | while read -r file; do
     cp "$file" "${file}.bak"
 
     # Update the dist.otelcol_version value using yq
+    # Easy install using `brew isntall yq`
     yq eval -i ".dist.otelcol_version = \"$new_version_opentelemetry_collector\"" "$file"
 
     # Use sed to update the version for matching lines
