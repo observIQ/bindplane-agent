@@ -34,12 +34,17 @@ import (
 
 type oktaLogsReceiver struct {
 	cfg       Config
+	client    httpClient
 	consumer  consumer.Logs
 	doneChan  chan bool
 	logger    *zap.Logger
 	nextUrl   string
 	startTime time.Time
 	wg        *sync.WaitGroup
+}
+
+type httpClient interface {
+	Do(req *http.Request) (*http.Response, error)
 }
 
 // newOktaLogsReceiver returns a newly configured oktaLogsReceiver
@@ -57,6 +62,7 @@ func newOktaLogsReceiver(cfg *Config, logger *zap.Logger, consumer consumer.Logs
 
 	return &oktaLogsReceiver{
 		cfg:       *cfg,
+		client:    http.DefaultClient,
 		consumer:  consumer,
 		doneChan:  make(chan bool),
 		logger:    logger,
@@ -101,7 +107,7 @@ func (r *oktaLogsReceiver) poll(ctx context.Context) error {
 			return nil
 		}
 	default:
-		logEvents := r.requestLogs()
+		logEvents := r.getLogs()
 		fmt.Println("\033[32m"+time.Now().Format("2006-01-02 15:04:05")+":", "Received", len(logEvents), "logs"+"\033[0m")
 		observedTime := pcommon.NewTimestampFromTime(time.Now())
 		logs := r.processLogEvents(observedTime, logEvents)
@@ -115,7 +121,7 @@ func (r *oktaLogsReceiver) poll(ctx context.Context) error {
 	return nil
 }
 
-func (r *oktaLogsReceiver) requestLogs() []*okta.LogEvent {
+func (r *oktaLogsReceiver) getLogs() []*okta.LogEvent {
 	var req *http.Request
 	var err error
 	var logs []*okta.LogEvent
@@ -142,7 +148,7 @@ func (r *oktaLogsReceiver) requestLogs() []*okta.LogEvent {
 	}
 
 	req.Header.Add("Authorization", "SSWS "+r.cfg.ApiToken)
-	res, err := http.DefaultClient.Do(req)
+	res, err := r.client.Do(req)
 	if err != nil {
 		r.logger.Warn("error performing okta api request", zap.Error(err))
 		return logs
@@ -229,6 +235,7 @@ func (r *oktaLogsReceiver) setNextLink(res *http.Response) {
 		if strings.TrimSpace(parts[1]) == `rel="next"` {
 			// Extract and return the URL
 			r.nextUrl = strings.Trim(parts[0], "<>")
+			return
 		}
 	}
 	r.logger.Warn("unable to get next link")

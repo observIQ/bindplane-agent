@@ -16,15 +16,30 @@ package oktareceiver
 
 import (
 	"context"
+	"io"
+	"log"
+	"net/http"
+	"os"
+	"strings"
 	"testing"
 	"time"
 
+	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest/plogtest"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/component/componenttest"
 	"go.opentelemetry.io/collector/consumer"
 	"go.opentelemetry.io/collector/consumer/consumertest"
+	"go.opentelemetry.io/collector/pdata/plog"
 	"go.uber.org/zap"
 )
+
+type mockHttpClient struct {
+	mockDo func(req *http.Request) (*http.Response, error)
+}
+
+func (m *mockHttpClient) Do(req *http.Request) (*http.Response, error) {
+	return m.mockDo(req)
+}
 
 func TestStartShutdown(t *testing.T) {
 	cfg := createDefaultConfig().(*Config)
@@ -37,6 +52,19 @@ func TestStartShutdown(t *testing.T) {
 
 	err = recv.Shutdown(context.Background())
 	require.NoError(t, err)
+}
+
+func TestStartContextDone(t *testing.T) {
+	cfg := createDefaultConfig().(*Config)
+
+	recv, err := newOktaLogsReceiver(cfg, zap.NewNop(), consumertest.NewNop())
+	require.NoError(t, err)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	err = recv.Start(ctx, componenttest.NewNopHost())
+	require.NoError(t, err)
+
+	cancel()
 }
 
 func TestStartTimeParse(t *testing.T) {
@@ -58,13 +86,52 @@ func TestStartTimeParseError(t *testing.T) {
 
 func TestShutdownNoServer(t *testing.T) {
 	// test that shutdown without a start does not error or panic
-	recv := newReceiver(t, &Config{
-		Domain:       "example.okta.com",
-		ApiToken:     "12345",
-		PollInterval: time.Minute,
-	}, consumertest.NewNop())
-
+	recv := newReceiver(t, createDefaultConfig().(*Config), consumertest.NewNop())
 	require.NoError(t, recv.Shutdown(context.Background()))
+}
+
+func TestPoll(t *testing.T) {
+	cfg := createDefaultConfig().(*Config)
+	mockDomain := "observiq.okta.com"
+	cfg.Domain = mockDomain
+
+	sink := &consumertest.LogsSink{}
+	recv, err := newOktaLogsReceiver(cfg, zap.NewNop(), sink)
+	require.NoError(t, err)
+
+	recv.client = &mockHttpClient{
+		mockDo: func(req *http.Request) (*http.Response, error) {
+			require.Contains(t, req.URL.String(), "https://observiq.okta.com/api/v1/logs?since")
+			return mockApiResponse200(), nil
+		},
+	}
+
+	err = recv.poll(context.Background())
+	require.NoError(t, err)
+
+	logs := sink.AllLogs()
+
+	log := logs[0]
+	oktaDomain, exist := log.ResourceLogs().At(0).Resource().Attributes().Get("okta.domain")
+	require.True(t, exist)
+	require.Equal(t, mockDomain, oktaDomain.Str())
+	expected, err := jsonFileAsPlogs("testdata/plog.json")
+	require.NoError(t, err)
+	require.NoError(t, plogtest.CompareLogs(expected, log, plogtest.IgnoreObservedTimestamp()))
+
+	require.Equal(t, "https://observiq.okta.com/api/v1/logs?limit=20&after=1627500044869_1", recv.nextUrl)
+
+	recv.client = &mockHttpClient{
+		mockDo: func(req *http.Request) (*http.Response, error) {
+			require.Equal(t, "https://observiq.okta.com/api/v1/logs?limit=20&after=1627500044869_1", req.URL.String())
+			return mockApiResponse200(), nil
+		},
+	}
+	err = recv.poll(context.Background())
+	require.NoError(t, err)
+
+	err = recv.Shutdown(context.Background())
+	require.NoError(t, err)
 }
 
 func newReceiver(t *testing.T, cfg *Config, c consumer.Logs) *oktaLogsReceiver {
@@ -72,3 +139,36 @@ func newReceiver(t *testing.T, cfg *Config, c consumer.Logs) *oktaLogsReceiver {
 	require.NoError(t, err)
 	return r
 }
+
+func jsonFileAsPlogs(filepath string) (plog.Logs, error) {
+	expectedFileBytes, err := os.ReadFile(filepath)
+	if err != nil {
+		return plog.Logs{}, nil
+	}
+	unmarshaler := &plog.JSONUnmarshaler{}
+	return unmarshaler.UnmarshalLogs(expectedFileBytes)
+}
+
+func mockApiResponse200() *http.Response {
+	mockRes := &http.Response{}
+	mockRes.StatusCode = http.StatusOK
+	mockRes.Header = http.Header{}
+	mockRes.Header.Add("Link", mockLinkHeaderNext)
+	mockRes.Header.Add("Link", mockLinkHeaderSelf)
+	mockRes.Body = io.NopCloser(strings.NewReader(jsonFileAsString("testdata/oktaResponse.json")))
+	return mockRes
+}
+
+func jsonFileAsString(filePath string) string {
+	jsonBytes, err := os.ReadFile(filePath)
+	if err != nil {
+		log.Fatalf("Failed to read JSON file: %s", err)
+		return ""
+	}
+	return string(jsonBytes)
+}
+
+var (
+	mockLinkHeaderNext = `<https://observiq.okta.com/api/v1/logs?limit=20&after=1627500044869_1>; rel="next"`
+	mockLinkHeaderSelf = `<https://observiq.okta.com/api/v1/logs?limit=20>; rel="self"`
+)
