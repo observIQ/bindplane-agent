@@ -19,7 +19,6 @@ import (
 
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/confmap"
-	"go.opentelemetry.io/collector/confmap/converter/expandconverter"
 	"go.opentelemetry.io/collector/confmap/provider/envprovider"
 	"go.opentelemetry.io/collector/confmap/provider/fileprovider"
 	"go.opentelemetry.io/collector/confmap/provider/httpsprovider"
@@ -47,7 +46,8 @@ func NewSettings(configPaths []string, version string, loggingOpts []zap.Option,
 				yamlprovider.NewFactory(),
 				httpsprovider.NewFactory(),
 			},
-			ConverterFactories: []confmap.ConverterFactory{expandconverter.NewFactory()},
+			ConverterFactories: []confmap.ConverterFactory{},
+			DefaultScheme:      "env",
 		},
 	}
 
