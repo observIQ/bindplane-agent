@@ -823,6 +823,10 @@ replace github.com/observiq/bindplane-agent/internal/report => ./internal/report
 // Relevant issue https://github.com/mattn/go-ieproxy/issues/45
 replace github.com/mattn/go-ieproxy => github.com/mattn/go-ieproxy v0.0.1
 
+// TODO(dakota): This could be removed after https://github.com/mholt/archiver/pull/396 is merged.
+// This replace includes a resolution for https://github.com/advisories/GHSA-rhh4-rh7c-7r5v.
+replace github.com/mholt/archiver/v3 => github.com/anchore/archiver/v3 v3.5.2
+
 // Replaces below this are required by datadog exporter in v0.83.0 https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.83.0/exporter/datadogexporter/go.mod#L266-L275
 
 // openshift removed all tags from their repo, use the pseudoversion from the release-3.9 branch HEAD
