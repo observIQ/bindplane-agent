@@ -37,7 +37,7 @@ find manifests -type f -name "manifest.yaml" | while read -r file; do
     cp "$file" "${file}.bak"
 
     # Update the dist.otelcol_version value using yq
-    # Easy install using `brew isntall yq`
+    # Easy install using `brew install yq`
     yq eval -i ".dist.otelcol_version = \"$new_version_opentelemetry_collector\"" "$file"
 
     # Use sed to update the version for matching lines
