@@ -101,7 +101,6 @@ install-tools:
 	cd $(TOOLS_MOD_DIR) && go install github.com/uw-labs/lichen
 	cd $(TOOLS_MOD_DIR) && go install github.com/vektra/mockery/v2
 	cd $(TOOLS_MOD_DIR) && go install golang.org/x/tools/cmd/goimports
-	cd $(TOOLS_MOD_DIR) && go install github.com/goreleaser/goreleaser
 
 .PHONY: lint
 lint:
