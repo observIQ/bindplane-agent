@@ -15,6 +15,7 @@
 package oktareceiver
 
 import (
+	"errors"
 	"testing"
 	"time"
 
@@ -44,6 +45,23 @@ func TestValidate(t *testing.T) {
 			},
 		},
 		{
+			desc: "pass with start time",
+			config: Config{
+				Domain:    "oktadomain.com",
+				ApiToken:  "dummyApiToken",
+				StartTime: time.Now().Add(-time.Hour).Format(OktaTimeFormat),
+			},
+		},
+		{
+			desc: "pass with all fields",
+			config: Config{
+				Domain:       "oktadomain.com",
+				ApiToken:     "dummyApiToken",
+				PollInterval: time.Second,
+				StartTime:    time.Now().Add(-time.Hour).Format(OktaTimeFormat),
+			},
+		},
+		{
 			desc: "pass with poll interval zero value",
 			config: Config{
 				Domain:       "oktadomain.com",
@@ -59,13 +77,28 @@ func TestValidate(t *testing.T) {
 			},
 		},
 		{
+			desc:        "fail invalid domain https",
+			expectedErr: errInvalidDomain,
+			config: Config{
+				ApiToken: "dummyApiToken",
+				Domain:   "https://test.okta.com",
+			},
+		},
+		{
+			desc:        "fail invalid domain http",
+			expectedErr: errInvalidDomain,
+			config: Config{
+				ApiToken: "dummyApiToken",
+				Domain:   "http://test.okta.com",
+			},
+		},
+		{
 			desc:        "fail no api token",
 			expectedErr: errNoApiToken,
 			config: Config{
 				Domain: "oktadomain.com",
 			},
 		},
-
 		{
 			desc:        "fail invalid poll interval",
 			expectedErr: errInvalidPollInterval,
@@ -73,6 +106,33 @@ func TestValidate(t *testing.T) {
 				Domain:       "oktadomain.com",
 				ApiToken:     "dummyApiToken",
 				PollInterval: 500 * time.Millisecond,
+			},
+		},
+		{
+			desc:        "fail invalid start time format",
+			expectedErr: errors.New("invalid start_time: invalid timestamp: must be in the format YYYY-MM-DDTHH:MM:SS"),
+			config: Config{
+				Domain:    "oktadomain.com",
+				ApiToken:  "dummyApiToken",
+				StartTime: time.Now().UTC().Add(-time.Hour).Format(time.RFC1123),
+			},
+		},
+		{
+			desc:        "fail invalid start time future",
+			expectedErr: errors.New("invalid start_time: invalid timestamp: must be within the past 180 days and not in the future"),
+			config: Config{
+				Domain:    "oktadomain.com",
+				ApiToken:  "dummyApiToken",
+				StartTime: time.Now().UTC().Add(time.Hour).Format(OktaTimeFormat),
+			},
+		},
+		{
+			desc:        "fail invalid start time too old",
+			expectedErr: errors.New("invalid start_time: invalid timestamp: must be within the past 180 days and not in the future"),
+			config: Config{
+				Domain:    "oktadomain.com",
+				ApiToken:  "dummyApiToken",
+				StartTime: time.Now().UTC().AddDate(0, 0, -181).Format(OktaTimeFormat),
 			},
 		},
 	}

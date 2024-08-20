@@ -17,6 +17,7 @@ package oktareceiver // import "github.com/observiq/bindplane-agent/receiver/okt
 import (
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 )
 
@@ -29,30 +30,36 @@ var (
 
 // Config defines the configuration for an Okta receiver
 type Config struct {
-	// Domain Okta Domain (ex: observiq.okta.com)
+	// Domain Okta Domain (no https://  -  ex: observiq.okta.com)
 	Domain string `mapstructure:"okta_domain"`
 
 	// ApiToken Okta Api Token
 	ApiToken string `mapstructure:"api_token"`
 
 	// PollInterval The interval at which the Okta API is scanned for Logs
+	// Must be 1s or greater
 	PollInterval time.Duration `mapstructure:"poll_interval"`
 
 	// StartTime UTC Timestamp following format specified in OktaTimeFormat
+	// Must be within the past 180 days and not in the future
 	StartTime string `mapstructure:"start_time"`
 }
 
 var (
-	errNoDomain            = errors.New("a domain must be specified")
-	errNoApiToken          = errors.New("an api token must be specified")
-	errInvalidPollInterval = errors.New("poll interval is incorrect, it must be a duration greater than one second")
+	errNoDomain            = errors.New("okta_domain must be specified")
+	errInvalidDomain       = errors.New("invalid okta_domain, do not include https://")
+	errNoApiToken          = errors.New("api_token must be specified")
+	errInvalidPollInterval = errors.New("invalid poll_interval, it must be a duration greater than one second")
 )
 
 // Validate ensures an Okta receiver config is correct
 func (c *Config) Validate() error {
-	fmt.Println("Poll interval:", c.PollInterval)
 	if c.Domain == "" {
 		return errNoDomain
+	}
+
+	if strings.Contains(c.Domain, "https://") || strings.Contains(c.Domain, "http://") {
+		return errInvalidDomain
 	}
 
 	if c.ApiToken == "" {
@@ -65,7 +72,7 @@ func (c *Config) Validate() error {
 
 	err := validateStartTime(c.StartTime)
 	if err != nil {
-		return fmt.Errorf("start_time is invalid: %w", err)
+		return fmt.Errorf("invalid start_time: %w", err)
 	}
 
 	return nil
@@ -80,15 +87,15 @@ func validateStartTime(startTime string) error {
 
 	parsedTime, err := time.Parse(OktaTimeFormat, startTime)
 	if err != nil {
-		return errors.New("invalid timestamp, must be in the format YYYY-MM-DDTHH:MM:SS")
+		return errors.New("invalid timestamp: must be in the format YYYY-MM-DDTHH:MM:SS")
 	}
 
-	now := time.Now()
-	time180DaysAgo := now.AddDate(0, 0, -180)
+	nowUTC := time.Now().UTC()
+	time180DaysAgo := nowUTC.AddDate(0, 0, -180)
 
 	// Check if the time is in the valid range the past 180 days and before now
-	if parsedTime.Before(time180DaysAgo) || parsedTime.After(now) {
-		return errors.New("invalid timestamp, must be within the past 180 days and not in the future")
+	if parsedTime.Before(time180DaysAgo) || parsedTime.After(nowUTC) {
+		return errors.New("invalid timestamp: must be within the past 180 days and not in the future")
 	}
 
 	return nil

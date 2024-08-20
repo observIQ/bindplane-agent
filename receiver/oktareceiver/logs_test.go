@@ -20,10 +20,41 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/require"
+	"go.opentelemetry.io/collector/component/componenttest"
 	"go.opentelemetry.io/collector/consumer"
 	"go.opentelemetry.io/collector/consumer/consumertest"
 	"go.uber.org/zap"
 )
+
+func TestStartShutdown(t *testing.T) {
+	cfg := createDefaultConfig().(*Config)
+
+	recv, err := newOktaLogsReceiver(cfg, zap.NewNop(), consumertest.NewNop())
+	require.NoError(t, err)
+
+	err = recv.Start(context.Background(), componenttest.NewNopHost())
+	require.NoError(t, err)
+
+	err = recv.Shutdown(context.Background())
+	require.NoError(t, err)
+}
+
+func TestStartTimeParse(t *testing.T) {
+	cfg := createDefaultConfig().(*Config)
+	cfg.StartTime = "2024-08-12T00:00:00Z"
+
+	recv, err := newOktaLogsReceiver(cfg, zap.NewNop(), consumertest.NewNop())
+	require.NoError(t, err)
+	require.Equal(t, time.Date(2024, 8, 12, 0, 0, 0, 0, time.UTC), recv.startTime)
+}
+
+func TestStartTimeParseError(t *testing.T) {
+	cfg := createDefaultConfig().(*Config)
+	cfg.StartTime = "9999999-08-12T00:00:00Z"
+
+	_, err := newOktaLogsReceiver(cfg, zap.NewNop(), consumertest.NewNop())
+	require.Error(t, err)
+}
 
 func TestShutdownNoServer(t *testing.T) {
 	// test that shutdown without a start does not error or panic

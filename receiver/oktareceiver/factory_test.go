@@ -32,11 +32,26 @@ func TestType(t *testing.T) {
 func TestCreateLogsReceiver(t *testing.T) {
 	cfg := createDefaultConfig().(*Config)
 
-	_, err := NewFactory().CreateLogsReceiver(
+	recv, err := NewFactory().CreateLogsReceiver(
 		context.Background(),
 		receivertest.NewNopSettings(),
 		cfg,
 		nil,
 	)
 	require.NoError(t, err)
+	require.NotNil(t, recv)
+}
+
+func TestCreateLogsReceiverError(t *testing.T) {
+	cfg := createDefaultConfig().(*Config)
+	cfg.StartTime = "9999999-08-12T00:00:00Z"
+
+	recv, err := NewFactory().CreateLogsReceiver(
+		context.Background(),
+		receivertest.NewNopSettings(),
+		cfg,
+		nil,
+	)
+	require.Error(t, err)
+	require.Nil(t, recv)
 }
