@@ -20,7 +20,7 @@ jobs:
         with:
           # either 'goreleaser' (default) or 'goreleaser-pro'
           distribution: goreleaser-pro
-          version: "v1.22.1"
+          version: "v2.1.0"
           args: build --single-target --skip=validate --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
