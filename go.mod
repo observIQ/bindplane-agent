@@ -36,6 +36,7 @@ require (
 	github.com/oklog/ulid/v2 v2.1.0
 	github.com/open-telemetry/opamp-go v0.9.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/connector/countconnector v0.107.0
+	github.com/open-telemetry/opentelemetry-collector-contrib/connector/routingconnector v0.107.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/connector/servicegraphconnector v0.107.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/connector/spanmetricsconnector v0.107.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/alibabacloudlogserviceexporter v0.107.0
