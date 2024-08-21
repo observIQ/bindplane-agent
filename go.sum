@@ -1908,6 +1908,8 @@ github.com/open-telemetry/opentelemetry-collector-contrib/connector/countconnect
 github.com/open-telemetry/opentelemetry-collector-contrib/connector/countconnector v0.107.0/go.mod h1:Fz1oG0B2AVwSAG22GOZc9EGpOXqdHJtYU0F0+KjA6zs=
 github.com/open-telemetry/opentelemetry-collector-contrib/connector/datadogconnector v0.107.0 h1:5nCidAaa6vxj85UHOz7/kqtVsnbFMXyDDUV0Ima8FHk=
 github.com/open-telemetry/opentelemetry-collector-contrib/connector/datadogconnector v0.107.0/go.mod h1:X+V2G++oM4NHchq7RR4kpL32zKzd6fH4QQzO7/F8i24=
+github.com/open-telemetry/opentelemetry-collector-contrib/connector/routingconnector v0.107.0 h1:jS6ACtJreXaDLG/zp90goLERgsrj4vQrGKZNiFBKGho=
+github.com/open-telemetry/opentelemetry-collector-contrib/connector/routingconnector v0.107.0/go.mod h1:uZus6WqY8aYfns2J2fZrFyyyBNZX7Ghi7s7wSc/02Kw=
 github.com/open-telemetry/opentelemetry-collector-contrib/connector/servicegraphconnector v0.107.0 h1:llpmzV6B3ayRns2O2VUvnmQhBmFYea6B9G/j3TubjnM=
 github.com/open-telemetry/opentelemetry-collector-contrib/connector/servicegraphconnector v0.107.0/go.mod h1:vG1hP4f3oLQI4qCm58GiCXm4X0QiKLojybCM9vqeFXc=
 github.com/open-telemetry/opentelemetry-collector-contrib/connector/spanmetricsconnector v0.107.0 h1:1S+oa3bMVrSi7PclgMvxtyPAi8mTdHsuDqAq8XA06qU=
