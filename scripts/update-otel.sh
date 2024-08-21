@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 TARGET_VERSION=$1
 if [ -z "$TARGET_VERSION" ]; then
     echo "Must specify a target version"
@@ -27,15 +26,13 @@ if [ -z "$CONTRIB_TARGET_VERSION" ]; then
 fi
 
 PDATA_TARGET_VERSION=$3
-
 if [ -z "$PDATA_TARGET_VERSION" ]; then
     echo "Must specify a target pdata version"
     exit 1
 fi
 
 LOCAL_MODULES=$(find . -type f -name "go.mod" -exec dirname {} \; | sort)
-for local_mod in $LOCAL_MODULES
-do
+for local_mod in $LOCAL_MODULES; do
     # Run in a subshell so that the CD doesn't change this shell's current directory
     (
         echo "Updating deps in $local_mod"
@@ -43,14 +40,13 @@ do
         OTEL_MODULES=$(go list -m -f '{{if not (or .Indirect .Main)}}{{.Path}}{{end}}' all |
             grep -E -e '(?:^github.com/open-telemetry/opentelemetry-collector-contrib)|(?:^go.opentelemetry.io/collector)')
 
-        for mod in $OTEL_MODULES
-        do
-            case $mod in 
+        for mod in $OTEL_MODULES; do
+            case $mod in
             go.opentelemetry.io/collector/pdata* | go.opentelemetry.io/collector/config/configtls* | go.opentelemetry.io/collector/config/configretry*)
                 # pdata package is versioned separately
                 echo "$local_mod: $mod@$PDATA_TARGET_VERSION"
                 go mod edit -require "$mod@$PDATA_TARGET_VERSION"
-                ;; 
+                ;;
             github.com/open-telemetry/opentelemetry-collector-contrib*)
                 echo "$local_mod: $mod@$CONTRIB_TARGET_VERSION"
                 go mod edit -require "$mod@$CONTRIB_TARGET_VERSION"
@@ -59,7 +55,7 @@ do
                 echo "$local_mod: $mod@$TARGET_VERSION"
                 go mod edit -require "$mod@$TARGET_VERSION"
                 ;;
-            esac;
+            esac
         done
     )
 done
