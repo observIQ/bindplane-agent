@@ -35,33 +35,40 @@ SCRIPT_NAME="$0"
 INDENT_WIDTH='  '
 indent=""
 
+IS_INTERACTIVE="false"
+case "$-" in
+  *i*) IS_INTERACTIVE="true" ;;
+esac
+
 # out_file_path is the full path to the downloaded package (e.g. "/tmp/observiq-otel-collector_linux_amd64.deb")
 out_file_path="unknown"
 
-# Colors
-num_colors=$(tput colors 2>/dev/null)
-if test -n "$num_colors" && test "$num_colors" -ge 8; then
-  bold="$(tput bold)"
-  underline="$(tput smul)"
-  # standout can be bold or reversed colors dependent on terminal
-  standout="$(tput smso)"
-  reset="$(tput sgr0)"
-  bg_black="$(tput setab 0)"
-  bg_blue="$(tput setab 4)"
-  bg_cyan="$(tput setab 6)"
-  bg_green="$(tput setab 2)"
-  bg_magenta="$(tput setab 5)"
-  bg_red="$(tput setab 1)"
-  bg_white="$(tput setab 7)"
-  bg_yellow="$(tput setab 3)"
-  fg_black="$(tput setaf 0)"
-  fg_blue="$(tput setaf 4)"
-  fg_cyan="$(tput setaf 6)"
-  fg_green="$(tput setaf 2)"
-  fg_magenta="$(tput setaf 5)"
-  fg_red="$(tput setaf 1)"
-  fg_white="$(tput setaf 7)"
-  fg_yellow="$(tput setaf 3)"
+if $IS_INTERACTIVE; then
+  # Colors
+  num_colors=$(tput colors 2>/dev/null)
+  if test -n "$num_colors" && test "$num_colors" -ge 8; then
+    bold="$(tput bold)"
+    underline="$(tput smul)"
+    # standout can be bold or reversed colors dependent on terminal
+    standout="$(tput smso)"
+    reset="$(tput sgr0)"
+    bg_black="$(tput setab 0)"
+    bg_blue="$(tput setab 4)"
+    bg_cyan="$(tput setab 6)"
+    bg_green="$(tput setab 2)"
+    bg_magenta="$(tput setab 5)"
+    bg_red="$(tput setab 1)"
+    bg_white="$(tput setab 7)"
+    bg_yellow="$(tput setab 3)"
+    fg_black="$(tput setaf 0)"
+    fg_blue="$(tput setaf 4)"
+    fg_cyan="$(tput setaf 6)"
+    fg_green="$(tput setaf 2)"
+    fg_magenta="$(tput setaf 5)"
+    fg_red="$(tput setaf 1)"
+    fg_white="$(tput setaf 7)"
+    fg_yellow="$(tput setaf 3)"
+  fi
 fi
 
 if [ -z "$reset" ]; then
@@ -328,6 +335,11 @@ set_proxy()
     info "Using proxy from arguments: $proxy"
     if [ -n "$proxy_user" ]; then
       while [ -z "$proxy_password" ] ; do
+        if ! $IS_INTERACTIVE; then 
+          error_exit "$LINENO" "The proxy password must be set via the command line argument -P, if called non-interactively!"
+          exit
+        fi
+
         increase_indent
         command printf "${indent}$(fg_blue "$proxy_user@$proxy")'s password: "
         stty -echo
