@@ -17,10 +17,10 @@ This receiver is capable of collecting logs from an Okta domain.
 ## Configuration
 | Field                | Type      | Default          | Required | Description                                                                                                                                                                            |
 |----------------------|-----------|------------------|----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| domain             |  string   |                  | `true`   | The Okta domain the receiver should collect logs from.                                                                                         |
-| api_token                 |  string   |                  | `true`  | An Okta API Token generated from the above Okta domain.
-| poll_interval                 |  string   | 1m   | `false`  | The rate at which this receiver will poll Okta for logs. This value must be at least 1 second and must be a string readable by Golang's [time.ParseDuration](https://pkg.go.dev/time#ParseDuration).
-| start_time                 |  string   | now   | `false`  | The UTC timestamp indicating the beginning of the range of logs this receiver will collect. Must be within the past 180 days and not in the future. Must be in the format "yyyy-mm-ddThh-mm-ssZ"
+| domain               |  string   |                  | `true`   | The Okta domain the receiver should collect logs from.
+| api_token            |  string   |                  | `true`   | An Okta API Token generated from the above Okta domain.
+| poll_interval        |  string   | 1m               | `false`  | The rate at which this receiver will poll Okta for logs. This value must be at least 1 second and must be a string readable by Golang's [time.ParseDuration](https://pkg.go.dev/time#ParseDuration).
+| start_time           |  string   | Now (UTC)        | `false`  | The UTC timestamp indicating the beginning of the range of logs this receiver will collect. Must be within the past 180 days and not in the future. Must be in the format "yyyy-mm-ddThh-mm-ssZ"
 
 ### Example Configuration
 ```yaml
