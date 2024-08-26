@@ -30,7 +30,7 @@ require (
 	github.com/observiq/bindplane-agent/receiver/azureblobrehydrationreceiver v1.59.0
 	github.com/observiq/bindplane-agent/receiver/httpreceiver v1.59.0
 	github.com/observiq/bindplane-agent/receiver/m365receiver v1.59.0
-	github.com/observiq/bindplane-agent/receiver/oktareceiver v0.0.0-00010101000000-000000000000
+	github.com/observiq/bindplane-agent/receiver/oktareceiver v1.59.0
 	github.com/observiq/bindplane-agent/receiver/pluginreceiver v1.59.0
 	github.com/observiq/bindplane-agent/receiver/routereceiver v1.59.0
 	github.com/observiq/bindplane-agent/receiver/sapnetweaverreceiver v1.59.0
