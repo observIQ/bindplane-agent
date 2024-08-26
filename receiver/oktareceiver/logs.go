@@ -32,45 +32,34 @@ import (
 )
 
 type oktaLogsReceiver struct {
-	cfg       Config
-	client    httpClient
-	consumer  consumer.Logs
-	doneChan  chan bool
-	logger    *zap.Logger
-	nextURL   string
-	startTime time.Time
-	wg        *sync.WaitGroup
+	cfg      Config
+	client   httpClient
+	consumer consumer.Logs
+	logger   *zap.Logger
+	nextURL  string
+	cancel   context.CancelFunc
+	wg       *sync.WaitGroup
 }
 
 type httpClient interface {
 	Do(req *http.Request) (*http.Response, error)
+	CloseIdleConnections()
 }
 
 // newOktaLogsReceiver returns a newly configured oktaLogsReceiver
 func newOktaLogsReceiver(cfg *Config, logger *zap.Logger, consumer consumer.Logs) (*oktaLogsReceiver, error) {
-	var startTime time.Time
-	if cfg.StartTime != "" {
-		cfgStartTime, err := time.Parse(OktaTimeFormat, cfg.StartTime)
-		if err != nil {
-			return nil, err
-		}
-		startTime = cfgStartTime
-	} else {
-		startTime = time.Now().UTC().Add(-cfg.PollInterval)
-	}
-
 	return &oktaLogsReceiver{
-		cfg:       *cfg,
-		client:    http.DefaultClient,
-		consumer:  consumer,
-		doneChan:  make(chan bool),
-		logger:    logger,
-		startTime: startTime,
-		wg:        &sync.WaitGroup{},
+		cfg:      *cfg,
+		client:   http.DefaultClient,
+		consumer: consumer,
+		logger:   logger,
+		wg:       &sync.WaitGroup{},
 	}, nil
 }
 
-func (r *oktaLogsReceiver) Start(ctx context.Context, _ component.Host) error {
+func (r *oktaLogsReceiver) Start(_ context.Context, _ component.Host) error {
+	ctx, cancel := context.WithCancel(context.Background())
+	r.cancel = cancel
 	r.wg.Add(1)
 	go r.startPolling(ctx)
 	return nil
@@ -88,8 +77,6 @@ func (r *oktaLogsReceiver) startPolling(ctx context.Context) {
 		select {
 		case <-ctx.Done():
 			return
-		case <-r.doneChan:
-			return
 		case <-t.C:
 			err := r.poll(ctx)
 			if err != nil {
@@ -100,50 +87,42 @@ func (r *oktaLogsReceiver) startPolling(ctx context.Context) {
 }
 
 func (r *oktaLogsReceiver) poll(ctx context.Context) error {
-	select {
-	case _, ok := <-r.doneChan:
-		if !ok {
-			return nil
-		}
-	default:
-		logEvents := r.getLogs()
-		observedTime := pcommon.NewTimestampFromTime(time.Now())
-		logs := r.processLogEvents(observedTime, logEvents)
-		if logs.LogRecordCount() > 0 {
-			if err := r.consumer.ConsumeLogs(ctx, logs); err != nil {
-				r.logger.Error("unable to consume logs", zap.Error(err))
-				break
-			}
+	logEvents := r.getLogs(ctx)
+	observedTime := pcommon.NewTimestampFromTime(time.Now())
+	logs := r.processLogEvents(observedTime, logEvents)
+	if logs.LogRecordCount() > 0 {
+		if err := r.consumer.ConsumeLogs(ctx, logs); err != nil {
+			return err
 		}
 	}
 	return nil
 }
 
-func (r *oktaLogsReceiver) getLogs() []*okta.LogEvent {
+func (r *oktaLogsReceiver) getLogs(ctx context.Context) []*okta.LogEvent {
 	var req *http.Request
 	var err error
 	var logs []*okta.LogEvent
 	if r.nextURL == "" {
-		// for the first polling request, use startTime
+		// for the first polling request, use since
 		reqURL := "https://" + r.cfg.Domain + "/api/v1/logs"
-		req, err = http.NewRequest("GET", reqURL, nil)
+		req, err = http.NewRequestWithContext(ctx, "GET", reqURL, nil)
 		if err != nil {
 			r.logger.Warn("error creating okta api request", zap.Error(err))
 			return logs
 		}
 
 		query := req.URL.Query()
-		query.Add("since", r.startTime.Format(OktaTimeFormat))
+		query.Add("since", time.Now().UTC().Format(OktaTimeFormat))
 		req.URL.RawQuery = query.Encode()
 	} else {
-		req, err = http.NewRequest("GET", r.nextURL, nil)
+		req, err = http.NewRequestWithContext(ctx, "GET", r.nextURL, nil)
 		if err != nil {
 			r.logger.Warn("error creating okta api request", zap.Error(err))
 			return logs
 		}
 	}
 
-	req.Header.Add("Authorization", "SSWS "+r.cfg.APIToken)
+	req.Header.Add("Authorization", "SSWS "+string(r.cfg.APIToken))
 	res, err := r.client.Do(req)
 	if err != nil {
 		r.logger.Warn("error performing okta api request", zap.Error(err))
@@ -213,7 +192,10 @@ func (r *oktaLogsReceiver) processLogEvents(observedTime pcommon.Timestamp, logE
 
 func (r *oktaLogsReceiver) Shutdown(_ context.Context) error {
 	r.logger.Debug("shutting down logs receiver")
-	close(r.doneChan)
+	r.client.CloseIdleConnections()
+	if r.cancel != nil {
+		r.cancel()
+	}
 	r.wg.Wait()
 	return nil
 }

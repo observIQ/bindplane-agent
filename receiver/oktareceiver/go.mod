@@ -1,6 +1,6 @@
 module github.com/observiq/bindplane-agent/receiver/oktareceiver
 
-go 1.23.0
+go 1.21.9
 
 require (
 	github.com/okta/okta-sdk-golang/v2 v2.20.0
@@ -67,6 +67,7 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	go.opentelemetry.io/collector/component v0.107.0
+	go.opentelemetry.io/collector/config/configopaque v1.13.0
 	go.opentelemetry.io/collector/consumer v0.107.0
 	go.opentelemetry.io/collector/receiver v0.107.0
 	gopkg.in/yaml.v3 v3.0.1 // indirect

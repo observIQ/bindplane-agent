@@ -17,9 +17,10 @@ package oktareceiver // import "github.com/observiq/bindplane-agent/receiver/okt
 
 import (
 	"errors"
-	"fmt"
 	"strings"
 	"time"
+
+	"go.opentelemetry.io/collector/config/configopaque"
 )
 
 var (
@@ -35,15 +36,11 @@ type Config struct {
 	Domain string `mapstructure:"okta_domain"`
 
 	// APIToken Okta API Token
-	APIToken string `mapstructure:"api_token"`
+	APIToken configopaque.String `mapstructure:"api_token"`
 
 	// PollInterval The interval at which the Okta API is scanned for Logs
 	// Must be 1s or greater
 	PollInterval time.Duration `mapstructure:"poll_interval"`
-
-	// StartTime UTC Timestamp following format specified in OktaTimeFormat
-	// Must be within the past 180 days and not in the future
-	StartTime string `mapstructure:"start_time"`
 }
 
 var (
@@ -59,44 +56,16 @@ func (c *Config) Validate() error {
 		return errNoDomain
 	}
 
-	if strings.Contains(c.Domain, "https://") || strings.Contains(c.Domain, "http://") {
+	if strings.HasPrefix(c.Domain, "https://") || strings.HasPrefix(c.Domain, "http://") {
 		return errInvalidDomain
 	}
 
-	if c.APIToken == "" {
+	if string(c.APIToken) == "" {
 		return errNoAPIToken
 	}
 
-	if c.PollInterval != 0 && c.PollInterval < time.Second {
+	if c.PollInterval < time.Second {
 		return errInvalidPollInterval
-	}
-
-	err := validateStartTime(c.StartTime)
-	if err != nil {
-		return fmt.Errorf("invalid start_time: %w", err)
-	}
-
-	return nil
-}
-
-// validateStartTime validates the passed in timestamp string
-// must be within the past 180 days and not in the future
-func validateStartTime(startTime string) error {
-	if startTime == "" {
-		return nil
-	}
-
-	parsedTime, err := time.Parse(OktaTimeFormat, startTime)
-	if err != nil {
-		return errors.New("invalid timestamp: must be in the format YYYY-MM-DDTHH:MM:SS")
-	}
-
-	nowUTC := time.Now().UTC()
-	time180DaysAgo := nowUTC.AddDate(0, 0, -180)
-
-	// Check if the time is in the valid range the past 180 days and before now
-	if parsedTime.Before(time180DaysAgo) || parsedTime.After(nowUTC) {
-		return errors.New("invalid timestamp: must be within the past 180 days and not in the future")
 	}
 
 	return nil

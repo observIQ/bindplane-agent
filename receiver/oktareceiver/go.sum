@@ -91,6 +91,8 @@ github.com/yuin/goldmark v1.2.1/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9dec
 go.opentelemetry.io/collector v0.107.0 h1:C1Mng03iE73flGhEg795IFVlr3qhDLef5GESjIVtx5g=
 go.opentelemetry.io/collector/component v0.107.0 h1:3ReaEAtKwrPj7HrlKjEGBDKbBaxdRMPC2mfZ9b6zjXE=
 go.opentelemetry.io/collector/component v0.107.0/go.mod h1:1xMIYKvpnP7laipjgEw7kq1ozG7ySLkA0Evhr2Bp8M4=
+go.opentelemetry.io/collector/config/configopaque v1.13.0 h1:EDB9JIifmBth1z9IsEduoE1bT1Q8jV0sR005EMW7q1w=
+go.opentelemetry.io/collector/config/configopaque v1.13.0/go.mod h1:0xURn2sOy5j4fbaocpEYfM97HPGsiffkkVudSPyTJlM=
 go.opentelemetry.io/collector/config/configtelemetry v0.107.0 h1:pSGd4FWQ/Up/Af+XZTR8JNneH/wmQ/TAU4Z16JHQeUc=
 go.opentelemetry.io/collector/config/configtelemetry v0.107.0/go.mod h1:WxWKNVAQJg/Io1nA3xLgn/DWLE/W1QOB2+/Js3ACi40=
 go.opentelemetry.io/collector/confmap v0.107.0 h1:M2o7jvQM9bnMU3pE2N6BK4KHYtSnvsSZkegUD89y8BU=

@@ -22,7 +22,6 @@ import (
 	"os"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest/plogtest"
 	"github.com/stretchr/testify/require"
@@ -41,6 +40,8 @@ func (m *mockHTTPClient) Do(req *http.Request) (*http.Response, error) {
 	return m.mockDo(req)
 }
 
+func (m *mockHTTPClient) CloseIdleConnections() {}
+
 func TestStartShutdown(t *testing.T) {
 	cfg := createDefaultConfig().(*Config)
 
@@ -52,36 +53,6 @@ func TestStartShutdown(t *testing.T) {
 
 	err = recv.Shutdown(context.Background())
 	require.NoError(t, err)
-}
-
-func TestStartContextDone(t *testing.T) {
-	cfg := createDefaultConfig().(*Config)
-
-	recv, err := newOktaLogsReceiver(cfg, zap.NewNop(), consumertest.NewNop())
-	require.NoError(t, err)
-
-	ctx, cancel := context.WithCancel(context.Background())
-	err = recv.Start(ctx, componenttest.NewNopHost())
-	require.NoError(t, err)
-
-	cancel()
-}
-
-func TestStartTimeParse(t *testing.T) {
-	cfg := createDefaultConfig().(*Config)
-	cfg.StartTime = "2024-08-12T00:00:00Z"
-
-	recv, err := newOktaLogsReceiver(cfg, zap.NewNop(), consumertest.NewNop())
-	require.NoError(t, err)
-	require.Equal(t, time.Date(2024, 8, 12, 0, 0, 0, 0, time.UTC), recv.startTime)
-}
-
-func TestStartTimeParseError(t *testing.T) {
-	cfg := createDefaultConfig().(*Config)
-	cfg.StartTime = "9999999-08-12T00:00:00Z"
-
-	_, err := newOktaLogsReceiver(cfg, zap.NewNop(), consumertest.NewNop())
-	require.Error(t, err)
 }
 
 func TestShutdownNoServer(t *testing.T) {
