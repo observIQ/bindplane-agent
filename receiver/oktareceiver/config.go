@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Package oktareceiver provides a receiver that receives telemetry from an Okta domain.
 package oktareceiver // import "github.com/observiq/bindplane-agent/receiver/oktareceiver"
 
 import (
@@ -24,7 +25,7 @@ import (
 var (
 	defaultPollInterval = time.Minute
 
-	// ISO 8601 Format
+	// OktaTimeFormat ISO 8601 Format
 	OktaTimeFormat = "2006-01-02T15:04:05Z"
 )
 
@@ -33,8 +34,8 @@ type Config struct {
 	// Domain Okta Domain (no https://  -  ex: observiq.okta.com)
 	Domain string `mapstructure:"okta_domain"`
 
-	// ApiToken Okta Api Token
-	ApiToken string `mapstructure:"api_token"`
+	// APIToken Okta API Token
+	APIToken string `mapstructure:"api_token"`
 
 	// PollInterval The interval at which the Okta API is scanned for Logs
 	// Must be 1s or greater
@@ -48,7 +49,7 @@ type Config struct {
 var (
 	errNoDomain            = errors.New("okta_domain must be specified")
 	errInvalidDomain       = errors.New("invalid okta_domain, do not include https://")
-	errNoApiToken          = errors.New("api_token must be specified")
+	errNoAPIToken          = errors.New("api_token must be specified")
 	errInvalidPollInterval = errors.New("invalid poll_interval, it must be a duration greater than one second")
 )
 
@@ -62,8 +63,8 @@ func (c *Config) Validate() error {
 		return errInvalidDomain
 	}
 
-	if c.ApiToken == "" {
-		return errNoApiToken
+	if c.APIToken == "" {
+		return errNoAPIToken
 	}
 
 	if c.PollInterval != 0 && c.PollInterval < time.Second {

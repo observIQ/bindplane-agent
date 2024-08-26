@@ -33,11 +33,11 @@ import (
 	"go.uber.org/zap"
 )
 
-type mockHttpClient struct {
+type mockHTTPClient struct {
 	mockDo func(req *http.Request) (*http.Response, error)
 }
 
-func (m *mockHttpClient) Do(req *http.Request) (*http.Response, error) {
+func (m *mockHTTPClient) Do(req *http.Request) (*http.Response, error) {
 	return m.mockDo(req)
 }
 
@@ -99,10 +99,10 @@ func TestPoll(t *testing.T) {
 	recv, err := newOktaLogsReceiver(cfg, zap.NewNop(), sink)
 	require.NoError(t, err)
 
-	recv.client = &mockHttpClient{
+	recv.client = &mockHTTPClient{
 		mockDo: func(req *http.Request) (*http.Response, error) {
 			require.Contains(t, req.URL.String(), "https://observiq.okta.com/api/v1/logs?since")
-			return mockApiResponse200(), nil
+			return mockAPIResponse200(), nil
 		},
 	}
 
@@ -119,12 +119,12 @@ func TestPoll(t *testing.T) {
 	require.NoError(t, err)
 	require.NoError(t, plogtest.CompareLogs(expected, log, plogtest.IgnoreObservedTimestamp()))
 
-	require.Equal(t, "https://observiq.okta.com/api/v1/logs?limit=20&after=1627500044869_1", recv.nextUrl)
+	require.Equal(t, "https://observiq.okta.com/api/v1/logs?limit=20&after=1627500044869_1", recv.nextURL)
 
-	recv.client = &mockHttpClient{
+	recv.client = &mockHTTPClient{
 		mockDo: func(req *http.Request) (*http.Response, error) {
 			require.Equal(t, "https://observiq.okta.com/api/v1/logs?limit=20&after=1627500044869_1", req.URL.String())
-			return mockApiResponse200(), nil
+			return mockAPIResponse200(), nil
 		},
 	}
 	err = recv.poll(context.Background())
@@ -149,7 +149,7 @@ func jsonFileAsPlogs(filepath string) (plog.Logs, error) {
 	return unmarshaler.UnmarshalLogs(expectedFileBytes)
 }
 
-func mockApiResponse200() *http.Response {
+func mockAPIResponse200() *http.Response {
 	mockRes := &http.Response{}
 	mockRes.StatusCode = http.StatusOK
 	mockRes.Header = http.Header{}

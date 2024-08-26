@@ -33,14 +33,14 @@ func TestValidate(t *testing.T) {
 			desc: "pass simple",
 			config: Config{
 				Domain:   "oktadomain.com",
-				ApiToken: "dummyApiToken",
+				APIToken: "dummyAPIToken",
 			},
 		},
 		{
 			desc: "pass with poll interval",
 			config: Config{
 				Domain:       "oktadomain.com",
-				ApiToken:     "dummyApiToken",
+				APIToken:     "dummyAPIToken",
 				PollInterval: time.Second,
 			},
 		},
@@ -48,7 +48,7 @@ func TestValidate(t *testing.T) {
 			desc: "pass with start time",
 			config: Config{
 				Domain:    "oktadomain.com",
-				ApiToken:  "dummyApiToken",
+				APIToken:  "dummyAPIToken",
 				StartTime: time.Now().Add(-time.Hour).Format(OktaTimeFormat),
 			},
 		},
@@ -56,7 +56,7 @@ func TestValidate(t *testing.T) {
 			desc: "pass with all fields",
 			config: Config{
 				Domain:       "oktadomain.com",
-				ApiToken:     "dummyApiToken",
+				APIToken:     "dummyAPIToken",
 				PollInterval: time.Second,
 				StartTime:    time.Now().Add(-time.Hour).Format(OktaTimeFormat),
 			},
@@ -65,7 +65,7 @@ func TestValidate(t *testing.T) {
 			desc: "pass with poll interval zero value",
 			config: Config{
 				Domain:       "oktadomain.com",
-				ApiToken:     "dummyApiToken",
+				APIToken:     "dummyAPIToken",
 				PollInterval: 0,
 			},
 		},
@@ -73,14 +73,14 @@ func TestValidate(t *testing.T) {
 			desc:        "fail no domain",
 			expectedErr: errNoDomain,
 			config: Config{
-				ApiToken: "dummyApiToken",
+				APIToken: "dummyAPIToken",
 			},
 		},
 		{
 			desc:        "fail invalid domain https",
 			expectedErr: errInvalidDomain,
 			config: Config{
-				ApiToken: "dummyApiToken",
+				APIToken: "dummyAPIToken",
 				Domain:   "https://test.okta.com",
 			},
 		},
@@ -88,13 +88,13 @@ func TestValidate(t *testing.T) {
 			desc:        "fail invalid domain http",
 			expectedErr: errInvalidDomain,
 			config: Config{
-				ApiToken: "dummyApiToken",
+				APIToken: "dummyAPIToken",
 				Domain:   "http://test.okta.com",
 			},
 		},
 		{
 			desc:        "fail no api token",
-			expectedErr: errNoApiToken,
+			expectedErr: errNoAPIToken,
 			config: Config{
 				Domain: "oktadomain.com",
 			},
@@ -104,7 +104,7 @@ func TestValidate(t *testing.T) {
 			expectedErr: errInvalidPollInterval,
 			config: Config{
 				Domain:       "oktadomain.com",
-				ApiToken:     "dummyApiToken",
+				APIToken:     "dummyAPIToken",
 				PollInterval: 500 * time.Millisecond,
 			},
 		},
@@ -113,7 +113,7 @@ func TestValidate(t *testing.T) {
 			expectedErr: errors.New("invalid start_time: invalid timestamp: must be in the format YYYY-MM-DDTHH:MM:SS"),
 			config: Config{
 				Domain:    "oktadomain.com",
-				ApiToken:  "dummyApiToken",
+				APIToken:  "dummyAPIToken",
 				StartTime: time.Now().UTC().Add(-time.Hour).Format(time.RFC1123),
 			},
 		},
@@ -122,7 +122,7 @@ func TestValidate(t *testing.T) {
 			expectedErr: errors.New("invalid start_time: invalid timestamp: must be within the past 180 days and not in the future"),
 			config: Config{
 				Domain:    "oktadomain.com",
-				ApiToken:  "dummyApiToken",
+				APIToken:  "dummyAPIToken",
 				StartTime: time.Now().UTC().Add(time.Hour).Format(OktaTimeFormat),
 			},
 		},
@@ -131,7 +131,7 @@ func TestValidate(t *testing.T) {
 			expectedErr: errors.New("invalid start_time: invalid timestamp: must be within the past 180 days and not in the future"),
 			config: Config{
 				Domain:    "oktadomain.com",
-				ApiToken:  "dummyApiToken",
+				APIToken:  "dummyAPIToken",
 				StartTime: time.Now().UTC().AddDate(0, 0, -181).Format(OktaTimeFormat),
 			},
 		},
