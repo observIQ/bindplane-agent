@@ -16,8 +16,6 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
-          check-latest: true
-          cache-dependency-path: "**/go.sum"
       - name: Run Tests
         run: make test
       - name: Run Updater Integration Tests (non-linux)
