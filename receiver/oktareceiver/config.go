@@ -28,6 +28,9 @@ var (
 
 	// OktaTimeFormat ISO 8601 Format
 	OktaTimeFormat = "2006-01-02T15:04:05Z"
+
+	// oktaMaxLimit maximum number of log objects returned in one call to Okta API
+	oktaMaxLimit = 1000
 )
 
 // Config defines the configuration for an Okta receiver

@@ -19,6 +19,7 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -99,54 +100,69 @@ func (r *oktaLogsReceiver) poll(ctx context.Context) error {
 }
 
 func (r *oktaLogsReceiver) getLogs(ctx context.Context) []*okta.LogEvent {
-	var req *http.Request
-	var err error
 	var logs []*okta.LogEvent
-	if r.nextURL == "" {
-		// for the first polling request, use since
-		reqURL := "https://" + r.cfg.Domain + "/api/v1/logs"
-		req, err = http.NewRequestWithContext(ctx, "GET", reqURL, nil)
-		if err != nil {
-			r.logger.Warn("error creating okta api request", zap.Error(err))
-			return logs
+	var reqURL string
+	pollTime := time.Now().UTC()
+
+	// get logs until there isn't any overflow OR we get logs published after initial pollTime
+	for {
+		if r.nextURL == "" {
+			reqURL = "https://" + r.cfg.Domain + "/api/v1/logs"
+		} else {
+			reqURL = r.nextURL
 		}
 
-		query := req.URL.Query()
-		query.Add("since", time.Now().UTC().Format(OktaTimeFormat))
-		req.URL.RawQuery = query.Encode()
-	} else {
-		req, err = http.NewRequestWithContext(ctx, "GET", r.nextURL, nil)
+		req, err := http.NewRequestWithContext(ctx, "GET", reqURL, nil)
 		if err != nil {
-			r.logger.Warn("error creating okta api request", zap.Error(err))
-			return logs
+			r.logger.Error("error creating okta api request", zap.Error(err))
+			break
 		}
-	}
 
-	req.Header.Add("Authorization", "SSWS "+string(r.cfg.APIToken))
-	res, err := r.client.Do(req)
-	if err != nil {
-		r.logger.Warn("error performing okta api request", zap.Error(err))
-		return logs
-	}
+		// add query params to the first polling request
+		if r.nextURL == "" {
+			query := req.URL.Query()
+			query.Add("since", pollTime.Add(-r.cfg.PollInterval).Format(OktaTimeFormat))
+			query.Add("limit", strconv.Itoa(oktaMaxLimit))
+			req.URL.RawQuery = query.Encode()
+		}
 
-	defer res.Body.Close()
+		req.Header.Add("Authorization", "SSWS "+string(r.cfg.APIToken))
 
-	if res.StatusCode != 200 {
-		r.logger.Error("okta logs endpoint returned non-200 statuscode: " + res.Status)
-		return logs
-	}
+		res, err := r.client.Do(req)
+		if err != nil {
+			r.logger.Error("error performing okta api request", zap.Error(err))
+			break
+		}
 
-	r.setNextLink(res)
+		if res.Body != nil {
+			defer res.Body.Close()
+		}
 
-	body, err := io.ReadAll(res.Body)
-	if err != nil {
-		r.logger.Warn("error reading response body", zap.Error(err))
-		return logs
-	}
+		if res.StatusCode != http.StatusOK {
+			r.logger.Error("okta logs endpoint returned non-200 statuscode: " + res.Status)
+			break
+		}
 
-	err = json.Unmarshal(body, &logs)
-	if err != nil {
-		r.logger.Warn("unable to unmarshal log event", zap.Error(err))
+		r.setNextLink(res)
+
+		body, err := io.ReadAll(res.Body)
+		if err != nil {
+			r.logger.Error("error reading response body", zap.Error(err))
+			break
+		}
+
+		var curLogs []*okta.LogEvent
+		err = json.Unmarshal(body, &curLogs)
+		if err != nil {
+			r.logger.Error("unable to unmarshal log events", zap.Error(err))
+			break
+		}
+
+		logs = append(logs, curLogs...)
+
+		if len(curLogs) < oktaMaxLimit || curLogs[len(curLogs)-1].Published.After(pollTime) {
+			break
+		}
 	}
 
 	return logs
@@ -172,7 +188,7 @@ func (r *oktaLogsReceiver) processLogEvents(observedTime pcommon.Timestamp, logE
 		// body
 		logEventBytes, err := json.Marshal(logEvent)
 		if err != nil {
-			r.logger.Warn("unable to marshal logEvent", zap.Error(err))
+			r.logger.Error("unable to marshal logEvent", zap.Error(err))
 		} else {
 			logRecord.Body().SetStr(string(logEventBytes))
 		}
@@ -215,5 +231,5 @@ func (r *oktaLogsReceiver) setNextLink(res *http.Response) {
 			return
 		}
 	}
-	r.logger.Warn("unable to get next link")
+	r.logger.Error("unable to get next link")
 }

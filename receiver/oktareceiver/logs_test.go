@@ -20,6 +20,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -61,7 +62,7 @@ func TestShutdownNoServer(t *testing.T) {
 	require.NoError(t, recv.Shutdown(context.Background()))
 }
 
-func TestPoll(t *testing.T) {
+func TestPollBasic(t *testing.T) {
 	cfg := createDefaultConfig().(*Config)
 	mockDomain := "observiq.okta.com"
 	cfg.Domain = mockDomain
@@ -72,8 +73,9 @@ func TestPoll(t *testing.T) {
 
 	recv.client = &mockHTTPClient{
 		mockDo: func(req *http.Request) (*http.Response, error) {
-			require.Contains(t, req.URL.String(), "https://observiq.okta.com/api/v1/logs?since")
-			return mockAPIResponse200(), nil
+			require.Contains(t, req.URL.String(), "since=")
+			require.Contains(t, req.URL.String(), "limit="+strconv.Itoa(oktaMaxLimit))
+			return mockAPIResponseOKBasic(), nil
 		},
 	}
 
@@ -90,16 +92,113 @@ func TestPoll(t *testing.T) {
 	require.NoError(t, err)
 	require.NoError(t, plogtest.CompareLogs(expected, log, plogtest.IgnoreObservedTimestamp()))
 
-	require.Equal(t, "https://observiq.okta.com/api/v1/logs?limit=20&after=1627500044869_1", recv.nextURL)
+	require.Equal(t, 2, logs[0].ResourceLogs().Len())
+	require.Equal(t, mockNextURL, recv.nextURL)
 
 	recv.client = &mockHTTPClient{
 		mockDo: func(req *http.Request) (*http.Response, error) {
-			require.Equal(t, "https://observiq.okta.com/api/v1/logs?limit=20&after=1627500044869_1", req.URL.String())
-			return mockAPIResponse200(), nil
+			require.Equal(t, mockNextURL, req.URL.String())
+			return mockAPIResponseOKBasic(), nil
 		},
 	}
 	err = recv.poll(context.Background())
 	require.NoError(t, err)
+
+	err = recv.Shutdown(context.Background())
+	require.NoError(t, err)
+}
+
+func TestPollTooManyRequests(t *testing.T) {
+	cfg := createDefaultConfig().(*Config)
+	mockDomain := "observiq.okta.com"
+	cfg.Domain = mockDomain
+
+	sink := &consumertest.LogsSink{}
+	recv, err := newOktaLogsReceiver(cfg, zap.NewNop(), sink)
+	require.NoError(t, err)
+
+	recv.client = &mockHTTPClient{
+		mockDo: func(req *http.Request) (*http.Response, error) {
+			require.Contains(t, req.URL.String(), "since=")
+			require.Contains(t, req.URL.String(), "limit="+strconv.Itoa(oktaMaxLimit))
+			if strings.Contains(req.URL.String(), "after=") {
+				return mockAPIResponseTooManyRequests(), nil
+			}
+			return mockAPIResponseOK1000Logs(), nil
+		},
+	}
+
+	err = recv.poll(context.Background())
+	require.NoError(t, err)
+
+	logs := sink.AllLogs()
+
+	require.Equal(t, 1000, logs[0].ResourceLogs().Len())
+	require.Equal(t, mockNextURL, recv.nextURL)
+
+	err = recv.Shutdown(context.Background())
+	require.NoError(t, err)
+}
+
+func TestPollOverflow(t *testing.T) {
+	cfg := createDefaultConfig().(*Config)
+	mockDomain := "observiq.okta.com"
+	cfg.Domain = mockDomain
+
+	sink := &consumertest.LogsSink{}
+	recv, err := newOktaLogsReceiver(cfg, zap.NewNop(), sink)
+	require.NoError(t, err)
+
+	recv.client = &mockHTTPClient{
+		mockDo: func(req *http.Request) (*http.Response, error) {
+			require.Contains(t, req.URL.String(), "since=")
+			require.Contains(t, req.URL.String(), "limit="+strconv.Itoa(oktaMaxLimit))
+			if strings.Contains(req.URL.String(), "after=") {
+				return mockAPIResponseOKBasic(), nil
+			}
+			return mockAPIResponseOK1000Logs(), nil
+		},
+	}
+
+	err = recv.poll(context.Background())
+	require.NoError(t, err)
+
+	logs := sink.AllLogs()
+
+	require.Equal(t, 1002, logs[0].ResourceLogs().Len())
+	require.Equal(t, mockNextURL, recv.nextURL)
+
+	err = recv.Shutdown(context.Background())
+	require.NoError(t, err)
+}
+
+func TestPollPublishedAfterPollTime(t *testing.T) {
+	cfg := createDefaultConfig().(*Config)
+	mockDomain := "observiq.okta.com"
+	cfg.Domain = mockDomain
+
+	sink := &consumertest.LogsSink{}
+	recv, err := newOktaLogsReceiver(cfg, zap.NewNop(), sink)
+	require.NoError(t, err)
+
+	recv.client = &mockHTTPClient{
+		mockDo: func(req *http.Request) (*http.Response, error) {
+			require.Contains(t, req.URL.String(), "since=")
+			require.Contains(t, req.URL.String(), "limit="+strconv.Itoa(oktaMaxLimit))
+			if strings.Contains(req.URL.String(), "after=") {
+				return mockAPIResponseOKBasic(), nil
+			}
+			return mockAPIResponseOK1000LogsAfter(), nil
+		},
+	}
+
+	err = recv.poll(context.Background())
+	require.NoError(t, err)
+
+	logs := sink.AllLogs()
+
+	require.Equal(t, 1000, logs[0].ResourceLogs().Len())
+	require.Equal(t, mockNextURL, recv.nextURL)
 
 	err = recv.Shutdown(context.Background())
 	require.NoError(t, err)
@@ -120,14 +219,41 @@ func jsonFileAsPlogs(filepath string) (plog.Logs, error) {
 	return unmarshaler.UnmarshalLogs(expectedFileBytes)
 }
 
-func mockAPIResponse200() *http.Response {
+func mockAPIResponseOKBasic() *http.Response {
 	mockRes := &http.Response{}
 	mockRes.StatusCode = http.StatusOK
 	mockRes.Header = http.Header{}
-	mockRes.Header.Add("Link", mockLinkHeaderNext)
 	mockRes.Header.Add("Link", mockLinkHeaderSelf)
-	mockRes.Body = io.NopCloser(strings.NewReader(jsonFileAsString("testdata/oktaResponse.json")))
+	mockRes.Header.Add("Link", mockLinkHeaderNext)
+	mockRes.Body = io.NopCloser(strings.NewReader(jsonFileAsString("testdata/oktaResponseBasic.json")))
 	return mockRes
+}
+
+func mockAPIResponseOK1000Logs() *http.Response {
+	mockRes := &http.Response{}
+	mockRes.StatusCode = http.StatusOK
+	mockRes.Header = http.Header{}
+	mockRes.Header.Add("Link", mockLinkHeaderSelf)
+	mockRes.Header.Add("Link", mockLinkHeaderNext)
+	mockRes.Body = io.NopCloser(strings.NewReader(jsonFileAsString("testdata/oktaResponse1000Logs.json")))
+	return mockRes
+}
+
+func mockAPIResponseOK1000LogsAfter() *http.Response {
+	mockRes := &http.Response{}
+	mockRes.StatusCode = http.StatusOK
+	mockRes.Header = http.Header{}
+	mockRes.Header.Add("Link", mockLinkHeaderSelf)
+	mockRes.Header.Add("Link", mockLinkHeaderNext)
+	mockRes.Body = io.NopCloser(strings.NewReader(jsonFileAsString("testdata/oktaResponse1000LogsAfter.json")))
+	return mockRes
+}
+
+func mockAPIResponseTooManyRequests() *http.Response {
+	return &http.Response{
+		StatusCode: http.StatusTooManyRequests,
+		Body:       io.NopCloser(strings.NewReader("{}")),
+	}
 }
 
 func jsonFileAsString(filePath string) string {
@@ -140,6 +266,7 @@ func jsonFileAsString(filePath string) string {
 }
 
 var (
-	mockLinkHeaderNext = `<https://observiq.okta.com/api/v1/logs?limit=20&after=1627500044869_1>; rel="next"`
-	mockLinkHeaderSelf = `<https://observiq.okta.com/api/v1/logs?limit=20>; rel="self"`
+	mockNextURL        = "https://observiq.okta.com/api/v1/logs?since=1999-10-01T00%3A00%3A00.000Z&limit=1000&after=1627500044869_1"
+	mockLinkHeaderNext = `<https://observiq.okta.com/api/v1/logs?since=1999-10-01T00%3A00%3A00.000Z&limit=1000&after=1627500044869_1>; rel="next"`
+	mockLinkHeaderSelf = `<https://observiq.okta.com/api/v1/logs?limit=1000>; rel="self"`
 )
