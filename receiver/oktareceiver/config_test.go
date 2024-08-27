@@ -80,12 +80,21 @@ func TestValidate(t *testing.T) {
 			},
 		},
 		{
-			desc:        "fail invalid poll interval",
+			desc:        "fail invalid poll interval short",
 			expectedErr: errInvalidPollInterval,
 			config: Config{
 				Domain:       "oktadomain.com",
 				APIToken:     "dummyAPIToken",
 				PollInterval: 500 * time.Millisecond,
+			},
+		},
+		{
+			desc:        "fail invalid poll interval long",
+			expectedErr: errInvalidPollInterval,
+			config: Config{
+				Domain:       "oktadomain.com",
+				APIToken:     "dummyAPIToken",
+				PollInterval: time.Hour * 25,
 			},
 		},
 		{

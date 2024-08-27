@@ -19,7 +19,7 @@ This receiver is capable of collecting logs from an Okta domain.
 |----------------------|-----------|------------------|----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | domain               |  string   |                  | `true`   | The Okta domain the receiver should collect logs from (Do not include "https://"): [Find your Okta Domain](https://developer.okta.com/docs/guides/find-your-domain/main/)                                   |
 | api_token            |  string   |                  | `true`   | An Okta API Token generated from the above Okta domain: [How to Create an Okta API Token](https://support.okta.com/help/s/article/How-to-create-an-API-token?language=en_US)                       |
-| poll_interval        |  string   | 1m               | `false`  | The rate at which this receiver will poll Okta for logs. This value must be at least 1 second and must be a string readable by Golang's [time.ParseDuration](https://pkg.go.dev/time#ParseDuration).     |
+| poll_interval        |  string   | 1m               | `false`  | The rate at which this receiver will poll Okta for logs. This value must be in the range [1 second - 24 hours] and must be a string readable by Golang's [time.ParseDuration](https://pkg.go.dev/time#ParseDuration).     |
 
 ### Example Configuration
 ```yaml

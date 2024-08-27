@@ -42,7 +42,7 @@ type Config struct {
 	APIToken configopaque.String `mapstructure:"api_token"`
 
 	// PollInterval The interval at which the Okta API is scanned for Logs
-	// Must be 1s or greater
+	// Must be in the range [1 second - 24 hours]
 	PollInterval time.Duration `mapstructure:"poll_interval"`
 }
 
@@ -50,7 +50,7 @@ var (
 	errNoDomain            = errors.New("okta_domain must be specified")
 	errInvalidDomain       = errors.New("invalid okta_domain, do not include https://")
 	errNoAPIToken          = errors.New("api_token must be specified")
-	errInvalidPollInterval = errors.New("invalid poll_interval, it must be a duration greater than one second")
+	errInvalidPollInterval = errors.New("invalid poll_interval, it must be within the range of [1 second - 24 hours]")
 )
 
 // Validate ensures an Okta receiver config is correct
@@ -67,7 +67,7 @@ func (c *Config) Validate() error {
 		return errNoAPIToken
 	}
 
-	if c.PollInterval < time.Second {
+	if c.PollInterval < time.Second || c.PollInterval > 24*time.Hour {
 		return errInvalidPollInterval
 	}
 
