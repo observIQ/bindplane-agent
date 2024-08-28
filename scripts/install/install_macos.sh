@@ -207,6 +207,9 @@ Usage:
   $(fg_yellow '-i, --clean-install')
     Do a clean install of the agent regardless of if a supervisor.yaml config file is already present.
 
+  $(fg_yellow '-u --dirty-install')
+    Do a dirty install by not generating a supervisor.yaml. Useful when one already exists and treats the install as an update.
+
 EOF
   )
   info "$USAGE"
@@ -456,11 +459,8 @@ set_opamp_secret_key() {
 # If an existing supervisor.yaml is present, ask whether we should do a clean install.
 # Want to avoid inadvertanly overwriting endpoint or secret_key values.
 ask_clean_install() {
-  if [ "$force_clean_install" = "true" ]; then
-    increase_indent
-    success "Doing clean install!"
-    decrease_indent
-    clean_install="true"
+  if [ "$clean_install" = "true" ] || [ "$clean_install" = "false" ]; then
+    # install type already set, so just return
     return
   fi
 
@@ -733,7 +733,11 @@ main() {
         shift 2
         ;;
       -i | --clean-install)
-        force_clean_install="true"
+        clean_install="true"
+        shift 1
+        ;;
+      -u | --dirty-install)
+        clean_install="false"
         shift 1
         ;;
       --)
