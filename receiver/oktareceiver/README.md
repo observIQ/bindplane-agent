@@ -25,7 +25,7 @@ This receiver is capable of collecting logs from an Okta domain.
 ```yaml
 receivers:
   okta:
-    domain: example.okta.com
+    okta_domain: example.okta.com
     api_token: 11Z-XDEwgRIf4p0-RqbSFoplFh_84EOtC_ka4J7ylx
     poll_interval: 2m
 exporters:
