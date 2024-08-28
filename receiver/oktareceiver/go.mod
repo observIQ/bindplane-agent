@@ -4,6 +4,7 @@ go 1.21.9
 
 require (
 	github.com/okta/okta-sdk-golang/v2 v2.20.0
+	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden v0.107.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest v0.107.0
 	github.com/stretchr/testify v1.9.0
 	go.opentelemetry.io/collector/confmap v0.107.0

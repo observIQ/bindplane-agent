@@ -17,19 +17,18 @@ package oktareceiver
 import (
 	"context"
 	"io"
-	"log"
 	"net/http"
 	"os"
 	"strconv"
 	"strings"
 	"testing"
 
+	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest/plogtest"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/component/componenttest"
 	"go.opentelemetry.io/collector/consumer"
 	"go.opentelemetry.io/collector/consumer/consumertest"
-	"go.opentelemetry.io/collector/pdata/plog"
 	"go.uber.org/zap"
 )
 
@@ -75,7 +74,7 @@ func TestPollBasic(t *testing.T) {
 		mockDo: func(req *http.Request) (*http.Response, error) {
 			require.Contains(t, req.URL.String(), "since=")
 			require.Contains(t, req.URL.String(), "limit="+strconv.Itoa(oktaMaxLimit))
-			return mockAPIResponseOKBasic(), nil
+			return mockAPIResponseOKBasic(t), nil
 		},
 	}
 
@@ -83,12 +82,14 @@ func TestPollBasic(t *testing.T) {
 	require.NoError(t, err)
 
 	logs := sink.AllLogs()
-
 	log := logs[0]
+
+	// golden.WriteLogs(t, "testdata/plog.yaml", log)
+
 	oktaDomain, exist := log.ResourceLogs().At(0).Resource().Attributes().Get("okta.domain")
 	require.True(t, exist)
 	require.Equal(t, mockDomain, oktaDomain.Str())
-	expected, err := jsonFileAsPlogs("testdata/plog.json")
+	expected, err := golden.ReadLogs("testdata/plog.yaml")
 	require.NoError(t, err)
 	require.NoError(t, plogtest.CompareLogs(expected, log, plogtest.IgnoreObservedTimestamp()))
 
@@ -98,7 +99,7 @@ func TestPollBasic(t *testing.T) {
 	recv.client = &mockHTTPClient{
 		mockDo: func(req *http.Request) (*http.Response, error) {
 			require.Equal(t, mockNextURL, req.URL.String())
-			return mockAPIResponseOKBasic(), nil
+			return mockAPIResponseOKBasic(t), nil
 		},
 	}
 	err = recv.poll(context.Background())
@@ -124,7 +125,7 @@ func TestPollTooManyRequests(t *testing.T) {
 			if strings.Contains(req.URL.String(), "after=") {
 				return mockAPIResponseTooManyRequests(), nil
 			}
-			return mockAPIResponseOK1000Logs(), nil
+			return mockAPIResponseOK1000Logs(t), nil
 		},
 	}
 
@@ -154,9 +155,9 @@ func TestPollOverflow(t *testing.T) {
 			require.Contains(t, req.URL.String(), "since=")
 			require.Contains(t, req.URL.String(), "limit="+strconv.Itoa(oktaMaxLimit))
 			if strings.Contains(req.URL.String(), "after=") {
-				return mockAPIResponseOKBasic(), nil
+				return mockAPIResponseOKBasic(t), nil
 			}
-			return mockAPIResponseOK1000Logs(), nil
+			return mockAPIResponseOK1000Logs(t), nil
 		},
 	}
 
@@ -186,9 +187,9 @@ func TestPollPublishedAfterPollTime(t *testing.T) {
 			require.Contains(t, req.URL.String(), "since=")
 			require.Contains(t, req.URL.String(), "limit="+strconv.Itoa(oktaMaxLimit))
 			if strings.Contains(req.URL.String(), "after=") {
-				return mockAPIResponseOKBasic(), nil
+				return mockAPIResponseOKBasic(t), nil
 			}
-			return mockAPIResponseOK1000LogsAfter(), nil
+			return mockAPIResponseOK1000LogsAfter(t), nil
 		},
 	}
 
@@ -210,42 +211,39 @@ func newReceiver(t *testing.T, cfg *Config, c consumer.Logs) *oktaLogsReceiver {
 	return r
 }
 
-func jsonFileAsPlogs(filepath string) (plog.Logs, error) {
-	expectedFileBytes, err := os.ReadFile(filepath)
-	if err != nil {
-		return plog.Logs{}, nil
-	}
-	unmarshaler := &plog.JSONUnmarshaler{}
-	return unmarshaler.UnmarshalLogs(expectedFileBytes)
+func jsonFileAsString(t *testing.T, filePath string) string {
+	jsonBytes, err := os.ReadFile(filePath)
+	require.NoError(t, err)
+	return string(jsonBytes)
 }
 
-func mockAPIResponseOKBasic() *http.Response {
+func mockAPIResponseOKBasic(t *testing.T) *http.Response {
 	mockRes := &http.Response{}
 	mockRes.StatusCode = http.StatusOK
 	mockRes.Header = http.Header{}
 	mockRes.Header.Add("Link", mockLinkHeaderSelf)
 	mockRes.Header.Add("Link", mockLinkHeaderNext)
-	mockRes.Body = io.NopCloser(strings.NewReader(jsonFileAsString("testdata/oktaResponseBasic.json")))
+	mockRes.Body = io.NopCloser(strings.NewReader(jsonFileAsString(t, "testdata/oktaResponseBasic.json")))
 	return mockRes
 }
 
-func mockAPIResponseOK1000Logs() *http.Response {
+func mockAPIResponseOK1000Logs(t *testing.T) *http.Response {
 	mockRes := &http.Response{}
 	mockRes.StatusCode = http.StatusOK
 	mockRes.Header = http.Header{}
 	mockRes.Header.Add("Link", mockLinkHeaderSelf)
 	mockRes.Header.Add("Link", mockLinkHeaderNext)
-	mockRes.Body = io.NopCloser(strings.NewReader(jsonFileAsString("testdata/oktaResponse1000Logs.json")))
+	mockRes.Body = io.NopCloser(strings.NewReader(jsonFileAsString(t, "testdata/oktaResponse1000Logs.json")))
 	return mockRes
 }
 
-func mockAPIResponseOK1000LogsAfter() *http.Response {
+func mockAPIResponseOK1000LogsAfter(t *testing.T) *http.Response {
 	mockRes := &http.Response{}
 	mockRes.StatusCode = http.StatusOK
 	mockRes.Header = http.Header{}
 	mockRes.Header.Add("Link", mockLinkHeaderSelf)
 	mockRes.Header.Add("Link", mockLinkHeaderNext)
-	mockRes.Body = io.NopCloser(strings.NewReader(jsonFileAsString("testdata/oktaResponse1000LogsAfter.json")))
+	mockRes.Body = io.NopCloser(strings.NewReader(jsonFileAsString(t, "testdata/oktaResponse1000LogsAfter.json")))
 	return mockRes
 }
 
@@ -254,15 +252,6 @@ func mockAPIResponseTooManyRequests() *http.Response {
 		StatusCode: http.StatusTooManyRequests,
 		Body:       io.NopCloser(strings.NewReader("{}")),
 	}
-}
-
-func jsonFileAsString(filePath string) string {
-	jsonBytes, err := os.ReadFile(filePath)
-	if err != nil {
-		log.Fatalf("Failed to read JSON file: %s", err)
-		return ""
-	}
-	return string(jsonBytes)
 }
 
 var (
