@@ -18,7 +18,6 @@ jobs:
           go-version-file: go.mod
           cache-dependency-path: |
             go.sum
-            **/go.sum
       - name: Run Tests
         run: make test
       - name: Run Updater Integration Tests (non-linux)
