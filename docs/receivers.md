@@ -51,7 +51,7 @@ Below is a list of supported receivers with links to their documentation pages.
 | MongoDB Atlas Receiver                     | [mongodbatlasreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.107.0/receiver/mongodbatlasreceiver/README.md)                     |
 | MySQL Receiver                             | [mysqlreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.107.0/receiver/mysqlreceiver/README.md)                                   |
 | NGINX Receiver                             | [nginxreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.107.0/receiver/nginxreceiver/README.md)                                   |
-| Okta Receiver                              | [oktareceiver](../receiver/oktareceiver/README.md)                         |
+| Okta Receiver                              | [oktareceiver](../receiver/oktareceiver/README.md)                                                                                                                 |
 | OpenCensus Receiver                        | [opencensusreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.107.0/receiver/opencensusreceiver/README.md)                         |
 | OTLP Receiver                              | [otlpreceiver](https://github.com/open-telemetry/opentelemetry-collector/blob/v0.107.0/receiver/otlpreceiver/README.md)                                             |
 | Plugin Receiver                            | [pluginreceiver](../receiver/pluginreceiver/README.md)                                                                                                             |
