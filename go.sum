@@ -1504,8 +1504,8 @@ github.com/gorilla/sessions v1.2.1 h1:DHd3rPN5lE3Ts3D8rKkQ8x/0kqfeNmBAaiSi+o7Fsg
 github.com/gorilla/sessions v1.2.1/go.mod h1:dk2InVEVJ0sfLlnXv9EAgkf6ecYs/i80K/zI+bUmuGM=
 github.com/gorilla/websocket v1.4.0/go.mod h1:E7qHFY5m1UJ88s3WnNqhKjPHQ0heANvMoAMk2YaljkQ=
 github.com/gorilla/websocket v1.4.2/go.mod h1:YR8l580nyteQvAITg2hZ9XVh4b55+EU/adAjf1fMHhE=
-github.com/gorilla/websocket v1.5.0 h1:PPwGk2jz7EePpoHN/+ClbZu8SPxiqlu12wZP/3sWmnc=
-github.com/gorilla/websocket v1.5.0/go.mod h1:YR8l580nyteQvAITg2hZ9XVh4b55+EU/adAjf1fMHhE=
+github.com/gorilla/websocket v1.5.1 h1:gmztn0JnHVt9JZquRuzLw3g4wouNVzKL15iLr/zn/QY=
+github.com/gorilla/websocket v1.5.1/go.mod h1:x3kM2JMyaluk02fnUJpQuwD2dCS5NDG2ZHL0uE0tcaY=
 github.com/gosnmp/gosnmp v1.37.0 h1:/Tf8D3b9wrnNuf/SfbvO+44mPrjVphBhRtcGg22V07Y=
 github.com/gosnmp/gosnmp v1.37.0/go.mod h1:GDH9vNqpsD7f2HvZhKs5dlqSEcAS6s6Qp099oZRCR+M=
 github.com/grafana/loki/pkg/push v0.0.0-20240514112848-a1b1eeb09583 h1:dN3eF1S5fvVu2l9WoqYSvmNmPK8Uh2vjE4yUsBq80l4=
@@ -1902,8 +1902,8 @@ github.com/onsi/gomega v1.10.1/go.mod h1:iN09h71vgCQne3DLsj+A5owkum+a2tYe+TOCB1y
 github.com/onsi/gomega v1.13.0/go.mod h1:lRk9szgn8TxENtWd0Tp4c3wjlRfMTMH27I+3Je41yGY=
 github.com/onsi/gomega v1.32.0 h1:JRYU78fJ1LPxlckP6Txi/EYqJvjtMrDC04/MM5XRHPk=
 github.com/onsi/gomega v1.32.0/go.mod h1:a4x4gW6Pz2yK1MAmvluYme5lvYTn61afQ2ETw/8n4Lg=
-github.com/open-telemetry/opamp-go v0.9.0 h1:S6Mwn8uxYjcttE6ZJ6AXoiOuryU67zjKysz3xRfYL9k=
-github.com/open-telemetry/opamp-go v0.9.0/go.mod h1:Pfmm5EdWqZCG0dZAJjAinlra3yEpqK5StCblxpbEp6Q=
+github.com/open-telemetry/opamp-go v0.14.0 h1:KoziIK+wsFojhUXNTkCSTnCPf0eCMqFAaccOs0HrWIY=
+github.com/open-telemetry/opamp-go v0.14.0/go.mod h1:XOGCigljsLSTZ8FfLwvat0M1QDj3conIIgRa77BWrKs=
 github.com/open-telemetry/opentelemetry-collector-contrib/connector/countconnector v0.107.0 h1:6A3R+q3JBxnhEYhM53fHF9qKGNEtvc8O5j0UnooLDrU=
 github.com/open-telemetry/opentelemetry-collector-contrib/connector/countconnector v0.107.0/go.mod h1:Fz1oG0B2AVwSAG22GOZc9EGpOXqdHJtYU0F0+KjA6zs=
 github.com/open-telemetry/opentelemetry-collector-contrib/connector/datadogconnector v0.107.0 h1:5nCidAaa6vxj85UHOz7/kqtVsnbFMXyDDUV0Ima8FHk=

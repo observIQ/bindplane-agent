@@ -22,9 +22,11 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"slices"
 	"sync"
 
 	"github.com/observiq/bindplane-agent/collector"
+	"github.com/observiq/bindplane-agent/internal/measurements"
 	"github.com/observiq/bindplane-agent/internal/report"
 	"github.com/observiq/bindplane-agent/internal/version"
 	"github.com/observiq/bindplane-agent/opamp"
@@ -63,6 +65,7 @@ type Client struct {
 	mutex                   sync.Mutex
 	updatingPackage         bool
 	reportManager           *report.Manager
+	measurementsSender      *measurementsSender
 
 	// To signal if we are disconnecting already and not take any actions on connection failures
 	disconnecting bool
@@ -82,10 +85,11 @@ type NewClientArgs struct {
 	Collector     collector.Collector
 	Version       string
 
-	TmpPath             string
-	ManagerConfigPath   string
-	CollectorConfigPath string
-	LoggerConfigPath    string
+	TmpPath              string
+	ManagerConfigPath    string
+	CollectorConfigPath  string
+	LoggerConfigPath     string
+	MeasurementsReporter MeasurementsReporter
 }
 
 // NewClient creates a new OpAmp client
@@ -136,10 +140,29 @@ func NewClient(args *NewClientArgs) (opamp.Client, error) {
 	// Create collect client based on URL scheme
 	switch opampURL.Scheme {
 	case "ws", "wss":
-		observiqClient.opampClient = client.NewWebSocket(clientLogger.Sugar())
+		logger := newZapOpAMPLoggerAdapter(clientLogger)
+		observiqClient.opampClient = client.NewWebSocket(logger)
 	default:
 		return nil, ErrUnsupportedURL
 	}
+
+	err = observiqClient.opampClient.SetCustomCapabilities(&protobufs.CustomCapabilities{
+		Capabilities: []string{
+			measurements.ReportMeasurementsV1Capability,
+		},
+	})
+	if err != nil {
+		return nil, fmt.Errorf("error setting custom capabilities: %w", err)
+	}
+
+	// Create measurements sender
+	observiqClient.measurementsSender = newMeasurementsSender(
+		clientLogger,
+		args.MeasurementsReporter,
+		observiqClient.opampClient,
+		args.Config.MeasurementsInterval,
+		args.Config.ExtraMeasurementsAttributes,
+	)
 
 	return observiqClient, nil
 }
@@ -255,7 +278,7 @@ func (c *Client) Disconnect(ctx context.Context) error {
 
 // client callbacks
 
-func (c *Client) onConnectHandler() {
+func (c *Client) onConnectHandler(_ context.Context) {
 	c.logger.Info("Successfully connected to server")
 
 	// See if we can retrieve the PackageStatuses where the collector package is in an installing state
@@ -287,7 +310,7 @@ func (c *Client) onConnectHandler() {
 	c.finishPackageInstall(pkgStatuses)
 }
 
-func (c *Client) onConnectFailedHandler(err error) {
+func (c *Client) onConnectFailedHandler(_ context.Context, err error) {
 	c.logger.Error("Failed to connect to server", zap.Error(err))
 
 	// We are currently disconnecting so any Connection failed error is expected and should not affect an install
@@ -297,7 +320,7 @@ func (c *Client) onConnectFailedHandler(err error) {
 	}
 }
 
-func (c *Client) onErrorHandler(errResp *protobufs.ServerErrorResponse) {
+func (c *Client) onErrorHandler(_ context.Context, errResp *protobufs.ServerErrorResponse) {
 	c.logger.Error("Server returned an error response", zap.String("Error", errResp.GetErrorMessage()))
 }
 
@@ -316,6 +339,15 @@ func (c *Client) onMessageFuncHandler(ctx context.Context, msg *types.MessageDat
 	if msg.PackagesAvailable != nil {
 		if err := c.onPackagesAvailableHandler(msg.PackagesAvailable); err != nil {
 			c.logger.Error("Error while processing Packages Available Change", zap.Error(err))
+		}
+	}
+	if msg.CustomCapabilities != nil {
+		if slices.Contains(msg.CustomCapabilities.Capabilities, measurements.ReportMeasurementsV1Capability) {
+			c.logger.Info("Server supports custom message measurements, starting sender.")
+			c.measurementsSender.Start()
+		} else {
+			c.logger.Info("Server does not support custom message measurements, stopping sender.")
+			c.measurementsSender.Stop()
 		}
 	}
 }

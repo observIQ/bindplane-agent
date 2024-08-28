@@ -19,6 +19,8 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/observiq/bindplane-agent/internal/measurements"
+
 	"github.com/observiq/bindplane-agent/collector"
 	"github.com/observiq/bindplane-agent/internal/version"
 	"github.com/observiq/bindplane-agent/opamp"
@@ -46,14 +48,15 @@ func NewManagedCollectorService(col collector.Collector, logger *zap.Logger, man
 
 	// Create client Args
 	clientArgs := &observiq.NewClientArgs{
-		DefaultLogger:       logger,
-		Config:              *opampConfig,
-		Collector:           col,
-		Version:             version.Version(),
-		TmpPath:             "./tmp",
-		ManagerConfigPath:   managerConfigPath,
-		CollectorConfigPath: collectorConfigPath,
-		LoggerConfigPath:    loggerConfigPath,
+		DefaultLogger:        logger,
+		Config:               *opampConfig,
+		Collector:            col,
+		Version:              version.Version(),
+		TmpPath:              "./tmp",
+		ManagerConfigPath:    managerConfigPath,
+		CollectorConfigPath:  collectorConfigPath,
+		LoggerConfigPath:     loggerConfigPath,
+		MeasurementsReporter: measurements.BindplaneAgentThroughputMeasurementsRegistry,
 	}
 
 	// Create new client
