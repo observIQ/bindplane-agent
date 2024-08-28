@@ -92,7 +92,7 @@ func TestPollBasic(t *testing.T) {
 	require.NoError(t, err)
 	require.NoError(t, plogtest.CompareLogs(expected, log, plogtest.IgnoreObservedTimestamp()))
 
-	require.Equal(t, 2, logs[0].ResourceLogs().Len())
+	require.Equal(t, 2, log.ResourceLogs().At(0).ScopeLogs().At(0).LogRecords().Len())
 	require.Equal(t, mockNextURL, recv.nextURL)
 
 	recv.client = &mockHTTPClient{
@@ -133,7 +133,7 @@ func TestPollTooManyRequests(t *testing.T) {
 
 	logs := sink.AllLogs()
 
-	require.Equal(t, 1000, logs[0].ResourceLogs().Len())
+	require.Equal(t, 1000, logs[0].ResourceLogs().At(0).ScopeLogs().At(0).LogRecords().Len())
 	require.Equal(t, mockNextURL, recv.nextURL)
 
 	err = recv.Shutdown(context.Background())
@@ -165,7 +165,7 @@ func TestPollOverflow(t *testing.T) {
 
 	logs := sink.AllLogs()
 
-	require.Equal(t, 1002, logs[0].ResourceLogs().Len())
+	require.Equal(t, 1002, logs[0].ResourceLogs().At(0).ScopeLogs().At(0).LogRecords().Len())
 	require.Equal(t, mockNextURL, recv.nextURL)
 
 	err = recv.Shutdown(context.Background())
@@ -197,7 +197,7 @@ func TestPollPublishedAfterPollTime(t *testing.T) {
 
 	logs := sink.AllLogs()
 
-	require.Equal(t, 1000, logs[0].ResourceLogs().Len())
+	require.Equal(t, 1000, logs[0].ResourceLogs().At(0).ScopeLogs().At(0).LogRecords().Len())
 	require.Equal(t, mockNextURL, recv.nextURL)
 
 	err = recv.Shutdown(context.Background())

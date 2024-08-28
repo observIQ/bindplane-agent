@@ -102,8 +102,8 @@ func (r *oktaLogsReceiver) poll(ctx context.Context) error {
 	return nil
 }
 
-func (r *oktaLogsReceiver) getLogs(ctx context.Context) []*okta.LogEvent {
-	var logs []*okta.LogEvent
+func (r *oktaLogsReceiver) getLogs(ctx context.Context) []okta.LogEvent {
+	var logs []okta.LogEvent
 	var reqURL string
 	pollTime := time.Now().UTC()
 
@@ -152,7 +152,7 @@ func (r *oktaLogsReceiver) getLogs(ctx context.Context) []*okta.LogEvent {
 			break
 		}
 
-		var curLogs []*okta.LogEvent
+		var curLogs []okta.LogEvent
 		err = json.Unmarshal(body, &curLogs)
 		if err != nil {
 			r.logger.Error("unable to unmarshal log events", zap.Error(err))
@@ -169,17 +169,17 @@ func (r *oktaLogsReceiver) getLogs(ctx context.Context) []*okta.LogEvent {
 	return logs
 }
 
-func (r *oktaLogsReceiver) processLogEvents(observedTime pcommon.Timestamp, logEvents []*okta.LogEvent) plog.Logs {
+func (r *oktaLogsReceiver) processLogEvents(observedTime pcommon.Timestamp, logEvents []okta.LogEvent) plog.Logs {
 	logs := plog.NewLogs()
 
-	for _, logEvent := range logEvents {
-		resourceLogs := logs.ResourceLogs().AppendEmpty()
-		resourceLogs.ScopeLogs().AppendEmpty()
-		logRecord := resourceLogs.ScopeLogs().At(0).LogRecords().AppendEmpty()
+	// resource attributes
+	resourceLogs := logs.ResourceLogs().AppendEmpty()
+	resourceLogs.ScopeLogs().AppendEmpty()
+	resourceAttributes := resourceLogs.Resource().Attributes()
+	resourceAttributes.PutStr("okta.domain", r.cfg.Domain)
 
-		// resource attributes
-		resourceAttributes := resourceLogs.Resource().Attributes()
-		resourceAttributes.PutStr("okta.domain", r.cfg.Domain)
+	for _, logEvent := range logEvents {
+		logRecord := resourceLogs.ScopeLogs().At(0).LogRecords().AppendEmpty()
 
 		// timestamps
 		logRecord.SetObservedTimestamp(observedTime)
@@ -198,10 +198,14 @@ func (r *oktaLogsReceiver) processLogEvents(observedTime pcommon.Timestamp, logE
 		logRecord.Attributes().PutStr("uuid", logEvent.Uuid)
 		logRecord.Attributes().PutStr("eventType", logEvent.EventType)
 		logRecord.Attributes().PutStr("displayMessage", logEvent.DisplayMessage)
-		logRecord.Attributes().PutStr("outcome.result", logEvent.Outcome.Result)
-		logRecord.Attributes().PutStr("actor.id", logEvent.Actor.Id)
-		logRecord.Attributes().PutStr("actor.alternateId", logEvent.Actor.AlternateId)
-		logRecord.Attributes().PutStr("actor.displayName", logEvent.Actor.DisplayName)
+		if logEvent.Outcome != nil {
+			logRecord.Attributes().PutStr("outcome.result", logEvent.Outcome.Result)
+		}
+		if logEvent.Actor != nil {
+			logRecord.Attributes().PutStr("actor.id", logEvent.Actor.Id)
+			logRecord.Attributes().PutStr("actor.alternateId", logEvent.Actor.AlternateId)
+			logRecord.Attributes().PutStr("actor.displayName", logEvent.Actor.DisplayName)
+		}
 	}
 
 	return logs
