@@ -19,8 +19,10 @@ import (
 	"crypto/x509"
 	"errors"
 	"fmt"
+	"maps"
 	"os"
 	"path/filepath"
+	"time"
 
 	"gopkg.in/yaml.v3"
 )
@@ -53,8 +55,10 @@ type Config struct {
 	TLS       *TLSConfig `yaml:"tls_config,omitempty"`
 
 	// Updatable fields
-	Labels    *string `yaml:"labels,omitempty"`
-	AgentName *string `yaml:"agent_name,omitempty"`
+	Labels                      *string           `yaml:"labels,omitempty"`
+	AgentName                   *string           `yaml:"agent_name,omitempty"`
+	MeasurementsInterval        time.Duration     `yaml:"measurements_interval,omitempty"`
+	ExtraMeasurementsAttributes map[string]string `yaml:"extra_measurements_attributes,omitempty"`
 }
 
 // TLSConfig represents the TLS config to connect to OpAmp server
@@ -153,8 +157,9 @@ func ParseConfig(configLocation string) (*Config, error) {
 func (c Config) Copy() *Config {
 
 	cfgCopy := &Config{
-		Endpoint: c.Endpoint,
-		AgentID:  c.AgentID,
+		Endpoint:             c.Endpoint,
+		AgentID:              c.AgentID,
+		MeasurementsInterval: c.MeasurementsInterval,
 	}
 
 	if c.SecretKey != nil {
@@ -171,6 +176,9 @@ func (c Config) Copy() *Config {
 	}
 	if c.TLS != nil {
 		cfgCopy.TLS = c.TLS.copy()
+	}
+	if c.ExtraMeasurementsAttributes != nil {
+		cfgCopy.ExtraMeasurementsAttributes = maps.Clone(c.ExtraMeasurementsAttributes)
 	}
 
 	return cfgCopy
@@ -209,6 +217,14 @@ func (c Config) GetSecretKey() string {
 // CmpUpdatableFields compares updatable fields for equality
 func (c Config) CmpUpdatableFields(o Config) (equal bool) {
 	if !cmpStringPtr(c.AgentName, o.AgentName) {
+		return false
+	}
+
+	if c.MeasurementsInterval != o.MeasurementsInterval {
+		return false
+	}
+
+	if !maps.Equal(c.ExtraMeasurementsAttributes, o.ExtraMeasurementsAttributes) {
 		return false
 	}
 
