@@ -221,6 +221,9 @@ Usage:
 
     This parameter will have the script check access to BindPlane based on the provided '--endpoint'
 
+  $(fg_yellow '-i, --clean-install')
+    Do a clean install of the agent regardless of if a supervisor.yaml config file is already present.
+
 EOF
   )
   info "$USAGE"
@@ -459,6 +462,14 @@ set_opamp_secret_key() {
 # If an existing supervisor.yaml is present, ask whether we should do a clean install.
 # Want to avoid inadvertanly overwriting endpoint or secret_key values.
 ask_clean_install() {
+  if [ "$force_clean_install" = "true" ]; then
+    increase_indent
+    success "Doing clean install!"
+    decrease_indent
+    clean_install="true"
+    return
+  fi
+
   if [ -f "$SUPERVISOR_YML_PATH" ]; then
     command printf "${indent}An installation already exists. Would you like to do a clean install? $(prompt n)"
     read -r clean_install_response
@@ -822,6 +833,10 @@ main() {
       -h | --help)
         usage
         exit 0
+        ;;
+      -i | --clean-install)
+        force_clean_install="true"
+        shift 1
         ;;
       --)
         shift
