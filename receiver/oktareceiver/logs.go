@@ -32,6 +32,9 @@ import (
 	"go.uber.org/zap"
 )
 
+// oktaMaxLimit maximum number of log objects returned in one call to Okta API
+var oktaMaxLimit = 1000
+
 type oktaLogsReceiver struct {
 	cfg      Config
 	client   httpClient
@@ -134,9 +137,7 @@ func (r *oktaLogsReceiver) getLogs(ctx context.Context) []*okta.LogEvent {
 			break
 		}
 
-		if res.Body != nil {
-			defer res.Body.Close()
-		}
+		defer res.Body.Close()
 
 		if res.StatusCode != http.StatusOK {
 			r.logger.Error("okta logs endpoint returned non-200 statuscode: " + res.Status)
@@ -208,10 +209,10 @@ func (r *oktaLogsReceiver) processLogEvents(observedTime pcommon.Timestamp, logE
 
 func (r *oktaLogsReceiver) Shutdown(_ context.Context) error {
 	r.logger.Debug("shutting down logs receiver")
-	r.client.CloseIdleConnections()
 	if r.cancel != nil {
 		r.cancel()
 	}
+	r.client.CloseIdleConnections()
 	r.wg.Wait()
 	return nil
 }
