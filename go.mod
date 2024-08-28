@@ -30,6 +30,7 @@ require (
 	github.com/observiq/bindplane-agent/receiver/azureblobrehydrationreceiver v1.59.0
 	github.com/observiq/bindplane-agent/receiver/httpreceiver v1.59.0
 	github.com/observiq/bindplane-agent/receiver/m365receiver v1.59.0
+	github.com/observiq/bindplane-agent/receiver/oktareceiver v1.59.0
 	github.com/observiq/bindplane-agent/receiver/pluginreceiver v1.59.0
 	github.com/observiq/bindplane-agent/receiver/routereceiver v1.59.0
 	github.com/observiq/bindplane-agent/receiver/sapnetweaverreceiver v1.59.0
@@ -205,6 +206,7 @@ require (
 	github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v4 v4.3.0 // indirect
 	github.com/Azure/azure-sdk-for-go/sdk/storage/azblob v1.4.0 // indirect
 	github.com/AzureAD/microsoft-authentication-library-for-go v1.2.2 // indirect
+	github.com/BurntSushi/toml v1.3.2 // indirect
 	github.com/ClickHouse/ch-go v0.61.5 // indirect
 	github.com/ClickHouse/clickhouse-go/v2 v2.27.1 // indirect
 	github.com/Code-Hex/go-generics-cache v1.5.1 // indirect
@@ -306,8 +308,9 @@ require (
 	github.com/expr-lang/expr v1.16.9 // indirect
 	github.com/go-faster/city v1.0.1 // indirect
 	github.com/go-faster/errors v0.7.1 // indirect
+	github.com/go-jose/go-jose/v3 v3.0.0 // indirect
 	github.com/go-jose/go-jose/v4 v4.0.2 // indirect
-	github.com/go-viper/mapstructure/v2 v2.0.0 // indirect
+	github.com/go-viper/mapstructure/v2 v2.1.0 // indirect
 	github.com/goccy/go-json v0.10.3 // indirect
 	github.com/golang-jwt/jwt/v5 v5.2.1 // indirect
 	github.com/golang/mock v1.6.0 // indirect
@@ -324,6 +327,7 @@ require (
 	github.com/joeshaw/multierror v0.0.0-20140124173710-69b34d4ec901 // indirect
 	github.com/jonboulle/clockwork v0.4.0 // indirect
 	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0 // indirect
+	github.com/kelseyhightower/envconfig v1.4.0 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.5 // indirect
 	github.com/knadh/koanf/v2 v2.1.1 // indirect
 	github.com/kylelemons/godebug v1.1.0 // indirect
@@ -338,6 +342,7 @@ require (
 	github.com/observiq/bindplane-agent/counter v1.59.0 // indirect
 	github.com/observiq/bindplane-agent/expr v1.59.0 // indirect
 	github.com/observiq/bindplane-agent/internal/rehydration v1.59.0 // indirect
+	github.com/okta/okta-sdk-golang/v2 v2.20.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlemanagedprometheusexporter v0.107.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/extension/ackextension v0.107.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/extension/sumologicextension v0.107.0 // indirect
@@ -406,7 +411,7 @@ require (
 	go.uber.org/dig v1.17.1 // indirect
 	go.uber.org/fx v1.18.2 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20240725223205-93522f1f2a9f // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20240730163845-b1a4ccb954bf // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20240814211410-ddb44dafa142 // indirect
 	gopkg.in/zorkian/go-datadog-api.v2 v2.30.0 // indirect
 	howett.net/plist v1.0.0 // indirect
 	sigs.k8s.io/controller-runtime v0.17.3 // indirect
@@ -674,7 +679,7 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/power-devops/perfstat v0.0.0-20220216144756-c35f1ee13d7c // indirect
-	github.com/prometheus/client_golang v1.19.1 // indirect
+	github.com/prometheus/client_golang v1.20.0 // indirect
 	github.com/prometheus/client_model v0.6.1 // indirect
 	github.com/prometheus/common v0.55.0 // indirect
 	github.com/prometheus/common/sigv4 v0.1.0 // indirect
@@ -814,6 +819,8 @@ replace github.com/observiq/bindplane-agent/exporter/googlemanagedprometheusexpo
 replace github.com/observiq/bindplane-agent/receiver/azureblobrehydrationreceiver => ./receiver/azureblobrehydrationreceiver
 
 replace github.com/observiq/bindplane-agent/receiver/httpreceiver => ./receiver/httpreceiver
+
+replace github.com/observiq/bindplane-agent/receiver/oktareceiver => ./receiver/oktareceiver
 
 replace github.com/observiq/bindplane-agent/receiver/awss3rehydrationreceiver => ./receiver/awss3rehydrationreceiver
 
