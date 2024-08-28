@@ -61,6 +61,8 @@ func managerReload(client *Client, managerConfigPath string) opamp.ReloadFunc {
 		// Updatable config fields
 		client.currentConfig.AgentName = newConfig.AgentName
 		client.currentConfig.Labels = newConfig.Labels
+		client.currentConfig.MeasurementsInterval = newConfig.MeasurementsInterval
+		client.currentConfig.ExtraMeasurementsAttributes = newConfig.ExtraMeasurementsAttributes
 
 		// Update identity
 		client.ident.agentName = newConfig.AgentName
@@ -100,6 +102,10 @@ func managerReload(client *Client, managerConfigPath string) opamp.ReloadFunc {
 			client.currentConfig = *rollBackCfg
 			return false, fmt.Errorf("failed to set agent description: %w ", err)
 		}
+
+		// Set new measurements interval and attributes
+		client.measurementsSender.SetInterval(client.currentConfig.MeasurementsInterval)
+		client.measurementsSender.SetExtraAttributes(client.currentConfig.ExtraMeasurementsAttributes)
 
 		return true, nil
 	}
