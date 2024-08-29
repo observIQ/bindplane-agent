@@ -30,6 +30,8 @@ import (
 const (
 	// noCompression is the no compression type.
 	noCompression = "none"
+	protocolHTTPS = "https"
+	protocolGRPC  = "gRPC"
 )
 
 // Config defines configuration for the Chronicle exporter.
@@ -70,8 +72,21 @@ type Config struct {
 
 	// CollectAgentMetrics is a flag that determines whether or not to collect agent metrics.
 	CollectAgentMetrics bool `mapstructure:"collect_agent_metrics"`
+
+	// Protocol is the protocol that will be used to send logs to Chronicle.
+	// Either https or grpc.
+	Protocol string `mapstructure:"protocol"`
+
+	// Location is the location that will be used when the protocol is https.
+	Location string `mapstructure:"location"`
+
+	// Project is the project that will be used when the protocol is https.
+	Project string `mapstructure:"project"`
+
+	Forwarder string `mapstructure:"forwarder"`
 }
 
+// TODO add validation for new config fields
 // Validate checks if the configuration is valid.
 func (cfg *Config) Validate() error {
 	if cfg.CredsFilePath != "" && cfg.Creds != "" {
