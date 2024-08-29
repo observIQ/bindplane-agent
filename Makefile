@@ -123,7 +123,7 @@ test-with-cover:
 	$(MAKE) for-all CMD="go test -coverprofile=cover.out ./..."
 	$(MAKE) for-all CMD="go tool cover -html=cover.out -o cover.html"
 
-.PHONY: test-updater-integration 
+.PHONY: test-updater-integration
 test-updater-integration:
 	cd updater; go test $(INTEGRATION_TEST_ARGS) -race ./...
 
@@ -141,7 +141,7 @@ fmt:
 
 .PHONY: tidy
 tidy:
-	$(MAKE) for-all CMD="go mod tidy -compat=1.21"
+	$(MAKE) for-all CMD="go mod tidy -compat=1.22"
 
 .PHONY: gosec
 gosec:
@@ -247,7 +247,7 @@ release:
 	@if ! [[ "$(version)" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$$ ]]; then \
 		echo "version $(version) is invalid semver"; \
 		exit 1; \
-	fi	
+	fi
 
 	@git tag $(version)
 	@git push --tags
