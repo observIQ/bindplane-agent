@@ -35,7 +35,7 @@ import (
 )
 
 const extractFolder = "latest"
-const maxArchiveObjectByteSize = 1024
+const maxArchiveObjectByteSize = 1000000000
 
 // Ensure interface is satisfied
 var _ opamp.DownloadableFileManager = (*DownloadableFileManager)(nil)
@@ -244,7 +244,8 @@ func extractTarGz(archivePath, extractPath string) error {
 			}
 			defer outFile.Close()
 
-			if _, err := io.CopyN(outFile, tarReader, maxArchiveObjectByteSize); err != nil {
+			_, err = io.CopyN(outFile, tarReader, maxArchiveObjectByteSize)
+			if err != nil && err != io.EOF {
 				return fmt.Errorf("write to file: %w", err)
 			}
 
@@ -302,7 +303,8 @@ func extractZip(archivePath, extractPath string) error {
 		}
 		defer rc.Close()
 
-		if _, err := io.CopyN(outFile, rc, maxArchiveObjectByteSize); err != nil {
+		_, err = io.CopyN(outFile, rc, maxArchiveObjectByteSize)
+		if err != nil && err != io.EOF {
 			return fmt.Errorf("write source file to output file: %w", err)
 		}
 	}
