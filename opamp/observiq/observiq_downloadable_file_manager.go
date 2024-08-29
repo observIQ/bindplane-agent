@@ -238,19 +238,15 @@ func extractTarGz(archivePath, extractPath string) error {
 
 		case tar.TypeReg:
 			outputPathClean := filepath.Clean(outputPath)
-			outFile, err := os.Create(outputPathClean)
+			outFile, err := os.OpenFile(outputPathClean, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, os.FileMode(header.Mode))
 			if err != nil {
-				return fmt.Errorf("create file: %w", err)
+				return fmt.Errorf("open output file: %w", err)
 			}
 			defer outFile.Close()
 
 			_, err = io.CopyN(outFile, tarReader, maxArchiveObjectByteSize)
 			if err != nil && err != io.EOF {
 				return fmt.Errorf("write to file: %w", err)
-			}
-
-			if err := os.Chmod(outputPath, os.FileMode(header.Mode)); err != nil {
-				return fmt.Errorf("chmod on file: %w", err)
 			}
 
 		default:
