@@ -114,7 +114,7 @@ template: |
           to: attributes.raw_log
         {{ end }}
         - type: regex_parser
-          regex: '(?P<timestamp>\d{2}-\w{3}-\d{4} \d{2}:\d{2}:\d{2}.\d{3})\s(?P<tomcat_severity>\w+)\s\[(?P<thread>[^\[\]]+)(\[[\d:]+\])?\]\s(?P<tc_source>[^ ]+)\s(?P<message>[\s\S]+)'
+          regex: '(?P<timestamp>\d{2}-\w{3}-\d{4} \d{2}:\d{2}:\d{2}.\d{3})\s(?P<tomcat_severity>\w+)\s\[(?P<thread>[^\[\]]+(?:\[[\d:]+\])?)\]\s(?P<tc_source>[^ ]+)\s(?P<message>[\s\S]+)'
           parse_to: {{ .parse_to }}
           timestamp:
             parse_from: {{ .parse_to }}.timestamp
