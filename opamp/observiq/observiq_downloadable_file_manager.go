@@ -35,6 +35,7 @@ import (
 )
 
 const extractFolder = "latest"
+const maxArchiveObjectByteSize = 1024
 
 // Ensure interface is satisfied
 var _ opamp.DownloadableFileManager = (*DownloadableFileManager)(nil)
@@ -200,7 +201,8 @@ func extractTarGz(archivePath, extractPath string) error {
 		return fmt.Errorf("mkdir extract path: %w", err)
 	}
 
-	file, err := os.Open(archivePath)
+	archivePathClean := filepath.Clean(archivePath)
+	file, err := os.Open(archivePathClean)
 	if err != nil {
 		return fmt.Errorf("open archive package: %w", err)
 	}
@@ -223,7 +225,10 @@ func extractTarGz(archivePath, extractPath string) error {
 			return fmt.Errorf("read next tarball header: %w", err)
 		}
 
-		outputPath := filepath.Join(extractPath, header.Name)
+		outputPath, err := sanitizeArchivePath(extractPath, header.Name)
+		if err != nil {
+			return fmt.Errorf("sanitize archive path: %w", err)
+		}
 
 		switch header.Typeflag {
 		case tar.TypeDir:
@@ -232,13 +237,14 @@ func extractTarGz(archivePath, extractPath string) error {
 			}
 
 		case tar.TypeReg:
-			outFile, err := os.Create(outputPath)
+			outputPathClean := filepath.Clean(outputPath)
+			outFile, err := os.Create(outputPathClean)
 			if err != nil {
 				return fmt.Errorf("create file: %w", err)
 			}
 			defer outFile.Close()
 
-			if _, err := io.Copy(outFile, tarReader); err != nil {
+			if _, err := io.CopyN(outFile, tarReader, maxArchiveObjectByteSize); err != nil {
 				return fmt.Errorf("write to file: %w", err)
 			}
 
@@ -256,7 +262,7 @@ func extractTarGz(archivePath, extractPath string) error {
 // extractZip will extract the .zip package at archivePath into the dir at extractPath
 func extractZip(archivePath, extractPath string) error {
 	// Ensure the output directory exists
-	if err := os.MkdirAll(extractPath, 0755); err != nil {
+	if err := os.MkdirAll(extractPath, 0750); err != nil {
 		return fmt.Errorf("mkdir extract path: %w", err)
 	}
 
@@ -267,7 +273,10 @@ func extractZip(archivePath, extractPath string) error {
 	defer r.Close()
 
 	for _, f := range r.File {
-		outputPath := filepath.Join(extractPath, f.Name)
+		outputPath, err := sanitizeArchivePath(extractPath, f.Name)
+		if err != nil {
+			return fmt.Errorf("sanitize archive path: %w", err)
+		}
 
 		if f.FileInfo().IsDir() {
 			if err := os.MkdirAll(outputPath, f.Mode()); err != nil {
@@ -276,11 +285,12 @@ func extractZip(archivePath, extractPath string) error {
 			continue
 		}
 
-		if err := os.MkdirAll(filepath.Dir(outputPath), 0755); err != nil {
+		if err := os.MkdirAll(filepath.Dir(outputPath), 0750); err != nil {
 			return fmt.Errorf("create file: %w", err)
 		}
 
-		outFile, err := os.OpenFile(outputPath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, f.Mode())
+		outputPathClean := filepath.Clean(outputPath)
+		outFile, err := os.OpenFile(outputPathClean, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, f.Mode())
 		if err != nil {
 			return fmt.Errorf("open output file: %w", err)
 		}
@@ -292,9 +302,17 @@ func extractZip(archivePath, extractPath string) error {
 		}
 		defer rc.Close()
 
-		if _, err := io.Copy(outFile, rc); err != nil {
+		if _, err := io.CopyN(outFile, rc, maxArchiveObjectByteSize); err != nil {
 			return fmt.Errorf("write source file to output file: %w", err)
 		}
 	}
 	return nil
+}
+
+func sanitizeArchivePath(dir, file string) (string, error) {
+	s := filepath.Join(dir, file)
+	if strings.HasPrefix(s, filepath.Clean(dir)) {
+		return s, nil
+	}
+	return "", fmt.Errorf("content filepath is tainted: %q", file)
 }
