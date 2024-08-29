@@ -1,0 +1,32 @@
+{
+  "resourceLogs": [
+    {
+      "resource": {
+        "attributes": [
+          { "key": "field1", "value": { "stringValue": "macos" } },
+          { "key": "field2", "value": { "stringValue": "standard" } }
+        ]
+      },
+      "scopeLogs": [
+        {
+          "scope": {},
+          "logRecords": [
+            {
+              "timeUnixNano": "1723563427664406000",
+              "severityNumber": 5,
+              "body": {
+                "stringValue": "{\"name\":\"test\",\"severity\":155,\"nested\":{\"n1\":1,\"n2\":2},\"bindplane-otel-attributes\":{\"baba\":\"you\",\"host\":\"myhost\"}}"
+              },
+              "attributes": [
+                { "key": "baba", "value": { "stringValue": "you" } },
+                { "key": "host", "value": { "stringValue": "myhost" } }
+              ],
+              "traceId": "",
+              "spanId": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
