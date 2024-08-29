@@ -12,25 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package serializeprocessor
+package marshalprocessor
 
 import (
 	"errors"
 	"strings"
 )
 
-var errInvalidSerializeTo = errors.New("serialize_to must be JSON, XML, or KV")
+var errInvalidMarshalTo = errors.New("marshal_to must be JSON, XML, or KV")
 
 // Config is the configuration for the processor
 type Config struct {
-	// SerializeTo is either JSON, XML, or KV
-	SerializeTo	string `mapstructure:"serialize_to"`
+	// MarshalTo is either JSON, XML, or KV
+	MarshalTo	string `mapstructure:"marshal_to"`
 }
 
 // Validate validates the processor configuration
 func (cfg Config) Validate() error {
-	// Validate SerializeTo choice
-	switch strings.ToUpper(cfg.SerializeTo) {
+	// Validate MarshalTo choice
+	switch strings.ToUpper(cfg.MarshalTo) {
 	case "JSON":
 		return nil
 	case "XML":
@@ -38,6 +38,6 @@ func (cfg Config) Validate() error {
 	case "KV":
 		return nil
 	default:
-		return errInvalidSerializeTo
+		return errInvalidMarshalTo
 	}
 }

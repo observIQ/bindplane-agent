@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package serializeprocessor
+package marshalprocessor
 
 import (
 	"testing"
@@ -29,51 +29,51 @@ func TestConfigValidate(t *testing.T) {
 		{
 			desc: "JSON",
 			cfg: Config{
-				SerializeTo: "JSON",
+				MarshalTo: "JSON",
 			},
 			expectedErr: nil,
 		},
 		{
 			desc: "XML",
 			cfg: Config{
-				SerializeTo: "XML",
+				MarshalTo: "XML",
 			},
 			expectedErr: nil,
 		},
 		{
 			desc: "KV",
 			cfg: Config{
-				SerializeTo: "KV",
+				MarshalTo: "KV",
 			},
 			expectedErr: nil,
 		},
 		{
 			desc: "JSON lowercase",
 			cfg: Config{
-				SerializeTo: "json",
+				MarshalTo: "json",
 			},
 			expectedErr: nil,
 		},
 		{
 			desc: "XML lowercase",
 			cfg: Config{
-				SerializeTo: "xml",
+				MarshalTo: "xml",
 			},
 			expectedErr: nil,
 		},
 		{
 			desc: "KV lowercase",
 			cfg: Config{
-				SerializeTo: "kv",
+				MarshalTo: "kv",
 			},
 			expectedErr: nil,
 		},
 		{
 			desc: "error",
 			cfg: Config{
-				SerializeTo: "TOML",
+				MarshalTo: "TOML",
 			},
-			expectedErr: errInvalidSerializeTo,
+			expectedErr: errInvalidMarshalTo,
 		},
 	}
 
