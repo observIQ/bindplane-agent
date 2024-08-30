@@ -16,7 +16,6 @@ package marshalprocessor
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"sort"
 	"strings"
@@ -62,12 +61,7 @@ func (mp *marshalProcessor) processLogs(_ context.Context, ld plog.Logs) (plog.L
 				case "XML":
 					return ld, fmt.Errorf("XML not yet supported")
 				case "KV":
-					jsonBody := logBody.AsString()
-					kvBody, err := convertJSONToKV(jsonBody)
-					if err != nil {
-						errors = append(errors, fmt.Errorf("Error converting to KV: %w", err))
-						continue
-					}
+					kvBody := convertToKV(logBody.Map())
 					logBody.SetStr(kvBody)
 				default:
 					return ld, fmt.Errorf("Unrecognized format to marshal to: %s", mp.marshalTo)
@@ -86,25 +80,13 @@ func (mp *marshalProcessor) processLogs(_ context.Context, ld plog.Logs) (plog.L
 	return ld, fmt.Errorf("%s", strings.Join(errorStrings, ", "))
 }
 
-func convertJSONToKV(jsonBody string) (string, error) {
-	var data map[string]interface{}
-	err := json.Unmarshal([]byte(jsonBody), &data)
-	if err != nil {
-		return jsonBody, fmt.Errorf("Error unmarshalling JSON: %w", err)
+func convertToKV(logBody pcommon.Map) string {
+	var kvStrings []string
+	for k, v := range logBody.AsRaw() {
+		kvStrings = append(kvStrings, fmt.Sprintf("%s=%v", k, v))
 	}
 
-	var keyValuePairs []string
-	for key, value := range data {
-		strValue := fmt.Sprintf("%v", value)
-		keyValuePairs = append(keyValuePairs, fmt.Sprintf("%s=%s", key, strValue))
-	}
+	sort.Strings(kvStrings)
 
-	// Ensure consistent order for testing
-	sort.Slice(keyValuePairs, func(i, j int) bool {
-		return keyValuePairs[i] < keyValuePairs[j]
-	})
-
-	kvBody := strings.Join(keyValuePairs, " ")
-
-	return kvBody, nil
+	return strings.Join(kvStrings, " ")
 }
