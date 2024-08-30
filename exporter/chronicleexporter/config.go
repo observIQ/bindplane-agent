@@ -83,10 +83,10 @@ type Config struct {
 	// Project is the project that will be used when the protocol is https.
 	Project string `mapstructure:"project"`
 
+	// Forwarder is the forwarder that will be used when the protocol is https.
 	Forwarder string `mapstructure:"forwarder"`
 }
 
-// TODO add validation for new config fields
 // Validate checks if the configuration is valid.
 func (cfg *Config) Validate() error {
 	if cfg.CredsFilePath != "" && cfg.Creds != "" {
@@ -112,6 +112,22 @@ func (cfg *Config) Validate() error {
 
 	if strings.HasPrefix(cfg.Endpoint, "http://") || strings.HasPrefix(cfg.Endpoint, "https://") {
 		return fmt.Errorf("endpoint should not contain a protocol: %s", cfg.Endpoint)
+	}
+
+	if cfg.Protocol != protocolHTTPS && cfg.Protocol != protocolGRPC {
+		return fmt.Errorf("invalid protocol: %s", cfg.Protocol)
+	}
+
+	if cfg.Protocol == protocolHTTPS {
+		if cfg.Location == "" {
+			return errors.New("location is required when protocol is https")
+		}
+		if cfg.Project == "" {
+			return errors.New("project is required when protocol is https")
+		}
+		if cfg.Forwarder == "" {
+			return errors.New("forwarder is required when protocol is https")
+		}
 	}
 
 	return nil
