@@ -17,17 +17,11 @@ package marshalprocessor
 import (
 	"context"
 
+	"github.com/observiq/bindplane-agent/processor/marshalprocessor/internal/metadata"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/consumer"
 	"go.opentelemetry.io/collector/processor"
 	"go.opentelemetry.io/collector/processor/processorhelper"
-)
-
-// componentType is the value of the "type" key in configuration.
-var componentType = component.MustNewType("marshal")
-
-const (
-	stability = component.StabilityLevelAlpha
 )
 
 var (
@@ -37,9 +31,9 @@ var (
 // NewFactory creates a new ProcessorFactory with default configuration
 func NewFactory() processor.Factory {
 	return processor.NewFactory(
-		componentType,
+		metadata.Type,
 		createDefaultConfig,
-		processor.WithLogs(createLogsProcessor, stability),
+		processor.WithLogs(createLogsProcessor, metadata.LogsStability),
 	)
 }
 
