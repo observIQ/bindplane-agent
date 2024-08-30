@@ -31,49 +31,42 @@ func Test_processLogs(t *testing.T) {
 		marshalTo     string
 		inputFilePath string
 		expected      string
-		expectedErr   error
 	}{
 		{
 			desc:          "Valid - Parsed body to JSON",
 			marshalTo:     "JSON",
 			inputFilePath: "parsed-log-1.json",
 			expected:      `{"bindplane-otel-attributes":{"baba":"you","host":"myhost"},"name":"test","nested":{"n1":1,"n2":2},"severity":155}`,
-			expectedErr:   nil,
 		},
 		{
 			desc:          "Invalid - String body to JSON",
 			marshalTo:     "JSON",
 			inputFilePath: "string-log-1.json",
-			expected:      "",
-			expectedErr:   ErrNonMapBodyNotSupported,
+			expected:      "this log is a string that cannot be parsed",
 		},
 		{
 			desc:          "Invalid - String body to KV",
 			marshalTo:     "KV",
 			inputFilePath: "string-log-1.json",
-			expected:      "",
-			expectedErr:   ErrNonMapBodyNotSupported,
+			expected:      "this log is a string that cannot be parsed",
 		},
 		{
 			desc:          "Invalid - String body to XML",
 			marshalTo:     "XML",
 			inputFilePath: "string-log-1.json",
-			expected:      "",
-			expectedErr:   ErrNonMapBodyNotSupported,
+			expected:      "this log is a string that cannot be parsed",
 		},
 		{
 			desc:          "Valid - Parsed and flattened body to KV",
 			marshalTo:     "KV",
 			inputFilePath: "parsed-flattened-log-1.json",
 			expected:      "bindplane-otel-attributes-baba=you bindplane-otel-attributes-host=myhost name=test nested-n1=1 nested-n2=2 severity=155",
-			expectedErr:   nil,
 		},
 		{
 			desc:          "Valid - Parsed nested body to KV", // not recommended to use this unflattened format but technically valid
 			marshalTo:     "KV",
 			inputFilePath: "parsed-log-1.json",
 			expected:      "bindplane-otel-attributes=map[baba:you host:myhost] name=test nested=map[n1:1 n2:2] severity=155",
-			expectedErr:   nil,
 		},
 	}
 
@@ -85,11 +78,9 @@ func Test_processLogs(t *testing.T) {
 
 			processor := newMarshalProcessor(zap.NewNop(), cfg)
 			actual, err := processor.processLogs(context.Background(), readLogs(t, filepath.Join("testdata", "input", tc.inputFilePath)))
-			require.Equal(t, tc.expectedErr, err)
-			if err == nil {
-				actualBody := actual.ResourceLogs().At(0).ScopeLogs().At(0).LogRecords().At(0).Body().AsString()
-				require.Equal(t, tc.expected, actualBody)
-			}
+			require.NoError(t, err)
+			actualBody := actual.ResourceLogs().At(0).ScopeLogs().At(0).LogRecords().At(0).Body().AsString()
+			require.Equal(t, tc.expected, actualBody)
 		})
 	}
 }
