@@ -15,6 +15,9 @@
 package observiq
 
 import (
+	"archive/tar"
+	"archive/zip"
+	"compress/gzip"
 	"crypto/sha256"
 	"crypto/subtle"
 	"errors"
@@ -24,14 +27,15 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"strings"
 
-	archiver "github.com/mholt/archiver/v3"
 	"github.com/observiq/bindplane-agent/opamp"
 	"github.com/open-telemetry/opamp-go/protobufs"
 	"go.uber.org/zap"
 )
 
 const extractFolder = "latest"
+const maxArchiveObjectByteSize = 1000000000
 
 // Ensure interface is satisfied
 var _ opamp.DownloadableFileManager = (*DownloadableFileManager)(nil)
@@ -75,7 +79,7 @@ func (m DownloadableFileManager) FetchAndExtractArchive(file *protobufs.Download
 		return fmt.Errorf("error cleaning archive extraction target path: %w", err)
 	}
 
-	if err := archiver.Unarchive(archiveFilePath, extractPath); err != nil {
+	if err := unarchive(archiveFilePath, extractPath); err != nil {
 		return fmt.Errorf("failed to extract file: %w", err)
 	}
 
@@ -170,4 +174,147 @@ func (m DownloadableFileManager) CleanupArtifacts() {
 	if err := os.RemoveAll(m.tmpPath); err != nil {
 		m.logger.Error("Failed to remove temporary directory", zap.Error(err))
 	}
+}
+
+// unarchive will unpack the package at archivePath(.tar.gz or .zip) into the directory found at extractPath
+func unarchive(archivePath, extractPath string) error {
+	if strings.HasSuffix(archivePath, ".tar.gz") {
+		// Handle tar.gz files
+		if err := extractTarGz(archivePath, extractPath); err != nil {
+			return fmt.Errorf("extract tar.gz: %w", err)
+		}
+	} else if strings.HasSuffix(archivePath, ".zip") {
+		// Handle zip files
+		if err := extractZip(archivePath, extractPath); err != nil {
+			return fmt.Errorf("extract .zip: %w", err)
+		}
+	} else {
+		return fmt.Errorf("unsupported file type: %s", archivePath)
+	}
+
+	return nil
+}
+
+// extractTarGz will extract the .tar package at archivePath into the dir at extractPath
+func extractTarGz(archivePath, extractPath string) error {
+	if err := os.MkdirAll(extractPath, 0750); err != nil {
+		return fmt.Errorf("mkdir extract path: %w", err)
+	}
+
+	archivePathClean := filepath.Clean(archivePath)
+	file, err := os.Open(archivePathClean)
+	if err != nil {
+		return fmt.Errorf("open archive package: %w", err)
+	}
+	defer file.Close()
+
+	gzipReader, err := gzip.NewReader(file)
+	if err != nil {
+		return fmt.Errorf("new gzip reader: %w", err)
+	}
+	defer gzipReader.Close()
+
+	tarReader := tar.NewReader(gzipReader)
+
+	for {
+		header, err := tarReader.Next()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return fmt.Errorf("read next tarball header: %w", err)
+		}
+
+		outputPath, err := sanitizeArchivePath(extractPath, header.Name)
+		if err != nil {
+			return fmt.Errorf("sanitize archive path: %w", err)
+		}
+
+		switch header.Typeflag {
+		case tar.TypeDir:
+			if err := os.MkdirAll(outputPath, os.FileMode(header.Mode)); err != nil {
+				return fmt.Errorf("mkdir: %w", err)
+			}
+
+		case tar.TypeReg:
+			if err := os.MkdirAll(filepath.Dir(outputPath), 0700); err != nil {
+				return fmt.Errorf("create file's dir: %w", err)
+			}
+
+			outputPathClean := filepath.Clean(outputPath)
+			outFile, err := os.OpenFile(outputPathClean, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, os.FileMode(header.Mode))
+			if err != nil {
+				return fmt.Errorf("open output file: %w", err)
+			}
+			defer outFile.Close()
+
+			_, err = io.CopyN(outFile, tarReader, maxArchiveObjectByteSize)
+			if err != nil && err != io.EOF {
+				return fmt.Errorf("write to file: %w", err)
+			}
+
+		default:
+			fmt.Printf("Unsupported type: %v in %s\n", header.Typeflag, header.Name)
+		}
+	}
+	return nil
+}
+
+// extractZip will extract the .zip package at archivePath into the dir at extractPath
+func extractZip(archivePath, extractPath string) error {
+	// Ensure the output directory exists
+	if err := os.MkdirAll(extractPath, 0750); err != nil {
+		return fmt.Errorf("mkdir extract path: %w", err)
+	}
+
+	r, err := zip.OpenReader(archivePath)
+	if err != nil {
+		return fmt.Errorf("new zip reader: %w", err)
+	}
+	defer r.Close()
+
+	for _, f := range r.File {
+		outputPath, err := sanitizeArchivePath(extractPath, f.Name)
+		if err != nil {
+			return fmt.Errorf("sanitize archive path: %w", err)
+		}
+
+		if f.FileInfo().IsDir() {
+			if err := os.MkdirAll(outputPath, f.Mode()); err != nil {
+				return fmt.Errorf("mkdir: %w", err)
+			}
+			continue
+		}
+
+		if err := os.MkdirAll(filepath.Dir(outputPath), 0700); err != nil {
+			return fmt.Errorf("create file's dir: %w", err)
+		}
+
+		outputPathClean := filepath.Clean(outputPath)
+		outFile, err := os.OpenFile(outputPathClean, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, f.Mode())
+		if err != nil {
+			return fmt.Errorf("open output file: %w", err)
+		}
+		defer outFile.Close()
+
+		rc, err := f.Open()
+		if err != nil {
+			return fmt.Errorf("open source file: %w", err)
+		}
+		defer rc.Close()
+
+		_, err = io.CopyN(outFile, rc, maxArchiveObjectByteSize)
+		if err != nil && err != io.EOF {
+			return fmt.Errorf("write source file to output file: %w", err)
+		}
+	}
+	return nil
+}
+
+func sanitizeArchivePath(dir, file string) (string, error) {
+	s := filepath.Join(dir, file)
+	if strings.HasPrefix(s, filepath.Clean(dir)) {
+		return s, nil
+	}
+	return "", fmt.Errorf("content filepath is tainted: %q", file)
 }
