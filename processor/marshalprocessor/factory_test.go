@@ -17,12 +17,13 @@ package marshalprocessor
 import (
 	"testing"
 
+	"github.com/observiq/bindplane-agent/processor/marshalprocessor/internal/metadata"
 	"github.com/stretchr/testify/require"
 )
 
 func TestNewFactory(t *testing.T) {
 	factory := NewFactory()
-	require.Equal(t, componentType, factory.Type())
+	require.Equal(t, metadata.Type, factory.Type())
 
 	expectedCfg := &Config{
 		MarshalTo: "JSON",
