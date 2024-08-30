@@ -12,56 +12,69 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package serializeprocessor
+package marshalprocessor
 
 import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"sort"
 	"strings"
 
+	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/plog"
 	"go.uber.org/zap"
 )
 
-type serializeProcessor struct {
+type marshalProcessor struct {
 	logger          *zap.Logger
-	serializeTo	string
+	marshalTo	string
 }
 
-func newSerializeProcessor(logger *zap.Logger, cfg *Config) *serializeProcessor {
-	return &serializeProcessor{
+func newMarshalProcessor(logger *zap.Logger, cfg *Config) *marshalProcessor {
+	return &marshalProcessor{
 		logger:          logger,
-		serializeTo: cfg.SerializeTo,
+		marshalTo: cfg.MarshalTo,
 	}
 }
 
-// The use of this processor assumes that the body of the log record has already been parsed. 
-func (sp *serializeProcessor) processLogs(_ context.Context, ld plog.Logs) (plog.Logs, error) {
+var ErrStringBodyNotSupported = fmt.Errorf("String body not supported")
+
+func (mp *marshalProcessor) processLogs(_ context.Context, ld plog.Logs) (plog.Logs, error) {
 	var errors []error
 	for i := 0; i < ld.ResourceLogs().Len(); i++ {
-		for j := 0; j < ld.ResourceLogs().At(i).ScopeLogs().Len(); j++ {
-			for k := 0; k < ld.ResourceLogs().At(i).ScopeLogs().At(j).LogRecords().Len(); k++ {
-				var body = ld.ResourceLogs().At(i).ScopeLogs().At(j).LogRecords().At(k).Body()
-				switch strings.ToUpper(sp.serializeTo) {
+		resourceLog := ld.ResourceLogs().At(i)
+		for j := 0; j < resourceLog.ScopeLogs().Len(); j++ {
+			scopeLog := resourceLog.ScopeLogs().At(j)
+			for k := 0; k < scopeLog.LogRecords().Len(); k++ {
+				logRecord := scopeLog.LogRecords().At(k)
+				logBody := logRecord.Body()
+				// If body is a string, skip that log
+				if logBody.Type() == pcommon.ValueTypeStr {
+					errors = append(errors, ErrStringBodyNotSupported)
+					continue
+				}
+				switch strings.ToUpper(mp.marshalTo) {
 				case "JSON":
-					var jsonBody = body.AsString()
-					ld.ResourceLogs().At(i).ScopeLogs().At(j).LogRecords().At(k).Body().SetStr(jsonBody)
-				// case "XML": 
+					jsonBody := logBody.AsString()
+					logBody.SetStr(jsonBody)
+				case "XML": 
+					return ld, fmt.Errorf("XML not yet supported")
 				case "KV":
-					var jsonBody = body.AsString()
+					jsonBody := logBody.AsString()
 					kvBody, err := convertJSONToKV(jsonBody)
 					if err != nil {
-						errors = append(errors, err)
+						errors = append(errors, fmt.Errorf("Error converting to KV: %w", err))
 						continue
 					}
-					ld.ResourceLogs().At(i).ScopeLogs().At(j).LogRecords().At(k).Body().SetStr(kvBody)
+					logBody.SetStr(kvBody)
 				default:
-					errors = append(errors, fmt.Errorf("No recognized serialization option provided"))
+					return ld, fmt.Errorf("Unrecognized format to marshal to: %s", mp.marshalTo)
 				}
 			}
 		}
 	}
+
 	if len(errors) == 0 {
 		return ld, nil
 	}
@@ -69,10 +82,9 @@ func (sp *serializeProcessor) processLogs(_ context.Context, ld plog.Logs) (plog
 	for _, err := range errors {
 		errorStrings = append(errorStrings, err.Error())
 	}
-	return ld, fmt.Errorf(strings.Join(errorStrings, ", "))
+	return ld, fmt.Errorf("%s", strings.Join(errorStrings, ", "))
 }
 
-// Assumes data is flattened for nice format
 func convertJSONToKV(jsonBody string) (string, error) {
 	var data map[string]interface{}
 	err := json.Unmarshal([]byte(jsonBody), &data)
@@ -85,6 +97,11 @@ func convertJSONToKV(jsonBody string) (string, error) {
 		strValue := fmt.Sprintf("%v", value)
 		keyValuePairs = append(keyValuePairs, fmt.Sprintf("%s=%s", key, strValue))
 	}
+
+	// Ensure consistent order for testing
+	sort.Slice(keyValuePairs, func(i, j int) bool {
+		return keyValuePairs[i] < keyValuePairs[j]
+	})
 
 	kvBody := strings.Join(keyValuePairs, " ")
 
