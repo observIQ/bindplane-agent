@@ -38,7 +38,7 @@ func TestConfigValidate(t *testing.T) {
 			cfg: Config{
 				MarshalTo: "XML",
 			},
-			expectedErr: nil,
+			expectedErr: errXMLNotSupported,
 		},
 		{
 			desc: "KV",
@@ -59,7 +59,7 @@ func TestConfigValidate(t *testing.T) {
 			cfg: Config{
 				MarshalTo: "xml",
 			},
-			expectedErr: nil,
+			expectedErr: errXMLNotSupported,
 		},
 		{
 			desc: "KV lowercase",

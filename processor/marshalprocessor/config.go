@@ -21,6 +21,7 @@ import (
 )
 
 var errInvalidMarshalTo = errors.New("marshal_to must be JSON, XML, or KV")
+var errXMLNotSupported = errors.New("XML not yet supported")
 
 // Config is the configuration for the processor
 type Config struct {
@@ -35,7 +36,7 @@ func (cfg Config) Validate() error {
 	case "JSON":
 		return nil
 	case "XML":
-		return nil
+		return errXMLNotSupported
 	case "KV":
 		return nil
 	default:
