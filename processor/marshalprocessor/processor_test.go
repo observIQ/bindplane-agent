@@ -16,57 +16,57 @@ package marshalprocessor
 
 import (
 	"context"
-	"os"
 	"path/filepath"
 	"testing"
 
+	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest/plogtest"
 	"github.com/stretchr/testify/require"
-	"go.opentelemetry.io/collector/pdata/plog"
 	"go.uber.org/zap"
 )
 
 func Test_processLogs(t *testing.T) {
 	testCases := []struct {
-		desc          string
-		marshalTo     string
-		inputFilePath string
-		expected      string
+		desc                   string
+		marshalTo              string
+		inputFilePath          string
+		expectedOutputFilePath string
 	}{
 		{
-			desc:          "Valid - Parsed body to JSON",
-			marshalTo:     "JSON",
-			inputFilePath: "parsed-log-1.json",
-			expected:      `{"bindplane-otel-attributes":{"baba":"you","host":"myhost"},"name":"test","nested":{"n1":1,"n2":2},"severity":155}`,
+			desc:                   "Valid - Parsed body to JSON",
+			marshalTo:              "JSON",
+			inputFilePath:          "parsed-log-input.json",
+			expectedOutputFilePath: `parsed-log-json-output.json`,
 		},
 		{
-			desc:          "Invalid - String body to JSON",
-			marshalTo:     "JSON",
-			inputFilePath: "string-log-1.json",
-			expected:      "this log is a string that cannot be parsed",
+			desc:                   "Invalid - String body to JSON",
+			marshalTo:              "JSON",
+			inputFilePath:          "string-log-input.json",
+			expectedOutputFilePath: "string-log-output.json",
 		},
 		{
-			desc:          "Invalid - String body to KV",
-			marshalTo:     "KV",
-			inputFilePath: "string-log-1.json",
-			expected:      "this log is a string that cannot be parsed",
+			desc:                   "Invalid - String body to KV",
+			marshalTo:              "KV",
+			inputFilePath:          "string-log-input.json",
+			expectedOutputFilePath: "string-log-output.json",
 		},
 		{
-			desc:          "Invalid - String body to XML",
-			marshalTo:     "XML",
-			inputFilePath: "string-log-1.json",
-			expected:      "this log is a string that cannot be parsed",
+			desc:                   "Invalid - String body to XML",
+			marshalTo:              "XML",
+			inputFilePath:          "string-log-input.json",
+			expectedOutputFilePath: "string-log-output.json",
 		},
 		{
-			desc:          "Valid - Parsed and flattened body to KV",
-			marshalTo:     "KV",
-			inputFilePath: "parsed-flattened-log-1.json",
-			expected:      "bindplane-otel-attributes-baba=you bindplane-otel-attributes-host=myhost name=test nested-n1=1 nested-n2=2 severity=155",
+			desc:                   "Valid - Parsed and flattened body to KV",
+			marshalTo:              "KV",
+			inputFilePath:          "parsed-flattened-log-input.json",
+			expectedOutputFilePath: "parsed-flattened-log-kv-output.json",
 		},
 		{
-			desc:          "Valid - Parsed nested body to KV", // not recommended to use this unflattened format but technically valid
-			marshalTo:     "KV",
-			inputFilePath: "parsed-log-1.json",
-			expected:      "bindplane-otel-attributes=map[baba:you host:myhost] name=test nested=map[n1:1 n2:2] severity=155",
+			desc:                   "Valid - Parsed nested body to KV", // not recommended to use this unflattened format but technically valid
+			marshalTo:              "KV",
+			inputFilePath:          "parsed-log-input.json",
+			expectedOutputFilePath: "parsed-log-kv-output.json",
 		},
 	}
 
@@ -77,23 +77,14 @@ func Test_processLogs(t *testing.T) {
 			}
 
 			processor := newMarshalProcessor(zap.NewNop(), cfg)
-			actual, err := processor.processLogs(context.Background(), readLogs(t, filepath.Join("testdata", "input", tc.inputFilePath)))
+			inputlogs, err := golden.ReadLogs(filepath.Join("testdata", "input", tc.inputFilePath))
 			require.NoError(t, err)
-			actualBody := actual.ResourceLogs().At(0).ScopeLogs().At(0).LogRecords().At(0).Body().AsString()
-			require.Equal(t, tc.expected, actualBody)
+			actual, err := processor.processLogs(context.Background(), inputlogs)
+			require.NoError(t, err)
+			expectedOutput, err := golden.ReadLogs(filepath.Join("testdata", "output", tc.expectedOutputFilePath))
+			require.NoError(t, err)
+
+			require.NoError(t, plogtest.CompareLogs(expectedOutput, actual))
 		})
 	}
-}
-
-func readLogs(t *testing.T, path string) plog.Logs {
-	t.Helper()
-
-	b, err := os.ReadFile(path)
-	require.NoError(t, err)
-
-	unmarshaller := plog.JSONUnmarshaler{}
-	l, err := unmarshaller.UnmarshalLogs(b)
-	require.NoError(t, err)
-
-	return l
 }

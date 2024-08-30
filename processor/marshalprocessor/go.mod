@@ -1,14 +1,18 @@
 module github.com/observiq/bindplane-agent/processor/marshalprocessor
 
-go 1.21.9
+go 1.22.0
+
+toolchain go1.22.5
 
 require (
+	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden v0.108.0
+	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest v0.108.0
 	github.com/stretchr/testify v1.9.0
 	go.opentelemetry.io/collector/component v0.106.1
 	go.opentelemetry.io/collector/confmap v0.106.1
 	go.opentelemetry.io/collector/consumer v0.106.1
 	go.opentelemetry.io/collector/consumer/consumertest v0.106.1
-	go.opentelemetry.io/collector/pdata v1.12.0
+	go.opentelemetry.io/collector/pdata v1.14.1
 	go.opentelemetry.io/collector/processor v0.106.1
 	go.uber.org/goleak v1.3.0
 	go.uber.org/zap v1.27.0
@@ -33,6 +37,7 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
+	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatautil v0.108.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/prometheus/client_golang v1.19.1 // indirect
 	github.com/prometheus/client_model v0.6.1 // indirect
