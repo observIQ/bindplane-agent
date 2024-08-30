@@ -38,7 +38,7 @@ func newMarshalProcessor(logger *zap.Logger, cfg *Config) *marshalProcessor {
 	}
 }
 
-// Errors
+// ErrStringBodyNotSupported is returned when a log body is a string
 var ErrStringBodyNotSupported = fmt.Errorf("String body not supported")
 
 func (mp *marshalProcessor) processLogs(_ context.Context, ld plog.Logs) (plog.Logs, error) {
