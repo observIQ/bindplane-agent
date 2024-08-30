@@ -14,5 +14,5 @@
 
 //go:generate mdatagen metadata.yaml
 
-// package marshalprocessor provides a processor that marshals logs to a specified format.
+// Package marshalprocessor provides a processor that marshals logs to a specified format.
 package marshalprocessor // import "github.com/observiq/bindplane-agent/processor/marshalprocessor"
