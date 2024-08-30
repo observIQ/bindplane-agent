@@ -38,8 +38,8 @@ func newMarshalProcessor(logger *zap.Logger, cfg *Config) *marshalProcessor {
 	}
 }
 
-// ErrStringBodyNotSupported is returned when a log body is a string
-var ErrStringBodyNotSupported = fmt.Errorf("String body not supported")
+// ErrNonMapBodyNotSupported is returned when a log body is not a map
+var ErrNonMapBodyNotSupported = fmt.Errorf("Non map body not supported")
 
 func (mp *marshalProcessor) processLogs(_ context.Context, ld plog.Logs) (plog.Logs, error) {
 	var errors []error
@@ -50,9 +50,9 @@ func (mp *marshalProcessor) processLogs(_ context.Context, ld plog.Logs) (plog.L
 			for k := 0; k < scopeLog.LogRecords().Len(); k++ {
 				logRecord := scopeLog.LogRecords().At(k)
 				logBody := logRecord.Body()
-				// If body is a string, skip that log
-				if logBody.Type() == pcommon.ValueTypeStr {
-					errors = append(errors, ErrStringBodyNotSupported)
+				// If body is not a map, skip that log
+				if logBody.Type() != pcommon.ValueTypeMap {
+					errors = append(errors, ErrNonMapBodyNotSupported)
 					continue
 				}
 				switch strings.ToUpper(mp.marshalTo) {
