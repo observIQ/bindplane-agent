@@ -237,7 +237,7 @@ func extractTarGz(archivePath, extractPath string) error {
 			}
 
 		case tar.TypeReg:
-			if err := os.MkdirAll(filepath.Dir(outputPath), 0750); err != nil {
+			if err := os.MkdirAll(filepath.Dir(outputPath), 0700); err != nil {
 				return fmt.Errorf("create file's dir: %w", err)
 			}
 
@@ -286,7 +286,7 @@ func extractZip(archivePath, extractPath string) error {
 			continue
 		}
 
-		if err := os.MkdirAll(filepath.Dir(outputPath), 0750); err != nil {
+		if err := os.MkdirAll(filepath.Dir(outputPath), 0700); err != nil {
 			return fmt.Errorf("create file's dir: %w", err)
 		}
 
