@@ -1,4 +1,4 @@
-module github.com/observiq/bindplane-agent/processor/serializeprocessor
+module github.com/observiq/bindplane-agent/processor/marshalprocessor
 
 go 1.21.9
 
