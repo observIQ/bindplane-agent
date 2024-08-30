@@ -51,6 +51,7 @@ import (
 	"go.opentelemetry.io/collector/processor/memorylimiterprocessor"
 	"go.opentelemetry.io/collector/processor/processortest"
 )
+
 var defaultProcessors = []processor.Factory{
 	attributesprocessor.NewFactory(),
 	batchprocessor.NewFactory(),

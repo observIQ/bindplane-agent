@@ -24,7 +24,7 @@ var errInvalidMarshalTo = errors.New("marshal_to must be JSON, XML, or KV")
 // Config is the configuration for the processor
 type Config struct {
 	// MarshalTo is either JSON, XML, or KV
-	MarshalTo	string `mapstructure:"marshal_to"`
+	MarshalTo string `mapstructure:"marshal_to"`
 }
 
 // Validate validates the processor configuration

@@ -27,53 +27,53 @@ import (
 
 func Test_processLogs(t *testing.T) {
 	testCases := []struct {
-		desc      string
-		marshalTo string
+		desc          string
+		marshalTo     string
 		inputFilePath string
-		expected  string
-		expectedErr error
+		expected      string
+		expectedErr   error
 	}{
 		{
-			desc:      "Valid - Parsed body to JSON",
-			marshalTo: "JSON",
+			desc:          "Valid - Parsed body to JSON",
+			marshalTo:     "JSON",
 			inputFilePath: "parsed-log-1.json",
-			expected:  `{"bindplane-otel-attributes":{"baba":"you","host":"myhost"},"name":"test","nested":{"n1":1,"n2":2},"severity":155}`,
-			expectedErr: nil,
+			expected:      `{"bindplane-otel-attributes":{"baba":"you","host":"myhost"},"name":"test","nested":{"n1":1,"n2":2},"severity":155}`,
+			expectedErr:   nil,
 		},
 		{
-			desc:      "Invalid - String body to JSON",
-			marshalTo: "JSON",
+			desc:          "Invalid - String body to JSON",
+			marshalTo:     "JSON",
 			inputFilePath: "string-log-1.json",
-			expected:  "",
-			expectedErr: ErrStringBodyNotSupported,
+			expected:      "",
+			expectedErr:   ErrStringBodyNotSupported,
 		},
 		{
-			desc:      "Invalid - String body to KV",
-			marshalTo: "KV",
+			desc:          "Invalid - String body to KV",
+			marshalTo:     "KV",
 			inputFilePath: "string-log-1.json",
-			expected:  "",
-			expectedErr: ErrStringBodyNotSupported,
+			expected:      "",
+			expectedErr:   ErrStringBodyNotSupported,
 		},
 		{
-			desc:      "Invalid - String body to XML",
-			marshalTo: "XML",
+			desc:          "Invalid - String body to XML",
+			marshalTo:     "XML",
 			inputFilePath: "string-log-1.json",
-			expected:  "",
-			expectedErr: ErrStringBodyNotSupported,
+			expected:      "",
+			expectedErr:   ErrStringBodyNotSupported,
 		},
 		{
-			desc:      "Valid - Parsed and flattened body to KV",
-			marshalTo: "KV",
+			desc:          "Valid - Parsed and flattened body to KV",
+			marshalTo:     "KV",
 			inputFilePath: "parsed-flattened-log-1.json",
-			expected:  "bindplane-otel-attributes-baba=you bindplane-otel-attributes-host=myhost name=test nested-n1=1 nested-n2=2 severity=155",
-			expectedErr: nil,
+			expected:      "bindplane-otel-attributes-baba=you bindplane-otel-attributes-host=myhost name=test nested-n1=1 nested-n2=2 severity=155",
+			expectedErr:   nil,
 		},
 		{
-			desc:      "Valid - Parsed nested body to KV", // not recommended to use this unflattened format but technically valid
-			marshalTo: "KV",
+			desc:          "Valid - Parsed nested body to KV", // not recommended to use this unflattened format but technically valid
+			marshalTo:     "KV",
 			inputFilePath: "parsed-log-1.json",
-			expected:  "bindplane-otel-attributes=map[baba:you host:myhost] name=test nested=map[n1:1 n2:2] severity=155",
-			expectedErr: nil,
+			expected:      "bindplane-otel-attributes=map[baba:you host:myhost] name=test nested=map[n1:1 n2:2] severity=155",
+			expectedErr:   nil,
 		},
 	}
 

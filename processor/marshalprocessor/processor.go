@@ -27,13 +27,13 @@ import (
 )
 
 type marshalProcessor struct {
-	logger          *zap.Logger
-	marshalTo	string
+	logger    *zap.Logger
+	marshalTo string
 }
 
 func newMarshalProcessor(logger *zap.Logger, cfg *Config) *marshalProcessor {
 	return &marshalProcessor{
-		logger:          logger,
+		logger:    logger,
 		marshalTo: cfg.MarshalTo,
 	}
 }
@@ -58,7 +58,7 @@ func (mp *marshalProcessor) processLogs(_ context.Context, ld plog.Logs) (plog.L
 				case "JSON":
 					jsonBody := logBody.AsString()
 					logBody.SetStr(jsonBody)
-				case "XML": 
+				case "XML":
 					return ld, fmt.Errorf("XML not yet supported")
 				case "KV":
 					jsonBody := logBody.AsString()
@@ -90,7 +90,7 @@ func convertJSONToKV(jsonBody string) (string, error) {
 	err := json.Unmarshal([]byte(jsonBody), &data)
 	if err != nil {
 		return jsonBody, fmt.Errorf("Error unmarshalling JSON: %w", err)
-	}		
+	}
 
 	var keyValuePairs []string
 	for key, value := range data {
