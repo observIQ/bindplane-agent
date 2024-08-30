@@ -797,6 +797,8 @@ replace github.com/observiq/bindplane-agent/processor/throughputmeasurementproce
 
 replace github.com/observiq/bindplane-agent/processor/samplingprocessor => ./processor/samplingprocessor
 
+replace github.com/observiq/bindplane-agent/processor/marshalprocessor => ./processor/marshalprocessor
+
 replace github.com/observiq/bindplane-agent/processor/maskprocessor => ./processor/maskprocessor
 
 replace github.com/observiq/bindplane-agent/processor/logcountprocessor => ./processor/logcountprocessor
