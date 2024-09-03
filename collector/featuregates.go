@@ -31,6 +31,10 @@ func SetFeatureFlags() error {
 	if err := featuregate.GlobalRegistry().Set("filelog.mtimeSortType", true); err != nil {
 		return fmt.Errorf("failed to enable filelog.mtimeSortType: %w", err)
 	}
+	// Temporary while we get some interoperability into BPOP
+	if err := featuregate.GlobalRegistry().Set("processor.transform.ConvertBetweenSumAndGaugeMetricContext", false); err != nil {
+		return fmt.Errorf("failed to enable processor.transform.ConvertBetweenSumAndGaugeMetricContext: %w", err)
+	}
 
 	return nil
 }
