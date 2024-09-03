@@ -37,6 +37,14 @@ func TestValidate(t *testing.T) {
 			},
 		},
 		{
+			desc: "pass poll interval minimum",
+			config: Config{
+				Principal:    "dummyPrincipal",
+				Secret:       "dummySecret",
+				PollInterval: time.Minute,
+			},
+		},
+		{
 			desc:        "fail no principal",
 			expectedErr: errNoPrincipal,
 			config: Config{
