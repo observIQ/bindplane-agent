@@ -84,6 +84,7 @@ import (
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/tcplogreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/udplogreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/vcenterreceiver"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/webhookeventreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/windowseventlogreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/windowsperfcountersreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/zipkinreceiver"
@@ -165,6 +166,7 @@ var defaultReceivers = []receiver.Factory{
 	telemetrygeneratorreceiver.NewFactory(),
 	udplogreceiver.NewFactory(),
 	vcenterreceiver.NewFactory(),
+	webhookeventreceiver.NewFactory(),
 	windowseventlogreceiver.NewFactory(),
 	windowsperfcountersreceiver.NewFactory(),
 	zipkinreceiver.NewFactory(),
