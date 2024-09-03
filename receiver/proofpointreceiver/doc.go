@@ -14,4 +14,4 @@
 
 //go:generate mdatagen metadata.yaml
 
-package proofpointreceiever //import "github.com/observiq/bindplane-agent/receiver/proofpointreceiver"
+package proofpointreceiver //import "github.com/observiq/bindplane-agent/receiver/proofpointreceiver"

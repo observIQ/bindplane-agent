@@ -37,11 +37,28 @@ func TestValidate(t *testing.T) {
 			},
 		},
 		{
-			desc:        "fail with no poll interval",
+			desc:        "fail no principal",
+			expectedErr: errNoPrincipal,
+			config: Config{
+				Secret:       "dummySecret",
+				PollInterval: 5 * time.Minute,
+			},
+		},
+		{
+			desc:        "fail no secret",
+			expectedErr: errNoSecret,
+			config: Config{
+				Principal:    "dummyPrincipal",
+				PollInterval: 5 * time.Minute,
+			},
+		},
+		{
+			desc:        "fail invalid poll_interval short",
 			expectedErr: errInvalidPollInterval,
 			config: Config{
-				Domain:   "oktadomain.com",
-				APIToken: "dummyAPIToken",
+				Principal:    "dummyPrincipal",
+				Secret:       "dummySecret",
+				PollInterval: 59 * time.Second,
 			},
 		},
 	}
