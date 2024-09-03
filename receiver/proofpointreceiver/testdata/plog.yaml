@@ -1,0 +1,159 @@
+resourceLogs:
+  - resource: {}
+    scopeLogs:
+      - logRecords:
+          - attributes:
+              - key: event.type
+                value:
+                  stringValue: clicksBlocked
+              - key: id
+                value:
+                  stringValue: 8c8b4895-a277-449f-r797-547e3c89b25a
+              - key: GUID
+                value:
+                  stringValue: b27dbea0-87d5-463b-b93c-4e8b708289ce
+              - key: threat.id
+                value:
+                  stringValue: 61f7622167144dba5e3ae4480eeee78b23d66f7dfed970cfc3d086cc0dabdf50
+              - key: threat.status
+                value:
+                  stringValue: active
+              - key: threat.url
+                value:
+                  stringValue: https://threatinsight.proofpoint.com/#/73aa0499-dfc8-75eb-1de8-a471b24a2e75/threat/u/61f7622167144dba5e3ae4480eeee78b23d66f7dfed970cfc3d086cc0dabdf50
+              - key: classification
+                value:
+                  stringValue: MALWARE
+              - key: recipient
+                value:
+                  stringValue: bruce.wayne@pharmtech.zz
+              - key: sender
+                value:
+                  stringValue: 9facbf452def2d7efc5b5c48cdb837fa@badguy.zz
+              - key: url
+                value:
+                  stringValue: http://badguy.zz/
+            body:
+              stringValue: '{"campaignId":"46e01b8a-c899-404d-bcd9-189bb393d1a7","classification":"MALWARE","clickIP":"192.0.2.1","clickTime":"2016-06-24T19:17:44Z","GUID":"b27dbea0-87d5-463b-b93c-4e8b708289ce","id":"8c8b4895-a277-449f-r797-547e3c89b25a","recipient":"bruce.wayne@pharmtech.zz","sender":"9facbf452def2d7efc5b5c48cdb837fa@badguy.zz","senderIP":"192.0.2.255","threatID":"61f7622167144dba5e3ae4480eeee78b23d66f7dfed970cfc3d086cc0dabdf50","threatTime":"2016-06-24T19:17:46Z","threatURL":"https://threatinsight.proofpoint.com/#/73aa0499-dfc8-75eb-1de8-a471b24a2e75/threat/u/61f7622167144dba5e3ae4480eeee78b23d66f7dfed970cfc3d086cc0dabdf50","threatStatus":"active","url":"http://badguy.zz/","userAgent":"Mozilla/5.0(WindowsNT6.1;WOW64;rv:27.0)Gecko/20100101Firefox/27.0"}'
+            observedTimeUnixNano: "1725384115432152000"
+            spanId: ""
+            timeUnixNano: "1466795864000000000"
+            traceId: ""
+          - attributes:
+              - key: event.type
+                value:
+                  stringValue: clicksPermitted
+              - key: id
+                value:
+                  stringValue: 8c8b4895-a277-449f-r797-547e3c89b25a
+              - key: GUID
+                value:
+                  stringValue: b27dbea0-87d5-463b-b93c-4e8b708289ce
+              - key: threat.id
+                value:
+                  stringValue: 61f7622167144dba5e3ae4480eeee78b23d66f7dfed970cfc3d086cc0dabdf50
+              - key: threat.status
+                value:
+                  stringValue: active
+              - key: threat.url
+                value:
+                  stringValue: https://threatinsight.proofpoint.com/#/73aa0499-dfc8-75eb-1de8-a471b24a2e75/threat/u/61f7622167144dba5e3ae4480eeee78b23d66f7dfed970cfc3d086cc0dabdf50
+              - key: classification
+                value:
+                  stringValue: MALWARE
+              - key: recipient
+                value:
+                  stringValue: bruce.wayne@pharmtech.zz
+              - key: sender
+                value:
+                  stringValue: 9facbf452def2d7efc5b5c48cdb837fa@badguy.zz
+              - key: url
+                value:
+                  stringValue: http://badguy.zz/
+            body:
+              stringValue: '{"campaignId":"46e01b8a-c899-404d-bcd9-189bb393d1a7","classification":"MALWARE","clickIP":"192.0.2.1","clickTime":"2016-06-24T19:17:44Z","GUID":"b27dbea0-87d5-463b-b93c-4e8b708289ce","id":"8c8b4895-a277-449f-r797-547e3c89b25a","recipient":"bruce.wayne@pharmtech.zz","sender":"9facbf452def2d7efc5b5c48cdb837fa@badguy.zz","senderIP":"192.0.2.255","threatID":"61f7622167144dba5e3ae4480eeee78b23d66f7dfed970cfc3d086cc0dabdf50","threatTime":"2016-06-24T19:17:46Z","threatURL":"https://threatinsight.proofpoint.com/#/73aa0499-dfc8-75eb-1de8-a471b24a2e75/threat/u/61f7622167144dba5e3ae4480eeee78b23d66f7dfed970cfc3d086cc0dabdf50","threatStatus":"active","url":"http://badguy.zz/","userAgent":"Mozilla/5.0(WindowsNT6.1;WOW64;rv:27.0)Gecko/20100101Firefox/27.0"}'
+            observedTimeUnixNano: "1725384115432152000"
+            spanId: ""
+            timeUnixNano: "1466795864000000000"
+            traceId: ""
+          - attributes:
+              - key: event.type
+                value:
+                  stringValue: messagesBlocked
+              - key: GUID
+                value:
+                  stringValue: c26dbea0-80d5-463b-b93c-4e8b708219ce
+              - key: message.id
+                value:
+                  stringValue: 20160624211145.62086.mail@evil.zz
+              - key: malwareScore
+                value:
+                  intValue: "100"
+              - key: imposterScore
+                value:
+                  intValue: "0"
+              - key: phishScore
+                value:
+                  intValue: "46"
+              - key: spamScore
+                value:
+                  intValue: "4"
+              - key: QID
+                value:
+                  stringValue: r2FNwRHF004109
+              - key: recipient
+                value:
+                  stringValue: '[clark.kent@pharmtech.zz diana.prince@pharmtech.zz]'
+              - key: sender
+                value:
+                  stringValue: e99d7ed5580193f36a51f597bc2c0210@evil.zz
+              - key: subject
+                value:
+                  stringValue: Please find a totally safe invoice attached.
+            body:
+              stringValue: '{"ccAddresses":["bruce.wayne@university-of-education.zz"],"clusterId":"pharmtech_hosted","completelyRewritten":"true","fromAddress":"badguy@evil.zz","GUID":"c26dbea0-80d5-463b-b93c-4e8b708219ce","headerFrom":"\"A. Badguy\" \u003cbadguy@evil.zz\u003e","headerReplyTo":"","imposterScore":0,"malwareScore":100,"messageID":"20160624211145.62086.mail@evil.zz","messagePart":null,"messageSize":0,"messageTime":"2016-06-24T21:18:38Z","modulesRun":["pdr","sandbox","spam","urldefense"],"phishScore":46,"policyRoutes":["default_inbound","executives"],"QID":"r2FNwRHF004109","quarantineFolder":"Attachment Defense","quarantineRule":"module.sandbox.threat","recipient":["clark.kent@pharmtech.zz","diana.prince@pharmtech.zz"],"replyToAddress":"","sender":"e99d7ed5580193f36a51f597bc2c0210@evil.zz","senderIP":"192.0.2.255","spamScore":4,"subject":"Please find a totally safe invoice attached.","threatsInfoMap":[{"detectionType":"","campaignId":"46e01b8a-c899-404d-bcd9-189bb393d1a7","classification":"MALWARE","threat":"2fab740f143fc1aa4c1cd0146d334c5593b1428f6d062b2c406e5efe8abe95ca","threatId":"2fab740f143fc1aa4c1cd0146d334c5593b1428f6d062b2c406e5efe8abe95ca","threatStatus":"active","threatTime":"2016-06-24T21:18:38Z","threatUrl":"https://threatinsight.proofpoint.com/#/73aa0499-dfc8-75eb-1de8-a471b24a2e75/threat/u/2fab740f143fc1aa4c1cd0146d334c5593b1428f6d062b2c406e5efe8abe95ca","toAddresses":null,"xmailer":""},{"detectionType":"","campaignId":"46e01b8a-c899-404d-bcd9-189bb393d1a7","classification":"MALWARE","threat":"badsite.zz","threatId":"3ba97fc852c66a7ba761450edfdfb9f4ffab74715b591294f78b5e37a76481aa","threatStatus":"","threatTime":"2016-06-24T21:18:07Z","threatUrl":"https://threatinsight.proofpoint.com/#/73aa0499-dfc8-75eb-1de8-a471b24a2e75/threat/u/3ba97fc852c66a7ba761450edfdfb9f4ffab74715b591294f78b5e37a76481aa","toAddresses":null,"xmailer":""}]}'
+            observedTimeUnixNano: "1725384115432152000"
+            spanId: ""
+            timeUnixNano: "1466803118000000000"
+            traceId: ""
+          - attributes:
+              - key: event.type
+                value:
+                  stringValue: messagesDelivered
+              - key: GUID
+                value:
+                  stringValue: c26dbea0-80d5-463b-b93c-4e8b708219ce
+              - key: message.id
+                value:
+                  stringValue: 20160624211145.62086.mail@evil.zz
+              - key: malwareScore
+                value:
+                  intValue: "100"
+              - key: imposterScore
+                value:
+                  intValue: "0"
+              - key: phishScore
+                value:
+                  intValue: "46"
+              - key: spamScore
+                value:
+                  intValue: "4"
+              - key: QID
+                value:
+                  stringValue: r2FNwRHF004109
+              - key: recipient
+                value:
+                  stringValue: '[clark.kent@pharmtech.zz diana.prince@pharmtech.zz]'
+              - key: sender
+                value:
+                  stringValue: e99d7ed5580193f36a51f597bc2c0210@evil.zz
+              - key: subject
+                value:
+                  stringValue: Please find a totally safe invoice attached.
+            body:
+              stringValue: '{"ccAddresses":["bruce.wayne@university-of-education.zz"],"clusterId":"pharmtech_hosted","completelyRewritten":"true","fromAddress":"badguy@evil.zz","GUID":"c26dbea0-80d5-463b-b93c-4e8b708219ce","headerFrom":"\"A. Badguy\" \u003cbadguy@evil.zz\u003e","headerReplyTo":"","imposterScore":0,"malwareScore":100,"messageID":"20160624211145.62086.mail@evil.zz","messagePart":null,"messageSize":0,"messageTime":"2016-06-24T21:18:38Z","modulesRun":["pdr","sandbox","spam","urldefense"],"phishScore":46,"policyRoutes":["default_inbound","executives"],"QID":"r2FNwRHF004109","quarantineFolder":"Attachment Defense","quarantineRule":"module.sandbox.threat","recipient":["clark.kent@pharmtech.zz","diana.prince@pharmtech.zz"],"replyToAddress":"","sender":"e99d7ed5580193f36a51f597bc2c0210@evil.zz","senderIP":"192.0.2.255","spamScore":4,"subject":"Please find a totally safe invoice attached.","threatsInfoMap":[{"detectionType":"","campaignId":"46e01b8a-c899-404d-bcd9-189bb393d1a7","classification":"MALWARE","threat":"2fab740f143fc1aa4c1cd0146d334c5593b1428f6d062b2c406e5efe8abe95ca","threatId":"2fab740f143fc1aa4c1cd0146d334c5593b1428f6d062b2c406e5efe8abe95ca","threatStatus":"active","threatTime":"2016-06-24T21:18:38Z","threatUrl":"https://threatinsight.proofpoint.com/#/73aa0499-dfc8-75eb-1de8-a471b24a2e75/threat/u/2fab740f143fc1aa4c1cd0146d334c5593b1428f6d062b2c406e5efe8abe95ca","toAddresses":null,"xmailer":""},{"detectionType":"","campaignId":"46e01b8a-c899-404d-bcd9-189bb393d1a7","classification":"MALWARE","threat":"badsite.zz","threatId":"3ba97fc852c66a7ba761450edfdfb9f4ffab74715b591294f78b5e37a76481aa","threatStatus":"","threatTime":"2016-06-24T21:18:07Z","threatUrl":"https://threatinsight.proofpoint.com/#/73aa0499-dfc8-75eb-1de8-a471b24a2e75/threat/u/3ba97fc852c66a7ba761450edfdfb9f4ffab74715b591294f78b5e37a76481aa","toAddresses":null,"xmailer":""}]}'
+            observedTimeUnixNano: "1725384115432152000"
+            spanId: ""
+            timeUnixNano: "1466803118000000000"
+            traceId: ""
+        scope: {}

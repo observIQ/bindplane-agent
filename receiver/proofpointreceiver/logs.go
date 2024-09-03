@@ -17,6 +17,7 @@ package proofpointreceiver
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"sync"
@@ -32,7 +33,7 @@ import (
 var (
 	proofpointAPIAllEventsURL = "https://tap-api-v2.proofpoint.com/v2/siem/all"
 
-	// ISO8601Format
+	// ISO8601Format datetime format for proofpoint api sinceTime field
 	ISO8601Format = "2006-01-02T15:04:05Z"
 )
 
@@ -130,7 +131,7 @@ func (r *proofpointLogsReceiver) getLogs(ctx context.Context) (*proofpointRespon
 	defer res.Body.Close()
 
 	if res.StatusCode != http.StatusOK {
-		return nil, err
+		return nil, fmt.Errorf("proofpoint returned non-200 status: %d", res.StatusCode)
 	}
 
 	body, err := io.ReadAll(res.Body)
@@ -138,14 +139,14 @@ func (r *proofpointLogsReceiver) getLogs(ctx context.Context) (*proofpointRespon
 		return nil, err
 	}
 
-	var responseJson proofpointResponse
-	err = json.Unmarshal(body, &responseJson)
+	var responseJSON proofpointResponse
+	err = json.Unmarshal(body, &responseJSON)
 	if err != nil {
 		return nil, err
 	}
 
-	r.sinceTime = responseJson.QueryEndTime
-	return &responseJson, nil
+	r.sinceTime = responseJSON.QueryEndTime
+	return &responseJSON, nil
 }
 
 func (r *proofpointLogsReceiver) processLogEvents(observedTime pcommon.Timestamp, response *proofpointResponse) plog.Logs {
@@ -173,7 +174,7 @@ func (r *proofpointLogsReceiver) processLogEvents(observedTime pcommon.Timestamp
 	return logs
 }
 
-func (r *proofpointLogsReceiver) processClickEvent(observedTime pcommon.Timestamp, resourceLogs plog.ResourceLogs, event ClickEvent, eventType string) {
+func (r *proofpointLogsReceiver) processClickEvent(observedTime pcommon.Timestamp, resourceLogs plog.ResourceLogs, event clickEvent, eventType string) {
 	logRecord := resourceLogs.ScopeLogs().At(0).LogRecords().AppendEmpty()
 
 	// timestamps
@@ -203,7 +204,7 @@ func (r *proofpointLogsReceiver) processClickEvent(observedTime pcommon.Timestam
 	attributes.PutStr("url", event.URL)
 }
 
-func (r *proofpointLogsReceiver) processMessageEvent(observedTime pcommon.Timestamp, resourceLogs plog.ResourceLogs, event MessageEvent, eventType string) {
+func (r *proofpointLogsReceiver) processMessageEvent(observedTime pcommon.Timestamp, resourceLogs plog.ResourceLogs, event messageEvent, eventType string) {
 	logRecord := resourceLogs.ScopeLogs().At(0).LogRecords().AppendEmpty()
 
 	// timestamps
@@ -229,7 +230,7 @@ func (r *proofpointLogsReceiver) processMessageEvent(observedTime pcommon.Timest
 	attributes.PutInt("phishScore", int64(event.PhishScore))
 	attributes.PutInt("spamScore", int64(event.SpamScore))
 	attributes.PutStr("QID", event.QID)
-	attributes.PutStr("recipient", event.Recipient)
+	attributes.PutStr("recipient", fmt.Sprintf("%v", event.Recipient))
 	attributes.PutStr("sender", event.Sender)
 	attributes.PutStr("subject", event.Subject)
 }
@@ -246,15 +247,15 @@ func (r *proofpointLogsReceiver) Shutdown(_ context.Context) error {
 
 type proofpointResponse struct {
 	QueryEndTime      string         `json:"queryEndTime"`
-	MessagesDelivered []MessageEvent `json:"messagesDelivered"`
-	MessagesBlocked   []MessageEvent `json:"messagesBlocked"`
-	ClicksPermitted   []ClickEvent   `json:"clicksPermitted"`
-	ClicksBlocked     []ClickEvent   `json:"clicksBlocked"`
+	MessagesDelivered []messageEvent `json:"messagesDelivered"`
+	MessagesBlocked   []messageEvent `json:"messagesBlocked"`
+	ClicksPermitted   []clickEvent   `json:"clicksPermitted"`
+	ClicksBlocked     []clickEvent   `json:"clicksBlocked"`
 }
 
-type MessageEvent struct {
-	CcAddresses         string        `json:"ccAddresses"`
-	ClusterId           string        `json:"clusterId"`
+type messageEvent struct {
+	CcAddresses         []string      `json:"ccAddresses"`
+	ClusterID           string        `json:"clusterId"`
 	CompletelyRewritten string        `json:"completelyRewritten"`
 	FromAddress         string        `json:"fromAddress"`
 	GUID                string        `json:"GUID"`
@@ -263,38 +264,38 @@ type MessageEvent struct {
 	ImposterScore       int           `json:"imposterScore"`
 	MalwareScore        int           `json:"malwareScore"`
 	MessageID           string        `json:"messageID"`
-	MessageParts        []MessagePart `json:"messagePart"`
+	MessageParts        []messagePart `json:"messagePart"`
 	MessageSize         int           `json:"messageSize"`
-	MessageTime         time.Time     `json:"messageTime"`
+	MessageTime         time.Time     `json:"messageTime,omitempty"`
 	ModulesRun          []string      `json:"modulesRun"`
 	PhishScore          int           `json:"phishScore"`
 	PolicyRoutes        []string      `json:"policyRoutes"`
 	QID                 string        `json:"QID"`
 	QuarantineFolder    string        `json:"quarantineFolder"`
 	QuarantineRule      string        `json:"quarantineRule"`
-	Recipient           string        `json:"recipient"`
+	Recipient           []string      `json:"recipient"`
 	ReplyToAddress      string        `json:"replyToAddress"`
 	Sender              string        `json:"sender"`
 	SenderIP            string        `json:"senderIP"`
 	SpamScore           int           `json:"spamScore"`
 	Subject             string        `json:"subject"`
-	ThreatsInfoMap      []ThreatInfo  `json:"threatsInfoMap"`
+	ThreatsInfoMap      []threatInfo  `json:"threatsInfoMap"`
 }
 
-type ThreatInfo struct {
+type threatInfo struct {
 	DetectionType  string    `json:"detectionType"`
 	CampaignID     string    `json:"campaignId"`
 	Classification string    `json:"classification"`
 	Threat         string    `json:"threat"`
 	ThreatID       string    `json:"threatId"`
 	ThreatStatus   string    `json:"threatStatus"`
-	ThreatTime     time.Time `json:"threatTime"`
+	ThreatTime     time.Time `json:"threatTime,omitempty"`
 	ThreatURL      string    `json:"threatUrl"`
 	ToAddresses    []string  `json:"toAddresses"`
 	XMailer        string    `json:"xmailer"`
 }
 
-type MessagePart struct {
+type messagePart struct {
 	ContentType   string `json:"contentType"`
 	Disposition   string `json:"disposition"`
 	Filename      string `json:"filename"`
@@ -304,18 +305,18 @@ type MessagePart struct {
 	SHA256        string `json:"sha256"`
 }
 
-type ClickEvent struct {
+type clickEvent struct {
 	CampaignID     string    `json:"campaignId"`
 	Classification string    `json:"classification"`
 	ClickIP        string    `json:"clickIP"`
-	ClickTime      time.Time `json:"clickTime"`
+	ClickTime      time.Time `json:"clickTime,omitempty"`
 	GUID           string    `json:"GUID"`
 	ID             string    `json:"id"`
 	Recipient      string    `json:"recipient"`
 	Sender         string    `json:"sender"`
 	SenderIP       string    `json:"senderIP"`
 	ThreatID       string    `json:"threatID"`
-	ThreatTime     time.Time `json:"threatTime"`
+	ThreatTime     time.Time `json:"threatTime,omitempty"`
 	ThreatURL      string    `json:"threatURL"`
 	ThreatStatus   string    `json:"threatStatus"`
 	URL            string    `json:"url"`
