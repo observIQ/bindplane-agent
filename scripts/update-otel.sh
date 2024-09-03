@@ -46,7 +46,7 @@ do
         for mod in $OTEL_MODULES
         do
             case $mod in 
-            go.opentelemetry.io/collector/pdata* | go.opentelemetry.io/collector/config/configtls* | go.opentelemetry.io/collector/config/configretry*)
+            go.opentelemetry.io/collector/pdata* | go.opentelemetry.io/collector/config/configtls* | go.opentelemetry.io/collector/config/configretry* | go.opentelemetry.io/collector/confmap | go.opentelemetry.io/collector/config/configopaque)
                 # pdata package is versioned separately
                 echo "$local_mod: $mod@$PDATA_TARGET_VERSION"
                 go mod edit -require "$mod@$PDATA_TARGET_VERSION"
