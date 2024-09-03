@@ -15,6 +15,9 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
+          cache-dependency-path: |
+            go.sum
+            **/go.sum
       - name: Build
         run: make build-linux
       - name: Scan Third Party Dependency Licenses
@@ -29,8 +32,11 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: "1.21"
+          go-version: "1.22"
           check-latest: true
+          cache-dependency-path: |
+            go.sum
+            **/go.sum
       - name: Build
         run: make build-darwin
       - name: Scan Third Party Dependency Licenses
@@ -45,8 +51,11 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: "1.21"
+          go-version: "1.22"
           check-latest: true
+          cache-dependency-path: |
+            go.sum
+            **/go.sum
       - name: Build
         run: make build-windows
       - name: Scan Third Party Dependency Licenses

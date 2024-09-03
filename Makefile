@@ -32,7 +32,7 @@ VERSION ?= $(if $(CURRENT_TAG),$(CURRENT_TAG),$(PREVIOUS_TAG))
 # Builds just the agent for current GOOS/GOARCH pair
 .PHONY: agent
 agent:
-	go build -ldflags "-s -w -X github.com/observiq/bindplane-agent/internal/version.version=$(VERSION)" -o $(OUTDIR)/collector_$(GOOS)_$(GOARCH)$(EXT) ./cmd/collector
+	go build -ldflags "-s -w -X github.com/observiq/bindplane-agent/internal/version.version=$(VERSION)" -tags bindplane -o $(OUTDIR)/collector_$(GOOS)_$(GOARCH)$(EXT) ./cmd/collector
 
 # Builds just the updater for current GOOS/GOARCH pair
 .PHONY: updater
@@ -123,7 +123,7 @@ test-with-cover:
 	$(MAKE) for-all CMD="go test -coverprofile=cover.out ./..."
 	$(MAKE) for-all CMD="go tool cover -html=cover.out -o cover.html"
 
-.PHONY: test-updater-integration 
+.PHONY: test-updater-integration
 test-updater-integration:
 	cd updater; go test $(INTEGRATION_TEST_ARGS) -race ./...
 
@@ -141,7 +141,7 @@ fmt:
 
 .PHONY: tidy
 tidy:
-	$(MAKE) for-all CMD="go mod tidy -compat=1.21"
+	$(MAKE) for-all CMD="go mod tidy -compat=1.22"
 
 .PHONY: gosec
 gosec:
@@ -247,7 +247,7 @@ release:
 	@if ! [[ "$(version)" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$$ ]]; then \
 		echo "version $(version) is invalid semver"; \
 		exit 1; \
-	fi	
+	fi
 
 	@git tag $(version)
 	@git push --tags

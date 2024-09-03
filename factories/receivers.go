@@ -19,6 +19,7 @@ import (
 	"github.com/observiq/bindplane-agent/receiver/azureblobrehydrationreceiver"
 	"github.com/observiq/bindplane-agent/receiver/httpreceiver"
 	"github.com/observiq/bindplane-agent/receiver/m365receiver"
+	"github.com/observiq/bindplane-agent/receiver/oktareceiver"
 	"github.com/observiq/bindplane-agent/receiver/pluginreceiver"
 	"github.com/observiq/bindplane-agent/receiver/routereceiver"
 	"github.com/observiq/bindplane-agent/receiver/sapnetweaverreceiver"
@@ -83,6 +84,7 @@ import (
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/tcplogreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/udplogreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/vcenterreceiver"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/webhookeventreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/windowseventlogreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/windowsperfcountersreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/zipkinreceiver"
@@ -138,6 +140,7 @@ var defaultReceivers = []receiver.Factory{
 	mongodbreceiver.NewFactory(),
 	mysqlreceiver.NewFactory(),
 	nginxreceiver.NewFactory(),
+	oktareceiver.NewFactory(),
 	opencensusreceiver.NewFactory(),
 	otlpreceiver.NewFactory(),
 	pluginreceiver.NewFactory(),
@@ -163,6 +166,7 @@ var defaultReceivers = []receiver.Factory{
 	telemetrygeneratorreceiver.NewFactory(),
 	udplogreceiver.NewFactory(),
 	vcenterreceiver.NewFactory(),
+	webhookeventreceiver.NewFactory(),
 	windowseventlogreceiver.NewFactory(),
 	windowsperfcountersreceiver.NewFactory(),
 	zipkinreceiver.NewFactory(),
