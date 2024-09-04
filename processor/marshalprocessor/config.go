@@ -18,28 +18,40 @@ package marshalprocessor
 import (
 	"errors"
 	"strings"
+
+	"go.uber.org/multierr"
 )
 
 var errInvalidMarshalTo = errors.New("marshal_to must be JSON, XML, or KV")
 var errXMLNotSupported = errors.New("XML not yet supported")
+var errKVSeparatorsEqual = errors.New("kv_separator and kv_pair_separator must be different")
 
 // Config is the configuration for the processor
 type Config struct {
 	// MarshalTo is either JSON, XML, or KV
 	MarshalTo string `mapstructure:"marshal_to"`
+	KVSeparator rune `mapstructure:"kv_separator"`
+	KVPairSeparator rune `mapstructure:"kv_pair_separator"`
 }
 
 // Validate validates the processor configuration
 func (cfg Config) Validate() error {
+	var errs error
+
 	// Validate MarshalTo choice
 	switch strings.ToUpper(cfg.MarshalTo) {
 	case "JSON":
-		return nil
 	case "XML":
-		return errXMLNotSupported
+		errs = multierr.Append(errs, errXMLNotSupported)
 	case "KV":
-		return nil
 	default:
-		return errInvalidMarshalTo
+		errs = multierr.Append(errs, errInvalidMarshalTo)
 	}
+
+	// Validate KV separators, which must be different from each other if set
+	if cfg.KVSeparator != 0 && cfg.KVSeparator == cfg.KVPairSeparator {
+		errs = multierr.Append(errs, errKVSeparatorsEqual)
+	}
+
+	return errs
 }

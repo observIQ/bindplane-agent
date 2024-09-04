@@ -75,6 +75,24 @@ func TestConfigValidate(t *testing.T) {
 			},
 			expectedErr: errInvalidMarshalTo,
 		},
+		{
+			desc: "KV separator fields do not cause a validation error",
+			cfg: Config{
+				MarshalTo: "JSON",
+				KVSeparator: ':',
+				KVPairSeparator: ',',
+			},
+			expectedErr: nil,
+		},
+		{
+			desc: "Identical KV separator fields are not allowed",
+			cfg: Config{
+				MarshalTo: "JSON",
+				KVSeparator: ':',
+				KVPairSeparator: ':',
+			},
+			expectedErr: errKVSeparatorsEqual,
+		},
 	}
 
 	for _, tc := range testCases {
