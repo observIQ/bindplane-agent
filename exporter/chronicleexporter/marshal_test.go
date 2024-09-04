@@ -230,7 +230,7 @@ func TestProtoMarshaler_MarshalRawLogsForHTTP(t *testing.T) {
 		cfg          Config
 		labels       []*api.Label
 		logRecords   func() plog.Logs
-		expectations func(t *testing.T, requests []*api.ImportLogsRequest)
+		expectations func(t *testing.T, requests map[string]*api.ImportLogsRequest)
 	}{
 		{
 			name: "Single log record with expected data",
@@ -250,9 +250,9 @@ func TestProtoMarshaler_MarshalRawLogsForHTTP(t *testing.T) {
 			logRecords: func() plog.Logs {
 				return mockLogs(mockLogRecord("Test log message", map[string]any{"log_type": "WINEVTLOG"}))
 			},
-			expectations: func(t *testing.T, requests []*api.ImportLogsRequest) {
+			expectations: func(t *testing.T, requests map[string]*api.ImportLogsRequest) {
 				require.Len(t, requests, 1)
-				logs := requests[0].GetInlineSource().Logs
+				logs := requests["WINEVTLOG"].GetInlineSource().Logs
 				require.Len(t, logs, 1)
 
 				// Convert Data (byte slice) to string for comparison
@@ -280,9 +280,9 @@ func TestProtoMarshaler_MarshalRawLogsForHTTP(t *testing.T) {
 				record2.Body().SetStr("Second log message")
 				return logs
 			},
-			expectations: func(t *testing.T, requests []*api.ImportLogsRequest) {
+			expectations: func(t *testing.T, requests map[string]*api.ImportLogsRequest) {
 				require.Len(t, requests, 1, "Expected a single batch request")
-				logs := requests[0].GetInlineSource().Logs
+				logs := requests["WINEVTLOG"].GetInlineSource().Logs
 				require.Len(t, logs, 2, "Expected two log entries in the batch")
 				// Verifying the first log entry data
 				require.Equal(t, "First log message", string(logs[0].Data))
@@ -302,9 +302,9 @@ func TestProtoMarshaler_MarshalRawLogsForHTTP(t *testing.T) {
 			logRecords: func() plog.Logs {
 				return mockLogs(mockLogRecord("", map[string]any{"key1": "value1", "log_type": "WINEVTLOG"}))
 			},
-			expectations: func(t *testing.T, requests []*api.ImportLogsRequest) {
+			expectations: func(t *testing.T, requests map[string]*api.ImportLogsRequest) {
 				require.Len(t, requests, 1)
-				logs := requests[0].GetInlineSource().Logs
+				logs := requests["WINEVTLOG"].GetInlineSource().Logs
 				require.Len(t, logs, 1)
 
 				// Assuming the attributes are marshaled into the Data field as a JSON string
@@ -325,7 +325,7 @@ func TestProtoMarshaler_MarshalRawLogsForHTTP(t *testing.T) {
 			logRecords: func() plog.Logs {
 				return plog.NewLogs() // No log records added
 			},
-			expectations: func(t *testing.T, requests []*api.ImportLogsRequest) {
+			expectations: func(t *testing.T, requests map[string]*api.ImportLogsRequest) {
 				require.Len(t, requests, 0, "Expected no requests due to no log records")
 			},
 		},

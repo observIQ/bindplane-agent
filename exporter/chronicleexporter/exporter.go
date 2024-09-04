@@ -257,8 +257,8 @@ func (ce *chronicleExporter) logsHTTPDataPusher(ctx context.Context, ld plog.Log
 		return fmt.Errorf("marshal logs: %w", err)
 	}
 
-	for _, payload := range payloads {
-		if err := ce.uploadToChronicleHTTP(ctx, payload); err != nil {
+	for logType, payload := range payloads {
+		if err := ce.uploadToChronicleHTTP(ctx, payload, logType); err != nil {
 			return fmt.Errorf("upload to chronicle: %w", err)
 		}
 	}
@@ -268,14 +268,13 @@ func (ce *chronicleExporter) logsHTTPDataPusher(ctx context.Context, ld plog.Log
 
 // This uses the DataPlane URL for the request
 // URL for the request: https://{region}-chronicle.googleapis.com/{version}/projects/{project}/location/{region}/instances/{customerID}/logTypes/{logtype}/logs:import
-func buildEndpoint(cfg *Config) string {
-	// TODO handle override of LogType
+func buildEndpoint(cfg *Config, logType string) string {
 	//                Location Endpoint Version    Project      Location    Instance     LogType
 	formatString := "https://%s-%s/%s/projects/%s/locations/%s/instances/%s/logTypes/%s/logs:import"
-	return fmt.Sprintf(formatString, cfg.Location, cfg.Endpoint, "v1alpha", cfg.Project, cfg.Location, cfg.CustomerID, cfg.LogType)
+	return fmt.Sprintf(formatString, cfg.Location, cfg.Endpoint, "v1alpha", cfg.Project, cfg.Location, cfg.CustomerID, logType)
 }
 
-func (ce *chronicleExporter) uploadToChronicleHTTP(ctx context.Context, logs *api.ImportLogsRequest) error {
+func (ce *chronicleExporter) uploadToChronicleHTTP(ctx context.Context, logs *api.ImportLogsRequest, logType string) error {
 
 	data, err := protojson.Marshal(logs)
 	if err != nil {
@@ -298,7 +297,7 @@ func (ce *chronicleExporter) uploadToChronicleHTTP(ctx context.Context, logs *ap
 		body = bytes.NewBuffer(data)
 	}
 
-	request, err := http.NewRequestWithContext(ctx, "POST", buildEndpoint(ce.cfg), body)
+	request, err := http.NewRequestWithContext(ctx, "POST", buildEndpoint(ce.cfg, logType), body)
 	if err != nil {
 		return fmt.Errorf("create request: %w", err)
 	}

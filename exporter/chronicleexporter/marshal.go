@@ -48,7 +48,7 @@ var supportedLogTypes = map[string]string{
 //go:generate mockery --name logMarshaler --filename mock_log_marshaler.go --structname MockMarshaler --inpackage
 type logMarshaler interface {
 	MarshalRawLogs(ctx context.Context, ld plog.Logs) ([]*api.BatchCreateLogsRequest, error)
-	MarshalRawLogsForHTTP(ctx context.Context, ld plog.Logs) ([]*api.ImportLogsRequest, error)
+	MarshalRawLogsForHTTP(ctx context.Context, ld plog.Logs) (map[string]*api.ImportLogsRequest, error)
 }
 
 type protoMarshaler struct {
@@ -229,7 +229,7 @@ func (m *protoMarshaler) constructPayloads(rawLogs map[string][]*api.LogEntry) [
 	return payloads
 }
 
-func (m *protoMarshaler) MarshalRawLogsForHTTP(ctx context.Context, ld plog.Logs) ([]*api.ImportLogsRequest, error) {
+func (m *protoMarshaler) MarshalRawLogsForHTTP(ctx context.Context, ld plog.Logs) (map[string]*api.ImportLogsRequest, error) {
 	rawLogs, err := m.extractRawHTTPLogs(ctx, ld)
 	if err != nil {
 		return nil, fmt.Errorf("extract raw logs: %w", err)
@@ -282,15 +282,15 @@ func buildForwarderString(cfg Config) string {
 	return fmt.Sprintf(format, cfg.Project, cfg.Location, cfg.CustomerID, cfg.Forwarder)
 }
 
-func (m *protoMarshaler) constructHTTPPayloads(rawLogs map[string][]*api.Log) []*api.ImportLogsRequest {
-	payloads := make([]*api.ImportLogsRequest, 0, len(rawLogs))
+func (m *protoMarshaler) constructHTTPPayloads(rawLogs map[string][]*api.Log) map[string]*api.ImportLogsRequest {
+	payloads := make(map[string]*api.ImportLogsRequest, len(rawLogs))
 
-	// TODO logType
-	for _, entries := range rawLogs {
+	for logType, entries := range rawLogs {
 		if len(entries) > 0 {
-			payloads = append(payloads,
+			payloads[logType] =
 				&api.ImportLogsRequest{
 					// TODO: Add parent and hint
+					// We don't yet have solid guidance on what these should be
 					Parent: "",
 					Hint:   "",
 
@@ -300,8 +300,7 @@ func (m *protoMarshaler) constructHTTPPayloads(rawLogs map[string][]*api.Log) []
 							Logs:      entries,
 						},
 					},
-				},
-			)
+				}
 		}
 	}
 	return payloads
