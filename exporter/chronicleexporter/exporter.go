@@ -45,8 +45,8 @@ import (
 )
 
 const (
-	grpcScope = "https://www.googleapis.com/auth/cloud-platform"
-	httpScope = "https://www.googleapis.com/auth/malachite-ingestion"
+	grpcScope = "https://www.googleapis.com/auth/malachite-ingestion"
+	httpScope = "https://www.googleapis.com/auth/cloud-platform"
 
 	baseEndpoint = "malachiteingestion-pa.googleapis.com"
 )

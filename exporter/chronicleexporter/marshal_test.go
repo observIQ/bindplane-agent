@@ -329,42 +329,6 @@ func TestProtoMarshaler_MarshalRawLogsForHTTP(t *testing.T) {
 				require.Len(t, requests, 0, "Expected no requests due to no log records")
 			},
 		},
-		// {
-		// 	name: "Override log type with attribute",
-		// 	cfg: Config{
-		// 		CustomerID:      uuid.New().String(),
-		// 		LogType:         "DEFAULT", // This should be overridden by the log_type attribute
-		// 		RawLogField:     "body",
-		// 		OverrideLogType: true,
-		// 	},
-		// 	labels: []*api.Label{},
-		// 	logRecords: func() plog.Logs {
-		// 		return mockLogs(mockLogRecord("Log with overridden type", map[string]any{"log_type": "windows_event.application"}))
-		// 	},
-		// 	expectations: func(t *testing.T, requests []*api.ImportLogsRequest) {
-		// 		require.Len(t, requests, 1)
-		// 		batch := requests[0].Batch
-		// 		require.Equal(t, "WINEVTLOG", batch.LogType, "Expected log type to be overridden by attribute")
-		// 	},
-		// },
-		// {
-		// 	name: "Override log type with chronicle attribute",
-		// 	cfg: Config{
-		// 		CustomerID:      uuid.New().String(),
-		// 		LogType:         "DEFAULT", // This should be overridden by the chronicle_log_type attribute
-		// 		RawLogField:     "body",
-		// 		OverrideLogType: true,
-		// 	},
-		// 	labels: []*api.Label{},
-		// 	logRecords: func() plog.Logs {
-		// 		return mockLogs(mockLogRecord("Log with overridden type", map[string]any{"chronicle_log_type": "ASOC_ALERT"}))
-		// 	},
-		// 	expectations: func(t *testing.T, requests []*api.ImportLogsRequest) {
-		// 		require.Len(t, requests, 1)
-		// 		batch := requests[0].Batch
-		// 		require.Equal(t, "ASOC_ALERT", batch.LogType, "Expected log type to be overridden by attribute")
-		// 	},
-		// },
 	}
 
 	for _, tt := range tests {
