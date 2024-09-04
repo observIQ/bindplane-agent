@@ -35,39 +35,50 @@ func Test_processLogs(t *testing.T) {
 		{
 			desc:                   "Valid - Parsed body to JSON",
 			marshalTo:              "JSON",
-			inputFilePath:          "parsed-log-input.json",
-			expectedOutputFilePath: `parsed-log-json-output.json`,
+			inputFilePath:          "parsed-log.json",
+			expectedOutputFilePath: `parsed-log-json.json`,
 		},
 		{
 			desc:                   "Invalid - String body to JSON",
 			marshalTo:              "JSON",
-			inputFilePath:          "string-log-input.json",
-			expectedOutputFilePath: "string-log-output.json",
+			inputFilePath:          "string-log.json",
+			expectedOutputFilePath: "string-log.json",
 		},
 		{
 			desc:                   "Invalid - String body to KV",
 			marshalTo:              "KV",
-			inputFilePath:          "string-log-input.json",
-			expectedOutputFilePath: "string-log-output.json",
+			inputFilePath:          "string-log.json",
+			expectedOutputFilePath: "string-log.json",
 		},
 		{
 			desc:                   "Invalid - String body to XML",
 			marshalTo:              "XML",
-			inputFilePath:          "string-log-input.json",
-			expectedOutputFilePath: "string-log-output.json",
+			inputFilePath:          "string-log.json",
+			expectedOutputFilePath: "string-log.json",
 		},
 		{
 			desc:                   "Valid - Parsed and flattened body to KV",
 			marshalTo:              "KV",
-			inputFilePath:          "parsed-flattened-log-input.json",
-			expectedOutputFilePath: "parsed-flattened-log-kv-output.json",
+			inputFilePath:          "parsed-flattened-log.json",
+			expectedOutputFilePath: "parsed-flattened-log-kv.json",
 		},
 		{
 			desc:                   "Valid - Parsed nested body to KV", // not recommended to use this unflattened format but technically valid
 			marshalTo:              "KV",
-			inputFilePath:          "parsed-log-input.json",
-			expectedOutputFilePath: "parsed-log-kv-output.json",
+			inputFilePath:          "parsed-log.json",
+			expectedOutputFilePath: "parsed-log-kv.json",
 		},
+		// {
+		// 	desc:                   "How does KV handle spaces",
+		// 	marshalTo:              "KV",
+		// 	inputFilePath:          "parsed-flattened-log-with-spaces.json",
+		// 	expectedOutputFilePath: "parsed-flattened-log-with-spaces-kv.json",
+		// },
+		// default KV separators
+		// one of each specified
+		// Identical case, just in case? 
+		// many difference examples
+		// some with escaping
 	}
 
 	for _, tc := range testCases {

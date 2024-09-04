@@ -28,12 +28,16 @@ import (
 type marshalProcessor struct {
 	logger    *zap.Logger
 	marshalTo string
+	kvSeparator rune
+	kvPairSeparator rune
 }
 
 func newMarshalProcessor(logger *zap.Logger, cfg *Config) *marshalProcessor {
 	return &marshalProcessor{
 		logger:    logger,
 		marshalTo: cfg.MarshalTo,
+		kvSeparator: cfg.KVSeparator,
+		kvPairSeparator: cfg.KVPairSeparator,
 	}
 }
 
@@ -57,7 +61,7 @@ func (mp *marshalProcessor) processLogs(_ context.Context, ld plog.Logs) (plog.L
 				case "XML":
 					return ld, fmt.Errorf("XML not yet supported")
 				case "KV":
-					kvBody := convertToKV(logBody.Map())
+					kvBody := mp.convertToKV(logBody.Map())
 					logBody.SetStr(kvBody)
 				default:
 					return ld, fmt.Errorf("Unrecognized format to marshal to: %s", mp.marshalTo)
@@ -69,13 +73,29 @@ func (mp *marshalProcessor) processLogs(_ context.Context, ld plog.Logs) (plog.L
 	return ld, nil
 }
 
-func convertToKV(logBody pcommon.Map) string {
+// test different separators
+// needs to handle escaping and quoting if chars are in string
+func (mp *marshalProcessor) convertToKV(logBody pcommon.Map) string {
 	var kvStrings []string
+	var kvPairSeparator string
+	var kvSeparator string
+	if mp.kvPairSeparator == 0 {
+		kvPairSeparator = "="
+	} else {
+		kvPairSeparator = string(mp.kvPairSeparator)
+	}
+	if mp.kvSeparator == 0 {
+		kvSeparator = " "
+	} else {
+		kvSeparator = string(mp.kvSeparator)
+	}
+
 	for k, v := range logBody.AsRaw() {
-		kvStrings = append(kvStrings, fmt.Sprintf("%s=%v", k, v))
+		// add quotes if these vals are present in the string
+		kvStrings = append(kvStrings, fmt.Sprintf("%s%s%v", k, kvPairSeparator, v))
 	}
 
 	sort.Strings(kvStrings)
 
-	return strings.Join(kvStrings, " ")
+	return strings.Join(kvStrings, kvSeparator)
 }

@@ -28,8 +28,7 @@ var errKVSeparatorsEqual = errors.New("kv_separator and kv_pair_separator must b
 
 // Config is the configuration for the processor
 type Config struct {
-	// MarshalTo is either JSON, XML, or KV
-	MarshalTo string `mapstructure:"marshal_to"`
+	MarshalTo string `mapstructure:"marshal_to"` 	// MarshalTo is either JSON, XML, or KV
 	KVSeparator rune `mapstructure:"kv_separator"`
 	KVPairSeparator rune `mapstructure:"kv_pair_separator"`
 }
