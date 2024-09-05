@@ -78,8 +78,8 @@ func TestConfigValidate(t *testing.T) {
 		{
 			desc: "KV separator fields do not cause a validation error if not marshaling to KV",
 			cfg: Config{
-				MarshalTo: "JSON",
-				KVSeparator: ':',
+				MarshalTo:       "JSON",
+				KVSeparator:     ':',
 				KVPairSeparator: ':',
 			},
 			expectedErr: nil,
@@ -87,8 +87,8 @@ func TestConfigValidate(t *testing.T) {
 		{
 			desc: "Identical KV separator fields are not allowed",
 			cfg: Config{
-				MarshalTo: "KV",
-				KVSeparator: ':',
+				MarshalTo:       "KV",
+				KVSeparator:     ':',
 				KVPairSeparator: ':',
 			},
 			expectedErr: errKVSeparatorsEqual,
@@ -96,7 +96,7 @@ func TestConfigValidate(t *testing.T) {
 		{
 			desc: "Identical KV separator fields are not allowed with default KVPairSeparator",
 			cfg: Config{
-				MarshalTo: "KV",
+				MarshalTo:   "KV",
 				KVSeparator: ' ',
 			},
 			expectedErr: errKVSeparatorsEqual,
@@ -104,7 +104,7 @@ func TestConfigValidate(t *testing.T) {
 		{
 			desc: "Identical KV separator fields are not allowed with default KVSeparator",
 			cfg: Config{
-				MarshalTo: "KV",
+				MarshalTo:       "KV",
 				KVPairSeparator: '=',
 			},
 			expectedErr: errKVSeparatorsEqual,

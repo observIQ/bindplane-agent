@@ -73,14 +73,14 @@ func Test_processLogs(t *testing.T) {
 		{
 			desc:                   "Valid - Parsed and flattened body to KV with custom pair separator",
 			marshalTo:              "KV",
-			kvPairSeparator: 		  '|',
+			kvPairSeparator:        '|',
 			inputFilePath:          "parsed-flattened-log.json",
 			expectedOutputFilePath: "parsed-flattened-log-kv-pipe.json",
 		},
 		{
 			desc:                   "Valid - Parsed and flattened body to KV with custom separator",
 			marshalTo:              "KV",
-			kvSeparator: 	  '+',
+			kvSeparator:            '+',
 			inputFilePath:          "parsed-flattened-log.json",
 			expectedOutputFilePath: "parsed-flattened-log-kv-plus.json",
 		},
@@ -94,7 +94,7 @@ func Test_processLogs(t *testing.T) {
 			desc:                   "Valid - Parsed and flattened body to KV with custom separators as part of the KV values",
 			marshalTo:              "KV",
 			kvPairSeparator:        ',',
-			kvSeparator: ':',
+			kvSeparator:            ':',
 			inputFilePath:          "parsed-flattened-log-with-custom-separators.json",
 			expectedOutputFilePath: "parsed-flattened-log-kv-custom-separators.json",
 		},
@@ -109,8 +109,8 @@ func Test_processLogs(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.desc, func(t *testing.T) {
 			cfg := &Config{
-				MarshalTo: tc.marshalTo,
-				KVSeparator: tc.kvSeparator,
+				MarshalTo:       tc.marshalTo,
+				KVSeparator:     tc.kvSeparator,
 				KVPairSeparator: tc.kvPairSeparator,
 			}
 
