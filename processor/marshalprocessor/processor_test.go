@@ -71,6 +71,12 @@ func Test_processLogs(t *testing.T) {
 			expectedOutputFilePath: "parsed-log-kv.json",
 		},
 		{
+			desc:                   "Valid - Parsed deeply nested body to KV with default separators", // not recommended to use this unflattened format but technically valid
+			marshalTo:              "KV",
+			inputFilePath:          "parsed-log-deeply-nested.json",
+			expectedOutputFilePath: "parsed-log-deeply-nested-kv.json",
+		},
+		{
 			desc:                   "Valid - Parsed and flattened body to KV with custom pair separator",
 			marshalTo:              "KV",
 			kvPairSeparator:        '|',

@@ -93,14 +93,39 @@ func (mp *marshalProcessor) convertToKV(logBody pcommon.Map) string {
 		if strings.Contains(k, kvPairSeparator) || strings.Contains(k, kvSeparator) {
 			k = "\"" + k + "\""
 		}
+
+		if valMap, ok := v.(map[string]interface{}); ok {
+			v = convertMapToString(valMap)
+		}
+
 		v = strings.ReplaceAll(fmt.Sprintf("%v", v), "\"", "\\\"")
 		if strings.Contains(fmt.Sprintf("%v", v), kvPairSeparator) || strings.Contains(fmt.Sprintf("%v", v), kvSeparator) {
 			v = "\"" + fmt.Sprintf("%v", v) + "\""
 		}
+
 		kvStrings = append(kvStrings, fmt.Sprintf("%s%s%v", k, kvSeparator, v))
 	}
 
 	sort.Strings(kvStrings)
-
 	return strings.Join(kvStrings, kvPairSeparator)
+}
+
+func convertMapToString(m map[string]interface{}) string {
+	var kvPairs []string
+	var keys []string
+	for k := range m {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	for _, k := range keys {
+		v := m[k]
+		switch val := v.(type) {
+		case map[string]interface{}:
+			v = convertMapToString(val)
+		default:
+			v = fmt.Sprintf("%v", v)
+		}
+		kvPairs = append(kvPairs, fmt.Sprintf("%s=%v", k, v))
+	}
+	return fmt.Sprintf("[%s]", strings.Join(kvPairs, ","))
 }
