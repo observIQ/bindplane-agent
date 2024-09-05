@@ -33,12 +33,12 @@ type throughputMeasurementProcessor struct {
 	enabled             bool
 	measurements        *measurements.ThroughputMeasurements
 	samplingCutOffRatio float64
-	processorID         string
+	processorID         component.ID
 	bindplane           component.ID
 }
 
-func newThroughputMeasurementProcessor(logger *zap.Logger, mp metric.MeterProvider, cfg *Config, processorID string) (*throughputMeasurementProcessor, error) {
-	measurements, err := measurements.NewThroughputMeasurements(mp, processorID, cfg.ExtraLabels)
+func newThroughputMeasurementProcessor(logger *zap.Logger, mp metric.MeterProvider, cfg *Config, processorID component.ID) (*throughputMeasurementProcessor, error) {
+	measurements, err := measurements.NewThroughputMeasurements(mp, processorID.String(), cfg.ExtraLabels)
 	if err != nil {
 		return nil, fmt.Errorf("create throughput measurements: %w", err)
 	}
@@ -61,7 +61,7 @@ func (tmp *throughputMeasurementProcessor) start(_ context.Context, host compone
 	}
 
 	if registry != nil {
-		registry.RegisterThroughputMeasurements(tmp.processorID, tmp.measurements)
+		registry.RegisterThroughputMeasurements(tmp.processorID.String(), tmp.measurements)
 	}
 
 	return nil
@@ -98,4 +98,9 @@ func (tmp *throughputMeasurementProcessor) processMetrics(ctx context.Context, m
 	}
 
 	return md, nil
+}
+
+func (tmp *throughputMeasurementProcessor) shutdown(_ context.Context) error {
+	unregisterProcessor(tmp.processorID)
+	return nil
 }
