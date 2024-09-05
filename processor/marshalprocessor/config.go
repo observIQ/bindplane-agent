@@ -47,10 +47,10 @@ func (cfg Config) Validate() error {
 		if cfg.KVSeparator == cfg.KVPairSeparator && cfg.KVSeparator != 0 {
 			errs = multierr.Append(errs, errKVSeparatorsEqual)
 		}
-		if cfg.KVSeparator == 0 && cfg.KVPairSeparator == ' ' {
+		if cfg.KVSeparator == 0 && cfg.KVPairSeparator == '=' {
 			errs = multierr.Append(errs, errKVSeparatorsEqual)
 		}
-		if cfg.KVPairSeparator == 0 && cfg.KVSeparator == '=' {
+		if cfg.KVPairSeparator == 0 && cfg.KVSeparator == ' ' {
 			errs = multierr.Append(errs, errKVSeparatorsEqual)
 		}
 	default:

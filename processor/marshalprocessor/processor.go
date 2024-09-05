@@ -78,12 +78,12 @@ func (mp *marshalProcessor) convertToKV(logBody pcommon.Map) string {
 	var kvPairSeparator string
 	var kvSeparator string
 	if mp.kvPairSeparator == 0 {
-		kvPairSeparator = "="
+		kvPairSeparator = " "
 	} else {
 		kvPairSeparator = string(mp.kvPairSeparator)
 	}
 	if mp.kvSeparator == 0 {
-		kvSeparator = " "
+		kvSeparator = "="
 	} else {
 		kvSeparator = string(mp.kvSeparator)
 	}
@@ -97,10 +97,10 @@ func (mp *marshalProcessor) convertToKV(logBody pcommon.Map) string {
 		if (strings.Contains(fmt.Sprintf("%v", v), kvPairSeparator) || strings.Contains(fmt.Sprintf("%v", v), kvSeparator)) {
 			v = "\"" + fmt.Sprintf("%v", v) + "\""
 		}
-		kvStrings = append(kvStrings, fmt.Sprintf("%s%s%v", k, kvPairSeparator, v))
+		kvStrings = append(kvStrings, fmt.Sprintf("%s%s%v", k, kvSeparator, v))
 	}
 
 	sort.Strings(kvStrings)
 
-	return strings.Join(kvStrings, kvSeparator)
+	return strings.Join(kvStrings, kvPairSeparator)
 }

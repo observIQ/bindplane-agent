@@ -97,7 +97,7 @@ func TestConfigValidate(t *testing.T) {
 			desc: "Identical KV separator fields are not allowed with default KVPairSeparator",
 			cfg: Config{
 				MarshalTo: "KV",
-				KVSeparator: '=',
+				KVSeparator: ' ',
 			},
 			expectedErr: errKVSeparatorsEqual,
 		},
@@ -105,7 +105,7 @@ func TestConfigValidate(t *testing.T) {
 			desc: "Identical KV separator fields are not allowed with default KVSeparator",
 			cfg: Config{
 				MarshalTo: "KV",
-				KVPairSeparator: ' ',
+				KVPairSeparator: '=',
 			},
 			expectedErr: errKVSeparatorsEqual,
 		},
