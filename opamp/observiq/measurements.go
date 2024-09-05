@@ -132,10 +132,9 @@ func (m *measurementsSender) loop() {
 		case <-m.done:
 			return
 		case <-t.Chan():
-			m.logger.Info("Ticker fired, sending measurements")
 			if m.reporter == nil {
 				// Continue if no reporter available
-				m.logger.Info("No reporter, skipping sending measurements.")
+				m.logger.Debug("No reporter, skipping sending measurements.")
 				continue
 			}
 
