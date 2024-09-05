@@ -225,7 +225,7 @@ func TestResettableThroughputMeasurementsRegistry(t *testing.T) {
 		tmp.AddMetrics(context.Background(), metrics)
 		tmp.AddTraces(context.Background(), traces)
 
-		reg.RegisterThroughputMeasurements("throughputmeasurement/1", tmp)
+		require.NoError(t, reg.RegisterThroughputMeasurements("throughputmeasurement/1", tmp))
 
 		actualMetrics := reg.OTLPMeasurements(nil)
 
@@ -257,7 +257,7 @@ func TestResettableThroughputMeasurementsRegistry(t *testing.T) {
 		tmp.AddMetrics(context.Background(), metrics)
 		tmp.AddTraces(context.Background(), traces)
 
-		reg.RegisterThroughputMeasurements("throughputmeasurement/1", tmp)
+		require.NoError(t, reg.RegisterThroughputMeasurements("throughputmeasurement/1", tmp))
 
 		actualMetrics := reg.OTLPMeasurements(nil)
 
@@ -281,7 +281,7 @@ func TestResettableThroughputMeasurementsRegistry(t *testing.T) {
 
 		tmp.AddMetrics(context.Background(), metrics)
 
-		reg.RegisterThroughputMeasurements("throughputmeasurement/1", tmp)
+		require.NoError(t, reg.RegisterThroughputMeasurements("throughputmeasurement/1", tmp))
 
 		actualMetrics := reg.OTLPMeasurements(nil)
 
@@ -306,7 +306,7 @@ func TestResettableThroughputMeasurementsRegistry(t *testing.T) {
 
 		tmp.AddMetrics(context.Background(), metrics)
 
-		reg.RegisterThroughputMeasurements("throughputmeasurement/1", tmp)
+		require.NoError(t, reg.RegisterThroughputMeasurements("throughputmeasurement/1", tmp))
 
 		actualMetrics := reg.OTLPMeasurements(nil)
 
@@ -341,7 +341,7 @@ func TestResettableThroughputMeasurementsRegistry(t *testing.T) {
 		tmp.AddMetrics(context.Background(), metrics)
 		tmp.AddTraces(context.Background(), traces)
 
-		reg.RegisterThroughputMeasurements("throughputmeasurement/1", tmp)
+		require.NoError(t, reg.RegisterThroughputMeasurements("throughputmeasurement/1", tmp))
 
 		actualMetrics := reg.OTLPMeasurements(nil)
 
@@ -373,7 +373,7 @@ func TestResettableThroughputMeasurementsRegistry(t *testing.T) {
 		tmp.AddMetrics(context.Background(), metrics)
 		tmp.AddTraces(context.Background(), traces)
 
-		reg.RegisterThroughputMeasurements("throughputmeasurement/1", tmp)
+		require.NoError(t, reg.RegisterThroughputMeasurements("throughputmeasurement/1", tmp))
 
 		reg.Reset()
 

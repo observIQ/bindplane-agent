@@ -18,6 +18,7 @@ import (
 	"context"
 	"fmt"
 	"math/rand"
+	"sync"
 
 	"github.com/observiq/bindplane-agent/internal/measurements"
 	"go.opentelemetry.io/collector/component"
@@ -35,6 +36,7 @@ type throughputMeasurementProcessor struct {
 	samplingCutOffRatio float64
 	processorID         component.ID
 	bindplane           component.ID
+	startOnce           sync.Once
 }
 
 func newThroughputMeasurementProcessor(logger *zap.Logger, mp metric.MeterProvider, cfg *Config, processorID component.ID) (*throughputMeasurementProcessor, error) {
@@ -50,24 +52,29 @@ func newThroughputMeasurementProcessor(logger *zap.Logger, mp metric.MeterProvid
 		samplingCutOffRatio: cfg.SamplingRatio,
 		processorID:         processorID,
 		bindplane:           cfg.BindplaneExtension,
+		startOnce:           sync.Once{},
 	}, nil
 }
 
 func (tmp *throughputMeasurementProcessor) start(_ context.Context, host component.Host) error {
-
-	registry, err := GetThroughputRegistry(host, tmp.bindplane)
-	if err != nil {
-		return fmt.Errorf("get throughput registry: %w", err)
-	}
-
-	if registry != nil {
-		err := registry.RegisterThroughputMeasurements(tmp.processorID.String(), tmp.measurements)
-		if err != nil {
-			return fmt.Errorf("register throughput measurements: %w", err)
+	var err error
+	tmp.startOnce.Do(func() {
+		registry, getRegErr := GetThroughputRegistry(host, tmp.bindplane)
+		if getRegErr != nil {
+			err = fmt.Errorf("get throughput registry: %w", err)
+			return
 		}
-	}
 
-	return nil
+		if registry != nil {
+			registerErr := registry.RegisterThroughputMeasurements(tmp.processorID.String(), tmp.measurements)
+			if registerErr != nil {
+				err = fmt.Errorf("register throughput measurements: %w", err)
+				return
+			}
+		}
+	})
+
+	return err
 }
 
 func (tmp *throughputMeasurementProcessor) processTraces(ctx context.Context, td ptrace.Traces) (ptrace.Traces, error) {
