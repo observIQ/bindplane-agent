@@ -61,7 +61,10 @@ func (tmp *throughputMeasurementProcessor) start(_ context.Context, host compone
 	}
 
 	if registry != nil {
-		registry.RegisterThroughputMeasurements(tmp.processorID.String(), tmp.measurements)
+		err := registry.RegisterThroughputMeasurements(tmp.processorID.String(), tmp.measurements)
+		if err != nil {
+			return fmt.Errorf("register throughput measurements: %w", err)
+		}
 	}
 
 	return nil
