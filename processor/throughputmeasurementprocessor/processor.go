@@ -61,14 +61,14 @@ func (tmp *throughputMeasurementProcessor) start(_ context.Context, host compone
 	tmp.startOnce.Do(func() {
 		registry, getRegErr := GetThroughputRegistry(host, tmp.bindplane)
 		if getRegErr != nil {
-			err = fmt.Errorf("get throughput registry: %w", err)
+			err = fmt.Errorf("get throughput registry: %w", getRegErr)
 			return
 		}
 
 		if registry != nil {
 			registerErr := registry.RegisterThroughputMeasurements(tmp.processorID.String(), tmp.measurements)
 			if registerErr != nil {
-				err = fmt.Errorf("register throughput measurements: %w", err)
+				err = fmt.Errorf("register throughput measurements: %w", registerErr)
 				return
 			}
 		}
