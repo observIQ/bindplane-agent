@@ -43,13 +43,18 @@ func (cfg Config) Validate() error {
 	case "XML":
 		errs = multierr.Append(errs, errXMLNotSupported)
 	case "KV":
+		// Validate KV separators, which must be different from each other
+		if cfg.KVSeparator == cfg.KVPairSeparator && cfg.KVSeparator != 0 {
+			errs = multierr.Append(errs, errKVSeparatorsEqual)
+		}
+		if cfg.KVSeparator == 0 && cfg.KVPairSeparator == ' ' {
+			errs = multierr.Append(errs, errKVSeparatorsEqual)
+		}
+		if cfg.KVPairSeparator == 0 && cfg.KVSeparator == '=' {
+			errs = multierr.Append(errs, errKVSeparatorsEqual)
+		}
 	default:
 		errs = multierr.Append(errs, errInvalidMarshalTo)
-	}
-
-	// Validate KV separators, which must be different from each other if set
-	if cfg.KVSeparator != 0 && cfg.KVSeparator == cfg.KVPairSeparator {
-		errs = multierr.Append(errs, errKVSeparatorsEqual)
 	}
 
 	return errs

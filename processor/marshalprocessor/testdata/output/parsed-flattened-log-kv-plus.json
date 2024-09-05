@@ -15,7 +15,7 @@
               "timeUnixNano": "1724942726840056000",
               "severityNumber": 5,
               "body": {
-                "stringValue": "bindplane-otel-attributes=\"map[baba:you host:myhost]\" name=test nested=\"map[n1:1 n2:2]\" severity=155"
+                "stringValue": "bindplane-otel-attributes-baba+you bindplane-otel-attributes-host+myhost name+test nested-n1+1 nested-n2+2 severity+155"
               },
               "attributes": [
                 { "key": "baba", "value": { "stringValue": "you" } },

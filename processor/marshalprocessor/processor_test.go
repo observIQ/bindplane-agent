@@ -29,6 +29,8 @@ func Test_processLogs(t *testing.T) {
 	testCases := []struct {
 		desc                   string
 		marshalTo              string
+		kvSeparator            rune
+		kvPairSeparator        rune
 		inputFilePath          string
 		expectedOutputFilePath string
 	}{
@@ -57,34 +59,59 @@ func Test_processLogs(t *testing.T) {
 			expectedOutputFilePath: "string-log.json",
 		},
 		{
-			desc:                   "Valid - Parsed and flattened body to KV",
+			desc:                   "Valid - Parsed and flattened body to KV with default separators",
 			marshalTo:              "KV",
 			inputFilePath:          "parsed-flattened-log.json",
 			expectedOutputFilePath: "parsed-flattened-log-kv.json",
 		},
 		{
-			desc:                   "Valid - Parsed nested body to KV", // not recommended to use this unflattened format but technically valid
+			desc:                   "Valid - Parsed nested body to KV with default separators", // not recommended to use this unflattened format but technically valid
 			marshalTo:              "KV",
 			inputFilePath:          "parsed-log.json",
 			expectedOutputFilePath: "parsed-log-kv.json",
 		},
-		// {
-		// 	desc:                   "How does KV handle spaces",
-		// 	marshalTo:              "KV",
-		// 	inputFilePath:          "parsed-flattened-log-with-spaces.json",
-		// 	expectedOutputFilePath: "parsed-flattened-log-with-spaces-kv.json",
-		// },
-		// default KV separators
-		// one of each specified
-		// Identical case, just in case? 
-		// many difference examples
-		// some with escaping
+		{
+			desc:                   "Valid - Parsed and flattened body to KV with custom separator",
+			marshalTo:              "KV",
+			kvSeparator: 		  '|',
+			inputFilePath:          "parsed-flattened-log.json",
+			expectedOutputFilePath: "parsed-flattened-log-kv-pipe.json",
+		},
+		{
+			desc:                   "Valid - Parsed and flattened body to KV with custom pair separator",
+			marshalTo:              "KV",
+			kvPairSeparator: 	  '+',
+			inputFilePath:          "parsed-flattened-log.json",
+			expectedOutputFilePath: "parsed-flattened-log-kv-plus.json",
+		},
+		{
+			desc:                   "Valid - Parsed and flattened body to KV with default separators as part of the KV values",
+			marshalTo:              "KV",
+			inputFilePath:          "parsed-flattened-log-with-separators.json",
+			expectedOutputFilePath: "parsed-flattened-log-kv-separators.json",
+		},
+		{
+			desc:                   "Valid - Parsed and flattened body to KV with custom separators as part of the KV values",
+			marshalTo:              "KV",
+			kvPairSeparator:        ':',
+			kvSeparator: ',',
+			inputFilePath:          "parsed-flattened-log-with-custom-separators.json",
+			expectedOutputFilePath: "parsed-flattened-log-kv-custom-separators.json",
+		},
+		{
+			desc:                   "Valid - Parsed and flattened body to KV with default separators as part of the KV values and quotes inside the KV values",
+			marshalTo:              "KV",
+			inputFilePath:          "parsed-flattened-log-with-separators-and-quotes.json",
+			expectedOutputFilePath: "parsed-flattened-log-kv-separators-and-quotes.json",
+		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.desc, func(t *testing.T) {
 			cfg := &Config{
 				MarshalTo: tc.marshalTo,
+				KVSeparator: tc.kvSeparator,
+				KVPairSeparator: tc.kvPairSeparator,
 			}
 
 			processor := newMarshalProcessor(zap.NewNop(), cfg)

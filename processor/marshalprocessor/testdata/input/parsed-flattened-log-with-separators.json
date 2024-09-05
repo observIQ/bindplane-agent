@@ -19,14 +19,14 @@
                   "values": [
                     { "key": "severity", "value": { "doubleValue": 155 } },
                     {
-                      "key": "nested-n1",
+                      "key": "nested-n1=",
                       "value": { "doubleValue": 1 }
                     },
                     {
                       "key": "nested-n2",
                       "value": { "doubleValue": 2 }
                     },
-                    { "key": "nam e", "value": { "stringValue": "test" } },
+                    { "key": "nam e", "value": { "stringValue": "test=" } },
                     {
                       "key": "bindplane-otel-attributes-baba",
                       "value": { "stringValue": "you" }

@@ -73,8 +73,6 @@ func (mp *marshalProcessor) processLogs(_ context.Context, ld plog.Logs) (plog.L
 	return ld, nil
 }
 
-// test different separators
-// needs to handle escaping and quoting if chars are in string
 func (mp *marshalProcessor) convertToKV(logBody pcommon.Map) string {
 	var kvStrings []string
 	var kvPairSeparator string
@@ -91,7 +89,14 @@ func (mp *marshalProcessor) convertToKV(logBody pcommon.Map) string {
 	}
 
 	for k, v := range logBody.AsRaw() {
-		// add quotes if these vals are present in the string
+		k = strings.ReplaceAll(k, "\"", "\\\"")
+		if (strings.Contains(k, kvPairSeparator) || strings.Contains(k, kvSeparator)) {
+			k = "\"" + k + "\""
+		}
+		v = strings.ReplaceAll(fmt.Sprintf("%v", v), "\"", "\\\"")
+		if (strings.Contains(fmt.Sprintf("%v", v), kvPairSeparator) || strings.Contains(fmt.Sprintf("%v", v), kvSeparator)) {
+			v = "\"" + fmt.Sprintf("%v", v) + "\""
+		}
 		kvStrings = append(kvStrings, fmt.Sprintf("%s%s%v", k, kvPairSeparator, v))
 	}
 
