@@ -2,7 +2,6 @@ resourceMetrics:
   - resource: {}
     scopeMetrics:
       - metrics:
-          - {}
           - name: otelcol_processor_throughputmeasurement_metric_data_size
             sum:
               dataPoints:
@@ -12,5 +11,4 @@ resourceMetrics:
                       value:
                         stringValue: throughputmeasurement/1
                   timeUnixNano: "1000000"
-          - {}
         scope: {}
