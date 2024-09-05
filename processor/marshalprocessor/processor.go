@@ -123,7 +123,12 @@ func convertMapToString(m map[string]interface{}) string {
 		case map[string]interface{}:
 			v = convertMapToString(val)
 		default:
-			v = fmt.Sprintf("%v", v)
+			if str, ok := v.(string); ok {
+				v = strings.ReplaceAll(str, "\"", "\\\\\"")
+				if strings.ContainsAny(v.(string), ",[]=") {
+					v = fmt.Sprintf("\"%v\"", v)
+				}
+			}
 		}
 		kvPairs = append(kvPairs, fmt.Sprintf("%s=%v", k, v))
 	}
