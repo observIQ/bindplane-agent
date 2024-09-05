@@ -2,7 +2,7 @@
 
 This processor is used to marshal parsed logs into JSON, XML, or KV format.
 
-This processor is intended to be wrapped into the Marshal source in Bindplane.
+This processor is intended to be wrapped into the Marshal processor in Bindplane.
 
 NOTE: XML support is in progress and not yet available.
 
@@ -17,23 +17,39 @@ NOTE: XML support is in progress and not yet available.
 2. The body can be marshaled to string-encoded JSON, XML, or KV.
 
    - For KV:
-     - Fields will be converted to "key1=value1 key2=value2 key3=value3..."
+     - Fields will be converted to "key1=value1 key2=value2 key3=value3..." if no separators are configured
      - The parsed fields should be flattened first so that every key is at the top level.
 
 3. The output of this processor will be the same as the input, but with a modified log body. Any body incompatible with the marshal type will be unchanged.
 
 ## Configuration
 
-| Field     | Type   | Default | Description                                         |
-| --------- | ------ | ------- | --------------------------------------------------- |
-| marshalTo | string | "JSON"  | The format to marshal into. Can be JSON, XML, or KV |
+| Field           | Type   | Default | Description                                         |
+| --------------- | ------ | ------- | --------------------------------------------------- |
+| marshalTo       | string | ""      | The format to marshal into. Can be JSON, XML, or KV |
+| kvSeparator     | rune   | "="     | The separator between key and value                 |
+| kvPairSeparator | rune   | " "     | The separator between KV pairs                      |
 
-## Example Config
+## Example JSON Config
 
 ```yaml
 processors:
   marshal:
     marshalTo: "JSON"
+service:
+  pipelines:
+    logs:
+      processors: [marshal]
+```
+
+## Example KV config
+
+```yaml
+processors:
+  marshal:
+    marshalTo: "KV"
+    kvSeparator: ","
+    kvPairSeparator: ":"
 service:
   pipelines:
     logs:
@@ -113,7 +129,7 @@ In the example below, "bindplane-otel-attributes" represents attributes that hav
 }
 ```
 
-### 2: Flattened parsed body to KV
+### 2: Flattened parsed body to KV with default separators
 
 In the example below, flattening has already been done on the "nested" field and the "bindplane-otel-attributes" field.
 
