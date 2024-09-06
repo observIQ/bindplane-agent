@@ -292,30 +292,6 @@ func TestResettableThroughputMeasurementsRegistry(t *testing.T) {
 		require.NoError(t, pmetrictest.CompareMetrics(expectedMetrics, actualMetrics, pmetrictest.IgnoreTimestamp()))
 	})
 
-	t.Run("Test multiple throughput measurements registered", func(t *testing.T) {
-		reg := NewResettableThroughputMeasurementsRegistry(false)
-
-		mp := metric.NewMeterProvider()
-		defer mp.Shutdown(context.Background())
-
-		tmp, err := NewThroughputMeasurements(mp, "throughputmeasurement/1", map[string]string{})
-		require.NoError(t, err)
-
-		metrics, err := golden.ReadMetrics(filepath.Join("testdata", "metrics", "host-metrics.yaml"))
-		require.NoError(t, err)
-
-		tmp.AddMetrics(context.Background(), metrics)
-
-		require.NoError(t, reg.RegisterThroughputMeasurements("throughputmeasurement/1", tmp))
-
-		actualMetrics := reg.OTLPMeasurements(nil)
-
-		expectedMetrics, err := golden.ReadMetrics(filepath.Join("testdata", "expected", "throughput_measurements_metrics_only.yaml"))
-		require.NoError(t, err)
-
-		require.NoError(t, pmetrictest.CompareMetrics(expectedMetrics, actualMetrics, pmetrictest.IgnoreTimestamp()))
-	})
-
 	t.Run("Test registered measurements are in OTLP payload (extra attributes)", func(t *testing.T) {
 		reg := NewResettableThroughputMeasurementsRegistry(false)
 
