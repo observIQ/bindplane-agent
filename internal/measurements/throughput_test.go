@@ -285,7 +285,6 @@ func TestResettableThroughputMeasurementsRegistry(t *testing.T) {
 
 		actualMetrics := reg.OTLPMeasurements(nil)
 
-		// golden.WriteMetrics(t, filepath.Join("testdata", "expected", "throughput_measurements_metrics_only.yaml"), actualMetrics)
 		expectedMetrics, err := golden.ReadMetrics(filepath.Join("testdata", "expected", "throughput_measurements_metrics_only.yaml"))
 		require.NoError(t, err)
 
@@ -310,7 +309,6 @@ func TestResettableThroughputMeasurementsRegistry(t *testing.T) {
 
 		actualMetrics := reg.OTLPMeasurements(nil)
 
-		// golden.WriteMetrics(t, filepath.Join("testdata", "expected", "throughput_measurements_metrics_only.yaml"), actualMetrics)
 		expectedMetrics, err := golden.ReadMetrics(filepath.Join("testdata", "expected", "throughput_measurements_metrics_only.yaml"))
 		require.NoError(t, err)
 
