@@ -30,7 +30,7 @@ NOTE: XML support is in progress and not yet available.
 | kvSeparator     | rune   | "="     | The separator between key and value                 |
 | kvPairSeparator | rune   | " "     | The separator between KV pairs                      |
 
-## Example JSON Config
+## Example Config for JSON
 
 ```yaml
 receivers:
@@ -49,7 +49,7 @@ service:
       exporters: [chronicle]
 ```
 
-## Example KV config
+## Example config for KV
 
 ```yaml
 receivers:
