@@ -33,27 +33,41 @@ NOTE: XML support is in progress and not yet available.
 ## Example JSON Config
 
 ```yaml
+receivers:
+  otlp:
 processors:
+  transform:
   marshal:
     marshalTo: "JSON"
+exporters:
+  chronicle:
 service:
   pipelines:
     logs:
-      processors: [marshal]
+      receivers: [otlp]
+      processors: [transform, marshal]
+      exporters: [chronicle]
 ```
 
 ## Example KV config
 
 ```yaml
+receivers:
+  otlp:
 processors:
+  transform:
   marshal:
     marshalTo: "KV"
     kvSeparator: ","
     kvPairSeparator: ":"
+exporters:
+  chronicle:
 service:
   pipelines:
     logs:
-      processors: [marshal]
+      receivers: [otlp]
+      processors: [transform, marshal]
+      exporters: [chronicle]
 ```
 
 ## Example Output
