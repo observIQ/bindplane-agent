@@ -60,7 +60,7 @@ func TestMeasurementsSender(t *testing.T) {
 		tm.AddMetrics(context.Background(), m)
 
 		reg := measurements.NewResettableThroughputMeasurementsRegistry(false)
-		reg.RegisterThroughputMeasurements(processorID, tm)
+		require.NoError(t, reg.RegisterThroughputMeasurements(processorID, tm))
 
 		ms := newMeasurementsSender(zap.NewNop(), reg, client, 1*time.Millisecond, nil)
 		ms.Start()
