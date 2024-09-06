@@ -32,6 +32,8 @@ import (
 // ThroughputMeasurementsRegistry represents a registry for the throughputmeasurement processor to
 // register their ThroughputMeasurements.
 type ThroughputMeasurementsRegistry interface {
+	// RegisterThroughputMeasurements registers the measurements for the given processor.
+	// It should return an error if the processor has already been registered.
 	RegisterThroughputMeasurements(processorID string, measurements *ThroughputMeasurements) error
 }
 

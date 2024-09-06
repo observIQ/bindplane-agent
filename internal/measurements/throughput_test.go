@@ -24,6 +24,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/metric/noop"
 	"go.opentelemetry.io/otel/sdk/metric"
 	"go.opentelemetry.io/otel/sdk/metric/metricdata"
 )
@@ -376,5 +377,20 @@ func TestResettableThroughputMeasurementsRegistry(t *testing.T) {
 		reg.Reset()
 
 		require.NoError(t, pmetrictest.CompareMetrics(pmetric.NewMetrics(), reg.OTLPMeasurements(nil)))
+	})
+
+	t.Run("Double registering is an error", func(t *testing.T) {
+		reg := NewResettableThroughputMeasurementsRegistry(false)
+
+		mp := noop.NewMeterProvider()
+
+		tmp, err := NewThroughputMeasurements(mp, "throughputmeasurement/1", map[string]string{})
+		require.NoError(t, err)
+
+		require.NoError(t, reg.RegisterThroughputMeasurements("throughputmeasurement/1", tmp))
+
+		err = reg.RegisterThroughputMeasurements("throughputmeasurement/1", tmp)
+		require.Error(t, err)
+		require.Equal(t, err.Error(), `measurements for processor "throughputmeasurement/1" was already registered`)
 	})
 }
