@@ -18,66 +18,79 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
+
+func TestCreateDefaultProcessorConfig(t *testing.T) {
+	cfg := createDefaultConfig().(*Config)
+	require.Equal(t, defaultMarshalTo, cfg.MarshalTo)
+	require.Equal(t, defaultKVSeparator, cfg.KVSeparator)
+	require.Equal(t, defaultKVPairSeparator, cfg.KVPairSeparator)
+}
 
 func TestConfigValidate(t *testing.T) {
 	testCases := []struct {
 		desc        string
-		cfg         Config
+		cfg         *Config
 		expectedErr error
 	}{
 		{
+			desc: "default",
+			cfg:  createDefaultConfig().(*Config),
+			expectedErr: nil,
+		},
+		{
 			desc: "JSON",
-			cfg: Config{
+			cfg: &Config{
 				MarshalTo: "JSON",
 			},
 			expectedErr: nil,
 		},
 		{
 			desc: "XML",
-			cfg: Config{
+			cfg: &Config{
 				MarshalTo: "XML",
 			},
 			expectedErr: errXMLNotSupported,
 		},
 		{
 			desc: "KV",
-			cfg: Config{
+			cfg: &Config{
 				MarshalTo: "KV",
 			},
 			expectedErr: nil,
 		},
 		{
 			desc: "JSON lowercase",
-			cfg: Config{
+			cfg: &Config{
 				MarshalTo: "json",
 			},
 			expectedErr: nil,
 		},
 		{
 			desc: "XML lowercase",
-			cfg: Config{
+			cfg: &Config{
 				MarshalTo: "xml",
 			},
 			expectedErr: errXMLNotSupported,
 		},
 		{
 			desc: "KV lowercase",
-			cfg: Config{
+			cfg: &Config{
 				MarshalTo: "kv",
 			},
 			expectedErr: nil,
 		},
 		{
 			desc: "error",
-			cfg: Config{
+			cfg: &Config{
 				MarshalTo: "TOML",
 			},
 			expectedErr: errInvalidMarshalTo,
 		},
 		{
 			desc: "KV separator fields do not cause a validation error if not marshaling to KV",
-			cfg: Config{
+			cfg: &Config{
 				MarshalTo:       "JSON",
 				KVSeparator:     ':',
 				KVPairSeparator: ':',
@@ -86,7 +99,7 @@ func TestConfigValidate(t *testing.T) {
 		},
 		{
 			desc: "Identical KV separator fields are not allowed",
-			cfg: Config{
+			cfg: &Config{
 				MarshalTo:       "KV",
 				KVSeparator:     ':',
 				KVPairSeparator: ':',
@@ -95,16 +108,18 @@ func TestConfigValidate(t *testing.T) {
 		},
 		{
 			desc: "Identical KV separator fields are not allowed with default KVPairSeparator",
-			cfg: Config{
+			cfg: &Config{
 				MarshalTo:   "KV",
 				KVSeparator: ' ',
+				KVPairSeparator: ' ',
 			},
 			expectedErr: errKVSeparatorsEqual,
 		},
 		{
 			desc: "Identical KV separator fields are not allowed with default KVSeparator",
-			cfg: Config{
+			cfg: &Config{
 				MarshalTo:       "KV",
+				KVSeparator:     '=',
 				KVPairSeparator: '=',
 			},
 			expectedErr: errKVSeparatorsEqual,

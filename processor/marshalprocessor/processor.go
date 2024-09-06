@@ -75,18 +75,8 @@ func (mp *marshalProcessor) processLogs(_ context.Context, ld plog.Logs) (plog.L
 
 func (mp *marshalProcessor) convertToKV(logBody pcommon.Map) string {
 	var kvStrings []string
-	var kvPairSeparator string
-	var kvSeparator string
-	if mp.kvPairSeparator == 0 {
-		kvPairSeparator = " "
-	} else {
-		kvPairSeparator = string(mp.kvPairSeparator)
-	}
-	if mp.kvSeparator == 0 {
-		kvSeparator = "="
-	} else {
-		kvSeparator = string(mp.kvSeparator)
-	}
+	kvPairSeparator := string(mp.kvPairSeparator)
+	kvSeparator := string(mp.kvSeparator)
 
 	for k, v := range logBody.AsRaw() {
 		k = strings.ReplaceAll(k, "\"", "\\\"")

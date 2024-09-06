@@ -126,6 +126,13 @@ func Test_processLogs(t *testing.T) {
 				KVPairSeparator: tc.kvPairSeparator,
 			}
 
+			if cfg.KVSeparator == 0 {
+				cfg.KVSeparator = defaultKVSeparator
+			}
+			if cfg.KVPairSeparator == 0 {
+				cfg.KVPairSeparator = defaultKVPairSeparator
+			}
+
 			processor := newMarshalProcessor(zap.NewNop(), cfg)
 			inputlogs, err := golden.ReadLogs(filepath.Join("testdata", "input", tc.inputFilePath))
 			require.NoError(t, err)

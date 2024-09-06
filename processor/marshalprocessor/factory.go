@@ -37,12 +37,6 @@ func NewFactory() processor.Factory {
 	)
 }
 
-func createDefaultConfig() component.Config {
-	return &Config{
-		MarshalTo: "JSON",
-	}
-}
-
 func createLogsProcessor(
 	ctx context.Context,
 	set processor.Settings,

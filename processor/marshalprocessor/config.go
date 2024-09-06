@@ -19,16 +19,23 @@ import (
 	"errors"
 	"strings"
 
+	"go.opentelemetry.io/collector/component"
 	"go.uber.org/multierr"
 )
 
-var errInvalidMarshalTo = errors.New("marshal_to must be JSON, XML, or KV")
+var errInvalidMarshalTo = errors.New("marshal_to must be JSON or KV")
 var errXMLNotSupported = errors.New("XML not yet supported")
 var errKVSeparatorsEqual = errors.New("kv_separator and kv_pair_separator must be different")
 
+const (
+	defaultMarshalTo       = "JSON"
+	defaultKVSeparator     = '='
+	defaultKVPairSeparator = ' '
+)
+
 // Config is the configuration for the processor
 type Config struct {
-	MarshalTo       string `mapstructure:"marshal_to"` // MarshalTo is either JSON, XML, or KV
+	MarshalTo       string `mapstructure:"marshal_to"` // MarshalTo is either JSON or KV
 	KVSeparator     rune   `mapstructure:"kv_separator"`
 	KVPairSeparator rune   `mapstructure:"kv_pair_separator"`
 }
@@ -47,15 +54,18 @@ func (cfg Config) Validate() error {
 		if cfg.KVSeparator == cfg.KVPairSeparator && cfg.KVSeparator != 0 {
 			errs = multierr.Append(errs, errKVSeparatorsEqual)
 		}
-		if cfg.KVSeparator == 0 && cfg.KVPairSeparator == '=' {
-			errs = multierr.Append(errs, errKVSeparatorsEqual)
-		}
-		if cfg.KVPairSeparator == 0 && cfg.KVSeparator == ' ' {
-			errs = multierr.Append(errs, errKVSeparatorsEqual)
-		}
 	default:
 		errs = multierr.Append(errs, errInvalidMarshalTo)
 	}
 
 	return errs
+}
+
+// createDefaultConfig returns the default config for the processor.
+func createDefaultConfig() component.Config {
+	return &Config{
+		MarshalTo: defaultMarshalTo,
+		KVSeparator: defaultKVSeparator,
+		KVPairSeparator:   defaultKVPairSeparator,
+	}
 }
