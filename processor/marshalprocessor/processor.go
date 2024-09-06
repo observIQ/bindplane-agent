@@ -28,16 +28,16 @@ import (
 type marshalProcessor struct {
 	logger          *zap.Logger
 	marshalTo       string
-	kvSeparator     rune
-	kvPairSeparator rune
+	kvSeparator     string
+	kvPairSeparator string
 }
 
 func newMarshalProcessor(logger *zap.Logger, cfg *Config) *marshalProcessor {
 	return &marshalProcessor{
 		logger:          logger,
 		marshalTo:       cfg.MarshalTo,
-		kvSeparator:     cfg.KVSeparator,
-		kvPairSeparator: cfg.KVPairSeparator,
+		kvSeparator:     string(cfg.KVSeparator),
+		kvPairSeparator: string(cfg.KVPairSeparator),
 	}
 }
 
@@ -75,12 +75,10 @@ func (mp *marshalProcessor) processLogs(_ context.Context, ld plog.Logs) (plog.L
 
 func (mp *marshalProcessor) convertToKV(logBody pcommon.Map) string {
 	var kvStrings []string
-	kvPairSeparator := string(mp.kvPairSeparator)
-	kvSeparator := string(mp.kvSeparator)
 
 	for k, v := range logBody.AsRaw() {
 		k = strings.ReplaceAll(k, "\"", "\\\"")
-		if strings.Contains(k, kvPairSeparator) || strings.Contains(k, kvSeparator) {
+		if strings.Contains(k, mp.kvPairSeparator) || strings.Contains(k, mp.kvSeparator) {
 			k = "\"" + k + "\""
 		}
 
@@ -89,15 +87,15 @@ func (mp *marshalProcessor) convertToKV(logBody pcommon.Map) string {
 		}
 
 		v = strings.ReplaceAll(fmt.Sprintf("%v", v), "\"", "\\\"")
-		if strings.Contains(fmt.Sprintf("%v", v), kvPairSeparator) || strings.Contains(fmt.Sprintf("%v", v), kvSeparator) {
+		if strings.Contains(fmt.Sprintf("%v", v), mp.kvPairSeparator) || strings.Contains(fmt.Sprintf("%v", v), mp.kvSeparator) {
 			v = "\"" + fmt.Sprintf("%v", v) + "\""
 		}
 
-		kvStrings = append(kvStrings, fmt.Sprintf("%s%s%v", k, kvSeparator, v))
+		kvStrings = append(kvStrings, fmt.Sprintf("%s%s%v", k, mp.kvSeparator, v))
 	}
 
 	sort.Strings(kvStrings)
-	return strings.Join(kvStrings, kvPairSeparator)
+	return strings.Join(kvStrings, mp.kvPairSeparator)
 }
 
 func convertMapToString(m map[string]interface{}) string {
