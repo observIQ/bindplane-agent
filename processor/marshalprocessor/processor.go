@@ -77,18 +77,18 @@ func (mp *marshalProcessor) convertToKV(logBody pcommon.Map) string {
 	var kvStrings []string
 
 	for k, v := range logBody.AsRaw() {
-		k = strings.ReplaceAll(k, "\"", "\\\"")
+		k = strings.ReplaceAll(k, `"`, `\"`)
 		if strings.Contains(k, mp.kvPairSeparator) || strings.Contains(k, mp.kvSeparator) {
-			k = "\"" + k + "\""
+			k = `"` + k + `"`
 		}
 
 		if valMap, ok := v.(map[string]interface{}); ok {
 			v = convertMapToString(valMap)
 		}
 
-		v = strings.ReplaceAll(fmt.Sprintf("%v", v), "\"", "\\\"")
+		v = strings.ReplaceAll(fmt.Sprintf("%v", v), `"`, `\"`)
 		if strings.Contains(fmt.Sprintf("%v", v), mp.kvPairSeparator) || strings.Contains(fmt.Sprintf("%v", v), mp.kvSeparator) {
-			v = "\"" + fmt.Sprintf("%v", v) + "\""
+			v = `"` + fmt.Sprintf("%v", v) + `"`
 		}
 
 		kvStrings = append(kvStrings, fmt.Sprintf("%s%s%v", k, mp.kvSeparator, v))
@@ -112,9 +112,9 @@ func convertMapToString(m map[string]interface{}) string {
 			v = convertMapToString(val)
 		default:
 			if str, ok := v.(string); ok {
-				v = strings.ReplaceAll(str, "\"", "\\\\\"")
+				v = strings.ReplaceAll(str, `"`, `\\"`)
 				if strings.ContainsAny(v.(string), ",[]=") {
-					v = fmt.Sprintf("\"%v\"", v)
+					v = fmt.Sprintf(`"%v"`, v)
 				}
 			}
 		}
