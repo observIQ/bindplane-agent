@@ -2,7 +2,7 @@ module github.com/observiq/bindplane-agent/processor/marshalprocessor
 
 go 1.22.0
 
-toolchain go1.22.5
+toolchain go1.22.6
 
 require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden v0.108.0
