@@ -3,7 +3,7 @@ module github.com/observiq/bindplane-agent/plugindocgen
 go 1.22.6
 
 require (
-	github.com/observiq/bindplane-agent/receiver/pluginreceiver v1.59.1
+	github.com/observiq/bindplane-agent/receiver/pluginreceiver v1.59.2
 	github.com/spf13/pflag v1.0.5
 	gopkg.in/yaml.v3 v3.0.1
 )
