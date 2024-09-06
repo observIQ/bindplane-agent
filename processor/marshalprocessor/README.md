@@ -1,6 +1,6 @@
 # Marshal Processor
 
-This processor is used to marshal parsed logs into JSON, XML, or KV format.
+This processor is used to marshal parsed logs into JSON or KV format.
 
 This processor is intended to be wrapped into the Marshal processor in Bindplane.
 
@@ -14,7 +14,7 @@ NOTE: XML support is in progress and not yet available.
 
 1. This processor expects its input to contain a parsed log body. It will marshal the body fields only; if additional fields from the log are desired, they must first be moved to the body.
 
-2. The body can be marshaled to string-encoded JSON, XML, or KV.
+2. The body can be marshaled to string-encoded JSON or KV.
 
    - For KV:
      - Fields will be converted to "key1=value1 key2=value2 key3=value3..." if no separators are configured
@@ -24,11 +24,11 @@ NOTE: XML support is in progress and not yet available.
 
 ## Configuration
 
-| Field           | Type   | Default | Description                                         |
-| --------------- | ------ | ------- | --------------------------------------------------- |
-| marshalTo       | string | ""      | The format to marshal into. Can be JSON, XML, or KV |
-| kvSeparator     | rune   | "="     | The separator between key and value                 |
-| kvPairSeparator | rune   | " "     | The separator between KV pairs                      |
+| Field           | Type   | Default | Description                                   |
+| --------------- | ------ | ------- | --------------------------------------------- |
+| marshalTo       | string | ""      | The format to marshal into. Can be JSON or KV |
+| kvSeparator     | rune   | "="     | The separator between key and value           |
+| kvPairSeparator | rune   | " "     | The separator between KV pairs                |
 
 ## Example Config for JSON
 
