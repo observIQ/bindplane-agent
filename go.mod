@@ -819,6 +819,8 @@ replace github.com/observiq/bindplane-agent/exporter/googlemanagedprometheusexpo
 
 replace github.com/observiq/bindplane-agent/receiver/azureblobrehydrationreceiver => ./receiver/azureblobrehydrationreceiver
 
+replace github.com/observiq/bindplane-agent/receiver/githubreceiver => ./receiver/githubreceiver
+
 replace github.com/observiq/bindplane-agent/receiver/httpreceiver => ./receiver/httpreceiver
 
 replace github.com/observiq/bindplane-agent/receiver/oktareceiver => ./receiver/oktareceiver

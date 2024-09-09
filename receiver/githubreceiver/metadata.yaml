@@ -1,0 +1,7 @@
+type: github
+
+status:
+  class: receiver
+  stability:
+    alpha: [logs]
+  distributions: [observiq]
