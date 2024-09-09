@@ -31,6 +31,8 @@ func Test_processLogs(t *testing.T) {
 		marshalTo              string
 		kvSeparator            rune
 		kvPairSeparator        rune
+		mapKVSeparator         rune
+		mapKVPairSeparator     rune
 		inputFilePath          string
 		expectedOutputFilePath string
 	}{
@@ -124,6 +126,8 @@ func Test_processLogs(t *testing.T) {
 				MarshalTo:       tc.marshalTo,
 				KVSeparator:     tc.kvSeparator,
 				KVPairSeparator: tc.kvPairSeparator,
+				MapKVSeparator: tc.mapKVSeparator,
+				MapKVPairSeparator: tc.mapKVPairSeparator,
 			}
 
 			if cfg.KVSeparator == 0 {
@@ -131,6 +135,12 @@ func Test_processLogs(t *testing.T) {
 			}
 			if cfg.KVPairSeparator == 0 {
 				cfg.KVPairSeparator = defaultKVPairSeparator
+			}
+			if cfg.MapKVSeparator == 0 {
+				cfg.MapKVSeparator = defaultMapKVSeparator
+			}
+			if cfg.MapKVPairSeparator == 0 {
+				cfg.MapKVPairSeparator = defaultMapKVPairSeparator
 			}
 
 			processor := newMarshalProcessor(zap.NewNop(), cfg)

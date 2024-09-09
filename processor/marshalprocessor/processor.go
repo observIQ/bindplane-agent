@@ -73,6 +73,7 @@ func (mp *marshalProcessor) processLogs(_ context.Context, ld plog.Logs) (plog.L
 	return ld, nil
 }
 
+// convertMapToKV recursively converts a map to a key-value string
 func (mp *marshalProcessor) convertMapToKV(logBody pcommon.Map, inNestedValue bool) string {
 	var kvStrings []string
 

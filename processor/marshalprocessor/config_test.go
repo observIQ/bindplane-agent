@@ -26,6 +26,8 @@ func TestCreateDefaultProcessorConfig(t *testing.T) {
 	require.Equal(t, defaultMarshalTo, cfg.MarshalTo)
 	require.Equal(t, defaultKVSeparator, cfg.KVSeparator)
 	require.Equal(t, defaultKVPairSeparator, cfg.KVPairSeparator)
+	require.Equal(t, defaultMapKVSeparator, cfg.MapKVSeparator)
+	require.Equal(t, defaultMapKVPairSeparator, cfg.MapKVPairSeparator)
 }
 
 func TestConfigValidate(t *testing.T) {
@@ -94,6 +96,8 @@ func TestConfigValidate(t *testing.T) {
 				MarshalTo:       "JSON",
 				KVSeparator:     ':',
 				KVPairSeparator: ':',
+				MapKVSeparator: '!',
+				MapKVPairSeparator: '!',
 			},
 			expectedErr: nil,
 		},
@@ -123,6 +127,44 @@ func TestConfigValidate(t *testing.T) {
 				KVPairSeparator: '=',
 			},
 			expectedErr: errKVSeparatorsEqual,
+		},
+		{
+			desc: "Identical Map KV separator fields are not allowed",
+			cfg: &Config{
+				MarshalTo:       "KV",
+				MapKVSeparator:     ':',
+				MapKVPairSeparator: ':',
+			},
+			expectedErr: errMapKVSeparatorsEqual,
+		},
+		{
+			desc: "Identical Map KV separator fields are not allowed with default MapKVPairSeparator",
+			cfg: &Config{
+				MarshalTo:       "KV",
+				MapKVSeparator:     ',',
+				MapKVPairSeparator: ',',
+			},
+			expectedErr: errMapKVSeparatorsEqual,
+		},
+		{
+			desc: "Identical Map KV separator fields are not allowed with default MapKVSeparator",
+			cfg: &Config{
+				MarshalTo:       "KV",
+				MapKVSeparator:     '=',
+				MapKVPairSeparator: '=',
+			},
+			expectedErr: errMapKVSeparatorsEqual,
+		},
+		{
+			desc: "Map KV separators can match their KV counterparts",
+			cfg: &Config{
+				MarshalTo:       "KV",
+				KVSeparator:     ':',
+				KVPairSeparator: ' ',
+				MapKVSeparator:  ':',
+				MapKVPairSeparator: ' ',
+			},
+			expectedErr: nil,
 		},
 	}
 

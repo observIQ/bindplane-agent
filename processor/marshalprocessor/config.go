@@ -26,11 +26,14 @@ import (
 var errInvalidMarshalTo = errors.New("marshal_to must be JSON or KV")
 var errXMLNotSupported = errors.New("XML not yet supported")
 var errKVSeparatorsEqual = errors.New("kv_separator and kv_pair_separator must be different")
+var errMapKVSeparatorsEqual = errors.New("map_kv_separator and map_kv_pair_separator must be different")
 
 const (
 	defaultMarshalTo       = "JSON"
 	defaultKVSeparator     = '='
 	defaultKVPairSeparator = ' '
+	defaultMapKVSeparator  = '='
+	defaultMapKVPairSeparator = ','
 )
 
 // Config is the configuration for the processor
@@ -38,6 +41,8 @@ type Config struct {
 	MarshalTo       string `mapstructure:"marshal_to"` // MarshalTo is either JSON or KV
 	KVSeparator     rune   `mapstructure:"kv_separator"`
 	KVPairSeparator rune   `mapstructure:"kv_pair_separator"`
+	MapKVSeparator  rune   `mapstructure:"map_kv_separator"`
+	MapKVPairSeparator rune `mapstructure:"map_kv_pair_separator"`
 }
 
 // Validate validates the processor configuration
@@ -54,6 +59,10 @@ func (cfg Config) Validate() error {
 		if cfg.KVSeparator == cfg.KVPairSeparator && cfg.KVSeparator != 0 {
 			errs = multierr.Append(errs, errKVSeparatorsEqual)
 		}
+		// Validate Map KV separators, which must be different from each other (but can match KV separators)
+		if cfg.MapKVSeparator == cfg.MapKVPairSeparator && cfg.MapKVSeparator != 0 {
+			errs = multierr.Append(errs, errMapKVSeparatorsEqual)
+		}
 	default:
 		errs = multierr.Append(errs, errInvalidMarshalTo)
 	}
@@ -67,5 +76,7 @@ func createDefaultConfig() component.Config {
 		MarshalTo:       defaultMarshalTo,
 		KVSeparator:     defaultKVSeparator,
 		KVPairSeparator: defaultKVPairSeparator,
+		MapKVSeparator: defaultMapKVSeparator,
+		MapKVPairSeparator: defaultMapKVPairSeparator,
 	}
 }

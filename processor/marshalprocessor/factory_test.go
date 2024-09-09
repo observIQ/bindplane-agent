@@ -29,6 +29,8 @@ func TestNewFactory(t *testing.T) {
 		MarshalTo:       "JSON",
 		KVSeparator:     '=',
 		KVPairSeparator: ' ',
+		MapKVSeparator:  '=',
+		MapKVPairSeparator: ',',
 	}
 
 	cfg, ok := factory.CreateDefaultConfig().(*Config)
