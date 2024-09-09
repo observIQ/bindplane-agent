@@ -15,9 +15,9 @@ jobs:
         with:
           go-version: "1.21"
           check-latest: true
-      # Needed until supervisor binary is released
       - name: Install Tools
         run: make install-tools
+      # Needed until supervisor binary is released
       - name: Build Supervisor Binary
         run: make release-prep
       - name: Build Windows Binaries
