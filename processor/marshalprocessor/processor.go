@@ -61,7 +61,7 @@ func (mp *marshalProcessor) processLogs(_ context.Context, ld plog.Logs) (plog.L
 				case "XML":
 					return ld, fmt.Errorf("XML not yet supported")
 				case "KV":
-					kvBody := mp.convertToKV(logBody.Map())
+					kvBody := mp.convertMapToKV(logBody.Map(), false)
 					logBody.SetStr(kvBody)
 				default:
 					return ld, fmt.Errorf("Unrecognized format to marshal to: %s", mp.marshalTo)
@@ -73,52 +73,62 @@ func (mp *marshalProcessor) processLogs(_ context.Context, ld plog.Logs) (plog.L
 	return ld, nil
 }
 
-func (mp *marshalProcessor) convertToKV(logBody pcommon.Map) string {
+func (mp *marshalProcessor) convertMapToKV(logBody pcommon.Map, inNestedValue bool) string {
 	var kvStrings []string
 
-	for k, v := range logBody.AsRaw() {
-		k = strings.ReplaceAll(k, `"`, `\"`)
-		if strings.Contains(k, mp.kvPairSeparator) || strings.Contains(k, mp.kvSeparator) {
-			k = `"` + k + `"`
+	logBody.Range(func(k string, v pcommon.Value) bool {
+		k = mp.escapeAndQuoteKV(k, inNestedValue)
+
+		var vStr string
+		switch v.Type() {
+		case pcommon.ValueTypeMap:
+			vStr = mp.convertMapToKV(v.Map(), true)
+			vStr = `[` + vStr + `]`
+			if !inNestedValue && (mp.kvSeparator == `=` || mp.kvPairSeparator == `,`) {
+				vStr = `"` + vStr + `"`
+			}
+		default:
+			vStr = mp.escapeAndQuoteKV(v.AsString(), inNestedValue)
 		}
 
-		if valMap, ok := v.(map[string]interface{}); ok {
-			v = convertMapToString(valMap)
+		if !inNestedValue {
+			kvStrings = append(kvStrings, fmt.Sprintf("%s%s%v", k, mp.kvSeparator, vStr))
+		} else {
+			kvStrings = append(kvStrings, fmt.Sprintf("%s%s%v", k, `=`, vStr))
 		}
 
-		vStr := strings.ReplaceAll(fmt.Sprintf("%v", v), `"`, `\"`)
-		if strings.Contains(vStr, mp.kvPairSeparator) || strings.Contains(vStr, mp.kvSeparator) {
-			vStr = `"` + vStr + `"`
-		}
-
-		kvStrings = append(kvStrings, fmt.Sprintf("%s%s%v", k, mp.kvSeparator, vStr))
-	}
+		return true
+	})
 
 	sort.Strings(kvStrings)
-	return strings.Join(kvStrings, mp.kvPairSeparator)
+
+	if !inNestedValue {
+		return strings.Join(kvStrings, mp.kvPairSeparator)
+	} else {
+		return strings.Join(kvStrings, `,`)
+	}
 }
 
-func convertMapToString(m map[string]interface{}) string {
-	var kvPairs []string
-	var keys []string
-	for k := range m {
-		keys = append(keys, k)
-	}
-	sort.Strings(keys)
-	for _, k := range keys {
-		v := m[k]
-		switch val := v.(type) {
-		case map[string]interface{}:
-			v = convertMapToString(val)
-		default:
-			if str, ok := v.(string); ok {
-				v = strings.ReplaceAll(str, `"`, `\\"`)
-				if strings.ContainsAny(v.(string), ",[]=") {
-					v = fmt.Sprintf(`"%v"`, v)
-				}
-			}
+func (mp marshalProcessor) escapeAndQuoteKV(s string, inNestedValue bool) string {
+	if !inNestedValue {
+		s = strings.ReplaceAll(s, `"`, `\"`)
+		if strings.Contains(s, mp.kvPairSeparator) || strings.Contains(s, mp.kvSeparator) {
+			s = `"` + s + `"`
 		}
-		kvPairs = append(kvPairs, fmt.Sprintf("%s=%v", k, v))
+	} else {
+		s = strings.ReplaceAll(s, `"`, `\\\"`)
+		if strings.ContainsAny(s, `=,[]`) {
+			s = `\"` + s + `\"`
+		}
 	}
-	return fmt.Sprintf("[%s]", strings.Join(kvPairs, ","))
+
+	return s
 }
+
+// func convertMapToString(m map[string]interface{}) string {
+// 	var kvPairs []string
+// 	var keys []string
+// 	for k := range m {
+// 		keys = append(keys, k)
+// 	}
+// 	sort.Strings(keys)

@@ -64,8 +64,8 @@ func (cfg Config) Validate() error {
 // createDefaultConfig returns the default config for the processor.
 func createDefaultConfig() component.Config {
 	return &Config{
-		MarshalTo: defaultMarshalTo,
-		KVSeparator: defaultKVSeparator,
-		KVPairSeparator:   defaultKVPairSeparator,
+		MarshalTo:       defaultMarshalTo,
+		KVSeparator:     defaultKVSeparator,
+		KVPairSeparator: defaultKVPairSeparator,
 	}
 }

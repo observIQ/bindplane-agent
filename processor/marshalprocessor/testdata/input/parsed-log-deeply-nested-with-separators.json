@@ -42,7 +42,10 @@
                                 }
                               }
                             },
-                            { "key": "n1", "value": { "doubleValue": 1 } }
+                            {
+                              "key": "a not =,, []]great string \"",
+                              "value": { "doubleValue": 1 }
+                            }
                           ]
                         }
                       }
