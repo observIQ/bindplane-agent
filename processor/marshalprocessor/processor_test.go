@@ -79,10 +79,34 @@ func Test_processLogs(t *testing.T) {
 			expectedOutputFilePath: "parsed-log-deeply-nested-kv.json",
 		},
 		{
+			desc:                   "Valid - Parsed deeply nested body to KV with custom Map separators", // not recommended to use this unflattened format but technically valid
+			marshalTo:              "KV",
+			mapKVSeparator:         ':',
+			mapKVPairSeparator:     '|',
+			inputFilePath:          "parsed-log-deeply-nested.json",
+			expectedOutputFilePath: "parsed-log-deeply-nested-kv-map.json",
+		},
+		{
 			desc:                   "Valid - Parsed deeply nested body to KV with default separators and separators present in nested map", // not recommended to use this unflattened format but technically valid
 			marshalTo:              "KV",
 			inputFilePath:          "parsed-log-deeply-nested-with-separators.json",
 			expectedOutputFilePath: "parsed-log-deeply-nested-with-separators-kv.json",
+		},
+		{
+			desc:                   "Valid - Parsed deeply nested body to KV with custon Map separators and map separators present in nested map", // not recommended to use this unflattened format but technically valid
+			marshalTo:              "KV",
+			mapKVSeparator:         ':',
+			mapKVPairSeparator:     '|',
+			inputFilePath:          "parsed-log-deeply-nested-with-separators-map.json",
+			expectedOutputFilePath: "parsed-log-deeply-nested-with-separators-kv-map.json",
+		},
+		{
+			desc: "Valid - Parsed deeply nested body to KV with normal KV separators in nested map vals but not the custom map separators in them", // not recommended to use this unflattened format but technically valid
+			marshalTo:              "KV",
+			mapKVSeparator:         ':',
+			mapKVPairSeparator:     '|',
+			inputFilePath:          "parsed-log-deeply-nested-with-separators-map-2.json",
+			expectedOutputFilePath: "parsed-log-deeply-nested-with-separators-kv-map-2.json",
 		},
 		{
 			desc:                   "Valid - Parsed and flattened body to KV with custom pair separator",
