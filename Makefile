@@ -233,7 +233,7 @@ release-prep:
 	@rm -rf release_deps
 	@mkdir release_deps
 	@echo 'v$(CURR_VERSION)' > release_deps/VERSION.txt
-	./buildscripts/download-dependencies.sh release_deps
+	bash ./buildscripts/download-dependencies.sh release_deps
 	@cp -r ./plugins release_deps/
 	@cp service/com.observiq.collector.plist release_deps/com.observiq.collector.plist
 	@jq ".files[] | select(.service != null)" windows/wix.json >> release_deps/windows_service.json
