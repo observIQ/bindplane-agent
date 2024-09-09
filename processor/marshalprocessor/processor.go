@@ -30,6 +30,8 @@ type marshalProcessor struct {
 	marshalTo       string
 	kvSeparator     string
 	kvPairSeparator string
+	mapKVSeparator  string
+	mapKVPairSeparator string
 }
 
 func newMarshalProcessor(logger *zap.Logger, cfg *Config) *marshalProcessor {
@@ -38,6 +40,8 @@ func newMarshalProcessor(logger *zap.Logger, cfg *Config) *marshalProcessor {
 		marshalTo:       cfg.MarshalTo,
 		kvSeparator:     string(cfg.KVSeparator),
 		kvPairSeparator: string(cfg.KVPairSeparator),
+		mapKVSeparator:  string(cfg.MapKVSeparator),
+		mapKVPairSeparator: string(cfg.MapKVPairSeparator),
 	}
 }
 
@@ -85,7 +89,7 @@ func (mp *marshalProcessor) convertMapToKV(logBody pcommon.Map, inNestedValue bo
 		case pcommon.ValueTypeMap:
 			vStr = mp.convertMapToKV(v.Map(), true)
 			vStr = `[` + vStr + `]`
-			if !inNestedValue && (mp.kvSeparator == `=` || mp.kvPairSeparator == `,`) {
+			if !inNestedValue && (mp.kvSeparator == mp.mapKVSeparator || mp.kvPairSeparator == mp.mapKVPairSeparator) {
 				vStr = `"` + vStr + `"`
 			}
 		default:
@@ -95,7 +99,7 @@ func (mp *marshalProcessor) convertMapToKV(logBody pcommon.Map, inNestedValue bo
 		if !inNestedValue {
 			kvStrings = append(kvStrings, fmt.Sprintf("%s%s%v", k, mp.kvSeparator, vStr))
 		} else {
-			kvStrings = append(kvStrings, fmt.Sprintf("%s%s%v", k, `=`, vStr))
+			kvStrings = append(kvStrings, fmt.Sprintf("%s%s%v", k, mp.mapKVSeparator, vStr))
 		}
 
 		return true
@@ -106,7 +110,7 @@ func (mp *marshalProcessor) convertMapToKV(logBody pcommon.Map, inNestedValue bo
 	if !inNestedValue {
 		return strings.Join(kvStrings, mp.kvPairSeparator)
 	} else {
-		return strings.Join(kvStrings, `,`)
+		return strings.Join(kvStrings, mp.mapKVPairSeparator)
 	}
 }
 
@@ -118,7 +122,7 @@ func (mp marshalProcessor) escapeAndQuoteKV(s string, inNestedValue bool) string
 		}
 	} else {
 		s = strings.ReplaceAll(s, `"`, `\\\"`)
-		if strings.ContainsAny(s, `=,[]`) {
+		if strings.ContainsAny(s, mp.kvPairSeparator+mp.kvSeparator+mp.mapKVPairSeparator+mp.mapKVSeparator+`[]`) {
 			s = `\"` + s + `\"`
 		}
 	}
