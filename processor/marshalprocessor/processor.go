@@ -86,12 +86,12 @@ func (mp *marshalProcessor) convertToKV(logBody pcommon.Map) string {
 			v = convertMapToString(valMap)
 		}
 
-		v = strings.ReplaceAll(fmt.Sprintf("%v", v), `"`, `\"`)
-		if strings.Contains(fmt.Sprintf("%v", v), mp.kvPairSeparator) || strings.Contains(fmt.Sprintf("%v", v), mp.kvSeparator) {
-			v = `"` + fmt.Sprintf("%v", v) + `"`
+		vStr := strings.ReplaceAll(fmt.Sprintf("%v", v), `"`, `\"`)
+		if strings.Contains(vStr, mp.kvPairSeparator) || strings.Contains(vStr, mp.kvSeparator) {
+			vStr = `"` + vStr + `"`
 		}
 
-		kvStrings = append(kvStrings, fmt.Sprintf("%s%s%v", k, mp.kvSeparator, v))
+		kvStrings = append(kvStrings, fmt.Sprintf("%s%s%v", k, mp.kvSeparator, vStr))
 	}
 
 	sort.Strings(kvStrings)
