@@ -12,22 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Package githubreceiver provides a receiver that receives telemetry from GitHub.
 package githubreceiver // import "github.com/observiq/bindplane-agent/receiver/githubreceiver"
 
 import (
 	"fmt"
 	"time"
+
+	"go.opentelemetry.io/collector/config/configopaque"
 )
 
+// WebhookConfig defines configuration for a webhook.
 type WebhookConfig any
 
 // Config defines configuration for GitHub receiver.
 type Config struct {
-	AccessToken   string        `mapstructure:"access_token"`
-	LogType       string        `mapstructure:"log_type"`                // "user", "organization", or "enterprise"
-	Name          string        `mapstructure:"name"`                    // The name of the user, organization, or enterprise
-	PollInterval  time.Duration `mapstructure:"poll_interval,omitempty"` // Optional
-	WebhookConfig WebhookConfig `mapstructure:"webhook,omitempty"`       // Optional
+	AccessToken   configopaque.String `mapstructure:"access_token"`
+	LogType       string              `mapstructure:"log_type"`                // "user", "organization", or "enterprise"
+	Name          string              `mapstructure:"name"`                    // The name of the user, organization, or enterprise
+	PollInterval  time.Duration       `mapstructure:"poll_interval,omitempty"` // Optional
+	WebhookConfig WebhookConfig       `mapstructure:"webhook,omitempty"`       // Optional
 }
 
 // Validate validates the configuration by checking for missing or invalid fields

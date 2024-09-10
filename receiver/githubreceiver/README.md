@@ -25,17 +25,15 @@ via the [GitHub API](https://docs.github.com/en/rest?apiVersion=2022-11-28).
 
 ## Configuration
 
-| Field         | Type          | Default | Requried | Description                                                                                                                                                                                                                                                                                       |
-| ------------- | ------------- | ------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| AccessToken   | string        |         | `true`   | Access token is required for audit log generation. Grants access to enterprise and organization if access token shows admin role. https://docs.github.com/en/enterprise-cloud@latest/apps/creating-github-apps/(authenticating-with-a-github-app/generating-a-user-access-token-for-a-github-app) |
-| LogType       | string        |         | `true`   | Specifies user, organization, or enterprise logs.                                                                                                                                                                                                                                                 |
-| Name          | string        |         | `true`   | The name of the user, organization or enterprise.                                                                                                                                                                                                                                                 |
-| PollInterval  | time.Duration |         | `false`  | The rate at which the receiver will poll for logs. An alternative to webhooks.                                                                                                                                                                                                                    |
-| WebhookConfig | WebhookConfig |         | `false`  | Webhooks (not configured yet) that are used when an event triggers on an enterprise, organization, or user. An alternative to polling.                                                                                                                                                            |
+| Field          | Type                | Default | Required | Description                                                                                                                                                                                                                                                                                       |
+| -------------- | ------------------- | ------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| access_token   | configopaque.String |         | `true`   | Access token is required for audit log generation. Grants access to enterprise and organization if access token shows admin role. https://docs.github.com/en/enterprise-cloud@latest/apps/creating-github-apps/(authenticating-with-a-github-app/generating-a-user-access-token-for-a-github-app) |
+| log_type       | string              |         | `true`   | Specifies user, organization, or enterprise logs.                                                                                                                                                                                                                                                 |
+| name           | string              |         | `true`   | The name of the user, organization or enterprise.                                                                                                                                                                                                                                                 |
+| poll_interval  | time.Duration       |         | `false`  | The rate at which the receiver will poll for logs. An alternative to webhooks.                                                                                                                                                                                                                    |
+| webhook_config | WebhookConfig       |         | `false`  | Webhooks (not configured yet) that are used when an event triggers on an enterprise, organization, or user. An alternative to polling.                                                                                                                                                            |
 
-## Example Configurations
-
-### Collect logs:
+## Example Configuration
 
 ```yaml
 receivers:

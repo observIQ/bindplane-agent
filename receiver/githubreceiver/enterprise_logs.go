@@ -33,15 +33,11 @@ import (
 
 var gitHubMaxLimit = 100
 
-
-
-
 type httpClient interface {
 	Do(req *http.Request) (*http.Response, error)
 	CloseIdleConnections()
 }
 
-// githubLogsReceiver is a receiver for GitHub logs.
 type gitHubLogsReceiver struct {
 	client   httpClient
 	logger   *zap.Logger
@@ -63,7 +59,7 @@ func newGitHubLogsReceiver(cfg *Config, logger *zap.Logger, consumer consumer.Lo
 	}, nil
 }
 
-// Start begins the receiver's operation.
+// start begins the receiver's operation.
 func (r *gitHubLogsReceiver) Start(_ context.Context, _ component.Host) error {
 	r.logger.Info("Starting GitHub logs receiver")
 	ctx, cancel := context.WithCancel(context.Background())
@@ -82,7 +78,7 @@ func (r *gitHubLogsReceiver) Start(_ context.Context, _ component.Host) error {
 }
 
 func (r *gitHubLogsReceiver) setupWebhook() error {
-	// waiting on open source code for webhooks
+	// waiting on open source code for webhooks: https://github.com/open-telemetry/opentelemetry-collector-contrib/pull/34944/commits
 	return nil
 }
 
@@ -118,7 +114,7 @@ func (r *gitHubLogsReceiver) poll(ctx context.Context) error {
 	return nil
 }
 
-func (r *gitHubLogsReceiver) getLogs(ctx context.Context) ([]gitHubEnterpriseLog) {
+func (r *gitHubLogsReceiver) getLogs(ctx context.Context) []gitHubEnterpriseLog {
 	pollTime := time.Now().UTC()
 	token := r.cfg.AccessToken
 	page := 1
@@ -135,28 +131,28 @@ func (r *gitHubLogsReceiver) getLogs(ctx context.Context) ([]gitHubEnterpriseLog
 	} else {
 
 		endpoint = fmt.Sprintf("enterprises/%s/audit-log", r.cfg.Name)
-	}	
+	}
 	for {
 
-		// Use nextURL if it's set
+		// use nextURL if it's set
 		if r.nextURL != "" {
 			url = r.nextURL
 		} else {
-			url = fmt.Sprintf("https://api.github.com/%s?per_page=%d&page=%d", endpoint, gitHubMaxLimit, page) 
+			url = fmt.Sprintf("https://api.github.com/%s?per_page=%d&page=%d", endpoint, gitHubMaxLimit, page)
 		}
 
-		// Create a new HTTP request with the provided context and URL
+		// create a new HTTP request with the provided context and URL
 		req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 		if err != nil {
 			r.logger.Error("error creating request: %w", zap.Error(err))
 			return allLogs
 		}
 
-		// Add headers
+		// add headers
 		req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
 		req.Header.Add("Accept", "application/vnd.github.v3+json") // optional?
-		req.Header.Add("X-GitHub-Api-Version", "2022-11-28") // optional?
-		
+		req.Header.Add("X-GitHub-Api-Version", "2022-11-28")       // optional?
+
 		resp, err := r.client.Do(req)
 		if err != nil {
 			r.logger.Error("error making request", zap.Error(err))
@@ -169,24 +165,24 @@ func (r *gitHubLogsReceiver) getLogs(ctx context.Context) ([]gitHubEnterpriseLog
 			return allLogs
 		}
 
-		// Read response body
+		// read response body
 		body, err := io.ReadAll(resp.Body)
 		if err != nil {
 			r.logger.Error("error reading response body", zap.Error(err))
 			return allLogs
 		}
-		
-		// Unmarshal JSON into curLogs
+
+		// unmarshal JSON into curLogs
 		err = json.Unmarshal(body, &curLogs)
 		if err != nil {
 			r.logger.Error("error unmarshalling JSON", zap.Error(err))
 			return allLogs
 		}
-		
-		// Append the current logs to the allLogs slice
+
+		// append the current logs to the allLogs slice
 		allLogs = append(allLogs, curLogs...)
 		page = r.setNextLink(resp, page)
-		// Check for the 'Link' header and set the next URL if it exists
+		// check for the 'Link' header and set the next URL if it exists
 		var curLogTime time.Time
 		if len(curLogs) != 0 {
 			curLogTime = millisecondsToTime(curLogs[len(curLogs)-1].Timestamp)
@@ -198,13 +194,14 @@ func (r *gitHubLogsReceiver) getLogs(ctx context.Context) ([]gitHubEnterpriseLog
 	return allLogs
 }
 
-
-
 func (r *gitHubLogsReceiver) processLogEvents(observedTime pcommon.Timestamp, logEvents []gitHubEnterpriseLog) plog.Logs {
 	logs := plog.NewLogs()
 	resourceLogs := logs.ResourceLogs().AppendEmpty()
 	resourceLogs.ScopeLogs().AppendEmpty()
-	resourceLogs.Resource().Attributes().PutStr("access_token", r.cfg.AccessToken)
+	resourceAttributes := resourceLogs.Resource().Attributes()
+	resourceAttributes.PutStr("log_type", r.cfg.LogType)
+	resourceAttributes.PutStr("name", r.cfg.Name)
+
 	for _, logEvent := range logEvents {
 		logRecord := resourceLogs.ScopeLogs().At(0).LogRecords().AppendEmpty()
 
@@ -278,19 +275,19 @@ func (r *gitHubLogsReceiver) addAttributes(logRecord plog.LogRecord, logEvent gi
 }
 func (r *gitHubLogsReceiver) setNextLink(res *http.Response, page int) int {
 	for _, link := range res.Header["Link"] {
-		// Split the link into URL and parameters
+		// split the link into URL and parameters
 		parts := strings.Split(strings.TrimSpace(link), ";")
 		if len(parts) < 2 {
 			continue
 		}
-		
-		// Check if the "rel" parameter is "next"
+
+		// check if the "rel" parameter is "next"
 		if strings.TrimSpace(parts[1]) == `rel="next"` {
 			// increment page
-			page ++
-			// Extract and return the URL
+			page++
+			// extract and return the URL
 			r.nextURL = strings.Trim(parts[0], "<>")
-			
+
 			return page
 		}
 	}
@@ -299,12 +296,10 @@ func (r *gitHubLogsReceiver) setNextLink(res *http.Response, page int) int {
 }
 
 func millisecondsToTime(ms int64) time.Time {
-	seconds := ms / 1000
-	nanoseconds := (ms % 1000) * 1000000
-	return time.Unix(seconds, nanoseconds)
+	return time.Unix(0, ms*int64(time.Millisecond))
 }
 
-func (r *gitHubLogsReceiver) Shutdown(ctx context.Context) error {
+func (r *gitHubLogsReceiver) Shutdown(_ context.Context) error {
 	r.logger.Debug("shutting down logs receiver")
 	if r.cancel != nil {
 		r.cancel()

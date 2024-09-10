@@ -27,6 +27,7 @@ import (
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest/plogtest"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/component/componenttest"
+	"go.opentelemetry.io/collector/config/configopaque"
 	"go.opentelemetry.io/collector/consumer"
 	"go.opentelemetry.io/collector/consumer/consumertest"
 	"go.uber.org/zap"
@@ -35,7 +36,6 @@ import (
 type mockHTTPClient struct {
 	mockDo func(req *http.Request) (*http.Response, error)
 }
-
 
 func (m *mockHTTPClient) Do(req *http.Request) (*http.Response, error) {
 	return m.mockDo(req)
@@ -62,8 +62,9 @@ func TestShutdownNoServer(t *testing.T) {
 
 func TestPollBasic(t *testing.T) {
 	cfg := createDefaultConfig().(*Config)
-	mockAccessToken := "AccessToken"
+	mockAccessToken := configopaque.String("AccessToken")
 	cfg.AccessToken = mockAccessToken
+	cfg.LogType = "enterprise"
 	cfg.Name = "justin-voss-observiq"
 	sink := &consumertest.LogsSink{}
 	recv, err := newGitHubLogsReceiver(cfg, zap.NewNop(), sink)
@@ -93,7 +94,7 @@ func TestPollBasic(t *testing.T) {
 
 func TestPollEmptyResponse(t *testing.T) {
 	cfg := createDefaultConfig().(*Config)
-	mockAccessToken := "AccessToken"
+	mockAccessToken := configopaque.String("AccessToken")
 	cfg.AccessToken = mockAccessToken
 	cfg.Name = "justin-voss-observiq"
 	sink := &consumertest.LogsSink{}
@@ -122,11 +123,10 @@ func TestPollTooManyRequests(t *testing.T) {
 
 	recv.client = &mockHTTPClient{
 		mockDo: func(req *http.Request) (*http.Response, error) {
-			recv.client = &mockHTTPClient{
-				mockDo: func(req *http.Request) (*http.Response, error) {
-					require.Contains(t, req.URL.String(), "per_page="+strconv.Itoa(gitHubMaxLimit))
-					return mockAPIResponseTooManyRequests(), nil
-				},
+
+			require.Contains(t, req.URL.String(), "per_page="+strconv.Itoa(gitHubMaxLimit))
+			if strings.Contains(req.URL.String(), "after=") {
+				return mockAPIResponseTooManyRequests(), nil
 			}
 			return mockAPIResponseOK100Logs(t), nil
 		},
@@ -152,11 +152,9 @@ func TestPollOverflow(t *testing.T) {
 
 	recv.client = &mockHTTPClient{
 		mockDo: func(req *http.Request) (*http.Response, error) {
-			recv.client = &mockHTTPClient{
-				mockDo: func(req *http.Request) (*http.Response, error) {
-					require.Contains(t, req.URL.String(), "per_page="+strconv.Itoa(gitHubMaxLimit))
-					return mockAPIResponseOKBasic(t), nil
-				},
+			require.Contains(t, req.URL.String(), "per_page="+strconv.Itoa(gitHubMaxLimit))
+			if strings.Contains(req.URL.String(), "after=") {
+				return mockAPIResponseOKBasic(t), nil
 			}
 			return mockAPIResponseOK100Logs(t), nil
 		},
@@ -173,7 +171,6 @@ func TestPollOverflow(t *testing.T) {
 	err = recv.Shutdown(context.Background())
 	require.NoError(t, err)
 }
-
 
 func newReceiver(t *testing.T, cfg *Config, c consumer.Logs) *gitHubLogsReceiver {
 	r, err := newGitHubLogsReceiver(cfg, zap.NewNop(), c)
@@ -197,7 +194,6 @@ func mockAPIResponseOKBasic(t *testing.T) *http.Response {
 	return mockRes
 }
 
-
 func mockAPIResponseEmpty(t *testing.T) *http.Response {
 	mockRes := &http.Response{}
 	mockRes.StatusCode = http.StatusOK
@@ -214,7 +210,6 @@ func mockAPIResponseOK100Logs(t *testing.T) *http.Response {
 	mockRes.Body = io.NopCloser(strings.NewReader(jsonFileAsString(t, "testdata/gitHub100ResponseEnterprise.json")))
 	return mockRes
 }
-
 
 func mockAPIResponseTooManyRequests() *http.Response {
 	return &http.Response{
