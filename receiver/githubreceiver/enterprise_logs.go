@@ -121,11 +121,12 @@ func (r *gitHubLogsReceiver) poll(ctx context.Context) error {
 func (r *gitHubLogsReceiver) getLogs(ctx context.Context) ([]gitHubEnterpriseLog) {
 	pollTime := time.Now().UTC()
 	token := r.cfg.AccessToken
+	page := 1
+	var url string
 	var endpoint string
 	var curLogs []gitHubEnterpriseLog
 	var allLogs []gitHubEnterpriseLog
-	var url string
-	page := 1
+
 	// endpoint changes based on log type
 	if r.cfg.LogType == "user" {
 		endpoint = fmt.Sprintf("users/%s/events/public", r.cfg.Name)
@@ -135,10 +136,8 @@ func (r *gitHubLogsReceiver) getLogs(ctx context.Context) ([]gitHubEnterpriseLog
 
 		endpoint = fmt.Sprintf("enterprises/%s/audit-log", r.cfg.Name)
 	}	
-	// Set the initial URL
-
-
 	for {
+
 		// Use nextURL if it's set
 		if r.nextURL != "" {
 			url = r.nextURL
@@ -146,6 +145,7 @@ func (r *gitHubLogsReceiver) getLogs(ctx context.Context) ([]gitHubEnterpriseLog
 			url = fmt.Sprintf("https://api.github.com/%s?per_page=%d&page=%d", endpoint, gitHubMaxLimit, page) 
 		}
 
+		// Create a new HTTP request with the provided context and URL
 		req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 		if err != nil {
 			r.logger.Error("error creating request: %w", zap.Error(err))
@@ -299,9 +299,9 @@ func (r *gitHubLogsReceiver) setNextLink(res *http.Response, page int) int {
 }
 
 func millisecondsToTime(ms int64) time.Time {
-    seconds := ms / 1000
-    nanoseconds := (ms % 1000) * 1000000
-    return time.Unix(seconds, nanoseconds)
+	seconds := ms / 1000
+	nanoseconds := (ms % 1000) * 1000000
+	return time.Unix(seconds, nanoseconds)
 }
 
 func (r *gitHubLogsReceiver) Shutdown(ctx context.Context) error {

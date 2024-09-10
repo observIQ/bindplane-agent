@@ -24,7 +24,7 @@ type gitHubEnterpriseLog struct {
     BusinessID                  int64         `json:"business_id,omitempty"`
     CreatedAt                   int64         `json:"created_at"`
     OperationType               string        `json:"operation_type,omitempty"`
-	UserAgent				   string        `json:"user_agent,omitempty"`
+	UserAgent				    string        `json:"user_agent,omitempty"`
     ActorLogin                  string        `json:"actor_login,omitempty"`
     ActorLocationCountryCode    string        `json:"actor_location_country_code,omitempty"`
     ActorAvatarURL              string        `json:"actor_avatar_url,omitempty"`
@@ -214,12 +214,12 @@ type gitHubUserLog struct {
 }
 
 type Actor struct {
-	ID          int64  `json:"id"`
-	Login       string `json:"login"`
-	DisplayLogin string `json:"display_login,omitempty"`
-	GravatarID  string `json:"gravatar_id,omitempty"`
-	URL         string `json:"url"`
-	AvatarURL   string `json:"avatar_url"`
+    ID          int64  `json:"id"`
+    Login       string `json:"login"`
+    DisplayLogin string `json:"display_login,omitempty"`
+    GravatarID  string `json:"gravatar_id,omitempty"`
+    URL         string `json:"url"`
+    AvatarURL   string `json:"avatar_url"`
 } 
 
 type Organization struct {
@@ -231,17 +231,17 @@ type Organization struct {
 }
 
 type Repository struct {
-	ID   int64  `json:"id"`
-	Name string `json:"name"`
-	URL  string `json:"url"`
+    ID   int64  `json:"id"`
+    Name string `json:"name"`
+    URL  string `json:"url"`
 }
 
 type Org struct {
-	ID         int64  `json:"id,omitempty"`
-	Login      string `json:"login,omitempty"`
-	GravatarID string `json:"gravatar_id,omitempty"`
-	URL        string `json:"url,omitempty"`
-	AvatarURL  string `json:"avatar_url,omitempty"`
+    ID         int64  `json:"id,omitempty"`
+    Login      string `json:"login,omitempty"`
+    GravatarID string `json:"gravatar_id,omitempty"`
+    URL        string `json:"url,omitempty"`
+    AvatarURL  string `json:"avatar_url,omitempty"`
 }
 
 type PushEvent struct {
@@ -273,35 +273,34 @@ type User struct {
 }
 
 type PullRequestEvent struct {
-    Action      string `json:"action"`
-    Number      int    `json:"number"`
-	PullRequest PullRequest `json:"PullRequestEvent"`
+    Action      string      `json:"action"`
+    Number      int         `json:"number"`
+    PullRequest PullRequest `json:"pull_request"`
 }
-
 type PullRequest struct {
-	ID                int64  `json:"id,omitempty"`
-	URL               string `json:"url,omitempty"`
-	HTMLURL           string `json:"html_url,omitempty"`
-	DiffURL           string `json:"diff_url,omitempty"`
-	PatchURL          string `json:"patch_url,omitempty"`
-	IssueURL          string `json:"issue_url,omitempty"`
-	CommitsURL        string `json:"commits_url,omitempty"`
-	ReviewCommentsURL string `json:"review_comments_url,omitempty"`
-	ReviewCommentURL  string `json:"review_comment_url,omitempty"`
-	CommentsURL       string `json:"comments_url,omitempty"`
-	StatusesURL       string `json:"statuses_url,omitempty"`
-	Title             string `json:"title,omitempty"`
-	User              struct {
-		Login string `json:"login,omitempty"`
-	} `json:"user,omitempty"`
-	Body               string   `json:"body,omitempty"`
-	CreatedAt          int64    `json:"created_at,omitempty"`
-	UpdatedAt          int64    `json:"updated_at,omitempty"`
-	ClosedAt           int64    `json:"closed_at,omitempty"`
-	MergedAt           int64    `json:"merged_at,omitempty"`
-	MergeCommitSHA     string   `json:"merge_commit_sha,omitempty"`
-	Assignees          []string `json:"assignees,omitempty"`
-	RequestedReviewers []string `json:"requested_reviewers,omitempty"`
+    ID                int64    `json:"id,omitempty"`
+    URL               string   `json:"url,omitempty"`
+    HTMLURL           string   `json:"html_url,omitempty"`
+    DiffURL           string   `json:"diff_url,omitempty"`
+    PatchURL          string   `json:"patch_url,omitempty"`
+    IssueURL          string   `json:"issue_url,omitempty"`
+    CommitsURL        string   `json:"commits_url,omitempty"`
+    ReviewCommentsURL string   `json:"review_comments_url,omitempty"`
+    ReviewCommentURL  string   `json:"review_comment_url,omitempty"`
+    CommentsURL       string   `json:"comments_url,omitempty"`
+    StatusesURL       string   `json:"statuses_url,omitempty"`
+    Title             string   `json:"title,omitempty"`
+    User              struct {
+        Login string `json:"login,omitempty"`
+    } `json:"user,omitempty"`
+    Body               string   `json:"body,omitempty"`
+    CreatedAt          int64    `json:"created_at,omitempty"`
+    UpdatedAt          int64    `json:"updated_at,omitempty"`
+    ClosedAt           int64    `json:"closed_at,omitempty"`
+    MergedAt           int64    `json:"merged_at,omitempty"`
+    MergeCommitSHA     string   `json:"merge_commit_sha,omitempty"`
+    Assignees          []string `json:"assignees,omitempty"`
+    RequestedReviewers []string `json:"requested_reviewers,omitempty"`
 }
 
 type DeleteEvent struct {
