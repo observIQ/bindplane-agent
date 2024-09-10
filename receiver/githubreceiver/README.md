@@ -5,7 +5,7 @@ via the [GitHub API](https://docs.github.com/en/rest?apiVersion=2022-11-28).
 
 ## Minimum Agent Versions
 
-- Introduced: [v1.59.0](https://github.com/observIQ/bindplane-agent/releases/tag/v1.59.0)
+- Introduced: [v1.60.0](https://github.com/observIQ/bindplane-agent/releases/tag/v1.60.0)
 
 ## Supported Pipelines
 
