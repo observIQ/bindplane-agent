@@ -8,8 +8,6 @@ on:
 jobs:
   build_linux:
     runs-on: ubuntu-latest-4-cores
-    needs:
-      - setup-tools
     steps:
       - name: Checkout Sources
         uses: actions/checkout@v4
