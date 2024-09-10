@@ -132,6 +132,11 @@ install-tools:
 # update cosign in docs/verify-signature.md when updating this version
 	go install github.com/sigstore/cosign/cmd/cosign@v1.13.1
 
+# install builder cmd for better CI
+.PHONY: install-builder
+install-builder:
+	cd $(TOOLS_MOD_DIR) && go install go.opentelemetry.io/collector/cmd/builder
+
 .PHONY: lint
 lint:
 	revive -config revive/config.toml -formatter friendly ./...
