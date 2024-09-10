@@ -72,6 +72,12 @@
 
         <Directory Id="$(var.Program_Files)">
             <Directory Id="INSTALLDIR" Name="observIQ OpenTelemetry Collector">
+                <Component Id="ProductFolder" Guid="f8525e78-62c7-4665-81ad-f27e936edc88">
+                    <CreateFolder>
+                        <Permission User="Administrators" GenericAll="yes" />
+                        <Permission User="Users" GenericAll="no" />
+                    </CreateFolder>
+                </Component>
                 {{define "FILES"}}
                 {{range $f := .}}
                 <Component 
@@ -268,6 +274,7 @@
          {{range $i, $e := .Shortcuts}}
          <ComponentRef Id="ApplicationShortcuts{{$i}}"/>
          {{end}}
+         <ComponentRef Id="ProductFolder"/>
       </Feature>
 
       <UI>
