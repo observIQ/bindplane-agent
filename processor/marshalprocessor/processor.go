@@ -109,9 +109,9 @@ func (mp *marshalProcessor) convertMapToKV(logBody pcommon.Map, inNestedValue bo
 
 	if !inNestedValue {
 		return strings.Join(kvStrings, mp.kvPairSeparator)
-	} else {
-		return strings.Join(kvStrings, mp.mapKVPairSeparator)
 	}
+
+	return strings.Join(kvStrings, mp.mapKVPairSeparator)
 }
 
 func (mp marshalProcessor) escapeAndQuoteKV(s string, inNestedValue bool) string {
