@@ -26,10 +26,10 @@ func TestNewFactory(t *testing.T) {
 	require.Equal(t, metadata.Type, factory.Type())
 
 	expectedCfg := &Config{
-		MarshalTo:       "JSON",
-		KVSeparator:     '=',
-		KVPairSeparator: ' ',
-		MapKVSeparator:  '=',
+		MarshalTo:          "JSON",
+		KVSeparator:        '=',
+		KVPairSeparator:    ' ',
+		MapKVSeparator:     '=',
 		MapKVPairSeparator: ',',
 	}
 

@@ -29,20 +29,20 @@ var errKVSeparatorsEqual = errors.New("kv_separator and kv_pair_separator must b
 var errMapKVSeparatorsEqual = errors.New("map_kv_separator and map_kv_pair_separator must be different")
 
 const (
-	defaultMarshalTo       = "JSON"
-	defaultKVSeparator     = '='
-	defaultKVPairSeparator = ' '
-	defaultMapKVSeparator  = '='
+	defaultMarshalTo          = "JSON"
+	defaultKVSeparator        = '='
+	defaultKVPairSeparator    = ' '
+	defaultMapKVSeparator     = '='
 	defaultMapKVPairSeparator = ','
 )
 
 // Config is the configuration for the processor
 type Config struct {
-	MarshalTo       string `mapstructure:"marshal_to"` // MarshalTo is either JSON or KV
-	KVSeparator     rune   `mapstructure:"kv_separator"`
-	KVPairSeparator rune   `mapstructure:"kv_pair_separator"`
-	MapKVSeparator  rune   `mapstructure:"map_kv_separator"`
-	MapKVPairSeparator rune `mapstructure:"map_kv_pair_separator"`
+	MarshalTo          string `mapstructure:"marshal_to"` // MarshalTo is either JSON or KV
+	KVSeparator        rune   `mapstructure:"kv_separator"`
+	KVPairSeparator    rune   `mapstructure:"kv_pair_separator"`
+	MapKVSeparator     rune   `mapstructure:"map_kv_separator"`
+	MapKVPairSeparator rune   `mapstructure:"map_kv_pair_separator"`
 }
 
 // Validate validates the processor configuration
@@ -73,10 +73,10 @@ func (cfg Config) Validate() error {
 // createDefaultConfig returns the default config for the processor.
 func createDefaultConfig() component.Config {
 	return &Config{
-		MarshalTo:       defaultMarshalTo,
-		KVSeparator:     defaultKVSeparator,
-		KVPairSeparator: defaultKVPairSeparator,
-		MapKVSeparator: defaultMapKVSeparator,
+		MarshalTo:          defaultMarshalTo,
+		KVSeparator:        defaultKVSeparator,
+		KVPairSeparator:    defaultKVPairSeparator,
+		MapKVSeparator:     defaultMapKVSeparator,
 		MapKVPairSeparator: defaultMapKVPairSeparator,
 	}
 }

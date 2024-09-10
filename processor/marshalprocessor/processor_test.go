@@ -101,7 +101,7 @@ func Test_processLogs(t *testing.T) {
 			expectedOutputFilePath: "parsed-log-deeply-nested-with-separators-kv-map.json",
 		},
 		{
-			desc: "Valid - Parsed deeply nested body to KV with normal KV separators in nested map vals but not the custom map separators in them", // not recommended to use this unflattened format but technically valid
+			desc:                   "Valid - Parsed deeply nested body to KV with normal KV separators in nested map vals but not the custom map separators in them", // not recommended to use this unflattened format but technically valid
 			marshalTo:              "KV",
 			mapKVSeparator:         ':',
 			mapKVPairSeparator:     '|',
@@ -147,10 +147,10 @@ func Test_processLogs(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.desc, func(t *testing.T) {
 			cfg := &Config{
-				MarshalTo:       tc.marshalTo,
-				KVSeparator:     tc.kvSeparator,
-				KVPairSeparator: tc.kvPairSeparator,
-				MapKVSeparator: tc.mapKVSeparator,
+				MarshalTo:          tc.marshalTo,
+				KVSeparator:        tc.kvSeparator,
+				KVPairSeparator:    tc.kvPairSeparator,
+				MapKVSeparator:     tc.mapKVSeparator,
 				MapKVPairSeparator: tc.mapKVPairSeparator,
 			}
 

@@ -26,21 +26,21 @@ import (
 )
 
 type marshalProcessor struct {
-	logger          *zap.Logger
-	marshalTo       string
-	kvSeparator     string
-	kvPairSeparator string
-	mapKVSeparator  string
+	logger             *zap.Logger
+	marshalTo          string
+	kvSeparator        string
+	kvPairSeparator    string
+	mapKVSeparator     string
 	mapKVPairSeparator string
 }
 
 func newMarshalProcessor(logger *zap.Logger, cfg *Config) *marshalProcessor {
 	return &marshalProcessor{
-		logger:          logger,
-		marshalTo:       cfg.MarshalTo,
-		kvSeparator:     string(cfg.KVSeparator),
-		kvPairSeparator: string(cfg.KVPairSeparator),
-		mapKVSeparator:  string(cfg.MapKVSeparator),
+		logger:             logger,
+		marshalTo:          cfg.MarshalTo,
+		kvSeparator:        string(cfg.KVSeparator),
+		kvPairSeparator:    string(cfg.KVPairSeparator),
+		mapKVSeparator:     string(cfg.MapKVSeparator),
 		mapKVPairSeparator: string(cfg.MapKVPairSeparator),
 	}
 }
@@ -129,11 +129,3 @@ func (mp marshalProcessor) escapeAndQuoteKV(s string, inNestedValue bool) string
 
 	return s
 }
-
-// func convertMapToString(m map[string]interface{}) string {
-// 	var kvPairs []string
-// 	var keys []string
-// 	for k := range m {
-// 		keys = append(keys, k)
-// 	}
-// 	sort.Strings(keys)

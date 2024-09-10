@@ -93,10 +93,10 @@ func TestConfigValidate(t *testing.T) {
 		{
 			desc: "KV separator fields do not cause a validation error if not marshaling to KV",
 			cfg: &Config{
-				MarshalTo:       "JSON",
-				KVSeparator:     ':',
-				KVPairSeparator: ':',
-				MapKVSeparator: '!',
+				MarshalTo:          "JSON",
+				KVSeparator:        ':',
+				KVPairSeparator:    ':',
+				MapKVSeparator:     '!',
 				MapKVPairSeparator: '!',
 			},
 			expectedErr: nil,
@@ -131,7 +131,7 @@ func TestConfigValidate(t *testing.T) {
 		{
 			desc: "Identical Map KV separator fields are not allowed",
 			cfg: &Config{
-				MarshalTo:       "KV",
+				MarshalTo:          "KV",
 				MapKVSeparator:     ':',
 				MapKVPairSeparator: ':',
 			},
@@ -140,7 +140,7 @@ func TestConfigValidate(t *testing.T) {
 		{
 			desc: "Identical Map KV separator fields are not allowed with default MapKVPairSeparator",
 			cfg: &Config{
-				MarshalTo:       "KV",
+				MarshalTo:          "KV",
 				MapKVSeparator:     ',',
 				MapKVPairSeparator: ',',
 			},
@@ -149,7 +149,7 @@ func TestConfigValidate(t *testing.T) {
 		{
 			desc: "Identical Map KV separator fields are not allowed with default MapKVSeparator",
 			cfg: &Config{
-				MarshalTo:       "KV",
+				MarshalTo:          "KV",
 				MapKVSeparator:     '=',
 				MapKVPairSeparator: '=',
 			},
@@ -158,10 +158,10 @@ func TestConfigValidate(t *testing.T) {
 		{
 			desc: "Map KV separators can match their KV counterparts",
 			cfg: &Config{
-				MarshalTo:       "KV",
-				KVSeparator:     ':',
-				KVPairSeparator: ' ',
-				MapKVSeparator:  ':',
+				MarshalTo:          "KV",
+				KVSeparator:        ':',
+				KVPairSeparator:    ' ',
+				MapKVSeparator:     ':',
 				MapKVPairSeparator: ' ',
 			},
 			expectedErr: nil,
