@@ -81,6 +81,11 @@ jobs:
         run: |
           go install github.com/uw-labs/lichen@v0.1.7
           lichen --config=./license.yaml $(find dist/collector_* dist/updater_*)
+      - name: Get disk usage
+        if: always()
+        run: |
+          df -h
+          du -sh
 
   build_windows:
     runs-on: ubuntu-20.04
