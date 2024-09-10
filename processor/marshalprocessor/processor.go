@@ -77,23 +77,40 @@ func (mp *marshalProcessor) processLogs(_ context.Context, ld plog.Logs) (plog.L
 	return ld, nil
 }
 
-// convertMapToKV recursively converts a map to a key-value string
+// convertMapToKV recursively converts a map to a key value string
 func (mp *marshalProcessor) convertMapToKV(logBody pcommon.Map, inNestedValue bool) string {
 	var kvStrings []string
+	var keyValues []struct {
+		key string
+		val pcommon.Value
+	}
 
+	// Sort by keys
 	logBody.Range(func(k string, v pcommon.Value) bool {
-		k = mp.escapeAndQuoteKV(k, inNestedValue)
+		keyValues = append(keyValues, struct {
+			key string
+			val pcommon.Value
+		}{key: k, val: v})
+		return true
+	})
+	sort.Slice(keyValues, func(i, j int) bool {
+		return keyValues[i].key < keyValues[j].key
+	})
+
+	// Convert KV pairs
+	for _, kv := range keyValues {
+		k := mp.escapeAndQuoteKV(kv.key, inNestedValue)
 
 		var vStr string
-		switch v.Type() {
+		switch kv.val.Type() {
 		case pcommon.ValueTypeMap:
-			vStr = mp.convertMapToKV(v.Map(), true)
+			vStr = mp.convertMapToKV(kv.val.Map(), true)
 			vStr = `[` + vStr + `]`
 			if !inNestedValue && (mp.kvSeparator == mp.mapKVSeparator || mp.kvPairSeparator == mp.mapKVPairSeparator) {
 				vStr = `"` + vStr + `"`
 			}
 		default:
-			vStr = mp.escapeAndQuoteKV(v.AsString(), inNestedValue)
+			vStr = mp.escapeAndQuoteKV(kv.val.AsString(), inNestedValue)
 		}
 
 		if !inNestedValue {
@@ -101,16 +118,11 @@ func (mp *marshalProcessor) convertMapToKV(logBody pcommon.Map, inNestedValue bo
 		} else {
 			kvStrings = append(kvStrings, fmt.Sprintf("%s%s%v", k, mp.mapKVSeparator, vStr))
 		}
-
-		return true
-	})
-
-	sort.Strings(kvStrings)
+	}
 
 	if !inNestedValue {
 		return strings.Join(kvStrings, mp.kvPairSeparator)
 	}
-
 	return strings.Join(kvStrings, mp.mapKVPairSeparator)
 }
 
