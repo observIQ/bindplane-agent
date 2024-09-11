@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package githubreceiver // import "github.com/observiq/bindplane-agent/receiver/github"
+package githubreceiver
 
 import (
 	"context"
@@ -114,26 +114,31 @@ func (r *gitHubLogsReceiver) poll(ctx context.Context) error {
 	return nil
 }
 
-func (r *gitHubLogsReceiver) getLogs(ctx context.Context) []gitHubEnterpriseLog {
+func (r *gitHubLogsReceiver) getLogs(ctx context.Context) []interface{} {
 	pollTime := time.Now().UTC()
 	token := r.cfg.AccessToken
 	page := 1
 	var url string
 	var endpoint string
-	var curLogs []gitHubEnterpriseLog
-	var allLogs []gitHubEnterpriseLog
+	var curLogs []interface{}
+	var allLogs []interface{}
 
-	// endpoint changes based on log type
-	if r.cfg.LogType == "user" {
+	// initialize log slice variable for unmarshalling
+	var userLogs []gitHubUserLog
+	var orgLogs []gitHubOrganizationLog
+	var enterpriseLogs []gitHubEnterpriseLog
+
+	// set endpoint based on log type
+	switch r.cfg.LogType {
+	case "user":
 		endpoint = fmt.Sprintf("users/%s/events/public", r.cfg.Name)
-	} else if r.cfg.LogType == "organization" {
+	case "organization":
 		endpoint = fmt.Sprintf("orgs/%s/audit-log", r.cfg.Name)
-	} else {
-
+	default: // "enterprise"
 		endpoint = fmt.Sprintf("enterprises/%s/audit-log", r.cfg.Name)
 	}
-	for {
 
+	for {
 		// use nextURL if it's set
 		if r.nextURL != "" {
 			url = r.nextURL
@@ -172,29 +177,61 @@ func (r *gitHubLogsReceiver) getLogs(ctx context.Context) []gitHubEnterpriseLog 
 			return allLogs
 		}
 
-		// unmarshal JSON into curLogs
-		err = json.Unmarshal(body, &curLogs)
-		if err != nil {
-			r.logger.Error("error unmarshalling JSON", zap.Error(err))
+		// unmarshal JSON into the appropriate log type
+		var unmarshalErr error
+		switch r.cfg.LogType {
+		case "user":
+			unmarshalErr = json.Unmarshal(body, &userLogs)
+			curLogs = make([]interface{}, len(userLogs))
+			for i, log := range userLogs {
+				curLogs[i] = log
+			}
+		case "organization":
+			unmarshalErr = json.Unmarshal(body, &orgLogs)
+			curLogs = make([]interface{}, len(orgLogs))
+			for i, log := range orgLogs {
+				curLogs[i] = log
+			}
+		default: // "enterprise"
+			unmarshalErr = json.Unmarshal(body, &enterpriseLogs)
+			curLogs = make([]interface{}, len(enterpriseLogs))
+			for i, log := range enterpriseLogs {
+				curLogs[i] = log
+			}
+		}
+
+		if unmarshalErr != nil {
+			r.logger.Error("error unmarshalling JSON", zap.Error(unmarshalErr))
 			return allLogs
 		}
 
-		// append the current logs to the allLogs slice
+		// append current logs to allLogs
 		allLogs = append(allLogs, curLogs...)
+
 		page = r.setNextLink(resp, page)
+
 		// check for the 'Link' header and set the next URL if it exists
 		var curLogTime time.Time
 		if len(curLogs) != 0 {
-			curLogTime = millisecondsToTime(curLogs[len(curLogs)-1].Timestamp)
+			switch r.cfg.LogType {
+			case "user":
+				curLogTime = curLogs[len(curLogs)-1].(gitHubUserLog).CreatedAt
+			case "organization":
+				curLogTime = millisecondsToTime(curLogs[len(curLogs)-1].(gitHubOrganizationLog).Timestamp)
+			case "enterprise":
+				curLogTime = millisecondsToTime(curLogs[len(curLogs)-1].(gitHubEnterpriseLog).Timestamp)
+			}
 		}
+
 		if r.nextURL == "" || len(curLogs) < gitHubMaxLimit || curLogTime.After(pollTime) {
 			break
 		}
 	}
+
 	return allLogs
 }
 
-func (r *gitHubLogsReceiver) processLogEvents(observedTime pcommon.Timestamp, logEvents []gitHubEnterpriseLog) plog.Logs {
+func (r *gitHubLogsReceiver) processLogEvents(observedTime pcommon.Timestamp, logEvents []interface{}) plog.Logs {
 	logs := plog.NewLogs()
 	resourceLogs := logs.ResourceLogs().AppendEmpty()
 	resourceLogs.ScopeLogs().AppendEmpty()
@@ -204,10 +241,18 @@ func (r *gitHubLogsReceiver) processLogEvents(observedTime pcommon.Timestamp, lo
 
 	for _, logEvent := range logEvents {
 		logRecord := resourceLogs.ScopeLogs().At(0).LogRecords().AppendEmpty()
-
-		// timestamps
 		logRecord.SetObservedTimestamp(observedTime)
-		timestamp := time.UnixMilli(logEvent.Timestamp)
+
+		var timestamp time.Time
+		switch event := logEvent.(type) {
+		case *gitHubUserLog:
+			timestamp = time.UnixMilli(event.CreatedAt.UnixNano() / int64(time.Millisecond))
+		case *gitHubOrganizationLog:
+			timestamp = time.UnixMilli(event.Timestamp)
+		case *gitHubEnterpriseLog:
+			timestamp = time.UnixMilli(event.Timestamp)
+		}
+
 		logRecord.SetTimestamp(pcommon.NewTimestampFromTime(timestamp))
 
 		// body
@@ -218,61 +263,59 @@ func (r *gitHubLogsReceiver) processLogEvents(observedTime pcommon.Timestamp, lo
 			logRecord.Body().SetStr(string(logEventBytes))
 		}
 		// add attributes
-		r.addAttributes(logRecord, logEvent)
+
+		switch r.cfg.LogType {
+		case "user":
+			r.addUserAttributes(logRecord, logEvent.(gitHubUserLog))
+		case "organization":
+			r.addOrganizationAttributes(logRecord, logEvent.(gitHubOrganizationLog))
+		case "enterprise":
+			r.addEnterpriseAttributes(logRecord, logEvent.(gitHubEnterpriseLog))
+		}
 	}
 	return logs
 }
 
-// helper function to add attributes to logRecord
-func (r *gitHubLogsReceiver) addAttributes(logRecord plog.LogRecord, logEvent gitHubEnterpriseLog) {
+// Helper function to add organization attributes to logRecord
+func (r *gitHubLogsReceiver) addUserAttributes(logRecord plog.LogRecord, logEvent GitHubLog) {
 	// add attributes
 	attrs := logRecord.Attributes()
-	attrs.PutInt("@timestamp", logEvent.Timestamp)
-	attrs.PutStr("_document_id", logEvent.DocumentID)
-	attrs.PutStr("action", logEvent.Action)
-	attrs.PutStr("actor", logEvent.Actor)
-	attrs.PutInt("actor_id", logEvent.ActorID)
-	attrs.PutBool("actor_is_bot", logEvent.ActorIsBot)
-	attrs.PutStr("actor_location", logEvent.ActorLocation.CountryCode)
-	attrs.PutStr("business", logEvent.Business)
-	attrs.PutInt("business_id", logEvent.BusinessID)
-	attrs.PutInt("created_at", logEvent.CreatedAt)
-	attrs.PutStr("operation_type", logEvent.OperationType)
-	attrs.PutStr("user_agent", logEvent.UserAgent)
-
-	// map of optional attributes
-	optionalAttrs := map[string]interface{}{
-		"name":                    logEvent.Name,
-		"org":                     logEvent.Org,
-		"org_id":                  logEvent.OrgID,
-		"organization_upgrade":    logEvent.OrganizationUpgrade,
-		"permission":              logEvent.Permission,
-		"user":                    logEvent.User,
-		"user_id":                 logEvent.UserID,
-		"owner_type":              logEvent.OwnerType,
-		"audit_log_stream_sink":   logEvent.AuditLogStreamSink,
-		"audit_log_stream_result": logEvent.AuditLogStreamResult,
-	}
-
-	// add optional attributes if they are present
-	for key, value := range optionalAttrs {
-		switch v := value.(type) {
-		case string:
-			if v != "" {
-				attrs.PutStr(key, v)
-			}
-		case int64:
-			if v != 0 {
-				attrs.PutInt(key, v)
-			}
-		case bool:
-			if v {
-				attrs.PutBool(key, v)
-			}
-		}
-	}
+	attrs.PutStr("id", logEvent.(gitHubUserLog).ID)
+	attrs.PutStr("type", logEvent.(gitHubUserLog).Type)
+	attrs.PutInt("actor.id", logEvent.(gitHubUserLog).Actor.ID)
+	attrs.PutStr("actor.login", logEvent.(gitHubUserLog).Actor.Login)
+	attrs.PutStr("actor.display_login", logEvent.(gitHubUserLog).Actor.DisplayLogin)
+	attrs.PutStr("actor.URL", logEvent.(gitHubUserLog).Actor.URL)
+	attrs.PutInt("repo.id", logEvent.(gitHubUserLog).Repo.ID)
 
 }
+
+// Helper function to add organization attributes to logRecord
+func (r *gitHubLogsReceiver) addOrganizationAttributes(logRecord plog.LogRecord, logEvent GitHubLog) {
+	// add attributes
+	attrs := logRecord.Attributes()
+	attrs.PutStr("action", logEvent.(gitHubOrganizationLog).Action)
+	attrs.PutStr("actor", logEvent.(gitHubOrganizationLog).Actor)
+	attrs.PutInt("actor_id", logEvent.(gitHubOrganizationLog).ActorID)
+	attrs.PutInt("created_at", logEvent.(gitHubOrganizationLog).CreatedAt)
+}
+
+// Helper function to add enterprise attributes to logRecord
+func (r *gitHubLogsReceiver) addEnterpriseAttributes(logRecord plog.LogRecord, logEvent GitHubLog) {
+	// add attributes
+	attrs := logRecord.Attributes()
+	attrs.PutStr("_document_id", logEvent.(gitHubEnterpriseLog).DocumentID)
+	attrs.PutStr("action", logEvent.(gitHubEnterpriseLog).Action)
+	attrs.PutStr("actor", logEvent.(gitHubEnterpriseLog).Actor)
+	attrs.PutInt("actor_id", logEvent.(gitHubEnterpriseLog).ActorID)
+	attrs.PutStr("actor_location", logEvent.(gitHubEnterpriseLog).ActorLocation.CountryCode)
+	attrs.PutStr("business", logEvent.(gitHubEnterpriseLog).Business)
+	attrs.PutInt("business_id", logEvent.(gitHubEnterpriseLog).BusinessID)
+	attrs.PutInt("created_at", logEvent.(gitHubEnterpriseLog).CreatedAt)
+	attrs.PutStr("operation_type", logEvent.(gitHubEnterpriseLog).OperationType)
+	attrs.PutStr("user_agent", logEvent.(gitHubEnterpriseLog).UserAgent)
+}
+
 func (r *gitHubLogsReceiver) setNextLink(res *http.Response, page int) int {
 	for _, link := range res.Header["Link"] {
 		// split the link into URL and parameters
@@ -283,8 +326,8 @@ func (r *gitHubLogsReceiver) setNextLink(res *http.Response, page int) int {
 
 		// check if the "rel" parameter is "next"
 		if strings.TrimSpace(parts[1]) == `rel="next"` {
-			// increment page
 			page++
+
 			// extract and return the URL
 			r.nextURL = strings.Trim(parts[0], "<>")
 

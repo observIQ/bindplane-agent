@@ -27,6 +27,7 @@ require (
 	github.com/observiq/bindplane-agent/processor/throughputmeasurementprocessor v1.60.0
 	github.com/observiq/bindplane-agent/receiver/awss3rehydrationreceiver v1.60.0
 	github.com/observiq/bindplane-agent/receiver/azureblobrehydrationreceiver v1.60.0
+	github.com/observiq/bindplane-agent/receiver/githubreceiver v1.60.0
 	github.com/observiq/bindplane-agent/receiver/httpreceiver v1.60.0
 	github.com/observiq/bindplane-agent/receiver/m365receiver v1.60.0
 	github.com/observiq/bindplane-agent/receiver/oktareceiver v1.60.0

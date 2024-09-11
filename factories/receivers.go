@@ -17,6 +17,7 @@ package factories
 import (
 	"github.com/observiq/bindplane-agent/receiver/awss3rehydrationreceiver"
 	"github.com/observiq/bindplane-agent/receiver/azureblobrehydrationreceiver"
+	"github.com/observiq/bindplane-agent/receiver/githubreceiver"
 	"github.com/observiq/bindplane-agent/receiver/httpreceiver"
 	"github.com/observiq/bindplane-agent/receiver/m365receiver"
 	"github.com/observiq/bindplane-agent/receiver/oktareceiver"
@@ -119,6 +120,7 @@ var defaultReceivers = []receiver.Factory{
 	filelogreceiver.NewFactory(),
 	flinkmetricsreceiver.NewFactory(),
 	fluentforwardreceiver.NewFactory(),
+	githubreceiver.NewFactory(),
 	googlecloudpubsubreceiver.NewFactory(),
 	googlecloudspannerreceiver.NewFactory(),
 	hostmetricsreceiver.NewFactory(),

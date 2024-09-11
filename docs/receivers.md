@@ -3,7 +3,7 @@
 Below is a list of supported receivers with links to their documentation pages.
 
 | Name                                       | GitHub README                                                                                                                                                       |
-|--------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Active Directory Domain Services Receiver  | [activedirectorydsreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.108.0/receiver/activedirectorydsreceiver/README.md)           |
 | Aerospike Receiver                         | [aerospikereceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.108.0/receiver/aerospikereceiver/README.md)                           |
 | Apache CouchDB Receiver                    | [couchdbreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.108.0/receiver/couchdbreceiver/README.md)                               |
@@ -29,6 +29,7 @@ Below is a list of supported receivers with links to their documentation pages.
 | F5 BIG-IP Receiver                         | [bigipreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.108.0/receiver/bigipreceiver/README.md)                                   |
 | File Log Receiver                          | [filelogreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.108.0/receiver/filelogreceiver/README.md)                               |
 | Fluentd Forward Receiver                   | [fluentforwardreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.108.0/receiver/fluentforwardreceiver/README.md)                   |
+| GitHub Receiver                            | [githubreceiver](../receiver/githubreceiver/README.md)                                                                                                              |
 | Google Cloud Pub/Sub Receiver              | [googlecloudpubsubreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.108.0/receiver/googlecloudpubsubreceiver/README.md)           |
 | Google Cloud Spanner Receiver              | [googlecloudspannerreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.108.0/receiver/googlecloudspannerreceiver/README.md)         |
 | HTTP Log Receiver                          | [httpreceiver](../receiver/httpreceiver/README.md)                                                                                                                  |

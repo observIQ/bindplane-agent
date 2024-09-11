@@ -10,9 +10,6 @@ resourceLogs:
     scopeLogs:
       - logRecords:
           - attributes:
-              - key: '@timestamp'
-                value:
-                  intValue: "1724940962603"
               - key: _document_id
                 value:
                   stringValue: ""
@@ -25,9 +22,6 @@ resourceLogs:
               - key: actor_id
                 value:
                   intValue: "90650155"
-              - key: actor_is_bot
-                value:
-                  boolValue: false
               - key: actor_location
                 value:
                   stringValue: US
@@ -46,25 +40,13 @@ resourceLogs:
               - key: user_agent
                 value:
                   stringValue: Mozilla/5.0 (Macintosh Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
-              - key: name
-                value:
-                  stringValue: justin-voss-observiq
-              - key: org
-                value:
-                  stringValue: Justin-Organization-observIQ
-              - key: org_id
-                value:
-                  intValue: "179841732"
             body:
               stringValue: '{"@timestamp":1724940962603,"document_id":"","action":"business.add_organization","actor":"justinianvoss22","actor_id":90650155,"actor_location":{"country_code":"US"},"business":"justin-voss-observiq","business_id":217999,"created_at":1724940962603,"operation_type":"create","user_agent":"Mozilla/5.0 (Macintosh Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36","name":"justin-voss-observiq","org":"Justin-Organization-observIQ","org_id":179841732}'
-            observedTimeUnixNano: "1725978627034106000"
+            observedTimeUnixNano: "1726068833174011000"
             spanId: ""
-            timeUnixNano: "1724940962603000000"
+            timeUnixNano: "11651379494838206464"
             traceId: ""
           - attributes:
-              - key: '@timestamp'
-                value:
-                  intValue: "1724940962455"
               - key: _document_id
                 value:
                   stringValue: ""
@@ -77,9 +59,6 @@ resourceLogs:
               - key: actor_id
                 value:
                   intValue: "179841732"
-              - key: actor_is_bot
-                value:
-                  boolValue: false
               - key: actor_location
                 value:
                   stringValue: US
@@ -98,25 +77,13 @@ resourceLogs:
               - key: user_agent
                 value:
                   stringValue: Mozilla/5.0 (Macintosh Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
-              - key: owner_type
-                value:
-                  stringValue: User
-              - key: org
-                value:
-                  stringValue: Justin-Organization-observIQ
-              - key: org_id
-                value:
-                  intValue: "179841732"
             body:
               stringValue: '{"@timestamp":1724940962455,"document_id":"","action":"org.codespaces_ownership_updated","actor":"Justin-Organization-observIQ","actor_id":179841732,"actor_location":{"country_code":"US"},"business":"justin-voss-observiq","business_id":217999,"created_at":1724940962455,"operation_type":"modify","user_agent":"Mozilla/5.0 (Macintosh Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36","org":"Justin-Organization-observIQ","org_id":179841732,"owner_type":"User"}'
-            observedTimeUnixNano: "1725978627034106000"
+            observedTimeUnixNano: "1726068833174011000"
             spanId: ""
-            timeUnixNano: "1724940962455000000"
+            timeUnixNano: "11651379494838206464"
             traceId: ""
           - attributes:
-              - key: '@timestamp'
-                value:
-                  intValue: "1724940962347"
               - key: _document_id
                 value:
                   stringValue: ""
@@ -129,9 +96,6 @@ resourceLogs:
               - key: actor_id
                 value:
                   intValue: "90650155"
-              - key: actor_is_bot
-                value:
-                  boolValue: false
               - key: actor_location
                 value:
                   stringValue: US
@@ -150,22 +114,13 @@ resourceLogs:
               - key: user_agent
                 value:
                   stringValue: Mozilla/5.0 (Macintosh Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
-              - key: org_id
-                value:
-                  intValue: "179841732"
-              - key: org
-                value:
-                  stringValue: Justin-Organization-observIQ
             body:
               stringValue: '{"@timestamp":1724940962347,"document_id":"","action":"org.create","actor":"justinianvoss22","actor_id":90650155,"actor_location":{"country_code":"US"},"business":"justin-voss-observiq","business_id":217999,"created_at":1724940962347,"operation_type":"create","user_agent":"Mozilla/5.0 (Macintosh Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36","org":"Justin-Organization-observIQ","org_id":179841732}'
-            observedTimeUnixNano: "1725978627034106000"
+            observedTimeUnixNano: "1726068833174011000"
             spanId: ""
-            timeUnixNano: "1724940962347000000"
+            timeUnixNano: "11651379494838206464"
             traceId: ""
           - attributes:
-              - key: '@timestamp'
-                value:
-                  intValue: "1724940962177"
               - key: _document_id
                 value:
                   stringValue: ""
@@ -178,9 +133,6 @@ resourceLogs:
               - key: actor_id
                 value:
                   intValue: "90650155"
-              - key: actor_is_bot
-                value:
-                  boolValue: false
               - key: actor_location
                 value:
                   stringValue: US
@@ -199,31 +151,13 @@ resourceLogs:
               - key: user_agent
                 value:
                   stringValue: Mozilla/5.0 (Macintosh Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
-              - key: org
-                value:
-                  stringValue: Justin-Organization-observIQ
-              - key: user
-                value:
-                  stringValue: justinianvoss22
-              - key: org_id
-                value:
-                  intValue: "179841732"
-              - key: permission
-                value:
-                  stringValue: admin
-              - key: user_id
-                value:
-                  intValue: "90650155"
             body:
               stringValue: '{"@timestamp":1724940962177,"document_id":"","action":"org.add_member","actor":"justinianvoss22","actor_id":90650155,"actor_location":{"country_code":"US"},"business":"justin-voss-observiq","business_id":217999,"created_at":1724940962177,"operation_type":"create","user_agent":"Mozilla/5.0 (Macintosh Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36","user":"justinianvoss22","user_id":90650155,"permission":"admin","org":"Justin-Organization-observIQ","org_id":179841732}'
-            observedTimeUnixNano: "1725978627034106000"
+            observedTimeUnixNano: "1726068833174011000"
             spanId: ""
-            timeUnixNano: "1724940962177000000"
+            timeUnixNano: "11651379494838206464"
             traceId: ""
           - attributes:
-              - key: '@timestamp'
-                value:
-                  intValue: "1724940962147"
               - key: _document_id
                 value:
                   stringValue: ""
@@ -236,9 +170,6 @@ resourceLogs:
               - key: actor_id
                 value:
                   intValue: "90650155"
-              - key: actor_is_bot
-                value:
-                  boolValue: false
               - key: actor_location
                 value:
                   stringValue: US
@@ -257,22 +188,13 @@ resourceLogs:
               - key: user_agent
                 value:
                   stringValue: Mozilla/5.0 (Macintosh Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
-              - key: org
-                value:
-                  stringValue: Justin-Organization-observIQ
-              - key: org_id
-                value:
-                  intValue: "179841732"
             body:
               stringValue: '{"@timestamp":1724940962147,"document_id":"","action":"organization_default_label.create","actor":"justinianvoss22","actor_id":90650155,"actor_location":{"country_code":"US"},"business":"justin-voss-observiq","business_id":217999,"created_at":1724940962147,"operation_type":"create","user_agent":"Mozilla/5.0 (Macintosh Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36","org":"Justin-Organization-observIQ","org_id":179841732}'
-            observedTimeUnixNano: "1725978627034106000"
+            observedTimeUnixNano: "1726068833174011000"
             spanId: ""
-            timeUnixNano: "1724940962147000000"
+            timeUnixNano: "11651379494838206464"
             traceId: ""
           - attributes:
-              - key: '@timestamp'
-                value:
-                  intValue: "1724940962121"
               - key: _document_id
                 value:
                   stringValue: ""
@@ -285,9 +207,6 @@ resourceLogs:
               - key: actor_id
                 value:
                   intValue: "90650155"
-              - key: actor_is_bot
-                value:
-                  boolValue: false
               - key: actor_location
                 value:
                   stringValue: US
@@ -306,22 +225,13 @@ resourceLogs:
               - key: user_agent
                 value:
                   stringValue: Mozilla/5.0 (Macintosh Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
-              - key: org
-                value:
-                  stringValue: Justin-Organization-observIQ
-              - key: org_id
-                value:
-                  intValue: "179841732"
             body:
               stringValue: '{"@timestamp":1724940962121,"document_id":"","action":"organization_default_label.create","actor":"justinianvoss22","actor_id":90650155,"actor_location":{"country_code":"US"},"business":"justin-voss-observiq","business_id":217999,"created_at":1724940962121,"operation_type":"create","user_agent":"Mozilla/5.0 (Macintosh Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36","org":"Justin-Organization-observIQ","org_id":179841732}'
-            observedTimeUnixNano: "1725978627034106000"
+            observedTimeUnixNano: "1726068833174011000"
             spanId: ""
-            timeUnixNano: "1724940962121000000"
+            timeUnixNano: "11651379494838206464"
             traceId: ""
           - attributes:
-              - key: '@timestamp'
-                value:
-                  intValue: "1724940962096"
               - key: _document_id
                 value:
                   stringValue: ""
@@ -334,9 +244,6 @@ resourceLogs:
               - key: actor_id
                 value:
                   intValue: "90650155"
-              - key: actor_is_bot
-                value:
-                  boolValue: false
               - key: actor_location
                 value:
                   stringValue: US
@@ -355,22 +262,13 @@ resourceLogs:
               - key: user_agent
                 value:
                   stringValue: Mozilla/5.0 (Macintosh Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
-              - key: org
-                value:
-                  stringValue: Justin-Organization-observIQ
-              - key: org_id
-                value:
-                  intValue: "179841732"
             body:
               stringValue: '{"@timestamp":1724940962096,"document_id":"","action":"organization_default_label.create","actor":"justinianvoss22","actor_id":90650155,"actor_location":{"country_code":"US"},"business":"justin-voss-observiq","business_id":217999,"created_at":1724940962096,"operation_type":"create","user_agent":"Mozilla/5.0 (Macintosh Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36","org":"Justin-Organization-observIQ","org_id":179841732}'
-            observedTimeUnixNano: "1725978627034106000"
+            observedTimeUnixNano: "1726068833174011000"
             spanId: ""
-            timeUnixNano: "1724940962096000000"
+            timeUnixNano: "11651379494838206464"
             traceId: ""
           - attributes:
-              - key: '@timestamp'
-                value:
-                  intValue: "1724940962070"
               - key: _document_id
                 value:
                   stringValue: ""
@@ -383,9 +281,6 @@ resourceLogs:
               - key: actor_id
                 value:
                   intValue: "90650155"
-              - key: actor_is_bot
-                value:
-                  boolValue: false
               - key: actor_location
                 value:
                   stringValue: US
@@ -404,22 +299,13 @@ resourceLogs:
               - key: user_agent
                 value:
                   stringValue: Mozilla/5.0 (Macintosh Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
-              - key: org
-                value:
-                  stringValue: Justin-Organization-observIQ
-              - key: org_id
-                value:
-                  intValue: "179841732"
             body:
               stringValue: '{"@timestamp":1724940962070,"document_id":"","action":"organization_default_label.create","actor":"justinianvoss22","actor_id":90650155,"actor_location":{"country_code":"US"},"business":"justin-voss-observiq","business_id":217999,"created_at":1724940962070,"operation_type":"create","user_agent":"Mozilla/5.0 (Macintosh Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36","org":"Justin-Organization-observIQ","org_id":179841732}'
-            observedTimeUnixNano: "1725978627034106000"
+            observedTimeUnixNano: "1726068833174011000"
             spanId: ""
-            timeUnixNano: "1724940962070000000"
+            timeUnixNano: "11651379494838206464"
             traceId: ""
           - attributes:
-              - key: '@timestamp'
-                value:
-                  intValue: "1724940962043"
               - key: _document_id
                 value:
                   stringValue: ""
@@ -432,9 +318,6 @@ resourceLogs:
               - key: actor_id
                 value:
                   intValue: "90650155"
-              - key: actor_is_bot
-                value:
-                  boolValue: false
               - key: actor_location
                 value:
                   stringValue: US
@@ -453,22 +336,13 @@ resourceLogs:
               - key: user_agent
                 value:
                   stringValue: Mozilla/5.0 (Macintosh Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
-              - key: org_id
-                value:
-                  intValue: "179841732"
-              - key: org
-                value:
-                  stringValue: Justin-Organization-observIQ
             body:
               stringValue: '{"@timestamp":1724940962043,"document_id":"","action":"organization_default_label.create","actor":"justinianvoss22","actor_id":90650155,"actor_location":{"country_code":"US"},"business":"justin-voss-observiq","business_id":217999,"created_at":1724940962043,"operation_type":"create","user_agent":"Mozilla/5.0 (Macintosh Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36","org":"Justin-Organization-observIQ","org_id":179841732}'
-            observedTimeUnixNano: "1725978627034106000"
+            observedTimeUnixNano: "1726068833174011000"
             spanId: ""
-            timeUnixNano: "1724940962043000000"
+            timeUnixNano: "11651379494838206464"
             traceId: ""
           - attributes:
-              - key: '@timestamp'
-                value:
-                  intValue: "1724940962016"
               - key: _document_id
                 value:
                   stringValue: ""
@@ -481,9 +355,6 @@ resourceLogs:
               - key: actor_id
                 value:
                   intValue: "90650155"
-              - key: actor_is_bot
-                value:
-                  boolValue: false
               - key: actor_location
                 value:
                   stringValue: US
@@ -502,22 +373,13 @@ resourceLogs:
               - key: user_agent
                 value:
                   stringValue: Mozilla/5.0 (Macintosh Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
-              - key: org
-                value:
-                  stringValue: Justin-Organization-observIQ
-              - key: org_id
-                value:
-                  intValue: "179841732"
             body:
               stringValue: '{"@timestamp":1724940962016,"document_id":"","action":"organization_default_label.create","actor":"justinianvoss22","actor_id":90650155,"actor_location":{"country_code":"US"},"business":"justin-voss-observiq","business_id":217999,"created_at":1724940962016,"operation_type":"create","user_agent":"Mozilla/5.0 (Macintosh Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36","org":"Justin-Organization-observIQ","org_id":179841732}'
-            observedTimeUnixNano: "1725978627034106000"
+            observedTimeUnixNano: "1726068833174011000"
             spanId: ""
-            timeUnixNano: "1724940962016000000"
+            timeUnixNano: "11651379494838206464"
             traceId: ""
           - attributes:
-              - key: '@timestamp'
-                value:
-                  intValue: "1724940961991"
               - key: _document_id
                 value:
                   stringValue: ""
@@ -530,9 +392,6 @@ resourceLogs:
               - key: actor_id
                 value:
                   intValue: "90650155"
-              - key: actor_is_bot
-                value:
-                  boolValue: false
               - key: actor_location
                 value:
                   stringValue: US
@@ -551,22 +410,13 @@ resourceLogs:
               - key: user_agent
                 value:
                   stringValue: Mozilla/5.0 (Macintosh Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
-              - key: org
-                value:
-                  stringValue: Justin-Organization-observIQ
-              - key: org_id
-                value:
-                  intValue: "179841732"
             body:
               stringValue: '{"@timestamp":1724940961991,"document_id":"","action":"organization_default_label.create","actor":"justinianvoss22","actor_id":90650155,"actor_location":{"country_code":"US"},"business":"justin-voss-observiq","business_id":217999,"created_at":1724940961991,"operation_type":"create","user_agent":"Mozilla/5.0 (Macintosh Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36","org":"Justin-Organization-observIQ","org_id":179841732}'
-            observedTimeUnixNano: "1725978627034106000"
+            observedTimeUnixNano: "1726068833174011000"
             spanId: ""
-            timeUnixNano: "1724940961991000000"
+            timeUnixNano: "11651379494838206464"
             traceId: ""
           - attributes:
-              - key: '@timestamp'
-                value:
-                  intValue: "1724940961966"
               - key: _document_id
                 value:
                   stringValue: ""
@@ -579,9 +429,6 @@ resourceLogs:
               - key: actor_id
                 value:
                   intValue: "90650155"
-              - key: actor_is_bot
-                value:
-                  boolValue: false
               - key: actor_location
                 value:
                   stringValue: US
@@ -600,22 +447,13 @@ resourceLogs:
               - key: user_agent
                 value:
                   stringValue: Mozilla/5.0 (Macintosh Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
-              - key: org
-                value:
-                  stringValue: Justin-Organization-observIQ
-              - key: org_id
-                value:
-                  intValue: "179841732"
             body:
               stringValue: '{"@timestamp":1724940961966,"document_id":"","action":"organization_default_label.create","actor":"justinianvoss22","actor_id":90650155,"actor_location":{"country_code":"US"},"business":"justin-voss-observiq","business_id":217999,"created_at":1724940961966,"operation_type":"create","user_agent":"Mozilla/5.0 (Macintosh Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36","org":"Justin-Organization-observIQ","org_id":179841732}'
-            observedTimeUnixNano: "1725978627034106000"
+            observedTimeUnixNano: "1726068833174011000"
             spanId: ""
-            timeUnixNano: "1724940961966000000"
+            timeUnixNano: "11651379494838206464"
             traceId: ""
           - attributes:
-              - key: '@timestamp'
-                value:
-                  intValue: "1724940961938"
               - key: _document_id
                 value:
                   stringValue: ""
@@ -628,9 +466,6 @@ resourceLogs:
               - key: actor_id
                 value:
                   intValue: "90650155"
-              - key: actor_is_bot
-                value:
-                  boolValue: false
               - key: actor_location
                 value:
                   stringValue: US
@@ -649,22 +484,13 @@ resourceLogs:
               - key: user_agent
                 value:
                   stringValue: Mozilla/5.0 (Macintosh Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
-              - key: org_id
-                value:
-                  intValue: "179841732"
-              - key: org
-                value:
-                  stringValue: Justin-Organization-observIQ
             body:
               stringValue: '{"@timestamp":1724940961938,"document_id":"","action":"organization_default_label.create","actor":"justinianvoss22","actor_id":90650155,"actor_location":{"country_code":"US"},"business":"justin-voss-observiq","business_id":217999,"created_at":1724940961938,"operation_type":"create","user_agent":"Mozilla/5.0 (Macintosh Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36","org":"Justin-Organization-observIQ","org_id":179841732}'
-            observedTimeUnixNano: "1725978627034106000"
+            observedTimeUnixNano: "1726068833174011000"
             spanId: ""
-            timeUnixNano: "1724940961938000000"
+            timeUnixNano: "11651379494838206464"
             traceId: ""
           - attributes:
-              - key: '@timestamp'
-                value:
-                  intValue: "1724871313597"
               - key: _document_id
                 value:
                   stringValue: ""
@@ -677,9 +503,6 @@ resourceLogs:
               - key: actor_id
                 value:
                   intValue: "90650155"
-              - key: actor_is_bot
-                value:
-                  boolValue: false
               - key: actor_location
                 value:
                   stringValue: US
@@ -698,19 +521,13 @@ resourceLogs:
               - key: user_agent
                 value:
                   stringValue: Mozilla/5.0 (Macintosh Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
-              - key: audit_log_stream_sink
-                value:
-                  stringValue: google_cloud
             body:
               stringValue: '{"@timestamp":1724871313597,"document_id":"","action":"audit_log_streaming.create","actor":"justinianvoss22","actor_id":90650155,"actor_location":{"country_code":"US"},"business":"justin-voss-observiq","business_id":217999,"created_at":1724871313597,"operation_type":"create","user_agent":"Mozilla/5.0 (Macintosh Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36","audit_log_stream_sink":"google_cloud"}'
-            observedTimeUnixNano: "1725978627034106000"
+            observedTimeUnixNano: "1726068833174011000"
             spanId: ""
-            timeUnixNano: "1724871313597000000"
+            timeUnixNano: "11651379494838206464"
             traceId: ""
           - attributes:
-              - key: '@timestamp'
-                value:
-                  intValue: "1724871313559"
               - key: _document_id
                 value:
                   stringValue: ""
@@ -723,9 +540,6 @@ resourceLogs:
               - key: actor_id
                 value:
                   intValue: "90650155"
-              - key: actor_is_bot
-                value:
-                  boolValue: false
               - key: actor_location
                 value:
                   stringValue: US
@@ -744,19 +558,13 @@ resourceLogs:
               - key: user_agent
                 value:
                   stringValue: Mozilla/5.0 (Macintosh Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
-              - key: audit_log_stream_result
-                value:
-                  stringValue: ok
             body:
               stringValue: '{"@timestamp":1724871313559,"document_id":"","action":"audit_log_streaming.check","actor":"justinianvoss22","actor_id":90650155,"actor_location":{"country_code":"US"},"business":"justin-voss-observiq","business_id":217999,"created_at":1724871313559,"operation_type":"access","user_agent":"Mozilla/5.0 (Macintosh Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36","audit_log_stream_result":"ok"}'
-            observedTimeUnixNano: "1725978627034106000"
+            observedTimeUnixNano: "1726068833174011000"
             spanId: ""
-            timeUnixNano: "1724871313559000000"
+            timeUnixNano: "11651379494838206464"
             traceId: ""
           - attributes:
-              - key: '@timestamp'
-                value:
-                  intValue: "1724871310355"
               - key: _document_id
                 value:
                   stringValue: ""
@@ -769,9 +577,6 @@ resourceLogs:
               - key: actor_id
                 value:
                   intValue: "90650155"
-              - key: actor_is_bot
-                value:
-                  boolValue: false
               - key: actor_location
                 value:
                   stringValue: US
@@ -790,19 +595,13 @@ resourceLogs:
               - key: user_agent
                 value:
                   stringValue: Mozilla/5.0 (Macintosh Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
-              - key: audit_log_stream_result
-                value:
-                  stringValue: ok
             body:
               stringValue: '{"@timestamp":1724871310355,"document_id":"","action":"audit_log_streaming.check","actor":"justinianvoss22","actor_id":90650155,"actor_location":{"country_code":"US"},"business":"justin-voss-observiq","business_id":217999,"created_at":1724871310355,"operation_type":"access","user_agent":"Mozilla/5.0 (Macintosh Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36","audit_log_stream_result":"ok"}'
-            observedTimeUnixNano: "1725978627034106000"
+            observedTimeUnixNano: "1726068833174011000"
             spanId: ""
-            timeUnixNano: "1724871310355000000"
+            timeUnixNano: "11651379494838206464"
             traceId: ""
           - attributes:
-              - key: '@timestamp'
-                value:
-                  intValue: "1724870979604"
               - key: _document_id
                 value:
                   stringValue: ""
@@ -815,9 +614,6 @@ resourceLogs:
               - key: actor_id
                 value:
                   intValue: "90650155"
-              - key: actor_is_bot
-                value:
-                  boolValue: false
               - key: actor_location
                 value:
                   stringValue: US
@@ -838,14 +634,11 @@ resourceLogs:
                   stringValue: Mozilla/5.0 (Macintosh Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
             body:
               stringValue: '{"@timestamp":1724870979604,"document_id":"","action":"payment_method.update","actor":"justinianvoss22","actor_id":90650155,"actor_location":{"country_code":"US"},"business":"justin-voss-observiq","business_id":217999,"created_at":1724870979604,"operation_type":"modify","user_agent":"Mozilla/5.0 (Macintosh Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36"}'
-            observedTimeUnixNano: "1725978627034106000"
+            observedTimeUnixNano: "1726068833174011000"
             spanId: ""
-            timeUnixNano: "1724870979604000000"
+            timeUnixNano: "11651379494838206464"
             traceId: ""
           - attributes:
-              - key: '@timestamp'
-                value:
-                  intValue: "1724870896771"
               - key: _document_id
                 value:
                   stringValue: ""
@@ -858,9 +651,6 @@ resourceLogs:
               - key: actor_id
                 value:
                   intValue: "90650155"
-              - key: actor_is_bot
-                value:
-                  boolValue: false
               - key: actor_location
                 value:
                   stringValue: US
@@ -879,19 +669,13 @@ resourceLogs:
               - key: user_agent
                 value:
                   stringValue: Mozilla/5.0 (Macintosh Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
-              - key: name
-                value:
-                  stringValue: justin-voss-observiq
             body:
               stringValue: '{"@timestamp":1724870896771,"document_id":"","action":"business.create_trial","actor":"justinianvoss22","actor_id":90650155,"actor_location":{"country_code":"US"},"business":"justin-voss-observiq","business_id":217999,"created_at":1724870896771,"operation_type":"create","user_agent":"Mozilla/5.0 (Macintosh Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36","name":"justin-voss-observiq"}'
-            observedTimeUnixNano: "1725978627034106000"
+            observedTimeUnixNano: "1726068833174011000"
             spanId: ""
-            timeUnixNano: "1724870896771000000"
+            timeUnixNano: "11651379494838206464"
             traceId: ""
           - attributes:
-              - key: '@timestamp'
-                value:
-                  intValue: "1724870896736"
               - key: _document_id
                 value:
                   stringValue: ""
@@ -904,9 +688,6 @@ resourceLogs:
               - key: actor_id
                 value:
                   intValue: "90650155"
-              - key: actor_is_bot
-                value:
-                  boolValue: false
               - key: actor_location
                 value:
                   stringValue: US
@@ -925,19 +706,13 @@ resourceLogs:
               - key: user_agent
                 value:
                   stringValue: Mozilla/5.0 (Macintosh Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
-              - key: name
-                value:
-                  stringValue: justin-voss-observiq
             body:
               stringValue: '{"@timestamp":1724870896736,"document_id":"","action":"business.create","actor":"justinianvoss22","actor_id":90650155,"actor_location":{"country_code":"US"},"business":"justin-voss-observiq","business_id":217999,"created_at":1724870896736,"operation_type":"create","user_agent":"Mozilla/5.0 (Macintosh Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36","name":"justin-voss-observiq"}'
-            observedTimeUnixNano: "1725978627034106000"
+            observedTimeUnixNano: "1726068833174011000"
             spanId: ""
-            timeUnixNano: "1724870896736000000"
+            timeUnixNano: "11651379494838206464"
             traceId: ""
           - attributes:
-              - key: '@timestamp'
-                value:
-                  intValue: "1724870896695"
               - key: _document_id
                 value:
                   stringValue: ""
@@ -950,9 +725,6 @@ resourceLogs:
               - key: actor_id
                 value:
                   intValue: "90650155"
-              - key: actor_is_bot
-                value:
-                  boolValue: false
               - key: actor_location
                 value:
                   stringValue: US
@@ -971,13 +743,10 @@ resourceLogs:
               - key: user_agent
                 value:
                   stringValue: Mozilla/5.0 (Macintosh Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
-              - key: name
-                value:
-                  stringValue: justin-voss-observiq
             body:
               stringValue: '{"@timestamp":1724870896695,"document_id":"","action":"business.set_default_workflow_permissions","actor":"justinianvoss22","actor_id":90650155,"actor_location":{"country_code":"US"},"business":"justin-voss-observiq","business_id":217999,"created_at":1724870896695,"operation_type":"modify","user_agent":"Mozilla/5.0 (Macintosh Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36","name":"justin-voss-observiq"}'
-            observedTimeUnixNano: "1725978627034106000"
+            observedTimeUnixNano: "1726068833174011000"
             spanId: ""
-            timeUnixNano: "1724870896695000000"
+            timeUnixNano: "11651379494838206464"
             traceId: ""
         scope: {}
