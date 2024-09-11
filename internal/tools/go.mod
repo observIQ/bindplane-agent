@@ -8,7 +8,7 @@ require (
 	github.com/client9/misspell v0.3.4
 	github.com/google/addlicense v1.1.1
 	github.com/mgechev/revive v1.5.0
-	github.com/open-telemetry/opentelemetry-collector-contrib/cmd/opampsupervisor v0.106.1
+	github.com/open-telemetry/opentelemetry-collector-contrib/cmd/opampsupervisor v0.108.0
 	github.com/securego/gosec/v2 v2.18.2
 	github.com/uw-labs/lichen v0.1.7
 	github.com/vektra/mockery/v2 v2.46.1
@@ -89,9 +89,9 @@ require (
 	github.com/xo/terminfo v0.0.0-20210125001918-ca9a967f8778 // indirect
 	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673 // indirect
 	go.opentelemetry.io/collector/component v0.113.0 // indirect
-	go.opentelemetry.io/collector/config/configopaque v1.12.0 // indirect
+	go.opentelemetry.io/collector/config/configopaque v1.14.1 // indirect
 	go.opentelemetry.io/collector/config/configtelemetry v0.113.0 // indirect
-	go.opentelemetry.io/collector/config/configtls v1.12.0 // indirect
+	go.opentelemetry.io/collector/config/configtls v1.14.1 // indirect
 	go.opentelemetry.io/collector/confmap v1.19.0 // indirect
 	go.opentelemetry.io/collector/confmap/provider/fileprovider v1.19.0 // indirect
 	go.opentelemetry.io/collector/filter v0.113.0 // indirect
