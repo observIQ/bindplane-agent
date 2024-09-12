@@ -36,7 +36,7 @@ func NewFactory() receiver.Factory {
 }
 func createDefaultConfig() component.Config {
 	c := &Config{
-		PollInterval:  time.Second,
+		PollInterval:  time.Second * 60,
 		WebhookConfig: nil,
 	}
 	return c

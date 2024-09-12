@@ -16,10 +16,12 @@ package githubreceiver
 
 import (
 	"context"
+	"path/filepath"
 	"testing"
 
 	"github.com/observiq/bindplane-agent/receiver/githubreceiver/internal/metadata"
 	"github.com/stretchr/testify/require"
+	"go.opentelemetry.io/collector/otelcol/otelcoltest"
 	"go.opentelemetry.io/collector/receiver/receivertest"
 )
 
@@ -40,4 +42,14 @@ func TestCreateLogsReceiver(t *testing.T) {
 	)
 	require.NoError(t, err)
 	require.NotNil(t, recv)
+
+	factories, err := otelcoltest.NopFactories()
+	require.NoError(t, err)
+
+	factory := NewFactory()
+	factories.Receivers[metadata.Type] = factory
+	cfg2, err := otelcoltest.LoadConfigAndValidate(filepath.Join("testdata", "config.yaml"), factories)
+
+	require.NoError(t, err)
+	require.NotNil(t, cfg2)
 }

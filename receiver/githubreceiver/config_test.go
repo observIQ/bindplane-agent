@@ -36,7 +36,7 @@ func TestValidate(t *testing.T) {
 				AccessToken:  "AccessToken",
 				LogType:      "user",
 				Name:         "testName",
-				PollInterval: time.Second,
+				PollInterval: time.Second * 60,
 			},
 		},
 		{
@@ -46,7 +46,7 @@ func TestValidate(t *testing.T) {
 			config: Config{
 				LogType:      "user",
 				Name:         "testName",
-				PollInterval: time.Second,
+				PollInterval: time.Second * 60,
 			},
 		},
 		{
@@ -56,7 +56,7 @@ func TestValidate(t *testing.T) {
 			config: Config{
 				AccessToken:  "AccessToken",
 				Name:         "testName",
-				PollInterval: time.Second,
+				PollInterval: time.Second * 60,
 			},
 		},
 		{
@@ -66,7 +66,7 @@ func TestValidate(t *testing.T) {
 			config: Config{
 				AccessToken:  "AccessToken",
 				LogType:      "user",
-				PollInterval: time.Second,
+				PollInterval: time.Second * 60,
 			},
 		},
 		{
@@ -76,7 +76,7 @@ func TestValidate(t *testing.T) {
 			config: Config{
 				AccessToken:  "AccessToken",
 				LogType:      "user",
-				PollInterval: time.Second,
+				PollInterval: time.Second * 60,
 			},
 		},
 		{
