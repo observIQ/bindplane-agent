@@ -21,6 +21,7 @@ NOTE: XML support is in progress and not yet available.
      - The parsed fields should be flattened first so that every key is at the top level
      - If fields are not flattened, the nested fields will be converted to "nested=[k1=v1,k2=v2]..." if no map separators are configured
      - If any key or value contains characters that conflict with the separators, they will be wrapped in `"` and any `"` inside them will be escaped
+     - Arrays will simply be stringified
 
 3. The output of this processor will be the same as the input, but with a modified log body. Any body incompatible with the marshal type will be unchanged.
 
