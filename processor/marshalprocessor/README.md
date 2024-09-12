@@ -27,13 +27,13 @@ NOTE: XML support is in progress and not yet available.
 
 ## Configuration
 
-| Field              | Type   | Default | Description                                   |
-| ------------------ | ------ | ------- | --------------------------------------------- |
-| marshalTo          | string | ""      | The format to marshal into. Can be JSON or KV |
-| kvSeparator        | rune   | "="     | The separator between key and value           |
-| kvPairSeparator    | rune   | " "     | The separator between KV pairs                |
-| mapKVSeparator     | rune   | "="     | The separator between nested KV pairs         |
-| mapKVPairSeparator | rune   | ","     | The separator between nested KV pairs         |
+| Field                 | Type   | Default | Description                                   |
+| --------------------- | ------ | ------- | --------------------------------------------- |
+| marshal_to            | string | ""      | The format to marshal into. Can be JSON or KV |
+| kv_separator          | rune   | "="     | The separator between key and value           |
+| kv_pair_separator     | rune   | " "     | The separator between KV pairs                |
+| map_kv_separator      | rune   | "="     | The separator between nested KV pairs         |
+| map_kv_pair_separator | rune   | ","     | The separator between nested KV pairs         |
 
 ## Example Config for JSON
 
@@ -43,7 +43,7 @@ receivers:
 processors:
   transform:
   marshal:
-    marshalTo: "JSON"
+    marshal_to: "JSON"
 exporters:
   chronicle:
 service:
@@ -62,9 +62,9 @@ receivers:
 processors:
   transform:
   marshal:
-    marshalTo: "KV"
-    kvSeparator: ","
-    kvPairSeparator: ":"
+    marshal_to: "KV"
+    kv_separator: ","
+    kv_pair_separator: ":"
 exporters:
   chronicle:
 service:
