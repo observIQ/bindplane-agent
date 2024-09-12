@@ -18,17 +18,21 @@ NOTE: XML support is in progress and not yet available.
 
    - For KV:
      - Fields will be converted to "key1=value1 key2=value2 key3=value3..." if no separators are configured
-     - The parsed fields should be flattened first so that every key is at the top level.
+     - The parsed fields should be flattened first so that every key is at the top level
+     - If fields are not flattened, the nested fields will be converted to "nested=[k1=v1,k2=v2]..." if no map separators are configured
+     - If any key or value contains characters that conflict with the separators, they will be wrapped in `"` and any `"` inside them will be escaped
 
 3. The output of this processor will be the same as the input, but with a modified log body. Any body incompatible with the marshal type will be unchanged.
 
 ## Configuration
 
-| Field           | Type   | Default | Description                                   |
-| --------------- | ------ | ------- | --------------------------------------------- |
-| marshalTo       | string | ""      | The format to marshal into. Can be JSON or KV |
-| kvSeparator     | rune   | "="     | The separator between key and value           |
-| kvPairSeparator | rune   | " "     | The separator between KV pairs                |
+| Field              | Type   | Default | Description                                   |
+| ------------------ | ------ | ------- | --------------------------------------------- |
+| marshalTo          | string | ""      | The format to marshal into. Can be JSON or KV |
+| kvSeparator        | rune   | "="     | The separator between key and value           |
+| kvPairSeparator    | rune   | " "     | The separator between KV pairs                |
+| mapKVSeparator     | rune   | "="     | The separator between nested KV pairs         |
+| mapKVPairSeparator | rune   | ","     | The separator between nested KV pairs         |
 
 ## Example Config for JSON
 
@@ -181,12 +185,7 @@ In the example below, flattening has already been done on the "nested" field and
 ```
 "body": {
     "stringValue": {
-        bindplane-otel-attributes-baba=you
-        bindplane-otel-attributes-host=myhost
-        name=test
-        nested-n1=1
-        nested-n2=2
-        severity=155
+        bindplane-otel-attributes-baba=you bindplane-otel-attributes-host=myhost name=test nested-n1=1 nested-n2=2 severity=155
     }
 }
 ```
