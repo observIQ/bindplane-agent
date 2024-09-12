@@ -142,6 +142,12 @@ func Test_processLogs(t *testing.T) {
 			inputFilePath:          "parsed-flattened-log-with-separators-and-quotes.json",
 			expectedOutputFilePath: "parsed-flattened-log-kv-separators-and-quotes.json",
 		},
+		{
+			desc:                   "Valid - Parsed body with nested arrays and maps to KV with default separators", // not recommended to use this unflattened format but technically valid
+			marshalTo:              "KV",
+			inputFilePath:          "parsed-nested-log-with-slice.json",
+			expectedOutputFilePath: "parsed-nested-log-with-slice-kv.json",
+		},
 	}
 
 	for _, tc := range testCases {
