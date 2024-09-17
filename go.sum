@@ -1874,6 +1874,8 @@ github.com/nxadm/tail v1.4.8 h1:nPr65rt6Y5JFSKQO7qToXr7pePgD6Gwiw05lkbyAQTE=
 github.com/nxadm/tail v1.4.8/go.mod h1:+ncqLTQzXmGhMZNUePPaPqPvBxHAIsmXswZKocGu+AU=
 github.com/oapi-codegen/runtime v1.0.0 h1:P4rqFX5fMFWqRzY9M/3YF9+aPSPPB06IzP2P7oOxrWo=
 github.com/oapi-codegen/runtime v1.0.0/go.mod h1:LmCUMQuPB4M/nLXilQXhHw+BLZdDb18B34OO356yJ/A=
+github.com/observIQ/opentelemetry-collector-contrib/pkg/stanza v0.0.0-20240917140935-2741093f40aa h1:8CxUu9d9sfWIDYSQZbXm1nzqyrW2O3ULcxhUs/dYzZw=
+github.com/observIQ/opentelemetry-collector-contrib/pkg/stanza v0.0.0-20240917140935-2741093f40aa/go.mod h1:/cJjT1Tsh3onIjeZlKH4Tc94HOvs7gDcdDwK3KKRUC4=
 github.com/oklog/run v1.0.0/go.mod h1:dlhp/R75TPv97u0XWUtDeV/lRKWPKSdTuV0TZvrmrQA=
 github.com/oklog/ulid v1.3.1 h1:EGfNDEx6MqHz8B3uNV6QAib1UR2Lm97sHi3ocA6ESJ4=
 github.com/oklog/ulid v1.3.1/go.mod h1:CirwcVhetQ6Lv90oh/F+FBtV6XMibvdAFo93nm5qn4U=
@@ -2062,8 +2064,6 @@ github.com/open-telemetry/opentelemetry-collector-contrib/pkg/resourcetotelemetr
 github.com/open-telemetry/opentelemetry-collector-contrib/pkg/resourcetotelemetry v0.109.0/go.mod h1:vo39/3CexkMcF+T0T8Ic/Oer/ErrSMiD+MWNBYo9VYE=
 github.com/open-telemetry/opentelemetry-collector-contrib/pkg/sampling v0.109.0 h1:YQB8+grNfmaLqiavbv4VKhBw1NF8O6pSmbLC+FjMrKM=
 github.com/open-telemetry/opentelemetry-collector-contrib/pkg/sampling v0.109.0/go.mod h1:XOuilD83ZQWc0Te2B7+X0dRm9Z19M4h480UXTPO41Xc=
-github.com/open-telemetry/opentelemetry-collector-contrib/pkg/stanza v0.109.0 h1:mr94+h1RarvcZbsHOz8dzqIBwIEAoxbBBlsuguQyZTU=
-github.com/open-telemetry/opentelemetry-collector-contrib/pkg/stanza v0.109.0/go.mod h1:/cJjT1Tsh3onIjeZlKH4Tc94HOvs7gDcdDwK3KKRUC4=
 github.com/open-telemetry/opentelemetry-collector-contrib/pkg/translator/azure v0.109.0 h1:aBX4V/3T7gT16EnrpSO1lMGNFfhhAtDYJ336ELImLHo=
 github.com/open-telemetry/opentelemetry-collector-contrib/pkg/translator/azure v0.109.0/go.mod h1:RjSpcrHZdWvZNyBQBxdgQmccuNAcoXc0WCuvyFghVr4=
 github.com/open-telemetry/opentelemetry-collector-contrib/pkg/translator/jaeger v0.109.0 h1:CSYFxtxCBTF7BHbITx3g5ilxsjAI2Mn5nDHotnU4KXg=
