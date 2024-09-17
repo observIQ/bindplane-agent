@@ -1874,6 +1874,8 @@ github.com/nxadm/tail v1.4.8 h1:nPr65rt6Y5JFSKQO7qToXr7pePgD6Gwiw05lkbyAQTE=
 github.com/nxadm/tail v1.4.8/go.mod h1:+ncqLTQzXmGhMZNUePPaPqPvBxHAIsmXswZKocGu+AU=
 github.com/oapi-codegen/runtime v1.0.0 h1:P4rqFX5fMFWqRzY9M/3YF9+aPSPPB06IzP2P7oOxrWo=
 github.com/oapi-codegen/runtime v1.0.0/go.mod h1:LmCUMQuPB4M/nLXilQXhHw+BLZdDb18B34OO356yJ/A=
+github.com/observIQ/opentelemetry-collector-contrib/pkg/ottl v0.0.0-20240916145915-59a37114ca55 h1:N6uHkyd7QOMevCt4xRiSgQXNIZLzEZzqKlCyt0Ug0V0=
+github.com/observIQ/opentelemetry-collector-contrib/pkg/ottl v0.0.0-20240916145915-59a37114ca55/go.mod h1:LfwqmbImTBZW5psp7tCyZPHIPy3Imwexq+K/A1NAhEY=
 github.com/oklog/run v1.0.0/go.mod h1:dlhp/R75TPv97u0XWUtDeV/lRKWPKSdTuV0TZvrmrQA=
 github.com/oklog/ulid v1.3.1 h1:EGfNDEx6MqHz8B3uNV6QAib1UR2Lm97sHi3ocA6ESJ4=
 github.com/oklog/ulid v1.3.1/go.mod h1:CirwcVhetQ6Lv90oh/F+FBtV6XMibvdAFo93nm5qn4U=
@@ -2052,8 +2054,6 @@ github.com/open-telemetry/opentelemetry-collector-contrib/pkg/experimentalmetric
 github.com/open-telemetry/opentelemetry-collector-contrib/pkg/experimentalmetricmetadata v0.109.0/go.mod h1:EWEI4jcMr9jXlBWTG77rqknzc3K+QObImve7y5vdnjs=
 github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden v0.109.0 h1:9mStsYv/9nnav/mftmHxEA6fp7c7mfd5CgU2802frjE=
 github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden v0.109.0/go.mod h1:P7e6ch+uoSfxK+lMwfcndkHE6gWUqvWKpr7mD04KIAA=
-github.com/open-telemetry/opentelemetry-collector-contrib/pkg/ottl v0.109.0 h1:k7uHhrznH4dYvzbaCRz5VgFyHzhd1NGow1s6504r6tA=
-github.com/open-telemetry/opentelemetry-collector-contrib/pkg/ottl v0.109.0/go.mod h1:LfwqmbImTBZW5psp7tCyZPHIPy3Imwexq+K/A1NAhEY=
 github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest v0.109.0 h1:Mi0qKcH4VjyyZsbaWYG038drk5FCFL7igVM8abEL4ZY=
 github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest v0.109.0/go.mod h1:KvJWxR0bDk9Qh0ktw4gOFsd/ZrJ7p5KTAQueEJsaK9Q=
 github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatautil v0.109.0 h1:3kXFgdEEKw37ftdRC7SmXAiZuLahVavqOYRhlJVMLc8=

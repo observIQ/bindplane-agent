@@ -852,3 +852,7 @@ replace github.com/mattn/go-ieproxy => github.com/mattn/go-ieproxy v0.0.1
 
 // openshift removed all tags from their repo, use the pseudoversion from the release-3.9 branch HEAD
 replace github.com/openshift/api v3.9.0+incompatible => github.com/openshift/api v0.0.0-20180801171038-322a19404e37
+
+// replace pkg/ottl until this pr is merged
+// https://github.com/open-telemetry/opentelemetry-collector-contrib/pull/35210
+replace github.com/open-telemetry/opentelemetry-collector-contrib/pkg/ottl => github.com/observIQ/opentelemetry-collector-contrib/pkg/ottl v0.0.0-20240916145915-59a37114ca55
