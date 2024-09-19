@@ -17,7 +17,6 @@ package qradar
 import (
 	"context"
 	"crypto/tls"
-	"errors"
 	"fmt"
 	"io"
 	"net"
@@ -100,18 +99,7 @@ func (ce *qradarExporter) logsDataPusher(ctx context.Context, ld plog.Logs) erro
 }
 
 func (ce *qradarExporter) openWriter(ctx context.Context) (io.WriteCloser, error) {
-	switch ce.cfg.ExportType {
-	case exportTypeSyslog:
-		return ce.openSyslogWriter(ctx)
-	case exportTypeFile:
-		return ce.openFileWriter()
-	default:
-		return nil, errors.New("unsupported export type")
-	}
-}
-
-func (ce *qradarExporter) openFileWriter() (io.WriteCloser, error) {
-	return ce.OpenFile(ce.cfg.File.Path)
+	return ce.openSyslogWriter(ctx)
 }
 
 func (ce *qradarExporter) openSyslogWriter(ctx context.Context) (io.WriteCloser, error) {

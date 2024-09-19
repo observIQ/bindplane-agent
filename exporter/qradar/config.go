@@ -27,28 +27,14 @@ import (
 	"go.uber.org/zap"
 )
 
-const (
-	// exportTypeSyslog is the syslog export type.
-	exportTypeSyslog = "syslog"
-
-	// exportTypeFile is the file export type.
-	exportTypeFile = "file"
-)
-
 // Config defines configuration for the QRadar exporter.
 type Config struct {
 	exporterhelper.TimeoutSettings `mapstructure:",squash"`
 	exporterhelper.QueueSettings   `mapstructure:"sending_queue"`
 	configretry.BackOffConfig      `mapstructure:"retry_on_failure"`
 
-	// ExportType is the type of export to use.
-	ExportType string `mapstructure:"export_type"`
-
 	// Syslog is the configuration for the connection to QRadar.
 	Syslog SyslogConfig `mapstructure:"syslog"`
-
-	// File is the configuration for the connection to QRadar.
-	File File `mapstructure:"file"`
 
 	// RawLogField is the field name that will be used to send raw logs to QRadar.
 	RawLogField string `mapstructure:"raw_log_field"`
@@ -62,12 +48,6 @@ type SyslogConfig struct {
 	TLSSetting *configtls.ClientConfig `mapstructure:"tls"`
 }
 
-// File defines configuration for sending to.
-type File struct {
-	// Path is the path to the file to send to QRadar.
-	Path string `mapstructure:"path"`
-}
-
 // validate validates the Syslog configuration.
 func (s *SyslogConfig) validate() error {
 	if s.AddrConfig.Endpoint == "" {
@@ -76,30 +56,11 @@ func (s *SyslogConfig) validate() error {
 	return nil
 }
 
-// validate validates the File configuration.
-func (f *File) validate() error {
-	if f.Path == "" {
-		return errors.New("file path is required for file export type")
-	}
-	return nil
-}
-
 // Validate validates the QRadar exporter configuration.
 func (cfg *Config) Validate() error {
-	if cfg.ExportType != exportTypeSyslog && cfg.ExportType != exportTypeFile {
-		return errors.New("export_type must be either 'syslog' or 'file'")
-	}
 
-	if cfg.ExportType == exportTypeSyslog {
-		if err := cfg.Syslog.validate(); err != nil {
-			return err
-		}
-	}
-
-	if cfg.ExportType == exportTypeFile {
-		if err := cfg.File.validate(); err != nil {
-			return err
-		}
+	if err := cfg.Syslog.validate(); err != nil {
+		return err
 	}
 
 	if cfg.RawLogField != "" {

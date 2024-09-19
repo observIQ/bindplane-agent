@@ -1,31 +1,24 @@
 # QRadaar Exporter
 
-The QRadar Exporter is designed for forwarding logs to a QRadar endpoint using either Syslog or File-based methods. This exporter supports customization of data export types and various configuration options to tailor the connection and data handling to specific needs.
+The QRadar Exporter is designed for forwarding logs to a QRadar instance using its Syslog endpoint. This exporter supports customization of data export types and various configuration options to tailor the connection and data handling to specific needs.
 
 ## Minimum Agent Versions
 
-- Introduced: [v1.42.0](https://github.com/observIQ/bindplane-agent/releases/tag/v1.42.0)
+- Introduced: [v1.61.0](https://github.com/observIQ/bindplane-agent/releases/tag/v1.61.0)
 
 ## Supported Pipelines
 
 - Logs
 
-## How It Works
-
-1. For Syslog, it establishes a network connection to the specified QRadar endpoint.
-2. For File, it writes logs to a specified file path.
-
 ## Configuration
 
 | Field                | Type   | Default Value     | Required | Description                                       |
 | -------------------- | ------ | ----------------- | -------- | ------------------------------------------------- |
-| export_type          | string | `syslog`          | `true`   | Type of export, either `syslog` or `file`.        |
 | raw_log_field        | string |                   | `false`  | The field name to send raw logs to QRadar.     |
 | syslog.endpoint      | string | `127.0.0.1:10514` | `false`  | The QRadar endpoint.                 |
 | syslog.transport     | string | `tcp`             | `false`  | The network protocol to use (e.g., `tcp`, `udp`). |
 | syslog.tls.key_file  | string |                   | `false`  | Configure the receiver to use TLS.                |
 | syslog.tls.cert_file | string |                   | `false`  | Configure the receiver to use TLS.                |
-| file.path            | string |                   | `false`  | The path to the file for storing logs.            |
 
 ## Raw Log Field
 
@@ -37,21 +30,9 @@ The raw log field is the field name that the exporter will use to send raw logs 
 
 ```yaml
 qradar:
-  export_type: "syslog"
   raw_log_field: body
   syslog:
     endpoint: "syslog.example.com:10514"
     network: "tcp"
 ```
 
-### File Configuration Example
-
-```yaml
-qradar:
-  export_type: "file"
-  raw_log_field: attributes["message"]
-  file:
-    path: "/path/to/logfile"
-```
-
----

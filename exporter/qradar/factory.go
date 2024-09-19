@@ -40,7 +40,6 @@ func createDefaultConfig() component.Config {
 		TimeoutSettings: exporterhelper.NewDefaultTimeoutSettings(),
 		QueueSettings:   exporterhelper.NewDefaultQueueSettings(),
 		BackOffConfig:   configretry.NewDefaultBackOffConfig(),
-		ExportType:      exportTypeSyslog,
 		Syslog: SyslogConfig{
 			AddrConfig: confignet.AddrConfig{
 				Endpoint:  "127.0.0.1:10514",

@@ -20,7 +20,6 @@ import (
 	"errors"
 	"log"
 	"net"
-	"os"
 	"testing"
 	"time"
 
@@ -36,37 +35,6 @@ func Test_exporter_Capabilities(t *testing.T) {
 	exp := &qradarExporter{}
 	capabilities := exp.Capabilities()
 	require.False(t, capabilities.MutatesData)
-}
-
-func TestLogDataPushingFile(t *testing.T) {
-	// Open a temporary file for testing
-	f, err := os.CreateTemp("", "test")
-	require.NoError(t, err)
-	defer f.Close()
-	defer os.Remove(f.Name()) // Clean up the file afterwards
-
-	cfg := &Config{
-		ExportType: exportTypeFile,
-		File: File{
-			Path: f.Name(),
-		},
-	}
-	exporter, _ := newExporter(cfg, exporter.Settings{})
-
-	// Mock log data
-	ld := mockLogs(mockLogRecord(t, "test", map[string]any{"test": "test"}))
-
-	err = exporter.logsDataPusher(context.Background(), ld)
-	require.NoError(t, err)
-
-	// Read the contents of the file
-	content, err := os.ReadFile(f.Name())
-	require.NoError(t, err)
-
-	// Convert the content to a string and compare with the expected output
-	receivedData := string(content)
-	expectedData := "{\"attributes\":{\"test\":\"test\"},\"body\":\"test\",\"resource_attributes\":{}}\n"
-	require.Equal(t, expectedData, receivedData, "File content does not match expected output")
 }
 
 func TestLogDataPushingNetwork(t *testing.T) {
@@ -99,7 +67,6 @@ func TestLogDataPushingNetwork(t *testing.T) {
 
 	// Configure the exporter to use the mock Syslog server
 	cfg := &Config{
-		ExportType: exportTypeSyslog,
 		Syslog: SyslogConfig{
 			AddrConfig: confignet.AddrConfig{
 				Endpoint:  ln.Addr().String(),
@@ -149,32 +116,7 @@ func TestOpenWriter(t *testing.T) {
 		expectedError bool
 		cfg           Config
 	}{
-		{
-			name: "Successful File Open",
-			setupMock: func(mockClient *mocks.MockForwarderClient) {
-				mockClient.On("OpenFile", "testfile.log").Return(&os.File{}, nil)
-			},
-			expectedError: false,
-			cfg: Config{
-				ExportType: exportTypeFile,
-				File: File{
-					Path: "testfile.log",
-				},
-			},
-		},
-		{
-			name: "File Open Error",
-			setupMock: func(mockClient *mocks.MockForwarderClient) {
-				mockClient.On("OpenFile", "invalidfile.log").Return(nil, errors.New("error opening file"))
-			},
-			expectedError: true,
-			cfg: Config{
-				ExportType: exportTypeFile,
-				File: File{
-					Path: "invalidfile.log",
-				},
-			},
-		},
+
 		{
 			name: "Successful Syslog Open",
 			setupMock: func(mockClient *mocks.MockForwarderClient) {
@@ -182,7 +124,6 @@ func TestOpenWriter(t *testing.T) {
 			},
 			expectedError: false,
 			cfg: Config{
-				ExportType: exportTypeSyslog,
 				Syslog: SyslogConfig{
 					AddrConfig: confignet.AddrConfig{
 						Endpoint:  "localhost:1234",
@@ -198,7 +139,6 @@ func TestOpenWriter(t *testing.T) {
 			},
 			expectedError: true,
 			cfg: Config{
-				ExportType: exportTypeSyslog,
 				Syslog: SyslogConfig{
 					AddrConfig: confignet.AddrConfig{
 						Endpoint:  "invalidendpoint",
@@ -213,7 +153,6 @@ func TestOpenWriter(t *testing.T) {
 				mockClient.On("DialWithTLS", "tcp", "localhost:1234", mock.Anything).Return(&tls.Conn{}, nil)
 			},
 			cfg: Config{
-				ExportType: exportTypeSyslog,
 				Syslog: SyslogConfig{
 					AddrConfig: confignet.AddrConfig{
 						Endpoint:  "localhost:1234",
@@ -230,7 +169,6 @@ func TestOpenWriter(t *testing.T) {
 				mockClient.On("DialWithTLS", "tcp", "localhost:1234", mock.Anything).Return(nil, errors.New("TLS dial error"))
 			},
 			cfg: Config{
-				ExportType: exportTypeSyslog,
 				Syslog: SyslogConfig{
 					AddrConfig: confignet.AddrConfig{
 						Endpoint:  "localhost:1234",
