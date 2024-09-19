@@ -9,6 +9,7 @@ require (
 	github.com/observiq/bindplane-agent/exporter/chronicleforwarderexporter v1.61.0
 	github.com/observiq/bindplane-agent/exporter/googlecloudexporter v1.61.0
 	github.com/observiq/bindplane-agent/exporter/googlemanagedprometheusexporter v1.61.0
+	github.com/observiq/bindplane-agent/exporter/qradar v1.61.0
 	github.com/observiq/bindplane-agent/exporter/snowflakeexporter v1.61.0
 	github.com/observiq/bindplane-agent/internal/measurements v1.61.0
 	github.com/observiq/bindplane-agent/internal/report v1.61.0
@@ -793,6 +794,8 @@ replace github.com/observiq/bindplane-agent/exporter/azureblobexporter => ./expo
 replace github.com/observiq/bindplane-agent/exporter/chronicleexporter => ./exporter/chronicleexporter
 
 replace github.com/observiq/bindplane-agent/exporter/chronicleforwarderexporter => ./exporter/chronicleforwarderexporter
+
+replace github.com/observiq/bindplane-agent/exporter/qradar => ./exporter/qradar
 
 replace github.com/observiq/bindplane-agent/exporter/snowflakeexporter => ./exporter/snowflakeexporter
 
