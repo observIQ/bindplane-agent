@@ -18,6 +18,10 @@ import (
 	"context"
 	"testing"
 
+	"github.com/observiq/bindplane-agent/expr"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/ottl/contexts/ottldatapoint"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/ottl/contexts/ottllog"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/ottl/contexts/ottlspan"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/pdata/plog"
 	"go.opentelemetry.io/collector/pdata/pmetric"
@@ -53,9 +57,11 @@ func Test_processTraces(t *testing.T) {
 		t.Run(tc.desc, func(t *testing.T) {
 			cfg := &Config{
 				DropRatio: tc.dropRatio,
+				Condition: "true",
 			}
 
-			processor := newSamplingProcessor(zap.NewNop(), cfg)
+			tCtx := expr.OTTLCondition[ottlspan.TransformContext]{}
+			processor := newTracesSamplingProcessor(zap.NewNop(), cfg, &tCtx)
 			actual, err := processor.processTraces(context.Background(), tc.input)
 			require.NoError(t, err)
 			require.Equal(t, tc.expected, actual)
@@ -93,7 +99,8 @@ func Test_processLogs(t *testing.T) {
 				DropRatio: tc.dropRatio,
 			}
 
-			processor := newSamplingProcessor(zap.NewNop(), cfg)
+			tCtx := expr.OTTLCondition[ottllog.TransformContext]{}
+			processor := newLogsSamplingProcessor(zap.NewNop(), cfg, &tCtx)
 			actual, err := processor.processLogs(context.Background(), tc.input)
 			require.NoError(t, err)
 			require.Equal(t, tc.expected, actual)
@@ -133,7 +140,8 @@ func Test_processMetrics(t *testing.T) {
 				DropRatio: tc.dropRatio,
 			}
 
-			processor := newSamplingProcessor(zap.NewNop(), cfg)
+			tCtx := expr.OTTLCondition[ottldatapoint.TransformContext]{}
+			processor := newMetricsSamplingProcessor(zap.NewNop(), cfg, &tCtx)
 			actual, err := processor.processMetrics(context.Background(), tc.input)
 			require.NoError(t, err)
 			require.Equal(t, tc.expected, actual)
