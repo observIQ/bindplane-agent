@@ -25,6 +25,10 @@ The following options may be configured:
 | drop_ratio | float  | 0.5     | The ratio of payload objects that are dropped. Values between `0.0` and `1.0`. Values closer to `1.0` mean any individual object in a payload is more likely to be dropped. |
 | condition  | string | `true`  | An [OTTL] expression used to match which log records to sample from. All paths in the [log context] are available to reference. All [converters] are available to use.      |
 
+[OTTL]: https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/v0.109.0/pkg/ottl#readme
+[converters]: https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.109.0/pkg/ottl/ottlfuncs/README.md#converters
+[log context]: https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.109.0/pkg/ottl/contexts/ottllog/README.md
+
 ### Example Configuration
 
 The following config is an example configuration of the `sampling` processor with defaults in a logs pipeline sending to the `logging` exporter.
