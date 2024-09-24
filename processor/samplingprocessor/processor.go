@@ -16,7 +16,6 @@ package samplingprocessor
 
 import (
 	"context"
-	"fmt"
 	"math/rand"
 
 	"github.com/observiq/bindplane-agent/expr"
@@ -126,11 +125,7 @@ func (sp *logsSamplingProcessor) processLogs(ctx context.Context, ld plog.Logs) 
 						ld.ResourceLogs().At(i),
 					)
 					match, err := sp.condition.Match(ctx, logCtx)
-					fmt.Println("error==nil:", err == nil)
-					fmt.Println("match:", match)
-					sf := sp.sampleFunc()
-					fmt.Println("sampleFunc:", sf)
-					return err == nil && match && sf
+					return err == nil && match && sp.sampleFunc()
 				})
 			}
 		}
@@ -146,20 +141,78 @@ func (sp *metricsSamplingProcessor) processMetrics(ctx context.Context, md pmetr
 		for i := 0; i < md.ResourceMetrics().Len(); i++ {
 			for j := 0; j < md.ResourceMetrics().At(i).ScopeMetrics().Len(); j++ {
 				md.ResourceMetrics().At(i).ScopeMetrics().At(j).Metrics().RemoveIf(func(metric pmetric.Metric) bool {
-					metricCtx := ottldatapoint.NewTransformContext(
-						nil,
-						metric,
-						md.ResourceMetrics().At(i).ScopeMetrics().At(j).Metrics(),
-						md.ResourceMetrics().At(i).ScopeMetrics().At(j).Scope(),
-						md.ResourceMetrics().At(i).Resource(),
-						md.ResourceMetrics().At(i).ScopeMetrics().At(j),
-						md.ResourceMetrics().At(i),
-					)
-					match, err := sp.condition.Match(ctx, metricCtx)
-					return err == nil && match && sp.sampleFunc()
+					anyMatch := false
+					eachDatapoint(metric, func(dp any) {
+						datapointCtx := ottldatapoint.NewTransformContext(
+							dp,
+							metric,
+							md.ResourceMetrics().At(i).ScopeMetrics().At(j).Metrics(),
+							md.ResourceMetrics().At(i).ScopeMetrics().At(j).Scope(),
+							md.ResourceMetrics().At(i).Resource(),
+							md.ResourceMetrics().At(i).ScopeMetrics().At(j),
+							md.ResourceMetrics().At(i),
+						)
+						curDatapointMatched, err := sp.condition.Match(ctx, datapointCtx)
+						anyMatch = anyMatch || (err == nil && curDatapointMatched)
+					})
+
+					// if no datapoints matched, check if metric matches without a datapoint
+					if !anyMatch {
+						metricCtx := ottldatapoint.NewTransformContext(
+							nil,
+							metric,
+							md.ResourceMetrics().At(i).ScopeMetrics().At(j).Metrics(),
+							md.ResourceMetrics().At(i).ScopeMetrics().At(j).Scope(),
+							md.ResourceMetrics().At(i).Resource(),
+							md.ResourceMetrics().At(i).ScopeMetrics().At(j),
+							md.ResourceMetrics().At(i),
+						)
+						metricMatch, err := sp.condition.Match(ctx, metricCtx)
+						anyMatch = err == nil && metricMatch
+					}
+
+					return anyMatch && sp.sampleFunc()
 				})
 			}
 		}
 		return md, nil
+	}
+}
+
+// eachDatapoint calls the callback function f with each datapoint in the metric
+func eachDatapoint(metric pmetric.Metric, f func(dp any)) {
+	switch metric.Type() {
+	case pmetric.MetricTypeGauge:
+		dps := metric.Gauge().DataPoints()
+		for i := 0; i < dps.Len(); i++ {
+			dp := dps.At(i)
+			f(dp)
+		}
+	case pmetric.MetricTypeSum:
+		dps := metric.Sum().DataPoints()
+		for i := 0; i < dps.Len(); i++ {
+			dp := dps.At(i)
+			f(dp)
+		}
+	case pmetric.MetricTypeHistogram:
+		dps := metric.Histogram().DataPoints()
+		for i := 0; i < dps.Len(); i++ {
+			dp := dps.At(i)
+			f(dp)
+		}
+	case pmetric.MetricTypeExponentialHistogram:
+		dps := metric.ExponentialHistogram().DataPoints()
+		for i := 0; i < dps.Len(); i++ {
+			dp := dps.At(i)
+			f(dp)
+		}
+	case pmetric.MetricTypeSummary:
+		dps := metric.Summary().DataPoints()
+		for i := 0; i < dps.Len(); i++ {
+			dp := dps.At(i)
+			f(dp)
+		}
+	default:
+		// skip anything else
 	}
 }
