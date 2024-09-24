@@ -10,7 +10,7 @@ This processor samples incoming OTLP objects and drops those objects based on a 
 
 ## How it works
 
-1. The user configures the processor in their pipeline with a `drop_ratio` and condition that is the desired.
+1. The user configures the processor in their pipeline with a `drop_ratio` and `condition`.
 2. If an incoming log matches the `condition` expression, the remaining steps are performed on it. Any log record that does not match the `condition` gets forwarded through the pipeline regardless of the `drop_ratio`.
 3. A number between 0 and 1 will be randomly generated for each piece incoming telemetry data.
 4. If the generated number is less than or equal to the `drop_ratio`, then the telemetry data is dropped.

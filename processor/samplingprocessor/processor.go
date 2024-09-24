@@ -70,113 +70,104 @@ func newTracesSamplingProcessor(logger *zap.Logger, cfg *Config, condition *expr
 	}
 }
 
-func (sp *logsSamplingProcessor) sampleFunc() bool {
+func sampleFunc(dropCutOffRatio float64) bool {
 	//#nosec G404 -- randomly generated number is not used for security purposes. It's ok if it's weak
-	return rand.Float64() <= sp.dropCutOffRatio
-}
-
-func (sp *metricsSamplingProcessor) sampleFunc() bool {
-	//#nosec G404 -- randomly generated number is not used for security purposes. It's ok if it's weak
-	return rand.Float64() <= sp.dropCutOffRatio
-}
-
-func (sp *tracesSamplingProcessor) sampleFunc() bool {
-	//#nosec G404 -- randomly generated number is not used for security purposes. It's ok if it's weak
-	return rand.Float64() <= sp.dropCutOffRatio
+	return rand.Float64() <= dropCutOffRatio
 }
 
 func (sp *tracesSamplingProcessor) processTraces(ctx context.Context, td ptrace.Traces) (ptrace.Traces, error) {
-	switch {
-	case sp.dropCutOffRatio == 0.0: // Drop nothing
-		return td, nil
-	default: // Drop based on ratio and condition
-		for i := 0; i < td.ResourceSpans().Len(); i++ {
-			for j := 0; j < td.ResourceSpans().At(i).ScopeSpans().Len(); j++ {
-				td.ResourceSpans().At(i).ScopeSpans().At(j).Spans().RemoveIf(func(span ptrace.Span) bool {
-					logCtx := ottlspan.NewTransformContext(
-						span,
-						td.ResourceSpans().At(i).ScopeSpans().At(j).Scope(),
-						td.ResourceSpans().At(i).Resource(),
-						td.ResourceSpans().At(i).ScopeSpans().At(j),
-						td.ResourceSpans().At(i),
-					)
-					match, err := sp.condition.Match(ctx, logCtx)
-					return err == nil && match && sp.sampleFunc()
-				})
-			}
-		}
+	// Drop nothing
+	if sp.dropCutOffRatio == 0.0 {
 		return td, nil
 	}
+
+	// Drop based on ratio and condition
+	for i := 0; i < td.ResourceSpans().Len(); i++ {
+		for j := 0; j < td.ResourceSpans().At(i).ScopeSpans().Len(); j++ {
+			td.ResourceSpans().At(i).ScopeSpans().At(j).Spans().RemoveIf(func(span ptrace.Span) bool {
+				logCtx := ottlspan.NewTransformContext(
+					span,
+					td.ResourceSpans().At(i).ScopeSpans().At(j).Scope(),
+					td.ResourceSpans().At(i).Resource(),
+					td.ResourceSpans().At(i).ScopeSpans().At(j),
+					td.ResourceSpans().At(i),
+				)
+				match, err := sp.condition.Match(ctx, logCtx)
+				return err == nil && match && sampleFunc(sp.dropCutOffRatio)
+			})
+		}
+	}
+	return td, nil
 }
 
 func (sp *logsSamplingProcessor) processLogs(ctx context.Context, ld plog.Logs) (plog.Logs, error) {
-	switch {
-	case sp.dropCutOffRatio == 0.0: // Drop nothing
-		return ld, nil
-	default: // Drop based on ratio and condition
-		for i := 0; i < ld.ResourceLogs().Len(); i++ {
-			for j := 0; j < ld.ResourceLogs().At(i).ScopeLogs().Len(); j++ {
-				ld.ResourceLogs().At(i).ScopeLogs().At(j).LogRecords().RemoveIf(func(logRecord plog.LogRecord) bool {
-					logCtx := ottllog.NewTransformContext(
-						logRecord,
-						ld.ResourceLogs().At(i).ScopeLogs().At(j).Scope(),
-						ld.ResourceLogs().At(i).Resource(),
-						ld.ResourceLogs().At(i).ScopeLogs().At(j),
-						ld.ResourceLogs().At(i),
-					)
-					match, err := sp.condition.Match(ctx, logCtx)
-					return err == nil && match && sp.sampleFunc()
-				})
-			}
-		}
+	// Drop nothing
+	if sp.dropCutOffRatio == 0.0 {
 		return ld, nil
 	}
+	// Drop based on ratio and condition
+	for i := 0; i < ld.ResourceLogs().Len(); i++ {
+		for j := 0; j < ld.ResourceLogs().At(i).ScopeLogs().Len(); j++ {
+			ld.ResourceLogs().At(i).ScopeLogs().At(j).LogRecords().RemoveIf(func(logRecord plog.LogRecord) bool {
+				logCtx := ottllog.NewTransformContext(
+					logRecord,
+					ld.ResourceLogs().At(i).ScopeLogs().At(j).Scope(),
+					ld.ResourceLogs().At(i).Resource(),
+					ld.ResourceLogs().At(i).ScopeLogs().At(j),
+					ld.ResourceLogs().At(i),
+				)
+				match, err := sp.condition.Match(ctx, logCtx)
+				return err == nil && match && sampleFunc(sp.dropCutOffRatio)
+			})
+		}
+	}
+	return ld, nil
 }
 
 func (sp *metricsSamplingProcessor) processMetrics(ctx context.Context, md pmetric.Metrics) (pmetric.Metrics, error) {
-	switch {
-	case sp.dropCutOffRatio == 0.0: // Drop nothing
-		return md, nil
-	default: // Drop based on ratio and condition
-		for i := 0; i < md.ResourceMetrics().Len(); i++ {
-			for j := 0; j < md.ResourceMetrics().At(i).ScopeMetrics().Len(); j++ {
-				md.ResourceMetrics().At(i).ScopeMetrics().At(j).Metrics().RemoveIf(func(metric pmetric.Metric) bool {
-					anyMatch := false
-					eachDatapoint(metric, func(dp any) {
-						datapointCtx := ottldatapoint.NewTransformContext(
-							dp,
-							metric,
-							md.ResourceMetrics().At(i).ScopeMetrics().At(j).Metrics(),
-							md.ResourceMetrics().At(i).ScopeMetrics().At(j).Scope(),
-							md.ResourceMetrics().At(i).Resource(),
-							md.ResourceMetrics().At(i).ScopeMetrics().At(j),
-							md.ResourceMetrics().At(i),
-						)
-						curDatapointMatched, err := sp.condition.Match(ctx, datapointCtx)
-						anyMatch = anyMatch || (err == nil && curDatapointMatched)
-					})
-
-					// if no datapoints matched, check if metric matches without a datapoint
-					if !anyMatch {
-						metricCtx := ottldatapoint.NewTransformContext(
-							nil,
-							metric,
-							md.ResourceMetrics().At(i).ScopeMetrics().At(j).Metrics(),
-							md.ResourceMetrics().At(i).ScopeMetrics().At(j).Scope(),
-							md.ResourceMetrics().At(i).Resource(),
-							md.ResourceMetrics().At(i).ScopeMetrics().At(j),
-							md.ResourceMetrics().At(i),
-						)
-						metricMatch, err := sp.condition.Match(ctx, metricCtx)
-						anyMatch = err == nil && metricMatch
-					}
-
-					return anyMatch && sp.sampleFunc()
-				})
-			}
-		}
+	// Drop nothing
+	if sp.dropCutOffRatio == 0.0 {
 		return md, nil
 	}
+	// Drop based on ratio and condition
+	for i := 0; i < md.ResourceMetrics().Len(); i++ {
+		for j := 0; j < md.ResourceMetrics().At(i).ScopeMetrics().Len(); j++ {
+			md.ResourceMetrics().At(i).ScopeMetrics().At(j).Metrics().RemoveIf(func(metric pmetric.Metric) bool {
+				anyMatch := false
+				eachDatapoint(metric, func(dp any) {
+					datapointCtx := ottldatapoint.NewTransformContext(
+						dp,
+						metric,
+						md.ResourceMetrics().At(i).ScopeMetrics().At(j).Metrics(),
+						md.ResourceMetrics().At(i).ScopeMetrics().At(j).Scope(),
+						md.ResourceMetrics().At(i).Resource(),
+						md.ResourceMetrics().At(i).ScopeMetrics().At(j),
+						md.ResourceMetrics().At(i),
+					)
+					curDatapointMatched, err := sp.condition.Match(ctx, datapointCtx)
+					anyMatch = anyMatch || (err == nil && curDatapointMatched)
+				})
+
+				// if no datapoints matched, check if metric matches without a datapoint
+				if !anyMatch {
+					metricCtx := ottldatapoint.NewTransformContext(
+						nil,
+						metric,
+						md.ResourceMetrics().At(i).ScopeMetrics().At(j).Metrics(),
+						md.ResourceMetrics().At(i).ScopeMetrics().At(j).Scope(),
+						md.ResourceMetrics().At(i).Resource(),
+						md.ResourceMetrics().At(i).ScopeMetrics().At(j),
+						md.ResourceMetrics().At(i),
+					)
+					metricMatch, err := sp.condition.Match(ctx, metricCtx)
+					anyMatch = err == nil && metricMatch
+				}
+
+				return anyMatch && sampleFunc(sp.dropCutOffRatio)
+			})
+		}
+	}
+	return md, nil
 }
 
 // eachDatapoint calls the callback function f with each datapoint in the metric
