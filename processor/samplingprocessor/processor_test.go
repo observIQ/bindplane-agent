@@ -248,7 +248,7 @@ func Test_processMetrics(t *testing.T) {
 		},
 		{
 			desc:      "multiple metrics condition",
-			condition: `(metric.name == "m1")`,
+			condition: `(name == "m1")`,
 			dropRatio: 1.0,
 			input:     multipleMetrics,
 			expected:  multipleMetricsResult,
@@ -262,7 +262,7 @@ func Test_processMetrics(t *testing.T) {
 				Condition: tc.condition,
 			}
 
-			ottlCondition, err := expr.NewOTTLDatapointCondition(cfg.Condition, component.TelemetrySettings{Logger: zap.NewNop()})
+			ottlCondition, err := expr.NewOTTLMetricCondition(cfg.Condition, component.TelemetrySettings{Logger: zap.NewNop()})
 			require.NoError(t, err)
 
 			processor := newMetricsSamplingProcessor(zap.NewNop(), cfg, ottlCondition)
