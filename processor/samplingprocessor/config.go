@@ -17,7 +17,6 @@ package samplingprocessor
 
 import (
 	"errors"
-	"fmt"
 )
 
 var errInvalidDropRatio = errors.New("drop_ratio must be between 0.0 and 1.0")
@@ -36,8 +35,6 @@ func (cfg Config) Validate() error {
 	if cfg.DropRatio < 0.0 || cfg.DropRatio > 1.0 {
 		return errInvalidDropRatio
 	}
-
-	fmt.Println("Condition:", cfg.Condition)
 
 	return nil
 }
