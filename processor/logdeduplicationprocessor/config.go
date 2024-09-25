@@ -35,6 +35,9 @@ const (
 	// defaultTimezone is the default timezone
 	defaultTimezone = "UTC"
 
+	// defaultCondition is the default condition
+	defaultCondition = "true"
+
 	// bodyField is the name of the body field
 	bodyField = "body"
 
@@ -55,6 +58,7 @@ type Config struct {
 	Interval          time.Duration `mapstructure:"interval"`
 	Timezone          string        `mapstructure:"timezone"`
 	ExcludeFields     []string      `mapstructure:"exclude_fields"`
+	Condition         string        `mapstructure:"condition"`
 }
 
 // createDefaultConfig returns the default config for the processor.
@@ -64,6 +68,7 @@ func createDefaultConfig() component.Config {
 		Interval:          defaultInterval,
 		Timezone:          defaultTimezone,
 		ExcludeFields:     []string{},
+		Condition:         defaultCondition,
 	}
 }
 

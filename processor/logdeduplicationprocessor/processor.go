@@ -20,6 +20,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/observiq/bindplane-agent/expr"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/ottl/contexts/ottllog"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/consumer"
 	"go.opentelemetry.io/collector/pdata/plog"
@@ -28,17 +30,19 @@ import (
 
 // logDedupProcessor is a logDedupProcessor that counts duplicate instances of logs.
 type logDedupProcessor struct {
-	emitInterval time.Duration
-	aggregator   *logAggregator
-	remover      *fieldRemover
-	consumer     consumer.Logs
-	logger       *zap.Logger
-	cancel       context.CancelFunc
-	wg           sync.WaitGroup
-	mux          sync.Mutex
+	emitInterval    time.Duration
+	condition       *expr.OTTLCondition[ottllog.TransformContext]
+	conditionString string
+	aggregator      *logAggregator
+	remover         *fieldRemover
+	consumer        consumer.Logs
+	logger          *zap.Logger
+	cancel          context.CancelFunc
+	wg              sync.WaitGroup
+	mux             sync.Mutex
 }
 
-func newProcessor(cfg *Config, consumer consumer.Logs, logger *zap.Logger) (*logDedupProcessor, error) {
+func newProcessor(cfg *Config, condition *expr.OTTLCondition[ottllog.TransformContext], consumer consumer.Logs, logger *zap.Logger) (*logDedupProcessor, error) {
 	// This should not happen due to config validation but we check anyways.
 	timezone, err := time.LoadLocation(cfg.Timezone)
 	if err != nil {
@@ -46,11 +50,13 @@ func newProcessor(cfg *Config, consumer consumer.Logs, logger *zap.Logger) (*log
 	}
 
 	return &logDedupProcessor{
-		emitInterval: cfg.Interval,
-		aggregator:   newLogAggregator(cfg.LogCountAttribute, timezone),
-		remover:      newFieldRemover(cfg.ExcludeFields),
-		consumer:     consumer,
-		logger:       logger,
+		emitInterval:    cfg.Interval,
+		condition:       condition,
+		conditionString: cfg.Condition,
+		aggregator:      newLogAggregator(cfg.LogCountAttribute, timezone),
+		remover:         newFieldRemover(cfg.ExcludeFields),
+		consumer:        consumer,
+		logger:          logger,
 	}, nil
 }
 
@@ -91,7 +97,7 @@ func (p *logDedupProcessor) Shutdown(ctx context.Context) error {
 }
 
 // ConsumeLogs processes the logs.
-func (p *logDedupProcessor) ConsumeLogs(_ context.Context, pl plog.Logs) error {
+func (p *logDedupProcessor) ConsumeLogs(ctx context.Context, pl plog.Logs) error {
 	p.mux.Lock()
 	defer p.mux.Unlock()
 
@@ -101,14 +107,39 @@ func (p *logDedupProcessor) ConsumeLogs(_ context.Context, pl plog.Logs) error {
 		for j := 0; j < resourceLogs.ScopeLogs().Len(); j++ {
 			scope := resourceLogs.ScopeLogs().At(j)
 			logs := scope.LogRecords()
-			for k := 0; k < logs.Len(); k++ {
-				logRecord := logs.At(k)
-				// Remove excluded fields if any
-				p.remover.RemoveFields(logRecord)
+			logs.RemoveIf(func(logRecord plog.LogRecord) bool {
+				var match bool
+				if p.conditionString == "true" || p.conditionString == "" {
+					match = true
+				} else {
+					logCtx := ottllog.NewTransformContext(
+						logRecord,
+						scope.Scope(),
+						resourceLogs.Resource(),
+						scope,
+						resourceLogs,
+					)
+					logMatch, err := p.condition.Match(ctx, logCtx)
+					match = err == nil && logMatch
+				}
+				// only aggregate logs that match condition
+				if match {
+					// Remove excluded fields if any
+					p.remover.RemoveFields(logRecord)
 
-				// Add the log to the aggregator
-				p.aggregator.Add(resourceAttrs, logRecord)
-			}
+					// Add the log to the aggregator
+					p.aggregator.Add(resourceAttrs, logRecord)
+				}
+				return match
+			})
+		}
+	}
+
+	// immediately consume any logs that didn't match the condition
+	if pl.LogRecordCount() > 0 {
+		err := p.consumer.ConsumeLogs(ctx, pl)
+		if err != nil {
+			p.logger.Error("failed to consume logs", zap.Error(err))
 		}
 	}
 

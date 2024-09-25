@@ -18,6 +18,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/observiq/bindplane-agent/expr"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/consumer"
 	"go.opentelemetry.io/collector/processor"
@@ -47,5 +48,10 @@ func createLogsProcessor(_ context.Context, params processor.Settings, cfg compo
 		return nil, fmt.Errorf("invalid config type: %+v", cfg)
 	}
 
-	return newProcessor(processorCfg, consumer, params.Logger)
+	condition, err := expr.NewOTTLLogRecordCondition(processorCfg.Condition, params.TelemetrySettings)
+	if err != nil {
+		return nil, fmt.Errorf("invalid condition: %w", err)
+	}
+
+	return newProcessor(processorCfg, condition, consumer, params.Logger)
 }
