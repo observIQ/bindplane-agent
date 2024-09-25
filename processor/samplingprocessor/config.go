@@ -36,9 +36,5 @@ func (cfg Config) Validate() error {
 		return errInvalidDropRatio
 	}
 
-	if cfg.Condition == "" {
-		cfg.Condition = "true"
-	}
-
 	return nil
 }
