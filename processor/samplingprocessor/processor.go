@@ -111,7 +111,13 @@ func (sp *tracesSamplingProcessor) processTraces(ctx context.Context, td ptrace.
 				return err == nil && match && sampleFunc(sp.dropCutOffRatio)
 			})
 		}
+		td.ResourceSpans().At(i).ScopeSpans().RemoveIf(func(ss ptrace.ScopeSpans) bool {
+			return ss.Spans().Len() == 0
+		})
 	}
+	td.ResourceSpans().RemoveIf(func(rs ptrace.ResourceSpans) bool {
+		return rs.ScopeSpans().Len() == 0
+	})
 	return td, nil
 }
 
@@ -186,6 +192,12 @@ func (sp *metricsSamplingProcessor) processMetrics(ctx context.Context, md pmetr
 				return err == nil && match && sampleFunc(sp.dropCutOffRatio)
 			})
 		}
+		md.ResourceMetrics().At(i).ScopeMetrics().RemoveIf(func(sm pmetric.ScopeMetrics) bool {
+			return sm.Metrics().Len() == 0
+		})
 	}
+	md.ResourceMetrics().RemoveIf(func(rm pmetric.ResourceMetrics) bool {
+		return rm.ScopeMetrics().Len() == 0
+	})
 	return md, nil
 }
