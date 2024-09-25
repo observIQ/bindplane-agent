@@ -144,12 +144,14 @@ func (sp *logsSamplingProcessor) processLogs(ctx context.Context, ld plog.Logs) 
 				match, err := sp.condition.Match(ctx, logCtx)
 				return err == nil && match && sampleFunc(sp.dropCutOffRatio)
 			})
-			ld.ResourceLogs().At(i).ScopeLogs().RemoveIf(func(sl plog.ScopeLogs) bool {
-				sp.logger.Info("sl removeIf", zap.Int("len", sl.LogRecords().Len()))
-				return sl.LogRecords().Len() == 0
-			})
 		}
+		ld.ResourceLogs().At(i).ScopeLogs().RemoveIf(func(sl plog.ScopeLogs) bool {
+			return sl.LogRecords().Len() == 0
+		})
 	}
+	ld.ResourceLogs().RemoveIf(func(rl plog.ResourceLogs) bool {
+		return rl.ScopeLogs().Len() == 0
+	})
 	return ld, nil
 }
 
