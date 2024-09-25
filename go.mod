@@ -78,8 +78,8 @@ require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/extension/pprofextension v0.109.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/extension/sigv4authextension v0.109.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/extension/storage/filestorage v0.109.0
-	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden v0.109.0
-	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest v0.109.0
+	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden v0.110.0
+	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest v0.110.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/processor/attributesprocessor v0.109.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/processor/cumulativetodeltaprocessor v0.109.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/processor/deltatorateprocessor v0.109.0
@@ -184,7 +184,7 @@ require (
 	go.opentelemetry.io/collector/extension/zpagesextension v0.109.0
 	go.opentelemetry.io/collector/featuregate v1.15.0
 	go.opentelemetry.io/collector/otelcol v0.109.0
-	go.opentelemetry.io/collector/pdata v1.15.0
+	go.opentelemetry.io/collector/pdata v1.16.0
 	go.opentelemetry.io/collector/processor v0.109.0
 	go.opentelemetry.io/collector/processor/batchprocessor v0.109.0
 	go.opentelemetry.io/collector/processor/memorylimiterprocessor v0.109.0
@@ -438,7 +438,7 @@ require (
 	github.com/Azure/azure-amqp-common-go/v4 v4.2.0 // indirect
 	github.com/bmatcuk/doublestar/v4 v4.6.1 // indirect
 	github.com/hooklift/gowsdl v0.5.0 // indirect
-	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatautil v0.109.0 // indirect; indir2ct
+	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatautil v0.110.0 // indirect; indir2ct
 	github.com/ovh/go-ovh v1.6.0 // indirect
 	github.com/relvacode/iso8601 v1.4.0 // indirect
 )
