@@ -31,18 +31,21 @@ import (
 type logsSamplingProcessor struct {
 	logger          *zap.Logger
 	dropCutOffRatio float64
+	conditionString string
 	condition       *expr.OTTLCondition[ottllog.TransformContext]
 }
 
 type metricsSamplingProcessor struct {
 	logger          *zap.Logger
 	dropCutOffRatio float64
+	conditionString string
 	condition       *expr.OTTLCondition[ottlmetric.TransformContext]
 }
 
 type tracesSamplingProcessor struct {
 	logger          *zap.Logger
 	dropCutOffRatio float64
+	conditionString string
 	condition       *expr.OTTLCondition[ottlspan.TransformContext]
 }
 
@@ -51,6 +54,7 @@ func newLogsSamplingProcessor(logger *zap.Logger, cfg *Config, condition *expr.O
 		logger:          logger,
 		dropCutOffRatio: cfg.DropRatio,
 		condition:       condition,
+		conditionString: cfg.Condition,
 	}
 }
 
@@ -59,6 +63,7 @@ func newMetricsSamplingProcessor(logger *zap.Logger, cfg *Config, condition *exp
 		logger:          logger,
 		dropCutOffRatio: cfg.DropRatio,
 		condition:       condition,
+		conditionString: cfg.Condition,
 	}
 }
 
@@ -67,6 +72,7 @@ func newTracesSamplingProcessor(logger *zap.Logger, cfg *Config, condition *expr
 		logger:          logger,
 		dropCutOffRatio: cfg.DropRatio,
 		condition:       condition,
+		conditionString: cfg.Condition,
 	}
 }
 
@@ -76,8 +82,13 @@ func sampleFunc(dropCutOffRatio float64) bool {
 }
 
 func (sp *tracesSamplingProcessor) processTraces(ctx context.Context, td ptrace.Traces) (ptrace.Traces, error) {
+	// Drop everything
+	if sp.dropCutOffRatio == 1.0 && sp.conditionString == "true" {
+		return ptrace.NewTraces(), nil
+	}
+
 	// Drop nothing
-	if sp.dropCutOffRatio == 0.0 {
+	if sp.dropCutOffRatio == 0.0 || sp.conditionString == "false" {
 		return td, nil
 	}
 
@@ -101,10 +112,16 @@ func (sp *tracesSamplingProcessor) processTraces(ctx context.Context, td ptrace.
 }
 
 func (sp *logsSamplingProcessor) processLogs(ctx context.Context, ld plog.Logs) (plog.Logs, error) {
+	// Drop everything
+	if sp.dropCutOffRatio == 1.0 && sp.conditionString == "true" {
+		return plog.NewLogs(), nil
+	}
+
 	// Drop nothing
-	if sp.dropCutOffRatio == 0.0 {
+	if sp.dropCutOffRatio == 0.0 || sp.conditionString == "false" {
 		return ld, nil
 	}
+
 	// Drop based on ratio and condition
 	for i := 0; i < ld.ResourceLogs().Len(); i++ {
 		for j := 0; j < ld.ResourceLogs().At(i).ScopeLogs().Len(); j++ {
@@ -125,10 +142,16 @@ func (sp *logsSamplingProcessor) processLogs(ctx context.Context, ld plog.Logs) 
 }
 
 func (sp *metricsSamplingProcessor) processMetrics(ctx context.Context, md pmetric.Metrics) (pmetric.Metrics, error) {
+	// Drop everything
+	if sp.dropCutOffRatio == 1.0 && sp.conditionString == "true" {
+		return pmetric.NewMetrics(), nil
+	}
+
 	// Drop nothing
-	if sp.dropCutOffRatio == 0.0 {
+	if sp.dropCutOffRatio == 0.0 || sp.conditionString == "false" {
 		return md, nil
 	}
+
 	// Drop based on ratio and condition
 	for i := 0; i < md.ResourceMetrics().Len(); i++ {
 		for j := 0; j < md.ResourceMetrics().At(i).ScopeMetrics().Len(); j++ {
