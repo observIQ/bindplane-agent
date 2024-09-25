@@ -96,14 +96,18 @@ func (sp *tracesSamplingProcessor) processTraces(ctx context.Context, td ptrace.
 	for i := 0; i < td.ResourceSpans().Len(); i++ {
 		for j := 0; j < td.ResourceSpans().At(i).ScopeSpans().Len(); j++ {
 			td.ResourceSpans().At(i).ScopeSpans().At(j).Spans().RemoveIf(func(span ptrace.Span) bool {
-				logCtx := ottlspan.NewTransformContext(
+				if sp.conditionString == "true" {
+					return sampleFunc(sp.dropCutOffRatio)
+				}
+
+				spanCtx := ottlspan.NewTransformContext(
 					span,
 					td.ResourceSpans().At(i).ScopeSpans().At(j).Scope(),
 					td.ResourceSpans().At(i).Resource(),
 					td.ResourceSpans().At(i).ScopeSpans().At(j),
 					td.ResourceSpans().At(i),
 				)
-				match, err := sp.condition.Match(ctx, logCtx)
+				match, err := sp.condition.Match(ctx, spanCtx)
 				return err == nil && match && sampleFunc(sp.dropCutOffRatio)
 			})
 		}
@@ -126,6 +130,10 @@ func (sp *logsSamplingProcessor) processLogs(ctx context.Context, ld plog.Logs) 
 	for i := 0; i < ld.ResourceLogs().Len(); i++ {
 		for j := 0; j < ld.ResourceLogs().At(i).ScopeLogs().Len(); j++ {
 			ld.ResourceLogs().At(i).ScopeLogs().At(j).LogRecords().RemoveIf(func(logRecord plog.LogRecord) bool {
+				if sp.conditionString == "true" {
+					return sampleFunc(sp.dropCutOffRatio)
+				}
+
 				logCtx := ottllog.NewTransformContext(
 					logRecord,
 					ld.ResourceLogs().At(i).ScopeLogs().At(j).Scope(),
@@ -156,6 +164,10 @@ func (sp *metricsSamplingProcessor) processMetrics(ctx context.Context, md pmetr
 	for i := 0; i < md.ResourceMetrics().Len(); i++ {
 		for j := 0; j < md.ResourceMetrics().At(i).ScopeMetrics().Len(); j++ {
 			md.ResourceMetrics().At(i).ScopeMetrics().At(j).Metrics().RemoveIf(func(metric pmetric.Metric) bool {
+				if sp.conditionString == "true" {
+					return sampleFunc(sp.dropCutOffRatio)
+				}
+
 				metricCtx := ottlmetric.NewTransformContext(
 					metric,
 					md.ResourceMetrics().At(i).ScopeMetrics().At(j).Metrics(),
