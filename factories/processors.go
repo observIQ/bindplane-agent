@@ -35,6 +35,7 @@ import (
 	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/groupbyattrsprocessor"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/groupbytraceprocessor"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/k8sattributesprocessor"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/logdedupprocessor"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/logstransformprocessor"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/metricsgenerationprocessor"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/metricstransformprocessor"
@@ -63,6 +64,7 @@ var defaultProcessors = []processor.Factory{
 	groupbytraceprocessor.NewFactory(),
 	k8sattributesprocessor.NewFactory(),
 	logcountprocessor.NewFactory(),
+	logdedupprocessor.NewFactory(),
 	logstransformprocessor.NewFactory(),
 	lookupprocessor.NewFactory(),
 	marshalprocessor.NewFactory(),
