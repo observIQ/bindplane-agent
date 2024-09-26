@@ -18,7 +18,6 @@ import (
 	"github.com/observiq/bindplane-agent/internal/processor/snapshotprocessor"
 	"github.com/observiq/bindplane-agent/processor/datapointcountprocessor"
 	"github.com/observiq/bindplane-agent/processor/logcountprocessor"
-	"github.com/observiq/bindplane-agent/processor/logdeduplicationprocessor"
 	"github.com/observiq/bindplane-agent/processor/lookupprocessor"
 	"github.com/observiq/bindplane-agent/processor/marshalprocessor"
 	"github.com/observiq/bindplane-agent/processor/maskprocessor"
@@ -64,7 +63,6 @@ var defaultProcessors = []processor.Factory{
 	groupbytraceprocessor.NewFactory(),
 	k8sattributesprocessor.NewFactory(),
 	logcountprocessor.NewFactory(),
-	logdeduplicationprocessor.NewFactory(),
 	logstransformprocessor.NewFactory(),
 	lookupprocessor.NewFactory(),
 	marshalprocessor.NewFactory(),
