@@ -13,7 +13,7 @@ Below is a list of supported processors with links to their documentation pages.
 | Group by Trace Processor                | [groupbytraceprocessor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.109.0/processor/groupbytraceprocessor/README.md) |
 | Kubernetes Attributes Processor         | [k8sattributesprocessor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.109.0/processor/k8sattributesprocessor/README.md) |
 | Log Count Processor                     | [logcountprocessor](../processor/logcountprocessor/README.md) |
-| Log DeDuplication Processor             | [logdeduplicationprocessor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/logdedupprocessor/README.md) |
+| Log DeDuplication Processor             | [logdedupprocessor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/logdedupprocessor/README.md) |
 | Logs Transform Processor                | [logstransform](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.109.0/processor/logstransformprocessor/README.md) |
 | Lookup Processor                        | [lookupprocessor](../processor/lookupprocessor/README.md) |
 | Marshal Processor                          | [marshalprocessor](../processor/marshalprocessor/README.md) |
