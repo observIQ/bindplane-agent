@@ -16,7 +16,6 @@ require (
 	github.com/observiq/bindplane-agent/packagestate v1.61.0
 	github.com/observiq/bindplane-agent/processor/datapointcountprocessor v1.61.0
 	github.com/observiq/bindplane-agent/processor/logcountprocessor v1.61.0
-	github.com/observiq/bindplane-agent/processor/logdeduplicationprocessor v1.61.0
 	github.com/observiq/bindplane-agent/processor/lookupprocessor v1.61.0
 	github.com/observiq/bindplane-agent/processor/marshalprocessor v1.61.0
 	github.com/observiq/bindplane-agent/processor/maskprocessor v1.61.0
@@ -87,6 +86,7 @@ require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/processor/groupbyattrsprocessor v0.109.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/processor/groupbytraceprocessor v0.109.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/processor/k8sattributesprocessor v0.109.0
+	github.com/open-telemetry/opentelemetry-collector-contrib/processor/logdedupprocessor v0.109.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/processor/logstransformprocessor v0.109.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/processor/metricsgenerationprocessor v0.109.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/processor/metricstransformprocessor v0.109.0
@@ -817,8 +817,6 @@ replace github.com/observiq/bindplane-agent/processor/maskprocessor => ./process
 replace github.com/observiq/bindplane-agent/processor/logcountprocessor => ./processor/logcountprocessor
 
 replace github.com/observiq/bindplane-agent/processor/metricextractprocessor => ./processor/metricextractprocessor
-
-replace github.com/observiq/bindplane-agent/processor/logdeduplicationprocessor => ./processor/logdeduplicationprocessor
 
 replace github.com/observiq/bindplane-agent/processor/spancountprocessor => ./processor/spancountprocessor
 
