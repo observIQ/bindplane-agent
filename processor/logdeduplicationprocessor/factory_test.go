@@ -20,8 +20,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/component"
-	"go.opentelemetry.io/collector/processor"
-	"go.uber.org/zap"
+	"go.opentelemetry.io/collector/processor/processortest"
 )
 
 func TestNewProcessorFactory(t *testing.T) {
@@ -63,12 +62,7 @@ func TestCreateLogsProcessor(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			f := NewFactory()
-			set := processor.Settings{
-				TelemetrySettings: component.TelemetrySettings{
-					Logger: zap.NewNop(),
-				},
-			}
-			p, err := f.CreateLogsProcessor(context.Background(), set, tc.cfg, nil)
+			p, err := f.CreateLogsProcessor(context.Background(), processortest.NewNopSettings(), tc.cfg, nil)
 			if tc.expectedErr == "" {
 				require.NoError(t, err)
 				require.IsType(t, &logDedupProcessor{}, p)
