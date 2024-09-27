@@ -8,7 +8,7 @@ require (
 	github.com/mgechev/revive v1.3.7
 	github.com/securego/gosec/v2 v2.18.2
 	github.com/uw-labs/lichen v0.1.7
-	github.com/vektra/mockery/v2 v2.45.0
+	github.com/vektra/mockery/v2 v2.46.0
 	go.opentelemetry.io/collector/cmd/mdatagen v0.110.0
 	golang.org/x/tools v0.25.0
 )
