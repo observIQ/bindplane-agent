@@ -864,3 +864,7 @@ replace github.com/openshift/api v3.9.0+incompatible => github.com/openshift/api
 // replace pkg/stanza with this commit until dan's pr is merged
 // https://github.com/open-telemetry/opentelemetry-collector-contrib/pull/35175
 replace github.com/open-telemetry/opentelemetry-collector-contrib/pkg/stanza => github.com/observIQ/opentelemetry-collector-contrib/pkg/stanza v0.0.0-20240917140935-2741093f40aa
+
+// Replace transformprocessor so that metric conversion functions are temporarily available on both the metric and datapoint context.
+// We will remove this in v1.63.0 of the agent and switch over to only having the conversion functions on the metric context.
+replace github.com/open-telemetry/opentelemetry-collector-contrib/processor/transformprocessor v0.110.0 => github.com/observiq/opentelemetry-collector-contrib/processor/transformprocessor v0.0.0-20240927124052-b041923b94a1

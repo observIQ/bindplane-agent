@@ -1880,6 +1880,8 @@ github.com/oapi-codegen/runtime v1.0.0 h1:P4rqFX5fMFWqRzY9M/3YF9+aPSPPB06IzP2P7o
 github.com/oapi-codegen/runtime v1.0.0/go.mod h1:LmCUMQuPB4M/nLXilQXhHw+BLZdDb18B34OO356yJ/A=
 github.com/observIQ/opentelemetry-collector-contrib/pkg/stanza v0.0.0-20240917140935-2741093f40aa h1:8CxUu9d9sfWIDYSQZbXm1nzqyrW2O3ULcxhUs/dYzZw=
 github.com/observIQ/opentelemetry-collector-contrib/pkg/stanza v0.0.0-20240917140935-2741093f40aa/go.mod h1:/cJjT1Tsh3onIjeZlKH4Tc94HOvs7gDcdDwK3KKRUC4=
+github.com/observiq/opentelemetry-collector-contrib/processor/transformprocessor v0.0.0-20240927124052-b041923b94a1 h1:JP2rgNyjjgN4sQd9XtuQKjPoh+ZAUjiX/NI7hFMslII=
+github.com/observiq/opentelemetry-collector-contrib/processor/transformprocessor v0.0.0-20240927124052-b041923b94a1/go.mod h1:cPBwwiLx37z3wmsYFD/xJLnMsDNyIkuQMDMsxlabAgw=
 github.com/oklog/run v1.0.0/go.mod h1:dlhp/R75TPv97u0XWUtDeV/lRKWPKSdTuV0TZvrmrQA=
 github.com/oklog/ulid v1.3.1 h1:EGfNDEx6MqHz8B3uNV6QAib1UR2Lm97sHi3ocA6ESJ4=
 github.com/oklog/ulid v1.3.1/go.mod h1:CirwcVhetQ6Lv90oh/F+FBtV6XMibvdAFo93nm5qn4U=
@@ -2126,8 +2128,6 @@ github.com/open-telemetry/opentelemetry-collector-contrib/processor/spanprocesso
 github.com/open-telemetry/opentelemetry-collector-contrib/processor/spanprocessor v0.110.0/go.mod h1:VSufsKGLHC2FwRtxjSJyt/Q+p+s27GHJ15AtGUTMhgg=
 github.com/open-telemetry/opentelemetry-collector-contrib/processor/tailsamplingprocessor v0.110.0 h1:bnzvE7VXMssr9uSWM0it5QQNvHxypvkGXyELSBBXuU8=
 github.com/open-telemetry/opentelemetry-collector-contrib/processor/tailsamplingprocessor v0.110.0/go.mod h1:fMbX6TkiafPxvoBZTJNbFXSBS1eBCyEru4squ0SmVcM=
-github.com/open-telemetry/opentelemetry-collector-contrib/processor/transformprocessor v0.110.0 h1:7qIVo3gsBbNITaW1aWItNkDnFk/5TEb69MeQRZpSxSY=
-github.com/open-telemetry/opentelemetry-collector-contrib/processor/transformprocessor v0.110.0/go.mod h1:cPBwwiLx37z3wmsYFD/xJLnMsDNyIkuQMDMsxlabAgw=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/activedirectorydsreceiver v0.110.0 h1:oDK8IyYtxRDHR7S9lTMVXJOG3MwwN77+6AY91eq1D54=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/activedirectorydsreceiver v0.110.0/go.mod h1:PFw6bvmWPcLrBb3HQXWejkbmcALRuFFaPNDCFQJlCVQ=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/aerospikereceiver v0.110.0 h1:/jE3efLqX/PGagn3oixwyhHHzQVx0O+0zQdjKzJY8QE=
