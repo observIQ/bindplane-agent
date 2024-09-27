@@ -43,10 +43,9 @@ do
         OTEL_MODULES=$(go list -m -f '{{if not (or .Indirect .Main)}}{{.Path}}{{end}}' all |
             grep -E -e '(?:^github.com/open-telemetry/opentelemetry-collector-contrib)|(?:^go.opentelemetry.io/collector)')
 
-        for mod in $OTEL_MODULES
-        do
-            case $mod in 
-            go.opentelemetry.io/collector/pdata* | go.opentelemetry.io/collector/config/configtls* | go.opentelemetry.io/collector/config/configretry* | go.opentelemetry.io/collector/confmap | go.opentelemetry.io/collector/config/configopaque)
+        for mod in $OTEL_MODULES; do
+            case $mod in
+            go.opentelemetry.io/collector/pdata* | go.opentelemetry.io/collector/config/configtls* | go.opentelemetry.io/collector/config/configretry* | go.opentelemetry.io/collector/confmap | go.opentelemetry.io/collector/config/configopaque | go.opentelemetry.io/collector/confmap/provider/envprovider | go.opentelemetry.io/collector/confmap/provider/fileprovider | go.opentelemetry.io/collector/config/confignet)
                 # pdata package is versioned separately
                 echo "$local_mod: $mod@$PDATA_TARGET_VERSION"
                 go mod edit -require "$mod@$PDATA_TARGET_VERSION"
