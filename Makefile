@@ -118,6 +118,10 @@ misspell-fix:
 test:
 	$(MAKE) for-all CMD="go test -race ./..."
 
+.PHONY: test-no-race
+test-no-race:
+	$(MAKE) for-all CMD="go test ./..."
+
 .PHONY: test-with-cover
 test-with-cover:
 	$(MAKE) for-all CMD="go test -coverprofile=cover.out ./..."
