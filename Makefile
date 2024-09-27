@@ -195,6 +195,9 @@ update-otel:
 	./scripts/update-otel.sh "$(OTEL_VERSION)" "$(CONTRIB_VERSION)" "$(PDATA_VERSION)"
 	./scripts/update-docs.sh "$(OTEL_VERSION)" "$(CONTRIB_VERSION)"
 	$(MAKE) tidy
+# Double make tidy - this unfortunately is needed due to the order in which modules are tidied.
+# The modules this seems to effect are plugindocgen and bindplaneextension
+	$(MAKE) tidy
 
 # update-modules updates all submodules to be the new version.
 # Usage: make update-modules NEW_VERSION=vx.x.x
