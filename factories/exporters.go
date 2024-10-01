@@ -20,6 +20,7 @@ import (
 	"github.com/observiq/bindplane-agent/exporter/chronicleforwarderexporter"
 	"github.com/observiq/bindplane-agent/exporter/googlecloudexporter"
 	"github.com/observiq/bindplane-agent/exporter/googlemanagedprometheusexporter"
+	"github.com/observiq/bindplane-agent/exporter/qradar"
 	"github.com/observiq/bindplane-agent/exporter/snowflakeexporter"
 	"github.com/observiq/bindplane-agent/internal/version"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/alibabacloudlogserviceexporter"
@@ -51,6 +52,7 @@ import (
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/syslogexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/zipkinexporter"
 	"go.opentelemetry.io/collector/exporter"
+	"go.opentelemetry.io/collector/exporter/debugexporter"
 	"go.opentelemetry.io/collector/exporter/loggingexporter"
 	"go.opentelemetry.io/collector/exporter/nopexporter"
 	"go.opentelemetry.io/collector/exporter/otlpexporter"
@@ -72,6 +74,7 @@ var defaultExporters = []exporter.Factory{
 	clickhouseexporter.NewFactory(),
 	coralogixexporter.NewFactory(),
 	datadogexporter.NewFactory(),
+	debugexporter.NewFactory(),
 	elasticsearchexporter.NewFactory(),
 	fileexporter.NewFactory(),
 	googlecloudexporter.NewFactory(version.Version()),
@@ -89,6 +92,7 @@ var defaultExporters = []exporter.Factory{
 	otlphttpexporter.NewFactory(),
 	prometheusexporter.NewFactory(),
 	prometheusremotewriteexporter.NewFactory(),
+	qradar.NewFactory(),
 	sapmexporter.NewFactory(),
 	signalfxexporter.NewFactory(),
 	snowflakeexporter.NewFactory(),

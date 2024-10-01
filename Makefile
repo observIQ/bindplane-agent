@@ -118,6 +118,10 @@ misspell-fix:
 test:
 	$(MAKE) for-all CMD="go test -race ./..."
 
+.PHONY: test-no-race
+test-no-race:
+	$(MAKE) for-all CMD="go test ./..."
+
 .PHONY: test-with-cover
 test-with-cover:
 	$(MAKE) for-all CMD="go test -coverprofile=cover.out ./..."
@@ -194,6 +198,9 @@ add-license:
 update-otel:
 	./scripts/update-otel.sh "$(OTEL_VERSION)" "$(CONTRIB_VERSION)" "$(PDATA_VERSION)"
 	./scripts/update-docs.sh "$(OTEL_VERSION)" "$(CONTRIB_VERSION)"
+	$(MAKE) tidy
+# Double make tidy - this unfortunately is needed due to the order in which modules are tidied.
+# The modules this seems to effect are plugindocgen and bindplaneextension
 	$(MAKE) tidy
 
 # update-modules updates all submodules to be the new version.

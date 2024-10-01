@@ -17,6 +17,7 @@ package factories
 import (
 	"github.com/open-telemetry/opentelemetry-collector-contrib/extension/basicauthextension"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/extension/bearertokenauthextension"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/extension/headerssetterextension"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/extension/healthcheckextension"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/extension/oauth2clientauthextension"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/extension/oidcauthextension"
@@ -33,6 +34,7 @@ var defaultExtensions = []extension.Factory{
 	bearertokenauthextension.NewFactory(),
 	extensiontest.NewNopFactory(),
 	filestorage.NewFactory(),
+	headerssetterextension.NewFactory(),
 	healthcheckextension.NewFactory(),
 	oauth2clientauthextension.NewFactory(),
 	oidcauthextension.NewFactory(),
