@@ -878,8 +878,8 @@ github.com/GoogleCloudPlatform/grpc-gcp-go/grpcgcp v1.5.0 h1:oVLqHXhnYtUwM89y9T1
 github.com/GoogleCloudPlatform/grpc-gcp-go/grpcgcp v1.5.0/go.mod h1:dppbR7CwXD4pgtV9t3wD1812RaLDcBjtblcDF5f1vI0=
 github.com/GoogleCloudPlatform/opentelemetry-operations-go/detectors/gcp v1.24.1 h1:pB2F2JKCj1Znmp2rwxxt1J0Fg0wezTMgWYk5Mpbi1kg=
 github.com/GoogleCloudPlatform/opentelemetry-operations-go/detectors/gcp v1.24.1/go.mod h1:itPGVDKf9cC/ov4MdvJ2QZ0khw4bfoo9jzwTJlaxy2k=
-github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector v0.48.2 h1:YkwqygP/gm2iuuxAFh8HnFL+ZQ/PKhYRDi3IlfLrBek=
-github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector v0.48.2/go.mod h1:f4MEEOvRbw06aLAQ3g/elRal5XvUaGPUI+uYUL6W4WI=
+github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector v0.48.1 h1:55BCCek53ynaXLoMS8bdivu34TYZ4dnKzi4sOf7qtIU=
+github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector v0.48.1/go.mod h1:n8ee0TUmtsXm2GUWL86jkrxc8mPGRLuTJg13M/iW6Q0=
 github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/googlemanagedprometheus v0.48.1 h1:u/of4NZ/0vK8c9Zjt6QLQtHjzjxKvplbrU8r1kLLYTk=
 github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/googlemanagedprometheus v0.48.1/go.mod h1:nolt+2xPwKxTH0sQ5SKrK0kKEvVq12N/+3r6vhAmPvw=
 github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.24.2 h1:B7ox5J7nwey9FPxobwU1wugDKgVqtFvwZRDS0YbM+tY=
@@ -3525,8 +3525,6 @@ google.golang.org/grpc v1.56.3/go.mod h1:I9bI3vqKfayGqPUAwGdOSu7kt6oIJLixfffKrpX
 google.golang.org/grpc v1.67.0 h1:IdH9y6PF5MPSdAntIcpjQ+tXO41pcQsfZV2RxtQgVcw=
 google.golang.org/grpc v1.67.0/go.mod h1:1gLDyUQU7CTLJI90u3nXZ9ekeghjeM7pTDZlqFNg2AA=
 google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.1.0/go.mod h1:6Kw0yEErY5E/yWrBtf03jp27GLLJujG4z/JK95pnjjw=
-google.golang.org/grpc/stats/opentelemetry v0.0.0-20240702152247-2da976983bbb h1:i2YAt03JpcWES+tSjXp3X3SvUdcVhwa07DJP8AqjLGQ=
-google.golang.org/grpc/stats/opentelemetry v0.0.0-20240702152247-2da976983bbb/go.mod h1:4R1ubOs0qFA4h2ZP1CgEXfa7auTXBxA2xUh9o26WXu8=
 google.golang.org/protobuf v0.0.0-20200109180630-ec00e32a8dfd/go.mod h1:DFci5gLYBciE7Vtevhsrf46CRTquxDuWsQurQQe4oz8=
 google.golang.org/protobuf v0.0.0-20200221191635-4d8936d0db64/go.mod h1:kwYJMbMJ01Woi6D6+Kah6886xMZcty6N08ah7+eCXa0=
 google.golang.org/protobuf v0.0.0-20200228230310-ab0ca4ff8a60/go.mod h1:cfTl7dwQJ+fmap5saPgwCLgHXTUD7jkjRqWcaiX5VyM=
