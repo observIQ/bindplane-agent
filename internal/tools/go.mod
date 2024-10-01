@@ -5,7 +5,7 @@ go 1.22.6
 require (
 	github.com/client9/misspell v0.3.4
 	github.com/google/addlicense v1.1.1
-	github.com/mgechev/revive v1.3.7
+	github.com/mgechev/revive v1.4.0
 	github.com/securego/gosec/v2 v2.18.2
 	github.com/uw-labs/lichen v0.1.7
 	github.com/vektra/mockery/v2 v2.45.0
@@ -14,14 +14,14 @@ require (
 )
 
 require (
-	github.com/BurntSushi/toml v1.3.2 // indirect
+	github.com/BurntSushi/toml v1.4.0 // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/bmatcuk/doublestar/v4 v4.0.2 // indirect
 	github.com/ccojocar/zxcvbn-go v1.0.2 // indirect
 	github.com/chavacava/garif v0.1.0 // indirect
 	github.com/chigopher/pathlib v0.19.1 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.4 // indirect
-	github.com/fatih/color v1.16.0 // indirect
+	github.com/fatih/color v1.17.0 // indirect
 	github.com/fatih/structtag v1.2.0 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/go-viper/mapstructure/v2 v2.1.0 // indirect
@@ -32,6 +32,7 @@ require (
 	github.com/gookit/color v1.5.4 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
+	github.com/hashicorp/go-version v1.7.0 // indirect
 	github.com/hashicorp/hcl v1.0.1-vault-5 // indirect
 	github.com/huandu/xstrings v1.4.0 // indirect
 	github.com/iancoleman/strcase v0.2.0 // indirect
@@ -56,7 +57,6 @@ require (
 	github.com/muesli/termenv v0.15.2 // indirect
 	github.com/olekukonko/tablewriter v0.0.5 // indirect
 	github.com/pelletier/go-toml/v2 v2.1.0 // indirect
-	github.com/pkg/errors v0.9.1 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/rogpeppe/go-internal v1.12.0 // indirect
 	github.com/rs/zerolog v1.29.0 // indirect
