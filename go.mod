@@ -862,8 +862,8 @@ replace github.com/mattn/go-ieproxy => github.com/mattn/go-ieproxy v0.0.1
 replace github.com/openshift/api v3.9.0+incompatible => github.com/openshift/api v0.0.0-20180801171038-322a19404e37
 
 // replace pkg/stanza with this commit until dan's pr is merged
-// https://github.com/open-telemetry/opentelemetry-collector-contrib/pull/35175
-replace github.com/open-telemetry/opentelemetry-collector-contrib/pkg/stanza => github.com/observIQ/opentelemetry-collector-contrib/pkg/stanza v0.0.0-20240917140935-2741093f40aa
+// https://github.com/open-telemetry/opentelemetry-collector-contrib/pull/35520
+replace github.com/open-telemetry/opentelemetry-collector-contrib/pkg/stanza => github.com/observIQ/opentelemetry-collector-contrib/pkg/stanza v0.0.0-20241001150002-c987c54460c5
 
 // Replace transformprocessor so that metric conversion functions are temporarily available on both the metric and datapoint context.
 // We will remove this in v1.63.0 of the agent and switch over to only having the conversion functions on the metric context.
