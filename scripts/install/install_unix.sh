@@ -510,7 +510,6 @@ check_prereqs()
   banner "Checking Prerequisites"
   increase_indent
   root_check
-  proxy_check
   os_check
   os_arch_check
   package_type_check
@@ -530,9 +529,18 @@ root_check()
   fi
 }
 
-proxy_check()
+# Test non-interactive mode compatibility
+interactive_check()
 {
+  # Incompatible with proxies unless both username and password are passed
   if [ "$non_interactive" = "true" ] && [ -z "$proxy_password" ]
+  then 
+    failed
+    error_exit "$LINENO" "The proxy password must be set via the command line argument -P, if called non-interactively!"
+  fi
+
+  # Incompatible with checking the BP url since it can be interactive on failed connection
+  if [ "$non_interactive" = "true" ] && [ "$check_bp_url" = "true" ]
   then 
     failed
     error_exit "$LINENO" "The proxy password must be set via the command line argument -P, if called non-interactively!"
@@ -882,6 +890,7 @@ main()
     done
   fi
 
+  interactive_check
   connection_check
   setup_installation
   install_package

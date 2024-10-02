@@ -283,6 +283,17 @@ check_prereqs()
   decrease_indent
 }
 
+# Test non-interactive mode compatibility
+interactive_check()
+{
+  # Incompatible with checking the BP url since it can be interactive on failed connection
+  if [ "$non_interactive" = "true" ] && [ "$check_bp_url" = "true" ]
+  then 
+    failed
+    error_exit "$LINENO" "The proxy password must be set via the command line argument -P, if called non-interactively!"
+  fi
+}
+
 # Test connection to BindPlane if it was specified
 connection_check()
 {
@@ -712,6 +723,7 @@ main()
     done
   fi
 
+  interactive_check
   connection_check
   setup_installation
   install_package
