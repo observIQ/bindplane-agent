@@ -24,7 +24,7 @@ import (
 	"strings"
 	"time"
 
-	"go.opentelemetry.io/collector/component"
+	"go.opentelemetry.io/collector/pipeline"
 )
 
 // TimeFormat is the format for the starting and end time
@@ -44,7 +44,7 @@ const (
 var entityNameRegex = regexp.MustCompile(`^(?:[^/]*/)?year=(\d{4})/month=(\d{2})/day=(\d{2})/hour=(\d{2})/(?:minute=(\d{2})/)?([^/].*)$`)
 
 // ParseEntityPath returns true if the entity is within the existing time range
-func ParseEntityPath(entityName string) (entityTime *time.Time, telemetryType component.DataType, err error) {
+func ParseEntityPath(entityName string) (entityTime *time.Time, telemetryType pipeline.Signal, err error) {
 	matches := entityNameRegex.FindStringSubmatch(entityName)
 	if matches == nil {
 		err = ErrInvalidEntityPath
@@ -75,11 +75,11 @@ func ParseEntityPath(entityName string) (entityTime *time.Time, telemetryType co
 
 	switch {
 	case strings.Contains(lastPart, metricEntitySignifier):
-		telemetryType = component.DataTypeMetrics
+		telemetryType = pipeline.SignalMetrics
 	case strings.Contains(lastPart, logsEntitySignifier):
-		telemetryType = component.DataTypeLogs
+		telemetryType = pipeline.SignalLogs
 	case strings.Contains(lastPart, tracesEntitySignifier):
-		telemetryType = component.DataTypeTraces
+		telemetryType = pipeline.SignalTraces
 	}
 
 	return

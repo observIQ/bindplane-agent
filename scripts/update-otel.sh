@@ -22,6 +22,8 @@ go.opentelemetry.io/collector/confmap
 go.opentelemetry.io/collector/config/configopaque
 go.opentelemetry.io/collector/confmap/provider/envprovider
 go.opentelemetry.io/collector/confmap/provider/fileprovider
+go.opentelemetry.io/collector/confmap/provider/httpsprovider
+go.opentelemetry.io/collector/confmap/provider/yamlprovider
 go.opentelemetry.io/collector/config/confignet
 EOF
 

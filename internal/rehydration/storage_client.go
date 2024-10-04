@@ -22,6 +22,7 @@ import (
 
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/extension/experimental/storage"
+	"go.opentelemetry.io/collector/pipeline"
 )
 
 // CheckpointStorer handles storing of checkpoints for rehydration receivers
@@ -66,7 +67,7 @@ type CheckpointStorage struct {
 }
 
 // NewCheckpointStorage creates a new CheckpointStorage based on the storage and component IDs
-func NewCheckpointStorage(ctx context.Context, host component.Host, storageID, componentID component.ID, componentType component.DataType) (*CheckpointStorage, error) {
+func NewCheckpointStorage(ctx context.Context, host component.Host, storageID, componentID component.ID, pipelineSignal pipeline.Signal) (*CheckpointStorage, error) {
 	extension, ok := host.GetExtensions()[storageID]
 	if !ok {
 		return nil, fmt.Errorf("storage extension '%s' not found", storageID)
@@ -77,7 +78,7 @@ func NewCheckpointStorage(ctx context.Context, host component.Host, storageID, c
 		return nil, fmt.Errorf("non-storage extension '%s' found", storageID)
 	}
 
-	client, err := storageExtension.GetClient(ctx, component.KindReceiver, componentID, componentType.String())
+	client, err := storageExtension.GetClient(ctx, component.KindReceiver, componentID, pipelineSignal.String())
 	if err != nil {
 		return nil, fmt.Errorf("get client: %w", err)
 	}

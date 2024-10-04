@@ -22,7 +22,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/require"
-	"go.opentelemetry.io/collector/component"
+	"go.opentelemetry.io/collector/pipeline"
 )
 
 func TestParseEntityPath(t *testing.T) {
@@ -33,63 +33,63 @@ func TestParseEntityPath(t *testing.T) {
 		desc         string
 		entityName   string
 		expectedTime *time.Time
-		expectedType component.DataType
+		expectedType pipeline.Signal
 		expectedErr  error
 	}{
 		{
 			desc:         "Empty entityName",
 			entityName:   "",
 			expectedTime: nil,
-			expectedType: component.Type{},
+			expectedType: pipeline.Signal{},
 			expectedErr:  ErrInvalidEntityPath,
 		},
 		{
 			desc:         "Malformed path",
 			entityName:   "year=2023/day=04/hour=12/minute=02/entitymetrics_12345.json",
 			expectedTime: nil,
-			expectedType: component.Type{},
+			expectedType: pipeline.Signal{},
 			expectedErr:  ErrInvalidEntityPath,
 		},
 		{
 			desc:         "Malformed timestamp",
 			entityName:   "year=2003/month=00/day=04/hour=12/minute=01/entitymetrics_12345.json",
 			expectedTime: nil,
-			expectedType: component.Type{},
+			expectedType: pipeline.Signal{},
 			expectedErr:  errors.New("parse entity time"),
 		},
 		{
 			desc:         "Prefix, minute, metrics",
 			entityName:   "prefix/year=2023/month=01/day=04/hour=12/minute=02/entitymetrics_12345.json",
 			expectedTime: &expectedTimeMinute,
-			expectedType: component.DataTypeMetrics,
+			expectedType: pipeline.SignalMetrics,
 			expectedErr:  nil,
 		},
 		{
 			desc:         "No Prefix, minute, metrics",
 			entityName:   "year=2023/month=01/day=04/hour=12/minute=02/entitymetrics_12345.json",
 			expectedTime: &expectedTimeMinute,
-			expectedType: component.DataTypeMetrics,
+			expectedType: pipeline.SignalMetrics,
 			expectedErr:  nil,
 		},
 		{
 			desc:         "No Prefix, minute, logs",
 			entityName:   "year=2023/month=01/day=04/hour=12/minute=02/entitylogs_12345.json",
 			expectedTime: &expectedTimeMinute,
-			expectedType: component.DataTypeLogs,
+			expectedType: pipeline.SignalLogs,
 			expectedErr:  nil,
 		},
 		{
 			desc:         "No Prefix, minute, traces",
 			entityName:   "year=2023/month=01/day=04/hour=12/minute=02/entitytraces_12345.json",
 			expectedTime: &expectedTimeMinute,
-			expectedType: component.DataTypeTraces,
+			expectedType: pipeline.SignalTraces,
 			expectedErr:  nil,
 		},
 		{
 			desc:         "No Prefix, hour, metrics",
 			entityName:   "year=2023/month=01/day=04/hour=12/entitymetrics_12345.json",
 			expectedTime: &expectedTimeHour,
-			expectedType: component.DataTypeMetrics,
+			expectedType: pipeline.SignalMetrics,
 			expectedErr:  nil,
 		},
 	}
