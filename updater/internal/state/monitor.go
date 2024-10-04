@@ -19,6 +19,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/http"
 	"path/filepath"
 	"time"
 
@@ -42,13 +43,14 @@ type Monitor interface {
 
 	// MonitorForSuccess will periodically check the state of the package. It will keep checking until the context is canceled or a failed/success state is detected.
 	// It will return an error if status is Failed or if the context times out.
-	MonitorForSuccess(ctx context.Context, packageName string) error
+	MonitorForSuccess(ctx context.Context, hcePort int) error
 }
 
 // CollectorMonitor implements Monitor interface for monitoring the Collector Package Status file
 type CollectorMonitor struct {
 	stateManager  packagestate.StateManager
 	currentStatus *protobufs.PackageStatuses
+	logger        *zap.Logger
 }
 
 // NewCollectorMonitor create a new Monitor specifically for the collector
@@ -59,6 +61,7 @@ func NewCollectorMonitor(logger *zap.Logger, installDir string) (Monitor, error)
 	packageStatusPath := filepath.Join(installDir, packagestate.DefaultFileName)
 	collectorMonitor := &CollectorMonitor{
 		stateManager: packagestate.NewFileStateManager(namedLogger, packageStatusPath),
+		logger:       namedLogger,
 	}
 
 	// Load the current status to ensure the package status file exists
@@ -94,43 +97,37 @@ func (c *CollectorMonitor) SetState(packageName string, status protobufs.Package
 	return c.stateManager.SaveStatuses(c.currentStatus)
 }
 
-// MonitorForSuccess intermittently checks the package status file for either an install failed or success status.
+// MonitorForSuccess checks the collector health check extension to verify if it is healthy
 // If an InstallFailed status is read this returns ErrFailedStatus error.
 // If the context is canceled the context error will be returned.
-func (c *CollectorMonitor) MonitorForSuccess(ctx context.Context, packageName string) error {
-	ticker := time.NewTicker(100 * time.Millisecond)
-	defer ticker.Stop()
-
-	for {
-		select {
-		case <-ctx.Done():
-			return ctx.Err()
-		case <-ticker.C:
-			packageStatus, err := c.stateManager.LoadStatuses()
-			switch {
-			// If there is any error we'll just continue. Some valid reasons we could error and should retry:
-			// - File was deleted by new collector before it's rewritten
-			// - File is being written to while we're reading it so we'll get invalid JSON
-			case err != nil:
-				continue
-			default:
-				targetPackage, ok := packageStatus.GetPackages()[packageName]
-				// Target package might not exist yet so continue
-				if !ok {
-					continue
-				}
-
-				switch targetPackage.GetStatus() {
-				case protobufs.PackageStatusEnum_PackageStatusEnum_InstallFailed:
-					return ErrFailedStatus
-				case protobufs.PackageStatusEnum_PackageStatusEnum_Installed:
-					// Install successful
-					return nil
-				default:
-					// Collector may still be starting up or we may have read the file while it's being written
-					continue
-				}
-			}
-		}
+// Uses a retry loop with 3 max tries and 3 second delay between each.
+func (c *CollectorMonitor) MonitorForSuccess(ctx context.Context, hcePort int) error {
+	endpoint := fmt.Sprintf("http://127.0.0.1:%d", hcePort)
+	req, err := http.NewRequestWithContext(ctx, "GET", endpoint, nil)
+	if err != nil {
+		return err
 	}
+	client := http.Client{
+		Timeout: time.Second * 10,
+	}
+
+	var resp *http.Response
+	for r := 0; r < 3; r++ {
+		resp, err = client.Do(req)
+		if err == nil {
+			break
+		}
+
+		c.logger.Info("request failed, retrying...", zap.Error(err))
+		time.Sleep(time.Second * 3)
+	}
+	if err != nil {
+		return fmt.Errorf("failed to reach agent after 3 attempts: %w", err)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("health check on %s returned %d", hcePort, resp.StatusCode)
+	}
+
+	return nil
 }

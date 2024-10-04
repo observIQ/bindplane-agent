@@ -19,6 +19,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net"
 	"os"
 	"time"
 
@@ -94,8 +95,13 @@ func (u *Updater) Update() error {
 		return fmt.Errorf("failed to backup: %w", err)
 	}
 
+	hcePort, err := findRandomPort()
+	if err != nil {
+		hcePort = 12345
+	}
+
 	// Install artifacts
-	if err := u.installer.Install(u.rollbacker); err != nil {
+	if err := u.installer.Install(u.rollbacker, hcePort); err != nil {
 		u.logger.Error("Failed to install", zap.Error(err))
 
 		// Set the state to failed before rollback so collector knows it failed
@@ -116,7 +122,7 @@ func (u *Updater) Update() error {
 	u.logger.Debug("Installation successful, begin monitor for success")
 
 	// Monitor the install state
-	if err := u.monitor.MonitorForSuccess(checkCtx, packagestate.CollectorPackageName); err != nil {
+	if err := u.monitor.MonitorForSuccess(checkCtx, hcePort); err != nil {
 		u.logger.Error("Failed to install", zap.Error(err))
 
 		// If this is not an error due to the collector setting a failed status we need to set a failed status
@@ -144,4 +150,22 @@ func (u *Updater) removeTmpDir() {
 	if err != nil {
 		u.logger.Error("failed to remove temporary directory", zap.Error(err))
 	}
+}
+
+func findRandomPort() (int, error) {
+	l, err := net.Listen("tcp", "localhost:0")
+
+	if err != nil {
+		return 0, err
+	}
+
+	port := l.Addr().(*net.TCPAddr).Port
+
+	err = l.Close()
+
+	if err != nil {
+		return 0, err
+	}
+
+	return port, nil
 }
