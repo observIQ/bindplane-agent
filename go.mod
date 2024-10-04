@@ -872,4 +872,4 @@ replace github.com/open-telemetry/opentelemetry-collector-contrib/pkg/stanza => 
 
 // Replace transformprocessor so that metric conversion functions are temporarily available on both the metric and datapoint context.
 // We will remove this in v1.63.0 of the agent and switch over to only having the conversion functions on the metric context.
-replace github.com/open-telemetry/opentelemetry-collector-contrib/processor/transformprocessor v0.110.0 => github.com/observiq/opentelemetry-collector-contrib/processor/transformprocessor v0.0.0-20240927124052-b041923b94a1
+replace github.com/open-telemetry/opentelemetry-collector-contrib/processor/transformprocessor v0.111.0 => github.com/observiq/opentelemetry-collector-contrib/processor/transformprocessor v0.0.0-20241004155750-926945f2947f
