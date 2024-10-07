@@ -27,32 +27,36 @@ MANAGEMENT_YML_PATH="$INSTALL_DIR/manager.yaml"
 SCRIPT_NAME="$0"
 INDENT_WIDTH='  '
 indent=""
+non_interactive=false
+error_mode=false
 
 
 # Colors
-num_colors=$(tput colors 2>/dev/null)
-if test -n "$num_colors" && test "$num_colors" -ge 8; then
-  bold="$(tput bold)"
-  underline="$(tput smul)"
-  # standout can be bold or reversed colors dependent on terminal
-  standout="$(tput smso)"
-  reset="$(tput sgr0)"
-  bg_black="$(tput setab 0)"
-  bg_blue="$(tput setab 4)"
-  bg_cyan="$(tput setab 6)"
-  bg_green="$(tput setab 2)"
-  bg_magenta="$(tput setab 5)"
-  bg_red="$(tput setab 1)"
-  bg_white="$(tput setab 7)"
-  bg_yellow="$(tput setab 3)"
-  fg_black="$(tput setaf 0)"
-  fg_blue="$(tput setaf 4)"
-  fg_cyan="$(tput setaf 6)"
-  fg_green="$(tput setaf 2)"
-  fg_magenta="$(tput setaf 5)"
-  fg_red="$(tput setaf 1)"
-  fg_white="$(tput setaf 7)"
-  fg_yellow="$(tput setaf 3)"
+if [ "$non_interactive" = "false" ]; then
+  num_colors=$(tput colors 2>/dev/null)
+  if test -n "$num_colors" && test "$num_colors" -ge 8; then
+    bold="$(tput bold)"
+    underline="$(tput smul)"
+    # standout can be bold or reversed colors dependent on terminal
+    standout="$(tput smso)"
+    reset="$(tput sgr0)"
+    bg_black="$(tput setab 0)"
+    bg_blue="$(tput setab 4)"
+    bg_cyan="$(tput setab 6)"
+    bg_green="$(tput setab 2)"
+    bg_magenta="$(tput setab 5)"
+    bg_red="$(tput setab 1)"
+    bg_white="$(tput setab 7)"
+    bg_yellow="$(tput setab 3)"
+    fg_black="$(tput setaf 0)"
+    fg_blue="$(tput setaf 4)"
+    fg_cyan="$(tput setaf 6)"
+    fg_green="$(tput setaf 2)"
+    fg_magenta="$(tput setaf 5)"
+    fg_red="$(tput setaf 1)"
+    fg_white="$(tput setaf 7)"
+    fg_yellow="$(tput setaf 3)"
+  fi
 fi
 
 if [ -z "$reset" ]; then
@@ -63,12 +67,14 @@ fi
 
 # Helper Functions
 printf() {
-  if command -v sed >/dev/null; then
-    command printf -- "$@" | sed -E "$sed_ignore s/^/$indent/g"  # Ignore sole reset characters if defined
-  else
-    # Ignore $* suggestion as this breaks the output
-    # shellcheck disable=SC2145
-    command printf -- "$indent$@"
+  if [ "$non_interactive" = "false" ] || [ "$error_mode" = "true" ]; then
+    if command -v sed >/dev/null; then
+      command printf -- "$@" | sed -E "$sed_ignore s/^/$indent/g"  # Ignore sole reset characters if defined
+    else
+      # Ignore $* suggestion as this breaks the output
+      # shellcheck disable=SC2145
+      command printf -- "$indent$@"
+    fi
   fi
 }
 
@@ -113,7 +119,9 @@ warn() {
 # shellcheck disable=SC2059
 error() {
   increase_indent
+  error_mode=true
   printf "$fg_red$*$reset\\n"
+  error_mode=false
   decrease_indent
 }
 # Intentionally using variables in format string
@@ -131,17 +139,19 @@ prompt() {
 
 observiq_banner()
 {
-  fg_cyan "           888                                        8888888 .d88888b.\\n"
-  fg_cyan "           888                                          888  d88P\" \"Y88b\\n"
-  fg_cyan "           888                                          888  888     888\\n"
-  fg_cyan "   .d88b.  88888b.  .d8888b   .d88b.  888d888 888  888  888  888     888\\n"
-  fg_cyan "  d88\"\"88b 888 \"88b 88K      d8P  Y8b 888P\"   888  888  888  888     888\\n"
-  fg_cyan "  888  888 888  888 \"Y8888b. 88888888 888     Y88  88P  888  888 Y8b 888\\n"
-  fg_cyan "  Y88..88P 888 d88P      X88 Y8b.     888      Y8bd8P   888  Y88b.Y8b88P\\n"
-  fg_cyan "   \"Y88P\"  88888P\"   88888P'  \"Y8888  888       Y88P  8888888 \"Y888888\"\\n"
-  fg_cyan "                                                                   Y8b  \\n"
+  if [ "$non_interactive" = "false" ]; then
+    fg_cyan "           888                                        8888888 .d88888b.\\n"
+    fg_cyan "           888                                          888  d88P\" \"Y88b\\n"
+    fg_cyan "           888                                          888  888     888\\n"
+    fg_cyan "   .d88b.  88888b.  .d8888b   .d88b.  888d888 888  888  888  888     888\\n"
+    fg_cyan "  d88\"\"88b 888 \"88b 88K      d8P  Y8b 888P\"   888  888  888  888     888\\n"
+    fg_cyan "  888  888 888  888 \"Y8888b. 88888888 888     Y88  88P  888  888 Y8b 888\\n"
+    fg_cyan "  Y88..88P 888 d88P      X88 Y8b.     888      Y8bd8P   888  Y88b.Y8b88P\\n"
+    fg_cyan "   \"Y88P\"  88888P\"   88888P'  \"Y8888  888       Y88P  8888888 \"Y888888\"\\n"
+    fg_cyan "                                                                   Y8b  \\n"
 
-  reset
+    reset
+  fi
 }
 
 separator() { printf "===================================================\\n" ; }
@@ -203,6 +213,9 @@ Usage:
     Check access to the BindPlane server URL.
 
     This parameter will have the script check access to BindPlane based on the provided '--endpoint'
+
+  $(fg_yellow '-q, --quiet')
+    Use quiet (non-interactive) mode to run the script in headless environments
 
 EOF
   )
@@ -277,6 +290,17 @@ check_prereqs()
   dependencies_check
   success "Prerequisite check complete!"
   decrease_indent
+}
+
+# Test non-interactive mode compatibility
+interactive_check()
+{
+  # Incompatible with checking the BP url since it can be interactive on failed connection
+  if [ "$non_interactive" = "true" ] && [ "$check_bp_url" = "true" ]
+  then 
+    failed
+    error_exit "$LINENO" "The proxy password must be set via the command line argument -P, if called non-interactively!"
+  fi
 }
 
 # Test connection to BindPlane if it was specified
@@ -673,6 +697,8 @@ main()
   if [ $# -ge 1 ]; then
     while [ -n "$1" ]; do
       case "$1" in
+        -q|--quiet)
+          non_interactive="true" ; shift 1 ;;
         -l|--url)
           url=$2 ; shift 2 ;;
         -v|--version)
@@ -706,6 +732,7 @@ main()
     done
   fi
 
+  interactive_check
   connection_check
   setup_installation
   install_package
