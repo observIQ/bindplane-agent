@@ -471,10 +471,10 @@ dockers:
 
 docker_manifests:
   # TODO: Consider removing later, used for alpha v2 releases
-  - name_template: "ghcr.io/observiq/bindplane-agent :{{ .RawVersion }}-{{ .Prerelease }}"
+  - name_template: "ghcr.io/observiq/bindplane-agent:{{ .RawVersion }}-{{ .Prerelease }}"
     image_templates:
-      - "ghcr.io/observiq/bindplane-agent-amd64 :{{ .RawVersion }}-{{ .Prerelease }}"
-      - "ghcr.io/observiq/bindplane-agent-arm64 :{{ .RawVersion }}-{{ .Prerelease }}"
+      - "ghcr.io/observiq/bindplane-agent-amd64:{{ .RawVersion }}-{{ .Prerelease }}"
+      - "ghcr.io/observiq/bindplane-agent-arm64:{{ .RawVersion }}-{{ .Prerelease }}"
     skip_push: false
 #   - name_template: "observiq/bindplane-agent:{{ .Major }}.{{ .Minor }}.{{ .Patch }}-minimal"
 #     image_templates:
