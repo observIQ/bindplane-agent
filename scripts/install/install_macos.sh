@@ -28,10 +28,11 @@ SCRIPT_NAME="$0"
 INDENT_WIDTH='  '
 indent=""
 non_interactive=false
+error_mode=false
 
 
 # Colors
-if [ "$non_interactive" = "true" ]; then
+if [ "$non_interactive" = "false" ]; then
   num_colors=$(tput colors 2>/dev/null)
   if test -n "$num_colors" && test "$num_colors" -ge 8; then
     bold="$(tput bold)"
@@ -66,12 +67,14 @@ fi
 
 # Helper Functions
 printf() {
-  if command -v sed >/dev/null; then
-    command printf -- "$@" | sed -E "$sed_ignore s/^/$indent/g"  # Ignore sole reset characters if defined
-  else
-    # Ignore $* suggestion as this breaks the output
-    # shellcheck disable=SC2145
-    command printf -- "$indent$@"
+  if [ "$non_interactive" = "false" ] || [ "$error_mode" = "true" ]; then
+    if command -v sed >/dev/null; then
+      command printf -- "$@" | sed -E "$sed_ignore s/^/$indent/g"  # Ignore sole reset characters if defined
+    else
+      # Ignore $* suggestion as this breaks the output
+      # shellcheck disable=SC2145
+      command printf -- "$indent$@"
+    fi
   fi
 }
 
@@ -116,7 +119,9 @@ warn() {
 # shellcheck disable=SC2059
 error() {
   increase_indent
+  error_mode=true
   printf "$fg_red$*$reset\\n"
+  error_mode=false
   decrease_indent
 }
 # Intentionally using variables in format string
@@ -134,17 +139,19 @@ prompt() {
 
 observiq_banner()
 {
-  fg_cyan "           888                                        8888888 .d88888b.\\n"
-  fg_cyan "           888                                          888  d88P\" \"Y88b\\n"
-  fg_cyan "           888                                          888  888     888\\n"
-  fg_cyan "   .d88b.  88888b.  .d8888b   .d88b.  888d888 888  888  888  888     888\\n"
-  fg_cyan "  d88\"\"88b 888 \"88b 88K      d8P  Y8b 888P\"   888  888  888  888     888\\n"
-  fg_cyan "  888  888 888  888 \"Y8888b. 88888888 888     Y88  88P  888  888 Y8b 888\\n"
-  fg_cyan "  Y88..88P 888 d88P      X88 Y8b.     888      Y8bd8P   888  Y88b.Y8b88P\\n"
-  fg_cyan "   \"Y88P\"  88888P\"   88888P'  \"Y8888  888       Y88P  8888888 \"Y888888\"\\n"
-  fg_cyan "                                                                   Y8b  \\n"
+  if [ "$non_interactive" = "false" ]; then
+    fg_cyan "           888                                        8888888 .d88888b.\\n"
+    fg_cyan "           888                                          888  d88P\" \"Y88b\\n"
+    fg_cyan "           888                                          888  888     888\\n"
+    fg_cyan "   .d88b.  88888b.  .d8888b   .d88b.  888d888 888  888  888  888     888\\n"
+    fg_cyan "  d88\"\"88b 888 \"88b 88K      d8P  Y8b 888P\"   888  888  888  888     888\\n"
+    fg_cyan "  888  888 888  888 \"Y8888b. 88888888 888     Y88  88P  888  888 Y8b 888\\n"
+    fg_cyan "  Y88..88P 888 d88P      X88 Y8b.     888      Y8bd8P   888  Y88b.Y8b88P\\n"
+    fg_cyan "   \"Y88P\"  88888P\"   88888P'  \"Y8888  888       Y88P  8888888 \"Y888888\"\\n"
+    fg_cyan "                                                                   Y8b  \\n"
 
-  reset
+    reset
+  fi
 }
 
 separator() { printf "===================================================\\n" ; }
