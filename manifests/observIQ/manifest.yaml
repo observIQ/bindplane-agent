@@ -2,7 +2,7 @@
 # https://github.com/open-telemetry/opentelemetry-collector-releases/blob/main/distributions/otelcol-contrib/manifest.yaml
 dist:
   module: github.com/observiq/bindplane-agent
-  name: observiq-otel-collector
+  name: com.observiq.collector
   description: ObservIQ's custom distro for OpenTelemetry Collector
   version: "v2.0.0"
   output_path: ./builder
@@ -80,7 +80,6 @@ exporters:
   - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/exporter/splunkhecexporter v0.111.0
   - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/exporter/sumologicexporter v0.111.0
   - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/exporter/syslogexporter v0.111.0
-  - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/exporter/tencentcloudlogserviceexporter v0.111.0
   - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/exporter/zipkinexporter v0.111.0
   - gomod: github.com/observiq/bindplane-agent/exporter/azureblobexporter v1.61.1
     path: "./exporter/azureblobexporter"
