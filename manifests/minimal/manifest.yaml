@@ -1,6 +1,6 @@
 dist:
   module: github.com/observiq/bindplane-agent-ocb
-  name: com.observiq.collector
+  name: observiq-distro
   description: ObservIQ's minimal distro for OpenTelemetry Collector
   version: "v0.0.1"
   output_path: ./dist
