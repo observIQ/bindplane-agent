@@ -28,10 +28,11 @@ SCRIPT_NAME="$0"
 INDENT_WIDTH='  '
 indent=""
 non_interactive=false
+error_mode=false
 
 
 # Colors
-if [ "$non_interactive" = "true" ]; then
+if [ "$non_interactive" = "false" ]; then
   num_colors=$(tput colors 2>/dev/null)
   if test -n "$num_colors" && test "$num_colors" -ge 8; then
     bold="$(tput bold)"
@@ -66,12 +67,14 @@ fi
 
 # Helper Functions
 printf() {
-  if command -v sed >/dev/null; then
-    command printf -- "$@" | sed -E "$sed_ignore s/^/$indent/g"  # Ignore sole reset characters if defined
-  else
-    # Ignore $* suggestion as this breaks the output
-    # shellcheck disable=SC2145
-    command printf -- "$indent$@"
+  if [ "$non_interactive" = "false" ] || [ "$error_mode" = "true" ]; then
+    if command -v sed >/dev/null; then
+      command printf -- "$@" | sed -E "$sed_ignore s/^/$indent/g"  # Ignore sole reset characters if defined
+    else
+      # Ignore $* suggestion as this breaks the output
+      # shellcheck disable=SC2145
+      command printf -- "$indent$@"
+    fi
   fi
 }
 
@@ -116,7 +119,9 @@ warn() {
 # shellcheck disable=SC2059
 error() {
   increase_indent
+  error_mode=true
   printf "$fg_red$*$reset\\n"
+  error_mode=false
   decrease_indent
 }
 # Intentionally using variables in format string
@@ -134,15 +139,17 @@ prompt() {
 
 bindplane_banner()
 {
-  fg_cyan " oooooooooo.   o8o                    .o8  ooooooooo.   oooo\\n"
-  fg_cyan " '888'   '88b  '\"'                   \"888  '888   'Y88. '888\\n" 
-  fg_cyan "  888     888 oooo  ooo. .oo.    .oooo888   888   .d88'  888   .oooo.   ooo. .oo.    .ooooo.\\n"
-  fg_cyan "  888oooo888' '888  '888P\"Y88b  d88' '888   888ooo88P'   888  'P  )88b  '888P\"Y88b  d88' '88b\\n" 
-  fg_cyan "  888    '88b  888   888   888  888   888   888          888   .oP\"888   888   888  888ooo888\\n"
-  fg_cyan "  888    .88P  888   888   888  888   888   888          888  d8(  888   888   888  888    .o\\n"
-  fg_cyan " o888bood8P'  o888o o888o o888o 'Y8bod88P\" o888o        o888o 'Y888\"\"8o o888o o888o '88bod8P'\\n"
+  if [ "$non_interactive" = "false" ]; then
+    fg_cyan " oooooooooo.   o8o                    .o8  ooooooooo.   oooo\\n"
+    fg_cyan " '888'   '88b  '\"'                   \"888  '888   'Y88. '888\\n" 
+    fg_cyan "  888     888 oooo  ooo. .oo.    .oooo888   888   .d88'  888   .oooo.   ooo. .oo.    .ooooo.\\n"
+    fg_cyan "  888oooo888' '888  '888P\"Y88b  d88' '888   888ooo88P'   888  'P  )88b  '888P\"Y88b  d88' '88b\\n" 
+    fg_cyan "  888    '88b  888   888   888  888   888   888          888   .oP\"888   888   888  888ooo888\\n"
+    fg_cyan "  888    .88P  888   888   888  888   888   888          888  d8(  888   888   888  888    .o\\n"
+    fg_cyan " o888bood8P'  o888o o888o o888o 'Y8bod88P\" o888o        o888o 'Y888\"\"8o o888o o888o '88bod8P'\\n"
 
-  reset
+    reset
+  fi
 }
 
 separator() { printf "===================================================\\n" ; }
@@ -629,6 +636,7 @@ display_results()
 
 uninstall()
 {
+  bindplane_banner
   banner "Uninstalling BindPlane Agent"
   increase_indent
 
