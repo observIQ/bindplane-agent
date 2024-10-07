@@ -190,7 +190,7 @@ func checkManagerConfig(configPath *string) error {
 			if err != nil {
 				return fmt.Errorf("new uuidv7: %w", err)
 			}
-		
+
 			newConfig.AgentID = opamp.AgentIDFromUUID(u)
 		}
 

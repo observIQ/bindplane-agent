@@ -98,7 +98,7 @@ func (p *packagesStateProvider) FileContentHash(_ string) ([]byte, error) {
 }
 
 // UpdateContent not implemented so returns an error with this info
-func (p *packagesStateProvider) UpdateContent(_ context.Context, _ string, _ io.Reader, _ []byte) error {
+func (p *packagesStateProvider) UpdateContent(_ context.Context, _ string, _ io.Reader, _, _ []byte) error {
 	p.logger.Debug("Update package content")
 
 	return errors.New("method not implemented: PackageStateProvider UpdateContent")

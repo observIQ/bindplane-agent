@@ -248,7 +248,7 @@ func TestUpdateContent(t *testing.T) {
 				}
 				var r io.Reader
 
-				err := p.UpdateContent(context.TODO(), "name", r, []byte("hash"))
+				err := p.UpdateContent(context.TODO(), "name", r, []byte("hash"), []byte("signature"))
 
 				assert.ErrorContains(t, err, "method not implemented")
 			},
