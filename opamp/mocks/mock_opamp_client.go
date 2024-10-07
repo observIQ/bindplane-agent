@@ -120,6 +120,11 @@ func (_m *MockOpAMPClient) SetCustomCapabilities(customCapabilities *protobufs.C
 	return r0
 }
 
+// SetFlags provides a mock function with given fields: flags
+func (_m *MockOpAMPClient) SetFlags(flags protobufs.AgentToServerFlags) {
+	_m.Called(flags)
+}
+
 // SetHealth provides a mock function with given fields: health
 func (_m *MockOpAMPClient) SetHealth(health *protobufs.ComponentHealth) error {
 	ret := _m.Called(health)
