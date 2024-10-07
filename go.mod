@@ -36,7 +36,7 @@ require (
 	github.com/observiq/bindplane-agent/receiver/sapnetweaverreceiver v1.63.0
 	github.com/observiq/bindplane-agent/receiver/telemetrygeneratorreceiver v1.63.0
 	github.com/oklog/ulid/v2 v2.1.0
-	github.com/open-telemetry/opamp-go v0.15.0
+	github.com/open-telemetry/opamp-go v0.17.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/connector/countconnector v0.111.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/connector/routingconnector v0.111.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/connector/servicegraphconnector v0.111.0
@@ -592,7 +592,7 @@ require (
 	github.com/googleapis/gax-go/v2 v2.13.0 // indirect
 	github.com/gophercloud/gophercloud v1.13.0 // indirect
 	github.com/gorilla/mux v1.8.1 // indirect
-	github.com/gorilla/websocket v1.5.1 // indirect
+	github.com/gorilla/websocket v1.5.3 // indirect
 	github.com/gosnmp/gosnmp v1.38.0 // indirect
 	github.com/grafana/regexp v0.0.0-20240518133315-a468a5bfb3bc // indirect
 	github.com/grobie/gomemcache v0.0.0-20230213081705-239240bbc445 // indirect
