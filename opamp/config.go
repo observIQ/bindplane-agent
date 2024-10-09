@@ -97,6 +97,8 @@ func ParseAgentID(s string) (AgentID, error) {
 	}
 }
 
+// AgentIDFromUUID creates an agent ID from a generated UUID.
+// See ParseAgentID for parsing a UUID string.
 func AgentIDFromUUID(u uuid.UUID) AgentID {
 	return AgentID{
 		by:     u,
@@ -115,6 +117,8 @@ func (a AgentID) OpAMPInstanceUID() types.InstanceUid {
 	return types.InstanceUid(a.by)
 }
 
+// Type returns the string type of the agent ID (ULID, UUID) as it should
+// be reported to BindPlane.
 func (a AgentID) Type() string {
 	return string(a.idType)
 }
