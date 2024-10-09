@@ -37,11 +37,6 @@ func CopyFileOverwrite(logger *zap.Logger, pathIn, pathOut string) error {
 	outFileInfo, _ := os.Stat(pathOutClean)
 	if outFileInfo != nil {
 		fileMode = outFileInfo.Mode()
-	} else {
-		fileName := filepath.Base(pathOutClean)
-		if fileName == "opampsupervisor" {
-			fileMode = fs.FileMode(0755)
-		}
 	}
 
 	pathInClean := filepath.Clean(pathIn)

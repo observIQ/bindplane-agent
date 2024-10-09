@@ -17,10 +17,10 @@ package updater
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"net"
 	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/observiq/bindplane-agent/packagestate"
@@ -47,7 +47,13 @@ type Updater struct {
 // NewUpdater creates a new updater which can be used to update the installation based at
 // installDir
 func NewUpdater(logger *zap.Logger, installDir string) (*Updater, error) {
-	monitor, err := state.NewCollectorMonitor(logger, installDir)
+	hcePort, err := findRandomPort()
+	if err != nil {
+		logger.Error("failed to get random port for collector health check extension, continuing with port 12345", zap.Error(err))
+		hcePort = 12345
+	}
+
+	monitor, err := state.NewCollectorMonitor(logger, installDir, hcePort)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create monitor: %w", err)
 	}
@@ -55,7 +61,7 @@ func NewUpdater(logger *zap.Logger, installDir string) (*Updater, error) {
 	svc := service.NewService(logger, installDir)
 	return &Updater{
 		installDir: installDir,
-		installer:  install.NewInstaller(logger, installDir, svc),
+		installer:  install.NewInstaller(logger, installDir, hcePort, svc),
 		svc:        svc,
 		rollbacker: rollback.NewRollbacker(logger, installDir),
 		monitor:    monitor,
@@ -95,13 +101,8 @@ func (u *Updater) Update() error {
 		return fmt.Errorf("failed to backup: %w", err)
 	}
 
-	hcePort, err := findRandomPort()
-	if err != nil {
-		hcePort = 12345
-	}
-
 	// Install artifacts
-	if err := u.installer.Install(u.rollbacker, hcePort); err != nil {
+	if err := u.installer.Install(u.rollbacker); err != nil {
 		u.logger.Error("Failed to install", zap.Error(err))
 
 		// Set the state to failed before rollback so collector knows it failed
@@ -122,22 +123,21 @@ func (u *Updater) Update() error {
 	u.logger.Debug("Installation successful, begin monitor for success")
 
 	// Monitor the install state
-	if err := u.monitor.MonitorForSuccess(checkCtx, hcePort); err != nil {
+	if err := u.monitor.MonitorForSuccess(checkCtx); err != nil {
 		u.logger.Error("Failed to install", zap.Error(err))
 
-		// If this is not an error due to the collector setting a failed status we need to set a failed status
-		if !errors.Is(err, state.ErrFailedStatus) {
-			// Set the state to failed before rollback so collector knows it failed
-			if setErr := u.monitor.SetState(packagestate.CollectorPackageName, protobufs.PackageStatusEnum_PackageStatusEnum_InstallFailed, err); setErr != nil {
-				u.logger.Error("Failed to set state on install failure", zap.Error(setErr))
-			}
+		// Set the state to failed before rollback so collector knows it failed
+		if setErr := u.monitor.SetState(packagestate.CollectorPackageName, protobufs.PackageStatusEnum_PackageStatusEnum_InstallFailed, err); setErr != nil {
+			u.logger.Error("Failed to set state on install failure", zap.Error(setErr))
 		}
-
 		u.rollbacker.Rollback()
 
 		u.logger.Error("Rollback complete")
 		return fmt.Errorf("failed while monitoring for success: %w", err)
 	}
+
+	// Remove excess files & folders
+	u.cleanup()
 
 	// Successful update
 	u.logger.Info("Update Complete")
@@ -149,6 +149,18 @@ func (u *Updater) removeTmpDir() {
 	err := os.RemoveAll(path.TempDir(u.installDir))
 	if err != nil {
 		u.logger.Error("failed to remove temporary directory", zap.Error(err))
+	}
+}
+
+// cleanup removes unnecessary files now that agent has updated from v1 to v2.
+// Update is already successfully completed at this point, so we don't want to return errors.
+func (u *Updater) cleanup() {
+	files := []string{filepath.Join("log", "collector.log"), "config.yaml", "manager.yaml", "updater", "config.bak.yaml", "logging.yaml", "package_statuses.json"}
+	for _, f := range files {
+		err := os.Remove(filepath.Join(u.installDir, f))
+		if err != nil {
+			u.logger.Info("failed to cleanup a directory entry", zap.String("file", f), zap.Error(err))
+		}
 	}
 }
 

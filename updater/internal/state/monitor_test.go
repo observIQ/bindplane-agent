@@ -17,12 +17,18 @@ package state
 import (
 	"context"
 	"errors"
-	"os"
+	"fmt"
+	"net"
+	"net/http"
+	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/observiq/bindplane-agent/packagestate/mocks"
 	"github.com/open-telemetry/opamp-go/protobufs"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"go.uber.org/zap"
 )
 
 func TestCollectorMonitorSetState(t *testing.T) {
@@ -191,172 +197,88 @@ func TestCollectorMonitorMonitorForSuccess(t *testing.T) {
 				ctx, cancel := context.WithCancel(context.Background())
 				cancel()
 
-				mockStateManger := mocks.NewMockStateManager(t)
+				testServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(http.StatusOK) }))
+				defer testServer.Close()
+				port := testServer.Listener.Addr().(*net.TCPAddr).Port
+
 				collectorMonitor := &CollectorMonitor{
-					stateManager: mockStateManger,
+					logger:          zap.NewNop(),
+					healthCheckPort: port,
 				}
 
-				err := collectorMonitor.MonitorForSuccess(ctx, "my_package")
+				err := collectorMonitor.MonitorForSuccess(ctx)
 				assert.ErrorIs(t, err, context.Canceled)
 			},
 		},
 		{
-			desc: "Package Status Indicates Failed Install",
+			desc: "Successful startup",
 			testFunc: func(t *testing.T) {
-				pgkName := "my_package"
-				returnedStatus := &protobufs.PackageStatuses{
-					Packages: map[string]*protobufs.PackageStatus{
-						pgkName: {
-							Name:   pgkName,
-							Status: protobufs.PackageStatusEnum_PackageStatusEnum_InstallFailed,
-						},
-					},
-				}
-
-				mockStateManger := mocks.NewMockStateManager(t)
-				mockStateManger.On("LoadStatuses").Return(returnedStatus, nil)
+				testServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(http.StatusOK) }))
+				defer testServer.Close()
+				port := testServer.Listener.Addr().(*net.TCPAddr).Port
 
 				collectorMonitor := &CollectorMonitor{
-					stateManager: mockStateManger,
+					logger:          zap.NewNop(),
+					healthCheckPort: port,
 				}
 
-				err := collectorMonitor.MonitorForSuccess(context.Background(), pgkName)
-				assert.ErrorIs(t, err, ErrFailedStatus)
-			},
-		},
-		{
-			desc: "Package Status Indicates Successful install",
-			testFunc: func(t *testing.T) {
-				pgkName := "my_package"
-				returnedStatus := &protobufs.PackageStatuses{
-					Packages: map[string]*protobufs.PackageStatus{
-						pgkName: {
-							Name:   pgkName,
-							Status: protobufs.PackageStatusEnum_PackageStatusEnum_Installed,
-						},
-					},
-				}
-
-				mockStateManger := mocks.NewMockStateManager(t)
-				mockStateManger.On("LoadStatuses").Return(returnedStatus, nil)
-
-				collectorMonitor := &CollectorMonitor{
-					stateManager: mockStateManger,
-				}
-
-				err := collectorMonitor.MonitorForSuccess(context.Background(), pgkName)
+				err := collectorMonitor.MonitorForSuccess(context.Background())
 				assert.NoError(t, err)
 			},
 		},
 		{
-			desc: "File does not exist at first then is successful",
+			desc: "Unreachable agent",
 			testFunc: func(t *testing.T) {
-				pgkName := "my_package"
-				returnedStatus := &protobufs.PackageStatuses{
-					Packages: map[string]*protobufs.PackageStatus{
-						pgkName: {
-							Name:   pgkName,
-							Status: protobufs.PackageStatusEnum_PackageStatusEnum_Installed,
-						},
-					},
-				}
-
-				mockStateManger := mocks.NewMockStateManager(t)
-				mockStateManger.On("LoadStatuses").Once().Return(nil, os.ErrNotExist)
-				mockStateManger.On("LoadStatuses").Return(returnedStatus, nil)
-
 				collectorMonitor := &CollectorMonitor{
-					stateManager: mockStateManger,
+					logger:          zap.NewNop(),
+					healthCheckPort: 12345,
 				}
 
-				err := collectorMonitor.MonitorForSuccess(context.Background(), pgkName)
-				assert.NoError(t, err)
+				err := collectorMonitor.MonitorForSuccess(context.Background())
+				assert.ErrorContains(t, err, "connect: connection refused")
 			},
 		},
 		{
-			desc: "Error reading file at first first then is successful",
+			desc: "Agent returns bad status",
 			testFunc: func(t *testing.T) {
-				pgkName := "my_package"
-				returnedStatus := &protobufs.PackageStatuses{
-					Packages: map[string]*protobufs.PackageStatus{
-						pgkName: {
-							Name:   pgkName,
-							Status: protobufs.PackageStatusEnum_PackageStatusEnum_Installed,
-						},
-					},
-				}
-
-				mockStateManger := mocks.NewMockStateManager(t)
-				mockStateManger.On("LoadStatuses").Once().Return(nil, errors.New("bad"))
-				mockStateManger.On("LoadStatuses").Return(returnedStatus, nil)
+				testServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(http.StatusBadRequest) }))
+				defer testServer.Close()
+				port := testServer.Listener.Addr().(*net.TCPAddr).Port
 
 				collectorMonitor := &CollectorMonitor{
-					stateManager: mockStateManger,
+					logger:          zap.NewNop(),
+					healthCheckPort: port,
 				}
 
-				err := collectorMonitor.MonitorForSuccess(context.Background(), pgkName)
-				assert.NoError(t, err)
+				err := collectorMonitor.MonitorForSuccess(context.Background())
+				assert.ErrorContains(t, err, fmt.Sprintf("health check on %d returned %d", port, http.StatusBadRequest))
 			},
 		},
 		{
-			desc: "Package is not present at first then is successful",
+			desc: "Agent initially fails but then succeeds",
 			testFunc: func(t *testing.T) {
-				pgkName := "my_package"
-				firstStatus := &protobufs.PackageStatuses{
-					Packages: map[string]*protobufs.PackageStatus{},
-				}
-				secondStatus := &protobufs.PackageStatuses{
-					Packages: map[string]*protobufs.PackageStatus{
-						pgkName: {
-							Name:   pgkName,
-							Status: protobufs.PackageStatusEnum_PackageStatusEnum_Installed,
-						},
-					},
-				}
-
-				mockStateManger := mocks.NewMockStateManager(t)
-				mockStateManger.On("LoadStatuses").Once().Return(firstStatus, nil)
-				mockStateManger.On("LoadStatuses").Return(secondStatus, nil)
+				testServer := httptest.NewUnstartedServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(http.StatusOK) }))
+				port := testServer.Listener.Addr().(*net.TCPAddr).Port
+				err := testServer.Listener.Close()
+				require.NoError(t, err)
 
 				collectorMonitor := &CollectorMonitor{
-					stateManager: mockStateManger,
+					logger:          zap.NewNop(),
+					healthCheckPort: port,
 				}
 
-				err := collectorMonitor.MonitorForSuccess(context.Background(), pgkName)
+				go func() {
+					// simulate agent coming up late
+					time.Sleep(time.Second * 5)
+					l, err := net.Listen("tcp", fmt.Sprintf("127.0.0.1:%d", port))
+					require.NoError(t, err)
+					testServer.Listener = l
+					testServer.Start()
+				}()
+
+				err = collectorMonitor.MonitorForSuccess(context.Background())
 				assert.NoError(t, err)
-			},
-		},
-		{
-			desc: "Package is still marked as Installing at first then is successful",
-			testFunc: func(t *testing.T) {
-				pgkName := "my_package"
-				firstStatus := &protobufs.PackageStatuses{
-					Packages: map[string]*protobufs.PackageStatus{
-						pgkName: {
-							Name:   pgkName,
-							Status: protobufs.PackageStatusEnum_PackageStatusEnum_InstallPending,
-						},
-					},
-				}
-				secondStatus := &protobufs.PackageStatuses{
-					Packages: map[string]*protobufs.PackageStatus{
-						pgkName: {
-							Name:   pgkName,
-							Status: protobufs.PackageStatusEnum_PackageStatusEnum_Installed,
-						},
-					},
-				}
-
-				mockStateManger := mocks.NewMockStateManager(t)
-				mockStateManger.On("LoadStatuses").Once().Return(firstStatus, nil)
-				mockStateManger.On("LoadStatuses").Return(secondStatus, nil)
-
-				collectorMonitor := &CollectorMonitor{
-					stateManager: mockStateManger,
-				}
-
-				err := collectorMonitor.MonitorForSuccess(context.Background(), pgkName)
-				assert.NoError(t, err)
+				testServer.Close()
 			},
 		},
 	}

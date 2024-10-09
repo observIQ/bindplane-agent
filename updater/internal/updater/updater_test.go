@@ -23,7 +23,6 @@ import (
 	install_mocks "github.com/observiq/bindplane-agent/updater/internal/install/mocks"
 	rollback_mocks "github.com/observiq/bindplane-agent/updater/internal/rollback/mocks"
 	service_mocks "github.com/observiq/bindplane-agent/updater/internal/service/mocks"
-	"github.com/observiq/bindplane-agent/updater/internal/state"
 	state_mocks "github.com/observiq/bindplane-agent/updater/internal/state/mocks"
 	"github.com/open-telemetry/opamp-go/protobufs"
 	"github.com/stretchr/testify/assert"
@@ -78,7 +77,7 @@ func TestUpdaterUpdate(t *testing.T) {
 		rollbacker.On("AppendAction", action.NewServiceStopAction(svc)).Times(1).Return()
 		rollbacker.On("Backup").Times(1).Return(nil)
 		installer.On("Install", rollbacker).Times(1).Return(nil)
-		monitor.On("MonitorForSuccess", mock.Anything, packagestate.CollectorPackageName).Times(1).Return(nil)
+		monitor.On("MonitorForSuccess", mock.Anything).Times(1).Return(nil)
 
 		err := updater.Update()
 		require.NoError(t, err)
@@ -242,13 +241,13 @@ func TestUpdaterUpdate(t *testing.T) {
 			logger:     zaptest.NewLogger(t),
 		}
 
-		err := errors.New("insufficient permissions")
+		err := errors.New("failed to reach agent after 3 attempts")
 
 		svc.On("Stop").Times(1).Return(nil)
 		rollbacker.On("AppendAction", action.NewServiceStopAction(svc)).Times(1).Return()
 		rollbacker.On("Backup").Times(1).Return(nil)
 		installer.On("Install", rollbacker).Times(1).Return(nil)
-		monitor.On("MonitorForSuccess", mock.Anything, packagestate.CollectorPackageName).Times(1).Return(err)
+		monitor.On("MonitorForSuccess", mock.Anything).Times(1).Return(err)
 		monitor.On("SetState", packagestate.CollectorPackageName, protobufs.PackageStatusEnum_PackageStatusEnum_InstallFailed, err).Times(1).Return(nil)
 		rollbacker.On("Rollback").Times(1).Return()
 
@@ -273,45 +272,17 @@ func TestUpdaterUpdate(t *testing.T) {
 			logger:     zaptest.NewLogger(t),
 		}
 
-		err := errors.New("insufficient permissions")
+		err := errors.New("failed to reach agent after 3 attempts")
 
 		svc.On("Stop").Times(1).Return(nil)
 		rollbacker.On("AppendAction", action.NewServiceStopAction(svc)).Times(1).Return()
 		rollbacker.On("Backup").Times(1).Return(nil)
 		installer.On("Install", rollbacker).Times(1).Return(nil)
-		monitor.On("MonitorForSuccess", mock.Anything, packagestate.CollectorPackageName).Times(1).Return(err)
+		monitor.On("MonitorForSuccess", mock.Anything).Times(1).Return(err)
 		monitor.On("SetState", packagestate.CollectorPackageName, protobufs.PackageStatusEnum_PackageStatusEnum_InstallFailed, err).Times(1).Return(errors.New("insufficient permissions"))
 		rollbacker.On("Rollback").Times(1).Return()
 
 		err = updater.Update()
-		require.ErrorContains(t, err, "failed while monitoring for success")
-	})
-
-	t.Run("Monitor for success finds error in package statuses", func(t *testing.T) {
-		installDir := t.TempDir()
-
-		installer := install_mocks.NewMockInstaller(t)
-		svc := service_mocks.NewMockService(t)
-		rollbacker := rollback_mocks.NewMockRollbacker(t)
-		monitor := state_mocks.NewMockMonitor(t)
-
-		updater := &Updater{
-			installDir: installDir,
-			installer:  installer,
-			svc:        svc,
-			rollbacker: rollbacker,
-			monitor:    monitor,
-			logger:     zaptest.NewLogger(t),
-		}
-
-		svc.On("Stop").Times(1).Return(nil)
-		rollbacker.On("AppendAction", action.NewServiceStopAction(svc)).Times(1).Return()
-		rollbacker.On("Backup").Times(1).Return(nil)
-		installer.On("Install", rollbacker).Times(1).Return(nil)
-		monitor.On("MonitorForSuccess", mock.Anything, packagestate.CollectorPackageName).Times(1).Return(state.ErrFailedStatus)
-		rollbacker.On("Rollback").Times(1).Return()
-
-		err := updater.Update()
 		require.ErrorContains(t, err, "failed while monitoring for success")
 	})
 }
