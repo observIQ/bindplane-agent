@@ -57,7 +57,6 @@ const (
 	agentIDTypeUUID agentIDType = "UUID"
 )
 
-// TODO: Test me
 // AgentID represents the ID of the agent
 type AgentID struct {
 	by     [16]byte
@@ -75,7 +74,7 @@ func ParseAgentID(s string) (AgentID, error) {
 		// length 26 strings can't be UUID, so they must be ULID
 		u, err := ulid.Parse(s)
 		if err != nil {
-			return AgentID{}, err
+			return AgentID{}, fmt.Errorf("parse ulid: %w", err)
 		}
 		return AgentID{
 			by:     u,
@@ -88,7 +87,7 @@ func ParseAgentID(s string) (AgentID, error) {
 		// lengths
 		u, err := uuid.Parse(s)
 		if err != nil {
-			return AgentID{}, err
+			return AgentID{}, fmt.Errorf("parse uuid: %w", err)
 		}
 		return AgentID{
 			by:     u,
