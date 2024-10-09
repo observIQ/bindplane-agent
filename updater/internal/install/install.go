@@ -244,36 +244,7 @@ func skipConfigFiles(path string) bool {
 	return false
 }
 
-type Headers struct {
-	Authorization string `yaml:"Authorization"`
-	AgentIDFormat string `yaml:"X-Bindplane-Agent-Id-Format"`
-}
-
-type TLS struct {
-	Insecure           bool `yaml:"insecure"`
-	InsecureSkipVerify bool `yaml:"insecure_skip_verify"`
-}
-
-type Server struct {
-	Endpoint string  `yaml:"endpoint"`
-	Headers  Headers `yaml:"headers"`
-	TLS      TLS     `yaml:"tls"`
-}
-
-type Capabilities struct {
-	AcceptsRemoteConfig bool `yaml:"accepts_remote_config"`
-	ReportsRemoteConfig bool `yaml:"reports_remote_config"`
-}
-
-type Agent struct {
-	Executable      string `yaml:"executable"`
-	HealthCheckPort int    `yaml:"health_check_port"`
-}
-
-type Storage struct {
-	Directory string `yaml:"directory"`
-}
-
+// SupervisorConfig describes how a supervisor is configured
 type SupervisorConfig struct {
 	Server       Server       `yaml:"server"`
 	Capabilities Capabilities `yaml:"capabilities"`
@@ -281,9 +252,45 @@ type SupervisorConfig struct {
 	Storage      Storage      `yaml:"storage"`
 }
 
+// Server configures how the supervisor connects to an OpAMP server
+type Server struct {
+	Endpoint string  `yaml:"endpoint"`
+	Headers  Headers `yaml:"headers"`
+	TLS      TLS     `yaml:"tls"`
+}
+
+// Headers are the headers the supervisor uses when interacting with the OpAMP server
+type Headers struct {
+	Authorization string `yaml:"Authorization"`
+	AgentIDFormat string `yaml:"X-Bindplane-Agent-Id-Format"`
+}
+
+// TLS describes how TLS is configured when interacting with the OpAMP server
+type TLS struct {
+	Insecure           bool `yaml:"insecure"`
+	InsecureSkipVerify bool `yaml:"insecure_skip_verify"`
+}
+
+// Capabilities are the capabilities the collector runs with
+type Capabilities struct {
+	AcceptsRemoteConfig bool `yaml:"accepts_remote_config"`
+	ReportsRemoteConfig bool `yaml:"reports_remote_config"`
+}
+
+// Agent describes the agent that's ran
+type Agent struct {
+	Executable      string `yaml:"executable"`
+	HealthCheckPort int    `yaml:"health_check_port"`
+}
+
+// Storage is where the supervisor stores various files
+type Storage struct {
+	Directory string `yaml:"directory"`
+}
+
 func translateManagerToSupervisor(logger *zap.Logger, installDir string, hcePort int, rb rollback.Rollbacker) error {
 	// Open manager.yaml
-	managerPath := filepath.Join(installDir, "manager.yaml")
+	managerPath := filepath.Clean(filepath.Join(installDir, "manager.yaml"))
 	data, err := os.ReadFile(managerPath)
 	if err != nil {
 		return fmt.Errorf("read manager.yaml: %w", err)
@@ -388,6 +395,7 @@ func writeSupervisorConfig(logger *zap.Logger, supervisorCfg *SupervisorConfig, 
 	return nil
 }
 
+// PersistentState stores the ID of the collector
 type PersistentState struct {
 	InstanceID string `yaml:"instance_id"`
 }
