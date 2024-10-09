@@ -21,6 +21,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/google/uuid"
 	"github.com/observiq/bindplane-agent/updater/internal/action"
@@ -38,34 +39,36 @@ import (
 //go:generate mockery --name Installer --filename mock_installer.go --structname MockInstaller
 type Installer interface {
 	// Install installs new artifacts over the old ones.
-	Install(rollback.Rollbacker, int) error
+	Install(rollback.Rollbacker) error
 }
 
 // archiveInstaller allows you to install files from latestDir into installDir,
 // as well as update the service configuration using the "Install" method.
 type archiveInstaller struct {
-	latestDir  string
-	installDir string
-	backupDir  string
-	svc        service.Service
-	logger     *zap.Logger
+	latestDir       string
+	installDir      string
+	backupDir       string
+	svc             service.Service
+	logger          *zap.Logger
+	healthCheckPort int
 }
 
 // NewInstaller returns a new instance of an Installer.
-func NewInstaller(logger *zap.Logger, installDir string, service service.Service) Installer {
+func NewInstaller(logger *zap.Logger, installDir string, hcePort int, service service.Service) Installer {
 	return &archiveInstaller{
-		latestDir:  path.LatestDir(installDir),
-		svc:        service,
-		installDir: installDir,
-		backupDir:  path.BackupDir(installDir),
-		logger:     logger.Named("installer"),
+		latestDir:       path.LatestDir(installDir),
+		svc:             service,
+		installDir:      installDir,
+		backupDir:       path.BackupDir(installDir),
+		logger:          logger.Named("installer"),
+		healthCheckPort: hcePort,
 	}
 }
 
 // Install installs the unpacked artifacts in latestDir to installDir,
 // as well as installing the new service file using the installer's Service interface.
 // It then starts the service.
-func (i archiveInstaller) Install(rb rollback.Rollbacker, hcePort int) error {
+func (i archiveInstaller) Install(rb rollback.Rollbacker) error {
 	// If JMX jar exists outside of install directory, make sure that gets backed up
 	if err := i.attemptSpecialJMXJarInstall(rb); err != nil {
 		return fmt.Errorf("failed to process special JMX jar: %w", err)
@@ -79,7 +82,7 @@ func (i archiveInstaller) Install(rb rollback.Rollbacker, hcePort int) error {
 	i.logger.Debug("Install artifacts copied")
 
 	// translate manager.yaml into supervisor config
-	if err := initializeSupervisorConfig(i.logger, i.installDir, i.backupDir, rb, hcePort); err != nil {
+	if err := translateManagerToSupervisor(i.logger, i.installDir, i.healthCheckPort, rb); err != nil {
 		return fmt.Errorf("failed to translate manager config into supervisor config: %w", err)
 	}
 	i.logger.Debug("Translated config files")
@@ -145,10 +148,18 @@ func installFiles(logger *zap.Logger, inputPath, installDir, backupDir string, r
 		// and we will want to roll that back if that is the case.
 		rb.AppendAction(cfa)
 
+		// Look for opampsupervisor binary and use CopyFileNoOverwrite to get correct permissions
+		// Use strings.HasPrefix so we don't need to consider .exe extension on windows
+		if strings.HasPrefix(filepath.Base(outPath), "opampsupervisor") {
+			if err := file.CopyFileNoOverwrite(logger.Named("copy-file"), inPath, outPath); err != nil {
+				return fmt.Errorf("failed to copy file: %w", err)
+			}
+			return nil
+		}
+
 		if err := file.CopyFileOverwrite(logger.Named("copy-file"), inPath, outPath); err != nil {
 			return fmt.Errorf("failed to copy file: %w", err)
 		}
-
 		return nil
 	})
 
@@ -270,7 +281,7 @@ type SupervisorConfig struct {
 	Storage      Storage      `yaml:"storage"`
 }
 
-func initializeSupervisorConfig(logger *zap.Logger, installDir, backupDir string, rb rollback.Rollbacker, hcePort int) error {
+func translateManagerToSupervisor(logger *zap.Logger, installDir string, hcePort int, rb rollback.Rollbacker) error {
 	// Open manager.yaml
 	managerPath := filepath.Join(installDir, "manager.yaml")
 	data, err := os.ReadFile(managerPath)
@@ -283,14 +294,9 @@ func initializeSupervisorConfig(logger *zap.Logger, installDir, backupDir string
 		return fmt.Errorf("unmarshal manager yaml: %w", err)
 	}
 
-	supervisorCfg, err := createSupervisorConfig(logger, manager, installDir, hcePort)
+	err = createSupervisorConfig(logger, manager, installDir, hcePort, rb)
 	if err != nil {
 		return fmt.Errorf("create supervisor config: %w", err)
-	}
-
-	err = writeSupervisorConfig(logger, supervisorCfg, installDir, managerPath, rb)
-	if err != nil {
-		return fmt.Errorf("write supervisor config")
 	}
 
 	err = handleAgentIDConversion(logger, manager, installDir, rb)
@@ -301,19 +307,19 @@ func initializeSupervisorConfig(logger *zap.Logger, installDir, backupDir string
 	return nil
 }
 
-func createSupervisorConfig(logger *zap.Logger, manager map[string]any, installDir string, hcePort int) (*SupervisorConfig, error) {
+func createSupervisorConfig(logger *zap.Logger, manager map[string]any, installDir string, hcePort int, rb rollback.Rollbacker) error {
 	// Read manager values
 	var ok bool
 	var endpoint, secretKey string
 	if endpoint, ok = manager["endpoint"].(string); !ok {
-		return nil, errors.New("read in endpoint")
+		return errors.New("read in endpoint")
 	}
 	if secretKey, ok = manager["secret_key"].(string); !ok {
-		return nil, errors.New("read in secret key")
+		return errors.New("read in secret key")
 	}
 
 	// Construct new supervisor config
-	return &SupervisorConfig{
+	cfg := &SupervisorConfig{
 		Server: Server{
 			Endpoint: endpoint,
 			Headers: Headers{
@@ -336,10 +342,17 @@ func createSupervisorConfig(logger *zap.Logger, manager map[string]any, installD
 		Storage: Storage{
 			Directory: filepath.Join(installDir, "supervisor_storage"),
 		},
-	}, nil
+	}
+
+	// write cfg to file
+	err := writeSupervisorConfig(logger, cfg, installDir, rb)
+	if err != nil {
+		return fmt.Errorf("write supervisor config")
+	}
+	return nil
 }
 
-func writeSupervisorConfig(logger *zap.Logger, supervisorCfg *SupervisorConfig, installDir, managerPath string, rb rollback.Rollbacker) error {
+func writeSupervisorConfig(logger *zap.Logger, supervisorCfg *SupervisorConfig, installDir string, rb rollback.Rollbacker) error {
 	supervisorYaml, err := yaml.Marshal(supervisorCfg)
 	if err != nil {
 		return fmt.Errorf("marshal supervisor yaml: %w", err)

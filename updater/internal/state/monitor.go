@@ -43,25 +43,27 @@ type Monitor interface {
 
 	// MonitorForSuccess will periodically check the state of the package. It will keep checking until the context is canceled or a failed/success state is detected.
 	// It will return an error if status is Failed or if the context times out.
-	MonitorForSuccess(ctx context.Context, hcePort int) error
+	MonitorForSuccess(ctx context.Context) error
 }
 
 // CollectorMonitor implements Monitor interface for monitoring the Collector Package Status file
 type CollectorMonitor struct {
-	stateManager  packagestate.StateManager
-	currentStatus *protobufs.PackageStatuses
-	logger        *zap.Logger
+	stateManager    packagestate.StateManager
+	currentStatus   *protobufs.PackageStatuses
+	logger          *zap.Logger
+	healthCheckPort int
 }
 
 // NewCollectorMonitor create a new Monitor specifically for the collector
-func NewCollectorMonitor(logger *zap.Logger, installDir string) (Monitor, error) {
+func NewCollectorMonitor(logger *zap.Logger, installDir string, hcePort int) (Monitor, error) {
 	namedLogger := logger.Named("collector-monitor")
 
 	// Create a collector monitor
 	packageStatusPath := filepath.Join(installDir, packagestate.DefaultFileName)
 	collectorMonitor := &CollectorMonitor{
-		stateManager: packagestate.NewFileStateManager(namedLogger, packageStatusPath),
-		logger:       namedLogger,
+		stateManager:    packagestate.NewFileStateManager(namedLogger, packageStatusPath),
+		logger:          namedLogger,
+		healthCheckPort: hcePort,
 	}
 
 	// Load the current status to ensure the package status file exists
@@ -101,8 +103,8 @@ func (c *CollectorMonitor) SetState(packageName string, status protobufs.Package
 // If an InstallFailed status is read this returns ErrFailedStatus error.
 // If the context is canceled the context error will be returned.
 // Uses a retry loop with 3 max tries and 3 second delay between each.
-func (c *CollectorMonitor) MonitorForSuccess(ctx context.Context, hcePort int) error {
-	endpoint := fmt.Sprintf("http://127.0.0.1:%d", hcePort)
+func (c *CollectorMonitor) MonitorForSuccess(ctx context.Context) error {
+	endpoint := fmt.Sprintf("http://127.0.0.1:%d", c.healthCheckPort)
 	req, err := http.NewRequestWithContext(ctx, "GET", endpoint, nil)
 	if err != nil {
 		return err
@@ -126,7 +128,7 @@ func (c *CollectorMonitor) MonitorForSuccess(ctx context.Context, hcePort int) e
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("health check on %s returned %d", hcePort, resp.StatusCode)
+		return fmt.Errorf("health check on %d returned %d", c.healthCheckPort, resp.StatusCode)
 	}
 
 	return nil
