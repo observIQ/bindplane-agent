@@ -197,7 +197,7 @@ func TestCollectorMonitorMonitorForSuccess(t *testing.T) {
 				ctx, cancel := context.WithCancel(context.Background())
 				cancel()
 
-				testServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(http.StatusOK) }))
+				testServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) { w.WriteHeader(http.StatusOK) }))
 				defer testServer.Close()
 				port := testServer.Listener.Addr().(*net.TCPAddr).Port
 
@@ -213,7 +213,7 @@ func TestCollectorMonitorMonitorForSuccess(t *testing.T) {
 		{
 			desc: "Successful startup",
 			testFunc: func(t *testing.T) {
-				testServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(http.StatusOK) }))
+				testServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) { w.WriteHeader(http.StatusOK) }))
 				defer testServer.Close()
 				port := testServer.Listener.Addr().(*net.TCPAddr).Port
 
@@ -235,13 +235,13 @@ func TestCollectorMonitorMonitorForSuccess(t *testing.T) {
 				}
 
 				err := collectorMonitor.MonitorForSuccess(context.Background())
-				assert.ErrorContains(t, err, "connect: connection refused")
+				assert.ErrorContains(t, err, "failed to reach agent after 3 attempts")
 			},
 		},
 		{
 			desc: "Agent returns bad status",
 			testFunc: func(t *testing.T) {
-				testServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(http.StatusBadRequest) }))
+				testServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) { w.WriteHeader(http.StatusBadRequest) }))
 				defer testServer.Close()
 				port := testServer.Listener.Addr().(*net.TCPAddr).Port
 
@@ -257,7 +257,7 @@ func TestCollectorMonitorMonitorForSuccess(t *testing.T) {
 		{
 			desc: "Agent initially fails but then succeeds",
 			testFunc: func(t *testing.T) {
-				testServer := httptest.NewUnstartedServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(http.StatusOK) }))
+				testServer := httptest.NewUnstartedServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) { w.WriteHeader(http.StatusOK) }))
 				port := testServer.Listener.Addr().(*net.TCPAddr).Port
 				err := testServer.Listener.Close()
 				require.NoError(t, err)
