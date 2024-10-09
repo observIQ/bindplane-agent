@@ -17,7 +17,6 @@ package main
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -29,6 +28,14 @@ import (
 	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v3"
 )
+
+// Must is a helper function for tests that panics if there is an error creating the object of type T
+func Must[T any](t T, err error) T {
+	if err != nil {
+		panic(err)
+	}
+	return t
+}
 
 func TestGetDefaultCollectorConfigPathENV(t *testing.T) {
 	fakeConfigPath := "./fake/path/config.yaml"
@@ -99,7 +106,7 @@ func TestCheckManagerConfigNoFile(t *testing.T) {
 
 	t.Setenv(agentNameENV, "agent name")
 
-	t.Setenv(agentIDENV, "agent ID")
+	t.Setenv(agentIDENV, "01HX2DWEQZ045KQR3VG0EYEZ94")
 
 	t.Setenv(secretkeyENV, "secretKey")
 
@@ -113,7 +120,7 @@ func TestCheckManagerConfigNoFile(t *testing.T) {
 	actual, _ := opamp.ParseConfig(manager)
 	expected := &opamp.Config{
 		Endpoint:  "0.0.0.0",
-		AgentID:   "agent ID",
+		AgentID:   Must(opamp.ParseAgentID("01HX2DWEQZ045KQR3VG0EYEZ94")),
 		AgentName: new(string),
 		SecretKey: new(string),
 		Labels:    new(string),
@@ -244,15 +251,12 @@ func TestManagerConfigNoAgentIDWillSet(t *testing.T) {
 	err := checkManagerConfig(&manager)
 	require.NoError(t, err)
 
-	cfgBytes, err := ioutil.ReadFile(manager)
+	cfgBytes, err := os.ReadFile(manager)
 	require.NoError(t, err)
 
 	var config opamp.Config
 	require.NoError(t, yaml.Unmarshal(cfgBytes, &config))
-	require.NotEmpty(t, config.AgentID)
-	ulidID, err := ulid.Parse(config.AgentID)
-	require.NoError(t, err)
-	require.NotEmpty(t, ulidID)
+	require.NotEqual(t, opamp.EmptyAgentID, config.AgentID)
 }
 
 // TestManagerConfigWillNotOverwriteCurrentAgentID tests that if the agent ID is a ULID it will not overwrite it
@@ -260,7 +264,7 @@ func TestManagerConfigWillNotOverwriteCurrentAgentID(t *testing.T) {
 	tmpDir := t.TempDir()
 	manager := filepath.Join(tmpDir, "manager.yaml")
 
-	id := ulid.Make().String()
+	id := ulid.Make()
 	data := []byte(fmt.Sprintf(`
 ---
 agent_id: %s
@@ -269,12 +273,12 @@ agent_id: %s
 	err := checkManagerConfig(&manager)
 	require.NoError(t, err)
 
-	cfgBytes, err := ioutil.ReadFile(manager)
+	cfgBytes, err := os.ReadFile(manager)
 	require.NoError(t, err)
 
 	var config opamp.Config
 	require.NoError(t, yaml.Unmarshal(cfgBytes, &config))
-	require.Equal(t, config.AgentID, id)
+	require.Equal(t, config.AgentID.String(), id.String())
 }
 
 // TestManagerConfigWillUpdateLegacyAgentID tests that if the agent ID is a Legacy ID (UUID format) it will overwrite with a new ULID
@@ -291,14 +295,12 @@ agent_id: %s
 	err := checkManagerConfig(&manager)
 	require.NoError(t, err)
 
-	cfgBytes, err := ioutil.ReadFile(manager)
+	cfgBytes, err := os.ReadFile(manager)
 	require.NoError(t, err)
 
 	var config opamp.Config
 	require.NoError(t, yaml.Unmarshal(cfgBytes, &config))
-	_, err = ulid.Parse(config.AgentID)
-	require.NoError(t, err)
-	require.NotEqual(t, config.AgentID, legacyID)
+	require.NotEqual(t, opamp.EmptyAgentID, config.AgentID)
 }
 
 func TestManagerConfigWillErrorOnInvalidOpAmpConfig(t *testing.T) {

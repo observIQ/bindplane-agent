@@ -47,7 +47,8 @@ const capabilities = protobufs.AgentCapabilities_AgentCapabilities_ReportsStatus
 	protobufs.AgentCapabilities_AgentCapabilities_ReportsPackageStatuses |
 	protobufs.AgentCapabilities_AgentCapabilities_ReportsEffectiveConfig |
 	protobufs.AgentCapabilities_AgentCapabilities_AcceptsRemoteConfig |
-	protobufs.AgentCapabilities_AgentCapabilities_ReportsRemoteConfig
+	protobufs.AgentCapabilities_AgentCapabilities_ReportsRemoteConfig |
+	protobufs.AgentCapabilities_AgentCapabilities_ReportsHeartbeat
 
 // Ensure interface is satisfied
 var _ opamp.Client = (*Client)(nil)
@@ -109,7 +110,7 @@ func NewClient(args *NewClientArgs) (opamp.Client, error) {
 	}
 
 	reportManager := report.GetManager()
-	if err := reportManager.SetClient(report.NewAgentClient(args.Config.AgentID, args.Config.SecretKey, tlsCfg)); err != nil {
+	if err := reportManager.SetClient(report.NewAgentClient(args.Config.AgentID.String(), args.Config.SecretKey, tlsCfg)); err != nil {
 		// Error should never happen as we only error if a nil client is sent
 		return nil, fmt.Errorf("failed to set client on report manager: %w", err)
 	}
@@ -219,15 +220,16 @@ func (c *Client) Connect(ctx context.Context) error {
 	settings := types.StartSettings{
 		OpAMPServerURL: c.currentConfig.Endpoint,
 		Header: http.Header{
-			"Authorization":  []string{fmt.Sprintf("Secret-Key %s", c.currentConfig.GetSecretKey())},
-			"User-Agent":     []string{fmt.Sprintf("observiq-otel-collector/%s", version.Version())},
-			"OpAMP-Version":  []string{opamp.Version()},
-			"Agent-ID":       []string{c.ident.agentID},
-			"Agent-Version":  []string{version.Version()},
-			"Agent-Hostname": []string{c.ident.hostname},
+			"Authorization":               []string{fmt.Sprintf("Secret-Key %s", c.currentConfig.GetSecretKey())},
+			"User-Agent":                  []string{fmt.Sprintf("observiq-otel-collector/%s", version.Version())},
+			"OpAMP-Version":               []string{opamp.Version()},
+			"Agent-ID":                    []string{c.ident.agentID.String()},
+			"Agent-Version":               []string{version.Version()},
+			"Agent-Hostname":              []string{c.ident.hostname},
+			"X-Bindplane-Agent-Id-Format": []string{c.ident.agentID.Type()},
 		},
 		TLSConfig:   tlsCfg,
-		InstanceUid: c.ident.agentID,
+		InstanceUid: c.ident.agentID.OpAMPInstanceUID(),
 		Callbacks: types.CallbacksStruct{
 			OnConnectFunc:          c.onConnectHandler,
 			OnConnectFailedFunc:    c.onConnectFailedHandler,
