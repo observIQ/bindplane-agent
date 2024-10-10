@@ -549,10 +549,7 @@ install_package() {
   decrease_indent
   succeeded
 
-  # If an endpoint was specified, we need to write the supervisor.yaml
-  if [ -n "$OPAMP_ENDPOINT" ]; then
-    create_supervisor_config "$SUPERVISOR_YML_PATH"
-  fi
+  create_supervisor_config "$SUPERVISOR_YML_PATH"
 
   # Install jmx jar
   info "Moving opentelemetry-java-contrib-jmx-metrics.jar to /opt..."
@@ -593,6 +590,13 @@ create_supervisor_config() {
   fi
 
   info "Creating supervisor config..."
+
+  if [ -z "$OPAMP_ENDPOINT" ]; then
+    OPAMP_ENDPOINT="ws://localhost:3000/v1/opamp"
+    increase_indent
+    info "No OpAMP endpoint specified, starting agent using 'ws://localhost:3001/v1/opamp' as endpoint."
+    decrease_indent
+  fi
 
   # Note here: We create the file and change permissions of the file here BEFORE writing info to it.
   # We do this because the file contains the secret key.

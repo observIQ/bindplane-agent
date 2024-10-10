@@ -651,12 +651,7 @@ install_package() {
   unpack_package || error_exit "$LINENO" "Failed to extract package"
   succeeded
 
-  # If an endpoint was specified, we need to write the manager.yaml
-  if [ -n "$OPAMP_ENDPOINT" ]; then
-    info "Creating supervisor config..."
-    create_supervisor_config "$SUPERVISOR_YML_PATH"
-    succeeded
-  fi
+  create_supervisor_config "$SUPERVISOR_YML_PATH"
 
   if [ "$SVC_PRE" = "systemctl" ]; then
     if [ "$(systemctl is-enabled observiq-otel-collector)" = "enabled" ]; then
@@ -718,6 +713,15 @@ create_supervisor_config() {
     return
   fi
 
+  info "Creating supervisor config..."
+
+  if [ -z "$OPAMP_ENDPOINT" ]; then
+    OPAMP_ENDPOINT="ws://localhost:3000/v1/opamp"
+    increase_indent
+    info "No OpAMP endpoint specified, starting agent using 'ws://localhost:3001/v1/opamp' as endpoint."
+    decrease_indent
+  fi
+
   # Note here: We create the file and change permissions of the file here BEFORE writing info to it.
   # We do this because the file contains the secret key.
   # We do not want the file readable by anyone other than root/obseriq-otel-collector.
@@ -746,6 +750,7 @@ create_supervisor_config() {
   command printf '  logs:\n' >>"$supervisor_yml_path"
   command printf '    level: 0\n' >>"$supervisor_yml_path"
   command printf '    output_paths: ["%s"]' "$INSTALL_DIR/supervisor_storage/supervisor.log" >>"$supervisor_yml_path"
+  succeeded
 }
 
 # This will display the results of an installation
