@@ -9,12 +9,12 @@
 
 </center>
 
-The BindPlane Agent is observIQ’s distribution of the [OpenTelemetry collector](https://github.com/open-telemetry/opentelemetry-collector). It’s the first distribution to implement the [Open Agent Management Protocol](https://opentelemetry.io/docs/specs/opamp/) (OpAMP) and is designed to be fully managed with [BindPlane OP](https://observiq.com/). To get started, follow our [Quickstart Guide](https://observiq.com/docs/getting-started/quickstart-guide).
+The BindPlane Agent is observIQ’s custom distribution of the [OpenTelemetry collector](https://github.com/open-telemetry/opentelemetry-collector) built using the [OpenTelemetry collector builder](https://github.com/open-telemetry/opentelemetry-collector/tree/main/cmd/builder). The [OpenTelemetry supervisor](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/cmd/opampsupervisor) is used to manage the collector (start/stop, apply configurations, etc) and communicate between the collector and [BindPlane OP](https://observiq.com/). To get started, follow our [Quickstart Guide](https://observiq.com/docs/getting-started/quickstart-guide).
 
 ## Benefits
 
 ### Focused on usability
-Increases the accessibility of OpenTelemetry by providing simplified installation scripts, tested example configurations, and end-to-end documentation making it easy to get started
+Increases the accessibility of OpenTelemetry by providing simplified installation scripts and end-to-end documentation making it easy to get started
 
 ### All the best parts of OpenTelemetry and more
 Bundled with all core OpenTelemetry receivers, processors, and exporters as well as additional capabilities for monitoring complex or enterprise technologies not yet available in upstream releases
@@ -23,6 +23,8 @@ Bundled with all core OpenTelemetry receivers, processors, and exporters as well
 Tested, verified, and supported by observIQ
 
 ## Quick Start
+
+You'll need a BindPlane server in order to run the collector with the supervisor. Namely you'll need the server's OpAMP endpoint and a secret key the agent can use to authenticate with.
 
 ### Installation
 
@@ -37,7 +39,7 @@ To install directly with the appropriate package manager, see [installing on Lin
 
 #### Windows
 
-To install the BindPlane Agent on Windows run the Powershell command below to install the MSI with no UI.
+To install the BindPlane Agent on Windows, run the Powershell command below to install the MSI with no UI.
 ```pwsh
 msiexec /i "https://github.com/observIQ/bindplane-agent/releases/latest/download/observiq-otel-collector.msi" /quiet
 ```
@@ -60,26 +62,29 @@ For more installation information see [installing on macOS](/docs/installation-m
 
 ### Next Steps
 
-Now that the agent is installed it is collecting basic metrics about the host machine printing them to the log. If you want to further configure your agent you may do so by editing the config file. To find your config file based on your OS reference the table below:
+With the agent installed, you can use BindPlane to create a configuration and begin monitoring.
 
-| OS      | Default Location                                              |
-|:--------|:--------------------------------------------------------------|
-| Linux   | /opt/observiq-otel-collector/config.yaml                      |
-| Windows | C:\Program Files\observIQ OpenTelemetry Collector\config.yaml |
-| macOS   | /opt/observiq-otel-collector/config.yaml                      |
+You can edit the supervisor config as needed for communicating with BindPlane and managing the agent. To find your config file based on your OS reference the table below:
+
+| OS      | Default Location                                                  |
+|:--------|:------------------------------------------------------------------|
+| Linux   | /opt/observiq-otel-collector/supervisor.yaml                      |
+| Windows | C:\Program Files\observIQ OpenTelemetry Collector\supervisor.yaml |
+| macOS   | /opt/observiq-otel-collector/supervisor.yaml                      |
 
 For more information on configuration see the [Configuration section](#configuration).
 
 ## Configuration
 
-The BindPlane Agent uses OpenTelemetry configuration.
+### Agent
 
-For sample configs, see the [config](/config/) directory.
+The BindPlane Agent uses OpenTelemetry configuration. Running the agent with the supervisor requires receiving the agent's config from an OpAMP management server, namely BindPlane in this context.
+
+Specific information on managing agents, creating a configuration, and rolling out configs can be found in [BindPlane documentation](https://observiq.com/docs/getting-started/quickstart-guide).
+
 For general configuration help, see the [OpenTelemetry docs](https://opentelemetry.io/docs/collector/configuration/).
 
 For configuration options of a specific component, take a look at the README found in their respective module roots. For a list of currently supported components see [Included Components](#included-components).
-
-For a list of possible command line arguments to use with the agent, run the agent with the `--help` argument.
 
 ### Included Components
 
@@ -102,38 +107,6 @@ For supported extensions and their documentation see [extensions](/docs/extensio
 #### Connectors
 
 For supported connectors and their documentation see [connectors](/docs/connectors.md).
-
-## Example
-
-Here is an example `config.yaml` setup for hostmetrics on Google Cloud. To make sure your environment is set up with required prerequisites, see our [Google Cloud Exporter Prerequisites](/config/google_cloud_exporter/README.md) page. Further details for this GCP example can be found [here](/config/google_cloud_exporter/hostmetrics).
-
-```yaml
-# Receivers collect metrics from a source. The hostmetrics receiver will get
-# CPU load metrics about the machine the agent is running on every minute.
-receivers:
-  hostmetrics:
-    collection_interval: 60s
-    scrapers:
-      cpu:
-      disk:
-      load:
-      filesystem:
-      memory:
-      network:
-      paging:
-      processes:
-
-# Exporters send the data to a destination, in this case GCP.
-exporters: 
-  googlecloud:
-
-# Service specifies how to construct the data pipelines using the configurations above.
-service:
-  pipelines:
-    metrics:
-      receivers: [hostmetrics]
-      exporters: [googlecloud]
-```
 
 # Community
 

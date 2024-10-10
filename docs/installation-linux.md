@@ -16,9 +16,9 @@ To install using the installation script, you may run:
 sudo sh -c "$(curl -fsSlL https://github.com/observiq/bindplane-agent/releases/latest/download/install_unix.sh)" install_unix.sh
 ```
 
-#### Managed Mode
+#### OpAMP Management
 
-To install the agent with an OpAMP connection configuration set the following flags. 
+To install the agent and connect the supervisor to an OpAMP management platform, set the following flags. 
 
 ```sh
 sudo sh -c "$(curl -fsSlL https://github.com/observiq/bindplane-agent/releases/latest/download/install_unix.sh)" install_unix.sh -e <your_endpoint> -s <secret-key>
