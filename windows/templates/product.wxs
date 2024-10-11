@@ -81,8 +81,8 @@
             <Directory Id="INSTALLDIR" Name="observIQ OpenTelemetry Collector">
                 <Component Id="ProductFolder" Guid="f8525e78-62c7-4665-81ad-f27e936edc88">
                     <CreateFolder>
-                        <Permission User="Administrators" GenericAll="yes" />
-                        <Permission User="Users" GenericAll="no" />
+                        <util:PermissionEx User="Administrators" GenericAll="yes" />
+                        <util:PermissionEx User="Users" GenericAll="no" />
                     </CreateFolder>
                 </Component>
                 {{define "FILES"}}
