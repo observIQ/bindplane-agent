@@ -239,14 +239,7 @@
         <Custom Action="CustomExecCreateManagerYaml" After="InstallFiles" >
             <![CDATA[(VersionNT >= 603 OR VersionNT64 >= 603) AND NOT Installed AND NOT REMOVE AND ENABLEMANAGEMENT AND NOT WIX_UPGRADE_DETECTED]]>
         </Custom>
-        
-        <!-- Schedule the action that removes the manager.yaml file on final uninstall -->
-        <Custom Action="CustomExecRemoveManagerYaml_set" After="InstallInitialize" >
-            <![CDATA[(VersionNT >= 603 OR VersionNT64 >= 603) and REMOVE="ALL" and not UPGRADINGPRODUCTCODE]]>
-        </Custom>
-        <Custom Action="CustomExecRemoveManagerYaml" Before="RemoveFiles" >
-            <![CDATA[(VersionNT >= 603 OR VersionNT64 >= 603) and REMOVE="ALL" and not UPGRADINGPRODUCTCODE]]>
-        </Custom>
+    
       </InstallExecuteSequence>
 
       <Feature Id="DefaultFeature" Level="1">
