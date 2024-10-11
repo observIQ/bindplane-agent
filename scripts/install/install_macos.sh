@@ -129,17 +129,15 @@ prompt() {
   fi
 }
 
-observiq_banner()
+bindplane_banner()
 {
-  fg_cyan "           888                                        8888888 .d88888b.\\n"
-  fg_cyan "           888                                          888  d88P\" \"Y88b\\n"
-  fg_cyan "           888                                          888  888     888\\n"
-  fg_cyan "   .d88b.  88888b.  .d8888b   .d88b.  888d888 888  888  888  888     888\\n"
-  fg_cyan "  d88\"\"88b 888 \"88b 88K      d8P  Y8b 888P\"   888  888  888  888     888\\n"
-  fg_cyan "  888  888 888  888 \"Y8888b. 88888888 888     Y88  88P  888  888 Y8b 888\\n"
-  fg_cyan "  Y88..88P 888 d88P      X88 Y8b.     888      Y8bd8P   888  Y88b.Y8b88P\\n"
-  fg_cyan "   \"Y88P\"  88888P\"   88888P'  \"Y8888  888       Y88P  8888888 \"Y888888\"\\n"
-  fg_cyan "                                                                   Y8b  \\n"
+  fg_cyan " oooooooooo.   o8o                    .o8  ooooooooo.   oooo\\n"
+  fg_cyan " '888'   '88b  '\"'                   \"888  '888   'Y88. '888\\n" 
+  fg_cyan "  888     888 oooo  ooo. .oo.    .oooo888   888   .d88'  888   .oooo.   ooo. .oo.    .ooooo.\\n"
+  fg_cyan "  888oooo888' '888  '888P\"Y88b  d88' '888   888ooo88P'   888  'P  )88b  '888P\"Y88b  d88' '88b\\n" 
+  fg_cyan "  888    '88b  888   888   888  888   888   888          888   .oP\"888   888   888  888ooo888\\n"
+  fg_cyan "  888    .88P  888   888   888  888   888   888          888  d8(  888   888   888  888    .o\\n"
+  fg_cyan " o888bood8P'  o888o o888o o888o 'Y8bod88P\" o888o        o888o 'Y888\"\"8o o888o o888o '88bod8P'\\n"
 
   reset
 }
@@ -667,7 +665,7 @@ main()
   # some of these options bail early, and we'd like to be sure that those commands
   # (e.g. uninstall) can run
 
-  observiq_banner
+  bindplane_banner
   check_prereqs
 
   if [ $# -ge 1 ]; then
