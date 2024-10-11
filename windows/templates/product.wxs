@@ -57,18 +57,17 @@
           <RegistrySearch Id='LOADINSTALLDIROLD' Type='raw'
             Root='HKLM' Key='Software\Microsoft\Windows\CurrentVersion\Uninstall\observIQ OpenTelemetry Collector' Name='InstallLocation' />
       </Property>
+      
+      <!-- Set default install dir to be "C:\Program Files\observIQ OpenTelemetry Collector" instead of "C:\Program Files\[ProductName]"-->
+      <SetProperty Id="INSTALLDIR" Value="[$(var.Program_Files)]\observIQ OpenTelemetry Collector" Before="CostInitialize">
+        <![CDATA[NOT INSTALLDIR]]>
+      </SetProperty>
 
       <Property Id="MANAGEREXISTS">
           <DirectorySearch Id="CheckInstallDir" Path="INSTALLDIR" Depth="0">
              <FileSearch Id="FindManager" Name="manager.yaml" />
           </DirectorySearch>
       </Property>
-
-      
-      <!-- Set default install dir to be "C:\Program Files\observIQ OpenTelemetry Collector" instead of "C:\Program Files\[ProductName]"-->
-      <SetProperty Id="INSTALLDIR" Value="[$(var.Program_Files)]\observIQ OpenTelemetry Collector" Before="CostInitialize">
-        <![CDATA[NOT INSTALLDIR]]>
-      </SetProperty>
 
       <!-- Set command prompt -->
       <SetProperty Id="CMDEXE" Value="[%SystemRoot]\system32\cmd.exe" Before="CostInitialize">
