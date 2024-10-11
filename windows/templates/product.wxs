@@ -57,6 +57,13 @@
           <RegistrySearch Id='LOADINSTALLDIROLD' Type='raw'
             Root='HKLM' Key='Software\Microsoft\Windows\CurrentVersion\Uninstall\observIQ OpenTelemetry Collector' Name='InstallLocation' />
       </Property>
+
+      <Property Id="MANAGEREXISTS">
+          <DirectorySearch Id="CheckInstallDir" Path="INSTALLDIR" Depth="0">
+             <FileSearch Id="FindManager" Name="manager.yaml" />
+          </DirectorySearch>
+      </Property>
+
       
       <!-- Set default install dir to be "C:\Program Files\observIQ OpenTelemetry Collector" instead of "C:\Program Files\[ProductName]"-->
       <SetProperty Id="INSTALLDIR" Value="[$(var.Program_Files)]\observIQ OpenTelemetry Collector" Before="CostInitialize">
@@ -208,13 +215,6 @@
 
       <CustomAction Id="CustomExecCreateManagerYaml" BinaryKey="WixCA" DllEntry="WixQuietExec" Execute="deferred" Impersonate="no" Return="check" />
 
-      <CustomAction Id="CustomExecRemoveManagerYaml_set"
-              Property="CustomExecRemoveManagerYaml"
-              Value="&quot;[CMDEXE]&quot; /C del &quot;[INSTALLDIR]manager.yaml&quot;"
-              Execute="immediate"/>
-
-      <CustomAction Id="CustomExecRemoveManagerYaml" BinaryKey="WixCA" DllEntry="WixQuietExec" Execute="deferred" Impersonate="no" Return="ignore" />
-
       <InstallExecuteSequence>
          {{range $i, $h := .Hooks}}
          <Custom Action="CustomExec{{$i}}" {{if eq $h.When "install"}} After="InstallFiles" {{else if eq $h.Execute "immediate"}} Before="InstallValidate" {{else}} After="InstallInitialize" {{end}}>
@@ -234,12 +234,11 @@
 
         <!-- Schedule the action that creates the manager.yaml file on initial install -->
         <Custom Action="CustomExecCreateManagerYaml_set" After="InstallInitialize" >
-            <![CDATA[(VersionNT >= 603 OR VersionNT64 >= 603) AND NOT Installed AND NOT REMOVE AND ENABLEMANAGEMENT AND NOT WIX_UPGRADE_DETECTED]]>
+            <![CDATA[(VersionNT >= 603 OR VersionNT64 >= 603) AND NOT Installed AND NOT REMOVE AND ENABLEMANAGEMENT AND NOT WIX_UPGRADE_DETECTED AND (not MANAGEREXISTS or CLEAN)]]>
         </Custom>
         <Custom Action="CustomExecCreateManagerYaml" After="InstallFiles" >
-            <![CDATA[(VersionNT >= 603 OR VersionNT64 >= 603) AND NOT Installed AND NOT REMOVE AND ENABLEMANAGEMENT AND NOT WIX_UPGRADE_DETECTED]]>
+            <![CDATA[(VersionNT >= 603 OR VersionNT64 >= 603) AND NOT Installed AND NOT REMOVE AND ENABLEMANAGEMENT AND NOT WIX_UPGRADE_DETECTED AND (not MANAGEREXISTS or CLEAN)]]>
         </Custom>
-    
       </InstallExecuteSequence>
 
       <Feature Id="DefaultFeature" Level="1">
