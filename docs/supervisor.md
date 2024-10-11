@@ -1,4 +1,16 @@
-# OpAMP Configuration
+# Supervisor
+
+The [OpenTelemetry supervisor]() is the process that runs the [OpenTelemetry collector](). The supervisor's responsibilities include but are not limited to:
+    - Starting & stopping the collector
+    - Communicating to OpAMP server on behalf of the collector
+    - Managing the collector's config based on OpAMP messages from the OpAMP server.
+    - Restarting the collector if it crashes
+
+In the case of the BindPlane Agent, a custom OTel collector built using the [OpenTelemetry builder]() is used, the manifest for which can be found [here](../manifests/observIQ/README.md).
+
+The install scripts 
+
+Managing the agent involves starting and stopping the agent process, managing 
 
 The BindPlane Agent can be setup as an agent that is managed by the [BindPlane OP platform](https://observiq.com/) via OpAMP.
 

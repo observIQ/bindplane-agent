@@ -59,17 +59,17 @@ sudo systemctl enable --now observiq-otel-collector
 ## Configuring the Agent
 After installing, systems with systemd installed will have the `observiq-otel-collector` service up and running!
 
-**Logging**
-
-Logs from the agent will appear in `/opt/observiq-otel-collector/log`. You may run `sudo tail -F /opt/observiq-otel-collector/log/collector.log` to view them.
-
-Stdout and stderr for the agent process are recorded via journald. You man run `sudo journalctl -u observiq-otel-collector.service` to view them.
-
 **Configuration**
 
-The config file for the agent can be found at `/opt/observiq-otel-collector/config.yaml`. When changing the configuration,the agent service must be restarted in order for config changes to take effect.
+The config file for the agent can be found at `/opt/observiq-otel-collector/supervisor_storage/effective.yaml`. If you modify this file, the supervisor will overwrite it on startup with the last config it received from an OpAMP platform. The best way to change the agent's configuration is to send a new config to the supervisor via OpAMP.
 
-For more information on configuring the agent, see the [OpenTelemetry docs](https://opentelemetry.io/docs/collector/configuration/).
+For more information on OTel configurations, see the [OpenTelemetry docs](https://opentelemetry.io/docs/collector/configuration/).
+
+**Logging**
+
+Logs from the agent will appear in `/opt/observiq-otel-collector/supervisor_storage/agent.log`. You may run `sudo tail -F /opt/observiq-otel-collector/supervisor_storage/agent.log` to view them.
+
+Stdout and stderr for the supervisor process are recorded via journald. You man run `sudo journalctl -u observiq-otel-collector.service` to view them.
 
 **Permissions**
 
