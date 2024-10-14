@@ -24,7 +24,7 @@ To install the agent and connect the supervisor to an OpAMP management platform,
 sudo sh -c "$(curl -fsSlL https://github.com/observiq/bindplane-agent/releases/latest/download/install_unix.sh)" install_unix.sh -e <your_endpoint> -s <secret-key>
 ```
 
-To read more about the generated connection configuration file see [OpAMP docs](./opamp.md).
+To read more about OpAMP management, see the [supervisor docs](./supervisor.md).
 
 ### Installation from local package
 
@@ -63,7 +63,7 @@ After installing, systems with systemd installed will have the `observiq-otel-co
 
 The config file for the agent can be found at `/opt/observiq-otel-collector/supervisor_storage/effective.yaml`. If you modify this file, the supervisor will overwrite it on startup with the last config it received from an OpAMP platform. The best way to change the agent's configuration is to send a new config to the supervisor via OpAMP.
 
-For more information on OTel configurations, see the [OpenTelemetry docs](https://opentelemetry.io/docs/collector/configuration/).
+If this method of collector management does not work for your use case, see this [alternative option](./supervisor.md#alternatives)
 
 **Logging**
 

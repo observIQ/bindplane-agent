@@ -24,7 +24,7 @@ Tested, verified, and supported by observIQ
 
 ## Quick Start
 
-You'll need a BindPlane server in order to run the collector with the supervisor. Namely you'll need the server's OpAMP endpoint and a secret key the agent can use to authenticate with.
+You'll need a BindPlane server in order to run the collector with the supervisor. Namely you'll need the server's OpAMP endpoint and a secret key the agent can use to authenticate with. For more information, see the [supervisor documentation](./docs/supervisor.md).
 
 ### Installation
 
@@ -72,7 +72,7 @@ You can edit the supervisor config as needed for communicating with BindPlane an
 | Windows | C:\Program Files\observIQ OpenTelemetry Collector\supervisor.yaml |
 | macOS   | /opt/observiq-otel-collector/supervisor.yaml                      |
 
-For more information on configuration see the [Configuration section](#configuration).
+For more information on supervisor configuration see the [supervisor documentation](./docs/supervisor.md).
 
 ## Configuration
 
