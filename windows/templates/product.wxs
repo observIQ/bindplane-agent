@@ -227,10 +227,10 @@
 
         <!-- Schedule the action that creates the manager.yaml file on initial install -->
         <Custom Action="CustomExecCreateManagerYaml_set" After="InstallInitialize" >
-            <![CDATA[(VersionNT >= 603 OR VersionNT64 >= 603) AND NOT Installed AND NOT REMOVE AND ENABLEMANAGEMENT AND NOT WIX_UPGRADE_DETECTED AND (not MANAGEREXISTS or CLEAN)]]>
+            <![CDATA[(VersionNT >= 603 OR VersionNT64 >= 603) AND NOT Installed AND NOT REMOVE AND ENABLEMANAGEMENT AND NOT WIX_UPGRADE_DETECTED]]>
         </Custom>
         <Custom Action="CustomExecCreateManagerYaml" After="InstallFiles" >
-            <![CDATA[(VersionNT >= 603 OR VersionNT64 >= 603) AND NOT Installed AND NOT REMOVE AND ENABLEMANAGEMENT AND NOT WIX_UPGRADE_DETECTED AND (not MANAGEREXISTS or CLEAN)]]>
+            <![CDATA[(VersionNT >= 603 OR VersionNT64 >= 603) AND NOT Installed AND NOT REMOVE AND ENABLEMANAGEMENT AND NOT WIX_UPGRADE_DETECTED]]>
         </Custom>
       </InstallExecuteSequence>
 
