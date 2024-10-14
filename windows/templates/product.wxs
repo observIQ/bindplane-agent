@@ -259,7 +259,7 @@
          {{range $i, $e := .Shortcuts}}
          <ComponentRef Id="ApplicationShortcuts{{$i}}"/>
          {{end}}
-         <ComponentRef Id="ProductFolder"/>
+         <!-- <ComponentRef Id="ProductFolder"/> -->
       </Feature>
 
       <UI>
