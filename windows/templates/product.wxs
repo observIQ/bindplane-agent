@@ -63,12 +63,6 @@
         <![CDATA[NOT INSTALLDIR]]>
       </SetProperty>
 
-      <Property Id="MANAGEREXISTS">
-          <DirectorySearch Id="CheckInstallDir" Path="INSTALLDIR" Depth="0">
-             <FileSearch Id="FindManager" Name="manager.yaml" />
-          </DirectorySearch>
-      </Property>
-
       <!-- Set command prompt -->
       <SetProperty Id="CMDEXE" Value="[%SystemRoot]\system32\cmd.exe" Before="CostInitialize">
         <![CDATA[NOT CMDEXE]]>
@@ -78,12 +72,12 @@
 
         <Directory Id="$(var.Program_Files)">
             <Directory Id="INSTALLDIR" Name="observIQ OpenTelemetry Collector">
-                <Component Id="ProductFolder" Guid="f8525e78-62c7-4665-81ad-f27e936edc88">
+                <!-- <Component Id="ProductFolder" Guid="f8525e78-62c7-4665-81ad-f27e936edc88">
                     <CreateFolder>
                         <util:PermissionEx User="Administrators" GenericAll="yes" />
                         <util:PermissionEx User="Users" GenericAll="no" />
                     </CreateFolder>
-                </Component>
+                </Component> -->
                 {{define "FILES"}}
                 {{range $f := .}}
                 <Component 
@@ -209,7 +203,7 @@
 
       <CustomAction Id="CustomExecCreateManagerYaml_set"
               Property="CustomExecCreateManagerYaml"
-              Value="&quot;[CMDEXE]&quot; /C CALL &quot;[INSTALLDIR]install\generate-manager-yaml.bat&quot; &quot;[INSTALLDIR]&quot; &quot;[OPAMPENDPOINT]&quot; &quot;[OPAMPSECRETKEY]&quot; &quot;[OPAMPLABELS]&quot;"
+              Value="&quot;[CMDEXE]&quot; /C CALL &quot;[INSTALLDIR]install\generate-manager-yaml.bat&quot; &quot;[INSTALLDIR]&quot; &quot;[OPAMPENDPOINT]&quot; &quot;[OPAMPSECRETKEY]&quot; &quot;[OPAMPLABELS]&quot; &quot;[CLEAN]&quot;"
               Execute="immediate"/>
 
       <CustomAction Id="CustomExecCreateManagerYaml" BinaryKey="WixCA" DllEntry="WixQuietExec" Execute="deferred" Impersonate="no" Return="check" />
