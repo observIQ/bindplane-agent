@@ -203,17 +203,10 @@
 
       <CustomAction Id="CustomExecCreateManagerYaml_set"
               Property="CustomExecCreateManagerYaml"
-              Value="&quot;[CMDEXE]&quot; /C CALL &quot;[INSTALLDIR]install\generate-manager-yaml.bat&quot; &quot;[INSTALLDIR]&quot; &quot;[OPAMPENDPOINT]&quot; &quot;[OPAMPSECRETKEY]&quot; &quot;[OPAMPLABELS]&quot;"
+              Value="&quot;[CMDEXE]&quot; /C CALL &quot;[INSTALLDIR]install\generate-manager-yaml.bat&quot; &quot;[INSTALLDIR]&quot; &quot;[OPAMPENDPOINT]&quot; &quot;[OPAMPSECRETKEY]&quot; &quot;[OPAMPLABELS]&quot; &quot;[CLEAN]&quot;"
               Execute="immediate"/>
 
       <CustomAction Id="CustomExecCreateManagerYaml" BinaryKey="WixCA" DllEntry="WixQuietExec" Execute="deferred" Impersonate="no" Return="check" />
-
-      <CustomAction Id="CustomExecRemoveManagerYaml_set"
-              Property="CustomExecRemoveManagerYaml"
-              Value="&quot;[CMDEXE]&quot; /C del &quot;[INSTALLDIR]manager.yaml&quot;"
-              Execute="immediate"/>
-
-      <CustomAction Id="CustomExecRemoveManagerYaml" BinaryKey="WixCA" DllEntry="WixQuietExec" Execute="deferred" Impersonate="no" Return="ignore" />
 
       <InstallExecuteSequence>
          {{range $i, $h := .Hooks}}
@@ -238,14 +231,6 @@
         </Custom>
         <Custom Action="CustomExecCreateManagerYaml" After="InstallFiles" >
             <![CDATA[(VersionNT >= 603 OR VersionNT64 >= 603) AND NOT Installed AND NOT REMOVE AND ENABLEMANAGEMENT AND NOT WIX_UPGRADE_DETECTED]]>
-        </Custom>
-        
-        <!-- Schedule the action that removes the manager.yaml file on final uninstall -->
-        <Custom Action="CustomExecRemoveManagerYaml_set" After="InstallInitialize" >
-            <![CDATA[(VersionNT >= 603 OR VersionNT64 >= 603) and REMOVE="ALL" and not UPGRADINGPRODUCTCODE]]>
-        </Custom>
-        <Custom Action="CustomExecRemoveManagerYaml" Before="RemoveFiles" >
-            <![CDATA[(VersionNT >= 603 OR VersionNT64 >= 603) and REMOVE="ALL" and not UPGRADINGPRODUCTCODE]]>
         </Custom>
       </InstallExecuteSequence>
 
