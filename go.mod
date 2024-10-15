@@ -866,10 +866,9 @@ replace github.com/mattn/go-ieproxy => github.com/mattn/go-ieproxy v0.0.1
 // openshift removed all tags from their repo, use the pseudoversion from the release-3.9 branch HEAD
 replace github.com/openshift/api v3.9.0+incompatible => github.com/openshift/api v0.0.0-20180801171038-322a19404e37
 
-// replace pkg/stanza with this commit until dan's pr is merged
-// https://github.com/open-telemetry/opentelemetry-collector-contrib/pull/35520
-replace github.com/open-telemetry/opentelemetry-collector-contrib/pkg/stanza => github.com/observIQ/opentelemetry-collector-contrib/pkg/stanza v0.0.0-20241001152623-511f1d70670f
-
 // Replace transformprocessor so that metric conversion functions are temporarily available on both the metric and datapoint context.
 // We will remove this in v1.63.0 of the agent and switch over to only having the conversion functions on the metric context.
 replace github.com/open-telemetry/opentelemetry-collector-contrib/processor/transformprocessor v0.111.0 => github.com/observiq/opentelemetry-collector-contrib/processor/transformprocessor v0.0.0-20241004155750-926945f2947f
+
+// Replace receiver/kafkareceiver until this PR is released: https://github.com/open-telemetry/opentelemetry-collector-contrib/pull/35767
+replace github.com/open-telemetry/opentelemetry-collector-contrib/receiver/kafkareceiver => github.com/observiq/opentelemetry-collector-contrib/receiver/kafkareceiver v0.0.0-20241015153718-532694c1f04e
