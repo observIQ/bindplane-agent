@@ -1,0 +1,7 @@
+type: sentinelone
+
+status:
+  class: receiver
+  stability:
+    alpha: [logs]
+  distributions: [observiq]
