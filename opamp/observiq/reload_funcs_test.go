@@ -59,7 +59,7 @@ func Test_managerReload(t *testing.T) {
 				client := &Client{
 					currentConfig: opamp.Config{
 						Endpoint: "ws://localhost:1234",
-						AgentID:  "d4691426-b0bb-41f7-84a8-320a9ec0ea2e",
+						AgentID:  testAgentID,
 					},
 				}
 				reloadFunc := managerReload(client, managerFilePath)
@@ -85,7 +85,7 @@ func Test_managerReload(t *testing.T) {
 
 				currConfig := &opamp.Config{
 					Endpoint: "ws://localhost:1234",
-					AgentID:  "d4691426-b0bb-41f7-84a8-320a9ec0ea2e",
+					AgentID:  testAgentID,
 				}
 
 				mockOpAmpClient := mocks.NewMockOpAMPClient(t)
@@ -110,7 +110,7 @@ func Test_managerReload(t *testing.T) {
 				agentName := "name"
 				newConfig := &opamp.Config{
 					Endpoint:  "ws://localhost:1234",
-					AgentID:   "d4691426-b0bb-41f7-84a8-320a9ec0ea2e",
+					AgentID:   testAgentID,
 					AgentName: &agentName,
 				}
 
@@ -140,7 +140,7 @@ func Test_managerReload(t *testing.T) {
 
 				currConfig := &opamp.Config{
 					Endpoint: "ws://localhost:1234",
-					AgentID:  "d4691426-b0bb-41f7-84a8-320a9ec0ea2e",
+					AgentID:  testAgentID,
 				}
 
 				expectedErr := errors.New("oops")
@@ -165,7 +165,7 @@ func Test_managerReload(t *testing.T) {
 				agentName := "name"
 				newConfig := &opamp.Config{
 					Endpoint:  "ws://localhost:1234",
-					AgentID:   "d4691426-b0bb-41f7-84a8-320a9ec0ea2e",
+					AgentID:   testAgentID,
 					AgentName: &agentName,
 				}
 
