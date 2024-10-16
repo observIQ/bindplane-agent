@@ -17,7 +17,6 @@ package sentinelonereceiver
 import (
 	"context"
 	"fmt"
-	"sentinelonereceiver/internal/metadata"
 
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/consumer"

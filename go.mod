@@ -34,6 +34,7 @@ require (
 	github.com/observiq/bindplane-agent/receiver/pluginreceiver v1.62.0
 	github.com/observiq/bindplane-agent/receiver/routereceiver v1.62.0
 	github.com/observiq/bindplane-agent/receiver/sapnetweaverreceiver v1.62.0
+	github.com/observiq/bindplane-agent/receiver/sentinelonereceiver v1.62.0
 	github.com/observiq/bindplane-agent/receiver/telemetrygeneratorreceiver v1.62.0
 	github.com/oklog/ulid/v2 v2.1.0
 	github.com/open-telemetry/opamp-go v0.14.0
@@ -846,6 +847,8 @@ replace github.com/observiq/bindplane-agent/receiver/azureblobrehydrationreceive
 replace github.com/observiq/bindplane-agent/receiver/httpreceiver => ./receiver/httpreceiver
 
 replace github.com/observiq/bindplane-agent/receiver/oktareceiver => ./receiver/oktareceiver
+
+replace github.com/observiq/bindplane-agent/receiver/sentinelonereceiver => ./receiver/sentinelonereceiver
 
 replace github.com/observiq/bindplane-agent/receiver/awss3rehydrationreceiver => ./receiver/awss3rehydrationreceiver
 

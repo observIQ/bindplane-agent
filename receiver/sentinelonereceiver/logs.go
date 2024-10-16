@@ -16,7 +16,12 @@ package sentinelonereceiver
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
+	"io"
 	"net/http"
+	"slices"
+	"strconv"
 	"sync"
 	"time"
 
@@ -28,29 +33,78 @@ import (
 )
 
 type sentinelOneLogsReceiver struct {
-	cfg      Config
-	client   httpClient
-	consumer consumer.Logs
-	logger   *zap.Logger
-	cancel   context.CancelFunc
-	wg       *sync.WaitGroup
+	apiURL         string
+	cfg            Config
+	client         httpClient
+	consumer       consumer.Logs
+	logger         *zap.Logger
+	cancel         context.CancelFunc
+	activitiesChan chan []Activity
+	since          time.Time
+	wg             *sync.WaitGroup
 }
 
-type sentinelOneLogEvent struct{}
+type sentinelOneAPIResponse struct {
+	Pagination PaginationData `json:"pagination"`
+	Data       []Activity     `json:"data"`
+	Errors     []string       `json:"errors"`
+}
+
+// PaginationData contains pagination details for the response
+type PaginationData struct {
+	TotalItems int    `json:"totalItems"`
+	NextCursor string `json:"nextCursor"`
+}
+
+// Activity represents individual activity data in the response
+type Activity struct {
+	AccountID            string `json:"accountId"`
+	AccountName          string `json:"accountName"`
+	ActivityType         int    `json:"activityType"`
+	ActivityUUID         string `json:"activityUuid"`
+	AgentID              string `json:"agentId"`
+	AgentUpdatedVersion  string `json:"agentUpdatedVersion"`
+	Comments             string `json:"comments"`
+	CreatedAt            string `json:"createdAt"`
+	Data                 any    `json:"data"`
+	Description          string `json:"description"`
+	GroupID              string `json:"groupId"`
+	GroupName            string `json:"groupName"`
+	Hash                 string `json:"hash"`
+	ID                   string `json:"id"`
+	OSFamily             string `json:"osFamily"`
+	PrimaryDescription   string `json:"primaryDescription"`
+	SecondaryDescription string `json:"secondaryDescription"`
+	SiteID               string `json:"siteId"`
+	SiteName             string `json:"siteName"`
+	ThreatID             string `json:"threatId"`
+	UpdatedAt            string `json:"updatedAt"`
+	UserID               string `json:"userId"`
+}
 
 type httpClient interface {
 	Do(req *http.Request) (*http.Response, error)
 	CloseIdleConnections()
 }
 
+var (
+	activities         = "activities"
+	agents             = "agents"
+	threats            = "threats"
+	activitiesMaxLimit = 1000
+)
+
 // newSentinelOneLogsReceiver returns a newly configured sentinelOneLogsReceiver
 func newSentinelOneLogsReceiver(cfg *Config, logger *zap.Logger, consumer consumer.Logs) (*sentinelOneLogsReceiver, error) {
 	return &sentinelOneLogsReceiver{
-		cfg:      *cfg,
-		client:   http.DefaultClient,
-		consumer: consumer,
-		logger:   logger,
-		wg:       &sync.WaitGroup{},
+		apiURL:         cfg.BaseURL + "/web/api/v2.1/",
+		cfg:            *cfg,
+		client:         http.DefaultClient,
+		consumer:       consumer,
+		logger:         logger,
+		since:          time.Now().Add(-cfg.PollInterval),
+		activitiesChan: make(chan []Activity, len(cfg.APIs)),
+		wg:             &sync.WaitGroup{},
 	}, nil
 }
 
@@ -95,11 +149,99 @@ func (r *sentinelOneLogsReceiver) poll(ctx context.Context) error {
 	return nil
 }
 
-func (r *sentinelOneLogsReceiver) getLogs(ctx context.Context) []sentinelOneLogEvent {
-	return []sentinelOneLogEvent{}
+func (r *sentinelOneLogsReceiver) getLogs(ctx context.Context) []Activity {
+	if slices.Contains(r.cfg.APIs, activities) {
+		go r.getActivities(ctx)
+	}
+
+	// if slices.Contains(r.cfg.APIs, agents) {
+	// 	go r.getAgents(ctx)
+	// }
+
+	// if slices.Contains(r.cfg.APIs, threats) {
+	// 	go r.getThreats(ctx)
+	// }
+
+	combinedLogs := []Activity{}
+	for logs := range r.activitiesChan {
+		combinedLogs = append(combinedLogs, logs...)
+	}
+
+	// TODO sort logs
+
+	return combinedLogs
 }
 
-func (r *sentinelOneLogsReceiver) processLogEvents(observedTime pcommon.Timestamp, logEvents []sentinelOneLogEvent) plog.Logs {
+func (r *sentinelOneLogsReceiver) getActivities(ctx context.Context) {
+	var activityLogs []Activity
+	for {
+		req, err := http.NewRequestWithContext(ctx, "GET", r.apiURL+activities, nil)
+		if err != nil {
+			r.logger.Error("error creating sentinelone activities request", zap.Error(err))
+			break
+		}
+		query := req.URL.Query()
+		query.Add("limit", strconv.Itoa(activitiesMaxLimit))
+		// until := time.Now().Unix()
+		// query.Add("createdAt__between", fmt.Sprintf("%d-%d", r.since.Unix(), until))
+		req.URL.RawQuery = query.Encode()
+
+		req.Header.Add("Authorization", "ApiToken "+string(r.cfg.APIToken))
+
+		res, err := r.client.Do(req)
+		if err != nil {
+			r.logger.Error("error performing sentinelone activities request", zap.Error(err))
+			break
+		}
+
+		defer res.Body.Close()
+
+		if res.StatusCode != http.StatusOK {
+			r.logger.Error("okta logs endpoint returned non-200 statuscode: " + res.Status)
+			break
+		}
+
+		body, err := io.ReadAll(res.Body)
+		if err != nil {
+			r.logger.Error("error reading response body", zap.Error(err))
+			break
+		}
+
+		var apiResponse sentinelOneAPIResponse
+		err = json.Unmarshal(body, &apiResponse)
+		if err != nil {
+			r.logger.Error("unable to unmarshal log events", zap.Error(err))
+			break
+		}
+
+		fmt.Println("TotalItems:", apiResponse.Pagination.TotalItems)
+
+		activityLogs = append(activityLogs, apiResponse.Data...)
+
+		if apiResponse.Pagination.NextCursor == "" {
+			break
+		}
+
+		// TODO cursor logic & until logic
+	}
+	r.activitiesChan <- activityLogs
+}
+
+// func (r *sentinelOneLogsReceiver) getAgents(ctx context.Context) {
+// 	for {
+// 		req, err := http.NewRequestWithContext(ctx, "GET")
+// 	}
+// 	r.logsChan <- logs
+// }
+
+// func (r *sentinelOneLogsReceiver) getThreats(ctx context.Context) {
+// 	for {
+// 		req, err := http.NewRequestWithContext(ctx, "GET")
+// 	}
+// 	r.logsChan <- logs
+// }
+
+func (r *sentinelOneLogsReceiver) processLogEvents(observedTime pcommon.Timestamp, logEvents []Activity) plog.Logs {
 	return plog.NewLogs()
 }
 
