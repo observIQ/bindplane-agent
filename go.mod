@@ -199,6 +199,8 @@ require (
 	gopkg.in/yaml.v3 v3.0.1
 )
 
+require github.com/open-telemetry/opentelemetry-collector-contrib/extension/opampcustommessages v0.111.0
+
 require (
 	cel.dev/expr v0.16.0 // indirect
 	cloud.google.com/go/auth v0.9.8 // indirect

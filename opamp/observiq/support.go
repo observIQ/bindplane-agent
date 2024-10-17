@@ -6,8 +6,10 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 	"runtime"
 
+	"github.com/shirou/gopsutil/v3/host"
 	"gopkg.in/yaml.v3"
 )
 
@@ -22,19 +24,26 @@ type diagnosticRequestCustomMessage struct {
 }
 
 type diagnosticInfo struct {
-	AgentID string
-	Version string
-	Goos    string
-	GoArch  string
+	AgentID  string
+	Version  string
+	Goos     string
+	GoArch   string
+	HostInfo *host.InfoStat
 }
 
-func newDiagnosticInfo(agentID, version string) diagnosticInfo {
-	return diagnosticInfo{
-		AgentID: agentID,
-		Version: version,
-		Goos:    runtime.GOOS,
-		GoArch:  runtime.GOARCH,
+func newDiagnosticInfo(agentID, version string) (diagnosticInfo, error) {
+	hi, err := host.Info()
+	if err != nil {
+		return diagnosticInfo{}, fmt.Errorf("stat hostinfo: %w", err)
 	}
+
+	return diagnosticInfo{
+		AgentID:  agentID,
+		Version:  version,
+		Goos:     runtime.GOOS,
+		GoArch:   runtime.GOARCH,
+		HostInfo: hi,
+	}, nil
 }
 
 func writeSupportPackage(writer io.Writer, di diagnosticInfo) error {
@@ -48,8 +57,27 @@ func writeSupportPackage(writer io.Writer, di diagnosticInfo) error {
 		return err
 	}
 
+	// Write basic agent info
 	if err := writeBytesToTar("diagnostic-info.yaml", diYaml, tw); err != nil {
 		return fmt.Errorf("write info yaml: %w", err)
+	}
+
+	// Write log files
+	home := os.Getenv("OIQ_OTEL_COLLECTOR_HOME")
+	logsDir := filepath.Join(home, "log")
+
+	logsDirEntries, err := os.ReadDir(logsDir)
+	if err != nil {
+		return fmt.Errorf("read logs dir entries: %w", err)
+	}
+	for _, ent := range logsDirEntries {
+		if !ent.IsDir() {
+			path := filepath.Join(logsDir, ent.Name())
+			err := writeFileToTar(path, ent.Name(), tw)
+			if err != nil {
+				return fmt.Errorf("write log files: %w", err)
+			}
+		}
 	}
 
 	return tw.Close()

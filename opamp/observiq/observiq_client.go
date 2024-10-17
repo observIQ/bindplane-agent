@@ -23,7 +23,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"os"
 	"slices"
 	"sync"
 
@@ -750,15 +749,17 @@ func (c *Client) handleDiagnosticPackageRequest(data []byte) {
 
 	// TODO: Support streaming (don't need to read full log files into memory)
 	buf := &bytes.Buffer{}
-	// TODO: Pass actual ID/version
-	di := newDiagnosticInfo(c.ident.agentID, c.ident.version)
-	err = writeSupportPackage(buf, di)
+	di, err := newDiagnosticInfo(c.ident.agentID, c.ident.version)
 	if err != nil {
-		c.logger.Error("Failed to unmarshal diagnostic request.", zap.Error(err))
+		c.logger.Error("Failed to create diagnostic info.", zap.Error(err))
 		return
 	}
 
-	_ = os.WriteFile("./test-out.tar.gz", buf.Bytes(), 0600)
+	err = writeSupportPackage(buf, di)
+	if err != nil {
+		c.logger.Error("Failed to create unmarshal request.", zap.Error(err))
+		return
+	}
 
 	httpReq, err := http.NewRequestWithContext(context.TODO(), "PUT", req.ReportURL, buf)
 	if err != nil {
