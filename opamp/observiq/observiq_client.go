@@ -16,12 +16,14 @@
 package observiq
 
 import (
+	"bytes"
 	"context"
 	"encoding/hex"
 	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
+	"os"
 	"slices"
 	"sync"
 
@@ -35,6 +37,7 @@ import (
 	"github.com/open-telemetry/opamp-go/client/types"
 	"github.com/open-telemetry/opamp-go/protobufs"
 	"go.uber.org/zap"
+	"gopkg.in/yaml.v3"
 )
 
 var (
@@ -149,6 +152,7 @@ func NewClient(args *NewClientArgs) (opamp.Client, error) {
 	err = observiqClient.opampClient.SetCustomCapabilities(&protobufs.CustomCapabilities{
 		Capabilities: []string{
 			measurements.ReportMeasurementsV1Capability,
+			diagnosticsReportV1Capability,
 		},
 	})
 	if err != nil {
@@ -348,6 +352,15 @@ func (c *Client) onMessageFuncHandler(ctx context.Context, msg *types.MessageDat
 		} else {
 			c.logger.Info("Server does not support custom message measurements, stopping sender.")
 			c.measurementsSender.Stop()
+		}
+	}
+	if msg.CustomMessage != nil {
+		msgCapability := msg.CustomMessage.GetCapability()
+		msgType := msg.CustomMessage.GetType()
+
+		if msgCapability == diagnosticsReportV1Capability &&
+			msgType == diagnosticsRequestType {
+			c.handleDiagnosticPackageRequest(msg.CustomMessage.GetData())
 		}
 	}
 }
@@ -725,4 +738,47 @@ func (c *Client) safeGetDisconnecting() bool {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 	return c.disconnecting
+}
+
+func (c *Client) handleDiagnosticPackageRequest(data []byte) {
+	var req diagnosticRequestCustomMessage
+	err := yaml.Unmarshal(data, &req)
+	if err != nil {
+		c.logger.Error("Failed to unmarshal diagnostic request.", zap.Error(err))
+		return
+	}
+
+	// TODO: Support streaming (don't need to read full log files into memory)
+	buf := &bytes.Buffer{}
+	// TODO: Pass actual ID/version
+	di := newDiagnosticInfo(c.ident.agentID, c.ident.version)
+	err = writeSupportPackage(buf, di)
+	if err != nil {
+		c.logger.Error("Failed to unmarshal diagnostic request.", zap.Error(err))
+		return
+	}
+
+	_ = os.WriteFile("./test-out.tar.gz", buf.Bytes(), 0600)
+
+	httpReq, err := http.NewRequestWithContext(context.TODO(), "PUT", req.ReportURL, buf)
+	if err != nil {
+		c.logger.Error("Failed to create http request.", zap.Error(err))
+		return
+	}
+
+	for k, v := range req.Headers {
+		httpReq.Header.Add(k, v)
+	}
+
+	resp, err := http.DefaultClient.Do(httpReq)
+	if err != nil {
+		c.logger.Error("Failed to PUT http request.", zap.Error(err))
+		return
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode < 200 || resp.StatusCode > 299 {
+		c.logger.Error("Diagnostic PUT returned bad status code", zap.Int("status_code", resp.StatusCode))
+		return
+	}
 }
