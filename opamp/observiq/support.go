@@ -62,7 +62,7 @@ func writeSupportPackage(writer io.Writer, di diagnosticInfo) error {
 	}
 
 	// Write basic agent info
-	if err := writeBytesToTar("diagnostic-info.yaml", diYaml, tw); err != nil {
+	if err := writeBytesToTar("agent-info.yaml", diYaml, tw); err != nil {
 		return fmt.Errorf("write info yaml: %w", err)
 	}
 
