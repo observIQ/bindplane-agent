@@ -78,6 +78,8 @@ type Client struct {
 	collectorMntrWg     sync.WaitGroup
 
 	currentConfig opamp.Config
+
+	supportPackageMux sync.Mutex
 }
 
 // NewClientArgs arguments passed when creating a new client
@@ -126,6 +128,7 @@ func NewClient(args *NewClientArgs) (opamp.Client, error) {
 		packagesStateProvider:   newPackagesStateProvider(clientLogger, packagestate.DefaultFileName),
 		updaterManager:          updaterManger,
 		reportManager:           reportManager,
+		supportPackageMux:       sync.Mutex{},
 	}
 
 	// Parse URL to determin scheme
@@ -359,7 +362,7 @@ func (c *Client) onMessageFuncHandler(ctx context.Context, msg *types.MessageDat
 
 		if msgCapability == diagnosticsReportV1Capability &&
 			msgType == diagnosticsRequestType {
-			c.handleDiagnosticPackageRequest(msg.CustomMessage.GetData())
+			go c.handleDiagnosticPackageRequest(msg.CustomMessage.GetData())
 		}
 	}
 }
@@ -740,6 +743,10 @@ func (c *Client) safeGetDisconnecting() bool {
 }
 
 func (c *Client) handleDiagnosticPackageRequest(data []byte) {
+	// Only one diagnostic package should be generated at a time.
+	c.supportPackageMux.Lock()
+	defer c.supportPackageMux.Unlock()
+
 	var req diagnosticRequestCustomMessage
 	err := yaml.Unmarshal(data, &req)
 	if err != nil {
@@ -748,6 +755,7 @@ func (c *Client) handleDiagnosticPackageRequest(data []byte) {
 	}
 
 	// TODO: Support streaming (don't need to read full log files into memory)
+	// We can do this with io.Pipe I think
 	buf := &bytes.Buffer{}
 	di, err := newDiagnosticInfo(c.ident.agentID, c.ident.version)
 	if err != nil {
