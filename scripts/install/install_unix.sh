@@ -753,9 +753,11 @@ display_results() {
   info "Agent Logs Command:       $(fg_cyan "sudo tail -F $INSTALL_DIR/supervisor_storage/agent.log")$(reset)"
   if [ "$SVC_PRE" = "systemctl" ]; then
     info "Supervisor Start Command:      $(fg_cyan "sudo systemctl start observiq-otel-collector")$(reset)"
+    info "Supervisor Status Command:     $(fg_cyan "sudo systemctl status observiq-otel-collector")$(reset)"
     info "Supervisor Stop Command:       $(fg_cyan "sudo systemctl stop observiq-otel-collector")$(reset)"
   else
     info "Supervisor Start Command:      $(fg_cyan "sudo service observiq-otel-collector start")$(reset)"
+    info "Supervisor Status Command:     $(fg_cyan "sudo service observiq-otel-collector status")$(reset)"
     info "Supervisor Stop Command:       $(fg_cyan "sudo service observiq-otel-collector stop")$(reset)"
   fi
   decrease_indent
