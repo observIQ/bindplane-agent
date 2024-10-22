@@ -727,9 +727,11 @@ display_results()
     if [ "$SVC_PRE" = "systemctl" ]; then
       info "Start Command:      $(fg_cyan "sudo systemctl start observiq-otel-collector")$(reset)"
       info "Stop Command:       $(fg_cyan "sudo systemctl stop observiq-otel-collector")$(reset)"
+      info "Status Command:     $(fg_cyan "sudo systemctl status observiq-otel-collector")$(reset)"
     else
       info "Start Command:      $(fg_cyan "sudo service observiq-otel-collector start")$(reset)"
       info "Stop Command:       $(fg_cyan "sudo service observiq-otel-collector stop")$(reset)"
+      info "Status Command:     $(fg_cyan "sudo service observiq-otel-collector status")$(reset)"
     fi
     info "Logs Command:       $(fg_cyan "sudo tail -F /opt/observiq-otel-collector/log/collector.log")$(reset)"
     decrease_indent
