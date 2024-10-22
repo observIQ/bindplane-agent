@@ -47,8 +47,7 @@ const capabilities = protobufs.AgentCapabilities_AgentCapabilities_ReportsStatus
 	protobufs.AgentCapabilities_AgentCapabilities_ReportsPackageStatuses |
 	protobufs.AgentCapabilities_AgentCapabilities_ReportsEffectiveConfig |
 	protobufs.AgentCapabilities_AgentCapabilities_AcceptsRemoteConfig |
-	protobufs.AgentCapabilities_AgentCapabilities_ReportsRemoteConfig |
-	protobufs.AgentCapabilities_AgentCapabilities_ReportsHeartbeat
+	protobufs.AgentCapabilities_AgentCapabilities_ReportsRemoteConfig
 
 // Ensure interface is satisfied
 var _ opamp.Client = (*Client)(nil)
