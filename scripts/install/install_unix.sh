@@ -540,17 +540,17 @@ root_check()
 interactive_check()
 {
   # Incompatible with proxies unless both username and password are passed
-  if [ "$non_interactive" = "true" ] && [ -z "$proxy_password" ]
+  if [ "$non_interactive" = "true" ] && [ -n "$proxy_password" ]
   then 
     failed
-    error_exit "$LINENO" "The proxy password must be set via the command line argument -P, if called non-interactively!"
+    error_exit "$LINENO" "The proxy password must be set via the command line argument -P, if called non-interactively."
   fi
 
   # Incompatible with checking the BP url since it can be interactive on failed connection
   if [ "$non_interactive" = "true" ] && [ "$check_bp_url" = "true" ]
   then 
     failed
-    error_exit "$LINENO" "The proxy password must be set via the command line argument -P, if called non-interactively!"
+    error_exit "$LINENO" "Checking the BindPlane server URL is not compatible with quiet (non-interactive) mode."
   fi
 }
 
