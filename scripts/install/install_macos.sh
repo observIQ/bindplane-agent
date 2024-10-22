@@ -636,7 +636,6 @@ display_results()
 
 uninstall()
 {
-  bindplane_banner
   banner "Uninstalling BindPlane Agent"
   increase_indent
 

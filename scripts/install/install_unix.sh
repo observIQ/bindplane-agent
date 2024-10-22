@@ -801,8 +801,6 @@ uninstall_package()
 
 uninstall()
 {
-  bindplane_banner
-
   set_package_type
   banner "Uninstalling BindPlane Agent"
   increase_indent
