@@ -35,6 +35,12 @@ agent:
 	CGO_ENABLED=0 builder --config="./manifests/observIQ/manifest.yaml" --ldflags "-s -w -X github.com/observiq/bindplane-agent/internal/version.version=$(VERSION)"
 	mkdir -p $(OUTDIR); cp ./builder/observiq-otel-collector $(OUTDIR)/collector_$(GOOS)_$(GOARCH)$(EXT)
 
+# Builds the agent for current GOOS/GOARCH pair (aix)
+.PHONY: agent-aix
+agent-aix:
+	builder --config="./manifests/observIQ/manifest-aix.yaml" --ldflags "-s -w -X github.com/observiq/bindplane-agent/internal/version.version=$(VERSION)"
+	mkdir -p $(OUTDIR); cp ./builder/observiq-otel-collector $(OUTDIR)/collector_$(GOOS)_$(GOARCH)$(EXT)
+
 # Builds a custom distro for the current GOOS/GOARCH pair using the manifest specified
 # MANIFEST = path to the manifest file for the distro to be built
 # Usage: make distro MANIFEST="./manifests/custom/my_distro_manifest.yaml"
@@ -70,6 +76,10 @@ reset: kill
 # Builds the updater + agent for current GOOS/GOARCH pair
 .PHONY: build-binaries
 build-binaries: agent updater
+
+# Builds the updater + agent for current GOOS/GOARCH pair
+.PHONY: build-binaries-aix
+build-binaries-aix: agent-aix updater
 
 .PHONY: build-all
 build-all: build-linux build-unix build-windows
@@ -111,7 +121,7 @@ build-linux-arm:
 
 .PHONY: build-aix-ppc64
 build-aix-ppc64:
-	GOOS=aix GOARCH=ppc64 $(MAKE) build-binaries -j2
+	GOOS=aix GOARCH=ppc64 $(MAKE) build-binaries-aix -j2
 
 .PHONY: build-darwin-amd64
 build-darwin-amd64:
