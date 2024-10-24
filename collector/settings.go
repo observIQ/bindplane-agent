@@ -17,6 +17,7 @@ package collector
 import (
 	"os"
 
+	"github.com/open-telemetry/opentelemetry-collector-contrib/confmap/provider/aesprovider"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/confmap"
 	"go.opentelemetry.io/collector/confmap/provider/envprovider"
@@ -24,6 +25,7 @@ import (
 	"go.opentelemetry.io/collector/confmap/provider/httpsprovider"
 	"go.opentelemetry.io/collector/confmap/provider/yamlprovider"
 	"go.opentelemetry.io/collector/otelcol"
+
 	"go.uber.org/zap"
 )
 
@@ -45,6 +47,7 @@ func NewSettings(configPaths []string, version string, loggingOpts []zap.Option,
 				envprovider.NewFactory(),
 				yamlprovider.NewFactory(),
 				httpsprovider.NewFactory(),
+				aesprovider.NewFactory(),
 			},
 			ConverterFactories: []confmap.ConverterFactory{},
 			DefaultScheme:      "env",
