@@ -256,17 +256,17 @@ func (_m *MockPackagesStateProvider) SetPackageState(packageName string, state t
 	return r0
 }
 
-// UpdateContent provides a mock function with given fields: ctx, packageName, data, contentHash
-func (_m *MockPackagesStateProvider) UpdateContent(ctx context.Context, packageName string, data io.Reader, contentHash []byte) error {
-	ret := _m.Called(ctx, packageName, data, contentHash)
+// UpdateContent provides a mock function with given fields: ctx, packageName, data, contentHash, signature
+func (_m *MockPackagesStateProvider) UpdateContent(ctx context.Context, packageName string, data io.Reader, contentHash []byte, signature []byte) error {
+	ret := _m.Called(ctx, packageName, data, contentHash, signature)
 
 	if len(ret) == 0 {
 		panic("no return value specified for UpdateContent")
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, io.Reader, []byte) error); ok {
-		r0 = rf(ctx, packageName, data, contentHash)
+	if rf, ok := ret.Get(0).(func(context.Context, string, io.Reader, []byte, []byte) error); ok {
+		r0 = rf(ctx, packageName, data, contentHash, signature)
 	} else {
 		r0 = ret.Error(0)
 	}

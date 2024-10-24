@@ -24,6 +24,9 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/google/uuid"
+	"github.com/oklog/ulid/v2"
+	"github.com/open-telemetry/opamp-go/client/types"
 	"gopkg.in/yaml.v3"
 )
 
@@ -47,11 +50,116 @@ var (
 	errInvalidCAFile = "failed to read TLS CA file"
 )
 
+type agentIDType string
+
+const (
+	agentIDTypeULID agentIDType = "ULID"
+	agentIDTypeUUID agentIDType = "UUID"
+)
+
+// AgentID represents the ID of the agent
+type AgentID struct {
+	by     [16]byte
+	idType agentIDType
+	orig   string
+}
+
+// EmptyAgentID represents an empty/unset agent ID.
+var EmptyAgentID = AgentID{}
+
+// ParseAgentID parses an agent ID from the given string
+func ParseAgentID(s string) (AgentID, error) {
+	switch len(s) {
+	case 26:
+		// length 26 strings can't be UUID, so they must be ULID
+		u, err := ulid.Parse(s)
+		if err != nil {
+			return AgentID{}, fmt.Errorf("parse ulid: %w", err)
+		}
+		return AgentID{
+			by:     u,
+			idType: agentIDTypeULID,
+			orig:   s,
+		}, nil
+
+	default:
+		// Try parsing as a UUID. There are a couple forms of UUID supported for parsing, so they may be a couple different
+		// lengths
+		u, err := uuid.Parse(s)
+		if err != nil {
+			return AgentID{}, fmt.Errorf("parse uuid: %w", err)
+		}
+		return AgentID{
+			by:     u,
+			idType: agentIDTypeUUID,
+			orig:   s,
+		}, nil
+	}
+}
+
+// AgentIDFromUUID creates an agent ID from a generated UUID.
+// See ParseAgentID for parsing a UUID string.
+func AgentIDFromUUID(u uuid.UUID) AgentID {
+	return AgentID{
+		by:     u,
+		idType: agentIDTypeUUID,
+		orig:   u.String(),
+	}
+}
+
+// String returns a string representation of the agent ID
+func (a AgentID) String() string {
+	return a.orig
+}
+
+// OpAMPInstanceUID returns the opamp representation of the agent ID
+func (a AgentID) OpAMPInstanceUID() types.InstanceUid {
+	return types.InstanceUid(a.by)
+}
+
+// Type returns the string type of the agent ID (ULID, UUID) as it should
+// be reported to BindPlane.
+func (a AgentID) Type() string {
+	return string(a.idType)
+}
+
+// MarshalYAML implements the yaml.Marshaler interface
+func (a AgentID) MarshalYAML() (any, error) {
+	return a.String(), nil
+}
+
+// UnmarshalYAML implements the yaml.Unmarshaler interface
+func (a *AgentID) UnmarshalYAML(unmarshal func(any) error) error {
+	var s string
+
+	err := unmarshal(&s)
+	if err != nil {
+		return err
+	}
+
+	if s == "" {
+		// Empty string = keep the 0 value
+		return nil
+	}
+
+	u, err := ParseAgentID(s)
+	if err != nil {
+		// In order to maintain backwards compatability, we don't error here.
+		// Instead, in main, we will regenerate a new agent ID
+		*a = EmptyAgentID
+		return nil
+	}
+
+	*a = AgentID(u)
+
+	return nil
+}
+
 // Config contains the configuration for the collector to communicate with an OpAmp enabled platform.
 type Config struct {
 	Endpoint  string     `yaml:"endpoint"`
 	SecretKey *string    `yaml:"secret_key,omitempty"`
-	AgentID   string     `yaml:"agent_id"`
+	AgentID   AgentID    `yaml:"agent_id"`
 	TLS       *TLSConfig `yaml:"tls_config,omitempty"`
 
 	// Updatable fields
