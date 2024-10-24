@@ -26,7 +26,7 @@ To read more about OpAMP management, see the [supervisor docs](./supervisor.md).
 
 The agent is ran and managed by the [OpenTelemetry supervisor](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/cmd/opampsupervisor). The supervisor must receive the agent's configuration from an OpAMP management platform, after which it will stop and restart the agent with the new config.
 
-The supervisor remembers the last config it received via OpAMP and always starts rewrites the agent's config file with it when it starts. This means you can't manually edit the agent's config file on disk. The best way to modify the configuration is to send a new one from the OpAMP platform the supervisor is connected to.
+The supervisor remembers the last config it received via OpAMP and always rewrites the agent's config file with it when it starts. This means you can't manually edit the agent's config file on disk. The best way to modify the configuration is to send a new one from the OpAMP platform the supervisor is connected to.
 
 The agent configuration file is located at `/opt/observiq-otel-collector/supervisor_storage/effective.yaml`.
 
