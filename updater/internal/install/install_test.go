@@ -389,7 +389,7 @@ func TestInstallArtifacts(t *testing.T) {
 		})
 
 		err = installer.Install(rb)
-		require.ErrorContains(t, err, "failed to translate manager config into supervisor config: convert agent id: parse agent id into a ULID")
+		require.ErrorContains(t, err, "failed to translate manager config into supervisor config: convert agent id: agent id is not a UUID")
 
 		contentsEqual(t, outDirConfig, "# The original config file")
 		contentsEqual(t, outDirManager, "endpoint: localhost:3001\nsecret_key: secret\nagent_id: oo7")

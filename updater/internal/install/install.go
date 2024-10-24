@@ -288,6 +288,13 @@ type Storage struct {
 	Directory string `yaml:"directory"`
 }
 
+// translateManagerToSupervisor handles the bulk of converting from a v1 agent to a v2 agent directory
+//
+// 1. Find and read in manager.yaml
+// 2. Read in agent_id, endpoint, and secret_key values from manager.yaml
+// 3. Construct new supervisor config using values from manager.yaml
+// 4. Create and write supervisor.yaml
+// 5. Marshal previous agent_id into and create persistent_state.yaml file in supervisor_storage
 func translateManagerToSupervisor(logger *zap.Logger, installDir string, hcePort int, rb rollback.Rollbacker) error {
 	// Open manager.yaml
 	managerPath := filepath.Clean(filepath.Join(installDir, "manager.yaml"))
@@ -301,12 +308,22 @@ func translateManagerToSupervisor(logger *zap.Logger, installDir string, hcePort
 		return fmt.Errorf("unmarshal manager yaml: %w", err)
 	}
 
-	err = createSupervisorConfig(logger, manager, installDir, hcePort, rb)
+	agentID, ok := manager["agent_id"].(string)
+	if !ok {
+		return errors.New("read in agent id")
+	}
+
+	var agentIDFormat = "UUID"
+	if agentIDIsULID([]byte(agentID)) {
+		agentIDFormat = "ULID"
+	}
+
+	err = createSupervisorConfig(logger, manager, installDir, agentIDFormat, hcePort, rb)
 	if err != nil {
 		return fmt.Errorf("create supervisor config: %w", err)
 	}
 
-	err = handleAgentIDConversion(logger, manager, installDir, rb)
+	err = handleAgentIDConversion(logger, agentID, installDir, rb)
 	if err != nil {
 		return fmt.Errorf("convert agent id: %w", err)
 	}
@@ -314,7 +331,7 @@ func translateManagerToSupervisor(logger *zap.Logger, installDir string, hcePort
 	return nil
 }
 
-func createSupervisorConfig(logger *zap.Logger, manager map[string]any, installDir string, hcePort int, rb rollback.Rollbacker) error {
+func createSupervisorConfig(logger *zap.Logger, manager map[string]any, installDir, agentIDFormat string, hcePort int, rb rollback.Rollbacker) error {
 	// Read manager values
 	var ok bool
 	var endpoint, secretKey string
@@ -331,7 +348,7 @@ func createSupervisorConfig(logger *zap.Logger, manager map[string]any, installD
 			Endpoint: endpoint,
 			Headers: Headers{
 				Authorization: "Secret-Key " + secretKey,
-				AgentIDFormat: "ULID",
+				AgentIDFormat: agentIDFormat,
 			},
 			TLS: TLS{
 				Insecure:           true,
@@ -400,25 +417,30 @@ type PersistentState struct {
 	InstanceID string `yaml:"instance_id"`
 }
 
-func handleAgentIDConversion(logger *zap.Logger, manager map[string]any, installDir string, rb rollback.Rollbacker) error {
-	// Retrieve agent id and convert to UUID
-	agentID, ok := manager["agent_id"].(string)
-	if !ok {
-		return fmt.Errorf("read in agent id")
+func handleAgentIDConversion(logger *zap.Logger, agentID string, installDir string, rb rollback.Rollbacker) error {
+	if agentIDIsULID([]byte(agentID)) {
+		agentULID, err := ulid.Parse(agentID)
+		if err != nil {
+			return fmt.Errorf("parse agent id into a ULID: %w", err)
+		}
+		ulidBytes, err := agentULID.MarshalBinary()
+		if err != nil {
+			return fmt.Errorf("marshal ulid to bytes: %w", err)
+		}
+		agentUUID, err := uuid.FromBytes(ulidBytes)
+		if err != nil {
+			return fmt.Errorf("convert agent id to UUID: %w", err)
+		}
+		agentID = agentUUID.String()
+	} else {
+		// verify agentID is a UUID
+		_, err := uuid.FromBytes([]byte(agentID))
+		if err != nil {
+			return fmt.Errorf("agent id is not a UUID: %w", err)
+		}
 	}
-	agentULID, err := ulid.Parse(agentID)
-	if err != nil {
-		return fmt.Errorf("parse agent id into a ULID: %w", err)
-	}
-	ulidBytes, err := agentULID.MarshalBinary()
-	if err != nil {
-		return fmt.Errorf("marshal ulid to bytes: %w", err)
-	}
-	agentUUID, err := uuid.FromBytes(ulidBytes)
-	if err != nil {
-		return fmt.Errorf("convert agent id to UUID: %w", err)
-	}
-	persistentStateYaml, err := yaml.Marshal(&PersistentState{InstanceID: agentUUID.String()})
+
+	persistentStateYaml, err := yaml.Marshal(&PersistentState{InstanceID: agentID})
 	if err != nil {
 		return fmt.Errorf("marshal persistent_state yaml: %w", err)
 	}
@@ -455,4 +477,11 @@ func handleAgentIDConversion(logger *zap.Logger, manager map[string]any, install
 		return fmt.Errorf("write persistent_state.yaml: %w", err)
 	}
 	return nil
+}
+
+func agentIDIsULID(agentID []byte) bool {
+	if len(agentID) == 26 {
+		return true
+	}
+	return false
 }
