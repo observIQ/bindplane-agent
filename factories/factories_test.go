@@ -24,7 +24,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"go.opentelemetry.io/collector/connector"
 	"go.opentelemetry.io/collector/exporter"
-	"go.opentelemetry.io/collector/exporter/loggingexporter"
+	"go.opentelemetry.io/collector/exporter/debugexporter"
 	"go.opentelemetry.io/collector/extension"
 	"go.opentelemetry.io/collector/processor"
 	"go.opentelemetry.io/collector/receiver"
@@ -67,8 +67,8 @@ func TestCombineFactories(t *testing.T) {
 				attributesprocessor.NewFactory(),
 			},
 			exporters: []exporter.Factory{
-				loggingexporter.NewFactory(),
-				loggingexporter.NewFactory(),
+				debugexporter.NewFactory(),
+				debugexporter.NewFactory(),
 			},
 			extensions: []extension.Factory{
 				bearertokenauthextension.NewFactory(),
