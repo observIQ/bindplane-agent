@@ -199,6 +199,7 @@ require (
 
 require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/confmap/provider/aesprovider v0.112.0
+	github.com/open-telemetry/opentelemetry-collector-contrib/processor/intervalprocessor v0.112.0
 	go.opentelemetry.io/collector/processor/processortest v0.112.0
 )
 

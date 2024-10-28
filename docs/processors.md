@@ -3,7 +3,7 @@
 Below is a list of supported processors with links to their documentation pages.
 
 | Name                                    | GitHub README                                                                                                                                                      |
-|-----------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | Attributes Processor                    | [attributesprocessor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.112.0/processor/attributesprocessor/README.md)                     |
 | Batch Processor                         | [batchprocessor](https://github.com/open-telemetry/opentelemetry-collector/blob/v0.112.0/processor/batchprocessor/README.md)                                       |
 | Cumulative to Delta Processor           | [cumulativetodeltaprocessor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.112.0/processor/cumulativetodeltaprocessor/README.md)       |
@@ -11,6 +11,7 @@ Below is a list of supported processors with links to their documentation pages.
 | Filter Processor                        | [filterprocessor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.112.0/processor/filterprocessor/README.md)                             |
 | Group by Attributes Processor           | [groupbyattrsprocessor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.112.0/processor/groupbyattrsprocessor/README.md)                 |
 | Group by Trace Processor                | [groupbytraceprocessor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.112.0/processor/groupbytraceprocessor/README.md)                 |
+| Interval Processor                      | [intervalprocessor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.112.0/processor/intervalprocessor/README.md)                         |
 | Kubernetes Attributes Processor         | [k8sattributesprocessor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.112.0/processor/k8sattributesprocessor/README.md)               |
 | Log Count Processor                     | [logcountprocessor](../processor/logcountprocessor/README.md)                                                                                                      |
 | Log DeDuplication Processor             | [logdedupprocessor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.112.0/processor/logdedupprocessor/README.md)                         |

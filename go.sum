@@ -2122,6 +2122,8 @@ github.com/open-telemetry/opentelemetry-collector-contrib/processor/groupbyattrs
 github.com/open-telemetry/opentelemetry-collector-contrib/processor/groupbyattrsprocessor v0.112.0/go.mod h1:sB2uF232sOCiE9/E+AYBEtefKMiVLRkIgo58R1BjPRE=
 github.com/open-telemetry/opentelemetry-collector-contrib/processor/groupbytraceprocessor v0.112.0 h1:oMDRiTCY6KgnY6IXl3s5g63XfohcIJ9nPncQ9vwM8H0=
 github.com/open-telemetry/opentelemetry-collector-contrib/processor/groupbytraceprocessor v0.112.0/go.mod h1:KRPv3lcKx8VvF5i3xGbLaMrW2XWSBR4G0MK6z37Ugcw=
+github.com/open-telemetry/opentelemetry-collector-contrib/processor/intervalprocessor v0.112.0 h1:J8uS4TQjedM6hUC2fxH4zME2hJYe/HJHWOYISk4QOac=
+github.com/open-telemetry/opentelemetry-collector-contrib/processor/intervalprocessor v0.112.0/go.mod h1:K6rKBtEIR62JpRLDKw73d3jHoMNgjJjg1Gaw3Q4khN4=
 github.com/open-telemetry/opentelemetry-collector-contrib/processor/k8sattributesprocessor v0.112.0 h1:Jipc8/hHHkFMmCsB5njzxkOpJAdOp3UVV6e7SENJq8I=
 github.com/open-telemetry/opentelemetry-collector-contrib/processor/k8sattributesprocessor v0.112.0/go.mod h1:kBpMZ5UoyodGNOZTjyHOsfUyfye70HJ5unL9tX4QnhU=
 github.com/open-telemetry/opentelemetry-collector-contrib/processor/logdedupprocessor v0.112.0 h1:UqU9Zhfu58vlML0iVX4jwVbBCWcoU9hLf33soQiPSAk=
