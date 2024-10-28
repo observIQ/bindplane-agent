@@ -32,8 +32,11 @@ import (
 )
 
 const logTypeField = `attributes["log_type"]`
-
+const namespaceField = `attributes["namespace"]`
+const ingestionLabelsField = `attributes["ingestion_labels"]`
 const chronicleLogTypeField = `attributes["chronicle_log_type"]`
+const chronicleNamespaceField = `attributes["chronicle_namespace"]`
+const chronicleIngestionLabel = `attributes["chronicle_ingestion_labels"]`
 
 // This is a specific collector ID for Chronicle. It's used to identify bindplane agents in Chronicle.
 var chronicleCollectorID = uuid.MustParse("aaaa1111-aaaa-1111-aaaa-1111aaaa1111")
@@ -90,7 +93,7 @@ func (m *protoMarshaler) extractRawLogs(ctx context.Context, ld plog.Logs) (map[
 			scopeLog := resourceLog.ScopeLogs().At(j)
 			for k := 0; k < scopeLog.LogRecords().Len(); k++ {
 				logRecord := scopeLog.LogRecords().At(k)
-				rawLog, logType, err := m.processLogRecord(ctx, logRecord, scopeLog, resourceLog)
+				rawLog, logType, namespace, ingestionLabels, err := m.processLogRecord(ctx, logRecord, scopeLog, resourceLog)
 				if err != nil {
 					m.teleSettings.Logger.Error("Error processing log record", zap.Error(err))
 					continue
@@ -113,6 +116,12 @@ func (m *protoMarshaler) extractRawLogs(ctx context.Context, ld plog.Logs) (map[
 					Data:           []byte(rawLog),
 				}
 				entries[logType] = append(entries[logType], entry)
+				if namespace != "" {
+					entries[namespace] = append(entries[namespace], entry)
+				}
+				for k := range ingestionLabels {
+					entries[k] = append(entries[k], entry)
+				}
 			}
 		}
 	}
@@ -120,18 +129,25 @@ func (m *protoMarshaler) extractRawLogs(ctx context.Context, ld plog.Logs) (map[
 	return entries, nil
 }
 
-func (m *protoMarshaler) processLogRecord(ctx context.Context, logRecord plog.LogRecord, scope plog.ScopeLogs, resource plog.ResourceLogs) (string, string, error) {
+func (m *protoMarshaler) processLogRecord(ctx context.Context, logRecord plog.LogRecord, scope plog.ScopeLogs, resource plog.ResourceLogs) (string, string, string, map[string]string, error) {
 	rawLog, err := m.getRawLog(ctx, logRecord, scope, resource)
 	if err != nil {
-		return "", "", err
+		return "", "", "", nil, err
 	}
 
 	logType, err := m.getLogType(ctx, logRecord, scope, resource)
 	if err != nil {
-		return "", "", err
+		return "", "", "", nil, err
 	}
-
-	return rawLog, logType, nil
+	namespace, err := m.getNamespace(ctx, logRecord, scope, resource)
+	if err != nil {
+		return "", "", "", nil, err
+	}
+	ingestionLabels, err := m.getIngestionLabels(ctx, logRecord, scope, resource)
+	if err != nil {
+		return "", "", "", nil, err
+	}
+	return rawLog, logType, namespace, ingestionLabels, nil
 }
 
 func (m *protoMarshaler) getRawLog(ctx context.Context, logRecord plog.LogRecord, scope plog.ScopeLogs, resource plog.ResourceLogs) (string, error) {
@@ -177,6 +193,48 @@ func (m *protoMarshaler) getLogType(ctx context.Context, logRecord plog.LogRecor
 	return m.cfg.LogType, nil
 }
 
+func (m *protoMarshaler) getNamespace(ctx context.Context, logRecord plog.LogRecord, scope plog.ScopeLogs, resource plog.ResourceLogs) (string, error) {
+	namespace, err := m.getRawField(ctx, chronicleNamespaceField, logRecord, scope, resource)
+	if err != nil {
+		return m.cfg.Namespace, fmt.Errorf("get chronicle log type: %w", err)
+	}
+	if namespace != "" {
+		return namespace, nil
+	}
+
+	if m.cfg.OverrideNamespace {
+		namespace, err := m.getRawField(ctx, namespaceField, logRecord, scope, resource)
+
+		if err != nil {
+			return m.cfg.Namespace, fmt.Errorf("get namespace: %w", err)
+		}
+		if namespace != "" {
+			return namespace, nil
+		}
+	}
+	return m.cfg.Namespace, nil
+}
+
+func (m *protoMarshaler) getIngestionLabels(ctx context.Context, logRecord plog.LogRecord, scope plog.ScopeLogs, resource plog.ResourceLogs) (map[string]string, error) {
+	ingestionLabels, err := m.getRawNestedFields(ctx, chronicleIngestionLabel, logRecord, scope, resource)
+	if err != nil {
+		return m.cfg.IngestionLabels, fmt.Errorf("get chronicle ingestion labels: %w", err)
+	}
+	if len(ingestionLabels) != 0 {
+		return ingestionLabels, nil
+	}
+	if m.cfg.OverrideNamespace {
+		ingestionLabels, err := m.getRawNestedFields(ctx, ingestionLabelsField, logRecord, scope, resource)
+		if err != nil {
+			return m.cfg.IngestionLabels, fmt.Errorf("get chronicle ingestion labels: %w", err)
+		}
+		if len(ingestionLabels) != 0 {
+			return ingestionLabels, nil
+		}
+	}
+	return m.cfg.IngestionLabels, nil
+}
+
 func (m *protoMarshaler) getRawField(ctx context.Context, field string, logRecord plog.LogRecord, scope plog.ScopeLogs, resource plog.ResourceLogs) (string, error) {
 	lrExpr, err := expr.NewOTTLLogRecordExpression(field, m.teleSettings)
 	if err != nil {
@@ -204,6 +262,35 @@ func (m *protoMarshaler) getRawField(ctx context.Context, field string, logRecor
 		return string(bytes), nil
 	default:
 		return "", fmt.Errorf("unsupported log record expression result type: %T", lrExprResult)
+	}
+}
+
+func (m *protoMarshaler) getRawNestedFields(ctx context.Context, field string, logRecord plog.LogRecord, scope plog.ScopeLogs, resource plog.ResourceLogs) (map[string]string, error) {
+	lrExpr, err := expr.NewOTTLLogRecordExpression(field, m.teleSettings)
+	if err != nil {
+		return nil, fmt.Errorf("raw_log_field is invalid: %s", err)
+	}
+
+	tCtx := ottllog.NewTransformContext(logRecord, scope.Scope(), resource.Resource(), scope, resource)
+	lrExprResult, err := lrExpr.Execute(ctx, tCtx)
+	if err != nil {
+		return nil, fmt.Errorf("execute log record expression: %w", err)
+	}
+
+	// Check if result is nil.
+	if lrExprResult == nil {
+		return nil, nil
+	}
+	switch result := lrExprResult.(type) {
+	case pcommon.Map:
+		nestedFieldsMap := make(map[string]string)
+		result.Range(func(k string, v pcommon.Value) bool {
+			nestedFieldsMap[k] = v.AsString()
+			return true
+		})
+		return nestedFieldsMap, nil
+	default:
+		return nil, fmt.Errorf("unsupported log record expression result type: %T", lrExprResult)
 	}
 }
 
@@ -247,7 +334,7 @@ func (m *protoMarshaler) extractRawHTTPLogs(ctx context.Context, ld plog.Logs) (
 			scopeLog := resourceLog.ScopeLogs().At(j)
 			for k := 0; k < scopeLog.LogRecords().Len(); k++ {
 				logRecord := scopeLog.LogRecords().At(k)
-				rawLog, logType, err := m.processLogRecord(ctx, logRecord, scopeLog, resourceLog)
+				rawLog, logType, namespace, ingestionLabels, err := m.processLogRecord(ctx, logRecord, scopeLog, resourceLog)
 				if err != nil {
 					m.teleSettings.Logger.Error("Error processing log record", zap.Error(err))
 					continue
@@ -270,6 +357,10 @@ func (m *protoMarshaler) extractRawHTTPLogs(ctx context.Context, ld plog.Logs) (
 					Data:           []byte(rawLog),
 				}
 				entries[logType] = append(entries[logType], entry)
+				entries[namespace] = append(entries[namespace], entry)
+				for k := range ingestionLabels {
+					entries[k] = append(entries[k], entry)
+				}
 			}
 		}
 	}

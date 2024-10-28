@@ -54,7 +54,10 @@ type Config struct {
 
 	// OverrideLogType is a flag that determines whether or not to override the `log_type` in the config with `attributes["log_type"]`.
 	OverrideLogType bool `mapstructure:"override_log_type"`
-
+	// OverrideNamespace is a flag that determines whether or not to override the `namespace` in the config with `attributes["namespace"]`.
+	OverrideNamespace bool `mapstructure:"override_namespace"`
+	// OverrideIngestionLabels is a flag that determines whether or not to override the `ingestion_labels` in the config with `attributes["ingestion_labels"]`.
+	OverrideIngestionLabels bool `mapstructure:"override_ingestion_labels"`
 	// RawLogField is the field name that will be used to send raw logs to Chronicle.
 	RawLogField string `mapstructure:"raw_log_field"`
 
@@ -91,10 +94,6 @@ type Config struct {
 func (cfg *Config) Validate() error {
 	if cfg.CredsFilePath != "" && cfg.Creds != "" {
 		return errors.New("can only specify creds_file_path or creds")
-	}
-
-	if cfg.LogType == "" {
-		return errors.New("log_type is required")
 	}
 
 	if cfg.RawLogField != "" {

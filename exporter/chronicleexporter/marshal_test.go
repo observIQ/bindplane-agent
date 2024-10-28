@@ -42,10 +42,12 @@ func TestProtoMarshaler_MarshalRawLogs(t *testing.T) {
 		{
 			name: "Single log record with expected data",
 			cfg: Config{
-				CustomerID:      uuid.New().String(),
-				LogType:         "WINEVTLOG",
-				RawLogField:     "body",
-				OverrideLogType: false,
+				CustomerID:              uuid.New().String(),
+				LogType:                 "WINEVTLOG",
+				RawLogField:             "body",
+				OverrideLogType:         false,
+				OverrideNamespace:       false,
+				OverrideIngestionLabels: false,
 			},
 			labels: []*api.Label{
 				{Key: "env", Value: "prod"},
@@ -71,10 +73,12 @@ func TestProtoMarshaler_MarshalRawLogs(t *testing.T) {
 		{
 			name: "Single log record with expected data, no log_type",
 			cfg: Config{
-				CustomerID:      uuid.New().String(),
-				LogType:         "WINEVTLOG",
-				RawLogField:     "body",
-				OverrideLogType: true,
+				CustomerID:              uuid.New().String(),
+				LogType:                 "WINEVTLOG",
+				RawLogField:             "body",
+				OverrideLogType:         true,
+				OverrideNamespace:       true,
+				OverrideIngestionLabels: true,
 			},
 			labels: []*api.Label{
 				{Key: "env", Value: "prod"},
@@ -100,10 +104,14 @@ func TestProtoMarshaler_MarshalRawLogs(t *testing.T) {
 		{
 			name: "Multiple log records",
 			cfg: Config{
-				CustomerID:      uuid.New().String(),
-				LogType:         "WINEVTLOG",
-				RawLogField:     "body",
-				OverrideLogType: false,
+				CustomerID:              uuid.New().String(),
+				LogType:                 "WINEVTLOG",
+				Namespace:               "test",
+				IngestionLabels:         map[string]string{`chronicle_ingestion_label["key1"]`: "value1", `chronicle_ingestion_label["key2"]`: "value2"},
+				RawLogField:             "body",
+				OverrideLogType:         false,
+				OverrideNamespace:       false,
+				OverrideIngestionLabels: false,
 			},
 			labels: []*api.Label{
 				{Key: "env", Value: "staging"},
@@ -117,7 +125,7 @@ func TestProtoMarshaler_MarshalRawLogs(t *testing.T) {
 				return logs
 			},
 			expectations: func(t *testing.T, requests []*api.BatchCreateLogsRequest) {
-				require.Len(t, requests, 1, "Expected a single batch request")
+				require.Len(t, requests, 4, "Expected a three batch request")
 				batch := requests[0].Batch
 				require.Len(t, batch.Entries, 2, "Expected two log entries in the batch")
 				// Verifying the first log entry data
@@ -129,22 +137,26 @@ func TestProtoMarshaler_MarshalRawLogs(t *testing.T) {
 		{
 			name: "Log record with attributes",
 			cfg: Config{
-				CustomerID:      uuid.New().String(),
-				LogType:         "WINEVTLOG",
-				RawLogField:     "attributes",
-				OverrideLogType: false,
+				CustomerID:              uuid.New().String(),
+				LogType:                 "WINEVTLOG",
+				Namespace:               "test",
+				IngestionLabels:         map[string]string{`chronicle_ingestion_label["key1"]`: "value1", `chronicle_ingestion_label["key2"]`: "value2"},
+				RawLogField:             "attributes",
+				OverrideLogType:         false,
+				OverrideNamespace:       false,
+				OverrideIngestionLabels: false,
 			},
 			labels: []*api.Label{},
 			logRecords: func() plog.Logs {
-				return mockLogs(mockLogRecord("", map[string]any{"key1": "value1", "log_type": "WINEVTLOG"}))
+				return mockLogs(mockLogRecord("", map[string]any{"key1": "value1", "log_type": "WINEVTLOG", "namespace": "test", `chronicle_ingestion_label["key1"]`: "value1", `chronicle_ingestion_label["key2"]`: "value2"}))
 			},
 			expectations: func(t *testing.T, requests []*api.BatchCreateLogsRequest) {
-				require.Len(t, requests, 1)
+				require.Len(t, requests, 4)
 				batch := requests[0].Batch
 				require.Len(t, batch.Entries, 1)
 
 				// Assuming the attributes are marshaled into the Data field as a JSON string
-				expectedData := `{"key1":"value1", "log_type":"WINEVTLOG"}`
+				expectedData := `{"key1":"value1", "log_type":"WINEVTLOG", "namespace":"test", "chronicle_ingestion_label[\"key1\"]": "value1", "chronicle_ingestion_label[\"key2\"]": "value2"}`
 				actualData := string(batch.Entries[0].Data)
 				require.JSONEq(t, expectedData, actualData, "Log attributes should match expected")
 			},
@@ -152,10 +164,12 @@ func TestProtoMarshaler_MarshalRawLogs(t *testing.T) {
 		{
 			name: "No log records",
 			cfg: Config{
-				CustomerID:      uuid.New().String(),
-				LogType:         "DEFAULT",
-				RawLogField:     "body",
-				OverrideLogType: false,
+				CustomerID:              uuid.New().String(),
+				LogType:                 "DEFAULT",
+				RawLogField:             "body",
+				OverrideLogType:         false,
+				OverrideNamespace:       false,
+				OverrideIngestionLabels: false,
 			},
 			labels: []*api.Label{},
 			logRecords: func() plog.Logs {
@@ -168,10 +182,12 @@ func TestProtoMarshaler_MarshalRawLogs(t *testing.T) {
 		{
 			name: "Override log type with attribute",
 			cfg: Config{
-				CustomerID:      uuid.New().String(),
-				LogType:         "DEFAULT", // This should be overridden by the log_type attribute
-				RawLogField:     "body",
-				OverrideLogType: true,
+				CustomerID:              uuid.New().String(),
+				LogType:                 "DEFAULT", // This should be overridden by the log_type attribute
+				RawLogField:             "body",
+				OverrideLogType:         true,
+				OverrideNamespace:       true,
+				OverrideIngestionLabels: true,
 			},
 			labels: []*api.Label{},
 			logRecords: func() plog.Logs {
@@ -186,10 +202,12 @@ func TestProtoMarshaler_MarshalRawLogs(t *testing.T) {
 		{
 			name: "Override log type with chronicle attribute",
 			cfg: Config{
-				CustomerID:      uuid.New().String(),
-				LogType:         "DEFAULT", // This should be overridden by the chronicle_log_type attribute
-				RawLogField:     "body",
-				OverrideLogType: true,
+				CustomerID:              uuid.New().String(),
+				LogType:                 "DEFAULT", // This should be overridden by the chronicle_log_type attribute
+				RawLogField:             "body",
+				OverrideLogType:         true,
+				OverrideNamespace:       true,
+				OverrideIngestionLabels: true,
 			},
 			labels: []*api.Label{},
 			logRecords: func() plog.Logs {
@@ -235,23 +253,26 @@ func TestProtoMarshaler_MarshalRawLogsForHTTP(t *testing.T) {
 		{
 			name: "Single log record with expected data",
 			cfg: Config{
-				CustomerID:      uuid.New().String(),
-				LogType:         "WINEVTLOG",
-				RawLogField:     "body",
-				OverrideLogType: false,
-				Protocol:        protocolHTTPS,
-				Project:         "test-project",
-				Location:        "us",
-				Forwarder:       uuid.New().String(),
+				CustomerID:              uuid.New().String(),
+				LogType:                 "WINEVTLOG",
+				Namespace:               "test",
+				RawLogField:             "body",
+				OverrideLogType:         false,
+				OverrideNamespace:       false,
+				OverrideIngestionLabels: false,
+				Protocol:                protocolHTTPS,
+				Project:                 "test-project",
+				Location:                "us",
+				Forwarder:               uuid.New().String(),
 			},
 			labels: []*api.Label{
 				{Key: "env", Value: "prod"},
 			},
 			logRecords: func() plog.Logs {
-				return mockLogs(mockLogRecord("Test log message", map[string]any{"log_type": "WINEVTLOG"}))
+				return mockLogs(mockLogRecord("Test log message", map[string]any{"log_type": "WINEVTLOG", "namespace": "test"}))
 			},
 			expectations: func(t *testing.T, requests map[string]*api.ImportLogsRequest) {
-				require.Len(t, requests, 1)
+				require.Len(t, requests, 2)
 				logs := requests["WINEVTLOG"].GetInlineSource().Logs
 				require.Len(t, logs, 1)
 
@@ -264,10 +285,14 @@ func TestProtoMarshaler_MarshalRawLogsForHTTP(t *testing.T) {
 		{
 			name: "Multiple log records",
 			cfg: Config{
-				CustomerID:      uuid.New().String(),
-				LogType:         "WINEVTLOG",
-				RawLogField:     "body",
-				OverrideLogType: false,
+				CustomerID:              uuid.New().String(),
+				LogType:                 "WINEVTLOG",
+				Namespace:               "test",
+				IngestionLabels:         map[string]string{`chronicle_ingestion_label["key1"]`: "value1", `chronicle_ingestion_label["key2"]`: "value2"},
+				RawLogField:             "body",
+				OverrideLogType:         false,
+				OverrideNamespace:       false,
+				OverrideIngestionLabels: false,
 			},
 			labels: []*api.Label{
 				{Key: "env", Value: "staging"},
@@ -281,7 +306,7 @@ func TestProtoMarshaler_MarshalRawLogsForHTTP(t *testing.T) {
 				return logs
 			},
 			expectations: func(t *testing.T, requests map[string]*api.ImportLogsRequest) {
-				require.Len(t, requests, 1, "Expected a single batch request")
+				require.Len(t, requests, 4, "Expected a four batch request")
 				logs := requests["WINEVTLOG"].GetInlineSource().Logs
 				require.Len(t, logs, 2, "Expected two log entries in the batch")
 				// Verifying the first log entry data
@@ -293,33 +318,43 @@ func TestProtoMarshaler_MarshalRawLogsForHTTP(t *testing.T) {
 		{
 			name: "Log record with attributes",
 			cfg: Config{
-				CustomerID:      uuid.New().String(),
-				LogType:         "WINEVTLOG",
-				RawLogField:     "attributes",
-				OverrideLogType: false,
+				CustomerID:              uuid.New().String(),
+				LogType:                 "WINEVTLOG",
+				Namespace:               "test",
+				IngestionLabels:         map[string]string{`chronicle_ingestion_label["key1"]`: "value1", `chronicle_ingestion_label["key2"]`: "value2"},
+				RawLogField:             "attributes",
+				OverrideLogType:         false,
+				OverrideNamespace:       false,
+				OverrideIngestionLabels: false,
 			},
 			labels: []*api.Label{},
 			logRecords: func() plog.Logs {
-				return mockLogs(mockLogRecord("", map[string]any{"key1": "value1", "log_type": "WINEVTLOG"}))
+				return mockLogs(mockLogRecord("", map[string]any{"key1": "value1", "log_type": "WINEVTLOG", "namespace": "test", `chronicle_ingestion_label["key1"]`: "value1", `chronicle_ingestion_label["key2"]`: "value2"}))
 			},
 			expectations: func(t *testing.T, requests map[string]*api.ImportLogsRequest) {
-				require.Len(t, requests, 1)
+				require.Len(t, requests, 4)
 				logs := requests["WINEVTLOG"].GetInlineSource().Logs
+				logs2 := requests["test"].GetInlineSource().Logs
 				require.Len(t, logs, 1)
-
+				require.Len(t, logs2, 1)
 				// Assuming the attributes are marshaled into the Data field as a JSON string
-				expectedData := `{"key1":"value1", "log_type":"WINEVTLOG"}`
+				expectedData := `{"key1":"value1", "log_type":"WINEVTLOG", "namespace":"test", "chronicle_ingestion_label[\"key1\"]": "value1", "chronicle_ingestion_label[\"key2\"]": "value2"}`
 				actualData := string(logs[0].Data)
 				require.JSONEq(t, expectedData, actualData, "Log attributes should match expected")
+				actualData2 := string(logs2[0].Data)
+				require.JSONEq(t, expectedData, actualData2, "Log attributes should match expected")
 			},
 		},
 		{
 			name: "No log records",
 			cfg: Config{
-				CustomerID:      uuid.New().String(),
-				LogType:         "DEFAULT",
-				RawLogField:     "body",
-				OverrideLogType: false,
+				CustomerID:              uuid.New().String(),
+				LogType:                 "DEFAULT",
+				Namespace:               "DEFAULT",
+				RawLogField:             "body",
+				OverrideLogType:         false,
+				OverrideNamespace:       false,
+				OverrideIngestionLabels: false,
 			},
 			labels: []*api.Label{},
 			logRecords: func() plog.Logs {
