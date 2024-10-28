@@ -81,7 +81,7 @@ func createMetricsExporter(ctx context.Context, set exporter.Settings, cfg compo
 	var consumer consumer.Metrics = gcpExporter
 	for i, processorConfig := range processorConfigs {
 		factory := processorFactories[i]
-		processor, err := factory.CreateMetricsProcessor(ctx, processorSettings, processorConfig, consumer)
+		processor, err := factory.CreateMetrics(ctx, processorSettings, processorConfig, consumer)
 		if err != nil {
 			return nil, fmt.Errorf("failed to create metrics processor %s: %w", set.ID.String(), err)
 		}
@@ -128,7 +128,7 @@ func createLogsExporter(ctx context.Context, set exporter.Settings, cfg componen
 	var consumer consumer.Logs = gcpExporter
 	for i, processorConfig := range processorConfigs {
 		factory := processorFactories[i]
-		processor, err := factory.CreateLogsProcessor(ctx, processorSettings, processorConfig, consumer)
+		processor, err := factory.CreateLogs(ctx, processorSettings, processorConfig, consumer)
 		if err != nil {
 			return nil, fmt.Errorf("failed to create logs processor %s: %w", set.ID.String(), err)
 		}
@@ -175,7 +175,7 @@ func createTracesExporter(ctx context.Context, set exporter.Settings, cfg compon
 	var consumer consumer.Traces = gcpExporter
 	for i, processorConfig := range processorConfigs {
 		factory := processorFactories[i]
-		processor, err := factory.CreateTracesProcessor(ctx, processorSettings, processorConfig, consumer)
+		processor, err := factory.CreateTraces(ctx, processorSettings, processorConfig, consumer)
 		if err != nil {
 			return nil, fmt.Errorf("failed to create traces processor %s: %w", set.ID.String(), err)
 		}
