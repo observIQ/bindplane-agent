@@ -53,7 +53,6 @@ import (
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/zipkinexporter"
 	"go.opentelemetry.io/collector/exporter"
 	"go.opentelemetry.io/collector/exporter/debugexporter"
-	"go.opentelemetry.io/collector/exporter/loggingexporter"
 	"go.opentelemetry.io/collector/exporter/nopexporter"
 	"go.opentelemetry.io/collector/exporter/otlpexporter"
 	"go.opentelemetry.io/collector/exporter/otlphttpexporter"
@@ -83,7 +82,6 @@ var defaultExporters = []exporter.Factory{
 	influxdbexporter.NewFactory(),
 	kafkaexporter.NewFactory(),
 	loadbalancingexporter.NewFactory(),
-	loggingexporter.NewFactory(),
 	logzioexporter.NewFactory(),
 	lokiexporter.NewFactory(),
 	nopexporter.NewFactory(),

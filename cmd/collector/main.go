@@ -24,12 +24,12 @@ import (
 	"strconv"
 	_ "time/tzdata"
 
+	"github.com/google/uuid"
 	"github.com/observiq/bindplane-agent/collector"
 	"github.com/observiq/bindplane-agent/internal/logging"
 	"github.com/observiq/bindplane-agent/internal/service"
 	"github.com/observiq/bindplane-agent/internal/version"
 	"github.com/observiq/bindplane-agent/opamp"
-	"github.com/oklog/ulid/v2"
 	"github.com/spf13/pflag"
 	"go.uber.org/zap"
 	"gopkg.in/yaml.v3"
@@ -179,9 +179,19 @@ func checkManagerConfig(configPath *string) error {
 			return statErr
 		}
 
-		newConfig.AgentID, ok = os.LookupEnv(agentIDENV)
-		if !ok {
-			newConfig.AgentID = ulid.Make().String()
+		if envString, ok := os.LookupEnv(agentIDENV); ok {
+			var err error
+			newConfig.AgentID, err = opamp.ParseAgentID(envString)
+			if err != nil {
+				return fmt.Errorf("invalid agent ID in env %q: %w", agentIDENV, err)
+			}
+		} else {
+			u, err := uuid.NewV7()
+			if err != nil {
+				return fmt.Errorf("new uuidv7: %w", err)
+			}
+
+			newConfig.AgentID = opamp.AgentIDFromUUID(u)
 		}
 
 		if sk, ok := os.LookupEnv(secretkeyENV); ok {
@@ -231,12 +241,18 @@ func ensureIdentity(configPath string) error {
 		return fmt.Errorf("unable to interpret config file: %w", err)
 	}
 
-	// If the AgentID is not a ULID (legacy ID or empty) then we need to generate a ULID as the AgentID.
-	if _, err := ulid.Parse(candidateConfig.AgentID); err == nil {
+	// If the AgentID is empty then we need to generate a new ID as the AgentID.
+	if candidateConfig.AgentID != opamp.EmptyAgentID {
 		return nil
 	}
 
-	candidateConfig.AgentID = ulid.Make().String()
+	u, err := uuid.NewV7()
+	if err != nil {
+		return fmt.Errorf("new uuidv7: %w", err)
+	}
+
+	candidateConfig.AgentID = opamp.AgentIDFromUUID(u)
+
 	newBytes, err := yaml.Marshal(candidateConfig)
 	if err != nil {
 		return fmt.Errorf("failed to marshal sanitized config: %w", err)

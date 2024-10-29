@@ -24,7 +24,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"go.opentelemetry.io/collector/connector"
 	"go.opentelemetry.io/collector/exporter"
-	"go.opentelemetry.io/collector/exporter/loggingexporter"
+	"go.opentelemetry.io/collector/exporter/debugexporter"
 	"go.opentelemetry.io/collector/extension"
 	"go.opentelemetry.io/collector/processor"
 	"go.opentelemetry.io/collector/receiver"
@@ -67,14 +67,14 @@ func TestCombineFactories(t *testing.T) {
 				attributesprocessor.NewFactory(),
 			},
 			exporters: []exporter.Factory{
-				loggingexporter.NewFactory(),
-				loggingexporter.NewFactory(),
+				debugexporter.NewFactory(),
+				debugexporter.NewFactory(),
 			},
 			extensions: []extension.Factory{
 				bearertokenauthextension.NewFactory(),
 				bearertokenauthextension.NewFactory(),
 			},
-			expectedError: errors.New(`duplicate receiver factory "tcplog"; duplicate processor factory "attributes"; duplicate exporter factory "logging"; duplicate extension factory "bearertokenauth"`),
+			expectedError: errors.New(`duplicate receiver factory "tcplog"; duplicate processor factory "attributes"; duplicate exporter factory "debug"; duplicate extension factory "bearertokenauth"`),
 		},
 	}
 

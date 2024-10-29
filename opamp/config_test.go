@@ -22,9 +22,22 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"gopkg.in/yaml.v3"
 )
+
+// Must is a helper function for tests that panics if there is an error creating the object of type T
+func Must[T any](t T, err error) T {
+	if err != nil {
+		panic(err)
+	}
+	return t
+}
+
+var testAgentIDString = "01HX2DWEQZ045KQR3VG0EYEZ94"
+var testAgentID = Must(ParseAgentID(testAgentIDString))
 
 func TestToTLS(t *testing.T) {
 	invalidCAFile := "/some/bad/file-ca.crt"
@@ -240,13 +253,13 @@ func TestParseConfig(t *testing.T) {
 		{
 			desc: "Successful Full Parse",
 			testFunc: func(t *testing.T) {
-				configContents := `
+				configContents := fmt.Sprintf(`
 endpoint: localhost:1234
 secret_key: b92222ee-a1fc-4bb1-98db-26de3448541b
-agent_id: 8321f735-a52c-4f49-aca9-66f9266c5fe5
+agent_id: %s
 labels: "one=foo,two=bar"
 agent_name: "My Agent"
-`
+`, testAgentIDString)
 
 				tmpDir := t.TempDir()
 				configPath := filepath.Join(tmpDir, "manager.yml")
@@ -257,7 +270,7 @@ agent_name: "My Agent"
 				expectedConfig := &Config{
 					Endpoint:  "localhost:1234",
 					SecretKey: &secretKeyContents,
-					AgentID:   "8321f735-a52c-4f49-aca9-66f9266c5fe5",
+					AgentID:   testAgentID,
 					Labels:    &labelsContents,
 					AgentName: &agentNameContents,
 				}
@@ -270,10 +283,10 @@ agent_name: "My Agent"
 		{
 			desc: "Successful Partial Parse",
 			testFunc: func(t *testing.T) {
-				configContents := `
+				configContents := fmt.Sprintf(`
 endpoint: localhost:1234
-agent_id: 8321f735-a52c-4f49-aca9-66f9266c5fe5
-`
+agent_id: %s
+`, testAgentIDString)
 
 				tmpDir := t.TempDir()
 				configPath := filepath.Join(tmpDir, "manager.yml")
@@ -284,7 +297,7 @@ agent_id: 8321f735-a52c-4f49-aca9-66f9266c5fe5
 				expectedConfig := &Config{
 					Endpoint:  "localhost:1234",
 					SecretKey: nil,
-					AgentID:   "8321f735-a52c-4f49-aca9-66f9266c5fe5",
+					AgentID:   testAgentID,
 					Labels:    nil,
 					AgentName: nil,
 				}
@@ -297,15 +310,15 @@ agent_id: 8321f735-a52c-4f49-aca9-66f9266c5fe5
 		{
 			desc: "Successful Full Parse with TLS Insecure Skip Verify",
 			testFunc: func(t *testing.T) {
-				configContents := `
+				configContents := fmt.Sprintf(`
 endpoint: localhost:1234
 secret_key: b92222ee-a1fc-4bb1-98db-26de3448541b
-agent_id: 8321f735-a52c-4f49-aca9-66f9266c5fe5
+agent_id: %s
 labels: "one=foo,two=bar"
 agent_name: "My Agent"
 tls_config:
   insecure_skip_verify: true
-`
+`, testAgentIDString)
 
 				tmpDir := t.TempDir()
 				configPath := filepath.Join(tmpDir, "manager.yml")
@@ -316,7 +329,7 @@ tls_config:
 				expectedConfig := &Config{
 					Endpoint:  "localhost:1234",
 					SecretKey: &secretKeyContents,
-					AgentID:   "8321f735-a52c-4f49-aca9-66f9266c5fe5",
+					AgentID:   testAgentID,
 					Labels:    &labelsContents,
 					AgentName: &agentNameContents,
 					TLS: &TLSConfig{
@@ -332,15 +345,15 @@ tls_config:
 		{
 			desc: "Successful Full Parse with TLS Secure Root CA",
 			testFunc: func(t *testing.T) {
-				configContents := `
+				configContents := fmt.Sprintf(`
 endpoint: localhost:1234
 secret_key: b92222ee-a1fc-4bb1-98db-26de3448541b
-agent_id: 8321f735-a52c-4f49-aca9-66f9266c5fe5
+agent_id: %s
 labels: "one=foo,two=bar"
 agent_name: "My Agent"
 tls_config:
   insecure_skip_verify: false
-`
+`, testAgentIDString)
 
 				tmpDir := t.TempDir()
 				configPath := filepath.Join(tmpDir, "manager.yml")
@@ -351,7 +364,7 @@ tls_config:
 				expectedConfig := &Config{
 					Endpoint:  "localhost:1234",
 					SecretKey: &secretKeyContents,
-					AgentID:   "8321f735-a52c-4f49-aca9-66f9266c5fe5",
+					AgentID:   testAgentID,
 					Labels:    &labelsContents,
 					AgentName: &agentNameContents,
 					TLS: &TLSConfig{
@@ -373,7 +386,7 @@ tls_config:
 				configContents := `
 endpoint: localhost:1234
 secret_key: b92222ee-a1fc-4bb1-98db-26de3448541b
-agent_id: 8321f735-a52c-4f49-aca9-66f9266c5fe5
+agent_id: 01HX2DWEQZ045KQR3VG0EYEZ94
 labels: "one=foo,two=bar"
 agent_name: "My Agent"
 tls_config:
@@ -403,13 +416,13 @@ tls_config:
 				configContents := fmt.Sprintf(`
 endpoint: localhost:1234
 secret_key: b92222ee-a1fc-4bb1-98db-26de3448541b
-agent_id: 8321f735-a52c-4f49-aca9-66f9266c5fe5
+agent_id: %s
 labels: "one=foo,two=bar"
 agent_name: "My Agent"
 tls_config:
   insecure_skip_verify: false
   ca_file: %s
-`, caPath)
+`, testAgentIDString, caPath)
 
 				err = os.WriteFile(configPath, []byte(configContents), os.ModePerm)
 				require.NoError(t, err)
@@ -417,7 +430,7 @@ tls_config:
 				expectedConfig := &Config{
 					Endpoint:  "localhost:1234",
 					SecretKey: &secretKeyContents,
-					AgentID:   "8321f735-a52c-4f49-aca9-66f9266c5fe5",
+					AgentID:   testAgentID,
 					Labels:    &labelsContents,
 					AgentName: &agentNameContents,
 					TLS: &TLSConfig{
@@ -440,7 +453,7 @@ tls_config:
 				configContents := `
 endpoint: localhost:1234
 secret_key: b92222ee-a1fc-4bb1-98db-26de3448541b
-agent_id: 8321f735-a52c-4f49-aca9-66f9266c5fe5
+agent_id: 01HX2DWEQZ045KQR3VG0EYEZ94
 labels: "one=foo,two=bar"
 agent_name: "My Agent"
 tls_config:
@@ -471,7 +484,7 @@ tls_config:
 				configContents := fmt.Sprintf(`
 endpoint: localhost:1234
 secret_key: b92222ee-a1fc-4bb1-98db-26de3448541b
-agent_id: 8321f735-a52c-4f49-aca9-66f9266c5fe5
+agent_id: 01HX2DWEQZ045KQR3VG0EYEZ94
 labels: "one=foo,two=bar"
 agent_name: "My Agent"
 tls_config:
@@ -502,7 +515,7 @@ tls_config:
 				configContents := fmt.Sprintf(`
 endpoint: localhost:1234
 secret_key: b92222ee-a1fc-4bb1-98db-26de3448541b
-agent_id: 8321f735-a52c-4f49-aca9-66f9266c5fe5
+agent_id: 01HX2DWEQZ045KQR3VG0EYEZ94
 labels: "one=foo,two=bar"
 agent_name: "My Agent"
 tls_config:
@@ -533,7 +546,7 @@ tls_config:
 				configContents := fmt.Sprintf(`
 endpoint: localhost:1234
 secret_key: b92222ee-a1fc-4bb1-98db-26de3448541b
-agent_id: 8321f735-a52c-4f49-aca9-66f9266c5fe5
+agent_id: 01HX2DWEQZ045KQR3VG0EYEZ94
 labels: "one=foo,two=bar"
 agent_name: "My Agent"
 tls_config:
@@ -563,7 +576,7 @@ tls_config:
 				configContents := fmt.Sprintf(`
 endpoint: localhost:1234
 secret_key: b92222ee-a1fc-4bb1-98db-26de3448541b
-agent_id: 8321f735-a52c-4f49-aca9-66f9266c5fe5
+agent_id: 01HX2DWEQZ045KQR3VG0EYEZ94
 labels: "one=foo,two=bar"
 agent_name: "My Agent"
 tls_config:
@@ -598,14 +611,14 @@ tls_config:
 				configContents := fmt.Sprintf(`
 endpoint: localhost:1234
 secret_key: b92222ee-a1fc-4bb1-98db-26de3448541b
-agent_id: 8321f735-a52c-4f49-aca9-66f9266c5fe5
+agent_id: %s
 labels: "one=foo,two=bar"
 agent_name: "My Agent"
 tls_config:
   insecure_skip_verify: false
   key_file: %s
   cert_file: %s
-`, keyPath, certPath)
+`, testAgentIDString, keyPath, certPath)
 
 				err = os.WriteFile(configPath, []byte(configContents), os.ModePerm)
 				require.NoError(t, err)
@@ -613,7 +626,7 @@ tls_config:
 				expectedConfig := &Config{
 					Endpoint:  "localhost:1234",
 					SecretKey: &secretKeyContents,
-					AgentID:   "8321f735-a52c-4f49-aca9-66f9266c5fe5",
+					AgentID:   testAgentID,
 					Labels:    &labelsContents,
 					AgentName: &agentNameContents,
 					TLS: &TLSConfig{
@@ -650,14 +663,14 @@ func TestCmpUpdatableFields(t *testing.T) {
 			baseCfg: Config{
 				Endpoint:  "ws://localhost:1234",
 				SecretKey: &secretKeyContents,
-				AgentID:   "20ce90b8-506c-4a3b-8134-21aa8d526e03",
+				AgentID:   testAgentID,
 				Labels:    &labelsOne,
 				AgentName: &nameOne,
 			},
 			compare: Config{
 				Endpoint:  "ws://localhost:1234",
 				SecretKey: &secretKeyContents,
-				AgentID:   "20ce90b8-506c-4a3b-8134-21aa8d526e03",
+				AgentID:   testAgentID,
 				Labels:    &labelsOne,
 				AgentName: &nameOne,
 			},
@@ -668,14 +681,14 @@ func TestCmpUpdatableFields(t *testing.T) {
 			baseCfg: Config{
 				Endpoint:  "ws://localhost:1234",
 				SecretKey: &secretKeyContents,
-				AgentID:   "20ce90b8-506c-4a3b-8134-21aa8d526e03",
+				AgentID:   testAgentID,
 				Labels:    &labelsOne,
 				AgentName: &nameOne,
 			},
 			compare: Config{
 				Endpoint:  "ws://some.host.com",
 				SecretKey: nil,
-				AgentID:   "d71cb88c-a4d3-4992-8bc8-d82702fdcb21",
+				AgentID:   EmptyAgentID,
 				Labels:    &labelsOne,
 				AgentName: &nameOne,
 			},
@@ -686,14 +699,14 @@ func TestCmpUpdatableFields(t *testing.T) {
 			baseCfg: Config{
 				Endpoint:  "ws://localhost:1234",
 				SecretKey: &secretKeyContents,
-				AgentID:   "20ce90b8-506c-4a3b-8134-21aa8d526e03",
+				AgentID:   testAgentID,
 				Labels:    &labelsOne,
 				AgentName: nil,
 			},
 			compare: Config{
 				Endpoint:  "ws://localhost:1234",
 				SecretKey: &secretKeyContents,
-				AgentID:   "20ce90b8-506c-4a3b-8134-21aa8d526e03",
+				AgentID:   testAgentID,
 				Labels:    &labelsOne,
 				AgentName: nil,
 			},
@@ -704,14 +717,14 @@ func TestCmpUpdatableFields(t *testing.T) {
 			baseCfg: Config{
 				Endpoint:  "ws://localhost:1234",
 				SecretKey: &secretKeyContents,
-				AgentID:   "20ce90b8-506c-4a3b-8134-21aa8d526e03",
+				AgentID:   testAgentID,
 				Labels:    &labelsOne,
 				AgentName: nil,
 			},
 			compare: Config{
 				Endpoint:  "ws://localhost:1234",
 				SecretKey: &secretKeyContents,
-				AgentID:   "20ce90b8-506c-4a3b-8134-21aa8d526e03",
+				AgentID:   testAgentID,
 				Labels:    &labelsTwo,
 				AgentName: nil,
 			},
@@ -722,14 +735,14 @@ func TestCmpUpdatableFields(t *testing.T) {
 			baseCfg: Config{
 				Endpoint:  "ws://localhost:1234",
 				SecretKey: &secretKeyContents,
-				AgentID:   "20ce90b8-506c-4a3b-8134-21aa8d526e03",
+				AgentID:   testAgentID,
 				Labels:    nil,
 				AgentName: &nameOne,
 			},
 			compare: Config{
 				Endpoint:  "ws://localhost:1234",
 				SecretKey: &secretKeyContents,
-				AgentID:   "20ce90b8-506c-4a3b-8134-21aa8d526e03",
+				AgentID:   testAgentID,
 				Labels:    nil,
 				AgentName: &nameOne,
 			},
@@ -740,14 +753,14 @@ func TestCmpUpdatableFields(t *testing.T) {
 			baseCfg: Config{
 				Endpoint:  "ws://localhost:1234",
 				SecretKey: &secretKeyContents,
-				AgentID:   "20ce90b8-506c-4a3b-8134-21aa8d526e03",
+				AgentID:   testAgentID,
 				Labels:    nil,
 				AgentName: &nameOne,
 			},
 			compare: Config{
 				Endpoint:  "ws://localhost:1234",
 				SecretKey: &secretKeyContents,
-				AgentID:   "20ce90b8-506c-4a3b-8134-21aa8d526e03",
+				AgentID:   testAgentID,
 				Labels:    nil,
 				AgentName: &nameTwo,
 			},
@@ -758,14 +771,14 @@ func TestCmpUpdatableFields(t *testing.T) {
 			baseCfg: Config{
 				Endpoint:  "ws://localhost:1234",
 				SecretKey: &secretKeyContents,
-				AgentID:   "20ce90b8-506c-4a3b-8134-21aa8d526e03",
+				AgentID:   testAgentID,
 				Labels:    &labelsOne,
 				AgentName: nil,
 			},
 			compare: Config{
 				Endpoint:  "ws://localhost:1234",
 				SecretKey: &secretKeyContents,
-				AgentID:   "20ce90b8-506c-4a3b-8134-21aa8d526e03",
+				AgentID:   testAgentID,
 				Labels:    nil,
 				AgentName: nil,
 			},
@@ -776,14 +789,14 @@ func TestCmpUpdatableFields(t *testing.T) {
 			baseCfg: Config{
 				Endpoint:  "ws://localhost:1234",
 				SecretKey: &secretKeyContents,
-				AgentID:   "20ce90b8-506c-4a3b-8134-21aa8d526e03",
+				AgentID:   testAgentID,
 				Labels:    nil,
 				AgentName: nil,
 			},
 			compare: Config{
 				Endpoint:  "ws://localhost:1234",
 				SecretKey: &secretKeyContents,
-				AgentID:   "20ce90b8-506c-4a3b-8134-21aa8d526e03",
+				AgentID:   testAgentID,
 				Labels:    &labelsTwo,
 				AgentName: nil,
 			},
@@ -845,7 +858,7 @@ func TestConfigCopy(t *testing.T) {
 	cfg := Config{
 		Endpoint:  "ws://localhost:1234",
 		SecretKey: &secretKeyContents,
-		AgentID:   "20ce90b8-506c-4a3b-8134-21aa8d526e03",
+		AgentID:   testAgentID,
 		Labels:    &labelsContents,
 		AgentName: &agentNameContents,
 		TLS:       &tlscfg,
@@ -853,4 +866,147 @@ func TestConfigCopy(t *testing.T) {
 
 	copyCfg := cfg.Copy()
 	require.Equal(t, cfg, *copyCfg)
+}
+
+func TestParseAgentID(t *testing.T) {
+	testCases := []struct {
+		name        string
+		id          string
+		expected    AgentID
+		expectedErr string
+	}{
+		{
+			name: "Valid ULID",
+			id:   "01J9RQ8V3ZT95MRH05DKJA3KSM",
+			expected: AgentID{
+				by:     [16]byte{0x1, 0x92, 0x71, 0x74, 0x6c, 0x7f, 0xd2, 0x4b, 0x4c, 0x44, 0x5, 0x6c, 0xe4, 0xa1, 0xcf, 0x34},
+				idType: agentIDTypeULID,
+				orig:   "01J9RQ8V3ZT95MRH05DKJA3KSM",
+			},
+		},
+		{
+			name: "Valid UUID",
+			id:   "01927175-7a98-7585-94ce-cc833ee7735d",
+			expected: AgentID{
+				by:     [16]byte{0x1, 0x92, 0x71, 0x75, 0x7a, 0x98, 0x75, 0x85, 0x94, 0xce, 0xcc, 0x83, 0x3e, 0xe7, 0x73, 0x5d},
+				idType: agentIDTypeUUID,
+				orig:   "01927175-7a98-7585-94ce-cc833ee7735d",
+			},
+		},
+		{
+			name:        "Invalid ULID",
+			id:          "A1J9RQ8V3ZT95MRH05DKJA3KSM",
+			expectedErr: "parse ulid:",
+		},
+		{
+			name:        "Invalid UUID",
+			id:          "01927175-7a98-7585-94ce-cc833ee7735l",
+			expectedErr: "parse uuid:",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			id, err := ParseAgentID(tc.id)
+			if tc.expectedErr != "" {
+				require.ErrorContains(t, err, tc.expectedErr)
+				return
+			}
+
+			require.Equal(t, tc.expected, id)
+		})
+	}
+}
+
+func TestAgentIDFromUUID(t *testing.T) {
+	id := AgentIDFromUUID(Must(uuid.Parse("01927175-7a98-7585-94ce-cc833ee7735d")))
+	require.Equal(t, AgentID{
+		by:     [16]byte{0x1, 0x92, 0x71, 0x75, 0x7a, 0x98, 0x75, 0x85, 0x94, 0xce, 0xcc, 0x83, 0x3e, 0xe7, 0x73, 0x5d},
+		idType: agentIDTypeUUID,
+		orig:   "01927175-7a98-7585-94ce-cc833ee7735d",
+	}, id)
+}
+
+func TestAgentID_String(t *testing.T) {
+	uuidID := Must(ParseAgentID("01927175-7a98-7585-94ce-cc833ee7735d"))
+	ulidID := Must(ParseAgentID("01J9RQ8V3ZT95MRH05DKJA3KSM"))
+
+	require.Equal(t, "01927175-7a98-7585-94ce-cc833ee7735d", uuidID.String())
+	require.Equal(t, "01J9RQ8V3ZT95MRH05DKJA3KSM", ulidID.String())
+}
+
+func TestAgentID_OpAMPInstanceUID(t *testing.T) {
+	uuidID := Must(ParseAgentID("01927175-7a98-7585-94ce-cc833ee7735d"))
+	ulidID := Must(ParseAgentID("01J9RQ8V3ZT95MRH05DKJA3KSM"))
+
+	require.EqualValues(t,
+		[16]byte{0x1, 0x92, 0x71, 0x75, 0x7a, 0x98, 0x75, 0x85, 0x94, 0xce, 0xcc, 0x83, 0x3e, 0xe7, 0x73, 0x5d},
+		uuidID.OpAMPInstanceUID(),
+	)
+
+	require.EqualValues(t,
+		[16]byte{0x1, 0x92, 0x71, 0x74, 0x6c, 0x7f, 0xd2, 0x4b, 0x4c, 0x44, 0x5, 0x6c, 0xe4, 0xa1, 0xcf, 0x34},
+		ulidID.OpAMPInstanceUID(),
+	)
+}
+
+func TestAgentID_Type(t *testing.T) {
+	uuidID := Must(ParseAgentID("01927175-7a98-7585-94ce-cc833ee7735d"))
+	ulidID := Must(ParseAgentID("01J9RQ8V3ZT95MRH05DKJA3KSM"))
+
+	require.EqualValues(t, agentIDTypeUUID, uuidID.Type())
+	require.EqualValues(t, agentIDTypeULID, ulidID.Type())
+}
+
+func TestAgentID_MarshalYaml(t *testing.T) {
+	uuidID := Must(ParseAgentID("01927175-7a98-7585-94ce-cc833ee7735d"))
+	ulidID := Must(ParseAgentID("01J9RQ8V3ZT95MRH05DKJA3KSM"))
+
+	uuidYaml, err := yaml.Marshal(uuidID)
+	require.NoError(t, err)
+	require.Equal(t, "01927175-7a98-7585-94ce-cc833ee7735d\n", string(uuidYaml))
+
+	ulidYaml, err := yaml.Marshal(ulidID)
+	require.NoError(t, err)
+	require.Equal(t, "01J9RQ8V3ZT95MRH05DKJA3KSM\n", string(ulidYaml))
+}
+
+func TestAgentID_UnmarshalYaml(t *testing.T) {
+	t.Run("UUID", func(t *testing.T) {
+		var uuidAgentID AgentID
+		err := yaml.Unmarshal([]byte("01927175-7a98-7585-94ce-cc833ee7735d"), &uuidAgentID)
+		require.NoError(t, err)
+		require.Equal(t, AgentID{
+			by:     [16]byte{0x1, 0x92, 0x71, 0x75, 0x7a, 0x98, 0x75, 0x85, 0x94, 0xce, 0xcc, 0x83, 0x3e, 0xe7, 0x73, 0x5d},
+			idType: agentIDTypeUUID,
+			orig:   "01927175-7a98-7585-94ce-cc833ee7735d",
+		}, uuidAgentID)
+	})
+
+	t.Run("ULID", func(t *testing.T) {
+		var ulidAgentID AgentID
+		err := yaml.Unmarshal([]byte("01J9RQ8V3ZT95MRH05DKJA3KSM"), &ulidAgentID)
+		require.NoError(t, err)
+		require.Equal(t, AgentID{
+			by:     [16]byte{0x1, 0x92, 0x71, 0x74, 0x6c, 0x7f, 0xd2, 0x4b, 0x4c, 0x44, 0x5, 0x6c, 0xe4, 0xa1, 0xcf, 0x34},
+			idType: agentIDTypeULID,
+			orig:   "01J9RQ8V3ZT95MRH05DKJA3KSM",
+		}, ulidAgentID)
+	})
+
+	t.Run("Invalid ID", func(t *testing.T) {
+		// Invalid IDs will give an empty ID instead of an error, so the
+		// ID can be regenerated from the partially read config.
+		var invalidID AgentID
+		err := yaml.Unmarshal([]byte("Invalid"), &invalidID)
+		require.NoError(t, err)
+		require.Equal(t, EmptyAgentID, invalidID)
+	})
+
+	t.Run("Empty ID", func(t *testing.T) {
+		var emptyID AgentID
+		err := yaml.Unmarshal([]byte(`""`), &emptyID)
+		require.NoError(t, err)
+		require.Equal(t, EmptyAgentID, emptyID)
+	})
 }
