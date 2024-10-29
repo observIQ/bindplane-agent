@@ -592,7 +592,7 @@ create_supervisor_config() {
   info "Creating supervisor config..."
 
   if [ -z "$OPAMP_ENDPOINT" ]; then
-    OPAMP_ENDPOINT="ws://localhost:3000/v1/opamp"
+    OPAMP_ENDPOINT="ws://localhost:3001/v1/opamp"
     increase_indent
     info "No OpAMP endpoint specified, starting agent using 'ws://localhost:3001/v1/opamp' as endpoint."
     decrease_indent
