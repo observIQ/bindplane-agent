@@ -15,6 +15,7 @@
 package observiq
 
 import (
+	"os"
 	"runtime"
 	"testing"
 
@@ -97,6 +98,7 @@ func TestToAgentDescription(t *testing.T) {
 					opamp.StringKeyValue("service.name", "com.observiq.collector"),
 					opamp.StringKeyValue("service.version", "v1.2.3"),
 					opamp.StringKeyValue("service.instance.name", "my-linux-box"),
+					opamp.StringKeyValue("service.instance.key_hash", "62af8704"),
 				},
 				NonIdentifyingAttributes: []*protobufs.KeyValue{
 					opamp.StringKeyValue("os.arch", "amd64"),
@@ -127,6 +129,7 @@ func TestToAgentDescription(t *testing.T) {
 					opamp.StringKeyValue("service.name", "com.observiq.collector"),
 					opamp.StringKeyValue("service.version", "v1.2.3"),
 					opamp.StringKeyValue("service.instance.name", agentNameContents),
+					opamp.StringKeyValue("service.instance.key_hash", "62af8704"),
 				},
 				NonIdentifyingAttributes: []*protobufs.KeyValue{
 					opamp.StringKeyValue("os.arch", "amd64"),
@@ -141,6 +144,7 @@ func TestToAgentDescription(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
+		os.Setenv("OTEL_AES_CREDENTIAL_PROVIDER", "test-key")
 		t.Run(tc.desc, func(t *testing.T) {
 			actual := tc.ident.ToAgentDescription()
 			assert.Equal(t, tc.expected, actual)
