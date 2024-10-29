@@ -1890,8 +1890,6 @@ github.com/nxadm/tail v1.4.8 h1:nPr65rt6Y5JFSKQO7qToXr7pePgD6Gwiw05lkbyAQTE=
 github.com/nxadm/tail v1.4.8/go.mod h1:+ncqLTQzXmGhMZNUePPaPqPvBxHAIsmXswZKocGu+AU=
 github.com/oapi-codegen/runtime v1.0.0 h1:P4rqFX5fMFWqRzY9M/3YF9+aPSPPB06IzP2P7oOxrWo=
 github.com/oapi-codegen/runtime v1.0.0/go.mod h1:LmCUMQuPB4M/nLXilQXhHw+BLZdDb18B34OO356yJ/A=
-github.com/observiq/opentelemetry-collector-contrib/receiver/kafkareceiver v0.0.0-20241015153718-532694c1f04e h1:b0OXY8osjmBVKwwjqKFWOi6yEBh5UV4QX5lWNFR056Q=
-github.com/observiq/opentelemetry-collector-contrib/receiver/kafkareceiver v0.0.0-20241015153718-532694c1f04e/go.mod h1:KF/D8fNrDOQwrviB3/z5C68UUcHmz/5/gX/pRrPyJE8=
 github.com/oklog/run v1.0.0/go.mod h1:dlhp/R75TPv97u0XWUtDeV/lRKWPKSdTuV0TZvrmrQA=
 github.com/oklog/ulid v1.3.1 h1:EGfNDEx6MqHz8B3uNV6QAib1UR2Lm97sHi3ocA6ESJ4=
 github.com/oklog/ulid v1.3.1/go.mod h1:CirwcVhetQ6Lv90oh/F+FBtV6XMibvdAFo93nm5qn4U=
@@ -2216,6 +2214,8 @@ github.com/open-telemetry/opentelemetry-collector-contrib/receiver/k8seventsrece
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/k8seventsreceiver v0.112.0/go.mod h1:wg24A2b8U8ndD1RmexGUMy+fvhLaqSKZKdjC45nXiWY=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/kafkametricsreceiver v0.112.0 h1:pzyJIfwljJ3Aoz7n52rry6AFyr6so/s7UDicuH4UkiA=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/kafkametricsreceiver v0.112.0/go.mod h1:QDSQiGi93tt2aKfKdA6aatx6csT8yEJ7iYVspLw15Sc=
+github.com/open-telemetry/opentelemetry-collector-contrib/receiver/kafkareceiver v0.112.0 h1:s9SFpmaztDQASACSYd3+n3gC8X3zI+/XKwlBXH8CuvE=
+github.com/open-telemetry/opentelemetry-collector-contrib/receiver/kafkareceiver v0.112.0/go.mod h1:v61OP6Zxu8Kx4WLuswY06uaUPiOWDt5ykW9vqNQJNXc=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/kubeletstatsreceiver v0.112.0 h1:aPC9qimb1YjuIcoFDHO8HpIQUjOp7FLZLg0leQZpLmc=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/kubeletstatsreceiver v0.112.0/go.mod h1:Q/Wcj+miokdCFIyojKRIllKEn2p12m2g8knrmdZ43iY=
 github.com/open-telemetry/opentelemetry-collector-contrib/receiver/memcachedreceiver v0.112.0 h1:MSviOrHGPV8JlXMK+yW9sW5NPsjbfMOGUJVSmo6i2ZQ=
