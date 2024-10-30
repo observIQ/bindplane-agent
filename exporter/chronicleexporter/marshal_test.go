@@ -92,7 +92,7 @@ func TestProtoMarshaler_MarshalRawLogs(t *testing.T) {
 				require.Len(t, requests, 1)
 				batch := requests[0].Batch
 				require.Equal(t, "WINEVTLOG", batch.LogType)
-				require.Equal(t, "test", batch.Namespace)
+				require.Equal(t, "test", batch.Source.Namespace)
 				require.Len(t, batch.Entries, 1)
 
 				// Convert Data (byte slice) to string for comparison
@@ -202,9 +202,11 @@ func TestProtoMarshaler_MarshalRawLogs(t *testing.T) {
 				require.Len(t, requests, 1)
 				batch := requests[0].Batch
 				require.Equal(t, "WINEVTLOG", batch.LogType, "Expected log type to be overridden by attribute")
-				require.Equal(t, "test", batch.Namespace, "Expected namespace to be overridden by attribute")
-				require.Equal(t, "realvalue1", batch.IngestionLabels[`ingestion_label["realkey1"]`], "Expected ingestion label to be overridden by attribute")
-				require.Equal(t, "realvalue2", batch.IngestionLabels[`ingestion_label["realkey2"]`], "Expected ingestion label to be overridden by attribute")
+				require.Equal(t, "test", batch.Source.Namespace, "Expected namespace to be overridden by attribute")
+				require.Equal(t, `ingestion_label["realkey1"]`, batch.Source.Labels[0].Key, "Expected ingestion label to be overridden by attribute")
+				require.Equal(t, "realvalue1", batch.Source.Labels[0].Value, "Expected ingestion label to be overridden by attribute")
+				require.Equal(t, `ingestion_label["realkey2"]`, batch.Source.Labels[1].Key, "Expected ingestion label to be overridden by attribute")
+				require.Equal(t, "realvalue2", batch.Source.Labels[1].Value, "Expected ingestion label to be overridden by attribute")
 			},
 		},
 		{
@@ -227,9 +229,11 @@ func TestProtoMarshaler_MarshalRawLogs(t *testing.T) {
 				require.Len(t, requests, 1)
 				batch := requests[0].Batch
 				require.Equal(t, "ASOC_ALERT", batch.LogType, "Expected log type to be overridden by attribute")
-				require.Equal(t, "test", batch.Namespace, "Expected namespace to be overridden by attribute")
-				require.Equal(t, "realvalue1", batch.IngestionLabels[`chronicle_ingestion_label["realkey1"]`], "Expected ingestion label to be overridden by attribute")
-				require.Equal(t, "realvalue2", batch.IngestionLabels[`chronicle_ingestion_label["realkey2"]`], "Expected ingestion label to be overridden by attribute")
+				require.Equal(t, "test", batch.Source.Namespace, "Expected namespace to be overridden by attribute")
+				require.Equal(t, `chronicle_ingestion_label["realkey1"]`, batch.Source.Labels[0].Key, "Expected ingestion label to be overridden by attribute")
+				require.Equal(t, "realvalue1", batch.Source.Labels[0].Value, "Expected ingestion label to be overridden by attribute")
+				require.Equal(t, `chronicle_ingestion_label["realkey2"]`, batch.Source.Labels[1].Key, "Expected ingestion label to be overridden by attribute")
+				require.Equal(t, "realvalue2", batch.Source.Labels[1].Value, "Expected ingestion label to be overridden by attribute")
 			},
 		},
 	}

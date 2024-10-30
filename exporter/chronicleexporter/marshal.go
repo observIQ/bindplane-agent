@@ -4,13 +4,14 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//	http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 package chronicleexporter
 
 import (
@@ -78,10 +79,10 @@ func (m *protoMarshaler) MarshalRawLogs(ctx context.Context, ld plog.Logs) ([]*a
 	}
 	return m.constructPayloads(rawLogs, namespace, ingestionLabels), nil
 }
-func (m *protoMarshaler) extractRawLogs(ctx context.Context, ld plog.Logs) (map[string][]*api.LogEntry, map[string]string, map[string]map[string]string, error) {
+func (m *protoMarshaler) extractRawLogs(ctx context.Context, ld plog.Logs) (map[string][]*api.LogEntry, map[string]string, map[string][]*api.Label, error) {
 	entries := make(map[string][]*api.LogEntry)
 	namespaceMap := make(map[string]string)
-	ingestionLabelsMap := make(map[string]map[string]string)
+	ingestionLabelsMap := make(map[string][]*api.Label)
 	for i := 0; i < ld.ResourceLogs().Len(); i++ {
 		resourceLog := ld.ResourceLogs().At(i)
 		for j := 0; j < resourceLog.ScopeLogs().Len(); j++ {
@@ -113,10 +114,10 @@ func (m *protoMarshaler) extractRawLogs(ctx context.Context, ld plog.Logs) (map[
 				}
 				if len(ingestionLabels) != 0 {
 					if ingestionLabelsMap[logType] == nil {
-						ingestionLabelsMap[logType] = make(map[string]string)
+						ingestionLabelsMap[logType] = make([]*api.Label, 0)
 					}
-					for k, v := range ingestionLabels {
-						ingestionLabelsMap[logType][k] = v
+					for _, v := range ingestionLabels {
+						ingestionLabelsMap[logType] = append(ingestionLabelsMap[logType], v)
 					}
 				}
 			}
@@ -124,7 +125,7 @@ func (m *protoMarshaler) extractRawLogs(ctx context.Context, ld plog.Logs) (map[
 	}
 	return entries, namespaceMap, ingestionLabelsMap, nil
 }
-func (m *protoMarshaler) processLogRecord(ctx context.Context, logRecord plog.LogRecord, scope plog.ScopeLogs, resource plog.ResourceLogs) (string, string, string, map[string]string, error) {
+func (m *protoMarshaler) processLogRecord(ctx context.Context, logRecord plog.LogRecord, scope plog.ScopeLogs, resource plog.ResourceLogs) (string, string, string, []*api.Label, error) {
 	rawLog, err := m.getRawLog(ctx, logRecord, scope, resource)
 	if err != nil {
 		return "", "", "", nil, err
@@ -209,10 +210,17 @@ func (m *protoMarshaler) getNamespace(ctx context.Context, logRecord plog.LogRec
 	}
 	return m.cfg.Namespace, nil
 }
-func (m *protoMarshaler) getIngestionLabels(logRecord plog.LogRecord) (map[string]string, error) {
+func (m *protoMarshaler) getIngestionLabels(logRecord plog.LogRecord) ([]*api.Label, error) {
+	configLabels := make([]*api.Label, 0)
+	for key, value := range m.cfg.IngestionLabels {
+		configLabels = append(configLabels, &api.Label{
+			Key:   key,
+			Value: value,
+		})
+	}
 	ingestionLabels, err := m.getRawNestedFields(chronicleIngestionLabelsPrefix, logRecord)
 	if err != nil {
-		return m.cfg.IngestionLabels, fmt.Errorf("get chronicle ingestion labels: %w", err)
+		return configLabels, fmt.Errorf("get chronicle ingestion labels: %w", err)
 	}
 	if len(ingestionLabels) != 0 {
 		return ingestionLabels, nil
@@ -220,13 +228,13 @@ func (m *protoMarshaler) getIngestionLabels(logRecord plog.LogRecord) (map[strin
 	if m.cfg.OverrideIngestionLabels {
 		ingestionLabels, err := m.getRawNestedFields(ingestionLabelsPrefix, logRecord)
 		if err != nil {
-			return m.cfg.IngestionLabels, fmt.Errorf("get chronicle ingestion labels: %w", err)
+			return configLabels, fmt.Errorf("get chronicle ingestion labels: %w", err)
 		}
 		if len(ingestionLabels) != 0 {
 			return ingestionLabels, nil
 		}
 	}
-	return m.cfg.IngestionLabels, nil
+	return configLabels, nil
 }
 func (m *protoMarshaler) getRawField(ctx context.Context, field string, logRecord plog.LogRecord, scope plog.ScopeLogs, resource plog.ResourceLogs) (string, error) {
 	lrExpr, err := expr.NewOTTLLogRecordExpression(field, m.teleSettings)
@@ -255,11 +263,14 @@ func (m *protoMarshaler) getRawField(ctx context.Context, field string, logRecor
 	}
 }
 
-func (m *protoMarshaler) getRawNestedFields(field string, logRecord plog.LogRecord) (map[string]string, error) {
-	nestedFields := make(map[string]string)
+func (m *protoMarshaler) getRawNestedFields(field string, logRecord plog.LogRecord) ([]*api.Label, error) {
+	nestedFields := make([]*api.Label, 0)
 	logRecord.Attributes().Range(func(key string, value pcommon.Value) bool {
 		if strings.HasPrefix(key, field) {
-			nestedFields[key] = value.AsString()
+			nestedFields = append(nestedFields, &api.Label{
+				Key:   key,
+				Value: value.AsString(),
+			})
 		}
 		return true
 	})
@@ -269,7 +280,7 @@ func (m *protoMarshaler) getRawNestedFields(field string, logRecord plog.LogReco
 	return nestedFields, nil
 }
 
-func (m *protoMarshaler) constructPayloads(rawLogs map[string][]*api.LogEntry, namespaceMap map[string]string, ingestionLabelsMap map[string]map[string]string) []*api.BatchCreateLogsRequest {
+func (m *protoMarshaler) constructPayloads(rawLogs map[string][]*api.LogEntry, namespaceMap map[string]string, ingestionLabelsMap map[string][]*api.Label) []*api.BatchCreateLogsRequest {
 	payloads := make([]*api.BatchCreateLogsRequest, 0, len(rawLogs))
 	for logType, entries := range rawLogs {
 		if len(entries) > 0 {
@@ -280,16 +291,14 @@ func (m *protoMarshaler) constructPayloads(rawLogs map[string][]*api.LogEntry, n
 			ingestionLabels := ingestionLabelsMap[logType]
 			payloads = append(payloads, &api.BatchCreateLogsRequest{
 				Batch: &api.LogEntryBatch{
-					StartTime:       timestamppb.New(m.startTime),
-					Entries:         entries,
-					LogType:         logType,
-					Namespace:       namespace,
-					IngestionLabels: ingestionLabels,
+					StartTime: timestamppb.New(m.startTime),
+					Entries:   entries,
+					LogType:   logType,
 					Source: &api.EventSource{
 						CollectorId: m.collectorID,
 						CustomerId:  m.customerID,
-						Labels:      m.labels,
-						Namespace:   m.cfg.Namespace,
+						Labels:      ingestionLabels,
+						Namespace:   namespace,
 					},
 				},
 			})
