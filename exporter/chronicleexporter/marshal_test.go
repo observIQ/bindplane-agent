@@ -188,7 +188,7 @@ func TestProtoMarshaler_MarshalRawLogs(t *testing.T) {
 				CustomerID:              uuid.New().String(),
 				LogType:                 "DEFAULT", // This should be overridden by the log_type attribute
 				Namespace:               "DEFAULT",
-				IngestionLabels:         map[string]string{`chronicle_ingestion_label["DEFAULTKEY1"]`: "DEFAULTVALUE1", `chronicle_ingestion_label["DEFAULTKEY2"]`: "DEFAUTLVALUE2"},
+				IngestionLabels:         map[string]string{`ingestion_label["DEFAULTKEY1"]`: "DEFAULTVALUE1", `ingestion_label["DEFAULTKEY2"]`: "DEFAUTLVALUE2"},
 				RawLogField:             "body",
 				OverrideLogType:         true,
 				OverrideNamespace:       true,
@@ -196,23 +196,24 @@ func TestProtoMarshaler_MarshalRawLogs(t *testing.T) {
 			},
 			labels: []*api.Label{},
 			logRecords: func() plog.Logs {
-				return mockLogs(mockLogRecord("Log with overridden type", map[string]any{"log_type": "windows_event.application", "namespace": "test", `chronicle_ingestion_label["realkey1"]`: "realvalue1", `chronicle_ingestion_label["realkey2"]`: "realvalue2"}))
+				return mockLogs(mockLogRecord("Log with overridden type", map[string]any{"log_type": "windows_event.application", "namespace": "test", `ingestion_label["realkey1"]`: "realvalue1", `ingestion_label["realkey2"]`: "realvalue2"}))
 			},
 			expectations: func(t *testing.T, requests []*api.BatchCreateLogsRequest) {
 				require.Len(t, requests, 1)
 				batch := requests[0].Batch
 				require.Equal(t, "WINEVTLOG", batch.LogType, "Expected log type to be overridden by attribute")
 				require.Equal(t, "test", batch.Namespace, "Expected namespace to be overridden by attribute")
-				// require.Equal(t, "realvalue1", batch.IngestionLabels["realkey1"], "Expected ingestion label to be overridden by attribute")
-				// require.Equal(t, "realvalue2", batch.IngestionLabels["realkey2"], "Expected ingestion label to be overridden by attribute")
+				require.Equal(t, "realvalue1", batch.IngestionLabels[`ingestion_label["realkey1"]`], "Expected ingestion label to be overridden by attribute")
+				require.Equal(t, "realvalue2", batch.IngestionLabels[`ingestion_label["realkey2"]`], "Expected ingestion label to be overridden by attribute")
 			},
 		},
 		{
 			name: "Override log type with chronicle attribute",
 			cfg: Config{
 				CustomerID:              uuid.New().String(),
-				LogType:                 "DEFAULT", // This should be overridden by the chronicle_log_type attribute
-				Namespace:               "DEFAULT", // This should be overridden by the chronicle_namespace attribute
+				LogType:                 "DEFAULT",                                                                                                               // This should be overridden by the chronicle_log_type attribute
+				Namespace:               "DEFAULT",                                                                                                               // This should be overridden by the chronicle_namespace attribute
+				IngestionLabels:         map[string]string{`ingestion_label["DEFAULTKEY1"]`: "DEFAULTVALUE1", `ingestion_label["DEFAULTKEY2"]`: "DEFAUTLVALUE2"}, // This should be overridden by the chronicle_ingestion_label attribute
 				RawLogField:             "body",
 				OverrideLogType:         true,
 				OverrideNamespace:       true,
@@ -220,13 +221,15 @@ func TestProtoMarshaler_MarshalRawLogs(t *testing.T) {
 			},
 			labels: []*api.Label{},
 			logRecords: func() plog.Logs {
-				return mockLogs(mockLogRecord("Log with overridden type", map[string]any{"chronicle_log_type": "ASOC_ALERT", "chronicle_namespace": "test"}))
+				return mockLogs(mockLogRecord("Log with overridden type", map[string]any{"chronicle_log_type": "ASOC_ALERT", "chronicle_namespace": "test", `chronicle_ingestion_label["realkey1"]`: "realvalue1", `chronicle_ingestion_label["realkey2"]`: "realvalue2"}))
 			},
 			expectations: func(t *testing.T, requests []*api.BatchCreateLogsRequest) {
 				require.Len(t, requests, 1)
 				batch := requests[0].Batch
 				require.Equal(t, "ASOC_ALERT", batch.LogType, "Expected log type to be overridden by attribute")
 				require.Equal(t, "test", batch.Namespace, "Expected namespace to be overridden by attribute")
+				require.Equal(t, "realvalue1", batch.IngestionLabels[`chronicle_ingestion_label["realkey1"]`], "Expected ingestion label to be overridden by attribute")
+				require.Equal(t, "realvalue2", batch.IngestionLabels[`chronicle_ingestion_label["realkey2"]`], "Expected ingestion label to be overridden by attribute")
 			},
 		},
 	}

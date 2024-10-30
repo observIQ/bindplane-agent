@@ -139,7 +139,7 @@ func (m *protoMarshaler) processLogRecord(ctx context.Context, logRecord plog.Lo
 	}
 	ingestionLabels, err := m.getIngestionLabels(logRecord)
 	if err != nil {
-		// return "", "", "", nil, err
+		return "", "", "", nil, err
 	}
 	return rawLog, logType, namespace, ingestionLabels, nil
 }
@@ -254,6 +254,7 @@ func (m *protoMarshaler) getRawField(ctx context.Context, field string, logRecor
 		return "", fmt.Errorf("unsupported log record expression result type: %T", lrExprResult)
 	}
 }
+
 func (m *protoMarshaler) getRawNestedFields(field string, logRecord plog.LogRecord) (map[string]string, error) {
 	nestedFields := make(map[string]string)
 	logRecord.Attributes().Range(func(key string, value pcommon.Value) bool {
@@ -263,10 +264,11 @@ func (m *protoMarshaler) getRawNestedFields(field string, logRecord plog.LogReco
 		return true
 	})
 	if len(nestedFields) == 0 {
-		return nil, fmt.Errorf("no attributes found with prefix 'chronicle_ingestion_labels'")
+		return nil, nil
 	}
 	return nestedFields, nil
 }
+
 func (m *protoMarshaler) constructPayloads(rawLogs map[string][]*api.LogEntry, namespaceMap map[string]string, ingestionLabelsMap map[string]map[string]string) []*api.BatchCreateLogsRequest {
 	payloads := make([]*api.BatchCreateLogsRequest, 0, len(rawLogs))
 	for logType, entries := range rawLogs {
