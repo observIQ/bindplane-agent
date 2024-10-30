@@ -127,6 +127,9 @@ type LogEntryBatch struct {
 	Source *EventSource `protobuf:"bytes,2,opt,name=source,proto3" json:"source,omitempty"`
 	// Log type in string.
 	LogType string `protobuf:"bytes,9,opt,name=log_type,json=logType,proto3" json:"log_type,omitempty"`
+	// Namespace in string.
+	Namespace string `protobuf:"bytes,9,opt,name=namespace,proto3" json:"namespace,omitempty"`
+	IngestionLabels map[string]string `protobuf:"bytes,9,opt,name=ingestion_labels,json=ingestionLabels,proto3" json:"ingestion_labels,omitempty"`
 	// Opaque hint to help parsing the log.
 	Hint string `protobuf:"bytes,4,opt,name=hint,proto3" json:"hint,omitempty"`
 	// Log entries in this batch.
