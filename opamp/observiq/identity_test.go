@@ -98,7 +98,6 @@ func TestToAgentDescription(t *testing.T) {
 					opamp.StringKeyValue("service.name", "com.observiq.collector"),
 					opamp.StringKeyValue("service.version", "v1.2.3"),
 					opamp.StringKeyValue("service.instance.name", "my-linux-box"),
-					opamp.StringKeyValue("service.instance.key_hash", "62af8704"),
 				},
 				NonIdentifyingAttributes: []*protobufs.KeyValue{
 					opamp.StringKeyValue("os.arch", "amd64"),
@@ -106,6 +105,7 @@ func TestToAgentDescription(t *testing.T) {
 					opamp.StringKeyValue("os.family", "linux"),
 					opamp.StringKeyValue("host.name", "my-linux-box"),
 					opamp.StringKeyValue("host.mac_address", "68-C7-B4-EB-A8-D2"),
+					opamp.StringKeyValue("service.key", "test-key"),
 				},
 			},
 		},
@@ -129,7 +129,6 @@ func TestToAgentDescription(t *testing.T) {
 					opamp.StringKeyValue("service.name", "com.observiq.collector"),
 					opamp.StringKeyValue("service.version", "v1.2.3"),
 					opamp.StringKeyValue("service.instance.name", agentNameContents),
-					opamp.StringKeyValue("service.instance.key_hash", "62af8704"),
 				},
 				NonIdentifyingAttributes: []*protobufs.KeyValue{
 					opamp.StringKeyValue("os.arch", "amd64"),
@@ -138,6 +137,7 @@ func TestToAgentDescription(t *testing.T) {
 					opamp.StringKeyValue("host.name", "my-linux-box"),
 					opamp.StringKeyValue("host.mac_address", "68-C7-B4-EB-A8-D2"),
 					opamp.StringKeyValue("service.labels", labelsContents),
+					opamp.StringKeyValue("service.key", "test-key"),
 				},
 			},
 		},

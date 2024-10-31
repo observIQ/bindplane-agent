@@ -15,8 +15,6 @@
 package observiq
 
 import (
-	"crypto/sha256"
-	"encoding/hex"
 	"os"
 	"runtime"
 
@@ -106,14 +104,6 @@ func (i *identity) ToAgentDescription() *protobufs.AgentDescription {
 		identifyingAttributes = append(identifyingAttributes, opamp.StringKeyValue("service.instance.name", i.hostname))
 	}
 
-	key := os.Getenv("OTEL_AES_CREDENTIAL_PROVIDER")
-	if key != "" {
-		keyHash := ""
-		sha := sha256.Sum256([]byte(key))
-		keyHash = hex.EncodeToString(sha[0:4])
-		identifyingAttributes = append(identifyingAttributes, opamp.StringKeyValue("service.instance.key_hash", keyHash))
-	}
-
 	nonIdentifyingAttributes := []*protobufs.KeyValue{
 		opamp.StringKeyValue("os.arch", i.oSArch),
 		opamp.StringKeyValue("os.details", i.oSDetails),
@@ -124,6 +114,11 @@ func (i *identity) ToAgentDescription() *protobufs.AgentDescription {
 
 	if i.labels != nil {
 		nonIdentifyingAttributes = append(nonIdentifyingAttributes, opamp.StringKeyValue("service.labels", *i.labels))
+	}
+
+	key := os.Getenv("OTEL_AES_CREDENTIAL_PROVIDER")
+	if key != "" {
+		nonIdentifyingAttributes = append(nonIdentifyingAttributes, opamp.StringKeyValue("service.key", key))
 	}
 
 	agentDesc := &protobufs.AgentDescription{
