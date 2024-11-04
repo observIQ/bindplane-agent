@@ -28,6 +28,9 @@ SCRIPT_NAME="$0"
 INDENT_WIDTH='  '
 indent=""
 
+# Default Supervisor Config Hash
+DEFAULT_SUPERVISOR_CFG_HASH="ac4e6001f1b19d371bba6a2797ba0a55d7ca73151ba6908040598ca275c0efca"
+
 # Colors
 num_colors=$(tput colors 2>/dev/null)
 if test -n "$num_colors" && test "$num_colors" -ge 8; then
@@ -465,21 +468,28 @@ ask_clean_install() {
   fi
 
   if [ -f "$SUPERVISOR_YML_PATH" ]; then
-    command printf "${indent}An installation already exists. Would you like to do a clean install? $(prompt n)"
-    read -r clean_install_response
-    clean_install_response=$(echo "$clean_install_response" | tr '[:upper:]' '[:lower:]')
-    case $clean_install_response in
-    y | yes)
-      increase_indent
-      success "Doing clean install!"
-      decrease_indent
+    # Check for default config file hash
+    cfg_file_hash=$(sha256sum "$SUPERVISOR_YML_PATH" | awk '{print $1}')
+    if [ "$cfg_file_hash" == "$DEFAULT_SUPERVISOR_CFG_HASH"]; then
+      # config matches default config, mark clean_install as true
       clean_install="true"
-      ;;
-    *)
-      warn "Doing upgrade instead of clean install"
-      clean_install="false"
-      ;;
-    esac
+    else
+      command printf "${indent}An installation already exists. Would you like to do a clean install? $(prompt n)"
+      read -r clean_install_response
+      clean_install_response=$(echo "$clean_install_response" | tr '[:upper:]' '[:lower:]')
+      case $clean_install_response in
+      y | yes)
+        increase_indent
+        success "Doing clean install!"
+        decrease_indent
+        clean_install="true"
+        ;;
+      *)
+        warn "Doing upgrade instead of clean install"
+        clean_install="false"
+        ;;
+      esac
+    fi
   else
     warn "Previous supervisor config not found, doing clean install"
     clean_install="true"
