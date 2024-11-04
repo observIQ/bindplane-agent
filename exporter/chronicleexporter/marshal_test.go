@@ -42,13 +42,11 @@ func TestProtoMarshaler_MarshalRawLogs(t *testing.T) {
 		{
 			name: "Single log record with expected data",
 			cfg: Config{
-				CustomerID:              uuid.New().String(),
-				LogType:                 "WINEVTLOG",
-				Namespace:               "test",
-				RawLogField:             "body",
-				OverrideLogType:         false,
-				OverrideNamespace:       false,
-				OverrideIngestionLabels: false,
+				CustomerID:      uuid.New().String(),
+				LogType:         "WINEVTLOG",
+				Namespace:       "test",
+				RawLogField:     "body",
+				OverrideLogType: false,
 			},
 			labels: []*api.Label{
 				{Key: "env", Value: "prod"},
@@ -74,13 +72,11 @@ func TestProtoMarshaler_MarshalRawLogs(t *testing.T) {
 		{
 			name: "Single log record with expected data, no log_type",
 			cfg: Config{
-				CustomerID:              uuid.New().String(),
-				LogType:                 "WINEVTLOG",
-				Namespace:               "test",
-				RawLogField:             "body",
-				OverrideLogType:         true,
-				OverrideNamespace:       true,
-				OverrideIngestionLabels: true,
+				CustomerID:      uuid.New().String(),
+				LogType:         "WINEVTLOG",
+				Namespace:       "test",
+				RawLogField:     "body",
+				OverrideLogType: true,
 			},
 			labels: []*api.Label{
 				{Key: "env", Value: "prod"},
@@ -107,14 +103,12 @@ func TestProtoMarshaler_MarshalRawLogs(t *testing.T) {
 		{
 			name: "Multiple log records",
 			cfg: Config{
-				CustomerID:              uuid.New().String(),
-				LogType:                 "WINEVTLOG",
-				Namespace:               "test",
-				IngestionLabels:         map[string]string{`chronicle_ingestion_label["key1"]`: "value1", `chronicle_ingestion_label["key2"]`: "value2"},
-				RawLogField:             "body",
-				OverrideLogType:         false,
-				OverrideNamespace:       false,
-				OverrideIngestionLabels: false,
+				CustomerID:      uuid.New().String(),
+				LogType:         "WINEVTLOG",
+				Namespace:       "test",
+				IngestionLabels: map[string]string{`chronicle_ingestion_label["key1"]`: "value1", `chronicle_ingestion_label["key2"]`: "value2"},
+				RawLogField:     "body",
+				OverrideLogType: false,
 			},
 			labels: []*api.Label{
 				{Key: "env", Value: "staging"},
@@ -140,14 +134,12 @@ func TestProtoMarshaler_MarshalRawLogs(t *testing.T) {
 		{
 			name: "Log record with attributes",
 			cfg: Config{
-				CustomerID:              uuid.New().String(),
-				LogType:                 "WINEVTLOG",
-				Namespace:               "test",
-				IngestionLabels:         map[string]string{`chronicle_ingestion_label["key1"]`: "value1", `chronicle_ingestion_label["key2"]`: "value2"},
-				RawLogField:             "attributes",
-				OverrideLogType:         false,
-				OverrideNamespace:       false,
-				OverrideIngestionLabels: false,
+				CustomerID:      uuid.New().String(),
+				LogType:         "WINEVTLOG",
+				Namespace:       "test",
+				IngestionLabels: map[string]string{`chronicle_ingestion_label["key1"]`: "value1", `chronicle_ingestion_label["key2"]`: "value2"},
+				RawLogField:     "attributes",
+				OverrideLogType: false,
 			},
 			labels: []*api.Label{},
 			logRecords: func() plog.Logs {
@@ -167,12 +159,10 @@ func TestProtoMarshaler_MarshalRawLogs(t *testing.T) {
 		{
 			name: "No log records",
 			cfg: Config{
-				CustomerID:              uuid.New().String(),
-				LogType:                 "DEFAULT",
-				RawLogField:             "body",
-				OverrideLogType:         false,
-				OverrideNamespace:       false,
-				OverrideIngestionLabels: false,
+				CustomerID:      uuid.New().String(),
+				LogType:         "DEFAULT",
+				RawLogField:     "body",
+				OverrideLogType: false,
 			},
 			labels: []*api.Label{},
 			logRecords: func() plog.Logs {
@@ -185,11 +175,9 @@ func TestProtoMarshaler_MarshalRawLogs(t *testing.T) {
 		{
 			name: "No log type set in config or attributes",
 			cfg: Config{
-				CustomerID:              uuid.New().String(),
-				RawLogField:             "body",
-				OverrideLogType:         true,
-				OverrideNamespace:       true,
-				OverrideIngestionLabels: true,
+				CustomerID:      uuid.New().String(),
+				RawLogField:     "body",
+				OverrideLogType: true,
 			},
 			labels: []*api.Label{},
 			logRecords: func() plog.Logs {
@@ -204,14 +192,12 @@ func TestProtoMarshaler_MarshalRawLogs(t *testing.T) {
 		{
 			name: "Override log type with attribute",
 			cfg: Config{
-				CustomerID:              uuid.New().String(),
-				LogType:                 "DEFAULT", // This should be overridden by the log_type attribute
-				Namespace:               "DEFAULT",
-				IngestionLabels:         map[string]string{`ingestion_label["DEFAULTKEY1"]`: "DEFAULTVALUE1", `ingestion_label["DEFAULTKEY2"]`: "DEFAUTLVALUE2"},
-				RawLogField:             "body",
-				OverrideLogType:         true,
-				OverrideNamespace:       true,
-				OverrideIngestionLabels: true,
+				CustomerID:      uuid.New().String(),
+				LogType:         "DEFAULT", // This should be overridden by the log_type attribute
+				Namespace:       "DEFAULT",
+				IngestionLabels: map[string]string{`ingestion_label["DEFAULTKEY1"]`: "DEFAULTVALUE1", `ingestion_label["DEFAULTKEY2"]`: "DEFAUTLVALUE2"},
+				RawLogField:     "body",
+				OverrideLogType: true,
 			},
 			labels: []*api.Label{},
 			logRecords: func() plog.Logs {
@@ -226,14 +212,12 @@ func TestProtoMarshaler_MarshalRawLogs(t *testing.T) {
 		{
 			name: "Override log type with chronicle attribute",
 			cfg: Config{
-				CustomerID:              uuid.New().String(),
-				LogType:                 "DEFAULT",                                                                                                               // This should be overridden by the chronicle_log_type attribute
-				Namespace:               "DEFAULT",                                                                                                               // This should be overridden by the chronicle_namespace attribute
-				IngestionLabels:         map[string]string{`ingestion_label["DEFAULTKEY1"]`: "DEFAULTVALUE1", `ingestion_label["DEFAULTKEY2"]`: "DEFAUTLVALUE2"}, // This should be overridden by the chronicle_ingestion_label attribute
-				RawLogField:             "body",
-				OverrideLogType:         true,
-				OverrideNamespace:       true,
-				OverrideIngestionLabels: true,
+				CustomerID:      uuid.New().String(),
+				LogType:         "DEFAULT",                                                                                                               // This should be overridden by the chronicle_log_type attribute
+				Namespace:       "DEFAULT",                                                                                                               // This should be overridden by the chronicle_namespace attribute
+				IngestionLabels: map[string]string{`ingestion_label["DEFAULTKEY1"]`: "DEFAULTVALUE1", `ingestion_label["DEFAULTKEY2"]`: "DEFAUTLVALUE2"}, // This should be overridden by the chronicle_ingestion_label attribute
+				RawLogField:     "body",
+				OverrideLogType: true,
 			},
 			labels: []*api.Label{},
 			logRecords: func() plog.Logs {
@@ -284,17 +268,15 @@ func TestProtoMarshaler_MarshalRawLogsForHTTP(t *testing.T) {
 		{
 			name: "Single log record with expected data",
 			cfg: Config{
-				CustomerID:              uuid.New().String(),
-				LogType:                 "WINEVTLOG",
-				Namespace:               "test",
-				RawLogField:             "body",
-				OverrideLogType:         false,
-				OverrideNamespace:       false,
-				OverrideIngestionLabels: false,
-				Protocol:                protocolHTTPS,
-				Project:                 "test-project",
-				Location:                "us",
-				Forwarder:               uuid.New().String(),
+				CustomerID:      uuid.New().String(),
+				LogType:         "WINEVTLOG",
+				Namespace:       "test",
+				RawLogField:     "body",
+				OverrideLogType: false,
+				Protocol:        protocolHTTPS,
+				Project:         "test-project",
+				Location:        "us",
+				Forwarder:       uuid.New().String(),
 			},
 			labels: []*api.Label{
 				{Key: "env", Value: "prod"},
@@ -315,14 +297,12 @@ func TestProtoMarshaler_MarshalRawLogsForHTTP(t *testing.T) {
 		{
 			name: "Multiple log records",
 			cfg: Config{
-				CustomerID:              uuid.New().String(),
-				LogType:                 "WINEVTLOG",
-				Namespace:               "test",
-				IngestionLabels:         map[string]string{`chronicle_ingestion_label["key1"]`: "value1", `chronicle_ingestion_label["key2"]`: "value2"},
-				RawLogField:             "body",
-				OverrideLogType:         false,
-				OverrideNamespace:       false,
-				OverrideIngestionLabels: false,
+				CustomerID:      uuid.New().String(),
+				LogType:         "WINEVTLOG",
+				Namespace:       "test",
+				IngestionLabels: map[string]string{`chronicle_ingestion_label["key1"]`: "value1", `chronicle_ingestion_label["key2"]`: "value2"},
+				RawLogField:     "body",
+				OverrideLogType: false,
 			},
 			labels: []*api.Label{
 				{Key: "env", Value: "staging"},
@@ -348,14 +328,12 @@ func TestProtoMarshaler_MarshalRawLogsForHTTP(t *testing.T) {
 		{
 			name: "Log record with attributes",
 			cfg: Config{
-				CustomerID:              uuid.New().String(),
-				LogType:                 "WINEVTLOG",
-				Namespace:               "test",
-				IngestionLabels:         map[string]string{`chronicle_ingestion_label["key1"]`: "value1", `chronicle_ingestion_label["key2"]`: "value2"},
-				RawLogField:             "attributes",
-				OverrideLogType:         false,
-				OverrideNamespace:       false,
-				OverrideIngestionLabels: false,
+				CustomerID:      uuid.New().String(),
+				LogType:         "WINEVTLOG",
+				Namespace:       "test",
+				IngestionLabels: map[string]string{`chronicle_ingestion_label["key1"]`: "value1", `chronicle_ingestion_label["key2"]`: "value2"},
+				RawLogField:     "attributes",
+				OverrideLogType: false,
 			},
 			labels: []*api.Label{},
 			logRecords: func() plog.Logs {
@@ -373,13 +351,11 @@ func TestProtoMarshaler_MarshalRawLogsForHTTP(t *testing.T) {
 		{
 			name: "No log records",
 			cfg: Config{
-				CustomerID:              uuid.New().String(),
-				LogType:                 "DEFAULT",
-				Namespace:               "DEFAULT",
-				RawLogField:             "body",
-				OverrideLogType:         false,
-				OverrideNamespace:       false,
-				OverrideIngestionLabels: false,
+				CustomerID:      uuid.New().String(),
+				LogType:         "DEFAULT",
+				Namespace:       "DEFAULT",
+				RawLogField:     "body",
+				OverrideLogType: false,
 			},
 			labels: []*api.Label{},
 			logRecords: func() plog.Logs {

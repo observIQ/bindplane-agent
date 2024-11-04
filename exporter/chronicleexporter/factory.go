@@ -38,16 +38,14 @@ func NewFactory() exporter.Factory {
 // createDefaultConfig creates the default configuration for the exporter.
 func createDefaultConfig() component.Config {
 	return &Config{
-		Protocol:                protocolGRPC,
-		TimeoutConfig:           exporterhelper.NewDefaultTimeoutConfig(),
-		QueueConfig:             exporterhelper.NewDefaultQueueConfig(),
-		BackOffConfig:           configretry.NewDefaultBackOffConfig(),
-		OverrideLogType:         true,
-		OverrideNamespace:       true,
-		OverrideIngestionLabels: true,
-		Endpoint:                baseEndpoint,
-		Compression:             noCompression,
-		CollectAgentMetrics:     true,
+		Protocol:            protocolGRPC,
+		TimeoutConfig:       exporterhelper.NewDefaultTimeoutConfig(),
+		QueueConfig:         exporterhelper.NewDefaultQueueConfig(),
+		BackOffConfig:       configretry.NewDefaultBackOffConfig(),
+		OverrideLogType:     true,
+		Endpoint:            baseEndpoint,
+		Compression:         noCompression,
+		CollectAgentMetrics: true,
 	}
 }
 

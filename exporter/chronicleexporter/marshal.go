@@ -70,6 +70,7 @@ func newProtoMarshaler(cfg Config, teleSettings component.TelemetrySettings, lab
 		collectorID:  chronicleCollectorID[:],
 	}, nil
 }
+
 func (m *protoMarshaler) MarshalRawLogs(ctx context.Context, ld plog.Logs) ([]*api.BatchCreateLogsRequest, error) {
 	rawLogs, namespace, ingestionLabels, err := m.extractRawLogs(ctx, ld)
 	if err != nil {
@@ -77,6 +78,7 @@ func (m *protoMarshaler) MarshalRawLogs(ctx context.Context, ld plog.Logs) ([]*a
 	}
 	return m.constructPayloads(rawLogs, namespace, ingestionLabels), nil
 }
+
 func (m *protoMarshaler) extractRawLogs(ctx context.Context, ld plog.Logs) (map[string][]*api.LogEntry, map[string]string, map[string][]*api.Label, error) {
 	entries := make(map[string][]*api.LogEntry)
 	namespaceMap := make(map[string]string)
@@ -123,6 +125,7 @@ func (m *protoMarshaler) extractRawLogs(ctx context.Context, ld plog.Logs) (map[
 	}
 	return entries, namespaceMap, ingestionLabelsMap, nil
 }
+
 func (m *protoMarshaler) processLogRecord(ctx context.Context, logRecord plog.LogRecord, scope plog.ScopeLogs, resource plog.ResourceLogs) (string, string, string, []*api.Label, error) {
 	rawLog, err := m.getRawLog(ctx, logRecord, scope, resource)
 	if err != nil {
@@ -142,6 +145,7 @@ func (m *protoMarshaler) processLogRecord(ctx context.Context, logRecord plog.Lo
 	}
 	return rawLog, logType, namespace, ingestionLabels, nil
 }
+
 func (m *protoMarshaler) processHTTPLogRecord(ctx context.Context, logRecord plog.LogRecord, scope plog.ScopeLogs, resource plog.ResourceLogs) (string, string, error) {
 	rawLog, err := m.getRawLog(ctx, logRecord, scope, resource)
 	if err != nil {
@@ -153,6 +157,7 @@ func (m *protoMarshaler) processHTTPLogRecord(ctx context.Context, logRecord plo
 	}
 	return rawLog, logType, nil
 }
+
 func (m *protoMarshaler) getRawLog(ctx context.Context, logRecord plog.LogRecord, scope plog.ScopeLogs, resource plog.ResourceLogs) (string, error) {
 	if m.cfg.RawLogField == "" {
 		entireLogRecord := map[string]any{
@@ -168,6 +173,7 @@ func (m *protoMarshaler) getRawLog(ctx context.Context, logRecord plog.LogRecord
 	}
 	return m.getRawField(ctx, m.cfg.RawLogField, logRecord, scope, resource)
 }
+
 func (m *protoMarshaler) getLogType(ctx context.Context, logRecord plog.LogRecord, scope plog.ScopeLogs, resource plog.ResourceLogs) (string, error) {
 	logType, err := m.getRawField(ctx, chronicleLogTypeField, logRecord, scope, resource)
 	if err != nil {
@@ -189,6 +195,7 @@ func (m *protoMarshaler) getLogType(ctx context.Context, logRecord plog.LogRecor
 	}
 	return m.cfg.LogType, nil
 }
+
 func (m *protoMarshaler) getNamespace(ctx context.Context, logRecord plog.LogRecord, scope plog.ScopeLogs, resource plog.ResourceLogs) (string, error) {
 	namespace, err := m.getRawField(ctx, chronicleNamespaceField, logRecord, scope, resource)
 	if err != nil {
@@ -199,6 +206,7 @@ func (m *protoMarshaler) getNamespace(ctx context.Context, logRecord plog.LogRec
 	}
 	return m.cfg.Namespace, nil
 }
+
 func (m *protoMarshaler) getIngestionLabels(logRecord plog.LogRecord) ([]*api.Label, error) {
 	configLabels := make([]*api.Label, 0)
 	for key, value := range m.cfg.IngestionLabels {
@@ -216,6 +224,7 @@ func (m *protoMarshaler) getIngestionLabels(logRecord plog.LogRecord) ([]*api.La
 	}
 	return configLabels, nil
 }
+
 func (m *protoMarshaler) getRawField(ctx context.Context, field string, logRecord plog.LogRecord, scope plog.ScopeLogs, resource plog.ResourceLogs) (string, error) {
 	lrExpr, err := expr.NewOTTLLogRecordExpression(field, m.teleSettings)
 	if err != nil {
@@ -286,6 +295,7 @@ func (m *protoMarshaler) constructPayloads(rawLogs map[string][]*api.LogEntry, n
 	}
 	return payloads
 }
+
 func (m *protoMarshaler) MarshalRawLogsForHTTP(ctx context.Context, ld plog.Logs) (map[string]*api.ImportLogsRequest, error) {
 	rawLogs, err := m.extractRawHTTPLogs(ctx, ld)
 	if err != nil {
@@ -293,6 +303,7 @@ func (m *protoMarshaler) MarshalRawLogsForHTTP(ctx context.Context, ld plog.Logs
 	}
 	return m.constructHTTPPayloads(rawLogs), nil
 }
+
 func (m *protoMarshaler) extractRawHTTPLogs(ctx context.Context, ld plog.Logs) (map[string][]*api.Log, error) {
 	entries := make(map[string][]*api.Log)
 	for i := 0; i < ld.ResourceLogs().Len(); i++ {
@@ -326,10 +337,12 @@ func (m *protoMarshaler) extractRawHTTPLogs(ctx context.Context, ld plog.Logs) (
 	}
 	return entries, nil
 }
+
 func buildForwarderString(cfg Config) string {
 	format := "projects/%s/locations/%s/instances/%s/forwarders/%s"
 	return fmt.Sprintf(format, cfg.Project, cfg.Location, cfg.CustomerID, cfg.Forwarder)
 }
+
 func (m *protoMarshaler) constructHTTPPayloads(rawLogs map[string][]*api.Log) map[string]*api.ImportLogsRequest {
 	payloads := make(map[string]*api.ImportLogsRequest, len(rawLogs))
 	for logType, entries := range rawLogs {
