@@ -33,8 +33,6 @@ import (
 )
 
 const logTypeField = `attributes["log_type"]`
-const namespaceField = `attributes["namespace"]`
-const ingestionLabelsPrefix = `ingestion_label`
 const chronicleLogTypeField = `attributes["chronicle_log_type"]`
 const chronicleNamespaceField = `attributes["chronicle_namespace"]`
 const chronicleIngestionLabelsPrefix = `chronicle_ingestion_label`
@@ -199,15 +197,6 @@ func (m *protoMarshaler) getNamespace(ctx context.Context, logRecord plog.LogRec
 	if namespace != "" {
 		return namespace, nil
 	}
-	if m.cfg.OverrideNamespace {
-		namespace, err := m.getRawField(ctx, namespaceField, logRecord, scope, resource)
-		if err != nil {
-			return m.cfg.Namespace, fmt.Errorf("get namespace: %w", err)
-		}
-		if namespace != "" {
-			return namespace, nil
-		}
-	}
 	return m.cfg.Namespace, nil
 }
 func (m *protoMarshaler) getIngestionLabels(logRecord plog.LogRecord) ([]*api.Label, error) {
@@ -224,15 +213,6 @@ func (m *protoMarshaler) getIngestionLabels(logRecord plog.LogRecord) ([]*api.La
 	}
 	if len(ingestionLabels) != 0 {
 		return ingestionLabels, nil
-	}
-	if m.cfg.OverrideIngestionLabels {
-		ingestionLabels, err := m.getRawNestedFields(ingestionLabelsPrefix, logRecord)
-		if err != nil {
-			return configLabels, fmt.Errorf("get chronicle ingestion labels: %w", err)
-		}
-		if len(ingestionLabels) != 0 {
-			return ingestionLabels, nil
-		}
 	}
 	return configLabels, nil
 }
