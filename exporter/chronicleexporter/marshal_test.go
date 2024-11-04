@@ -35,7 +35,6 @@ func TestProtoMarshaler_MarshalRawLogs(t *testing.T) {
 	tests := []struct {
 		name         string
 		cfg          Config
-		labels       []*api.Label
 		logRecords   func() plog.Logs
 		expectations func(t *testing.T, requests []*api.BatchCreateLogsRequest)
 	}{
@@ -48,11 +47,8 @@ func TestProtoMarshaler_MarshalRawLogs(t *testing.T) {
 				RawLogField:     "body",
 				OverrideLogType: false,
 			},
-			labels: []*api.Label{
-				{Key: "env", Value: "prod"},
-			},
 			logRecords: func() plog.Logs {
-				return mockLogs(mockLogRecord("Test log message", map[string]any{"log_type": "WINEVTLOG", "namespace": "test"}))
+				return mockLogs(mockLogRecord("Test log message", map[string]any{"log_type": "WINEVTLOG", "namespace": "test", `chronicle_ingestion_label["env"]`: "prod"}))
 			},
 			expectations: func(t *testing.T, requests []*api.BatchCreateLogsRequest) {
 				require.Len(t, requests, 1)
@@ -70,16 +66,12 @@ func TestProtoMarshaler_MarshalRawLogs(t *testing.T) {
 			},
 		},
 		{
-			name: "Single log record with expected data, no log_type",
+			name: "Single log record with expected data, no log_type, namespace, or ingestion labels",
 			cfg: Config{
 				CustomerID:      uuid.New().String(),
 				LogType:         "WINEVTLOG",
-				Namespace:       "test",
 				RawLogField:     "body",
 				OverrideLogType: true,
-			},
-			labels: []*api.Label{
-				{Key: "env", Value: "prod"},
 			},
 			logRecords: func() plog.Logs {
 				return mockLogs(mockLogRecord("Test log message", nil))
@@ -88,7 +80,8 @@ func TestProtoMarshaler_MarshalRawLogs(t *testing.T) {
 				require.Len(t, requests, 1)
 				batch := requests[0].Batch
 				require.Equal(t, "WINEVTLOG", batch.LogType)
-				require.Equal(t, "test", batch.Source.Namespace)
+				require.Equal(t, "", batch.Source.Namespace)
+				require.Equal(t, 0, len(batch.Source.Labels))
 				require.Len(t, batch.Entries, 1)
 
 				// Convert Data (byte slice) to string for comparison
@@ -106,12 +99,9 @@ func TestProtoMarshaler_MarshalRawLogs(t *testing.T) {
 				CustomerID:      uuid.New().String(),
 				LogType:         "WINEVTLOG",
 				Namespace:       "test",
-				IngestionLabels: map[string]string{`chronicle_ingestion_label["key1"]`: "value1", `chronicle_ingestion_label["key2"]`: "value2"},
+				IngestionLabels: map[string]string{`chronicle_ingestion_label["env"]`: "staging"},
 				RawLogField:     "body",
 				OverrideLogType: false,
-			},
-			labels: []*api.Label{
-				{Key: "env", Value: "staging"},
 			},
 			logRecords: func() plog.Logs {
 				logs := plog.NewLogs()
@@ -141,7 +131,6 @@ func TestProtoMarshaler_MarshalRawLogs(t *testing.T) {
 				RawLogField:     "attributes",
 				OverrideLogType: false,
 			},
-			labels: []*api.Label{},
 			logRecords: func() plog.Logs {
 				return mockLogs(mockLogRecord("", map[string]any{"key1": "value1", "log_type": "WINEVTLOG", "namespace": "test", `chronicle_ingestion_label["key1"]`: "value1", `chronicle_ingestion_label["key2"]`: "value2"}))
 			},
@@ -164,7 +153,6 @@ func TestProtoMarshaler_MarshalRawLogs(t *testing.T) {
 				RawLogField:     "body",
 				OverrideLogType: false,
 			},
-			labels: []*api.Label{},
 			logRecords: func() plog.Logs {
 				return plog.NewLogs() // No log records added
 			},
@@ -179,7 +167,6 @@ func TestProtoMarshaler_MarshalRawLogs(t *testing.T) {
 				RawLogField:     "body",
 				OverrideLogType: true,
 			},
-			labels: []*api.Label{},
 			logRecords: func() plog.Logs {
 				return mockLogs(mockLogRecord("Log without logType", map[string]any{"namespace": "test", `ingestion_label["realkey1"]`: "realvalue1", `ingestion_label["realkey2"]`: "realvalue2"}))
 			},
@@ -187,6 +174,70 @@ func TestProtoMarshaler_MarshalRawLogs(t *testing.T) {
 				require.Len(t, requests, 1)
 				batch := requests[0].Batch
 				require.Equal(t, "", batch.LogType, "Expected log type to be empty")
+			},
+		},
+		{
+			name: "Multiple log records with duplicate data, no log type in attributes",
+			cfg: Config{
+				CustomerID:      uuid.New().String(),
+				LogType:         "WINEVTLOG",
+				Namespace:       "test",
+				RawLogField:     "body",
+				OverrideLogType: false,
+			},
+			logRecords: func() plog.Logs {
+				logs := plog.NewLogs()
+				record1 := logs.ResourceLogs().AppendEmpty().ScopeLogs().AppendEmpty().LogRecords().AppendEmpty()
+				record1.Body().SetStr("First log message")
+				record1.Attributes().FromRaw(map[string]any{"chronicle_namespace": "test1", `chronicle_ingestion_label["key1"]`: "value1", `chronicle_ingestion_label["key2"]`: "value2"})
+				record2 := logs.ResourceLogs().AppendEmpty().ScopeLogs().AppendEmpty().LogRecords().AppendEmpty()
+				record2.Body().SetStr("Second log message")
+				record2.Attributes().FromRaw(map[string]any{"chronicle_namespace": "test1", `chronicle_ingestion_label["key1"]`: "value1", `chronicle_ingestion_label["key2"]`: "value2"})
+				return logs
+			},
+			expectations: func(t *testing.T, requests []*api.BatchCreateLogsRequest) {
+				// verify 1 request for one log type
+				require.Len(t, requests, 1, "Expected a single batch request")
+				batch := requests[0].Batch
+				// verify batch source labels
+				require.Len(t, batch.Source.Labels, 2)
+				require.Len(t, batch.Entries, 2, "Expected two log entries in the batch")
+				// Verifying the first log entry data
+				require.Equal(t, "First log message", string(batch.Entries[0].Data))
+				// Verifying the second log entry data
+				require.Equal(t, "Second log message", string(batch.Entries[1].Data))
+			},
+		},
+		{
+			name: "Multiple log records with different data, no log type in attributes",
+			cfg: Config{
+				CustomerID:      uuid.New().String(),
+				LogType:         "WINEVTLOG",
+				Namespace:       "test",
+				RawLogField:     "body",
+				OverrideLogType: false,
+			},
+			logRecords: func() plog.Logs {
+				logs := plog.NewLogs()
+				record1 := logs.ResourceLogs().AppendEmpty().ScopeLogs().AppendEmpty().LogRecords().AppendEmpty()
+				record1.Body().SetStr("First log message")
+				record1.Attributes().FromRaw(map[string]any{`chronicle_ingestion_label["key1"]`: "value1", `chronicle_ingestion_label["key2"]`: "value2"})
+				record2 := logs.ResourceLogs().AppendEmpty().ScopeLogs().AppendEmpty().LogRecords().AppendEmpty()
+				record2.Body().SetStr("Second log message")
+				record2.Attributes().FromRaw(map[string]any{`chronicle_ingestion_label["key3"]`: "value3", `chronicle_ingestion_label["key4"]`: "value4"})
+				return logs
+			},
+			expectations: func(t *testing.T, requests []*api.BatchCreateLogsRequest) {
+				// verify 1 request for one log type
+				require.Len(t, requests, 1, "Expected a single batch request")
+				batch := requests[0].Batch
+				// verify batch source labels
+				require.Len(t, batch.Source.Labels, 4)
+				require.Len(t, batch.Entries, 2, "Expected two log entries in the batch")
+				// Verifying the first log entry data
+				require.Equal(t, "First log message", string(batch.Entries[0].Data))
+				// Verifying the second log entry data
+				require.Equal(t, "Second log message", string(batch.Entries[1].Data))
 			},
 		},
 		{
@@ -199,7 +250,6 @@ func TestProtoMarshaler_MarshalRawLogs(t *testing.T) {
 				RawLogField:     "body",
 				OverrideLogType: true,
 			},
-			labels: []*api.Label{},
 			logRecords: func() plog.Logs {
 				return mockLogs(mockLogRecord("Log with overridden type", map[string]any{"log_type": "windows_event.application", "namespace": "test", `ingestion_label["realkey1"]`: "realvalue1", `ingestion_label["realkey2"]`: "realvalue2"}))
 			},
@@ -219,7 +269,6 @@ func TestProtoMarshaler_MarshalRawLogs(t *testing.T) {
 				RawLogField:     "body",
 				OverrideLogType: true,
 			},
-			labels: []*api.Label{},
 			logRecords: func() plog.Logs {
 				return mockLogs(mockLogRecord("Log with overridden type", map[string]any{"chronicle_log_type": "ASOC_ALERT", "chronicle_namespace": "test", `chronicle_ingestion_label["realkey1"]`: "realvalue1", `chronicle_ingestion_label["realkey2"]`: "realvalue2"}))
 			},
@@ -234,6 +283,73 @@ func TestProtoMarshaler_MarshalRawLogs(t *testing.T) {
 				require.Equal(t, "realvalue2", batch.Source.Labels[1].Value, "Expected ingestion label to be overridden by attribute")
 			},
 		},
+		{
+			name: "Multiple log records with duplicate data, log type in attributes",
+			cfg: Config{
+				CustomerID:      uuid.New().String(),
+				LogType:         "WINEVTLOG",
+				Namespace:       "TEST",
+				RawLogField:     "body",
+				OverrideLogType: false,
+			},
+			logRecords: func() plog.Logs {
+				logs := plog.NewLogs()
+				record1 := logs.ResourceLogs().AppendEmpty().ScopeLogs().AppendEmpty().LogRecords().AppendEmpty()
+				record1.Body().SetStr("First log message")
+				record1.Attributes().FromRaw(map[string]any{"chronicle_log_type": "WINEVTLOGS", "chronicle_namespace": "test1", `chronicle_ingestion_label["key1"]`: "value1", `chronicle_ingestion_label["key2"]`: "value2"})
+
+				record2 := logs.ResourceLogs().AppendEmpty().ScopeLogs().AppendEmpty().LogRecords().AppendEmpty()
+				record2.Body().SetStr("Second log message")
+				record2.Attributes().FromRaw(map[string]any{"chronicle_log_type": "WINEVTLOGS", "chronicle_namespace": "test1", `chronicle_ingestion_label["key1"]`: "value1", `chronicle_ingestion_label["key2"]`: "value2"})
+				return logs
+			},
+			expectations: func(t *testing.T, requests []*api.BatchCreateLogsRequest) {
+				// verify 2 requests for 2 different log types
+				require.Len(t, requests, 1, "Expected a single batch request")
+				batch := requests[0].Batch
+				require.Len(t, batch.Entries, 2, "Expected two log entries in the batch")
+				// verify batch for first log
+				require.Equal(t, "WINEVTLOGS", batch.LogType)
+				require.Equal(t, "test1", batch.Source.Namespace)
+				require.Equal(t, "value2", batch.Source.Labels[1].Value)
+				require.Len(t, batch.Source.Labels, 2)
+				require.Equal(t, `chronicle_ingestion_label["key2"]`, batch.Source.Labels[1].Key)
+				require.Equal(t, "value2", batch.Source.Labels[1].Value)
+			},
+		},
+		{
+			name: "Multiple log records with different data, log type in attributes",
+			cfg: Config{
+				CustomerID:      uuid.New().String(),
+				LogType:         "WINEVTLOG",
+				Namespace:       "TEST",
+				RawLogField:     "body",
+				OverrideLogType: false,
+			},
+			logRecords: func() plog.Logs {
+				logs := plog.NewLogs()
+				record1 := logs.ResourceLogs().AppendEmpty().ScopeLogs().AppendEmpty().LogRecords().AppendEmpty()
+				record1.Body().SetStr("First log message")
+				record1.Attributes().FromRaw(map[string]any{"chronicle_log_type": "WINEVTLOGS", "chronicle_namespace": "test1", `chronicle_ingestion_label["key1"]`: "value1", `chronicle_ingestion_label["key2"]`: "value2"})
+
+				record2 := logs.ResourceLogs().AppendEmpty().ScopeLogs().AppendEmpty().LogRecords().AppendEmpty()
+				record2.Body().SetStr("Second log message")
+				record2.Attributes().FromRaw(map[string]any{"chronicle_log_type": "ASOC_ALERT", "chronicle_namespace": "test2", `chronicle_ingestion_label["key3"]`: "value3", `chronicle_ingestion_label["key4"]`: "value4"})
+				return logs
+			},
+			expectations: func(t *testing.T, requests []*api.BatchCreateLogsRequest) {
+				// verify 2 requests for 2 different log types
+				require.Len(t, requests, 2, "Expected a two batch request")
+				batch := requests[0].Batch
+				require.Len(t, batch.Entries, 1, "Expected two log entries in the batch")
+				// verify batch for first log
+				require.Equal(t, "WINEVTLOGS", batch.LogType)
+				require.Equal(t, "test1", batch.Source.Namespace)
+				require.Equal(t, "value2", batch.Source.Labels[1].Value)
+				require.Len(t, batch.Source.Labels, 2)
+				require.Equal(t, `chronicle_ingestion_label["key2"]`, batch.Source.Labels[1].Key)
+			},
+		},
 	}
 
 	for _, tt := range tests {
@@ -241,7 +357,7 @@ func TestProtoMarshaler_MarshalRawLogs(t *testing.T) {
 			customerID, err := uuid.Parse(tt.cfg.CustomerID)
 			require.NoError(t, err)
 
-			marshaler, err := newProtoMarshaler(tt.cfg, component.TelemetrySettings{Logger: logger}, tt.labels, customerID[:])
+			marshaler, err := newProtoMarshaler(tt.cfg, component.TelemetrySettings{Logger: logger}, customerID[:])
 			marshaler.startTime = startTime
 			require.NoError(t, err)
 
@@ -372,7 +488,7 @@ func TestProtoMarshaler_MarshalRawLogsForHTTP(t *testing.T) {
 			customerID, err := uuid.Parse(tt.cfg.CustomerID)
 			require.NoError(t, err)
 
-			marshaler, err := newProtoMarshaler(tt.cfg, component.TelemetrySettings{Logger: logger}, tt.labels, customerID[:])
+			marshaler, err := newProtoMarshaler(tt.cfg, component.TelemetrySettings{Logger: logger}, customerID[:])
 			marshaler.startTime = startTime
 			require.NoError(t, err)
 
