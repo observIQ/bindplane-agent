@@ -476,7 +476,7 @@ ask_clean_install() {
   if [ -f "$SUPERVISOR_YML_PATH" ]; then
     # Check for default config file hash
     cfg_file_hash=$(sha256sum "$SUPERVISOR_YML_PATH" | awk '{print $1}')
-    if [ "$cfg_file_hash" == "$DEFAULT_SUPERVISOR_CFG_HASH"]; then
+    if [ "$cfg_file_hash" = "$DEFAULT_SUPERVISOR_CFG_HASH" ]; then
       # config matches default config, mark clean_install as true
       clean_install="true"
     else
