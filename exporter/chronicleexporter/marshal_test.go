@@ -196,7 +196,7 @@ func TestProtoMarshaler_MarshalRawLogs(t *testing.T) {
 				return logs
 			},
 			expectations: func(t *testing.T, requests []*api.BatchCreateLogsRequest) {
-				// verify 1 request for one log type
+				// verify one request for log type in config
 				require.Len(t, requests, 1, "Expected a single batch request")
 				batch := requests[0].Batch
 				// verify batch source labels
@@ -228,9 +228,11 @@ func TestProtoMarshaler_MarshalRawLogs(t *testing.T) {
 				return logs
 			},
 			expectations: func(t *testing.T, requests []*api.BatchCreateLogsRequest) {
-				// verify 1 request for one log type
+				// verify one request for one log type
 				require.Len(t, requests, 1, "Expected a single batch request")
 				batch := requests[0].Batch
+				require.Equal(t, "WINEVTLOG", batch.LogType)
+				require.Equal(t, "test", batch.Source.Namespace)
 				// verify batch source labels
 				require.Len(t, batch.Source.Labels, 4)
 				require.Len(t, batch.Entries, 2, "Expected two log entries in the batch")
@@ -277,10 +279,8 @@ func TestProtoMarshaler_MarshalRawLogs(t *testing.T) {
 				batch := requests[0].Batch
 				require.Equal(t, "ASOC_ALERT", batch.LogType, "Expected log type to be overridden by attribute")
 				require.Equal(t, "test", batch.Source.Namespace, "Expected namespace to be overridden by attribute")
-				require.Equal(t, `chronicle_ingestion_label["realkey1"]`, batch.Source.Labels[0].Key, "Expected ingestion label to be overridden by attribute")
-				require.Equal(t, "realvalue1", batch.Source.Labels[0].Value, "Expected ingestion label to be overridden by attribute")
-				require.Equal(t, `chronicle_ingestion_label["realkey2"]`, batch.Source.Labels[1].Key, "Expected ingestion label to be overridden by attribute")
-				require.Equal(t, "realvalue2", batch.Source.Labels[1].Value, "Expected ingestion label to be overridden by attribute")
+				require.Contains(t, batch.Source.Labels, &api.Label{Key: `chronicle_ingestion_label["realkey1"]`, Value: "realvalue1"}, "Expected ingestion label to be overridden by attribute")
+				require.Contains(t, batch.Source.Labels, &api.Label{Key: `chronicle_ingestion_label["realkey2"]`, Value: "realvalue2"}, "Expected ingestion label to be overridden by attribute")
 			},
 		},
 		{
@@ -304,17 +304,16 @@ func TestProtoMarshaler_MarshalRawLogs(t *testing.T) {
 				return logs
 			},
 			expectations: func(t *testing.T, requests []*api.BatchCreateLogsRequest) {
-				// verify 2 requests for 2 different log types
+				// verify 1 request, 2 batches for same log type
 				require.Len(t, requests, 1, "Expected a single batch request")
 				batch := requests[0].Batch
 				require.Len(t, batch.Entries, 2, "Expected two log entries in the batch")
 				// verify batch for first log
 				require.Equal(t, "WINEVTLOGS", batch.LogType)
 				require.Equal(t, "test1", batch.Source.Namespace)
-				require.Equal(t, "value2", batch.Source.Labels[1].Value)
 				require.Len(t, batch.Source.Labels, 2)
-				require.Equal(t, `chronicle_ingestion_label["key2"]`, batch.Source.Labels[1].Key)
-				require.Equal(t, "value2", batch.Source.Labels[1].Value)
+				require.Contains(t, batch.Source.Labels, &api.Label{Key: `chronicle_ingestion_label["key1"]`, Value: "value1"}, "Expected ingestion label to be overridden by attribute")
+				require.Contains(t, batch.Source.Labels, &api.Label{Key: `chronicle_ingestion_label["key2"]`, Value: "value2"}, "Expected ingestion label to be overridden by attribute")
 			},
 		},
 		{
@@ -330,24 +329,33 @@ func TestProtoMarshaler_MarshalRawLogs(t *testing.T) {
 				logs := plog.NewLogs()
 				record1 := logs.ResourceLogs().AppendEmpty().ScopeLogs().AppendEmpty().LogRecords().AppendEmpty()
 				record1.Body().SetStr("First log message")
-				record1.Attributes().FromRaw(map[string]any{"chronicle_log_type": "WINEVTLOGS", "chronicle_namespace": "test1", `chronicle_ingestion_label["key1"]`: "value1", `chronicle_ingestion_label["key2"]`: "value2"})
+				record1.Attributes().FromRaw(map[string]any{"chronicle_log_type": "WINEVTLOGS1", "chronicle_namespace": "test1", `chronicle_ingestion_label["key1"]`: "value1", `chronicle_ingestion_label["key2"]`: "value2"})
 
 				record2 := logs.ResourceLogs().AppendEmpty().ScopeLogs().AppendEmpty().LogRecords().AppendEmpty()
 				record2.Body().SetStr("Second log message")
-				record2.Attributes().FromRaw(map[string]any{"chronicle_log_type": "ASOC_ALERT", "chronicle_namespace": "test2", `chronicle_ingestion_label["key3"]`: "value3", `chronicle_ingestion_label["key4"]`: "value4"})
+				record2.Attributes().FromRaw(map[string]any{"chronicle_log_type": "WINEVTLOGS2", "chronicle_namespace": "test2", `chronicle_ingestion_label["key3"]`: "value3", `chronicle_ingestion_label["key4"]`: "value4"})
 				return logs
 			},
+
 			expectations: func(t *testing.T, requests []*api.BatchCreateLogsRequest) {
-				// verify 2 requests for 2 different log types
+				// verify 2 requests, with 1 batch for different log types
 				require.Len(t, requests, 2, "Expected a two batch request")
 				batch := requests[0].Batch
-				require.Len(t, batch.Entries, 1, "Expected two log entries in the batch")
+				require.Len(t, batch.Entries, 1, "Expected one log entries in the batch")
 				// verify batch for first log
-				require.Equal(t, "WINEVTLOGS", batch.LogType)
-				require.Equal(t, "test1", batch.Source.Namespace)
-				require.Equal(t, "value2", batch.Source.Labels[1].Value)
+				require.Contains(t, batch.LogType, "WINEVTLOGS")
+				require.Contains(t, batch.Source.Namespace, "test")
 				require.Len(t, batch.Source.Labels, 2)
-				require.Equal(t, `chronicle_ingestion_label["key2"]`, batch.Source.Labels[1].Key)
+				require.Contains(t, batch.Source.Labels, &api.Label{Key: `chronicle_ingestion_label["key1"]`, Value: "value1"})
+				require.Contains(t, batch.Source.Labels, &api.Label{Key: `chronicle_ingestion_label["key2"]`, Value: "value2"})
+				batch2 := requests[1].Batch
+				require.Len(t, batch2.Entries, 1, "Expected one log entries in the batch")
+				// verify batch for second log
+				require.Contains(t, batch2.LogType, "WINEVTLOGS")
+				require.Contains(t, batch2.Source.Namespace, "test")
+				require.Len(t, batch2.Source.Labels, 2)
+				require.Contains(t, batch2.Source.Labels, &api.Label{Key: `chronicle_ingestion_label["key3"]`, Value: "value3"}, "Expected ingestion label to be overridden by attribute")
+				require.Contains(t, batch2.Source.Labels, &api.Label{Key: `chronicle_ingestion_label["key4"]`, Value: "value4"}, "Expected ingestion label to be overridden by attribute")
 			},
 		},
 	}
