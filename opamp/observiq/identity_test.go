@@ -15,6 +15,7 @@
 package observiq
 
 import (
+	"os"
 	"runtime"
 	"testing"
 
@@ -104,6 +105,7 @@ func TestToAgentDescription(t *testing.T) {
 					opamp.StringKeyValue("os.family", "linux"),
 					opamp.StringKeyValue("host.name", "my-linux-box"),
 					opamp.StringKeyValue("host.mac_address", "68-C7-B4-EB-A8-D2"),
+					opamp.StringKeyValue("service.key", "test-key"),
 				},
 			},
 		},
@@ -135,12 +137,14 @@ func TestToAgentDescription(t *testing.T) {
 					opamp.StringKeyValue("host.name", "my-linux-box"),
 					opamp.StringKeyValue("host.mac_address", "68-C7-B4-EB-A8-D2"),
 					opamp.StringKeyValue("service.labels", labelsContents),
+					opamp.StringKeyValue("service.key", "test-key"),
 				},
 			},
 		},
 	}
 
 	for _, tc := range testCases {
+		os.Setenv("OTEL_AES_CREDENTIAL_PROVIDER", "test-key")
 		t.Run(tc.desc, func(t *testing.T) {
 			actual := tc.ident.ToAgentDescription()
 			assert.Equal(t, tc.expected, actual)

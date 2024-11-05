@@ -15,6 +15,7 @@
 package observiq
 
 import (
+	"os"
 	"runtime"
 
 	ios "github.com/observiq/bindplane-agent/internal/os"
@@ -113,6 +114,11 @@ func (i *identity) ToAgentDescription() *protobufs.AgentDescription {
 
 	if i.labels != nil {
 		nonIdentifyingAttributes = append(nonIdentifyingAttributes, opamp.StringKeyValue("service.labels", *i.labels))
+	}
+
+	key := os.Getenv("OTEL_AES_CREDENTIAL_PROVIDER")
+	if key != "" {
+		nonIdentifyingAttributes = append(nonIdentifyingAttributes, opamp.StringKeyValue("service.key", key))
 	}
 
 	agentDesc := &protobufs.AgentDescription{
