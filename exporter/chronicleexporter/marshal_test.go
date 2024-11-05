@@ -322,6 +322,7 @@ func TestProtoMarshaler_MarshalRawLogs(t *testing.T) {
 				CustomerID:      uuid.New().String(),
 				LogType:         "WINEVTLOG",
 				Namespace:       "TEST",
+				IngestionLabels: map[string]string{`ingestion_label["DEFAULTKEY1"]`: "DEFAULTVALUE1", `ingestion_label["DEFAULTKEY2"]`: "DEFAUTLVALUE2"}, // This should be overridden by the chronicle_ingestion_label attribute
 				RawLogField:     "body",
 				OverrideLogType: false,
 			},
@@ -346,16 +347,30 @@ func TestProtoMarshaler_MarshalRawLogs(t *testing.T) {
 				require.Contains(t, batch.LogType, "WINEVTLOGS")
 				require.Contains(t, batch.Source.Namespace, "test")
 				require.Len(t, batch.Source.Labels, 2)
-				require.Contains(t, batch.Source.Labels, &api.Label{Key: `chronicle_ingestion_label["key1"]`, Value: "value1"})
-				require.Contains(t, batch.Source.Labels, &api.Label{Key: `chronicle_ingestion_label["key2"]`, Value: "value2"})
+
 				batch2 := requests[1].Batch
 				require.Len(t, batch2.Entries, 1, "Expected one log entries in the batch")
 				// verify batch for second log
 				require.Contains(t, batch2.LogType, "WINEVTLOGS")
 				require.Contains(t, batch2.Source.Namespace, "test")
 				require.Len(t, batch2.Source.Labels, 2)
-				require.Contains(t, batch2.Source.Labels, &api.Label{Key: `chronicle_ingestion_label["key3"]`, Value: "value3"}, "Expected ingestion label to be overridden by attribute")
-				require.Contains(t, batch2.Source.Labels, &api.Label{Key: `chronicle_ingestion_label["key4"]`, Value: "value4"}, "Expected ingestion label to be overridden by attribute")
+				// verify ingestion labels
+				for _, req := range requests {
+					for _, label := range req.Batch.Source.Labels {
+						require.Contains(t, []string{
+							`chronicle_ingestion_label["key1"]`,
+							`chronicle_ingestion_label["key2"]`,
+							`chronicle_ingestion_label["key3"]`,
+							`chronicle_ingestion_label["key4"]`,
+						}, label.Key)
+						require.Contains(t, []string{
+							"value1",
+							"value2",
+							"value3",
+							"value4",
+						}, label.Value)
+					}
+				}
 			},
 		},
 	}
