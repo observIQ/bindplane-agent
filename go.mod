@@ -17,7 +17,6 @@ require (
 	github.com/observiq/bindplane-agent/processor/datapointcountprocessor v1.64.0
 	github.com/observiq/bindplane-agent/processor/logcountprocessor v1.64.0
 	github.com/observiq/bindplane-agent/processor/lookupprocessor v1.64.0
-	github.com/observiq/bindplane-agent/processor/marshalprocessor v1.64.0
 	github.com/observiq/bindplane-agent/processor/maskprocessor v1.64.0
 	github.com/observiq/bindplane-agent/processor/metricextractprocessor v1.64.0
 	github.com/observiq/bindplane-agent/processor/metricstatsprocessor v1.64.0
@@ -830,8 +829,6 @@ replace github.com/observiq/bindplane-agent/processor/removeemptyvaluesprocessor
 replace github.com/observiq/bindplane-agent/processor/throughputmeasurementprocessor => ./processor/throughputmeasurementprocessor
 
 replace github.com/observiq/bindplane-agent/processor/samplingprocessor => ./processor/samplingprocessor
-
-replace github.com/observiq/bindplane-agent/processor/marshalprocessor => ./processor/marshalprocessor
 
 replace github.com/observiq/bindplane-agent/processor/maskprocessor => ./processor/maskprocessor
 
