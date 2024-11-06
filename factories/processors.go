@@ -19,7 +19,6 @@ import (
 	"github.com/observiq/bindplane-agent/processor/datapointcountprocessor"
 	"github.com/observiq/bindplane-agent/processor/logcountprocessor"
 	"github.com/observiq/bindplane-agent/processor/lookupprocessor"
-	"github.com/observiq/bindplane-agent/processor/marshalprocessor"
 	"github.com/observiq/bindplane-agent/processor/maskprocessor"
 	"github.com/observiq/bindplane-agent/processor/metricextractprocessor"
 	"github.com/observiq/bindplane-agent/processor/metricstatsprocessor"
@@ -69,7 +68,6 @@ var defaultProcessors = []processor.Factory{
 	logdedupprocessor.NewFactory(),
 	logstransformprocessor.NewFactory(),
 	lookupprocessor.NewFactory(),
-	marshalprocessor.NewFactory(),
 	maskprocessor.NewFactory(),
 	memorylimiterprocessor.NewFactory(),
 	metricextractprocessor.NewFactory(),

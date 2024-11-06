@@ -17,7 +17,6 @@ Below is a list of supported processors with links to their documentation pages.
 | Log DeDuplication Processor             | [logdedupprocessor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.112.0/processor/logdedupprocessor/README.md)                         |
 | Logs Transform Processor                | [logstransform](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.112.0/processor/logstransformprocessor/README.md)                        |
 | Lookup Processor                        | [lookupprocessor](../processor/lookupprocessor/README.md)                                                                                                          |
-| Marshal Processor                       | [marshalprocessor](../processor/marshalprocessor/README.md)                                                                                                        |
 | Mask Processor                          | [maskprocessor](../processor/maskprocessor/README.md)                                                                                                              |
 | Memory Limiter Processor                | [memorylimiterprocessor](https://github.com/open-telemetry/opentelemetry-collector/blob/v0.112.0/processor/memorylimiterprocessor/README.md)                       |
 | Metric Extract Processor                | [metricextract](../processor/metricextractprocessor/README.md)                                                                                                     |
