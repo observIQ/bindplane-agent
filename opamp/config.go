@@ -15,6 +15,7 @@
 package opamp
 
 import (
+	"context"
 	"crypto/tls"
 	"crypto/x509"
 	"errors"
@@ -27,10 +28,15 @@ import (
 	"github.com/google/uuid"
 	"github.com/oklog/ulid/v2"
 	"github.com/open-telemetry/opamp-go/client/types"
-	"gopkg.in/yaml.v3"
+	"go.opentelemetry.io/collector/confmap"
+	"go.opentelemetry.io/collector/confmap/provider/envprovider"
+	"go.opentelemetry.io/collector/confmap/provider/fileprovider"
 )
 
 var (
+	// errPrefixResolverInitialization for error when initializing config file resolver
+	errPrefixResolverInitialization = "failed to initialize OpAmp config resolver"
+
 	// errPrefixReadFile for error when reading config file
 	errPrefixReadFile = "failed to read OpAmp config file"
 
@@ -155,26 +161,54 @@ func (a *AgentID) UnmarshalYAML(unmarshal func(any) error) error {
 	return nil
 }
 
+// UnmarshalText implements the encoding.TextUnmarshaler interface
+func (a *AgentID) UnmarshalText(text []byte) error {
+	s := string(text)
+
+	if s == "" {
+		// Empty string = keep the 0 value
+		return nil
+	}
+
+	u, err := ParseAgentID(s)
+	if err != nil {
+		// In order to maintain backwards compatability, we don't error here.
+		// Instead, in main, we will regenerate a new agent ID
+		*a = EmptyAgentID
+		return nil
+	}
+
+	*a = AgentID(u)
+
+	return nil
+}
+
+// MarshalText implements the encoding.TextMarshaler interface
+func (a *AgentID) MarshalText() ([]byte, error) {
+	// Format the time in your desired format
+	return []byte(a.String()), nil
+}
+
 // Config contains the configuration for the collector to communicate with an OpAmp enabled platform.
 type Config struct {
-	Endpoint  string     `yaml:"endpoint"`
-	SecretKey *string    `yaml:"secret_key,omitempty"`
-	AgentID   AgentID    `yaml:"agent_id"`
-	TLS       *TLSConfig `yaml:"tls_config,omitempty"`
+	Endpoint  string     `yaml:"endpoint" mapstructure:"endpoint"`
+	SecretKey *string    `yaml:"secret_key,omitempty" mapstructure:"secret_key,omitempty"`
+	AgentID   AgentID    `yaml:"agent_id" mapstructure:"agent_id"`
+	TLS       *TLSConfig `yaml:"tls_config,omitempty" mapstructure:"tls_config,omitempty"`
 
 	// Updatable fields
-	Labels                      *string           `yaml:"labels,omitempty"`
-	AgentName                   *string           `yaml:"agent_name,omitempty"`
-	MeasurementsInterval        time.Duration     `yaml:"measurements_interval,omitempty"`
-	ExtraMeasurementsAttributes map[string]string `yaml:"extra_measurements_attributes,omitempty"`
+	Labels                      *string           `yaml:"labels,omitempty" mapstructure:"labels,omitempty"`
+	AgentName                   *string           `yaml:"agent_name,omitempty" mapstructure:"agent_name,omitempty"`
+	MeasurementsInterval        time.Duration     `yaml:"measurements_interval,omitempty" mapstructure:"measurements_interval,omitempty"`
+	ExtraMeasurementsAttributes map[string]string `yaml:"extra_measurements_attributes,omitempty" mapstructure:"extra_measurements_attributes,omitempty"`
 }
 
 // TLSConfig represents the TLS config to connect to OpAmp server
 type TLSConfig struct {
-	InsecureSkipVerify bool    `yaml:"insecure_skip_verify"`
-	KeyFile            *string `yaml:"key_file"`
-	CertFile           *string `yaml:"cert_file"`
-	CAFile             *string `yaml:"ca_file"`
+	InsecureSkipVerify bool    `yaml:"insecure_skip_verify" mapstructure:"insecure_skip_verify"`
+	KeyFile            *string `yaml:"key_file" mapstructure:"key_file"`
+	CertFile           *string `yaml:"cert_file" mapstructure:"cert_file"`
+	CAFile             *string `yaml:"ca_file" mapstructure:"ca_file"`
 }
 
 // ToTLS converts the config to a tls.Config
@@ -221,20 +255,33 @@ func (c Config) ToTLS() (*tls.Config, error) {
 func ParseConfig(configLocation string) (*Config, error) {
 	configPath := filepath.Clean(configLocation)
 
-	// Read in config file contents
-	data, err := os.ReadFile(configPath)
+	resolverSettings := &confmap.ResolverSettings{
+		URIs: []string{configPath},
+		ProviderFactories: []confmap.ProviderFactory{
+			fileprovider.NewFactory(),
+			envprovider.NewFactory(),
+		},
+		ConverterFactories: []confmap.ConverterFactory{},
+		DefaultScheme:      "env",
+	}
+
+	resolver, err := confmap.NewResolver(*resolverSettings)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", errPrefixResolverInitialization, err)
+	}
+
+	conf, err := resolver.Resolve(context.Background())
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", errPrefixReadFile, err)
 	}
 
-	// Parse the config
 	var config Config
-	if err := yaml.Unmarshal(data, &config); err != nil {
+	if err = conf.Unmarshal(&config); err != nil {
 		return nil, fmt.Errorf("%s: %w", errPrefixParse, err)
 	}
 
 	// Using Secure TLS check files
-	if config.TLS != nil && config.TLS.InsecureSkipVerify == false {
+	if config.TLS != nil && !config.TLS.InsecureSkipVerify {
 		// If CA file is specified
 		if config.TLS.CAFile != nil {
 			// Validate CA file exists on disk
