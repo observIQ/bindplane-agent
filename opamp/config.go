@@ -255,7 +255,7 @@ func (c Config) ToTLS() (*tls.Config, error) {
 func ParseConfig(configLocation string) (*Config, error) {
 	configPath := filepath.Clean(configLocation)
 
-	resolverSettings := &confmap.ResolverSettings{
+	resolverSettings := confmap.ResolverSettings{
 		URIs: []string{configPath},
 		ProviderFactories: []confmap.ProviderFactory{
 			fileprovider.NewFactory(),
@@ -265,7 +265,7 @@ func ParseConfig(configLocation string) (*Config, error) {
 		DefaultScheme:      "env",
 	}
 
-	resolver, err := confmap.NewResolver(*resolverSettings)
+	resolver, err := confmap.NewResolver(resolverSettings)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", errPrefixResolverInitialization, err)
 	}
