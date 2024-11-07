@@ -15,19 +15,20 @@
 package factories
 
 import (
-	"github.com/observiq/bindplane-otel-collector/internal/processor/snapshotprocessor"
-	"github.com/observiq/bindplane-otel-collector/processor/datapointcountprocessor"
-	"github.com/observiq/bindplane-otel-collector/processor/logcountprocessor"
-	"github.com/observiq/bindplane-otel-collector/processor/lookupprocessor"
-	"github.com/observiq/bindplane-otel-collector/processor/maskprocessor"
-	"github.com/observiq/bindplane-otel-collector/processor/metricextractprocessor"
-	"github.com/observiq/bindplane-otel-collector/processor/metricstatsprocessor"
-	"github.com/observiq/bindplane-otel-collector/processor/removeemptyvaluesprocessor"
-	"github.com/observiq/bindplane-otel-collector/processor/resourceattributetransposerprocessor"
-	"github.com/observiq/bindplane-otel-collector/processor/samplingprocessor"
-	"github.com/observiq/bindplane-otel-collector/processor/spancountprocessor"
-	"github.com/observiq/bindplane-otel-collector/processor/throughputmeasurementprocessor"
-	"github.com/observiq/bindplane-otel-collector/processor/unrollprocessor"
+	"github.com/observiq/bindplane-agent/internal/processor/snapshotprocessor"
+	"github.com/observiq/bindplane-agent/processor/datapointcountprocessor"
+	"github.com/observiq/bindplane-agent/processor/loganomalyprocessor"
+	"github.com/observiq/bindplane-agent/processor/logcountprocessor"
+	"github.com/observiq/bindplane-agent/processor/lookupprocessor"
+	"github.com/observiq/bindplane-agent/processor/marshalprocessor"
+	"github.com/observiq/bindplane-agent/processor/maskprocessor"
+	"github.com/observiq/bindplane-agent/processor/metricextractprocessor"
+	"github.com/observiq/bindplane-agent/processor/metricstatsprocessor"
+	"github.com/observiq/bindplane-agent/processor/removeemptyvaluesprocessor"
+	"github.com/observiq/bindplane-agent/processor/resourceattributetransposerprocessor"
+	"github.com/observiq/bindplane-agent/processor/samplingprocessor"
+	"github.com/observiq/bindplane-agent/processor/spancountprocessor"
+	"github.com/observiq/bindplane-agent/processor/throughputmeasurementprocessor"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/attributesprocessor"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/cumulativetodeltaprocessor"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/deltatorateprocessor"
@@ -65,6 +66,7 @@ var defaultProcessors = []processor.Factory{
 	groupbytraceprocessor.NewFactory(),
 	intervalprocessor.NewFactory(),
 	k8sattributesprocessor.NewFactory(),
+	loganomalyprocessor.NewFactory(),
 	logcountprocessor.NewFactory(),
 	logdedupprocessor.NewFactory(),
 	logstransformprocessor.NewFactory(),
