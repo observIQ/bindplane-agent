@@ -16,6 +16,7 @@ package opamp
 
 import (
 	"crypto/tls"
+	"crypto/x509"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -188,14 +189,14 @@ func TestToTLS(t *testing.T) {
 				}
 
 				expectedConfig := tls.Config{
-					// MinVersion: tls.VersionTLS12,
+					MinVersion: tls.VersionTLS12,
 				}
 
-				// caCert, err := os.ReadFile(caFileContents)
-				// require.NoError(t, err)
-				// caCertPool := x509.NewCertPool()
-				// caCertPool.AppendCertsFromPEM(caCert)
-				// expectedConfig.RootCAs = caCertPool
+				caCert, err := os.ReadFile(caFileContents)
+				require.NoError(t, err)
+				caCertPool := x509.NewCertPool()
+				caCertPool.AppendCertsFromPEM(caCert)
+				expectedConfig.RootCAs = caCertPool
 
 				cert, err := tls.LoadX509KeyPair(certFileContents, keyFileContents)
 				require.NoError(t, err)
