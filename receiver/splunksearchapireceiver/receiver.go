@@ -16,6 +16,7 @@ package splunksearchapireceiver
 
 import (
 	"context"
+	"net/http"
 	"time"
 
 	"go.opentelemetry.io/collector/component"
@@ -30,10 +31,17 @@ type splunksearchapireceiver struct {
 	logger       *zap.Logger
 	logsConsumer consumer.Logs
 	config       *Config
+	settings     component.TelemetrySettings
+	client       *http.Client
 }
 
 func (ssapir *splunksearchapireceiver) Start(ctx context.Context, host component.Host) error {
 	ssapir.host = host
+	client, err := ssapir.config.ClientConfig.ToClient(ctx, host, ssapir.settings)
+	if err != nil {
+		return err
+	}
+	ssapir.client = client
 	go ssapir.runQueries(ctx)
 	return nil
 }
@@ -45,7 +53,7 @@ func (ssapir *splunksearchapireceiver) Shutdown(_ context.Context) error {
 func (ssapir *splunksearchapireceiver) runQueries(ctx context.Context) error {
 	for _, search := range ssapir.config.Searches {
 		// create search in Splunk
-		searchID, err := createSplunkSearch(ssapir.config, search.Query)
+		searchID, err := ssapir.createSplunkSearch(ssapir.config, search.Query)
 		if err != nil {
 			ssapir.logger.Error("error creating search", zap.Error(err))
 		}
@@ -53,7 +61,7 @@ func (ssapir *splunksearchapireceiver) runQueries(ctx context.Context) error {
 
 		// wait for search to complete
 		for {
-			done, err := isSearchCompleted(ssapir.config, searchID)
+			done, err := ssapir.isSearchCompleted(ssapir.config, searchID)
 			if err != nil {
 				ssapir.logger.Error("error checking search status", zap.Error(err))
 			}
@@ -65,7 +73,7 @@ func (ssapir *splunksearchapireceiver) runQueries(ctx context.Context) error {
 		// fmt.Println("Search completed successfully")
 
 		// fetch search results
-		results, err := getSplunkSearchResults(ssapir.config, searchID)
+		results, err := ssapir.getSplunkSearchResults(ssapir.config, searchID)
 		if err != nil {
 			ssapir.logger.Error("error fetching search results", zap.Error(err))
 		}
@@ -127,16 +135,16 @@ func (ssapir *splunksearchapireceiver) runQueries(ctx context.Context) error {
 	return nil
 }
 
-func createSplunkSearch(config *Config, search string) (string, error) {
-	resp, err := createSearchJob(config, search)
+func (ssapir *splunksearchapireceiver) createSplunkSearch(config *Config, search string) (string, error) {
+	resp, err := ssapir.createSearchJob(config, search)
 	if err != nil {
 		return "", err
 	}
 	return resp.SID, nil
 }
 
-func isSearchCompleted(config *Config, sid string) (bool, error) {
-	resp, err := getJobStatus(config, sid)
+func (ssapir *splunksearchapireceiver) isSearchCompleted(config *Config, sid string) (bool, error) {
+	resp, err := ssapir.getJobStatus(config, sid)
 	if err != nil {
 		return false, err
 	}
@@ -152,8 +160,8 @@ func isSearchCompleted(config *Config, sid string) (bool, error) {
 	return false, nil
 }
 
-func getSplunkSearchResults(config *Config, sid string) (SearchResults, error) {
-	resp, err := getSearchResults(config, sid)
+func (ssapir *splunksearchapireceiver) getSplunkSearchResults(config *Config, sid string) (SearchResults, error) {
+	resp, err := ssapir.getSearchResults(config, sid)
 	if err != nil {
 		return SearchResults{}, err
 	}
