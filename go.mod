@@ -855,6 +855,8 @@ replace github.com/observiq/bindplane-otel-collector/processor/unrollprocessor =
 
 replace github.com/observiq/bindplane-otel-collector/expr => ./expr
 
+replace github.com/observiq/bindplane-otel-collector/processor/topologyprocessor => ./processor/topologyprocessor
+
 replace github.com/observiq/bindplane-otel-collector/counter => ./counter
 
 replace github.com/observiq/bindplane-otel-collector/exporter/googlemanagedprometheusexporter => ./exporter/googlemanagedprometheusexporter
