@@ -168,6 +168,7 @@ func TestToTLS(t *testing.T) {
 				}
 
 				cert, err := tls.LoadX509KeyPair(certFileContents, keyFileContents)
+				require.NoError(t, err)
 				expectedConfig.Certificates = []tls.Certificate{cert}
 
 				actual, err := cfg.ToTLS()
@@ -192,11 +193,13 @@ func TestToTLS(t *testing.T) {
 				}
 
 				caCert, err := os.ReadFile(caFileContents)
+				require.NoError(t, err)
 				caCertPool := x509.NewCertPool()
 				caCertPool.AppendCertsFromPEM(caCert)
 				expectedConfig.RootCAs = caCertPool
 
 				cert, err := tls.LoadX509KeyPair(certFileContents, keyFileContents)
+				require.NoError(t, err)
 				expectedConfig.Certificates = []tls.Certificate{cert}
 
 				actual, err := cfg.ToTLS()
@@ -246,7 +249,7 @@ func TestParseConfig(t *testing.T) {
 				require.NoError(t, err)
 
 				cfg, err := ParseConfig(configPath)
-				assert.ErrorContains(t, err, errPrefixParse)
+				assert.ErrorContains(t, err, errPrefixReadFile)
 				assert.Nil(t, cfg)
 			},
 		},
@@ -619,6 +622,187 @@ tls_config:
   key_file: %s
   cert_file: %s
 `, testAgentIDString, keyPath, certPath)
+
+				err = os.WriteFile(configPath, []byte(configContents), os.ModePerm)
+				require.NoError(t, err)
+
+				expectedConfig := &Config{
+					Endpoint:  "localhost:1234",
+					SecretKey: &secretKeyContents,
+					AgentID:   testAgentID,
+					Labels:    &labelsContents,
+					AgentName: &agentNameContents,
+					TLS: &TLSConfig{
+						InsecureSkipVerify: false,
+						KeyFile:            &keyPath,
+						CertFile:           &certPath,
+					},
+				}
+
+				cfg, err := ParseConfig(configPath)
+				assert.NoError(t, err)
+				assert.Equal(t, expectedConfig, cfg)
+			},
+		},
+		{
+			desc: "Successful Parse With Environment Variables",
+			testFunc: func(t *testing.T) {
+				endpointEnvVar := "TEST_ENDPOINT"
+				require.NoError(t, os.Setenv(endpointEnvVar, "localhost:1234"))
+				defer func() {
+					require.NoError(t, os.Unsetenv(endpointEnvVar))
+				}()
+
+				secretKeyEnvVar := "TEST_SECRET_KEY"
+				require.NoError(t, os.Setenv(secretKeyEnvVar, secretKeyContents))
+				defer func() {
+					require.NoError(t, os.Unsetenv(secretKeyEnvVar))
+				}()
+
+				agentIDEnvVar := "TEST_AGENT_ID"
+				require.NoError(t, os.Setenv(agentIDEnvVar, testAgentIDString))
+				defer func() {
+					require.NoError(t, os.Unsetenv(agentIDEnvVar))
+				}()
+
+				labelsEnvVar := "TEST_LABELS"
+				require.NoError(t, os.Setenv(labelsEnvVar, "one=foo,two=bar"))
+				defer func() {
+					require.NoError(t, os.Unsetenv(labelsEnvVar))
+				}()
+
+				agentNameEnvVar := "TEST_AGENT_NAME"
+				require.NoError(t, os.Setenv(agentNameEnvVar, "My Agent"))
+				defer func() {
+					require.NoError(t, os.Unsetenv(agentNameEnvVar))
+				}()
+
+				configContents := fmt.Sprintf(`
+endpoint: ${%s}
+secret_key: ${%s}
+agent_id: ${%s}
+labels: ${%s}
+agent_name: ${%s}
+`, endpointEnvVar, secretKeyEnvVar, agentIDEnvVar, labelsEnvVar, agentNameEnvVar)
+
+				tmpDir := t.TempDir()
+				configPath := filepath.Join(tmpDir, "manager.yml")
+
+				err := os.WriteFile(configPath, []byte(configContents), os.ModePerm)
+				require.NoError(t, err)
+
+				expectedConfig := &Config{
+					Endpoint:  "localhost:1234",
+					SecretKey: &secretKeyContents,
+					AgentID:   testAgentID,
+					Labels:    &labelsContents,
+					AgentName: &agentNameContents,
+				}
+
+				cfg, err := ParseConfig(configPath)
+				assert.NoError(t, err)
+				assert.Equal(t, expectedConfig, cfg)
+			},
+		},
+		{
+			desc: "Successful Parse With env:Environment Variables",
+			testFunc: func(t *testing.T) {
+				endpointEnvVar := "TEST_ENDPOINT"
+				require.NoError(t, os.Setenv(endpointEnvVar, "localhost:1234"))
+				defer func() {
+					require.NoError(t, os.Unsetenv(endpointEnvVar))
+				}()
+
+				secretKeyEnvVar := "TEST_SECRET_KEY"
+				require.NoError(t, os.Setenv(secretKeyEnvVar, secretKeyContents))
+				defer func() {
+					require.NoError(t, os.Unsetenv(secretKeyEnvVar))
+				}()
+
+				agentIDEnvVar := "TEST_AGENT_ID"
+				require.NoError(t, os.Setenv(agentIDEnvVar, testAgentIDString))
+				defer func() {
+					require.NoError(t, os.Unsetenv(agentIDEnvVar))
+				}()
+
+				labelsEnvVar := "TEST_LABELS"
+				require.NoError(t, os.Setenv(labelsEnvVar, "one=foo,two=bar"))
+				defer func() {
+					require.NoError(t, os.Unsetenv(labelsEnvVar))
+				}()
+
+				agentNameEnvVar := "TEST_AGENT_NAME"
+				require.NoError(t, os.Setenv(agentNameEnvVar, "My Agent"))
+				defer func() {
+					require.NoError(t, os.Unsetenv(agentNameEnvVar))
+				}()
+
+				configContents := fmt.Sprintf(`
+endpoint: ${env:%s}
+secret_key: ${env:%s}
+agent_id: ${env:%s}
+labels: ${env:%s}
+agent_name: ${env:%s}
+`, endpointEnvVar, secretKeyEnvVar, agentIDEnvVar, labelsEnvVar, agentNameEnvVar)
+
+				tmpDir := t.TempDir()
+				configPath := filepath.Join(tmpDir, "manager.yml")
+
+				err := os.WriteFile(configPath, []byte(configContents), os.ModePerm)
+				require.NoError(t, err)
+
+				expectedConfig := &Config{
+					Endpoint:  "localhost:1234",
+					SecretKey: &secretKeyContents,
+					AgentID:   testAgentID,
+					Labels:    &labelsContents,
+					AgentName: &agentNameContents,
+				}
+
+				cfg, err := ParseConfig(configPath)
+				assert.NoError(t, err)
+				assert.Equal(t, expectedConfig, cfg)
+			},
+		},
+		{
+			desc: "Successful Full Parse with TLS Valid Key and Cert Environment Variables",
+			testFunc: func(t *testing.T) {
+				tmpDir := t.TempDir()
+				configPath := filepath.Join(tmpDir, "manager.yml")
+
+				keyPath := filepath.Join(tmpDir, "file-key.crt")
+				k, err := os.Create(keyPath)
+				require.NoError(t, err)
+				defer k.Close()
+
+				certPath := filepath.Join(tmpDir, "file-cert.crt")
+				c, err := os.Create(certPath)
+				require.NoError(t, err)
+				defer c.Close()
+
+				keyEnvVariable := "TEST_TLS_KEY"
+				require.NoError(t, os.Setenv(keyEnvVariable, keyPath))
+				defer func() {
+					require.NoError(t, os.Unsetenv(keyEnvVariable))
+				}()
+
+				certEnvVariable := "TEST_TLS_CERT"
+				require.NoError(t, os.Setenv(certEnvVariable, certPath))
+				defer func() {
+					require.NoError(t, os.Unsetenv(certEnvVariable))
+				}()
+
+				configContents := fmt.Sprintf(`
+endpoint: localhost:1234
+secret_key: b92222ee-a1fc-4bb1-98db-26de3448541b
+agent_id: %s
+labels: "one=foo,two=bar"
+agent_name: "My Agent"
+tls_config:
+  insecure_skip_verify: false
+  key_file: ${%s}
+  cert_file: ${%s}
+`, testAgentIDString, keyEnvVariable, certEnvVariable)
 
 				err = os.WriteFile(configPath, []byte(configContents), os.ModePerm)
 				require.NoError(t, err)
