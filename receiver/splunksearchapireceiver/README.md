@@ -1,0 +1,1 @@
+# Splunk Search API Receiver
