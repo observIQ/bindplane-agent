@@ -114,21 +114,24 @@ func (m *protoMarshaler) extractRawLogs(ctx context.Context, ld plog.Logs) (map[
 					Data:           []byte(rawLog),
 				}
 				entries[logType] = append(entries[logType], entry)
-				namespaceMap[logType] = namespace
+				// each logType maps to exactly 1 namespace value
+				if _, ok := namespaceMap[logType]; !ok {
+					namespaceMap[logType] = namespace
+				}
 
 				if len(ingestionLabels) > 0 {
 					if _, exists := ingestionLabelsMap[logType]; !exists {
-						ingestionLabelsMap[logType] = []*api.Label{}
+						ingestionLabelsMap[logType] = make([]*api.Label, 0)
 					}
-					uniqueLabels := make(map[string]bool)
+					existingLabels := make(map[string]struct{})
 					for _, label := range ingestionLabelsMap[logType] {
-						uniqueLabels[label.Key] = true
+						existingLabels[label.Key] = struct{}{}
 					}
 					for _, label := range ingestionLabels {
 						// Only add to ingestionLabelsMap if the label is unique
-						if !uniqueLabels[label.Key] {
+						if _, ok := existingLabels[label.Key]; !ok {
 							ingestionLabelsMap[logType] = append(ingestionLabelsMap[logType], label)
-							uniqueLabels[label.Key] = true
+							existingLabels[label.Key] = struct{}{}
 						}
 					}
 				}
@@ -191,9 +194,10 @@ func (m *protoMarshaler) getRawLog(ctx context.Context, logRecord plog.LogRecord
 }
 
 func (m *protoMarshaler) getLogType(ctx context.Context, logRecord plog.LogRecord, scope plog.ScopeLogs, resource plog.ResourceLogs) (string, error) {
+	// check for attributes in attributes["chronicle_log_type"]
 	logType, err := m.getRawField(ctx, chronicleLogTypeField, logRecord, scope, resource)
 	if err != nil {
-		return m.cfg.LogType, fmt.Errorf("get chronicle log type: %w", err)
+		return "", fmt.Errorf("get chronicle log type: %w", err)
 	}
 	if logType != "" {
 		return logType, nil
@@ -203,7 +207,7 @@ func (m *protoMarshaler) getLogType(ctx context.Context, logRecord plog.LogRecor
 		logType, err := m.getRawField(ctx, logTypeField, logRecord, scope, resource)
 
 		if err != nil {
-			return m.cfg.LogType, fmt.Errorf("get log type: %w", err)
+			return "", fmt.Errorf("get log type: %w", err)
 		}
 		if logType != "" {
 			if chronicleLogType, ok := supportedLogTypes[logType]; ok {
@@ -216,9 +220,10 @@ func (m *protoMarshaler) getLogType(ctx context.Context, logRecord plog.LogRecor
 }
 
 func (m *protoMarshaler) getNamespace(ctx context.Context, logRecord plog.LogRecord, scope plog.ScopeLogs, resource plog.ResourceLogs) (string, error) {
+	// check for attributes in attributes["chronicle_namespace"]
 	namespace, err := m.getRawField(ctx, chronicleNamespaceField, logRecord, scope, resource)
 	if err != nil {
-		return m.cfg.Namespace, fmt.Errorf("get chronicle log type: %w", err)
+		return "", fmt.Errorf("get chronicle log type: %w", err)
 	}
 	if namespace != "" {
 		return namespace, nil
@@ -227,19 +232,21 @@ func (m *protoMarshaler) getNamespace(ctx context.Context, logRecord plog.LogRec
 }
 
 func (m *protoMarshaler) getIngestionLabels(logRecord plog.LogRecord) ([]*api.Label, error) {
+	// check for labels in attributes["chronicle_ingestion_labels"]
+	ingestionLabels, err := m.getRawNestedFields(chronicleIngestionLabelsPrefix, logRecord)
+	if err != nil {
+		return []*api.Label{}, fmt.Errorf("get chronicle ingestion labels: %w", err)
+	}
+	if len(ingestionLabels) != 0 {
+		return ingestionLabels, nil
+	}
+	// use labels defined in config if needed
 	configLabels := make([]*api.Label, 0)
 	for key, value := range m.cfg.IngestionLabels {
 		configLabels = append(configLabels, &api.Label{
 			Key:   key,
 			Value: value,
 		})
-	}
-	ingestionLabels, err := m.getRawNestedFields(chronicleIngestionLabelsPrefix, logRecord)
-	if err != nil {
-		return configLabels, fmt.Errorf("get chronicle ingestion labels: %w", err)
-	}
-	if len(ingestionLabels) != 0 {
-		return ingestionLabels, nil
 	}
 	return configLabels, nil
 }
@@ -275,19 +282,25 @@ func (m *protoMarshaler) getRawField(ctx context.Context, field string, logRecor
 }
 
 func (m *protoMarshaler) getRawNestedFields(field string, logRecord plog.LogRecord) ([]*api.Label, error) {
-	nestedFields := make([]*api.Label, 0)
+	var nestedFields []*api.Label
 	logRecord.Attributes().Range(func(key string, value pcommon.Value) bool {
-		if strings.HasPrefix(key, field) {
-			nestedFields = append(nestedFields, &api.Label{
-				Key:   key,
-				Value: value.AsString(),
-			})
+		if !strings.HasPrefix(key, field) {
+			return true
+		}
+		// Extract the key name from the nested field
+		cleanKey := strings.Trim(key[len(field):], `[]"`)
+		var jsonMap map[string]string
+
+		// If needs to be parsed as JSON
+		if err := json.Unmarshal([]byte(value.AsString()), &jsonMap); err == nil {
+			for k, v := range jsonMap {
+				nestedFields = append(nestedFields, &api.Label{Key: k, Value: v})
+			}
+		} else {
+			nestedFields = append(nestedFields, &api.Label{Key: cleanKey, Value: value.AsString()})
 		}
 		return true
 	})
-	if len(nestedFields) == 0 {
-		return nil, nil
-	}
 	return nestedFields, nil
 }
 

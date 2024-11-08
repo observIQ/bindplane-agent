@@ -43,7 +43,6 @@ func TestProtoMarshaler_MarshalRawLogs(t *testing.T) {
 			cfg: Config{
 				CustomerID:      uuid.New().String(),
 				LogType:         "WINEVTLOG",
-				Namespace:       "test",
 				RawLogField:     "body",
 				OverrideLogType: false,
 			},
@@ -98,8 +97,6 @@ func TestProtoMarshaler_MarshalRawLogs(t *testing.T) {
 			cfg: Config{
 				CustomerID:      uuid.New().String(),
 				LogType:         "WINEVTLOG",
-				Namespace:       "test",
-				IngestionLabels: map[string]string{`chronicle_ingestion_label["env"]`: "staging"},
 				RawLogField:     "body",
 				OverrideLogType: false,
 			},
@@ -126,8 +123,6 @@ func TestProtoMarshaler_MarshalRawLogs(t *testing.T) {
 			cfg: Config{
 				CustomerID:      uuid.New().String(),
 				LogType:         "WINEVTLOG",
-				Namespace:       "test",
-				IngestionLabels: map[string]string{`chronicle_ingestion_label["key1"]`: "value1", `chronicle_ingestion_label["key2"]`: "value2"},
 				RawLogField:     "attributes",
 				OverrideLogType: false,
 			},
@@ -181,7 +176,6 @@ func TestProtoMarshaler_MarshalRawLogs(t *testing.T) {
 			cfg: Config{
 				CustomerID:      uuid.New().String(),
 				LogType:         "WINEVTLOG",
-				Namespace:       "test",
 				RawLogField:     "body",
 				OverrideLogType: false,
 			},
@@ -213,7 +207,6 @@ func TestProtoMarshaler_MarshalRawLogs(t *testing.T) {
 			cfg: Config{
 				CustomerID:      uuid.New().String(),
 				LogType:         "WINEVTLOG",
-				Namespace:       "test",
 				RawLogField:     "body",
 				OverrideLogType: false,
 			},
@@ -232,7 +225,7 @@ func TestProtoMarshaler_MarshalRawLogs(t *testing.T) {
 				require.Len(t, requests, 1, "Expected a single batch request")
 				batch := requests[0].Batch
 				require.Equal(t, "WINEVTLOG", batch.LogType)
-				require.Equal(t, "test", batch.Source.Namespace)
+				require.Equal(t, "", batch.Source.Namespace)
 				// verify batch source labels
 				require.Len(t, batch.Source.Labels, 4)
 				require.Len(t, batch.Entries, 2, "Expected two log entries in the batch")
@@ -247,8 +240,6 @@ func TestProtoMarshaler_MarshalRawLogs(t *testing.T) {
 			cfg: Config{
 				CustomerID:      uuid.New().String(),
 				LogType:         "DEFAULT", // This should be overridden by the log_type attribute
-				Namespace:       "DEFAULT",
-				IngestionLabels: map[string]string{`ingestion_label["DEFAULTKEY1"]`: "DEFAULTVALUE1", `ingestion_label["DEFAULTKEY2"]`: "DEFAUTLVALUE2"},
 				RawLogField:     "body",
 				OverrideLogType: true,
 			},
@@ -265,9 +256,7 @@ func TestProtoMarshaler_MarshalRawLogs(t *testing.T) {
 			name: "Override log type with chronicle attribute",
 			cfg: Config{
 				CustomerID:      uuid.New().String(),
-				LogType:         "DEFAULT",                                                                                                               // This should be overridden by the chronicle_log_type attribute
-				Namespace:       "DEFAULT",                                                                                                               // This should be overridden by the chronicle_namespace attribute
-				IngestionLabels: map[string]string{`ingestion_label["DEFAULTKEY1"]`: "DEFAULTVALUE1", `ingestion_label["DEFAULTKEY2"]`: "DEFAUTLVALUE2"}, // This should be overridden by the chronicle_ingestion_label attribute
+				LogType:         "DEFAULT", // This should be overridden by the chronicle_log_type attribute
 				RawLogField:     "body",
 				OverrideLogType: true,
 			},
@@ -279,8 +268,13 @@ func TestProtoMarshaler_MarshalRawLogs(t *testing.T) {
 				batch := requests[0].Batch
 				require.Equal(t, "ASOC_ALERT", batch.LogType, "Expected log type to be overridden by attribute")
 				require.Equal(t, "test", batch.Source.Namespace, "Expected namespace to be overridden by attribute")
-				require.Contains(t, batch.Source.Labels, &api.Label{Key: `chronicle_ingestion_label["realkey1"]`, Value: "realvalue1"}, "Expected ingestion label to be overridden by attribute")
-				require.Contains(t, batch.Source.Labels, &api.Label{Key: `chronicle_ingestion_label["realkey2"]`, Value: "realvalue2"}, "Expected ingestion label to be overridden by attribute")
+				expectedLabels := map[string]string{
+					"realkey1": "realvalue1",
+					"realkey2": "realvalue2",
+				}
+				for _, label := range batch.Source.Labels {
+					require.Equal(t, expectedLabels[label.Key], label.Value, "Expected ingestion label to be overridden by attribute")
+				}
 			},
 		},
 		{
@@ -288,7 +282,6 @@ func TestProtoMarshaler_MarshalRawLogs(t *testing.T) {
 			cfg: Config{
 				CustomerID:      uuid.New().String(),
 				LogType:         "WINEVTLOG",
-				Namespace:       "TEST",
 				RawLogField:     "body",
 				OverrideLogType: false,
 			},
@@ -312,8 +305,13 @@ func TestProtoMarshaler_MarshalRawLogs(t *testing.T) {
 				require.Equal(t, "WINEVTLOGS", batch.LogType)
 				require.Equal(t, "test1", batch.Source.Namespace)
 				require.Len(t, batch.Source.Labels, 2)
-				require.Contains(t, batch.Source.Labels, &api.Label{Key: `chronicle_ingestion_label["key1"]`, Value: "value1"}, "Expected ingestion label to be overridden by attribute")
-				require.Contains(t, batch.Source.Labels, &api.Label{Key: `chronicle_ingestion_label["key2"]`, Value: "value2"}, "Expected ingestion label to be overridden by attribute")
+				expectedLabels := map[string]string{
+					"key1": "value1",
+					"key2": "value2",
+				}
+				for _, label := range batch.Source.Labels {
+					require.Equal(t, expectedLabels[label.Key], label.Value, "Expected ingestion label to be overridden by attribute")
+				}
 			},
 		},
 		{
@@ -321,8 +319,6 @@ func TestProtoMarshaler_MarshalRawLogs(t *testing.T) {
 			cfg: Config{
 				CustomerID:      uuid.New().String(),
 				LogType:         "WINEVTLOG",
-				Namespace:       "TEST",
-				IngestionLabels: map[string]string{`ingestion_label["DEFAULTKEY1"]`: "DEFAULTVALUE1", `ingestion_label["DEFAULTKEY2"]`: "DEFAUTLVALUE2"}, // This should be overridden by the chronicle_ingestion_label attribute
 				RawLogField:     "body",
 				OverrideLogType: false,
 			},
@@ -358,10 +354,10 @@ func TestProtoMarshaler_MarshalRawLogs(t *testing.T) {
 				for _, req := range requests {
 					for _, label := range req.Batch.Source.Labels {
 						require.Contains(t, []string{
-							`chronicle_ingestion_label["key1"]`,
-							`chronicle_ingestion_label["key2"]`,
-							`chronicle_ingestion_label["key3"]`,
-							`chronicle_ingestion_label["key4"]`,
+							"key1",
+							"key2",
+							"key3",
+							"key4",
 						}, label.Key)
 						require.Contains(t, []string{
 							"value1",
@@ -409,7 +405,6 @@ func TestProtoMarshaler_MarshalRawLogsForHTTP(t *testing.T) {
 			cfg: Config{
 				CustomerID:      uuid.New().String(),
 				LogType:         "WINEVTLOG",
-				Namespace:       "test",
 				RawLogField:     "body",
 				OverrideLogType: false,
 				Protocol:        protocolHTTPS,
@@ -438,8 +433,6 @@ func TestProtoMarshaler_MarshalRawLogsForHTTP(t *testing.T) {
 			cfg: Config{
 				CustomerID:      uuid.New().String(),
 				LogType:         "WINEVTLOG",
-				Namespace:       "test",
-				IngestionLabels: map[string]string{`chronicle_ingestion_label["key1"]`: "value1", `chronicle_ingestion_label["key2"]`: "value2"},
 				RawLogField:     "body",
 				OverrideLogType: false,
 			},
@@ -469,7 +462,6 @@ func TestProtoMarshaler_MarshalRawLogsForHTTP(t *testing.T) {
 			cfg: Config{
 				CustomerID:      uuid.New().String(),
 				LogType:         "WINEVTLOG",
-				Namespace:       "test",
 				IngestionLabels: map[string]string{`chronicle_ingestion_label["key1"]`: "value1", `chronicle_ingestion_label["key2"]`: "value2"},
 				RawLogField:     "attributes",
 				OverrideLogType: false,
@@ -492,7 +484,6 @@ func TestProtoMarshaler_MarshalRawLogsForHTTP(t *testing.T) {
 			cfg: Config{
 				CustomerID:      uuid.New().String(),
 				LogType:         "DEFAULT",
-				Namespace:       "DEFAULT",
 				RawLogField:     "body",
 				OverrideLogType: false,
 			},
