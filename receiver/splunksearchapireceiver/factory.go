@@ -18,6 +18,7 @@ import (
 	"context"
 
 	"go.opentelemetry.io/collector/component"
+	"go.opentelemetry.io/collector/config/confighttp"
 	"go.opentelemetry.io/collector/consumer"
 	"go.opentelemetry.io/collector/receiver"
 )
@@ -27,7 +28,9 @@ var (
 )
 
 func createDefaultConfig() component.Config {
-	return &Config{}
+	return &Config{
+		ClientConfig: confighttp.NewDefaultClientConfig(),
+	}
 }
 
 func createLogsReceiver(_ context.Context,
@@ -35,12 +38,12 @@ func createLogsReceiver(_ context.Context,
 	cfg component.Config,
 	consumer consumer.Logs,
 ) (receiver.Logs, error) {
-	logger := params.Logger
 	ssapirConfig := cfg.(*Config)
 	ssapir := &splunksearchapireceiver{
-		logger:       logger,
+		logger:       params.Logger,
 		logsConsumer: consumer,
 		config:       ssapirConfig,
+		settings:     params.TelemetrySettings,
 	}
 	return ssapir, nil
 }

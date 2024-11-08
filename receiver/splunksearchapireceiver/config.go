@@ -18,14 +18,16 @@ import (
 	"errors"
 	"strings"
 	"time"
+
+	"go.opentelemetry.io/collector/config/confighttp"
 )
 
 // Config struct to represent the configuration for the Splunk Search API receiver
 type Config struct {
-	Server   string   `mapstructure:"splunk_server"`
-	Username string   `mapstructure:"splunk_username"`
-	Password string   `mapstructure:"splunk_password"`
-	Searches []Search `mapstructure:"searches"`
+	confighttp.ClientConfig `mapstructure:",squash"`
+	Username                string   `mapstructure:"splunk_username"`
+	Password                string   `mapstructure:"splunk_password"`
+	Searches                []Search `mapstructure:"searches"`
 }
 
 // Search struct to represent a Splunk search
@@ -38,8 +40,8 @@ type Search struct {
 
 // Validate validates the Splunk Search API receiver configuration
 func (cfg *Config) Validate() error {
-	if cfg.Server == "" {
-		return errors.New("missing Splunk server")
+	if cfg.Endpoint == "" {
+		return errors.New("missing Splunk server endpoint")
 	}
 	if cfg.Username == "" {
 		return errors.New("missing Splunk username")

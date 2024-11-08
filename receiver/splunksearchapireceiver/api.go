@@ -17,7 +17,6 @@ package splunksearchapireceiver
 
 import (
 	"bytes"
-	"crypto/tls"
 	"encoding/json"
 	"encoding/xml"
 	"fmt"
@@ -25,17 +24,9 @@ import (
 	"net/http"
 )
 
-func createHTTPClient() *http.Client {
-	// TODO: Add TLS
-	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, // Disables TLS verification
-	}
-	return &http.Client{Transport: tr}
-}
-
-func createSearchJob(config *Config, search string) (CreateJobResponse, error) {
+func (ssapir *splunksearchapireceiver) createSearchJob(config *Config, search string) (CreateJobResponse, error) {
 	// fmt.Println("Creating search job for search: ", search)
-	endpoint := fmt.Sprintf("https://%s/services/search/jobs", config.Server)
+	endpoint := fmt.Sprintf("%s/services/search/jobs", config.Endpoint)
 
 	reqBody := fmt.Sprintf(`search=%s`, search)
 	req, err := http.NewRequest("POST", endpoint, bytes.NewBuffer([]byte(reqBody)))
@@ -44,8 +35,7 @@ func createSearchJob(config *Config, search string) (CreateJobResponse, error) {
 	}
 	req.SetBasicAuth(config.Username, config.Password)
 
-	client := createHTTPClient()
-	resp, err := client.Do(req)
+	resp, err := ssapir.client.Do(req)
 	if err != nil {
 		return CreateJobResponse{}, err
 	}
@@ -68,9 +58,9 @@ func createSearchJob(config *Config, search string) (CreateJobResponse, error) {
 	return jobResponse, nil
 }
 
-func getJobStatus(config *Config, sid string) (JobStatusResponse, error) {
+func (ssapir *splunksearchapireceiver) getJobStatus(config *Config, sid string) (JobStatusResponse, error) {
 	// fmt.Println("Getting job status")
-	endpoint := fmt.Sprintf("https://%s/services/search/v2/jobs/%s", config.Server, sid)
+	endpoint := fmt.Sprintf("%s/services/search/v2/jobs/%s", config.Endpoint, sid)
 
 	req, err := http.NewRequest("GET", endpoint, nil)
 	if err != nil {
@@ -78,8 +68,7 @@ func getJobStatus(config *Config, sid string) (JobStatusResponse, error) {
 	}
 	req.SetBasicAuth(config.Username, config.Password)
 
-	client := createHTTPClient()
-	resp, err := client.Do(req)
+	resp, err := ssapir.client.Do(req)
 	if err != nil {
 		return JobStatusResponse{}, err
 	}
@@ -102,16 +91,15 @@ func getJobStatus(config *Config, sid string) (JobStatusResponse, error) {
 	return jobStatusResponse, nil
 }
 
-func getSearchResults(config *Config, sid string) (SearchResults, error) {
-	endpoint := fmt.Sprintf("https://%s/services/search/v2/jobs/%s/results?output_mode=json", config.Server, sid)
+func (ssapir *splunksearchapireceiver) getSearchResults(config *Config, sid string) (SearchResults, error) {
+	endpoint := fmt.Sprintf("%s/services/search/v2/jobs/%s/results?output_mode=json", config.Endpoint, sid)
 	req, err := http.NewRequest("GET", endpoint, nil)
 	if err != nil {
 		return SearchResults{}, err
 	}
 	req.SetBasicAuth(config.Username, config.Password)
 
-	client := createHTTPClient()
-	resp, err := client.Do(req)
+	resp, err := ssapir.client.Do(req)
 	if err != nil {
 		return SearchResults{}, err
 	}
