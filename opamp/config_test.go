@@ -58,7 +58,7 @@ func TestToTLS(t *testing.T) {
 					TLS: nil,
 				}
 
-				actual, err := cfg.ToTLS()
+				actual, err := cfg.ToTLS(nil)
 				assert.NoError(t, err)
 				assert.Nil(t, actual)
 			},
@@ -77,7 +77,7 @@ func TestToTLS(t *testing.T) {
 					MinVersion:         tls.VersionTLS12,
 				}
 
-				actual, err := cfg.ToTLS()
+				actual, err := cfg.ToTLS(nil)
 				assert.NoError(t, err)
 				assert.Equal(t, &expectedConfig, actual)
 			},
@@ -95,7 +95,7 @@ func TestToTLS(t *testing.T) {
 					MinVersion: tls.VersionTLS12,
 				}
 
-				actual, err := cfg.ToTLS()
+				actual, err := cfg.ToTLS(nil)
 				assert.NoError(t, err)
 				assert.Equal(t, &expectedConfig, actual)
 			},
@@ -110,7 +110,7 @@ func TestToTLS(t *testing.T) {
 					},
 				}
 
-				actual, err := cfg.ToTLS()
+				actual, err := cfg.ToTLS(nil)
 				assert.ErrorContains(t, err, "failed to read CA file")
 				assert.Nil(t, actual)
 			},
@@ -125,7 +125,7 @@ func TestToTLS(t *testing.T) {
 					},
 				}
 
-				actual, err := cfg.ToTLS()
+				actual, err := cfg.ToTLS(nil)
 				assert.NoError(t, err)
 				assert.NotNil(t, actual)
 				assert.False(t, actual.InsecureSkipVerify)
@@ -147,7 +147,7 @@ func TestToTLS(t *testing.T) {
 				_, err := tls.LoadX509KeyPair(invalidCertFile, invalidKeyFile)
 				errinvalidKeyorCertFile := fmt.Sprintf("failed to read Key and Cert file: %s", err)
 
-				actual, err := cfg.ToTLS()
+				actual, err := cfg.ToTLS(nil)
 				assert.ErrorContains(t, err, errinvalidKeyorCertFile)
 				assert.Nil(t, actual)
 			},
@@ -171,7 +171,7 @@ func TestToTLS(t *testing.T) {
 				require.NoError(t, err)
 				expectedConfig.Certificates = []tls.Certificate{cert}
 
-				actual, err := cfg.ToTLS()
+				actual, err := cfg.ToTLS(nil)
 				assert.NoError(t, err)
 				assert.Equal(t, &expectedConfig, actual)
 			},
@@ -202,9 +202,10 @@ func TestToTLS(t *testing.T) {
 				require.NoError(t, err)
 				expectedConfig.Certificates = []tls.Certificate{cert}
 
-				actual, err := cfg.ToTLS()
+				actual, err := cfg.ToTLS(caCertPool)
 				assert.NoError(t, err)
-				assert.Equal(t, expectedConfig.Certificates, actual.Certificates)
+
+				assert.Equal(t, &expectedConfig, actual)
 			},
 		},
 	}

@@ -212,7 +212,7 @@ type TLSConfig struct {
 }
 
 // ToTLS converts the config to a tls.Config
-func (c Config) ToTLS() (*tls.Config, error) {
+func (c Config) ToTLS(caCertPool *x509.CertPool) (*tls.Config, error) {
 	if c.TLS == nil {
 		return nil, nil
 	}
@@ -232,7 +232,9 @@ func (c Config) ToTLS() (*tls.Config, error) {
 		if err != nil {
 			return nil, fmt.Errorf("failed to read CA file: %w", err)
 		}
-		caCertPool := x509.NewCertPool()
+		if caCertPool == nil {
+			caCertPool = x509.NewCertPool()
+		}
 		caCertPool.AppendCertsFromPEM(caCert)
 
 		tlsConfig.RootCAs = caCertPool
