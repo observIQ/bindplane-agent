@@ -199,6 +199,7 @@ require (
 )
 
 require (
+	github.com/observiq/bindplane-agent/receiver/splunksearchapireceiver v0.0.0-00010101000000-000000000000
 	github.com/open-telemetry/opentelemetry-collector-contrib/confmap/provider/aesprovider v0.113.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/processor/intervalprocessor v0.113.0
 	go.opentelemetry.io/collector/processor/processortest v0.113.0
@@ -870,6 +871,8 @@ replace github.com/observiq/bindplane-agent/internal/testutils => ./internal/tes
 replace github.com/observiq/bindplane-agent/internal/report => ./internal/report
 
 replace github.com/observiq/bindplane-agent/internal/measurements => ./internal/measurements
+
+replace github.com/observiq/bindplane-agent/receiver/splunksearchapireceiver => ./receiver/splunksearchapireceiver
 
 // Does not build with windows and only used in configschema executable
 // Relevant issue https://github.com/mattn/go-ieproxy/issues/45
