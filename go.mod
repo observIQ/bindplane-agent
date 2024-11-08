@@ -197,6 +197,7 @@ require (
 )
 
 require (
+	github.com/observiq/bindplane-agent/processor/topologyprocessor v0.0.0-00010101000000-000000000000
 	github.com/open-telemetry/opentelemetry-collector-contrib/confmap/provider/aesprovider v0.114.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/processor/intervalprocessor v0.114.0
 	go.opentelemetry.io/collector/extension/extensiontest v0.114.0
@@ -366,6 +367,7 @@ require (
 	github.com/okta/okta-sdk-golang/v2 v2.20.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlemanagedprometheusexporter v0.114.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/extension/ackextension v0.114.0 // indirect
+	github.com/open-telemetry/opentelemetry-collector-contrib/extension/opampcustommessages v0.113.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/extension/sumologicextension v0.114.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/internal/collectd v0.114.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/internal/exp/metrics v0.114.0 // indirect
@@ -852,6 +854,8 @@ replace github.com/observiq/bindplane-agent/processor/spancountprocessor => ./pr
 replace github.com/observiq/bindplane-agent/processor/datapointcountprocessor => ./processor/datapointcountprocessor
 
 replace github.com/observiq/bindplane-agent/processor/lookupprocessor => ./processor/lookupprocessor
+
+replace github.com/observiq/bindplane-agent/processor/topologyprocessor => ./processor/topologyprocessor
 
 replace github.com/observiq/bindplane-agent/expr => ./expr
 

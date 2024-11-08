@@ -2015,6 +2015,8 @@ github.com/open-telemetry/opentelemetry-collector-contrib/extension/oauth2client
 github.com/open-telemetry/opentelemetry-collector-contrib/extension/oauth2clientauthextension v0.114.0/go.mod h1:6eXGaWN4/IVhupZd2ItQGV3E3Trjfant9xDu5w4KjSg=
 github.com/open-telemetry/opentelemetry-collector-contrib/extension/oidcauthextension v0.114.0 h1:ERSAneyQ40gBEJq8dW9UZW0Ev48t+daI4TPPUsrTnFk=
 github.com/open-telemetry/opentelemetry-collector-contrib/extension/oidcauthextension v0.114.0/go.mod h1:d4V/vXAA6RtriuxbWGa53oz1Oo4NgldrwHNJ7PwoGkI=
+github.com/open-telemetry/opentelemetry-collector-contrib/extension/opampcustommessages v0.113.0 h1:0eyvK5mY5vGodlUlUBzHu2tWcZKygeWCc+fO4BdZXKA=
+github.com/open-telemetry/opentelemetry-collector-contrib/extension/opampcustommessages v0.113.0/go.mod h1:wBrMy+mgk1llwg2zufyS6VNVZxavBQH97zJcxiDEWz8=
 github.com/open-telemetry/opentelemetry-collector-contrib/extension/pprofextension v0.114.0 h1:6g5EvbygaEBqed0rJotGHcfxgxGV8hSN/4ZoZFfac5M=
 github.com/open-telemetry/opentelemetry-collector-contrib/extension/pprofextension v0.114.0/go.mod h1:gU87iMdDAdHrQQCWTURbrlE/dLYgFecJ/+WBHuNMjQI=
 github.com/open-telemetry/opentelemetry-collector-contrib/extension/sigv4authextension v0.114.0 h1:M9tZ4hoR2WrrhUodP9mcTAVu6oSeTY3rjKXe4f/pbKY=
