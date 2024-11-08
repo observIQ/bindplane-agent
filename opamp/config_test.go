@@ -16,7 +16,6 @@ package opamp
 
 import (
 	"crypto/tls"
-	"crypto/x509"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -194,9 +193,6 @@ func TestToTLS(t *testing.T) {
 
 				caCert, err := os.ReadFile(caFileContents)
 				require.NoError(t, err)
-				caCertPool := x509.NewCertPool()
-				caCertPool.AppendCertsFromPEM(caCert)
-				expectedConfig.RootCAs = caCertPool
 
 				cert, err := tls.LoadX509KeyPair(certFileContents, keyFileContents)
 				require.NoError(t, err)
@@ -204,7 +200,12 @@ func TestToTLS(t *testing.T) {
 
 				actual, err := cfg.ToTLS()
 				assert.NoError(t, err)
-				assert.Equal(t, expectedConfig.Certificates, actual.Certificates)
+
+				// use the same caCertPool that was created by cfg.ToTLS()
+				caCertPool.AppendCertsFromPEM(caCert)
+				expectedConfig.RootCAs = caCertPool
+
+				assert.Equal(t, &expectedConfig, actual)
 			},
 		},
 	}
