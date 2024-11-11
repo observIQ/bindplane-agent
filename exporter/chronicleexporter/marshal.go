@@ -115,11 +115,13 @@ func (m *protoMarshaler) extractRawLogs(ctx context.Context, ld plog.Logs) (map[
 				}
 				entries[logType] = append(entries[logType], entry)
 				// each logType maps to exactly 1 namespace value
-				if _, ok := namespaceMap[logType]; !ok {
-					namespaceMap[logType] = namespace
+				if namespace != "" {
+					if _, ok := namespaceMap[logType]; !ok {
+						namespaceMap[logType] = namespace
+					}
 				}
-
 				if len(ingestionLabels) > 0 {
+					// each logType maps to a list of ingestion labels
 					if _, exists := ingestionLabelsMap[logType]; !exists {
 						ingestionLabelsMap[logType] = make([]*api.Label, 0)
 					}
@@ -128,7 +130,7 @@ func (m *protoMarshaler) extractRawLogs(ctx context.Context, ld plog.Logs) (map[
 						existingLabels[label.Key] = struct{}{}
 					}
 					for _, label := range ingestionLabels {
-						// Only add to ingestionLabelsMap if the label is unique
+						// only add to ingestionLabelsMap if the label is unique
 						if _, ok := existingLabels[label.Key]; !ok {
 							ingestionLabelsMap[logType] = append(ingestionLabelsMap[logType], label)
 							existingLabels[label.Key] = struct{}{}
