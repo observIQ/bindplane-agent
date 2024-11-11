@@ -33,6 +33,7 @@ import (
 	"go.opentelemetry.io/collector/exporter"
 	"go.opentelemetry.io/collector/pdata/plog"
 	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
 	"go.uber.org/zap"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
@@ -45,7 +46,7 @@ import (
 	"google.golang.org/protobuf/encoding/protojson"
 )
 
-var tracer = otel.Tracer("exporter/chronicleexporter")
+var tracer = otel.Tracer("chronicleexporter")
 
 const (
 	grpcScope = "https://www.googleapis.com/auth/malachite-ingestion"
@@ -172,7 +173,7 @@ func (ce *chronicleExporter) Capabilities() consumer.Capabilities {
 }
 
 func (ce *chronicleExporter) logsDataPusher(ctx context.Context, ld plog.Logs) error {
-	ctx, span := tracer.Start(ctx, "logsDataPusher")
+	ctx, span := tracer.Start(ctx, "chronicleExporter/logsDataPusher")
 	defer span.End()
 
 	payloads, err := ce.marshaler.MarshalRawLogs(ctx, ld)
@@ -183,7 +184,6 @@ func (ce *chronicleExporter) logsDataPusher(ctx context.Context, ld plog.Logs) e
 
 	for _, payload := range payloads {
 		if err := ce.uploadToChronicle(ctx, payload); err != nil {
-			span.RecordError(err)
 			return fmt.Errorf("upload to chronicle: %w", err)
 		}
 	}
@@ -192,7 +192,7 @@ func (ce *chronicleExporter) logsDataPusher(ctx context.Context, ld plog.Logs) e
 }
 
 func (ce *chronicleExporter) uploadToChronicle(ctx context.Context, request *api.BatchCreateLogsRequest) error {
-	ctx, span := tracer.Start(ctx, "uploadToChronicle")
+	ctx, span := tracer.Start(ctx, "chronicleExporter/uploadToChronicle")
 	defer span.End()
 
 	totalLogs := int64(len(request.GetBatch().GetEntries()))
@@ -200,6 +200,8 @@ func (ce *chronicleExporter) uploadToChronicle(ctx context.Context, request *api
 	_, err := ce.client.BatchCreateLogs(ctx, request, ce.buildOptions()...)
 	if err != nil {
 		errCode := status.Code(err)
+		span.RecordError(err)
+		span.SetAttributes(attribute.Int("error_code", int(errCode)))
 		switch errCode {
 		// These errors are potentially transient
 		case codes.Canceled,

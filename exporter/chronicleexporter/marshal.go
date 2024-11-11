@@ -74,31 +74,21 @@ func newProtoMarshaler(cfg Config, teleSettings component.TelemetrySettings, lab
 }
 
 func (m *protoMarshaler) MarshalRawLogs(ctx context.Context, ld plog.Logs) ([]*api.BatchCreateLogsRequest, error) {
-	ctx, span := tracer.Start(ctx, "MarshalRawLogs")
+	ctx, span := tracer.Start(ctx, "protoMarshaler/MarshalRawLogs")
 	defer span.End()
 
-	span.SetAttributes(attribute.Int("count_input_logs", ld.ResourceLogs().Len()))
+	span.SetAttributes(attribute.Int("count_plog", ld.ResourceLogs().Len()))
 
 	rawLogs, err := m.extractRawLogs(ctx, ld)
 	if err != nil {
 		return nil, fmt.Errorf("extract raw logs: %w", err)
 	}
 
-	rawLogCount := 0
-	for _, v := range rawLogs {
-		rawLogCount += len(v)
-	}
-	span.SetAttributes(attribute.Int("count_raw_logs", rawLogCount))
-
-	payloads := m.constructPayloads(ctx, rawLogs)
-
-	span.SetAttributes(attribute.Int("count_payloads", len(payloads)))
-
-	return payloads, nil
+	return m.constructPayloads(ctx, rawLogs), nil
 }
 
 func (m *protoMarshaler) extractRawLogs(ctx context.Context, ld plog.Logs) (map[string][]*api.LogEntry, error) {
-	ctx, span := tracer.Start(ctx, "extractRawLogs")
+	ctx, span := tracer.Start(ctx, "protoMarshaler/extractRawLogs")
 	defer span.End()
 
 	entries := make(map[string][]*api.LogEntry)
@@ -227,7 +217,7 @@ func (m *protoMarshaler) getRawField(ctx context.Context, field string, logRecor
 }
 
 func (m *protoMarshaler) constructPayloads(ctx context.Context, rawLogs map[string][]*api.LogEntry) []*api.BatchCreateLogsRequest {
-	ctx, span := tracer.Start(ctx, "MarshalRawLogs")
+	_, span := tracer.Start(ctx, "protoMarshaler/constructPayloads")
 	defer span.End()
 
 	payloads := make([]*api.BatchCreateLogsRequest, 0, len(rawLogs))
