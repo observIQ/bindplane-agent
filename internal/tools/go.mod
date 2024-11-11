@@ -7,7 +7,7 @@ toolchain go1.23.1
 require (
 	github.com/client9/misspell v0.3.4
 	github.com/google/addlicense v1.1.1
-	github.com/mgechev/revive v1.4.0
+	github.com/mgechev/revive v1.5.0
 	github.com/securego/gosec/v2 v2.18.2
 	github.com/uw-labs/lichen v0.1.7
 	github.com/vektra/mockery/v2 v2.46.1
@@ -23,7 +23,7 @@ require (
 	github.com/chavacava/garif v0.1.0 // indirect
 	github.com/chigopher/pathlib v0.19.1 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.4 // indirect
-	github.com/fatih/color v1.17.0 // indirect
+	github.com/fatih/color v1.18.0 // indirect
 	github.com/fatih/structtag v1.2.0 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/go-viper/mapstructure/v2 v2.2.1 // indirect
@@ -48,7 +48,7 @@ require (
 	github.com/magiconair/properties v1.8.7 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
-	github.com/mattn/go-runewidth v0.0.15 // indirect
+	github.com/mattn/go-runewidth v0.0.16 // indirect
 	github.com/mgechev/dots v0.0.0-20210922191527-e955255bf517 // indirect
 	github.com/mitchellh/copystructure v1.2.0 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
