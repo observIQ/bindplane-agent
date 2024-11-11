@@ -172,7 +172,7 @@ func (ce *chronicleExporter) Capabilities() consumer.Capabilities {
 }
 
 func (ce *chronicleExporter) logsDataPusher(ctx context.Context, ld plog.Logs) error {
-	timeout := ce.cfg.Timeout - 5*time.Second
+	timeout := ce.cfg.Timeout - (time.Millisecond * 200)
 
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()

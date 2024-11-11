@@ -27,6 +27,7 @@ import (
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/plog"
+	"go.opentelemetry.io/otel/attribute"
 	"go.uber.org/zap"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
@@ -73,15 +74,33 @@ func newProtoMarshaler(cfg Config, teleSettings component.TelemetrySettings, lab
 }
 
 func (m *protoMarshaler) MarshalRawLogs(ctx context.Context, ld plog.Logs) ([]*api.BatchCreateLogsRequest, error) {
+	ctx, span := tracer.Start(ctx, "MarshalRawLogs")
+	defer span.End()
+
+	span.SetAttributes(attribute.Int("count_input_logs", ld.ResourceLogs().Len()))
+
 	rawLogs, err := m.extractRawLogs(ctx, ld)
 	if err != nil {
 		return nil, fmt.Errorf("extract raw logs: %w", err)
 	}
 
-	return m.constructPayloads(rawLogs), nil
+	rawLogCount := 0
+	for _, v := range rawLogs {
+		rawLogCount += len(v)
+	}
+	span.SetAttributes(attribute.Int("count_raw_logs", rawLogCount))
+
+	payloads := m.constructPayloads(ctx, rawLogs)
+
+	span.SetAttributes(attribute.Int("count_payloads", len(payloads)))
+
+	return payloads, nil
 }
 
 func (m *protoMarshaler) extractRawLogs(ctx context.Context, ld plog.Logs) (map[string][]*api.LogEntry, error) {
+	ctx, span := tracer.Start(ctx, "extractRawLogs")
+	defer span.End()
+
 	entries := make(map[string][]*api.LogEntry)
 
 	for i := 0; i < ld.ResourceLogs().Len(); i++ {
@@ -207,7 +226,10 @@ func (m *protoMarshaler) getRawField(ctx context.Context, field string, logRecor
 	}
 }
 
-func (m *protoMarshaler) constructPayloads(rawLogs map[string][]*api.LogEntry) []*api.BatchCreateLogsRequest {
+func (m *protoMarshaler) constructPayloads(ctx context.Context, rawLogs map[string][]*api.LogEntry) []*api.BatchCreateLogsRequest {
+	ctx, span := tracer.Start(ctx, "MarshalRawLogs")
+	defer span.End()
+
 	payloads := make([]*api.BatchCreateLogsRequest, 0, len(rawLogs))
 	for logType, entries := range rawLogs {
 		if len(entries) > 0 {
