@@ -172,11 +172,6 @@ func (ce *chronicleExporter) Capabilities() consumer.Capabilities {
 }
 
 func (ce *chronicleExporter) logsDataPusher(ctx context.Context, ld plog.Logs) error {
-	timeout := ce.cfg.Timeout - (time.Millisecond * 200)
-
-	ctx, cancel := context.WithTimeout(ctx, timeout)
-	defer cancel()
-
 	ctx, span := tracer.Start(ctx, "logsDataPusher")
 	defer span.End()
 
