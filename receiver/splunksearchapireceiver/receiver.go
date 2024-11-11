@@ -16,14 +16,22 @@ package splunksearchapireceiver
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"net/http"
 	"time"
 
+	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/stanza/adapter"
+	"go.etcd.io/etcd/proxy/grpcproxy/adapter"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/consumer"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/plog"
 	"go.uber.org/zap"
+)
+
+const (
+	eventStorageKey = "last_event_offset"
 )
 
 var (
@@ -33,12 +41,18 @@ var (
 )
 
 type splunksearchapireceiver struct {
-	host         component.Host
-	logger       *zap.Logger
-	logsConsumer consumer.Logs
-	config       *Config
-	settings     component.TelemetrySettings
-	client       splunkSearchAPIClient
+	host          component.Host
+	logger        *zap.Logger
+	logsConsumer  consumer.Logs
+	config        *Config
+	settings      component.TelemetrySettings
+	client        splunkSearchAPIClient
+	storageClient adapter.StorageClient
+	record        *eventRecord
+}
+
+type eventRecord struct {
+	Offset string `json:"offset"`
 }
 
 func (ssapir *splunksearchapireceiver) Start(ctx context.Context, host component.Host) error {
@@ -48,6 +62,18 @@ func (ssapir *splunksearchapireceiver) Start(ctx context.Context, host component
 	if err != nil {
 		return err
 	}
+	ssapir.client = client
+
+	// create storage client
+	storageClient, err := adapter.GetStorageClient(ssapir.config.StorageID)
+	if err != nil {
+		return fmt.Errorf("failed to get storage client: %w", err)
+	}
+	ssapir.storageClient = storageClient
+
+	// check if a checkpoint already exists
+	ssapir.loadCheckpoint(ctx)
+
 	go ssapir.runQueries(ctx)
 	return nil
 }
@@ -77,15 +103,11 @@ func (ssapir *splunksearchapireceiver) runQueries(ctx context.Context) error {
 			time.Sleep(2 * time.Second)
 		}
 
-		var resultCountTracker = 0 // track number of results exported
-		var offset = 0             // offset for pagination
-		var limitReached = false
-		for {
-			// fetch search results
-			results, err := ssapir.getSplunkSearchResults(ssapir.config, searchID, offset)
-			if err != nil {
-				ssapir.logger.Error("error fetching search results", zap.Error(err))
-			}
+		// fetch search results
+		results, err := ssapir.getSplunkSearchResults(ssapir.config, searchID)
+		if err != nil {
+			ssapir.logger.Error("error fetching search results", zap.Error(err))
+		}
 
 			// parse time strings to time.Time
 			earliestTime, err := time.Parse(time.RFC3339, search.EarliestTime)
@@ -209,4 +231,28 @@ func (ssapir *splunksearchapireceiver) getSplunkSearchResults(sid string, offset
 		return SearchResultsResponse{}, err
 	}
 	return resp, nil
+}
+
+func (ssapir *splunksearchapireceiver) checkpoint(ctx context.Context) error {
+	marshalBytes, err := json.Marshal(ssapir.record)
+	if err != nil {
+		return fmt.Errorf("failed to write checkpoint: %w", err)
+	}
+	return ssapir.storageClient.Set(ctx, eventStorageKey, marshalBytes)
+}
+
+func (ssapir *splunksearchapireceiver) loadCheckpoint(ctx context.Context) {
+	marshalBytes, err := ssapir.storageClient.Get(ctx, eventStorageKey)
+	if err != nil {
+		ssapir.logger.Error("failed to read checkpoint", zap.Error(err))
+		return
+	}
+	if marshalBytes == nil {
+		ssapir.logger.Info("no checkpoint found")
+		return
+	}
+	err = json.Unmarshal(marshalBytes, ssapir.record)
+	if err != nil {
+		ssapir.logger.Error("failed to unmarshal checkpoint", zap.Error(err))
+	}
 }

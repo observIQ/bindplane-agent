@@ -20,6 +20,7 @@ import (
 	"strings"
 	"time"
 
+	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/config/confighttp"
 )
 
@@ -33,8 +34,8 @@ type Config struct {
 	Username                string        `mapstructure:"splunk_username"`
 	Password                string        `mapstructure:"splunk_password"`
 	Searches                []Search      `mapstructure:"searches"`
-	EventBatchSize          int           `mapstructure:"event_batch_size"`
 	JobPollInterval         time.Duration `mapstructure:"job_poll_interval"`
+	StorageID               *component.ID `mapstructure:"storage"`
 }
 
 // Search struct to represent a Splunk search
