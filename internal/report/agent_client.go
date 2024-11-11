@@ -16,7 +16,9 @@ package report
 
 import (
 	"crypto/tls"
+	"net"
 	"net/http"
+	"time"
 )
 
 var _ Client = (*AgentClient)(nil)
@@ -31,12 +33,28 @@ type AgentClient struct {
 
 // NewAgentClient creates a new AgentClient
 func NewAgentClient(agentID string, secretKey *string, tlsConfig *tls.Config) *AgentClient {
+
+	// Values are copied from http.DefaultTransport. We don't use a copy of http.DefaultTransport with
+	// our own values because the http.DefaultTransport struct has private mutexes that we can't copy.
+	// http.DefaultClient is equivalent to &http.Client{}
+
+	dialer := &net.Dialer{
+		Timeout:   30 * time.Second,
+		KeepAlive: 30 * time.Second,
+	}
 	return &AgentClient{
 		agentID:   agentID,
 		secretKey: secretKey,
 		client: &http.Client{
 			Transport: &http.Transport{
-				TLSClientConfig: tlsConfig,
+				Proxy:                 http.ProxyFromEnvironment,
+				DialContext:           dialer.DialContext,
+				ForceAttemptHTTP2:     true,
+				MaxIdleConns:          100,
+				IdleConnTimeout:       90 * time.Second,
+				TLSHandshakeTimeout:   10 * time.Second,
+				ExpectContinueTimeout: 1 * time.Second,
+				TLSClientConfig:       tlsConfig,
 			},
 		},
 	}
