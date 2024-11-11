@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Package splunksearchapireceiver contains the Splunk Search API receiver.
 package splunksearchapireceiver
 
 import (
