@@ -32,6 +32,7 @@ import (
 	"go.opentelemetry.io/collector/consumer/consumererror"
 	"go.opentelemetry.io/collector/exporter"
 	"go.opentelemetry.io/collector/pdata/plog"
+	"go.opentelemetry.io/otel"
 	"go.uber.org/zap"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
@@ -43,6 +44,8 @@ import (
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/encoding/protojson"
 )
+
+var tracer = otel.Tracer("exporter/chronicleexporter")
 
 const (
 	grpcScope = "https://www.googleapis.com/auth/malachite-ingestion"
@@ -67,6 +70,8 @@ type chronicleExporter struct {
 }
 
 func newExporter(cfg *Config, params exporter.Settings, collectorID, exporterID string) (*chronicleExporter, error) {
+	otel.SetTracerProvider(params.TracerProvider)
+
 	creds, err := loadGoogleCredentials(cfg)
 	if err != nil {
 		return nil, fmt.Errorf("load Google credentials: %w", err)
@@ -167,13 +172,23 @@ func (ce *chronicleExporter) Capabilities() consumer.Capabilities {
 }
 
 func (ce *chronicleExporter) logsDataPusher(ctx context.Context, ld plog.Logs) error {
+	timeout := ce.cfg.Timeout - 5*time.Second
+
+	ctx, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
+
+	ctx, span := tracer.Start(ctx, "logsDataPusher")
+	defer span.End()
+
 	payloads, err := ce.marshaler.MarshalRawLogs(ctx, ld)
 	if err != nil {
+		span.RecordError(err)
 		return fmt.Errorf("marshal logs: %w", err)
 	}
 
 	for _, payload := range payloads {
 		if err := ce.uploadToChronicle(ctx, payload); err != nil {
+			span.RecordError(err)
 			return fmt.Errorf("upload to chronicle: %w", err)
 		}
 	}
@@ -182,6 +197,9 @@ func (ce *chronicleExporter) logsDataPusher(ctx context.Context, ld plog.Logs) e
 }
 
 func (ce *chronicleExporter) uploadToChronicle(ctx context.Context, request *api.BatchCreateLogsRequest) error {
+	ctx, span := tracer.Start(ctx, "uploadToChronicle")
+	defer span.End()
+
 	totalLogs := int64(len(request.GetBatch().GetEntries()))
 
 	_, err := ce.client.BatchCreateLogs(ctx, request, ce.buildOptions()...)
