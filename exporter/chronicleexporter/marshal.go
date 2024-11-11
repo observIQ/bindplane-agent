@@ -130,6 +130,9 @@ func (m *protoMarshaler) extractRawLogs(ctx context.Context, ld plog.Logs) (map[
 }
 
 func (m *protoMarshaler) processLogRecord(ctx context.Context, logRecord plog.LogRecord, scope plog.ScopeLogs, resource plog.ResourceLogs) (string, string, error) {
+	ctx, span := tracer.Start(ctx, "protoMarshaler/processLogRecord")
+	defer span.End()
+
 	rawLog, err := m.getRawLog(ctx, logRecord, scope, resource)
 	if err != nil {
 		return "", "", err
@@ -144,6 +147,9 @@ func (m *protoMarshaler) processLogRecord(ctx context.Context, logRecord plog.Lo
 }
 
 func (m *protoMarshaler) getRawLog(ctx context.Context, logRecord plog.LogRecord, scope plog.ScopeLogs, resource plog.ResourceLogs) (string, error) {
+	ctx, span := tracer.Start(ctx, "protoMarshaler/getRawLog")
+	defer span.End()
+
 	if m.cfg.RawLogField == "" {
 		entireLogRecord := map[string]any{
 			"body":                logRecord.Body().Str(),
@@ -162,6 +168,9 @@ func (m *protoMarshaler) getRawLog(ctx context.Context, logRecord plog.LogRecord
 }
 
 func (m *protoMarshaler) getLogType(ctx context.Context, logRecord plog.LogRecord, scope plog.ScopeLogs, resource plog.ResourceLogs) (string, error) {
+	ctx, span := tracer.Start(ctx, "protoMarshaler/getLogType")
+	defer span.End()
+
 	logType, err := m.getRawField(ctx, chronicleLogTypeField, logRecord, scope, resource)
 	if err != nil {
 		return m.cfg.LogType, fmt.Errorf("get chronicle log type: %w", err)
@@ -187,6 +196,9 @@ func (m *protoMarshaler) getLogType(ctx context.Context, logRecord plog.LogRecor
 }
 
 func (m *protoMarshaler) getRawField(ctx context.Context, field string, logRecord plog.LogRecord, scope plog.ScopeLogs, resource plog.ResourceLogs) (string, error) {
+	ctx, span := tracer.Start(ctx, "protoMarshaler/getRawField")
+	defer span.End()
+
 	lrExpr, err := expr.NewOTTLLogRecordExpression(field, m.teleSettings)
 	if err != nil {
 		return "", fmt.Errorf("raw_log_field is invalid: %s", err)
