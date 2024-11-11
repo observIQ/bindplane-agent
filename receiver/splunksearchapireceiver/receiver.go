@@ -16,7 +16,6 @@ package splunksearchapireceiver
 
 import (
 	"context"
-	"net/http"
 	"time"
 
 	"go.opentelemetry.io/collector/component"
@@ -32,16 +31,16 @@ type splunksearchapireceiver struct {
 	logsConsumer consumer.Logs
 	config       *Config
 	settings     component.TelemetrySettings
-	client       *http.Client
+	client       splunkSearchAPIClient
 }
 
 func (ssapir *splunksearchapireceiver) Start(ctx context.Context, host component.Host) error {
 	ssapir.host = host
-	client, err := ssapir.config.ClientConfig.ToClient(ctx, host, ssapir.settings)
+	var err error
+	ssapir.client, err = newSplunkSearchAPIClient(ctx, ssapir.settings, *ssapir.config, ssapir.host)
 	if err != nil {
 		return err
 	}
-	ssapir.client = client
 	go ssapir.runQueries(ctx)
 	return nil
 }
@@ -53,7 +52,7 @@ func (ssapir *splunksearchapireceiver) Shutdown(_ context.Context) error {
 func (ssapir *splunksearchapireceiver) runQueries(ctx context.Context) error {
 	for _, search := range ssapir.config.Searches {
 		// create search in Splunk
-		searchID, err := ssapir.createSplunkSearch(ssapir.config, search.Query)
+		searchID, err := ssapir.createSplunkSearch(search.Query)
 		if err != nil {
 			ssapir.logger.Error("error creating search", zap.Error(err))
 		}
@@ -61,7 +60,7 @@ func (ssapir *splunksearchapireceiver) runQueries(ctx context.Context) error {
 
 		// wait for search to complete
 		for {
-			done, err := ssapir.isSearchCompleted(ssapir.config, searchID)
+			done, err := ssapir.isSearchCompleted(searchID)
 			if err != nil {
 				ssapir.logger.Error("error checking search status", zap.Error(err))
 			}
@@ -73,7 +72,7 @@ func (ssapir *splunksearchapireceiver) runQueries(ctx context.Context) error {
 		// fmt.Println("Search completed successfully")
 
 		// fetch search results
-		results, err := ssapir.getSplunkSearchResults(ssapir.config, searchID)
+		results, err := ssapir.getSplunkSearchResults(searchID)
 		if err != nil {
 			ssapir.logger.Error("error fetching search results", zap.Error(err))
 		}
@@ -135,16 +134,16 @@ func (ssapir *splunksearchapireceiver) runQueries(ctx context.Context) error {
 	return nil
 }
 
-func (ssapir *splunksearchapireceiver) createSplunkSearch(config *Config, search string) (string, error) {
-	resp, err := ssapir.createSearchJob(config, search)
+func (ssapir *splunksearchapireceiver) createSplunkSearch(search string) (string, error) {
+	resp, err := ssapir.client.CreateSearchJob(search)
 	if err != nil {
 		return "", err
 	}
 	return resp.SID, nil
 }
 
-func (ssapir *splunksearchapireceiver) isSearchCompleted(config *Config, sid string) (bool, error) {
-	resp, err := ssapir.getJobStatus(config, sid)
+func (ssapir *splunksearchapireceiver) isSearchCompleted(sid string) (bool, error) {
+	resp, err := ssapir.client.GetJobStatus(sid)
 	if err != nil {
 		return false, err
 	}
@@ -160,10 +159,10 @@ func (ssapir *splunksearchapireceiver) isSearchCompleted(config *Config, sid str
 	return false, nil
 }
 
-func (ssapir *splunksearchapireceiver) getSplunkSearchResults(config *Config, sid string) (SearchResults, error) {
-	resp, err := ssapir.getSearchResults(config, sid)
+func (ssapir *splunksearchapireceiver) getSplunkSearchResults(sid string) (SearchResultsResponse, error) {
+	resp, err := ssapir.client.GetSearchResults(sid)
 	if err != nil {
-		return SearchResults{}, err
+		return SearchResultsResponse{}, err
 	}
 	return resp, nil
 }

@@ -77,22 +77,22 @@ func (cfg *Config) Validate() error {
 		// parse time strings to time.Time
 		earliestTime, err := time.Parse(time.RFC3339, search.EarliestTime)
 		if err != nil {
-			return errors.New("earliest_time failed to be parsed as RFC3339")
+			return errors.New("earliest_time failed to parse as RFC3339")
 		}
 
 		latestTime, err := time.Parse(time.RFC3339, search.LatestTime)
 		if err != nil {
-			return errors.New("latest_time failed to be parsed as RFC3339")
+			return errors.New("latest_time failed to parse as RFC3339")
 		}
 
-		if earliestTime.UTC().After(latestTime.UTC()) {
+		if earliestTime.UTC().After(latestTime.UTC()) || earliestTime.UTC().Equal(latestTime.UTC()) {
 			return errors.New("earliest_time must be earlier than latest_time")
 		}
-		if earliestTime.UTC().After(time.Now().UTC()) {
+		if earliestTime.UTC().After(time.Now().UTC()) || earliestTime.UTC().Equal(time.Now().UTC()) {
 			return errors.New("earliest_time must be earlier than current time")
 		}
 		if latestTime.UTC().After(time.Now().UTC()) {
-			return errors.New("latest_time must be earlier than current time")
+			return errors.New("latest_time must be earlier than or equal to current time")
 		}
 	}
 	return nil
