@@ -19,15 +19,17 @@ import (
 	"strings"
 	"time"
 
+	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/config/confighttp"
 )
 
 // Config struct to represent the configuration for the Splunk Search API receiver
 type Config struct {
 	confighttp.ClientConfig `mapstructure:",squash"`
-	Username                string   `mapstructure:"splunk_username"`
-	Password                string   `mapstructure:"splunk_password"`
-	Searches                []Search `mapstructure:"searches"`
+	Username                string        `mapstructure:"splunk_username"`
+	Password                string        `mapstructure:"splunk_password"`
+	Searches                []Search      `mapstructure:"searches"`
+	StorageID               *component.ID `mapstructure:"storage"`
 }
 
 // Search struct to represent a Splunk search
