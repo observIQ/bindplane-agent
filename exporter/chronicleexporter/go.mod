@@ -1,6 +1,6 @@
 module github.com/observiq/bindplane-agent/exporter/chronicleexporter
 
-go 1.22.6
+go 1.22.7
 
 require (
 	github.com/golang/mock v1.6.0
