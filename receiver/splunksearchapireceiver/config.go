@@ -22,13 +22,18 @@ import (
 	"go.opentelemetry.io/collector/config/confighttp"
 )
 
+var (
+	errNonStandaloneSearchQuery = errors.New("only standalone search commands can be used for scraping data")
+)
+
 // Config struct to represent the configuration for the Splunk Search API receiver
 type Config struct {
 	confighttp.ClientConfig `mapstructure:",squash"`
-	Username                string   `mapstructure:"splunk_username"`
-	Password                string   `mapstructure:"splunk_password"`
-	Searches                []Search `mapstructure:"searches"`
-	EventBatchSize          int      `mapstructure:"event_batch_size"`
+	Username                string        `mapstructure:"splunk_username"`
+	Password                string        `mapstructure:"splunk_password"`
+	Searches                []Search      `mapstructure:"searches"`
+	EventBatchSize          int           `mapstructure:"event_batch_size"`
+	JobPollInterval         time.Duration `mapstructure:"job_poll_interval"`
 }
 
 // Search struct to represent a Splunk search
@@ -61,11 +66,11 @@ func (cfg *Config) Validate() error {
 
 		// query implicitly starts with "search" command
 		if !strings.HasPrefix(search.Query, "search ") {
-			search.Query = "search " + search.Query
+			return errNonStandaloneSearchQuery
 		}
 
 		if strings.Contains(search.Query, "|") {
-			return errors.New("command chaining is not supported for queries")
+			return errNonStandaloneSearchQuery
 		}
 
 		if search.EarliestTime == "" {
@@ -76,25 +81,16 @@ func (cfg *Config) Validate() error {
 		}
 
 		// parse time strings to time.Time
-		earliestTime, err := time.Parse(time.RFC3339, search.EarliestTime)
+		_, err := time.Parse(time.RFC3339, search.EarliestTime)
 		if err != nil {
 			return errors.New("earliest_time failed to be parsed as RFC3339")
 		}
 
-		latestTime, err := time.Parse(time.RFC3339, search.LatestTime)
+		_, err = time.Parse(time.RFC3339, search.LatestTime)
 		if err != nil {
 			return errors.New("latest_time failed to be parsed as RFC3339")
 		}
 
-		if earliestTime.UTC().After(latestTime.UTC()) {
-			return errors.New("earliest_time must be earlier than latest_time")
-		}
-		if earliestTime.UTC().After(time.Now().UTC()) {
-			return errors.New("earliest_time must be earlier than current time")
-		}
-		if latestTime.UTC().After(time.Now().UTC()) {
-			return errors.New("latest_time must be earlier than current time")
-		}
 	}
 	return nil
 }

@@ -118,7 +118,6 @@ func (ssapir *splunksearchapireceiver) getSearchResults(config *Config, sid stri
 	if err != nil {
 		return SearchResults{}, fmt.Errorf("failed to read search job results response: %v", err)
 	}
-
 	err = json.Unmarshal(body, &searchResults)
 	if err != nil {
 		return SearchResults{}, fmt.Errorf("failed to unmarshal search job results: %v", err)
