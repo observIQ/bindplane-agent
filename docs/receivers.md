@@ -67,7 +67,7 @@ Below is a list of supported receivers with links to their documentation pages.
 | SAP Netweaver Receiver                     | [sapnetweaverreceiver](../receiver/sapnetweaverreceiver/README.md)                                                                                                  |
 | SAPM Receiver                              | [sapmreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.113.0/receiver/sapmreceiver/README.md)                                     |
 | SNMP Receiver                              | [snmpreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.113.0/receiver/snmpreceiver/README.md)                                     |
-| Splunk Search API Receiver                 | [splunksearchapireceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.113.0/receiver/splunksearchapireceiver/README.md)               |
+| Splunk Search API Receiver                 | [splunksearchapireceiver](../receiver/splunksearchapireceiver/README.md)               |
 | Splunk HEC Receiver                        | [splunkhecreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.113.0/receiver/splunkhecreceiver/README.md)                           |
 | StatsD Receiver                            | [statsdreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.113.0/receiver/statsdreceiver/README.md)                                 |
 | SQL Query Receiver                         | [sqlqueryreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.113.0/receiver/sqlqueryreceiver/README.md)                             |
