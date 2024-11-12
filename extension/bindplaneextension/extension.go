@@ -191,11 +191,15 @@ func (b *bindplaneExtension) reportTopologyLoop() {
 func (b *bindplaneExtension) reportTopology() error {
 	ts := b.rtsr.TopologyStates()
 
+	fmt.Println("\033[34m Reporting Topology to BP: \033[0m", ts)
+
 	// Send topology state snappy-encoded
 	marshalled, err := json.Marshal(ts)
 	if err != nil {
 		return fmt.Errorf("marshal topology state: %w", err)
 	}
+
+	fmt.Println("\033[34m Marshalled Topology to BP: \033[0m", marshalled)
 
 	encoded := snappy.Encode(nil, marshalled)
 	for {

@@ -58,6 +58,7 @@ func createTracesProcessor(
 	nextConsumer consumer.Traces,
 ) (processor.Traces, error) {
 	oCfg := cfg.(*Config)
+	fmt.Println("\033[34m Create Traces Processor \033[0m", set.ID)
 	tp, err := createOrGetProcessor(set, oCfg)
 	if err != nil {
 		return nil, fmt.Errorf("create topologyprocessor: %w", err)
@@ -78,6 +79,7 @@ func createLogsProcessor(
 	nextConsumer consumer.Logs,
 ) (processor.Logs, error) {
 	oCfg := cfg.(*Config)
+	fmt.Println("\033[34m Create Logs Processor \033[0m", set.ID)
 	tp, err := createOrGetProcessor(set, oCfg)
 	if err != nil {
 		return nil, fmt.Errorf("create topologyprocessor: %w", err)
@@ -98,6 +100,7 @@ func createMetricsProcessor(
 	nextConsumer consumer.Metrics,
 ) (processor.Metrics, error) {
 	oCfg := cfg.(*Config)
+	fmt.Println("\033[34m Create Metrics Processor \033[0m", set.ID)
 	tp, err := createOrGetProcessor(set, oCfg)
 	if err != nil {
 		return nil, fmt.Errorf("create topologyprocessor: %w", err)
@@ -117,9 +120,11 @@ func createOrGetProcessor(set processor.Settings, cfg *Config) (*topologyProcess
 
 	var tp *topologyProcessor
 	if p, ok := processors[set.ID]; ok {
+		fmt.Println("\033[34m Found existing TopoProc \033[0m", set.ID)
 		tp = p
 	} else {
 		var err error
+		fmt.Println("\033[34m Creating new TopoProc \033[0m", set.ID)
 		tp, err = newTopologyProcessor(set.Logger, cfg, set.ID)
 		if err != nil {
 			return nil, err
