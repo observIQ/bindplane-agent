@@ -28,6 +28,7 @@ type Config struct {
 	Username                string   `mapstructure:"splunk_username"`
 	Password                string   `mapstructure:"splunk_password"`
 	Searches                []Search `mapstructure:"searches"`
+	EventBatchSize          int      `mapstructure:"event_batch_size"`
 }
 
 // Search struct to represent a Splunk search

@@ -49,7 +49,8 @@ type List struct {
 
 // SearchResults struct to represent the JSON response from Splunk search results endpoint
 type SearchResults struct {
-	Results []struct {
+	InitOffset int `json:"init_offset"`
+	Results    []struct {
 		Raw  string `json:"_raw"`
 		Time string `json:"_time"`
 	} `json:"results"`
