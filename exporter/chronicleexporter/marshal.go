@@ -196,14 +196,12 @@ func (m *protoMarshaler) getLogType(ctx context.Context, logRecord plog.LogRecor
 }
 
 func (m *protoMarshaler) getRawField(ctx context.Context, field string, logRecord plog.LogRecord, scope plog.ScopeLogs, resource plog.ResourceLogs) (string, error) {
-	// TODO(jsirianni): Performance?
-	// This was responsible for a huge performance boost.
-	// if field == "body" {
-	// 	// TODO(jsirianni): Calling Type() wil panic if the body is nil. We should handle this case.
-	// 	if logRecord.Body().Type() == pcommon.ValueTypeStr {
-	// 		return logRecord.Body().Str(), nil
-	// 	}
-	// }
+	// If the field is "body", return the entire log body as a string
+	// instead of trying to evaluate it as an expression. This improves
+	// performance significantly.
+	if field == "body" {
+		return logRecord.Body().Str(), nil
+	}
 
 	lrExpr, err := expr.NewOTTLLogRecordExpression(field, m.teleSettings)
 	if err != nil {

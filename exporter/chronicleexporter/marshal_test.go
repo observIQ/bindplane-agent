@@ -369,3 +369,79 @@ func mockLogs(record plog.LogRecord) plog.Logs {
 	record.CopyTo(sl.LogRecords().AppendEmpty())
 	return logs
 }
+
+type getRawFieldCase struct {
+	name         string
+	field        string
+	logRecord    plog.LogRecord
+	scope        plog.ScopeLogs
+	resource     plog.ResourceLogs
+	expect       string
+	expectErrStr string
+}
+
+// Used by tests and benchmarks
+var getRawFieldCases = []getRawFieldCase{
+	{
+		name:  "String body",
+		field: "body",
+		logRecord: func() plog.LogRecord {
+			lr := plog.NewLogRecord()
+			lr.Body().SetStr("<Event xmlns='http://schemas.microsoft.com/win/2004/08/events/event'><System><Provider Name='Service Control Manager' Guid='{555908d1-a6d7-4695-8e1e-26931d2012f4}' EventSourceName='Service Control Manager'/><EventID Qualifiers='16384'>7036</EventID><Version>0</Version><Level>4</Level><Task>0</Task><Opcode>0</Opcode><Keywords>0x8080000000000000</Keywords><TimeCreated SystemTime='2024-11-08T18:51:13.504187700Z'/><EventRecordID>3562</EventRecordID><Correlation/><Execution ProcessID='604' ThreadID='4792'/><Channel>System</Channel><Computer>WIN-L6PC55MPB98</Computer><Security/></System><EventData><Data Name='param1'>Print Spooler</Data><Data Name='param2'>stopped</Data><Binary>530070006F006F006C00650072002F0031000000</Binary></EventData></Event>")
+			return lr
+		}(),
+		scope:    plog.NewScopeLogs(),
+		resource: plog.NewResourceLogs(),
+		expect:   "<Event xmlns='http://schemas.microsoft.com/win/2004/08/events/event'><System><Provider Name='Service Control Manager' Guid='{555908d1-a6d7-4695-8e1e-26931d2012f4}' EventSourceName='Service Control Manager'/><EventID Qualifiers='16384'>7036</EventID><Version>0</Version><Level>4</Level><Task>0</Task><Opcode>0</Opcode><Keywords>0x8080000000000000</Keywords><TimeCreated SystemTime='2024-11-08T18:51:13.504187700Z'/><EventRecordID>3562</EventRecordID><Correlation/><Execution ProcessID='604' ThreadID='4792'/><Channel>System</Channel><Computer>WIN-L6PC55MPB98</Computer><Security/></System><EventData><Data Name='param1'>Print Spooler</Data><Data Name='param2'>stopped</Data><Binary>530070006F006F006C00650072002F0031000000</Binary></EventData></Event>",
+	},
+	{
+		name:  "String attribute",
+		field: "attributes[\"log.file.name\"]",
+		logRecord: func() plog.LogRecord {
+			lr := plog.NewLogRecord()
+			lr.Attributes().PutStr("status", "200")
+			lr.Attributes().PutStr("log_type", "k8s-container")
+			lr.Attributes().PutStr("log.file.name", "/var/log/containers/agent_agent_ns.log")
+			return lr
+		}(),
+		scope:    plog.NewScopeLogs(),
+		resource: plog.NewResourceLogs(),
+		expect:   "/var/log/containers/agent_agent_ns.log",
+	},
+}
+
+func Test_getRawField(t *testing.T) {
+	for _, tc := range getRawFieldCases {
+		t.Run(tc.name, func(t *testing.T) {
+			m := &protoMarshaler{}
+			m.teleSettings.Logger = zap.NewNop()
+
+			ctx := context.Background()
+
+			rawField, err := m.getRawField(ctx, tc.field, tc.logRecord, tc.scope, tc.resource)
+			if tc.expectErrStr != "" {
+				require.Contains(t, err.Error(), tc.expectErrStr)
+				return
+			}
+
+			require.Equal(t, tc.expect, rawField)
+		})
+	}
+}
+
+func Benchmark_getRawField(b *testing.B) {
+	m := &protoMarshaler{}
+	m.teleSettings.Logger = zap.NewNop()
+
+	ctx := context.Background()
+
+	for _, tc := range getRawFieldCases {
+		b.ResetTimer()
+		b.Run(tc.name, func(b *testing.B) {
+			for i := 0; i < b.N; i++ {
+				_, _ = m.getRawField(ctx, tc.field, tc.logRecord, tc.scope, tc.resource)
+			}
+		})
+	}
+
+}
