@@ -26,11 +26,14 @@ type Config struct {
 	// Labels in "k1=v1,k2=v2" format
 	Labels string `mapstructure:"labels"`
 	// Component ID of the opamp extension. If not specified, then
-	// this extension will not generate any custom messages for throughput metrics.
+	// this extension will not generate any custom messages for throughput metrics or topology.
 	OpAMP component.ID `mapstructure:"opamp"`
 	// MeasurementsInterval is the interval on which to report measurements.
 	// Measurements reporting is disabled if this duration is 0.
 	MeasurementsInterval time.Duration `mapstructure:"measurements_interval"`
+	// TopologyInterval is the interval on which to report topology.
+	// Topology reporting is disabled if this duration is 0.
+	TopologyInterval time.Duration `mapstructure:"topology_interval"`
 	// ExtraMeasurementsAttributes are a map of key-value pairs to add to all reported measurements.
 	ExtraMeasurementsAttributes map[string]string `mapstructure:"extra_measurements_attributes,omitempty"`
 }
@@ -39,6 +42,10 @@ type Config struct {
 func (c Config) Validate() error {
 	if c.MeasurementsInterval < 0 {
 		return errors.New("measurements interval must be postitive or 0")
+	}
+
+	if c.TopologyInterval < 0 {
+		return errors.New("topology interval must be postitive or 0")
 	}
 
 	return nil

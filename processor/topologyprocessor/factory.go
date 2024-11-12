@@ -16,6 +16,7 @@ package topologyprocessor
 
 import (
 	"context"
+	"fmt"
 	"sync"
 
 	"go.opentelemetry.io/collector/component"
@@ -45,8 +46,8 @@ func NewFactory() processor.Factory {
 
 func createDefaultConfig() component.Config {
 	return &Config{
+		Enabled:  true,
 		Interval: defaultInterval,
-		OpAMP:    defaultOpAMPExtensionID,
 	}
 }
 
@@ -57,16 +58,16 @@ func createTracesProcessor(
 	nextConsumer consumer.Traces,
 ) (processor.Traces, error) {
 	oCfg := cfg.(*Config)
-	sp := createOrGetProcessor(set, oCfg)
+	tp, err := createOrGetProcessor(set, oCfg)
+	if err != nil {
+		return nil, fmt.Errorf("create topologyprocessor: %w", err)
+	}
 
 	return processorhelper.NewTraces(
-		ctx,
-		set,
-		cfg,
-		nextConsumer,
-		sp.processTraces,
+		ctx, set, cfg, nextConsumer, tp.processTraces,
 		processorhelper.WithCapabilities(consumerCapabilities),
-		processorhelper.WithStart(sp.start),
+		processorhelper.WithStart(tp.start),
+		processorhelper.WithShutdown(tp.shutdown),
 	)
 }
 
@@ -77,16 +78,16 @@ func createLogsProcessor(
 	nextConsumer consumer.Logs,
 ) (processor.Logs, error) {
 	oCfg := cfg.(*Config)
-	sp := createOrGetProcessor(set, oCfg)
+	tp, err := createOrGetProcessor(set, oCfg)
+	if err != nil {
+		return nil, fmt.Errorf("create topologyprocessor: %w", err)
+	}
 
 	return processorhelper.NewLogs(
-		ctx,
-		set,
-		cfg,
-		nextConsumer,
-		sp.processLogs,
+		ctx, set, cfg, nextConsumer, tp.processLogs,
 		processorhelper.WithCapabilities(consumerCapabilities),
-		processorhelper.WithStart(sp.start),
+		processorhelper.WithStart(tp.start),
+		processorhelper.WithShutdown(tp.shutdown),
 	)
 }
 
@@ -97,32 +98,37 @@ func createMetricsProcessor(
 	nextConsumer consumer.Metrics,
 ) (processor.Metrics, error) {
 	oCfg := cfg.(*Config)
-	sp := createOrGetProcessor(set, oCfg)
+	tp, err := createOrGetProcessor(set, oCfg)
+	if err != nil {
+		return nil, fmt.Errorf("create topologyprocessor: %w", err)
+	}
 
 	return processorhelper.NewMetrics(
-		ctx,
-		set,
-		cfg,
-		nextConsumer,
-		sp.processMetrics,
+		ctx, set, cfg, nextConsumer, tp.processMetrics,
 		processorhelper.WithCapabilities(consumerCapabilities),
-		processorhelper.WithStart(sp.start),
+		processorhelper.WithStart(tp.start),
+		processorhelper.WithShutdown(tp.shutdown),
 	)
 }
 
-func createOrGetProcessor(set processor.Settings, cfg *Config) *topologyProcessor {
+func createOrGetProcessor(set processor.Settings, cfg *Config) (*topologyProcessor, error) {
 	processorsMux.Lock()
 	defer processorsMux.Unlock()
 
-	var sp *topologyProcessor
+	var tp *topologyProcessor
 	if p, ok := processors[set.ID]; ok {
-		sp = p
+		tp = p
 	} else {
-		sp = newTopologyProcessor(set.Logger, cfg, set.ID)
-		processors[set.ID] = sp
+		var err error
+		tp, err = newTopologyProcessor(set.Logger, cfg, set.ID)
+		if err != nil {
+			return nil, err
+		}
+
+		processors[set.ID] = tp
 	}
 
-	return sp
+	return tp, nil
 }
 
 func unregisterProcessor(id component.ID) {

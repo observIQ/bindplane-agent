@@ -5,6 +5,7 @@ go 1.22.7
 require (
 	github.com/golang/snappy v0.0.4
 	github.com/observiq/bindplane-agent/internal/measurements v1.66.0
+	github.com/observiq/bindplane-agent/internal/topology v0.0.0-00010101000000-000000000000
 	github.com/open-telemetry/opamp-go v0.17.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/extension/opampcustommessages v0.114.0
 	github.com/stretchr/testify v1.9.0
@@ -51,3 +52,5 @@ require (
 )
 
 replace github.com/observiq/bindplane-agent/internal/measurements => ../../internal/measurements
+
+replace github.com/observiq/bindplane-agent/internal/topology => ../../internal/topology

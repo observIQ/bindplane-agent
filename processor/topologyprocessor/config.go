@@ -28,19 +28,30 @@ const defaultInterval = time.Minute
 
 // Config is the configuration for the processor
 type Config struct {
+	// Enabled controls whether this processor is enabled or not.
+	Enabled bool `mapstructure:"enabled"`
+
 	// Interval is the interval at which this processor sends topology messages to BindPlane
-	Interval   time.Duration `mapstructure:"interval"`
-	OpAMP      component.ID  `mapstructure:"opamp"`
-	ConfigName string        `mapstructure:"configName"`
-	OrgID      string        `mapstructure:"orgID"`
-	AccountID  string        `mapstructure:"accountID"`
+	Interval time.Duration `mapstructure:"interval"`
+
+	// Bindplane extension to use in order to report metrics. Optional.
+	BindplaneExtension component.ID `mapstructure:"bindplane_extension"`
+
+	// Name of the Config where this processor is present
+	ConfigName string `mapstructure:"configName"`
+
+	// OrgID of the Org where this processor is present
+	OrgID string `mapstructure:"orgID"`
+
+	// AccountID of the Account where this processor is present
+	AccountID string `mapstructure:"accountID"`
 }
 
 // Validate validates the processor configuration
 func (cfg Config) Validate() error {
-	var emptyID component.ID
-	if cfg.OpAMP == emptyID {
-		return errors.New("`opamp` must be specified")
+	// Processor not enabled no validation needed
+	if !cfg.Enabled {
+		return nil
 	}
 
 	if cfg.ConfigName == "" {
