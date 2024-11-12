@@ -79,10 +79,19 @@ func (m *protoMarshaler) MarshalRawLogs(ctx context.Context, ld plog.Logs) ([]*a
 	ctx, span := tracer.Start(ctx, "protoMarshaler/MarshalRawLogs")
 	defer span.End()
 
+	start := time.Now()
+
 	rawLogs, err := m.extractRawLogs(ctx, ld)
 	if err != nil {
 		return nil, fmt.Errorf("extract raw logs: %w", err)
 	}
+
+	// Record only successful operations
+	elapsed := time.Since(start)
+	marshalTime.Record(
+		ctx,
+		elapsed.Milliseconds(),
+	)
 
 	return m.constructPayloads(ctx, rawLogs), nil
 }

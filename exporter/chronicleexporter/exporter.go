@@ -34,6 +34,7 @@ import (
 	"go.opentelemetry.io/collector/pdata/plog"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/metric"
 	"go.uber.org/zap"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
@@ -47,6 +48,29 @@ import (
 )
 
 var tracer = otel.Tracer("chronicleexporter")
+var mp = otel.Meter("chronicleexporter")
+
+var apiRequestTime metric.Int64Histogram
+var marshalTime metric.Int64Histogram
+
+func init() {
+	var err error
+	apiRequestTime, err = mp.Int64Histogram(
+		"chronicle.upload_to_chronicle_time",
+		metric.WithUnit("ms"),
+	)
+	if err != nil {
+		panic(err)
+	}
+
+	marshalTime, err = mp.Int64Histogram(
+		"chronicle.marshal_raw_logs_time",
+		metric.WithUnit("ms"),
+	)
+	if err != nil {
+		panic(err)
+	}
+}
 
 const (
 	grpcScope = "https://www.googleapis.com/auth/malachite-ingestion"
@@ -72,6 +96,7 @@ type chronicleExporter struct {
 
 func newExporter(cfg *Config, params exporter.Settings, collectorID, exporterID string) (*chronicleExporter, error) {
 	otel.SetTracerProvider(params.TracerProvider)
+	otel.SetMeterProvider(params.MeterProvider)
 
 	creds, err := loadGoogleCredentials(cfg)
 	if err != nil {
@@ -197,7 +222,9 @@ func (ce *chronicleExporter) uploadToChronicle(ctx context.Context, request *api
 
 	totalLogs := int64(len(request.GetBatch().GetEntries()))
 
+	start := time.Now()
 	_, err := ce.client.BatchCreateLogs(ctx, request, ce.buildOptions()...)
+	elapsed := time.Since(start)
 	if err != nil {
 		errCode := status.Code(err)
 		span.RecordError(err)
@@ -209,12 +236,38 @@ func (ce *chronicleExporter) uploadToChronicle(ctx context.Context, request *api
 			codes.DeadlineExceeded,
 			codes.ResourceExhausted,
 			codes.Aborted:
+
+			// Record the API request time for failed requests with known error
+			apiRequestTime.Record(
+				ctx,
+				elapsed.Milliseconds(),
+				metric.WithAttributeSet(attribute.NewSet(
+					attribute.String("error", errCode.String()),
+				)),
+			)
 			return fmt.Errorf("upload logs to chronicle: %w", err)
 		default:
+			// Record the API request time for failed requests with unknown error
+			apiRequestTime.Record(
+				ctx,
+				elapsed.Milliseconds(),
+				metric.WithAttributeSet(attribute.NewSet(
+					attribute.String("error", "unknown"),
+				)),
+			)
 			return consumererror.NewPermanent(fmt.Errorf("upload logs to chronicle: %w", err))
 		}
 
 	}
+
+	// Record the API request time for successful requests
+	apiRequestTime.Record(
+		ctx,
+		elapsed.Milliseconds(),
+		metric.WithAttributeSet(attribute.NewSet(
+			attribute.String("error", "none"),
+		)),
+	)
 
 	ce.metrics.addSentLogs(totalLogs)
 	ce.metrics.updateLastSuccessfulUpload()
