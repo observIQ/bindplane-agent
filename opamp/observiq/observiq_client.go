@@ -28,6 +28,7 @@ import (
 	"github.com/observiq/bindplane-otel-collector/collector"
 	"github.com/observiq/bindplane-otel-collector/internal/measurements"
 	"github.com/observiq/bindplane-otel-collector/internal/report"
+	"github.com/observiq/bindplane-otel-collector/internal/topology"
 	"github.com/observiq/bindplane-otel-collector/internal/version"
 	"github.com/observiq/bindplane-otel-collector/opamp"
 	"github.com/observiq/bindplane-otel-collector/packagestate"
@@ -66,6 +67,7 @@ type Client struct {
 	updatingPackage         bool
 	reportManager           *report.Manager
 	measurementsSender      *measurementsSender
+	topologySender          *topologySender
 
 	// To signal if we are disconnecting already and not take any actions on connection failures
 	disconnecting bool
@@ -90,6 +92,7 @@ type NewClientArgs struct {
 	CollectorConfigPath  string
 	LoggerConfigPath     string
 	MeasurementsReporter MeasurementsReporter
+	TopologyReporter     TopologyReporter
 }
 
 // NewClient creates a new OpAmp client
@@ -149,6 +152,7 @@ func NewClient(args *NewClientArgs) (opamp.Client, error) {
 	err = observiqClient.opampClient.SetCustomCapabilities(&protobufs.CustomCapabilities{
 		Capabilities: []string{
 			measurements.ReportMeasurementsV1Capability,
+			topology.ReportTopologyV1Capability,
 		},
 	})
 	if err != nil {
@@ -162,6 +166,14 @@ func NewClient(args *NewClientArgs) (opamp.Client, error) {
 		observiqClient.opampClient,
 		args.Config.MeasurementsInterval,
 		args.Config.ExtraMeasurementsAttributes,
+	)
+
+	// Create topology sender
+	observiqClient.topologySender = newTopologySender(
+		clientLogger,
+		args.TopologyReporter,
+		observiqClient.opampClient,
+		args.Config.MeasurementsInterval,
 	)
 
 	return observiqClient, nil

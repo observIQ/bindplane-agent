@@ -15,14 +15,12 @@
 package topologyprocessor
 
 import (
-	"bytes"
-	"compress/gzip"
 	"context"
 	"fmt"
 	"sync"
-	"sync/atomic"
+	"time"
 
-	"github.com/open-telemetry/opentelemetry-collector-contrib/extension/opampcustommessages"
+	"github.com/observiq/bindplane-agent/internal/topology"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/pdata/plog"
 	"go.opentelemetry.io/collector/pdata/pmetric"
@@ -32,143 +30,155 @@ import (
 )
 
 const (
-	topologyCapability = "com.bindplane.topology"
-	orgIDHeader        = "x-bp-orgid"
-	accountIDHeader    = "x-bp-accountid"
-	configNameHeader   = "x-bp-config"
+	orgIDHeader      = "x-bp-orgid"
+	accountIDHeader  = "x-bp-accountid"
+	configNameHeader = "x-bp-config"
 )
 
-type gateway struct {
-	configName string
-	accountID  string
-	orgID      string
+type topologyUpdate struct {
+	gw         topology.GatewayConfigInfo
+	routeTable map[topology.GatewayConfigInfo]time.Time
 }
 
 type topologyProcessor struct {
-	logger *zap.Logger
+	logger      *zap.Logger
+	enabled     bool
+	topology    *topology.TopologyState
+	interval    time.Duration
+	processorID component.ID
+	bindplane   component.ID
 
-	processorID      component.ID
-	opampExtensionID component.ID
-
-	routeTable map[gateway][]gateway
-
-	customCapabilityHandler opampcustommessages.CustomCapabilityHandler
-
-	started  *atomic.Bool
-	stopped  *atomic.Bool
-	doneChan chan struct{}
-	wg       *sync.WaitGroup
+	startOnce sync.Once
 }
 
 // newTopologyProcessor creates a new topology processor
-func newTopologyProcessor(logger *zap.Logger, cfg *Config, processorID component.ID) *topologyProcessor {
-	return &topologyProcessor{
-		logger: logger,
-
-		processorID:      processorID,
-		opampExtensionID: cfg.OpAMP,
-
-		routeTable: make(map[gateway][]gateway),
-
-		started:  &atomic.Bool{},
-		stopped:  &atomic.Bool{},
-		doneChan: make(chan struct{}),
-		wg:       &sync.WaitGroup{},
+func newTopologyProcessor(logger *zap.Logger, cfg *Config, processorID component.ID) (*topologyProcessor, error) {
+	destGw := topology.GatewayConfigInfo{
+		ConfigName: cfg.ConfigName,
+		AccountID:  cfg.AccountID,
+		OrgID:      cfg.OrgID,
 	}
+	topology, err := topology.NewTopologyState(destGw)
+	if err != nil {
+		return nil, fmt.Errorf("create topology state: %w", err)
+	}
+
+	return &topologyProcessor{
+		logger:      logger,
+		topology:    topology,
+		processorID: processorID,
+
+		interval: cfg.Interval,
+
+		startOnce: sync.Once{},
+	}, nil
 }
 
-func (tp *topologyProcessor) start(_ context.Context, host component.Host) error {
-	if tp.started.Swap(true) {
-		// Start logic should only be run once
-		return nil
-	}
-
-	ext, ok := host.GetExtensions()[tp.opampExtensionID]
-	if !ok {
-		return fmt.Errorf("opamp extension %q does not exist", tp.opampExtensionID)
-	}
-
-	registry, ok := ext.(opampcustommessages.CustomCapabilityRegistry)
-	if !ok {
-		return fmt.Errorf("extension %q is not an custom message registry", tp.opampExtensionID)
-	}
-
+func (tp *topologyProcessor) start(ctx context.Context, host component.Host) error {
 	var err error
-	tp.customCapabilityHandler, err = registry.Register(topologyCapability)
-	if err != nil {
-		return fmt.Errorf("register custom capability: %w", err)
-	}
+	fmt.Println("\033[34m TP START \033[0m")
+	tp.startOnce.Do(func() {
+		registry, getRegErr := GetTopologyRegistry(host, tp.bindplane)
+		if getRegErr != nil {
+			err = fmt.Errorf("get topology registry: %w", getRegErr)
+			return
+		}
 
-	return nil
+		if registry != nil {
+			registerErr := registry.RegisterTopologyState(tp.processorID.String(), tp.topology)
+			if registerErr != nil {
+				err = fmt.Errorf("register topology: %w", registerErr)
+				return
+			}
+		}
+	})
+
+	return err
 }
 
 func (tp *topologyProcessor) processTraces(ctx context.Context, td ptrace.Traces) (ptrace.Traces, error) {
-	metadata, ok := metadata.FromIncomingContext(ctx)
-	if ok {
-		fmt.Println(metadata)
-	}
+	tp.processTopologyHeaders(ctx)
 	return td, nil
 }
 
 func (tp *topologyProcessor) processLogs(ctx context.Context, ld plog.Logs) (plog.Logs, error) {
-	metadata, ok := metadata.FromIncomingContext(ctx)
-	if ok {
-		fmt.Println(metadata)
-	}
+	fmt.Println("\033[34m PROCESS LOGS \033[0m")
+	tp.processTopologyHeaders(ctx)
 	return ld, nil
 }
 
 func (tp *topologyProcessor) processMetrics(ctx context.Context, md pmetric.Metrics) (pmetric.Metrics, error) {
-	metadata, ok := metadata.FromIncomingContext(ctx)
-	if ok {
-		fmt.Println(metadata)
-	}
+	tp.processTopologyHeaders(ctx)
 	return md, nil
 }
 
-func (tp *topologyProcessor) stop(ctx context.Context) error {
-	if tp.stopped.Swap(true) {
-		// Stop logic should only be run once
-		return nil
+func (tp *topologyProcessor) processTopologyHeaders(ctx context.Context) {
+	metadata, ok := metadata.FromIncomingContext(ctx)
+	if ok {
+		gw := topology.GatewayConfigInfo{
+			ConfigName: metadata.Get(configNameHeader)[0],
+			AccountID:  metadata.Get(accountIDHeader)[0],
+			OrgID:      metadata.Get(orgIDHeader)[0],
+		}
+		tp.topology.UpsertRoute(ctx, gw)
 	}
+}
 
+func (tp *topologyProcessor) shutdown(_ context.Context) error {
 	unregisterProcessor(tp.processorID)
-
-	if tp.customCapabilityHandler != nil {
-		tp.customCapabilityHandler.Unregister()
-	}
-
-	if tp.doneChan != nil {
-		close(tp.doneChan)
-	}
-
-	waitgroupDone := make(chan struct{})
-	go func() {
-		tp.wg.Wait()
-		close(waitgroupDone)
-	}()
-
-	select {
-	case <-waitgroupDone:
-	case <-ctx.Done():
-		return ctx.Err()
-	}
-
 	return nil
 }
 
-// compress gzip compresses the input data
-func compress(data []byte) ([]byte, error) {
-	var b bytes.Buffer
-	w := gzip.NewWriter(&b)
-	_, err := w.Write(data)
-	if err != nil {
-		return nil, err
-	}
+// func (tp *topologyProcessor) updateBindplane(ctx context.Context) {
+// 	defer tp.wg.Done()
+// 	t := time.NewTicker(tp.interval)
 
-	if err := w.Close(); err != nil {
-		return nil, err
-	}
+// 	fmt.Println("TP: UPDATE BINDPLANE")
 
-	return b.Bytes(), nil
-}
+// 	for {
+// 		select {
+// 		case <-ctx.Done():
+// 			return
+// 		case <-t.C:
+// 			tp.sendRouteTable(ctx)
+// 		}
+// 	}
+// }
+
+// func (tp *topologyProcessor) sendRouteTable(_ context.Context) {
+// 	fmt.Println("TP: SEND ROUTE TABLE")
+// 	msg := topologyUpdate{
+// 		gw:         tp.gw,
+// 		routeTable: tp.routeTable,
+// 	}
+
+// 	msgJSON, err := json.Marshal(msg)
+// 	if err != nil {
+// 		tp.logger.Error("Could not marshal topology update message.", zap.Error(err))
+// 		return
+// 	}
+
+// 	// compressedResponse, err := compress(response)
+// 	// if err != nil {
+// 	// 	tp.logger.Error("Failed to compress snapshot payload.", zap.Error(err))
+// 	// 	return
+// 	// }
+
+// 	for {
+// 		msgSendChan, err := tp.customCapabilityHandler.SendMessage(topologyUpdateType, msgJSON)
+// 		switch {
+// 		case err == nil: // Message is scheduled to send
+// 			tp.logger.Debug("Message scheduled")
+// 			return
+
+// 		case errors.Is(err, types.ErrCustomMessagePending):
+// 			// Wait until message is ready to send, then try again
+// 			tp.logger.Debug("Custom message pending, will try sending again after message is clear.")
+// 			<-msgSendChan
+
+// 		default:
+// 			tp.logger.Error("Failed to send topology update message.", zap.Error(err))
+// 			return
+// 		}
+// 	}
+// }

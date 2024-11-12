@@ -121,6 +121,7 @@ func managerReload(client *Client, managerConfigPath string) opamp.ReloadFunc {
 		// Set new measurements interval and attributes
 		client.measurementsSender.SetInterval(client.currentConfig.MeasurementsInterval)
 		client.measurementsSender.SetExtraAttributes(client.currentConfig.ExtraMeasurementsAttributes)
+		client.topologySender.SetInterval(client.currentConfig.TopologyInterval)
 
 		return true, nil
 	}

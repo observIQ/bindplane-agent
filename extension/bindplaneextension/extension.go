@@ -16,6 +16,7 @@ package bindplaneextension
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"sync"
@@ -23,6 +24,7 @@ import (
 
 	"github.com/golang/snappy"
 	"github.com/observiq/bindplane-otel-collector/internal/measurements"
+	"github.com/observiq/bindplane-otel-collector/internal/topology"
 	"github.com/open-telemetry/opamp-go/client/types"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/extension/opampcustommessages"
 	"go.opentelemetry.io/collector/component"
@@ -31,12 +33,15 @@ import (
 )
 
 type bindplaneExtension struct {
-	logger                  *zap.Logger
-	cfg                     *Config
-	ctmr                    *measurements.ResettableThroughputMeasurementsRegistry
-	customCapabilityHandler opampcustommessages.CustomCapabilityHandler
-	doneChan                chan struct{}
-	wg                      *sync.WaitGroup
+	logger                            *zap.Logger
+	cfg                               *Config
+	ctmr                              *measurements.ResettableThroughputMeasurementsRegistry
+	rtsr                              *topology.ResettableTopologyStateRegistry
+	customCapabilityHandlerThroughput opampcustommessages.CustomCapabilityHandler
+	customCapabilityHandlerTopology   opampcustommessages.CustomCapabilityHandler
+
+	doneChan chan struct{}
+	wg       *sync.WaitGroup
 }
 
 func newBindplaneExtension(logger *zap.Logger, cfg *Config) *bindplaneExtension {
@@ -44,6 +49,7 @@ func newBindplaneExtension(logger *zap.Logger, cfg *Config) *bindplaneExtension 
 		logger:   logger,
 		cfg:      cfg,
 		ctmr:     measurements.NewResettableThroughputMeasurementsRegistry(false),
+		rtsr:     topology.NewResettableTopologyStateRegistry(),
 		doneChan: make(chan struct{}),
 		wg:       &sync.WaitGroup{},
 	}
@@ -53,14 +59,21 @@ func (b *bindplaneExtension) Start(_ context.Context, host component.Host) error
 	var emptyComponentID component.ID
 
 	// Set up measurements if enabled
-	if b.cfg.OpAMP != emptyComponentID && b.cfg.MeasurementsInterval > 0 {
+	if b.cfg.OpAMP != emptyComponentID && (b.cfg.MeasurementsInterval > 0 || b.cfg.TopologyInterval > 0) {
 		err := b.setupCustomCapabilities(host)
 		if err != nil {
 			return fmt.Errorf("setup capability handler: %w", err)
 		}
 
-		b.wg.Add(1)
-		go b.reportMetricsLoop()
+		if b.cfg.MeasurementsInterval > 0 {
+			b.wg.Add(1)
+			go b.reportMetricsLoop()
+		}
+
+		if b.cfg.TopologyInterval > 0 {
+			b.wg.Add(1)
+			go b.reportTopologyLoop()
+		}
 	}
 
 	return nil
@@ -68,6 +81,10 @@ func (b *bindplaneExtension) Start(_ context.Context, host component.Host) error
 
 func (b *bindplaneExtension) RegisterThroughputMeasurements(processorID string, measurements *measurements.ThroughputMeasurements) error {
 	return b.ctmr.RegisterThroughputMeasurements(processorID, measurements)
+}
+
+func (b *bindplaneExtension) RegisterTopologyState(processorID string, topology *topology.TopologyState) error {
+	return b.rtsr.RegisterTopologyState(processorID, topology)
 }
 
 func (b *bindplaneExtension) setupCustomCapabilities(host component.Host) error {
@@ -82,9 +99,18 @@ func (b *bindplaneExtension) setupCustomCapabilities(host component.Host) error 
 	}
 
 	var err error
-	b.customCapabilityHandler, err = registry.Register(measurements.ReportMeasurementsV1Capability)
-	if err != nil {
-		return fmt.Errorf("register custom capability: %w", err)
+	if b.cfg.MeasurementsInterval > 0 {
+		b.customCapabilityHandlerThroughput, err = registry.Register(measurements.ReportMeasurementsV1Capability)
+		if err != nil {
+			return fmt.Errorf("register custom measurements capability: %w", err)
+		}
+	}
+
+	if b.cfg.TopologyInterval > 0 {
+		b.customCapabilityHandlerTopology, err = registry.Register(topology.ReportTopologyV1Capability)
+		if err != nil {
+			return fmt.Errorf("register custom topology capability: %w", err)
+		}
 	}
 
 	return nil
@@ -130,7 +156,7 @@ func (b *bindplaneExtension) reportMetrics() error {
 
 	encoded := snappy.Encode(nil, marshalled)
 	for {
-		sendingChannel, err := b.customCapabilityHandler.SendMessage(measurements.ReportMeasurementsType, encoded)
+		sendingChannel, err := b.customCapabilityHandlerThroughput.SendMessage(measurements.ReportMeasurementsType, encoded)
 		switch {
 		case err == nil:
 			return nil
@@ -138,7 +164,50 @@ func (b *bindplaneExtension) reportMetrics() error {
 			<-sendingChannel
 			continue
 		default:
-			return fmt.Errorf("send custom message: %w", err)
+			return fmt.Errorf("send custom throughput message: %w", err)
+		}
+	}
+}
+
+func (b *bindplaneExtension) reportTopologyLoop() {
+	defer b.wg.Done()
+
+	t := time.NewTicker(b.cfg.TopologyInterval)
+	defer t.Stop()
+
+	for {
+		select {
+		case <-t.C:
+			err := b.reportMetrics()
+			if err != nil {
+				b.logger.Error("Failed to report topology.", zap.Error(err))
+			}
+		case <-b.doneChan:
+			return
+		}
+	}
+}
+
+func (b *bindplaneExtension) reportTopology() error {
+	ts := b.rtsr.TopologyStates()
+
+	// Send topology state snappy-encoded
+	marshalled, err := json.Marshal(ts)
+	if err != nil {
+		return fmt.Errorf("marshal topology state: %w", err)
+	}
+
+	encoded := snappy.Encode(nil, marshalled)
+	for {
+		sendingChannel, err := b.customCapabilityHandlerTopology.SendMessage(topology.ReportTopologyType, encoded)
+		switch {
+		case err == nil:
+			return nil
+		case errors.Is(err, types.ErrCustomMessagePending):
+			<-sendingChannel
+			continue
+		default:
+			return fmt.Errorf("send custom topology message: %w", err)
 		}
 	}
 }
@@ -158,8 +227,12 @@ func (b *bindplaneExtension) Shutdown(ctx context.Context) error {
 	case <-waitgroupDone: // OK
 	}
 
-	if b.customCapabilityHandler != nil {
-		b.customCapabilityHandler.Unregister()
+	if b.customCapabilityHandlerThroughput != nil {
+		b.customCapabilityHandlerThroughput.Unregister()
+	}
+
+	if b.customCapabilityHandlerTopology != nil {
+		b.customCapabilityHandlerTopology.Unregister()
 	}
 
 	return nil
