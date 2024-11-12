@@ -67,10 +67,8 @@ func newTopologyProcessor(logger *zap.Logger, cfg *Config, processorID component
 		logger:      logger,
 		topology:    topology,
 		processorID: processorID,
-
-		interval: cfg.Interval,
-
-		startOnce: sync.Once{},
+		interval:    cfg.Interval,
+		startOnce:   sync.Once{},
 	}, nil
 }
 
@@ -78,6 +76,7 @@ func (tp *topologyProcessor) start(ctx context.Context, host component.Host) err
 	var err error
 	fmt.Println("\033[34m TP START \033[0m")
 	tp.startOnce.Do(func() {
+		fmt.Println("\033[34m TP DOING START \033[0m")
 		registry, getRegErr := GetTopologyRegistry(host, tp.bindplane)
 		if getRegErr != nil {
 			err = fmt.Errorf("get topology registry: %w", getRegErr)
@@ -128,57 +127,3 @@ func (tp *topologyProcessor) shutdown(_ context.Context) error {
 	unregisterProcessor(tp.processorID)
 	return nil
 }
-
-// func (tp *topologyProcessor) updateBindplane(ctx context.Context) {
-// 	defer tp.wg.Done()
-// 	t := time.NewTicker(tp.interval)
-
-// 	fmt.Println("TP: UPDATE BINDPLANE")
-
-// 	for {
-// 		select {
-// 		case <-ctx.Done():
-// 			return
-// 		case <-t.C:
-// 			tp.sendRouteTable(ctx)
-// 		}
-// 	}
-// }
-
-// func (tp *topologyProcessor) sendRouteTable(_ context.Context) {
-// 	fmt.Println("TP: SEND ROUTE TABLE")
-// 	msg := topologyUpdate{
-// 		gw:         tp.gw,
-// 		routeTable: tp.routeTable,
-// 	}
-
-// 	msgJSON, err := json.Marshal(msg)
-// 	if err != nil {
-// 		tp.logger.Error("Could not marshal topology update message.", zap.Error(err))
-// 		return
-// 	}
-
-// 	// compressedResponse, err := compress(response)
-// 	// if err != nil {
-// 	// 	tp.logger.Error("Failed to compress snapshot payload.", zap.Error(err))
-// 	// 	return
-// 	// }
-
-// 	for {
-// 		msgSendChan, err := tp.customCapabilityHandler.SendMessage(topologyUpdateType, msgJSON)
-// 		switch {
-// 		case err == nil: // Message is scheduled to send
-// 			tp.logger.Debug("Message scheduled")
-// 			return
-
-// 		case errors.Is(err, types.ErrCustomMessagePending):
-// 			// Wait until message is ready to send, then try again
-// 			tp.logger.Debug("Custom message pending, will try sending again after message is clear.")
-// 			<-msgSendChan
-
-// 		default:
-// 			tp.logger.Error("Failed to send topology update message.", zap.Error(err))
-// 			return
-// 		}
-// 	}
-// }

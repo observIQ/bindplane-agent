@@ -17,6 +17,7 @@ package observiq
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"sync"
 	"time"
 
@@ -30,7 +31,7 @@ import (
 
 // TopologyReporter represents an object that reports topology state.
 type TopologyReporter interface {
-	TopologyStates() []topology.TopologyState
+	TopologyMessages() []topology.TopologyMessage
 }
 
 // topologySender is a struct that handles periodically sending topology state via a custom message to an OpAMP endpoint.
@@ -124,8 +125,9 @@ func (ts *topologySender) loop() {
 				continue
 			}
 
-			topoState := ts.reporter.TopologyStates()
+			topoState := ts.reporter.TopologyMessages()
 			if len(topoState) == 0 {
+				fmt.Println("\033[34m TopoSender: No Topo States \033[0m")
 				// don't report empty payloads
 				continue
 			}
@@ -144,6 +146,9 @@ func (ts *topologySender) loop() {
 				Type:       topology.ReportTopologyType,
 				Data:       encoded,
 			}
+
+			fmt.Println("\033[34m TopoSender: Sending Topo State: \033[0m", topoState)
+			fmt.Println("\033[34m TopoSender: Marshalled State: \033[0m", string(marshalled))
 
 			for i := 0; i < maxSendRetries; i++ {
 				sendingChannel, err := ts.opampClient.SendCustomMessage(cm)

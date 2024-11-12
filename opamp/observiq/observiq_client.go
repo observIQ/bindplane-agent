@@ -356,11 +356,18 @@ func (c *Client) onMessageFuncHandler(ctx context.Context, msg *types.MessageDat
 	}
 	if msg.CustomCapabilities != nil {
 		if slices.Contains(msg.CustomCapabilities.Capabilities, measurements.ReportMeasurementsV1Capability) {
-			c.logger.Info("Server supports custom message measurements, starting sender.")
+			c.logger.Info("Server supports custom throughput message measurements, starting measurements sender.")
 			c.measurementsSender.Start()
 		} else {
-			c.logger.Info("Server does not support custom message measurements, stopping sender.")
+			c.logger.Info("Server does not support custom throughput message measurements, stopping measurements sender.")
 			c.measurementsSender.Stop()
+		}
+		if slices.Contains(msg.CustomCapabilities.Capabilities, topology.ReportTopologyV1Capability) {
+			c.logger.Info("Server supports custom topology messages, starting topology sender.")
+			c.topologySender.Start()
+		} else {
+			c.logger.Info("Server does not support custom topology messages, stopping topology sender.")
+			c.topologySender.Stop()
 		}
 	}
 }

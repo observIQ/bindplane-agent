@@ -42,6 +42,16 @@ type TopologyState struct {
 	routeTable  map[GatewayConfigInfo]time.Time
 }
 
+type TopologyMessage struct {
+	DestGateway    GatewayConfigInfo `json:"destGateway"`
+	SourceGateways []GatewayState    `json:"sourceGateways"`
+}
+
+type GatewayState struct {
+	Gateway GatewayConfigInfo `json:"gateway"`
+	Updated time.Time         `json:"updated"`
+}
+
 // NewTopologyState initializes a new TopologyState
 func NewTopologyState(destGateway GatewayConfigInfo) (*TopologyState, error) {
 	return &TopologyState{
@@ -52,6 +62,7 @@ func NewTopologyState(destGateway GatewayConfigInfo) (*TopologyState, error) {
 
 // UpsertRoute upserts given route.
 func (ts *TopologyState) UpsertRoute(ctx context.Context, gw GatewayConfigInfo) {
+	fmt.Println("\033[34m UPSERT ROUTE \033[0m", gw)
 	ts.routeTable[gw] = time.Now()
 }
 
@@ -82,15 +93,28 @@ func (rtsr *ResettableTopologyStateRegistry) Reset() {
 	rtsr.topology = &sync.Map{}
 }
 
-// TopologyStates returns all the topology states in this registry.
-func (rtsr *ResettableTopologyStateRegistry) TopologyStates() []TopologyState {
-	result := []TopologyState{}
+// TopologyMessages returns all the topology states in this registry.
+func (rtsr *ResettableTopologyStateRegistry) TopologyMessages() []TopologyMessage {
+	states := []TopologyState{}
 
 	rtsr.topology.Range(func(_, value any) bool {
 		ts := value.(*TopologyState)
-		result = append(result, *ts)
+		states = append(states, *ts)
 		return true
 	})
 
-	return result
+	messages := []TopologyMessage{}
+	for _, ts := range states {
+		curMessage := TopologyMessage{}
+		curMessage.DestGateway = ts.destGateway
+		for gw, updated := range ts.routeTable {
+			curMessage.SourceGateways = append(curMessage.SourceGateways, GatewayState{
+				Gateway: gw,
+				Updated: updated,
+			})
+		}
+		messages = append(messages, curMessage)
+	}
+
+	return messages
 }
