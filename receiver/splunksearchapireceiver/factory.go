@@ -29,7 +29,8 @@ var (
 
 func createDefaultConfig() component.Config {
 	return &Config{
-		ClientConfig: confighttp.NewDefaultClientConfig(),
+		ClientConfig:   confighttp.NewDefaultClientConfig(),
+		EventBatchSize: 100,
 	}
 }
 
