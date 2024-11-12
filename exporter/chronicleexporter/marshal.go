@@ -20,6 +20,9 @@ import (
 	"fmt"
 	"time"
 
+	// TODO(jsirianni): Performance?
+	// json "github.com/json-iterator/go"
+
 	"github.com/google/uuid"
 	"github.com/observiq/bindplane-agent/exporter/chronicleexporter/protos/api"
 	"github.com/observiq/bindplane-agent/expr"
@@ -27,7 +30,6 @@ import (
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/plog"
-	"go.opentelemetry.io/otel/attribute"
 	"go.uber.org/zap"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
@@ -76,8 +78,6 @@ func newProtoMarshaler(cfg Config, teleSettings component.TelemetrySettings, lab
 func (m *protoMarshaler) MarshalRawLogs(ctx context.Context, ld plog.Logs) ([]*api.BatchCreateLogsRequest, error) {
 	ctx, span := tracer.Start(ctx, "protoMarshaler/MarshalRawLogs")
 	defer span.End()
-
-	span.SetAttributes(attribute.Int("count_plog", ld.ResourceLogs().Len()))
 
 	rawLogs, err := m.extractRawLogs(ctx, ld)
 	if err != nil {
@@ -130,9 +130,6 @@ func (m *protoMarshaler) extractRawLogs(ctx context.Context, ld plog.Logs) (map[
 }
 
 func (m *protoMarshaler) processLogRecord(ctx context.Context, logRecord plog.LogRecord, scope plog.ScopeLogs, resource plog.ResourceLogs) (string, string, error) {
-	ctx, span := tracer.Start(ctx, "protoMarshaler/processLogRecord")
-	defer span.End()
-
 	rawLog, err := m.getRawLog(ctx, logRecord, scope, resource)
 	if err != nil {
 		return "", "", err
@@ -147,9 +144,6 @@ func (m *protoMarshaler) processLogRecord(ctx context.Context, logRecord plog.Lo
 }
 
 func (m *protoMarshaler) getRawLog(ctx context.Context, logRecord plog.LogRecord, scope plog.ScopeLogs, resource plog.ResourceLogs) (string, error) {
-	ctx, span := tracer.Start(ctx, "protoMarshaler/getRawLog")
-	defer span.End()
-
 	if m.cfg.RawLogField == "" {
 		entireLogRecord := map[string]any{
 			"body":                logRecord.Body().Str(),
@@ -168,9 +162,6 @@ func (m *protoMarshaler) getRawLog(ctx context.Context, logRecord plog.LogRecord
 }
 
 func (m *protoMarshaler) getLogType(ctx context.Context, logRecord plog.LogRecord, scope plog.ScopeLogs, resource plog.ResourceLogs) (string, error) {
-	ctx, span := tracer.Start(ctx, "protoMarshaler/getLogType")
-	defer span.End()
-
 	logType, err := m.getRawField(ctx, chronicleLogTypeField, logRecord, scope, resource)
 	if err != nil {
 		return m.cfg.LogType, fmt.Errorf("get chronicle log type: %w", err)
@@ -196,8 +187,14 @@ func (m *protoMarshaler) getLogType(ctx context.Context, logRecord plog.LogRecor
 }
 
 func (m *protoMarshaler) getRawField(ctx context.Context, field string, logRecord plog.LogRecord, scope plog.ScopeLogs, resource plog.ResourceLogs) (string, error) {
-	ctx, span := tracer.Start(ctx, "protoMarshaler/getRawField")
-	defer span.End()
+	// TODO(jsirianni): Performance?
+	// This was responsible for a huge performance boost.
+	// if field == "body" {
+	// 	// TODO(jsirianni): Calling Type() wil panic if the body is nil. We should handle this case.
+	// 	if logRecord.Body().Type() == pcommon.ValueTypeStr {
+	// 		return logRecord.Body().Str(), nil
+	// 	}
+	// }
 
 	lrExpr, err := expr.NewOTTLLogRecordExpression(field, m.teleSettings)
 	if err != nil {
