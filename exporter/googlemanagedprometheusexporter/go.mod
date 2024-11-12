@@ -2,8 +2,6 @@ module github.com/observiq/bindplane-agent/exporter/googlemanagedprometheusexpor
 
 go 1.22.7
 
-toolchain go1.23.1
-
 require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlemanagedprometheusexporter v0.113.0
 	github.com/stretchr/testify v1.9.0

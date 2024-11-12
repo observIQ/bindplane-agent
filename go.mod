@@ -2,8 +2,6 @@ module github.com/observiq/bindplane-agent
 
 go 1.22.7
 
-toolchain go1.23.1
-
 require (
 	github.com/google/uuid v1.6.0
 	github.com/observiq/bindplane-agent/exporter/azureblobexporter v1.64.0

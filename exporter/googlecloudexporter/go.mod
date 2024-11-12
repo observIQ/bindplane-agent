@@ -2,8 +2,6 @@ module github.com/observiq/bindplane-agent/exporter/googlecloudexporter
 
 go 1.22.7
 
-toolchain go1.23.1
-
 require (
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector v0.49.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlecloudexporter v0.113.0

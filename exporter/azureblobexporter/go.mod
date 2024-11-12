@@ -1,6 +1,6 @@
 module github.com/observiq/bindplane-agent/exporter/azureblobexporter
 
-go 1.22.6
+go 1.22.7
 
 require (
 	github.com/Azure/azure-sdk-for-go/sdk/storage/azblob v1.4.1
