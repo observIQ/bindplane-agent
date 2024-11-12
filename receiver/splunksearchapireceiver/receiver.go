@@ -16,6 +16,7 @@ package splunksearchapireceiver
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -54,11 +55,11 @@ func (ssapir *splunksearchapireceiver) Shutdown(_ context.Context) error {
 func (ssapir *splunksearchapireceiver) runQueries(ctx context.Context) error {
 	for _, search := range ssapir.config.Searches {
 		// create search in Splunk
-		searchID, err := ssapir.createSplunkSearch(ssapir.config, search.Query)
+		ssapir.logger.Info("creating search", zap.String("query", search.Query))
+		searchID, err := ssapir.createSplunkSearch(search.Query)
 		if err != nil {
 			ssapir.logger.Error("error creating search", zap.Error(err))
 		}
-		// fmt.Println("Search created successfully with ID: ", searchID)
 
 		// wait for search to complete
 		for {
@@ -148,16 +149,38 @@ func (ssapir *splunksearchapireceiver) runQueries(ctx context.Context) error {
 	return nil
 }
 
-func (ssapir *splunksearchapireceiver) createSplunkSearch(config *Config, search string) (string, error) {
-	resp, err := ssapir.createSearchJob(config, search)
+func (ssapir *splunksearchapireceiver) pollSearchCompletion(ctx context.Context, searchID string) error {
+	t := time.NewTicker(ssapir.config.JobPollInterval)
+	defer t.Stop()
+	for {
+		select {
+		case <-t.C:
+			ssapir.logger.Info("polling for search completion")
+			done, err := ssapir.isSearchCompleted(searchID)
+			if err != nil {
+				return fmt.Errorf("error polling for search completion: %v", err)
+			}
+			if done {
+				ssapir.logger.Info("search completed")
+				return nil
+			}
+			ssapir.logger.Info("search not completed yet")
+		case <-ctx.Done():
+			return nil
+		}
+	}
+}
+
+func (ssapir *splunksearchapireceiver) createSplunkSearch(search string) (string, error) {
+	resp, err := ssapir.createSearchJob(ssapir.config, search)
 	if err != nil {
 		return "", err
 	}
 	return resp.SID, nil
 }
 
-func (ssapir *splunksearchapireceiver) isSearchCompleted(config *Config, sid string) (bool, error) {
-	resp, err := ssapir.getJobStatus(config, sid)
+func (ssapir *splunksearchapireceiver) isSearchCompleted(sid string) (bool, error) {
+	resp, err := ssapir.getJobStatus(ssapir.config, sid)
 	if err != nil {
 		return false, err
 	}
