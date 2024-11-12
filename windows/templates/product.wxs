@@ -86,7 +86,7 @@
                     Permanent="{{if $f.Permanent}}yes{{else}}no{{end}}"
                     NeverOverwrite="{{if $f.NeverOverwrite}}yes{{else}}no{{end}}">
                     
-                    <File Id="ApplicationFile{{$f.ID}}" Source="{{$f.Path}}" DefaultVersion="{{.CollectorVersion}}"/>
+                    <File Id="ApplicationFile{{$f.ID}}" Source="{{$f.Path}}" DefaultVersion="v1.64.0"/>
                     {{if $f.Service}}
                     <ServiceInstall Id="ServiceInstall{{$f.ID}}" Type="ownProcess" Name="{{$f.Service.Name}}" Start="{{$f.Service.Start}}" Account="LocalSystem" ErrorControl="normal"
                     {{if gt ($f.Service.DisplayName | len) 0}} DisplayName="{{$f.Service.DisplayName}}" {{end}}
