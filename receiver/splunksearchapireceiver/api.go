@@ -22,6 +22,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+
+	"go.uber.org/zap"
 )
 
 func (ssapir *splunksearchapireceiver) createSearchJob(search string) (CreateJobResponse, error) {
@@ -90,15 +92,15 @@ func (ssapir *splunksearchapireceiver) getJobStatus(sid string) (JobStatusRespon
 	return jobStatusResponse, nil
 }
 
-func (ssapir *splunksearchapireceiver) getSearchResults(sid string, offset int) (SearchResults, error) {
-	endpoint := fmt.Sprintf("%s/services/search/v2/jobs/%s/results?output_mode=json&offset=%d&count=%d", ssapir.config.Endpoint, sid, offset, ssapir.config.EventBatchSize)
+func (ssapir *splunksearchapireceiver) getSearchResults(sid string, offset int, batchSize int) (SearchResults, error) {
+	endpoint := fmt.Sprintf("%s/services/search/v2/jobs/%s/results?output_mode=json&offset=%d&count=%d", ssapir.config.Endpoint, sid, offset, batchSize)
 	req, err := http.NewRequest("GET", endpoint, nil)
 	if err != nil {
 		return SearchResults{}, err
 	}
 	req.SetBasicAuth(ssapir.config.Username, ssapir.config.Password)
 
-	// ssapir.logger.Info("Getting search results", zap.Int("offset", offset), zap.Int("count", ssapir.config.EventBatchSize))
+	ssapir.logger.Info("Getting search results", zap.Int("offset", offset), zap.Int("count", batchSize))
 
 	resp, err := ssapir.client.Do(req)
 	if err != nil {
@@ -119,7 +121,6 @@ func (ssapir *splunksearchapireceiver) getSearchResults(sid string, offset int) 
 	if err != nil {
 		return SearchResults{}, fmt.Errorf("failed to unmarshal search job results: %v", err)
 	}
-	fmt.Println("Init offset: ", searchResults.InitOffset)
-
+	fmt.Println("Search results: ", searchResults)
 	return searchResults, nil
 }

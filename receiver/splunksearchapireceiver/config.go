@@ -32,16 +32,16 @@ type Config struct {
 	Username                string        `mapstructure:"splunk_username"`
 	Password                string        `mapstructure:"splunk_password"`
 	Searches                []Search      `mapstructure:"searches"`
-	EventBatchSize          int           `mapstructure:"event_batch_size"`
 	JobPollInterval         time.Duration `mapstructure:"job_poll_interval"`
 }
 
 // Search struct to represent a Splunk search
 type Search struct {
-	Query        string `mapstructure:"query"`
-	EarliestTime string `mapstructure:"earliest_time"`
-	LatestTime   string `mapstructure:"latest_time"`
-	Limit        int    `mapstructure:"limit"`
+	Query          string `mapstructure:"query"`
+	EarliestTime   string `mapstructure:"earliest_time"`
+	LatestTime     string `mapstructure:"latest_time"`
+	Limit          int    `mapstructure:"limit"`
+	EventBatchSize int    `mapstructure:"event_batch_size"`
 }
 
 // Validate validates the Splunk Search API receiver configuration
