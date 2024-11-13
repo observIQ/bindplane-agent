@@ -32,6 +32,7 @@ import (
 // TopologyReporter represents an object that reports topology state.
 type TopologyReporter interface {
 	TopologyMessages() []topology.TopologyMessage
+	SetIntervalChan() chan time.Duration
 }
 
 // topologySender is a struct that handles periodically sending topology state via a custom message to an OpAMP endpoint.
@@ -41,6 +42,7 @@ type topologySender struct {
 	opampClient client.OpAMPClient
 	interval    time.Duration
 
+	setIntervalChan      chan time.Duration
 	changeIntervalChan   chan time.Duration
 	changeAttributesChan chan map[string]string
 
@@ -50,12 +52,12 @@ type topologySender struct {
 	wg        *sync.WaitGroup
 }
 
-func newTopologySender(l *zap.Logger, reporter TopologyReporter, opampClient client.OpAMPClient, interval time.Duration) *topologySender {
+func newTopologySender(l *zap.Logger, reporter TopologyReporter, opampClient client.OpAMPClient, setIntervalChan chan time.Duration) *topologySender {
 	return &topologySender{
-		logger:      l,
-		reporter:    reporter,
-		opampClient: opampClient,
-		interval:    interval,
+		logger:          l,
+		reporter:        reporter,
+		opampClient:     opampClient,
+		setIntervalChan: setIntervalChan,
 
 		changeIntervalChan: make(chan time.Duration, 1),
 		mux:                &sync.Mutex{},
@@ -108,14 +110,20 @@ func (ts *topologySender) Stop() {
 
 func (ts *topologySender) loop() {
 	t := newTicker()
+	fmt.Println("\033[34m Loop with interval: \033[0m", ts.interval)
 	t.SetInterval(ts.interval)
 	defer t.Stop()
 
 	for {
 		select {
 		case newInterval := <-ts.changeIntervalChan:
+			fmt.Println("\033[34m New Interval: \033[0m", newInterval)
 			ts.interval = newInterval
 			t.SetInterval(newInterval)
+		case setInterval := <-ts.reporter.SetIntervalChan():
+			fmt.Println("\033[34m Set Interval: \033[0m", setInterval)
+			ts.interval = setInterval
+			t.SetInterval(setInterval)
 		case <-ts.done:
 			return
 		case <-t.Chan():
