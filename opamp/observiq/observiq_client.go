@@ -173,7 +173,7 @@ func NewClient(args *NewClientArgs) (opamp.Client, error) {
 		clientLogger,
 		args.TopologyReporter,
 		observiqClient.opampClient,
-		args.Config.MeasurementsInterval,
+		args.Config.TopologyInterval,
 	)
 
 	return observiqClient, nil
