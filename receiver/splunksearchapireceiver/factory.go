@@ -16,7 +16,6 @@ package splunksearchapireceiver
 
 import (
 	"context"
-	"sync"
 	"time"
 
 	"go.opentelemetry.io/collector/component"
@@ -47,7 +46,6 @@ func createLogsReceiver(_ context.Context,
 		logsConsumer: consumer,
 		config:       ssapirConfig,
 		settings:     params.TelemetrySettings,
-		wg:           &sync.WaitGroup{},
 	}
 	return ssapir, nil
 }

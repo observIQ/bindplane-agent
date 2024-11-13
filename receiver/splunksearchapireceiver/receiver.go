@@ -18,7 +18,6 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"sync"
 	"time"
 
 	"go.opentelemetry.io/collector/component"
@@ -35,7 +34,6 @@ type splunksearchapireceiver struct {
 	config       *Config
 	settings     component.TelemetrySettings
 	client       *http.Client
-	wg           *sync.WaitGroup
 }
 
 func (ssapir *splunksearchapireceiver) Start(ctx context.Context, host component.Host) error {
@@ -137,7 +135,7 @@ func (ssapir *splunksearchapireceiver) pollSearchCompletion(ctx context.Context,
 	for {
 		select {
 		case <-t.C:
-			ssapir.logger.Info("polling for search completion")
+			ssapir.logger.Debug("polling for search completion")
 			done, err := ssapir.isSearchCompleted(searchID)
 			if err != nil {
 				return fmt.Errorf("error polling for search completion: %v", err)
@@ -146,7 +144,7 @@ func (ssapir *splunksearchapireceiver) pollSearchCompletion(ctx context.Context,
 				ssapir.logger.Info("search completed")
 				return nil
 			}
-			ssapir.logger.Info("search not completed yet")
+			ssapir.logger.Debug("search not completed yet")
 		case <-ctx.Done():
 			return nil
 		}
