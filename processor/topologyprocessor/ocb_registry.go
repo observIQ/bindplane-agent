@@ -27,6 +27,7 @@ import (
 // nil, nil may be returned by this function. In this case, the processor should not register it's topology state anywhere.
 func GetTopologyRegistry(host component.Host, bindplane component.ID) (topology.TopologyStateRegistry, error) {
 	var emptyComponentID component.ID
+	fmt.Println("\033[34m IN OCB REGISTRY \033[0m")
 	if bindplane == emptyComponentID {
 		// No bindplane component referenced, so we won't register our topology state anywhere.
 		return nil, nil

@@ -107,7 +107,7 @@ func (b *bindplaneExtension) setupCustomCapabilities(host component.Host) error 
 	}
 
 	if b.cfg.TopologyInterval > 0 {
-		b.customCapabilityHandlerTopology, err = registry.Register(topology.ReportTopologyV1Capability)
+		b.customCapabilityHandlerTopology, err = registry.Register(topology.ReportTopologyCapability)
 		if err != nil {
 			return fmt.Errorf("register custom topology capability: %w", err)
 		}
@@ -178,7 +178,7 @@ func (b *bindplaneExtension) reportTopologyLoop() {
 	for {
 		select {
 		case <-t.C:
-			err := b.reportMetrics()
+			err := b.reportTopology()
 			if err != nil {
 				b.logger.Error("Failed to report topology.", zap.Error(err))
 			}

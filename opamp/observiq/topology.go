@@ -142,7 +142,7 @@ func (ts *topologySender) loop() {
 			encoded := snappy.Encode(nil, marshalled)
 
 			cm := &protobufs.CustomMessage{
-				Capability: topology.ReportTopologyV1Capability,
+				Capability: topology.ReportTopologyCapability,
 				Type:       topology.ReportTopologyType,
 				Data:       encoded,
 			}
