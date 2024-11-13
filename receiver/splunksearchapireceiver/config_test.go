@@ -165,7 +165,7 @@ func TestValidate(t *testing.T) {
 				},
 			},
 			errExpected: true,
-			errText:     "command chaining is not supported for queries",
+			errText:     "only standalone search commands can be used for scraping data",
 		},
 		{
 			desc:     "Valid config",
