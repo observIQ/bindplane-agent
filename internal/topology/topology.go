@@ -27,6 +27,7 @@ type TopologyStateRegistry interface {
 	// RegisterTopologyState registers the topology state for the given processor.
 	// It should return an error if the processor has already been registered.
 	RegisterTopologyState(processorID string, data *TopologyState) error
+	Reset()
 }
 
 // GatewayConfigInfo reprents the unique identifiable information about a bindplane gateway's configuration
@@ -42,14 +43,16 @@ type TopologyState struct {
 	routeTable  map[GatewayConfigInfo]time.Time
 }
 
+// TopologyMessage represents the data captured through topology processors in a format sent to bindplane.
 type TopologyMessage struct {
 	DestGateway    GatewayConfigInfo `json:"destGateway"`
 	SourceGateways []GatewayState    `json:"sourceGateways"`
 }
 
+// GatewayState represents a source gateway and the last time it sent a message
 type GatewayState struct {
-	Gateway GatewayConfigInfo `json:"gateway"`
-	Updated time.Time         `json:"updated"`
+	Gateway     GatewayConfigInfo `json:"gateway"`
+	LastUpdated time.Duration     `json:"lastUpdated"`
 }
 
 // NewTopologyState initializes a new TopologyState
@@ -103,17 +106,20 @@ func (rtsr *ResettableTopologyStateRegistry) TopologyMessages() []TopologyMessag
 		return true
 	})
 
+	timeNow := time.Now()
 	messages := []TopologyMessage{}
 	for _, ts := range states {
 		curMessage := TopologyMessage{}
 		curMessage.DestGateway = ts.destGateway
 		for gw, updated := range ts.routeTable {
 			curMessage.SourceGateways = append(curMessage.SourceGateways, GatewayState{
-				Gateway: gw,
-				Updated: updated,
+				Gateway:     gw,
+				LastUpdated: timeNow.Sub(updated),
 			})
 		}
-		messages = append(messages, curMessage)
+		if len(curMessage.SourceGateways) > 0 {
+			messages = append(messages, curMessage)
+		}
 	}
 
 	return messages

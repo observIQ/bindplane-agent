@@ -77,6 +77,7 @@ func managerReload(client *Client, managerConfigPath string) opamp.ReloadFunc {
 		client.currentConfig.AgentName = newConfig.AgentName
 		client.currentConfig.Labels = newConfig.Labels
 		client.currentConfig.MeasurementsInterval = newConfig.MeasurementsInterval
+		client.currentConfig.TopologyInterval = newConfig.TopologyInterval
 		client.currentConfig.ExtraMeasurementsAttributes = newConfig.ExtraMeasurementsAttributes
 
 		// Update identity
