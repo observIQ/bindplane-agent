@@ -57,7 +57,6 @@ func newSplunkSearchAPIClient(ctx context.Context, settings component.TelemetryS
 }
 
 func (c defaultSplunkSearchAPIClient) CreateSearchJob(search string) (CreateJobResponse, error) {
-	// fmt.Println("Creating search job for search: ", search)
 	endpoint := fmt.Sprintf("%s/services/search/jobs", c.endpoint)
 
 	reqBody := fmt.Sprintf(`search=%s`, search)
@@ -91,7 +90,6 @@ func (c defaultSplunkSearchAPIClient) CreateSearchJob(search string) (CreateJobR
 }
 
 func (c defaultSplunkSearchAPIClient) GetJobStatus(sid string) (JobStatusResponse, error) {
-	// fmt.Println("Getting job status")
 	endpoint := fmt.Sprintf("%s/services/search/v2/jobs/%s", c.endpoint, sid)
 
 	req, err := http.NewRequest("GET", endpoint, nil)
