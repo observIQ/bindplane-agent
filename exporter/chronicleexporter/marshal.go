@@ -254,6 +254,21 @@ func (m *protoMarshaler) getIngestionLabels(logRecord plog.LogRecord) ([]*api.La
 }
 
 func (m *protoMarshaler) getRawField(ctx context.Context, field string, logRecord plog.LogRecord, scope plog.ScopeLogs, resource plog.ResourceLogs) (string, error) {
+	// If the field is "body", skip creating an OTTL expression
+	// and return the body as a string or map.
+	if field == "body" {
+		switch logRecord.Body().Type() {
+		case pcommon.ValueTypeStr:
+			return logRecord.Body().Str(), nil
+		case pcommon.ValueTypeMap:
+			bytes, err := json.Marshal(logRecord.Body().AsRaw())
+			if err != nil {
+				return "", fmt.Errorf("marshal log body: %w", err)
+			}
+			return string(bytes), nil
+		}
+	}
+
 	lrExpr, err := expr.NewOTTLLogRecordExpression(field, m.teleSettings)
 	if err != nil {
 		return "", fmt.Errorf("raw_log_field is invalid: %s", err)
