@@ -162,7 +162,7 @@ func (ssapir *splunksearchapireceiver) pollSearchCompletion(ctx context.Context,
 	for {
 		select {
 		case <-t.C:
-			ssapir.logger.Info("polling for search completion")
+			ssapir.logger.Debug("polling for search completion")
 			done, err := ssapir.isSearchCompleted(searchID)
 			if err != nil {
 				return fmt.Errorf("error polling for search completion: %v", err)
@@ -171,7 +171,7 @@ func (ssapir *splunksearchapireceiver) pollSearchCompletion(ctx context.Context,
 				ssapir.logger.Info("search completed")
 				return nil
 			}
-			ssapir.logger.Info("search not completed yet")
+			ssapir.logger.Debug("search not completed yet")
 		case <-ctx.Done():
 			return nil
 		}
