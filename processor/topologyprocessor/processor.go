@@ -126,14 +126,6 @@ func (tp *topologyProcessor) processTopologyHeaders(ctx context.Context) {
 
 func (tp *topologyProcessor) shutdown(_ context.Context) error {
 	fmt.Println("\033[34m TP SHUTDOWN \033[0m")
-	registry, getRegErr := GetTopologyRegistry(nil, tp.bindplane)
-	if getRegErr != nil {
-		err := fmt.Errorf("get topology registry: %w", getRegErr)
-		return err
-	}
-	if registry != nil {
-		registry.Reset()
-	}
 	unregisterProcessor(tp.processorID)
 	return nil
 }

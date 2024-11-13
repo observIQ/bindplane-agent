@@ -237,7 +237,6 @@ func (b *bindplaneExtension) Shutdown(ctx context.Context) error {
 
 	if b.customCapabilityHandlerTopology != nil {
 		b.customCapabilityHandlerTopology.Unregister()
-		b.rtsr.Reset()
 	}
 
 	return nil

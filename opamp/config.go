@@ -318,6 +318,7 @@ func (c Config) Copy() *Config {
 		Endpoint:             c.Endpoint,
 		AgentID:              c.AgentID,
 		MeasurementsInterval: c.MeasurementsInterval,
+		TopologyInterval:     c.TopologyInterval,
 	}
 
 	if c.SecretKey != nil {
@@ -379,6 +380,10 @@ func (c Config) CmpUpdatableFields(o Config) (equal bool) {
 	}
 
 	if c.MeasurementsInterval != o.MeasurementsInterval {
+		return false
+	}
+
+	if c.TopologyInterval != o.TopologyInterval {
 		return false
 	}
 
