@@ -16,6 +16,7 @@ package splunksearchapireceiver
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"go.opentelemetry.io/collector/component"
@@ -52,31 +53,24 @@ func (ssapir *splunksearchapireceiver) Shutdown(_ context.Context) error {
 func (ssapir *splunksearchapireceiver) runQueries(ctx context.Context) error {
 	for _, search := range ssapir.config.Searches {
 		// create search in Splunk
+		ssapir.logger.Info("creating search", zap.String("query", search.Query))
 		searchID, err := ssapir.createSplunkSearch(search.Query)
 		if err != nil {
 			ssapir.logger.Error("error creating search", zap.Error(err))
 		}
-		// fmt.Println("Search created successfully with ID: ", searchID)
 
 		// wait for search to complete
-		for {
-			done, err := ssapir.isSearchCompleted(searchID)
-			if err != nil {
-				ssapir.logger.Error("error checking search status", zap.Error(err))
-			}
-			if done {
-				break
-			}
-			time.Sleep(2 * time.Second)
+		if err = ssapir.pollSearchCompletion(ctx, searchID); err != nil {
+			ssapir.logger.Error("error polling for search completion", zap.Error(err))
 		}
-		// fmt.Println("Search completed successfully")
 
 		// fetch search results
+		ssapir.logger.Info("fetching search results")
 		results, err := ssapir.getSplunkSearchResults(searchID)
 		if err != nil {
 			ssapir.logger.Error("error fetching search results", zap.Error(err))
 		}
-		// fmt.Println("Search results: ", results)
+		ssapir.logger.Info("search results fetched", zap.Int("num_results", len(results.Results)))
 
 		// parse time strings to time.Time
 		earliestTime, err := time.Parse(time.RFC3339, search.EarliestTime)
@@ -132,6 +126,28 @@ func (ssapir *splunksearchapireceiver) runQueries(ctx context.Context) error {
 		}
 	}
 	return nil
+}
+
+func (ssapir *splunksearchapireceiver) pollSearchCompletion(ctx context.Context, searchID string) error {
+	t := time.NewTicker(ssapir.config.JobPollInterval)
+	defer t.Stop()
+	for {
+		select {
+		case <-t.C:
+			ssapir.logger.Debug("polling for search completion")
+			done, err := ssapir.isSearchCompleted(searchID)
+			if err != nil {
+				return fmt.Errorf("error polling for search completion: %v", err)
+			}
+			if done {
+				ssapir.logger.Info("search completed")
+				return nil
+			}
+			ssapir.logger.Debug("search not completed yet")
+		case <-ctx.Done():
+			return nil
+		}
+	}
 }
 
 func (ssapir *splunksearchapireceiver) createSplunkSearch(search string) (string, error) {

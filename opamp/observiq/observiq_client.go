@@ -103,7 +103,7 @@ func NewClient(args *NewClientArgs) (opamp.Client, error) {
 	}
 
 	// Propagate TLS config to reportManager agent
-	tlsCfg, err := args.Config.ToTLS()
+	tlsCfg, err := args.Config.ToTLS(nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed creating TLS config: %w", err)
 	}
@@ -208,7 +208,7 @@ func (c *Client) Connect(ctx context.Context) error {
 		return err
 	}
 
-	tlsCfg, err := c.currentConfig.ToTLS()
+	tlsCfg, err := c.currentConfig.ToTLS(nil)
 	if err != nil {
 		// Set package status file for error (for Updater to pick up), but do not force send to Server
 		c.tryToFailPackageInstall(fmt.Sprintf("Failed creating TLS config: %s", err.Error()), false)
