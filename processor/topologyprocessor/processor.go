@@ -58,7 +58,7 @@ func newTopologyProcessor(logger *zap.Logger, cfg *Config, processorID component
 		AccountID:  cfg.AccountID,
 		OrgID:      cfg.OrgID,
 	}
-	topology, err := topology.NewTopologyState(destGw)
+	topology, err := topology.NewTopologyState(destGw, cfg.Interval)
 	if err != nil {
 		return nil, fmt.Errorf("create topology state: %w", err)
 	}
@@ -90,6 +90,8 @@ func (tp *topologyProcessor) start(ctx context.Context, host component.Host) err
 				err = fmt.Errorf("register topology: %w", registerErr)
 				return
 			}
+			fmt.Println("\033[34m Sending on channel: \033[0m", tp.interval)
+			registry.SetIntervalChan() <- tp.interval
 		}
 	})
 
@@ -102,7 +104,6 @@ func (tp *topologyProcessor) processTraces(ctx context.Context, td ptrace.Traces
 }
 
 func (tp *topologyProcessor) processLogs(ctx context.Context, ld plog.Logs) (plog.Logs, error) {
-	fmt.Println("\033[34m PROCESS LOGS \033[0m")
 	tp.processTopologyHeaders(ctx)
 	return ld, nil
 }

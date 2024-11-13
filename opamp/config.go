@@ -200,7 +200,6 @@ type Config struct {
 	Labels                      *string           `yaml:"labels,omitempty"`
 	AgentName                   *string           `yaml:"agent_name,omitempty"`
 	MeasurementsInterval        time.Duration     `yaml:"measurements_interval,omitempty"`
-	TopologyInterval            time.Duration     `yaml:"topology_interval,omitempty"`
 	ExtraMeasurementsAttributes map[string]string `yaml:"extra_measurements_attributes,omitempty"`
 }
 
@@ -318,7 +317,6 @@ func (c Config) Copy() *Config {
 		Endpoint:             c.Endpoint,
 		AgentID:              c.AgentID,
 		MeasurementsInterval: c.MeasurementsInterval,
-		TopologyInterval:     c.TopologyInterval,
 	}
 
 	if c.SecretKey != nil {
@@ -380,10 +378,6 @@ func (c Config) CmpUpdatableFields(o Config) (equal bool) {
 	}
 
 	if c.MeasurementsInterval != o.MeasurementsInterval {
-		return false
-	}
-
-	if c.TopologyInterval != o.TopologyInterval {
 		return false
 	}
 
