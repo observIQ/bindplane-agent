@@ -22,20 +22,17 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-
-	"go.uber.org/zap"
 )
 
-func (ssapir *splunksearchapireceiver) createSearchJob(config *Config, search string) (CreateJobResponse, error) {
-	// fmt.Println("Creating search job for search: ", search)
-	endpoint := fmt.Sprintf("%s/services/search/jobs", config.Endpoint)
+func (ssapir *splunksearchapireceiver) createSearchJob(search string) (CreateJobResponse, error) {
+	endpoint := fmt.Sprintf("%s/services/search/jobs", ssapir.config.Endpoint)
 
 	reqBody := fmt.Sprintf(`search=%s`, search)
 	req, err := http.NewRequest("POST", endpoint, bytes.NewBuffer([]byte(reqBody)))
 	if err != nil {
 		return CreateJobResponse{}, err
 	}
-	req.SetBasicAuth(config.Username, config.Password)
+	req.SetBasicAuth(ssapir.config.Username, ssapir.config.Password)
 
 	resp, err := ssapir.client.Do(req)
 	if err != nil {
@@ -60,15 +57,15 @@ func (ssapir *splunksearchapireceiver) createSearchJob(config *Config, search st
 	return jobResponse, nil
 }
 
-func (ssapir *splunksearchapireceiver) getJobStatus(config *Config, sid string) (JobStatusResponse, error) {
+func (ssapir *splunksearchapireceiver) getJobStatus(sid string) (JobStatusResponse, error) {
 	// fmt.Println("Getting job status")
-	endpoint := fmt.Sprintf("%s/services/search/v2/jobs/%s", config.Endpoint, sid)
+	endpoint := fmt.Sprintf("%s/services/search/v2/jobs/%s", ssapir.config.Endpoint, sid)
 
 	req, err := http.NewRequest("GET", endpoint, nil)
 	if err != nil {
 		return JobStatusResponse{}, err
 	}
-	req.SetBasicAuth(config.Username, config.Password)
+	req.SetBasicAuth(ssapir.config.Username, ssapir.config.Password)
 
 	resp, err := ssapir.client.Do(req)
 	if err != nil {
@@ -93,15 +90,15 @@ func (ssapir *splunksearchapireceiver) getJobStatus(config *Config, sid string) 
 	return jobStatusResponse, nil
 }
 
-func (ssapir *splunksearchapireceiver) getSearchResults(config *Config, sid string, offset int) (SearchResults, error) {
-	endpoint := fmt.Sprintf("%s/services/search/v2/jobs/%s/results?output_mode=json&offset=%d&count=%d", config.Endpoint, sid, offset, ssapir.eventBatchSize)
+func (ssapir *splunksearchapireceiver) getSearchResults(sid string, offset int) (SearchResults, error) {
+	endpoint := fmt.Sprintf("%s/services/search/v2/jobs/%s/results?output_mode=json&offset=%d&count=%d", ssapir.config.Endpoint, sid, offset, ssapir.config.EventBatchSize)
 	req, err := http.NewRequest("GET", endpoint, nil)
 	if err != nil {
 		return SearchResults{}, err
 	}
-	req.SetBasicAuth(config.Username, config.Password)
+	req.SetBasicAuth(ssapir.config.Username, ssapir.config.Password)
 
-	ssapir.logger.Info("Getting search results", zap.Int("offset", offset), zap.Int("count", ssapir.eventBatchSize))
+	// ssapir.logger.Info("Getting search results", zap.Int("offset", offset), zap.Int("count", ssapir.config.EventBatchSize))
 
 	resp, err := ssapir.client.Do(req)
 	if err != nil {
