@@ -16,7 +16,7 @@ package splunksearchapireceiver
 
 import (
 	"context"
-	"sync"
+	"time"
 
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/config/confighttp"
@@ -30,8 +30,8 @@ var (
 
 func createDefaultConfig() component.Config {
 	return &Config{
-		ClientConfig:   confighttp.NewDefaultClientConfig(),
-		EventBatchSize: 100,
+		ClientConfig:    confighttp.NewDefaultClientConfig(),
+		JobPollInterval: 10 * time.Second,
 	}
 }
 
@@ -46,7 +46,6 @@ func createLogsReceiver(_ context.Context,
 		logsConsumer: consumer,
 		config:       ssapirConfig,
 		settings:     params.TelemetrySettings,
-		wg:           &sync.WaitGroup{},
 	}
 	return ssapir, nil
 }
