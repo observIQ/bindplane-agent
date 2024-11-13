@@ -189,7 +189,7 @@ func (b *bindplaneExtension) reportTopologyLoop() {
 }
 
 func (b *bindplaneExtension) reportTopology() error {
-	ts := b.rtsr.TopologyStates()
+	ts := b.rtsr.TopologyMessages()
 
 	fmt.Println("\033[34m Reporting Topology to BP: \033[0m", ts)
 
@@ -237,6 +237,7 @@ func (b *bindplaneExtension) Shutdown(ctx context.Context) error {
 
 	if b.customCapabilityHandlerTopology != nil {
 		b.customCapabilityHandlerTopology.Unregister()
+		b.rtsr.Reset()
 	}
 
 	return nil
