@@ -152,7 +152,7 @@ func NewClient(args *NewClientArgs) (opamp.Client, error) {
 	err = observiqClient.opampClient.SetCustomCapabilities(&protobufs.CustomCapabilities{
 		Capabilities: []string{
 			measurements.ReportMeasurementsV1Capability,
-			topology.ReportTopologyV1Capability,
+			topology.ReportTopologyCapability,
 		},
 	})
 	if err != nil {
@@ -362,7 +362,7 @@ func (c *Client) onMessageFuncHandler(ctx context.Context, msg *types.MessageDat
 			c.logger.Info("Server does not support custom throughput message measurements, stopping measurements sender.")
 			c.measurementsSender.Stop()
 		}
-		if slices.Contains(msg.CustomCapabilities.Capabilities, topology.ReportTopologyV1Capability) {
+		if slices.Contains(msg.CustomCapabilities.Capabilities, topology.ReportTopologyCapability) {
 			c.logger.Info("Server supports custom topology messages, starting topology sender.")
 			c.topologySender.Start()
 		} else {
