@@ -269,22 +269,25 @@ func (m *protoMarshaler) getRawField(ctx context.Context, field string, logRecor
 	case logTypeField:
 		attributes := logRecord.Attributes().AsRaw()
 		if logType, ok := attributes["log_type"]; ok {
-			// TODO(jsirianni): Check type before asserting
-			return logType.(string), nil
+			if v, ok := logType.(string); ok {
+				return v, nil
+			}
 		}
 		return "", nil
 	case chronicleLogTypeField:
 		attributes := logRecord.Attributes().AsRaw()
 		if logType, ok := attributes["chronicle_log_type"]; ok {
-			// TODO(jsirianni): Check type before asserting
-			return logType.(string), nil
+			if v, ok := logType.(string); ok {
+				return v, nil
+			}
 		}
 		return "", nil
 	case chronicleNamespaceField:
 		attributes := logRecord.Attributes().AsRaw()
 		if namespace, ok := attributes["chronicle_namespace"]; ok {
-			// TODO(jsirianni): Check type before asserting
-			return namespace.(string), nil
+			if v, ok := namespace.(string); ok {
+				return v, nil
+			}
 		}
 		return "", nil
 	}
