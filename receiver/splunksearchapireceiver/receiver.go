@@ -53,8 +53,7 @@ func (ssapir *splunksearchapireceiver) Shutdown(_ context.Context) error {
 func (ssapir *splunksearchapireceiver) runQueries(ctx context.Context) error {
 	for _, search := range ssapir.config.Searches {
 		// create search in Splunk
-		ssapir.logger.Info("creating search", zap.String("query", search.Query))
-		searchID, err := ssapir.createSplunkSearch(search.Query)
+		searchID, err := ssapir.createSplunkSearch(search)
 		if err != nil {
 			ssapir.logger.Error("error creating search", zap.Error(err))
 		}
@@ -103,7 +102,7 @@ func (ssapir *splunksearchapireceiver) runQueries(ctx context.Context) error {
 			}
 			if logTimestamp.UTC().Before(earliestTime) {
 				ssapir.logger.Info("skipping log entry - timestamp before earliestTime", zap.Time("time", logTimestamp.UTC()), zap.Time("earliestTime", earliestTime.UTC()))
-				continue
+				break
 			}
 			log := logs.ResourceLogs().AppendEmpty().ScopeLogs().AppendEmpty().LogRecords().AppendEmpty()
 
@@ -150,8 +149,11 @@ func (ssapir *splunksearchapireceiver) pollSearchCompletion(ctx context.Context,
 	}
 }
 
-func (ssapir *splunksearchapireceiver) createSplunkSearch(search string) (string, error) {
-	resp, err := ssapir.client.CreateSearchJob(search)
+func (ssapir *splunksearchapireceiver) createSplunkSearch(search Search) (string, error) {
+	timeFormat := "%Y-%m-%dT%H:%M:%S"
+	searchQuery := fmt.Sprintf("%s starttime=\"%s\" endtime=\"%s\" timeformat=\"%s\"", search.Query, search.EarliestTime, search.LatestTime, timeFormat)
+	ssapir.logger.Info("creating search", zap.String("query", searchQuery))
+	resp, err := ssapir.client.CreateSearchJob(searchQuery)
 	if err != nil {
 		return "", err
 	}
