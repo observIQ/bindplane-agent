@@ -15,11 +15,13 @@
 package splunksearchapireceiver
 
 // CreateJobResponse struct to represent the XML response from Splunk create job endpoint
+// https://docs.splunk.com/Documentation/Splunk/9.3.1/RESTREF/RESTsearch#search.2Fjobs
 type CreateJobResponse struct {
 	SID string `xml:"sid"`
 }
 
 // JobStatusResponse struct to represent the XML response from Splunk job status endpoint
+// https://docs.splunk.com/Documentation/Splunk/9.3.1/RESTREF/RESTsearch#search.2Fjobs.2F.7Bsearch_id.7D
 type JobStatusResponse struct {
 	Content struct {
 		Type string `xml:"type,attr"`
@@ -48,8 +50,10 @@ type List struct {
 }
 
 // SearchResultsResponse struct to represent the JSON response from Splunk search results endpoint
+// https://docs.splunk.com/Documentation/Splunk/9.3.1/RESTREF/RESTsearch#search.2Fv2.2Fjobs.2F.7Bsearch_id.7D.2Fresults
 type SearchResultsResponse struct {
-	Results []struct {
+	InitOffset int `json:"init_offset"`
+	Results    []struct {
 		Raw  string `json:"_raw"`
 		Time string `json:"_time"`
 	} `json:"results"`

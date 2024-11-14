@@ -16,6 +16,7 @@ package splunksearchapireceiver
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 	"time"
 
@@ -37,10 +38,11 @@ type Config struct {
 
 // Search struct to represent a Splunk search
 type Search struct {
-	Query        string `mapstructure:"query"`
-	EarliestTime string `mapstructure:"earliest_time"`
-	LatestTime   string `mapstructure:"latest_time"`
-	Limit        int    `mapstructure:"limit"`
+	Query          string `mapstructure:"query"`
+	EarliestTime   string `mapstructure:"earliest_time"`
+	LatestTime     string `mapstructure:"latest_time"`
+	Limit          int    `mapstructure:"limit"`
+	EventBatchSize int    `mapstructure:"event_batch_size"`
 }
 
 // Validate validates the Splunk Search API receiver configuration
@@ -70,6 +72,10 @@ func (cfg *Config) Validate() error {
 
 		if strings.Contains(search.Query, "|") {
 			return errNonStandaloneSearchQuery
+		}
+
+		if strings.Contains(search.Query, "earliest=") || strings.Contains(search.Query, "latest=") {
+			return fmt.Errorf("time query parameters must be configured using only the \"earliest_time\" and \"latest_time\" configuration parameters")
 		}
 
 		if search.EarliestTime == "" {
