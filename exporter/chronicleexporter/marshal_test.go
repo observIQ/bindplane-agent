@@ -618,32 +618,61 @@ var getRawFieldCases = []getRawFieldCase{
 		expect:   "",
 	},
 	{
-		name:  "String attribute",
-		field: "attributes[\"log.file.name\"]",
+		name:  "Attribute log_type",
+		field: `attributes["log_type"]`,
 		logRecord: func() plog.LogRecord {
 			lr := plog.NewLogRecord()
 			lr.Attributes().PutStr("status", "200")
-			lr.Attributes().PutStr("log_type", "k8s-container")
 			lr.Attributes().PutStr("log.file.name", "/var/log/containers/agent_agent_ns.log")
+			lr.Attributes().PutStr("log_type", "WINEVTLOG")
 			return lr
 		}(),
 		scope:    plog.NewScopeLogs(),
 		resource: plog.NewResourceLogs(),
-		expect:   "/var/log/containers/agent_agent_ns.log",
+		expect:   "WINEVTLOG",
 	},
 	{
-		name:  "String attribute missing",
-		field: "attributes[\"missing\"]",
+		name:  "Attribute log_type missing",
+		field: `attributes["log_type"]`,
 		logRecord: func() plog.LogRecord {
 			lr := plog.NewLogRecord()
 			lr.Attributes().PutStr("status", "200")
-			lr.Attributes().PutStr("log_type", "k8s-container")
 			lr.Attributes().PutStr("log.file.name", "/var/log/containers/agent_agent_ns.log")
 			return lr
 		}(),
 		scope:    plog.NewScopeLogs(),
 		resource: plog.NewResourceLogs(),
 		expect:   "",
+	},
+	{
+		name:  "Attribute chronicle_log_type",
+		field: `attributes["chronicle_log_type"]`,
+		logRecord: func() plog.LogRecord {
+			lr := plog.NewLogRecord()
+			lr.Attributes().PutStr("status", "200")
+			lr.Attributes().PutStr("log.file.name", "/var/log/containers/agent_agent_ns.log")
+			lr.Attributes().PutStr("chronicle_log_type", "MICROSOFT_SQL")
+			return lr
+		}(),
+		scope:    plog.NewScopeLogs(),
+		resource: plog.NewResourceLogs(),
+		expect:   "MICROSOFT_SQL",
+	},
+	{
+		name:  "Attribute chronicle_namespace",
+		field: `attributes["chronicle_namespace"]`,
+		logRecord: func() plog.LogRecord {
+			lr := plog.NewLogRecord()
+			lr.Attributes().PutStr("status", "200")
+			lr.Attributes().PutStr("log_type", "k8s-container")
+			lr.Attributes().PutStr("log.file.name", "/var/log/containers/agent_agent_ns.log")
+			lr.Attributes().PutStr("chronicle_log_type", "MICROSOFT_SQL")
+			lr.Attributes().PutStr("chronicle_namespace", "test")
+			return lr
+		}(),
+		scope:    plog.NewScopeLogs(),
+		resource: plog.NewResourceLogs(),
+		expect:   "test",
 	},
 }
 
