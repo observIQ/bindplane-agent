@@ -254,9 +254,8 @@ func (m *protoMarshaler) getIngestionLabels(logRecord plog.LogRecord) ([]*api.La
 }
 
 func (m *protoMarshaler) getRawField(ctx context.Context, field string, logRecord plog.LogRecord, scope plog.ScopeLogs, resource plog.ResourceLogs) (string, error) {
-	// If the field is "body", skip creating an OTTL expression
-	// and return the body as a string or map.
-	if field == "body" {
+	switch field {
+	case "body":
 		switch logRecord.Body().Type() {
 		case pcommon.ValueTypeStr:
 			return logRecord.Body().Str(), nil
@@ -267,6 +266,27 @@ func (m *protoMarshaler) getRawField(ctx context.Context, field string, logRecor
 			}
 			return string(bytes), nil
 		}
+	case logTypeField:
+		attributes := logRecord.Attributes().AsRaw()
+		if logType, ok := attributes["log_type"]; ok {
+			// TODO(jsirianni): Check type before asserting
+			return logType.(string), nil
+		}
+		return "", nil
+	case chronicleLogTypeField:
+		attributes := logRecord.Attributes().AsRaw()
+		if logType, ok := attributes["chronicle_log_type"]; ok {
+			// TODO(jsirianni): Check type before asserting
+			return logType.(string), nil
+		}
+		return "", nil
+	case chronicleNamespaceField:
+		attributes := logRecord.Attributes().AsRaw()
+		if namespace, ok := attributes["chronicle_namespace"]; ok {
+			// TODO(jsirianni): Check type before asserting
+			return namespace.(string), nil
+		}
+		return "", nil
 	}
 
 	lrExpr, err := expr.NewOTTLLogRecordExpression(field, m.teleSettings)
