@@ -49,9 +49,9 @@ type List struct {
 	} `xml:"item"`
 }
 
-// SearchResults struct to represent the JSON response from Splunk search results endpoint
+// SearchResultsResponse struct to represent the JSON response from Splunk search results endpoint
 // https://docs.splunk.com/Documentation/Splunk/9.3.1/RESTREF/RESTsearch#search.2Fv2.2Fjobs.2F.7Bsearch_id.7D.2Fresults
-type SearchResults struct {
+type SearchResultsResponse struct {
 	InitOffset int `json:"init_offset"`
 	Results    []struct {
 		Raw  string `json:"_raw"`

@@ -17,7 +17,6 @@ package splunksearchapireceiver
 import (
 	"context"
 	"fmt"
-	"net/http"
 	"time"
 
 	"go.opentelemetry.io/collector/component"
@@ -39,16 +38,16 @@ type splunksearchapireceiver struct {
 	logsConsumer consumer.Logs
 	config       *Config
 	settings     component.TelemetrySettings
-	client       *http.Client
+	client       splunkSearchAPIClient
 }
 
 func (ssapir *splunksearchapireceiver) Start(ctx context.Context, host component.Host) error {
 	ssapir.host = host
-	client, err := ssapir.config.ClientConfig.ToClient(ctx, host, ssapir.settings)
+	var err error
+	ssapir.client, err = newSplunkSearchAPIClient(ctx, ssapir.settings, *ssapir.config, ssapir.host)
 	if err != nil {
 		return err
 	}
-	ssapir.client = client
 	go ssapir.runQueries(ctx)
 	return nil
 }
@@ -154,7 +153,7 @@ func (ssapir *splunksearchapireceiver) pollSearchCompletion(ctx context.Context,
 	for {
 		select {
 		case <-t.C:
-			ssapir.logger.Info("polling for search completion")
+			ssapir.logger.Debug("polling for search completion")
 			done, err := ssapir.isSearchCompleted(searchID)
 			if err != nil {
 				return fmt.Errorf("error polling for search completion: %v", err)
@@ -163,7 +162,7 @@ func (ssapir *splunksearchapireceiver) pollSearchCompletion(ctx context.Context,
 				ssapir.logger.Info("search completed")
 				return nil
 			}
-			ssapir.logger.Info("search not completed yet")
+			ssapir.logger.Debug("search not completed yet")
 		case <-ctx.Done():
 			return nil
 		}
@@ -171,7 +170,7 @@ func (ssapir *splunksearchapireceiver) pollSearchCompletion(ctx context.Context,
 }
 
 func (ssapir *splunksearchapireceiver) createSplunkSearch(search string) (string, error) {
-	resp, err := ssapir.createSearchJob(search)
+	resp, err := ssapir.client.CreateSearchJob(search)
 	if err != nil {
 		return "", err
 	}
@@ -179,7 +178,7 @@ func (ssapir *splunksearchapireceiver) createSplunkSearch(search string) (string
 }
 
 func (ssapir *splunksearchapireceiver) isSearchCompleted(sid string) (bool, error) {
-	resp, err := ssapir.getJobStatus(sid)
+	resp, err := ssapir.client.GetJobStatus(sid)
 	if err != nil {
 		return false, err
 	}
@@ -195,10 +194,10 @@ func (ssapir *splunksearchapireceiver) isSearchCompleted(sid string) (bool, erro
 	return false, nil
 }
 
-func (ssapir *splunksearchapireceiver) getSplunkSearchResults(sid string, offset int, batchSize int) (SearchResults, error) {
-	resp, err := ssapir.getSearchResults(sid, offset, batchSize)
+func (ssapir *splunksearchapireceiver) getSplunkSearchResults(sid string, offset int, batchSize int) (SearchResultsResponse, error) {
+	resp, err := ssapir.client.GetSearchResults(sid, offset, batchSize)
 	if err != nil {
-		return SearchResults{}, err
+		return SearchResultsResponse{}, err
 	}
 	return resp, nil
 }

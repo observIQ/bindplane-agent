@@ -1,6 +1,6 @@
 module github.com/observiq/bindplane-agent/exporter/chronicleforwarderexporter
 
-go 1.22.6
+go 1.22.7
 
 require (
 	github.com/observiq/bindplane-agent/expr v1.64.0

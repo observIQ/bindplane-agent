@@ -1,6 +1,6 @@
 module github.com/observiq/bindplane-agent/processor/snapshotprocessor
 
-go 1.22.6
+go 1.22.7
 
 require (
 	github.com/observiq/bindplane-agent/internal/report v1.64.0
