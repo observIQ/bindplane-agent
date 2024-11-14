@@ -17,7 +17,6 @@ package splunksearchapireceiver
 import (
 	"context"
 	"fmt"
-	"net/http"
 	"time"
 
 	"go.opentelemetry.io/collector/component"
@@ -33,16 +32,16 @@ type splunksearchapireceiver struct {
 	logsConsumer consumer.Logs
 	config       *Config
 	settings     component.TelemetrySettings
-	client       *http.Client
+	client       splunkSearchAPIClient
 }
 
 func (ssapir *splunksearchapireceiver) Start(ctx context.Context, host component.Host) error {
 	ssapir.host = host
-	client, err := ssapir.config.ClientConfig.ToClient(ctx, host, ssapir.settings)
+	var err error
+	ssapir.client, err = newSplunkSearchAPIClient(ctx, ssapir.settings, *ssapir.config, ssapir.host)
 	if err != nil {
 		return err
 	}
-	ssapir.client = client
 	go ssapir.runQueries(ctx)
 	return nil
 }
@@ -152,7 +151,7 @@ func (ssapir *splunksearchapireceiver) pollSearchCompletion(ctx context.Context,
 }
 
 func (ssapir *splunksearchapireceiver) createSplunkSearch(search string) (string, error) {
-	resp, err := ssapir.createSearchJob(ssapir.config, search)
+	resp, err := ssapir.client.CreateSearchJob(search)
 	if err != nil {
 		return "", err
 	}
@@ -160,7 +159,7 @@ func (ssapir *splunksearchapireceiver) createSplunkSearch(search string) (string
 }
 
 func (ssapir *splunksearchapireceiver) isSearchCompleted(sid string) (bool, error) {
-	resp, err := ssapir.getJobStatus(ssapir.config, sid)
+	resp, err := ssapir.client.GetJobStatus(sid)
 	if err != nil {
 		return false, err
 	}
@@ -176,10 +175,10 @@ func (ssapir *splunksearchapireceiver) isSearchCompleted(sid string) (bool, erro
 	return false, nil
 }
 
-func (ssapir *splunksearchapireceiver) getSplunkSearchResults(sid string) (SearchResults, error) {
-	resp, err := ssapir.getSearchResults(ssapir.config, sid)
+func (ssapir *splunksearchapireceiver) getSplunkSearchResults(sid string) (SearchResultsResponse, error) {
+	resp, err := ssapir.client.GetSearchResults(sid)
 	if err != nil {
-		return SearchResults{}, err
+		return SearchResultsResponse{}, err
 	}
 	return resp, nil
 }

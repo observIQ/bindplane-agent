@@ -47,8 +47,8 @@ type List struct {
 	} `xml:"item"`
 }
 
-// SearchResults struct to represent the JSON response from Splunk search results endpoint
-type SearchResults struct {
+// SearchResultsResponse struct to represent the JSON response from Splunk search results endpoint
+type SearchResultsResponse struct {
 	Results []struct {
 		Raw  string `json:"_raw"`
 		Time string `json:"_time"`
