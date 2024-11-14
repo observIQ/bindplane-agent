@@ -70,7 +70,7 @@ func (cfg *Config) Validate() error {
 			return errors.New("missing query in search")
 		}
 
-		// query implicitly starts with "search" command
+		// query must start with "search" command
 		if !strings.HasPrefix(search.Query, "search ") {
 			return errNonStandaloneSearchQuery
 		}
