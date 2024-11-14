@@ -22,9 +22,9 @@ import (
 	"time"
 
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/stanza/adapter"
-	"go.etcd.io/etcd/proxy/grpcproxy/adapter"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/consumer"
+	"go.opentelemetry.io/collector/extension/experimental/storage"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/plog"
 	"go.uber.org/zap"
@@ -46,8 +46,9 @@ type splunksearchapireceiver struct {
 	logsConsumer  consumer.Logs
 	config        *Config
 	settings      component.TelemetrySettings
+	id            component.ID
 	client        splunkSearchAPIClient
-	storageClient adapter.StorageClient
+	storageClient storage.Client
 	record        *eventRecord
 }
 
@@ -65,7 +66,7 @@ func (ssapir *splunksearchapireceiver) Start(ctx context.Context, host component
 	ssapir.client = client
 
 	// create storage client
-	storageClient, err := adapter.GetStorageClient(ssapir.config.StorageID)
+	storageClient, err := adapter.GetStorageClient(ctx, host, ssapir.config.StorageID, ssapir.id)
 	if err != nil {
 		return fmt.Errorf("failed to get storage client: %w", err)
 	}

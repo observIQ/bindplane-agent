@@ -3,27 +3,47 @@ module github.com/open-telemetry/opentelemtry-collector-contrib/receiver/splunks
 go 1.22.5
 
 require (
+	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/stanza v0.113.0
 	github.com/stretchr/testify v1.9.0
+	go.etcd.io/etcd v3.3.27+incompatible
 	go.opentelemetry.io/collector/component v0.113.0
 	go.opentelemetry.io/collector/consumer v0.113.0
 	go.opentelemetry.io/collector/consumer/consumertest v0.112.0
 	go.opentelemetry.io/collector/pdata v1.19.0
-	go.opentelemetry.io/collector/receiver v0.112.0
+	go.opentelemetry.io/collector/receiver v0.113.0
 	go.uber.org/zap v1.27.0
 )
 
 require (
+	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
+	github.com/cespare/xxhash/v2 v2.3.0 // indirect
+	github.com/coreos/etcd v3.3.27+incompatible // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/elastic/lunes v0.1.0 // indirect
+	github.com/expr-lang/expr v1.16.9 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/fsnotify/fsnotify v1.8.0 // indirect
 	github.com/go-logr/logr v1.4.2 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
+	github.com/go-viper/mapstructure/v2 v2.2.1 // indirect
+	github.com/goccy/go-json v0.10.3 // indirect
+	github.com/golang/protobuf v1.5.0 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/klauspost/compress v1.17.11 // indirect
+	github.com/knadh/koanf/maps v0.1.1 // indirect
+	github.com/knadh/koanf/providers/confmap v0.1.0 // indirect
+	github.com/knadh/koanf/v2 v2.1.1 // indirect
+	github.com/leodido/go-syslog/v4 v4.2.0 // indirect
+	github.com/leodido/ragel-machinery v0.0.0-20190525184631-5f46317e436b // indirect
+	github.com/magefile/mage v1.15.0 // indirect
+	github.com/mitchellh/copystructure v1.2.0 // indirect
+	github.com/mitchellh/reflectwalk v1.0.2 // indirect
+	github.com/open-telemetry/opentelemetry-collector-contrib/internal/coreinternal v0.113.0 // indirect
 	github.com/pierrec/lz4/v4 v4.1.21 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rs/cors v1.11.1 // indirect
+	github.com/valyala/fastjson v1.6.4 // indirect
 	go.opentelemetry.io/collector/client v1.19.0 // indirect
 	go.opentelemetry.io/collector/config/configauth v0.113.0 // indirect
 	go.opentelemetry.io/collector/config/configcompression v1.19.0 // indirect
@@ -49,7 +69,7 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	go.opentelemetry.io/collector/config/confighttp v0.113.0
 	go.opentelemetry.io/collector/config/configtelemetry v0.113.0 // indirect
-	go.opentelemetry.io/collector/pipeline v0.112.0 // indirect
+	go.opentelemetry.io/collector/pipeline v0.113.0 // indirect
 	go.opentelemetry.io/otel v1.31.0 // indirect
 	go.opentelemetry.io/otel/metric v1.31.0 // indirect
 	go.opentelemetry.io/otel/trace v1.31.0 // indirect

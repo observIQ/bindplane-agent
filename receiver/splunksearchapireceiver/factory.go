@@ -45,6 +45,7 @@ func createLogsReceiver(_ context.Context,
 		logger:       params.Logger,
 		logsConsumer: consumer,
 		config:       ssapirConfig,
+		id:           params.ID,
 		settings:     params.TelemetrySettings,
 	}
 	return ssapir, nil
