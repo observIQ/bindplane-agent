@@ -72,7 +72,12 @@ func (cfg *Config) Validate() error {
 			return errNonStandaloneSearchQuery
 		}
 
-		if strings.Contains(search.Query, "earliest=") || strings.Contains(search.Query, "latest=") {
+		// ensure user query does not include time parameters
+		if strings.Contains(search.Query, "earliest=") ||
+			strings.Contains(search.Query, "latest=") ||
+			strings.Contains(search.Query, "starttime=") ||
+			strings.Contains(search.Query, "endtime=") ||
+			strings.Contains(search.Query, "timeformat=") {
 			return errors.New("time query parameters must be configured using only the 'earliest_time' and 'latest_time' configuration parameters")
 		}
 
