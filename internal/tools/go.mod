@@ -8,11 +8,11 @@ require (
 	github.com/client9/misspell v0.3.4
 	github.com/google/addlicense v1.1.1
 	github.com/mgechev/revive v1.5.0
-	github.com/open-telemetry/opentelemetry-collector-contrib/cmd/opampsupervisor v0.111.0
+	github.com/open-telemetry/opentelemetry-collector-contrib/cmd/opampsupervisor v0.113.0
 	github.com/securego/gosec/v2 v2.18.2
 	github.com/uw-labs/lichen v0.1.7
 	github.com/vektra/mockery/v2 v2.46.1
-	go.opentelemetry.io/collector/cmd/builder v0.111.0
+	go.opentelemetry.io/collector/cmd/builder v0.113.0
 	go.opentelemetry.io/collector/cmd/mdatagen v0.113.0
 	golang.org/x/tools v0.27.0
 )
@@ -50,7 +50,7 @@ require (
 	github.com/knadh/koanf/parsers/yaml v0.1.0 // indirect
 	github.com/knadh/koanf/providers/confmap v0.1.0 // indirect
 	github.com/knadh/koanf/providers/env v1.0.0 // indirect
-	github.com/knadh/koanf/providers/file v1.1.0 // indirect
+	github.com/knadh/koanf/providers/file v1.1.2 // indirect
 	github.com/knadh/koanf/providers/fs v0.1.0 // indirect
 	github.com/knadh/koanf/providers/rawbytes v0.1.0 // indirect
 	github.com/knadh/koanf/v2 v2.1.1 // indirect
@@ -116,5 +116,3 @@ require (
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
-
-replace go.opentelemetry.io/collector/cmd/builder => go.opentelemetry.io/collector/cmd/builder v0.111.1-0.20241004150551-9d6a84e0b86f
