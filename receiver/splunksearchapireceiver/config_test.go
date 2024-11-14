@@ -215,6 +215,21 @@ func TestValidate(t *testing.T) {
 			},
 			errExpected: false,
 		},
+		{
+			desc:     "Query with ealiest and latest time",
+			endpoint: "http://localhost:8089",
+			username: "user",
+			password: "password",
+			searches: []Search{
+				{
+					Query:        "search index=_internal earliest=2024-10-30T04:00:00.000Z latest=2024-10-30T14:00:00.000Z",
+					EarliestTime: "2024-10-30T04:00:00.000Z",
+					LatestTime:   "2024-10-30T14:00:00.000Z",
+				},
+			},
+			errExpected: true,
+			errText:     "time query parameters must be configured using only the 'earliest_time' and 'latest_time' configuration parameters",
+		},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.desc, func(t *testing.T) {

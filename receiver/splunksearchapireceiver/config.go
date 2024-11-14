@@ -16,7 +16,6 @@ package splunksearchapireceiver
 
 import (
 	"errors"
-	"fmt"
 	"strings"
 	"time"
 
@@ -81,7 +80,7 @@ func (cfg *Config) Validate() error {
 		}
 
 		if strings.Contains(search.Query, "earliest=") || strings.Contains(search.Query, "latest=") {
-			return fmt.Errorf("time query parameters must be configured using only the \"earliest_time\" and \"latest_time\" configuration parameters")
+			return errors.New("time query parameters must be configured using only the 'earliest_time' and 'latest_time' configuration parameters")
 		}
 
 		if search.EarliestTime == "" {
