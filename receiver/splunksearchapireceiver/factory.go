@@ -16,6 +16,7 @@ package splunksearchapireceiver
 
 import (
 	"context"
+	"time"
 
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/config/confighttp"
@@ -29,7 +30,8 @@ var (
 
 func createDefaultConfig() component.Config {
 	return &Config{
-		ClientConfig: confighttp.NewDefaultClientConfig(),
+		ClientConfig:    confighttp.NewDefaultClientConfig(),
+		JobPollInterval: 10 * time.Second,
 	}
 }
 

@@ -2,8 +2,6 @@ module github.com/observiq/bindplane-agent/exporter/googlemanagedprometheusexpor
 
 go 1.22.7
 
-toolchain go1.23.1
-
 require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlemanagedprometheusexporter v0.113.0
 	github.com/stretchr/testify v1.9.0
@@ -13,12 +11,12 @@ require (
 	go.opentelemetry.io/collector/exporter/exportertest v0.113.0
 	go.opentelemetry.io/collector/pdata v1.19.0
 	go.uber.org/zap v1.27.0
-	google.golang.org/api v0.204.0
+	google.golang.org/api v0.205.0
 )
 
 require (
 	cloud.google.com/go v0.116.0 // indirect
-	cloud.google.com/go/auth v0.10.0 // indirect
+	cloud.google.com/go/auth v0.10.1 // indirect
 	cloud.google.com/go/auth/oauth2adapt v0.2.5 // indirect
 	cloud.google.com/go/compute/metadata v0.5.2 // indirect
 	cloud.google.com/go/logging v1.12.0 // indirect

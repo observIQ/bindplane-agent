@@ -16,11 +16,16 @@ package splunksearchapireceiver
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 	"time"
 
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/config/confighttp"
+)
+
+var (
+	errNonStandaloneSearchQuery = errors.New("only standalone search commands can be used for scraping data")
 )
 
 // Config struct to represent the configuration for the Splunk Search API receiver
@@ -29,15 +34,17 @@ type Config struct {
 	Username                string        `mapstructure:"splunk_username"`
 	Password                string        `mapstructure:"splunk_password"`
 	Searches                []Search      `mapstructure:"searches"`
+	JobPollInterval         time.Duration `mapstructure:"job_poll_interval"`
 	StorageID               *component.ID `mapstructure:"storage"`
 }
 
 // Search struct to represent a Splunk search
 type Search struct {
-	Query        string `mapstructure:"query"`
-	EarliestTime string `mapstructure:"earliest_time"`
-	LatestTime   string `mapstructure:"latest_time"`
-	Limit        int    `mapstructure:"limit"`
+	Query          string `mapstructure:"query"`
+	EarliestTime   string `mapstructure:"earliest_time"`
+	LatestTime     string `mapstructure:"latest_time"`
+	Limit          int    `mapstructure:"limit"`
+	EventBatchSize int    `mapstructure:"event_batch_size"`
 }
 
 // Validate validates the Splunk Search API receiver configuration
@@ -62,11 +69,15 @@ func (cfg *Config) Validate() error {
 
 		// query implicitly starts with "search" command
 		if !strings.HasPrefix(search.Query, "search ") {
-			search.Query = "search " + search.Query
+			return errNonStandaloneSearchQuery
 		}
 
 		if strings.Contains(search.Query, "|") {
-			return errors.New("command chaining is not supported for queries")
+			return errNonStandaloneSearchQuery
+		}
+
+		if strings.Contains(search.Query, "earliest=") || strings.Contains(search.Query, "latest=") {
+			return fmt.Errorf("time query parameters must be configured using only the \"earliest_time\" and \"latest_time\" configuration parameters")
 		}
 
 		if search.EarliestTime == "" {
@@ -77,25 +88,16 @@ func (cfg *Config) Validate() error {
 		}
 
 		// parse time strings to time.Time
-		earliestTime, err := time.Parse(time.RFC3339, search.EarliestTime)
+		_, err := time.Parse(time.RFC3339, search.EarliestTime)
 		if err != nil {
-			return errors.New("earliest_time failed to be parsed as RFC3339")
+			return errors.New("earliest_time failed to parse as RFC3339")
 		}
 
-		latestTime, err := time.Parse(time.RFC3339, search.LatestTime)
+		_, err = time.Parse(time.RFC3339, search.LatestTime)
 		if err != nil {
-			return errors.New("latest_time failed to be parsed as RFC3339")
+			return errors.New("latest_time failed to parse as RFC3339")
 		}
 
-		if earliestTime.UTC().After(latestTime.UTC()) {
-			return errors.New("earliest_time must be earlier than latest_time")
-		}
-		if earliestTime.UTC().After(time.Now().UTC()) {
-			return errors.New("earliest_time must be earlier than current time")
-		}
-		if latestTime.UTC().After(time.Now().UTC()) {
-			return errors.New("latest_time must be earlier than current time")
-		}
 	}
 	return nil
 }

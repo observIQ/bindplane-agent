@@ -12,30 +12,61 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package splunksearchapireceiver provides a receiver that uses the Splunk API to migrate event data.
+// Package splunksearchapireceiver contains the Splunk Search API receiver.
 package splunksearchapireceiver
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"encoding/xml"
 	"fmt"
 	"io"
 	"net/http"
+
+	"go.opentelemetry.io/collector/component"
+	"go.uber.org/zap"
 )
 
-func (ssapir *splunksearchapireceiver) createSearchJob(config *Config, search string) (CreateJobResponse, error) {
-	// fmt.Println("Creating search job for search: ", search)
-	endpoint := fmt.Sprintf("%s/services/search/jobs", config.Endpoint)
+type splunkSearchAPIClient interface {
+	CreateSearchJob(search string) (CreateJobResponse, error)
+	GetJobStatus(searchID string) (JobStatusResponse, error)
+	GetSearchResults(searchID string, offset int, batchSize int) (SearchResultsResponse, error)
+}
+
+type defaultSplunkSearchAPIClient struct {
+	client   *http.Client
+	endpoint string
+	logger   *zap.Logger
+	username string
+	password string
+}
+
+func newSplunkSearchAPIClient(ctx context.Context, settings component.TelemetrySettings, conf Config, host component.Host) (*defaultSplunkSearchAPIClient, error) {
+	client, err := conf.ClientConfig.ToClient(ctx, host, settings)
+	if err != nil {
+		return nil, err
+	}
+	return &defaultSplunkSearchAPIClient{
+		client:   client,
+		endpoint: conf.Endpoint,
+		logger:   settings.Logger,
+		username: conf.Username,
+		password: conf.Password,
+	}, nil
+}
+
+func (c defaultSplunkSearchAPIClient) CreateSearchJob(search string) (CreateJobResponse, error) {
+	endpoint := fmt.Sprintf("%s/services/search/jobs", c.endpoint)
 
 	reqBody := fmt.Sprintf(`search=%s`, search)
 	req, err := http.NewRequest("POST", endpoint, bytes.NewBuffer([]byte(reqBody)))
 	if err != nil {
 		return CreateJobResponse{}, err
 	}
-	req.SetBasicAuth(config.Username, config.Password)
+	req.SetBasicAuth(c.username, c.password)
 
-	resp, err := ssapir.client.Do(req)
+	resp, err := c.client.Do(req)
 	if err != nil {
 		return CreateJobResponse{}, err
 	}
@@ -58,17 +89,16 @@ func (ssapir *splunksearchapireceiver) createSearchJob(config *Config, search st
 	return jobResponse, nil
 }
 
-func (ssapir *splunksearchapireceiver) getJobStatus(config *Config, sid string) (JobStatusResponse, error) {
-	// fmt.Println("Getting job status")
-	endpoint := fmt.Sprintf("%s/services/search/v2/jobs/%s", config.Endpoint, sid)
+func (c defaultSplunkSearchAPIClient) GetJobStatus(sid string) (JobStatusResponse, error) {
+	endpoint := fmt.Sprintf("%s/services/search/v2/jobs/%s", c.endpoint, sid)
 
 	req, err := http.NewRequest("GET", endpoint, nil)
 	if err != nil {
 		return JobStatusResponse{}, err
 	}
-	req.SetBasicAuth(config.Username, config.Password)
+	req.SetBasicAuth(c.username, c.password)
 
-	resp, err := ssapir.client.Do(req)
+	resp, err := c.client.Do(req)
 	if err != nil {
 		return JobStatusResponse{}, err
 	}
@@ -91,33 +121,32 @@ func (ssapir *splunksearchapireceiver) getJobStatus(config *Config, sid string) 
 	return jobStatusResponse, nil
 }
 
-func (ssapir *splunksearchapireceiver) getSearchResults(config *Config, sid string) (SearchResults, error) {
-	endpoint := fmt.Sprintf("%s/services/search/v2/jobs/%s/results?output_mode=json", config.Endpoint, sid)
+func (c defaultSplunkSearchAPIClient) GetSearchResults(sid string, offset int, batchSize int) (SearchResultsResponse, error) {
+	endpoint := fmt.Sprintf("%s/services/search/v2/jobs/%s/results?output_mode=json&offset=%d&count=%d", c.endpoint, sid, offset, batchSize)
 	req, err := http.NewRequest("GET", endpoint, nil)
 	if err != nil {
-		return SearchResults{}, err
+		return SearchResultsResponse{}, err
 	}
-	req.SetBasicAuth(config.Username, config.Password)
+	req.SetBasicAuth(c.username, c.password)
 
-	resp, err := ssapir.client.Do(req)
+	resp, err := c.client.Do(req)
 	if err != nil {
-		return SearchResults{}, err
+		return SearchResultsResponse{}, err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return SearchResults{}, fmt.Errorf("failed to get search job results: %d", resp.StatusCode)
+		return SearchResultsResponse{}, fmt.Errorf("failed to get search job results: %d", resp.StatusCode)
 	}
 
-	var searchResults SearchResults
+	var searchResults SearchResultsResponse
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return SearchResults{}, fmt.Errorf("failed to read search job results response: %v", err)
+		return SearchResultsResponse{}, fmt.Errorf("failed to read search job results response: %v", err)
 	}
-	// fmt.Println("Body: ", string(body))
 	err = json.Unmarshal(body, &searchResults)
 	if err != nil {
-		return SearchResults{}, fmt.Errorf("failed to unmarshal search job results: %v", err)
+		return SearchResultsResponse{}, fmt.Errorf("failed to unmarshal search job results: %v", err)
 	}
 
 	return searchResults, nil

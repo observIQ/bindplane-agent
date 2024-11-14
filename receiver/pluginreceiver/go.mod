@@ -1,6 +1,6 @@
 module github.com/observiq/bindplane-agent/receiver/pluginreceiver
 
-go 1.22.6
+go 1.22.7
 
 require (
 	github.com/mitchellh/mapstructure v1.5.1-0.20231216201459-8508981c8b6c
