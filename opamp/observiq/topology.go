@@ -31,7 +31,7 @@ import (
 
 // TopologyReporter represents an object that reports topology state.
 type TopologyReporter interface {
-	TopologyMessages() []topology.TopologyMessage
+	TopologyInfos() []topology.TopologyInfo
 	SetIntervalChan() chan time.Duration
 }
 
@@ -42,7 +42,6 @@ type topologySender struct {
 	opampClient client.OpAMPClient
 	interval    time.Duration
 
-	setIntervalChan      chan time.Duration
 	changeIntervalChan   chan time.Duration
 	changeAttributesChan chan map[string]string
 
@@ -52,12 +51,11 @@ type topologySender struct {
 	wg        *sync.WaitGroup
 }
 
-func newTopologySender(l *zap.Logger, reporter TopologyReporter, opampClient client.OpAMPClient, setIntervalChan chan time.Duration) *topologySender {
+func newTopologySender(l *zap.Logger, reporter TopologyReporter, opampClient client.OpAMPClient) *topologySender {
 	return &topologySender{
-		logger:          l,
-		reporter:        reporter,
-		opampClient:     opampClient,
-		setIntervalChan: setIntervalChan,
+		logger:      l,
+		reporter:    reporter,
+		opampClient: opampClient,
 
 		changeIntervalChan: make(chan time.Duration, 1),
 		mux:                &sync.Mutex{},
@@ -69,6 +67,7 @@ func newTopologySender(l *zap.Logger, reporter TopologyReporter, opampClient cli
 
 // Start starts the sender. It may be called multiple times, even if the sender is already started.
 func (ts *topologySender) Start() {
+	fmt.Println("\033[34m TopologySender START \033[0m")
 	ts.mux.Lock()
 	defer ts.mux.Unlock()
 
@@ -133,7 +132,7 @@ func (ts *topologySender) loop() {
 				continue
 			}
 
-			topoState := ts.reporter.TopologyMessages()
+			topoState := ts.reporter.TopologyInfos()
 			if len(topoState) == 0 {
 				fmt.Println("\033[34m TopoSender: No Topo States \033[0m")
 				// don't report empty payloads
