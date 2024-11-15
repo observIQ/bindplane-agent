@@ -183,6 +183,9 @@ Usage:
       set to configure the agent version.
       Example: '-v 1.2.12' will download 1.2.12.
 
+  $(fg_yellow '-r, --uninstall')
+      Stops the agent services and uninstalls the agent.
+
   $(fg_yellow '-l, --url')
       Defines the URL that the components will be downloaded from.
       If not provided, this will default to BindPlane Agent\'s GitHub releases.
