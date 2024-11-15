@@ -18,6 +18,7 @@ package topology
 import (
 	"context"
 	"fmt"
+	"slices"
 	"sync"
 	"time"
 )
@@ -40,27 +41,31 @@ type GatewayConfigInfo struct {
 
 // TopologyState represents the data captured through topology processors.
 type TopologyState struct {
-	destGateway GatewayConfigInfo
-	routeTable  map[GatewayConfigInfo]time.Time
+	destConfig GatewayConfigInfo
+	routeTable map[GatewayConfigInfo]time.Time
 }
 
-// TopologyMessage represents the data captured through topology processors in a format sent to bindplane.
-type TopologyMessage struct {
-	DestGateway    GatewayConfigInfo `json:"destGateway"`
-	SourceGateways []GatewayState    `json:"sourceGateways"`
+// TopologyInfo represents topology relationships between configs.
+type TopologyInfo struct {
+	ConfigName    string       `json:"configName"`
+	AccountID     string       `json:"accountID"`
+	OrgID         string       `json:"orgID"`
+	SourceConfigs []ConfigInfo `json:"sourceConfigs"`
 }
 
-// GatewayState represents a source gateway and the last time it sent a message
-type GatewayState struct {
-	Gateway     GatewayConfigInfo `json:"gateway"`
-	LastUpdated time.Duration     `json:"lastUpdated"`
+// ConfigInfo represents a source config and the time it was last detected
+type ConfigInfo struct {
+	ConfigName  string    `json:"configName"`
+	AccountID   string    `json:"accountID"`
+	OrgID       string    `json:"orgID"`
+	LastUpdated time.Time `json:"lastUpdated"`
 }
 
 // NewTopologyState initializes a new TopologyState
 func NewTopologyState(destGateway GatewayConfigInfo, interval time.Duration) (*TopologyState, error) {
 	return &TopologyState{
-		destGateway: destGateway,
-		routeTable:  make(map[GatewayConfigInfo]time.Time),
+		destConfig: destGateway,
+		routeTable: make(map[GatewayConfigInfo]time.Time),
 	}, nil
 }
 
@@ -104,8 +109,8 @@ func (rtsr *ResettableTopologyStateRegistry) SetIntervalChan() chan time.Duratio
 	return rtsr.setIntervalChan
 }
 
-// TopologyMessages returns all the topology states in this registry.
-func (rtsr *ResettableTopologyStateRegistry) TopologyMessages() []TopologyMessage {
+// TopologyInfos returns all the topology data in this registry.
+func (rtsr *ResettableTopologyStateRegistry) TopologyInfos() []TopologyInfo {
 	states := []TopologyState{}
 
 	rtsr.topology.Range(func(_, value any) bool {
@@ -114,21 +119,45 @@ func (rtsr *ResettableTopologyStateRegistry) TopologyMessages() []TopologyMessag
 		return true
 	})
 
-	timeNow := time.Now()
-	messages := []TopologyMessage{}
+	ti := []TopologyInfo{}
 	for _, ts := range states {
-		curMessage := TopologyMessage{}
-		curMessage.DestGateway = ts.destGateway
+		curInfo := TopologyInfo{}
+		curInfo.ConfigName = ts.destConfig.ConfigName
+		curInfo.AccountID = ts.destConfig.AccountID
+		curInfo.OrgID = ts.destConfig.OrgID
 		for gw, updated := range ts.routeTable {
-			curMessage.SourceGateways = append(curMessage.SourceGateways, GatewayState{
-				Gateway:     gw,
-				LastUpdated: timeNow.Sub(updated),
+			curInfo.SourceConfigs = append(curInfo.SourceConfigs, ConfigInfo{
+				ConfigName:  gw.ConfigName,
+				AccountID:   gw.AccountID,
+				OrgID:       gw.OrgID,
+				LastUpdated: updated.UTC(),
 			})
 		}
-		if len(curMessage.SourceGateways) > 0 {
-			messages = append(messages, curMessage)
+		if len(curInfo.SourceConfigs) > 0 {
+			slices.SortFunc(curInfo.SourceConfigs, func(a ConfigInfo, b ConfigInfo) int {
+				if a.OrgID < b.OrgID {
+					return -1
+				}
+				if a.OrgID > b.OrgID {
+					return 1
+				}
+				if a.AccountID < b.AccountID {
+					return -1
+				}
+				if a.AccountID > b.AccountID {
+					return 1
+				}
+				if a.ConfigName < b.ConfigName {
+					return -1
+				}
+				if a.ConfigName > b.ConfigName {
+					return 1
+				}
+				return 0
+			})
+			ti = append(ti, curInfo)
 		}
 	}
 
-	return messages
+	return ti
 }

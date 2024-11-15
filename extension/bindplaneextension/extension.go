@@ -189,7 +189,7 @@ func (b *bindplaneExtension) reportTopologyLoop() {
 }
 
 func (b *bindplaneExtension) reportTopology() error {
-	ts := b.rtsr.TopologyMessages()
+	ts := b.rtsr.TopologyInfos()
 
 	fmt.Println("\033[34m Reporting Topology to BP: \033[0m", ts)
 
