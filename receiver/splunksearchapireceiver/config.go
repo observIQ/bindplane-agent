@@ -37,10 +37,11 @@ type Config struct {
 
 // Search struct to represent a Splunk search
 type Search struct {
-	Query        string `mapstructure:"query"`
-	EarliestTime string `mapstructure:"earliest_time"`
-	LatestTime   string `mapstructure:"latest_time"`
-	Limit        int    `mapstructure:"limit"`
+	Query          string `mapstructure:"query"`
+	EarliestTime   string `mapstructure:"earliest_time"`
+	LatestTime     string `mapstructure:"latest_time"`
+	Limit          int    `mapstructure:"limit"`
+	EventBatchSize int    `mapstructure:"event_batch_size"`
 }
 
 // Validate validates the Splunk Search API receiver configuration

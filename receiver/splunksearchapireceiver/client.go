@@ -32,7 +32,7 @@ import (
 type splunkSearchAPIClient interface {
 	CreateSearchJob(search string) (CreateJobResponse, error)
 	GetJobStatus(searchID string) (JobStatusResponse, error)
-	GetSearchResults(searchID string) (SearchResultsResponse, error)
+	GetSearchResults(searchID string, offset int, batchSize int) (SearchResultsResponse, error)
 }
 
 type defaultSplunkSearchAPIClient struct {
@@ -122,8 +122,8 @@ func (c defaultSplunkSearchAPIClient) GetJobStatus(sid string) (JobStatusRespons
 	return jobStatusResponse, nil
 }
 
-func (c defaultSplunkSearchAPIClient) GetSearchResults(sid string) (SearchResultsResponse, error) {
-	endpoint := fmt.Sprintf("%s/services/search/v2/jobs/%s/results?output_mode=json", c.endpoint, sid)
+func (c defaultSplunkSearchAPIClient) GetSearchResults(sid string, offset int, batchSize int) (SearchResultsResponse, error) {
+	endpoint := fmt.Sprintf("%s/services/search/v2/jobs/%s/results?output_mode=json&offset=%d&count=%d", c.endpoint, sid, offset, batchSize)
 	req, err := http.NewRequest("GET", endpoint, nil)
 	if err != nil {
 		return SearchResultsResponse{}, err
