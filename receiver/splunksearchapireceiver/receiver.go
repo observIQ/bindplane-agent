@@ -69,7 +69,9 @@ func (ssapir *splunksearchapireceiver) Start(ctx context.Context, host component
 	ssapir.storageClient = storageClient
 
 	// if a checkpoint already exists, use the offset from the checkpoint
-	ssapir.loadCheckpoint(ctx)
+	if err = ssapir.loadCheckpoint(ctx); err != nil {
+		return fmt.Errorf("failed to load checkpoint: %w", err)
+	}
 	if ssapir.checkpointRecord.Offset != 0 {
 		ssapir.logger.Info("found offset checkpoint in storage extension", zap.Int("offset", ssapir.checkpointRecord.Offset))
 		offset = ssapir.checkpointRecord.Offset
@@ -256,17 +258,14 @@ func (ssapir *splunksearchapireceiver) checkpoint(ctx context.Context) error {
 	return ssapir.storageClient.Set(ctx, eventStorageKey, marshalBytes)
 }
 
-func (ssapir *splunksearchapireceiver) loadCheckpoint(ctx context.Context) {
+func (ssapir *splunksearchapireceiver) loadCheckpoint(ctx context.Context) error {
 	marshalBytes, err := ssapir.storageClient.Get(ctx, eventStorageKey)
 	if err != nil {
-		ssapir.logger.Error("failed to read checkpoint", zap.Error(err))
-		return
+		return err
 	}
 	if marshalBytes == nil {
 		ssapir.logger.Info("no checkpoint found")
-		return
+		return nil
 	}
-	if err = json.Unmarshal(marshalBytes, ssapir.checkpointRecord); err != nil {
-		ssapir.logger.Fatal("failed to unmarshal checkpoint", zap.Error(err))
-	}
+	return json.Unmarshal(marshalBytes, ssapir.checkpointRecord)
 }
