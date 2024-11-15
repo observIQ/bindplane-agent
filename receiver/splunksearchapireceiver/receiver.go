@@ -78,7 +78,7 @@ func (ssapir *splunksearchapireceiver) Start(ctx context.Context, host component
 }
 
 func (ssapir *splunksearchapireceiver) Shutdown(ctx context.Context) error {
-	ssapir.logger.Info("shutting down logs receiver")
+	ssapir.logger.Debug("shutting down logs receiver")
 
 	err := ssapir.checkpoint(ctx)
 	if err != nil {
@@ -167,7 +167,6 @@ func (ssapir *splunksearchapireceiver) runQueries(ctx context.Context) error {
 
 			// update checkpoint
 			ssapir.checkpointRecord.Offset = offset
-			fmt.Println("offset", offset)
 			err = ssapir.checkpoint(ctx)
 			if err != nil {
 				ssapir.logger.Error("error writing checkpoint", zap.Error(err))
@@ -182,7 +181,7 @@ func (ssapir *splunksearchapireceiver) runQueries(ctx context.Context) error {
 			}
 
 		}
-		ssapir.logger.Info("all search results exported", zap.String("query", search.Query), zap.Int("total results", exportedEvents))
+		ssapir.logger.Debug("all search results exported", zap.String("query", search.Query), zap.Int("total results", exportedEvents))
 	}
 	return nil
 }
@@ -261,6 +260,6 @@ func (ssapir *splunksearchapireceiver) loadCheckpoint(ctx context.Context) {
 		return
 	}
 	if err = json.Unmarshal(marshalBytes, ssapir.checkpointRecord); err != nil {
-		ssapir.logger.Error("failed to unmarshal checkpoint", zap.Error(err))
+		ssapir.logger.Fatal("failed to unmarshal checkpoint", zap.Error(err))
 	}
 }
