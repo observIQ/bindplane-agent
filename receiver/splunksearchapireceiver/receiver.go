@@ -80,7 +80,7 @@ func (ssapir *splunksearchapireceiver) Start(ctx context.Context, host component
 }
 
 func (ssapir *splunksearchapireceiver) Shutdown(ctx context.Context) error {
-	ssapir.logger.Info("shutting down logs receiver")
+	ssapir.logger.Debug("shutting down logs receiver")
 
 	err := ssapir.checkpoint(ctx)
 	if err != nil {
@@ -267,6 +267,6 @@ func (ssapir *splunksearchapireceiver) loadCheckpoint(ctx context.Context) {
 		return
 	}
 	if err = json.Unmarshal(marshalBytes, ssapir.checkpointRecord); err != nil {
-		ssapir.logger.Error("failed to unmarshal checkpoint", zap.Error(err))
+		ssapir.logger.Fatal("failed to unmarshal checkpoint", zap.Error(err))
 	}
 }
