@@ -42,11 +42,12 @@ func createLogsReceiver(_ context.Context,
 ) (receiver.Logs, error) {
 	ssapirConfig := cfg.(*Config)
 	ssapir := &splunksearchapireceiver{
-		logger:       params.Logger,
-		logsConsumer: consumer,
-		config:       ssapirConfig,
-		id:           params.ID,
-		settings:     params.TelemetrySettings,
+		logger:           params.Logger,
+		logsConsumer:     consumer,
+		config:           ssapirConfig,
+		id:               params.ID,
+		settings:         params.TelemetrySettings,
+		checkpointRecord: &EventRecord{},
 	}
 	return ssapir, nil
 }
