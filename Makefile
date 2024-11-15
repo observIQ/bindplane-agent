@@ -85,35 +85,35 @@ build-windows: build-windows-amd64
 
 .PHONY: build-linux-ppc64
 build-linux-ppc64:
-	GOOS=linux GOARCH=ppc64 $(MAKE) build-binaries -j2
+	GOOS=linux GOARCH=ppc64 CGO_ENABLED=0 $(MAKE) build-binaries -j2
 
 .PHONY: build-linux-ppc64le
 build-linux-ppc64le:
-	GOOS=linux GOARCH=ppc64le $(MAKE) build-binaries -j2
+	GOOS=linux GOARCH=ppc64le CGO_ENABLED=0 $(MAKE) build-binaries -j2
 
 .PHONY: build-linux-amd64
 build-linux-amd64:
-	GOOS=linux GOARCH=amd64 $(MAKE) build-binaries -j2
+	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 $(MAKE) build-binaries -j2
 
 .PHONY: build-linux-arm64
 build-linux-arm64:
-	GOOS=linux GOARCH=arm64 $(MAKE) build-binaries -j2
+	GOOS=linux GOARCH=arm64 CGO_ENABLED=0 $(MAKE) build-binaries -j2
 
 .PHONY: build-linux-arm
 build-linux-arm:
-	GOOS=linux GOARCH=arm $(MAKE) build-binaries -j2
+	GOOS=linux GOARCH=arm CGO_ENABLED=0 $(MAKE) build-binaries -j2
 
 .PHONY: build-darwin-amd64
 build-darwin-amd64:
-	GOOS=darwin GOARCH=amd64 $(MAKE) build-binaries -j2
+	GOOS=darwin GOARCH=amd64 CGO_ENABLED=0 $(MAKE) build-binaries -j2
 
 .PHONY: build-darwin-arm64
 build-darwin-arm64:
-	GOOS=darwin GOARCH=arm64 $(MAKE) build-binaries -j2
+	GOOS=darwin GOARCH=arm64 CGO_ENABLED=0 $(MAKE) build-binaries -j2
 
 .PHONY: build-windows-amd64
 build-windows-amd64:
-	GOOS=windows GOARCH=amd64 $(MAKE) build-binaries -j2
+	GOOS=windows GOARCH=amd64 CGO_ENABLED=0 $(MAKE) build-binaries -j2
 
 # tool-related commands
 .PHONY: install-tools
