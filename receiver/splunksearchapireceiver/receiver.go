@@ -40,19 +40,15 @@ var (
 )
 
 type splunksearchapireceiver struct {
-	host          component.Host
-	logger        *zap.Logger
-	logsConsumer  consumer.Logs
-	config        *Config
-	settings      component.TelemetrySettings
-	id            component.ID
-	client        splunkSearchAPIClient
-	storageClient storage.Client
-	record        *eventRecord
-}
-
-type eventRecord struct {
-	Offset int `json:"offset"`
+	host             component.Host
+	logger           *zap.Logger
+	logsConsumer     consumer.Logs
+	config           *Config
+	settings         component.TelemetrySettings
+	id               component.ID
+	client           splunkSearchAPIClient
+	storageClient    storage.Client
+	checkpointRecord *EventRecord
 }
 
 func (ssapir *splunksearchapireceiver) Start(ctx context.Context, host component.Host) error {
@@ -70,15 +66,26 @@ func (ssapir *splunksearchapireceiver) Start(ctx context.Context, host component
 	}
 	ssapir.storageClient = storageClient
 
-	// check if a checkpoint already exists
+	// if a checkpoint already exists, use the offset from the checkpoint
 	ssapir.loadCheckpoint(ctx)
+	if ssapir.checkpointRecord.Offset != 0 {
+		ssapir.logger.Info("found offset checkpoint in storage extension", zap.Int("offset", ssapir.checkpointRecord.Offset))
+		offset = ssapir.checkpointRecord.Offset
+	}
 
 	go ssapir.runQueries(ctx)
 	return nil
 }
 
-func (ssapir *splunksearchapireceiver) Shutdown(_ context.Context) error {
-	return nil
+func (ssapir *splunksearchapireceiver) Shutdown(ctx context.Context) error {
+	ssapir.logger.Info("shutting down logs receiver")
+
+	err := ssapir.checkpoint(ctx)
+	if err != nil {
+		ssapir.logger.Error("failed checkpoint", zap.Error(err))
+	}
+
+	return ssapir.storageClient.Close(ctx)
 }
 
 func (ssapir *splunksearchapireceiver) runQueries(ctx context.Context) error {
@@ -154,24 +161,26 @@ func (ssapir *splunksearchapireceiver) runQueries(ctx context.Context) error {
 				// error from down the pipeline, freak out
 				ssapir.logger.Error("error consuming logs", zap.Error(err))
 			}
-			// last batch of logs has been successfully exported, update checkpoint
-			ssapir.record.Offset = offset
+			// last batch of logs has been successfully exported
+			exportedEvents += logs.ResourceLogs().Len()
+			offset += len(results.Results)
+
+			// update checkpoint
+			ssapir.checkpointRecord.Offset = offset
+			fmt.Println("offset", offset)
 			err = ssapir.checkpoint(ctx)
 			if err != nil {
 				ssapir.logger.Error("error writing checkpoint", zap.Error(err))
 			}
 			if limitReached {
 				ssapir.logger.Info("limit reached, stopping search result export")
-				exportedEvents += logs.ResourceLogs().Len()
 				break
 			}
 			// if the number of results is less than the results per request, we have queried all pages for the search
 			if len(results.Results) < search.EventBatchSize {
-				exportedEvents += len(results.Results)
 				break
 			}
-			exportedEvents += logs.ResourceLogs().Len()
-			offset += len(results.Results)
+
 		}
 		ssapir.logger.Info("all search results exported", zap.String("query", search.Query), zap.Int("total results", exportedEvents))
 	}
@@ -234,7 +243,7 @@ func (ssapir *splunksearchapireceiver) getSplunkSearchResults(sid string, offset
 }
 
 func (ssapir *splunksearchapireceiver) checkpoint(ctx context.Context) error {
-	marshalBytes, err := json.Marshal(ssapir.record)
+	marshalBytes, err := json.Marshal(ssapir.checkpointRecord)
 	if err != nil {
 		return fmt.Errorf("failed to write checkpoint: %w", err)
 	}
@@ -251,8 +260,7 @@ func (ssapir *splunksearchapireceiver) loadCheckpoint(ctx context.Context) {
 		ssapir.logger.Info("no checkpoint found")
 		return
 	}
-	err = json.Unmarshal(marshalBytes, ssapir.record)
-	if err != nil {
+	if err = json.Unmarshal(marshalBytes, ssapir.checkpointRecord); err != nil {
 		ssapir.logger.Error("failed to unmarshal checkpoint", zap.Error(err))
 	}
 }

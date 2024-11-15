@@ -58,3 +58,8 @@ type SearchResultsResponse struct {
 		Time string `json:"_time"`
 	} `json:"results"`
 }
+
+// EventRecord struct stores the offset of the last event exported successfully
+type EventRecord struct {
+	Offset int `json:"offset"`
+}
