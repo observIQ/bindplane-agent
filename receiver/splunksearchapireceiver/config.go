@@ -63,7 +63,7 @@ func (cfg *Config) Validate() error {
 	}
 
 	if cfg.StorageID == nil {
-		return errors.New("storage configuration must be provided")
+		return errors.New("storage configuration is required for this receiver")
 	}
 
 	for _, search := range cfg.Searches {
