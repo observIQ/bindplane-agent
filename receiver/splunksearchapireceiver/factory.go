@@ -31,7 +31,7 @@ var (
 func createDefaultConfig() component.Config {
 	return &Config{
 		ClientConfig:    confighttp.NewDefaultClientConfig(),
-		JobPollInterval: 10 * time.Second,
+		JobPollInterval: 5 * time.Second,
 	}
 }
 

@@ -16,7 +16,6 @@ package splunksearchapireceiver
 
 import (
 	"errors"
-	"fmt"
 	"strings"
 	"time"
 
@@ -65,7 +64,7 @@ func (cfg *Config) Validate() error {
 			return errors.New("missing query in search")
 		}
 
-		// query implicitly starts with "search" command
+		// query must start with "search" command
 		if !strings.HasPrefix(search.Query, "search ") {
 			return errNonStandaloneSearchQuery
 		}
@@ -74,8 +73,13 @@ func (cfg *Config) Validate() error {
 			return errNonStandaloneSearchQuery
 		}
 
-		if strings.Contains(search.Query, "earliest=") || strings.Contains(search.Query, "latest=") {
-			return fmt.Errorf("time query parameters must be configured using only the \"earliest_time\" and \"latest_time\" configuration parameters")
+		// ensure user query does not include time parameters
+		if strings.Contains(search.Query, "earliest=") ||
+			strings.Contains(search.Query, "latest=") ||
+			strings.Contains(search.Query, "starttime=") ||
+			strings.Contains(search.Query, "endtime=") ||
+			strings.Contains(search.Query, "timeformat=") {
+			return errors.New("time query parameters must be configured using only the 'earliest_time' and 'latest_time' configuration parameters")
 		}
 
 		if search.EarliestTime == "" {
