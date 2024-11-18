@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 
 	"go.opentelemetry.io/collector/component"
 	"go.uber.org/zap"
@@ -59,7 +60,7 @@ func newSplunkSearchAPIClient(ctx context.Context, settings component.TelemetryS
 func (c defaultSplunkSearchAPIClient) CreateSearchJob(search string) (CreateJobResponse, error) {
 	endpoint := fmt.Sprintf("%s/services/search/jobs", c.endpoint)
 
-	reqBody := fmt.Sprintf(`search=%s`, search)
+	reqBody := fmt.Sprintf(`search=%s`, url.QueryEscape(search))
 	req, err := http.NewRequest("POST", endpoint, bytes.NewBuffer([]byte(reqBody)))
 	if err != nil {
 		return CreateJobResponse{}, err
