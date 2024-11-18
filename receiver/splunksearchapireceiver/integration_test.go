@@ -40,7 +40,7 @@ func TestSplunkResultsPaginationFailure(t *testing.T) {
 			EventBatchSize: 5,
 		},
 	}
-	var callCount int = 0
+	var callCount int
 	server := newMockSplunkServer(&callCount)
 	defer server.Close()
 	settings := componenttest.NewNopTelemetrySettings()
