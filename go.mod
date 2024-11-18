@@ -166,7 +166,7 @@ require (
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.9.0
 	go.opentelemetry.io/collector/component v0.113.0
-	go.opentelemetry.io/collector/confmap v1.19.0
+	go.opentelemetry.io/collector/confmap v1.20.0
 	go.opentelemetry.io/collector/confmap/provider/envprovider v1.19.0
 	go.opentelemetry.io/collector/confmap/provider/fileprovider v1.19.0
 	go.opentelemetry.io/collector/confmap/provider/httpsprovider v1.19.0
@@ -308,7 +308,6 @@ require (
 	github.com/briandowns/spinner v1.23.0 // indirect
 	github.com/cihub/seelog v0.0.0-20170130134532-f561c5e57575 // indirect
 	github.com/containerd/cgroups/v3 v3.0.3 // indirect
-	github.com/coreos/etcd v3.3.27+incompatible // indirect
 	github.com/coreos/go-oidc/v3 v3.11.0 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/distribution/reference v0.6.0 // indirect
@@ -348,7 +347,7 @@ require (
 	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0 // indirect
 	github.com/kelseyhightower/envconfig v1.4.0 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.5 // indirect
-	github.com/knadh/koanf/v2 v2.1.1 // indirect
+	github.com/knadh/koanf/v2 v2.1.2 // indirect
 	github.com/kylelemons/godebug v1.1.0 // indirect
 	github.com/leodido/go-syslog/v4 v4.2.0 // indirect
 	github.com/lestrrat-go/strftime v1.1.0 // indirect
@@ -399,7 +398,6 @@ require (
 	go.elastic.co/apm/module/apmzap/v2 v2.6.0 // indirect
 	go.elastic.co/apm/v2 v2.6.0 // indirect
 	go.elastic.co/fastjson v1.3.0 // indirect
-	go.etcd.io/etcd v3.3.27+incompatible // indirect
 	go.opencensus.io v0.24.0 // indirect
 	go.opentelemetry.io/collector v0.113.0 // indirect
 	go.opentelemetry.io/collector/client v1.19.0 // indirect
@@ -426,7 +424,7 @@ require (
 	go.opentelemetry.io/collector/extension/auth v0.113.0 // indirect
 	go.opentelemetry.io/collector/extension/experimental/storage v0.113.0 // indirect
 	go.opentelemetry.io/collector/extension/extensioncapabilities v0.113.0 // indirect
-	go.opentelemetry.io/collector/filter v0.113.0 // indirect
+	go.opentelemetry.io/collector/filter v0.114.0 // indirect
 	go.opentelemetry.io/collector/internal/fanoutconsumer v0.113.0 // indirect
 	go.opentelemetry.io/collector/internal/memorylimiter v0.113.0 // indirect
 	go.opentelemetry.io/collector/internal/sharedcomponent v0.113.0 // indirect

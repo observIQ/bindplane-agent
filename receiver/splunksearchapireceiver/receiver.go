@@ -81,7 +81,10 @@ func (ssapir *splunksearchapireceiver) Start(ctx context.Context, host component
 	}
 	ssapir.storageClient = storageClient
 
-	ssapir.initCheckpoint(ctx)
+	err = ssapir.initCheckpoint(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to initialize checkpoint: %w", err)
+	}
 	go ssapir.runQueries(ctx)
 	return nil
 }
