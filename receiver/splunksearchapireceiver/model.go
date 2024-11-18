@@ -61,5 +61,6 @@ type SearchResults struct {
 
 // EventRecord struct stores the offset of the last event exported successfully
 type EventRecord struct {
-	Offset int `json:"offset"`
+	Offset int    `json:"offset"`
+	Search string `json:"search"`
 }

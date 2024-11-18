@@ -52,6 +52,21 @@ type splunksearchapireceiver struct {
 	checkpointRecord *EventRecord
 }
 
+func newSSAPIReceiver(
+	logger *zap.Logger,
+	config *Config,
+	settings component.TelemetrySettings,
+	id component.ID,
+) *splunksearchapireceiver {
+	return &splunksearchapireceiver{
+		logger:           logger,
+		config:           config,
+		settings:         settings,
+		id:               id,
+		checkpointRecord: &EventRecord{},
+	}
+}
+
 func (ssapir *splunksearchapireceiver) Start(ctx context.Context, host component.Host) error {
 	ssapir.host = host
 	var err error
@@ -68,15 +83,7 @@ func (ssapir *splunksearchapireceiver) Start(ctx context.Context, host component
 	}
 	ssapir.storageClient = storageClient
 
-	// if a checkpoint already exists, use the offset from the checkpoint
-	if err = ssapir.loadCheckpoint(ctx); err != nil {
-		return fmt.Errorf("failed to load checkpoint: %w", err)
-	}
-	if ssapir.checkpointRecord.Offset != 0 {
-		ssapir.logger.Info("found offset checkpoint in storage extension", zap.Int("offset", ssapir.checkpointRecord.Offset))
-		offset = ssapir.checkpointRecord.Offset
-	}
-
+	ssapir.initCheckpoint(ctx)
 	go ssapir.runQueries(ctx)
 	return nil
 }
@@ -248,6 +255,25 @@ func (ssapir *splunksearchapireceiver) getSplunkSearchResults(sid string, offset
 		return SearchResultsResponse{}, err
 	}
 	return resp, nil
+}
+
+func (ssapir *splunksearchapireceiver) initCheckpoint(ctx context.Context) error {
+	// if a checkpoint already exists, use the offset from the checkpoint
+	if err := ssapir.loadCheckpoint(ctx); err != nil {
+		return fmt.Errorf("failed to load checkpoint: %w", err)
+	}
+	if ssapir.checkpointRecord.Offset != 0 {
+		// check if the search query in the checkpoint record matches any of the search queries in the config
+		for idx, search := range ssapir.config.Searches {
+			if search.Query == ssapir.checkpointRecord.Search {
+				ssapir.logger.Info("found offset checkpoint in storage extension", zap.Int("offset", ssapir.checkpointRecord.Offset), zap.String("search", ssapir.checkpointRecord.Search))
+				// skip searches that have already been processed, use the offset from the checkpoint
+				ssapir.config.Searches = ssapir.config.Searches[idx:]
+				offset = ssapir.checkpointRecord.Offset
+			}
+		}
+	}
+	return nil
 }
 
 func (ssapir *splunksearchapireceiver) checkpoint(ctx context.Context) error {
