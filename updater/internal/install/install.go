@@ -312,6 +312,7 @@ func translateManagerToSupervisor(logger *zap.Logger, installDir string, hcePort
 	if !ok {
 		return errors.New("read in agent id")
 	}
+	logger.Info("updating agent id", zap.String("", agentID))
 
 	var agentIDFormat = "UUID"
 	if agentIDIsULID([]byte(agentID)) {
@@ -434,7 +435,7 @@ func handleAgentIDConversion(logger *zap.Logger, agentID string, installDir stri
 		agentID = agentUUID.String()
 	} else {
 		// verify agentID is a UUID
-		_, err := uuid.FromBytes([]byte(agentID))
+		_, err := uuid.Parse(agentID)
 		if err != nil {
 			return fmt.Errorf("agent id is not a UUID: %w", err)
 		}
