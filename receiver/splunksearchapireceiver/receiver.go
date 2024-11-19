@@ -176,8 +176,14 @@ func (ssapir *splunksearchapireceiver) runQueries(ctx context.Context) error {
 			// pass logs, wait for exporter to confirm successful export to GCP
 			err = ssapir.logsConsumer.ConsumeLogs(ctx, logs)
 			if err != nil {
+<<<<<<< HEAD
 				// Error from down the pipeline, freak out
 				ssapir.logger.Error("error consuming logs", zap.Error(err))
+=======
+				// error from down the pipeline, freak out
+				return fmt.Errorf("error consuming logs: %w", err)
+
+>>>>>>> 2153d9e0 (return error on export fail)
 			}
 			// last batch of logs has been successfully exported
 			exportedEvents += logs.ResourceLogs().Len()
