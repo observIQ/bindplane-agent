@@ -34,6 +34,9 @@ func TestNewAgentClient(t *testing.T) {
 	require.NotNil(t, client.client)
 }
 
+// TestAgentClientDo tests the AgentClient Do method
+// Note: this unit test can't test the proxy settings since the test server has a loopback address
+// (127.*.*.* or localhost) and the proxy settings are ignored for these addresses.
 func TestAgentClientDo(t *testing.T) {
 	secretKey := "secret_key"
 	testCases := []struct {
