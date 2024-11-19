@@ -43,7 +43,6 @@ type logCountProcessor struct {
 	logger    *zap.Logger
 	cancel    context.CancelFunc
 	wg        sync.WaitGroup
-	mux       sync.Mutex
 }
 
 // newProcessor returns a new processor.
@@ -105,8 +104,6 @@ func (p *logCountProcessor) Shutdown(_ context.Context) error {
 
 // ConsumeLogs processes the logs.
 func (p *logCountProcessor) ConsumeLogs(ctx context.Context, pl plog.Logs) error {
-	p.mux.Lock()
-	defer p.mux.Unlock()
 
 	if p.isOTTL() {
 		p.consumeLogsOTTL(ctx, pl)
@@ -176,15 +173,11 @@ func (p *logCountProcessor) handleMetricInterval(ctx context.Context) {
 
 // sendMetrics sends metrics to the consumer.
 func (p *logCountProcessor) sendMetrics(ctx context.Context) {
-	p.mux.Lock()
-	defer p.mux.Unlock()
 
 	metrics := p.createMetrics()
 	if metrics.ResourceMetrics().Len() == 0 {
 		return
 	}
-
-	p.counter.Reset()
 
 	if err := routereceiver.RouteMetrics(ctx, p.config.Route, metrics); err != nil {
 		p.logger.Error("Failed to send metrics", zap.Error(err))
