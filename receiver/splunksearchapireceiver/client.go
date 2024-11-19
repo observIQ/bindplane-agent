@@ -79,12 +79,12 @@ func (c defaultSplunkSearchAPIClient) CreateSearchJob(search string) (CreateJobR
 	var jobResponse CreateJobResponse
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return CreateJobResponse{}, fmt.Errorf("failed to read search job status response: %v", err)
+		return CreateJobResponse{}, fmt.Errorf("failed to read search job create response: %v", err)
 	}
 
 	err = xml.Unmarshal(body, &jobResponse)
 	if err != nil {
-		return CreateJobResponse{}, fmt.Errorf("failed to unmarshal search job response: %v", err)
+		return CreateJobResponse{}, fmt.Errorf("failed to unmarshal search job create response: %v", err)
 	}
 	return jobResponse, nil
 }
@@ -115,7 +115,7 @@ func (c defaultSplunkSearchAPIClient) GetJobStatus(sid string) (JobStatusRespons
 	var jobStatusResponse JobStatusResponse
 	err = xml.Unmarshal(body, &jobStatusResponse)
 	if err != nil {
-		return JobStatusResponse{}, fmt.Errorf("failed to unmarshal search job response: %v", err)
+		return JobStatusResponse{}, fmt.Errorf("failed to unmarshal search job status response: %v", err)
 	}
 
 	return jobStatusResponse, nil
@@ -147,7 +147,7 @@ func (c defaultSplunkSearchAPIClient) GetSearchResults(sid string) (SearchResult
 	// fmt.Println("Body: ", string(body))
 	err = json.Unmarshal(body, &searchResults)
 	if err != nil {
-		return SearchResultsResponse{}, fmt.Errorf("failed to unmarshal search job results: %v", err)
+		return SearchResultsResponse{}, fmt.Errorf("failed to unmarshal search job results response: %v", err)
 	}
 
 	return searchResults, nil
