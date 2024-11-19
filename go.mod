@@ -166,7 +166,7 @@ require (
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.9.0
 	go.opentelemetry.io/collector/component v0.113.0
-	go.opentelemetry.io/collector/confmap v1.19.0
+	go.opentelemetry.io/collector/confmap v1.20.0
 	go.opentelemetry.io/collector/confmap/provider/envprovider v1.19.0
 	go.opentelemetry.io/collector/confmap/provider/fileprovider v1.19.0
 	go.opentelemetry.io/collector/confmap/provider/httpsprovider v1.19.0
@@ -347,7 +347,7 @@ require (
 	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0 // indirect
 	github.com/kelseyhightower/envconfig v1.4.0 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.5 // indirect
-	github.com/knadh/koanf/v2 v2.1.1 // indirect
+	github.com/knadh/koanf/v2 v2.1.2 // indirect
 	github.com/kylelemons/godebug v1.1.0 // indirect
 	github.com/leodido/go-syslog/v4 v4.2.0 // indirect
 	github.com/lestrrat-go/strftime v1.1.0 // indirect
@@ -424,7 +424,7 @@ require (
 	go.opentelemetry.io/collector/extension/auth v0.113.0 // indirect
 	go.opentelemetry.io/collector/extension/experimental/storage v0.113.0 // indirect
 	go.opentelemetry.io/collector/extension/extensioncapabilities v0.113.0 // indirect
-	go.opentelemetry.io/collector/filter v0.113.0 // indirect
+	go.opentelemetry.io/collector/filter v0.114.0 // indirect
 	go.opentelemetry.io/collector/internal/fanoutconsumer v0.113.0 // indirect
 	go.opentelemetry.io/collector/internal/memorylimiter v0.113.0 // indirect
 	go.opentelemetry.io/collector/internal/sharedcomponent v0.113.0 // indirect

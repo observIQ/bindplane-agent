@@ -18,6 +18,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"go.opentelemetry.io/collector/component"
 )
 
 func TestValidate(t *testing.T) {
@@ -26,6 +27,7 @@ func TestValidate(t *testing.T) {
 		endpoint    string
 		username    string
 		password    string
+		storage     string
 		searches    []Search
 		errExpected bool
 		errText     string
@@ -34,6 +36,7 @@ func TestValidate(t *testing.T) {
 			desc:     "Missing endpoint",
 			username: "user",
 			password: "password",
+			storage:  "file_storage",
 			searches: []Search{
 				{
 					Query:        "search index=_internal",
@@ -48,6 +51,7 @@ func TestValidate(t *testing.T) {
 			desc:     "Missing username",
 			endpoint: "http://localhost:8089",
 			password: "password",
+			storage:  "file_storage",
 			searches: []Search{
 				{
 					Query:        "search index=_internal",
@@ -62,6 +66,7 @@ func TestValidate(t *testing.T) {
 			desc:     "Missing password",
 			endpoint: "http://localhost:8089",
 			username: "user",
+			storage:  "file_storage",
 			searches: []Search{
 				{
 					Query:        "search index=_internal",
@@ -73,10 +78,26 @@ func TestValidate(t *testing.T) {
 			errText:     "missing Splunk password",
 		},
 		{
+			desc:     "Missing storage",
+			endpoint: "http://localhost:8089",
+			username: "user",
+			password: "password",
+			searches: []Search{
+				{
+					Query:        "search index=_internal",
+					EarliestTime: "2024-10-30T04:00:00.000Z",
+					LatestTime:   "2024-10-30T14:00:00.000Z",
+				},
+			},
+			errExpected: true,
+			errText:     "storage configuration is required for this receiver",
+		},
+		{
 			desc:        "Missing searches",
 			endpoint:    "http://localhost:8089",
 			username:    "user",
 			password:    "password",
+			storage:     "file_storage",
 			errExpected: true,
 			errText:     "at least one search must be provided",
 		},
@@ -85,6 +106,7 @@ func TestValidate(t *testing.T) {
 			endpoint: "http://localhost:8089",
 			username: "user",
 			password: "password",
+			storage:  "file_storage",
 			searches: []Search{
 				{
 					EarliestTime: "2024-10-30T04:00:00.000Z",
@@ -99,6 +121,7 @@ func TestValidate(t *testing.T) {
 			endpoint: "http://localhost:8089",
 			username: "user",
 			password: "password",
+			storage:  "file_storage",
 			searches: []Search{
 				{
 					Query:      "search index=_internal",
@@ -113,6 +136,7 @@ func TestValidate(t *testing.T) {
 			endpoint: "http://localhost:8089",
 			username: "user",
 			password: "password",
+			storage:  "file_storage",
 			searches: []Search{
 				{
 					Query:        "search index=_internal",
@@ -128,6 +152,7 @@ func TestValidate(t *testing.T) {
 			endpoint: "http://localhost:8089",
 			username: "user",
 			password: "password",
+			storage:  "file_storage",
 			searches: []Search{
 				{
 					Query:        "search index=_internal",
@@ -142,6 +167,7 @@ func TestValidate(t *testing.T) {
 			endpoint: "http://localhost:8089",
 			username: "user",
 			password: "password",
+			storage:  "file_storage",
 			searches: []Search{
 				{
 					Query:        "search index=_internal",
@@ -157,6 +183,7 @@ func TestValidate(t *testing.T) {
 			endpoint: "http://localhost:8089",
 			username: "user",
 			password: "password",
+			storage:  "file_storage",
 			searches: []Search{
 				{
 					Query:        "search index=_internal | stats count by sourcetype",
@@ -172,6 +199,7 @@ func TestValidate(t *testing.T) {
 			endpoint: "http://localhost:8089",
 			username: "user",
 			password: "password",
+			storage:  "file_storage",
 			searches: []Search{
 				{
 					Query:        "search index=_internal",
@@ -186,6 +214,7 @@ func TestValidate(t *testing.T) {
 			endpoint: "http://localhost:8089",
 			username: "user",
 			password: "password",
+			storage:  "file_storage",
 			searches: []Search{
 				{
 					Query:        "search index=_internal",
@@ -205,6 +234,7 @@ func TestValidate(t *testing.T) {
 			endpoint: "http://localhost:8089",
 			username: "user",
 			password: "password",
+			storage:  "file_storage",
 			searches: []Search{
 				{
 					Query:        "search index=_internal",
@@ -216,10 +246,11 @@ func TestValidate(t *testing.T) {
 			errExpected: false,
 		},
 		{
-			desc:     "Query with ealiest and latest time",
+			desc:     "Query with earliest and latest time",
 			endpoint: "http://localhost:8089",
 			username: "user",
 			password: "password",
+			storage:  "file_storage",
 			searches: []Search{
 				{
 					Query:        "search index=_internal earliest=2024-10-30T04:00:00.000Z latest=2024-10-30T14:00:00.000Z",
@@ -238,6 +269,9 @@ func TestValidate(t *testing.T) {
 			cfg.Username = tc.username
 			cfg.Password = tc.password
 			cfg.Searches = tc.searches
+			if tc.storage != "" {
+				cfg.StorageID = &component.ID{}
+			}
 			err := cfg.Validate()
 			if tc.errExpected {
 				require.EqualError(t, err, tc.errText)
