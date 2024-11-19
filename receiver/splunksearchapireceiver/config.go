@@ -16,10 +16,10 @@ package splunksearchapireceiver
 
 import (
 	"errors"
-	"fmt"
 	"strings"
 	"time"
 
+	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/config/confighttp"
 )
 
@@ -34,6 +34,7 @@ type Config struct {
 	Password                string        `mapstructure:"splunk_password"`
 	Searches                []Search      `mapstructure:"searches"`
 	JobPollInterval         time.Duration `mapstructure:"job_poll_interval"`
+	StorageID               *component.ID `mapstructure:"storage"`
 }
 
 // Search struct to represent a Splunk search
@@ -60,12 +61,16 @@ func (cfg *Config) Validate() error {
 		return errors.New("at least one search must be provided")
 	}
 
+	if cfg.StorageID == nil {
+		return errors.New("storage configuration is required for this receiver")
+	}
+
 	for _, search := range cfg.Searches {
 		if search.Query == "" {
 			return errors.New("missing query in search")
 		}
 
-		// query implicitly starts with "search" command
+		// query must start with "search" command
 		if !strings.HasPrefix(search.Query, "search ") {
 			return errNonStandaloneSearchQuery
 		}
@@ -74,8 +79,13 @@ func (cfg *Config) Validate() error {
 			return errNonStandaloneSearchQuery
 		}
 
-		if strings.Contains(search.Query, "earliest=") || strings.Contains(search.Query, "latest=") {
-			return fmt.Errorf("time query parameters must be configured using only the \"earliest_time\" and \"latest_time\" configuration parameters")
+		// ensure user query does not include time parameters
+		if strings.Contains(search.Query, "earliest=") ||
+			strings.Contains(search.Query, "latest=") ||
+			strings.Contains(search.Query, "starttime=") ||
+			strings.Contains(search.Query, "endtime=") ||
+			strings.Contains(search.Query, "timeformat=") {
+			return errors.New("time query parameters must be configured using only the 'earliest_time' and 'latest_time' configuration parameters")
 		}
 
 		if search.EarliestTime == "" {

@@ -31,7 +31,7 @@ var (
 func createDefaultConfig() component.Config {
 	return &Config{
 		ClientConfig:    confighttp.NewDefaultClientConfig(),
-		JobPollInterval: 10 * time.Second,
+		JobPollInterval: 5 * time.Second,
 	}
 }
 
@@ -42,10 +42,12 @@ func createLogsReceiver(_ context.Context,
 ) (receiver.Logs, error) {
 	ssapirConfig := cfg.(*Config)
 	ssapir := &splunksearchapireceiver{
-		logger:       params.Logger,
-		logsConsumer: consumer,
-		config:       ssapirConfig,
-		settings:     params.TelemetrySettings,
+		logger:           params.Logger,
+		logsConsumer:     consumer,
+		config:           ssapirConfig,
+		id:               params.ID,
+		settings:         params.TelemetrySettings,
+		checkpointRecord: &EventRecord{},
 	}
 	return ssapir, nil
 }
