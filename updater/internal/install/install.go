@@ -250,6 +250,7 @@ type SupervisorConfig struct {
 	Capabilities Capabilities `yaml:"capabilities"`
 	Agent        Agent        `yaml:"agent"`
 	Storage      Storage      `yaml:"storage"`
+	Telemetry    Telemetry    `yaml:"telemetry"`
 }
 
 // Server configures how the supervisor connects to an OpAMP server
@@ -286,6 +287,17 @@ type Agent struct {
 // Storage is where the supervisor stores various files
 type Storage struct {
 	Directory string `yaml:"directory"`
+}
+
+// Telemetry describes the supervisor's telemetry config
+type Telemetry struct {
+	Logs Logs `yaml:"logs"`
+}
+
+// Logs describes how the supervisor's logging is configured
+type Logs struct {
+	Level       int      `yaml:"level"`
+	OutputPaths []string `yaml:"output_paths"`
 }
 
 // translateManagerToSupervisor handles the bulk of converting from a v1 agent to a v2 agent directory
@@ -366,6 +378,12 @@ func createSupervisorConfig(logger *zap.Logger, manager map[string]any, installD
 		},
 		Storage: Storage{
 			Directory: filepath.Join(installDir, "supervisor_storage"),
+		},
+		Telemetry: Telemetry{
+			Logs: Logs{
+				Level:       -1,
+				OutputPaths: []string{filepath.Join(installDir, "supervisor.log")},
+			},
 		},
 	}
 
