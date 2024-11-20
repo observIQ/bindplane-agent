@@ -104,6 +104,7 @@ func (p *metricCountProcessor) Shutdown(_ context.Context) error {
 		p.cancel()
 	}
 	p.wg.Wait()
+	p.counter.Stop()
 	return nil
 }
 

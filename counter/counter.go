@@ -21,6 +21,7 @@ import "encoding/json"
 type TelemetryCounter struct {
 	resources map[string]*ResourceCounter
 	commands  chan func()
+	done      chan struct{}
 }
 
 // NewTelemetryCounter creates a new TelemetryCounter.
@@ -28,6 +29,7 @@ func NewTelemetryCounter() *TelemetryCounter {
 	t := &TelemetryCounter{
 		resources: make(map[string]*ResourceCounter),
 		commands:  make(chan func()),
+		done:      make(chan struct{}),
 	}
 	go t.run()
 	return t
@@ -35,9 +37,20 @@ func NewTelemetryCounter() *TelemetryCounter {
 
 // run listens for commands to modify or read the resources.
 func (t *TelemetryCounter) run() {
-	for cmd := range t.commands {
-		cmd()
+	for {
+		select {
+		case cmd := <-t.commands:
+			cmd() // Execute the command
+		case <-t.done:
+			// Shutdown signal received, exit the loop
+			return
+		}
 	}
+}
+
+// Stop gracefully shuts down the TelemetryCounter.
+func (t *TelemetryCounter) Stop() {
+	close(t.done)
 }
 
 // Add increments the counter with the supplied dimensions.
