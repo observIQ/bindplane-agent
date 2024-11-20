@@ -25,6 +25,7 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/component"
+	"go.opentelemetry.io/collector/extension/experimental/storage"
 	"go.uber.org/zap"
 )
 
@@ -87,15 +88,73 @@ func TestIsSearchCompleted(t *testing.T) {
 }
 
 func TestInitCheckpoint(t *testing.T) {
+	mockStorage := &mockStorage{}
+	searches := []Search{
+		{
+			Query: "index=otel",
+		},
+		{
+			Query: "index=otel2",
+		},
+		{
+			Query: "index=otel3",
+		},
+		{
+			Query: "index=otel4",
+		},
+		{
+			Query: "index=otel5",
+		},
+	}
+	ssapireceiver.config.Searches = searches
+	ssapireceiver.storageClient = mockStorage
+	err := ssapireceiver.initCheckpoint(context.Background())
+	require.NoError(t, err)
+	require.Equal(t, 0, ssapireceiver.checkpointRecord.Offset)
 
+	mockStorage.Value = []byte(`{"offset":5,"search":"index=otel3"}`)
+	err = ssapireceiver.initCheckpoint(context.Background())
+	require.NoError(t, err)
+	require.Equal(t, 5, ssapireceiver.checkpointRecord.Offset)
+	require.Equal(t, "index=otel3", ssapireceiver.checkpointRecord.Search)
 }
 
 func TestCheckpoint(t *testing.T) {
-	t.Skip("Not implemented")
+	mockStorage := &mockStorage{}
+	ssapireceiver.storageClient = mockStorage
+	mockStorage.On("Set", mock.Anything, eventStorageKey, mock.Anything).Return(nil)
+	err := ssapireceiver.checkpoint(context.Background())
+	require.NoError(t, err)
+	mockStorage.AssertCalled(t, "Set", mock.Anything, eventStorageKey, []byte(`{"offset":0,"search":""}`))
+
+	ssapireceiver.checkpointRecord = &EventRecord{
+		Offset: 5,
+		Search: "index=otel3",
+	}
+
+	err = ssapireceiver.checkpoint(context.Background())
+	require.NoError(t, err)
+	mockStorage.AssertCalled(t, "Set", mock.Anything, eventStorageKey, []byte(`{"offset":5,"search":"index=otel3"}`))
 }
 
 func TestLoadCheckpoint(t *testing.T) {
-	t.Skip("Not implemented")
+	mockStorage := &mockStorage{}
+	ssapireceiver.storageClient = mockStorage
+	mockStorage.Value = []byte(`{"offset":5,"search":"index=otel3"}`)
+	err := ssapireceiver.loadCheckpoint(context.Background())
+	require.NoError(t, err)
+	require.Equal(t, 5, ssapireceiver.checkpointRecord.Offset)
+	require.Equal(t, "index=otel3", ssapireceiver.checkpointRecord.Search)
+
+	mockStorage.Value = []byte(`{"offset":10,"search":"index=otel4"}`)
+	err = ssapireceiver.loadCheckpoint(context.Background())
+	require.NoError(t, err)
+	require.Equal(t, 10, ssapireceiver.checkpointRecord.Offset)
+	require.Equal(t, "index=otel4", ssapireceiver.checkpointRecord.Search)
+
+	mockStorage.Value = []byte(`{}`)
+	err = ssapireceiver.loadCheckpoint(context.Background())
+	require.NoError(t, err)
 }
 
 type mockLogsClient struct {
@@ -124,4 +183,33 @@ func (m *mockLogsClient) CreateSearchJob(searchQuery string) (CreateJobResponse,
 func (m *mockLogsClient) GetSearchResults(searchID string, offset int, batchSize int) (SearchResultsResponse, error) {
 	args := m.Called(searchID, offset, batchSize)
 	return args.Get(0).(SearchResultsResponse), args.Error(1)
+}
+
+type mockStorage struct {
+	mock.Mock
+	Key   string
+	Value []byte
+}
+
+func (m *mockStorage) Get(ctx context.Context, key string) ([]byte, error) {
+	return []byte(m.Value), nil
+}
+
+func (m *mockStorage) Set(ctx context.Context, key string, value []byte) error {
+	args := m.Called(ctx, key, value)
+	m.Key = key
+	m.Value = value
+	return args.Error(0)
+}
+
+func (m *mockStorage) Batch(ctx context.Context, op ...storage.Operation) error {
+	return nil
+}
+
+func (m *mockStorage) Close(ctx context.Context) error {
+	return nil
+}
+
+func (m *mockStorage) Delete(ctx context.Context, key string) error {
+	return nil
 }
