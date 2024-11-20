@@ -285,8 +285,10 @@ func (ssapir *splunksearchapireceiver) initCheckpoint(ctx context.Context) error
 				// skip searches that have already been processed, use the offset from the checkpoint
 				ssapir.config.Searches = ssapir.config.Searches[idx:]
 				offset = ssapir.checkpointRecord.Offset
+				return nil
 			}
 		}
+		ssapir.logger.Debug("while initializing checkpoint, no matching search query found, starting from the beginning")
 	}
 	return nil
 }
