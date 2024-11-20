@@ -24,6 +24,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strings"
 
 	"go.opentelemetry.io/collector/component"
 	"go.uber.org/zap"
@@ -60,6 +61,10 @@ func newSplunkSearchAPIClient(ctx context.Context, settings component.TelemetryS
 func (c defaultSplunkSearchAPIClient) CreateSearchJob(search string) (CreateJobResponse, error) {
 	endpoint := fmt.Sprintf("%s/services/search/jobs", c.endpoint)
 
+	if !strings.Contains(search, "starttime=") || !strings.Contains(search, "endtime=") || !strings.Contains(search, "timeformat=") {
+		return CreateJobResponse{}, fmt.Errorf("search query must contain starttime, endtime, and timeformat")
+	}
+
 	reqBody := fmt.Sprintf(`search=%s`, url.QueryEscape(search))
 	req, err := http.NewRequest("POST", endpoint, bytes.NewBuffer([]byte(reqBody)))
 	if err != nil {
@@ -90,33 +95,33 @@ func (c defaultSplunkSearchAPIClient) CreateSearchJob(search string) (CreateJobR
 	return jobResponse, nil
 }
 
-func (c defaultSplunkSearchAPIClient) GetJobStatus(sid string) (JobStatusResponse, error) {
+func (c defaultSplunkSearchAPIClient) GetJobStatus(sid string) (SearchStatusResponse, error) {
 	endpoint := fmt.Sprintf("%s/services/search/v2/jobs/%s", c.endpoint, sid)
 
 	req, err := http.NewRequest("GET", endpoint, nil)
 	if err != nil {
-		return JobStatusResponse{}, err
+		return SearchStatusResponse{}, err
 	}
 	req.SetBasicAuth(c.username, c.password)
 
 	resp, err := c.client.Do(req)
 	if err != nil {
-		return JobStatusResponse{}, err
+		return SearchStatusResponse{}, err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return JobStatusResponse{}, fmt.Errorf("failed to get search job status: %d", resp.StatusCode)
+		return SearchStatusResponse{}, fmt.Errorf("failed to get search job status: %d", resp.StatusCode)
 	}
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return JobStatusResponse{}, fmt.Errorf("failed to read search job status response: %v", err)
+		return SearchStatusResponse{}, fmt.Errorf("failed to read search job status response: %v", err)
 	}
-	var jobStatusResponse JobStatusResponse
+	var jobStatusResponse SearchStatusResponse
 	err = xml.Unmarshal(body, &jobStatusResponse)
 	if err != nil {
-		return JobStatusResponse{}, fmt.Errorf("failed to unmarshal search job status response: %v", err)
+		return SearchStatusResponse{}, fmt.Errorf("failed to unmarshal search job status response: %v", err)
 	}
 
 	return jobStatusResponse, nil
