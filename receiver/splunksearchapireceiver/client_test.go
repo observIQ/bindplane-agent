@@ -25,7 +25,7 @@ import (
 )
 
 var (
-	server     = newMockSplunkServer()
+	server     = newMockServer()
 	testClient = defaultSplunkSearchAPIClient{
 		client:   server.Client(),
 		endpoint: server.URL,
@@ -33,17 +33,22 @@ var (
 )
 
 func TestCreateSearchJob(t *testing.T) {
-	resp, err := testClient.CreateSearchJob("index=otel")
+	resp, err := testClient.CreateSearchJob("index=otel starttime=\"\" endtime=\"\" timeformat=\"\"")
 	require.NoError(t, err)
 	require.Equal(t, "123456", resp.SID)
 
+	// returns an error if the search doesn't have times
+	resp, err = testClient.CreateSearchJob("index=otel")
+	require.EqualError(t, err, "search query must contain starttime, endtime, and timeformat")
+	require.Empty(t, resp)
+
 	// returns an error if the response status isn't 201
-	resp, err = testClient.CreateSearchJob("index=fail_to_create_job")
+	resp, err = testClient.CreateSearchJob("index=fail_to_create_job starttime=\"\" endtime=\"\" timeformat=\"\"")
 	require.ErrorContains(t, err, "failed to create search job")
 	require.Empty(t, resp)
 
 	// returns an error if the response body can't be unmarshalled
-	resp, err = testClient.CreateSearchJob("index=fail_to_unmarshal")
+	resp, err = testClient.CreateSearchJob("index=fail_to_unmarshal starttime=\"\" endtime=\"\" timeformat=\"\"")
 	require.ErrorContains(t, err, "failed to unmarshal search job create response")
 	require.Empty(t, resp)
 
@@ -84,12 +89,12 @@ func TestGetSearchResults(t *testing.T) {
 }
 
 // mock Splunk servers
-func newMockSplunkServer() *httptest.Server {
+func newMockServer() *httptest.Server {
 	return httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 		switch req.URL.String() {
 		case "/services/search/jobs":
 			body, _ := io.ReadAll(req.Body)
-			if strings.Contains(string(body), "index=otel") {
+			if strings.Contains(string(body), "search=index%3Dotel") {
 				rw.Header().Set("Content-Type", "application/xml")
 				rw.WriteHeader(http.StatusCreated)
 				rw.Write([]byte(`<?xml version="1.0" encoding="UTF-8"?>
@@ -98,13 +103,12 @@ func newMockSplunkServer() *httptest.Server {
 				</response>
 				`))
 			}
-			if strings.Contains(string(body), "index=fail_to_create_job") {
+			if strings.Contains(string(body), "index%3Dfail_to_create_job") {
 				rw.WriteHeader(http.StatusNotFound)
 			}
-			if strings.Contains(string(body), "index=fail_to_unmarshal") {
+			if strings.Contains(string(body), "index%3Dfail_to_unmarshal") {
 				rw.WriteHeader(http.StatusCreated)
 				rw.Write([]byte(`invalid xml`))
-				req.Body = &errorReader{}
 			}
 		case "/services/search/v2/jobs/123456":
 			rw.Header().Set("Content-Type", "application/xml")
@@ -135,40 +139,4 @@ func newMockSplunkServer() *httptest.Server {
 			rw.WriteHeader(http.StatusNotFound)
 		}
 	}))
-}
-
-var splunkEventsResultsP1 = []byte(`{
-	"init_offset": 0,
-	"results": [
-		{
-			"_raw": "Hello, world!",
-			"_time": "2024-11-14T13:02:31.000-05:00"
-		},
-		{
-			"_raw": "Goodbye, world!",
-			"_time": "2024-11-14T13:02:30.000-05:00"
-		},
-		{
-			"_raw": "lorem ipsum",
-			"_time": "2024-11-14T13:02:29.000-05:00"
-		},
-		{
-			"_raw": "dolor sit amet",
-			"_time": "2024-11-14T13:02:28.000-05:00"
-		},
-		{
-			"_raw": "consectetur adipiscing elit",
-			"_time": "2024-11-14T13:02:27.000-05:00"
-		}
-	]
-}`)
-
-type errorReader struct{}
-
-func (e *errorReader) Read(p []byte) (n int, err error) {
-	return 0, io.ErrUnexpectedEOF
-}
-
-func (e *errorReader) Close() error {
-	return nil
 }
