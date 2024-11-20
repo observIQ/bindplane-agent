@@ -123,6 +123,10 @@ func TestCheckpoint(t *testing.T) {
 	mockStorage := &mockStorage{}
 	ssapireceiver.storageClient = mockStorage
 	mockStorage.On("Set", mock.Anything, eventStorageKey, mock.Anything).Return(nil)
+	ssapireceiver.checkpointRecord = &EventRecord{
+		Offset: 0,
+		Search: "",
+	}
 	err := ssapireceiver.checkpoint(context.Background())
 	require.NoError(t, err)
 	mockStorage.AssertCalled(t, "Set", mock.Anything, eventStorageKey, []byte(`{"offset":0,"search":""}`))
