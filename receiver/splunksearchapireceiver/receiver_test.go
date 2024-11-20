@@ -191,7 +191,7 @@ type mockStorage struct {
 	Value []byte
 }
 
-func (m *mockStorage) Get(ctx context.Context, key string) ([]byte, error) {
+func (m *mockStorage) Get(_ context.Context, _ string) ([]byte, error) {
 	return []byte(m.Value), nil
 }
 
@@ -202,14 +202,14 @@ func (m *mockStorage) Set(ctx context.Context, key string, value []byte) error {
 	return args.Error(0)
 }
 
-func (m *mockStorage) Batch(ctx context.Context, op ...storage.Operation) error {
+func (m *mockStorage) Batch(_ context.Context, _ ...storage.Operation) error {
 	return nil
 }
 
-func (m *mockStorage) Close(ctx context.Context) error {
+func (m *mockStorage) Close(_ context.Context) error {
 	return nil
 }
 
-func (m *mockStorage) Delete(ctx context.Context, key string) error {
+func (m *mockStorage) Delete(_ context.Context, _ string) error {
 	return nil
 }
