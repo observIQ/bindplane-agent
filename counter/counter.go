@@ -20,33 +20,58 @@ import "encoding/json"
 // TelemetryCounter tracks the number of times a set of resource and attribute dimensions have been seen.
 type TelemetryCounter struct {
 	resources map[string]*ResourceCounter
+	commands  chan func()
+	done      chan struct{}
 }
 
 // NewTelemetryCounter creates a new TelemetryCounter.
 func NewTelemetryCounter() *TelemetryCounter {
-	return &TelemetryCounter{
+	t := &TelemetryCounter{
 		resources: make(map[string]*ResourceCounter),
+		commands:  make(chan func()),
+		done:      make(chan struct{}),
 	}
+	go t.run()
+	return t
+}
+
+// run listens for commands to modify or read the resources.
+func (t *TelemetryCounter) run() {
+	for {
+		select {
+		case cmd := <-t.commands:
+			cmd() // Execute the command
+		case <-t.done:
+			// Shutdown signal received, exit the loop
+			return
+		}
+	}
+}
+
+// Stop gracefully shuts down the TelemetryCounter.
+func (t *TelemetryCounter) Stop() {
+	close(t.done)
 }
 
 // Add increments the counter with the supplied dimensions.
 func (t *TelemetryCounter) Add(resource, attributes map[string]any) {
-	key := getDimensionKey(resource)
-	if _, ok := t.resources[key]; !ok {
-		t.resources[key] = NewResourceCounter(resource)
+	t.commands <- func() {
+		key := getDimensionKey(resource)
+		if _, ok := t.resources[key]; !ok {
+			t.resources[key] = newResourceCounter(resource)
+		}
+		t.resources[key].add(attributes)
 	}
-
-	t.resources[key].Add(attributes)
 }
 
-// Resources returns a map of resource ID to a counter for that resource.
-func (t TelemetryCounter) Resources() map[string]*ResourceCounter {
-	return t.resources
-}
-
-// Reset resets the counter.
-func (t *TelemetryCounter) Reset() {
-	t.resources = make(map[string]*ResourceCounter)
+// Resources returns a map of resource ID to a counter for that resource and resets the counter.
+func (t *TelemetryCounter) Resources() map[string]*ResourceCounter {
+	result := make(chan map[string]*ResourceCounter)
+	t.commands <- func() {
+		result <- t.resources
+		t.resources = make(map[string]*ResourceCounter) // Reset the counter
+	}
+	return <-result
 }
 
 // ResourceCounter dimensions the counter by resource.
@@ -55,22 +80,22 @@ type ResourceCounter struct {
 	attributes map[string]*AttributeCounter
 }
 
-// NewResourceCounter creates a new ResourceCounter.
-func NewResourceCounter(values map[string]any) *ResourceCounter {
+// newResourceCounter creates a new ResourceCounter.
+func newResourceCounter(values map[string]any) *ResourceCounter {
 	return &ResourceCounter{
 		values:     values,
 		attributes: map[string]*AttributeCounter{},
 	}
 }
 
-// Add increments the counter with the supplied dimensions.
-func (r *ResourceCounter) Add(attributes map[string]any) {
+// add increments the counter with the supplied dimensions.
+func (r *ResourceCounter) add(attributes map[string]any) {
 	key := getDimensionKey(attributes)
 	if _, ok := r.attributes[key]; !ok {
-		r.attributes[key] = NewAttributeCounter(attributes)
+		r.attributes[key] = newAttributeCounter(attributes)
 	}
 
-	r.attributes[key].Add()
+	r.attributes[key].add()
 }
 
 // Attributes returns a map of attribute set ID to a counter for that attribute set.
@@ -89,15 +114,15 @@ type AttributeCounter struct {
 	count  int
 }
 
-// NewAttributeCounter creates a new AttributeCounter.
-func NewAttributeCounter(values map[string]any) *AttributeCounter {
+// newAttributeCounter creates a new AttributeCounter.
+func newAttributeCounter(values map[string]any) *AttributeCounter {
 	return &AttributeCounter{
 		values: values,
 	}
 }
 
-// Add increments the counter.
-func (a *AttributeCounter) Add() {
+// add increments the counter.
+func (a *AttributeCounter) add() {
 	a.count++
 }
 

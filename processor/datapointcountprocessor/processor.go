@@ -42,7 +42,6 @@ type metricCountProcessor struct {
 	logger    *zap.Logger
 	cancel    context.CancelFunc
 	wg        sync.WaitGroup
-	mux       sync.Mutex
 }
 
 // newExprProcessor returns a new processor with expr expressions.
@@ -105,13 +104,12 @@ func (p *metricCountProcessor) Shutdown(_ context.Context) error {
 		p.cancel()
 	}
 	p.wg.Wait()
+	p.counter.Stop()
 	return nil
 }
 
 // ConsumeMetrics processes the metrics.
 func (p *metricCountProcessor) ConsumeMetrics(ctx context.Context, m pmetric.Metrics) error {
-	p.mux.Lock()
-	defer p.mux.Unlock()
 
 	if p.isOTTL() {
 		p.consumeMetricsOTTL(ctx, m)
@@ -202,9 +200,6 @@ func (p *metricCountProcessor) sendMetrics(ctx context.Context) {
 
 // createMetrics creates metrics from the counter. The counter is reset after the metrics are created.
 func (p *metricCountProcessor) createMetrics() pmetric.Metrics {
-	p.mux.Lock()
-	defer p.mux.Unlock()
-
 	metrics := pmetric.NewMetrics()
 	for _, resource := range p.counter.Resources() {
 		resourceMetrics := metrics.ResourceMetrics().AppendEmpty()
@@ -231,9 +226,6 @@ func (p *metricCountProcessor) createMetrics() pmetric.Metrics {
 
 		}
 	}
-
-	p.counter.Reset()
-
 	return metrics
 }
 

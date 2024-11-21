@@ -42,10 +42,13 @@ func TestLogCounter(t *testing.T) {
 	attrKey1 := getDimensionKey(attrMap1)
 	attrKey2 := getDimensionKey(attrMap2)
 
-	require.Equal(t, 10, counter.resources[resourceKey1].attributes[attrKey1].count)
-	require.Equal(t, 5, counter.resources[resourceKey1].attributes[attrKey2].count)
-	require.Equal(t, 1, counter.resources[resourceKey2].attributes[attrKey1].count)
+	resources := counter.Resources()
 
-	counter.Reset()
-	require.Len(t, counter.resources, 0)
+	require.Equal(t, 10, resources[resourceKey1].attributes[attrKey1].count)
+	require.Equal(t, 5, resources[resourceKey1].attributes[attrKey2].count)
+	require.Equal(t, 1, resources[resourceKey2].attributes[attrKey1].count)
+
+	// Ensure that the counter has been reset
+	resources = counter.Resources()
+	require.Len(t, resources, 0)
 }

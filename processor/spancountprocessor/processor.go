@@ -43,7 +43,6 @@ type spanCountProcessor struct {
 	logger    *zap.Logger
 	cancel    context.CancelFunc
 	wg        sync.WaitGroup
-	mux       sync.Mutex
 }
 
 // newProcessor returns a new processor.
@@ -101,13 +100,12 @@ func (p *spanCountProcessor) Shutdown(_ context.Context) error {
 		p.cancel()
 	}
 	p.wg.Wait()
+	p.counter.Stop()
 	return nil
 }
 
 // ConsumeMetrics processes the metrics.
 func (p *spanCountProcessor) ConsumeTraces(ctx context.Context, t ptrace.Traces) error {
-	p.mux.Lock()
-	defer p.mux.Unlock()
 
 	if p.isOTTL() {
 		p.consumeTracesOTTL(ctx, t)
@@ -184,15 +182,11 @@ func (p *spanCountProcessor) handleMetricInterval(ctx context.Context) {
 
 // sendMetrics sends metrics to the consumer.
 func (p *spanCountProcessor) sendMetrics(ctx context.Context) {
-	p.mux.Lock()
-	defer p.mux.Unlock()
 
 	metrics := p.createMetrics()
 	if metrics.ResourceMetrics().Len() == 0 {
 		return
 	}
-
-	p.counter.Reset()
 
 	if err := routereceiver.RouteMetrics(ctx, p.config.Route, metrics); err != nil {
 		p.logger.Error("Failed to send metrics", zap.Error(err))
