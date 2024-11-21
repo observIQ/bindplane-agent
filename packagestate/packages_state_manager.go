@@ -26,7 +26,7 @@ import (
 )
 
 // CollectorPackageName is the name for the top level packages for this collector
-const CollectorPackageName = "observiq-otel-collector"
+const CollectorPackageName = "bindplane-agent"
 
 // DefaultFileName is the default name of the file use to store state
 const DefaultFileName = "package_statuses.json"

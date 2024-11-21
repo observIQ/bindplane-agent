@@ -14,12 +14,15 @@ The BindPlane Agent is observIQ’s custom distribution of the [OpenTelemetry co
 ## Benefits
 
 ### Focused on usability
+
 Increases the accessibility of OpenTelemetry by providing simplified installation scripts and end-to-end documentation making it easy to get started
 
 ### All the best parts of OpenTelemetry and more
+
 Bundled with all core OpenTelemetry receivers, processors, and exporters as well as additional capabilities for monitoring complex or enterprise technologies not yet available in upstream releases
- 
+
 ### Always Production-ready and fully-supported
+
 Tested, verified, and supported by observIQ
 
 ## Quick Start
@@ -31,6 +34,7 @@ You'll need a BindPlane server in order to run the collector with the supervisor
 #### Linux
 
 To install using the installation script, you may run:
+
 ```sh
 sudo sh -c "$(curl -fsSlL https://github.com/observiq/bindplane-agent/releases/latest/download/install_unix.sh)" install_unix.sh
 ```
@@ -40,8 +44,9 @@ To install directly with the appropriate package manager, see [installing on Lin
 #### Windows
 
 To install the BindPlane Agent on Windows, run the Powershell command below to install the MSI with no UI.
+
 ```pwsh
-msiexec /i "https://github.com/observIQ/bindplane-agent/releases/latest/download/observiq-otel-collector.msi" /quiet
+msiexec /i "https://github.com/observIQ/bindplane-agent/releases/latest/download/bindplane-agent.msi" /quiet
 ```
 
 Alternately, for an interactive installation [download the latest MSI](https://github.com/observIQ/bindplane-agent/releases/latest).
@@ -67,10 +72,10 @@ With the agent installed, you can use BindPlane to create a configuration and be
 You can edit the supervisor config as needed for communicating with BindPlane and managing the agent. To find your config file based on your OS reference the table below:
 
 | OS      | Default Location                                                  |
-|:--------|:------------------------------------------------------------------|
-| Linux   | /opt/observiq-otel-collector/supervisor.yaml                      |
+| :------ | :---------------------------------------------------------------- |
+| Linux   | /opt/bindplane-agent/supervisor.yaml                              |
 | Windows | C:\Program Files\observIQ OpenTelemetry Collector\supervisor.yaml |
-| macOS   | /opt/observiq-otel-collector/supervisor.yaml                      |
+| macOS   | /opt/bindplane-agent/supervisor.yaml                              |
 
 For more information on supervisor configuration see the [supervisor documentation](./docs/supervisor.md).
 

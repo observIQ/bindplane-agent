@@ -17,7 +17,7 @@ if "%endpoint%"=="" (
 )
 
 set "supervisorFile=%install_dir%supervisor.yaml"
-set "agentBinary=%install_dir%observiq-otel-collector.exe"
+set "agentBinary=%install_dir%bindplane-agent.exe"
 
 echo Writing manager yaml
 
