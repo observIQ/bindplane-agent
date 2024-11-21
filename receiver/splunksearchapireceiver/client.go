@@ -32,7 +32,7 @@ import (
 
 type splunkSearchAPIClient interface {
 	CreateSearchJob(search string) (CreateJobResponse, error)
-	GetJobStatus(searchID string) (SearchStatusResponse, error)
+	GetJobStatus(searchID string) (SearchJobStatusResponse, error)
 	GetSearchResults(searchID string, offset int, batchSize int) (SearchResultsResponse, error)
 }
 
@@ -61,7 +61,7 @@ func newSplunkSearchAPIClient(ctx context.Context, settings component.TelemetryS
 func (c defaultSplunkSearchAPIClient) CreateSearchJob(search string) (CreateJobResponse, error) {
 	endpoint := fmt.Sprintf("%s/services/search/jobs", c.endpoint)
 
-	if !strings.Contains(search, "starttime=") || !strings.Contains(search, "endtime=") || !strings.Contains(search, "timeformat=") {
+	if !strings.Contains(search, strings.ToLower("starttime=")) || !strings.Contains(search, strings.ToLower("endtime=")) || !strings.Contains(search, strings.ToLower("timeformat=")) {
 		return CreateJobResponse{}, fmt.Errorf("search query must contain starttime, endtime, and timeformat")
 	}
 
@@ -95,33 +95,33 @@ func (c defaultSplunkSearchAPIClient) CreateSearchJob(search string) (CreateJobR
 	return jobResponse, nil
 }
 
-func (c defaultSplunkSearchAPIClient) GetJobStatus(sid string) (SearchStatusResponse, error) {
+func (c defaultSplunkSearchAPIClient) GetJobStatus(sid string) (SearchJobStatusResponse, error) {
 	endpoint := fmt.Sprintf("%s/services/search/v2/jobs/%s", c.endpoint, sid)
 
 	req, err := http.NewRequest("GET", endpoint, nil)
 	if err != nil {
-		return SearchStatusResponse{}, err
+		return SearchJobStatusResponse{}, err
 	}
 	req.SetBasicAuth(c.username, c.password)
 
 	resp, err := c.client.Do(req)
 	if err != nil {
-		return SearchStatusResponse{}, err
+		return SearchJobStatusResponse{}, err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return SearchStatusResponse{}, fmt.Errorf("failed to get search job status: %d", resp.StatusCode)
+		return SearchJobStatusResponse{}, fmt.Errorf("failed to get search job status: %d", resp.StatusCode)
 	}
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return SearchStatusResponse{}, fmt.Errorf("failed to read search job status response: %v", err)
+		return SearchJobStatusResponse{}, fmt.Errorf("failed to read search job status response: %v", err)
 	}
-	var jobStatusResponse SearchStatusResponse
+	var jobStatusResponse SearchJobStatusResponse
 	err = xml.Unmarshal(body, &jobStatusResponse)
 	if err != nil {
-		return SearchStatusResponse{}, fmt.Errorf("failed to unmarshal search job status response: %v", err)
+		return SearchJobStatusResponse{}, fmt.Errorf("failed to unmarshal search job status response: %v", err)
 	}
 
 	return jobStatusResponse, nil
