@@ -26,12 +26,36 @@ func TestConfigValidate(t *testing.T) {
 		require.NoError(t, err)
 	})
 
-	// t.Run("OpAMP ID must be specified", func(t *testing.T) {
-	// 	var emptyID component.ID
+	t.Run("Empty configName", func(t *testing.T) {
+		cfg := Config{
+			Enabled:   true,
+			Interval:  defaultInterval,
+			AccountID: "myacct",
+			OrgID:     "myorg",
+		}
+		err := cfg.Validate()
+		require.Error(t, err)
+	})
 
-	// 	cfg := createDefaultConfig().(*Config)
-	// 	cfg.OpAMP = emptyID
+	t.Run("Empty AccountID", func(t *testing.T) {
+		cfg := Config{
+			Enabled:    true,
+			Interval:   defaultInterval,
+			OrgID:      "myorg",
+			ConfigName: "myconfig",
+		}
+		err := cfg.Validate()
+		require.Error(t, err)
+	})
 
-	// 	require.ErrorContains(t, cfg.Validate(), "`opamp` must be specified")
-	// })
+	t.Run("Empty OrgID", func(t *testing.T) {
+		cfg := Config{
+			Enabled:    true,
+			Interval:   defaultInterval,
+			AccountID:  "myacct",
+			ConfigName: "myconfig",
+		}
+		err := cfg.Validate()
+		require.Error(t, err)
+	})
 }

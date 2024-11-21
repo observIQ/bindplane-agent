@@ -32,8 +32,8 @@ type TopologyStateRegistry interface {
 	Reset()
 }
 
-// GatewayConfigInfo reprents the unique identifiable information about a bindplane gateway's configuration
-type GatewayConfigInfo struct {
+// ConfigInfo reprents the unique identifiable information about a bindplane gateway's configuration
+type ConfigInfo struct {
 	ConfigName string
 	AccountID  string
 	OrgID      string
@@ -41,20 +41,20 @@ type GatewayConfigInfo struct {
 
 // TopologyState represents the data captured through topology processors.
 type TopologyState struct {
-	destConfig GatewayConfigInfo
-	routeTable map[GatewayConfigInfo]time.Time
+	destConfig ConfigInfo
+	routeTable map[ConfigInfo]time.Time
 }
 
 // TopologyInfo represents topology relationships between configs.
 type TopologyInfo struct {
-	ConfigName    string       `json:"configName"`
-	AccountID     string       `json:"accountID"`
-	OrgID         string       `json:"orgID"`
-	SourceConfigs []ConfigInfo `json:"sourceConfigs"`
+	ConfigName    string         `json:"configName"`
+	AccountID     string         `json:"accountID"`
+	OrgID         string         `json:"orgID"`
+	SourceConfigs []ConfigRecord `json:"sourceConfigs"`
 }
 
-// ConfigInfo represents a source config and the time it was last detected
-type ConfigInfo struct {
+// ConfigRecord represents a source config and the time it was last detected
+type ConfigRecord struct {
 	ConfigName  string    `json:"configName"`
 	AccountID   string    `json:"accountID"`
 	OrgID       string    `json:"orgID"`
@@ -62,16 +62,15 @@ type ConfigInfo struct {
 }
 
 // NewTopologyState initializes a new TopologyState
-func NewTopologyState(destGateway GatewayConfigInfo, interval time.Duration) (*TopologyState, error) {
+func NewTopologyState(destGateway ConfigInfo, interval time.Duration) (*TopologyState, error) {
 	return &TopologyState{
 		destConfig: destGateway,
-		routeTable: make(map[GatewayConfigInfo]time.Time),
+		routeTable: make(map[ConfigInfo]time.Time),
 	}, nil
 }
 
 // UpsertRoute upserts given route.
-func (ts *TopologyState) UpsertRoute(ctx context.Context, gw GatewayConfigInfo) {
-	fmt.Println("\033[34m UPSERT ROUTE \033[0m", gw)
+func (ts *TopologyState) UpsertRoute(ctx context.Context, gw ConfigInfo) {
 	ts.routeTable[gw] = time.Now()
 }
 
@@ -126,7 +125,7 @@ func (rtsr *ResettableTopologyStateRegistry) TopologyInfos() []TopologyInfo {
 		curInfo.AccountID = ts.destConfig.AccountID
 		curInfo.OrgID = ts.destConfig.OrgID
 		for gw, updated := range ts.routeTable {
-			curInfo.SourceConfigs = append(curInfo.SourceConfigs, ConfigInfo{
+			curInfo.SourceConfigs = append(curInfo.SourceConfigs, ConfigRecord{
 				ConfigName:  gw.ConfigName,
 				AccountID:   gw.AccountID,
 				OrgID:       gw.OrgID,
@@ -134,7 +133,7 @@ func (rtsr *ResettableTopologyStateRegistry) TopologyInfos() []TopologyInfo {
 			})
 		}
 		if len(curInfo.SourceConfigs) > 0 {
-			slices.SortFunc(curInfo.SourceConfigs, func(a ConfigInfo, b ConfigInfo) int {
+			slices.SortFunc(curInfo.SourceConfigs, func(a ConfigRecord, b ConfigRecord) int {
 				if a.OrgID < b.OrgID {
 					return -1
 				}

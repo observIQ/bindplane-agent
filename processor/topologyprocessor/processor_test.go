@@ -49,7 +49,7 @@ func TestProcess_Logs(t *testing.T) {
 	}
 
 	mockHost := &mockHost{
-		extensions: map[component.ID]component.Component{
+		extMap: map[component.ID]component.Component{
 			component.MustNewID("opamp"): mockOpamp,
 		},
 	}
@@ -113,7 +113,7 @@ func TestProcess_Metrics(t *testing.T) {
 	}
 
 	mockHost := &mockHost{
-		extensions: map[component.ID]component.Component{
+		extMap: map[component.ID]component.Component{
 			component.MustNewID("opamp"): mockOpamp,
 		},
 	}
@@ -177,7 +177,7 @@ func TestProcess_Traces(t *testing.T) {
 	}
 
 	mockHost := &mockHost{
-		extensions: map[component.ID]component.Component{
+		extMap: map[component.ID]component.Component{
 			component.MustNewID("opamp"): mockOpamp,
 		},
 	}
@@ -226,19 +226,6 @@ func TestProcess_Traces(t *testing.T) {
 
 	require.Equal(t, expectedMessageContents, actualMessageContents)
 	require.Equal(t, "reportSnapshot", mockOpamp.sentMessageType)
-}
-
-// mockHost for component.Host
-type mockHost struct {
-	extensions map[component.ID]component.Component
-}
-
-func (nh *mockHost) GetFactory(component.Kind, component.Type) component.Factory {
-	return nil
-}
-
-func (nh *mockHost) GetExtensions() map[component.ID]component.Component {
-	return nh.extensions
 }
 
 type mockOpAMPExtension struct {

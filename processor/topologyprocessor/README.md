@@ -1,51 +1,51 @@
 # Topology Processor
+This processor utilizes request headers to provide extended topology functionality in BindPlane.
 
-The topology processor is used in custom distributions of the collector to provide snapshot functionality in BindPlane. It is not currently included in the official `bindplane-agent`.
+## Minimum agent versions
+- Introduced: [v1.6.6](https://github.com/observIQ/bindplane-agent/releases/tag/v1.6.6)
 
-# TODO: write this whole file for topo processor
-
-## Supported pipelines
-
+## Supported pipelines:
 - Logs
 - Metrics
 - Traces
 
-## How it works
-
 ## Configuration
+| Field               | Type      | Default | Description                                                                                                                                                               |
+|---------------------|-----------|---------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `enabled`           | bool      | `false` | When `true`, this processor will look for incoming topology headers and track the relevant connections accordingly. If false this processor acts as a no-op.              |
+| `interval`          | duration  | `1m`    | The interval at which topology data is sent to Bindplane via OpAMP.                                                                                                       |
+| `configName`        | string    |         | The name of the Bindplane configuration this processor is running on.                                                                                                     |
+| `orgID`             | string    |         | The Organization ID of the Bindplane configuration where this processor is running.                                                                                       |
+| `accountID`         | string    |         | The Account ID of the Bindplane configuration where this processor is running.                                                                                            |
 
-| Field   | Type   | Default | Required | Description                                                            |
-|---------|--------|---------|----------|------------------------------------------------------------------------|
-| opamp   | string | `opamp` | `true`   | Specifies the name of the opamp extension for sending custom messages. |
 
+### Example configuration
 
-## Examples
-
-### Usage in pipelines
+The example configuration below shows ingesting logs and sampling the size of 50% of the OTLP log objects.
 
 ```yaml
 receivers:
   filelog:
-    include: [/var/log/logfile.txt]
+    inclucde: ["/var/log/*.log"]
 
 processors:
   topology:
-    opamp: opamp
+    enabled: true
+    interval: 1m
+    configName: "myConfigName"
+    orgID: "myOrgID"
+    accountID: "myAccountID"
 
 exporters:
-  nop:
-
-extensions:
-  bindplane:
-    labels: "labelA=valueA,labelB=valueB"
-  opamp:
-    endpoint: "https://localhost:3001/v1/opamp"
+  googlecloud:
 
 service:
-  extensions: [bindplane, opamp]
   pipelines:
     logs:
-      receivers: [filelog]
-      processors: [topologyprocessor]
-      exporters: [nop]
+      receivers:
+        - filelog
+      processors:
+        - topology
+      exporters:
+        - googlecloud
 ```

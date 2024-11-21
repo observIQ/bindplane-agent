@@ -35,8 +35,8 @@ import (
 type bindplaneExtension struct {
 	logger                            *zap.Logger
 	cfg                               *Config
-	ctmr                              *measurements.ResettableThroughputMeasurementsRegistry
-	rtsr                              *topology.ResettableTopologyStateRegistry
+	measurementsRegistry              *measurements.ResettableThroughputMeasurementsRegistry
+	topologyRegistry                  *topology.ResettableTopologyStateRegistry
 	customCapabilityHandlerThroughput opampcustommessages.CustomCapabilityHandler
 	customCapabilityHandlerTopology   opampcustommessages.CustomCapabilityHandler
 
@@ -46,12 +46,12 @@ type bindplaneExtension struct {
 
 func newBindplaneExtension(logger *zap.Logger, cfg *Config) *bindplaneExtension {
 	return &bindplaneExtension{
-		logger:   logger,
-		cfg:      cfg,
-		ctmr:     measurements.NewResettableThroughputMeasurementsRegistry(false),
-		rtsr:     topology.NewResettableTopologyStateRegistry(),
-		doneChan: make(chan struct{}),
-		wg:       &sync.WaitGroup{},
+		logger:               logger,
+		cfg:                  cfg,
+		measurementsRegistry: measurements.NewResettableThroughputMeasurementsRegistry(false),
+		topologyRegistry:     topology.NewResettableTopologyStateRegistry(),
+		doneChan:             make(chan struct{}),
+		wg:                   &sync.WaitGroup{},
 	}
 }
 
@@ -80,11 +80,11 @@ func (b *bindplaneExtension) Start(_ context.Context, host component.Host) error
 }
 
 func (b *bindplaneExtension) RegisterThroughputMeasurements(processorID string, measurements *measurements.ThroughputMeasurements) error {
-	return b.ctmr.RegisterThroughputMeasurements(processorID, measurements)
+	return b.measurementsRegistry.RegisterThroughputMeasurements(processorID, measurements)
 }
 
 func (b *bindplaneExtension) RegisterTopologyState(processorID string, topology *topology.TopologyState) error {
-	return b.rtsr.RegisterTopologyState(processorID, topology)
+	return b.topologyRegistry.RegisterTopologyState(processorID, topology)
 }
 
 func (b *bindplaneExtension) setupCustomCapabilities(host component.Host) error {
@@ -145,7 +145,7 @@ func (b *bindplaneExtension) reportMetricsLoop() {
 }
 
 func (b *bindplaneExtension) reportMetrics() error {
-	m := b.ctmr.OTLPMeasurements(b.cfg.ExtraMeasurementsAttributes)
+	m := b.measurementsRegistry.OTLPMeasurements(b.cfg.ExtraMeasurementsAttributes)
 
 	// Send metrics as snappy-encoded otlp proto
 	marshaller := pmetric.ProtoMarshaler{}
@@ -189,9 +189,7 @@ func (b *bindplaneExtension) reportTopologyLoop() {
 }
 
 func (b *bindplaneExtension) reportTopology() error {
-	ts := b.rtsr.TopologyInfos()
-
-	fmt.Println("\033[34m Reporting Topology to BP: \033[0m", ts)
+	ts := b.topologyRegistry.TopologyInfos()
 
 	// Send topology state snappy-encoded
 	marshalled, err := json.Marshal(ts)
