@@ -26,8 +26,10 @@ import (
 
 var (
 	errNonStandaloneSearchQuery = errors.New("only standalone search commands can be used for scraping data")
-	TokenTypeBearer             = "Bearer"
-	TokenTypeSplunk             = "Splunk"
+	// TokenTypeBearer is the token type for Bearer tokens
+	TokenTypeBearer = "Bearer"
+	// TokenTypeSplunk is the token type for Splunk tokens
+	TokenTypeSplunk = "Splunk"
 )
 
 // Config struct to represent the configuration for the Splunk Search API receiver
