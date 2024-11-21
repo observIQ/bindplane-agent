@@ -33,7 +33,7 @@ VERSION ?= $(if $(CURRENT_TAG),$(CURRENT_TAG),$(PREVIOUS_TAG))
 .PHONY: agent
 agent:
 	CGO_ENABLED=0 builder --config="./manifests/observIQ/manifest.yaml" --ldflags "-s -w -X github.com/observiq/bindplane-agent/internal/version.version=$(VERSION)"
-	mkdir -p $(OUTDIR); cp ./builder/observiq-otel-collector $(OUTDIR)/collector_$(GOOS)_$(GOARCH)$(EXT)
+	mkdir -p $(OUTDIR); cp ./builder/bindplane-agent $(OUTDIR)/collector_$(GOOS)_$(GOARCH)$(EXT)
 
 # Builds a custom distro for the current GOOS/GOARCH pair using the manifest specified
 # MANIFEST = path to the manifest file for the distro to be built
@@ -41,15 +41,6 @@ agent:
 .PHONY: distro
 distro:
 	builder --config="$(MANIFEST)"
-
-# Builds the updater for current GOOS/GOARCH pair && sets flags
-.PHONY: updater
-updater:
-	cd ./updater/; CGO_ENABLED=0 go build -ldflags "-s -w\
-		-X 'github.com/observiq/bindplane-agent/updater/internal/version.version=$(VERSION)'\
-		-X 'github.com/observiq/bindplane-agent/updater/internal/version.gitHash=$(shell git rev-parse HEAD)'\
-		-X 'github.com/observiq/bindplane-agent/updater/internal/version.date=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")'"\
-		-o ../$(OUTDIR)/updater_$(GOOS)_$(GOARCH)$(EXT) ./cmd/updater
 
 # Runs the supervisor invoking the agent build in /dist
 .PHONY: run-supervisor
@@ -67,9 +58,9 @@ kill:
 reset: kill
 	rm -rf agent.log effective.yaml local/storage/* builder/
 
-# Builds the updater + agent for current GOOS/GOARCH pair
+# Builds the agent for current GOOS/GOARCH pair
 .PHONY: build-binaries
-build-binaries: agent updater
+build-binaries: agent
 
 .PHONY: build-all
 build-all: build-linux build-darwin build-windows
@@ -162,10 +153,6 @@ test-with-cover:
 	$(MAKE) for-all CMD="go test -coverprofile=cover.out ./..."
 	$(MAKE) for-all CMD="go tool cover -html=cover.out -o cover.html"
 
-.PHONY: test-updater-integration
-test-updater-integration:
-	cd updater; go test $(INTEGRATION_TEST_ARGS) -race ./...
-
 .PHONY: bench
 bench:
 	$(MAKE) for-all CMD="go test -benchmem -run=^$$ -bench ^* ./..."
@@ -189,7 +176,6 @@ gosec:
 	cd internal; $(MAKE) -f "../Makefile" for-all CMD="gosec ./..."
 	cd extension; $(MAKE) -f "../Makefile" for-all CMD="gosec ./..."
 	cd receiver; $(MAKE) -f "../Makefile" for-all CMD="gosec ./..."
-	cd updater; gosec -exclude-dir internal/service/testdata ./...
 
 # This target performs all checks that CI will do (excluding the build itself)
 .PHONY: ci-checks
@@ -247,17 +233,17 @@ release-prep:
 	@echo '$(CURR_VERSION)' > release_deps/VERSION.txt
 	bash ./buildscripts/download-dependencies.sh release_deps
 	@cp -r ./plugins release_deps/
-	@cp service/com.observiq.collector.plist release_deps/com.observiq.collector.plist
+	@cp service/com.bindplane.agent.plist release_deps/com.bindplane.agent.plist
 	@jq ".files[] | select(.service != null)" windows/wix.json >> release_deps/windows_service.json
-	@cp service/observiq-otel-collector.service release_deps/observiq-otel-collector.service
-	@cp service/observiq-otel-collector release_deps/observiq-otel-collector
+	@cp service/bindplane-agent.service release_deps/bindplane-agent.service
+	@cp service/bindplane-agent release_deps/bindplane-agent
 	@cp -r ./service/sysconfig release_deps/
 
 # Build and sign, skip release and ignore dirty git tree
 .PHONY: release-test
 release-test:
 # If there is no MSI in the root dir, we'll create a dummy one so that goreleaser can complete successfully
-	if [ ! -e "./observiq-otel-collector.msi" ]; then touch ./observiq-otel-collector.msi; fi
+	if [ ! -e "./bindplane-agent.msi" ]; then touch ./bindplane-agent.msi; fi
 	GORELEASER_CURRENT_TAG=$(VERSION) goreleaser release --parallelism 4 --skip=publish --skip=validate --skip=sign --clean --snapshot
 
 .PHONY: for-all
@@ -300,7 +286,7 @@ clean:
 
 .PHONY: scan-licenses
 scan-licenses:
-	lichen --config=./license.yaml $$(find dist/collector_* dist/updater_*)
+	lichen --config=./license.yaml $$(find dist/collector_*)
 
 .PHONY: generate
 generate:

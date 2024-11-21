@@ -1,6 +1,7 @@
 # Supervisor
 
 The [OpenTelemetry supervisor](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/cmd/opampsupervisor) is the process that runs the [OpenTelemetry collector](https://github.com/open-telemetry/opentelemetry-collector). The supervisor's responsibilities include but are not limited to:
+
 - Starting & stopping the collector
 - Communicating to OpAMP server on behalf of the collector
 - Managing the collector's config based on OpAMP messages from the OpAMP server.
@@ -15,10 +16,10 @@ The install scripts are oriented towards running the supervisor connected to an 
 The supervisor's config file can be located depending on your OS:
 
 | OS      | Default Location                                                  |
-|:--------|:------------------------------------------------------------------|
-| Linux   | /opt/observiq-otel-collector/supervisor.yaml                      |
+| :------ | :---------------------------------------------------------------- |
+| Linux   | /opt/bindplane-agent/supervisor.yaml                              |
 | Windows | C:\Program Files\observIQ OpenTelemetry Collector\supervisor.yaml |
-| macOS   | /opt/observiq-otel-collector/supervisor.yaml                      |
+| macOS   | /opt/bindplane-agent/supervisor.yaml                              |
 
 Configuration options for the supervisor can be found [here](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/cmd/opampsupervisor/specification/README.md#supervisor-configuration).
 
@@ -28,10 +29,10 @@ If this model of running the collector via the supervisor and an OpAMP managemen
 
 The collector's binary can be found depending on your OS below:
 
-| OS      | Default Location                                                              |
-|:--------|:------------------------------------------------------------------------------|
-| Linux   | /opt/observiq-otel-collector/observiq-otel-collector                          |
-| Windows | C:\Program Files\observIQ OpenTelemetry Collector\observiq-otel-collector.exe |
-| macOS   | /opt/observiq-otel-collector/observiq-otel-collector                          |
+| OS      | Default Location                                                      |
+| :------ | :-------------------------------------------------------------------- |
+| Linux   | /opt/bindplane-agent/bindplane-agent                                  |
+| Windows | C:\Program Files\observIQ OpenTelemetry Collector\bindplane-agent.exe |
+| macOS   | /opt/bindplane-agent/bindplane-agent                                  |
 
 You can create an OTel configuration for the collector and run it like any other OTel collector. For more information on OTel configurations, see the [OpenTelemetry docs](https://opentelemetry.io/docs/collector/configuration/).

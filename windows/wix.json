@@ -11,7 +11,7 @@
     {
       "path": "opampsupervisor.exe",
       "service": {
-        "name": "observiq-otel-collector",
+        "name": "bindplane-agent",
         "start": "delayed",
         "display-name": "observIQ Distro for OpenTelemetry Collector",
         "description": "observIQ's distribution of the OpenTelemetry collector.",
@@ -19,7 +19,7 @@
       }
     },
     {
-      "path": "observiq-otel-collector.exe"
+      "path": "bindplane-agent.exe"
     },
     {
       "path": "updater.exe"
