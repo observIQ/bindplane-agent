@@ -16,6 +16,7 @@ package splunksearchapireceiver
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 	"time"
 
@@ -25,13 +26,17 @@ import (
 
 var (
 	errNonStandaloneSearchQuery = errors.New("only standalone search commands can be used for scraping data")
+	TokenTypeBearer             = "Bearer"
+	TokenTypeSplunk             = "Splunk"
 )
 
 // Config struct to represent the configuration for the Splunk Search API receiver
 type Config struct {
 	confighttp.ClientConfig `mapstructure:",squash"`
-	Username                string        `mapstructure:"splunk_username"`
-	Password                string        `mapstructure:"splunk_password"`
+	Username                string        `mapstructure:"splunk_username,omitempty"`
+	Password                string        `mapstructure:"splunk_password,omitempty"`
+	AuthToken               string        `mapstructure:"auth_token,omitempty"`
+	TokenType               string        `mapstructure:"token_type,omitempty"`
 	Searches                []Search      `mapstructure:"searches"`
 	JobPollInterval         time.Duration `mapstructure:"job_poll_interval"`
 	StorageID               *component.ID `mapstructure:"storage"`
@@ -51,12 +56,27 @@ func (cfg *Config) Validate() error {
 	if cfg.Endpoint == "" {
 		return errors.New("missing Splunk server endpoint")
 	}
-	if cfg.Username == "" {
+
+	if cfg.Username == "" && cfg.AuthToken == "" {
 		return errors.New("missing Splunk username")
 	}
-	if cfg.Password == "" {
+
+	if cfg.Password == "" && cfg.AuthToken == "" {
 		return errors.New("missing Splunk password")
 	}
+
+	if cfg.AuthToken != "" {
+		if cfg.TokenType == "" {
+			return errors.New("auth_token provided without a token type")
+		}
+		if !strings.EqualFold(cfg.TokenType, TokenTypeBearer) && !strings.EqualFold(cfg.TokenType, TokenTypeSplunk) {
+			return fmt.Errorf("auth_token provided without a correct token type, valid token types are %v", []string{TokenTypeBearer, TokenTypeSplunk})
+		}
+		if cfg.Username != "" || cfg.Password != "" {
+			return errors.New("auth_token and username/password were both provided, only one can be provided to authenticate with Splunk")
+		}
+	}
+
 	if len(cfg.Searches) == 0 {
 		return errors.New("at least one search must be provided")
 	}

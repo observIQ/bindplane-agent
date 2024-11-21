@@ -119,25 +119,23 @@ func (ssapir *splunksearchapireceiver) runQueries(ctx context.Context) error {
 		searchID, err := ssapir.createSplunkSearch(search)
 		if err != nil {
 			ssapir.logger.Error("error creating search", zap.Error(err))
+			return err
 		}
 
 		// wait for search to complete
-		for {
-			done, err := ssapir.isSearchCompleted(searchID)
-			if err != nil {
-				ssapir.logger.Error("error checking search status", zap.Error(err))
-			}
-			if done {
-				break
-			}
-			time.Sleep(2 * time.Second)
+		if err = ssapir.pollSearchCompletion(ctx, searchID); err != nil {
+			ssapir.logger.Error("error polling for search completion", zap.Error(err))
+			return err
 		}
 
-		// fetch search results
-		results, err := ssapir.getSplunkSearchResults(ssapir.config, searchID)
-		if err != nil {
-			ssapir.logger.Error("error fetching search results", zap.Error(err))
-		}
+		for {
+			ssapir.logger.Info("fetching search results")
+			results, err := ssapir.getSplunkSearchResults(searchID, offset, search.EventBatchSize)
+			if err != nil {
+				ssapir.logger.Error("error fetching search results", zap.Error(err))
+				return err
+			}
+			ssapir.logger.Info("search results fetched", zap.Int("num_results", len(results.Results)))
 
 			// parse time strings to time.Time
 			earliestTime, err := time.Parse(time.RFC3339, search.EarliestTime)
@@ -212,9 +210,9 @@ func (ssapir *splunksearchapireceiver) runQueries(ctx context.Context) error {
 			}
 			// if the number of results is less than the results per request, we have queried all pages for the search
 			if len(results.Results) < search.EventBatchSize {
+				ssapir.logger.Debug("results less than batch size, stopping search result export")
 				break
 			}
-
 		}
 		ssapir.logger.Info("search results exported", zap.String("query", search.Query), zap.Int("total results", exportedEvents))
 	}

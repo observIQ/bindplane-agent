@@ -98,6 +98,30 @@ func TestGetSearchResults(t *testing.T) {
 	require.Empty(t, resp)
 }
 
+func TestSetSplunkRequestAuth(t *testing.T) {
+	client := defaultSplunkSearchAPIClient{
+		username: "user",
+		password: "password",
+	}
+	req := httptest.NewRequest("GET", "http://localhost:8089", nil)
+	client.SetSplunkRequestAuth(req)
+	require.Equal(t, req.Header.Get("Authorization"), "Basic dXNlcjpwYXNzd29yZA==")
+
+	client = defaultSplunkSearchAPIClient{
+		authToken: "token",
+		tokenType: TokenTypeBearer,
+	}
+	client.SetSplunkRequestAuth(req)
+	require.Equal(t, req.Header.Get("Authorization"), "Bearer token")
+
+	client = defaultSplunkSearchAPIClient{
+		authToken: "token",
+		tokenType: TokenTypeSplunk,
+	}
+	client.SetSplunkRequestAuth(req)
+	require.Equal(t, req.Header.Get("Authorization"), "Splunk token")
+}
+
 // mock Splunk servers
 func newMockServer() *httptest.Server {
 	return httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
