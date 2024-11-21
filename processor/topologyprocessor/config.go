@@ -22,8 +22,6 @@ import (
 	"go.opentelemetry.io/collector/component"
 )
 
-var defaultOpAMPExtensionID = component.MustNewID("opamp")
-
 const defaultInterval = time.Minute
 
 // Config is the configuration for the processor
@@ -34,7 +32,7 @@ type Config struct {
 	// Interval is the interval at which this processor sends topology messages to BindPlane
 	Interval time.Duration `mapstructure:"interval"`
 
-	// Bindplane extension to use in order to report metrics. Optional.
+	// Bindplane extension to use in order to report topology. Optional.
 	BindplaneExtension component.ID `mapstructure:"bindplane_extension"`
 
 	// Name of the Config where this processor is present

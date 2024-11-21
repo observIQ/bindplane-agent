@@ -30,14 +30,14 @@ import (
 )
 
 const (
-	orgIDHeader      = "x-bp-orgid"
-	accountIDHeader  = "x-bp-accountid"
-	configNameHeader = "x-bp-config"
+	organizationIDHeader = "X-Bindplane-Organization-ID"
+	accountIDHeader      = "X-Bindplane-Account-ID"
+	configNameHeader     = "X-Bindplane-Configuration"
 )
 
 type topologyUpdate struct {
-	gw         topology.GatewayConfigInfo
-	routeTable map[topology.GatewayConfigInfo]time.Time
+	gw         topology.ConfigInfo
+	routeTable map[topology.ConfigInfo]time.Time
 }
 
 type topologyProcessor struct {
@@ -53,7 +53,7 @@ type topologyProcessor struct {
 
 // newTopologyProcessor creates a new topology processor
 func newTopologyProcessor(logger *zap.Logger, cfg *Config, processorID component.ID) (*topologyProcessor, error) {
-	destGw := topology.GatewayConfigInfo{
+	destGw := topology.ConfigInfo{
 		ConfigName: cfg.ConfigName,
 		AccountID:  cfg.AccountID,
 		OrgID:      cfg.OrgID,
@@ -74,9 +74,7 @@ func newTopologyProcessor(logger *zap.Logger, cfg *Config, processorID component
 
 func (tp *topologyProcessor) start(ctx context.Context, host component.Host) error {
 	var err error
-	fmt.Println("\033[34m TP START \033[0m")
 	tp.startOnce.Do(func() {
-		fmt.Println("\033[34m TP DOING START \033[0m")
 		registry, getRegErr := GetTopologyRegistry(host, tp.bindplane)
 		if getRegErr != nil {
 			err = fmt.Errorf("get topology registry: %w", getRegErr)
@@ -84,13 +82,10 @@ func (tp *topologyProcessor) start(ctx context.Context, host component.Host) err
 		}
 
 		if registry != nil {
-			fmt.Println("\033[34m TP Register Topology State \033[0m")
 			registerErr := registry.RegisterTopologyState(tp.processorID.String(), tp.topology)
 			if registerErr != nil {
-				err = fmt.Errorf("register topology: %w", registerErr)
 				return
 			}
-			fmt.Println("\033[34m Sending on channel: \033[0m", tp.interval)
 			registry.SetIntervalChan() <- tp.interval
 		}
 	})
@@ -116,17 +111,16 @@ func (tp *topologyProcessor) processMetrics(ctx context.Context, md pmetric.Metr
 func (tp *topologyProcessor) processTopologyHeaders(ctx context.Context) {
 	metadata, ok := metadata.FromIncomingContext(ctx)
 	if ok {
-		gw := topology.GatewayConfigInfo{
+		gw := topology.ConfigInfo{
 			ConfigName: metadata.Get(configNameHeader)[0],
 			AccountID:  metadata.Get(accountIDHeader)[0],
-			OrgID:      metadata.Get(orgIDHeader)[0],
+			OrgID:      metadata.Get(organizationIDHeader)[0],
 		}
 		tp.topology.UpsertRoute(ctx, gw)
 	}
 }
 
 func (tp *topologyProcessor) shutdown(_ context.Context) error {
-	fmt.Println("\033[34m TP SHUTDOWN \033[0m")
 	unregisterProcessor(tp.processorID)
 	return nil
 }

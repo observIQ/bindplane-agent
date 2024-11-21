@@ -12,13 +12,11 @@
 // // See the License for the specific language governing permissions and
 // // limitations under the License.
 
-// //go:build bindplane
+//go:build bindplane
 
 package topologyprocessor
 
 import (
-	"fmt"
-
 	"github.com/observiq/bindplane-agent/internal/topology"
 	"go.opentelemetry.io/collector/component"
 )
@@ -26,6 +24,5 @@ import (
 // GetTopologyRegistry returns the topology registry that should be registered to based on the component ID.
 // nil, nil may be returned by this function. In this case, the processor should not register it's topology state anywhere.
 func GetTopologyRegistry(host component.Host, bindplane component.ID) (topology.TopologyStateRegistry, error) {
-	fmt.Println("\033[34m IN BINDPLANE REGISTRY \033[0m")
 	return topology.BindplaneAgentTopologyStateRegistry, nil
 }
