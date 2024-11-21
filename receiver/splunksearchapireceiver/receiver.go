@@ -102,15 +102,24 @@ func (ssapir *splunksearchapireceiver) Shutdown(ctx context.Context) error {
 
 func (ssapir *splunksearchapireceiver) runQueries(ctx context.Context) error {
 	for _, search := range ssapir.config.Searches {
+		// set default event batch size
+		fmt.Println(search.EventBatchSize)
+		if search.EventBatchSize == 0 {
+			search.EventBatchSize = 100
+			fmt.Println(search.EventBatchSize)
+		}
+
 		// create search in Splunk
 		searchID, err := ssapir.createSplunkSearch(search)
 		if err != nil {
 			ssapir.logger.Error("error creating search", zap.Error(err))
+			return err
 		}
 
 		// wait for search to complete
 		if err = ssapir.pollSearchCompletion(ctx, searchID); err != nil {
 			ssapir.logger.Error("error polling for search completion", zap.Error(err))
+			return err
 		}
 
 		for {
@@ -118,6 +127,7 @@ func (ssapir *splunksearchapireceiver) runQueries(ctx context.Context) error {
 			results, err := ssapir.getSplunkSearchResults(searchID, offset, search.EventBatchSize)
 			if err != nil {
 				ssapir.logger.Error("error fetching search results", zap.Error(err))
+				return err
 			}
 			ssapir.logger.Info("search results fetched", zap.Int("num_results", len(results.Results)))
 
@@ -189,10 +199,11 @@ func (ssapir *splunksearchapireceiver) runQueries(ctx context.Context) error {
 			}
 			// if the number of results is less than the results per request, we have queried all pages for the search
 			if len(results.Results) < search.EventBatchSize {
+				ssapir.logger.Debug("results less than batch size, stopping search result export")
 				break
 			}
-
 		}
+
 		ssapir.logger.Debug("all search results exported", zap.String("query", search.Query), zap.Int("total results", exportedEvents))
 	}
 	return nil

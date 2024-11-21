@@ -27,6 +27,8 @@ func TestValidate(t *testing.T) {
 		endpoint    string
 		username    string
 		password    string
+		authToken   string
+		tokenType   string
 		storage     string
 		searches    []Search
 		errExpected bool
@@ -48,7 +50,7 @@ func TestValidate(t *testing.T) {
 			errText:     "missing Splunk server endpoint",
 		},
 		{
-			desc:     "Missing username",
+			desc:     "Missing username, no auth token",
 			endpoint: "http://localhost:8089",
 			password: "password",
 			storage:  "file_storage",
@@ -63,7 +65,7 @@ func TestValidate(t *testing.T) {
 			errText:     "missing Splunk username",
 		},
 		{
-			desc:     "Missing password",
+			desc:     "Missing password, no auth token",
 			endpoint: "http://localhost:8089",
 			username: "user",
 			storage:  "file_storage",
@@ -76,6 +78,55 @@ func TestValidate(t *testing.T) {
 			},
 			errExpected: true,
 			errText:     "missing Splunk password",
+		},
+		{
+			desc:      "Auth token without token type",
+			endpoint:  "http://localhost:8089",
+			authToken: "token",
+			storage:   "file_storage",
+			searches: []Search{
+				{
+					Query:        "search index=_internal",
+					EarliestTime: "2024-10-30T04:00:00.000Z",
+					LatestTime:   "2024-10-30T14:00:00.000Z",
+				},
+			},
+			errExpected: true,
+			errText:     "auth_token provided without a token type",
+		},
+		{
+			desc:      "Auth token with invalid token type",
+			endpoint:  "http://localhost:8089",
+			authToken: "token",
+			tokenType: "invalid",
+			storage:   "file_storage",
+			searches: []Search{
+				{
+					Query:        "search index=_internal",
+					EarliestTime: "2024-10-30T04:00:00.000Z",
+					LatestTime:   "2024-10-30T14:00:00.000Z",
+				},
+			},
+			errExpected: true,
+			errText:     "auth_token provided without a correct token type, valid token types are [Bearer Splunk]",
+		},
+		{
+			desc:      "Auth token and username/password provided",
+			endpoint:  "http://localhost:8089",
+			username:  "user",
+			password:  "password",
+			authToken: "token",
+			tokenType: "Bearer",
+			storage:   "file_storage",
+			searches: []Search{
+				{
+					Query:        "search index=_internal",
+					EarliestTime: "2024-10-30T04:00:00.000Z",
+					LatestTime:   "2024-10-30T14:00:00.000Z",
+				},
+			},
+			errExpected: true,
+			errText:     "auth_token and username/password were both provided, only one can be provided to authenticate with Splunk",
 		},
 		{
 			desc:     "Missing storage",
@@ -210,6 +261,21 @@ func TestValidate(t *testing.T) {
 			errExpected: false,
 		},
 		{
+			desc:      "Valid config with auth token",
+			endpoint:  "http://localhost:8089",
+			authToken: "token",
+			tokenType: "Bearer",
+			storage:   "file_storage",
+			searches: []Search{
+				{
+					Query:        "search index=_internal",
+					EarliestTime: "2024-10-30T04:00:00.000Z",
+					LatestTime:   "2024-10-30T14:00:00.000Z",
+				},
+			},
+			errExpected: false,
+		},
+		{
 			desc:     "Valid config with multiple searches",
 			endpoint: "http://localhost:8089",
 			username: "user",
@@ -268,6 +334,8 @@ func TestValidate(t *testing.T) {
 			cfg.Endpoint = tc.endpoint
 			cfg.Username = tc.username
 			cfg.Password = tc.password
+			cfg.AuthToken = tc.authToken
+			cfg.TokenType = tc.tokenType
 			cfg.Searches = tc.searches
 			if tc.storage != "" {
 				cfg.StorageID = &component.ID{}

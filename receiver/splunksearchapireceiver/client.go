@@ -24,6 +24,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strings"
 
 	"go.opentelemetry.io/collector/component"
 	"go.uber.org/zap"
@@ -36,11 +37,13 @@ type splunkSearchAPIClient interface {
 }
 
 type defaultSplunkSearchAPIClient struct {
-	client   *http.Client
-	endpoint string
-	logger   *zap.Logger
-	username string
-	password string
+	client    *http.Client
+	endpoint  string
+	logger    *zap.Logger
+	username  string
+	password  string
+	authToken string
+	tokenType string
 }
 
 func newSplunkSearchAPIClient(ctx context.Context, settings component.TelemetrySettings, conf Config, host component.Host) (*defaultSplunkSearchAPIClient, error) {
@@ -48,12 +51,15 @@ func newSplunkSearchAPIClient(ctx context.Context, settings component.TelemetryS
 	if err != nil {
 		return nil, err
 	}
+
 	return &defaultSplunkSearchAPIClient{
-		client:   client,
-		endpoint: conf.Endpoint,
-		logger:   settings.Logger,
-		username: conf.Username,
-		password: conf.Password,
+		client:    client,
+		endpoint:  conf.Endpoint,
+		logger:    settings.Logger,
+		username:  conf.Username,
+		password:  conf.Password,
+		authToken: conf.AuthToken,
+		tokenType: conf.TokenType,
 	}, nil
 }
 
@@ -65,7 +71,11 @@ func (c defaultSplunkSearchAPIClient) CreateSearchJob(search string) (CreateJobR
 	if err != nil {
 		return CreateJobResponse{}, err
 	}
-	req.SetBasicAuth(c.username, c.password)
+
+	err = c.SetSplunkRequestAuth(req)
+	if err != nil {
+		return CreateJobResponse{}, err
+	}
 
 	resp, err := c.client.Do(req)
 	if err != nil {
@@ -97,7 +107,11 @@ func (c defaultSplunkSearchAPIClient) GetJobStatus(sid string) (JobStatusRespons
 	if err != nil {
 		return JobStatusResponse{}, err
 	}
-	req.SetBasicAuth(c.username, c.password)
+
+	err = c.SetSplunkRequestAuth(req)
+	if err != nil {
+		return JobStatusResponse{}, err
+	}
 
 	resp, err := c.client.Do(req)
 	if err != nil {
@@ -128,7 +142,11 @@ func (c defaultSplunkSearchAPIClient) GetSearchResults(sid string, offset int, b
 	if err != nil {
 		return SearchResultsResponse{}, err
 	}
-	req.SetBasicAuth(c.username, c.password)
+
+	err = c.SetSplunkRequestAuth(req)
+	if err != nil {
+		return SearchResultsResponse{}, err
+	}
 
 	resp, err := c.client.Do(req)
 	if err != nil {
@@ -151,4 +169,19 @@ func (c defaultSplunkSearchAPIClient) GetSearchResults(sid string, offset int, b
 	}
 
 	return searchResults, nil
+}
+
+func (c defaultSplunkSearchAPIClient) SetSplunkRequestAuth(req *http.Request) error {
+	if c.authToken != "" {
+		if strings.EqualFold(c.tokenType, TokenTypeBearer) {
+			req.Header.Set("Authorization", "Bearer "+string(c.authToken))
+		} else if strings.EqualFold(c.tokenType, TokenTypeSplunk) {
+			req.Header.Set("Authorization", "Splunk "+string(c.authToken))
+		} else {
+			return fmt.Errorf("auth_token provided without a correct token type, valid token types are %v", []string{TokenTypeBearer, TokenTypeSplunk})
+		}
+	} else {
+		req.SetBasicAuth(c.username, c.password)
+	}
+	return nil
 }
