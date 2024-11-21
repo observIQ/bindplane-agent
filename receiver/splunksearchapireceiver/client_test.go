@@ -24,15 +24,13 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-var (
-	server     = newMockServer()
-	testClient = defaultSplunkSearchAPIClient{
+func TestCreateSearchJob(t *testing.T) {
+	server := newMockServer()
+	testClient := defaultSplunkSearchAPIClient{
 		client:   server.Client(),
 		endpoint: server.URL,
 	}
-)
 
-func TestCreateSearchJob(t *testing.T) {
 	resp, err := testClient.CreateSearchJob("index=otel starttime=\"\" endtime=\"\" timeformat=\"\"")
 	require.NoError(t, err)
 	require.Equal(t, "123456", resp.SID)
@@ -55,6 +53,12 @@ func TestCreateSearchJob(t *testing.T) {
 }
 
 func TestGetJobStatus(t *testing.T) {
+	server := newMockServer()
+	testClient := defaultSplunkSearchAPIClient{
+		client:   server.Client(),
+		endpoint: server.URL,
+	}
+
 	resp, err := testClient.GetJobStatus("123456")
 	require.NoError(t, err)
 	require.Equal(t, "DONE", resp.Content.Dict.Keys[0].Value)
@@ -72,6 +76,12 @@ func TestGetJobStatus(t *testing.T) {
 }
 
 func TestGetSearchResults(t *testing.T) {
+	server := newMockServer()
+	testClient := defaultSplunkSearchAPIClient{
+		client:   server.Client(),
+		endpoint: server.URL,
+	}
+
 	resp, err := testClient.GetSearchResults("123456", 0, 5)
 	require.NoError(t, err)
 	require.Equal(t, 5, len(resp.Results))

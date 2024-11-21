@@ -252,7 +252,7 @@ func (ssapir *splunksearchapireceiver) createSplunkSearch(search Search) (string
 	return resp.SID, nil
 }
 
-func (ssapir *splunksearchapireceiver) isSearchCompleted(resp SearchStatusResponse) bool {
+func (ssapir *splunksearchapireceiver) isSearchCompleted(resp SearchJobStatusResponse) bool {
 	for _, key := range resp.Content.Dict.Keys {
 		if key.Name == "dispatchState" {
 			if key.Value == "DONE" {

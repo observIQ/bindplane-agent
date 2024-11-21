@@ -45,7 +45,7 @@ func TestPolling(t *testing.T) {
 	client := &mockLogsClient{}
 	ssapireceiver.client = client
 
-	file := filepath.Join("testdata", "logs", "testPollJobStatus", "input.xml")
+	file := filepath.Join("testdata", "logs", "testPollJobStatus", "input-done.xml")
 	client.On("GetJobStatus", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(client.loadTestStatusResponse(t, file), nil)
 	cancelCtx, cancel := context.WithCancel(context.Background())
 	ssapireceiver.cancel = cancel
@@ -53,16 +53,22 @@ func TestPolling(t *testing.T) {
 
 	err := ssapireceiver.pollSearchCompletion(cancelCtx, "123456")
 	require.NoError(t, err)
+	client.AssertNumberOfCalls(t, "GetJobStatus", 1)
 
-	client.AssertCalled(t, "GetJobStatus", "123456")
+	// Test polling for a job that is still running
+	file = filepath.Join("testdata", "logs", "testPollJobStatus", "input-queued.xml")
+	client.On("GetJobStatus", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(client.loadTestStatusResponse(t, file), nil)
+	err = ssapireceiver.pollSearchCompletion(cancelCtx, "123456")
+	require.NoError(t, err)
+	client.AssertNumberOfCalls(t, "GetJobStatus", 2)
 
 	err = ssapireceiver.Shutdown(context.Background())
 	require.NoError(t, err)
 }
 
 func TestIsSearchCompleted(t *testing.T) {
-	jobResponse := SearchStatusResponse{
-		Content: Content{
+	jobResponse := SearchJobStatusResponse{
+		Content: SearchJobContent{
 			Dict: Dict{
 				Keys: []Key{
 					{
@@ -74,7 +80,7 @@ func TestIsSearchCompleted(t *testing.T) {
 		},
 	}
 
-	emptyResponse := SearchStatusResponse{}
+	emptyResponse := SearchJobStatusResponse{}
 
 	done := ssapireceiver.isSearchCompleted(jobResponse)
 	require.True(t, done)
@@ -165,18 +171,18 @@ type mockLogsClient struct {
 	mock.Mock
 }
 
-func (m *mockLogsClient) loadTestStatusResponse(t *testing.T, file string) SearchStatusResponse {
+func (m *mockLogsClient) loadTestStatusResponse(t *testing.T, file string) SearchJobStatusResponse {
 	logBytes, err := os.ReadFile(file)
 	require.NoError(t, err)
-	var resp SearchStatusResponse
+	var resp SearchJobStatusResponse
 	err = xml.Unmarshal(logBytes, &resp)
 	require.NoError(t, err)
 	return resp
 }
 
-func (m *mockLogsClient) GetJobStatus(searchID string) (SearchStatusResponse, error) {
+func (m *mockLogsClient) GetJobStatus(searchID string) (SearchJobStatusResponse, error) {
 	args := m.Called(searchID)
-	return args.Get(0).(SearchStatusResponse), args.Error(1)
+	return args.Get(0).(SearchJobStatusResponse), args.Error(1)
 }
 
 func (m *mockLogsClient) CreateSearchJob(searchQuery string) (CreateJobResponse, error) {

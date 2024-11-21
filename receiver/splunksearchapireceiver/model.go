@@ -20,14 +20,14 @@ type CreateJobResponse struct {
 	SID string `xml:"sid"`
 }
 
-// SearchStatusResponse struct to represent the XML response from Splunk job status endpoint
+// SearchJobStatusResponse struct to represent the XML response from Splunk job status endpoint
 // https://docs.splunk.com/Documentation/Splunk/9.3.1/RESTREF/RESTsearch#search.2Fjobs.2F.7Bsearch_id.7D
-type SearchStatusResponse struct {
-	Content Content `xml:"content"`
+type SearchJobStatusResponse struct {
+	Content SearchJobContent `xml:"content"`
 }
 
-// Content struct to represent <content> elements
-type Content struct {
+// SearchJobContent struct to represent <content> elements
+type SearchJobContent struct {
 	Type string `xml:"type,attr"`
 	Dict Dict   `xml:"dict"`
 }
