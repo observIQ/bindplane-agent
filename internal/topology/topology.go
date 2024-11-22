@@ -23,11 +23,11 @@ import (
 	"time"
 )
 
-// TopologyStateRegistry represents a registry for the topology processor to register their TopologyState.
-type TopologyStateRegistry interface {
-	// RegisterTopologyState registers the topology state for the given processor.
+// ConfigTopologyRegistry represents a registry for the topology processor to register their ConfigTopology.
+type ConfigTopologyRegistry interface {
+	// RegisterConfigTopology registers the topology state for the given processor.
 	// It should return an error if the processor has already been registered.
-	RegisterTopologyState(processorID string, data *TopologyState) error
+	RegisterConfigTopology(processorID string, data *ConfigTopology) error
 	SetIntervalChan() chan time.Duration
 	Reset()
 }
@@ -39,14 +39,14 @@ type ConfigInfo struct {
 	OrgID      string
 }
 
-// TopologyState represents the data captured through topology processors.
-type TopologyState struct {
+// ConfigTopology represents the data captured through topology processors.
+type ConfigTopology struct {
 	DestConfig ConfigInfo
 	RouteTable map[ConfigInfo]time.Time
 }
 
-// TopologyInfo represents topology relationships between configs.
-type TopologyInfo struct {
+// ConfigTopologyInfo represents topology relationships between configs.
+type ConfigTopologyInfo struct {
 	ConfigName    string         `json:"configName"`
 	AccountID     string         `json:"accountID"`
 	OrgID         string         `json:"orgID"`
@@ -61,36 +61,36 @@ type ConfigRecord struct {
 	LastUpdated time.Time `json:"lastUpdated"`
 }
 
-// NewTopologyState initializes a new TopologyState
-func NewTopologyState(destGateway ConfigInfo) (*TopologyState, error) {
-	return &TopologyState{
+// NewConfigTopology initializes a new ConfigTopology
+func NewConfigTopology(destGateway ConfigInfo) (*ConfigTopology, error) {
+	return &ConfigTopology{
 		DestConfig: destGateway,
 		RouteTable: make(map[ConfigInfo]time.Time),
 	}, nil
 }
 
 // UpsertRoute upserts given route.
-func (ts *TopologyState) UpsertRoute(_ context.Context, gw ConfigInfo) {
+func (ts *ConfigTopology) UpsertRoute(_ context.Context, gw ConfigInfo) {
 	ts.RouteTable[gw] = time.Now()
 }
 
-// ResettableTopologyStateRegistry is a concrete version of TopologyDataRegistry that is able to be reset.
-type ResettableTopologyStateRegistry struct {
+// ResettableConfigTopologyRegistry is a concrete version of TopologyDataRegistry that is able to be reset.
+type ResettableConfigTopologyRegistry struct {
 	topology        *sync.Map
 	setIntervalChan chan time.Duration
 }
 
-// NewResettableTopologyStateRegistry creates a new ResettableTopologyStateRegistry
-func NewResettableTopologyStateRegistry() *ResettableTopologyStateRegistry {
-	return &ResettableTopologyStateRegistry{
+// NewResettableConfigTopologyRegistry creates a new ResettableConfigTopologyRegistry
+func NewResettableConfigTopologyRegistry() *ResettableConfigTopologyRegistry {
+	return &ResettableConfigTopologyRegistry{
 		topology:        &sync.Map{},
 		setIntervalChan: make(chan time.Duration, 1),
 	}
 }
 
-// RegisterTopologyState registers the TopologyState with the registry.
-func (rtsr *ResettableTopologyStateRegistry) RegisterTopologyState(processorID string, topologyState *TopologyState) error {
-	_, alreadyExists := rtsr.topology.LoadOrStore(processorID, topologyState)
+// RegisterConfigTopology registers the ConfigTopology with the registry.
+func (rtsr *ResettableConfigTopologyRegistry) RegisterConfigTopology(processorID string, configTopology *ConfigTopology) error {
+	_, alreadyExists := rtsr.topology.LoadOrStore(processorID, configTopology)
 	if alreadyExists {
 		return fmt.Errorf("topology for processor %q was already registered", processorID)
 	}
@@ -99,28 +99,28 @@ func (rtsr *ResettableTopologyStateRegistry) RegisterTopologyState(processorID s
 }
 
 // Reset unregisters all topology states in this registry
-func (rtsr *ResettableTopologyStateRegistry) Reset() {
+func (rtsr *ResettableConfigTopologyRegistry) Reset() {
 	rtsr.topology = &sync.Map{}
 }
 
 // SetIntervalChan returns the setIntervalChan
-func (rtsr *ResettableTopologyStateRegistry) SetIntervalChan() chan time.Duration {
+func (rtsr *ResettableConfigTopologyRegistry) SetIntervalChan() chan time.Duration {
 	return rtsr.setIntervalChan
 }
 
 // TopologyInfos returns all the topology data in this registry.
-func (rtsr *ResettableTopologyStateRegistry) TopologyInfos() []TopologyInfo {
-	states := []TopologyState{}
+func (rtsr *ResettableConfigTopologyRegistry) TopologyInfos() []ConfigTopologyInfo {
+	states := []ConfigTopology{}
 
 	rtsr.topology.Range(func(_, value any) bool {
-		ts := value.(*TopologyState)
+		ts := value.(*ConfigTopology)
 		states = append(states, *ts)
 		return true
 	})
 
-	ti := []TopologyInfo{}
+	ti := []ConfigTopologyInfo{}
 	for _, ts := range states {
-		curInfo := TopologyInfo{}
+		curInfo := ConfigTopologyInfo{}
 		curInfo.ConfigName = ts.DestConfig.ConfigName
 		curInfo.AccountID = ts.DestConfig.AccountID
 		curInfo.OrgID = ts.DestConfig.OrgID

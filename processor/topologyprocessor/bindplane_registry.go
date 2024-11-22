@@ -25,9 +25,9 @@ import (
 
 // GetTopologyRegistry returns the topology registry that should be registered to based on the component ID.
 // nil, nil may be returned by this function. In this case, the processor should not register it's topology state anywhere.
-func GetTopologyRegistry(host component.Host, bindplane component.ID) (topology.TopologyStateRegistry, error) {
+func GetTopologyRegistry(host component.Host, bindplane component.ID) (topology.ConfigTopologyRegistry, error) {
 
 	fmt.Println("in Bindplane Registry")
 
-	return topology.BindplaneAgentTopologyStateRegistry, nil
+	return topology.BindplaneAgentConfigTopologyRegistry, nil
 }
