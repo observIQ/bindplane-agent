@@ -36,9 +36,10 @@ type bindplaneExtension struct {
 	logger                            *zap.Logger
 	cfg                               *Config
 	measurementsRegistry              *measurements.ResettableThroughputMeasurementsRegistry
-	topologyRegistry                  *topology.ResettableTopologyStateRegistry
+	topologyRegistry                  *topology.ResettableConfigTopologyRegistry
 	customCapabilityHandlerThroughput opampcustommessages.CustomCapabilityHandler
 	customCapabilityHandlerTopology   opampcustommessages.CustomCapabilityHandler
+	topologyInterval                  time.Duration
 
 	doneChan chan struct{}
 	wg       *sync.WaitGroup
@@ -49,17 +50,17 @@ func newBindplaneExtension(logger *zap.Logger, cfg *Config) *bindplaneExtension 
 		logger:               logger,
 		cfg:                  cfg,
 		measurementsRegistry: measurements.NewResettableThroughputMeasurementsRegistry(false),
-		topologyRegistry:     topology.NewResettableTopologyStateRegistry(),
+		topologyRegistry:     topology.NewResettableConfigTopologyRegistry(),
 		doneChan:             make(chan struct{}),
 		wg:                   &sync.WaitGroup{},
 	}
 }
 
-func (b *bindplaneExtension) Start(_ context.Context, host component.Host) error {
+func (b *bindplaneExtension) Start(ctx context.Context, host component.Host) error {
 	var emptyComponentID component.ID
 
-	// Set up measurements if enabled
-	if b.cfg.OpAMP != emptyComponentID && (b.cfg.MeasurementsInterval > 0 || b.cfg.TopologyInterval > 0) {
+	// Set up custom capabilities if enabled
+	if b.cfg.OpAMP != emptyComponentID {
 		err := b.setupCustomCapabilities(host)
 		if err != nil {
 			return fmt.Errorf("setup capability handler: %w", err)
@@ -69,10 +70,15 @@ func (b *bindplaneExtension) Start(_ context.Context, host component.Host) error
 			b.wg.Add(1)
 			go b.reportMetricsLoop()
 		}
-
-		if b.cfg.TopologyInterval > 0 {
-			b.wg.Add(1)
-			go b.reportTopologyLoop()
+		select {
+		case <-ctx.Done():
+			return nil
+		case b.topologyInterval = <-b.topologyRegistry.SetIntervalChan():
+			if b.topologyInterval > 0 {
+				b.wg.Add(1)
+				go b.reportTopologyLoop()
+			}
+			return nil
 		}
 	}
 
@@ -83,8 +89,8 @@ func (b *bindplaneExtension) RegisterThroughputMeasurements(processorID string, 
 	return b.measurementsRegistry.RegisterThroughputMeasurements(processorID, measurements)
 }
 
-func (b *bindplaneExtension) RegisterTopologyState(processorID string, topology *topology.TopologyState) error {
-	return b.topologyRegistry.RegisterTopologyState(processorID, topology)
+func (b *bindplaneExtension) RegisterConfigTopology(processorID string, topology *topology.ConfigTopology) error {
+	return b.topologyRegistry.RegisterConfigTopology(processorID, topology)
 }
 
 func (b *bindplaneExtension) setupCustomCapabilities(host component.Host) error {
@@ -106,11 +112,9 @@ func (b *bindplaneExtension) setupCustomCapabilities(host component.Host) error 
 		}
 	}
 
-	if b.cfg.TopologyInterval > 0 {
-		b.customCapabilityHandlerTopology, err = registry.Register(topology.ReportTopologyCapability)
-		if err != nil {
-			return fmt.Errorf("register custom topology capability: %w", err)
-		}
+	b.customCapabilityHandlerTopology, err = registry.Register(topology.ReportTopologyCapability)
+	if err != nil {
+		return fmt.Errorf("register custom topology capability: %w", err)
 	}
 
 	return nil
@@ -172,7 +176,7 @@ func (b *bindplaneExtension) reportMetrics() error {
 func (b *bindplaneExtension) reportTopologyLoop() {
 	defer b.wg.Done()
 
-	t := time.NewTicker(b.cfg.TopologyInterval)
+	t := time.NewTicker(b.topologyInterval)
 	defer t.Stop()
 
 	for {

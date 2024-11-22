@@ -30,7 +30,7 @@ import (
 
 // TopologyReporter represents an object that reports topology state.
 type TopologyReporter interface {
-	TopologyInfos() []topology.TopologyInfo
+	TopologyInfos() []topology.ConfigTopologyInfo
 	SetIntervalChan() chan time.Duration
 }
 

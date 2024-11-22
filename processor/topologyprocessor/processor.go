@@ -43,7 +43,7 @@ type topologyUpdate struct {
 type topologyProcessor struct {
 	logger      *zap.Logger
 	enabled     bool
-	topology    *topology.TopologyState
+	topology    *topology.ConfigTopology
 	interval    time.Duration
 	processorID component.ID
 	bindplane   component.ID
@@ -58,7 +58,7 @@ func newTopologyProcessor(logger *zap.Logger, cfg *Config, processorID component
 		AccountID:  cfg.AccountID,
 		OrgID:      cfg.OrgID,
 	}
-	topology, err := topology.NewTopologyState(destGw)
+	topology, err := topology.NewConfigTopology(destGw)
 	if err != nil {
 		return nil, fmt.Errorf("create topology state: %w", err)
 	}
@@ -82,7 +82,7 @@ func (tp *topologyProcessor) start(_ context.Context, host component.Host) error
 		}
 
 		if registry != nil {
-			registerErr := registry.RegisterTopologyState(tp.processorID.String(), tp.topology)
+			registerErr := registry.RegisterConfigTopology(tp.processorID.String(), tp.topology)
 			if registerErr != nil {
 				return
 			}

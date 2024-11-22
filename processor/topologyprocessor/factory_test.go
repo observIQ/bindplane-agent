@@ -82,7 +82,7 @@ func TestCreateProcessorTwice_Logs(t *testing.T) {
 	require.NoError(t, err)
 
 	mockBindplane := mockTopologyRegistry{
-		ResettableTopologyStateRegistry: topology.NewResettableTopologyStateRegistry(),
+		ResettableConfigTopologyRegistry: topology.NewResettableConfigTopologyRegistry(),
 	}
 
 	mh := mockHost{
@@ -120,7 +120,7 @@ func TestCreateProcessorTwice_Metrics(t *testing.T) {
 	require.NoError(t, err)
 
 	mockBindplane := mockTopologyRegistry{
-		ResettableTopologyStateRegistry: topology.NewResettableTopologyStateRegistry(),
+		ResettableConfigTopologyRegistry: topology.NewResettableConfigTopologyRegistry(),
 	}
 
 	mh := mockHost{
@@ -158,7 +158,7 @@ func TestCreateProcessorTwice_Traces(t *testing.T) {
 	require.NoError(t, err)
 
 	mockBindplane := mockTopologyRegistry{
-		ResettableTopologyStateRegistry: topology.NewResettableTopologyStateRegistry(),
+		ResettableConfigTopologyRegistry: topology.NewResettableConfigTopologyRegistry(),
 	}
 
 	mh := mockHost{
@@ -186,7 +186,7 @@ func (m mockHost) GetExtensions() map[component.ID]component.Component {
 }
 
 type mockTopologyRegistry struct {
-	*topology.ResettableTopologyStateRegistry
+	*topology.ResettableConfigTopologyRegistry
 }
 
 func (mockTopologyRegistry) Start(_ context.Context, _ component.Host) error { return nil }
