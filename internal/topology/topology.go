@@ -41,8 +41,8 @@ type ConfigInfo struct {
 
 // TopologyState represents the data captured through topology processors.
 type TopologyState struct {
-	destConfig ConfigInfo
-	routeTable map[ConfigInfo]time.Time
+	DestConfig ConfigInfo
+	RouteTable map[ConfigInfo]time.Time
 }
 
 // TopologyInfo represents topology relationships between configs.
@@ -62,16 +62,16 @@ type ConfigRecord struct {
 }
 
 // NewTopologyState initializes a new TopologyState
-func NewTopologyState(destGateway ConfigInfo, interval time.Duration) (*TopologyState, error) {
+func NewTopologyState(destGateway ConfigInfo) (*TopologyState, error) {
 	return &TopologyState{
-		destConfig: destGateway,
-		routeTable: make(map[ConfigInfo]time.Time),
+		DestConfig: destGateway,
+		RouteTable: make(map[ConfigInfo]time.Time),
 	}, nil
 }
 
 // UpsertRoute upserts given route.
-func (ts *TopologyState) UpsertRoute(ctx context.Context, gw ConfigInfo) {
-	ts.routeTable[gw] = time.Now()
+func (ts *TopologyState) UpsertRoute(_ context.Context, gw ConfigInfo) {
+	ts.RouteTable[gw] = time.Now()
 }
 
 // ResettableTopologyStateRegistry is a concrete version of TopologyDataRegistry that is able to be reset.
@@ -121,10 +121,10 @@ func (rtsr *ResettableTopologyStateRegistry) TopologyInfos() []TopologyInfo {
 	ti := []TopologyInfo{}
 	for _, ts := range states {
 		curInfo := TopologyInfo{}
-		curInfo.ConfigName = ts.destConfig.ConfigName
-		curInfo.AccountID = ts.destConfig.AccountID
-		curInfo.OrgID = ts.destConfig.OrgID
-		for gw, updated := range ts.routeTable {
+		curInfo.ConfigName = ts.DestConfig.ConfigName
+		curInfo.AccountID = ts.DestConfig.AccountID
+		curInfo.OrgID = ts.DestConfig.OrgID
+		for gw, updated := range ts.RouteTable {
 			curInfo.SourceConfigs = append(curInfo.SourceConfigs, ConfigRecord{
 				ConfigName:  gw.ConfigName,
 				AccountID:   gw.AccountID,

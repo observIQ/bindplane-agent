@@ -58,7 +58,7 @@ func newTopologyProcessor(logger *zap.Logger, cfg *Config, processorID component
 		AccountID:  cfg.AccountID,
 		OrgID:      cfg.OrgID,
 	}
-	topology, err := topology.NewTopologyState(destGw, cfg.Interval)
+	topology, err := topology.NewTopologyState(destGw)
 	if err != nil {
 		return nil, fmt.Errorf("create topology state: %w", err)
 	}
@@ -72,7 +72,7 @@ func newTopologyProcessor(logger *zap.Logger, cfg *Config, processorID component
 	}, nil
 }
 
-func (tp *topologyProcessor) start(ctx context.Context, host component.Host) error {
+func (tp *topologyProcessor) start(_ context.Context, host component.Host) error {
 	var err error
 	tp.startOnce.Do(func() {
 		registry, getRegErr := GetTopologyRegistry(host, tp.bindplane)
@@ -111,12 +111,32 @@ func (tp *topologyProcessor) processMetrics(ctx context.Context, md pmetric.Metr
 func (tp *topologyProcessor) processTopologyHeaders(ctx context.Context) {
 	metadata, ok := metadata.FromIncomingContext(ctx)
 	if ok {
-		gw := topology.ConfigInfo{
-			ConfigName: metadata.Get(configNameHeader)[0],
-			AccountID:  metadata.Get(accountIDHeader)[0],
-			OrgID:      metadata.Get(organizationIDHeader)[0],
+		var configName, accountID, orgID string
+
+		configNameHeaders := metadata.Get(configNameHeader)
+		if len(configNameHeader) > 0 {
+			configName = configNameHeaders[0]
 		}
-		tp.topology.UpsertRoute(ctx, gw)
+
+		accountIDHeaders := metadata.Get(accountIDHeader)
+		if len(configNameHeader) > 0 {
+			accountID = accountIDHeaders[0]
+		}
+
+		orgIDHeaders := metadata.Get(organizationIDHeader)
+		if len(configNameHeader) > 0 {
+			orgID = orgIDHeaders[0]
+		}
+
+		// only upsert if all headers are present
+		if configName != "" && accountID != "" && orgID != "" {
+			gw := topology.ConfigInfo{
+				ConfigName: configName,
+				AccountID:  accountID,
+				OrgID:      orgID,
+			}
+			tp.topology.UpsertRoute(ctx, gw)
+		}
 	}
 }
 

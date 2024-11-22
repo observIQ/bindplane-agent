@@ -197,10 +197,10 @@ type Config struct {
 	TLS       *TLSConfig `yaml:"tls_config,omitempty" mapstructure:"tls_config,omitempty"`
 
 	// Updatable fields
-	Labels                      *string           `yaml:"labels,omitempty"`
-	AgentName                   *string           `yaml:"agent_name,omitempty"`
-	MeasurementsInterval        time.Duration     `yaml:"measurements_interval,omitempty"`
-	ExtraMeasurementsAttributes map[string]string `yaml:"extra_measurements_attributes,omitempty"`
+	Labels                      *string           `yaml:"labels,omitempty" mapstructure:"labels,omitempty"`
+	AgentName                   *string           `yaml:"agent_name,omitempty" mapstructure:"agent_name,omitempty"`
+	MeasurementsInterval        time.Duration     `yaml:"measurements_interval,omitempty" mapstructure:"measurements_interval,omitempty"`
+	ExtraMeasurementsAttributes map[string]string `yaml:"extra_measurements_attributes,omitempty" mapstructure:"extra_measurements_attributes,omitempty"`
 }
 
 // TLSConfig represents the TLS config to connect to OpAmp server

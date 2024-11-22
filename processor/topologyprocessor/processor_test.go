@@ -15,277 +15,201 @@
 package topologyprocessor
 
 import (
-	"bytes"
-	"compress/gzip"
 	"context"
-	"encoding/json"
-	"fmt"
-	"io"
-	"os"
 	"path/filepath"
-	"sync"
 	"testing"
 	"time"
 
-	"github.com/open-telemetry/opamp-go/protobufs"
-	"github.com/open-telemetry/opentelemetry-collector-contrib/extension/opampcustommessages"
+	"github.com/observiq/bindplane-agent/internal/topology"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest/plogtest"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest/pmetrictest"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest/ptracetest"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/component"
-	"go.opentelemetry.io/collector/consumer/consumertest"
-	"go.opentelemetry.io/collector/processor/processortest"
+	"go.uber.org/zap"
+	"google.golang.org/grpc/metadata"
 )
 
-func TestProcess_Logs(t *testing.T) {
-	factory := NewFactory()
-	sink := &consumertest.LogsSink{}
+func TestProcessor_Logs(t *testing.T) {
+	processorID := component.MustNewIDWithName("topology", "1")
 
-	pSet := processortest.NewNopSettings()
-	p, err := factory.CreateLogs(context.Background(), pSet, factory.CreateDefaultConfig(), sink)
+	tmp, err := newTopologyProcessor(zap.NewNop(), &Config{
+		Enabled:    true,
+		Interval:   time.Second,
+		OrgID:      "myOrgID",
+		AccountID:  "myAccountID",
+		ConfigName: "myConfigName",
+	}, processorID)
 	require.NoError(t, err)
 
-	mockOpamp := &mockOpAMPExtension{
-		msgChan: make(chan *protobufs.CustomMessage, 1),
-	}
+	logs, err := golden.ReadLogs(filepath.Join("testdata", "logs", "w3c-logs.yaml"))
+	require.NoError(t, err)
 
-	mockHost := &mockHost{
-		extMap: map[component.ID]component.Component{
-			component.MustNewID("opamp"): mockOpamp,
-		},
-	}
+	ctx := metadata.NewIncomingContext(context.Background(), metadata.MD{
+		accountIDHeader:      []string{"myAccountID1"},
+		organizationIDHeader: []string{"myOrgID1"},
+		configNameHeader:     []string{"myConfigName1"},
+	})
+	processedLogs, err := tmp.processLogs(ctx, logs)
+	require.NoError(t, err)
 
-	require.NoError(t, p.Start(context.Background(), mockHost))
-	t.Cleanup(func() {
-		require.NoError(t, p.Shutdown(context.Background()))
+	// Output logs should be the same as input logs (passthrough check)
+	require.NoError(t, plogtest.CompareLogs(logs, processedLogs))
+
+	// validate that upsert route was performed
+	require.True(t, tmp.topology.DestConfig.AccountID == "myAccountID")
+	require.True(t, tmp.topology.DestConfig.OrgID == "myOrgID")
+	require.True(t, tmp.topology.DestConfig.ConfigName == "myConfigName")
+	ci := topology.ConfigInfo{
+		ConfigName: "myConfigName1",
+		AccountID:  "myAccountID1",
+		OrgID:      "myOrgID1",
+	}
+	_, ok := tmp.topology.RouteTable[ci]
+	require.True(t, ok)
+}
+
+func TestProcessor_Metrics(t *testing.T) {
+	processorID := component.MustNewIDWithName("topology", "1")
+
+	tmp, err := newTopologyProcessor(zap.NewNop(), &Config{
+		Enabled:    true,
+		Interval:   time.Second,
+		OrgID:      "myOrgID",
+		AccountID:  "myAccountID",
+		ConfigName: "myConfigName",
+	}, processorID)
+	require.NoError(t, err)
+
+	metrics, err := golden.ReadMetrics(filepath.Join("testdata", "metrics", "host-metrics.yaml"))
+	require.NoError(t, err)
+
+	ctx := metadata.NewIncomingContext(context.Background(), metadata.MD{
+		accountIDHeader:      []string{"myAccountID1"},
+		organizationIDHeader: []string{"myOrgID1"},
+		configNameHeader:     []string{"myConfigName1"},
 	})
 
-	require.Equal(t, "com.bindplane.snapshot", mockOpamp.capability)
-
-	l, err := golden.ReadLogs(filepath.Join("testdata", "logs", "w3c-logs.yaml"))
+	processedMetrics, err := tmp.processMetrics(ctx, metrics)
 	require.NoError(t, err)
 
-	require.NoError(t, p.ConsumeLogs(context.Background(), l))
+	// Output metrics should be the same as input logs (passthrough check)
+	require.NoError(t, pmetrictest.CompareMetrics(metrics, processedMetrics))
 
-	require.Equal(t, 1, len(sink.AllLogs()))
-	require.Equal(t, l, sink.AllLogs()[0])
-
-	// Request buffer
-	reqPayload := fmt.Sprintf(`{"processor":%q,"pipeline_type":"logs","session_id":"my-session-id"}`, pSet.ID)
-
-	cm := &protobufs.CustomMessage{
-		Capability: "com.bindplane.snapshot",
-		Type:       "requestSnapshot",
-		Data:       []byte(reqPayload),
+	// validate that upsert route was performed
+	require.True(t, tmp.topology.DestConfig.AccountID == "myAccountID")
+	require.True(t, tmp.topology.DestConfig.OrgID == "myOrgID")
+	require.True(t, tmp.topology.DestConfig.ConfigName == "myConfigName")
+	ci := topology.ConfigInfo{
+		ConfigName: "myConfigName1",
+		AccountID:  "myAccountID1",
+		OrgID:      "myOrgID1",
 	}
-
-	mockOpamp.msgChan <- cm
-
-	// Wait for response
-	require.Eventually(t, func() bool {
-		return mockOpamp.GotMessage()
-	}, 5*time.Second, 100*time.Millisecond)
-
-	by, err := os.ReadFile(filepath.Join("testdata", "snapshot", "logs-report.json"))
-	require.NoError(t, err)
-
-	var expectedMessageContents map[string]any
-	err = json.Unmarshal(by, &expectedMessageContents)
-	require.NoError(t, err)
-
-	var actualMessageContents map[string]any
-	err = json.Unmarshal(gunzipBytes(t, mockOpamp.sentMessage), &actualMessageContents)
-	require.NoError(t, err)
-
-	require.Equal(t, expectedMessageContents, actualMessageContents)
-	require.Equal(t, "reportSnapshot", mockOpamp.sentMessageType)
+	_, ok := tmp.topology.RouteTable[ci]
+	require.True(t, ok)
 }
 
-func TestProcess_Metrics(t *testing.T) {
-	factory := NewFactory()
-	sink := &consumertest.MetricsSink{}
+func TestProcessor_Traces(t *testing.T) {
+	processorID := component.MustNewIDWithName("topology", "1")
 
-	pSet := processortest.NewNopSettings()
-	p, err := factory.CreateMetrics(context.Background(), pSet, factory.CreateDefaultConfig(), sink)
+	tmp, err := newTopologyProcessor(zap.NewNop(), &Config{
+		Enabled:    true,
+		Interval:   time.Second,
+		OrgID:      "myOrgID",
+		AccountID:  "myAccountID",
+		ConfigName: "myConfigName",
+	}, processorID)
 	require.NoError(t, err)
 
-	mockOpamp := &mockOpAMPExtension{
-		msgChan: make(chan *protobufs.CustomMessage, 1),
-	}
+	traces, err := golden.ReadTraces(filepath.Join("testdata", "traces", "bindplane-traces.yaml"))
+	require.NoError(t, err)
 
-	mockHost := &mockHost{
-		extMap: map[component.ID]component.Component{
-			component.MustNewID("opamp"): mockOpamp,
-		},
-	}
-
-	require.NoError(t, p.Start(context.Background(), mockHost))
-	t.Cleanup(func() {
-		require.NoError(t, p.Shutdown(context.Background()))
+	ctx := metadata.NewIncomingContext(context.Background(), metadata.MD{
+		accountIDHeader:      []string{"myAccountID1"},
+		organizationIDHeader: []string{"myOrgID1"},
+		configNameHeader:     []string{"myConfigName1"},
 	})
 
-	require.Equal(t, "com.bindplane.snapshot", mockOpamp.capability)
-
-	m, err := golden.ReadMetrics(filepath.Join("testdata", "metrics", "host-metrics.yaml"))
+	processedTraces, err := tmp.processTraces(ctx, traces)
 	require.NoError(t, err)
 
-	require.NoError(t, p.ConsumeMetrics(context.Background(), m))
+	// Output traces should be the same as input logs (passthrough check)
+	require.NoError(t, ptracetest.CompareTraces(traces, processedTraces))
 
-	require.Equal(t, 1, len(sink.AllMetrics()))
-	require.Equal(t, m, sink.AllMetrics()[0])
-
-	// Request buffer
-	reqPayload := fmt.Sprintf(`{"processor":%q,"pipeline_type":"metrics","session_id":"my-session-id"}`, pSet.ID)
-
-	cm := &protobufs.CustomMessage{
-		Capability: "com.bindplane.snapshot",
-		Type:       "requestSnapshot",
-		Data:       []byte(reqPayload),
+	// validate that upsert route was performed
+	require.True(t, tmp.topology.DestConfig.AccountID == "myAccountID")
+	require.True(t, tmp.topology.DestConfig.OrgID == "myOrgID")
+	require.True(t, tmp.topology.DestConfig.ConfigName == "myConfigName")
+	ci := topology.ConfigInfo{
+		ConfigName: "myConfigName1",
+		AccountID:  "myAccountID1",
+		OrgID:      "myOrgID1",
 	}
-
-	mockOpamp.msgChan <- cm
-
-	// Wait for response
-	require.Eventually(t, func() bool {
-		return mockOpamp.GotMessage()
-	}, 5*time.Second, 100*time.Millisecond)
-
-	by, err := os.ReadFile(filepath.Join("testdata", "snapshot", "metrics-report.json"))
-	require.NoError(t, err)
-
-	var expectedMessageContents map[string]any
-	err = json.Unmarshal(by, &expectedMessageContents)
-	require.NoError(t, err)
-
-	var actualMessageContents map[string]any
-	err = json.Unmarshal(gunzipBytes(t, mockOpamp.sentMessage), &actualMessageContents)
-	require.NoError(t, err)
-
-	require.Equal(t, expectedMessageContents, actualMessageContents)
-	require.Equal(t, "reportSnapshot", mockOpamp.sentMessageType)
+	_, ok := tmp.topology.RouteTable[ci]
+	require.True(t, ok)
 }
 
-func TestProcess_Traces(t *testing.T) {
-	factory := NewFactory()
-	sink := &consumertest.TracesSink{}
+// Test 2 instances with the same processor ID
+func TestProcessor_Logs_TwoInstancesSameID(t *testing.T) {
+	processorID := component.MustNewIDWithName("topology", "1")
 
-	pSet := processortest.NewNopSettings()
-	p, err := factory.CreateTraces(context.Background(), pSet, factory.CreateDefaultConfig(), sink)
+	tmp1, err := newTopologyProcessor(zap.NewNop(), &Config{
+		Enabled:    true,
+		Interval:   time.Second,
+		OrgID:      "myOrgID",
+		AccountID:  "myAccountID",
+		ConfigName: "myConfigName",
+	}, processorID)
 	require.NoError(t, err)
 
-	mockOpamp := &mockOpAMPExtension{
-		msgChan: make(chan *protobufs.CustomMessage, 1),
-	}
-
-	mockHost := &mockHost{
-		extMap: map[component.ID]component.Component{
-			component.MustNewID("opamp"): mockOpamp,
-		},
-	}
-
-	require.NoError(t, p.Start(context.Background(), mockHost))
-	t.Cleanup(func() {
-		require.NoError(t, p.Shutdown(context.Background()))
-	})
-
-	require.Equal(t, "com.bindplane.snapshot", mockOpamp.capability)
-
-	tr, err := golden.ReadTraces(filepath.Join("testdata", "traces", "bindplane-traces.yaml"))
+	tmp2, err := newTopologyProcessor(zap.NewNop(), &Config{
+		Enabled:    true,
+		Interval:   time.Second,
+		OrgID:      "myOrgID2",
+		AccountID:  "myAccountID2",
+		ConfigName: "myConfigName2",
+	}, processorID)
 	require.NoError(t, err)
 
-	require.NoError(t, p.ConsumeTraces(context.Background(), tr))
-
-	require.Equal(t, 1, len(sink.AllTraces()))
-	require.Equal(t, tr, sink.AllTraces()[0])
-
-	// Request buffer
-	reqPayload := fmt.Sprintf(`{"processor":%q,"pipeline_type":"traces","session_id":"my-session-id"}`, pSet.ID)
-
-	cm := &protobufs.CustomMessage{
-		Capability: "com.bindplane.snapshot",
-		Type:       "requestSnapshot",
-		Data:       []byte(reqPayload),
-	}
-
-	mockOpamp.msgChan <- cm
-
-	// Wait for response
-	require.Eventually(t, func() bool {
-		return mockOpamp.GotMessage()
-	}, 5*time.Second, 100*time.Millisecond)
-
-	by, err := os.ReadFile(filepath.Join("testdata", "snapshot", "traces-report.json"))
+	logs, err := golden.ReadLogs(filepath.Join("testdata", "logs", "w3c-logs.yaml"))
 	require.NoError(t, err)
 
-	var expectedMessageContents map[string]any
-	err = json.Unmarshal(by, &expectedMessageContents)
+	_, err = tmp1.processLogs(context.Background(), logs)
 	require.NoError(t, err)
 
-	var actualMessageContents map[string]any
-	err = json.Unmarshal(gunzipBytes(t, mockOpamp.sentMessage), &actualMessageContents)
+	_, err = tmp2.processLogs(context.Background(), logs)
+	require.NoError(t, err)
+}
+
+func TestProcessor_Logs_TwoInstancesDifferentID(t *testing.T) {
+	processorID := component.MustNewIDWithName("topology", "1")
+	processorID2 := component.MustNewIDWithName("topology", "2")
+
+	tmp1, err := newTopologyProcessor(zap.NewNop(), &Config{
+		Enabled:    true,
+		Interval:   time.Second,
+		OrgID:      "myOrgID",
+		AccountID:  "myAccountID",
+		ConfigName: "myConfigName",
+	}, processorID)
 	require.NoError(t, err)
 
-	require.Equal(t, expectedMessageContents, actualMessageContents)
-	require.Equal(t, "reportSnapshot", mockOpamp.sentMessageType)
-}
-
-type mockOpAMPExtension struct {
-	msgChan chan *protobufs.CustomMessage
-
-	capability string
-
-	gotMessageMux   sync.Mutex
-	gotMessage      bool
-	sentMessageType string
-	sentMessage     []byte
-}
-
-// Start implements component.Component::Start
-func (m *mockOpAMPExtension) Start(_ context.Context, _ component.Host) error {
-	return nil
-}
-
-// Shutdown implements component.Component::Shutdown
-func (m *mockOpAMPExtension) Shutdown(_ context.Context) error { return nil }
-
-func (m *mockOpAMPExtension) Register(capability string, _ ...opampcustommessages.CustomCapabilityRegisterOption) (handler opampcustommessages.CustomCapabilityHandler, err error) {
-	m.capability = capability
-	return m, nil
-}
-
-func (m *mockOpAMPExtension) Message() <-chan *protobufs.CustomMessage {
-	return m.msgChan
-}
-
-func (m *mockOpAMPExtension) SendMessage(messageType string, message []byte) (messageSendingChannel chan struct{}, err error) {
-	m.gotMessageMux.Lock()
-	defer m.gotMessageMux.Unlock()
-
-	if m.gotMessage {
-		return
-	}
-	m.gotMessage = true
-
-	m.sentMessageType = messageType
-	m.sentMessage = message
-	return
-}
-
-func (m *mockOpAMPExtension) GotMessage() bool {
-	m.gotMessageMux.Lock()
-	defer m.gotMessageMux.Unlock()
-
-	return m.gotMessage
-}
-
-func (m *mockOpAMPExtension) Unregister() {}
-
-func gunzipBytes(t *testing.T, b []byte) []byte {
-	t.Helper()
-
-	r, err := gzip.NewReader(bytes.NewBuffer(b))
-	require.NoError(t, err)
-	bOut, err := io.ReadAll(r)
+	tmp2, err := newTopologyProcessor(zap.NewNop(), &Config{
+		Enabled:    true,
+		Interval:   time.Second,
+		OrgID:      "myOrgID2",
+		AccountID:  "myAccountID2",
+		ConfigName: "myConfigName2",
+	}, processorID2)
 	require.NoError(t, err)
 
-	return bOut
+	logs, err := golden.ReadLogs(filepath.Join("testdata", "logs", "w3c-logs.yaml"))
+	require.NoError(t, err)
+
+	_, err = tmp1.processLogs(context.Background(), logs)
+	require.NoError(t, err)
+
+	_, err = tmp2.processLogs(context.Background(), logs)
+	require.NoError(t, err)
 }
