@@ -17,7 +17,6 @@ package observiq
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"sync"
 	"time"
 
@@ -67,7 +66,6 @@ func newTopologySender(l *zap.Logger, reporter TopologyReporter, opampClient cli
 
 // Start starts the sender. It may be called multiple times, even if the sender is already started.
 func (ts *topologySender) Start() {
-	fmt.Println("\033[34m TopologySender START \033[0m")
 	ts.mux.Lock()
 	defer ts.mux.Unlock()
 
@@ -109,18 +107,15 @@ func (ts *topologySender) Stop() {
 
 func (ts *topologySender) loop() {
 	t := newTicker()
-	fmt.Println("\033[34m Loop with interval: \033[0m", ts.interval)
 	t.SetInterval(ts.interval)
 	defer t.Stop()
 
 	for {
 		select {
 		case newInterval := <-ts.changeIntervalChan:
-			fmt.Println("\033[34m New Interval: \033[0m", newInterval)
 			ts.interval = newInterval
 			t.SetInterval(newInterval)
 		case setInterval := <-ts.reporter.SetIntervalChan():
-			fmt.Println("\033[34m Set Interval: \033[0m", setInterval)
 			ts.interval = setInterval
 			t.SetInterval(setInterval)
 		case <-ts.done:
@@ -134,7 +129,6 @@ func (ts *topologySender) loop() {
 
 			topoState := ts.reporter.TopologyInfos()
 			if len(topoState) == 0 {
-				fmt.Println("\033[34m TopoSender: No Topo States \033[0m")
 				// don't report empty payloads
 				continue
 			}
@@ -153,9 +147,6 @@ func (ts *topologySender) loop() {
 				Type:       topology.ReportTopologyType,
 				Data:       encoded,
 			}
-
-			fmt.Println("\033[34m TopoSender: Sending Topo State: \033[0m", topoState)
-			fmt.Println("\033[34m TopoSender: Marshalled State: \033[0m", string(marshalled))
 
 			for i := 0; i < maxSendRetries; i++ {
 				sendingChannel, err := ts.opampClient.SendCustomMessage(cm)

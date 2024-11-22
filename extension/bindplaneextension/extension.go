@@ -197,8 +197,6 @@ func (b *bindplaneExtension) reportTopology() error {
 		return fmt.Errorf("marshal topology state: %w", err)
 	}
 
-	fmt.Println("\033[34m Marshalled Topology to BP: \033[0m", marshalled)
-
 	encoded := snappy.Encode(nil, marshalled)
 	for {
 		sendingChannel, err := b.customCapabilityHandlerTopology.SendMessage(topology.ReportTopologyType, encoded)
