@@ -26,6 +26,7 @@ import (
 // GetTopologyRegistry returns the topology registry that should be registered to based on the component ID.
 // nil, nil may be returned by this function. In this case, the processor should not register it's topology state anywhere.
 func GetTopologyRegistry(host component.Host, bindplane component.ID) (topology.TopologyStateRegistry, error) {
+	fmt.Println("in OCB Registry")
 	var emptyComponentID component.ID
 	if bindplane == emptyComponentID {
 		// No bindplane component referenced, so we won't register our topology state anywhere.

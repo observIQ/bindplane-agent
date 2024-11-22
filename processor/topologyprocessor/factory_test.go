@@ -177,7 +177,7 @@ type mockHost struct {
 	extMap map[component.ID]component.Component
 }
 
-func (nh *mockHost) GetFactory(component.Kind, component.Type) component.Factory {
+func (m *mockHost) GetFactory(component.Kind, component.Type) component.Factory {
 	return nil
 }
 
