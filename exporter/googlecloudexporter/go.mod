@@ -14,7 +14,7 @@ require (
 	go.opentelemetry.io/collector/processor v0.114.0
 	go.opentelemetry.io/collector/processor/batchprocessor v0.114.0
 	go.uber.org/multierr v1.11.0
-	google.golang.org/api v0.208.0
+	google.golang.org/api v0.209.0
 )
 
 require (
