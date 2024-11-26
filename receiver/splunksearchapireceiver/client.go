@@ -24,6 +24,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strings"
 
 	"go.opentelemetry.io/collector/component"
 	"go.uber.org/zap"
@@ -31,7 +32,7 @@ import (
 
 type splunkSearchAPIClient interface {
 	CreateSearchJob(search string) (CreateJobResponse, error)
-	GetJobStatus(searchID string) (JobStatusResponse, error)
+	GetJobStatus(searchID string) (SearchJobStatusResponse, error)
 	GetSearchResults(searchID string, offset int, batchSize int) (SearchResultsResponse, error)
 }
 
@@ -60,6 +61,10 @@ func newSplunkSearchAPIClient(ctx context.Context, settings component.TelemetryS
 func (c defaultSplunkSearchAPIClient) CreateSearchJob(search string) (CreateJobResponse, error) {
 	endpoint := fmt.Sprintf("%s/services/search/jobs", c.endpoint)
 
+	if !strings.Contains(search, strings.ToLower("starttime=")) || !strings.Contains(search, strings.ToLower("endtime=")) || !strings.Contains(search, strings.ToLower("timeformat=")) {
+		return CreateJobResponse{}, fmt.Errorf("search query must contain starttime, endtime, and timeformat")
+	}
+
 	reqBody := fmt.Sprintf(`search=%s`, url.QueryEscape(search))
 	req, err := http.NewRequest("POST", endpoint, bytes.NewBuffer([]byte(reqBody)))
 	if err != nil {
@@ -80,43 +85,43 @@ func (c defaultSplunkSearchAPIClient) CreateSearchJob(search string) (CreateJobR
 	var jobResponse CreateJobResponse
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return CreateJobResponse{}, fmt.Errorf("failed to read search job status response: %v", err)
+		return CreateJobResponse{}, fmt.Errorf("failed to read search job create response: %v", err)
 	}
 
 	err = xml.Unmarshal(body, &jobResponse)
 	if err != nil {
-		return CreateJobResponse{}, fmt.Errorf("failed to unmarshal search job response: %v", err)
+		return CreateJobResponse{}, fmt.Errorf("failed to unmarshal search job create response: %v", err)
 	}
 	return jobResponse, nil
 }
 
-func (c defaultSplunkSearchAPIClient) GetJobStatus(sid string) (JobStatusResponse, error) {
+func (c defaultSplunkSearchAPIClient) GetJobStatus(sid string) (SearchJobStatusResponse, error) {
 	endpoint := fmt.Sprintf("%s/services/search/v2/jobs/%s", c.endpoint, sid)
 
 	req, err := http.NewRequest("GET", endpoint, nil)
 	if err != nil {
-		return JobStatusResponse{}, err
+		return SearchJobStatusResponse{}, err
 	}
 	req.SetBasicAuth(c.username, c.password)
 
 	resp, err := c.client.Do(req)
 	if err != nil {
-		return JobStatusResponse{}, err
+		return SearchJobStatusResponse{}, err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return JobStatusResponse{}, fmt.Errorf("failed to get search job status: %d", resp.StatusCode)
+		return SearchJobStatusResponse{}, fmt.Errorf("failed to get search job status: %d", resp.StatusCode)
 	}
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return JobStatusResponse{}, fmt.Errorf("failed to read search job status response: %v", err)
+		return SearchJobStatusResponse{}, fmt.Errorf("failed to read search job status response: %v", err)
 	}
-	var jobStatusResponse JobStatusResponse
+	var jobStatusResponse SearchJobStatusResponse
 	err = xml.Unmarshal(body, &jobStatusResponse)
 	if err != nil {
-		return JobStatusResponse{}, fmt.Errorf("failed to unmarshal search job response: %v", err)
+		return SearchJobStatusResponse{}, fmt.Errorf("failed to unmarshal search job status response: %v", err)
 	}
 
 	return jobStatusResponse, nil
@@ -147,7 +152,7 @@ func (c defaultSplunkSearchAPIClient) GetSearchResults(sid string, offset int, b
 	}
 	err = json.Unmarshal(body, &searchResults)
 	if err != nil {
-		return SearchResultsResponse{}, fmt.Errorf("failed to unmarshal search job results: %v", err)
+		return SearchResultsResponse{}, fmt.Errorf("failed to unmarshal search job results response: %v", err)
 	}
 
 	return searchResults, nil
