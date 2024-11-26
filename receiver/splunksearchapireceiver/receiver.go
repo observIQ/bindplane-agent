@@ -46,6 +46,7 @@ type splunksearchapireceiver struct {
 	config           *Config
 	settings         component.TelemetrySettings
 	id               component.ID
+	cancel           context.CancelFunc
 	client           splunkSearchAPIClient
 	storageClient    storage.Client
 	checkpointRecord *EventRecord
@@ -61,6 +62,7 @@ func newSSAPIReceiver(
 		logger:           logger,
 		config:           config,
 		settings:         settings,
+		storageClient:    storage.NewNopClient(),
 		id:               id,
 		checkpointRecord: &EventRecord{},
 	}
@@ -74,6 +76,10 @@ func (ssapir *splunksearchapireceiver) Start(ctx context.Context, host component
 		return err
 	}
 
+	// set cancel function
+	cancelCtx, cancel := context.WithCancel(ctx)
+	ssapir.cancel = cancel
+
 	// create storage client
 	storageClient, err := adapter.GetStorageClient(ctx, host, ssapir.config.StorageID, ssapir.id)
 	if err != nil {
@@ -81,16 +87,19 @@ func (ssapir *splunksearchapireceiver) Start(ctx context.Context, host component
 	}
 	ssapir.storageClient = storageClient
 
-	err = ssapir.initCheckpoint(ctx)
+	err = ssapir.initCheckpoint(cancelCtx)
 	if err != nil {
 		return fmt.Errorf("failed to initialize checkpoint: %w", err)
 	}
-	go ssapir.runQueries(ctx)
+	go ssapir.runQueries(cancelCtx)
 	return nil
 }
 
 func (ssapir *splunksearchapireceiver) Shutdown(ctx context.Context) error {
 	ssapir.logger.Debug("shutting down logs receiver")
+	if ssapir.cancel != nil {
+		ssapir.cancel()
+	}
 
 	err := ssapir.checkpoint(ctx)
 	if err != nil {
@@ -216,10 +225,11 @@ func (ssapir *splunksearchapireceiver) pollSearchCompletion(ctx context.Context,
 		select {
 		case <-t.C:
 			ssapir.logger.Debug("polling for search completion")
-			done, err := ssapir.isSearchCompleted(searchID)
+			resp, err := ssapir.client.GetJobStatus(searchID)
 			if err != nil {
-				return fmt.Errorf("error polling for search completion: %v", err)
+				return fmt.Errorf("error getting search job status: %v", err)
 			}
+			done := ssapir.isSearchCompleted(resp)
 			if done {
 				ssapir.logger.Info("search completed")
 				return nil
@@ -242,21 +252,16 @@ func (ssapir *splunksearchapireceiver) createSplunkSearch(search Search) (string
 	return resp.SID, nil
 }
 
-func (ssapir *splunksearchapireceiver) isSearchCompleted(sid string) (bool, error) {
-	resp, err := ssapir.client.GetJobStatus(sid)
-	if err != nil {
-		return false, err
-	}
-
+func (ssapir *splunksearchapireceiver) isSearchCompleted(resp SearchJobStatusResponse) bool {
 	for _, key := range resp.Content.Dict.Keys {
 		if key.Name == "dispatchState" {
 			if key.Value == "DONE" {
-				return true, nil
+				return true
 			}
 			break
 		}
 	}
-	return false, nil
+	return false
 }
 
 func (ssapir *splunksearchapireceiver) getSplunkSearchResults(sid string, offset int, batchSize int) (SearchResultsResponse, error) {
@@ -280,13 +285,18 @@ func (ssapir *splunksearchapireceiver) initCheckpoint(ctx context.Context) error
 				// skip searches that have already been processed, use the offset from the checkpoint
 				ssapir.config.Searches = ssapir.config.Searches[idx:]
 				offset = ssapir.checkpointRecord.Offset
+				return nil
 			}
 		}
+		ssapir.logger.Debug("while initializing checkpoint, no matching search query found, starting from the beginning")
 	}
 	return nil
 }
 
 func (ssapir *splunksearchapireceiver) checkpoint(ctx context.Context) error {
+	if ssapir.checkpointRecord == nil {
+		return nil
+	}
 	marshalBytes, err := json.Marshal(ssapir.checkpointRecord)
 	if err != nil {
 		return fmt.Errorf("failed to write checkpoint: %w", err)
