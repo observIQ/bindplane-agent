@@ -114,7 +114,7 @@ func (c defaultSplunkSearchAPIClient) GetJobStatus(sid string) (SearchJobStatusR
 
 	err = c.SetSplunkRequestAuth(req)
 	if err != nil {
-		return JobStatusResponse{}, err
+		return SearchJobStatusResponse{}, err
 	}
 
 	resp, err := c.client.Do(req)
