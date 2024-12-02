@@ -60,11 +60,11 @@ func (cfg *Config) Validate() error {
 	}
 
 	if cfg.Username == "" && cfg.AuthToken == "" {
-		return errors.New("missing Splunk username")
+		return errors.New("missing Splunk username or auth token")
 	}
 
 	if cfg.Password == "" && cfg.AuthToken == "" {
-		return errors.New("missing Splunk password")
+		return errors.New("missing Splunk password or auth token")
 	}
 
 	if cfg.AuthToken != "" {
