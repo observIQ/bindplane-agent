@@ -33,9 +33,9 @@ The steps are as follows:
     ./scripts/update-otel.sh {COLLECTOR_VERSION} {CONTRIB_VERSION} {PDATA_VERSION}
     ```
     Grab the different versions from OTEL's GitHub by checking the latest release versions of [collector-contrib](https://github.com/open-telemetry/opentelemetry-collector-contrib) and the [collector](https://github.com/open-telemetry/opentelemetry-collector). They should be the same.
-    The pdata version can be found by checking which version of it is imported in the collector-contrib [go.mod file](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/go.mod). The specific line with the pdata version should look similar to
-    ```
-    go.opentelemetry.io/collector/pdata v1.0.0 // indirect
+    The pdata version can be found by checking the latest release notes of the collector in a header with {PDATA_VERSION}/{COLLECTOR_VERSION}. All three version arguments should include the v - an example run of the script would look like this:
+    ```sh
+    ./scripts/update-otel.sh v0.114.0 v0.114.0 v1.20.0
     ```
 
 2. Run `make tidy`
@@ -46,25 +46,15 @@ The steps are as follows:
     ```
     These should be the same versions used in the first step.
 
-4. Update the `mdatagen` package in the `install-tools` command in the Makefile to now point to the same version as collector-contrib.
-    
-    Specifically, this line is the one to update:
-    ```
-    .PHONY: install-tools
-    install-tools:
-        ...
-        go install github.com/open-telemetry/opentelemetry-collector-contrib/cmd/mdatagen@v0.90.1
-    ``` 
+4. Run `make install-tools`
 
-5. Run `make install-tools`
+5. Run `make generate`
 
-6. Run `make generate`
+6. Run `make tidy`
 
-7. Run `make tidy`
+7. Run `make ci-checks`
 
-8. Run `make ci-checks`
-
-If all was successful, the repo has had it's OTEL dependencies updated to the latest version. 
+If all was successful, the repo has had its OTEL dependencies updated to the latest version. 
 
 There is potential for tests to fail, deprecation issues, code changes, or a variety of other problems to arise, but once the above steps are successful the repo can be updated.
 
