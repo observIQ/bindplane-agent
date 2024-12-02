@@ -112,10 +112,8 @@ func (ssapir *splunksearchapireceiver) Shutdown(ctx context.Context) error {
 func (ssapir *splunksearchapireceiver) runQueries(ctx context.Context) error {
 	for _, search := range ssapir.config.Searches {
 		// set default event batch size
-		fmt.Println(search.EventBatchSize)
 		if search.EventBatchSize == 0 {
 			search.EventBatchSize = 100
-			fmt.Println(search.EventBatchSize)
 		}
 
 		// create search in Splunk
