@@ -1,6 +1,6 @@
 module github.com/observiq/bindplane-agent/processor/unrollprocessor
 
-go 1.23.3
+go 1.22.7
 
 require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden v0.114.0
