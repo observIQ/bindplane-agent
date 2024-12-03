@@ -1,6 +1,6 @@
 # Unroll Processor
 
-This is an experimental processor that will take a log records with slice bodies and expand each element of the slice into its own log record within the slice.
+This is an experimental processor that will take a log record with slice bodies and expand each element of the slice into its own log record within the slice.
 
 ## Important Note
 

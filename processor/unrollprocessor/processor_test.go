@@ -21,7 +21,6 @@ import (
 
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest/plogtest"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/consumer/consumertest"
 	"go.opentelemetry.io/collector/pdata/plog"
@@ -83,6 +82,9 @@ func TestProcessor(t *testing.T) {
 			name:      "recursive_true",
 			recursive: true,
 		},
+		{
+			name: "empty",
+		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			input, err := golden.ReadLogs(filepath.Join("testdata", test.name, "input.yaml"))
@@ -104,7 +106,7 @@ func TestProcessor(t *testing.T) {
 			actual := sink.AllLogs()
 			require.Equal(t, 1, len(actual))
 
-			assert.NoError(t, plogtest.CompareLogs(expected, actual[0]))
+			require.NoError(t, plogtest.CompareLogs(expected, actual[0]))
 		})
 	}
 }

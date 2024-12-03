@@ -92,5 +92,9 @@ func (p *unrollProcessor) setBody(newLogRecord plog.LogRecord, expansion pcommon
 		expansion.Map().CopyTo(newLogRecord.Body().SetEmptyMap())
 	case pcommon.ValueTypeSlice:
 		expansion.Slice().CopyTo(newLogRecord.Body().SetEmptySlice())
+	case pcommon.ValueTypeBytes:
+		expansion.Bytes().CopyTo(newLogRecord.Body().SetEmptyBytes())
+	case pcommon.ValueTypeEmpty:
+		expansion.CopyTo(newLogRecord.Body())
 	}
 }
