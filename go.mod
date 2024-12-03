@@ -25,6 +25,7 @@ require (
 	github.com/observiq/bindplane-agent/processor/samplingprocessor v1.66.0
 	github.com/observiq/bindplane-agent/processor/spancountprocessor v1.66.0
 	github.com/observiq/bindplane-agent/processor/throughputmeasurementprocessor v1.66.0
+	github.com/observiq/bindplane-agent/processor/unrollprocessor v1.66.0
 	github.com/observiq/bindplane-agent/receiver/awss3rehydrationreceiver v1.66.0
 	github.com/observiq/bindplane-agent/receiver/azureblobrehydrationreceiver v1.66.0
 	github.com/observiq/bindplane-agent/receiver/httpreceiver v1.66.0
@@ -852,6 +853,8 @@ replace github.com/observiq/bindplane-agent/processor/spancountprocessor => ./pr
 replace github.com/observiq/bindplane-agent/processor/datapointcountprocessor => ./processor/datapointcountprocessor
 
 replace github.com/observiq/bindplane-agent/processor/lookupprocessor => ./processor/lookupprocessor
+
+replace github.com/observiq/bindplane-agent/processor/unrollprocessor => ./processor/unrollprocessor
 
 replace github.com/observiq/bindplane-agent/expr => ./expr
 
