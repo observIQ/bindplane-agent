@@ -25,74 +25,28 @@ func newUnrollProcessor(config *Config) (*unrollProcessor, error) {
 
 // ProcessLogs implements the processor interface
 func (p *unrollProcessor) ProcessLogs(_ context.Context, ld plog.Logs) (plog.Logs, error) {
-	newLogs := plog.NewLogs()
-	resourceLogs := ld.ResourceLogs()
 	var errs error
-	for i := 0; i < resourceLogs.Len(); i++ {
-		resourceLog := resourceLogs.At(i)
-		sl := resourceLog.ScopeLogs()
-		p.siftScopeLogs(sl)
-	}
-	resourceLogs.CopyTo(newLogs.ResourceLogs())
-	return newLogs, errs
-}
-
-// siftScopeLogs will iterate through scope logs and copy over new logs from siftLogRecords
-func (p *unrollProcessor) siftScopeLogs(sl plog.ScopeLogsSlice) {
-	for i := 0; i < sl.Len(); i++ {
-		scopeLogs := sl.At(i)
-		l := scopeLogs.LogRecords()
-		p.siftLogRecords(l).CopyTo(scopeLogs.LogRecords())
-	}
-}
-
-// siftLogRecords goes through each log record in the slice and will add new logs if there is a slice body
-// returns a log record slice with any logs that were not a slice body and new logs from the slice body
-func (p *unrollProcessor) siftLogRecords(logs plog.LogRecordSlice) plog.LogRecordSlice {
-	newLogRecords := plog.NewLogRecordSlice()
-	for i := 0; i < logs.Len(); i++ {
-		logRecord := logs.At(i)
-		// if the body is not a slice, retain the original log
-		if logRecord.Body().Type() != pcommon.ValueTypeSlice {
-			logRecord.CopyTo(newLogRecords.AppendEmpty())
-			continue
-		}
-
-		// get length of slice, make that many new log records
-		// TODO: optimized: n-1 copies, modify original log record
-		for j := 0; j < logRecord.Body().Slice().Len(); j++ {
-			expansion := logRecord.Body().Slice().At(j)
-			newLogRecord := plog.NewLogRecord()
-			logRecord.CopyTo(newLogRecord)
-			if p.cfg.UnrollKey == "" {
-				p.setBody(newLogRecord, expansion)
-			} else {
-				p.addToNewMap(newLogRecord, expansion)
+	for i := 0; i < ld.ResourceLogs().Len(); i++ {
+		rls := ld.ResourceLogs().At(i)
+		for j := 0; j < rls.ScopeLogs().Len(); j++ {
+			sls := rls.ScopeLogs().At(j)
+			for k := 0; k < sls.LogRecords().Len(); k++ {
+				lr := sls.LogRecords().At(k)
+				if lr.Body().Type() != pcommon.ValueTypeSlice {
+					continue
+				}
+				for l := 0; l < lr.Body().Slice().Len(); l++ {
+					newRecord := sls.LogRecords().AppendEmpty()
+					lr.CopyTo(newRecord)
+					p.setBody(newRecord, lr.Body().Slice().At(l))
+				}
 			}
-			newLogRecord.CopyTo(newLogRecords.AppendEmpty())
+			sls.LogRecords().RemoveIf(func(lr plog.LogRecord) bool {
+				return lr.Body().Type() == pcommon.ValueTypeSlice
+			})
 		}
-
 	}
-	return newLogRecords
-}
-
-// addToNewMap will add a new map body to the log record with the unroll key and the provided value
-func (p *unrollProcessor) addToNewMap(newLogRecord plog.LogRecord, value pcommon.Value) {
-	m := newLogRecord.Body().SetEmptyMap()
-	switch value.Type() {
-	case pcommon.ValueTypeStr:
-		m.PutStr(p.cfg.UnrollKey, value.Str())
-	case pcommon.ValueTypeInt:
-		m.PutInt(p.cfg.UnrollKey, value.Int())
-	case pcommon.ValueTypeDouble:
-		m.PutDouble(p.cfg.UnrollKey, value.Double())
-	case pcommon.ValueTypeBool:
-		m.PutBool(p.cfg.UnrollKey, value.Bool())
-	case pcommon.ValueTypeMap:
-		value.Map().CopyTo(m.PutEmptyMap(p.cfg.UnrollKey))
-	case pcommon.ValueTypeSlice:
-		value.Slice().CopyTo(m.PutEmptySlice(p.cfg.UnrollKey))
-	}
+	return ld, errs
 }
 
 // setBody will set the body of the log record to the provided value
