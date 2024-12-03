@@ -16,15 +16,19 @@ package splunksearchapireceiver
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/component/componenttest"
+	"go.opentelemetry.io/collector/consumer"
 	"go.opentelemetry.io/collector/consumer/consumertest"
 	"go.opentelemetry.io/collector/extension/experimental/storage"
+	"go.opentelemetry.io/collector/pdata/plog"
 	"go.uber.org/zap"
 )
 
@@ -41,7 +45,7 @@ func TestSplunkResultsPaginationFailure(t *testing.T) {
 		},
 	}
 	var callCount int
-	server := newMockSplunkServer(&callCount)
+	server := newMockSplunkServerPagination(&callCount)
 	defer server.Close()
 	settings := componenttest.NewNopTelemetrySettings()
 	ssapir := newSSAPIReceiver(zap.NewNop(), cfg, settings, component.NewID(typeStr))
@@ -58,7 +62,7 @@ func TestSplunkResultsPaginationFailure(t *testing.T) {
 	require.Equal(t, 1, callCount)
 }
 
-func newMockSplunkServer(callCount *int) *httptest.Server {
+func newMockSplunkServerPagination(callCount *int) *httptest.Server {
 	return httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 		if req.URL.String() == "/services/search/jobs" {
 			rw.Header().Set("Content-Type", "application/xml")
@@ -96,6 +100,77 @@ func newMockSplunkServer(callCount *int) *httptest.Server {
 	}))
 }
 
+// Test the case where the GCP exporter returns an error
+func TestExporterFailure(t *testing.T) {
+	factory := NewFactory()
+	cfg := factory.CreateDefaultConfig().(*Config)
+	cfg.Searches = []Search{
+		{
+			Query:          "search index=otel",
+			EarliestTime:   "2024-11-14T00:00:00.000Z",
+			LatestTime:     "2024-11-14T23:59:59.000Z",
+			EventBatchSize: 5,
+		},
+	}
+	server := newMockSplunkServer()
+	defer server.Close()
+	settings := componenttest.NewNopTelemetrySettings()
+	ssapir := newSSAPIReceiver(zap.NewNop(), cfg, settings, component.NewID(typeStr))
+	logsConsumer := &mockLogsConsumerExporterErr{}
+	logsConsumer.On("ConsumeLogs", mock.Anything, mock.Anything).Return(nil)
+
+	ssapir.logsConsumer = logsConsumer
+	ssapir.client, _ = newSplunkSearchAPIClient(context.Background(), settings, *cfg, componenttest.NewNopHost())
+	ssapir.client.(*defaultSplunkSearchAPIClient).client = server.Client()
+	ssapir.client.(*defaultSplunkSearchAPIClient).endpoint = server.URL
+
+	ssapir.initCheckpoint(context.Background())
+	err := ssapir.runQueries(context.Background())
+	require.NoError(t, err)
+	require.Equal(t, 5, ssapir.checkpointRecord.Offset)
+
+	// simulate 2nd batch of data failing
+	// the checkpoint should not be updated, and an error should be returned
+	logsConsumerErr := &mockLogsConsumerExporterErr{}
+	logsConsumerErr.On("ConsumeLogs", mock.Anything, mock.Anything).Return(errors.New("error exporting logs"))
+	ssapir.logsConsumer = logsConsumerErr
+	err = ssapir.runQueries(context.Background())
+	require.EqualError(t, err, "error consuming logs: error exporting logs")
+	require.Equal(t, 5, ssapir.checkpointRecord.Offset)
+}
+
+func newMockSplunkServer() *httptest.Server {
+	return httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+		if req.URL.String() == "/services/search/jobs" {
+			rw.Header().Set("Content-Type", "application/xml")
+			rw.WriteHeader(201)
+			rw.Write([]byte(`<?xml version="1.0" encoding="UTF-8"?>
+			<response>
+				<sid>123456</sid>
+			</response>
+			`))
+		}
+		if req.URL.String() == "/services/search/v2/jobs/123456" {
+			rw.Header().Set("Content-Type", "application/xml")
+			rw.WriteHeader(200)
+			rw.Write([]byte(`<?xml version="1.0" encoding="UTF-8"?>
+			<response>
+				<content>
+					<type>DISPATCH</type>
+					<dict>
+						<key name="dispatchState">DONE</key>
+					</dict>
+				</content>
+			</response>`))
+		}
+		if req.URL.String() == "/services/search/v2/jobs/123456/results?output_mode=json&offset=0&count=5" {
+			rw.Header().Set("Content-Type", "application/json")
+			rw.WriteHeader(200)
+			rw.Write(splunkEventsResultsP1)
+		}
+	}))
+}
+
 var splunkEventsResultsP1 = []byte(`{
 	"init_offset": 0,
 	"results": [
@@ -121,3 +196,16 @@ var splunkEventsResultsP1 = []byte(`{
 		}
 	]
 }`)
+
+type mockLogsConsumerExporterErr struct {
+	mock.Mock
+}
+
+func (m *mockLogsConsumerExporterErr) ConsumeLogs(ctx context.Context, logs plog.Logs) error {
+	args := m.Called(ctx, logs)
+	return args.Error(0)
+}
+
+func (m *mockLogsConsumerExporterErr) Capabilities() consumer.Capabilities {
+	return consumer.Capabilities{MutatesData: false}
+}
