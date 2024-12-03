@@ -39,6 +39,14 @@ func BenchmarkUnroll(b *testing.B) {
 	}
 }
 
+func TestInvalidConfig(t *testing.T) {
+	_, err := newUnrollProcessor(&Config{
+		Field:     "invalid",
+		Recursive: true,
+	})
+	require.Error(t, err)
+}
+
 func createTestResourceLogs() plog.Logs {
 	rl := plog.NewLogs()
 	for i := 0; i < 10; i++ {
