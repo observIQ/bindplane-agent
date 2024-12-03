@@ -20,6 +20,7 @@ import (
 	"fmt"
 
 	"github.com/observiq/bindplane-agent/internal/measurements"
+	"github.com/observiq/bindplane-agent/internal/topology"
 
 	"github.com/observiq/bindplane-agent/collector"
 	"github.com/observiq/bindplane-agent/internal/version"
@@ -57,6 +58,7 @@ func NewManagedCollectorService(col collector.Collector, logger *zap.Logger, man
 		CollectorConfigPath:  collectorConfigPath,
 		LoggerConfigPath:     loggerConfigPath,
 		MeasurementsReporter: measurements.BindplaneAgentThroughputMeasurementsRegistry,
+		TopologyReporter:     topology.BindplaneAgentConfigTopologyRegistry,
 	}
 
 	// Create new client

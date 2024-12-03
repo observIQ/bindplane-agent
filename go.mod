@@ -197,6 +197,8 @@ require (
 )
 
 require (
+	github.com/observiq/bindplane-agent/internal/topology v0.0.0-00010101000000-000000000000
+	github.com/observiq/bindplane-agent/processor/topologyprocessor v0.0.0-00010101000000-000000000000
 	github.com/open-telemetry/opentelemetry-collector-contrib/confmap/provider/aesprovider v0.114.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/processor/intervalprocessor v0.114.0
 	go.opentelemetry.io/collector/extension/extensiontest v0.114.0
@@ -853,6 +855,8 @@ replace github.com/observiq/bindplane-agent/processor/datapointcountprocessor =>
 
 replace github.com/observiq/bindplane-agent/processor/lookupprocessor => ./processor/lookupprocessor
 
+replace github.com/observiq/bindplane-agent/processor/topologyprocessor => ./processor/topologyprocessor
+
 replace github.com/observiq/bindplane-agent/expr => ./expr
 
 replace github.com/observiq/bindplane-agent/counter => ./counter
@@ -874,6 +878,8 @@ replace github.com/observiq/bindplane-agent/internal/testutils => ./internal/tes
 replace github.com/observiq/bindplane-agent/internal/report => ./internal/report
 
 replace github.com/observiq/bindplane-agent/internal/measurements => ./internal/measurements
+
+replace github.com/observiq/bindplane-agent/internal/topology => ./internal/topology
 
 // Does not build with windows and only used in configschema executable
 // Relevant issue https://github.com/mattn/go-ieproxy/issues/45
