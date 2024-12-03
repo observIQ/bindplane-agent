@@ -18,14 +18,17 @@ This is an experimental processor and is expected that this functionality would 
 
 
 ## Configuration
-| Field | Type | Default | Description |
-| ----- | ---- | ------- | ----------- |
+| Field     | Type   | Default | Description                                                                                                |
+| --------- | ------ | ------- | ---------------------------------------------------------------------------------------------------------- |
+| field     | string | body    | note: body is currently the only available value for unrolling; making this configuration currently static |
+| recursive | bool   | false   | whether to recursively unroll body slices of slices                                                        |
 
 
 ### Example configuration
 
 ```yaml
 unroll:
+    recursive: false
 ```
 
 
