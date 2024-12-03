@@ -44,9 +44,9 @@ $response = Read-Host -Prompt "Do you want to include only the most recent logs 
 if ($response -eq "n") {
     Copy-Item "$collector_dir\log\*" -Destination "$output_dir\" -Force
 } else {
-    if (Test-Path "$collector_dir\log\observiq_collector.err") {
-        Write-Host "Adding $collector_dir\log\observiq_collector.err"
-        Copy-Item "$collector_dir\log\observiq_collector.err" -Destination "$output_dir\" -Force
+    if (Test-Path "$collector_dir\log\bindplane_agent.err") {
+        Write-Host "Adding $collector_dir\log\bindplane_agent.err"
+        Copy-Item "$collector_dir\log\bindplane_agent.err" -Destination "$output_dir\" -Force
     }
     Write-Host "Adding $collector_dir\log\collector.log"
     Copy-Item "$collector_dir\log\collector.log" -Destination "$output_dir\" -Force
