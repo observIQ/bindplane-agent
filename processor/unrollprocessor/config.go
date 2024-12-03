@@ -21,7 +21,8 @@ import (
 
 // Config is the configuration for the unroll processor.
 type Config struct {
-	Field UnrollField `mapstructure:"field"`
+	Field     UnrollField `mapstructure:"field"`
+	Recursive bool        `mapstructure:"recursive"`
 }
 
 // UnrollField is the field to unroll.
