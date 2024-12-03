@@ -58,10 +58,10 @@ func TestProcessor_Logs(t *testing.T) {
 	require.NoError(t, plogtest.CompareLogs(logs, processedLogs))
 
 	// validate that upsert route was performed
-	require.True(t, tmp.topology.DestConfig.AccountID == "myAccountID")
-	require.True(t, tmp.topology.DestConfig.OrgID == "myOrgID")
-	require.True(t, tmp.topology.DestConfig.ConfigName == "myConfigName")
-	ci := topology.ConfigInfo{
+	require.True(t, tmp.topology.DestGateway.AccountID == "myAccountID")
+	require.True(t, tmp.topology.DestGateway.OrgID == "myOrgID")
+	require.True(t, tmp.topology.DestGateway.ConfigName == "myConfigName")
+	ci := topology.GatewayInfo{
 		ConfigName: "myConfigName1",
 		AccountID:  "myAccountID1",
 		OrgID:      "myOrgID1",
@@ -98,10 +98,10 @@ func TestProcessor_Metrics(t *testing.T) {
 	require.NoError(t, pmetrictest.CompareMetrics(metrics, processedMetrics))
 
 	// validate that upsert route was performed
-	require.True(t, tmp.topology.DestConfig.AccountID == "myAccountID")
-	require.True(t, tmp.topology.DestConfig.OrgID == "myOrgID")
-	require.True(t, tmp.topology.DestConfig.ConfigName == "myConfigName")
-	ci := topology.ConfigInfo{
+	require.True(t, tmp.topology.DestGateway.AccountID == "myAccountID")
+	require.True(t, tmp.topology.DestGateway.OrgID == "myOrgID")
+	require.True(t, tmp.topology.DestGateway.ConfigName == "myConfigName")
+	ci := topology.GatewayInfo{
 		ConfigName: "myConfigName1",
 		AccountID:  "myAccountID1",
 		OrgID:      "myOrgID1",
@@ -138,10 +138,10 @@ func TestProcessor_Traces(t *testing.T) {
 	require.NoError(t, ptracetest.CompareTraces(traces, processedTraces))
 
 	// validate that upsert route was performed
-	require.True(t, tmp.topology.DestConfig.AccountID == "myAccountID")
-	require.True(t, tmp.topology.DestConfig.OrgID == "myOrgID")
-	require.True(t, tmp.topology.DestConfig.ConfigName == "myConfigName")
-	ci := topology.ConfigInfo{
+	require.True(t, tmp.topology.DestGateway.AccountID == "myAccountID")
+	require.True(t, tmp.topology.DestGateway.OrgID == "myOrgID")
+	require.True(t, tmp.topology.DestGateway.ConfigName == "myConfigName")
+	ci := topology.GatewayInfo{
 		ConfigName: "myConfigName1",
 		AccountID:  "myAccountID1",
 		OrgID:      "myOrgID1",

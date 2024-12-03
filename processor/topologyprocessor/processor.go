@@ -17,6 +17,7 @@ package topologyprocessor
 import (
 	"context"
 	"fmt"
+	"strings"
 	"sync"
 	"time"
 
@@ -36,8 +37,8 @@ const (
 )
 
 type topologyUpdate struct {
-	gw         topology.ConfigInfo
-	routeTable map[topology.ConfigInfo]time.Time
+	gw         topology.GatewayInfo
+	routeTable map[topology.GatewayInfo]time.Time
 }
 
 type topologyProcessor struct {
@@ -53,7 +54,8 @@ type topologyProcessor struct {
 
 // newTopologyProcessor creates a new topology processor
 func newTopologyProcessor(logger *zap.Logger, cfg *Config, processorID component.ID) (*topologyProcessor, error) {
-	destGw := topology.ConfigInfo{
+	destGw := topology.GatewayInfo{
+		GatewayID:  strings.TrimPrefix(cfg.GatewayID, "bindplane_gateway/"),
 		ConfigName: cfg.ConfigName,
 		AccountID:  cfg.AccountID,
 		OrgID:      cfg.OrgID,
@@ -130,7 +132,7 @@ func (tp *topologyProcessor) processTopologyHeaders(ctx context.Context) {
 
 		// only upsert if all headers are present
 		if configName != "" && accountID != "" && orgID != "" {
-			gw := topology.ConfigInfo{
+			gw := topology.GatewayInfo{
 				ConfigName: configName,
 				AccountID:  accountID,
 				OrgID:      orgID,

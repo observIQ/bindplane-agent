@@ -32,8 +32,9 @@ type ConfigTopologyRegistry interface {
 	Reset()
 }
 
-// ConfigInfo reprents the unique identifiable information about a bindplane gateway's configuration
-type ConfigInfo struct {
+// GatewayInfo represents the unique identifiable information about a bindplane gateway's configuration
+type GatewayInfo struct {
+	GatewayID  string
 	ConfigName string
 	AccountID  string
 	OrgID      string
@@ -41,19 +42,20 @@ type ConfigInfo struct {
 
 // ConfigTopology represents the data captured through topology processors.
 type ConfigTopology struct {
-	DestConfig ConfigInfo
-	RouteTable map[ConfigInfo]time.Time
+	DestGateway GatewayInfo
+	RouteTable  map[GatewayInfo]time.Time
 }
 
 // ConfigTopologyInfo represents topology relationships between configs.
 type ConfigTopologyInfo struct {
+	GatewayID     string         `json:"gatewayID"`
 	ConfigName    string         `json:"configName"`
 	AccountID     string         `json:"accountID"`
 	OrgID         string         `json:"orgID"`
 	SourceConfigs []ConfigRecord `json:"sourceConfigs"`
 }
 
-// ConfigRecord represents a source config and the time it was last detected
+// ConfigRecord represents a gateway source and the time it was last detected
 type ConfigRecord struct {
 	ConfigName  string    `json:"configName"`
 	AccountID   string    `json:"accountID"`
@@ -62,15 +64,15 @@ type ConfigRecord struct {
 }
 
 // NewConfigTopology initializes a new ConfigTopology
-func NewConfigTopology(destGateway ConfigInfo) (*ConfigTopology, error) {
+func NewConfigTopology(destGateway GatewayInfo) (*ConfigTopology, error) {
 	return &ConfigTopology{
-		DestConfig: destGateway,
-		RouteTable: make(map[ConfigInfo]time.Time),
+		DestGateway: destGateway,
+		RouteTable:  make(map[GatewayInfo]time.Time),
 	}, nil
 }
 
 // UpsertRoute upserts given route.
-func (ts *ConfigTopology) UpsertRoute(_ context.Context, gw ConfigInfo) {
+func (ts *ConfigTopology) UpsertRoute(_ context.Context, gw GatewayInfo) {
 	ts.RouteTable[gw] = time.Now()
 }
 
@@ -121,9 +123,10 @@ func (rtsr *ResettableConfigTopologyRegistry) TopologyInfos() []ConfigTopologyIn
 	ti := []ConfigTopologyInfo{}
 	for _, ts := range states {
 		curInfo := ConfigTopologyInfo{}
-		curInfo.ConfigName = ts.DestConfig.ConfigName
-		curInfo.AccountID = ts.DestConfig.AccountID
-		curInfo.OrgID = ts.DestConfig.OrgID
+		curInfo.GatewayID = ts.DestGateway.GatewayID
+		curInfo.ConfigName = ts.DestGateway.ConfigName
+		curInfo.AccountID = ts.DestGateway.AccountID
+		curInfo.OrgID = ts.DestGateway.OrgID
 		for gw, updated := range ts.RouteTable {
 			curInfo.SourceConfigs = append(curInfo.SourceConfigs, ConfigRecord{
 				ConfigName:  gw.ConfigName,

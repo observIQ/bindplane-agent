@@ -35,6 +35,9 @@ type Config struct {
 	// Bindplane extension to use in order to report topology. Optional.
 	BindplaneExtension component.ID `mapstructure:"bindplane_extension"`
 
+	// ComponentID of the Gateway Source where this processor is present
+	GatewayID string `mapstructure:"gatewayID"`
+
 	// Name of the Config where this processor is present
 	ConfigName string `mapstructure:"configName"`
 
@@ -50,6 +53,10 @@ func (cfg Config) Validate() error {
 	// Processor not enabled no validation needed
 	if !cfg.Enabled {
 		return nil
+	}
+
+	if cfg.GatewayID == "" {
+		return errors.New("`gatewayID` must be specified")
 	}
 
 	if cfg.ConfigName == "" {
