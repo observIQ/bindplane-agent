@@ -30,7 +30,14 @@ func (p *unrollProcessor) ProcessLogs(_ context.Context, ld plog.Logs) (plog.Log
 		rls := ld.ResourceLogs().At(i)
 		for j := 0; j < rls.ScopeLogs().Len(); j++ {
 			sls := rls.ScopeLogs().At(j)
-			for k := 0; k < sls.LogRecords().Len(); k++ {
+			origLen := sls.LogRecords().Len()
+			var last func() int
+			if p.cfg.Recursive {
+				last = sls.LogRecords().Len
+			} else {
+				last = func() int { return origLen }
+			}
+			for k := 0; k < last(); k++ {
 				lr := sls.LogRecords().At(k)
 				if lr.Body().Type() != pcommon.ValueTypeSlice {
 					continue
@@ -42,6 +49,13 @@ func (p *unrollProcessor) ProcessLogs(_ context.Context, ld plog.Logs) (plog.Log
 				}
 			}
 			sls.LogRecords().RemoveIf(func(lr plog.LogRecord) bool {
+				if p.cfg.Recursive {
+					return lr.Body().Type() == pcommon.ValueTypeSlice
+				}
+				if origLen == 0 {
+					return false
+				}
+				origLen--
 				return lr.Body().Type() == pcommon.ValueTypeSlice
 			})
 		}
