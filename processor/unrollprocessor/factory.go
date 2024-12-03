@@ -22,27 +22,29 @@ import (
 	"go.opentelemetry.io/collector/consumer"
 	"go.opentelemetry.io/collector/processor"
 	"go.opentelemetry.io/collector/processor/processorhelper"
-
-	"github.com/observiq/bindplane-agent/processor/unrollprocessor/internal/metadata"
 )
 
 var processorCapabilities = consumer.Capabilities{MutatesData: true}
 
-const typeStr = "unroll"
+// componentType is the value of the "type" key in configuration.
+var componentType = component.MustNewType("unroll")
+
+const (
+	stability = component.StabilityLevelAlpha
+)
 
 // NewFactory returns a new factory for the Transform processor.
 func NewFactory() processor.Factory {
 	return processor.NewFactory(
-		metadata.Type,
+		componentType,
 		createDefaultConfig,
-		processor.WithLogs(createLogsProcessor, metadata.LogsStability),
+		processor.WithLogs(createLogsProcessor, stability),
 	)
 }
 
 func createDefaultConfig() component.Config {
 	return &Config{
-		UnrollKey: "message",
-		Field:     UnrollFieldBody,
+		Field: UnrollFieldBody,
 	}
 }
 

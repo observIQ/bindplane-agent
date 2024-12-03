@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Package unrollprocessor contains the logic to unroll logs from a slice in the body field.
 package unrollprocessor
 
 import (
@@ -20,8 +21,7 @@ import (
 
 // Config is the configuration for the unroll processor.
 type Config struct {
-	UnrollKey string      `mapstructure:"unroll_key"`
-	Field     UnrollField `mapstructure:"field"`
+	Field UnrollField `mapstructure:"field"`
 }
 
 // UnrollField is the field to unroll.
