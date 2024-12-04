@@ -114,6 +114,11 @@ func (ssapir *splunksearchapireceiver) runQueries(ctx context.Context) error {
 	for _, search := range ssapir.config.Searches {
 		// set current search query
 		ssapir.checkpointRecord.Search = search.Query
+		
+		// set default event batch size (matches Splunk API default)
+		if search.EventBatchSize == 0 {
+			search.EventBatchSize = 100
+		}
 
 		// create search in Splunk
 		searchID, err := ssapir.createSplunkSearch(search)
@@ -216,6 +221,7 @@ func (ssapir *splunksearchapireceiver) runQueries(ctx context.Context) error {
 		}
 		ssapir.logger.Info("search results exported", zap.String("query", search.Query), zap.Int("total results", exportedEvents))
 	}
+	ssapir.logger.Debug("all search results exported", zap.Int("total results", exportedEvents))
 	return nil
 }
 
