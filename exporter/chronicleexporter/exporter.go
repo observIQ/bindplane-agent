@@ -95,7 +95,7 @@ func newExporter(cfg *Config, params exporter.Settings, collectorID, exporterID 
 	}, nil
 }
 
-func (ce *chronicleExporter) Start(_ context.Context, host component.Host) error {
+func (ce *chronicleExporter) Start(_ context.Context, _ component.Host) error {
 	creds, err := loadGoogleCredentials(ce.cfg)
 	if err != nil {
 		return fmt.Errorf("load Google credentials: %w", err)
