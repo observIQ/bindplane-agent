@@ -18,18 +18,13 @@ import (
 	"context"
 	"errors"
 	"testing"
-	"time"
 
 	"github.com/golang/mock/gomock"
 	"github.com/observiq/bindplane-agent/exporter/chronicleexporter/protos/api"
 	"github.com/observiq/bindplane-agent/exporter/chronicleexporter/protos/api/mocks"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
-	"go.opentelemetry.io/collector/component/componenttest"
 	"go.opentelemetry.io/collector/consumer/consumererror"
-	"go.opentelemetry.io/collector/exporter/exportertest"
-	"go.opentelemetry.io/collector/pdata/pcommon"
-	"go.opentelemetry.io/collector/pdata/plog"
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -173,52 +168,4 @@ func TestLogsDataPusher(t *testing.T) {
 			}
 		})
 	}
-}
-
-func TestReallyPushToChronicle(t *testing.T) {
-	f := NewFactory()
-	cfg := f.CreateDefaultConfig().(*Config)
-	cfg.CustomerID = "b536658e-469e-44a5-b764-d5ab15b72ce0"
-	cfg.Protocol = protocolHTTPS
-	cfg.CredsFilePath = "/tmp/chronicle_creds.json"
-	cfg.Project = "telemetry-sandbox-340915"
-	cfg.Forwarder = "fbcb7d35-dd6f-4f20-aa2e-5ab2cceffa3c"
-	cfg.Location = "us"
-	cfg.Endpoint = "chronicle.googleapis.com"
-	cfg.LogType = "OFFICE_365"
-	settings := exportertest.NewNopSettings()
-
-	exp, err := f.CreateLogs(context.Background(), settings, cfg)
-	require.NoError(t, err)
-
-	require.NoError(t, exp.Start(context.Background(), componenttest.NewNopHost()))
-
-	logs := generateFakeLogs(1)
-
-	require.NoError(t, exp.ConsumeLogs(context.Background(), logs))
-
-	require.NoError(t, exp.Shutdown(context.Background()))
-}
-
-func generateFakeLogs(numLogs int) plog.Logs {
-	logs := plog.NewLogs()
-	// Configure resource attributes
-	res := logs.ResourceLogs().AppendEmpty()
-	res.Resource().Attributes().PutStr("service.name", "google-secops-log-generator")
-	res.Resource().Attributes().PutStr("log_type", "OFFICE_365")
-
-	// Add log entry
-	scopeLogs := res.ScopeLogs().AppendEmpty()
-	for i := 0; i < numLogs; i++ {
-		log := scopeLogs.LogRecords().AppendEmpty()
-		log.SetSeverityNumber(plog.SeverityNumberInfo)
-		log.Body().SetStr("User login detected.")
-		log.Attributes().PutStr("operation_name", "UserLogin")
-		log.Attributes().PutStr("user_email", "user@example.com")
-		log.Attributes().PutStr("status", "Success")
-		log.Attributes().PutStr("ip_address", "203.0.113.42")
-		log.SetTimestamp(pcommon.NewTimestampFromTime(time.Now()))
-	}
-
-	return logs
 }
