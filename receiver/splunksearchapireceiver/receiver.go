@@ -210,10 +210,9 @@ func (ssapir *splunksearchapireceiver) runQueries(ctx context.Context) error {
 				break
 			}
 		}
-
-		ssapir.logger.Debug("all search results exported", zap.String("query", search.Query), zap.Int("total results", exportedEvents))
+		ssapir.logger.Info("all search results exported", zap.String("query", search.Query), zap.Int("total results", exportedEvents))
 	}
-	ssapir.logger.Debug("all search results exported", zap.Int("total results", exportedEvents))
+	ssapir.logger.Info("all search results exported")
 	return nil
 }
 
@@ -272,6 +271,7 @@ func (ssapir *splunksearchapireceiver) getSplunkSearchResults(sid string, offset
 }
 
 func (ssapir *splunksearchapireceiver) initCheckpoint(ctx context.Context) error {
+	ssapir.logger.Info("initializing checkpoint")
 	// if a checkpoint already exists, use the offset from the checkpoint
 	if err := ssapir.loadCheckpoint(ctx); err != nil {
 		return fmt.Errorf("failed to load checkpoint: %w", err)
@@ -287,7 +287,7 @@ func (ssapir *splunksearchapireceiver) initCheckpoint(ctx context.Context) error
 				return nil
 			}
 		}
-		ssapir.logger.Debug("while initializing checkpoint, no matching search query found, starting from the beginning")
+		ssapir.logger.Info("while initializing checkpoint, no matching search query found, starting from the beginning")
 	}
 	return nil
 }
