@@ -106,9 +106,6 @@ func (ce *chronicleExporter) Start(_ context.Context, _ component.Host) error {
 		return nil
 	}
 
-	ctx, cancel := context.WithCancel(context.Background())
-	ce.cancel = cancel
-
 	opts := []grpc.DialOption{
 		// Apply OAuth tokens for each RPC call
 		grpc.WithPerRPCCredentials(oauth.TokenSource{TokenSource: creds.TokenSource}),
@@ -122,6 +119,8 @@ func (ce *chronicleExporter) Start(_ context.Context, _ component.Host) error {
 	ce.grpcClient = api.NewIngestionServiceV2Client(conn)
 
 	if ce.cfg.CollectAgentMetrics {
+		ctx, cancel := context.WithCancel(context.Background())
+		ce.cancel = cancel
 		ce.wg.Add(1)
 		go ce.startHostMetricsCollection(ctx)
 	}
@@ -130,12 +129,11 @@ func (ce *chronicleExporter) Start(_ context.Context, _ component.Host) error {
 }
 
 func (ce *chronicleExporter) Shutdown(context.Context) error {
+	defer http.DefaultTransport.(*http.Transport).CloseIdleConnections()
 	if ce.cfg.Protocol == protocolHTTPS {
 		t := ce.httpClient.Transport.(*oauth2.Transport)
 		if t.Base != nil {
 			t.Base.(*http.Transport).CloseIdleConnections()
-		} else {
-			http.DefaultTransport.(*http.Transport).CloseIdleConnections()
 		}
 		return nil
 	}
@@ -212,7 +210,6 @@ func (ce *chronicleExporter) uploadToChronicle(ctx context.Context, request *api
 		default:
 			return consumererror.NewPermanent(fmt.Errorf("upload logs to chronicle: %w", err))
 		}
-
 	}
 
 	ce.metrics.addSentLogs(totalLogs)
