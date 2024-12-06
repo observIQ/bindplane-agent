@@ -271,7 +271,7 @@ func (ssapir *splunksearchapireceiver) getSplunkSearchResults(sid string, offset
 }
 
 func (ssapir *splunksearchapireceiver) initCheckpoint(ctx context.Context) error {
-	ssapir.logger.Info("initializing checkpoint")
+	ssapir.logger.Debug("initializing checkpoint")
 	// if a checkpoint already exists, use the offset from the checkpoint
 	if err := ssapir.loadCheckpoint(ctx); err != nil {
 		return fmt.Errorf("failed to load checkpoint: %w", err)
