@@ -62,3 +62,39 @@ extensions:
 5. Add a `googlecloud` exporter to your config. Configure the exporter to send to a GCP project where your service account has Logging Admin role. To check the permissions of service accounts in your project, go to the [IAM page](https://console.cloud.google.com/iam-admin/iam). 
 6. Disable the `sending_queue` field on the GCP exporter. The sending queue introduces an asynchronous step to the pipeline, which will jeopardize the receiver's ability to checkpoint correctly and recover from errors. For this same reason, avoid using any asynchronous processors (e.g., batch processor).
 
+After following these steps, your configuration should look something like this:
+```yaml
+receivers:
+  splunksearchapi:
+    endpoint: "https://splunk-c4-0.example.localnet:8089"
+    tls:
+      insecure_skip_verify: true
+    splunk_username: "user"
+    splunk_password: "pass"
+    job_poll_interval: 5s
+    searches:
+      - query: 'search index=my_index'
+        earliest_time: "2024-11-01T01:00:00.000-05:00"
+        latest_time: "2024-11-30T23:59:59.999-05:00"
+        event_batch_size: 500
+    storage: file_storage
+exporters:
+  googlecloud:
+    project: "my-gcp-project"
+    log: 
+      default_log_name: "splunk-events"
+    sending_queue:
+      enabled: false
+
+extensions:
+  file_storage:
+    directory: "./local/storage"
+
+service:
+  extensions: [file_storage]
+  pipelines:
+    logs:
+      receivers: [splunksearchapi]
+      exporters: [googlecloud]
+```
+You are now ready to migrate events from Splunk to Google Cloud Logging.
