@@ -49,7 +49,7 @@ extensions:
 
 ### Migrate historical events to Google Cloud Logging
 1. Identify the Splunk index to migrate events from. Create a Splunk search to capture the events from that index. This will be the `searches.query` you pass to the receiver.
-   - Example: `search index=my_index1`
+   - Example: `search index=my_index`
    - Note: queries must begin with the explicit `search` command, and must not include additional commands, nor any time fields (e.g. `earliesttime`)
 2. Determine the timeframe you want to migrate events from, and set the `searches.earliest_time` and `searches.latest_time` config fields accordingly.
    - To migrate events from December 2024, EST (UTC-5):
@@ -74,8 +74,8 @@ receivers:
     job_poll_interval: 5s
     searches:
       - query: 'search index=my_index'
-        earliest_time: "2024-11-01T01:00:00.000-05:00"
-        latest_time: "2024-11-30T23:59:59.999-05:00"
+        earliest_time: "2024-12-01T00:00:00.000-05:00"
+        latest_time: "2024-12-31T23:59:59.999-05:00"
         event_batch_size: 500
     storage: file_storage
 exporters:
