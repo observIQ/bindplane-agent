@@ -114,15 +114,22 @@ func (ssapir *splunksearchapireceiver) runQueries(ctx context.Context) error {
 		// set current search query
 		ssapir.checkpointRecord.Search = search.Query
 
+		// set default event batch size (matches Splunk API default)
+		if search.EventBatchSize == 0 {
+			search.EventBatchSize = 100
+		}
+
 		// create search in Splunk
 		searchID, err := ssapir.createSplunkSearch(search)
 		if err != nil {
 			ssapir.logger.Error("error creating search", zap.Error(err))
+			return err
 		}
 
 		// wait for search to complete
 		if err = ssapir.pollSearchCompletion(ctx, searchID); err != nil {
 			ssapir.logger.Error("error polling for search completion", zap.Error(err))
+			return err
 		}
 
 		for {
@@ -130,6 +137,7 @@ func (ssapir *splunksearchapireceiver) runQueries(ctx context.Context) error {
 			results, err := ssapir.getSplunkSearchResults(searchID, offset, search.EventBatchSize)
 			if err != nil {
 				ssapir.logger.Error("error fetching search results", zap.Error(err))
+				return err
 			}
 			ssapir.logger.Info("search results fetched", zap.Int("num_results", len(results.Results)))
 
@@ -201,12 +209,13 @@ func (ssapir *splunksearchapireceiver) runQueries(ctx context.Context) error {
 			}
 			// if the number of results is less than the results per request, we have queried all pages for the search
 			if len(results.Results) < search.EventBatchSize {
+				ssapir.logger.Debug("results less than batch size, stopping search result export")
 				break
 			}
-
 		}
-		ssapir.logger.Debug("all search results exported", zap.String("query", search.Query), zap.Int("total results", exportedEvents))
+		ssapir.logger.Info("all search results exported", zap.String("query", search.Query), zap.Int("total results", exportedEvents))
 	}
+	ssapir.logger.Info("all search results exported")
 	return nil
 }
 
@@ -265,6 +274,7 @@ func (ssapir *splunksearchapireceiver) getSplunkSearchResults(sid string, offset
 }
 
 func (ssapir *splunksearchapireceiver) initCheckpoint(ctx context.Context) error {
+	ssapir.logger.Debug("initializing checkpoint")
 	// if a checkpoint already exists, use the offset from the checkpoint
 	if err := ssapir.loadCheckpoint(ctx); err != nil {
 		return fmt.Errorf("failed to load checkpoint: %w", err)
@@ -280,7 +290,7 @@ func (ssapir *splunksearchapireceiver) initCheckpoint(ctx context.Context) error
 				return nil
 			}
 		}
-		ssapir.logger.Debug("while initializing checkpoint, no matching search query found, starting from the beginning")
+		ssapir.logger.Info("while initializing checkpoint, no matching search query found, starting from the beginning")
 	}
 	return nil
 }
