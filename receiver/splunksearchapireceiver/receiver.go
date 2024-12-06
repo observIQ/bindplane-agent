@@ -112,6 +112,9 @@ func (ssapir *splunksearchapireceiver) Shutdown(ctx context.Context) error {
 
 func (ssapir *splunksearchapireceiver) runQueries(ctx context.Context) error {
 	for _, search := range ssapir.config.Searches {
+		// set current search query
+		ssapir.checkpointRecord.Search = search.Query
+
 		// create search in Splunk
 		searchID, err := ssapir.createSplunkSearch(search)
 		if err != nil {
@@ -297,6 +300,7 @@ func (ssapir *splunksearchapireceiver) checkpoint(ctx context.Context) error {
 	if ssapir.checkpointRecord == nil {
 		return nil
 	}
+
 	marshalBytes, err := json.Marshal(ssapir.checkpointRecord)
 	if err != nil {
 		return fmt.Errorf("failed to write checkpoint: %w", err)
