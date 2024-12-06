@@ -128,6 +128,7 @@ func TestExporterFailure(t *testing.T) {
 	err := ssapir.runQueries(context.Background())
 	require.NoError(t, err)
 	require.Equal(t, 5, ssapir.checkpointRecord.Offset)
+	require.Equal(t, "search index=otel", ssapir.checkpointRecord.Search)
 
 	// simulate 2nd batch of data failing
 	// the checkpoint should not be updated, and an error should be returned
@@ -137,6 +138,7 @@ func TestExporterFailure(t *testing.T) {
 	err = ssapir.runQueries(context.Background())
 	require.EqualError(t, err, "error consuming logs: error exporting logs")
 	require.Equal(t, 5, ssapir.checkpointRecord.Offset)
+	require.Equal(t, "search index=otel", ssapir.checkpointRecord.Search)
 }
 
 func newMockSplunkServer() *httptest.Server {
