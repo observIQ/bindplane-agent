@@ -16,12 +16,15 @@ package chronicleexporter
 
 import (
 	"context"
+	"errors"
 
-	"github.com/observiq/bindplane-otel-collector/exporter/chronicleexporter/internal/metadata"
+	"github.com/google/uuid"
+	"github.com/observiq/bindplane-agent/exporter/chronicleexporter/internal/metadata"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/config/configretry"
 	"go.opentelemetry.io/collector/exporter"
 	"go.opentelemetry.io/collector/exporter/exporterhelper"
+	semconv "go.opentelemetry.io/collector/semconv/v1.5.0"
 )
 
 // NewFactory creates a new Chronicle exporter factory.
@@ -32,29 +35,17 @@ func NewFactory() exporter.Factory {
 		exporter.WithLogs(createLogsExporter, metadata.LogsStability))
 }
 
-const (
-	defaultEndpoint                  = "malachiteingestion-pa.googleapis.com"
-	defaultBatchLogCountLimitGRPC    = 1000
-	defaultBatchRequestSizeLimitGRPC = 1048576
-	defaultBatchLogCountLimitHTTP    = 1000
-	defaultBatchRequestSizeLimitHTTP = 1048576
-)
-
 // createDefaultConfig creates the default configuration for the exporter.
 func createDefaultConfig() component.Config {
 	return &Config{
-		Protocol:                  protocolGRPC,
-		TimeoutConfig:             exporterhelper.NewDefaultTimeoutConfig(),
-		QueueConfig:               exporterhelper.NewDefaultQueueConfig(),
-		BackOffConfig:             configretry.NewDefaultBackOffConfig(),
-		OverrideLogType:           true,
-		Compression:               noCompression,
-		CollectAgentMetrics:       true,
-		Endpoint:                  defaultEndpoint,
-		BatchLogCountLimitGRPC:    defaultBatchLogCountLimitGRPC,
-		BatchRequestSizeLimitGRPC: defaultBatchRequestSizeLimitGRPC,
-		BatchLogCountLimitHTTP:    defaultBatchLogCountLimitHTTP,
-		BatchRequestSizeLimitHTTP: defaultBatchRequestSizeLimitHTTP,
+		Protocol:            protocolGRPC,
+		TimeoutConfig:       exporterhelper.NewDefaultTimeoutConfig(),
+		QueueConfig:         exporterhelper.NewDefaultQueueConfig(),
+		BackOffConfig:       configretry.NewDefaultBackOffConfig(),
+		OverrideLogType:     true,
+		Endpoint:            baseEndpoint,
+		Compression:         noCompression,
+		CollectAgentMetrics: true,
 	}
 }
 
@@ -63,25 +54,38 @@ func createLogsExporter(
 	ctx context.Context,
 	params exporter.Settings,
 	cfg component.Config,
-) (exp exporter.Logs, err error) {
-	c := cfg.(*Config)
-	if c.Protocol == protocolHTTPS {
-		exp, err = newHTTPExporter(c, params)
-	} else {
-		exp, err = newGRPCExporter(c, params)
+) (exporter.Logs, error) {
+	chronicleCfg, ok := cfg.(*Config)
+	if !ok {
+		return nil, errors.New("invalid config type")
 	}
+
+	var cID string
+	sid, ok := params.Resource.Attributes().Get(semconv.AttributeServiceInstanceID)
+	if ok {
+		cID = sid.AsString()
+	} else {
+		cID = uuid.New().String()
+	}
+
+	exp, err := newExporter(chronicleCfg, params, cID, params.ID.String())
 	if err != nil {
 		return nil, err
+	}
+
+	pusher := exp.logsDataPusher
+	if chronicleCfg.Protocol == protocolHTTPS {
+		pusher = exp.logsHTTPDataPusher
 	}
 	return exporterhelper.NewLogs(
 		ctx,
 		params,
-		c,
-		exp.ConsumeLogs,
+		chronicleCfg,
+		pusher,
 		exporterhelper.WithCapabilities(exp.Capabilities()),
-		exporterhelper.WithTimeout(c.TimeoutConfig),
-		exporterhelper.WithQueue(c.QueueConfig),
-		exporterhelper.WithRetry(c.BackOffConfig),
+		exporterhelper.WithTimeout(chronicleCfg.TimeoutConfig),
+		exporterhelper.WithQueue(chronicleCfg.QueueConfig),
+		exporterhelper.WithRetry(chronicleCfg.BackOffConfig),
 		exporterhelper.WithStart(exp.Start),
 		exporterhelper.WithShutdown(exp.Shutdown),
 	)
