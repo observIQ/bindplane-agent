@@ -109,7 +109,7 @@ func TestExporterFailure(t *testing.T) {
 			Query:          "search index=otel",
 			EarliestTime:   "2024-11-14T00:00:00.000Z",
 			LatestTime:     "2024-11-14T23:59:59.000Z",
-			EventBatchSize: 5,
+			EventBatchSize: 10,
 		},
 	}
 	server := newMockSplunkServer()
@@ -165,7 +165,7 @@ func newMockSplunkServer() *httptest.Server {
 				</content>
 			</response>`))
 		}
-		if req.URL.String() == "/services/search/v2/jobs/123456/results?output_mode=json&offset=0&count=5" {
+		if req.URL.String() == "/services/search/v2/jobs/123456/results?output_mode=json&offset=0&count=10" {
 			rw.Header().Set("Content-Type", "application/json")
 			rw.WriteHeader(200)
 			rw.Write(splunkEventsResultsP1)
