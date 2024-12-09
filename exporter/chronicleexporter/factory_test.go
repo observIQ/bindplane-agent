@@ -32,10 +32,10 @@ func Test_createDefaultConfig(t *testing.T) {
 		Compression:               "none",
 		CollectAgentMetrics:       true,
 		Protocol:                  protocolGRPC,
-		BatchLogCountLimitGRPC:    DefaultBatchLogCountLimitGRPC,
-		BatchRequestSizeLimitGRPC: DefaultBatchRequestSizeLimitGRPC,
-		BatchLogCountLimitHTTP:    DefaultBatchLogCountLimitHTTP,
-		BatchRequestSizeLimitHTTP: DefaultBatchRequestSizeLimitHTTP,
+		BatchLogCountLimitGRPC:    defaultBatchLogCountLimitGRPC,
+		BatchRequestSizeLimitGRPC: defaultBatchRequestSizeLimitGRPC,
+		BatchLogCountLimitHTTP:    defaultBatchLogCountLimitHTTP,
+		BatchRequestSizeLimitHTTP: defaultBatchRequestSizeLimitHTTP,
 	}
 
 	actual := createDefaultConfig()

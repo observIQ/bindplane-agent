@@ -35,10 +35,10 @@ func NewFactory() exporter.Factory {
 		exporter.WithLogs(createLogsExporter, metadata.LogsStability))
 }
 
-const DefaultBatchLogCountLimitGRPC = 1000
-const DefaultBatchRequestSizeLimitGRPC = 1048576
-const DefaultBatchLogCountLimitHTTP = 1000
-const DefaultBatchRequestSizeLimitHTTP = 1048576
+const defaultBatchLogCountLimitGRPC = 1000
+const defaultBatchRequestSizeLimitGRPC = 1048576
+const defaultBatchLogCountLimitHTTP = 1000
+const defaultBatchRequestSizeLimitHTTP = 1048576
 
 // createDefaultConfig creates the default configuration for the exporter.
 func createDefaultConfig() component.Config {
@@ -51,10 +51,10 @@ func createDefaultConfig() component.Config {
 		Endpoint:                  baseEndpoint,
 		Compression:               noCompression,
 		CollectAgentMetrics:       true,
-		BatchLogCountLimitGRPC:    DefaultBatchLogCountLimitGRPC,
-		BatchRequestSizeLimitGRPC: DefaultBatchRequestSizeLimitGRPC,
-		BatchLogCountLimitHTTP:    DefaultBatchLogCountLimitHTTP,
-		BatchRequestSizeLimitHTTP: DefaultBatchRequestSizeLimitHTTP,
+		BatchLogCountLimitGRPC:    defaultBatchLogCountLimitGRPC,
+		BatchRequestSizeLimitGRPC: defaultBatchRequestSizeLimitGRPC,
+		BatchLogCountLimitHTTP:    defaultBatchLogCountLimitHTTP,
+		BatchRequestSizeLimitHTTP: defaultBatchRequestSizeLimitHTTP,
 	}
 }
 
