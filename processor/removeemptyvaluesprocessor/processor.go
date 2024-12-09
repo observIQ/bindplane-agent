@@ -16,6 +16,7 @@ package removeemptyvaluesprocessor
 
 import (
 	"context"
+
 	"strings"
 
 	"go.opentelemetry.io/collector/pdata/pcommon"
@@ -298,6 +299,7 @@ func cleanLogBody(lr plog.LogRecord, c Config, keys map[string]struct{}) {
 		}
 	case pcommon.ValueTypeSlice:
 		bodySlice := body.Slice()
+		cleanSlice(bodySlice, c, keys)
 		if c.RemoveEmptyLists && bodySlice.Len() == 0 {
 			pcommon.NewValueEmpty().CopyTo(body)
 		}
