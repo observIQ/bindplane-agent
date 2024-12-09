@@ -423,31 +423,31 @@ func (m *protoMarshaler) constructPayloads(rawLogs map[string][]*api.LogEntry, n
 
 func (m *protoMarshaler) enforceMaximumsGRPCRequest(request *api.BatchCreateLogsRequest) []*api.BatchCreateLogsRequest {
 	size := proto.Size(request)
-	if size > m.cfg.BatchRequestSizeLimitGRPC || len(request.Batch.Entries) > m.cfg.BatchLogCountLimitGRPC {
-		if len(request.Batch.Entries) < 2 {
-			m.teleSettings.Logger.Error("Single entry exceeds max request size. Dropping entry", zap.Int("size", size))
-			return []*api.BatchCreateLogsRequest{}
+	entries := request.Batch.Entries
+	if size <= m.cfg.BatchRequestSizeLimitGRPC && len(entries) <= m.cfg.BatchLogCountLimitGRPC {
+		return []*api.BatchCreateLogsRequest{
+			request,
 		}
-
-		// split request into two
-		entries := request.Batch.Entries
-		mid := len(entries) / 2
-		leftHalf := entries[:mid]
-		rightHalf := entries[mid:]
-
-		request.Batch.Entries = leftHalf
-		otherHalfRequest := m.buildGRPCRequest(rightHalf, request.Batch.LogType, request.Batch.Source.Namespace, request.Batch.Source.Labels)
-
-		// re-enforce max size restriction on each half
-		enforcedRequest := m.enforceMaximumsGRPCRequest(request)
-		enforcedOtherHalfRequest := m.enforceMaximumsGRPCRequest(otherHalfRequest)
-
-		return append(enforcedRequest, enforcedOtherHalfRequest...)
 	}
 
-	return []*api.BatchCreateLogsRequest{
-		request,
+	if len(entries) < 2 {
+		m.teleSettings.Logger.Error("Single entry exceeds max request size. Dropping entry", zap.Int("size", size))
+		return []*api.BatchCreateLogsRequest{}
 	}
+
+	// split request into two
+	mid := len(entries) / 2
+	leftHalf := entries[:mid]
+	rightHalf := entries[mid:]
+
+	request.Batch.Entries = leftHalf
+	otherHalfRequest := m.buildGRPCRequest(rightHalf, request.Batch.LogType, request.Batch.Source.Namespace, request.Batch.Source.Labels)
+
+	// re-enforce max size restriction on each half
+	enforcedRequest := m.enforceMaximumsGRPCRequest(request)
+	enforcedOtherHalfRequest := m.enforceMaximumsGRPCRequest(otherHalfRequest)
+
+	return append(enforcedRequest, enforcedOtherHalfRequest...)
 }
 
 func (m *protoMarshaler) buildGRPCRequest(entries []*api.LogEntry, logType, namespace string, ingestionLabels []*api.Label) *api.BatchCreateLogsRequest {
@@ -535,30 +535,30 @@ func (m *protoMarshaler) constructHTTPPayloads(rawLogs map[string][]*api.Log) ma
 func (m *protoMarshaler) enforceMaximumsHTTPRequest(request *api.ImportLogsRequest) []*api.ImportLogsRequest {
 	size := proto.Size(request)
 	logs := request.GetInlineSource().Logs
-	if size > m.cfg.BatchRequestSizeLimitHTTP || len(logs) > m.cfg.BatchLogCountLimitHTTP {
-		if len(logs) < 2 {
-			m.teleSettings.Logger.Error("Single entry exceeds max request size. Dropping entry", zap.Int("size", size))
-			return []*api.ImportLogsRequest{}
+	if size <= m.cfg.BatchRequestSizeLimitHTTP && len(logs) <= m.cfg.BatchLogCountLimitHTTP {
+		return []*api.ImportLogsRequest{
+			request,
 		}
-
-		// split request into two
-		mid := len(logs) / 2
-		leftHalf := logs[:mid]
-		rightHalf := logs[mid:]
-
-		request.GetInlineSource().Logs = leftHalf
-		otherHalfRequest := m.buildHTTPRequest(rightHalf)
-
-		// re-enforce max size restriction on each half
-		enforcedRequest := m.enforceMaximumsHTTPRequest(request)
-		enforcedOtherHalfRequest := m.enforceMaximumsHTTPRequest(otherHalfRequest)
-
-		return append(enforcedRequest, enforcedOtherHalfRequest...)
 	}
 
-	return []*api.ImportLogsRequest{
-		request,
+	if len(logs) < 2 {
+		m.teleSettings.Logger.Error("Single entry exceeds max request size. Dropping entry", zap.Int("size", size))
+		return []*api.ImportLogsRequest{}
 	}
+
+	// split request into two
+	mid := len(logs) / 2
+	leftHalf := logs[:mid]
+	rightHalf := logs[mid:]
+
+	request.GetInlineSource().Logs = leftHalf
+	otherHalfRequest := m.buildHTTPRequest(rightHalf)
+
+	// re-enforce max size restriction on each half
+	enforcedRequest := m.enforceMaximumsHTTPRequest(request)
+	enforcedOtherHalfRequest := m.enforceMaximumsHTTPRequest(otherHalfRequest)
+
+	return append(enforcedRequest, enforcedOtherHalfRequest...)
 }
 
 func (m *protoMarshaler) buildHTTPRequest(entries []*api.Log) *api.ImportLogsRequest {
