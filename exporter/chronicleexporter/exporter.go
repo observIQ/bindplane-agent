@@ -46,21 +46,23 @@ const (
 )
 
 type chronicleExporter struct {
-	cfg        *Config
-	set        component.TelemetrySettings
-	marshaler  logMarshaler
-	exporterID string
+	cfg                     *Config
+	logger                  *zap.Logger
+	marshaler               logMarshaler
+	collectorID, exporterID string
 
 	// fields used for gRPC
 	grpcClient api.IngestionServiceV2Client
 	grpcConn   *grpc.ClientConn
-	metrics    *hostMetricsReporter
+	wg         sync.WaitGroup
+	cancel     context.CancelFunc
+	metrics    *exporterMetrics
 
 	// fields used for HTTP
 	httpClient *http.Client
 }
 
-func newExporter(cfg *Config, params exporter.Settings, exporterID string) (*chronicleExporter, error) {
+func newExporter(cfg *Config, params exporter.Settings, collectorID, exporterID string) (*chronicleExporter, error) {
 	customerID, err := uuid.Parse(cfg.CustomerID)
 	if err != nil {
 		return nil, fmt.Errorf("parse customer ID: %w", err)
@@ -85,13 +87,33 @@ func (ce *chronicleExporter) Start(ctx context.Context, _ component.Host) error 
 		return fmt.Errorf("load Google credentials: %w", err)
 	}
 
+	return &chronicleExporter{
+		cfg:         cfg,
+		logger:      params.Logger,
+		metrics:     newExporterMetrics(uuidCID[:], customerID[:], exporterID, cfg.Namespace),
+		marshaler:   marshaller,
+		collectorID: collectorID,
+		exporterID:  exporterID,
+	}, nil
+}
+
+func (ce *chronicleExporter) Start(_ context.Context, _ component.Host) error {
+	creds, err := loadGoogleCredentials(ce.cfg)
+	if err != nil {
+		return fmt.Errorf("load Google credentials: %w", err)
+	}
+
 	if ce.cfg.Protocol == protocolHTTPS {
-		ce.httpClient = oauth2.NewClient(context.Background(), ts)
+		ce.httpClient = oauth2.NewClient(context.Background(), creds.TokenSource)
 		return nil
 	}
 
-	endpoint, dialOpts := grpcClientParams(ce.cfg.Endpoint, ts)
-	conn, err := grpc.NewClient(endpoint, dialOpts...)
+	opts := []grpc.DialOption{
+		// Apply OAuth tokens for each RPC call
+		grpc.WithPerRPCCredentials(oauth.TokenSource{TokenSource: creds.TokenSource}),
+		grpc.WithTransportCredentials(credentials.NewClientTLSFromCert(nil, "")),
+	}
+	conn, err := grpc.NewClient(ce.cfg.Endpoint+":443", opts...)
 	if err != nil {
 		return fmt.Errorf("dial: %w", err)
 	}
@@ -99,16 +121,10 @@ func (ce *chronicleExporter) Start(ctx context.Context, _ component.Host) error 
 	ce.grpcClient = api.NewIngestionServiceV2Client(conn)
 
 	if ce.cfg.CollectAgentMetrics {
-		f := func(ctx context.Context, request *api.BatchCreateEventsRequest) error {
-			_, err := ce.grpcClient.BatchCreateEvents(ctx, request)
-			return err
-		}
-		metrics, err := newHostMetricsReporter(ce.cfg, ce.set, ce.exporterID, f)
-		if err != nil {
-			return fmt.Errorf("create metrics reporter: %w", err)
-		}
-		ce.metrics = metrics
-		ce.metrics.start()
+		ctx, cancel := context.WithCancel(context.Background())
+		ce.cancel = cancel
+		ce.wg.Add(1)
+		go ce.startHostMetricsCollection(ctx)
 	}
 
 	return nil
@@ -123,8 +139,9 @@ func (ce *chronicleExporter) Shutdown(context.Context) error {
 		}
 		return nil
 	}
-	if ce.metrics != nil {
-		ce.metrics.shutdown()
+	if ce.cancel != nil {
+		ce.cancel()
+		ce.wg.Wait()
 	}
 	if ce.grpcConn != nil {
 		if err := ce.grpcConn.Close(); err != nil {
@@ -136,6 +153,31 @@ func (ce *chronicleExporter) Shutdown(context.Context) error {
 
 func (ce *chronicleExporter) Capabilities() consumer.Capabilities {
 	return consumer.Capabilities{MutatesData: false}
+}
+
+func loadGoogleCredentials(cfg *Config) (*google.Credentials, error) {
+	scope := grpcScope
+	if cfg.Protocol == protocolHTTPS {
+		scope = httpScope
+	}
+
+	switch {
+	case cfg.Creds != "":
+		return google.CredentialsFromJSON(context.Background(), []byte(cfg.Creds), scope)
+	case cfg.CredsFilePath != "":
+		credsData, err := os.ReadFile(cfg.CredsFilePath)
+		if err != nil {
+			return nil, fmt.Errorf("read credentials file: %w", err)
+		}
+
+		if len(credsData) == 0 {
+			return nil, errors.New("credentials file is empty")
+		}
+
+		return google.CredentialsFromJSON(context.Background(), credsData, scope)
+	default:
+		return google.FindDefaultCredentials(context.Background(), scope)
+	}
 }
 
 func (ce *chronicleExporter) logsDataPusher(ctx context.Context, ld plog.Logs) error {
@@ -159,6 +201,7 @@ func (ce *chronicleExporter) uploadToChronicle(ctx context.Context, request *api
 		defer ce.metrics.recordSent(totalLogs)
 	}
 
+	_, err := ce.grpcClient.BatchCreateLogs(ctx, request, ce.buildOptions()...)
 	_, err := ce.grpcClient.BatchCreateLogs(ctx, request, ce.buildOptions()...)
 	if err != nil {
 		errCode := status.Code(err)
@@ -186,6 +229,30 @@ func (ce *chronicleExporter) buildOptions() []grpc.CallOption {
 	}
 
 	return opts
+}
+
+func (ce *chronicleExporter) startHostMetricsCollection(ctx context.Context) {
+	ticker := time.NewTicker(5 * time.Minute)
+	defer ticker.Stop()
+
+	defer ce.wg.Done()
+
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case <-ticker.C:
+			err := ce.metrics.collectHostMetrics()
+			if err != nil {
+				ce.logger.Error("Failed to collect host metrics", zap.Error(err))
+			}
+			request := ce.metrics.getAndReset()
+			_, err = ce.grpcClient.BatchCreateEvents(ctx, request, ce.buildOptions()...)
+			if err != nil {
+				ce.logger.Error("Failed to upload host metrics", zap.Error(err))
+			}
+		}
+	}
 }
 
 func (ce *chronicleExporter) logsHTTPDataPusher(ctx context.Context, ld plog.Logs) error {
