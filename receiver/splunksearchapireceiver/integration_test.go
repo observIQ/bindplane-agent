@@ -58,7 +58,7 @@ func TestSplunkResultsPaginationFailure(t *testing.T) {
 
 	ssapir.initCheckpoint(context.Background())
 	ssapir.runQueries(context.Background())
-	require.Equal(t, 5, ssapir.checkpointRecord.Offset)
+	require.Equal(t, 3, ssapir.checkpointRecord.Offset)
 	require.Equal(t, 1, callCount)
 }
 
@@ -72,8 +72,7 @@ func newMockSplunkServerPagination(callCount *int) *httptest.Server {
 				<sid>123456</sid>
 			</response>
 			`))
-		}
-		if req.URL.String() == "/services/search/v2/jobs/123456" {
+		} else if req.URL.String() == "/services/search/v2/jobs/123456" {
 			rw.Header().Set("Content-Type", "application/xml")
 			rw.WriteHeader(200)
 			rw.Write([]byte(`<?xml version="1.0" encoding="UTF-8"?>
@@ -85,14 +84,12 @@ func newMockSplunkServerPagination(callCount *int) *httptest.Server {
 					</dict>
 				</content>
 			</response>`))
-		}
-		if req.URL.String() == "/services/search/v2/jobs/123456/results?output_mode=json&offset=0&count=5" && req.URL.Query().Get("offset") == "0" {
+		} else if req.URL.String() == "/services/search/v2/jobs/123456/results?output_mode=json&offset=0&count=5" && req.URL.Query().Get("offset") == "0" {
 			rw.Header().Set("Content-Type", "application/json")
 			rw.WriteHeader(200)
 			rw.Write(splunkEventsResultsP1)
 			*callCount++
-		}
-		if req.URL.String() == "/services/search/v2/jobs/123456/results?output_mode=json&offset=5&count=5" && req.URL.Query().Get("offset") == "5" {
+		} else if req.URL.String() == "/services/search/v2/jobs/123456/results?output_mode=json&offset=5&count=5" && req.URL.Query().Get("offset") == "5" {
 			rw.Header().Set("Content-Type", "application/json")
 			rw.WriteHeader(400)
 			rw.Write([]byte("error, bad request"))
@@ -109,7 +106,7 @@ func TestExporterFailure(t *testing.T) {
 			Query:          "search index=otel",
 			EarliestTime:   "2024-11-14T00:00:00.000Z",
 			LatestTime:     "2024-11-14T23:59:59.000Z",
-			EventBatchSize: 10,
+			EventBatchSize: 3,
 		},
 	}
 	server := newMockSplunkServer()
@@ -130,14 +127,18 @@ func TestExporterFailure(t *testing.T) {
 	require.Equal(t, 5, ssapir.checkpointRecord.Offset)
 	require.Equal(t, "search index=otel", ssapir.checkpointRecord.Search)
 
-	// simulate 2nd batch of data failing
+	// simulate data failing
 	// the checkpoint should not be updated, and an error should be returned
+	ssapir.checkpointRecord.Offset = 0
+	offset = 0
 	logsConsumerErr := &mockLogsConsumerExporterErr{}
 	logsConsumerErr.On("ConsumeLogs", mock.Anything, mock.Anything).Return(errors.New("error exporting logs"))
+
 	ssapir.logsConsumer = logsConsumerErr
+	ssapir.initCheckpoint(context.Background())
 	err = ssapir.runQueries(context.Background())
 	require.EqualError(t, err, "error consuming logs: error exporting logs")
-	require.Equal(t, 5, ssapir.checkpointRecord.Offset)
+	require.Equal(t, 0, ssapir.checkpointRecord.Offset)
 	require.Equal(t, "search index=otel", ssapir.checkpointRecord.Search)
 }
 
@@ -151,8 +152,7 @@ func newMockSplunkServer() *httptest.Server {
 				<sid>123456</sid>
 			</response>
 			`))
-		}
-		if req.URL.String() == "/services/search/v2/jobs/123456" {
+		} else if req.URL.String() == "/services/search/v2/jobs/123456" {
 			rw.Header().Set("Content-Type", "application/xml")
 			rw.WriteHeader(200)
 			rw.Write([]byte(`<?xml version="1.0" encoding="UTF-8"?>
@@ -164,11 +164,14 @@ func newMockSplunkServer() *httptest.Server {
 					</dict>
 				</content>
 			</response>`))
-		}
-		if req.URL.String() == "/services/search/v2/jobs/123456/results?output_mode=json&offset=0&count=10" {
+		} else if req.URL.String() == "/services/search/v2/jobs/123456/results?output_mode=json&offset=0&count=3" {
 			rw.Header().Set("Content-Type", "application/json")
 			rw.WriteHeader(200)
 			rw.Write(splunkEventsResultsP1)
+		} else if req.URL.String() == "/services/search/v2/jobs/123456/results?output_mode=json&offset=3&count=3" {
+			rw.Header().Set("Content-Type", "application/json")
+			rw.WriteHeader(200)
+			rw.Write(splunkEventsResultsP2)
 		}
 	}))
 }
@@ -187,7 +190,13 @@ var splunkEventsResultsP1 = []byte(`{
 		{
 			"_raw": "lorem ipsum",
 			"_time": "2024-11-14T13:02:29.000-05:00"
-		},
+		}
+	]
+}`)
+
+var splunkEventsResultsP2 = []byte(`{
+	"init_offset": 3,
+	"results": [
 		{
 			"_raw": "dolor sit amet",
 			"_time": "2024-11-14T13:02:28.000-05:00"
