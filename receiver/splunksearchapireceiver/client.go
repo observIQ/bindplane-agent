@@ -33,7 +33,7 @@ import (
 type splunkSearchAPIClient interface {
 	CreateSearchJob(search string) (CreateJobResponse, error)
 	GetJobStatus(searchID string) (SearchJobStatusResponse, error)
-	GetSearchResults(searchID string, offset int, batchSize int) (SearchResultsResponse, error)
+	GetSearchResults(searchID string, offset int, batchSize int) (SearchResults, error)
 }
 
 type defaultSplunkSearchAPIClient struct {
@@ -140,37 +140,37 @@ func (c defaultSplunkSearchAPIClient) GetJobStatus(sid string) (SearchJobStatusR
 	return jobStatusResponse, nil
 }
 
-func (c defaultSplunkSearchAPIClient) GetSearchResults(sid string) (SearchResultsResponse, error) {
-	endpoint := fmt.Sprintf("%s/services/search/v2/jobs/%s/results?output_mode=json", c.endpoint, sid)
+func (c defaultSplunkSearchAPIClient) GetSearchResults(sid string, offset int, batchSize int) (SearchResults, error) {
+	endpoint := fmt.Sprintf("%s/services/search/v2/jobs/%s/results?output_mode=json&offset=%d&count=%d", c.endpoint, sid, offset, batchSize)
 	req, err := http.NewRequest("GET", endpoint, nil)
 	if err != nil {
-		return SearchResultsResponse{}, err
+		return SearchResults{}, err
 	}
 
 	err = c.SetSplunkRequestAuth(req)
 	if err != nil {
-		return SearchResultsResponse{}, err
+		return SearchResults{}, err
 	}
 
 	resp, err := c.client.Do(req)
 	if err != nil {
-		return SearchResultsResponse{}, err
+		return SearchResults{}, err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return SearchResultsResponse{}, fmt.Errorf("failed to get search job results: %d", resp.StatusCode)
+		return SearchResults{}, fmt.Errorf("failed to get search job results: %d", resp.StatusCode)
 	}
 
-	var searchResults SearchResultsResponse
+	var searchResults SearchResults
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return SearchResultsResponse{}, fmt.Errorf("failed to read search job results response: %v", err)
+		return SearchResults{}, fmt.Errorf("failed to read search job results response: %v", err)
 	}
 	// fmt.Println("Body: ", string(body))
 	err = json.Unmarshal(body, &searchResults)
 	if err != nil {
-		return SearchResultsResponse{}, fmt.Errorf("failed to unmarshal search job results response: %v", err)
+		return SearchResults{}, fmt.Errorf("failed to unmarshal search job results response: %v", err)
 	}
 
 	return searchResults, nil

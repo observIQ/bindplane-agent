@@ -190,9 +190,9 @@ func (m *mockLogsClient) CreateSearchJob(searchQuery string) (CreateJobResponse,
 	return args.Get(0).(CreateJobResponse), args.Error(1)
 }
 
-func (m *mockLogsClient) GetSearchResults(searchID string, offset int, batchSize int) (SearchResultsResponse, error) {
+func (m *mockLogsClient) GetSearchResults(searchID string, offset int, batchSize int) (SearchResults, error) {
 	args := m.Called(searchID, offset, batchSize)
-	return args.Get(0).(SearchResultsResponse), args.Error(1)
+	return args.Get(0).(SearchResults), args.Error(1)
 }
 
 type mockStorage struct {
