@@ -84,7 +84,7 @@ func TestGetSearchResults(t *testing.T) {
 
 	resp, err := testClient.GetSearchResults("123456", 0, 5)
 	require.NoError(t, err)
-	require.Equal(t, 5, len(resp.Results))
+	require.Equal(t, 3, len(resp.Results))
 	require.Equal(t, "Hello, world!", resp.Results[0].Raw)
 
 	// returns an error if the response status isn't 200

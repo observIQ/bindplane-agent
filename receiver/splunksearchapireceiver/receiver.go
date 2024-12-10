@@ -111,6 +111,9 @@ func (ssapir *splunksearchapireceiver) Shutdown(ctx context.Context) error {
 
 func (ssapir *splunksearchapireceiver) runQueries(ctx context.Context) error {
 	for _, search := range ssapir.config.Searches {
+		// set current search query
+		ssapir.checkpointRecord.Search = search.Query
+
 		// set default event batch size (matches Splunk API default)
 		if search.EventBatchSize == 0 {
 			search.EventBatchSize = 100
@@ -296,6 +299,7 @@ func (ssapir *splunksearchapireceiver) checkpoint(ctx context.Context) error {
 	if ssapir.checkpointRecord == nil {
 		return nil
 	}
+
 	marshalBytes, err := json.Marshal(ssapir.checkpointRecord)
 	if err != nil {
 		return fmt.Errorf("failed to write checkpoint: %w", err)
