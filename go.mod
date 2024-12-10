@@ -198,6 +198,7 @@ require (
 )
 
 require (
+	github.com/observiq/bindplane-agent/receiver/splunksearchapireceiver v0.0.0-00010101000000-000000000000
 	github.com/open-telemetry/opentelemetry-collector-contrib/confmap/provider/aesprovider v0.114.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/processor/intervalprocessor v0.114.0
 	go.opentelemetry.io/collector/extension/extensiontest v0.114.0
