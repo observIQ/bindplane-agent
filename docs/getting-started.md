@@ -17,7 +17,7 @@ Please note that the agent must be installed on the system which you wish to col
 #### Windows:
 
 ```pwsh
-msiexec /i "https://github.com/observIQ/bindplane-agent/releases/latest/download/observiq-otel-collector.msi" /quiet ENABLEMANAGEMENT="1" OPAMPENDPOINT="<your_endpoint>" OPAMPSECRETKEY="<your_secret_key>"
+msiexec /i "https://github.com/observIQ/bindplane-agent/releases/latest/download/bindplane-agent.msi" /quiet ENABLEMANAGEMENT="1" OPAMPENDPOINT="<your_endpoint>" OPAMPSECRETKEY="<your_secret_key>"
 ```
 
 #### Linux:
@@ -30,7 +30,7 @@ For more details on installation, see our [Linux](/docs/installation-linux.md), 
 
 ## Setting up pre-requisites and authentication credentials
 
-In the following example, we are using Google Cloud Operations as the destination. However, OpenTelemetry offers exporters for many destinations. Check out the list of exporters [here](/docs/exporters.md). 
+In the following example, we are using Google Cloud Operations as the destination. However, OpenTelemetry offers exporters for many destinations. Check out the list of exporters [here](/docs/exporters.md).
 
 ### Setting up Google Cloud exporter prerequisites:
 
@@ -45,29 +45,29 @@ Create a service account JSON key and place it on the system that is running the
 
 ### Linux
 
-In this example, the key is placed at `/opt/observiq-otel-collector/sa.json` and its permissions are restricted to the user running the collector process.
+In this example, the key is placed at `/opt/bindplane-agent/sa.json` and its permissions are restricted to the user running the collector process.
 
 ```shell
-sudo cp sa.json /opt/observiq-otel-collector/sa.json
-sudo chown observiq-otel-collector: /opt/observiq-otel-collector/sa.json
-sudo chmod 0400 /opt/observiq-otel-collector/sa.json
+sudo cp sa.json /opt/bindplane-agent/sa.json
+sudo chown bindplane-agent: /opt/bindplane-agent/sa.json
+sudo chmod 0400 /opt/bindplane-agent/sa.json
 ```
- 
+
 Set the `GOOGLE_APPLICATION_CREDENTIALS` environment variable by creating a systemd override. A systemd override allows users to modify the systemd service configuration without modifying the service directly. This allows package upgrades to happen seamlessly. You can learn more about systemd units and overrides here.
 
 Run the following command
 
 ```shell
-sudo systemctl edit observiq-otel-collector
+sudo systemctl edit bindplane-agent
 ```
 
 If this is the first time an override is being created, paste the following contents into the file:
 
 ```
 [Service]
-Environment=GOOGLE_APPLICATION_CREDENTIALS=/opt/observiq-otel-collector/sa.json
+Environment=GOOGLE_APPLICATION_CREDENTIALS=/opt/bindplane-agent/sa.json
 ```
- 
+
 If an override is already in place, simply insert the Environment parameter into the existing Service section.
 
 Reload Systemd:
@@ -79,9 +79,9 @@ sudo systemctl daemon-reload
 Restart the supervisor
 
 ```shell
-sudo systemctl restart observiq-otel-collector
+sudo systemctl restart bindplane-agent
 ```
- 
+
 ### Windows
 
 In this example, the key is placed at `C:/observiq/collector/sa.json`.
@@ -92,12 +92,12 @@ Run the following command
 ```batch
 setx GOOGLE_APPLICATION_CREDENTIALS "C:/observiq/collector/sa.json" /m
 ```
- 
+
 Restart the service using the services application.
 
 ## Configuring the agent
 
-With the agent installed it should be connected to your BindPlane instance. Navigate to BindPlane and create a configuration with the "Host Metrics" source and "Google Cloud Platform" destination. 
+With the agent installed it should be connected to your BindPlane instance. Navigate to BindPlane and create a configuration with the "Host Metrics" source and "Google Cloud Platform" destination.
 
 Once the configuration is made, roll it out to this agent to begin collecting data and sending to GCP.
 
@@ -107,18 +107,18 @@ You should now be able to view the host metrics in your Metrics explorer. Nice w
 
 ### Metrics collected
 
-| Metric | Description | Metric Namespace |
-| --- | --- | --- |
-| Processes Created | Total number of created processes. | custom.googleapis.com/opencensus/system.processes.created |
-| Process Count | Total number of processes in each state. | custom.googleapis.com/opencensus/system.processes.count |
-| Process CPU time | Total CPU seconds broken down by different states. | custom.googleapis.com/opencensus/process.cpu.time |
-| Process Disk IO | Disk bytes transferred. | custom.googleapis.com/opencensus/process.disk.io |
-| File System Inodes Used | FileSystem inodes used. | custom.googleapis.com/opencensus/system.filesystem.inodes.usage |
-| File System Utilization | Filesystem bytes used. | custom.googleapis.com/opencensus/system.filesystem.usage |
-| Process Physical Memory Utilization | The amount of physical memory in use. | custom.googleapis.com/opencensus/process.memory.physical_usage |
-| Process Virtual Memory Utilization | Virtual memory size. | custom.googleapis.com/opencensus/process.memory.virtual_usage |
-| Networking Errors | The number of errors encountered. | custom.googleapis.com/opencensus/system.network.errors |
-| Networking Connections | The number of connections. | custom.googleapis.com/opencensus/system.network.connections |
+| Metric                              | Description                                        | Metric Namespace                                                |
+| ----------------------------------- | -------------------------------------------------- | --------------------------------------------------------------- |
+| Processes Created                   | Total number of created processes.                 | custom.googleapis.com/opencensus/system.processes.created       |
+| Process Count                       | Total number of processes in each state.           | custom.googleapis.com/opencensus/system.processes.count         |
+| Process CPU time                    | Total CPU seconds broken down by different states. | custom.googleapis.com/opencensus/process.cpu.time               |
+| Process Disk IO                     | Disk bytes transferred.                            | custom.googleapis.com/opencensus/process.disk.io                |
+| File System Inodes Used             | FileSystem inodes used.                            | custom.googleapis.com/opencensus/system.filesystem.inodes.usage |
+| File System Utilization             | Filesystem bytes used.                             | custom.googleapis.com/opencensus/system.filesystem.usage        |
+| Process Physical Memory Utilization | The amount of physical memory in use.              | custom.googleapis.com/opencensus/process.memory.physical_usage  |
+| Process Virtual Memory Utilization  | Virtual memory size.                               | custom.googleapis.com/opencensus/process.memory.virtual_usage   |
+| Networking Errors                   | The number of errors encountered.                  | custom.googleapis.com/opencensus/system.network.errors          |
+| Networking Connections              | The number of connections.                         | custom.googleapis.com/opencensus/system.network.connections     |
 
 ## What Next?
 

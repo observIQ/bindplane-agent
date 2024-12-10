@@ -15,7 +15,7 @@ The provided configuration assumes the agent is running on the Docker system. By
 The user running the agent must have permission to read the [docker socket](https://docs.docker.com/engine/install/linux-postinstall/).
 
 ```bash
-sudo usermod -aG docker observiq-otel-collector
+sudo usermod -aG docker bindplane-agent
 ```
 
 ## Deployment
