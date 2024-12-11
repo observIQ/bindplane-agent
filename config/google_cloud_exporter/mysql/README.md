@@ -8,7 +8,7 @@ The agent must be installed on the Mysql system.
 
 ## Prerequisites
 
-See the [documentation](https://github.com/observIQ/bindplane-agent/blob/main/docs/receivers.md) for Mysql prerequisites.
+See the [documentation](https://github.com/observiq/bindplane-otel-collector/blob/main/docs/receivers.md) for Mysql prerequisites.
 
 See the [prerequisites](../README.md) doc for Google Cloud prerequisites.
 

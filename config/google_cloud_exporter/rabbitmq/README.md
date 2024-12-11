@@ -4,7 +4,7 @@ The RabbitMQ Receiver can be used to send RabbitMQ metrics to Google Cloud Monit
 
 ## Prerequisites
 
-See the [documentation](https://github.com/observIQ/bindplane-agent/blob/main/docs/receivers.md) for RabbitMQ prerequisites.
+See the [documentation](https://github.com/observiq/bindplane-otel-collector/blob/main/docs/receivers.md) for RabbitMQ prerequisites.
 
 See the [prerequisites](../README.md) doc for Google Cloud prerequisites.
 

@@ -2,8 +2,8 @@
 
 <center>
 
-[![Action Status](https://github.com/observIQ/bindplane-agent/workflows/Build/badge.svg)](https://github.com/observIQ/bindplane-agent/actions)
-[![Action Test Status](https://github.com/observIQ/bindplane-agent/workflows/Tests/badge.svg)](https://github.com/observIQ/bindplane-agent/actions)
+[![Action Status](https://github.com/observiq/bindplane-otel-collector/workflows/Build/badge.svg)](https://github.com/observiq/bindplane-otel-collector/actions)
+[![Action Test Status](https://github.com/observiq/bindplane-otel-collector/workflows/Tests/badge.svg)](https://github.com/observiq/bindplane-otel-collector/actions)
 [![Go Report Card](https://goreportcard.com/badge/github.com/observIQ/bindplane-agent)](https://goreportcard.com/report/github.com/observIQ/bindplane-agent)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
@@ -30,7 +30,7 @@ Tested, verified, and supported by observIQ
 
 To install using the installation script, you may run:
 ```sh
-sudo sh -c "$(curl -fsSlL https://github.com/observiq/bindplane-agent/releases/latest/download/install_unix.sh)" install_unix.sh
+sudo sh -c "$(curl -fsSlL https://github.com/observiq/bindplane-otel-collector/releases/latest/download/install_unix.sh)" install_unix.sh
 ```
 
 To install directly with the appropriate package manager, see [installing on Linux](/docs/installation-linux.md).
@@ -39,10 +39,10 @@ To install directly with the appropriate package manager, see [installing on Lin
 
 To install the BindPlane Agent on Windows run the Powershell command below to install the MSI with no UI.
 ```pwsh
-msiexec /i "https://github.com/observIQ/bindplane-agent/releases/latest/download/observiq-otel-collector.msi" /quiet
+msiexec /i "https://github.com/observiq/bindplane-otel-collector/releases/latest/download/observiq-otel-collector.msi" /quiet
 ```
 
-Alternately, for an interactive installation [download the latest MSI](https://github.com/observIQ/bindplane-agent/releases/latest).
+Alternately, for an interactive installation [download the latest MSI](https://github.com/observiq/bindplane-otel-collector/releases/latest).
 
 After downloading the MSI, simply double click it to open the installation wizard. Follow the instructions to configure and install the agent.
 
@@ -53,7 +53,7 @@ For more installation information see [installing on Windows](/docs/installation
 To install using the installation script, you may run:
 
 ```sh
-sudo sh -c "$(curl -fsSlL https://github.com/observiq/bindplane-agent/releases/latest/download/install_macos.sh)" install_macos.sh
+sudo sh -c "$(curl -fsSlL https://github.com/observiq/bindplane-otel-collector/releases/latest/download/install_macos.sh)" install_macos.sh
 ```
 
 For more installation information see [installing on macOS](/docs/installation-mac.md).

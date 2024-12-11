@@ -41,9 +41,9 @@ builds:
         goarch: ppc64le
     ldflags:
       - -s -w
-      - -X github.com/observiq/bindplane-agent/internal/version.version=v{{ .Version }}
-      - -X github.com/observiq/bindplane-agent/internal/version.gitHash={{ .FullCommit }}
-      - -X github.com/observiq/bindplane-agent/internal/version.date={{ .Date }}
+      - -X github.com/observiq/bindplane-otel-collector/internal/version.version=v{{ .Version }}
+      - -X github.com/observiq/bindplane-otel-collector/internal/version.gitHash={{ .FullCommit }}
+      - -X github.com/observiq/bindplane-otel-collector/internal/version.date={{ .Date }}
     no_unique_dist_dir: false
   - id: updater
     binary: updater
@@ -77,9 +77,9 @@ builds:
         goarch: ppc64le
     ldflags:
       - -s -w
-      - -X github.com/observiq/bindplane-agent/updater/internal/version.version=v{{ .Version }}
-      - -X github.com/observiq/bindplane-agent/updater/internal/version.gitHash={{ .FullCommit }}
-      - -X github.com/observiq/bindplane-agent/updater/internal/version.date={{ .Date }}
+      - -X github.com/observiq/bindplane-otel-collector/updater/internal/version.version=v{{ .Version }}
+      - -X github.com/observiq/bindplane-otel-collector/updater/internal/version.gitHash={{ .FullCommit }}
+      - -X github.com/observiq/bindplane-otel-collector/updater/internal/version.date={{ .Date }}
     no_unique_dist_dir: false
 
 # https://goreleaser.com/customization/archive/
