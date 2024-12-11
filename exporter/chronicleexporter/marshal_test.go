@@ -462,7 +462,6 @@ func TestProtoMarshaler_MarshalRawLogsForHTTP(t *testing.T) {
 			cfg: Config{
 				CustomerID:      uuid.New().String(),
 				LogType:         "WINEVTLOG",
-				IngestionLabels: map[string]string{`chronicle_ingestion_label["key1"]`: "value1", `chronicle_ingestion_label["key2"]`: "value2"},
 				RawLogField:     "attributes",
 				OverrideLogType: false,
 			},

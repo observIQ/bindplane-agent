@@ -62,7 +62,7 @@ func TestValidate(t *testing.T) {
 				},
 			},
 			errExpected: true,
-			errText:     "missing Splunk username or auth token",
+			errText:     "missing Splunk basic auth credentials, need username and password",
 		},
 		{
 			desc:     "Missing password, no auth token",
@@ -77,7 +77,7 @@ func TestValidate(t *testing.T) {
 				},
 			},
 			errExpected: true,
-			errText:     "missing Splunk password or auth token",
+			errText:     "missing Splunk basic auth credentials, need username and password",
 		},
 		{
 			desc:      "Auth token without token type",

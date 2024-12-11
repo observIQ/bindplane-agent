@@ -49,7 +49,7 @@ func TestSplunkResultsPaginationFailure(t *testing.T) {
 	defer server.Close()
 	settings := componenttest.NewNopTelemetrySettings()
 	ssapir := newSSAPIReceiver(zap.NewNop(), cfg, settings, component.NewID(typeStr))
-	ssapir.client, _ = newSplunkSearchAPIClient(context.Background(), settings, *cfg, componenttest.NewNopHost())
+	ssapir.client, _ = newDefaultSplunkSearchAPIClient(context.Background(), settings, *cfg, componenttest.NewNopHost())
 	ssapir.client.(*defaultSplunkSearchAPIClient).client = server.Client()
 	ssapir.client.(*defaultSplunkSearchAPIClient).endpoint = server.URL
 	ssapir.logsConsumer = &consumertest.LogsSink{}
@@ -117,13 +117,12 @@ func TestExporterFailure(t *testing.T) {
 	logsConsumer.On("ConsumeLogs", mock.Anything, mock.Anything).Return(nil)
 
 	ssapir.logsConsumer = logsConsumer
-	ssapir.client, _ = newSplunkSearchAPIClient(context.Background(), settings, *cfg, componenttest.NewNopHost())
+	ssapir.client, _ = newDefaultSplunkSearchAPIClient(context.Background(), settings, *cfg, componenttest.NewNopHost())
 	ssapir.client.(*defaultSplunkSearchAPIClient).client = server.Client()
 	ssapir.client.(*defaultSplunkSearchAPIClient).endpoint = server.URL
 
 	ssapir.initCheckpoint(context.Background())
-	err := ssapir.runQueries(context.Background())
-	require.NoError(t, err)
+	ssapir.runQueries(context.Background())
 	require.Equal(t, 5, ssapir.checkpointRecord.Offset)
 	require.Equal(t, "search index=otel", ssapir.checkpointRecord.Search)
 
@@ -136,8 +135,7 @@ func TestExporterFailure(t *testing.T) {
 
 	ssapir.logsConsumer = logsConsumerErr
 	ssapir.initCheckpoint(context.Background())
-	err = ssapir.runQueries(context.Background())
-	require.EqualError(t, err, "error consuming logs: error exporting logs")
+	ssapir.runQueries(context.Background())
 	require.Equal(t, 0, ssapir.checkpointRecord.Offset)
 	require.Equal(t, "search index=otel", ssapir.checkpointRecord.Search)
 }

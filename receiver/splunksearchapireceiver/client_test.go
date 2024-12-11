@@ -42,12 +42,12 @@ func TestCreateSearchJob(t *testing.T) {
 
 	// returns an error if the response status isn't 201
 	resp, err = testClient.CreateSearchJob("index=fail_to_create_job starttime=\"\" endtime=\"\" timeformat=\"\"")
-	require.ErrorContains(t, err, "failed to create search job")
+	require.ErrorContains(t, err, "create search job")
 	require.Empty(t, resp)
 
 	// returns an error if the response body can't be unmarshalled
 	resp, err = testClient.CreateSearchJob("index=fail_to_unmarshal starttime=\"\" endtime=\"\" timeformat=\"\"")
-	require.ErrorContains(t, err, "failed to unmarshal search job create response")
+	require.ErrorContains(t, err, "unmarshal search job create response")
 	require.Empty(t, resp)
 
 }
@@ -66,12 +66,12 @@ func TestGetJobStatus(t *testing.T) {
 
 	// returns an error if the response status isn't 200
 	resp, err = testClient.GetJobStatus("654321")
-	require.ErrorContains(t, err, "failed to get search job status")
+	require.ErrorContains(t, err, "get search job status")
 	require.Empty(t, resp)
 
 	// returns an error if the response body can't be unmarshalled
 	resp, err = testClient.GetJobStatus("098765")
-	require.ErrorContains(t, err, "failed to unmarshal search job status response")
+	require.ErrorContains(t, err, "unmarshal search job status response")
 	require.Empty(t, resp)
 }
 
@@ -89,12 +89,12 @@ func TestGetSearchResults(t *testing.T) {
 
 	// returns an error if the response status isn't 200
 	resp, err = testClient.GetSearchResults("654321", 0, 5)
-	require.ErrorContains(t, err, "failed to get search job results")
+	require.ErrorContains(t, err, "get search job results")
 	require.Empty(t, resp)
 
 	// returns an error if the response body can't be unmarshalled
 	resp, err = testClient.GetSearchResults("098765", 0, 5)
-	require.ErrorContains(t, err, "failed to unmarshal search job results response")
+	require.ErrorContains(t, err, "unmarshal search job results response")
 	require.Empty(t, resp)
 }
 
@@ -104,21 +104,21 @@ func TestSetSplunkRequestAuth(t *testing.T) {
 		password: "password",
 	}
 	req := httptest.NewRequest("GET", "http://localhost:8089", nil)
-	client.SetSplunkRequestAuth(req)
+	client.setSplunkRequestAuth(req)
 	require.Equal(t, req.Header.Get("Authorization"), "Basic dXNlcjpwYXNzd29yZA==")
 
 	client = defaultSplunkSearchAPIClient{
 		authToken: "token",
 		tokenType: TokenTypeBearer,
 	}
-	client.SetSplunkRequestAuth(req)
+	client.setSplunkRequestAuth(req)
 	require.Equal(t, req.Header.Get("Authorization"), "Bearer token")
 
 	client = defaultSplunkSearchAPIClient{
 		authToken: "token",
 		tokenType: TokenTypeSplunk,
 	}
-	client.SetSplunkRequestAuth(req)
+	client.setSplunkRequestAuth(req)
 	require.Equal(t, req.Header.Get("Authorization"), "Splunk token")
 }
 

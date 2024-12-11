@@ -46,7 +46,7 @@ type defaultSplunkSearchAPIClient struct {
 	tokenType string
 }
 
-func newSplunkSearchAPIClient(ctx context.Context, settings component.TelemetrySettings, conf Config, host component.Host) (*defaultSplunkSearchAPIClient, error) {
+func newDefaultSplunkSearchAPIClient(ctx context.Context, settings component.TelemetrySettings, conf Config, host component.Host) (*defaultSplunkSearchAPIClient, error) {
 	client, err := conf.ClientConfig.ToClient(ctx, host, settings)
 	if err != nil {
 		return nil, err
@@ -63,7 +63,7 @@ func newSplunkSearchAPIClient(ctx context.Context, settings component.TelemetryS
 	}, nil
 }
 
-func (c defaultSplunkSearchAPIClient) CreateSearchJob(search string) (CreateJobResponse, error) {
+func (c *defaultSplunkSearchAPIClient) CreateSearchJob(search string) (CreateJobResponse, error) {
 	endpoint := fmt.Sprintf("%s/services/search/jobs", c.endpoint)
 
 	if !strings.Contains(search, strings.ToLower("starttime=")) || !strings.Contains(search, strings.ToLower("endtime=")) || !strings.Contains(search, strings.ToLower("timeformat=")) {
@@ -71,119 +71,102 @@ func (c defaultSplunkSearchAPIClient) CreateSearchJob(search string) (CreateJobR
 	}
 
 	reqBody := fmt.Sprintf(`search=%s`, url.QueryEscape(search))
-	req, err := http.NewRequest("POST", endpoint, bytes.NewBuffer([]byte(reqBody)))
-	if err != nil {
-		return CreateJobResponse{}, err
-	}
-
-	err = c.SetSplunkRequestAuth(req)
-	if err != nil {
-		return CreateJobResponse{}, err
-	}
-
-	resp, err := c.client.Do(req)
+	resp, err := c.doSplunkRequest("POST", endpoint, bytes.NewBuffer([]byte(reqBody)))
 	if err != nil {
 		return CreateJobResponse{}, err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusCreated {
-		return CreateJobResponse{}, fmt.Errorf("failed to create search job: %d", resp.StatusCode)
+		return CreateJobResponse{}, fmt.Errorf("create search job: %d", resp.StatusCode)
 	}
 
 	var jobResponse CreateJobResponse
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return CreateJobResponse{}, fmt.Errorf("failed to read search job create response: %v", err)
+		return CreateJobResponse{}, fmt.Errorf("read search job create response: %w", err)
 	}
 
 	err = xml.Unmarshal(body, &jobResponse)
 	if err != nil {
-		return CreateJobResponse{}, fmt.Errorf("failed to unmarshal search job create response: %v", err)
+		return CreateJobResponse{}, fmt.Errorf("unmarshal search job create response: %w", err)
 	}
 	return jobResponse, nil
 }
 
-func (c defaultSplunkSearchAPIClient) GetJobStatus(sid string) (SearchJobStatusResponse, error) {
+func (c *defaultSplunkSearchAPIClient) GetJobStatus(sid string) (SearchJobStatusResponse, error) {
 	endpoint := fmt.Sprintf("%s/services/search/v2/jobs/%s", c.endpoint, sid)
 
-	req, err := http.NewRequest("GET", endpoint, nil)
-	if err != nil {
-		return SearchJobStatusResponse{}, err
-	}
-
-	err = c.SetSplunkRequestAuth(req)
-	if err != nil {
-		return SearchJobStatusResponse{}, err
-	}
-
-	resp, err := c.client.Do(req)
+	resp, err := c.doSplunkRequest("GET", endpoint, nil)
 	if err != nil {
 		return SearchJobStatusResponse{}, err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return SearchJobStatusResponse{}, fmt.Errorf("failed to get search job status: %d", resp.StatusCode)
+		return SearchJobStatusResponse{}, fmt.Errorf("get search job status: %d", resp.StatusCode)
 	}
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return SearchJobStatusResponse{}, fmt.Errorf("failed to read search job status response: %v", err)
+		return SearchJobStatusResponse{}, fmt.Errorf("read search job status response: %w", err)
 	}
 	var jobStatusResponse SearchJobStatusResponse
 	err = xml.Unmarshal(body, &jobStatusResponse)
 	if err != nil {
-		return SearchJobStatusResponse{}, fmt.Errorf("failed to unmarshal search job status response: %v", err)
+		return SearchJobStatusResponse{}, fmt.Errorf("unmarshal search job status response: %w", err)
 	}
 
 	return jobStatusResponse, nil
 }
 
-func (c defaultSplunkSearchAPIClient) GetSearchResults(sid string, offset int, batchSize int) (SearchResults, error) {
+func (c *defaultSplunkSearchAPIClient) GetSearchResults(sid string, offset int, batchSize int) (SearchResults, error) {
 	endpoint := fmt.Sprintf("%s/services/search/v2/jobs/%s/results?output_mode=json&offset=%d&count=%d", c.endpoint, sid, offset, batchSize)
-	req, err := http.NewRequest("GET", endpoint, nil)
-	if err != nil {
-		return SearchResults{}, err
-	}
-
-	err = c.SetSplunkRequestAuth(req)
-	if err != nil {
-		return SearchResults{}, err
-	}
-
-	resp, err := c.client.Do(req)
+	resp, err := c.doSplunkRequest("GET", endpoint, nil)
 	if err != nil {
 		return SearchResults{}, err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return SearchResults{}, fmt.Errorf("failed to get search job results: %d", resp.StatusCode)
+		return SearchResults{}, fmt.Errorf("get search job results: %d", resp.StatusCode)
 	}
 
 	var searchResults SearchResults
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return SearchResults{}, fmt.Errorf("failed to read search job results response: %v", err)
+		return SearchResults{}, fmt.Errorf("read search job results response: %w", err)
 	}
-	// fmt.Println("Body: ", string(body))
 	err = json.Unmarshal(body, &searchResults)
 	if err != nil {
-		return SearchResults{}, fmt.Errorf("failed to unmarshal search job results response: %v", err)
+		return SearchResults{}, fmt.Errorf("unmarshal search job results response: %w", err)
 	}
 
 	return searchResults, nil
 }
 
-func (c defaultSplunkSearchAPIClient) SetSplunkRequestAuth(req *http.Request) error {
+func (c *defaultSplunkSearchAPIClient) doSplunkRequest(method, endpoint string, body io.Reader) (*http.Response, error) {
+	req, err := http.NewRequest(method, endpoint, body)
+	if err != nil {
+		return nil, fmt.Errorf("new http request: %w", err)
+	}
+	err = c.setSplunkRequestAuth(req)
+	if err != nil {
+		return nil, fmt.Errorf("set splunk request auth: %w", err)
+	}
+	resp, err := c.client.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("client do request: %w", err)
+	}
+	return resp, nil
+}
+
+func (c *defaultSplunkSearchAPIClient) setSplunkRequestAuth(req *http.Request) error {
 	if c.authToken != "" {
 		if strings.EqualFold(c.tokenType, TokenTypeBearer) {
 			req.Header.Set("Authorization", "Bearer "+string(c.authToken))
 		} else if strings.EqualFold(c.tokenType, TokenTypeSplunk) {
 			req.Header.Set("Authorization", "Splunk "+string(c.authToken))
-		} else {
-			return fmt.Errorf("auth_token provided without a correct token type, valid token types are %v", []string{TokenTypeBearer, TokenTypeSplunk})
 		}
 	} else {
 		req.SetBasicAuth(c.username, c.password)

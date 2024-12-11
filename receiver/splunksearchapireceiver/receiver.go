@@ -30,7 +30,8 @@ import (
 )
 
 const (
-	eventStorageKey = "last_event_offset"
+	eventStorageKey             = "last_event_offset"
+	splunkDefaultEventBatchSize = 100
 )
 
 var (
@@ -40,7 +41,6 @@ var (
 )
 
 type splunksearchapireceiver struct {
-	host             component.Host
 	logger           *zap.Logger
 	logsConsumer     consumer.Logs
 	config           *Config
@@ -69,9 +69,8 @@ func newSSAPIReceiver(
 }
 
 func (ssapir *splunksearchapireceiver) Start(ctx context.Context, host component.Host) error {
-	ssapir.host = host
 	var err error
-	ssapir.client, err = newSplunkSearchAPIClient(ctx, ssapir.settings, *ssapir.config, ssapir.host)
+	ssapir.client, err = newDefaultSplunkSearchAPIClient(ctx, ssapir.settings, *ssapir.config, host)
 	if err != nil {
 		return err
 	}
@@ -101,35 +100,34 @@ func (ssapir *splunksearchapireceiver) Shutdown(ctx context.Context) error {
 		ssapir.cancel()
 	}
 
-	err := ssapir.checkpoint(ctx)
-	if err != nil {
+	if err := ssapir.checkpoint(ctx); err != nil {
 		ssapir.logger.Error("failed checkpoint", zap.Error(err))
 	}
 
 	return ssapir.storageClient.Close(ctx)
 }
 
-func (ssapir *splunksearchapireceiver) runQueries(ctx context.Context) error {
+func (ssapir *splunksearchapireceiver) runQueries(ctx context.Context) {
 	for _, search := range ssapir.config.Searches {
 		// set current search query
 		ssapir.checkpointRecord.Search = search.Query
 
 		// set default event batch size (matches Splunk API default)
 		if search.EventBatchSize == 0 {
-			search.EventBatchSize = 100
+			search.EventBatchSize = splunkDefaultEventBatchSize
 		}
 
 		// create search in Splunk
 		searchID, err := ssapir.createSplunkSearch(search)
 		if err != nil {
 			ssapir.logger.Error("error creating search", zap.Error(err))
-			return err
+			return
 		}
 
 		// wait for search to complete
 		if err = ssapir.pollSearchCompletion(ctx, searchID); err != nil {
 			ssapir.logger.Error("error polling for search completion", zap.Error(err))
-			return err
+			return
 		}
 
 		for {
@@ -137,7 +135,6 @@ func (ssapir *splunksearchapireceiver) runQueries(ctx context.Context) error {
 			results, err := ssapir.getSplunkSearchResults(searchID, offset, search.EventBatchSize)
 			if err != nil {
 				ssapir.logger.Error("error fetching search results", zap.Error(err))
-				return err
 			}
 			ssapir.logger.Info("search results fetched", zap.Int("num_results", len(results.Results)))
 
@@ -158,10 +155,14 @@ func (ssapir *splunksearchapireceiver) runQueries(ctx context.Context) error {
 					limitReached = true
 					break
 				}
-				// convert log timestamp to ISO8601 (UTC() makes RFC3339 into ISO8601)
+				// convert log timestamp to ISO 8601 (UTC() makes RFC 3339 into ISO 8601)
 				logTimestamp, err := time.Parse(time.RFC3339, splunkLog.Time)
 				if err != nil {
 					ssapir.logger.Error("error parsing log timestamp", zap.Error(err))
+					break
+				}
+				if logTimestamp.UTC().Before(earliestTime) {
+					ssapir.logger.Info("skipping log entry - timestamp before earliestTime", zap.Time("time", logTimestamp.UTC()), zap.Time("earliestTime", earliestTime.UTC()))
 					break
 				}
 				if logTimestamp.UTC().After(latestTime.UTC()) {
@@ -169,28 +170,24 @@ func (ssapir *splunksearchapireceiver) runQueries(ctx context.Context) error {
 					// logger will only log up to 10 times for a given code block, known weird behavior
 					continue
 				}
-				if logTimestamp.UTC().Before(earliestTime) {
-					ssapir.logger.Info("skipping log entry - timestamp before earliestTime", zap.Time("time", logTimestamp.UTC()), zap.Time("earliestTime", earliestTime.UTC()))
-					break
-				}
 				log := logs.ResourceLogs().AppendEmpty().ScopeLogs().AppendEmpty().LogRecords().AppendEmpty()
-
 				// convert time to timestamp
 				timestamp := pcommon.NewTimestampFromTime(logTimestamp.UTC())
 				log.SetTimestamp(timestamp)
 				log.Body().SetStr(splunkLog.Raw)
+			}
 
-				if logs.ResourceLogs().Len() == 0 {
-					ssapir.logger.Info("search returned no logs within the given time range")
-					return nil
-				}
+			if logs.ResourceLogs().Len() == 0 {
+				ssapir.logger.Info("search returned no logs within the given time range")
+				break
 			}
 
 			// pass logs, wait for exporter to confirm successful export to GCP
 			err = ssapir.logsConsumer.ConsumeLogs(ctx, logs)
 			if err != nil {
 				// error from down the pipeline, freak out
-				return fmt.Errorf("error consuming logs: %w", err)
+				ssapir.logger.Error("error exporting logs", zap.Error(err))
+				return
 
 			}
 			// last batch of logs has been successfully exported
@@ -216,7 +213,6 @@ func (ssapir *splunksearchapireceiver) runQueries(ctx context.Context) error {
 		ssapir.logger.Info("search results exported", zap.String("query", search.Query), zap.Int("total results", exportedEvents))
 	}
 	ssapir.logger.Info("all search results exported")
-	return nil
 }
 
 func (ssapir *splunksearchapireceiver) pollSearchCompletion(ctx context.Context, searchID string) error {

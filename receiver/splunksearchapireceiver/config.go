@@ -59,14 +59,6 @@ func (cfg *Config) Validate() error {
 		return errors.New("missing Splunk server endpoint")
 	}
 
-	if cfg.Username == "" && cfg.AuthToken == "" {
-		return errors.New("missing Splunk username or auth token")
-	}
-
-	if cfg.Password == "" && cfg.AuthToken == "" {
-		return errors.New("missing Splunk password or auth token")
-	}
-
 	if cfg.AuthToken != "" {
 		if cfg.TokenType == "" {
 			return errors.New("auth_token provided without a token type")
@@ -77,6 +69,8 @@ func (cfg *Config) Validate() error {
 		if cfg.Username != "" || cfg.Password != "" {
 			return errors.New("auth_token and username/password were both provided, only one can be provided to authenticate with Splunk")
 		}
+	} else if cfg.Username == "" || cfg.Password == "" {
+		return errors.New("missing Splunk basic auth credentials, need username and password")
 	}
 
 	if len(cfg.Searches) == 0 {
