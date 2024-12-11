@@ -370,6 +370,7 @@ func (c *Client) onRemoteConfigHandler(ctx context.Context, remoteConfig *protob
 		remoteCfgStatus.ErrorMessage = fmt.Sprintf("Failed to apply config changes: %s", err.Error())
 	}
 
+	c.logger.Debug("Setting remote config status", zap.String("status", remoteCfgStatus.Status.String()))
 	// Set the remote config status
 	if err := c.opampClient.SetRemoteConfigStatus(remoteCfgStatus); err != nil {
 		return fmt.Errorf("failed to set remote config status: %w", err)
@@ -377,6 +378,7 @@ func (c *Client) onRemoteConfigHandler(ctx context.Context, remoteConfig *protob
 
 	// If we changed the config call UpdateEffectiveConfig
 	if changed {
+		c.logger.Debug("Updating effective config")
 		if err := c.opampClient.UpdateEffectiveConfig(ctx); err != nil {
 			return fmt.Errorf("failed to update effective config: %w", err)
 		}
