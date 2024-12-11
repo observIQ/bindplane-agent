@@ -1,6 +1,6 @@
 # BindPlane Extension
 
-This extension is used by BindPlane in custom distributions to store BindPlane specific information. It is not currently included in the official `bindplane-agent`.
+This extension is used by BindPlane in custom distributions to store BindPlane specific information. It is not currently included in the official `bindplane-otel-collector`.
 
 ## Configuration
 

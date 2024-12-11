@@ -37,10 +37,10 @@ services:
     - /var/lib/docker/:/var/lib/docker:ro
 
   agent:
-    image: observiq/bindplane-agent:1.30.0
+    image: observiq/bindplane-otel-collector:1.30.0
     restart: always
-    container_name: bindplane-agent
-    hostname: bindplane-agent
+    container_name: bindplane-otel-collector
+    hostname: bindplane-otel-collector
     deploy:
       resources:
         limits:

@@ -1,4 +1,4 @@
-module github.com/observiq/bindplane-agent/internal/report
+module github.com/observiq/bindplane-otel-collector/internal/report
 
 go 1.22.7
 
@@ -29,4 +29,4 @@ require (
 	google.golang.org/protobuf v1.35.1 // indirect
 )
 
-replace github.com/observiq/bindplane-agent/internal/report => ../../internal/report
+replace github.com/observiq/bindplane-otel-collector/internal/report => ../../internal/report

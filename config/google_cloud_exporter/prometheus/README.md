@@ -54,9 +54,9 @@ receivers:
 
 ### Deploy
 
-1. Copy [config.yaml](./config.yaml) to `/opt/bindplane-agent/config.yaml`
+1. Copy [config.yaml](./config.yaml) to `/opt/bindplane-otel-collector/config.yaml`
 2. Modify the configuration to reflect your environment (See [Usage](./README.md#usage))
-3. Restart the agent: `sudo systemctl restart bindplane-agent`
+3. Restart the agent: `sudo systemctl restart bindplane-otel-collector`
 
 You can search for metrics under the "Generic Node" section
 with the prefix `workload.googleapis.com`.
@@ -65,7 +65,7 @@ with the prefix `workload.googleapis.com`.
 
 | Label      | Description                                                                                                                                                                                                                                                                                           | Example        |
 | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- |
-| `node_id`  | The hostname of the agent. Set within the [Google exporter](https://github.com/observIQ/bindplane-agent/tree/main/exporter/googlecloudexporter#metric-processing-steps), and required for [generic_node](https://cloud.google.com/monitoring/api/resources#tag_generic_node) monitored resource type. | `collector-0`  |
+| `node_id`  | The hostname of the agent. Set within the [Google exporter](https://github.com/observIQ/bindplane-otel-collector/tree/main/exporter/googlecloudexporter#metric-processing-steps), and required for [generic_node](https://cloud.google.com/monitoring/api/resources#tag_generic_node) monitored resource type. | `collector-0`  |
 | `job`      | Dervied from the Prometheus receiver's `config.scrape_configs` `job_name` value. This value should represent the applications being scraped by the scrape config.                                                                                                                                     | `nodeexporter` |
 | `instance` | The host / ip and port being scraped by the scrape config.                                                                                                                                                                                                                                            | `node-1:9100`  |
 

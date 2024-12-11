@@ -2,17 +2,17 @@
 # observIQ OTEL daemon
 # chkconfig: 2345 99 05
 # description: observIQ's distribution of the OpenTelemetry collector
-# processname: bindplane-agent
-# pidfile: /var/run/bindplane-agent.pid
+# processname: bindplane-otel-collector
+# pidfile: /var/run/bindplane-otel-collector.pid
 
 ### BEGIN INIT INFO
-# Provides: bindplane-agent
+# Provides: bindplane-otel-collector
 # Required-Start:
 # Required-Stop:
 # Should-Start:
 # Default-Start: 3 5
 # Default-Stop: 0 1 2 6
-# Description: Start the bindplane-agent service
+# Description: Start the bindplane-otel-collector service
 ### END INIT INFO
 
 # Source function library.
@@ -64,7 +64,7 @@ fi
 
 # Pull in sysconfig settings
 # shellcheck disable=SC1091
-[ -f /etc/sysconfig/bindplane-agent ] && . /etc/sysconfig/bindplane-agent
+[ -f /etc/sysconfig/bindplane-otel-collector ] && . /etc/sysconfig/bindplane-otel-collector
 
 RETVAL=0
 start() {

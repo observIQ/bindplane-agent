@@ -17,12 +17,12 @@ set -e
 
 # Collector Constants
 SERVICE_NAME="com.bindplane.agent"
-DOWNLOAD_BASE="https://github.com/observIQ/bindplane-agent/releases/download"
+DOWNLOAD_BASE="https://github.com/observIQ/bindplane-otel-collector/releases/download"
 
 # Script Constants
 PREREQS="printf sed uname tr find grep"
-TMP_DIR="${TMPDIR:-"/tmp/"}bindplane-agent" # Allow this to be overriden by cannonical TMPDIR env var
-INSTALL_DIR="/opt/bindplane-agent"
+TMP_DIR="${TMPDIR:-"/tmp/"}bindplane-otel-collector" # Allow this to be overriden by cannonical TMPDIR env var
+INSTALL_DIR="/opt/bindplane-otel-collector"
 SUPERVISOR_YML_PATH="$INSTALL_DIR/supervisor.yaml"
 SCRIPT_NAME="$0"
 INDENT_WIDTH='  '
@@ -180,12 +180,12 @@ Usage:
   $(fg_yellow '-l, --url')
       Defines the URL that the components will be downloaded from.
       If not provided, this will default to BindPlane Agent\'s GitHub releases.
-      Example: '-l http://my.domain.org/bindplane-agent' will download from there.
+      Example: '-l http://my.domain.org/bindplane-otel-collector' will download from there.
 
   $(fg_yellow '-b, --base-url')
-      Defines the base of the download URL as '{base_url}/v{version}/bindplane-agent-v{version}-darwin-{os_arch}.tar.gz'.
+      Defines the base of the download URL as '{base_url}/v{version}/bindplane-otel-collector-v{version}-darwin-{os_arch}.tar.gz'.
       If not provided, this will default to '$DOWNLOAD_BASE'.
-      Example: '-b http://my.domain.org/bindplane-agent/binaries' will be used as the base of the download URL.
+      Example: '-b http://my.domain.org/bindplane-otel-collector/binaries' will be used as the base of the download URL.
     
   $(fg_yellow '-f, --file')
       Install Agent from a local file instead of downloading from a URL.
@@ -387,7 +387,7 @@ setup_installation() {
 
   if [ -z "$package_path" ]; then
     set_download_urls
-    out_file_path="$TMP_DIR/bindplane-agent.tar.gz"
+    out_file_path="$TMP_DIR/bindplane-otel-collector.tar.gz"
   else
     out_file_path="$package_path"
   fi
@@ -441,7 +441,7 @@ set_download_urls() {
       base_url=$DOWNLOAD_BASE
     fi
 
-    collector_download_url="$base_url/v$version/bindplane-agent-v${version}-darwin-${os_arch}.tar.gz"
+    collector_download_url="$base_url/v$version/bindplane-otel-collector-v${version}-darwin-${os_arch}.tar.gz"
   else
     collector_download_url="$url"
   fi
@@ -518,7 +518,7 @@ ask_clean_install() {
 
 # latest_version gets the tag of the latest release, without the v prefix.
 latest_version() {
-  curl -sSL -H"Accept: application/vnd.github.v3+json" https://api.github.com/repos/observIQ/bindplane-agent/releases/latest |
+  curl -sSL -H"Accept: application/vnd.github.v3+json" https://api.github.com/repos/observIQ/bindplane-otel-collector/releases/latest |
     grep "\"tag_name\"" |
     sed -E 's/ *"tag_name": "v([0-9]+\.[0-9]+\.[0-9+])",/\1/'
 }
@@ -646,7 +646,7 @@ create_supervisor_config() {
   command printf '  accepts_remote_config: true\n' >>"$supervisor_yml_path"
   command printf '  reports_remote_config: true\n' >>"$supervisor_yml_path"
   command printf 'agent:\n' >>"$supervisor_yml_path"
-  command printf '  executable: "%s"\n' "$INSTALL_DIR/bindplane-agent" >>"$supervisor_yml_path"
+  command printf '  executable: "%s"\n' "$INSTALL_DIR/bindplane-otel-collector" >>"$supervisor_yml_path"
   command printf '  description:\n' >>"$supervisor_yml_path"
   command printf '    non_identifying_attributes:\n' >>"$supervisor_yml_path"
   [ -n "$OPAMP_LABELS" ] && command printf '      service.labels: "%s"\n' "$OPAMP_LABELS" >>"$supervisor_yml_path"
@@ -674,7 +674,7 @@ display_results() {
   increase_indent
   info "For more information on configuring the agent, see the docs:"
   increase_indent
-  info "$(fg_cyan "https://github.com/observIQ/bindplane-agent/tree/main#bindplane-agent")$(reset)"
+  info "$(fg_cyan "https://github.com/observIQ/bindplane-otel-collector/tree/main#bindplane-otel-collector")$(reset)"
   decrease_indent
   info "If you have any other questions please contact us at $(fg_cyan support@observiq.com)$(reset)"
   decrease_indent
@@ -687,7 +687,7 @@ uninstall() {
   banner "Uninstalling BindPlane Agent"
   increase_indent
 
-  if [ ! -f "$INSTALL_DIR/bindplane-agent" ]; then
+  if [ ! -f "$INSTALL_DIR/bindplane-otel-collector" ]; then
     # If the agent binary is not present, we assume that the agent is not installed
     # In this case, do nothing.
     info "No install detected, skipping..."
@@ -703,7 +703,7 @@ uninstall() {
 
   # Removes the whole install directory
   info "Removing installed artifacts..."
-  rm -rf /opt/bindplane-agent || error_exit "$LINENO" "Failed to remove /opt/bindplane-agent"
+  rm -rf /opt/bindplane-otel-collector || error_exit "$LINENO" "Failed to remove /opt/bindplane-otel-collector"
   succeeded
 
   info "Removing any existing log files"

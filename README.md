@@ -2,9 +2,9 @@
 
 <center>
 
-[![Action Status](https://github.com/observIQ/bindplane-agent/workflows/Build/badge.svg)](https://github.com/observIQ/bindplane-agent/actions)
-[![Action Test Status](https://github.com/observIQ/bindplane-agent/workflows/Tests/badge.svg)](https://github.com/observIQ/bindplane-agent/actions)
-[![Go Report Card](https://goreportcard.com/badge/github.com/observIQ/bindplane-agent)](https://goreportcard.com/report/github.com/observIQ/bindplane-agent)
+[![Action Status](https://github.com/observIQ/bindplane-otel-collector/workflows/Build/badge.svg)](https://github.com/observIQ/bindplane-otel-collector/actions)
+[![Action Test Status](https://github.com/observIQ/bindplane-otel-collector/workflows/Tests/badge.svg)](https://github.com/observIQ/bindplane-otel-collector/actions)
+[![Go Report Card](https://goreportcard.com/badge/github.com/observIQ/bindplane-otel-collector)](https://goreportcard.com/report/github.com/observIQ/bindplane-otel-collector)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 </center>
@@ -36,7 +36,7 @@ You'll need a BindPlane server in order to run the collector with the supervisor
 To install using the installation script, you may run:
 
 ```sh
-sudo sh -c "$(curl -fsSlL https://github.com/observiq/bindplane-agent/releases/latest/download/install_unix.sh)" install_unix.sh
+sudo sh -c "$(curl -fsSlL https://github.com/observiq/bindplane-otel-collector/releases/latest/download/install_unix.sh)" install_unix.sh
 ```
 
 To install directly with the appropriate package manager, see [installing on Linux](/docs/installation-linux.md).
@@ -46,10 +46,10 @@ To install directly with the appropriate package manager, see [installing on Lin
 To install the BindPlane Agent on Windows, run the Powershell command below to install the MSI with no UI.
 
 ```pwsh
-msiexec /i "https://github.com/observIQ/bindplane-agent/releases/latest/download/bindplane-agent.msi" /quiet
+msiexec /i "https://github.com/observIQ/bindplane-otel-collector/releases/latest/download/bindplane-otel-collector.msi" /quiet
 ```
 
-Alternately, for an interactive installation [download the latest MSI](https://github.com/observIQ/bindplane-agent/releases/latest).
+Alternately, for an interactive installation [download the latest MSI](https://github.com/observIQ/bindplane-otel-collector/releases/latest).
 
 After downloading the MSI, simply double click it to open the installation wizard. Follow the instructions to configure and install the agent.
 
@@ -60,7 +60,7 @@ For more installation information see [installing on Windows](/docs/installation
 To install using the installation script, you may run:
 
 ```sh
-sudo sh -c "$(curl -fsSlL https://github.com/observiq/bindplane-agent/releases/latest/download/install_macos.sh)" install_macos.sh
+sudo sh -c "$(curl -fsSlL https://github.com/observiq/bindplane-otel-collector/releases/latest/download/install_macos.sh)" install_macos.sh
 ```
 
 For more installation information see [installing on macOS](/docs/installation-mac.md).
@@ -73,9 +73,9 @@ You can edit the supervisor config as needed for communicating with BindPlane an
 
 | OS      | Default Location                                                  |
 | :------ | :---------------------------------------------------------------- |
-| Linux   | /opt/bindplane-agent/supervisor.yaml                              |
+| Linux   | /opt/bindplane-otel-collector/supervisor.yaml                              |
 | Windows | C:\Program Files\observIQ OpenTelemetry Collector\supervisor.yaml |
-| macOS   | /opt/bindplane-agent/supervisor.yaml                              |
+| macOS   | /opt/bindplane-otel-collector/supervisor.yaml                              |
 
 For more information on supervisor configuration see the [supervisor documentation](./docs/supervisor.md).
 

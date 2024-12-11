@@ -1,9 +1,9 @@
-module github.com/observiq/bindplane-agent/exporter/googlemanagedprometheusexporter
+module github.com/observiq/bindplane-otel-collector/exporter/googlemanagedprometheusexporter
 
 go 1.22.7
 
 require (
-	github.com/observiq/bindplane-agent/internal/version v1.66.0
+	github.com/observiq/bindplane-otel-collector/internal/version v1.66.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/googlemanagedprometheusexporter v0.114.0
 	github.com/stretchr/testify v1.10.0
 	go.opentelemetry.io/collector/component v0.114.0
@@ -99,4 +99,4 @@ require (
 )
 
 // Needed until 'version' package changes are included in a release
-replace github.com/observiq/bindplane-agent/internal/version => ../../internal/version
+replace github.com/observiq/bindplane-otel-collector/internal/version => ../../internal/version

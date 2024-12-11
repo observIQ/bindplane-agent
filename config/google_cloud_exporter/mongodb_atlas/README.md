@@ -4,7 +4,7 @@ The Mongodb Atlas Receiver can be used to send Mongodb Atlas metrics to Google C
 
 ## Prerequisites
 
-See the [documentation](https://github.com/observIQ/bindplane-agent/blob/main/docs/receivers.md) for Mongodb Atlas prerequisites.
+See the [documentation](https://github.com/observIQ/bindplane-otel-collector/blob/main/docs/receivers.md) for Mongodb Atlas prerequisites.
 
 See the [prerequisites](../README.md) doc for Google Cloud prerequisites.
 
@@ -20,7 +20,7 @@ Set the variables by creating a [systemd override](https://wiki.archlinux.org/ti
 Run the following command
 
 ```bash
-sudo systemctl edit bindplane-agent
+sudo systemctl edit bindplane-otel-collector
 ```
 
 If this is the first time an override is being created, the file will be empty. Paste the following contents into the file. If the `Service` section is already present, append the two `Environment` lines to the `Service` section.
@@ -36,7 +36,7 @@ Environment=MONGODB_ATLAS_PRIVATE_KEY=otel
 After restarting the agent, the configuration will attempt to use the configured public and private key.
 
 ```bash
-sudo systemctl restart bindplane-agent
+sudo systemctl restart bindplane-otel-collector
 ```
 
 ## Warning

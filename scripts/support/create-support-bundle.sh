@@ -19,7 +19,7 @@ PREREQS="printf sed uname sudo tar gzip"
 INDENT_WIDTH='  '
 indent=""
 
-collector_dir=/opt/bindplane-agent
+collector_dir=/opt/bindplane-otel-collector
 
 # Colors
 num_colors=$(tput colors 2>/dev/null)
@@ -281,7 +281,7 @@ function bundle_files() {
   # Grab the logs from journalctl -- in some cases, the collector.log file
   # may be empty, but there may be logs in journalctl
   info "Collecting logs from journalctl..."
-  journalctl -u bindplane-agent.service -n 50 >journalctl.log
+  journalctl -u bindplane-otel-collector.service -n 50 >journalctl.log
   tar --append --file=$tar_filename journalctl.log
   rm journalctl.log
 

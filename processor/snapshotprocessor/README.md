@@ -1,6 +1,6 @@
 # Snapshot Processor
 
-The snapshot processor is used in custom distributions of the collector to provide snapshot functionality in BindPlane. It is not currently included in the official `bindplane-agent`.
+The snapshot processor is used in custom distributions of the collector to provide snapshot functionality in BindPlane. It is not currently included in the official `bindplane-otel-collector`.
 ## Supported pipelines
 
 - Logs

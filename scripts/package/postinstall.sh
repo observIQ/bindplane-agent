@@ -17,8 +17,8 @@ set -e
 
 manage_systemd_service() {
   # Ensure sysv script isn't present, and if it is remove it
-  if [ -f /etc/init.d/bindplane-agent ]; then
-    rm -f /etc/init.d/bindplane-agent
+  if [ -f /etc/init.d/bindplane-otel-collector ]; then
+    rm -f /etc/init.d/bindplane-otel-collector
   fi
 
   systemctl daemon-reload
@@ -27,36 +27,36 @@ manage_systemd_service() {
 
   cat <<EOF
 
-The "bindplane-agent" service has been configured!
+The "bindplane-otel-collector" service has been configured!
 
 The collector's config file can be found here: 
-  /opt/bindplane-agent/supervisor_storage/effective.yaml
+  /opt/bindplane-otel-collector/supervisor_storage/effective.yaml
 
 To view logs from the collector, run:
-  sudo tail -F /opt/bindplane-agent/supervisor_storage/agent.log
+  sudo tail -F /opt/bindplane-otel-collector/supervisor_storage/agent.log
 
 For more information on configuring the collector, see the docs:
-  https://github.com/observIQ/bindplane-agent/tree/main#observiq-opentelemetry-collector
+  https://github.com/observIQ/bindplane-otel-collector/tree/main#observiq-opentelemetry-collector
 
-To stop the bindplane-agent service, run:
-  sudo systemctl stop bindplane-agent
+To stop the bindplane-otel-collector service, run:
+  sudo systemctl stop bindplane-otel-collector
 
-To start the bindplane-agent service, run:
-  sudo systemctl start bindplane-agent
+To start the bindplane-otel-collector service, run:
+  sudo systemctl start bindplane-otel-collector
 
-To restart the bindplane-agent service, run:
-  sudo systemctl restart bindplane-agent
+To restart the bindplane-otel-collector service, run:
+  sudo systemctl restart bindplane-otel-collector
 
 To enable the service on startup, run:
-  sudo systemctl enable bindplane-agent
+  sudo systemctl enable bindplane-otel-collector
 
 If you have any other questions please contact us at support@observiq.com
 EOF
 }
 
 manage_sysv_service() {
-  chmod 755 /etc/init.d/bindplane-agent
-  chmod 644 /etc/sysconfig/bindplane-agent
+  chmod 755 /etc/init.d/bindplane-otel-collector
+  chmod 644 /etc/sysconfig/bindplane-otel-collector
   echo "configured sysv service"
 }
 
@@ -91,13 +91,13 @@ manage_service() {
 
 finish_permissions() {
   # Goreleaser does not set plugin file permissions, so do them here
-  # We also change the owner of the binary to bindplane-agent
-  chown -R bindplane-agent:bindplane-agent \
-    /opt/bindplane-agent/bindplane-agent \
-    /opt/bindplane-agent/opampsupervisor \
-    /opt/bindplane-agent/plugins/*
+  # We also change the owner of the binary to bindplane-otel-collector
+  chown -R bindplane-otel-collector:bindplane-otel-collector \
+    /opt/bindplane-otel-collector/bindplane-otel-collector \
+    /opt/bindplane-otel-collector/opampsupervisor \
+    /opt/bindplane-otel-collector/plugins/*
 
-  chmod 0640 /opt/bindplane-agent/plugins/*
+  chmod 0640 /opt/bindplane-otel-collector/plugins/*
 }
 
 install() {

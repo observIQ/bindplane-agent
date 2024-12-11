@@ -11,18 +11,18 @@
                 <Control Id="InstallDescription" Hidden="yes" Type="Text" X="135" Y="70" Width="220" Height="80" Transparent="yes" NoPrefix="yes" Text="Config location: 
     [INSTALLDIR]config.yaml
 To stop the agent service, run: 
-    Stop-Service -Name bindplane-agent
+    Stop-Service -Name bindplane-otel-collector
 To start the agent service, run: 
-    Start-Service -Name bindplane-agent
+    Start-Service -Name bindplane-otel-collector
 To restart agent the service, run:
-    Restart-Service -Name bindplane-agent" >
+    Restart-Service -Name bindplane-otel-collector" >
                     <Condition Action="show">NOT Installed</Condition>
                 </Control>
                 <Control Id="UninstallDescription" Hidden="yes" Type="Text" X="135" Y="70" Width="220" Height="40" Transparent="yes" NoPrefix="yes" Text="!(loc.ExitDialogDescription)" >
                     <Condition Action="show">Installed</Condition>
                 </Control>
                 <Control Id="DocLink" Hidden="yes" Type="Hyperlink" X="135" Y="200" Width="220" Height="20" Transparent="yes">
-                    <Text><![CDATA[<a href="https://github.com/observIQ/bindplane-agent/blob/main/docs/installation-windows.md#configuring-the-agent">Click here for online documentation on configuration.</a>]]></Text>
+                    <Text><![CDATA[<a href="https://github.com/observIQ/bindplane-otel-collector/blob/main/docs/installation-windows.md#configuring-the-agent">Click here for online documentation on configuration.</a>]]></Text>
                     <Condition Action="show">NOT Installed</Condition>
                 </Control>
                 <Control Id="Title" Type="Text" X="135" Y="20" Width="220" Height="60" Transparent="yes" NoPrefix="yes" Text="!(loc.ExitDialogTitle)" />

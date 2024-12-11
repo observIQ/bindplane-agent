@@ -16,19 +16,19 @@
 set -e
 
 handle_systemctl() {
-  systemctl stop bindplane-agent >/dev/null || {
+  systemctl stop bindplane-otel-collector >/dev/null || {
     printf 'failed to stop service'
   }
-  systemctl disable bindplane-agent >/dev/null 2>&1 || {
+  systemctl disable bindplane-otel-collector >/dev/null 2>&1 || {
     printf 'failed to disable service'
   }
 }
 
 handle_service() {
-  service bindplane-agent stop || {
+  service bindplane-otel-collector stop || {
     printf 'failed to stop service'
   }
-  chkconfig bindplane-agent on >/dev/null 2>&1 || {
+  chkconfig bindplane-otel-collector on >/dev/null 2>&1 || {
     printf 'failed to disable service'
   }
 }

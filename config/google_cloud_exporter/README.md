@@ -42,7 +42,7 @@ The `credentials_file` parameter can be set:
 ```yaml
 exporters:
   googlecloud:
-    credentials_file: /opt/bindplane-agent/credentials.json
+    credentials_file: /opt/bindplane-otel-collector/credentials.json
 ```
 
 **Credential JSON**

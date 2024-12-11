@@ -1,11 +1,11 @@
-module github.com/observiq/bindplane-agent/processor/logcountprocessor
+module github.com/observiq/bindplane-otel-collector/processor/logcountprocessor
 
 go 1.22.7
 
 require (
-	github.com/observiq/bindplane-agent/internal/counter v1.66.0
-	github.com/observiq/bindplane-agent/internal/expr v1.66.0
-	github.com/observiq/bindplane-agent/receiver/routereceiver v1.66.0
+	github.com/observiq/bindplane-otel-collector/internal/counter v1.66.0
+	github.com/observiq/bindplane-otel-collector/internal/expr v1.66.0
+	github.com/observiq/bindplane-otel-collector/receiver/routereceiver v1.66.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/ottl v0.114.0
 	github.com/stretchr/testify v1.10.0
 	go.opentelemetry.io/collector/component v0.114.0
@@ -59,8 +59,8 @@ require (
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
 
-replace github.com/observiq/bindplane-agent/receiver/routereceiver => ../../receiver/routereceiver
+replace github.com/observiq/bindplane-otel-collector/receiver/routereceiver => ../../receiver/routereceiver
 
-replace github.com/observiq/bindplane-agent/internal/expr => ../../internal/expr
+replace github.com/observiq/bindplane-otel-collector/internal/expr => ../../internal/expr
 
-replace github.com/observiq/bindplane-agent/internal/counter => ../../internal/counter
+replace github.com/observiq/bindplane-otel-collector/internal/counter => ../../internal/counter

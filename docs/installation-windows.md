@@ -5,10 +5,10 @@
 To install the agent on Windows, start Powershell as an administrator and run the command below to install the MSI with no UI.
 
 ```pwsh
-msiexec /i "https://github.com/observIQ/bindplane-agent/releases/latest/download/bindplane-agent.msi" /quiet
+msiexec /i "https://github.com/observIQ/bindplane-otel-collector/releases/latest/download/bindplane-otel-collector.msi" /quiet
 ```
 
-Alternately, for an interactive installation [download the latest MSI](https://github.com/observIQ/bindplane-agent/releases/latest).
+Alternately, for an interactive installation [download the latest MSI](https://github.com/observIQ/bindplane-otel-collector/releases/latest).
 
 After downloading the MSI, simply double click it to open the installation wizard. Follow the instructions to configure and install the agent.
 
@@ -19,20 +19,20 @@ Installation artifacts are signed. Information on verifying the signature can be
 To install the agent and connect the supervisor to an OpAMP management platform, set the following flags.
 
 ```sh
-msiexec /i "https://github.com/observIQ/bindplane-agent/releases/latest/download/bindplane-agent.msi" /quiet ENABLEMANAGEMENT=1 OPAMPENDPOINT=<your_endpoint> OPAMPSECRETKEY=<secret-key>
+msiexec /i "https://github.com/observIQ/bindplane-otel-collector/releases/latest/download/bindplane-otel-collector.msi" /quiet ENABLEMANAGEMENT=1 OPAMPENDPOINT=<your_endpoint> OPAMPSECRETKEY=<secret-key>
 ```
 
 To read more about OpAMP management, see the [supervisor docs](./supervisor.md).
 
 ## Configuring the Agent
 
-After installing, the `bindplane-agent` service will be running and ready for configuration!
+After installing, the `bindplane-otel-collector` service will be running and ready for configuration!
 
 The agent is ran and managed by the [OpenTelemetry supervisor](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/cmd/opampsupervisor). The supervisor must receive the agent's configuration from an OpAMP management platform, after which it will stop and restart the agent with the new config.
 
 The supervisor remembers the last config it received via OpAMP and always starts rewrites the agent's config file with it when it starts. This means you can't manually edit the agent's config file on disk. The best way to modify the configuration is to send a new one from the OpAMP platform the supervisor is connected to.
 
-The agent configuration file is located at `/opt/bindplane-agent/supervisor_storage/effective.yaml`.
+The agent configuration file is located at `/opt/bindplane-otel-collector/supervisor_storage/effective.yaml`.
 
 If this method of collector management does not work for your use case, see this [alternative option](./supervisor.md#alternatives)
 
@@ -56,7 +56,7 @@ Locate the "observIQ Distro for OpenTelemetry Collector" service, right click th
 Alternatively, the Powershell command below may be run to restart the agent service.
 
 ```pwsh
-Restart-Service -Name "bindplane-agent"
+Restart-Service -Name "bindplane-otel-collector"
 ```
 
 ## Stopping the Agent
@@ -73,7 +73,7 @@ Locate the "observIQ Distro for OpenTelemetry Collector" service, right click th
 Alternatively, the Powershell command below may be run to stop the agent service.
 
 ```pwsh
-Stop-Service -Name "bindplane-agent"
+Stop-Service -Name "bindplane-otel-collector"
 ```
 
 ## Starting the Agent
@@ -90,7 +90,7 @@ Locate the "observIQ Distro for OpenTelemetry Collector" service, right click th
 Alternatively, the Powershell command below may be run to start the agent service.
 
 ```pwsh
-Start-Service -Name "bindplane-agent"
+Start-Service -Name "bindplane-otel-collector"
 ```
 
 ## Uninstalling

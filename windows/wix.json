@@ -11,7 +11,7 @@
     {
       "path": "opampsupervisor.exe",
       "service": {
-        "name": "bindplane-agent",
+        "name": "bindplane-otel-collector",
         "start": "delayed",
         "display-name": "observIQ Distro for OpenTelemetry Collector",
         "description": "observIQ's distribution of the OpenTelemetry collector.",
@@ -19,7 +19,7 @@
       }
     },
     {
-      "path": "bindplane-agent.exe"
+      "path": "bindplane-otel-collector.exe"
     },
     {
       "path": "opentelemetry-java-contrib-jmx-metrics.jar"

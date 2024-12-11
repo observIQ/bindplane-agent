@@ -32,8 +32,8 @@ VERSION ?= $(if $(CURRENT_TAG),$(CURRENT_TAG),$(PREVIOUS_TAG))
 # Builds the agent for current GOOS/GOARCH pair
 .PHONY: agent
 agent:
-	CGO_ENABLED=0 builder --config="./manifests/observIQ/manifest.yaml" --ldflags "-s -w -X github.com/observiq/bindplane-agent/internal/version.version=$(VERSION)"
-	mkdir -p $(OUTDIR); cp ./builder/bindplane-agent $(OUTDIR)/collector_$(GOOS)_$(GOARCH)$(EXT)
+	CGO_ENABLED=0 builder --config="./manifests/observIQ/manifest.yaml" --ldflags "-s -w -X github.com/observiq/bindplane-otel-collector/internal/version.version=$(VERSION)"
+	mkdir -p $(OUTDIR); cp ./builder/bindplane-otel-collector $(OUTDIR)/collector_$(GOOS)_$(GOARCH)$(EXT)
 
 # Builds a custom distro for the current GOOS/GOARCH pair using the manifest specified
 # MANIFEST = path to the manifest file for the distro to be built
@@ -235,15 +235,15 @@ release-prep:
 	@cp -r ./plugins release_deps/
 	@cp service/com.bindplane.agent.plist release_deps/com.bindplane.agent.plist
 	@jq ".files[] | select(.service != null)" windows/wix.json >> release_deps/windows_service.json
-	@cp service/bindplane-agent.service release_deps/bindplane-agent.service
-	@cp service/bindplane-agent release_deps/bindplane-agent
+	@cp service/bindplane-otel-collector.service release_deps/bindplane-otel-collector.service
+	@cp service/bindplane-otel-collector release_deps/bindplane-otel-collector
 	@cp -r ./service/sysconfig release_deps/
 
 # Build and sign, skip release and ignore dirty git tree
 .PHONY: release-test
 release-test:
 # If there is no MSI in the root dir, we'll create a dummy one so that goreleaser can complete successfully
-	if [ ! -e "./bindplane-agent.msi" ]; then touch ./bindplane-agent.msi; fi
+	if [ ! -e "./bindplane-otel-collector.msi" ]; then touch ./bindplane-otel-collector.msi; fi
 	GORELEASER_CURRENT_TAG=$(VERSION) goreleaser release --parallelism 4 --skip=publish --skip=validate --skip=sign --clean --snapshot
 
 .PHONY: for-all

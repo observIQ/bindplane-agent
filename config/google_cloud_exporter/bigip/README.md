@@ -15,10 +15,10 @@ there is a unique `node_id` (hostname of the agent) label for each BIG-IP system
 
 An example configuration is located [here](./config.yaml).
 
-1. Copy [config.yaml](./config.yaml) to `/opt/bindplane-agent/config.yaml`.
+1. Copy [config.yaml](./config.yaml) to `/opt/bindplane-otel-collector/config.yaml`.
 2. Update the `endpoint` field with the endpoint of your Big IP F5 iControl REST API.
 3. Follow the [authentication section](./README.md#authentication-environment-variables) for configuring username and password.
-4. Restart the agent: `sudo systemctl restart bindplane-agent`.
+4. Restart the agent: `sudo systemctl restart bindplane-otel-collector`.
 
 ## Authentication Environment Variables
 
@@ -32,7 +32,7 @@ Set the variables by creating a [systemd override](https://wiki.archlinux.org/ti
 Run the following command
 
 ```bash
-sudo systemctl edit bindplane-agent
+sudo systemctl edit bindplane-otel-collector
 ```
 
 If this is the first time an override is being created, the file will be empty. Paste the following contents into the file. If the `Service` section is already present, append the two `Environment` lines to the `Service` section.
@@ -48,5 +48,5 @@ Environment=BIGIP_PASSWORD=otel
 After restarting the agent, the configuration will attempt to use the username:password `otel:otel`.
 
 ```bash
-sudo systemctl restart bindplane-agent
+sudo systemctl restart bindplane-otel-collector
 ```

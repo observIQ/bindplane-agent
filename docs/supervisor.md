@@ -17,9 +17,9 @@ The supervisor's config file can be located depending on your OS:
 
 | OS      | Default Location                                                  |
 | :------ | :---------------------------------------------------------------- |
-| Linux   | /opt/bindplane-agent/supervisor.yaml                              |
+| Linux   | /opt/bindplane-otel-collector/supervisor.yaml                              |
 | Windows | C:\Program Files\observIQ OpenTelemetry Collector\supervisor.yaml |
-| macOS   | /opt/bindplane-agent/supervisor.yaml                              |
+| macOS   | /opt/bindplane-otel-collector/supervisor.yaml                              |
 
 Configuration options for the supervisor can be found [here](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/cmd/opampsupervisor/specification/README.md#supervisor-configuration).
 
@@ -31,8 +31,8 @@ The collector's binary can be found depending on your OS below:
 
 | OS      | Default Location                                                      |
 | :------ | :-------------------------------------------------------------------- |
-| Linux   | /opt/bindplane-agent/bindplane-agent                                  |
-| Windows | C:\Program Files\observIQ OpenTelemetry Collector\bindplane-agent.exe |
-| macOS   | /opt/bindplane-agent/bindplane-agent                                  |
+| Linux   | /opt/bindplane-otel-collector/bindplane-otel-collector                                  |
+| Windows | C:\Program Files\observIQ OpenTelemetry Collector\bindplane-otel-collector.exe |
+| macOS   | /opt/bindplane-otel-collector/bindplane-otel-collector                                  |
 
 You can create an OTel configuration for the collector and run it like any other OTel collector. For more information on OTel configurations, see the [OpenTelemetry docs](https://opentelemetry.io/docs/collector/configuration/).

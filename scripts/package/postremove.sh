@@ -16,22 +16,22 @@
 set -e
 
 remove() {
-  rm -f /usr/lib/systemd/system/bindplane-agent.service || {
-    printf 'failed to remove /usr/lib/systemd/system/bindplane-agent.service'
+  rm -f /usr/lib/systemd/system/bindplane-otel-collector.service || {
+    printf 'failed to remove /usr/lib/systemd/system/bindplane-otel-collector.service'
   }
 
-  rm -f /etc/sysconfig/bindplane-agent || {
-    printf 'failed to remove /etc/sysconfig/bindplane-agent'
+  rm -f /etc/sysconfig/bindplane-otel-collector || {
+    printf 'failed to remove /etc/sysconfig/bindplane-otel-collector'
   }
 
-  rm -f /etc/init.d/bindplane-agent || {
-    printf 'failed to remove /etc/init.d/bindplane-agent'
+  rm -f /etc/init.d/bindplane-otel-collector || {
+    printf 'failed to remove /etc/init.d/bindplane-otel-collector'
   }
 
   # remove the entire folder
   # pkg manager will remove most files but this will delete the remaining
-  rm -rf /opt/bindplane-agent || {
-    printf 'failed to remove /opt/bindplane-agent'
+  rm -rf /opt/bindplane-otel-collector || {
+    printf 'failed to remove /opt/bindplane-otel-collector'
   }
 }
 
