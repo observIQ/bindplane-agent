@@ -48,30 +48,25 @@ var supportedLogTypes = map[string]string{
 	"sql_server":                "MICROSOFT_SQL",
 }
 
-//go:generate mockery --name logMarshaler --filename mock_log_marshaler.go --structname MockMarshaler --inpackage
-type logMarshaler interface {
-	MarshalRawLogs(ctx context.Context, ld plog.Logs) ([]*api.BatchCreateLogsRequest, error)
-	MarshalRawLogsForHTTP(ctx context.Context, ld plog.Logs) (map[string][]*api.ImportLogsRequest, error)
-}
 type protoMarshaler struct {
-	cfg          Config
-	teleSettings component.TelemetrySettings
-	startTime    time.Time
-	customerID   []byte
-	collectorID  []byte
+	cfg         Config
+	set         component.TelemetrySettings
+	startTime   time.Time
+	customerID  []byte
+	collectorID []byte
 }
 
-func newProtoMarshaler(cfg Config, teleSettings component.TelemetrySettings) (*protoMarshaler, error) {
+func newProtoMarshaler(cfg Config, set component.TelemetrySettings) (*protoMarshaler, error) {
 	customerID, err := uuid.Parse(cfg.CustomerID)
 	if err != nil {
 		return nil, fmt.Errorf("parse customer ID: %w", err)
 	}
 	return &protoMarshaler{
-		startTime:    time.Now(),
-		cfg:          cfg,
-		teleSettings: teleSettings,
-		customerID:   customerID[:],
-		collectorID:  chronicleCollectorID[:],
+		startTime:   time.Now(),
+		cfg:         cfg,
+		set:         set,
+		customerID:  customerID[:],
+		collectorID: chronicleCollectorID[:],
 	}, nil
 }
 
@@ -97,7 +92,7 @@ func (m *protoMarshaler) extractRawLogs(ctx context.Context, ld plog.Logs) (map[
 				rawLog, logType, namespace, ingestionLabels, err := m.processLogRecord(ctx, logRecord, scopeLog, resourceLog)
 
 				if err != nil {
-					m.teleSettings.Logger.Error("Error processing log record", zap.Error(err))
+					m.set.Logger.Error("Error processing log record", zap.Error(err))
 					continue
 				}
 
@@ -327,7 +322,7 @@ func (m *protoMarshaler) getRawField(ctx context.Context, field string, logRecor
 		return "", nil
 	}
 
-	lrExpr, err := expr.NewOTTLLogRecordExpression(field, m.teleSettings)
+	lrExpr, err := expr.NewOTTLLogRecordExpression(field, m.set)
 	if err != nil {
 		return "", fmt.Errorf("raw_log_field is invalid: %s", err)
 	}
@@ -435,7 +430,7 @@ func (m *protoMarshaler) enforceMaximumsGRPCRequest(request *api.BatchCreateLogs
 	}
 
 	if len(entries) < 2 {
-		m.teleSettings.Logger.Error("Single entry exceeds max request size. Dropping entry", zap.Int("size", size))
+		m.set.Logger.Error("Single entry exceeds max request size. Dropping entry", zap.Int("size", size))
 		return []*api.BatchCreateLogsRequest{}
 	}
 
@@ -488,7 +483,7 @@ func (m *protoMarshaler) extractRawHTTPLogs(ctx context.Context, ld plog.Logs) (
 				logRecord := scopeLog.LogRecords().At(k)
 				rawLog, logType, namespace, ingestionLabels, err := m.processHTTPLogRecord(ctx, logRecord, scopeLog, resourceLog)
 				if err != nil {
-					m.teleSettings.Logger.Error("Error processing log record", zap.Error(err))
+					m.set.Logger.Error("Error processing log record", zap.Error(err))
 					continue
 				}
 
@@ -546,7 +541,7 @@ func (m *protoMarshaler) enforceMaximumsHTTPRequest(request *api.ImportLogsReque
 	}
 
 	if len(logs) < 2 {
-		m.teleSettings.Logger.Error("Single entry exceeds max request size. Dropping entry", zap.Int("size", size))
+		m.set.Logger.Error("Single entry exceeds max request size. Dropping entry", zap.Int("size", size))
 		return []*api.ImportLogsRequest{}
 	}
 

@@ -68,9 +68,9 @@ func newHostMetricsReporter(cfg *Config, set component.TelemetrySettings, export
 	return &hostMetricsReporter{
 		set:        set,
 		send:       send,
+		startTime:  now,
 		agentID:    agentID[:],
 		exporterID: exporterID,
-		startTime:  now,
 		customerID: customerID[:],
 		namespace:  cfg.Namespace,
 		stats: &api.AgentStatsEvent{
@@ -108,6 +108,13 @@ func (hmr *hostMetricsReporter) start() {
 	}()
 }
 
+func (hmr *hostMetricsReporter) shutdown() {
+	if hmr.cancel != nil {
+		hmr.cancel()
+		hmr.wg.Wait()
+	}
+}
+
 func (hmr *hostMetricsReporter) getAndReset() *api.BatchCreateEventsRequest {
 	hmr.mutex.Lock()
 	defer hmr.mutex.Unlock()
@@ -141,13 +148,6 @@ func (hmr *hostMetricsReporter) getAndReset() *api.BatchCreateEventsRequest {
 
 	hmr.resetStats()
 	return request
-}
-
-func (hmr *hostMetricsReporter) shutdown() {
-	if hmr.cancel != nil {
-		hmr.cancel()
-		hmr.wg.Wait()
-	}
 }
 
 func (hmr *hostMetricsReporter) resetStats() {

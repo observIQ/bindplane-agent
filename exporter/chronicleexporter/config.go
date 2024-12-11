@@ -104,7 +104,7 @@ type Config struct {
 	// BatchRequestSizeLimitHTTP is the maximum batch request size, in bytes, that can be sent to Chronicle via the HTTP protocol
 	// This field is defaulted to 1048576 as that is the default Chronicle backend limit
 	// Setting this option to a value above the Chronicle backend limit may result in rejected log batch requests
-	BatchRequestSizeLimitHTTP int `mapstructure:"batch_request_size_limit_grpc"`
+	BatchRequestSizeLimitHTTP int `mapstructure:"batch_request_size_limit_http"`
 }
 
 // Validate checks if the configuration is valid.

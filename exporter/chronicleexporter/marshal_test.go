@@ -1667,7 +1667,7 @@ func Test_getRawField(t *testing.T) {
 	for _, tc := range getRawFieldCases {
 		t.Run(tc.name, func(t *testing.T) {
 			m := &protoMarshaler{}
-			m.teleSettings.Logger = zap.NewNop()
+			m.set.Logger = zap.NewNop()
 
 			ctx := context.Background()
 
@@ -1685,7 +1685,7 @@ func Test_getRawField(t *testing.T) {
 
 func Benchmark_getRawField(b *testing.B) {
 	m := &protoMarshaler{}
-	m.teleSettings.Logger = zap.NewNop()
+	m.set.Logger = zap.NewNop()
 
 	ctx := context.Background()
 
