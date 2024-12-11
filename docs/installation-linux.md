@@ -13,7 +13,7 @@ This script may also be used to update an existing installation.
 
 To install using the installation script, you may run:
 ```sh
-sudo sh -c "$(curl -fsSlL https://github.com/observiq/bindplane-otel-collector/releases/latest/download/install_unix.sh)" install_unix.sh
+sudo sh -c "$(curl -fsSlL https://github.com/observIQ/bindplane-otel-collector/releases/latest/download/install_unix.sh)" install_unix.sh
 ```
 
 #### Managed Mode
@@ -21,7 +21,7 @@ sudo sh -c "$(curl -fsSlL https://github.com/observiq/bindplane-otel-collector/r
 To install the agent with an OpAMP connection configuration set the following flags. 
 
 ```sh
-sudo sh -c "$(curl -fsSlL https://github.com/observiq/bindplane-otel-collector/releases/latest/download/install_unix.sh)" install_unix.sh -e <your_endpoint> -s <secret-key>
+sudo sh -c "$(curl -fsSlL https://github.com/observIQ/bindplane-otel-collector/releases/latest/download/install_unix.sh)" install_unix.sh -e <your_endpoint> -s <secret-key>
 ```
 
 To read more about the generated connection configuration file see [OpAMP docs](./opamp.md).
@@ -31,11 +31,11 @@ To read more about the generated connection configuration file see [OpAMP docs](
 To install the agent from a local package use the `-f` with the path to the package.
 
 ```sh
-sudo sh -c "$(curl -fsSlL https://github.com/observiq/bindplane-otel-collector/releases/latest/download/install_unix.sh)" install_unix.sh -f <path_to_package>
+sudo sh -c "$(curl -fsSlL https://github.com/observIQ/bindplane-otel-collector/releases/latest/download/install_unix.sh)" install_unix.sh -f <path_to_package>
 ```
 
 ### RPM Installation
-First download the RPM package for your architecture from the [releases page](https://github.com/observiq/bindplane-otel-collector/releases/latest).
+First download the RPM package for your architecture from the [releases page](https://github.com/observIQ/bindplane-otel-collector/releases/latest).
 Then you may install the package using `rpm`, see this example for installing the amd64 package:
 
 **Note**: Replace `${VERSION}` with the version of the package you downloaded.
@@ -46,7 +46,7 @@ sudo systemctl enable --now observiq-otel-collector
 ```
 
 ### DEB Installation
-First download the DEB package for your architecture from the [releases page](https://github.com/observiq/bindplane-otel-collector/releases/latest).
+First download the DEB package for your architecture from the [releases page](https://github.com/observIQ/bindplane-otel-collector/releases/latest).
 Then you may install the package using `dpkg`, see this example for installing the amd64 package:
 
 **Note**: Replace `${VERSION}` with the version of the package you downloaded.
@@ -131,5 +131,5 @@ sudo dpkg -r observiq-otel-collector
 
 To uninstall an installation made with the install script, run:
 ```sh
-sudo sh -c "$(curl -fsSlL https://github.com/observiq/bindplane-otel-collector/releases/latest/download/install_unix.sh)" install_unix.sh -r
+sudo sh -c "$(curl -fsSlL https://github.com/observIQ/bindplane-otel-collector/releases/latest/download/install_unix.sh)" install_unix.sh -r
 ```

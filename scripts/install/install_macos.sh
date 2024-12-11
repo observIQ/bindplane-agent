@@ -17,7 +17,7 @@ set -e
 
 # Collector Constants
 SERVICE_NAME="com.observiq.collector"
-DOWNLOAD_BASE="https://github.com/observiq/bindplane-otel-collector/releases/download"
+DOWNLOAD_BASE="https://github.com/observIQ/bindplane-otel-collector/releases/download"
 
 # Script Constants
 PREREQS="printf sed uname tr find grep"
@@ -625,7 +625,7 @@ display_results()
     increase_indent
     info "For more information on configuring the agent, see the docs:"
     increase_indent
-    info "$(fg_cyan "https://github.com/observiq/bindplane-otel-collector/tree/main#bindplane-agent")$(reset)"
+    info "$(fg_cyan "https://github.com/observIQ/bindplane-otel-collector/tree/main#bindplane-agent")$(reset)"
     decrease_indent
     info "If you have any other questions please contact us at $(fg_cyan support@observiq.com)$(reset)"
     decrease_indent
