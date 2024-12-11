@@ -166,6 +166,7 @@ func (evp *emptyValueProcessor) processMetrics(_ context.Context, md pmetric.Met
 	return md, nil
 }
 
+// cleanMap removes empty values from the map, as defined by the config.
 func cleanMap(m pcommon.Map, c Config, excludeKeys map[string]struct{}) {
 	m.RemoveIf(func(s string, v pcommon.Value) bool {
 		if _, ok := excludeKeys[s]; ok {
@@ -189,6 +190,7 @@ func cleanMap(m pcommon.Map, c Config, excludeKeys map[string]struct{}) {
 	})
 }
 
+// cleanSlice removes empty values from the slice, as defined by the config.
 func cleanSlice(slice pcommon.Slice, c Config, excludeKeys map[string]struct{}) {
 	filteredSlice := pcommon.NewSlice()
 	for i := 0; i < slice.Len(); i++ {
