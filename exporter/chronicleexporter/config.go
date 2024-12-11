@@ -99,12 +99,12 @@ type Config struct {
 	// BatchLogCountLimitHTTP is the maximum number of logs that can be sent in a single batch to Chronicle via the HTTP protocol
 	// This field is defaulted to 1000, as that is the default Chronicle backend limit.
 	// All batched logs beyond the backend limit will be dropped. Any batches with more logs than this limit will be split into multiple batches
-	BatchLogCountLimitHTTP int `mapstructure:"batch_log_count_limit_grpc"`
+	BatchLogCountLimitHTTP int `mapstructure:"batch_log_count_limit_http"`
 
 	// BatchRequestSizeLimitHTTP is the maximum batch request size, in bytes, that can be sent to Chronicle via the HTTP protocol
 	// This field is defaulted to 1048576 as that is the default Chronicle backend limit
 	// Setting this option to a value above the Chronicle backend limit may result in rejected log batch requests
-	BatchRequestSizeLimitHTTP int `mapstructure:"batch_request_size_limit_grpc"`
+	BatchRequestSizeLimitHTTP int `mapstructure:"batch_request_size_limit_http"`
 }
 
 // Validate checks if the configuration is valid.
