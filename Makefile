@@ -233,7 +233,7 @@ release-prep:
 	@echo '$(CURR_VERSION)' > release_deps/VERSION.txt
 	bash ./buildscripts/download-dependencies.sh release_deps
 	@cp -r ./plugins release_deps/
-	@cp service/com.bindplane.agent.plist release_deps/com.bindplane.agent.plist
+	@cp service/com.bindplane.otel.collector.plist release_deps/com.bindplane.otel.collector.plist
 	@jq ".files[] | select(.service != null)" windows/wix.json >> release_deps/windows_service.json
 	@cp service/bindplane-otel-collector.service release_deps/bindplane-otel-collector.service
 	@cp service/bindplane-otel-collector release_deps/bindplane-otel-collector

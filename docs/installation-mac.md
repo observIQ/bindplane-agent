@@ -46,10 +46,10 @@ The agent uses `launchctl` to control the agent lifecycle using the following co
 
 ```sh
 # Start the agent
-sudo launchctl load /Library/LaunchDaemons/com.bindplane.agent.plist
+sudo launchctl load /Library/LaunchDaemons/com.bindplane.otel.collector.plist
 
 # Stop the agent
-sudo launchctl unload /Library/LaunchDaemons/com.bindplane.agent.plist
+sudo launchctl unload /Library/LaunchDaemons/com.bindplane.otel.collector.plist
 ```
 
 ## Uninstalling

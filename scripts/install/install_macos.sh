@@ -16,7 +16,7 @@
 set -e
 
 # Collector Constants
-SERVICE_NAME="com.bindplane.agent"
+SERVICE_NAME="com.bindplane.otel.collector"
 DOWNLOAD_BASE="https://github.com/observIQ/bindplane-otel-collector/releases/download"
 
 # Script Constants
