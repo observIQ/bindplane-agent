@@ -95,7 +95,7 @@ type ResettableConfigTopologyRegistry struct {
 // NewResettableConfigTopologyRegistry creates a new ResettableConfigTopologyRegistry
 func NewResettableConfigTopologyRegistry() *ResettableConfigTopologyRegistry {
 	return &ResettableConfigTopologyRegistry{
-		topology:        &sync.Map{},
+		topology: &sync.Map{},
 	}
 }
 

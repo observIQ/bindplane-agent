@@ -58,15 +58,15 @@ func TestProcessor_Logs(t *testing.T) {
 	require.NoError(t, plogtest.CompareLogs(logs, processedLogs))
 
 	// validate that upsert route was performed
-	require.True(t, tmp.topology.DestGateway.AccountID == "myAccountID")
-	require.True(t, tmp.topology.DestGateway.OrgID == "myOrgID")
-	require.True(t, tmp.topology.DestGateway.ConfigName == "myConfigName")
+	require.True(t, tmp.topology.ConfigTopology.DestGateway.AccountID == "myAccountID")
+	require.True(t, tmp.topology.ConfigTopology.DestGateway.OrgID == "myOrgID")
+	require.True(t, tmp.topology.ConfigTopology.DestGateway.ConfigName == "myConfigName")
 	ci := topology.GatewayInfo{
 		ConfigName: "myConfigName1",
 		AccountID:  "myAccountID1",
 		OrgID:      "myOrgID1",
 	}
-	_, ok := tmp.topology.RouteTable[ci]
+	_, ok := tmp.topology.ConfigTopology.RouteTable[ci]
 	require.True(t, ok)
 }
 
@@ -98,15 +98,15 @@ func TestProcessor_Metrics(t *testing.T) {
 	require.NoError(t, pmetrictest.CompareMetrics(metrics, processedMetrics))
 
 	// validate that upsert route was performed
-	require.True(t, tmp.topology.DestGateway.AccountID == "myAccountID")
-	require.True(t, tmp.topology.DestGateway.OrgID == "myOrgID")
-	require.True(t, tmp.topology.DestGateway.ConfigName == "myConfigName")
+	require.True(t, tmp.topology.ConfigTopology.DestGateway.AccountID == "myAccountID")
+	require.True(t, tmp.topology.ConfigTopology.DestGateway.OrgID == "myOrgID")
+	require.True(t, tmp.topology.ConfigTopology.DestGateway.ConfigName == "myConfigName")
 	ci := topology.GatewayInfo{
 		ConfigName: "myConfigName1",
 		AccountID:  "myAccountID1",
 		OrgID:      "myOrgID1",
 	}
-	_, ok := tmp.topology.RouteTable[ci]
+	_, ok := tmp.topology.ConfigTopology.RouteTable[ci]
 	require.True(t, ok)
 }
 
@@ -138,15 +138,15 @@ func TestProcessor_Traces(t *testing.T) {
 	require.NoError(t, ptracetest.CompareTraces(traces, processedTraces))
 
 	// validate that upsert route was performed
-	require.True(t, tmp.topology.DestGateway.AccountID == "myAccountID")
-	require.True(t, tmp.topology.DestGateway.OrgID == "myOrgID")
-	require.True(t, tmp.topology.DestGateway.ConfigName == "myConfigName")
+	require.True(t, tmp.topology.ConfigTopology.DestGateway.AccountID == "myAccountID")
+	require.True(t, tmp.topology.ConfigTopology.DestGateway.OrgID == "myOrgID")
+	require.True(t, tmp.topology.ConfigTopology.DestGateway.ConfigName == "myConfigName")
 	ci := topology.GatewayInfo{
 		ConfigName: "myConfigName1",
 		AccountID:  "myAccountID1",
 		OrgID:      "myOrgID1",
 	}
-	_, ok := tmp.topology.RouteTable[ci]
+	_, ok := tmp.topology.ConfigTopology.RouteTable[ci]
 	require.True(t, ok)
 }
 
