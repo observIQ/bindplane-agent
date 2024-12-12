@@ -22,6 +22,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/observiq/bindplane-otel-collector/exporter/chronicleexporter/internal/ccid"
 	"github.com/observiq/bindplane-otel-collector/exporter/chronicleexporter/protos/api"
 	"github.com/shirou/gopsutil/v3/process"
 	"go.opentelemetry.io/collector/component"
@@ -122,7 +123,7 @@ func (hmr *hostMetricsReporter) getAndReset() *api.BatchCreateEventsRequest {
 	now := timestamppb.Now()
 	batchID := uuid.New()
 	source := &api.EventSource{
-		CollectorId: chronicleCollectorID[:],
+		CollectorId: ccid.ChronicleCollectorID[:],
 		Namespace:   hmr.namespace,
 		CustomerId:  hmr.customerID,
 	}
