@@ -24,8 +24,8 @@ import (
 	"github.com/observiq/bindplane-agent/exporter/chronicleexporter/protos/api/mocks"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
+	"go.opentelemetry.io/collector/component/componenttest"
 	"go.opentelemetry.io/collector/consumer/consumererror"
-	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -51,8 +51,8 @@ func TestLogsDataPusher(t *testing.T) {
 				marshaller.On("MarshalRawLogs", mock.Anything, mock.Anything).Return([]*api.BatchCreateLogsRequest{{}}, nil)
 				return &chronicleExporter{
 					cfg:        &cfg,
-					metrics:    newExporterMetrics([]byte{}, []byte{}, "", cfg.Namespace),
-					logger:     zap.NewNop(),
+					metrics:    newHostMetricsReporter([]byte{}, []byte{}, "", cfg.Namespace),
+					set:        componenttest.NewNopTelemetrySettings(),
 					grpcClient: mockClient,
 					marshaler:  marshaller,
 				}
@@ -70,8 +70,8 @@ func TestLogsDataPusher(t *testing.T) {
 				marshaller.On("MarshalRawLogs", mock.Anything, mock.Anything).Return([]*api.BatchCreateLogsRequest{{}}, nil)
 				return &chronicleExporter{
 					cfg:        &cfg,
-					metrics:    newExporterMetrics([]byte{}, []byte{}, "", cfg.Namespace),
-					logger:     zap.NewNop(),
+					metrics:    newHostMetricsReporter([]byte{}, []byte{}, "", cfg.Namespace),
+					set:        componenttest.NewNopTelemetrySettings(),
 					grpcClient: mockClient,
 					marshaler:  marshaller,
 				}
@@ -91,8 +91,8 @@ func TestLogsDataPusher(t *testing.T) {
 				marshaller.On("MarshalRawLogs", mock.Anything, mock.Anything).Return([]*api.BatchCreateLogsRequest{{}}, nil)
 				return &chronicleExporter{
 					cfg:        &cfg,
-					metrics:    newExporterMetrics([]byte{}, []byte{}, "", cfg.Namespace),
-					logger:     zap.NewNop(),
+					metrics:    newHostMetricsReporter([]byte{}, []byte{}, "", cfg.Namespace),
+					set:        componenttest.NewNopTelemetrySettings(),
 					grpcClient: mockClient,
 					marshaler:  marshaller,
 				}
@@ -113,8 +113,8 @@ func TestLogsDataPusher(t *testing.T) {
 				marshaller.On("MarshalRawLogs", mock.Anything, mock.Anything).Return(nil, errors.New("marshal error"))
 				return &chronicleExporter{
 					cfg:        &cfg,
-					metrics:    newExporterMetrics([]byte{}, []byte{}, "", cfg.Namespace),
-					logger:     zap.NewNop(),
+					metrics:    newHostMetricsReporter([]byte{}, []byte{}, "", cfg.Namespace),
+					set:        componenttest.NewNopTelemetrySettings(),
 					grpcClient: mockClient,
 					marshaler:  marshaller,
 				}
@@ -133,8 +133,8 @@ func TestLogsDataPusher(t *testing.T) {
 				marshaller.On("MarshalRawLogs", mock.Anything, mock.Anything).Return([]*api.BatchCreateLogsRequest{}, nil)
 				return &chronicleExporter{
 					cfg:        &cfg,
-					metrics:    newExporterMetrics([]byte{}, []byte{}, "", cfg.Namespace),
-					logger:     zap.NewNop(),
+					metrics:    newHostMetricsReporter([]byte{}, []byte{}, "", cfg.Namespace),
+					set:        componenttest.NewNopTelemetrySettings(),
 					grpcClient: mockClient,
 					marshaler:  marshaller,
 				}

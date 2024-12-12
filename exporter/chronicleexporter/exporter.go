@@ -22,6 +22,7 @@ import (
 	"io"
 	"net/http"
 	"sync"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/observiq/bindplane-agent/exporter/chronicleexporter/protos/api"
@@ -34,8 +35,6 @@ import (
 	"golang.org/x/oauth2"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/credentials"
-	"google.golang.org/grpc/credentials/oauth"
 	grpcgzip "google.golang.org/grpc/encoding/gzip"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/encoding/protojson"
@@ -49,10 +48,10 @@ const (
 )
 
 type chronicleExporter struct {
-	cfg        *Config
-	set        component.TelemetrySettings
-	marshaler  logMarshaler
-	exporterID string
+	cfg                     *Config
+	set                     component.TelemetrySettings
+	marshaler               logMarshaler
+	collectorID, exporterID string
 
 	// fields used for gRPC
 	grpcClient api.IngestionServiceV2Client
@@ -78,8 +77,8 @@ func newExporter(cfg *Config, params exporter.Settings, exporterID string) (*chr
 
 	return &chronicleExporter{
 		cfg:         cfg,
-		logger:      params.Logger,
-		metrics:     newExporterMetrics(uuidCID[:], customerID[:], exporterID, cfg.Namespace),
+		set:         params.TelemetrySettings,
+		metrics:     newHostMetricsReporter(uuidCID[:], customerID[:], exporterID, cfg.Namespace),
 		marshaler:   marshaller,
 		collectorID: collectorID,
 		exporterID:  exporterID,
@@ -195,6 +194,30 @@ func (ce *chronicleExporter) buildOptions() []grpc.CallOption {
 	return opts
 }
 
+func (ce *chronicleExporter) startHostMetricsCollection(ctx context.Context) {
+	ticker := time.NewTicker(5 * time.Minute)
+	defer ticker.Stop()
+
+	defer ce.wg.Done()
+
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case <-ticker.C:
+			err := ce.metrics.collectHostMetrics()
+			if err != nil {
+				ce.set.Logger.Error("Failed to collect host metrics", zap.Error(err))
+			}
+			request := ce.metrics.getAndReset()
+			_, err = ce.grpcClient.BatchCreateEvents(ctx, request, ce.buildOptions()...)
+			if err != nil {
+				ce.set.Logger.Error("Failed to upload host metrics", zap.Error(err))
+			}
+		}
+	}
+}
+
 func (ce *chronicleExporter) logsHTTPDataPusher(ctx context.Context, ld plog.Logs) error {
 	payloads, err := ce.marshaler.MarshalRawLogsForHTTP(ctx, ld)
 	if err != nil {
@@ -251,38 +274,14 @@ func (ce *chronicleExporter) uploadToChronicleHTTP(ctx context.Context, logs *ap
 	defer resp.Body.Close()
 
 	respBody, err := io.ReadAll(resp.Body)
-	if err == nil && resp.StatusCode == http.StatusOK {
-		return nil
+	if resp.StatusCode != http.StatusOK {
+		if err != nil {
+			ce.set.Logger.Warn("Failed to read response body", zap.Error(err))
+		} else {
+			ce.set.Logger.Warn("Received non-OK response from Chronicle", zap.String("status", resp.Status), zap.ByteString("response", respBody))
+		}
+		return fmt.Errorf("received non-OK response from Chronicle: %s", resp.Status)
 	}
 
-	if err != nil {
-		ce.set.Logger.Warn("Failed to read response body", zap.Error(err))
-	} else {
-		ce.set.Logger.Warn("Received non-OK response from Chronicle", zap.String("status", resp.Status), zap.ByteString("response", respBody))
-	}
-
-	// TODO interpret with https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/internal/coreinternal/errorutil/http.go
-	statusErr := fmt.Errorf("upload logs to chronicle: %s", resp.Status)
-	switch resp.StatusCode {
-	case http.StatusInternalServerError, http.StatusServiceUnavailable: // potentially transient
-		return statusErr
-	default:
-		return consumererror.NewPermanent(statusErr)
-	}
-}
-
-// Override for testing
-var grpcClientParams = func(cfgEndpoint string, ts oauth2.TokenSource) (string, []grpc.DialOption) {
-	return cfgEndpoint + ":443", []grpc.DialOption{
-		grpc.WithPerRPCCredentials(oauth.TokenSource{TokenSource: ts}),
-		grpc.WithTransportCredentials(credentials.NewClientTLSFromCert(nil, "")),
-	}
-}
-
-// This uses the DataPlane URL for the request
-// URL for the request: https://{region}-chronicle.googleapis.com/{version}/projects/{project}/location/{region}/instances/{customerID}
-// Override for testing
-var httpEndpoint = func(cfg *Config, logType string) string {
-	formatString := "https://%s-%s/v1alpha/projects/%s/locations/%s/instances/%s/logTypes/%s/logs:import"
-	return fmt.Sprintf(formatString, cfg.Location, cfg.Endpoint, cfg.Project, cfg.Location, cfg.CustomerID, logType)
+	return nil
 }
