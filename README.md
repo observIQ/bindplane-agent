@@ -1,9 +1,9 @@
 <a href="https://observiq.com">
   <p align="center">
     <picture>
-      <source media="(prefers-color-scheme: light)" srcset="docs/assets/bindplane-logo.svg" width="auto" height="50">
-      <source media="(prefers-color-scheme: dark)" srcset="docs/assets/bindplane-logo-dark.svg" width="auto" height="80">
-      <img alt="BindPlane Logo" src="docs/assets/bindplane-logo.svg" width="auto" height="50">
+      <source media="(prefers-color-scheme: light)" srcset="https://res.cloudinary.com/du4nxa27k/image/upload/v1734001913/bindplane-logo_czndai.svg" width="auto" height="50">
+      <source media="(prefers-color-scheme: dark)" srcset="https://res.cloudinary.com/du4nxa27k/image/upload/v1734001913/bindplane-logo-dark_lkmoxd.svg" width="auto" height="80">
+      <img alt="BindPlane Logo" src="https://res.cloudinary.com/du4nxa27k/image/upload/v1734001913/bindplane-logo_czndai.svg" width="auto" height="50">
     </picture>
   </p>
 </a>
@@ -43,7 +43,7 @@
 </center>
 
 <p align="center">
-  <img src="docs/assets/bindplane-overview.webp" style="width:66%;height:auto">
+  <img src="https://res.cloudinary.com/du4nxa27k/image/upload/v1734000985/bindplane-overview_ke8xmq.webp" style="width:66%;height:auto">
 </p>
 <p align="center">
   <i>
@@ -85,13 +85,13 @@ Tested, verified, and supported by observIQ
 
 BindPlane Cloud is the quickest way to get started. It offers managed infrastructure along with instant, free access for development projects and proofs of concept.
 
-<a href="https://app.bindplane.com/signup"><img src="docs/assets/sign-up-bindplane-cloud.png" alt="Sign-up" width="200px"></a>
+<a href="https://app.bindplane.com/signup"><img src="https://res.cloudinary.com/du4nxa27k/image/upload/v1734001746/sign-up-bindplane-cloud_tzhj8r.png" alt="Sign-up" width="200px"></a>
 
 ### BindPlane On Prem
 
 You can also get started with BindPlane On Prem by hosting it yourself.
 
-<a href="https://observiq.com/download"><img src="docs/assets/download-bindplane-on-prem.png" alt="Sign-up" width="200px"></a>
+<a href="https://observiq.com/download"><img src="https://res.cloudinary.com/du4nxa27k/image/upload/v1734000970/download-bindplane-on-prem_rhdrme.png" alt="Download" width="200px"></a>
 
 ## BindPlane Agent Installation
 
