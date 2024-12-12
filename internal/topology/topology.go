@@ -18,7 +18,6 @@ package topology
 import (
 	"context"
 	"fmt"
-	"slices"
 	"sync"
 	"time"
 )
@@ -27,7 +26,7 @@ import (
 type ConfigTopologyRegistry interface {
 	// RegisterConfigTopology registers the topology state for the given processor.
 	// It should return an error if the processor has already been registered.
-	RegisterConfigTopology(processorID string, data *ConfigTopology) error
+	RegisterConfigTopology(processorID string, data *ConfigTopologyState) error
 	SetIntervalChan() chan time.Duration
 	Reset()
 }
@@ -40,8 +39,13 @@ type GatewayInfo struct {
 	OrgID      string
 }
 
-// ConfigTopology represents the data captured through topology processors.
-type ConfigTopology struct {
+// ConfigTopologyState represents the data captured through topology processors.
+type ConfigTopologyState struct {
+	ConfigTopology configTopology
+	mux            sync.Mutex
+}
+
+type configTopology struct {
 	DestGateway GatewayInfo
 	RouteTable  map[GatewayInfo]time.Time
 }
@@ -63,17 +67,23 @@ type ConfigRecord struct {
 	LastUpdated time.Time `json:"lastUpdated"`
 }
 
-// NewConfigTopology initializes a new ConfigTopology
-func NewConfigTopology(destGateway GatewayInfo) (*ConfigTopology, error) {
-	return &ConfigTopology{
-		DestGateway: destGateway,
-		RouteTable:  make(map[GatewayInfo]time.Time),
+// NewConfigTopologyState initializes a new ConfigTopologyState
+func NewConfigTopologyState(destGateway GatewayInfo) (*ConfigTopologyState, error) {
+	return &ConfigTopologyState{
+		ConfigTopology: configTopology{
+			DestGateway: destGateway,
+			RouteTable:  make(map[GatewayInfo]time.Time),
+		},
+		mux: sync.Mutex{},
 	}, nil
 }
 
 // UpsertRoute upserts given route.
-func (ts *ConfigTopology) UpsertRoute(_ context.Context, gw GatewayInfo) {
-	ts.RouteTable[gw] = time.Now()
+func (ts *ConfigTopologyState) UpsertRoute(_ context.Context, gw GatewayInfo) {
+	ts.mux.Lock()
+	defer ts.mux.Unlock()
+
+	ts.ConfigTopology.RouteTable[gw] = time.Now()
 }
 
 // ResettableConfigTopologyRegistry is a concrete version of TopologyDataRegistry that is able to be reset.
@@ -86,12 +96,11 @@ type ResettableConfigTopologyRegistry struct {
 func NewResettableConfigTopologyRegistry() *ResettableConfigTopologyRegistry {
 	return &ResettableConfigTopologyRegistry{
 		topology:        &sync.Map{},
-		setIntervalChan: make(chan time.Duration, 1),
 	}
 }
 
 // RegisterConfigTopology registers the ConfigTopology with the registry.
-func (rtsr *ResettableConfigTopologyRegistry) RegisterConfigTopology(processorID string, configTopology *ConfigTopology) error {
+func (rtsr *ResettableConfigTopologyRegistry) RegisterConfigTopology(processorID string, configTopology *ConfigTopologyState) error {
 	_, alreadyExists := rtsr.topology.LoadOrStore(processorID, configTopology)
 	if alreadyExists {
 		return fmt.Errorf("topology for processor %q was already registered", processorID)
@@ -112,11 +121,11 @@ func (rtsr *ResettableConfigTopologyRegistry) SetIntervalChan() chan time.Durati
 
 // TopologyInfos returns all the topology data in this registry.
 func (rtsr *ResettableConfigTopologyRegistry) TopologyInfos() []ConfigTopologyInfo {
-	states := []ConfigTopology{}
+	states := []configTopology{}
 
 	rtsr.topology.Range(func(_, value any) bool {
-		ts := value.(*ConfigTopology)
-		states = append(states, *ts)
+		ts := value.(*ConfigTopologyState)
+		states = append(states, ts.ConfigTopology)
 		return true
 	})
 
@@ -136,27 +145,6 @@ func (rtsr *ResettableConfigTopologyRegistry) TopologyInfos() []ConfigTopologyIn
 			})
 		}
 		if len(curInfo.SourceConfigs) > 0 {
-			slices.SortFunc(curInfo.SourceConfigs, func(a ConfigRecord, b ConfigRecord) int {
-				if a.OrgID < b.OrgID {
-					return -1
-				}
-				if a.OrgID > b.OrgID {
-					return 1
-				}
-				if a.AccountID < b.AccountID {
-					return -1
-				}
-				if a.AccountID > b.AccountID {
-					return 1
-				}
-				if a.ConfigName < b.ConfigName {
-					return -1
-				}
-				if a.ConfigName > b.ConfigName {
-					return 1
-				}
-				return 0
-			})
 			ti = append(ti, curInfo)
 		}
 	}

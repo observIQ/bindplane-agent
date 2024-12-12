@@ -44,7 +44,7 @@ type topologyUpdate struct {
 type topologyProcessor struct {
 	logger      *zap.Logger
 	enabled     bool
-	topology    *topology.ConfigTopology
+	topology    *topology.ConfigTopologyState
 	interval    time.Duration
 	processorID component.ID
 	bindplane   component.ID
@@ -60,7 +60,7 @@ func newTopologyProcessor(logger *zap.Logger, cfg *Config, processorID component
 		AccountID:  cfg.AccountID,
 		OrgID:      cfg.OrgID,
 	}
-	topology, err := topology.NewConfigTopology(destGw)
+	topology, err := topology.NewConfigTopologyState(destGw)
 	if err != nil {
 		return nil, fmt.Errorf("create topology state: %w", err)
 	}
@@ -116,17 +116,17 @@ func (tp *topologyProcessor) processTopologyHeaders(ctx context.Context) {
 		var configName, accountID, orgID string
 
 		configNameHeaders := metadata.Get(configNameHeader)
-		if len(configNameHeader) > 0 {
+		if len(configNameHeaders) > 0 {
 			configName = configNameHeaders[0]
 		}
 
 		accountIDHeaders := metadata.Get(accountIDHeader)
-		if len(configNameHeader) > 0 {
+		if len(accountIDHeaders) > 0 {
 			accountID = accountIDHeaders[0]
 		}
 
 		orgIDHeaders := metadata.Get(organizationIDHeader)
-		if len(configNameHeader) > 0 {
+		if len(orgIDHeaders) > 0 {
 			orgID = orgIDHeaders[0]
 		}
 

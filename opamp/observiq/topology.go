@@ -17,6 +17,7 @@ package observiq
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"sync"
 	"time"
 
@@ -39,10 +40,6 @@ type topologySender struct {
 	logger      *zap.Logger
 	reporter    TopologyReporter
 	opampClient client.OpAMPClient
-	interval    time.Duration
-
-	changeIntervalChan   chan time.Duration
-	changeAttributesChan chan map[string]string
 
 	mux       *sync.Mutex
 	isRunning bool
@@ -56,11 +53,10 @@ func newTopologySender(l *zap.Logger, reporter TopologyReporter, opampClient cli
 		reporter:    reporter,
 		opampClient: opampClient,
 
-		changeIntervalChan: make(chan time.Duration, 1),
-		mux:                &sync.Mutex{},
-		isRunning:          false,
-		done:               make(chan struct{}),
-		wg:                 &sync.WaitGroup{},
+		mux:       &sync.Mutex{},
+		isRunning: false,
+		done:      make(chan struct{}),
+		wg:        &sync.WaitGroup{},
 	}
 }
 
@@ -82,15 +78,6 @@ func (ts *topologySender) Start() {
 	}()
 }
 
-// SetInterval changes the interval of the measurements sender.
-func (ts topologySender) SetInterval(d time.Duration) {
-	select {
-	case ts.changeIntervalChan <- d:
-	case <-ts.done:
-	}
-
-}
-
 func (ts *topologySender) Stop() {
 	ts.mux.Lock()
 	defer ts.mux.Unlock()
@@ -107,16 +94,14 @@ func (ts *topologySender) Stop() {
 
 func (ts *topologySender) loop() {
 	t := newTicker()
-	t.SetInterval(ts.interval)
 	defer t.Stop()
+
+	fmt.Println("topology sender loop")
 
 	for {
 		select {
-		case newInterval := <-ts.changeIntervalChan:
-			ts.interval = newInterval
-			t.SetInterval(newInterval)
 		case setInterval := <-ts.reporter.SetIntervalChan():
-			ts.interval = setInterval
+			fmt.Println("topology sender loop: received interval: ", setInterval)
 			t.SetInterval(setInterval)
 		case <-ts.done:
 			return
