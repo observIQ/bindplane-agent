@@ -1,15 +1,15 @@
 <a href="https://observiq.com">
   <p align="center">
     <picture>
-      <source media="(prefers-color-scheme: light)" srcset="https://res.cloudinary.com/du4nxa27k/image/upload/v1734001913/bindplane-logo_czndai.svg" width="auto" height="50">
-      <source media="(prefers-color-scheme: dark)" srcset="https://res.cloudinary.com/du4nxa27k/image/upload/v1734001913/bindplane-logo-dark_lkmoxd.svg" width="auto" height="80">
-      <img alt="BindPlane Logo" src="https://res.cloudinary.com/du4nxa27k/image/upload/v1734001913/bindplane-logo_czndai.svg" width="auto" height="50">
+      <source media="(prefers-color-scheme: light)" srcset="https://res.cloudinary.com/du4nxa27k/image/upload/v1734023130/observiq-logo-dark_i3ycyh.svg" width="auto" height="50">
+      <source media="(prefers-color-scheme: dark)" srcset="https://res.cloudinary.com/du4nxa27k/image/upload/v1734023130/observiq-logo-white_fdr6y8.svg" width="auto" height="80">
+      <img alt="BindPlane Logo" src="https://res.cloudinary.com/du4nxa27k/image/upload/v1734023130/observiq-logo-dark_i3ycyh.svg" width="auto" height="50">
     </picture>
   </p>
 </a>
 
 <p align="center">
-  BindPlane standardizes your telemetry ingestion, processing, and shipping, by providing a unified, OTel-native pipeline.
+  The BindPlane Agent is observIQ’s distribution of the <a href="https://github.com/open-telemetry/opentelemetry-collector">OpenTelemetry Collector</a>. It’s the first distribution to implement the <a href="https://opentelemetry.io/docs/specs/opamp/">Open Agent Management Protocol</a> (OpAMP) and is designed to be fully managed with <a href="https://observiq.com/">BindPlane Telemetry Pipeline</a>.
 </p>
 
 <b>
@@ -33,25 +33,31 @@
 </b>
 
 <!-- badges -->
-<center>
-
-[![Action Status](https://github.com/observIQ/bindplane-agent/workflows/Build/badge.svg)](https://github.com/observIQ/bindplane-agent/actions)
-[![Action Test Status](https://github.com/observIQ/bindplane-agent/workflows/Tests/badge.svg)](https://github.com/observIQ/bindplane-agent/actions)
-[![Go Report Card](https://goreportcard.com/badge/github.com/observIQ/bindplane-agent)](https://goreportcard.com/report/github.com/observIQ/bindplane-agent)
-[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-
-</center>
+<p align="center">
+  <a href="https://github.com/observIQ/bindplane-agent/actions">
+    <img src="https://github.com/observIQ/bindplane-agent/workflows/Build/badge.svg" alt="Action Status">
+  </a>
+  <a href="https://github.com/observIQ/bindplane-agent/actions">
+    <img src="https://github.com/observIQ/bindplane-agent/workflows/Tests/badge.svg" alt="Action Test Status">
+  </a>
+  <a href="https://goreportcard.com/report/github.com/observIQ/bindplane-agent">
+    <img src="https://goreportcard.com/badge/github.com/observIQ/bindplane-agent" alt="Go Report Card">
+  </a>
+  <a href="https://opensource.org/licenses/Apache-2.0">
+    <img src="https://img.shields.io/badge/License-Apache_2.0-blue.svg" alt="License">
+  </a>
+</p>
 
 <p align="center">
   <img src="https://res.cloudinary.com/du4nxa27k/image/upload/v1734000985/bindplane-overview_ke8xmq.webp" style="width:66%;height:auto">
 </p>
 <p align="center">
   <i>
-    Learn how to connect BindPlane to telemetry <a href="https://observiq.com/docs/resources/sources">sources</a> and <a href="https://observiq.com/docs/resources/destinations">destinations</a>, and use <a href="https://observiq.com/docs/resources/processors">processors</a> to transform data.
+    Learn how to connect BindPlane Agent to telemetry <a href="https://observiq.com/docs/resources/sources">sources</a> and <a href="https://observiq.com/docs/resources/destinations">destinations</a>, and use <a href="https://observiq.com/docs/resources/processors">processors</a> to transform data.
   </i>
 </p>
 
-BindPlane is designed to be OpenTelemetry-first, with OpenTelemetry as its core framework, to create a unified toolset with data ownership. By providing a centralized management plane, BindPlane simplifies the development, implementation, management, and configuration of OpenTelemetry.
+BindPlane Telemetry Pipeline standardizes your telemetry ingestion, processing, and shipping, by providing a unified, OTel-native pipeline.
 
 ## Why BindPlane?
 
@@ -65,7 +71,7 @@ That's why BindPlane will always be committed to these 4 core tenets.
 
 ### A collector you're used to
 
-The BindPlane Agent is observIQ’s distribution of the [OpenTelemetry Collector](https://github.com/open-telemetry/opentelemetry-collector). It’s the first distribution to implement the [Open Agent Management Protocol](https://opentelemetry.io/docs/specs/opamp/) (OpAMP) and is designed to be fully managed with [BindPlane OP](https://observiq.com/solutions).
+The BindPlane Agent is observIQ’s distribution of the [OpenTelemetry Collector](https://github.com/open-telemetry/opentelemetry-collector). It’s the first distribution to implement the [Open Agent Management Protocol](https://opentelemetry.io/docs/specs/opamp/) (OpAMP) and is designed to be fully managed with [BindPlane Telemetry Pipeline](https://observiq.com/solutions).
 
 ### Focus on usability
 
@@ -77,27 +83,13 @@ Bundled with all core OpenTelemetry receivers, processors, and exporters as well
 
 ### Always production-ready and fully-supported
 
-Tested, verified, and supported by observIQ
+Tested, verified, and supported by observIQ.
 
 ## Getting Started
 
-### BindPlane Cloud
+### Installing BindPlane Agent
 
-BindPlane Cloud is the quickest way to get started. It offers managed infrastructure along with instant, free access for development projects and proofs of concept.
-
-<a href="https://app.bindplane.com/signup"><img src="https://res.cloudinary.com/du4nxa27k/image/upload/v1734001746/sign-up-bindplane-cloud_tzhj8r.png" alt="Sign-up" width="200px"></a>
-
-### BindPlane On Prem
-
-You can also get started with BindPlane On Prem by hosting it yourself.
-
-<a href="https://observiq.com/download"><img src="https://res.cloudinary.com/du4nxa27k/image/upload/v1734000970/download-bindplane-on-prem_rhdrme.png" alt="Download" width="200px"></a>
-
-## BindPlane Agent Installation
-
-BindPlane Agent uses OpAMP to connect to BindPlane OP.
-
-### Linux
+#### Linux
 
 To install using the installation script, you may run:
 
@@ -107,7 +99,7 @@ sudo sh -c "$(curl -fsSlL https://github.com/observiq/bindplane-agent/releases/l
 
 To install directly with the appropriate package manager, see [installing on Linux](/docs/installation-linux.md).
 
-### Windows
+#### Windows
 
 To install the BindPlane Agent on Windows run the Powershell command below to install the MSI with no UI.
 
@@ -121,7 +113,7 @@ After downloading the MSI, simply double click it to open the installation wizar
 
 For more installation information see [installing on Windows](/docs/installation-windows.md).
 
-### macOS
+#### macOS
 
 To install using the installation script, you may run:
 
@@ -142,6 +134,22 @@ Now that the agent is installed it is collecting basic metrics about the host ma
 | macOS   | /opt/observiq-otel-collector/config.yaml                      |
 
 For more information on configuration see the [Configuration section](#configuration).
+
+### Connecting a Telemetry Pipeline
+
+BindPlane is designed to be OpenTelemetry-first, with OpenTelemetry as its core framework, to create a unified toolset with data ownership. By providing a centralized management plane, it simplifies the development, implementation, management, and configuration of OpenTelemetry.
+
+### BindPlane Cloud
+
+BindPlane Cloud is the quickest way to get started with OpenTelemetry-native telemetry pipelines. It offers managed infrastructure along with instant, free access for development projects and proofs of concept.
+
+<a href="https://app.bindplane.com/signup"><img src="https://res.cloudinary.com/du4nxa27k/image/upload/v1734001746/sign-up-bindplane-cloud_tzhj8r.png" alt="Sign-up" width="200px"></a>
+
+### BindPlane On Prem
+
+You can also get started with BindPlane On Prem by hosting it yourself.
+
+<a href="https://observiq.com/download"><img src="https://res.cloudinary.com/du4nxa27k/image/upload/v1734000970/download-bindplane-on-prem_rhdrme.png" alt="Download" width="200px"></a>
 
 ## Configuration
 
