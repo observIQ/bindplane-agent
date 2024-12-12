@@ -89,7 +89,7 @@ func (b *bindplaneExtension) RegisterThroughputMeasurements(processorID string, 
 	return b.measurementsRegistry.RegisterThroughputMeasurements(processorID, measurements)
 }
 
-func (b *bindplaneExtension) RegisterConfigTopology(processorID string, topology *topology.ConfigTopology) error {
+func (b *bindplaneExtension) RegisterConfigTopology(processorID string, topology *topology.ConfigTopologyState) error {
 	return b.topologyRegistry.RegisterConfigTopology(processorID, topology)
 }
 
