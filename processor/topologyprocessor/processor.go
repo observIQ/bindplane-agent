@@ -34,7 +34,7 @@ const (
 	organizationIDHeader = "X-Bindplane-Organization-ID"
 	accountIDHeader      = "X-Bindplane-Account-ID"
 	configurationHeader  = "X-Bindplane-Configuration"
-	resourceNameHeader   = "X-Bindplane-ResourceName"
+	resourceNameHeader   = "X-Bindplane-Resource-Name"
 )
 
 type topologyUpdate struct {
