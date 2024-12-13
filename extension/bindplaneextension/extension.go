@@ -36,7 +36,7 @@ type bindplaneExtension struct {
 	logger                            *zap.Logger
 	cfg                               *Config
 	measurementsRegistry              *measurements.ResettableThroughputMeasurementsRegistry
-	topologyRegistry                  *topology.ResettableConfigTopologyRegistry
+	topologyRegistry                  *topology.ResettableTopologyRegistry
 	customCapabilityHandlerThroughput opampcustommessages.CustomCapabilityHandler
 	customCapabilityHandlerTopology   opampcustommessages.CustomCapabilityHandler
 	topologyInterval                  time.Duration
@@ -50,7 +50,7 @@ func newBindplaneExtension(logger *zap.Logger, cfg *Config) *bindplaneExtension 
 		logger:               logger,
 		cfg:                  cfg,
 		measurementsRegistry: measurements.NewResettableThroughputMeasurementsRegistry(false),
-		topologyRegistry:     topology.NewResettableConfigTopologyRegistry(),
+		topologyRegistry:     topology.NewResettableTopologyRegistry(),
 		doneChan:             make(chan struct{}),
 		wg:                   &sync.WaitGroup{},
 	}
@@ -89,8 +89,8 @@ func (b *bindplaneExtension) RegisterThroughputMeasurements(processorID string, 
 	return b.measurementsRegistry.RegisterThroughputMeasurements(processorID, measurements)
 }
 
-func (b *bindplaneExtension) RegisterConfigTopology(processorID string, topology *topology.ConfigTopologyState) error {
-	return b.topologyRegistry.RegisterConfigTopology(processorID, topology)
+func (b *bindplaneExtension) RegisterTopologyState(processorID string, topology *topology.TopoState) error {
+	return b.topologyRegistry.RegisterTopologyState(processorID, topology)
 }
 
 func (b *bindplaneExtension) setupCustomCapabilities(host component.Host) error {

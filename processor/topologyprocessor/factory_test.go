@@ -70,9 +70,9 @@ func TestCreateProcessorTwice_Logs(t *testing.T) {
 	cfg := &Config{
 		Enabled:            true,
 		Interval:           defaultInterval,
-		ConfigName:         "myConf",
+		Configuration:      "myConf",
 		AccountID:          "myAcct",
-		OrgID:              "myOrg",
+		OrganizationID:     "myOrg",
 		BindplaneExtension: bindplaneExtensionID,
 	}
 
@@ -82,7 +82,7 @@ func TestCreateProcessorTwice_Logs(t *testing.T) {
 	require.NoError(t, err)
 
 	mockBindplane := mockTopologyRegistry{
-		ResettableConfigTopologyRegistry: topology.NewResettableConfigTopologyRegistry(),
+		ResettableTopologyRegistry: topology.NewResettableTopologyRegistry(),
 	}
 
 	mh := mockHost{
@@ -108,9 +108,9 @@ func TestCreateProcessorTwice_Metrics(t *testing.T) {
 	cfg := &Config{
 		Enabled:            true,
 		Interval:           defaultInterval,
-		ConfigName:         "myConf",
+		Configuration:      "myConf",
 		AccountID:          "myAcct",
-		OrgID:              "myOrg",
+		OrganizationID:     "myOrg",
 		BindplaneExtension: bindplaneExtensionID,
 	}
 
@@ -120,7 +120,7 @@ func TestCreateProcessorTwice_Metrics(t *testing.T) {
 	require.NoError(t, err)
 
 	mockBindplane := mockTopologyRegistry{
-		ResettableConfigTopologyRegistry: topology.NewResettableConfigTopologyRegistry(),
+		ResettableTopologyRegistry: topology.NewResettableTopologyRegistry(),
 	}
 
 	mh := mockHost{
@@ -146,9 +146,9 @@ func TestCreateProcessorTwice_Traces(t *testing.T) {
 	cfg := &Config{
 		Enabled:            true,
 		Interval:           defaultInterval,
-		ConfigName:         "myConf",
+		Configuration:      "myConf",
 		AccountID:          "myAcct",
-		OrgID:              "myOrg",
+		OrganizationID:     "myOrg",
 		BindplaneExtension: bindplaneExtensionID,
 	}
 
@@ -158,7 +158,7 @@ func TestCreateProcessorTwice_Traces(t *testing.T) {
 	require.NoError(t, err)
 
 	mockBindplane := mockTopologyRegistry{
-		ResettableConfigTopologyRegistry: topology.NewResettableConfigTopologyRegistry(),
+		ResettableTopologyRegistry: topology.NewResettableTopologyRegistry(),
 	}
 
 	mh := mockHost{
@@ -186,7 +186,7 @@ func (m mockHost) GetExtensions() map[component.ID]component.Component {
 }
 
 type mockTopologyRegistry struct {
-	*topology.ResettableConfigTopologyRegistry
+	*topology.ResettableTopologyRegistry
 }
 
 func (mockTopologyRegistry) Start(_ context.Context, _ component.Host) error { return nil }

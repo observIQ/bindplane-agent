@@ -2,7 +2,7 @@
 This processor utilizes request headers to provide extended topology functionality in BindPlane.
 
 ## Minimum agent versions
-- Introduced: [v1.6.6](https://github.com/observIQ/bindplane-agent/releases/tag/v1.6.6)
+- Introduced: [v1.6.7](https://github.com/observIQ/bindplane-agent/releases/tag/v1.6.7)
 
 ## Supported pipelines:
 - Logs
@@ -10,13 +10,12 @@ This processor utilizes request headers to provide extended topology functionali
 - Traces
 
 ## Configuration
-| Field               | Type      | Default | Description                                                                                                                                                               |
-|---------------------|-----------|---------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `enabled`           | bool      | `false` | When `true`, this processor will look for incoming topology headers and track the relevant connections accordingly. If false this processor acts as a no-op.              |
-| `interval`          | duration  | `1m`    | The interval at which topology data is sent to Bindplane via OpAMP.                                                                                                       |
-| `configName`        | string    |         | The name of the Bindplane configuration this processor is running on.                                                                                                     |
-| `orgID`             | string    |         | The Organization ID of the Bindplane configuration where this processor is running.                                                                                       |
-| `accountID`         | string    |         | The Account ID of the Bindplane configuration where this processor is running.                                                                                            |
+| Field                | Type      | Default | Description                                                                                                                                                               |
+|----------------------|-----------|---------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `interval`           | duration  | `1m`    | The interval at which topology data is sent to Bindplane via OpAMP.                                                                                                       |
+| `organizationID`     | string    |         | The Organization ID of the Bindplane configuration where this processor is running.                                                                                       |
+| `accountID`          | string    |         | The Account ID of the Bindplane configuration where this processor is running.                                                                                            |
+| `configuration`      | string    |         | The name of the Bindplane configuration this processor is running on.                                                                                                     |
 
 
 ### Example configuration
@@ -30,11 +29,11 @@ receivers:
 
 processors:
   topology:
-    enabled: true
     interval: 1m
-    configName: "myConfigName"
-    orgID: "myOrgID"
+    organizationID: "myOrganizationID"
     accountID: "myAccountID"
+    configuration: "myConfiguration"
+
 
 exporters:
   googlecloud:

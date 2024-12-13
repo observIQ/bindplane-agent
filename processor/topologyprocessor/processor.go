@@ -33,7 +33,8 @@ import (
 const (
 	organizationIDHeader = "X-Bindplane-Organization-ID"
 	accountIDHeader      = "X-Bindplane-Account-ID"
-	configNameHeader     = "X-Bindplane-Configuration"
+	configurationHeader  = "X-Bindplane-Configuration"
+	resourceNameHeader   = "X-Bindplane-ResourceName"
 )
 
 type topologyUpdate struct {
@@ -44,7 +45,7 @@ type topologyUpdate struct {
 type topologyProcessor struct {
 	logger      *zap.Logger
 	enabled     bool
-	topology    *topology.ConfigTopologyState
+	topology    *topology.TopoState
 	interval    time.Duration
 	processorID component.ID
 	bindplane   component.ID
@@ -55,12 +56,12 @@ type topologyProcessor struct {
 // newTopologyProcessor creates a new topology processor
 func newTopologyProcessor(logger *zap.Logger, cfg *Config, processorID component.ID) (*topologyProcessor, error) {
 	destGw := topology.GatewayInfo{
-		GatewayID:  strings.TrimPrefix(cfg.GatewayID, "bindplane_gateway/"),
-		ConfigName: cfg.ConfigName,
-		AccountID:  cfg.AccountID,
-		OrgID:      cfg.OrgID,
+		GatewayID:      strings.TrimPrefix(processorID.String(), "topology/"),
+		Configuration:  cfg.Configuration,
+		AccountID:      cfg.AccountID,
+		OrganizationID: cfg.OrganizationID,
 	}
-	topology, err := topology.NewConfigTopologyState(destGw)
+	topology, err := topology.NewTopologyState(destGw)
 	if err != nil {
 		return nil, fmt.Errorf("create topology state: %w", err)
 	}
@@ -84,7 +85,7 @@ func (tp *topologyProcessor) start(_ context.Context, host component.Host) error
 		}
 
 		if registry != nil {
-			registerErr := registry.RegisterConfigTopology(tp.processorID.String(), tp.topology)
+			registerErr := registry.RegisterTopologyState(tp.processorID.String(), tp.topology)
 			if registerErr != nil {
 				return
 			}
@@ -113,11 +114,11 @@ func (tp *topologyProcessor) processMetrics(ctx context.Context, md pmetric.Metr
 func (tp *topologyProcessor) processTopologyHeaders(ctx context.Context) {
 	metadata, ok := metadata.FromIncomingContext(ctx)
 	if ok {
-		var configName, accountID, orgID string
+		var configuration, accountID, organizationID, resourceName string
 
-		configNameHeaders := metadata.Get(configNameHeader)
-		if len(configNameHeaders) > 0 {
-			configName = configNameHeaders[0]
+		configurationHeaders := metadata.Get(configurationHeader)
+		if len(configurationHeaders) > 0 {
+			configuration = configurationHeaders[0]
 		}
 
 		accountIDHeaders := metadata.Get(accountIDHeader)
@@ -125,17 +126,23 @@ func (tp *topologyProcessor) processTopologyHeaders(ctx context.Context) {
 			accountID = accountIDHeaders[0]
 		}
 
-		orgIDHeaders := metadata.Get(organizationIDHeader)
-		if len(orgIDHeaders) > 0 {
-			orgID = orgIDHeaders[0]
+		organizationIDHeaders := metadata.Get(organizationIDHeader)
+		if len(organizationIDHeaders) > 0 {
+			organizationID = organizationIDHeaders[0]
+		}
+
+		resourceNameHeaders := metadata.Get(resourceNameHeader)
+		if len(resourceNameHeaders) > 0 {
+			resourceName = resourceNameHeaders[0]
 		}
 
 		// only upsert if all headers are present
-		if configName != "" && accountID != "" && orgID != "" {
+		if configuration != "" && accountID != "" && organizationID != "" && resourceName != "" {
 			gw := topology.GatewayInfo{
-				ConfigName: configName,
-				AccountID:  accountID,
-				OrgID:      orgID,
+				Configuration:  configuration,
+				AccountID:      accountID,
+				OrganizationID: organizationID,
+				GatewayID:      resourceName,
 			}
 			tp.topology.UpsertRoute(ctx, gw)
 		}

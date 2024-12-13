@@ -35,14 +35,11 @@ type Config struct {
 	// Bindplane extension to use in order to report topology. Optional.
 	BindplaneExtension component.ID `mapstructure:"bindplane_extension"`
 
-	// ComponentID of the Gateway Source where this processor is present
-	GatewayID string `mapstructure:"gatewayID"`
-
 	// Name of the Config where this processor is present
-	ConfigName string `mapstructure:"configName"`
+	Configuration string `mapstructure:"configuration"`
 
-	// OrgID of the Org where this processor is present
-	OrgID string `mapstructure:"orgID"`
+	// OrganizationID of the Org where this processor is present
+	OrganizationID string `mapstructure:"organizationID"`
 
 	// AccountID of the Account where this processor is present
 	AccountID string `mapstructure:"accountID"`
@@ -55,16 +52,12 @@ func (cfg Config) Validate() error {
 		return nil
 	}
 
-	if cfg.GatewayID == "" {
-		return errors.New("`gatewayID` must be specified")
+	if cfg.Configuration == "" {
+		return errors.New("`configuration` must be specified")
 	}
 
-	if cfg.ConfigName == "" {
-		return errors.New("`configName` must be specified")
-	}
-
-	if cfg.OrgID == "" {
-		return errors.New("`orgID` must be specified")
+	if cfg.OrganizationID == "" {
+		return errors.New("`organizationID` must be specified")
 	}
 
 	if cfg.AccountID == "" {

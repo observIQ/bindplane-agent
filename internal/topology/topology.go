@@ -22,86 +22,90 @@ import (
 	"time"
 )
 
-// ConfigTopologyRegistry represents a registry for the topology processor to register their ConfigTopology.
-type ConfigTopologyRegistry interface {
-	// RegisterConfigTopology registers the topology state for the given processor.
+// TopoRegistry represents a registry for the topology processor to register their TopologyState.
+type TopoRegistry interface {
+	// RegisterTopologyState registers the topology state for the given processor.
 	// It should return an error if the processor has already been registered.
-	RegisterConfigTopology(processorID string, data *ConfigTopologyState) error
+	RegisterTopologyState(processorID string, data *TopoState) error
 	SetIntervalChan() chan time.Duration
 	Reset()
 }
 
-// GatewayInfo represents the unique identifiable information about a bindplane gateway's configuration
+// TopoState represents the data captured through topology processors.
+type TopoState struct {
+	Topology topology
+	mux      sync.Mutex
+}
+
+type topology struct {
+	// GatewaySource is the gateway source that the entries in the route table point to
+	GatewaySource GatewayInfo
+	// RouteTable is a map of gateway destinations to the time at which they were last detected
+	RouteTable map[GatewayInfo]time.Time
+}
+
+// GatewayInfo represents a bindplane gateway source or destination
 type GatewayInfo struct {
-	GatewayID  string
-	ConfigName string
-	AccountID  string
-	OrgID      string
+	// OrganizationID is the organizationID where this gateway dest/source lives
+	OrganizationID string `json:"organizationID"`
+	// AccountID is the accountID where this gateway dest/source lives
+	AccountID string `json:"accountID"`
+	// Configuration is the name of the configuration where this gateway dest/source lives
+	Configuration string `json:"configuration"`
+	// GatewayID is the ComponentID of a gateway source, or the resource name of a gateway destination
+	GatewayID string `json:"gatewayID"`
 }
 
-// ConfigTopologyState represents the data captured through topology processors.
-type ConfigTopologyState struct {
-	ConfigTopology configTopology
-	mux            sync.Mutex
-}
-
-type configTopology struct {
-	DestGateway GatewayInfo
-	RouteTable  map[GatewayInfo]time.Time
-}
-
-// ConfigTopologyInfo represents topology relationships between configs.
-type ConfigTopologyInfo struct {
-	GatewayID     string         `json:"gatewayID"`
-	ConfigName    string         `json:"configName"`
-	AccountID     string         `json:"accountID"`
-	OrgID         string         `json:"orgID"`
-	SourceConfigs []ConfigRecord `json:"sourceConfigs"`
-}
-
-// ConfigRecord represents a gateway source and the time it was last detected
-type ConfigRecord struct {
-	ConfigName  string    `json:"configName"`
-	AccountID   string    `json:"accountID"`
-	OrgID       string    `json:"orgID"`
+// GatewayRecord represents a gateway destination and the time it was last detected
+type GatewayRecord struct {
+	// Gateway represents a gateway destinations
+	Gateway GatewayInfo `json:"gateway"`
+	// LastUpdated is a timestamp of the last time a message w/ topology headers was detected from the above gateway destination
 	LastUpdated time.Time `json:"lastUpdated"`
 }
 
-// NewConfigTopologyState initializes a new ConfigTopologyState
-func NewConfigTopologyState(destGateway GatewayInfo) (*ConfigTopologyState, error) {
-	return &ConfigTopologyState{
-		ConfigTopology: configTopology{
-			DestGateway: destGateway,
-			RouteTable:  make(map[GatewayInfo]time.Time),
+// TopoInfo represents a gateway source & the gateway destinations that point to it.
+type TopoInfo struct {
+	GatewaySource       GatewayInfo     `json:"gatewaySource"`
+	GatewayDestinations []GatewayRecord `json:"gatewayDestinations"`
+}
+
+// NewTopologyState initializes a new TopologyState
+func NewTopologyState(gw GatewayInfo) (*TopoState, error) {
+	return &TopoState{
+		Topology: topology{
+			GatewaySource: gw,
+			RouteTable:    make(map[GatewayInfo]time.Time),
 		},
 		mux: sync.Mutex{},
 	}, nil
 }
 
 // UpsertRoute upserts given route.
-func (ts *ConfigTopologyState) UpsertRoute(_ context.Context, gw GatewayInfo) {
+func (ts *TopoState) UpsertRoute(_ context.Context, gw GatewayInfo) {
 	ts.mux.Lock()
 	defer ts.mux.Unlock()
 
-	ts.ConfigTopology.RouteTable[gw] = time.Now()
+	ts.Topology.RouteTable[gw] = time.Now()
 }
 
-// ResettableConfigTopologyRegistry is a concrete version of TopologyDataRegistry that is able to be reset.
-type ResettableConfigTopologyRegistry struct {
+// ResettableTopologyRegistry is a concrete version of TopologyDataRegistry that is able to be reset.
+type ResettableTopologyRegistry struct {
 	topology        *sync.Map
 	setIntervalChan chan time.Duration
 }
 
-// NewResettableConfigTopologyRegistry creates a new ResettableConfigTopologyRegistry
-func NewResettableConfigTopologyRegistry() *ResettableConfigTopologyRegistry {
-	return &ResettableConfigTopologyRegistry{
-		topology: &sync.Map{},
+// NewResettableTopologyRegistry creates a new ResettableTopologyRegistry
+func NewResettableTopologyRegistry() *ResettableTopologyRegistry {
+	return &ResettableTopologyRegistry{
+		topology:        &sync.Map{},
+		setIntervalChan: make(chan time.Duration, 1),
 	}
 }
 
-// RegisterConfigTopology registers the ConfigTopology with the registry.
-func (rtsr *ResettableConfigTopologyRegistry) RegisterConfigTopology(processorID string, configTopology *ConfigTopologyState) error {
-	_, alreadyExists := rtsr.topology.LoadOrStore(processorID, configTopology)
+// RegisterTopologyState registers the TopologyState with the registry.
+func (rtsr *ResettableTopologyRegistry) RegisterTopologyState(processorID string, topoState *TopoState) error {
+	_, alreadyExists := rtsr.topology.LoadOrStore(processorID, topoState)
 	if alreadyExists {
 		return fmt.Errorf("topology for processor %q was already registered", processorID)
 	}
@@ -110,41 +114,44 @@ func (rtsr *ResettableConfigTopologyRegistry) RegisterConfigTopology(processorID
 }
 
 // Reset unregisters all topology states in this registry
-func (rtsr *ResettableConfigTopologyRegistry) Reset() {
+func (rtsr *ResettableTopologyRegistry) Reset() {
 	rtsr.topology = &sync.Map{}
 }
 
 // SetIntervalChan returns the setIntervalChan
-func (rtsr *ResettableConfigTopologyRegistry) SetIntervalChan() chan time.Duration {
+func (rtsr *ResettableTopologyRegistry) SetIntervalChan() chan time.Duration {
 	return rtsr.setIntervalChan
 }
 
 // TopologyInfos returns all the topology data in this registry.
-func (rtsr *ResettableConfigTopologyRegistry) TopologyInfos() []ConfigTopologyInfo {
-	states := []configTopology{}
+func (rtsr *ResettableTopologyRegistry) TopologyInfos() []TopoInfo {
+	states := []topology{}
 
 	rtsr.topology.Range(func(_, value any) bool {
-		ts := value.(*ConfigTopologyState)
-		states = append(states, ts.ConfigTopology)
+		ts := value.(*TopoState)
+		states = append(states, ts.Topology)
 		return true
 	})
 
-	ti := []ConfigTopologyInfo{}
+	ti := []TopoInfo{}
 	for _, ts := range states {
-		curInfo := ConfigTopologyInfo{}
-		curInfo.GatewayID = ts.DestGateway.GatewayID
-		curInfo.ConfigName = ts.DestGateway.ConfigName
-		curInfo.AccountID = ts.DestGateway.AccountID
-		curInfo.OrgID = ts.DestGateway.OrgID
+		curInfo := TopoInfo{}
+		curInfo.GatewaySource.OrganizationID = ts.GatewaySource.OrganizationID
+		curInfo.GatewaySource.AccountID = ts.GatewaySource.AccountID
+		curInfo.GatewaySource.Configuration = ts.GatewaySource.Configuration
+		curInfo.GatewaySource.GatewayID = ts.GatewaySource.GatewayID
 		for gw, updated := range ts.RouteTable {
-			curInfo.SourceConfigs = append(curInfo.SourceConfigs, ConfigRecord{
-				ConfigName:  gw.ConfigName,
-				AccountID:   gw.AccountID,
-				OrgID:       gw.OrgID,
+			curInfo.GatewayDestinations = append(curInfo.GatewayDestinations, GatewayRecord{
+				Gateway: GatewayInfo{
+					OrganizationID: gw.OrganizationID,
+					AccountID:      gw.AccountID,
+					Configuration:  gw.Configuration,
+					GatewayID:      gw.GatewayID,
+				},
 				LastUpdated: updated.UTC(),
 			})
 		}
-		if len(curInfo.SourceConfigs) > 0 {
+		if len(curInfo.GatewayDestinations) > 0 {
 			ti = append(ti, curInfo)
 		}
 	}

@@ -17,7 +17,6 @@ package observiq
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"sync"
 	"time"
 
@@ -31,7 +30,7 @@ import (
 
 // TopologyReporter represents an object that reports topology state.
 type TopologyReporter interface {
-	TopologyInfos() []topology.ConfigTopologyInfo
+	TopologyInfos() []topology.TopoInfo
 	SetIntervalChan() chan time.Duration
 }
 
@@ -96,12 +95,9 @@ func (ts *topologySender) loop() {
 	t := newTicker()
 	defer t.Stop()
 
-	fmt.Println("topology sender loop")
-
 	for {
 		select {
 		case setInterval := <-ts.reporter.SetIntervalChan():
-			fmt.Println("topology sender loop: received interval: ", setInterval)
 			t.SetInterval(setInterval)
 		case <-ts.done:
 			return

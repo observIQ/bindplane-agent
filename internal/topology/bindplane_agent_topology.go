@@ -14,5 +14,5 @@
 
 package topology
 
-// BindplaneAgentConfigTopologyRegistry is the registry singleton used by bindplane agent to track topology state
-var BindplaneAgentConfigTopologyRegistry = NewResettableConfigTopologyRegistry()
+// BindplaneAgentTopologyRegistry is the registry singleton used by bindplane agent to track topology state
+var BindplaneAgentTopologyRegistry = NewResettableTopologyRegistry()

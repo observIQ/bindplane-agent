@@ -204,7 +204,7 @@ func (c *collector) Stop(ctx context.Context) {
 
 	// After shutting down, we reset the registries so they're fresh for the next collector startup.
 	measurements.BindplaneAgentThroughputMeasurementsRegistry.Reset()
-	topology.BindplaneAgentConfigTopologyRegistry.Reset()
+	topology.BindplaneAgentTopologyRegistry.Reset()
 }
 
 // Restart will restart the collector. It will also reset the status channel.

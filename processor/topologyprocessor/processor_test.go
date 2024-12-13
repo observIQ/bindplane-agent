@@ -35,11 +35,11 @@ func TestProcessor_Logs(t *testing.T) {
 	processorID := component.MustNewIDWithName("topology", "1")
 
 	tmp, err := newTopologyProcessor(zap.NewNop(), &Config{
-		Enabled:    true,
-		Interval:   time.Second,
-		OrgID:      "myOrgID",
-		AccountID:  "myAccountID",
-		ConfigName: "myConfigName",
+		Enabled:        true,
+		Interval:       time.Second,
+		OrganizationID: "myOrgID",
+		AccountID:      "myAccountID",
+		Configuration:  "myConfigName",
 	}, processorID)
 	require.NoError(t, err)
 
@@ -49,7 +49,8 @@ func TestProcessor_Logs(t *testing.T) {
 	ctx := metadata.NewIncomingContext(context.Background(), metadata.MD{
 		accountIDHeader:      []string{"myAccountID1"},
 		organizationIDHeader: []string{"myOrgID1"},
-		configNameHeader:     []string{"myConfigName1"},
+		configurationHeader:  []string{"myConfigName1"},
+		resourceNameHeader:   []string{"myResourceName1"},
 	})
 	processedLogs, err := tmp.processLogs(ctx, logs)
 	require.NoError(t, err)
@@ -58,15 +59,16 @@ func TestProcessor_Logs(t *testing.T) {
 	require.NoError(t, plogtest.CompareLogs(logs, processedLogs))
 
 	// validate that upsert route was performed
-	require.True(t, tmp.topology.ConfigTopology.DestGateway.AccountID == "myAccountID")
-	require.True(t, tmp.topology.ConfigTopology.DestGateway.OrgID == "myOrgID")
-	require.True(t, tmp.topology.ConfigTopology.DestGateway.ConfigName == "myConfigName")
+	require.True(t, tmp.topology.Topology.GatewaySource.AccountID == "myAccountID")
+	require.True(t, tmp.topology.Topology.GatewaySource.OrganizationID == "myOrgID")
+	require.True(t, tmp.topology.Topology.GatewaySource.Configuration == "myConfigName")
 	ci := topology.GatewayInfo{
-		ConfigName: "myConfigName1",
-		AccountID:  "myAccountID1",
-		OrgID:      "myOrgID1",
+		Configuration:  "myConfigName1",
+		AccountID:      "myAccountID1",
+		OrganizationID: "myOrgID1",
+		GatewayID:      "myResourceName1",
 	}
-	_, ok := tmp.topology.ConfigTopology.RouteTable[ci]
+	_, ok := tmp.topology.Topology.RouteTable[ci]
 	require.True(t, ok)
 }
 
@@ -74,11 +76,11 @@ func TestProcessor_Metrics(t *testing.T) {
 	processorID := component.MustNewIDWithName("topology", "1")
 
 	tmp, err := newTopologyProcessor(zap.NewNop(), &Config{
-		Enabled:    true,
-		Interval:   time.Second,
-		OrgID:      "myOrgID",
-		AccountID:  "myAccountID",
-		ConfigName: "myConfigName",
+		Enabled:        true,
+		Interval:       time.Second,
+		OrganizationID: "myOrgID",
+		AccountID:      "myAccountID",
+		Configuration:  "myConfigName",
 	}, processorID)
 	require.NoError(t, err)
 
@@ -88,7 +90,8 @@ func TestProcessor_Metrics(t *testing.T) {
 	ctx := metadata.NewIncomingContext(context.Background(), metadata.MD{
 		accountIDHeader:      []string{"myAccountID1"},
 		organizationIDHeader: []string{"myOrgID1"},
-		configNameHeader:     []string{"myConfigName1"},
+		configurationHeader:  []string{"myConfigName1"},
+		resourceNameHeader:   []string{"myResourceName1"},
 	})
 
 	processedMetrics, err := tmp.processMetrics(ctx, metrics)
@@ -98,15 +101,16 @@ func TestProcessor_Metrics(t *testing.T) {
 	require.NoError(t, pmetrictest.CompareMetrics(metrics, processedMetrics))
 
 	// validate that upsert route was performed
-	require.True(t, tmp.topology.ConfigTopology.DestGateway.AccountID == "myAccountID")
-	require.True(t, tmp.topology.ConfigTopology.DestGateway.OrgID == "myOrgID")
-	require.True(t, tmp.topology.ConfigTopology.DestGateway.ConfigName == "myConfigName")
+	require.True(t, tmp.topology.Topology.GatewaySource.AccountID == "myAccountID")
+	require.True(t, tmp.topology.Topology.GatewaySource.OrganizationID == "myOrgID")
+	require.True(t, tmp.topology.Topology.GatewaySource.Configuration == "myConfigName")
 	ci := topology.GatewayInfo{
-		ConfigName: "myConfigName1",
-		AccountID:  "myAccountID1",
-		OrgID:      "myOrgID1",
+		Configuration:  "myConfigName1",
+		AccountID:      "myAccountID1",
+		OrganizationID: "myOrgID1",
+		GatewayID:      "myResourceName1",
 	}
-	_, ok := tmp.topology.ConfigTopology.RouteTable[ci]
+	_, ok := tmp.topology.Topology.RouteTable[ci]
 	require.True(t, ok)
 }
 
@@ -114,11 +118,11 @@ func TestProcessor_Traces(t *testing.T) {
 	processorID := component.MustNewIDWithName("topology", "1")
 
 	tmp, err := newTopologyProcessor(zap.NewNop(), &Config{
-		Enabled:    true,
-		Interval:   time.Second,
-		OrgID:      "myOrgID",
-		AccountID:  "myAccountID",
-		ConfigName: "myConfigName",
+		Enabled:        true,
+		Interval:       time.Second,
+		OrganizationID: "myOrgID",
+		AccountID:      "myAccountID",
+		Configuration:  "myConfigName",
 	}, processorID)
 	require.NoError(t, err)
 
@@ -128,7 +132,8 @@ func TestProcessor_Traces(t *testing.T) {
 	ctx := metadata.NewIncomingContext(context.Background(), metadata.MD{
 		accountIDHeader:      []string{"myAccountID1"},
 		organizationIDHeader: []string{"myOrgID1"},
-		configNameHeader:     []string{"myConfigName1"},
+		configurationHeader:  []string{"myConfigName1"},
+		resourceNameHeader:   []string{"myResourceName1"},
 	})
 
 	processedTraces, err := tmp.processTraces(ctx, traces)
@@ -138,15 +143,16 @@ func TestProcessor_Traces(t *testing.T) {
 	require.NoError(t, ptracetest.CompareTraces(traces, processedTraces))
 
 	// validate that upsert route was performed
-	require.True(t, tmp.topology.ConfigTopology.DestGateway.AccountID == "myAccountID")
-	require.True(t, tmp.topology.ConfigTopology.DestGateway.OrgID == "myOrgID")
-	require.True(t, tmp.topology.ConfigTopology.DestGateway.ConfigName == "myConfigName")
+	require.True(t, tmp.topology.Topology.GatewaySource.AccountID == "myAccountID")
+	require.True(t, tmp.topology.Topology.GatewaySource.OrganizationID == "myOrgID")
+	require.True(t, tmp.topology.Topology.GatewaySource.Configuration == "myConfigName")
 	ci := topology.GatewayInfo{
-		ConfigName: "myConfigName1",
-		AccountID:  "myAccountID1",
-		OrgID:      "myOrgID1",
+		Configuration:  "myConfigName1",
+		AccountID:      "myAccountID1",
+		OrganizationID: "myOrgID1",
+		GatewayID:      "myResourceName1",
 	}
-	_, ok := tmp.topology.ConfigTopology.RouteTable[ci]
+	_, ok := tmp.topology.Topology.RouteTable[ci]
 	require.True(t, ok)
 }
 
@@ -155,20 +161,20 @@ func TestProcessor_Logs_TwoInstancesSameID(t *testing.T) {
 	processorID := component.MustNewIDWithName("topology", "1")
 
 	tmp1, err := newTopologyProcessor(zap.NewNop(), &Config{
-		Enabled:    true,
-		Interval:   time.Second,
-		OrgID:      "myOrgID",
-		AccountID:  "myAccountID",
-		ConfigName: "myConfigName",
+		Enabled:        true,
+		Interval:       time.Second,
+		OrganizationID: "myOrgID",
+		AccountID:      "myAccountID",
+		Configuration:  "myConfigName",
 	}, processorID)
 	require.NoError(t, err)
 
 	tmp2, err := newTopologyProcessor(zap.NewNop(), &Config{
-		Enabled:    true,
-		Interval:   time.Second,
-		OrgID:      "myOrgID2",
-		AccountID:  "myAccountID2",
-		ConfigName: "myConfigName2",
+		Enabled:        true,
+		Interval:       time.Second,
+		OrganizationID: "myOrgID2",
+		AccountID:      "myAccountID2",
+		Configuration:  "myConfigName2",
 	}, processorID)
 	require.NoError(t, err)
 
@@ -187,20 +193,20 @@ func TestProcessor_Logs_TwoInstancesDifferentID(t *testing.T) {
 	processorID2 := component.MustNewIDWithName("topology", "2")
 
 	tmp1, err := newTopologyProcessor(zap.NewNop(), &Config{
-		Enabled:    true,
-		Interval:   time.Second,
-		OrgID:      "myOrgID",
-		AccountID:  "myAccountID",
-		ConfigName: "myConfigName",
+		Enabled:        true,
+		Interval:       time.Second,
+		OrganizationID: "myOrgID",
+		AccountID:      "myAccountID",
+		Configuration:  "myConfigName",
 	}, processorID)
 	require.NoError(t, err)
 
 	tmp2, err := newTopologyProcessor(zap.NewNop(), &Config{
-		Enabled:    true,
-		Interval:   time.Second,
-		OrgID:      "myOrgID2",
-		AccountID:  "myAccountID2",
-		ConfigName: "myConfigName2",
+		Enabled:        true,
+		Interval:       time.Second,
+		OrganizationID: "myOrgID2",
+		AccountID:      "myAccountID2",
+		Configuration:  "myConfigName2",
 	}, processorID2)
 	require.NoError(t, err)
 

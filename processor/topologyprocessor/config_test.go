@@ -26,12 +26,12 @@ func TestConfigValidate(t *testing.T) {
 		require.NoError(t, err)
 	})
 
-	t.Run("Empty configName", func(t *testing.T) {
+	t.Run("Empty configuration", func(t *testing.T) {
 		cfg := Config{
-			Enabled:   true,
-			Interval:  defaultInterval,
-			AccountID: "myacct",
-			OrgID:     "myorg",
+			Enabled:        true,
+			Interval:       defaultInterval,
+			AccountID:      "myacct",
+			OrganizationID: "myorg",
 		}
 		err := cfg.Validate()
 		require.Error(t, err)
@@ -39,21 +39,21 @@ func TestConfigValidate(t *testing.T) {
 
 	t.Run("Empty AccountID", func(t *testing.T) {
 		cfg := Config{
-			Enabled:    true,
-			Interval:   defaultInterval,
-			OrgID:      "myorg",
-			ConfigName: "myconfig",
+			Enabled:        true,
+			Interval:       defaultInterval,
+			OrganizationID: "myorg",
+			Configuration:  "myconfig",
 		}
 		err := cfg.Validate()
 		require.Error(t, err)
 	})
 
-	t.Run("Empty OrgID", func(t *testing.T) {
+	t.Run("Empty OrganizationID", func(t *testing.T) {
 		cfg := Config{
-			Enabled:    true,
-			Interval:   defaultInterval,
-			AccountID:  "myacct",
-			ConfigName: "myconfig",
+			Enabled:       true,
+			Interval:      defaultInterval,
+			AccountID:     "myacct",
+			Configuration: "myconfig",
 		}
 		err := cfg.Validate()
 		require.Error(t, err)

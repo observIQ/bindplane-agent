@@ -58,7 +58,7 @@ func NewManagedCollectorService(col collector.Collector, logger *zap.Logger, man
 		CollectorConfigPath:  collectorConfigPath,
 		LoggerConfigPath:     loggerConfigPath,
 		MeasurementsReporter: measurements.BindplaneAgentThroughputMeasurementsRegistry,
-		TopologyReporter:     topology.BindplaneAgentConfigTopologyRegistry,
+		TopologyReporter:     topology.BindplaneAgentTopologyRegistry,
 	}
 
 	// Create new client
