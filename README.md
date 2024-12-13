@@ -9,7 +9,7 @@
 </a>
 
 <p align="center">
-  The BindPlane Agent is observIQ’s distribution of the <a href="https://github.com/open-telemetry/opentelemetry-collector">OpenTelemetry Collector</a>. It’s the first distribution to implement the <a href="https://opentelemetry.io/docs/specs/opamp/">Open Agent Management Protocol</a> (OpAMP) and is designed to be fully managed with <a href="https://observiq.com/">BindPlane Telemetry Pipeline</a>.
+  The BindPlane Agent is observIQ’s distribution of the upstream <a href="https://github.com/open-telemetry/opentelemetry-collector">OpenTelemetry Collector</a>. It’s the first distribution to implement the <a href="https://opentelemetry.io/docs/specs/opamp/">Open Agent Management Protocol</a> (OpAMP) and is designed to be fully managed with <a href="https://observiq.com/">BindPlane Telemetry Pipeline</a>.
 </p>
 
 <b>
@@ -57,23 +57,19 @@
   </i>
 </p>
 
-BindPlane Telemetry Pipeline standardizes your telemetry ingestion, processing, and shipping, by providing a unified, OTel-native pipeline.
-
-## Why BindPlane?
+## Why BindPlane Agent?
 
 If you're managing telemetry at scale you'll run in to these problems sooner or later:
 
-1. **Agent fatigue.** You'll end up managing dozens of proprietary agents all collecting and forwarding telemetry to different observability backends, which leads to performance issues and...
-2. **Endless configuration files.** Even with GitOps practices you'll end up managing hundreds of configuration files for different sources, destinations, and processors that are written in proprietary languages instead leading to...
-3. **Vendor lock-in.** BindPlane's primary focus is OpenTelemetry. It deploys and manages OpenTelemetry Collectors, uses OpenTelemetry Standards for terminology and configuration, and enables remote management with OpAMP.
+1. **Agent fatigue.** You'll manage endless proprietary agents and OpenTelemetry Collectors that collect and forward telemetry to different observability backends, leading to performance issues.
+2. **Endless configuration files.** Even with GitOps practices you'll have to manage hundreds of configuration files for different sources, destinations, and processors written in either proprietary languages or YAML.
+3. **High complexity.** OpenTelemetry's complexity and learning curve make it difficult to implement, manage, and re-point telemetry without a centralized management plane like BindPlane Telemetry Pipeline to standardize telemetry ingestion, processing, and shipping, with a unified, OpenTelemetry-native pipeline.
 
-That's why BindPlane will always be committed to these 4 core tenets.
+### An OpenTelemetry Collector you're used to
 
-### A collector you're used to
+The BindPlane Agent is observIQ’s distribution of the upstream [OpenTelemetry Collector](https://github.com/open-telemetry/opentelemetry-collector). It’s the first distribution to implement the [Open Agent Management Protocol](https://opentelemetry.io/docs/specs/opamp/) (OpAMP) and is designed to be fully managed with [BindPlane Telemetry Pipeline](https://observiq.com/solutions).
 
-The BindPlane Agent is observIQ’s distribution of the [OpenTelemetry Collector](https://github.com/open-telemetry/opentelemetry-collector). It’s the first distribution to implement the [Open Agent Management Protocol](https://opentelemetry.io/docs/specs/opamp/) (OpAMP) and is designed to be fully managed with [BindPlane Telemetry Pipeline](https://observiq.com/solutions).
-
-### Focus on usability
+### Focused on usability
 
 Increases the accessibility of OpenTelemetry by providing simplified installation scripts, tested example configurations, and end-to-end documentation making it easy to get started.
 
@@ -87,19 +83,19 @@ Tested, verified, and supported by observIQ.
 
 ## Getting Started
 
-### Installing BindPlane Agent
+For more detailed installation instructions view the [Getting Started](/docs/getting-started.md) guide.
 
-#### Linux
+### Linux
 
-To install using the installation script, you may run:
+Install BindPlane Agent using the installation script below.
 
 ```sh
 sudo sh -c "$(curl -fsSlL https://github.com/observiq/bindplane-agent/releases/latest/download/install_unix.sh)" install_unix.sh
 ```
 
-To install directly with the appropriate package manager, see [installing on Linux](/docs/installation-linux.md).
+To install directly with the appropriate package manager, and how to configure OpAMP, see [installing on Linux](/docs/installation-linux.md).
 
-#### Windows
+### Windows
 
 To install the BindPlane Agent on Windows run the Powershell command below to install the MSI with no UI.
 
@@ -111,49 +107,43 @@ Alternately, for an interactive installation [download the latest MSI](https://g
 
 After downloading the MSI, simply double click it to open the installation wizard. Follow the instructions to configure and install the agent.
 
-For more installation information see [installing on Windows](/docs/installation-windows.md).
+For more installation information, and how to configure OpAMP, see [installing on Windows](/docs/installation-windows.md).
 
-#### macOS
+### macOS
 
-To install using the installation script, you may run:
+Install BindPlane Agent using the installation script below.
 
 ```sh
 sudo sh -c "$(curl -fsSlL https://github.com/observiq/bindplane-agent/releases/latest/download/install_macos.sh)" install_macos.sh
 ```
 
-For more installation information see [installing on macOS](/docs/installation-mac.md).
+For more installation information, and how to configure OpAMP, see [installing on macOS](/docs/installation-mac.md).
 
-### Next Steps
+## Next Steps
 
-Now that the agent is installed it is collecting basic metrics about the host machine printing them to the log. If you want to further configure your agent you may do so by editing the config file. To find your config file based on your OS reference the table below:
+### BindPlane Agent default `config.yaml`
+
+With the BindPlane Agent installed, it will start collecting basic metrics about the host machine printing them to the log. To further configure your agent edit the `config.yaml` file just like you would an OpenTelemetry Collector. To find your `config.yaml` file based on your operating system, reference the table below:
 
 | OS      | Default Location                                              |
 |:--------|:--------------------------------------------------------------|
-| Linux   | /opt/observiq-otel-collector/config.yaml                      |
-| Windows | C:\Program Files\observIQ OpenTelemetry Collector\config.yaml |
-| macOS   | /opt/observiq-otel-collector/config.yaml                      |
+| Linux   | `/opt/observiq-otel-collector/config.yaml`                      |
+| Windows | `C:\Program Files\observIQ OpenTelemetry Collector\config.yaml` |
+| macOS   | `/opt/observiq-otel-collector/config.yaml`                      |
 
 For more information on configuration see the [Configuration section](#configuration).
 
-### Connecting a Telemetry Pipeline
+### Manage BindPlane Agent with BindPlane Telemetry Pipeline via OpAMP
 
-BindPlane is designed to be OpenTelemetry-first, with OpenTelemetry as its core framework, to create a unified toolset with data ownership. By providing a centralized management plane, it simplifies the development, implementation, management, and configuration of OpenTelemetry.
+Improving developer experience with OpenTelemetry is observIQ's primary focus. We're building BindPlane Telemetry Pipeline to help deploy and manage OpenTelemetry Collectors at scale, but retain core OpenTelemetry Standards for terminology and configuration, with the added benefit of enabling remote management with OpAMP.
 
-### BindPlane Cloud
+The BindPlane Agent can be configured as an OpenTelemetry Collector that is managed by the BindPlane Telemetry Pipeline via OpAMP. BindPlane is designed to be OpenTelemetry-first, with OpenTelemetry as its core framework. By providing a centralized management plane, it simplifies the development, implementation, management, and configuration of OpenTelemetry.
 
-BindPlane Cloud is the quickest way to get started with OpenTelemetry-native telemetry pipelines. It offers managed infrastructure along with instant, free access for development projects and proofs of concept.
-
-<a href="https://app.bindplane.com/signup"><img src="https://res.cloudinary.com/du4nxa27k/image/upload/v1734001746/sign-up-bindplane-cloud_tzhj8r.png" alt="Sign-up" width="200px"></a>
-
-### BindPlane On Prem
-
-You can also get started with BindPlane On Prem by hosting it yourself.
-
-<a href="https://observiq.com/download"><img src="https://res.cloudinary.com/du4nxa27k/image/upload/v1734000970/download-bindplane-on-prem_rhdrme.png" alt="Download" width="200px"></a>
+For more information on managing agents via OpAMP see the [Connecting to BindPlane Telemetry Pipeline with OpAMP section](#connecting-to-bindplane-telemetry-pipeline-with-opamp).
 
 ## Configuration
 
-The BindPlane Agent uses OpenTelemetry configuration.
+The BindPlane Agent uses OpenTelemetry Collector configuration.
 
 For sample configs, see the [config](/config/) directory.
 For general configuration help, see the [OpenTelemetry docs](https://opentelemetry.io/docs/collector/configuration/).
@@ -184,7 +174,7 @@ For supported extensions and their documentation see [extensions](/docs/extensio
 
 For supported connectors and their documentation see [connectors](/docs/connectors.md).
 
-## Example `config.yaml`
+### Example `config.yaml`
 
 Here's a sample setup for `hostmetrics` on Google Cloud. To make sure your environment is set up with required prerequisites, see the [Google Cloud Exporter Prerequisites](/config/google_cloud_exporter/README.md) page. Further details for this GCP example can be found [here](/config/google_cloud_exporter/hostmetrics).
 
@@ -216,9 +206,27 @@ service:
       exporters: [googlecloud]
 ```
 
+## Connecting to BindPlane Telemetry Pipeline with OpAMP
+
+BindPlane is designed to be OpenTelemetry-first, with OpenTelemetry as its core framework, to create a unified toolset with data ownership. By providing a centralized management plane, it simplifies the development, implementation, management, and configuration of OpenTelemetry.
+
+To learn more about configuring OpAMP, see [OpAMP Configuration](/docs/opamp.md), or get started with BindPlane Telemetry Pipeline below.
+
+### BindPlane Cloud
+
+BindPlane Cloud is the quickest way to get started with OpenTelemetry-native telemetry pipelines. It offers managed infrastructure along with instant, free access for development projects and proofs of concept.
+
+<a href="https://app.bindplane.com/signup"><img src="https://res.cloudinary.com/du4nxa27k/image/upload/v1734001746/sign-up-bindplane-cloud_tzhj8r.png" alt="Sign-up" width="200px"></a>
+
+### BindPlane On Prem
+
+You can also get started with BindPlane On Prem for free by hosting it yourself.
+
+<a href="https://observiq.com/download"><img src="https://res.cloudinary.com/du4nxa27k/image/upload/v1734000970/download-bindplane-on-prem_rhdrme.png" alt="Download" width="200px"></a>
+
 ## Community
 
-Have an idea to improve BindPlane Agent or BindPlane OP? Here's how you can help:
+Have an idea to improve BindPlane Agent? Here's how you can help:
 
 - Star this repo ⭐️ and follow us on [Twitter](https://x.com/bindplane).
 - Upvote issues with 👍 so we know what to prioritize in the road map.
