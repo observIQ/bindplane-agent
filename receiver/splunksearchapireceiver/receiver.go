@@ -119,6 +119,10 @@ func (ssapir *splunksearchapireceiver) runQueries(ctx context.Context) {
 			search.EventBatchSize = splunkDefaultEventBatchSize
 		}
 
+		// parse time strings to time.Time
+		earliestTime, _ := time.Parse(time.RFC3339, search.EarliestTime)
+		latestTime, _ := time.Parse(time.RFC3339, search.LatestTime)
+
 		// create search in Splunk
 		searchID, err := ssapir.createSplunkSearch(search)
 		if err != nil {
@@ -140,17 +144,6 @@ func (ssapir *splunksearchapireceiver) runQueries(ctx context.Context) {
 			}
 			ssapir.logger.Info("search results fetched", zap.Int("num_results", len(results.Results)))
 
-			// parse time strings to time.Time
-			earliestTime, err := time.Parse(time.RFC3339, search.EarliestTime)
-			if err != nil {
-				ssapir.logger.Error("earliest_time failed to be parsed as RFC3339", zap.Error(err))
-			}
-
-			latestTime, err := time.Parse(time.RFC3339, search.LatestTime)
-			if err != nil {
-				ssapir.logger.Error("latest_time failed to be parsed as RFC3339", zap.Error(err))
-			}
-
 			logs := plog.NewLogs()
 			for idx, splunkLog := range results.Results {
 				if (idx+exportedEvents) >= search.Limit && search.Limit != 0 {
@@ -163,13 +156,12 @@ func (ssapir *splunksearchapireceiver) runQueries(ctx context.Context) {
 					ssapir.logger.Error("error parsing log timestamp", zap.Error(err))
 					break
 				}
-				if logTimestamp.UTC().Before(earliestTime) {
+				if logTimestamp.UTC().Before(earliestTime.UTC()) {
 					ssapir.logger.Info("skipping log entry - timestamp before earliestTime", zap.Time("time", logTimestamp.UTC()), zap.Time("earliestTime", earliestTime.UTC()))
 					break
 				}
 				if logTimestamp.UTC().After(latestTime.UTC()) {
 					ssapir.logger.Info("skipping log entry - timestamp after latestTime", zap.Time("time", logTimestamp.UTC()), zap.Time("latestTime", latestTime.UTC()))
-					// logger will only log up to 10 times for a given code block, known weird behavior
 					continue
 				}
 				log := logs.ResourceLogs().AppendEmpty().ScopeLogs().AppendEmpty().LogRecords().AppendEmpty()
