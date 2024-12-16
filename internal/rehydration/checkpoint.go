@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package rehydration //import "github.com/observiq/bindplane-agent/internal/rehydration"
+package rehydration //import "github.com/observiq/bindplane-otel-collector/internal/rehydration"
 
 import (
 	"time"

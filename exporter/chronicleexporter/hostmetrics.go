@@ -22,7 +22,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/observiq/bindplane-agent/exporter/chronicleexporter/protos/api"
+	"github.com/observiq/bindplane-otel-collector/exporter/chronicleexporter/protos/api"
 	"github.com/shirou/gopsutil/v3/process"
 	"go.opentelemetry.io/collector/component"
 	semconv "go.opentelemetry.io/collector/semconv/v1.5.0"

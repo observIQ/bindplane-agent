@@ -23,7 +23,7 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
-	"github.com/observiq/bindplane-agent/opamp"
+	"github.com/observiq/bindplane-otel-collector/opamp"
 	"github.com/oklog/ulid/v2"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v3"

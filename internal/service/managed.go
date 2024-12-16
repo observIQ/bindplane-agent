@@ -19,12 +19,12 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/observiq/bindplane-agent/internal/measurements"
+	"github.com/observiq/bindplane-otel-collector/internal/measurements"
 
-	"github.com/observiq/bindplane-agent/collector"
-	"github.com/observiq/bindplane-agent/internal/version"
-	"github.com/observiq/bindplane-agent/opamp"
-	"github.com/observiq/bindplane-agent/opamp/observiq"
+	"github.com/observiq/bindplane-otel-collector/collector"
+	"github.com/observiq/bindplane-otel-collector/internal/version"
+	"github.com/observiq/bindplane-otel-collector/opamp"
+	"github.com/observiq/bindplane-otel-collector/opamp/observiq"
 	"go.uber.org/zap"
 )
 

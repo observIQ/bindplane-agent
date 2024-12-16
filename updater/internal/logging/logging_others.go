@@ -21,7 +21,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/observiq/bindplane-agent/updater/internal/path"
+	"github.com/observiq/bindplane-otel-collector/updater/internal/path"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )

@@ -4,10 +4,10 @@
 
 To install the agent on Windows run the Powershell command below to install the MSI with no UI.
 ```pwsh
-msiexec /i "https://github.com/observIQ/bindplane-agent/releases/latest/download/observiq-otel-collector.msi" /quiet
+msiexec /i "https://github.com/observIQ/bindplane-otel-collector/releases/latest/download/observiq-otel-collector.msi" /quiet
 ```
 
-Alternately, for an interactive installation [download the latest MSI](https://github.com/observIQ/bindplane-agent/releases/latest).
+Alternately, for an interactive installation [download the latest MSI](https://github.com/observIQ/bindplane-otel-collector/releases/latest).
 
 After downloading the MSI, simply double click it to open the installation wizard. Follow the instructions to configure and install the agent.
 
@@ -18,7 +18,7 @@ Installation artifacts are signed. Information on verifying the signature can be
 To install the agent with an OpAMP connection configuration set the following flags. 
 
 ```sh
-msiexec /i "https://github.com/observIQ/bindplane-agent/releases/latest/download/observiq-otel-collector.msi" /quiet ENABLEMANAGEMENT=1 OPAMPENDPOINT=<your_endpoint> OPAMPSECRETKEY=<secret-key>
+msiexec /i "https://github.com/observIQ/bindplane-otel-collector/releases/latest/download/observiq-otel-collector.msi" /quiet ENABLEMANAGEMENT=1 OPAMPENDPOINT=<your_endpoint> OPAMPSECRETKEY=<secret-key>
 ```
 
 To read more about the generated connection configuration file see [OpAMP docs](./opamp.md).

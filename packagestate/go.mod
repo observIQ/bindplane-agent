@@ -1,4 +1,4 @@
-module github.com/observiq/bindplane-agent/packagestate
+module github.com/observiq/bindplane-otel-collector/packagestate
 
 go 1.22.7
 

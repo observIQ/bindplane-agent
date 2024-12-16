@@ -15,14 +15,14 @@
 package factories
 
 import (
-	"github.com/observiq/bindplane-agent/exporter/azureblobexporter"
-	"github.com/observiq/bindplane-agent/exporter/chronicleexporter"
-	"github.com/observiq/bindplane-agent/exporter/chronicleforwarderexporter"
-	"github.com/observiq/bindplane-agent/exporter/googlecloudexporter"
-	"github.com/observiq/bindplane-agent/exporter/googlemanagedprometheusexporter"
-	"github.com/observiq/bindplane-agent/exporter/qradar"
-	"github.com/observiq/bindplane-agent/exporter/snowflakeexporter"
-	"github.com/observiq/bindplane-agent/internal/version"
+	"github.com/observiq/bindplane-otel-collector/exporter/azureblobexporter"
+	"github.com/observiq/bindplane-otel-collector/exporter/chronicleexporter"
+	"github.com/observiq/bindplane-otel-collector/exporter/chronicleforwarderexporter"
+	"github.com/observiq/bindplane-otel-collector/exporter/googlecloudexporter"
+	"github.com/observiq/bindplane-otel-collector/exporter/googlemanagedprometheusexporter"
+	"github.com/observiq/bindplane-otel-collector/exporter/qradar"
+	"github.com/observiq/bindplane-otel-collector/exporter/snowflakeexporter"
+	"github.com/observiq/bindplane-otel-collector/internal/version"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/alibabacloudlogserviceexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/awscloudwatchlogsexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/awsemfexporter"

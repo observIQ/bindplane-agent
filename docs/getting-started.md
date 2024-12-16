@@ -14,13 +14,13 @@ Please note that the agent must be installed on the system which you wish to col
 #### Windows:
 
 ```batch
-msiexec /i "https://github.com/observIQ/bindplane-agent/releases/latest/download/observiq-otel-collector.msi" /quiet
+msiexec /i "https://github.com/observIQ/bindplane-otel-collector/releases/latest/download/observiq-otel-collector.msi" /quiet
 ```
 
 #### Linux:
 
 ```shell
-sudo sh -c "$(curl -fsSlL https://github.com/observiq/bindplane-agent/releases/latest/download/install_unix.sh)" install_unix.sh
+sudo sh -c "$(curl -fsSlL https://github.com/observIQ/bindplane-otel-collector/releases/latest/download/install_unix.sh)" install_unix.sh
 ```
 
 For more details on installation, see our [Linux](/docs/installation-linux.md), [Windows](/docs/installation-windows.md), and [Mac](/docs/installation-mac.md) installation guides.
