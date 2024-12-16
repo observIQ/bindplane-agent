@@ -13,7 +13,7 @@
 // limitations under the License.
 
 // Package rehydration contains interfaces and implementations used across all rehydration receivers
-package rehydration //import "github.com/observiq/bindplane-agent/internal/rehydration"
+package rehydration //import "github.com/observiq/bindplane-otel-collector/internal/rehydration"
 
 import (
 	"context"

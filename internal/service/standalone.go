@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/observiq/bindplane-agent/collector"
+	"github.com/observiq/bindplane-otel-collector/collector"
 )
 
 // StandaloneCollectorService is a RunnableService that runs the collector in standalone mode.

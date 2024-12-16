@@ -1,9 +1,9 @@
-module github.com/observiq/bindplane-agent/plugindocgen
+module github.com/observiq/bindplane-otel-collector/plugindocgen
 
 go 1.22.7
 
 require (
-	github.com/observiq/bindplane-agent/receiver/pluginreceiver v1.66.0
+	github.com/observiq/bindplane-otel-collector/receiver/pluginreceiver v1.66.0
 	github.com/spf13/pflag v1.0.5
 	gopkg.in/yaml.v3 v3.0.1
 )
@@ -124,4 +124,4 @@ require (
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
 
-replace github.com/observiq/bindplane-agent/receiver/pluginreceiver => ../../receiver/pluginreceiver
+replace github.com/observiq/bindplane-otel-collector/receiver/pluginreceiver => ../../receiver/pluginreceiver

@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package rehydration //import "github.com/observiq/bindplane-agent/internal/rehydration"
+package rehydration //import "github.com/observiq/bindplane-otel-collector/internal/rehydration"
 
 import (
 	"context"
 	"testing"
 
-	"github.com/observiq/bindplane-agent/internal/testutils"
+	"github.com/observiq/bindplane-otel-collector/internal/testutils"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/consumer/consumertest"
 )

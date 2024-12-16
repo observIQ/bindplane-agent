@@ -23,8 +23,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/observiq/bindplane-agent/factories"
-	"github.com/observiq/bindplane-agent/internal/measurements"
+	"github.com/observiq/bindplane-otel-collector/factories"
+	"github.com/observiq/bindplane-otel-collector/internal/measurements"
 	"go.opentelemetry.io/collector/otelcol"
 	"go.uber.org/zap"
 )
