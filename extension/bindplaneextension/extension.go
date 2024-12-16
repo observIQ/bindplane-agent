@@ -39,7 +39,6 @@ type bindplaneExtension struct {
 	topologyRegistry                  *topology.ResettableTopologyRegistry
 	customCapabilityHandlerThroughput opampcustommessages.CustomCapabilityHandler
 	customCapabilityHandlerTopology   opampcustommessages.CustomCapabilityHandler
-	topologyInterval                  time.Duration
 
 	doneChan chan struct{}
 	wg       *sync.WaitGroup
@@ -70,16 +69,9 @@ func (b *bindplaneExtension) Start(ctx context.Context, host component.Host) err
 			b.wg.Add(1)
 			go b.reportMetricsLoop()
 		}
-		select {
-		case <-ctx.Done():
-			return nil
-		case b.topologyInterval = <-b.topologyRegistry.SetIntervalChan():
-			if b.topologyInterval > 0 {
-				b.wg.Add(1)
-				go b.reportTopologyLoop()
-			}
-			return nil
-		}
+
+		b.wg.Add(1)
+		go b.reportTopologyLoop()
 	}
 
 	return nil
@@ -176,7 +168,17 @@ func (b *bindplaneExtension) reportMetrics() error {
 func (b *bindplaneExtension) reportTopologyLoop() {
 	defer b.wg.Done()
 
-	t := time.NewTicker(b.topologyInterval)
+	var topologyInterval time.Duration
+	select {
+	case <-b.doneChan:
+		return
+	case topologyInterval = <-b.topologyRegistry.SetIntervalChan():
+		if topologyInterval <= 0 {
+			return
+		}
+	}
+
+	t := time.NewTicker(topologyInterval)
 	defer t.Stop()
 
 	for {
