@@ -33,6 +33,8 @@ import (
 	"golang.org/x/oauth2"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/credentials/oauth"
 	grpcgzip "google.golang.org/grpc/encoding/gzip"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/encoding/protojson"
@@ -244,14 +246,38 @@ func (ce *chronicleExporter) uploadToChronicleHTTP(ctx context.Context, logs *ap
 	defer resp.Body.Close()
 
 	respBody, err := io.ReadAll(resp.Body)
-	if resp.StatusCode != http.StatusOK {
-		if err != nil {
-			ce.set.Logger.Warn("Failed to read response body", zap.Error(err))
-		} else {
-			ce.set.Logger.Warn("Received non-OK response from Chronicle", zap.String("status", resp.Status), zap.ByteString("response", respBody))
-		}
-		return fmt.Errorf("received non-OK response from Chronicle: %s", resp.Status)
+	if err == nil && resp.StatusCode == http.StatusOK {
+		return nil
 	}
 
-	return nil
+	if err != nil {
+		ce.set.Logger.Warn("Failed to read response body", zap.Error(err))
+	} else {
+		ce.set.Logger.Warn("Received non-OK response from Chronicle", zap.String("status", resp.Status), zap.ByteString("response", respBody))
+	}
+
+	// TODO interpret with https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/internal/coreinternal/errorutil/http.go
+	statusErr := fmt.Errorf("upload logs to chronicle: %s", resp.Status)
+	switch resp.StatusCode {
+	case http.StatusInternalServerError, http.StatusServiceUnavailable: // potentially transient
+		return statusErr
+	default:
+		return consumererror.NewPermanent(statusErr)
+	}
+}
+
+// Override for testing
+var grpcClientParams = func(cfgEndpoint string, ts oauth2.TokenSource) (string, []grpc.DialOption) {
+	return cfgEndpoint + ":443", []grpc.DialOption{
+		grpc.WithPerRPCCredentials(oauth.TokenSource{TokenSource: ts}),
+		grpc.WithTransportCredentials(credentials.NewClientTLSFromCert(nil, "")),
+	}
+}
+
+// This uses the DataPlane URL for the request
+// URL for the request: https://{region}-chronicle.googleapis.com/{version}/projects/{project}/location/{region}/instances/{customerID}
+// Override for testing
+var httpEndpoint = func(cfg *Config, logType string) string {
+	formatString := "https://%s-%s/v1alpha/projects/%s/locations/%s/instances/%s/logTypes/%s/logs:import"
+	return fmt.Sprintf(formatString, cfg.Location, cfg.Endpoint, cfg.Project, cfg.Location, cfg.CustomerID, logType)
 }
