@@ -48,13 +48,11 @@ import (
 const (
 	grpcScope = "https://www.googleapis.com/auth/malachite-ingestion"
 	httpScope = "https://www.googleapis.com/auth/cloud-platform"
-
-	baseEndpoint = "malachiteingestion-pa.googleapis.com"
 )
 
 type chronicleExporter struct {
 	cfg                     *Config
-	logger                  *zap.Logger
+	set                     component.TelemetrySettings
 	marshaler               logMarshaler
 	collectorID, exporterID string
 
@@ -63,7 +61,7 @@ type chronicleExporter struct {
 	grpcConn   *grpc.ClientConn
 	wg         sync.WaitGroup
 	cancel     context.CancelFunc
-	metrics    *exporterMetrics
+	metrics    *hostMetricsReporter
 
 	// fields used for HTTP
 	httpClient *http.Client
@@ -87,8 +85,8 @@ func newExporter(cfg *Config, params exporter.Settings, collectorID, exporterID 
 
 	return &chronicleExporter{
 		cfg:         cfg,
-		logger:      params.Logger,
-		metrics:     newExporterMetrics(uuidCID[:], customerID[:], exporterID, cfg.Namespace),
+		set:         params.TelemetrySettings,
+		metrics:     newHostMetricsReporter(uuidCID[:], customerID[:], exporterID, cfg.Namespace),
 		marshaler:   marshaller,
 		collectorID: collectorID,
 		exporterID:  exporterID,
@@ -240,12 +238,12 @@ func (ce *chronicleExporter) startHostMetricsCollection(ctx context.Context) {
 		case <-ticker.C:
 			err := ce.metrics.collectHostMetrics()
 			if err != nil {
-				ce.logger.Error("Failed to collect host metrics", zap.Error(err))
+				ce.set.Logger.Error("Failed to collect host metrics", zap.Error(err))
 			}
 			request := ce.metrics.getAndReset()
 			_, err = ce.grpcClient.BatchCreateEvents(ctx, request, ce.buildOptions()...)
 			if err != nil {
-				ce.logger.Error("Failed to upload host metrics", zap.Error(err))
+				ce.set.Logger.Error("Failed to upload host metrics", zap.Error(err))
 			}
 		}
 	}
@@ -319,9 +317,9 @@ func (ce *chronicleExporter) uploadToChronicleHTTP(ctx context.Context, logs *ap
 	respBody, err := io.ReadAll(resp.Body)
 	if resp.StatusCode != http.StatusOK {
 		if err != nil {
-			ce.logger.Warn("Failed to read response body", zap.Error(err))
+			ce.set.Logger.Warn("Failed to read response body", zap.Error(err))
 		} else {
-			ce.logger.Warn("Received non-OK response from Chronicle", zap.String("status", resp.Status), zap.ByteString("response", respBody))
+			ce.set.Logger.Warn("Received non-OK response from Chronicle", zap.String("status", resp.Status), zap.ByteString("response", respBody))
 		}
 		return fmt.Errorf("received non-OK response from Chronicle: %s", resp.Status)
 	}
