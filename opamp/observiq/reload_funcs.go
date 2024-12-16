@@ -114,6 +114,7 @@ func managerReload(client *Client, managerConfigPath string) opamp.ReloadFunc {
 func collectorReload(client *Client, collectorConfigPath string) opamp.ReloadFunc {
 	return func(contents []byte) (bool, error) {
 		rollbackFunc, cleanupFunc, err := prepRollback(collectorConfigPath)
+		client.logger.Debug("Rollback prepped", zap.String("collectorConfigPath", collectorConfigPath))
 		if err != nil {
 			return false, fmt.Errorf("failed to prep for rollback: %w", err)
 		}
@@ -129,15 +130,18 @@ func collectorReload(client *Client, collectorConfigPath string) opamp.ReloadFun
 		if err := updateConfigFile(CollectorConfigName, collectorConfigPath, contents); err != nil {
 			return false, err
 		}
-
+		client.logger.Debug("Config file updated", zap.String("name", CollectorConfigName), zap.String("collectorConfigPath", collectorConfigPath))
 		// Stop collector monitoring as we are going to restart it
 		client.stopCollectorMonitoring()
 
+		client.logger.Debug("Collector monitoring stopped")
 		// Setup new monitoring after collector has been restarted
 		defer client.startCollectorMonitoring(context.Background())
 
 		// Reload collector
 		if err := client.collector.Restart(context.Background()); err != nil {
+			client.logger.Debug("OTEL Collector restart error", zap.Error(err))
+
 			// Rollback file
 			if rollbackErr := rollbackFunc(); rollbackErr != nil {
 				client.logger.Error("Rollback failed for collector config", zap.Error(rollbackErr))
@@ -150,9 +154,10 @@ func collectorReload(client *Client, collectorConfigPath string) opamp.ReloadFun
 
 			return false, fmt.Errorf("collector failed to restart: %w", err)
 		}
-
+		client.logger.Debug("OTEL Collector restarted")
 		// Reset Snapshot Reporter
 		report.GetSnapshotReporter().Reset()
+		client.logger.Debug("Snapshot reporter reset")
 
 		return true, nil
 	}
