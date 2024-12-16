@@ -24,7 +24,6 @@ import (
 	"net/http"
 	"os"
 	"sync"
-	"time"
 
 	"github.com/google/uuid"
 	"github.com/observiq/bindplane-agent/exporter/chronicleexporter/protos/api"
@@ -53,10 +52,10 @@ const (
 )
 
 type chronicleExporter struct {
-	cfg                     *Config
-	set                     component.TelemetrySettings
-	marshaler               logMarshaler
-	collectorID, exporterID string
+	cfg        *Config
+	set        component.TelemetrySettings
+	marshaler  logMarshaler
+	exporterID string
 
 	// fields used for gRPC
 	grpcClient api.IngestionServiceV2Client
@@ -69,7 +68,7 @@ type chronicleExporter struct {
 	httpClient *http.Client
 }
 
-func newExporter(cfg *Config, params exporter.Settings, collectorID, exporterID string) (*chronicleExporter, error) {
+func newExporter(cfg *Config, params exporter.Settings, exporterID string) (*chronicleExporter, error) {
 	customerID, err := uuid.Parse(cfg.CustomerID)
 	if err != nil {
 		return nil, fmt.Errorf("parse customer ID: %w", err)
@@ -78,11 +77,6 @@ func newExporter(cfg *Config, params exporter.Settings, collectorID, exporterID 
 	marshaller, err := newProtoMarshaler(*cfg, params.TelemetrySettings, customerID[:])
 	if err != nil {
 		return nil, fmt.Errorf("create proto marshaller: %w", err)
-	}
-
-	uuidCID, err := uuid.Parse(collectorID)
-	if err != nil {
-		return nil, fmt.Errorf("parse collector ID: %w", err)
 	}
 
 	return &chronicleExporter{
@@ -119,10 +113,16 @@ func (ce *chronicleExporter) Start(_ context.Context, _ component.Host) error {
 	ce.grpcClient = api.NewIngestionServiceV2Client(conn)
 
 	if ce.cfg.CollectAgentMetrics {
-		ctx, cancel := context.WithCancel(context.Background())
-		ce.cancel = cancel
-		ce.wg.Add(1)
-		go ce.startHostMetricsCollection(ctx)
+		f := func(ctx context.Context, request *api.BatchCreateEventsRequest) error {
+			_, err := ce.grpcClient.BatchCreateEvents(ctx, request)
+			return err
+		}
+		metrics, err := newHostMetricsReporter(ce.cfg, ce.set, ce.exporterID, f)
+		if err != nil {
+			return fmt.Errorf("create metrics reporter: %w", err)
+		}
+		ce.metrics = metrics
+		ce.metrics.start()
 	}
 
 	return nil
@@ -137,9 +137,8 @@ func (ce *chronicleExporter) Shutdown(context.Context) error {
 		}
 		return nil
 	}
-	if ce.cancel != nil {
-		ce.cancel()
-		ce.wg.Wait()
+	if ce.metrics != nil {
+		ce.metrics.shutdown()
 	}
 	if ce.grpcConn != nil {
 		if err := ce.grpcConn.Close(); err != nil {
@@ -194,7 +193,10 @@ func (ce *chronicleExporter) logsDataPusher(ctx context.Context, ld plog.Logs) e
 }
 
 func (ce *chronicleExporter) uploadToChronicle(ctx context.Context, request *api.BatchCreateLogsRequest) error {
-	totalLogs := int64(len(request.GetBatch().GetEntries()))
+	if ce.metrics != nil {
+		totalLogs := int64(len(request.GetBatch().GetEntries()))
+		defer ce.metrics.recordSent(totalLogs)
+	}
 
 	_, err := ce.grpcClient.BatchCreateLogs(ctx, request, ce.buildOptions()...)
 	if err != nil {
@@ -212,8 +214,6 @@ func (ce *chronicleExporter) uploadToChronicle(ctx context.Context, request *api
 		}
 	}
 
-	ce.metrics.addSentLogs(totalLogs)
-	ce.metrics.updateLastSuccessfulUpload()
 	return nil
 }
 
@@ -225,30 +225,6 @@ func (ce *chronicleExporter) buildOptions() []grpc.CallOption {
 	}
 
 	return opts
-}
-
-func (ce *chronicleExporter) startHostMetricsCollection(ctx context.Context) {
-	ticker := time.NewTicker(5 * time.Minute)
-	defer ticker.Stop()
-
-	defer ce.wg.Done()
-
-	for {
-		select {
-		case <-ctx.Done():
-			return
-		case <-ticker.C:
-			err := ce.metrics.collectHostMetrics()
-			if err != nil {
-				ce.set.Logger.Error("Failed to collect host metrics", zap.Error(err))
-			}
-			request := ce.metrics.getAndReset()
-			_, err = ce.grpcClient.BatchCreateEvents(ctx, request, ce.buildOptions()...)
-			if err != nil {
-				ce.set.Logger.Error("Failed to upload host metrics", zap.Error(err))
-			}
-		}
-	}
 }
 
 func (ce *chronicleExporter) logsHTTPDataPusher(ctx context.Context, ld plog.Logs) error {
