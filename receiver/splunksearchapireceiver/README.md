@@ -8,6 +8,9 @@ This receiver collects Splunk events using the [Splunk Search API](https://docs.
 - Splunk admin credentials
 - Configured storage extension
 
+## Use Case
+Unlike other receivers, the SSAPI receiver is not built to collect live data. Instead, it collects a finite set of historical data and transfers it to a destination, preserving the timestamp from the source. For this reason, the SSAPI recevier only needs to be left running until all Splunk events have been migrated, which is denoted by the log message: "all search results exported". Until this log message or some other error is printed, avoid cancelling the collector for any reason, as it will unnecessarily interfere with the receiver's ability to protect against writing duplicate events.
+
 ## Configuration
 | Field               | Type     | Default                                                                                         | Description                                                                                                                                                             |
 |---------------------|----------|-------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------|

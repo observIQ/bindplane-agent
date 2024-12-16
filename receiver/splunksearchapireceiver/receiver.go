@@ -137,6 +137,11 @@ func (ssapir *splunksearchapireceiver) runQueries(ctx context.Context) {
 		}
 
 		for {
+			if ctx.Err() != nil {
+				ssapir.logger.Error("context cancelled, stopping search result export", zap.Error(ctx.Err()))
+				return
+			}
+
 			ssapir.logger.Info("fetching search results")
 			results, err := ssapir.getSplunkSearchResults(searchID, offset, search.EventBatchSize)
 			if err != nil {
@@ -226,7 +231,7 @@ func (ssapir *splunksearchapireceiver) pollSearchCompletion(ctx context.Context,
 			}
 			ssapir.logger.Debug("search not completed yet")
 		case <-ctx.Done():
-			return nil
+			return ctx.Err()
 		}
 	}
 }
