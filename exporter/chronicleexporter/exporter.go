@@ -21,8 +21,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"sync"
-	"time"
 
 	"github.com/google/uuid"
 	"github.com/observiq/bindplane-agent/exporter/chronicleexporter/protos/api"
@@ -48,17 +46,15 @@ const (
 )
 
 type chronicleExporter struct {
-	cfg                     *Config
-	set                     component.TelemetrySettings
-	marshaler               logMarshaler
-	collectorID, exporterID string
+	cfg        *Config
+	set        component.TelemetrySettings
+	marshaler  logMarshaler
+	exporterID string
 
 	// fields used for gRPC
 	grpcClient api.IngestionServiceV2Client
 	grpcConn   *grpc.ClientConn
-	wg         sync.WaitGroup
-	cancel     context.CancelFunc
-	metrics    *exporterMetrics
+	metrics    *hostMetricsReporter
 
 	// fields used for HTTP
 	httpClient *http.Client
@@ -76,12 +72,10 @@ func newExporter(cfg *Config, params exporter.Settings, exporterID string) (*chr
 	}
 
 	return &chronicleExporter{
-		cfg:         cfg,
-		set:         params.TelemetrySettings,
-		metrics:     newHostMetricsReporter(uuidCID[:], customerID[:], exporterID, cfg.Namespace),
-		marshaler:   marshaller,
-		collectorID: collectorID,
-		exporterID:  exporterID,
+		cfg:        cfg,
+		set:        params.TelemetrySettings,
+		marshaler:  marshaller,
+		exporterID: exporterID,
 	}, nil
 }
 
@@ -192,30 +186,6 @@ func (ce *chronicleExporter) buildOptions() []grpc.CallOption {
 	}
 
 	return opts
-}
-
-func (ce *chronicleExporter) startHostMetricsCollection(ctx context.Context) {
-	ticker := time.NewTicker(5 * time.Minute)
-	defer ticker.Stop()
-
-	defer ce.wg.Done()
-
-	for {
-		select {
-		case <-ctx.Done():
-			return
-		case <-ticker.C:
-			err := ce.metrics.collectHostMetrics()
-			if err != nil {
-				ce.set.Logger.Error("Failed to collect host metrics", zap.Error(err))
-			}
-			request := ce.metrics.getAndReset()
-			_, err = ce.grpcClient.BatchCreateEvents(ctx, request, ce.buildOptions()...)
-			if err != nil {
-				ce.set.Logger.Error("Failed to upload host metrics", zap.Error(err))
-			}
-		}
-	}
 }
 
 func (ce *chronicleExporter) logsHTTPDataPusher(ctx context.Context, ld plog.Logs) error {
