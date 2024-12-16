@@ -55,7 +55,7 @@ func newBindplaneExtension(logger *zap.Logger, cfg *Config) *bindplaneExtension 
 	}
 }
 
-func (b *bindplaneExtension) Start(ctx context.Context, host component.Host) error {
+func (b *bindplaneExtension) Start(_ context.Context, host component.Host) error {
 	var emptyComponentID component.ID
 
 	// Set up custom capabilities if enabled
