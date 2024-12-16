@@ -100,11 +100,13 @@ func (ssapir *splunksearchapireceiver) Shutdown(ctx context.Context) error {
 		ssapir.cancel()
 	}
 
-	if err := ssapir.checkpoint(ctx); err != nil {
-		ssapir.logger.Error("failed checkpoint", zap.Error(err))
+	if ssapir.storageClient != nil {
+		if err := ssapir.checkpoint(ctx); err != nil {
+			ssapir.logger.Error("failed checkpoint", zap.Error(err))
+		}
+		return ssapir.storageClient.Close(ctx)
 	}
-
-	return ssapir.storageClient.Close(ctx)
+	return nil
 }
 
 func (ssapir *splunksearchapireceiver) runQueries(ctx context.Context) {
@@ -188,7 +190,6 @@ func (ssapir *splunksearchapireceiver) runQueries(ctx context.Context) {
 				// error from down the pipeline, freak out
 				ssapir.logger.Error("error exporting logs", zap.Error(err))
 				return
-
 			}
 			// last batch of logs has been successfully exported
 			exportedEvents += logs.ResourceLogs().Len()
