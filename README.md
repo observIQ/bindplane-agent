@@ -83,7 +83,9 @@ Tested, verified, and supported by observIQ.
 
 ## Getting Started
 
-For more detailed installation instructions view the [Getting Started](/docs/getting-started.md) guide.
+Follow the [Getting Started](/docs/getting-started.md) guide for more detailed installation instructions, or view the list of [Supported Operating System Versions](https://observiq.com/docs/advanced-setup/installation/install-agent).
+
+To continue with the quick start, follow along below.
 
 ### Linux
 
