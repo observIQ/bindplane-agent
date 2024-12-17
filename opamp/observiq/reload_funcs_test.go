@@ -40,7 +40,9 @@ func Test_managerReload(t *testing.T) {
 		{
 			desc: "Invalid new config contents",
 			testFunc: func(*testing.T) {
-				client := &Client{}
+				client := &Client{
+					logger: zap.NewNop(),
+				}
 				reloadFunc := managerReload(client, ManagerConfigName)
 
 				badContents := []byte(`\t\t\t`)
@@ -57,6 +59,7 @@ func Test_managerReload(t *testing.T) {
 
 				managerFilePath := filepath.Join(tmpDir, ManagerConfigName)
 				client := &Client{
+					logger: zap.NewNop(),
 					currentConfig: opamp.Config{
 						Endpoint: "ws://localhost:1234",
 						AgentID:  testAgentID,
@@ -92,6 +95,7 @@ func Test_managerReload(t *testing.T) {
 				mockOpAmpClient.On("SetAgentDescription", mock.Anything).Return(nil)
 
 				client := &Client{
+					logger:             zap.NewNop(),
 					opampClient:        mockOpAmpClient,
 					ident:              newIdentity(zap.NewNop(), *currConfig, "0.0.0"),
 					currentConfig:      *currConfig,
@@ -148,6 +152,7 @@ func Test_managerReload(t *testing.T) {
 				mockOpAmpClient.On("SetAgentDescription", mock.Anything).Return(expectedErr)
 
 				client := &Client{
+					logger:        zap.NewNop(),
 					opampClient:   mockOpAmpClient,
 					ident:         newIdentity(zap.NewNop(), *currConfig, "0.0.0"),
 					currentConfig: *currConfig,
@@ -221,8 +226,8 @@ func Test_collectorReload(t *testing.T) {
 				assert.NoError(t, err)
 
 				client := &Client{
-					collector: mockCollector,
 					logger:    zap.NewNop(),
+					collector: mockCollector,
 				}
 
 				// Setup Context to mock out already running collector monitor
@@ -324,6 +329,7 @@ func Test_loggerReload(t *testing.T) {
 				mockCol.On("Restart", mock.Anything).Return(nil)
 
 				client := &Client{
+					logger:    zap.NewNop(),
 					collector: mockCol,
 				}
 
