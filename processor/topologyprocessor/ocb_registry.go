@@ -19,7 +19,7 @@ package topologyprocessor
 import (
 	"fmt"
 
-	"github.com/observiq/bindplane-agent/internal/topology"
+	"github.com/observiq/bindplane-otel-collector/internal/topology"
 	"go.opentelemetry.io/collector/component"
 )
 

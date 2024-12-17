@@ -199,8 +199,8 @@ require (
 )
 
 require (
-	github.com/observiq/bindplane-agent/internal/topology v1.67.0
-	github.com/observiq/bindplane-agent/processor/topologyprocessor v1.67.0
+	github.com/observiq/bindplane-otel-collector/internal/topology v1.67.0
+	github.com/observiq/bindplane-otel-collector/processor/topologyprocessor v1.67.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/confmap/provider/aesprovider v0.114.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/processor/intervalprocessor v0.114.0
 	go.opentelemetry.io/collector/extension/extensiontest v0.114.0
@@ -882,7 +882,7 @@ replace github.com/observiq/bindplane-otel-collector/internal/report => ./intern
 
 replace github.com/observiq/bindplane-otel-collector/internal/measurements => ./internal/measurements
 
-replace github.com/observiq/bindplane-agent/internal/topology => ./internal/topology
+replace github.com/observiq/bindplane-otel-collector/internal/topology => ./internal/topology
 
 replace github.com/observiq/bindplane-otel-collector/receiver/splunksearchapireceiver => ./receiver/splunksearchapireceiver
 

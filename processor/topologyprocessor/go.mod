@@ -1,4 +1,4 @@
-module github.com/observiq/bindplane-agent/processor/topologyprocessor
+module github.com/observiq/bindplane-otel-collector/processor/topologyprocessor
 
 go 1.22.6
 
@@ -27,7 +27,7 @@ require (
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
-	github.com/observiq/bindplane-agent/internal/topology v0.0.0-00010101000000-000000000000
+	github.com/observiq/bindplane-otel-collector/internal/topology v0.0.0-00010101000000-000000000000
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest v0.114.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatautil v0.114.0 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
@@ -53,4 +53,4 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace github.com/observiq/bindplane-agent/internal/topology => ../../internal/topology
+replace github.com/observiq/bindplane-otel-collector/internal/topology => ../../internal/topology

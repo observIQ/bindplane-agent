@@ -21,7 +21,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/observiq/bindplane-agent/internal/topology"
+	"github.com/observiq/bindplane-otel-collector/internal/topology"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/pdata/plog"
 	"go.opentelemetry.io/collector/pdata/pmetric"
