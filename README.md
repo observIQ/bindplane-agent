@@ -9,7 +9,7 @@
 </a>
 
 <p align="center">
-  The BindPlane Agent is observIQ’s distribution of the upstream <a href="https://github.com/open-telemetry/opentelemetry-collector">OpenTelemetry Collector</a>. It’s the first distribution to implement the <a href="https://opentelemetry.io/docs/specs/opamp/">Open Agent Management Protocol</a> (OpAMP) and is designed to be fully managed with <a href="https://observiq.com/">BindPlane Telemetry Pipeline</a>.
+  The BindPlane Distro for OpenTelemetry Collector (BDOT Collector) is observIQ’s distribution of the upstream <a href="https://github.com/open-telemetry/opentelemetry-collector">OpenTelemetry Collector</a>. It’s the first distribution to implement the <a href="https://opentelemetry.io/docs/specs/opamp/">Open Agent Management Protocol</a> (OpAMP) and is designed to be fully managed with <a href="https://observiq.com/">BindPlane Telemetry Pipeline</a>.
 </p>
 
 <b>
@@ -34,14 +34,14 @@
 
 <!-- badges -->
 <p align="center">
-  <a href="https://github.com/observIQ/bindplane-agent/actions">
-    <img src="https://github.com/observIQ/bindplane-agent/workflows/Build/badge.svg" alt="Action Status">
+  <a href="https://github.com/observIQ/bindplane-otel-collector/actions">
+    <img src="https://github.com/observIQ/bindplane-otel-collector/workflows/Build/badge.svg" alt="Action Status">
   </a>
-  <a href="https://github.com/observIQ/bindplane-agent/actions">
-    <img src="https://github.com/observIQ/bindplane-agent/workflows/Tests/badge.svg" alt="Action Test Status">
+  <a href="https://github.com/observIQ/bindplane-otel-collector/actions">
+    <img src="https://github.com/observIQ/bindplane-otel-collector/workflows/Tests/badge.svg" alt="Action Test Status">
   </a>
-  <a href="https://goreportcard.com/report/github.com/observIQ/bindplane-agent">
-    <img src="https://goreportcard.com/badge/github.com/observIQ/bindplane-agent" alt="Go Report Card">
+  <a href="https://goreportcard.com/report/github.com/observIQ/bindplane-otel-collector">
+    <img src="https://goreportcard.com/badge/github.com/observIQ/bindplane-otel-collector" alt="Go Report Card">
   </a>
   <a href="https://opensource.org/licenses/Apache-2.0">
     <img src="https://img.shields.io/badge/License-Apache_2.0-blue.svg" alt="License">
@@ -53,11 +53,11 @@
 </p>
 <p align="center">
   <i>
-    Learn how to connect BindPlane Agent to telemetry <a href="https://observiq.com/docs/resources/sources">sources</a> and <a href="https://observiq.com/docs/resources/destinations">destinations</a>, and use <a href="https://observiq.com/docs/resources/processors">processors</a> to transform data.
+    Learn how to connect BindPlane Distro for OpenTelemetry Collector to telemetry <a href="https://observiq.com/docs/resources/sources">sources</a> and <a href="https://observiq.com/docs/resources/destinations">destinations</a>, and use <a href="https://observiq.com/docs/resources/processors">processors</a> to transform data.
   </i>
 </p>
 
-## Why BindPlane Agent?
+## Why BindPlane Distro for OpenTelemetry Collector?
 
 If you're managing telemetry at scale you'll run in to these problems sooner or later:
 
@@ -67,7 +67,7 @@ If you're managing telemetry at scale you'll run in to these problems sooner or 
 
 ### An OpenTelemetry Collector you're used to
 
-The BindPlane Agent is observIQ’s distribution of the upstream [OpenTelemetry Collector](https://github.com/open-telemetry/opentelemetry-collector). It’s the first distribution to implement the [Open Agent Management Protocol](https://opentelemetry.io/docs/specs/opamp/) (OpAMP) and is designed to be fully managed with [BindPlane Telemetry Pipeline](https://observiq.com/solutions).
+The BDOT Collector is observIQ’s distribution of the upstream [OpenTelemetry Collector](https://github.com/open-telemetry/opentelemetry-collector). It’s the first distribution to implement the [Open Agent Management Protocol](https://opentelemetry.io/docs/specs/opamp/) (OpAMP) and is designed to be fully managed with [BindPlane Telemetry Pipeline](https://observiq.com/solutions).
 
 ### Focused on usability
 
@@ -89,43 +89,43 @@ To continue with the quick start, follow along below.
 
 ### Linux
 
-Install BindPlane Agent using the installation script below.
+Install BDOT Collector using the installation script below.
 
 ```sh
-sudo sh -c "$(curl -fsSlL https://github.com/observiq/bindplane-agent/releases/latest/download/install_unix.sh)" install_unix.sh
+sudo sh -c "$(curl -fsSlL https://github.com/observiq/bindplane-otel-collector/releases/latest/download/install_unix.sh)" install_unix.sh
 ```
 
 To install directly with the appropriate package manager, and how to configure OpAMP, see [installing on Linux](/docs/installation-linux.md).
 
 ### Windows
 
-To install the BindPlane Agent on Windows run the Powershell command below to install the MSI with no UI.
+To install the BDOT Collector on Windows run the Powershell command below to install the MSI with no UI.
 
 ```pwsh
-msiexec /i "https://github.com/observIQ/bindplane-agent/releases/latest/download/observiq-otel-collector.msi" /quiet
+msiexec /i "https://github.com/observIQ/bindplane-otel-collector/releases/latest/download/observiq-otel-collector.msi" /quiet
 ```
 
-Alternately, for an interactive installation [download the latest MSI](https://github.com/observIQ/bindplane-agent/releases/latest).
+Alternately, for an interactive installation [download the latest MSI](https://github.com/observIQ/bindplane-otel-collector/releases/latest).
 
-After downloading the MSI, simply double click it to open the installation wizard. Follow the instructions to configure and install the agent.
+After downloading the MSI, simply double click it to open the installation wizard. Follow the instructions to configure and install the BDOT Collector.
 
 For more installation information, and how to configure OpAMP, see [installing on Windows](/docs/installation-windows.md).
 
 ### macOS
 
-Install BindPlane Agent using the installation script below.
+Install BDOT Collector using the installation script below.
 
 ```sh
-sudo sh -c "$(curl -fsSlL https://github.com/observiq/bindplane-agent/releases/latest/download/install_macos.sh)" install_macos.sh
+sudo sh -c "$(curl -fsSlL https://github.com/observiq/bindplane-otel-collector/releases/latest/download/install_macos.sh)" install_macos.sh
 ```
 
 For more installation information, and how to configure OpAMP, see [installing on macOS](/docs/installation-mac.md).
 
 ## Next Steps
 
-### BindPlane Agent default `config.yaml`
+### BDOT Collector default `config.yaml`
 
-With the BindPlane Agent installed, it will start collecting basic metrics about the host machine printing them to the log. To further configure your agent edit the `config.yaml` file just like you would an OpenTelemetry Collector. To find your `config.yaml` file based on your operating system, reference the table below:
+With the BDOT Collector installed, it will start collecting basic metrics about the host machine printing them to the log. To further configure your collector edit the `config.yaml` file just like you would an OpenTelemetry Collector. To find your `config.yaml` file based on your operating system, reference the table below:
 
 | OS      | Default Location                                              |
 |:--------|:--------------------------------------------------------------|
@@ -135,24 +135,24 @@ With the BindPlane Agent installed, it will start collecting basic metrics about
 
 For more information on configuration see the [Configuration section](#configuration).
 
-### Manage BindPlane Agent with BindPlane Telemetry Pipeline via OpAMP
+### Manage BDOT Collector with BindPlane Telemetry Pipeline via OpAMP
 
 Improving developer experience with OpenTelemetry is observIQ's primary focus. We're building BindPlane Telemetry Pipeline to help deploy and manage OpenTelemetry Collectors at scale, but retain core OpenTelemetry Standards for terminology and configuration, with the added benefit of enabling remote management with OpAMP.
 
-The BindPlane Agent can be configured as an OpenTelemetry Collector that is managed by the BindPlane Telemetry Pipeline via OpAMP. BindPlane is designed to be OpenTelemetry-first, with OpenTelemetry as its core framework. By providing a centralized management plane, it simplifies the development, implementation, management, and configuration of OpenTelemetry.
+The BDOT Collector can be configured as an OpenTelemetry Collector that is managed by the BindPlane Telemetry Pipeline via OpAMP. BindPlane is designed to be OpenTelemetry-first, with OpenTelemetry as its core framework. By providing a centralized management plane, it simplifies the development, implementation, management, and configuration of OpenTelemetry.
 
-For more information on managing agents via OpAMP see the [Connecting to BindPlane Telemetry Pipeline with OpAMP section](#connecting-to-bindplane-telemetry-pipeline-with-opamp).
+For more information on managing collectors via OpAMP see the [Connecting to BindPlane Telemetry Pipeline with OpAMP section](#connecting-to-bindplane-telemetry-pipeline-with-opamp).
 
 ## Configuration
 
-The BindPlane Agent uses OpenTelemetry Collector configuration.
+The BDOT Collector uses OpenTelemetry Collector configuration.
 
 For sample configs, see the [config](/config/) directory.
 For general configuration help, see the [OpenTelemetry docs](https://opentelemetry.io/docs/collector/configuration/).
 
 For configuration options of a specific component, take a look at the README found in their respective module roots. For a list of currently supported components see [Included Components](#included-components).
 
-For a list of possible command line arguments to use with the agent, run the agent with the `--help` argument.
+For a list of possible command line arguments to use with the BDOT Collector, run the collector with the `--help` argument.
 
 ### Included Components
 
@@ -182,7 +182,7 @@ Here's a sample setup for `hostmetrics` on Google Cloud. To make sure your envir
 
 ```yaml
 # Receivers collect metrics from a source. The hostmetrics receiver will get
-# CPU load metrics about the machine the agent is running on every minute.
+# CPU load metrics about the machine the collector is running on every minute.
 receivers:
   hostmetrics:
     collection_interval: 60s
@@ -228,16 +228,16 @@ You can also get started with BindPlane On Prem for free by hosting it yourself.
 
 ## Community
 
-Have an idea to improve BindPlane Agent? Here's how you can help:
+Have an idea to improve the BindPlane Distro for OpenTelemetry Collector? Here's how you can help:
 
 - Star this repo ⭐️ and follow us on [Twitter](https://x.com/bindplane).
 - Upvote issues with 👍 so we know what to prioritize in the road map.
-- [Create issues](https://github.com/observIQ/bindplane-agent/issues) when you feel something is missing or wrong.
+- [Create issues](https://github.com/observIQ/bindplane-otel-collector/issues) when you feel something is missing or wrong.
 - Join our [Slack Community](https://www.launchpass.com/bindplane), and ask us any questions there.
 
 ## Contributing
 
-The BindPlane Agent is an open source project. If you'd like to contribute, take a look at our [contribution guidelines](/CONTRIBUTING.md) and [developer guide](/docs/development.md).
+The BindPlane Distro for OpenTelemetry Collector is an open source project. If you'd like to contribute, take a look at our [contribution guidelines](/CONTRIBUTING.md) and [developer guide](/docs/development.md).
 
 All sorts of contributions are **welcome and extremely helpful**. 🙌
 
