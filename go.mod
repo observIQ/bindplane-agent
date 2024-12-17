@@ -34,6 +34,7 @@ require (
 	github.com/observiq/bindplane-otel-collector/receiver/pluginreceiver v1.67.0
 	github.com/observiq/bindplane-otel-collector/receiver/routereceiver v1.67.0
 	github.com/observiq/bindplane-otel-collector/receiver/sapnetweaverreceiver v1.67.0
+	github.com/observiq/bindplane-otel-collector/receiver/splunksearchapireceiver v1.67.0
 	github.com/observiq/bindplane-otel-collector/receiver/telemetrygeneratorreceiver v1.67.0
 	github.com/oklog/ulid/v2 v2.1.0
 	github.com/open-telemetry/opamp-go v0.17.0
@@ -198,7 +199,6 @@ require (
 )
 
 require (
-	github.com/observiq/bindplane-agent/receiver/splunksearchapireceiver v1.67.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/confmap/provider/aesprovider v0.114.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/processor/intervalprocessor v0.114.0
 	go.opentelemetry.io/collector/extension/extensiontest v0.114.0

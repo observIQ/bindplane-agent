@@ -35,6 +35,7 @@ var (
 // Config struct to represent the configuration for the Splunk Search API receiver
 type Config struct {
 	confighttp.ClientConfig `mapstructure:",squash"`
+	Endpoint                string        `mapstructure:"endpoint"`
 	Username                string        `mapstructure:"splunk_username,omitempty"`
 	Password                string        `mapstructure:"splunk_password,omitempty"`
 	AuthToken               string        `mapstructure:"auth_token,omitempty"`
