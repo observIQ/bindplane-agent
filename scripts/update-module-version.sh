@@ -26,7 +26,7 @@ for local_mod in $LOCAL_MODULES; do
         echo "Updating version in $local_mod"
         cd "$local_mod" || exit 1
         OTEL_MODULES=$(go list -m -f '{{if not (or .Indirect .Main)}}{{.Path}}{{end}}' all |
-            grep -E -e '^github.com/observiq/bindplane-agent')
+            grep -E -e '^github.com/observiq/bindplane-otel-collector')
 
         for mod in $OTEL_MODULES; do
             echo "$local_mod: $mod@$TARGET_VERSION"
