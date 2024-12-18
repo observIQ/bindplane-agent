@@ -25,6 +25,7 @@ go.opentelemetry.io/collector/confmap/provider/fileprovider
 go.opentelemetry.io/collector/confmap/provider/httpsprovider
 go.opentelemetry.io/collector/confmap/provider/yamlprovider
 go.opentelemetry.io/collector/config/confignet
+go.opentelemetry.io/collector/consumer
 EOF
 
 is_stable_module() {
