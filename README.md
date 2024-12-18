@@ -1,4 +1,4 @@
-# BindPlane Agent
+# BDOT
 
 <center>
 
@@ -9,17 +9,20 @@
 
 </center>
 
-The BindPlane Agent is observIQ’s custom distribution of the [OpenTelemetry collector](https://github.com/open-telemetry/opentelemetry-collector) built using the [OpenTelemetry collector builder](https://github.com/open-telemetry/opentelemetry-collector/tree/main/cmd/builder). The [OpenTelemetry supervisor](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/cmd/opampsupervisor) is used to manage the collector (start/stop, apply configurations, etc) and communicate between the collector and [BindPlane OP](https://observiq.com/). To get started, follow our [Quickstart Guide](https://observiq.com/docs/getting-started/quickstart-guide).
+The BDOT is observIQ’s custom distribution of the [OpenTelemetry collector](https://github.com/open-telemetry/opentelemetry-collector) built using the [OpenTelemetry collector builder](https://github.com/open-telemetry/opentelemetry-collector/tree/main/cmd/builder). The [OpenTelemetry supervisor](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/cmd/opampsupervisor) is used to manage the collector (start/stop, apply configurations, etc) and communicate between the collector and [BindPlane OP](https://observiq.com/). To get started, follow our [Quickstart Guide](https://observiq.com/docs/getting-started/quickstart-guide).
 
 ## Benefits
 
 ### Focused on usability
+
 Increases the accessibility of OpenTelemetry by providing simplified installation scripts and end-to-end documentation making it easy to get started
 
 ### All the best parts of OpenTelemetry and more
+
 Bundled with all core OpenTelemetry receivers, processors, and exporters as well as additional capabilities for monitoring complex or enterprise technologies not yet available in upstream releases
- 
+
 ### Always Production-ready and fully-supported
+
 Tested, verified, and supported by observIQ
 
 ## Quick Start
@@ -31,6 +34,7 @@ You'll need a BindPlane server in order to run the collector with the supervisor
 #### Linux
 
 To install using the installation script, you may run:
+
 ```sh
 sudo sh -c "$(curl -fsSlL https://github.com/observIQ/bindplane-otel-collector/releases/latest/download/install_unix.sh)" install_unix.sh
 ```
@@ -39,9 +43,10 @@ To install directly with the appropriate package manager, see [installing on Lin
 
 #### Windows
 
-To install the BindPlane Agent on Windows, run the Powershell command below to install the MSI with no UI.
+To install the BDOT on Windows, run the Powershell command below to install the MSI with no UI.
+
 ```pwsh
-msiexec /i "https://github.com/observIQ/bindplane-otel-collector/releases/latest/download/observiq-otel-collector.msi" /quiet
+msiexec /i "https://github.com/observIQ/bindplane-otel-collector/releases/latest/download/bindplane-otel-collector.msi" /quiet
 ```
 
 Alternately, for an interactive installation [download the latest MSI](https://github.com/observIQ/bindplane-otel-collector/releases/latest).
@@ -67,10 +72,10 @@ With the agent installed, you can use BindPlane to create a configuration and be
 You can edit the supervisor config as needed for communicating with BindPlane and managing the agent. To find your config file based on your OS reference the table below:
 
 | OS      | Default Location                                                  |
-|:--------|:------------------------------------------------------------------|
-| Linux   | /opt/observiq-otel-collector/supervisor.yaml                      |
+| :------ | :---------------------------------------------------------------- |
+| Linux   | /opt/bindplane-otel-collector/supervisor.yaml                     |
 | Windows | C:\Program Files\observIQ OpenTelemetry Collector\supervisor.yaml |
-| macOS   | /opt/observiq-otel-collector/supervisor.yaml                      |
+| macOS   | /opt/bindplane-otel-collector/supervisor.yaml                     |
 
 For more information on supervisor configuration see the [supervisor documentation](./docs/supervisor.md).
 
@@ -78,7 +83,7 @@ For more information on supervisor configuration see the [supervisor documentati
 
 ### Agent
 
-The BindPlane Agent uses OpenTelemetry configuration. Running the agent with the supervisor requires receiving the agent's config from an OpAMP management server, namely BindPlane in this context.
+The BDOT uses OpenTelemetry configuration. Running the agent with the supervisor requires receiving the agent's config from an OpAMP management server, namely BindPlane in this context.
 
 Specific information on managing agents, creating a configuration, and rolling out configs can be found in [BindPlane documentation](https://observiq.com/docs/getting-started/quickstart-guide).
 
@@ -110,7 +115,7 @@ For supported connectors and their documentation see [connectors](/docs/connecto
 
 # Community
 
-The BindPlane Agent is an open source project. If you'd like to contribute, take a look at our [contribution guidelines](/CONTRIBUTING.md) and [developer guide](/docs/development.md). We look forward to building with you.
+The BDOT is an open source project. If you'd like to contribute, take a look at our [contribution guidelines](/CONTRIBUTING.md) and [developer guide](/docs/development.md). We look forward to building with you.
 
 # How can we help?
 
