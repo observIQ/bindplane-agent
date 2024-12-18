@@ -25,6 +25,8 @@ override:
     licenses: ["Apache-2.0"] # Actual license is Apache-2.0 https://github.com/apache/arrow/blob/master/go/LICENSE.txt
   - path: "github.com/apache/arrow/go/v15"
     licenses: ["Apache-2.0"] # Actual license is Apache-2.0 https://github.com/apache/arrow/blob/master/go/LICENSE.txt
+  - path: "github.com/apache/arrow/go/v16"
+    licenses: ["Apache-2.0"] # Actual license is Apache-2.0. Go code was moved to a new rep. https://github.com/apache/arrow-go/blob/main/LICENSE.txt
   - path: "github.com/JohnCGriffin/overflow"
     licenses: ["MIT"] # License is embedded in the readme https://github.com/JohnCGriffin/overflow/blob/master/README.md
 
