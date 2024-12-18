@@ -1195,3 +1195,75 @@ func TestAgentID_UnmarshalYaml(t *testing.T) {
 		require.Equal(t, EmptyAgentID, emptyID)
 	})
 }
+
+func Test_cmpStringPtr(t *testing.T) {
+	strPtr := func(s string) *string {
+		return &s
+	}
+	type args struct {
+		p1 *string
+		p2 *string
+	}
+	tests := []struct {
+		name string
+		args args
+		want bool
+	}{
+
+		{
+			name: "Both nil",
+			args: args{
+				p1: nil,
+				p2: nil,
+			},
+			want: true,
+		},
+		{
+			name: "p1 nil",
+			args: args{
+				p1: nil,
+				p2: strPtr("foo"),
+			},
+			want: false,
+		},
+		{
+			name: "p2 nil",
+			args: args{
+				p1: strPtr("foo"),
+				p2: nil,
+			},
+			want: false,
+		},
+		{
+			name: "Both empty",
+			args: args{
+				p1: strPtr(""),
+				p2: strPtr(""),
+			},
+			want: true,
+		},
+		{
+			name: "Both equal",
+			args: args{
+				p1: strPtr("foo"),
+				p2: strPtr("foo"),
+			},
+			want: true,
+		},
+		{
+			name: "Different",
+			args: args{
+				p1: strPtr("foo"),
+				p2: strPtr("bar"),
+			},
+			want: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := CmpStringPtr(tt.args.p1, tt.args.p2); got != tt.want {
+				t.Errorf("cmpStringPtr() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

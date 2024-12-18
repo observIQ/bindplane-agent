@@ -17,6 +17,7 @@ package observiq
 import (
 	"context"
 	"fmt"
+	"maps"
 	"os"
 	"path/filepath"
 
@@ -41,6 +42,20 @@ func managerReload(client *Client, managerConfigPath string) opamp.ReloadFunc {
 			return false, nil
 		}
 
+		updatedKeys := []string{}
+		if !opamp.CmpStringPtr(client.currentConfig.AgentName, newConfig.AgentName) {
+			updatedKeys = append(updatedKeys, "agent_name")
+		}
+
+		if client.currentConfig.MeasurementsInterval != newConfig.MeasurementsInterval {
+			updatedKeys = append(updatedKeys, "measurements_interval")
+		}
+
+		if !maps.Equal(client.currentConfig.ExtraMeasurementsAttributes, newConfig.ExtraMeasurementsAttributes) {
+			updatedKeys = append(updatedKeys, "extra_measurements_attributes")
+		}
+
+		client.logger.Info("Manager config update detected", zap.Strings("updated_keys", updatedKeys))
 		// Going to do an update prep a rollback
 		rollbackFunc, cleanupFunc, err := prepRollback(managerConfigPath)
 		if err != nil {
@@ -114,6 +129,7 @@ func managerReload(client *Client, managerConfigPath string) opamp.ReloadFunc {
 func collectorReload(client *Client, collectorConfigPath string) opamp.ReloadFunc {
 	return func(contents []byte) (bool, error) {
 		rollbackFunc, cleanupFunc, err := prepRollback(collectorConfigPath)
+		client.logger.Info("Rollback prepped", zap.String("collectorConfigPath", collectorConfigPath))
 		if err != nil {
 			return false, fmt.Errorf("failed to prep for rollback: %w", err)
 		}
@@ -129,15 +145,18 @@ func collectorReload(client *Client, collectorConfigPath string) opamp.ReloadFun
 		if err := updateConfigFile(CollectorConfigName, collectorConfigPath, contents); err != nil {
 			return false, err
 		}
-
+		client.logger.Info("Config file updated", zap.String("name", CollectorConfigName), zap.String("collectorConfigPath", collectorConfigPath))
 		// Stop collector monitoring as we are going to restart it
 		client.stopCollectorMonitoring()
 
+		client.logger.Info("Collector monitoring stopped")
 		// Setup new monitoring after collector has been restarted
 		defer client.startCollectorMonitoring(context.Background())
 
 		// Reload collector
 		if err := client.collector.Restart(context.Background()); err != nil {
+			client.logger.Info("OTEL Collector restart error", zap.Error(err))
+
 			// Rollback file
 			if rollbackErr := rollbackFunc(); rollbackErr != nil {
 				client.logger.Error("Rollback failed for collector config", zap.Error(rollbackErr))
@@ -150,9 +169,10 @@ func collectorReload(client *Client, collectorConfigPath string) opamp.ReloadFun
 
 			return false, fmt.Errorf("collector failed to restart: %w", err)
 		}
-
+		client.logger.Info("OTEL Collector restarted")
 		// Reset Snapshot Reporter
 		report.GetSnapshotReporter().Reset()
+		client.logger.Info("Snapshot reporter reset")
 
 		return true, nil
 	}
