@@ -34,6 +34,7 @@ require (
 	github.com/observiq/bindplane-otel-collector/receiver/pluginreceiver v1.67.0
 	github.com/observiq/bindplane-otel-collector/receiver/routereceiver v1.67.0
 	github.com/observiq/bindplane-otel-collector/receiver/sapnetweaverreceiver v1.67.0
+	github.com/observiq/bindplane-otel-collector/receiver/splunksearchapireceiver v1.67.0
 	github.com/observiq/bindplane-otel-collector/receiver/telemetrygeneratorreceiver v1.67.0
 	github.com/oklog/ulid/v2 v2.1.0
 	github.com/open-telemetry/opamp-go v0.17.0
@@ -874,6 +875,8 @@ replace github.com/observiq/bindplane-otel-collector/internal/testutils => ./int
 replace github.com/observiq/bindplane-otel-collector/internal/report => ./internal/report
 
 replace github.com/observiq/bindplane-otel-collector/internal/measurements => ./internal/measurements
+
+replace github.com/observiq/bindplane-otel-collector/receiver/splunksearchapireceiver => ./receiver/splunksearchapireceiver
 
 // Does not build with windows and only used in configschema executable
 // Relevant issue https://github.com/mattn/go-ieproxy/issues/45
