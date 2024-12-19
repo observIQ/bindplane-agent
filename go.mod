@@ -199,6 +199,7 @@ require (
 )
 
 require (
+	github.com/observiq/bindplane-otel-collector/connector/loganomalyconnector v0.0.0-00010101000000-000000000000
 	github.com/open-telemetry/opentelemetry-collector-contrib/confmap/provider/aesprovider v0.116.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/processor/intervalprocessor v0.116.0
 	go.opentelemetry.io/collector/extension/extensiontest v0.116.0
@@ -807,9 +808,9 @@ require (
 
 replace github.com/observiq/bindplane-otel-collector/processor/resourceattributetransposerprocessor => ./processor/resourceattributetransposerprocessor
 
-replace github.com/observiq/bindplane-agent/processor/loganomalyprocessor => ./processor/loganomalyprocessor
+replace github.com/observiq/bindplane-otel-collector/connector/loganomalyconnector => ./connector/loganomalyconnector
 
-replace github.com/observiq/bindplane-agent/receiver/pluginreceiver => ./receiver/pluginreceiver
+replace github.com/observiq/bindplane-otel-collector/receiver/pluginreceiver => ./receiver/pluginreceiver
 
 replace github.com/observiq/bindplane-otel-collector/receiver/m365receiver => ./receiver/m365receiver
 

@@ -15,8 +15,8 @@
 package factories
 
 import (
+	"github.com/observiq/bindplane-otel-collector/connector/loganomalyconnector"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/connector/countconnector"
-	"github.com/observiq/bindplane-agent/connector/loganomalyconnector"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/connector/routingconnector"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/connector/servicegraphconnector"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/connector/spanmetricsconnector"
