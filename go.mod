@@ -199,8 +199,8 @@ require (
 )
 
 require (
-	github.com/observiq/bindplane-otel-collector/internal/topology v1.67.0
-	github.com/observiq/bindplane-otel-collector/processor/topologyprocessor v1.67.0
+	github.com/observiq/bindplane-otel-collector/internal/topology v1.68.0
+	github.com/observiq/bindplane-otel-collector/processor/topologyprocessor v1.68.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/confmap/provider/aesprovider v0.116.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/processor/intervalprocessor v0.116.0
 	go.opentelemetry.io/collector/extension/extensiontest v0.116.0

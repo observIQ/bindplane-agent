@@ -2,7 +2,7 @@
 This processor utilizes request headers to provide extended topology functionality in BindPlane.
 
 ## Minimum agent versions
-- Introduced: [v1.67.0](https://github.com/observIQ/bindplane-otel-collector/releases/tag/v1.6.7)
+- Introduced: [v1.68.0](https://github.com/observIQ/bindplane-otel-collector/releases/tag/v1.68.0)
 
 ## Supported pipelines:
 - Logs
