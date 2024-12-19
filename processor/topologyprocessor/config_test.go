@@ -32,6 +32,7 @@ func TestConfigValidate(t *testing.T) {
 			Enabled:        true,
 			Interval:       8 * time.Second,
 			AccountID:      "myacct",
+			Configuration:  "myConfig",
 			OrganizationID: "myorg",
 		}
 		err := cfg.Validate()
