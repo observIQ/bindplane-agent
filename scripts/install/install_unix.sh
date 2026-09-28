@@ -52,7 +52,7 @@ remove_created_aix_user() {
 trap remove_created_aix_user EXIT
 INSTALL_DIR="/opt/bindplane-otel-collector"
 SUPERVISOR_YML_PATH="$INSTALL_DIR/supervisor.yaml"
-PREREQS="curl printf $SVC_PRE sed uname cut tr tar sudo awk shasum|sha256sum"
+PREREQS="curl|perl printf $SVC_PRE sed uname cut tr tar awk shasum|sha256sum"
 SUGGESTED_TOOLS="jq bash"
 SCRIPT_NAME="$0"
 INDENT_WIDTH='  '
@@ -749,7 +749,7 @@ connection_check() {
       HTTP_ENDPOINT="$(echo "${opamp_endpoint}" | sed -z 's#^ws#http#' | sed -z 's#/v1/opamp$##')"
       info "Testing connection to Bindplane: $fg_magenta$HTTP_ENDPOINT$reset..."
 
-      if curl --max-time 20 -s "${HTTP_ENDPOINT}" >/dev/null; then
+      if http_check "${HTTP_ENDPOINT}"; then
         succeeded
       else
         failed
@@ -972,6 +972,9 @@ resolve_alternate_cmd() {
     "gpg2|gpg")
       GPG_CMD="$2"
       ;;
+    "curl|perl")
+      HTTP_CLIENT="$2"
+      ;;
   esac
 }
 
@@ -1042,7 +1045,73 @@ package_type_check()
 # latest_version gets the tag of the latest release, without the v prefix.
 latest_version()
 {
-  curl -s https://bdot.bindplane.com/latest
+  http_get https://bdot.bindplane.com/latest
+}
+
+# HTTP helpers. They use curl when it is installed, and otherwise fall back to
+# HTTP::Tiny from the base AIX perl.rte fileset, so AIX installs need no AIX Toolbox.
+# Perl verifies TLS against Mozilla::CA (also in perl.rte) when it is available.
+PERL_HTTP='
+use strict; use HTTP::Tiny;
+my ($mode, $url, $out) = @ARGV;
+my %o = (verify_SSL => 1, timeout => ($mode eq "check" ? 20 : 300));
+$o{SSL_options} = { SSL_ca_file => Mozilla::CA::SSL_ca_file() } if eval { require Mozilla::CA; 1 };
+$o{proxy} = $ENV{BDOT_HTTP_PROXY} if $ENV{BDOT_HTTP_PROXY};
+my $h = HTTP::Tiny->new(%o);
+if ($mode eq "download") {
+  open(my $fh, ">", $out) or die "cannot write $out: $!\n";
+  binmode $fh;
+  my $r = $h->request("GET", $url, { data_callback => sub { print {$fh} $_[0] if $_[1]{status} =~ /^2/ } });
+  close $fh;
+  print STDERR "$r->{status} $r->{reason}\n" unless $r->{success};
+  exit($r->{success} ? 0 : 1);
+}
+my $r = $h->get($url);
+exit($r->{status} == 599 ? 1 : 0) if $mode eq "check";
+print $r->{content} if $r->{success};
+exit($r->{success} ? 0 : 1);
+'
+
+# http_proxy_url prints the --proxy value with any --proxy-user credentials embedded, for Perl.
+# ponytail: credentials are not URL-encoded; a password with @ or : needs curl.
+http_proxy_url() {
+  [ -n "$proxy" ] || return 0
+  case "$proxy" in
+    *://*) _scheme="${proxy%%://*}://"; _hostport="${proxy#*://}" ;;
+    *) _scheme="http://"; _hostport="$proxy" ;;
+  esac
+  if [ -n "$proxy_user" ]; then
+    printf '%s%s:%s@%s' "$_scheme" "$proxy_user" "$proxy_password" "$_hostport"
+  else
+    printf '%s%s' "$_scheme" "$_hostport"
+  fi
+}
+
+# http_get prints the body of a small text response.
+http_get() {
+  if [ "$HTTP_CLIENT" = "perl" ]; then
+    perl -e "$PERL_HTTP" get "$1"
+  else
+    curl -s "$1"
+  fi
+}
+
+# http_check succeeds when the server answers within 20 seconds.
+http_check() {
+  if [ "$HTTP_CLIENT" = "perl" ]; then
+    perl -e "$PERL_HTTP" check "$1"
+  else
+    curl --max-time 20 -s "$1" > /dev/null
+  fi
+}
+
+# http_download downloads $1 to $2 through any configured proxy, failing on HTTP errors.
+http_download() {
+  if [ "$HTTP_CLIENT" = "perl" ]; then
+    BDOT_HTTP_PROXY=$(http_proxy_url) perl -e "$PERL_HTTP" download "$1" "$2"
+  else
+    eval curl -L "$proxy_args" "\"\$1\"" -o "\"\$2\"" --progress-bar --fail
+  fi
 }
 
 # This will install the package by downloading the archived agent,
@@ -1067,7 +1136,7 @@ install_package() {
       info "Downloading package from $collector_download_url..."
     fi
 
-    eval curl -L "$proxy_args" "$collector_download_url" -o "$package_out_file_path" --progress-bar --fail || error_exit "$LINENO" "Failed to download package"
+    http_download "$collector_download_url" "$package_out_file_path" || error_exit "$LINENO" "Failed to download package"
 
     if [ -n "$proxy" ]; then
       info "Downloading GPG key tar file from $gpg_tar_download_url using proxy..."
@@ -1075,12 +1144,12 @@ install_package() {
       info "Downloading GPG key tar file from $gpg_tar_download_url..."
     fi
 
-    eval curl -L "$proxy_args" "$gpg_tar_download_url" -o "$gpg_tar_out_file_path" --progress-bar --fail || error_exit "$LINENO" "Failed to download GPG tar file"
+    http_download "$gpg_tar_download_url" "$gpg_tar_out_file_path" || error_exit "$LINENO" "Failed to download GPG tar file"
 
     # AIX packages are verified against a detached signature published beside the package
     if [ "$package_type" = "mkssys" ] && [ "$skip_gpg_check" != "true" ]; then
       info "Downloading package signature from ${collector_download_url}.gpg.sig..."
-      eval curl -L "$proxy_args" "${collector_download_url}.gpg.sig" -o "${package_out_file_path}.gpg.sig" --progress-bar --fail || error_exit "$LINENO" "Failed to download package signature"
+      http_download "${collector_download_url}.gpg.sig" "${package_out_file_path}.gpg.sig" || error_exit "$LINENO" "Failed to download package signature"
     fi
     succeeded
   fi
@@ -1849,8 +1918,8 @@ main() {
     exit 0
   fi
 
-  # GPG is required unless --no-gpg-check was passed
-  if [ "$skip_gpg_check" != "true" ]; then
+  # GPG is required to verify installs unless --no-gpg-check was passed
+  if [ "$skip_gpg_check" != "true" ] && [ "$_do_uninstall" != "true" ]; then
     PREREQS="$PREREQS gpg2|gpg"
   fi
 
