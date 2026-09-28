@@ -972,6 +972,12 @@ resolve_alternate_cmd() {
     "gpg2|gpg")
       GPG_CMD="$2"
       ;;
+    "gpg2|gpg|openssl")
+      case "$2" in
+        openssl) GPG_CMD="" ;;
+        *) GPG_CMD="$2" ;;
+      esac
+      ;;
     "curl|perl")
       HTTP_CLIENT="$2"
       ;;
@@ -1309,7 +1315,16 @@ verify_package() {
   [ -d "$TMP_DIR/gpg" ] && rm -rf "$TMP_DIR/gpg"
   mkdir -p "$TMP_DIR/gpg"
 
-  if ! tar -xzf "$gpg_tar_out_file_path" -C "$TMP_DIR/gpg" > /dev/null 2>&1; then
+  # AIX base tar has no -z, so decompress separately there
+  if [ "$OS_TYPE" = "AIX" ]; then
+    _gpg_extract_ok=true
+    gunzip -c "$gpg_tar_out_file_path" | (cd "$TMP_DIR/gpg" && tar -xf -) > /dev/null 2>&1 || _gpg_extract_ok=false
+  elif tar -xzf "$gpg_tar_out_file_path" -C "$TMP_DIR/gpg" > /dev/null 2>&1; then
+    _gpg_extract_ok=true
+  else
+    _gpg_extract_ok=false
+  fi
+  if [ "$_gpg_extract_ok" != "true" ]; then
     error "Failed to extract GPG key tar file"
     return 1
   fi
@@ -1476,42 +1491,181 @@ verify_package_rpm() {
   return 0
 }
 
-# Verify AIX tar.gz package using GPG detached signature.
-# The release process produces a .gpg.sig file alongside the tar.gz.
+# PERL_PGP_PREPARE lets base openssl check an OpenPGP detached signature on AIX hosts
+# without gpg. It reads the key bundle, any revocation certificates, and the signature,
+# rejects revoked keys and signatures made outside the key's validity, then writes the
+# signing key as PEM, the raw RSA signature, and the signed trailer for openssl to verify.
+# Args: <key.asc> <revocation dir> <signature> <output dir>. Prints the openssl digest name.
+PERL_PGP_PREPARE='
+use strict; use MIME::Base64; use Digest::SHA qw(sha1);
+my ($asc, $revdir, $sigfile, $out) = @ARGV;
+sub slurp { my $f = shift; open(my $h, "<", $f) or die "cannot read $f\n"; binmode $h; local $/; my $d = <$h>; close $h; $d }
+sub dearmor {
+  my $d = shift;
+  return $d unless $d =~ /-----BEGIN PGP/;
+  my ($bin, $in, $body, $b64) = ("", 0, 0, "");
+  for my $l (split /\r?\n/, $d) {
+    if ($l =~ /^-----BEGIN PGP/) { ($in, $body, $b64) = (1, 0, ""); next }
+    next unless $in;
+    if ($l =~ /^-----END PGP/) { $bin .= decode_base64($b64); $in = 0; next }
+    if (!$body) { $body = 1 if $l eq ""; next }
+    next if $l =~ /^=/;
+    $b64 .= $l;
+  }
+  $bin
+}
+sub packets {
+  my $d = shift; my @p; my $i = 0;
+  while ($i < length $d) {
+    my $h = ord substr($d, $i++, 1); die "malformed OpenPGP data\n" unless $h & 0x80;
+    my ($tag, $len);
+    if ($h & 0x40) {
+      $tag = $h & 0x3f; my $o = ord substr($d, $i++, 1);
+      if ($o < 192) { $len = $o }
+      elsif ($o < 224) { $len = (($o - 192) << 8) + ord(substr($d, $i++, 1)) + 192 }
+      elsif ($o == 255) { $len = unpack("N", substr($d, $i, 4)); $i += 4 }
+      else { die "unsupported OpenPGP partial length\n" }
+    } else {
+      $tag = ($h >> 2) & 0x0f; my $lt = $h & 3;
+      if ($lt == 0) { $len = ord substr($d, $i, 1); $i += 1 }
+      elsif ($lt == 1) { $len = unpack("n", substr($d, $i, 2)); $i += 2 }
+      elsif ($lt == 2) { $len = unpack("N", substr($d, $i, 4)); $i += 4 }
+      else { die "unsupported OpenPGP indeterminate length\n" }
+    }
+    die "truncated OpenPGP packet\n" if $i + $len > length $d;
+    push @p, [$tag, substr($d, $i, $len)]; $i += $len;
+  }
+  @p
+}
+sub mpi { my ($b, $p) = @_; my $n = int((unpack("n", substr($b, $p, 2)) + 7) / 8); (substr($b, $p + 2, $n), $p + 2 + $n) }
+sub subpackets {
+  my ($s, $d, $hashed) = @_; my $i = 0;
+  while ($i < length $d) {
+    my $o = ord substr($d, $i++, 1); my $l;
+    if ($o < 192) { $l = $o } elsif ($o < 255) { $l = (($o - 192) << 8) + ord(substr($d, $i++, 1)) + 192 } else { $l = unpack("N", substr($d, $i, 4)); $i += 4 }
+    die "malformed signature subpacket\n" if $l < 1 || $i + $l > length $d;
+    my $t = ord(substr($d, $i, 1)) & 0x7f; my $v = substr($d, $i + 1, $l - 1); $i += $l;
+    if ($t == 16) { $s->{issuer} = uc unpack("H*", $v) }
+    elsif ($t == 33) { $s->{issuer} = uc substr(unpack("H*", substr($v, 1)), -16) }
+    next unless $hashed;
+    if ($t == 2) { $s->{created} = unpack("N", $v) }
+    elsif ($t == 9) { $s->{keyexp} = unpack("N", $v) }
+    elsif ($t == 27) { $s->{flags} = ord $v }
+  }
+}
+sub signature {
+  my $b = shift; die "unsupported OpenPGP signature version\n" unless ord(substr($b, 0, 1)) == 4;
+  my ($type, $pk, $ha) = map { ord substr($b, $_, 1) } 1 .. 3;
+  my $hl = unpack("n", substr($b, 4, 2)); my $ul = unpack("n", substr($b, 6 + $hl, 2));
+  my %s = (type => $type, pk => $pk, ha => $ha, created => 0,
+           trailer => substr($b, 0, 6 + $hl) . "\x04\xff" . pack("N", 6 + $hl));
+  subpackets(\%s, substr($b, 6, $hl), 1); subpackets(\%s, substr($b, 8 + $hl, $ul), 0);
+  ($s{sig}) = mpi($b, 8 + $hl + $ul + 2) if $pk == 1 || $pk == 3;
+  \%s
+}
+my (%keys, $primary, $current);
+sub key_packet {
+  my ($b, $is_primary) = @_;
+  return undef unless ord(substr($b, 0, 1)) == 4;
+  my %k = (created => unpack("N", substr($b, 1, 4)), algo => ord(substr($b, 5, 1)), primary => $is_primary, revoked => 0, keyexp => 0, selfsig => -1);
+  if ($k{algo} == 1 || $k{algo} == 3) { my $p; ($k{n}, $p) = mpi($b, 6); ($k{e}) = mpi($b, $p) }
+  $k{id} = uc substr(unpack("H*", sha1("\x99" . pack("n", length $b) . $b)), -16);
+  $keys{$k{id}} = \%k
+}
+for my $f ($asc, glob("$revdir/*")) {
+  next unless -f $f;
+  ($primary, $current) = (undef, undef);
+  for my $pk (packets(dearmor(slurp($f)))) {
+    my ($tag, $b) = @$pk;
+    if ($tag == 6) { $primary = $current = key_packet($b, 1) }
+    elsif ($tag == 14) { $current = key_packet($b, 0); $current->{parent} = $primary if $current }
+    elsif ($tag == 2) {
+      my $s = signature($b); my $t = $s->{type};
+      if ($t == 0x20) { my $k = $primary || $keys{$s->{issuer} || ""}; $k->{revoked} = 1 if $k }
+      elsif ($t == 0x28) { $current->{revoked} = 1 if $current && !$current->{primary} }
+      elsif (($t >= 0x10 && $t <= 0x13) || $t == 0x1f || $t == 0x18) {
+        my $k = $t == 0x18 ? $current : $primary;
+        next unless $k && $s->{created} >= $k->{selfsig};
+        $k->{selfsig} = $s->{created}; $k->{keyexp} = $s->{keyexp} || 0; $k->{flags} = $s->{flags};
+      }
+    }
+  }
+}
+my @sigs = grep { $_->[0] == 2 } packets(dearmor(slurp($sigfile)));
+die "expected exactly one signature\n" unless @sigs == 1;
+my $s = signature($sigs[0][1]);
+my %hash = (8 => "sha256", 9 => "sha384", 10 => "sha512", 11 => "sha224");
+die "unsupported signature type\n" unless $s->{type} == 0x00;
+die "unsupported signature algorithm\n" unless $s->{pk} == 1 || $s->{pk} == 3;
+die "unsupported signature digest\n" unless $hash{$s->{ha}};
+die "signature has no creation time\n" unless $s->{created};
+my $k = $keys{$s->{issuer} || ""} or die "signature was not made by a key in the bundle\n";
+die "signing key is not an RSA key\n" unless $k->{n};
+die "key is not allowed to sign\n" if defined $k->{flags} && !($k->{flags} & 0x02);
+for my $c ($k, $k->{parent} || ()) {
+  die "signing key $c->{id} is revoked\n" if $c->{revoked};
+  die "signature predates signing key $c->{id}\n" if $s->{created} < $c->{created};
+  die "signing key $c->{id} had expired when the signature was made\n" if $c->{keyexp} && $s->{created} >= $c->{created} + $c->{keyexp};
+}
+sub der_len { my $l = shift; return chr $l if $l < 128; my $b = ""; while ($l) { $b = chr($l & 255) . $b; $l >>= 8 } chr(0x80 | length $b) . $b }
+sub der { my ($t, $c) = @_; chr($t) . der_len(length $c) . $c }
+sub der_int { my $x = shift; $x =~ s/^\x00+//; $x = "\x00$x" if ord($x) & 0x80; der(2, $x) }
+my $spki = der(0x30, der(0x30, der(6, "\x2a\x86\x48\x86\xf7\x0d\x01\x01\x01") . der(5, "")) . der(3, "\x00" . der(0x30, der_int($k->{n}) . der_int($k->{e}))));
+my $pem = encode_base64($spki, ""); $pem =~ s/(.{1,64})/$1\n/g;
+my $sig = ("\x00" x (length($k->{n}) - length($s->{sig}))) . $s->{sig};
+for (["key.pem", "-----BEGIN PUBLIC KEY-----\n$pem-----END PUBLIC KEY-----\n"], ["sig.raw", $sig], ["sig.trailer", $s->{trailer}]) {
+  open(my $h, ">", "$out/$_->[0]") or die "cannot write $out/$_->[0]\n"; binmode $h; print {$h} $_->[1]; close $h;
+}
+print "$hash{$s->{ha}}\n";
+'
+
+# verify_package_aix checks the package against its detached signature and the bundled
+# BDOT public key. It uses gpg when installed, and otherwise base Perl plus openssl, so
+# hosts without the AIX Toolbox still verify. Both paths reject revoked keys and
+# signatures made after the signing key expired; gpg --verify alone exits 0 for those.
 verify_package_aix() {
-  if [ -z "$GPG_CMD" ]; then
-    info "neither gpg nor gpg2 is installed, skipping signature verification"
-    return 0
-  fi
-
-  # Import the public key
-  if ! GNUPGHOME="$TMP_DIR/gpg" $GPG_CMD --import "$TMP_DIR/gpg/bdot-public-gpg-key.asc" > /dev/null 2>&1; then
-    error "Failed to import public key"
-    return 1
-  fi
-
-  # Import any revocation keys
-  if [ -n "$(ls -A "$TMP_DIR/gpg/deb-revocations/" 2>/dev/null)" ]; then
-    for key in "$TMP_DIR/gpg/deb-revocations/"*; do
-      if ! GNUPGHOME="$TMP_DIR/gpg" $GPG_CMD --import "$key" > /dev/null 2>&1; then
-        error "Failed to import revocation key"
-        return 1
-      fi
-    done
-  fi
-
-  # Look for the detached GPG signature file
   _sig_file="${package_out_file_path}.gpg.sig"
   if [ ! -f "$_sig_file" ]; then
     error "GPG signature file not found: $_sig_file"
     return 1
   fi
 
-  # Verify the detached signature
-  set +e
-  VERIFY_OUTPUT=$(GNUPGHOME="$TMP_DIR/gpg" $GPG_CMD --verify "$_sig_file" "$package_out_file_path" 2>&1)
-  VERIFY_EXIT_CODE=$?
-  set -e
+  if [ -n "$GPG_CMD" ]; then
+    if ! GNUPGHOME="$TMP_DIR/gpg" $GPG_CMD --import "$TMP_DIR/gpg/bdot-public-gpg-key.asc" > /dev/null 2>&1; then
+      error "Failed to import public key"
+      return 1
+    fi
+    for key in "$TMP_DIR/gpg/deb-revocations/"*; do
+      [ -f "$key" ] || continue
+      if ! GNUPGHOME="$TMP_DIR/gpg" $GPG_CMD --import "$key" > /dev/null 2>&1; then
+        error "Failed to import revocation key"
+        return 1
+      fi
+    done
+    set +e
+    VERIFY_OUTPUT=$(GNUPGHOME="$TMP_DIR/gpg" $GPG_CMD --status-fd 1 --verify "$_sig_file" "$package_out_file_path" 2>&1)
+    VERIFY_EXIT_CODE=$?
+    set -e
+    case "$VERIFY_OUTPUT" in
+      *"[GNUPG:] REVKEYSIG"*|*"[GNUPG:] KEYREVOKED"*|*"[GNUPG:] EXPSIG"*|*"[GNUPG:] BADSIG"*|*"[GNUPG:] ERRSIG"*) VERIFY_EXIT_CODE=1 ;;
+      *"[GNUPG:] VALIDSIG"*) ;;
+      *) VERIFY_EXIT_CODE=1 ;;
+    esac
+    # gpg reports a key expired today as EXPKEYSIG; reject it only if it had expired when signing
+    if [ $VERIFY_EXIT_CODE -eq 0 ] && ! perl -e "$PERL_PGP_PREPARE" "$TMP_DIR/gpg/bdot-public-gpg-key.asc" "$TMP_DIR/gpg/deb-revocations" "$_sig_file" "$TMP_DIR/gpg" > /dev/null 2>&1; then
+      VERIFY_OUTPUT=$(perl -e "$PERL_PGP_PREPARE" "$TMP_DIR/gpg/bdot-public-gpg-key.asc" "$TMP_DIR/gpg/deb-revocations" "$_sig_file" "$TMP_DIR/gpg" 2>&1)
+      VERIFY_EXIT_CODE=1
+    fi
+  else
+    set +e
+    VERIFY_OUTPUT=$(perl -e "$PERL_PGP_PREPARE" "$TMP_DIR/gpg/bdot-public-gpg-key.asc" "$TMP_DIR/gpg/deb-revocations" "$_sig_file" "$TMP_DIR/gpg" 2>&1)
+    VERIFY_EXIT_CODE=$?
+    if [ $VERIFY_EXIT_CODE -eq 0 ]; then
+      VERIFY_OUTPUT=$(cat "$package_out_file_path" "$TMP_DIR/gpg/sig.trailer" | openssl dgst "-$VERIFY_OUTPUT" -verify "$TMP_DIR/gpg/key.pem" -signature "$TMP_DIR/gpg/sig.raw" 2>&1)
+      VERIFY_EXIT_CODE=$?
+    fi
+    set -e
+  fi
 
   if [ $VERIFY_EXIT_CODE -ne 0 ]; then
     error "GPG signature verification failed"
@@ -1920,7 +2074,12 @@ main() {
 
   # GPG is required to verify installs unless --no-gpg-check was passed
   if [ "$skip_gpg_check" != "true" ] && [ "$_do_uninstall" != "true" ]; then
-    PREREQS="$PREREQS gpg2|gpg"
+    if [ "$OS_TYPE" = "AIX" ]; then
+      # AIX can verify with base openssl and perl when gpg is not installed
+      PREREQS="$PREREQS gpg2|gpg|openssl perl"
+    else
+      PREREQS="$PREREQS gpg2|gpg"
+    fi
   fi
 
   bindplane_banner
