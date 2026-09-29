@@ -1374,6 +1374,8 @@ verification_missing_tools() {
   _missing=""
   _tools="gpg tar gzip awk sed grep tr cut"
   [ "$package_type" = "deb" ] && _tools="$_tools ar"
+  # od and tail locate the header and payload that gpg checks where rpm cannot
+  [ "$package_type" = "rpm" ] && _tools="$_tools od tail"
   if [ "$package_type" = "mkssys" ]; then
     # AIX verifies with base Perl and openssl when gpg is not installed
     _tools="perl tar gunzip awk sed grep tr cut"
