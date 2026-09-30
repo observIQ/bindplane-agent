@@ -65,8 +65,8 @@ run_case() {
     [ -e "$p" ] && [ ! -e "$bin/${p##*/}" ] || continue   # first match on PATH wins, like the shell
     ln -s "$p" "$bin/${p##*/}"; done
   rm -f "$bin/uname"; printf '#!/bin/sh\necho AIX\n' > "$bin/uname"; chmod +x "$bin/uname"
-  if [ "$path" = gpg ]; then gpgcmd=gpg; else gpgcmd=""; rm -f "$bin/gpg" "$bin/gpg2"; fi
-  out=$(PATH="$bin" "$bin/sh" -c ". '$WORK/lib.sh'; TMP_DIR='$t'; package_out_file_path='$t/pkg.tar.gz'; GPG_CMD='$gpgcmd'; verify_package_aix" 2>&1); rc=$?
+  [ "$path" = gpg ] || rm -f "$bin/gpg" "$bin/gpg2"
+  out=$(PATH="$bin" "$bin/sh" -c ". '$WORK/lib.sh'; GPG_DIR='$t/gpg'; package_out_file_path='$t/pkg.tar.gz'; verify_package_aix" 2>&1); rc=$?
   if { [ "$expect" = ok ] && [ $rc -eq 0 ]; } || { [ "$expect" = fail ] && [ $rc -ne 0 ]; }; then
     pass=$((pass+1)); echo "PASS $name ($path)"
   else
@@ -96,7 +96,7 @@ rm -f "$bin/uname" "$bin/tar" "$bin/gpg" "$bin/gpg2"
 printf '#!/bin/sh\necho AIX\n' > "$bin/uname"
 printf '#!/bin/sh\ncase "$1" in *z*) echo "tar: illegal option -- z" >&2; exit 1 ;; esac\nexec %s "$@"\n' "$(command -v tar)" > "$bin/tar"
 chmod +x "$bin/uname" "$bin/tar"
-out=$(PATH="$bin" "$bin/sh" -c ". '$WORK/lib.sh'; TMP_DIR='$t'; package_type=mkssys; package_out_file_path='$t/pkg.tar.gz'; gpg_tar_out_file_path='$t/gpg-keys.tar.gz'; GPG_CMD=''; verify_package" 2>&1); rc=$?
+out=$(PATH="$bin" "$bin/sh" -c ". '$WORK/lib.sh'; TMP_DIR='$t'; package_type=mkssys; package_out_file_path='$t/pkg.tar.gz'; gpg_tar_out_file_path='$t/gpg-keys.tar.gz'; verify_package" 2>&1); rc=$?
 if [ $rc -eq 0 ]; then pass=$((pass+1)); echo "PASS bundle-without-tar-z (openssl)"; else fail=$((fail+1)); echo "FAIL bundle-without-tar-z (rc=$rc)"; printf '%s\n' "$out" | tail -3; fi
 
 echo "pass=$pass fail=$fail"; [ $fail -eq 0 ]
