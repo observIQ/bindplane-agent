@@ -104,11 +104,11 @@ bundle() {
   [ -n "$BAD_TAR" ] && echo garbage > "$1/gpg-keys.tar.gz"
   return 0
 }
-# report <name> <rc> <expect> <message a failure must contain> <output>. expect is ok (0),
+# report <name> <rc> <expect> <message the output must contain, if any> <output>. expect is ok (0),
 # fail (1, the user may override), hard (3, never installs), or abort (error_exit's SIGPIPE).
 report() {
   case "$3" in ok) want=0 ;; fail) want=1 ;; hard) want=3 ;; abort) want=141 ;; esac
-  if [ "$2" -eq "$want" ] && { [ "$want" -eq 0 ] || printf '%s' "$5" | grep -qF -- "$4"; }; then pass=$((pass+1)); echo "PASS $1"; return; fi
+  if [ "$2" -eq "$want" ] && { [ -z "$4" ] || printf '%s' "$5" | grep -qF -- "$4"; }; then pass=$((pass+1)); echo "PASS $1"; return; fi
   fail=$((fail+1)); echo "FAIL $1 (rc=$2, wanted $3${4:+: $4})"; printf '%s\n' "$5" | tail -3
 }
 # run_verify <dir> <package file> <package type> <locale> <extra shell> runs verify_package
@@ -342,7 +342,8 @@ bundle "$t" "$S" ""
 out=$(cd "$t" && sh -c ". '$WORK/lib.sh'; TMP_DIR='$t'; package_out_file_path='$DATA/signed-test.rpm'; GPG_DIR=\$(mktemp -d '$t/gpg.XXXXXX'); tar -xzf '$t/gpg-keys.tar.gz' -C \"\$GPG_DIR\"; rpm_signing_key_check; r=\$?; gpg_cleanup; exit \$r" 2>&1); rc=$?
 report rpm-real-header-wrong-bundle $rc fail "not signed by a key in the BDOT key bundle" "$out"
 
-# Verification must fail closed when gpg, tar, gzip, or ar is missing, unless --no-gpg-check was given.
+# When gpg, tar, gzip, or ar is missing, verification is skipped with a warning by default,
+# and fails closed with --require-gpg-check.
 # nopath <dir> <tools to omit>: a PATH directory mirroring the system bin dirs without those tools
 nopath() {
   mkdir -p "$1"
@@ -362,15 +363,26 @@ tool_case() {
   out=$(cd "$t" && PATH="$t/bin" sh -c ". '$WORK/lib.sh'; TMP_DIR='$t'; package_out_file_path='$t/pkg.deb'; gpg_tar_out_file_path='$t/gpg-keys.tar.gz'; $3" 2>&1); rc=$?
   report "$1" $rc "$4" "$5" "$out"
 }
-tool_case deb-verify-no-gpg    "gpg gpg2" "package_type=deb; verify_package"                           fail "requires: [gpg]"
-tool_case deb-verify-no-ar     "ar"       "package_type=deb; verify_package"                           fail "requires: [ar]"
-tool_case check-no-gpg         "gpg gpg2" "package_type=rpm; verification_check"                       abort "requires: [gpg]"
-tool_case check-no-tar-gzip    "tar gzip" "package_type=rpm; verification_check"                       abort "requires: [tar, gzip]"
+SKIP_MSG="Skipping package signature verification"
+REQ="require_gpg_check=true;"
+tool_case deb-verify-no-gpg    "gpg gpg2" "package_type=deb; verify_package"                           ok "$SKIP_MSG"
+tool_case deb-verify-no-ar     "ar"       "package_type=deb; verify_package"                           ok "$SKIP_MSG"
+tool_case deb-verify-no-gpg-required "gpg gpg2" "$REQ package_type=deb; verify_package"                fail "requires: [gpg]"
+tool_case deb-verify-no-ar-required  "ar"       "$REQ package_type=deb; verify_package"                fail "requires: [ar]"
+tool_case check-no-gpg         "gpg gpg2" "package_type=rpm; verification_check"                       ok
+tool_case check-no-gpg-required "gpg gpg2" "$REQ package_type=rpm; verification_check"                 abort "requires: [gpg]"
+tool_case check-no-tar-gzip-required "tar gzip" "$REQ package_type=rpm; verification_check"            abort "requires: [tar, gzip]"
 tool_case check-no-gpg-skipped "gpg gpg2" "package_type=rpm; skip_gpg_check=true; verification_check"  ok
-tool_case check-deb-no-ar      "ar"       "package_type=deb; verification_check"                       abort "requires: [ar]"
-tool_case check-rpm-no-ar      "ar"       "package_type=rpm; verification_check"                       ok
-tool_case check-no-text-tools  "awk sed grep tr cut" "package_type=rpm; verification_check"             abort "requires: [awk, sed, grep, tr, cut]"
-tool_case check-all-present    ""         "package_type=deb; verification_check"                       ok
+tool_case check-deb-no-ar      "ar"       "package_type=deb; verification_check"                       ok
+tool_case check-deb-no-ar-required "ar"   "$REQ package_type=deb; verification_check"                  abort "requires: [ar]"
+# rpm packages never need ar, even when verification is required
+tool_case check-rpm-no-ar-required "ar"   "$REQ package_type=rpm; verification_check"                  ok
+tool_case check-no-text-tools-required "awk sed grep tr cut" "$REQ package_type=rpm; verification_check" abort "requires: [awk, sed, grep, tr, cut]"
+tool_case check-all-present-required "" "$REQ package_type=deb; verification_check"                    ok
+tool_case require-with-no-gpg-check "" "$REQ skip_gpg_check=true; interactive_check"                   abort "--require-gpg-check is incompatible with '--no-gpg-check'"
+# main (or parse_args, where it exists) parses the flag into require_gpg_check
+flag=$(awk '/^(main|parse_args)\(\)/{m=1} m && /^}/{m=0} m && /--require-gpg-check\)/{getline; print; exit}' "$SCRIPT")
+case "$flag" in *'require_gpg_check="true"'*) report require-flag-parsed 0 ok "" "" ;; *) report require-flag-parsed 1 ok "" "main() does not parse --require-gpg-check: $flag" ;; esac
 # gnupg2-minimal has no gpgconf, and gpg 2.0's cannot stop daemons; cleanup must still succeed
 tool_case verify-no-gpgconf    "gpgconf"  "package_type=deb; verify_package"                           ok
 set -- "$WORK/tool-verify-no-gpgconf"/bdot-gpg.*; if [ -e "$1" ]; then report verify-no-gpgconf-cleanup 1 ok "" "left $1"; else report verify-no-gpgconf-cleanup 0 ok "" ""; fi
