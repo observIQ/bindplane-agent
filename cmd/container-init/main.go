@@ -37,9 +37,19 @@ import (
 	"strings"
 )
 
-// Default file contents. The collector config is the same minimal nop
-// pipeline the container images ship as their default config.yaml, and the
-// logging config matches config/logging.stdout.yaml.
+// Default file contents.
+//
+// defaultCollectorConfig is also the config the container images bake in as
+// /etc/otel/config.yaml: docker/Dockerfile.scratch, Dockerfile.ubuntu and
+// Dockerfile.jmx write it with a COPY heredoc, and
+// TestDefaultCollectorConfigMatchesDockerfiles fails unless all of them are
+// byte-identical, so change them together. It is a nop pipeline plus the
+// health_check extension on 0.0.0.0:13133 (the extension defaults to
+// localhost), so Kubernetes probes, which target the pod IP, pass before a
+// config arrives over OpAMP. The first OpAMP push replaces the whole file, so
+// pushed configs must carry their own health_check.
+//
+// defaultLoggingConfig matches config/logging.stdout.yaml.
 const (
 	defaultCollectorConfig = `receivers:
   nop:
@@ -47,7 +57,11 @@ processors:
   batch:
 exporters:
   nop:
+extensions:
+  health_check:
+    endpoint: 0.0.0.0:13133
 service:
+  extensions: [health_check]
   pipelines:
     metrics:
       receivers: [nop]
