@@ -317,7 +317,8 @@ Usage:
 
   $(fg_yellow '--require-gpg-check')
       Requires GPG signature verification of the package. Verification needs gpg,
-      tar, gzip, awk, sed, grep, tr, and cut (and ar for deb packages). By default,
+      tar, gzip, awk, sed, grep, tr, and cut (and ar for deb packages). AIX needs
+      perl, tar, gunzip, awk, sed, grep, tr, cut, and gpg or openssl. By default,
       when this system lacks them, the script warns and installs without
       verifying. With this flag, it stops the install instead. When the tools
       are present, verification runs the same either way.
