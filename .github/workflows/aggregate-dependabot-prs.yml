@@ -1,0 +1,46 @@
+name: Aggregate Dependabot PRs
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  aggregate:
+    runs-on: ubuntu-latest-8-cores
+    steps:
+      # App token (not GITHUB_TOKEN) so the resulting PR triggers CI.
+      - name: Mint App Token
+        id: app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.DEPS_APP_ID }}
+          private-key: ${{ secrets.DEPS_APP_PRIVATE_KEY }}
+      - name: Checkout Sources
+        uses: actions/checkout@v7
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: internal/extension/opampconnectionextension/go.mod
+      - name: Aggregate
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          BRANCH="deps/aggregate-dependabot-$(date -u +%Y%m%d)"
+          git checkout -b "$BRANCH"
+          ./scripts/aggregate-dependabot-prs.sh
+          if git diff --quiet "origin/${{ github.ref_name }}" HEAD; then
+            echo "Nothing to aggregate."
+            exit 0
+          fi
+          git push --force origin "$BRANCH"
+          gh pr create \
+            --base "${{ github.ref_name }}" \
+            --head "$BRANCH" \
+            --title "deps: Aggregate dependabot PRs $(date -u +%Y-%m-%d)" \
+            --body "$(git log --format='- %s' "origin/${{ github.ref_name }}..HEAD")"
