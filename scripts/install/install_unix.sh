@@ -60,6 +60,8 @@ indent=""
 non_interactive=false
 error_mode=false
 skip_gpg_check=false
+# require_gpg_check fails the install, instead of skipping verification, when verification tools are missing
+require_gpg_check=false
 
 # Set up AIX-specific constants and supervisor timeout values (AIX needs higher values due to slow I/O)
 if [ "$OS_TYPE" = "AIX" ]; then
@@ -314,6 +316,15 @@ Usage:
       through other means.
       
       This option is incompatible with '--gpg-tar-file' and will cause the script
+      to exit with an error if both are specified.
+
+  $(fg_yellow '--require-gpg-check')
+      Requires GPG signature verification of the package. By default, when this
+      system lacks the tools verification needs, the script warns and installs
+      without verifying. With this flag, it stops the install instead. When the
+      tools are present, verification runs the same either way.
+
+      This option is incompatible with '--no-gpg-check' and will cause the script
       to exit with an error if both are specified.
 
   $(fg_yellow '-q, --quiet')
@@ -800,6 +811,11 @@ interactive_check()
   if [ "$skip_gpg_check" = "true" ] && [ -n "$gpg_tar_path" ]; then
     failed
     error_exit "$LINENO" "--no-gpg-check is incompatible with '--gpg-tar-file'. These options cannot be used together."
+  fi
+
+  if [ "$require_gpg_check" = "true" ] && [ "$skip_gpg_check" = "true" ]; then
+    failed
+    error_exit "$LINENO" "--require-gpg-check is incompatible with '--no-gpg-check'. These options cannot be used together."
   fi
 
   # Incompatible with proxies unless both username and password are passed
@@ -1299,8 +1315,13 @@ verify_package() {
 
   _missing=$(verification_missing_tools)
   if [ -n "$_missing" ]; then
-    error "Package signature verification requires: [$_missing]. Install them or use '--no-gpg-check'."
-    return 1
+    if [ "$require_gpg_check" = "true" ]; then
+      error "Package signature verification requires: [$_missing]. Install them, or drop '--require-gpg-check' to install without verification."
+      return 1
+    fi
+    warn "Skipping package signature verification: this system lacks [$_missing]."
+    warn "Install them to verify the package, or use '--require-gpg-check' to stop the install when they are missing."
+    return 0
   fi
 
   # A private keyring, so the host's own keys never take part
@@ -1367,13 +1388,15 @@ verification_missing_tools() {
 # literal escapes text for the output functions, which treat it as a printf format.
 literal() { command printf '%s' "$1" | tr -c '[:print:]\n' '?' | sed 's/[%\\]/&&/g'; }
 
-# verification_check fails before download when verification tools are missing. It needs
+# verification_check fails before download when --require-gpg-check is set and verification
+# tools are missing. Without it, verify_package warns and skips verification. It needs
 # package_type, so it runs after setup_installation.
 verification_check() {
   [ "$skip_gpg_check" = "true" ] && return 0
+  [ "$require_gpg_check" = "true" ] || return 0
   _missing=$(verification_missing_tools)
   if [ -n "$_missing" ]; then
-    error_exit "$LINENO" "Package signature verification requires: [$_missing]. Install them or use '--no-gpg-check'."
+    error_exit "$LINENO" "Package signature verification requires: [$_missing]. Install them, or drop '--require-gpg-check' to install without verification."
   fi
 }
 
@@ -2154,6 +2177,10 @@ parse_args() {
         ;;
       --no-gpg-check)
         skip_gpg_check="true"
+        shift 1
+        ;;
+      --require-gpg-check)
+        require_gpg_check="true"
         shift 1
         ;;
       -r | --uninstall)
