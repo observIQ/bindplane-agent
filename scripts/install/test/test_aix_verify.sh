@@ -86,7 +86,7 @@ for path in openssl gpg; do
   # a revocation certificate for a key outside the bundle means the bundle is wrong
   run_case stray-rev subkey   "$S" yes $path 3
 done
-# Full verify_package on AIX, where base tar has no -z: the key bundle must still extract
+# Full verify_package on AIX, where base tar has no -z and there is no mktemp: the key bundle must still extract
 t="$WORK/tmp-bundle"; mkdir -p "$t/keys/deb-revocations" "$t/gpg"
 gpg --homedir "$G" --armor --export "$S" > "$t/keys/bdot-public-gpg-key.asc" 2>/dev/null
 (cd "$t/keys" && tar -cf - . | gzip -c > "$t/gpg-keys.tar.gz")   # AIX 7.3 base tar has no -z
@@ -95,7 +95,7 @@ bin="$WORK/bin-bundle"; mkdir -p "$bin"
 for p in $(IFS=:; for d in $PATH; do printf '%s\n' "$d"/*; done); do
     [ -e "$p" ] && [ ! -e "$bin/${p##*/}" ] || continue   # first match on PATH wins, like the shell
     ln -s "$p" "$bin/${p##*/}"; done
-rm -f "$bin/uname" "$bin/tar" "$bin/gpg" "$bin/gpg2"
+rm -f "$bin/uname" "$bin/tar" "$bin/gpg" "$bin/gpg2" "$bin/mktemp"   # base AIX has no mktemp
 printf '#!/bin/sh\necho AIX\n' > "$bin/uname"
 printf '#!/bin/sh\ncase "$1" in *z*) echo "tar: illegal option -- z" >&2; exit 1 ;; esac\nexec %s "$@"\n' "$(command -v tar)" > "$bin/tar"
 chmod +x "$bin/uname" "$bin/tar"
