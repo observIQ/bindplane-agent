@@ -292,7 +292,7 @@ fmt:
 
 .PHONY: tidy
 tidy:
-	$(MAKE) for-all-modules CMD="go mod tidy -compat=1.26.4"
+	$(MAKE) for-all-modules CMD="go mod tidy -compat=1.26.9"
 
 .PHONY: gosec
 gosec:
