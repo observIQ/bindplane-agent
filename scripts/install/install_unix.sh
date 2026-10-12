@@ -1324,8 +1324,9 @@ verify_package() {
     return 0
   fi
 
-  # A private keyring, so the host's own keys never take part
-  if ! GPG_DIR=$(mktemp -d "$TMP_DIR/bdot-gpg.XXXXXX"); then
+  # A private keyring, so the host's own keys never take part. Base AIX has no mktemp, and
+  # mkdir fails rather than reuse a directory that already exists.
+  if ! GPG_DIR=$(mktemp -d "$TMP_DIR/bdot-gpg.XXXXXX" 2> /dev/null || { mkdir -m 700 "$TMP_DIR/bdot-gpg.$$" && echo "$TMP_DIR/bdot-gpg.$$"; }); then
     error "Failed to create a temporary GPG directory"
     return 1
   fi
