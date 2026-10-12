@@ -1834,6 +1834,8 @@ verify_package_rpm() {
 PERL_PGP_PREPARE='
 use strict; use MIME::Base64; use Digest::SHA qw(sha1);
 my ($asc, $revdir, $sigfile, $out) = @ARGV;
+# reject exits 3, which never installs; a plain die exits 255 for an unverifiable package
+sub reject { print STDERR @_; exit 3 }
 sub slurp { my $f = shift; open(my $h, "<", $f) or die "cannot read $f\n"; binmode $h; local $/; my $d = <$h>; close $h; $d }
 sub dearmor {
   my $d = shift;
@@ -1916,7 +1918,12 @@ for my $f ($asc, glob("$revdir/*")) {
     elsif ($tag == 14) { $current = key_packet($b, 0); $current->{parent} = $primary if $current }
     elsif ($tag == 2) {
       my $s = signature($b); my $t = $s->{type};
-      if ($t == 0x20) { my $k = $primary || $keys{$s->{issuer} || ""}; $k->{revoked} = 1 if $k }
+      if ($t == 0x20) {
+        my $k = $primary || $keys{$s->{issuer} || ""};
+        # A certificate for a key outside the bundle means the bundle is wrong; gpg would ignore it
+        reject "Revocation certificate " . (split m{/}, $f)[-1] . " does not revoke a key in the BDOT key bundle\n" unless $k;
+        $k->{revoked} = 1;
+      }
       elsif ($t == 0x28) { $current->{revoked} = 1 if $current && !$current->{primary} }
       elsif (($t >= 0x10 && $t <= 0x13) || $t == 0x1f || $t == 0x18) {
         my $k = $t == 0x18 ? $current : $primary;
@@ -1938,9 +1945,9 @@ my $k = $keys{$s->{issuer} || ""} or die "signature was not made by a key in the
 die "signing key is not an RSA key\n" unless $k->{n};
 die "key is not allowed to sign\n" if defined $k->{flags} && !($k->{flags} & 0x02);
 for my $c ($k, $k->{parent} || ()) {
-  die "signing key $c->{id} is revoked\n" if $c->{revoked};
-  die "signature predates signing key $c->{id}\n" if $s->{created} < $c->{created};
-  die "signing key $c->{id} had expired when the signature was made\n" if $c->{keyexp} && $s->{created} >= $c->{created} + $c->{keyexp};
+  reject "signing key $c->{id} is revoked\n" if $c->{revoked};
+  reject "signature predates signing key $c->{id}\n" if $s->{created} < $c->{created};
+  reject "signing key $c->{id} had expired when the signature was made\n" if $c->{keyexp} && $s->{created} >= $c->{created} + $c->{keyexp};
 }
 sub der_len { my $l = shift; return chr $l if $l < 128; my $b = ""; while ($l) { $b = chr($l & 255) . $b; $l >>= 8 } chr(0x80 | length $b) . $b }
 sub der { my ($t, $c) = @_; chr($t) . der_len(length $c) . $c }
@@ -1966,53 +1973,28 @@ verify_package_aix() {
   fi
 
   if command -v gpg > /dev/null 2>&1; then
-    if ! GNUPGHOME="$GPG_DIR" gpg --import "$GPG_DIR/bdot-public-gpg-key.asc" > /dev/null 2>&1; then
-      error "Failed to import public key"
-      return 1
-    fi
-    for key in "$GPG_DIR/deb-revocations/"*; do
-      [ -f "$key" ] || continue
-      if ! GNUPGHOME="$GPG_DIR" gpg --import "$key" > /dev/null 2>&1; then
-        error "Failed to import revocation key"
-        return 1
-      fi
-    done
-    set +e
-    VERIFY_OUTPUT=$(GNUPGHOME="$GPG_DIR" gpg --status-fd 1 --verify "$_sig_file" "$package_out_file_path" 2>&1)
-    VERIFY_EXIT_CODE=$?
-    set -e
-    case "$VERIFY_OUTPUT" in
-      *"[GNUPG:] REVKEYSIG"*|*"[GNUPG:] KEYREVOKED"*|*"[GNUPG:] EXPSIG"*|*"[GNUPG:] BADSIG"*|*"[GNUPG:] ERRSIG"*) VERIFY_EXIT_CODE=1 ;;
-      *"[GNUPG:] VALIDSIG"*) ;;
-      *) VERIFY_EXIT_CODE=1 ;;
-    esac
-    # gpg reports a key expired today as EXPKEYSIG; reject it only if it had expired when signing
-    if [ $VERIFY_EXIT_CODE -eq 0 ] && ! perl -e "$PERL_PGP_PREPARE" "$GPG_DIR/bdot-public-gpg-key.asc" "$GPG_DIR/deb-revocations" "$_sig_file" "$GPG_DIR" > /dev/null 2>&1; then
-      VERIFY_OUTPUT=$(perl -e "$PERL_PGP_PREPARE" "$GPG_DIR/bdot-public-gpg-key.asc" "$GPG_DIR/deb-revocations" "$_sig_file" "$GPG_DIR" 2>&1)
-      VERIFY_EXIT_CODE=1
-    fi
-  else
-    set +e
-    VERIFY_OUTPUT=$(perl -e "$PERL_PGP_PREPARE" "$GPG_DIR/bdot-public-gpg-key.asc" "$GPG_DIR/deb-revocations" "$_sig_file" "$GPG_DIR" 2>&1)
-    VERIFY_EXIT_CODE=$?
-    if [ $VERIFY_EXIT_CODE -eq 0 ]; then
-      VERIFY_OUTPUT=$(cat "$package_out_file_path" "$GPG_DIR/sig.trailer" | openssl dgst "-$VERIFY_OUTPUT" -verify "$GPG_DIR/key.pem" -signature "$GPG_DIR/sig.raw" 2>&1)
-      VERIFY_EXIT_CODE=$?
-    fi
-    set -e
+    gpg_import_bundle || return $?
+    gpg_verify_file "$_sig_file" "$package_out_file_path" "Package" || return $?
+    success "Package signature is valid, and its key was neither revoked nor expired when it signed"
+    return 0
   fi
 
-  if [ $VERIFY_EXIT_CODE -ne 0 ]; then
-    error "GPG signature verification failed"
-    if [ -n "$VERIFY_OUTPUT" ]; then
-      increase_indent
-      error "$VERIFY_OUTPUT"
-      decrease_indent
-    fi
+  # Without gpg, base Perl checks the keys and openssl checks the signature
+  set +e
+  _digest=$(perl -e "$PERL_PGP_PREPARE" "$GPG_DIR/bdot-public-gpg-key.asc" "$GPG_DIR/deb-revocations" "$_sig_file" "$GPG_DIR" 2> "$GPG_DIR/verify.err")
+  _rc=$?
+  set -e
+  if [ $_rc -ne 0 ]; then
+    error "Package signature is invalid: $(literal "$(cat "$GPG_DIR/verify.err")")"
+    [ $_rc -eq 3 ] && return 3
     return 1
   fi
+  if ! cat "$package_out_file_path" "$GPG_DIR/sig.trailer" | openssl dgst "-$_digest" -verify "$GPG_DIR/key.pem" -signature "$GPG_DIR/sig.raw" > /dev/null 2>&1; then
+    error "Package was altered: its signature does not match its contents"
+    return 3
+  fi
 
-  success "Package GPG signature is valid"
+  success "Package signature is valid, and its key was neither revoked nor expired when it signed"
   return 0
 }
 
