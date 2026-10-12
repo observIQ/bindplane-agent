@@ -307,10 +307,7 @@ Usage:
     This parameter will have the script check access to Bindplane based on the provided '--endpoint'
 
   $(fg_yellow '--no-gpg-check')
-      Skips GPG signature verification of the package. Verification needs gpg,
-      tar, gzip, awk, sed, grep, tr, and cut (and ar for deb packages), and a
-      package whose signing key is revoked or expired, or that was altered,
-      never installs, even interactively. When using this flag, the
+      Skips GPG signature verification of the package. When using this flag, the
       package signature will not be verified. This should only be used in trusted
       or offline environments where the package authenticity has been verified
       through other means.
@@ -319,10 +316,11 @@ Usage:
       to exit with an error if both are specified.
 
   $(fg_yellow '--require-gpg-check')
-      Requires GPG signature verification of the package. By default, when this
-      system lacks the tools verification needs, the script warns and installs
-      without verifying. With this flag, it stops the install instead. When the
-      tools are present, verification runs the same either way.
+      Requires GPG signature verification of the package. Verification needs gpg,
+      tar, gzip, awk, sed, grep, tr, and cut (and ar for deb packages). By default,
+      when this system lacks them, the script warns and installs without
+      verifying. With this flag, it stops the install instead. When the tools
+      are present, verification runs the same either way.
 
       This option is incompatible with '--no-gpg-check' and will cause the script
       to exit with an error if both are specified.
