@@ -52,7 +52,8 @@ gpgq --faked-system-time 20200102T000000 --quick-set-expire "$X" 1d
 sed 's/^:-----BEGIN/-----BEGIN/' "$G/openpgp-revocs.d/$R.rev" > "$WORK/revoked-cert.asc"
 gpgq --import < "$(sed 's/^:-----BEGIN/-----BEGIN/' "$G/openpgp-revocs.d/$E.rev" > "$WORK/e.rev" && echo "$WORK/e.rev")"
 
-# run_case <name> <signature> <key fingerprint for the bundle> <with revocation cert: yes|no> <path: gpg|openssl> <expect: ok|fail>
+# run_case <name> <signature> <key fingerprint for the bundle> <with revocation cert: yes|no> <path: gpg|openssl> <expected return code>
+# 3 never installs, even interactively; 1 lets an interactive user choose
 run_case() {
   name=$1 sig=$2 key=$3 rev=$4 path=$5 expect=$6
   t="$WORK/tmp-$name-$path"; mkdir -p "$t/gpg/deb-revocations"
@@ -67,21 +68,23 @@ run_case() {
   rm -f "$bin/uname"; printf '#!/bin/sh\necho AIX\n' > "$bin/uname"; chmod +x "$bin/uname"
   [ "$path" = gpg ] || rm -f "$bin/gpg" "$bin/gpg2"
   out=$(PATH="$bin" "$bin/sh" -c ". '$WORK/lib.sh'; GPG_DIR='$t/gpg'; package_out_file_path='$t/pkg.tar.gz'; verify_package_aix" 2>&1); rc=$?
-  if { [ "$expect" = ok ] && [ $rc -eq 0 ]; } || { [ "$expect" = fail ] && [ $rc -ne 0 ]; }; then
+  if [ "$rc" -eq "$expect" ]; then
     pass=$((pass+1)); echo "PASS $name ($path)"
   else
-    fail=$((fail+1)); echo "FAIL $name ($path, rc=$rc)"; printf '%s\n' "$out" | tail -3
+    fail=$((fail+1)); echo "FAIL $name ($path, rc=$rc, wanted $expect)"; printf '%s\n' "$out" | tail -3
   fi
 }
 
 for path in openssl gpg; do
-  run_case subkey    subkey   "$S" no  $path ok
-  run_case sha512    sha512   "$S" no  $path ok
-  run_case corrupted subkey   "$S" no  $path fail
-  run_case unknown   other    "$S" no  $path fail
-  run_case revoked   revoked  "$R" yes $path fail
-  run_case embedded  embedded "$E" no  $path fail
-  run_case expired   expired  "$X" no  $path fail
+  run_case subkey    subkey   "$S" no  $path 0
+  run_case sha512    sha512   "$S" no  $path 0
+  run_case corrupted subkey   "$S" no  $path 3
+  run_case unknown   other    "$S" no  $path 1
+  run_case revoked   revoked  "$R" yes $path 3
+  run_case embedded  embedded "$E" no  $path 3
+  run_case expired   expired  "$X" no  $path 3
+  # a revocation certificate for a key outside the bundle means the bundle is wrong
+  run_case stray-rev subkey   "$S" yes $path 3
 done
 # Full verify_package on AIX, where base tar has no -z: the key bundle must still extract
 t="$WORK/tmp-bundle"; mkdir -p "$t/keys/deb-revocations" "$t/gpg"
@@ -98,5 +101,12 @@ printf '#!/bin/sh\ncase "$1" in *z*) echo "tar: illegal option -- z" >&2; exit 1
 chmod +x "$bin/uname" "$bin/tar"
 out=$(PATH="$bin" "$bin/sh" -c ". '$WORK/lib.sh'; TMP_DIR='$t'; package_type=mkssys; package_out_file_path='$t/pkg.tar.gz'; gpg_tar_out_file_path='$t/gpg-keys.tar.gz'; verify_package" 2>&1); rc=$?
 if [ $rc -eq 0 ]; then pass=$((pass+1)); echo "PASS bundle-without-tar-z (openssl)"; else fail=$((fail+1)); echo "FAIL bundle-without-tar-z (rc=$rc)"; printf '%s\n' "$out" | tail -3; fi
+
+# Missing verification tools: warn and install unverified by default, abort with --require-gpg-check
+rm -f "$bin/openssl"
+out=$(PATH="$bin" "$bin/sh" -c ". '$WORK/lib.sh'; TMP_DIR='$t'; package_type=mkssys; package_out_file_path='$t/pkg.tar.gz'; gpg_tar_out_file_path='$t/gpg-keys.tar.gz'; verify_package" 2>&1); rc=$?
+case "$rc $out" in "0 "*"Skipping package signature verification: this system lacks [gpg or openssl]"*) pass=$((pass+1)); echo "PASS no-tools-skips" ;; *) fail=$((fail+1)); echo "FAIL no-tools-skips (rc=$rc)"; printf '%s\n' "$out" | tail -3 ;; esac
+out=$(PATH="$bin" "$bin/sh" -c ". '$WORK/lib.sh'; TMP_DIR='$t'; package_type=mkssys; require_gpg_check=true; verification_check; echo reached" 2>&1); rc=$?
+case "$rc $out" in *reached*) fail=$((fail+1)); echo "FAIL no-tools-required (rc=$rc)"; printf '%s\n' "$out" | tail -3 ;; *"requires: [gpg or openssl]"*) pass=$((pass+1)); echo "PASS no-tools-required" ;; *) fail=$((fail+1)); echo "FAIL no-tools-required (rc=$rc)"; printf '%s\n' "$out" | tail -3 ;; esac
 
 echo "pass=$pass fail=$fail"; [ $fail -eq 0 ]
