@@ -21,7 +21,33 @@ COPY release_deps/VERSION.txt /etc/otel/VERSION.txt
 
 COPY release_deps/plugins /etc/otel/plugins
 COPY config/logging.stdout.yaml /etc/otel/logging.yaml
-COPY release_deps/config.yaml /etc/otel/config.yaml
+
+# Default config is a nop pipeline plus the health_check extension on
+# 0.0.0.0:13133, so Kubernetes probes pass before Bindplane pushes a config
+# over OpAMP. It must stay byte-identical to defaultCollectorConfig in
+# cmd/container-init/main.go, which its tests enforce. The quoted delimiter
+# disables build-time variable expansion.
+COPY <<"EOF" /etc/otel/config.yaml
+receivers:
+  nop:
+processors:
+  batch:
+exporters:
+  nop:
+extensions:
+  health_check:
+    endpoint: 0.0.0.0:13133
+service:
+  extensions: [health_check]
+  pipelines:
+    metrics:
+      receivers: [nop]
+      processors: [batch]
+      exporters: [nop]
+  telemetry:
+    metrics:
+      level: none
+EOF
 
 # Scratch images contain nothing by default. The built image
 # will contain only what was copied into it. This means it
