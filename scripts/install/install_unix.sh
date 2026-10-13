@@ -100,7 +100,7 @@ RPM_GPG_KEYS_TO_REMOVE=""
 
 # Colors
 if [ "$non_interactive" = "false" ] && [ "$OS_TYPE" != AIX ]; then
-  num_colors=$(tput colors 2>/dev/null)
+  num_colors=$(tput colors 2>/dev/null || echo 0)
   if test -n "$num_colors" && test "$num_colors" -ge 8; then
     bold="$(tput bold)"
     underline="$(tput smul)"
