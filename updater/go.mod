@@ -4,7 +4,7 @@ go 1.26.9
 
 require (
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51
-	github.com/open-telemetry/opamp-go v0.24.0
+	github.com/open-telemetry/opamp-go v0.25.0
 	github.com/spf13/pflag v1.0.10
 	github.com/stretchr/testify v1.12.1
 	go.uber.org/zap v1.28.0

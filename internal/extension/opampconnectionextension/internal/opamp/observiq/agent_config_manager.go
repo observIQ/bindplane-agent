@@ -69,7 +69,7 @@ func (a *AgentConfigManager) AddConfig(configName string, managedConfig *opamp.M
 
 // ComposeEffectiveConfig reads in all config files and calculates the effective config
 func (a *AgentConfigManager) ComposeEffectiveConfig() (*protobufs.EffectiveConfig, error) {
-	contentMap := make(map[string]*protobufs.AgentConfigFile, len(a.configMap))
+	contentMap := make(map[string]*protobufs.AgentConfigObject, len(a.configMap))
 
 	for configName, managedConfig := range a.configMap {
 		// Report config is in memory and should not be considered part of the effective config
@@ -85,7 +85,7 @@ func (a *AgentConfigManager) ComposeEffectiveConfig() (*protobufs.EffectiveConfi
 		}
 
 		// Add to contentMap
-		contentMap[configName] = &protobufs.AgentConfigFile{
+		contentMap[configName] = &protobufs.AgentConfigObject{
 			Body:        configContents,
 			ContentType: opamp.DetermineContentType(managedConfig.ConfigPath),
 		}

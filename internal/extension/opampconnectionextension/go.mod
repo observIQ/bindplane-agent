@@ -12,7 +12,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/observiq/bindplane-otel-collector/internal/report v1.110.0
 	github.com/oklog/ulid/v2 v2.1.2
-	github.com/open-telemetry/opamp-go v0.24.0
+	github.com/open-telemetry/opamp-go v0.25.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/confmap/provider/aesprovider v0.162.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/connector/spanmetricsconnector v0.162.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/prometheusexporter v0.162.0

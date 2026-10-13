@@ -10,7 +10,7 @@ replace github.com/observiq/bindplane-otel-collector/internal/extension/opampcon
 
 require (
 	github.com/dynatrace/dynatrace-bindplane-otel-contrib/pkg/snapshot v1.1.0
-	github.com/open-telemetry/opamp-go v0.24.0
+	github.com/open-telemetry/opamp-go v0.25.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/extension/opampcustommessages v0.162.0
 	github.com/stretchr/testify v1.12.1
 	go.opentelemetry.io/collector/component v1.68.0

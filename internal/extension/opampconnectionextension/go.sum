@@ -399,8 +399,8 @@ github.com/observiq/opentelemetry-collector-contrib/pkg/stanza v0.0.0-2026070121
 github.com/observiq/opentelemetry-collector-contrib/pkg/stanza v0.0.0-20260701212116-67bea8600013/go.mod h1:1DFUJuGWhWhE4ABx+is/l7ZEzHxTfFhkrV00ZMfxBjI=
 github.com/oklog/ulid/v2 v2.1.2 h1:IEclFb9JNvzYA6MW2SCxbLzcHTVsfqm3PrqGQJH5zec=
 github.com/oklog/ulid/v2 v2.1.2/go.mod h1:rcEKHmBBKfef9DhnvX7y1HZBYxjXb0cP5ExxNsTT1QQ=
-github.com/open-telemetry/opamp-go v0.24.0 h1:PLPZoCa9myOl2iUBVQYnAToi7Xa+MF0DF/XPcC3gFls=
-github.com/open-telemetry/opamp-go v0.24.0/go.mod h1:xgYySBY286Bei9/0gFH0X+l6h51fQnvZcLvglDQf9DI=
+github.com/open-telemetry/opamp-go v0.25.0 h1:UXXSQBtXWxa1ClY85caMrsdiry9dnCZn+LG441eWk5A=
+github.com/open-telemetry/opamp-go v0.25.0/go.mod h1:xgYySBY286Bei9/0gFH0X+l6h51fQnvZcLvglDQf9DI=
 github.com/open-telemetry/opentelemetry-collector-contrib/confmap/provider/aesprovider v0.162.0 h1:ETUntkbQyKTE47Jslm42mU/hjlCqZMgGMUnSbopkMf4=
 github.com/open-telemetry/opentelemetry-collector-contrib/confmap/provider/aesprovider v0.162.0/go.mod h1:U2qQjFkyVc7AC+zg3m3rzpIYYFCmAdFIk0pXvTBbZ2Q=
 github.com/open-telemetry/opentelemetry-collector-contrib/connector/spanmetricsconnector v0.162.0 h1:aGGNR0dPcKmN0u64ZQOXCVK7A2n3wQdbyqizPGLamGk=

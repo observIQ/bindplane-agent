@@ -138,6 +138,24 @@ func (_m *MockOpAMPClient) SetCapabilities(capabilities *protobufs.AgentCapabili
 	return r0
 }
 
+// SetConnectionSettingsStatus provides a mock function with given fields: status
+func (_m *MockOpAMPClient) SetConnectionSettingsStatus(status *protobufs.ConnectionSettingsStatus) error {
+	ret := _m.Called(status)
+
+	if len(ret) == 0 {
+		panic("no return value specified for SetConnectionSettingsStatus")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(*protobufs.ConnectionSettingsStatus) error); ok {
+		r0 = rf(status)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // SetCustomCapabilities provides a mock function with given fields: customCapabilities
 func (_m *MockOpAMPClient) SetCustomCapabilities(customCapabilities *protobufs.CustomCapabilities) error {
 	ret := _m.Called(customCapabilities)
