@@ -18,8 +18,8 @@ require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/prometheusexporter v0.161.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/prometheusremotewriteexporter v0.161.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/extension/opampcustommessages v0.161.0
-	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden v0.161.0
-	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest v0.161.0
+	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden v0.162.0
+	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest v0.162.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/filelogreceiver v0.161.0
 	github.com/spf13/pflag v1.0.10
 	github.com/stretchr/testify v1.12.1
@@ -29,13 +29,13 @@ require (
 	go.opentelemetry.io/collector/confmap/provider/fileprovider v1.67.0
 	go.opentelemetry.io/collector/confmap/provider/httpsprovider v1.67.0
 	go.opentelemetry.io/collector/confmap/provider/yamlprovider v1.67.0
-	go.opentelemetry.io/collector/consumer v1.67.0
+	go.opentelemetry.io/collector/consumer v1.68.0
 	go.opentelemetry.io/collector/exporter v1.67.0
 	go.opentelemetry.io/collector/exporter/nopexporter v0.161.0
 	go.opentelemetry.io/collector/extension v1.67.0
-	go.opentelemetry.io/collector/featuregate v1.67.0
+	go.opentelemetry.io/collector/featuregate v1.68.0
 	go.opentelemetry.io/collector/otelcol v0.161.0
-	go.opentelemetry.io/collector/pdata v1.67.0
+	go.opentelemetry.io/collector/pdata v1.68.0
 	go.opentelemetry.io/collector/receiver v1.67.0
 	go.opentelemetry.io/collector/service v0.161.0
 	go.opentelemetry.io/otel/sdk/metric v1.46.0
@@ -87,7 +87,7 @@ require (
 	github.com/cockroachdb/tokenbucket v0.0.0-20230807174530-cc333fc44b06 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/dennwc/varint v1.0.0 // indirect
-	github.com/dynatrace/dynatrace-bindplane-otel-contrib/pkg/snapshot v1.0.0 // indirect
+	github.com/dynatrace/dynatrace-bindplane-otel-contrib/pkg/snapshot v1.1.0 // indirect
 	github.com/ebitengine/purego v0.10.2 // indirect
 	github.com/elastic/lunes v0.2.2 // indirect
 	github.com/expr-lang/expr v1.17.8 // indirect
@@ -173,7 +173,7 @@ require (
 	github.com/x448/float16 v0.8.4 // indirect
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
-	go.opentelemetry.io/collector/client v1.67.0 // indirect
+	go.opentelemetry.io/collector/client v1.68.0 // indirect
 	go.opentelemetry.io/collector/component/componentstatus v0.161.0 // indirect
 	go.opentelemetry.io/collector/component/componenttest v0.161.0 // indirect
 	go.opentelemetry.io/collector/config/configauth v1.67.0 // indirect
@@ -204,9 +204,9 @@ require (
 	go.opentelemetry.io/collector/internal/componentalias v0.161.0 // indirect
 	go.opentelemetry.io/collector/internal/fanoutconsumer v0.161.0 // indirect
 	go.opentelemetry.io/collector/internal/telemetry v0.161.0 // indirect
-	go.opentelemetry.io/collector/pdata/pprofile v0.161.0 // indirect
-	go.opentelemetry.io/collector/pdata/testdata v0.161.0 // indirect
-	go.opentelemetry.io/collector/pdata/xpdata v0.161.0 // indirect
+	go.opentelemetry.io/collector/pdata/pprofile v0.162.0 // indirect
+	go.opentelemetry.io/collector/pdata/testdata v0.162.0 // indirect
+	go.opentelemetry.io/collector/pdata/xpdata v0.162.0 // indirect
 	go.opentelemetry.io/collector/pipeline v1.67.0 // indirect
 	go.opentelemetry.io/collector/pipeline/xpipeline v0.161.0 // indirect
 	go.opentelemetry.io/collector/processor v1.67.0 // indirect
