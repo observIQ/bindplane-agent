@@ -117,6 +117,7 @@ processors:
   - gomod: github.com/dynatrace/dynatrace-bindplane-otel-contrib/processor/asimstandardizationprocessor v1.1.0
   - gomod: github.com/dynatrace/dynatrace-bindplane-otel-contrib/processor/datapointcountprocessor v1.1.0
   - gomod: github.com/dynatrace/dynatrace-bindplane-otel-contrib/processor/logcountprocessor v1.1.0
+  - gomod: github.com/dynatrace/dynatrace-bindplane-otel-contrib/processor/logtypedetectionprocessor v1.1.0
   - gomod: github.com/dynatrace/dynatrace-bindplane-otel-contrib/processor/lookupprocessor v1.1.0
   - gomod: github.com/dynatrace/dynatrace-bindplane-otel-contrib/processor/maskprocessor v1.1.0
   - gomod: github.com/dynatrace/dynatrace-bindplane-otel-contrib/processor/metricextractprocessor v1.1.0
