@@ -36,7 +36,8 @@ run_case() {
   [ -e "$bin/iostat" ] || { printf '#!/bin/sh\n' > "$bin/iostat"; chmod +x "$bin/iostat"; }
   rm -f "$bin/uname"
   printf '#!/bin/sh\necho %s\n' "$os" > "$bin/uname"; chmod +x "$bin/uname"
-  out=$(PATH="$bin" "$bin/sh" -c ". '$WORK/lib.sh'; dependencies_check" 2>&1); rc=$?
+  # No TERM, as under CI, cron, or a pipe, where tput fails
+  out=$(unset TERM; PATH="$bin" "$bin/sh" -c ". '$WORK/lib.sh'; dependencies_check" 2>&1); rc=$?
   ok=true
   if [ "$expect" = ok ] && [ $rc -ne 0 ]; then ok=false; fi
   if [ "$expect" = fail ]; then
