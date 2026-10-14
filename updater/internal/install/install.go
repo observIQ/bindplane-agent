@@ -43,17 +43,28 @@ type archiveInstaller struct {
 	latestDir  string
 	installDir string
 	backupDir  string
-	svc        service.Service
-	logger     *zap.Logger
+	// selfPath is the running updater binary. The collector copies it from latestDir into
+	// installDir and runs it from there, so installing latestDir would overwrite it; Windows
+	// refuses to overwrite a running executable. It is already the new version, so it is skipped.
+	selfPath string
+	svc      service.Service
+	logger   *zap.Logger
 }
 
 // NewInstaller returns a new instance of an Installer.
 func NewInstaller(logger *zap.Logger, installDir string, service service.Service) Installer {
+	selfPath, err := os.Executable()
+	if err != nil {
+		// Not fatal: without the skip, a Windows install fails later with a sharing
+		// violation on updater.exe. The warning is what makes that log explainable.
+		logger.Warn("Failed to determine the updater's own path; it will not be skipped during install", zap.Error(err))
+	}
 	return &archiveInstaller{
 		latestDir:  path.LatestDir(installDir),
 		svc:        service,
 		installDir: installDir,
 		backupDir:  path.BackupDir(installDir),
+		selfPath:   selfPath,
 		logger:     logger.Named("installer"),
 	}
 }
@@ -64,7 +75,7 @@ func NewInstaller(logger *zap.Logger, installDir string, service service.Service
 func (i archiveInstaller) Install(rb rollback.Rollbacker) error {
 	// install files that go to installDirPath to their correct location,
 	// excluding any config files (logging.yaml, config.yaml, manager.yaml)
-	if err := installFiles(i.logger, i.latestDir, i.installDir, i.backupDir, rb); err != nil {
+	if err := installFiles(i.logger, i.latestDir, i.installDir, i.backupDir, i.selfPath, rb); err != nil {
 		return fmt.Errorf("failed to install new files: %w", err)
 	}
 	i.logger.Debug("Install artifacts copied")
@@ -87,8 +98,14 @@ func (i archiveInstaller) Install(rb rollback.Rollbacker) error {
 }
 
 // installFiles moves the file tree rooted at inputPath to installDir,
-// skipping configuration files. Appends CopyFileAction-s to the Rollbacker as it copies file.
-func installFiles(logger *zap.Logger, inputPath, installDir, backupDir string, rb rollback.Rollbacker) error {
+// skipping configuration files and the running executable at selfPath.
+// Appends CopyFileAction-s to the Rollbacker as it copies file.
+func installFiles(logger *zap.Logger, inputPath, installDir, backupDir, selfPath string, rb rollback.Rollbacker) error {
+	var self fs.FileInfo
+	if selfPath != "" {
+		self, _ = os.Stat(selfPath)
+	}
+
 	err := filepath.WalkDir(inputPath, func(inPath string, d fs.DirEntry, err error) error {
 		switch {
 		case err != nil:
@@ -113,6 +130,15 @@ func installFiles(logger *zap.Logger, inputPath, installDir, backupDir string, r
 		// to get the out directory (which we will create if it does not exist).
 		outPath := filepath.Join(installDir, relPath)
 		outDir := filepath.Dir(outPath)
+
+		// os.SameFile rather than a string compare: installDir comes from the registry on Windows and
+		// may differ from os.Executable in case, trailing separator, or short (8.3) path form.
+		if self != nil {
+			if outInfo, err := os.Stat(outPath); err == nil && os.SameFile(outInfo, self) {
+				logger.Info("Skipping running updater binary", zap.String("path", outPath))
+				return nil
+			}
+		}
 
 		if err := os.MkdirAll(outDir, 0750); err != nil {
 			return fmt.Errorf("failed to create dir: %w", err)
