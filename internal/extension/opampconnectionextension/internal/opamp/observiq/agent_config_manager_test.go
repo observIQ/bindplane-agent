@@ -104,7 +104,7 @@ func TestComposeEffectiveConfig(t *testing.T) {
 
 				expected := &protobufs.EffectiveConfig{
 					ConfigMap: &protobufs.AgentConfigMap{
-						ConfigMap: map[string]*protobufs.AgentConfigFile{
+						ConfigMap: map[string]*protobufs.AgentConfigObject{
 							configOne: {
 								Body:        configOneContents,
 								ContentType: opamp.YAMLContentType,
@@ -148,7 +148,7 @@ func TestComposeEffectiveConfig(t *testing.T) {
 
 				expected := &protobufs.EffectiveConfig{
 					ConfigMap: &protobufs.AgentConfigMap{
-						ConfigMap: map[string]*protobufs.AgentConfigFile{
+						ConfigMap: map[string]*protobufs.AgentConfigObject{
 							configOne: {
 								Body:        configOneContents,
 								ContentType: opamp.YAMLContentType,
@@ -196,7 +196,7 @@ func TestApplyConfigChanges(t *testing.T) {
 
 				expectedEffCfg := &protobufs.EffectiveConfig{
 					ConfigMap: &protobufs.AgentConfigMap{
-						ConfigMap: map[string]*protobufs.AgentConfigFile{
+						ConfigMap: map[string]*protobufs.AgentConfigObject{
 							ManagerConfigName: {
 								Body:        configContents,
 								ContentType: opamp.YAMLContentType,
@@ -231,7 +231,7 @@ func TestApplyConfigChanges(t *testing.T) {
 
 				remoteConfig := &protobufs.AgentRemoteConfig{
 					Config: &protobufs.AgentConfigMap{
-						ConfigMap: map[string]*protobufs.AgentConfigFile{
+						ConfigMap: map[string]*protobufs.AgentConfigObject{
 							ManagerConfigName: {
 								Body:        configContents,
 								ContentType: opamp.YAMLContentType,
@@ -242,7 +242,7 @@ func TestApplyConfigChanges(t *testing.T) {
 
 				expectedEffCfg := &protobufs.EffectiveConfig{
 					ConfigMap: &protobufs.AgentConfigMap{
-						ConfigMap: map[string]*protobufs.AgentConfigFile{
+						ConfigMap: map[string]*protobufs.AgentConfigObject{
 							ManagerConfigName: {
 								Body:        configContents,
 								ContentType: opamp.YAMLContentType,
@@ -278,7 +278,7 @@ func TestApplyConfigChanges(t *testing.T) {
 
 				remoteConfig := &protobufs.AgentRemoteConfig{
 					Config: &protobufs.AgentConfigMap{
-						ConfigMap: map[string]*protobufs.AgentConfigFile{
+						ConfigMap: map[string]*protobufs.AgentConfigObject{
 							ManagerConfigName: {
 								Body:        configContents,
 								ContentType: opamp.YAMLContentType,
@@ -293,7 +293,7 @@ func TestApplyConfigChanges(t *testing.T) {
 
 				expectedEffCfg := &protobufs.EffectiveConfig{
 					ConfigMap: &protobufs.AgentConfigMap{
-						ConfigMap: map[string]*protobufs.AgentConfigFile{
+						ConfigMap: map[string]*protobufs.AgentConfigObject{
 							ManagerConfigName: {
 								Body:        configContents,
 								ContentType: opamp.YAMLContentType,
@@ -335,7 +335,7 @@ func TestApplyConfigChanges(t *testing.T) {
 
 				remoteConfig := &protobufs.AgentRemoteConfig{
 					Config: &protobufs.AgentConfigMap{
-						ConfigMap: map[string]*protobufs.AgentConfigFile{
+						ConfigMap: map[string]*protobufs.AgentConfigObject{
 							"other.yaml": {
 								Body:        []byte("other: value"),
 								ContentType: opamp.YAMLContentType,
@@ -346,7 +346,7 @@ func TestApplyConfigChanges(t *testing.T) {
 
 				expectedEffCfg := &protobufs.EffectiveConfig{
 					ConfigMap: &protobufs.AgentConfigMap{
-						ConfigMap: map[string]*protobufs.AgentConfigFile{
+						ConfigMap: map[string]*protobufs.AgentConfigObject{
 							ManagerConfigName: {
 								Body:        configContents,
 								ContentType: opamp.YAMLContentType,
@@ -383,7 +383,7 @@ func TestApplyConfigChanges(t *testing.T) {
 
 				remoteConfig := &protobufs.AgentRemoteConfig{
 					Config: &protobufs.AgentConfigMap{
-						ConfigMap: map[string]*protobufs.AgentConfigFile{
+						ConfigMap: map[string]*protobufs.AgentConfigObject{
 							ManagerConfigName: {
 								Body:        configContents,
 								ContentType: opamp.YAMLContentType,
@@ -398,7 +398,7 @@ func TestApplyConfigChanges(t *testing.T) {
 
 				expectedEffCfg := &protobufs.EffectiveConfig{
 					ConfigMap: &protobufs.AgentConfigMap{
-						ConfigMap: map[string]*protobufs.AgentConfigFile{
+						ConfigMap: map[string]*protobufs.AgentConfigObject{
 							ManagerConfigName: {
 								Body:        configContents,
 								ContentType: opamp.YAMLContentType,
@@ -438,7 +438,7 @@ func TestApplyConfigChanges(t *testing.T) {
 
 				remoteConfig := &protobufs.AgentRemoteConfig{
 					Config: &protobufs.AgentConfigMap{
-						ConfigMap: map[string]*protobufs.AgentConfigFile{
+						ConfigMap: map[string]*protobufs.AgentConfigObject{
 							ReportConfigName: {
 								Body:        newFileContents,
 								ContentType: opamp.YAMLContentType,
@@ -449,7 +449,7 @@ func TestApplyConfigChanges(t *testing.T) {
 
 				expectedEffCfg := &protobufs.EffectiveConfig{
 					ConfigMap: &protobufs.AgentConfigMap{
-						ConfigMap: map[string]*protobufs.AgentConfigFile{},
+						ConfigMap: map[string]*protobufs.AgentConfigObject{},
 					},
 				}
 				changed, err := manager.ApplyConfigChanges(remoteConfig)
@@ -485,7 +485,7 @@ func TestApplyConfigChanges(t *testing.T) {
 
 				remoteConfig := &protobufs.AgentRemoteConfig{
 					Config: &protobufs.AgentConfigMap{
-						ConfigMap: map[string]*protobufs.AgentConfigFile{
+						ConfigMap: map[string]*protobufs.AgentConfigObject{
 							LoggingConfigName: {
 								Body:        newFileContents,
 								ContentType: opamp.YAMLContentType,
@@ -496,7 +496,7 @@ func TestApplyConfigChanges(t *testing.T) {
 
 				expectedEffCfg := &protobufs.EffectiveConfig{
 					ConfigMap: &protobufs.AgentConfigMap{
-						ConfigMap: map[string]*protobufs.AgentConfigFile{
+						ConfigMap: map[string]*protobufs.AgentConfigObject{
 							LoggingConfigName: {
 								Body:        newFileContents,
 								ContentType: opamp.YAMLContentType,
@@ -537,7 +537,7 @@ func TestApplyConfigChanges(t *testing.T) {
 
 				remoteConfig := &protobufs.AgentRemoteConfig{
 					Config: &protobufs.AgentConfigMap{
-						ConfigMap: map[string]*protobufs.AgentConfigFile{
+						ConfigMap: map[string]*protobufs.AgentConfigObject{
 							LoggingConfigName: {
 								Body:        newFileContents,
 								ContentType: opamp.YAMLContentType,
@@ -548,7 +548,7 @@ func TestApplyConfigChanges(t *testing.T) {
 
 				expectedEffCfg := &protobufs.EffectiveConfig{
 					ConfigMap: &protobufs.AgentConfigMap{
-						ConfigMap: map[string]*protobufs.AgentConfigFile{
+						ConfigMap: map[string]*protobufs.AgentConfigObject{
 							LoggingConfigName: {
 								Body:        configContents,
 								ContentType: opamp.YAMLContentType,

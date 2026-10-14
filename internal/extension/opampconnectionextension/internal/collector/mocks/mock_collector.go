@@ -9,7 +9,7 @@ import (
 
 	mock "github.com/stretchr/testify/mock"
 
-	service "go.opentelemetry.io/collector/service"
+	"go.opentelemetry.io/collector/service"
 
 	zap "go.uber.org/zap"
 )
