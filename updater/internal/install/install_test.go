@@ -102,6 +102,55 @@ func TestInstallArtifacts(t *testing.T) {
 		require.Contains(t, actions, action.NewServiceStartAction(svc))
 	})
 
+	t.Run("Skips the running updater binary", func(t *testing.T) {
+		outDir := t.TempDir()
+		svc := mocks.NewMockService(t)
+		rb := rb_mocks.NewMockRollbacker(t)
+
+		// Stand-in for updater.exe: the collector copies it from latestDir into installDir and
+		// runs it from there, so installing latestDir would try to overwrite the running binary.
+		selfPath := filepath.Join(outDir, "test.txt")
+		require.NoError(t, os.WriteFile(selfPath, []byte("# The running updater"), 0600))
+
+		installer := &archiveInstaller{
+			latestDir:  filepath.Join("testdata", "example-install"),
+			installDir: outDir,
+			backupDir:  filepath.Join("testdata", "rollback"),
+			selfPath:   selfPath,
+			svc:        svc,
+			logger:     zaptest.NewLogger(t),
+		}
+
+		svc.On("Update").Once().Return(nil)
+		svc.On("Start").Once().Return(nil)
+
+		actions := []action.RollbackableAction{}
+		rb.On("AppendAction", mock.Anything).Run(func(args mock.Arguments) {
+			actions = append(actions, args.Get(0).(action.RollbackableAction))
+		})
+
+		require.NoError(t, installer.Install(rb))
+
+		// Not overwritten, and no rollback action recorded for it.
+		contentsEqual(t, selfPath, "# The running updater")
+		// Everything else still installs.
+		contentsEqual(t, filepath.Join(outDir, "test-folder", "another-test.txt"), "This is a nested text file\n")
+
+		copyNestedTestTxtAction, err := action.NewCopyFileAction(
+			installer.logger,
+			filepath.Join("test-folder", "another-test.txt"),
+			filepath.Join(installer.installDir, "test-folder", "another-test.txt"),
+			installer.backupDir,
+		)
+		require.NoError(t, err)
+		copyNestedTestTxtAction.FileCreated = true
+
+		require.Equal(t, 3, len(actions))
+		require.Contains(t, actions, copyNestedTestTxtAction)
+		require.Contains(t, actions, action.NewServiceUpdateAction(installer.logger, installer.installDir))
+		require.Contains(t, actions, action.NewServiceStartAction(svc))
+	})
+
 	t.Run("Update fails", func(t *testing.T) {
 		outDir := t.TempDir()
 		svc := mocks.NewMockService(t)
