@@ -27,7 +27,7 @@ PORT=$(python3 -c 'import socket; s=socket.socket(); s.bind(("127.0.0.1",0)); pr
 python3 -m http.server "$PORT" --bind 127.0.0.1 --directory "$WORK/www" > /dev/null 2>&1 &
 SERVER=$!
 trap 'kill $SERVER 2>/dev/null; rm -rf "$WORK"' EXIT
-i=0; until python3 -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:$PORT/pkg.bin')" 2>/dev/null; do i=$((i+1)); [ $i -gt 50 ] && break; sleep 0.1; done
+i=0; until python3 -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:$PORT/pkg.bin')" 2>/dev/null; do i=$((i+1)); [ $i -gt 10 ] && break; sleep 1; done
 
 # run_case <name> <os> <omit tools> <shell to run after sourcing> <expect: ok|fail> [must-mention]
 run_case() {
