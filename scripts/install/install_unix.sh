@@ -50,6 +50,8 @@ indent=""
 non_interactive=false
 error_mode=false
 skip_gpg_check=false
+# require_gpg_check fails the install, instead of skipping verification, when verification tools are missing
+require_gpg_check=false
 
 # Set up AIX-specific constants and supervisor timeout values (AIX needs higher values due to slow I/O)
 if [ "$OS_TYPE" = "AIX" ]; then
@@ -81,17 +83,13 @@ gpg_tar_out_file_path="unknown"
 
 offline_installation=false
 
-# RPM_GPG_KEYS_TO_REMOVE is a list of GPG keys to remove from the RPM package. This is used for revoked keys. Deb packages are handled differently.
-# The entries in this should be formatted similarly to gpg-pubkey-<version>-<release>
-# The entries can be found by importing the revoked public key and then exploring the RPM database for the key.
-# rpm --import <revoked_public_key>.asc
-# rpm -q gpg-pubkey, it's one of these
-# rpm -q gpg-pubkey --info, go find the BDOT public key and use the version and release numbers from there.
-RPM_GPG_KEYS_TO_REMOVE=[]
+# RPM_GPG_KEYS_TO_REMOVE lists revoked rpm key names to remove; the bundle's
+# rpm-revocations.txt adds more. See signature/gpg/revocations.md.
+RPM_GPG_KEYS_TO_REMOVE=""
 
 # Colors
 if [ "$non_interactive" = "false" ] && [ "$OS_TYPE" != AIX ]; then
-  num_colors=$(tput colors 2>/dev/null)
+  num_colors=$(tput colors 2>/dev/null || echo 0)
   if test -n "$num_colors" && test "$num_colors" -ge 8; then
     bold="$(tput bold)"
     underline="$(tput smul)"
@@ -305,6 +303,16 @@ Usage:
       through other means.
       
       This option is incompatible with '--gpg-tar-file' and will cause the script
+      to exit with an error if both are specified.
+
+  $(fg_yellow '--require-gpg-check')
+      Requires GPG signature verification of the package. Verification needs gpg,
+      tar, gzip, awk, sed, grep, tr, and cut (and ar for deb packages). By default,
+      when this system lacks them, the script warns and installs without
+      verifying. With this flag, it stops the install instead. When the tools
+      are present, verification runs the same either way.
+
+      This option is incompatible with '--no-gpg-check' and will cause the script
       to exit with an error if both are specified.
 
   $(fg_yellow '-q, --quiet')
@@ -793,6 +801,11 @@ interactive_check()
     error_exit "$LINENO" "--no-gpg-check is incompatible with '--gpg-tar-file'. These options cannot be used together."
   fi
 
+  if [ "$require_gpg_check" = "true" ] && [ "$skip_gpg_check" = "true" ]; then
+    failed
+    error_exit "$LINENO" "--require-gpg-check is incompatible with '--no-gpg-check'. These options cannot be used together."
+  fi
+
   # Incompatible with proxies unless both username and password are passed
   if [ "$non_interactive" = "true" ] && [ -n "$proxy_password" ]; then
     failed
@@ -1091,7 +1104,7 @@ install_package() {
     dpkg -s "bindplane-otel-collector" >/dev/null 2>&1 && dpkg --purge "bindplane-otel-collector" >/dev/null 2>&1
   fi
 
-  # Verify the package signature, with optional user override on failure
+  # Verify the package signature
   # Capture GPG verification output to display failure details
   # Temporarily disable set -e to allow capture of failing command output
   set +e
@@ -1099,33 +1112,32 @@ install_package() {
   gpg_verify_exit_code=$?
   set -e
 
+  # Say why verification failed, even in quiet mode
   if [ -n "$gpg_verify_output" ]; then
+    if [ $gpg_verify_exit_code -ne 0 ]; then error_mode=true; fi
+    # The captured lines are already indented
+    _indent=$indent; indent=""
     printf "%s\n" "$gpg_verify_output"
+    indent=$_indent
+    error_mode=false
   fi
   
+  # Return code 3 never installs, even interactively
+  if [ $gpg_verify_exit_code -eq 3 ]; then
+    error_exit "$LINENO" "Refusing to install: the package signing key is revoked or expired, the package was altered, or the package or key bundle is malformed."
+  fi
+
   if [ $gpg_verify_exit_code -ne 0 ]; then
     if [ "$non_interactive" = "true" ]; then
       # In quiet mode, fail immediately on GPG verification failure
-      if [ -n "$gpg_verify_output" ]; then
-        increase_indent
-        printf "%s\n" "$gpg_verify_output"
-        decrease_indent
-      fi
       error_exit "$LINENO" "Failed to verify package signature. Use '--no-gpg-check' to skip verification."
     else
-      # In interactive mode, show verification output, prompt the user, and explain failure
-      if [ -n "$gpg_verify_output" ]; then
-        increase_indent
-        printf "%s\n" "$gpg_verify_output"
-        decrease_indent
-      fi
-      
+      # Interactive: explain the failure printed above, then ask
       increase_indent
       printf "\\n${indent}The package signature could not be verified. This may indicate:\n"
       printf "${indent}  - The GPG keys are not properly installed or accessible\n"
       printf "${indent}  - The package has been tampered with\n"
-      printf "${indent}  - The signing key has expired or been revoked\n"
-      printf "${indent}  - Network issues prevented GPG key retrieval\n"
+      printf "${indent}  - The package is unsigned, or signed by a key that is not in the BDOT key bundle\n"
       printf "\\n${indent}$(fg_yellow 'Continuing without signature verification is NOT RECOMMENDED unless you have independently verified the package authenticity.')\\n\\n"
       decrease_indent
       
@@ -1135,12 +1147,6 @@ install_package() {
       printf "\\n"
       
       if [ "$gpg_override_input" != "y" ] && [ "$gpg_override_input" != "Y" ]; then
-        if [ -n "$gpg_verify_output" ]; then
-          increase_indent
-          error "Verification failed due to:"
-          printf "%s\n" "$gpg_verify_output"
-          decrease_indent
-        fi
         error_exit "$LINENO" "Installation aborted due to GPG verification failure."
       fi
       
@@ -1221,13 +1227,15 @@ install_package() {
     esac
   else
     # This is an error state that should never be reached
-    error_exit "Found an invalid SVC_PRE value in install_package()"
+    error_exit "$LINENO" "Found an invalid SVC_PRE value in install_package()"
   fi
 
   success "BDOT installation complete!"
   decrease_indent
 }
 
+# verify_package returns 1 for a failure the user may override, and 3, which never installs,
+# for a revoked or expired key, an altered package, or a malformed bundle.
 verify_package() {
   # If GPG check is skipped, return success immediately
   if [ "$skip_gpg_check" = "true" ]; then
@@ -1236,175 +1244,502 @@ verify_package() {
     return 0
   fi
 
-  [ -d "$TMP_DIR/gpg" ] && rm -rf "$TMP_DIR/gpg"
-  mkdir -p "$TMP_DIR/gpg"
+  _missing=$(verification_missing_tools)
+  if [ -n "$_missing" ]; then
+    if [ "$require_gpg_check" = "true" ]; then
+      error "Package signature verification requires: [$_missing]. Install them, or drop '--require-gpg-check' to install without verification."
+      return 1
+    fi
+    warn "Skipping package signature verification: this system lacks [$_missing]."
+    warn "Install them to verify the package, or use '--require-gpg-check' to stop the install when they are missing."
+    return 0
+  fi
 
-  if ! tar -xzf "$gpg_tar_out_file_path" -C "$TMP_DIR/gpg" > /dev/null 2>&1; then
-    error "Failed to extract GPG key tar file"
+  # A private keyring, so the host's own keys never take part
+  if ! GPG_DIR=$(mktemp -d "$TMP_DIR/bdot-gpg.XXXXXX"); then
+    error "Failed to create a temporary GPG directory"
     return 1
   fi
+  trap 'gpg_cleanup; exit 1' HUP INT TERM
 
-  case "$package_type" in
-    deb)
-      if ! verify_package_deb; then
-        return 1
-      fi
-      ;;
-    mkssys)
-      if ! verify_package_aix; then
-        return 1
-      fi
-      ;;
-    rpm)
-      if ! verify_package_rpm; then
-        return 1
-      fi
-      ;;
-    *)
-      error "Unrecognized package type"
-      return 1
-      ;;
-  esac
+  _verify_rc=0
+  if ! tar -xzf "$gpg_tar_out_file_path" -C "$GPG_DIR" > /dev/null 2>&1; then
+    error "Failed to extract GPG key tar file"
+    _verify_rc=1
+  else
+    case "$package_type" in
+      deb) verify_package_deb || _verify_rc=$? ;;
+      rpm) verify_package_rpm || _verify_rc=$? ;;
+      mkssys) verify_package_aix || _verify_rc=$? ;;
+      *)
+        error "Unrecognized package type"
+        _verify_rc=1
+        ;;
+    esac
+  fi
 
-  return 0
+  gpg_cleanup
+  trap - HUP INT TERM
+  return $_verify_rc
 }
 
-verify_package_deb() {
-  if [ -z "$GPG_CMD" ]; then
-    info "neither gpg nor gpg2 is installed, skipping signature verification"
-    return 0
-  fi
+# gpg_cleanup stops gpg daemons in the temporary keyrings and removes them.
+gpg_cleanup() {
+  for _home in "$GPG_DIR" "$GPG_DIR"/*/; do
+    [ -d "$_home" ] && GNUPGHOME="$_home" gpgconf --kill all > /dev/null 2>&1 || true
+  done
+  rm -rf "$GPG_DIR"
+}
 
-  if ! command -v ar > /dev/null 2>&1; then
-    info "ar is not installed, skipping signature verification"
-    return 0
-  fi
+# verification_missing_tools prints the verification tools the host lacks.
+verification_missing_tools() {
+  _missing=""
+  _tools="gpg tar gzip awk sed grep tr cut"
+  [ "$package_type" = "deb" ] && _tools="$_tools ar"
+  # od and tail feed the legacy rpm check
+  if [ "$package_type" = "rpm" ] && rpm_lacks_subkey_support; then _tools="$_tools od tail"; fi
+  for _tool in $_tools; do
+    command -v "$_tool" > /dev/null 2>&1 || _missing="${_missing:+$_missing, }$_tool"
+  done
+  command printf '%s' "$_missing"
+}
 
-  if ! GNUPGHOME="$TMP_DIR/gpg" $GPG_CMD --import "$TMP_DIR/gpg/bdot-public-gpg-key.asc" > /dev/null 2>&1; then
+# literal escapes text for the output functions, which treat it as a printf format.
+literal() { command printf '%s' "$1" | tr -c '[:print:]\n' '?' | sed 's/[%\\]/&&/g'; }
+
+# verification_check fails before download when --require-gpg-check is set and verification
+# tools are missing. Without it, verify_package warns and skips verification. It needs
+# package_type, so it runs after setup_installation.
+verification_check() {
+  [ "$skip_gpg_check" = "true" ] && return 0
+  [ "$require_gpg_check" = "true" ] || return 0
+  _missing=$(verification_missing_tools)
+  if [ -n "$_missing" ]; then
+    error_exit "$LINENO" "Package signature verification requires: [$_missing]. Install them, or drop '--require-gpg-check' to install without verification."
+  fi
+}
+
+# gpg_import_bundle imports the bundle's keys and revocation certificates.
+# gpg's exit code is ignored: gnupg2-minimal exits nonzero after a good import. Returns 3 when
+# a certificate revokes no bundle key, since gpg would silently ignore it.
+gpg_import_bundle() {
+  GNUPGHOME="$GPG_DIR" gpg --batch --import "$GPG_DIR/bdot-public-gpg-key.asc" > /dev/null 2>&1 || true
+  if ! GNUPGHOME="$GPG_DIR" gpg --batch --with-colons --list-keys 2>/dev/null | grep -q '^pub:'; then
     error "Failed to import public key"
     return 1
   fi
-  # if there are any revocation keys, import them
-  if [ -n "$(ls -A "$TMP_DIR/gpg/deb-revocations/" 2>/dev/null)" ]; then
-    for key in "$TMP_DIR/gpg/deb-revocations/"*; do
-      if ! GNUPGHOME="$TMP_DIR/gpg" $GPG_CMD --import "$key" > /dev/null 2>&1; then
-        error "Failed to import revocation key"
-        return 1
-      fi
-    done
+  for _cert in "$GPG_DIR/deb-revocations/"*; do
+    [ -f "$_cert" ] || continue
+    GNUPGHOME="$GPG_DIR" gpg --batch --import "$_cert" > /dev/null 2>&1 || true
+    _revoked_id=$(LC_ALL=C GNUPGHOME="$GPG_DIR" gpg --batch --list-packets "$_cert" 2>/dev/null | \
+      awk '/^:signature packet:/ { for (i = 1; i < NF; i++) if ($i == "keyid") id = toupper($(i + 1)) }
+           / sigclass 0x20/ && id != "" { print id; exit }')
+    if [ -z "$_revoked_id" ] || ! GNUPGHOME="$GPG_DIR" gpg --batch --with-colons --list-keys 2>/dev/null | \
+        awk -F: -v id="$_revoked_id" '$1 == "pub" && $5 == id && $2 == "r" { found = 1 } END { exit !found }'; then
+      error "Revocation certificate $(literal "${_cert##*/}") does not revoke a key in the BDOT key bundle"
+      return 3
+    fi
+  done
+  # Judge signers by this snapshot, not the live keyring, which a host gpg.conf can let
+  # --verify extend. Doubled --with-fingerprint lists subkey fingerprints on gpg 2.0.
+  if ! GNUPGHOME="$GPG_DIR" gpg --batch --with-colons --fixed-list-mode --with-fingerprint --with-fingerprint --list-keys > "$GPG_DIR/bundle-keys" 2> /dev/null; then
+    error "Failed to list the bundle keys"
+    return 1
+  fi
+}
+
+# gpg_key_status <listing> <key ID or fingerprint> <signature epoch> prints ok, revoked,
+# expired, unknown, or malformed. gpg --verify exits 0 for revoked and expired keys, so this
+# reads the colon listing. v4 keys only; a signature made before expiry stays valid.
+gpg_key_status() {
+  # Read through cat so a missing listing still reaches the malformed-input check in END
+  cat "$1" 2> /dev/null | awk -F: -v want="$(echo "$2" | tr '[:lower:]' '[:upper:]')" -v sigtime="$3" '
+      function state(k) {
+        if (val[k] == "r") return "revoked"
+        if (expiry[k] != "" && sigtime + 0 >= expiry[k] + 0) return "expired"
+        return "ok"
+      }
+      $1 == "pub" { prim = NR }
+      $1 == "pub" || $1 == "sub" { cur = NR; id[cur] = $5; val[cur] = $2; expiry[cur] = $7; parent[cur] = prim }
+      $1 == "fpr" { fpr[cur] = $10 }
+      END {
+        if ((length(want) != 16 && length(want) != 40) || want ~ /[^0-9A-F]/ || sigtime !~ /^[0-9]+$/ || sigtime + 0 <= 0) { print "malformed"; exit }
+        for (k in id) {
+          if (id[k] != substr(want, length(want) - 15)) continue
+          if (length(want) == 40 && fpr[k] != want) continue
+          s = state(parent[k]); if (s == "ok") s = state(k)
+          print s; exit
+        }
+        print "unknown"
+      }'
+}
+
+# gpg_key_verdict <key> <signature epoch> <label> maps gpg_key_status to an error and return code.
+gpg_key_verdict() {
+  case "$(gpg_key_status "$GPG_DIR/bundle-keys" "$1" "$2")" in
+    ok) return 0 ;;
+    revoked)
+      error "$3 signing key $1 is revoked"
+      return 3
+      ;;
+    expired)
+      error "$3 signing key $1 had expired when it signed"
+      return 3
+      ;;
+    malformed)
+      error "$3 signature has no usable key ID or signing time"
+      return 1
+      ;;
+    *)
+      error "$3 was not signed by a key in the BDOT key bundle"
+      return 1
+      ;;
+  esac
+}
+
+# gpg_verify_file <signature> <data> <label> checks a detached signature by gpg's untranslated
+# status output. Returns 0 when valid, 1 when unverifiable, and 3 for a revoked or expired key
+# or altered data; sets SIGNER_PRIMARY to the signer's primary key fingerprint.
+gpg_verify_file() {
+  SIGNER_PRIMARY=""
+  OUTPUT=$(GNUPGHOME="$GPG_DIR" gpg --batch --keyserver-options no-auto-key-retrieve --status-fd 1 --verify "$1" "$2" 2> "$GPG_DIR/verify.err")
+  EXIT_CODE=$?
+
+  case "$OUTPUT" in
+    *"[GNUPG:] REVKEYSIG"* | *"[GNUPG:] KEYREVOKED"*)
+      error "$3 signing key is revoked"
+      return 3
+      ;;
+    *"[GNUPG:] EXPSIG"*)
+      error "$3 signature has expired"
+      return 3
+      ;;
+    *"[GNUPG:] BADSIG"*)
+      error "$3 was altered: its signature does not match its contents"
+      return 3
+      ;;
+  esac
+  # command printf: the script's printf wrapper prints nothing in quiet mode
+  _validsig=$(command printf '%s\n' "$OUTPUT" | awk '$2 == "VALIDSIG" { print $3, $5; exit }')
+  SIGNER_PRIMARY=$(command printf '%s\n' "$OUTPUT" | awk '$2 == "VALIDSIG" { print $12; exit }')
+  if [ $EXIT_CODE -ne 0 ] || [ -z "$_validsig" ]; then
+    error "$3 signature is invalid"
+    [ -s "$GPG_DIR/verify.err" ] && error "$(literal "$(cat "$GPG_DIR/verify.err")")"
+    return 1
   fi
 
-  if ! ar x "$package_out_file_path" "_gpgorigin" > /dev/null 2>&1; then
+  gpg_key_verdict "${_validsig% *}" "${_validsig#* }" "$3"
+}
+
+verify_package_deb() {
+  # dpkg installs the first control.tar.* and data.tar.* it finds, but the signature covers
+  # only these members, so the layout is pinned. A compression change must update it.
+  _deb_members=$(ar t "$package_out_file_path" 2> /dev/null)
+  if [ -z "$_deb_members" ]; then
+    error "Package is not a valid Debian package; the download may be incomplete"
+    return 1
+  fi
+  if [ "$_deb_members" = "$(command printf 'debian-binary\ncontrol.tar.gz\ndata.tar.gz')" ]; then
+    error "Package is not signed, or its download is incomplete"
+    return 1
+  fi
+  if [ "$_deb_members" != "$(command printf 'debian-binary\ncontrol.tar.gz\ndata.tar.gz\n_gpgorigin')" ]; then
+    error "Package has unexpected contents: [$(literal "$(command printf '%s' "$_deb_members" | tr '\n' ' ')")]"
+    return 3
+  fi
+
+  gpg_import_bundle || return $?
+
+  if ! ar p "$package_out_file_path" _gpgorigin > "$GPG_DIR/_gpgorigin" 2> /dev/null; then
     error "Failed to extract package signature"
     return 1
   fi
 
-  if ! mv "_gpgorigin" "$TMP_DIR/gpg/_gpgorigin"; then
-    error "Failed to move package signature to temporary directory"
+  # Extract first, so a read failure is not taken for tampering
+  if ! ar p "$package_out_file_path" debian-binary control.tar.gz data.tar.gz > "$GPG_DIR/signed-data" 2> /dev/null; then
+    error "Failed to extract the signed package contents"
     return 1
   fi
+  gpg_verify_file "$GPG_DIR/_gpgorigin" "$GPG_DIR/signed-data" "Package" || return $?
 
-  set +e
-  # Run pipeline, capture both output and exit code
-  OUTPUT=$(ar p "$package_out_file_path" debian-binary control.tar.gz data.tar.gz | \
-          GNUPGHOME="$TMP_DIR/gpg" $GPG_CMD --verify "$TMP_DIR/gpg/_gpgorigin" - 2>&1)
-  EXIT_CODE=$?
-  set -e
-
-  # Fail if gpg failed
-  if [ $EXIT_CODE -ne 0 ]; then
-    error "Package signature is invalid"
-    return 1
-  fi
-
-  # Fail if key is revoked
-  if echo "$OUTPUT" | grep -q "key has been revoked"; then
-    error "Package signature is from a revoked key"
-    return 1
-  fi
-
-  if echo "$OUTPUT" | grep -q "key has expired"; then
-    error "Package signature is from an expired key"
-    return 1
-  fi
-
-  success "Package signature is valid, not revoked, and subkey is not expired"
+  success "Package signature is valid, and its key was neither revoked nor expired when it signed"
   return 0
 }
 
-verify_package_rpm() {
-  set +e
-  # Capture stderr from rpm --import
-  IMPORT_OUTPUT=$(rpm --import "$TMP_DIR/gpg/bdot-public-gpg-key.asc" 2>&1)
-  IMPORT_EXIT_CODE=$?
-  set -e
-
-  # Fail if rpm --import itself fails
-  if [ $IMPORT_EXIT_CODE -ne 0 ]; then
-      error "Failed to import public key"
+# rpm_signing_key_check sets SIGNING_KEYID from the header signature packet and rejects an
+# unknown, revoked, or expired key. It parses the packet since rpm translates its labels and
+# prints a 1970 signing date for this field on RHEL.
+rpm_signing_key_check() {
+  _rpm_packet=$(LC_ALL=C rpm -qp --qf '%{RSAHEADER:armor}' "$package_out_file_path" 2> /dev/null | \
+    LC_ALL=C GNUPGHOME="$GPG_DIR" gpg --batch --list-packets 2> /dev/null)
+  SIGNING_KEYID=$(command printf '%s\n' "$_rpm_packet" | awk '/^:signature packet:/ { for (i = 1; i < NF; i++) if ($i == "keyid") { print toupper($(i + 1)); exit } }')
+  _rpm_sig_time=$(command printf '%s\n' "$_rpm_packet" | awk '{ for (i = 1; i < NF; i++) if ($i == "created") { v = $(i + 1); sub(/,$/, "", v); print v; exit } }')
+  case "$SIGNING_KEYID" in
+    ????????????????) ;;
+    *)
+      error "Could not read the RPM signature"
       return 1
-  fi
+      ;;
+  esac
+  gpg_import_bundle || return $?
+  gpg_key_verdict "$SIGNING_KEYID" "$_rpm_sig_time" "RPM"
+}
 
-  # Extract the signing key ID from checksig (reliable on EL7+)
-  SIGNING_KEYID=$(rpm --checksig --verbose "$package_out_file_path" 2>&1 \
-    | sed -nE 's/.*[Kk]ey ID ([0-9A-Fa-f]+):.*/\1/p' \
-    | head -n1)
+# rpm_lacks_subkey_support succeeds for rpm older than 4.12, which cannot check subkey signatures.
+rpm_lacks_subkey_support() {
+  _rpm_version=$(LC_ALL=C rpm --version 2> /dev/null | awk '{ print $NF }')
+  _rpm_major=${_rpm_version%%.*}
+  _rpm_minor=${_rpm_version#*.}
+  _rpm_minor=${_rpm_minor%%.*}
+  case "$_rpm_major$_rpm_minor" in
+    "" | *[!0-9]*) return 1 ;;
+  esac
+  [ "$_rpm_major" -lt 4 ] || { [ "$_rpm_major" -eq 4 ] && [ "$_rpm_minor" -lt 12 ]; }
+}
 
-  if [ -z "$SIGNING_KEYID" ]; then
-    error "Could not determine RPM signing key ID"
+# rpm_key_names <key ID> prints the lowercase names rpm --checksig may use for the key: its
+# 8- and 16-hex IDs, its fingerprint, and its primary's fingerprint.
+rpm_key_names() {
+  cat "$GPG_DIR/bundle-keys" 2> /dev/null | \
+    awk -F: -v id="$1" '
+      $1 == "pub" { prim = 1 }
+      $1 == "pub" || $1 == "sub" { hit = ($5 == id); next_fpr = 1 }
+      $1 == "fpr" && next_fpr { if (prim) pfpr = $10; if (hit) f = $10; prim = 0; next_fpr = 0; if (hit) { print tolower(substr(id, 9) " " id " " f " " pfpr); exit } }'
+}
+
+# bundle_primary <rpm key version> prints the fingerprint of the bundle's primary key with that
+# 8-hex ID (rpm 4) or fingerprint (rpm 6), and fails when there is none.
+bundle_primary() {
+  awk -F: -v v="$1" '
+    $1 == "pub" { prim = 1; next }
+    $1 == "fpr" && prim { f = tolower($10); prim = 0; if (f == v || substr(f, 33) == v) { print $10; found = 1; exit } }
+    END { exit !found }' "$GPG_DIR/bundle-keys" 2> /dev/null
+}
+
+# rpm_entry_keyring <gpg-pubkey name> imports that rpm keyring entry into a new gpg home and
+# prints the home's path.
+rpm_entry_keyring() {
+  _home=$(mktemp -d "$GPG_DIR/rpmkey.XXXXXX") || return 1
+  rpm -qi "$1" 2> /dev/null | GNUPGHOME="$_home" gpg --batch --import > /dev/null 2>&1
+  command printf '%s' "$_home"
+}
+
+# rpm_entry_has_key <gpg-pubkey name> <primary fingerprint> [key ID] succeeds when that rpm
+# keyring entry carries the primary, and the key ID when given. A short-ID match alone could
+# name another vendor's key.
+rpm_entry_has_key() {
+  _home=$(rpm_entry_keyring "$1") || return 1
+  GNUPGHOME="$_home" gpg --batch --with-colons --fixed-list-mode --with-fingerprint --list-keys 2> /dev/null | \
+    awk -F: -v f="$2" -v id="$3" '
+      $1 == "pub" { p = 1 } $1 == "pub" || $1 == "sub" { if ($5 == id) hasid = 1 }
+      $1 == "fpr" && p { if ($10 == f) found = 1; p = 0 }
+      END { exit !(found && (id == "" || hasid)) }'
+}
+
+# rpm_version_matches <rpm key version> <fingerprint> succeeds when an rpm key name's version
+# names the key: its 8-hex ID on rpm 4 or its fingerprint on rpm 6.
+rpm_version_matches() {
+  _lower=$(command printf '%s' "$2" | tr '[:upper:]' '[:lower:]')
+  [ -n "$_lower" ] && { [ "$1" = "$_lower" ] || [ "$1" = "$(command printf '%s' "$_lower" | cut -c33-40)" ]; }
+}
+
+# rpm_list_revokes <primary fingerprint> succeeds when the revoked-key list names the key, by
+# 8-hex ID (rpm 4) or fingerprint (rpm 6).
+rpm_list_revokes() {
+  for key in $_revoked_keys; do
+    _version=${key#gpg-pubkey-}
+    rpm_version_matches "${_version%-*}" "$1" && return 0
+  done
+  return 1
+}
+
+# rpm_refresh_stale_key <primary fingerprint> removes an installed copy of the signing key's
+# primary that lacks the signing key, as an install before a subkey rotation leaves, so the
+# import that follows can replace it: rpm 4 skips a key whose entry is already installed. It
+# saves the old copy for rpm_restore_stale_key.
+rpm_refresh_stale_key() {
+  _stale_saved=""
+  _key_names=$(rpm_key_names "$SIGNING_KEYID")
+  [ "${_key_names##* }" = "$(command printf '%s' "$1" | tr '[:upper:]' '[:lower:]')" ] || return 0
+  for _entry in $(rpm -qa 'gpg-pubkey*' 2> /dev/null); do
+    _version=${_entry#gpg-pubkey-}
+    rpm_version_matches "${_version%-*}" "$1" || continue
+    rpm_entry_has_key "$_entry" "$1" || continue
+    rpm_entry_has_key "$_entry" "$1" "$SIGNING_KEYID" && continue
+    _home=$(rpm_entry_keyring "$_entry")
+    GNUPGHOME="$_home" gpg --batch --armor --export > "$GPG_DIR/rpm-stale.asc" 2> /dev/null
+    if ! rpm -e "$_entry" > /dev/null 2>&1; then
+      error "Failed to remove outdated key $_entry"
+      return 1
+    fi
+    _stale_saved=1
+  done
+}
+
+# rpm_restore_stale_key puts back the copy rpm_refresh_stale_key removed.
+rpm_restore_stale_key() {
+  [ -n "$_stale_saved" ] && rpm --import "$GPG_DIR/rpm-stale.asc" > /dev/null 2>&1
+  _stale_saved=""
+}
+
+# rpm_header_offset <rpm file> prints the byte offset of the main header, which follows the
+# 96-byte lead and the signature header padded to 8 bytes.
+rpm_header_offset() {
+  # shellcheck disable=SC2046 # split od's bytes into the positional parameters
+  set -- $(od -An -v -tu1 -j 96 -N 16 "$1" 2> /dev/null)
+  [ $# -eq 16 ] && [ "$1 $2 $3 $4 $5 $6 $7 $8" = "142 173 232 1 0 0 0 0" ] || return 1
+  _il=$((($9 << 24) + (${10} << 16) + (${11} << 8) + ${12}))
+  _dl=$(((${13} << 24) + (${14} << 16) + (${15} << 8) + ${16}))
+  command printf '%s' $((96 + (16 + 16 * _il + _dl + 7) / 8 * 8))
+}
+
+# rpm_legacy_verify checks SIGPGP with gpg over the header and payload rpm installs, for rpm
+# older than 4.12. rpm cannot check the header signature there, so rpm_signing_key_check only
+# screens its key ID. A package must carry a payload, since a header-only signature over the
+# header alone would otherwise pass as SIGPGP.
+rpm_legacy_verify() {
+  LC_ALL=C rpm -qp --qf '%{SIGPGP:armor}' "$package_out_file_path" > "$GPG_DIR/rpm-payload.sig" 2> /dev/null
+  if ! grep -q -- '-----BEGIN PGP SIGNATURE-----' "$GPG_DIR/rpm-payload.sig"; then
+    error "RPM has no header and payload signature for gpg to check"
     return 1
   fi
+  if ! _rpm_offset=$(rpm_header_offset "$package_out_file_path"); then
+    error "Could not read the RPM header layout"
+    return 1
+  fi
+  # shellcheck disable=SC2046 # split od's bytes into the positional parameters
+  set -- $(od -An -v -tu1 -j "$_rpm_offset" -N 16 "$package_out_file_path" 2> /dev/null)
+  if [ $# -ne 16 ] || [ "$1 $2 $3 $4" != "142 173 232 1" ]; then
+    error "Could not read the RPM header layout"
+    return 1
+  fi
+  _header_end=$((_rpm_offset + 16 + 16 * (($9 << 24) + (${10} << 16) + (${11} << 8) + ${12}) + ((${13} << 24) + (${14} << 16) + (${15} << 8) + ${16})))
+  if [ "$(wc -c < "$package_out_file_path")" -le "$_header_end" ]; then
+    error "RPM has no payload; the download may be incomplete"
+    return 1
+  fi
+  if ! tail -c +$((_rpm_offset + 1)) "$package_out_file_path" > "$GPG_DIR/rpm-signed-data" 2> /dev/null; then
+    error "Failed to extract the signed RPM contents"
+    return 1
+  fi
+  gpg_verify_file "$GPG_DIR/rpm-payload.sig" "$GPG_DIR/rpm-signed-data" "RPM" || return $?
+  # rpm verified no signature here, so apply the rpm revoked-key list to this signer too
+  if [ -z "$SIGNER_PRIMARY" ]; then
+    error "RPM signature names no primary key"
+    return 1
+  fi
+  if rpm_list_revokes "$SIGNER_PRIMARY"; then
+    error "RPM signing key $SIGNER_PRIMARY is revoked"
+    return 3
+  fi
+}
 
-  # Normalize key ID to lowercase (rpm stores gpg-pubkey in lowercase)
-  SIGNING_KEYID=$(echo "$SIGNING_KEYID" | tr '[:upper:]' '[:lower:]')
+# rpm_read_revoked_list sets _revoked_keys from RPM_GPG_KEYS_TO_REMOVE and the bundle's
+# rpm-revocations.txt, and returns 3 for an entry that is not a bundle key's rpm name.
+rpm_read_revoked_list() {
+  # rpm -e runs as root: validate every entry before importing, with globbing off
+  set -f
+  # shellcheck disable=SC2046,SC2086 # split the list into one entry per line
+  _revoked_keys=$(command printf '%s\n' $RPM_GPG_KEYS_TO_REMOVE $(tr -d '\r' 2> /dev/null < "$GPG_DIR/rpm-revocations.txt"))
+  for key in $_revoked_keys; do
+    if ! command printf '%s\n' "$key" | grep -qxE 'gpg-pubkey-[0-9a-f]+-[0-9a-f]+'; then
+      set +f
+      error "Revoked key list has an entry that is not an rpm key name: $(literal "$key")"
+      return 3
+    fi
+    # Only bundle keys, so a bad bundle cannot strip host keys
+    _version=${key#gpg-pubkey-}
+    if ! bundle_primary "${_version%-*}" > /dev/null; then
+      set +f
+      error "Revoked key list names $key, which is not a key in the BDOT key bundle"
+      return 3
+    fi
+  done
+  # Entries are hex and dashes now, so globbing is harmless
+  set +f
+}
 
-  # Remove revoked keys (your existing logic)
-  if [ ${#RPM_GPG_KEYS_TO_REMOVE[@]} -gt 0 ]; then
-    for key in "${RPM_GPG_KEYS_TO_REMOVE[@]}"; do
-      if rpm -q "$key" > /dev/null 2>&1; then
-        if ! rpm -e "$key" > /dev/null 2>&1; then
-          error "Failed to remove revocation key"
-          return 1
-        fi
+verify_package_rpm() {
+  # Check the key against the bundle before rpm trusts it
+  rpm_signing_key_check || return $?
+
+  rpm_read_revoked_list || return $?
+
+  # Revoked primaries are the listed ones plus any the bundle itself marks revoked. Remove
+  # entries an earlier install left, matched by fingerprint so a wrong release or a foreign key
+  # sharing the short ID stays.
+  _remove_failed=""
+  _revoked_fprs=$(awk -F: '$1 == "pub" { r = ($2 == "r"); next } $1 == "fpr" && r != "" { if (r) print $10; r = "" }' "$GPG_DIR/bundle-keys")
+  for key in $_revoked_keys; do
+    _version=${key#gpg-pubkey-}
+    _revoked_fprs="$_revoked_fprs $(bundle_primary "${_version%-*}")"
+  done
+  for _fpr in $_revoked_fprs; do
+    for _entry in $(rpm -qa 'gpg-pubkey*' 2> /dev/null); do
+      _version=${_entry#gpg-pubkey-}
+      rpm_version_matches "${_version%-*}" "$_fpr" || continue
+      if rpm_entry_has_key "$_entry" "$_fpr" && ! rpm -e "$_entry" > /dev/null 2>&1; then
+        error "Failed to remove revoked key $_entry"
+        _remove_failed=1
       fi
     done
+  done
+  # Fail on a revoked signer before importing anything
+  _key_names=$(rpm_key_names "$SIGNING_KEYID")
+  if rpm_list_revokes "${_key_names##* }"; then
+    error "RPM signing key $SIGNING_KEYID is revoked"
+    return 3
   fi
+  [ -z "$_remove_failed" ] || return 1
 
-  if ! rpm -qa 'gpg-pubkey*' \
-  | xargs -n1 rpm -qi \
-  | $GPG_CMD --quiet --with-colons --show-keys \
-  | awk -F: '$1=="sub" {print tolower(substr($5, length($5)-7))}' \
-  | grep -qx "$SIGNING_KEYID"; then
-      error "RPM signed by subkey $SIGNING_KEYID which is not present in any installed GPG key"
+  # Import each key that is not revoked on its own, since rpm 4.11 merges a multi-key file into
+  # one entry named after its last key. The imported keys stay even if a later check fails.
+  for _fpr in $(awk -F: '$1 == "pub" { p = 1; next } $1 == "fpr" && p { print $10; p = 0 }' "$GPG_DIR/bundle-keys"); do
+    case " $(command printf '%s' "$_revoked_fprs" | tr '\n' ' ') " in *" $_fpr "*) continue ;; esac
+    rpm_refresh_stale_key "$_fpr" || return $?
+    GNUPGHOME="$GPG_DIR" gpg --batch --armor --export "$_fpr" > "$GPG_DIR/rpm-key.asc" 2> /dev/null
+    if ! IMPORT_OUTPUT=$(rpm --import "$GPG_DIR/rpm-key.asc" 2>&1); then
+      error "Failed to import public key: $(literal "$IMPORT_OUTPUT")"
+      rpm_restore_stale_key
       return 1
+    fi
+  done
+
+  # rpm must hold the signing key, except before 4.12, where rpm cannot use it and gpg's
+  # SIGPGP check decides. Read its keyring through gpg (--show-keys needs 2.1).
+  if ! rpm_lacks_subkey_support; then
+    mkdir -m 700 "$GPG_DIR/rpmdb"
+    for _rpm_key in $(rpm -qa 'gpg-pubkey*'); do
+      rpm -qi "$_rpm_key" 2> /dev/null
+    done | GNUPGHOME="$GPG_DIR/rpmdb" gpg --batch --import > /dev/null 2>&1 || true
+    if ! GNUPGHOME="$GPG_DIR/rpmdb" gpg --batch --with-colons --list-keys 2> /dev/null | \
+        awk -F: -v id="$SIGNING_KEYID" '($1 == "pub" || $1 == "sub") && $5 == id { found = 1 } END { exit !found }'; then
+      error "RPM signing key $SIGNING_KEYID is not in the rpm keyring"
+      return 1
+    fi
   fi
 
-  # Verify the signature
-  set +e
-  CHECKSIG_OUTPUT=$(rpm --checksig --verbose "$package_out_file_path" 2>&1)
-  CHECKSIG_EXIT_CODE=$?
-  set -e
-
-  # Reject hard failures first
-  if echo "$CHECKSIG_OUTPUT" | grep -q "BAD"; then
+  # rpm's exit code also fails for other keyless signatures, so judge the BDOT key's own line
+  _checksig=$(LC_ALL=C rpm --checksig --verbose "$package_out_file_path" 2>&1 | tr '[:upper:]' '[:lower:]')
+  # Any BAD line fails: a bad digest means the package was altered
+  if command printf '%s\n' "$_checksig" | grep -qE ': bad( |$)'; then
     error "RPM signature is BAD"
+    return 3
+  fi
+
+  _key_pattern=" ($(command printf '%s' "$_key_names" | tr ' ' '|')): "
+  # rpm before 4.12 (EL6, EL7, Amazon Linux 2, SLES 12) cannot check subkey signatures and
+  # leaves the payload unsigned, so gpg's SIGPGP check decides there, whatever rpm reports
+  if rpm_lacks_subkey_support && command printf '%s\n' "$_checksig" | grep -qE "${_key_pattern}(ok|nokey)\$"; then
+    rpm_legacy_verify || return $?
+  elif command printf '%s\n' "$_checksig" | grep -qE "${_key_pattern}ok\$"; then
+    :
+  else
+    error "RPM signature could not be checked against the BDOT key"
     return 1
   fi
 
-  if echo "$CHECKSIG_OUTPUT" | grep -qi "EXPIRED"; then
-    error "RPM signature uses an expired key"
-    return 1
-  fi
-
-  # On Oracle Linux 7, rpm --checksig may show NOKEY/MISSING KEYS even when valid
-  if echo "$CHECKSIG_OUTPUT" | grep -qE "NOKEY|MISSING KEYS"; then
-    info "Ignoring legacy MD5/PGP warning on Oracle Linux (key verified)"
-  elif [ $CHECKSIG_EXIT_CODE -ne 0 ]; then
-    error "Failed to verify package signature"
-    return 1
-  fi
-
-  success "Package signature is valid, not revoked, and subkey is not expired"
+  success "Package signature is valid, and its key was neither revoked nor expired when it signed"
   return 0
 }
 
@@ -1750,91 +2085,63 @@ parse_args() {
   if [ $# -ge 1 ]; then
     while [ -n "$1" ]; do
       case "$1" in
-      -q | --quiet)
-        non_interactive="true"
-        shift 1
-        ;;
-      -v | --version)
-        version=$2
-        shift 2
-        ;;
-      -l | --url)
-        url=$2
-        shift 2
-        ;;
-      -gl|--gpg-tar-url)
-        gpg_tar_url=$2
-        shift 2
-        ;;
-      -f | --file)
-        package_path=$2
-        shift 2
-        ;;
-      -gf|--gpg-tar-file)
-        gpg_tar_path=$2
-        shift 2
-        ;;
-      -x | --proxy)
-        proxy=$2
-        shift 2
-        ;;
-      -U | --proxy-user)
-        proxy_user=$2
-        shift 2
-        ;;
-      -P | --proxy-password)
-        proxy_password=$2
-        shift 2
-        ;;
-      -e | --endpoint)
-        opamp_endpoint=$2
-        shift 2
-        ;;
-      -k | --labels)
-        opamp_labels=$2
-        shift 2
-        ;;
-      -s | --secret-key)
-        opamp_secret_key=$2
-        shift 2
-        ;;
-      -c | --check-bp-url)
-        check_bp_url="true"
-        shift 1
-        ;;
-      -b | --base-url)
-        base_url=$2
-        shift 2
-        ;;
-      --no-gpg-check)
-        skip_gpg_check="true"
-        shift 1
-        ;;
-      -r | --uninstall)
-        _do_uninstall=true
-        shift 1
-        ;;
-      -h | --help)
-        _do_help=true
-        shift 1
-        ;;
-      -i | --clean-install)
-        clean_install="true"
-        shift 1
-        ;;
-      -u | --dirty-install)
-        clean_install="false"
-        shift 1
-        ;;
-      --)
-        shift
-        break
-        ;;
-      *)
-        error "Invalid argument: $1"
-        usage
-        force_exit
-        ;;
+        -q|--quiet)
+          non_interactive="true" ; shift 1 ;;
+        -v|--version)
+          version=$2 ; shift 2 ;;
+        -l|--url)
+          url=$2 ; shift 2 ;;
+        -gl|--gpg-tar-url)
+          gpg_tar_url=$2 ; shift 2 ;;
+        -f|--file)
+          package_path=$2 ; shift 2 ;;
+        -gf|--gpg-tar-file)
+          gpg_tar_path=$2 ; shift 2 ;;
+        -x|--proxy)
+          proxy=$2 ; shift 2 ;;
+        -U|--proxy-user)
+          proxy_user=$2 ; shift 2 ;;
+        -P|--proxy-password)
+          proxy_password=$2 ; shift 2 ;;
+        -e|--endpoint)
+          opamp_endpoint=$2 ; shift 2 ;;
+        -k|--labels)
+          opamp_labels=$2 ; shift 2 ;;
+        -s|--secret-key)
+          opamp_secret_key=$2 ; shift 2 ;;
+        -c|--check-bp-url)
+          check_bp_url="true" ; shift 1 ;;
+        -b|--base-url)
+          base_url=$2 ; shift 2 ;;
+        --no-gpg-check)
+          skip_gpg_check="true" ; shift 1 ;;
+        --require-gpg-check)
+          require_gpg_check="true" ; shift 1 ;;
+        -r|--uninstall)
+          _do_uninstall=true
+          shift 1
+          ;;
+        -h | --help)
+          _do_help=true
+          shift 1
+          ;;
+        -i | --clean-install)
+          clean_install="true"
+          shift 1
+          ;;
+        -u | --dirty-install)
+          clean_install="false"
+          shift 1
+            ;;
+        --)
+          shift
+          break
+          ;;
+        *)
+          error "Invalid argument: $1"
+          usage
+          force_exit
+          ;;
       esac
     done
   fi
@@ -1908,6 +2215,7 @@ main() {
   connection_check
   offline_check
   setup_installation
+  verification_check
   install_package
   display_results
 }

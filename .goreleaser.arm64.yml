@@ -5,25 +5,43 @@ project_name: bindplane-otel-collector
 before:
   hooks:
     - make release-prep CURR_VERSION={{ .Version }}
+    # Pre-build the linux/arm64 binary via ocb-driven `make`. Goreleaser runs
+    # hooks without a shell, so GOOS/GOARCH go in `env`, not as a command prefix.
+    - cmd: make build-linux-amd64 OUTDIR=tmp
+    - cmd: make container-init OUTDIR=tmp
+      env:
+        GOOS: linux
+        GOARCH: arm64
 
+after:
+  hooks:
+    - cmd: rm -rf tmp
+
+# `builder: prebuilt` — Make owns the build (`AGENT_LDFLAGS`,
+# `-tags $(AGENT_BUILD_TAGS)`, i.e. `embed_library`).
 builds:
   - id: collector
+    builder: prebuilt
     binary: bindplane-otel-collector
-    main: ./cmd/collector
-    env:
-      - CGO_ENABLED=0
-    mod_timestamp: "{{ .CommitTimestamp }}"
-    tags:
-      - embed_library
     goos:
       - linux
     goarch:
       - arm64
+    prebuilt:
+      path: tmp/collector_{{ .Os }}_{{ .Arch }}{{ .Ext }}
+  # Unlike the collector (built by ocb/make and imported prebuilt),
+  # container-init is a plain Go module goreleaser can build itself.
+  - id: container-init
+    dir: cmd/container-init
+    binary: container-init
+    env:
+      - CGO_ENABLED=0
     ldflags:
       - -s -w
-      - -X github.com/observiq/bindplane-otel-contrib/pkg/version.version=v{{ .Version }}
-      - -X github.com/observiq/bindplane-otel-contrib/pkg/version.gitHash={{ .FullCommit }}
-      - -X github.com/observiq/bindplane-otel-contrib/pkg/version.date={{ .Date }}
+    goos:
+      - linux
+    goarch:
+      - arm64
 
 dockers:
   - id: ubuntu-arm64
@@ -35,6 +53,7 @@ dockers:
       max_delay: 1m
     ids:
       - collector
+      - container-init
     image_templates:
       - "observiq/bindplane-agent-arm64:{{ .Version }}"
       - "observiq/bindplane-agent-arm64:latest"
@@ -52,7 +71,6 @@ dockers:
       - release_deps/config.yaml
       - config/logging.stdout.yaml
       - LICENSE
-      - release_deps/opentelemetry-java-contrib-jmx-metrics.jar
 
 changelog:
   disable: true
