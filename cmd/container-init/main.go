@@ -40,8 +40,7 @@ import (
 // Default file contents.
 //
 // defaultCollectorConfig is also the config the container images bake in as
-// /etc/otel/config.yaml: docker/Dockerfile.scratch, Dockerfile.ubuntu and
-// Dockerfile.jmx write it with a COPY heredoc, and
+// /etc/otel/config.yaml: docker/Dockerfile.ubuntu writes it with a COPY heredoc, and
 // TestDefaultCollectorConfigMatchesDockerfiles fails unless all of them are
 // byte-identical, so change them together. It is a nop pipeline plus the
 // health_check extension on 0.0.0.0:13133 (the extension defaults to

@@ -558,7 +558,7 @@ detect_distro_package_type()
         echo "deb"
         return 0
         ;;
-      *rhel*|*centos*|*fedora*|*rocky*|*almalinux*|*amzn*|*sles*|*suse*|*opensuse*)
+      *rhel*|*centos*|*fedora*|*rocky*|*almalinux*|*amzn*|*sles*|*suse*)
         echo "rpm"
         return 0
         ;;

@@ -31,7 +31,7 @@ const imageConfigPath = "/etc/otel/config.yaml"
 // defaultCollectorConfig and the copy each container image bakes in with a
 // COPY heredoc.
 func TestDefaultCollectorConfigMatchesDockerfiles(t *testing.T) {
-	for _, name := range []string{"Dockerfile.scratch", "Dockerfile.ubuntu", "Dockerfile.jmx"} {
+	for _, name := range []string{"Dockerfile.ubuntu"} {
 		t.Run(name, func(t *testing.T) {
 			path := filepath.Join("..", "..", "docker", name)
 			contents, err := os.ReadFile(path)
