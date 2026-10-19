@@ -58,4 +58,10 @@ run_case download-404-with-perl  AIX   "curl sudo"      "dependencies_check >/de
 run_case get-with-perl           AIX   "curl sudo"      "dependencies_check >/dev/null; [ \"\$(http_get $URL)\" = payload-123 ]" ok
 run_case check-with-perl         AIX   "curl sudo"      "dependencies_check >/dev/null; http_check $URL" ok
 run_case check-refused-with-perl AIX   "curl sudo"      "dependencies_check >/dev/null; http_check http://127.0.0.1:1/" fail
+# AIX sed has no -z, so connection_check must not use it.
+NOZ='sed() { case "$1" in -z) echo "sed: illegal option -- z" >&2; return 2 ;; esac; command sed "$@"; }'
+run_case connection-check-sed     AIX   "curl sudo"      "$NOZ; dependencies_check >/dev/null; check_bp_url=true opamp_endpoint=ws://127.0.0.1:$PORT/v1/opamp; connection_check < /dev/null" ok "127.0.0.1:$PORT"
+# The script's printf wrapper indents output and prints nothing in quiet mode, so the proxy URL must bypass it.
+run_case proxy-url-quiet         AIX   "curl sudo"      "non_interactive=true proxy=host:8080 proxy_user=u proxy_password=p; [ \"\$(http_proxy_url)\" = http://u:p@host:8080 ]" ok
+run_case proxy-url-indented      AIX   "curl sudo"      "indent='  ' proxy=https://host:8080; [ \"\$(http_proxy_url)\" = https://host:8080 ]" ok
 echo "pass=$pass fail=$fail"; [ $fail -eq 0 ]

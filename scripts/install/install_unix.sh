@@ -755,7 +755,7 @@ ask_clean_install() {
 connection_check() {
   if [ -n "$check_bp_url" ]; then
     if [ -n "$opamp_endpoint" ]; then
-      HTTP_ENDPOINT="$(echo "${opamp_endpoint}" | sed -z 's#^ws#http#' | sed -z 's#/v1/opamp$##')"
+      HTTP_ENDPOINT="$(echo "${opamp_endpoint}" | sed -e 's#^ws#http#' -e 's#/v1/opamp$##')"
       info "Testing connection to Bindplane: $fg_magenta$HTTP_ENDPOINT$reset..."
 
       if http_check "${HTTP_ENDPOINT}"; then
@@ -1092,9 +1092,9 @@ http_proxy_url() {
     *) _scheme="http://"; _hostport="$proxy" ;;
   esac
   if [ -n "$proxy_user" ]; then
-    printf '%s%s:%s@%s' "$_scheme" "$proxy_user" "$proxy_password" "$_hostport"
+    command printf '%s%s:%s@%s' "$_scheme" "$proxy_user" "$proxy_password" "$_hostport"
   else
-    printf '%s%s' "$_scheme" "$_hostport"
+    command printf '%s%s' "$_scheme" "$_hostport"
   fi
 }
 
