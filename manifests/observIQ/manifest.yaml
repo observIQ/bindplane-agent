@@ -38,6 +38,7 @@ extensions:
   - gomod: github.com/dynatrace/dynatrace-bindplane-otel-contrib/extension/badgerextension v1.1.0
   - gomod: github.com/dynatrace/dynatrace-bindplane-otel-contrib/extension/opampgateway v1.1.0
   - gomod: github.com/dynatrace/dynatrace-bindplane-otel-contrib/extension/pebbleextension v1.1.0
+  - gomod: github.com/dynatrace/dynatrace-bindplane-otel-contrib/extension/bindplaneextension v1.1.0
 
 exporters:
   - gomod: go.opentelemetry.io/collector/exporter/debugexporter v0.162.0
