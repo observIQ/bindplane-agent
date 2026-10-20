@@ -523,9 +523,9 @@ tool_case check-rpm-no-ar-required "ar"   "$REQ package_type=rpm; verification_c
 tool_case check-no-text-tools-required "awk sed grep tr cut" "$REQ package_type=rpm; verification_check" abort "requires: [awk, sed, grep, tr, cut]"
 tool_case check-all-present-required "" "$REQ package_type=deb; verification_check"                    ok
 tool_case require-with-no-gpg-check "" "$REQ skip_gpg_check=true; interactive_check"                   abort "--require-gpg-check is incompatible with '--no-gpg-check'"
-# parse_args parses the flag into require_gpg_check
-flag=$(awk '/^parse_args\(\)/{m=1} m && /^}/{m=0} m && /--require-gpg-check\)/{getline; print; exit}' "$SCRIPT")
-case "$flag" in *'require_gpg_check="true"'*) report require-flag-parsed 0 ok "" "" ;; *) report require-flag-parsed 1 ok "" "parse_args() does not parse --require-gpg-check: $flag" ;; esac
+# main (or parse_args, where it exists) parses the flag into require_gpg_check
+flag=$(awk '/^(main|parse_args)\(\)/{m=1} m && /^}/{m=0} m && /--require-gpg-check\)/{getline; print; exit}' "$SCRIPT")
+case "$flag" in *'require_gpg_check="true"'*) report require-flag-parsed 0 ok "" "" ;; *) report require-flag-parsed 1 ok "" "main() does not parse --require-gpg-check: $flag" ;; esac
 # od and tail are needed only where rpm cannot use signing subkeys
 tool_case check-legacy-rpm-no-od-tail-required "od tail" "$REQ package_type=rpm; rpm_lacks_subkey_support() { return 0; }; verification_check" abort "requires: [od, tail]"
 tool_case check-rpm-no-od-tail-required "od tail" "$REQ package_type=rpm; rpm_lacks_subkey_support() { return 1; }; verification_check" ok

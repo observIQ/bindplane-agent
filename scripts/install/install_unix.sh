@@ -18,7 +18,7 @@ set -e
 # Cache OS type to avoid repeated subshell forks
 OS_TYPE=$(uname -s)
 
-# Allow configurable runtime user/group (used for permissions and manager.yaml)
+# Allow configurable runtime user/group (used for file ownership)
 : "${BDOT_USER:=bdot}"
 : "${BDOT_GROUP:=bdot}"
 
@@ -26,13 +26,14 @@ OS_TYPE=$(uname -s)
 PACKAGE_NAME="bindplane-otel-collector"
 DOWNLOAD_BASE="https://bdot.bindplane.com"
 
-# Determine if we need service or systemctl for prereqs
-if command -v systemctl >/dev/null 2>&1; then
+# Determine the service manager for prereqs. AIX always uses SRC, even when a
+# systemctl or service command is also on PATH.
+if [ "$OS_TYPE" = "AIX" ] && command -v mkssys > /dev/null 2>&1; then
+  SVC_PRE=mkssys
+elif command -v systemctl >/dev/null 2>&1; then
   SVC_PRE=systemctl
 elif command -v service >/dev/null 2>&1; then
   SVC_PRE=service
-elif command -v mkssys > /dev/null 2>&1; then
-  SVC_PRE=mkssys
 fi
 
 # Script Constants
@@ -40,10 +41,19 @@ COLLECTOR_USER="${BDOT_USER}"
 COLLECTOR_GROUP="${BDOT_GROUP}"
 COLLECTOR_USER_LEGACY="bindplane-otel-collector"
 TMP_DIR=${TMPDIR:-"/tmp"} # Allow this to be overriden by cannonical TMPDIR env var
+
+# Remove the user install_aix created if the install fails, so a re-run creates it again.
+# force_exit calls this too: AIX's ksh88 skips EXIT traps when a function kills or set -e ends the shell,
+# and runs a function's own EXIT trap when the function returns, so the trap lives here.
+created_aix_user=false
+remove_created_aix_user() {
+  if [ "$created_aix_user" = true ]; then rmuser -p "$COLLECTOR_USER" > /dev/null 2>&1; fi
+}
+trap remove_created_aix_user EXIT
 INSTALL_DIR="/opt/bindplane-otel-collector"
 SUPERVISOR_YML_PATH="$INSTALL_DIR/supervisor.yaml"
-PREREQS="curl printf $SVC_PRE sed uname cut tr tar sudo shasum|sha256sum"
-SUGGESTED_TOOLS="jq bash awk"
+PREREQS="curl|perl printf $SVC_PRE sed uname cut tr tar awk shasum|sha256sum"
+SUGGESTED_TOOLS="jq bash"
 SCRIPT_NAME="$0"
 INDENT_WIDTH='  '
 indent=""
@@ -55,7 +65,7 @@ require_gpg_check=false
 
 # Set up AIX-specific constants and supervisor timeout values (AIX needs higher values due to slow I/O)
 if [ "$OS_TYPE" = "AIX" ]; then
-  PREREQS="$PREREQS iostat"
+  PREREQS="$PREREQS gunzip"
   # AIX SRC (System Resource Controller) uses two identifiers:
   #   Group name: used with -g flag for stopsrc, lssrc, startsrc, and inittab entries
   #   Subsystem name: used with -s flag for mkssys, rmssys, lssrc status checks
@@ -307,7 +317,8 @@ Usage:
 
   $(fg_yellow '--require-gpg-check')
       Requires GPG signature verification of the package. Verification needs gpg,
-      tar, gzip, awk, sed, grep, tr, and cut (and ar for deb packages). By default,
+      tar, gzip, awk, sed, grep, tr, and cut (and ar for deb packages). AIX needs
+      perl, tar, gunzip, awk, sed, grep, tr, cut, and gpg or openssl. By default,
       when this system lacks them, the script warns and installs without
       verifying. With this flag, it stops the install instead. When the tools
       are present, verification runs the same either way.
@@ -337,6 +348,7 @@ EOF
 }
 
 force_exit() {
+  remove_created_aix_user
   # Exit regardless of subshell level with no "Terminated" message
   kill -PIPE $$
   # Call exit to handle special circumstances (like running script during docker container build)
@@ -743,10 +755,10 @@ ask_clean_install() {
 connection_check() {
   if [ -n "$check_bp_url" ]; then
     if [ -n "$opamp_endpoint" ]; then
-      HTTP_ENDPOINT="$(echo "${opamp_endpoint}" | sed -z 's#^ws#http#' | sed -z 's#/v1/opamp$##')"
+      HTTP_ENDPOINT="$(echo "${opamp_endpoint}" | sed -e 's#^ws#http#' -e 's#/v1/opamp$##')"
       info "Testing connection to Bindplane: $fg_magenta$HTTP_ENDPOINT$reset..."
 
-      if curl --max-time 20 -s "${HTTP_ENDPOINT}" >/dev/null; then
+      if http_check "${HTTP_ENDPOINT}"; then
         succeeded
       else
         failed
@@ -777,7 +789,6 @@ check_prereqs() {
   os_arch_check
   package_type_check
   dependencies_check
-  aix_iostat_check
   user_check
   success "Prerequisite check complete!"
   decrease_indent
@@ -972,8 +983,8 @@ resolve_alternate_cmd() {
         sha256sum) SHA256CMD="sha256sum" ;;
       esac
       ;;
-    "gpg2|gpg")
-      GPG_CMD="$2"
+    "curl|perl")
+      HTTP_CLIENT="$2"
       ;;
   esac
 }
@@ -1027,7 +1038,8 @@ package_type_check()
     info "Checking for required AIX commands..."
     if command -v mkssys > /dev/null 2>&1 \
       && command -v mkgroup > /dev/null 2>&1 \
-      && command -v useradd > /dev/null 2>&1 \
+      && command -v mkuser > /dev/null 2>&1 \
+      && command -v rmuser > /dev/null 2>&1 \
       && command -v startsrc > /dev/null 2>&1 \
       && command -v stopsrc > /dev/null 2>&1 \
       && command -v lssrc > /dev/null 2>&1 \
@@ -1041,26 +1053,76 @@ package_type_check()
   fi
 }
 
-# AIX requires the sys0 iostat kernel attribute to be enabled for per-process
-# I/O accounting. Without it, process disk I/O metrics will not be available.
-aix_iostat_check() {
-  if [ "$OS_TYPE" != "AIX" ]; then
-    return
-  fi
-
-  info "Checking AIX iostat kernel attribute..."
-  _iostat_val=$(lsattr -El sys0 -a iostat 2>/dev/null | awk '{print $2}')
-  if [ "$_iostat_val" != "true" ]; then
-    failed
-    error_exit "$LINENO" "AIX kernel attribute 'iostat' is not enabled. Per-process I/O metrics require this. Enable with: chdev -l sys0 -a iostat=true (reboot required)"
-  fi
-  succeeded
-}
-
 # latest_version gets the tag of the latest release, without the v prefix.
 latest_version()
 {
-  curl -s https://bdot.bindplane.com/latest
+  http_get https://bdot.bindplane.com/latest
+}
+
+# HTTP helpers. They use curl when it is installed, and otherwise fall back to
+# HTTP::Tiny from the base AIX perl.rte fileset, so AIX installs need no AIX Toolbox.
+# Perl verifies TLS against Mozilla::CA (also in perl.rte) when it is available.
+PERL_HTTP='
+use strict; use HTTP::Tiny;
+my ($mode, $url, $out) = @ARGV;
+my %o = (verify_SSL => 1, timeout => ($mode eq "check" ? 20 : 300));
+$o{SSL_options} = { SSL_ca_file => Mozilla::CA::SSL_ca_file() } if eval { require Mozilla::CA; 1 };
+$o{proxy} = $ENV{BDOT_HTTP_PROXY} if $ENV{BDOT_HTTP_PROXY};
+my $h = HTTP::Tiny->new(%o);
+if ($mode eq "download") {
+  open(my $fh, ">", $out) or die "cannot write $out: $!\n";
+  binmode $fh;
+  my $r = $h->request("GET", $url, { data_callback => sub { print {$fh} $_[0] if $_[1]{status} =~ /^2/ } });
+  close $fh;
+  print STDERR "$r->{status} $r->{reason}\n" unless $r->{success};
+  exit($r->{success} ? 0 : 1);
+}
+my $r = $h->get($url);
+exit($r->{status} == 599 ? 1 : 0) if $mode eq "check";
+print $r->{content} if $r->{success};
+exit($r->{success} ? 0 : 1);
+'
+
+# http_proxy_url prints the --proxy value with any --proxy-user credentials embedded, for Perl.
+# ponytail: credentials are not URL-encoded; a password with @ or : needs curl.
+http_proxy_url() {
+  [ -n "$proxy" ] || return 0
+  case "$proxy" in
+    *://*) _scheme="${proxy%%://*}://"; _hostport="${proxy#*://}" ;;
+    *) _scheme="http://"; _hostport="$proxy" ;;
+  esac
+  if [ -n "$proxy_user" ]; then
+    command printf '%s%s:%s@%s' "$_scheme" "$proxy_user" "$proxy_password" "$_hostport"
+  else
+    command printf '%s%s' "$_scheme" "$_hostport"
+  fi
+}
+
+# http_get prints the body of a small text response.
+http_get() {
+  if [ "$HTTP_CLIENT" = "perl" ]; then
+    perl -e "$PERL_HTTP" get "$1"
+  else
+    curl -s "$1"
+  fi
+}
+
+# http_check succeeds when the server answers within 20 seconds.
+http_check() {
+  if [ "$HTTP_CLIENT" = "perl" ]; then
+    perl -e "$PERL_HTTP" check "$1"
+  else
+    curl --max-time 20 -s "$1" > /dev/null
+  fi
+}
+
+# http_download downloads $1 to $2 through any configured proxy, failing on HTTP errors.
+http_download() {
+  if [ "$HTTP_CLIENT" = "perl" ]; then
+    BDOT_HTTP_PROXY=$(http_proxy_url) perl -e "$PERL_HTTP" download "$1" "$2"
+  else
+    eval curl -L "$proxy_args" "\"\$1\"" -o "\"\$2\"" --progress-bar --fail
+  fi
 }
 
 # This will install the package by downloading the archived agent,
@@ -1085,7 +1147,7 @@ install_package() {
       info "Downloading package from $collector_download_url..."
     fi
 
-    eval curl -L "$proxy_args" "$collector_download_url" -o "$package_out_file_path" --progress-bar --fail || error_exit "$LINENO" "Failed to download package"
+    http_download "$collector_download_url" "$package_out_file_path" || error_exit "$LINENO" "Failed to download package"
 
     if [ -n "$proxy" ]; then
       info "Downloading GPG key tar file from $gpg_tar_download_url using proxy..."
@@ -1093,7 +1155,13 @@ install_package() {
       info "Downloading GPG key tar file from $gpg_tar_download_url..."
     fi
 
-    eval curl -L "$proxy_args" "$gpg_tar_download_url" -o "$gpg_tar_out_file_path" --progress-bar --fail || error_exit "$LINENO" "Failed to download GPG tar file"
+    http_download "$gpg_tar_download_url" "$gpg_tar_out_file_path" || error_exit "$LINENO" "Failed to download GPG tar file"
+
+    # AIX packages are verified against a detached signature published beside the package
+    if [ "$package_type" = "mkssys" ] && [ "$skip_gpg_check" != "true" ]; then
+      info "Downloading package signature from ${collector_download_url}.gpg.sig..."
+      http_download "${collector_download_url}.gpg.sig" "${package_out_file_path}.gpg.sig" || error_exit "$LINENO" "Failed to download package signature"
+    fi
     succeeded
   fi
 
@@ -1255,22 +1323,32 @@ verify_package() {
     return 0
   fi
 
-  # A private keyring, so the host's own keys never take part
-  if ! GPG_DIR=$(mktemp -d "$TMP_DIR/bdot-gpg.XXXXXX"); then
+  # A private keyring, so the host's own keys never take part. Base AIX has no mktemp, and
+  # mkdir fails rather than reuse a directory that already exists.
+  if ! GPG_DIR=$(mktemp -d "$TMP_DIR/bdot-gpg.XXXXXX" 2> /dev/null || { mkdir -m 700 "$TMP_DIR/bdot-gpg.$$" && echo "$TMP_DIR/bdot-gpg.$$"; }); then
     error "Failed to create a temporary GPG directory"
     return 1
   fi
   trap 'gpg_cleanup; exit 1' HUP INT TERM
 
   _verify_rc=0
-  if ! tar -xzf "$gpg_tar_out_file_path" -C "$GPG_DIR" > /dev/null 2>&1; then
+  # AIX base tar has no -z, so decompress separately there
+  if [ "$OS_TYPE" = "AIX" ]; then
+    _gpg_extract_ok=true
+    gunzip -c "$gpg_tar_out_file_path" | (cd "$GPG_DIR" && tar -xf -) > /dev/null 2>&1 || _gpg_extract_ok=false
+  elif tar -xzf "$gpg_tar_out_file_path" -C "$GPG_DIR" > /dev/null 2>&1; then
+    _gpg_extract_ok=true
+  else
+    _gpg_extract_ok=false
+  fi
+  if [ "$_gpg_extract_ok" != "true" ]; then
     error "Failed to extract GPG key tar file"
     _verify_rc=1
   else
     case "$package_type" in
       deb) verify_package_deb || _verify_rc=$? ;;
-      rpm) verify_package_rpm || _verify_rc=$? ;;
       mkssys) verify_package_aix || _verify_rc=$? ;;
+      rpm) verify_package_rpm || _verify_rc=$? ;;
       *)
         error "Unrecognized package type"
         _verify_rc=1
@@ -1298,6 +1376,11 @@ verification_missing_tools() {
   [ "$package_type" = "deb" ] && _tools="$_tools ar"
   # od and tail feed the legacy rpm check
   if [ "$package_type" = "rpm" ] && rpm_lacks_subkey_support; then _tools="$_tools od tail"; fi
+  if [ "$package_type" = "mkssys" ]; then
+    # AIX verifies with base Perl and openssl when gpg is not installed
+    _tools="perl tar gunzip awk sed grep tr cut"
+    command -v gpg > /dev/null 2>&1 || command -v openssl > /dev/null 2>&1 || _missing="gpg or openssl"
+  fi
   for _tool in $_tools; do
     command -v "$_tool" > /dev/null 2>&1 || _missing="${_missing:+$_missing, }$_tool"
   done
@@ -1743,54 +1826,175 @@ verify_package_rpm() {
   return 0
 }
 
-# Verify AIX tar.gz package using GPG detached signature.
-# The release process produces a .gpg.sig file alongside the tar.gz.
+# PERL_PGP_PREPARE lets base openssl check an OpenPGP detached signature on AIX hosts
+# without gpg. It reads the key bundle, any revocation certificates, and the signature,
+# rejects revoked keys and signatures made outside the key's validity, then writes the
+# signing key as PEM, the raw RSA signature, and the signed trailer for openssl to verify.
+# Args: <key.asc> <revocation dir> <signature> <output dir>. Prints the openssl digest name.
+PERL_PGP_PREPARE='
+use strict; use MIME::Base64; use Digest::SHA qw(sha1);
+my ($asc, $revdir, $sigfile, $out) = @ARGV;
+# reject exits 3, which never installs; a plain die exits 255 for an unverifiable package
+sub reject { print STDERR @_; exit 3 }
+sub slurp { my $f = shift; open(my $h, "<", $f) or die "cannot read $f\n"; binmode $h; local $/; my $d = <$h>; close $h; $d }
+sub dearmor {
+  my $d = shift;
+  return $d unless $d =~ /-----BEGIN PGP/;
+  my ($bin, $in, $body, $b64) = ("", 0, 0, "");
+  for my $l (split /\r?\n/, $d) {
+    if ($l =~ /^-----BEGIN PGP/) { ($in, $body, $b64) = (1, 0, ""); next }
+    next unless $in;
+    if ($l =~ /^-----END PGP/) { $bin .= decode_base64($b64); $in = 0; next }
+    if (!$body) { $body = 1 if $l eq ""; next }
+    next if $l =~ /^=/;
+    $b64 .= $l;
+  }
+  $bin
+}
+sub packets {
+  my $d = shift; my @p; my $i = 0;
+  while ($i < length $d) {
+    my $h = ord substr($d, $i++, 1); die "malformed OpenPGP data\n" unless $h & 0x80;
+    my ($tag, $len);
+    if ($h & 0x40) {
+      $tag = $h & 0x3f; my $o = ord substr($d, $i++, 1);
+      if ($o < 192) { $len = $o }
+      elsif ($o < 224) { $len = (($o - 192) << 8) + ord(substr($d, $i++, 1)) + 192 }
+      elsif ($o == 255) { $len = unpack("N", substr($d, $i, 4)); $i += 4 }
+      else { die "unsupported OpenPGP partial length\n" }
+    } else {
+      $tag = ($h >> 2) & 0x0f; my $lt = $h & 3;
+      if ($lt == 0) { $len = ord substr($d, $i, 1); $i += 1 }
+      elsif ($lt == 1) { $len = unpack("n", substr($d, $i, 2)); $i += 2 }
+      elsif ($lt == 2) { $len = unpack("N", substr($d, $i, 4)); $i += 4 }
+      else { die "unsupported OpenPGP indeterminate length\n" }
+    }
+    die "truncated OpenPGP packet\n" if $i + $len > length $d;
+    push @p, [$tag, substr($d, $i, $len)]; $i += $len;
+  }
+  @p
+}
+sub mpi { my ($b, $p) = @_; my $n = int((unpack("n", substr($b, $p, 2)) + 7) / 8); (substr($b, $p + 2, $n), $p + 2 + $n) }
+sub subpackets {
+  my ($s, $d, $hashed) = @_; my $i = 0;
+  while ($i < length $d) {
+    my $o = ord substr($d, $i++, 1); my $l;
+    if ($o < 192) { $l = $o } elsif ($o < 255) { $l = (($o - 192) << 8) + ord(substr($d, $i++, 1)) + 192 } else { $l = unpack("N", substr($d, $i, 4)); $i += 4 }
+    die "malformed signature subpacket\n" if $l < 1 || $i + $l > length $d;
+    my $t = ord(substr($d, $i, 1)) & 0x7f; my $v = substr($d, $i + 1, $l - 1); $i += $l;
+    if ($t == 16) { $s->{issuer} = uc unpack("H*", $v) }
+    elsif ($t == 33) { $s->{issuer} = uc substr(unpack("H*", substr($v, 1)), -16) }
+    next unless $hashed;
+    if ($t == 2) { $s->{created} = unpack("N", $v) }
+    elsif ($t == 9) { $s->{keyexp} = unpack("N", $v) }
+    elsif ($t == 27) { $s->{flags} = ord $v }
+  }
+}
+sub signature {
+  my $b = shift; die "unsupported OpenPGP signature version\n" unless ord(substr($b, 0, 1)) == 4;
+  my ($type, $pk, $ha) = map { ord substr($b, $_, 1) } 1 .. 3;
+  my $hl = unpack("n", substr($b, 4, 2)); my $ul = unpack("n", substr($b, 6 + $hl, 2));
+  my %s = (type => $type, pk => $pk, ha => $ha, created => 0,
+           trailer => substr($b, 0, 6 + $hl) . "\x04\xff" . pack("N", 6 + $hl));
+  subpackets(\%s, substr($b, 6, $hl), 1); subpackets(\%s, substr($b, 8 + $hl, $ul), 0);
+  ($s{sig}) = mpi($b, 8 + $hl + $ul + 2) if $pk == 1 || $pk == 3;
+  \%s
+}
+my (%keys, $primary, $current);
+sub key_packet {
+  my ($b, $is_primary) = @_;
+  return undef unless ord(substr($b, 0, 1)) == 4;
+  my %k = (created => unpack("N", substr($b, 1, 4)), algo => ord(substr($b, 5, 1)), primary => $is_primary, revoked => 0, keyexp => 0, selfsig => -1);
+  if ($k{algo} == 1 || $k{algo} == 3) { my $p; ($k{n}, $p) = mpi($b, 6); ($k{e}) = mpi($b, $p) }
+  $k{id} = uc substr(unpack("H*", sha1("\x99" . pack("n", length $b) . $b)), -16);
+  $keys{$k{id}} = \%k
+}
+for my $f ($asc, glob("$revdir/*")) {
+  next unless -f $f;
+  ($primary, $current) = (undef, undef);
+  for my $pk (packets(dearmor(slurp($f)))) {
+    my ($tag, $b) = @$pk;
+    if ($tag == 6) { $primary = $current = key_packet($b, 1) }
+    elsif ($tag == 14) { $current = key_packet($b, 0); $current->{parent} = $primary if $current }
+    elsif ($tag == 2) {
+      my $s = signature($b); my $t = $s->{type};
+      if ($t == 0x20) {
+        my $k = $primary || $keys{$s->{issuer} || ""};
+        # A certificate for a key outside the bundle means the bundle is wrong; gpg would ignore it
+        reject "Revocation certificate " . (split m{/}, $f)[-1] . " does not revoke a key in the BDOT key bundle\n" unless $k;
+        $k->{revoked} = 1;
+      }
+      elsif ($t == 0x28) { $current->{revoked} = 1 if $current && !$current->{primary} }
+      elsif (($t >= 0x10 && $t <= 0x13) || $t == 0x1f || $t == 0x18) {
+        my $k = $t == 0x18 ? $current : $primary;
+        next unless $k && $s->{created} >= $k->{selfsig};
+        $k->{selfsig} = $s->{created}; $k->{keyexp} = $s->{keyexp} || 0; $k->{flags} = $s->{flags};
+      }
+    }
+  }
+}
+my @sigs = grep { $_->[0] == 2 } packets(dearmor(slurp($sigfile)));
+die "expected exactly one signature\n" unless @sigs == 1;
+my $s = signature($sigs[0][1]);
+my %hash = (8 => "sha256", 9 => "sha384", 10 => "sha512", 11 => "sha224");
+die "unsupported signature type\n" unless $s->{type} == 0x00;
+die "unsupported signature algorithm\n" unless $s->{pk} == 1 || $s->{pk} == 3;
+die "unsupported signature digest\n" unless $hash{$s->{ha}};
+die "signature has no creation time\n" unless $s->{created};
+my $k = $keys{$s->{issuer} || ""} or die "signature was not made by a key in the bundle\n";
+die "signing key is not an RSA key\n" unless $k->{n};
+die "key is not allowed to sign\n" if defined $k->{flags} && !($k->{flags} & 0x02);
+for my $c ($k, $k->{parent} || ()) {
+  reject "signing key $c->{id} is revoked\n" if $c->{revoked};
+  reject "signature predates signing key $c->{id}\n" if $s->{created} < $c->{created};
+  reject "signing key $c->{id} had expired when the signature was made\n" if $c->{keyexp} && $s->{created} >= $c->{created} + $c->{keyexp};
+}
+sub der_len { my $l = shift; return chr $l if $l < 128; my $b = ""; while ($l) { $b = chr($l & 255) . $b; $l >>= 8 } chr(0x80 | length $b) . $b }
+sub der { my ($t, $c) = @_; chr($t) . der_len(length $c) . $c }
+sub der_int { my $x = shift; $x =~ s/^\x00+//; $x = "\x00$x" if ord($x) & 0x80; der(2, $x) }
+my $spki = der(0x30, der(0x30, der(6, "\x2a\x86\x48\x86\xf7\x0d\x01\x01\x01") . der(5, "")) . der(3, "\x00" . der(0x30, der_int($k->{n}) . der_int($k->{e}))));
+my $pem = encode_base64($spki, ""); $pem =~ s/(.{1,64})/$1\n/g;
+my $sig = ("\x00" x (length($k->{n}) - length($s->{sig}))) . $s->{sig};
+for (["key.pem", "-----BEGIN PUBLIC KEY-----\n$pem-----END PUBLIC KEY-----\n"], ["sig.raw", $sig], ["sig.trailer", $s->{trailer}]) {
+  open(my $h, ">", "$out/$_->[0]") or die "cannot write $out/$_->[0]\n"; binmode $h; print {$h} $_->[1]; close $h;
+}
+print "$hash{$s->{ha}}\n";
+'
+
+# verify_package_aix checks the package against its detached signature and the bundled
+# BDOT public key. It uses gpg when installed, and otherwise base Perl plus openssl, so
+# hosts without the AIX Toolbox still verify. Both paths reject revoked keys and
+# signatures made after the signing key expired; gpg --verify alone exits 0 for those.
 verify_package_aix() {
-  if [ -z "$GPG_CMD" ]; then
-    info "neither gpg nor gpg2 is installed, skipping signature verification"
-    return 0
-  fi
-
-  # Import the public key
-  if ! GNUPGHOME="$TMP_DIR/gpg" $GPG_CMD --import "$TMP_DIR/gpg/bdot-public-gpg-key.asc" > /dev/null 2>&1; then
-    error "Failed to import public key"
-    return 1
-  fi
-
-  # Import any revocation keys
-  if [ -n "$(ls -A "$TMP_DIR/gpg/deb-revocations/" 2>/dev/null)" ]; then
-    for key in "$TMP_DIR/gpg/deb-revocations/"*; do
-      if ! GNUPGHOME="$TMP_DIR/gpg" $GPG_CMD --import "$key" > /dev/null 2>&1; then
-        error "Failed to import revocation key"
-        return 1
-      fi
-    done
-  fi
-
-  # Look for the detached GPG signature file
   _sig_file="${package_out_file_path}.gpg.sig"
   if [ ! -f "$_sig_file" ]; then
     error "GPG signature file not found: $_sig_file"
     return 1
   fi
 
-  # Verify the detached signature
-  set +e
-  VERIFY_OUTPUT=$(GNUPGHOME="$TMP_DIR/gpg" $GPG_CMD --verify "$_sig_file" "$package_out_file_path" 2>&1)
-  VERIFY_EXIT_CODE=$?
-  set -e
-
-  if [ $VERIFY_EXIT_CODE -ne 0 ]; then
-    error "GPG signature verification failed"
-    if [ -n "$VERIFY_OUTPUT" ]; then
-      increase_indent
-      error "$VERIFY_OUTPUT"
-      decrease_indent
-    fi
-    return 1
+  if command -v gpg > /dev/null 2>&1; then
+    gpg_import_bundle || return $?
+    gpg_verify_file "$_sig_file" "$package_out_file_path" "Package" || return $?
+    success "Package signature is valid, and its key was neither revoked nor expired when it signed"
+    return 0
   fi
 
-  success "Package GPG signature is valid"
+  # Without gpg, base Perl checks the keys and openssl checks the signature
+  set +e
+  _digest=$(perl -e "$PERL_PGP_PREPARE" "$GPG_DIR/bdot-public-gpg-key.asc" "$GPG_DIR/deb-revocations" "$_sig_file" "$GPG_DIR" 2> "$GPG_DIR/verify.err")
+  _rc=$?
+  set -e
+  if [ $_rc -ne 0 ]; then
+    error "Package signature is invalid: $(literal "$(cat "$GPG_DIR/verify.err")")"
+    [ $_rc -eq 3 ] && return 3
+    return 1
+  fi
+  if ! cat "$package_out_file_path" "$GPG_DIR/sig.trailer" | openssl dgst "-$_digest" -verify "$GPG_DIR/key.pem" -signature "$GPG_DIR/sig.raw" > /dev/null 2>&1; then
+    error "Package was altered: its signature does not match its contents"
+    return 3
+  fi
+
+  success "Package signature is valid, and its key was neither revoked nor expired when it signed"
   return 0
 }
 
@@ -1801,12 +2005,18 @@ install_aix()
   if ! lsgroup "$COLLECTOR_GROUP" > /dev/null 2>&1; then
     mkgroup "$COLLECTOR_GROUP" || error_exit "$LINENO" "Failed to create group '$COLLECTOR_GROUP'"
   fi
-  if ! lsuser "$COLLECTOR_USER" > /dev/null 2>&1; then
-    useradd -d /opt/bindplane-otel-collector -g "$COLLECTOR_GROUP" -s /usr/bin/false "$COLLECTOR_USER" || error_exit "$LINENO" "Failed to create user '$COLLECTOR_USER'"
-  fi
 
-  # Create the install & storage directories
+  # Create the install & storage directories. Before the user, so mkuser leaves the home's mode alone.
   mkdir -p /opt/bindplane-otel-collector/storage > /dev/null 2>&1
+
+  if ! lsuser "$COLLECTOR_USER" > /dev/null 2>&1; then
+    # No shell: AIX only accepts shells listed in /etc/security/login.cfg, and /usr/bin/false
+    # is not there by default. The mkuser.default shell always is, so keep it and create the account locked.
+    mkuser pgrp="$COLLECTOR_GROUP" home=/opt/bindplane-otel-collector account_locked=true login=false rlogin=false "$COLLECTOR_USER" || error_exit "$LINENO" "Failed to create user '$COLLECTOR_USER'"
+    # mkuser copies in a .profile, and the locked account never reads it
+    rm -f /opt/bindplane-otel-collector/.profile
+    created_aix_user=true
+  fi
 
   # Check if this is an upgrade (service already exists and is running)
   _aix_was_running=false
@@ -1852,10 +2062,8 @@ install_aix()
     rm -rf "$_aix_stage"
   else
     # Fresh install — no running binaries to worry about, extract directly
-    gunzip -c "$package_out_file_path" | tar -xvf - -C /opt/bindplane-otel-collector
-    if [ $? -ne 0 ]; then
-      error_exit "$LINENO" "Failed to extract package to /opt/bindplane-otel-collector"
-    fi
+    # || rather than a $? check, since set -e would exit first and skip error_exit
+    gunzip -c "$package_out_file_path" | tar -xvf - -C /opt/bindplane-otel-collector || error_exit "$LINENO" "Failed to extract package to /opt/bindplane-otel-collector"
   fi
 
   # Move files to appropriate locations
@@ -2065,10 +2273,6 @@ uninstall() {
     succeeded
   fi
 
-  info "Removing any existing manager.yaml..."
-  rm -f "$MANAGEMENT_YML_PATH"
-  succeeded
-
   info "Removing package..."
   uninstall_package || error_exit "$LINENO" "Failed to remove package"
   succeeded
@@ -2084,63 +2288,95 @@ parse_args() {
   if [ $# -ge 1 ]; then
     while [ -n "$1" ]; do
       case "$1" in
-        -q|--quiet)
-          non_interactive="true" ; shift 1 ;;
-        -v|--version)
-          version=$2 ; shift 2 ;;
-        -l|--url)
-          url=$2 ; shift 2 ;;
-        -gl|--gpg-tar-url)
-          gpg_tar_url=$2 ; shift 2 ;;
-        -f|--file)
-          package_path=$2 ; shift 2 ;;
-        -gf|--gpg-tar-file)
-          gpg_tar_path=$2 ; shift 2 ;;
-        -x|--proxy)
-          proxy=$2 ; shift 2 ;;
-        -U|--proxy-user)
-          proxy_user=$2 ; shift 2 ;;
-        -P|--proxy-password)
-          proxy_password=$2 ; shift 2 ;;
-        -e|--endpoint)
-          opamp_endpoint=$2 ; shift 2 ;;
-        -k|--labels)
-          opamp_labels=$2 ; shift 2 ;;
-        -s|--secret-key)
-          opamp_secret_key=$2 ; shift 2 ;;
-        -c|--check-bp-url)
-          check_bp_url="true" ; shift 1 ;;
-        -b|--base-url)
-          base_url=$2 ; shift 2 ;;
-        --no-gpg-check)
-          skip_gpg_check="true" ; shift 1 ;;
-        --require-gpg-check)
-          require_gpg_check="true" ; shift 1 ;;
-        -r|--uninstall)
-          _do_uninstall=true
-          shift 1
-          ;;
-        -h | --help)
-          _do_help=true
-          shift 1
-          ;;
-        -i | --clean-install)
-          clean_install="true"
-          shift 1
-          ;;
-        -u | --dirty-install)
-          clean_install="false"
-          shift 1
-            ;;
-        --)
-          shift
-          break
-          ;;
-        *)
-          error "Invalid argument: $1"
-          usage
-          force_exit
-          ;;
+      -q | --quiet)
+        non_interactive="true"
+        shift 1
+        ;;
+      -v | --version)
+        version=$2
+        shift 2
+        ;;
+      -l | --url)
+        url=$2
+        shift 2
+        ;;
+      -gl|--gpg-tar-url)
+        gpg_tar_url=$2
+        shift 2
+        ;;
+      -f | --file)
+        package_path=$2
+        shift 2
+        ;;
+      -gf|--gpg-tar-file)
+        gpg_tar_path=$2
+        shift 2
+        ;;
+      -x | --proxy)
+        proxy=$2
+        shift 2
+        ;;
+      -U | --proxy-user)
+        proxy_user=$2
+        shift 2
+        ;;
+      -P | --proxy-password)
+        proxy_password=$2
+        shift 2
+        ;;
+      -e | --endpoint)
+        opamp_endpoint=$2
+        shift 2
+        ;;
+      -k | --labels)
+        opamp_labels=$2
+        shift 2
+        ;;
+      -s | --secret-key)
+        opamp_secret_key=$2
+        shift 2
+        ;;
+      -c | --check-bp-url)
+        check_bp_url="true"
+        shift 1
+        ;;
+      -b | --base-url)
+        base_url=$2
+        shift 2
+        ;;
+      --no-gpg-check)
+        skip_gpg_check="true"
+        shift 1
+        ;;
+      --require-gpg-check)
+        require_gpg_check="true"
+        shift 1
+        ;;
+      -r | --uninstall)
+        _do_uninstall=true
+        shift 1
+        ;;
+      -h | --help)
+        _do_help=true
+        shift 1
+        ;;
+      -i | --clean-install)
+        clean_install="true"
+        shift 1
+        ;;
+      -u | --dirty-install)
+        clean_install="false"
+        shift 1
+        ;;
+      --)
+        shift
+        break
+        ;;
+      *)
+        error "Invalid argument: $1"
+        usage
+        force_exit
+        ;;
       esac
     done
   fi
@@ -2154,11 +2390,6 @@ main() {
   if [ "$_do_help" = true ]; then
     usage
     exit 0
-  fi
-
-  # GPG is required unless --no-gpg-check was passed
-  if [ "$skip_gpg_check" != "true" ]; then
-    PREREQS="$PREREQS gpg2|gpg"
   fi
 
   bindplane_banner
@@ -2216,6 +2447,8 @@ main() {
   setup_installation
   verification_check
   install_package
+  # The install succeeded, so keep any user install_aix created
+  created_aix_user=false
   display_results
 }
 

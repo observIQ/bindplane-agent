@@ -321,6 +321,11 @@ check-install-scripts:
 	shellcheck -S warning scripts/install/install_unix.sh scripts/install/install_macos.sh scripts/install/test/*.sh scripts/install/test/testdata/*.sh
 	sh scripts/install/test/run_tests.sh
 
+# This target checks that every component in the AIX manifest is also in the main manifest
+.PHONY: check-aix-manifest
+check-aix-manifest:
+	./scripts/check-aix-manifest.sh
+
 # This target checks that license copyright header is on every source file
 .PHONY: check-license
 check-license:

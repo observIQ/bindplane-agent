@@ -17,6 +17,7 @@
 dir=$(dirname "$0")
 rc=0
 for t in "$dir"/test_*.sh; do
+  [ -e "$t" ] || continue
   echo "== ${t##*/}"
   # GitHub Actions starts jobs with SIGPIPE ignored, which a shell cannot undo, so
   # force_exit's kill -PIPE would fall through to exit 1. Restore the default.
