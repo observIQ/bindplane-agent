@@ -68,10 +68,6 @@ builds:
       - arm64
       - ppc64le
 
-# Skip over building default archives
-archives:
-  - format: binary
-
 # https://goreleaser.com/customization/dockers_v2/
 # dockers_v2 produces a multi-arch manifest natively, so no separate
 # docker_manifests block is required. The Dockerfile references
@@ -89,32 +85,6 @@ dockers_v2:
     tags:
       - "{{ .RawVersion }}-{{ .Prerelease }}-supervised"
       - "latest-supervised"
-    platforms:
-      - linux/amd64
-      - linux/arm64
-    labels:
-      created: "{{ .Date }}"
-      title: "{{ .ProjectName }}"
-      revision: "{{ .FullCommit }}"
-      version: "{{ .Version }}"
-    extra_files:
-      - release_deps/VERSION.txt
-      - release_deps/plugins
-      - LICENSE
-    retry:
-      attempts: 10
-      delay: 30s
-      max_delay: 1m
-  - id: ubuntu
-    ids:
-      - collector
-      - container-init
-    dockerfile: ./docker/Dockerfile.ubuntu-collector
-    images:
-      - "ghcr.io/observiq/bindplane-otel-collector"
-    tags:
-      - "{{ .RawVersion }}-{{ .Prerelease }}"
-      - "latest"
     platforms:
       - linux/amd64
       - linux/arm64

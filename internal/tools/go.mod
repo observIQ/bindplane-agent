@@ -10,7 +10,7 @@ require (
 	github.com/securego/gosec/v2 v2.18.2
 	github.com/uw-labs/lichen v0.1.7
 	github.com/vektra/mockery/v2 v2.53.0
-	go.opentelemetry.io/collector/cmd/builder v0.163.0
+	go.opentelemetry.io/collector/cmd/builder v0.162.0
 	go.opentelemetry.io/collector/cmd/mdatagen v0.162.0
 	golang.org/x/tools v0.51.0
 	golang.org/x/vuln v1.8.0

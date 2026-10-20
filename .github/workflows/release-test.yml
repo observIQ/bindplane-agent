@@ -46,6 +46,9 @@ jobs:
           timeout_minutes: 10
           command: make install-tools
 
+      - name: Set VERSION
+        run: echo "VERSION=${{ github.event.inputs.version }}" >> $GITHUB_ENV
+
       - name: Retrieve Windows AMD64 MSI Installer
         uses: actions/download-artifact@v8
         with:

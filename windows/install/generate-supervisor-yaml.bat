@@ -64,7 +64,6 @@ echo %insecureSkipField% >>"%supervisorFile%"
 
 echo %capabilitiesField% >>"%supervisorFile%"
 echo %acceptsRemoteCfgField% >>"%supervisorFile%"
-echo %reportsRemoteCfgField% >>"%supervisorFile%"
 echo %reportsAvailableComponentsField% >>"%supervisorFile%"
 echo %agentField% >>"%supervisorFile%"
 echo %executablePathField% >>"%supervisorFile%"
