@@ -51,7 +51,7 @@ jobs:
       - name: Build
         run: make build-linux
       - name: Scan Third Party Dependency Licenses
-        run: lichen --config=./license.yaml $(find dist/collector_* release_deps/opampsupervisor_*)
+        run: lichen --config=./license.yaml $(find dist/collector_* release_deps/supervisor_bin/opampsupervisor_*)
   build_darwin:
     if: github.actor != 'dependabot[bot]'
     runs-on: macos-14
@@ -74,7 +74,7 @@ jobs:
       - name: Build
         run: make build-darwin
       - name: Scan Third Party Dependency Licenses
-        run: lichen --config=./license.yaml $(find dist/collector_* release_deps/opampsupervisor_*)
+        run: lichen --config=./license.yaml $(find dist/collector_* release_deps/supervisor_bin/opampsupervisor_*)
   build_windows:
     if: github.actor != 'dependabot[bot]'
     runs-on: ubuntu-latest-4-cores
@@ -98,4 +98,4 @@ jobs:
       - name: Build
         run: make build-windows
       - name: Scan Third Party Dependency Licenses
-        run: lichen --config=./license.yaml dist/collector_windows_amd64.exe release_deps/opampsupervisor_windows_amd64.exe dist/collector_windows_arm64.exe release_deps/opampsupervisor_windows_arm64.exe
+        run: lichen --config=./license.yaml dist/collector_windows_amd64.exe release_deps/supervisor_bin/opampsupervisor_windows_amd64.exe dist/collector_windows_arm64.exe release_deps/supervisor_bin/opampsupervisor_windows_arm64.exe

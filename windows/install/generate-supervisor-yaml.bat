@@ -34,7 +34,6 @@ set "insecureSkipField=    insecure_skip_verify: true"
 
 set "capabilitiesField=capabilities:"
 set "acceptsRemoteCfgField=  accepts_remote_config: true"
-set "reportsRemoteCfgField=  reports_remote_config: true"
 set "reportsAvailableComponentsField=  reports_available_components: true"
 
 set "agentField=agent:"
