@@ -26,6 +26,8 @@ Type=simple
 User=root
 Group={{.Group}}
 Environment=PATH=/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin
+Environment=OIQ_OTEL_COLLECTOR_HOME={{.InstallDir}}
+Environment=OIQ_OTEL_COLLECTOR_STORAGE={{.InstallDir}}/storage
 Environment=BINDPLANE_COLLECTOR_HOME={{.InstallDir}}
 Environment=BINDPLANE_COLLECTOR_STORAGE={{.InstallDir}}/storage
 WorkingDirectory={{.InstallDir}}
@@ -113,6 +115,8 @@ PIDFILE=/var/run/"$BINARY".pid
 DEBUG=false
 
 # Exported variables are used by the collector process.
+export OIQ_OTEL_COLLECTOR_HOME=/opt/bindplane-otel-collector
+export OIQ_OTEL_COLLECTOR_STORAGE=/opt/bindplane-otel-collector/storage
 export BINDPLANE_COLLECTOR_HOME=/opt/bindplane-otel-collector
 export BINDPLANE_COLLECTOR_STORAGE=/opt/bindplane-otel-collector/storage
 

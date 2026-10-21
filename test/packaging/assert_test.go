@@ -233,6 +233,8 @@ func (b *box) assertUnit() {
 	}
 	assert.Contains(b.t, got["ExecStart"], "argv[]="+installDir+"/observiq-otel-collector --config config.yaml ;", "unit ExecStart")
 	env := strings.Fields(got["Environment"])
+	assert.Contains(b.t, env, "OIQ_OTEL_COLLECTOR_HOME="+installDir, "unit Environment")
+	assert.Contains(b.t, env, "OIQ_OTEL_COLLECTOR_STORAGE="+installDir+"/storage", "unit Environment")
 	assert.Contains(b.t, env, "BINDPLANE_COLLECTOR_HOME="+installDir, "unit Environment")
 	assert.Contains(b.t, env, "BINDPLANE_COLLECTOR_STORAGE="+installDir+"/storage", "unit Environment")
 }

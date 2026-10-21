@@ -40,9 +40,9 @@ import (
 // Default file contents.
 //
 // defaultCollectorConfig is also the config the container images bake in as
-// /etc/otel/config.yaml: docker/Dockerfile.ubuntu writes it with a COPY heredoc, and
-// TestDefaultCollectorConfigMatchesDockerfiles fails unless all of them are
-// byte-identical, so change them together. It is a nop pipeline plus the
+// /etc/otel/config.yaml: docker/Dockerfile.ubuntu-collector writes it with a COPY
+// heredoc, and TestDefaultCollectorConfigMatchesDockerfiles fails unless all of them
+// are byte-identical, so change them together. It is a nop pipeline plus the
 // health_check extension on 0.0.0.0:13133 (the extension defaults to
 // localhost), so Kubernetes probes, which target the pod IP, pass before a
 // config arrives over OpAMP. The first OpAMP push replaces the whole file, so
