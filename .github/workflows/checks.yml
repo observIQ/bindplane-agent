@@ -389,6 +389,6 @@ jobs:
       - detect-changes
     steps:
       - name: Checkout Sources
-        uses: namespacelabs/nscloud-checkout-action@v7
+        uses: actions/checkout@v7
       - name: Check AIX Manifest Is Subset of Main Manifest
         run: make check-aix-manifest

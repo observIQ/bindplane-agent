@@ -257,10 +257,10 @@ jobs:
 
   # AIX release test job — runs in parallel with the main release-test job.
   release-test-aix:
-    runs-on: namespace-profile-bindplane-default-ubuntu-24-04-32x128
+    runs-on: ubuntu-latest-32-cores
     steps:
       - name: Checkout Repo
-        uses: namespacelabs/nscloud-checkout-action@v7
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: Set up Go
@@ -269,7 +269,7 @@ jobs:
           go-version: 1.27.3
           cache: false
       - name: Set up Go cache
-        uses: namespacelabs/nscloud-cache-action@v1
+        uses: actions/cache@v6
         with:
           cache: go
       - name: Set VERSION
@@ -295,7 +295,7 @@ jobs:
       - name: Create AIX artifact archive
         run: tar -czvf bindplane-otel-collector-${{ env.VERSION }}-aix-artifacts.tar.gz -C dist/ .
       - name: Upload AIX build artifacts
-        uses: namespace-actions/upload-artifact@v1
+        uses: actions/upload-artifact@v7
         with:
           name: bindplane-otel-collector-${{ env.VERSION }}-aix-artifacts.tar.gz
           path: bindplane-otel-collector-${{ env.VERSION }}-aix-artifacts.tar.gz
