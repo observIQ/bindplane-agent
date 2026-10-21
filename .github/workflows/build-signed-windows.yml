@@ -150,13 +150,20 @@ jobs:
           }
       # Handed to the release job so goreleaser packages these exact signed
       # bytes instead of the unsigned copies it builds on the Linux runner.
+      # Stage both into one flat directory first: upload-artifact roots a
+      # multi-path upload at the least common ancestor, which would otherwise
+      # preserve the dist/ and release_deps/ prefixes the overlay script does
+      # not expect.
+      - name: Stage Signed Windows Binaries
+        run: |
+          mkdir signed-windows
+          cp dist/collector_windows_${{ matrix.arch }}.exe signed-windows/
+          cp release_deps/supervisor_bin/opampsupervisor_windows_${{ matrix.arch }}.exe signed-windows/
       - name: Upload Signed Windows Binaries
         uses: actions/upload-artifact@v4
         with:
           name: signed-windows-${{ matrix.arch }}
-          path: |
-            dist/collector_windows_${{ matrix.arch }}.exe
-            release_deps/supervisor_bin/opampsupervisor_windows_${{ matrix.arch }}.exe
+          path: signed-windows/
           if-no-files-found: error
           retention-days: 1
       # The bootstrap script is downloaded and executed by users, so it needs a
