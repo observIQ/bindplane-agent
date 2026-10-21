@@ -75,18 +75,24 @@ if [ ! -d "$SIGNED_WINDOWS_DIR" ]; then
   exit 1
 fi
 
-# Must match the windows targets goreleaser packages. See the collector and
-# opampsupervisor builds in .goreleaser.yml: windows is built for amd64 and arm64, and
-# arm/ppc64/ppc64le are ignored.
+# Each signed binary must land where goreleaser reads its prebuilt from, and the
+# two builds read from different places (see .goreleaser.yml): the collector from
+# <outdir> (the OUTDIR make build-all writes to), the supervisor from
+# release_deps/supervisor_bin where release-prep stages it. Copying both into
+# <outdir> silently leaves the packaged supervisor unsigned (BPOP-5780). Windows
+# is built for amd64 and arm64 only; arm/ppc64/ppc64le are ignored.
+supervisor_dir="release_deps/supervisor_bin"
+# "<source name>:<destination dir>"
 binaries=(
-  "collector_windows_amd64.exe"
-  "collector_windows_arm64.exe"
-  "opampsupervisor_windows_amd64.exe"
-  "opampsupervisor_windows_arm64.exe"
+  "collector_windows_amd64.exe:${outdir}"
+  "collector_windows_arm64.exe:${outdir}"
+  "opampsupervisor_windows_amd64.exe:${supervisor_dir}"
+  "opampsupervisor_windows_arm64.exe:${supervisor_dir}"
 )
 
 missing=0
-for name in "${binaries[@]}"; do
+for entry in "${binaries[@]}"; do
+  name="${entry%%:*}"
   if [ ! -s "${SIGNED_WINDOWS_DIR}/${name}" ]; then
     echo "overlay-signed-windows: missing or empty ${SIGNED_WINDOWS_DIR}/${name}" >&2
     missing=1
@@ -100,13 +106,20 @@ if [ "$missing" -ne 0 ]; then
   exit 1
 fi
 
-for name in "${binaries[@]}"; do
-  cp -f "${SIGNED_WINDOWS_DIR}/${name}" "${outdir}/${name}"
-  echo "overlay-signed-windows: installed signed ${name}" \
-    "($(wc -c <"${outdir}/${name}" | tr -d ' ') bytes)"
+for entry in "${binaries[@]}"; do
+  name="${entry%%:*}"
+  destdir="${entry#*:}"
+  if [ ! -d "$destdir" ]; then
+    echo "overlay-signed-windows: destination ${destdir} does not exist;" \
+      "did release-prep and the build run before the overlay?" >&2
+    exit 1
+  fi
+  cp -f "${SIGNED_WINDOWS_DIR}/${name}" "${destdir}/${name}"
+  echo "overlay-signed-windows: installed signed ${name} into ${destdir}" \
+    "($(wc -c <"${destdir}/${name}" | tr -d ' ') bytes)"
 done
 
-echo "overlay-signed-windows: ${#binaries[@]} signed Windows binaries staged in ${outdir}."
+echo "overlay-signed-windows: ${#binaries[@]} signed Windows binaries staged."
 
 if [ -n "${SIGNED_INSTALL_SCRIPT+set}" ]; then
   if [ ! -s "$SIGNED_INSTALL_SCRIPT" ]; then
