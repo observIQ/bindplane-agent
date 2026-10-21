@@ -51,7 +51,7 @@ collector:
 # Builds the agent for current GOOS/GOARCH pair (aix)
 .PHONY: collector-aix
 collector-aix:
-	CGO_ENABLED=0 builder --config="./manifests/observIQ/manifest-aix.yaml" --ldflags "-s -w -X github.com/observiq/bindplane-otel-collector/version.version=$(VERSION)"
+	CGO_ENABLED=0 builder --config="./manifests/observIQ/manifest-aix.yaml" --ldflags "-s -w -X github.com/Dynatrace/dynatrace-bindplane-otel-contrib/pkg/version.version=$(VERSION)"
 	mkdir -p $(OUTDIR); cp ./builder/bindplane-otel-collector$(EXT) $(OUTDIR)/collector_$(GOOS)_$(GOARCH)$(EXT)
 
 # Builds a custom distro for the current GOOS/GOARCH pair using the manifest specified
@@ -439,10 +439,6 @@ release-containers-test:
 build-single:
 	$(MAKE)
 	SIGNING_KEY_FILE="fake-file" GORELEASER_CURRENT_TAG=$(SNAPSHOT_TAG) goreleaser release --timeout $(GORELEASER_TIMEOUT) --skip=publish --skip=sign --clean --skip=validate --snapshot --single-target
-
-.PHONY: release-test-single
-release-test-single:
-	GORELEASER_CURRENT_TAG=$(SNAPSHOT_TAG) goreleaser release -f .goreleaser.arm64.yml --timeout $(GORELEASER_TIMEOUT) --skip=publish --clean --skip=validate --snapshot
 
 .PHONY: for-all
 for-all:
