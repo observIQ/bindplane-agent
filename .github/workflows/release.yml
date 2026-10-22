@@ -37,7 +37,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: 1.27.3
+          go-version: 1.26.10
           cache: false # Caching handled by the actions/cache step below
       - name: Set up Go cache
         uses: actions/cache@v6
@@ -270,7 +270,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: 1.27.3
+          go-version: 1.26.10
           cache: false
       - name: Set up Go cache
         uses: actions/cache@v6
