@@ -1704,3 +1704,15 @@ func Test_onAgentIdentificationHandler(t *testing.T) {
 		assert.Equal(t, originalAgentID.String(), client.currentConfig.AgentID.String())
 	})
 }
+
+func TestConnectionHeaders(t *testing.T) {
+	header := ConnectionHeaders(http.Header{}, "secret", testAgentID, "my-host")
+
+	assert.Equal(t, "Secret-Key secret", header.Get("Authorization"))
+	assert.Equal(t, fmt.Sprintf("observiq-otel-collector/%s", version.Version()), header.Get("User-Agent"))
+	assert.Equal(t, opamp.Version(), header.Get("OpAMP-Version"))
+	assert.Equal(t, testAgentID.String(), header.Get("Agent-ID"))
+	assert.Equal(t, version.Version(), header.Get("Agent-Version"))
+	assert.Equal(t, "my-host", header.Get("Agent-Hostname"))
+	assert.Equal(t, testAgentID.Type(), header.Get("X-Bindplane-Agent-Id-Format"))
+}

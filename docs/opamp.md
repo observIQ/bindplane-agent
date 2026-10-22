@@ -59,3 +59,33 @@ If the agent can not find the specified `manager.yaml` file it will search for t
 | OPAMP_TLS_CA          |          | File path to a certificate authority file that should be used to validate the server's TLS certificate |
 | OPAMP_TLS_CERT        |          | File path to a certificate file that will be used for client TLS authentication |
 | OPAMP_TLS_KEY         |          | File path to a private key file that will be used for client TLS authentication |
+
+## Testing the Connection
+
+The `test-connection` command checks the connection to the OpAMP server using the settings in `manager.yaml`. It performs a websocket handshake only and does not send any OpAMP messages. The command fails if `manager.yaml` does not exist and never modifies it.
+
+```shell
+sudo /opt/observiq-otel-collector/observiq-otel-collector test-connection
+```
+
+| Flag      | Description                                                         |
+| :-------- | :------------------------------------------------------------------ |
+| --manager | Path to the manager config. See below for the default               |
+| --timeout | Maximum time to wait for the handshake. Defaults to `30s`           |
+
+When `--manager` is not set, the first of the following paths that exists is used. The selected path is printed.
+
+1. `./manager.yaml`
+2. `/opt/observiq-otel-collector/manager.yaml` (Linux)
+3. `C:\Program Files\observIQ OpenTelemetry Collector\manager.yaml` (Windows)
+4. The path in the `MANAGER_YAML_PATH` environment variable
+
+TLS settings are read from `tls_config` in `manager.yaml`.
+
+The command uses the same proxy environment variables as the agent (`HTTPS_PROXY`, `HTTP_PROXY`, and `NO_PROXY`) and reports which proxy, if any, applies to the endpoint:
+
+- **Linux with systemd**: The proxy variables are read from the `observiq-otel-collector` systemd unit, including its overrides and environment files, so the test uses the same proxy as the service. Proxy variables in the current shell are ignored. The command must be run as root or with `sudo`.
+- **Linux without systemd, such as containers**: The current environment is used.
+- **Windows**: The current environment is used. The collector service reads proxy variables from the system environment.
+
+If Bindplane rejects the connection with `429 Too Many Requests`, the command retries up to three times. It waits for the duration in the server's `Retry-After` header, or backs off starting at one second when the header is not set, and prints each retry and how long it waits. Bindplane returns `429` when too many agents are connecting or when it detects another connection with the same agent ID, for example when the collector is running.

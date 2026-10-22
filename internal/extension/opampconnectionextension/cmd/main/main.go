@@ -127,6 +127,14 @@ var legacyContribComponents = map[string]bool{
 }
 
 func main() {
+	if len(os.Args) > 1 && os.Args[1] == "test-connection" {
+		if err := runtime.RunConnectionTest(os.Args[2:], os.Stdout); err != nil {
+			fmt.Fprintln(os.Stderr, "connection test failed:", err)
+			os.Exit(1)
+		}
+		return
+	}
+
 	collectorConfigPaths := pflag.StringSlice("config", defaultCollectorPaths(), "the collector config path")
 	managerConfigPath := pflag.String("manager", defaultManagerPath(), "The configuration for remote management")
 	loggingConfigPath := pflag.String("logging", defaultLoggingPath(), "the collector logging config path")
