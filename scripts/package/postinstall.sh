@@ -163,9 +163,9 @@ EOF
   chown root:root "$override_dir"
   chmod 0755 "$override_dir"
 
-  # Write the User= drop-in when BDOT_UNPRIVILEGED is true and remove it
-  # otherwise, like the sudoers drop-in, so the two always agree. A leftover
-  # drop-in would run a default install as the runtime user.
+  # Write the User= drop-in when BDOT_UNPRIVILEGED is true. Otherwise there is
+  # none to remove: check_runtime_user_change refuses the install when one is
+  # present, and preremove.sh removes it on uninstall.
   override_user_path="${override_dir}/10-package-customizations-username.conf"
   if [ "${BDOT_UNPRIVILEGED}" = "true" ]; then
     cat << EOF > "${override_user_path}"
@@ -175,9 +175,6 @@ EOF
     chown root:root "${override_user_path}"
     chmod 0644 "${override_user_path}"
     echo "Configured systemd service to run as ${BDOT_USER} user in ${override_user_path}"
-  elif [ -f "${override_user_path}" ]; then
-    echo "Removing systemd drop-in: ${override_user_path}"
-    rm -f "${override_user_path}"
   fi
 }
 
