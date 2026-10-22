@@ -108,5 +108,5 @@ replaces:
   # The commit being replaced to is built on the OTel v0.161.0 tag.
   # https://github.com/observIQ/opentelemetry-collector-contrib/tree/bdot-1.109.0
   - github.com/open-telemetry/opentelemetry-collector-contrib/receiver/jmxreceiver => github.com/observiq/opentelemetry-collector-contrib/receiver/jmxreceiver v0.0.0-20260928163111-c0a1ce236296
-  # AIX patches for gopsutil - can be removed when upstream merges AIX support
+  # AIX host metrics come from the Bindplane gopsutil fork, which is maintained permanently.
   - github.com/shirou/gopsutil/v4 => github.com/observIQ/gopsutil/v4 d1842df9a81a02f760157eb891e40ad7f2c03d64
