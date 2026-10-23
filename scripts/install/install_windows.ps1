@@ -48,8 +48,13 @@
 .PARAMETER Uninstall
     Uninstall the agent instead of installing it.
 
+.PARAMETER BaseUrl
+    Base URL to download the MSI from instead of the default, e.g. a Bindplane server hosting the agent
+    artifacts. The MSI is downloaded from '{BaseUrl}/v{Version}/{MSI for the detected arch}'.
+    Requires Version. Ignored if MsiUrl or MsiFile is set.
+
 .PARAMETER MsiUrl
-    Override the full MSI download URL. If set, Version and arch detection are ignored.
+    Override the full MSI download URL. If set, Version, BaseUrl and arch detection are ignored.
 
 .PARAMETER MsiFile
     Path to a local MSI file to install. Skips all download and version resolution steps.
@@ -64,6 +69,9 @@
 
 .EXAMPLE
     .\install_windows.ps1 -Version "1.94.0" -Quiet
+
+.EXAMPLE
+    .\install_windows.ps1 -Version "1.94.0" -BaseUrl "http://bindplane:3001/agent-downloads/observiq-otel-collector" -Quiet
 
 .EXAMPLE
     .\install_windows.ps1 -Uninstall
@@ -93,6 +101,9 @@ param(
     [Parameter(Mandatory = $false)]
     [ValidateSet("0", "1")]
     [string]$Clean = "0",
+
+    [Parameter(Mandatory = $false)]
+    [string]$BaseUrl,
 
     [Parameter(Mandatory = $false)]
     [string]$MsiUrl,
@@ -346,16 +357,25 @@ function Main {
         }
         else {
             $msiFileName = Get-MsiName
+            $downloadBase = $DOWNLOAD_BASE
+            if ($BaseUrl) {
+                # The latest version can only be looked up from the default download base
+                if (-not $Version -or $Version -eq "latest") {
+                    Fail "-Version is required with -BaseUrl."
+                }
+                $downloadBase = $BaseUrl.TrimEnd('/')
+            }
+
             if (-not $Version -or $Version -eq "latest") {
                 $resolvedVersion = Get-LatestVersion
                 if (-not $resolvedVersion) {
                     Fail "Could not determine latest version to install."
                 }
                 Write-Info "Latest version: $resolvedVersion"
-                $resolvedUrl = "$DOWNLOAD_BASE/v$($resolvedVersion.TrimStart('v'))/$msiFileName"
+                $resolvedUrl = "$downloadBase/v$($resolvedVersion.TrimStart('v'))/$msiFileName"
             }
             else {
-                $resolvedUrl = "$DOWNLOAD_BASE/v$($Version.TrimStart('v'))/$msiFileName"
+                $resolvedUrl = "$downloadBase/v$($Version.TrimStart('v'))/$msiFileName"
             }
         }
 
