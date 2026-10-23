@@ -12,12 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:build !linux
+//go:build !linux && !windows
 
 package runtime
 
-// loadServiceProxyEnv uses the current environment. On Windows, the collector service
-// reads proxy variables from the system environment.
+// loadServiceProxyEnv uses the current environment.
 func (connectionTest) loadServiceProxyEnv() error {
 	return nil
 }
