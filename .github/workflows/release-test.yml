@@ -162,11 +162,25 @@ jobs:
           path: observiq-otel-collector-${{ github.event.inputs.version }}-artifacts.tar.gz
           retention-days: 1
 
-      - name: Upload per-platform build artifacts
+      - name: Upload Linux build artifacts
         uses: actions/upload-artifact@v7
         with:
-          name: observiq-otel-collector-${{ github.event.inputs.version }}-platform-artifacts
-          path: observiq-otel-collector-${{ github.event.inputs.version }}-artifacts-*.tar.gz
+          name: observiq-otel-collector-${{ github.event.inputs.version }}-artifacts-linux.tar.gz
+          path: observiq-otel-collector-${{ github.event.inputs.version }}-artifacts-linux.tar.gz
+          retention-days: 1
+
+      - name: Upload macOS build artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: observiq-otel-collector-${{ github.event.inputs.version }}-artifacts-darwin.tar.gz
+          path: observiq-otel-collector-${{ github.event.inputs.version }}-artifacts-darwin.tar.gz
+          retention-days: 1
+
+      - name: Upload Windows build artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: observiq-otel-collector-${{ github.event.inputs.version }}-artifacts-windows.tar.gz
+          path: observiq-otel-collector-${{ github.event.inputs.version }}-artifacts-windows.tar.gz
           retention-days: 1
 
       # Linux package uploads to Google Artifact Registry
