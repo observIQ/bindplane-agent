@@ -239,6 +239,18 @@ func (c *Client) addManagedConfigs(args *NewClientArgs) error {
 	return nil
 }
 
+// ConnectionHeaders sets the headers sent on the OpAMP websocket handshake
+func ConnectionHeaders(header http.Header, secretKey string, agentID opamp.AgentID, hostname string) http.Header {
+	header.Set("Authorization", fmt.Sprintf("Secret-Key %s", secretKey))
+	header.Set("User-Agent", fmt.Sprintf("observiq-otel-collector/%s", version.Version()))
+	header.Set("OpAMP-Version", opamp.Version())
+	header.Set("Agent-ID", agentID.String())
+	header.Set("Agent-Version", version.Version())
+	header.Set("Agent-Hostname", hostname)
+	header.Set("X-Bindplane-Agent-Id-Format", agentID.Type())
+	return header
+}
+
 // Connect initiates a connection to the OpAmp server
 func (c *Client) Connect(ctx context.Context) error {
 	// Compose and set the agent description
@@ -261,14 +273,7 @@ func (c *Client) Connect(ctx context.Context) error {
 
 	// Use HeaderFunc to dynamically set headers, allowing them to update when agent ID changes
 	headerFunc := func(header http.Header) http.Header {
-		header.Set("Authorization", fmt.Sprintf("Secret-Key %s", c.currentConfig.GetSecretKey()))
-		header.Set("User-Agent", fmt.Sprintf("observiq-otel-collector/%s", version.Version()))
-		header.Set("OpAMP-Version", opamp.Version())
-		header.Set("Agent-ID", c.ident.agentID.String())
-		header.Set("Agent-Version", version.Version())
-		header.Set("Agent-Hostname", c.ident.hostname)
-		header.Set("X-Bindplane-Agent-Id-Format", c.ident.agentID.Type())
-		return header
+		return ConnectionHeaders(header, c.currentConfig.GetSecretKey(), c.ident.agentID, c.ident.hostname)
 	}
 
 	settings := types.StartSettings{
