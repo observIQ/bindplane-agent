@@ -64,6 +64,8 @@ If the agent can not find the specified `manager.yaml` file it will search for t
 
 The `test-connection` command checks the connection to the OpAMP server using the settings in `manager.yaml`. It performs a websocket handshake only and does not send any OpAMP messages. The command fails if `manager.yaml` does not exist and never modifies it.
 
+The command connects with a new temporary agent ID instead of the `agent_id` in `manager.yaml`, so it can run while the collector is connected without being rejected as a duplicate agent. The temporary agent ID is printed.
+
 On Linux:
 
 ```shell
@@ -96,4 +98,4 @@ The command uses the same proxy environment variables as the agent (`HTTPS_PROXY
 - **Linux without systemd, such as containers**: The current environment is used.
 - **Windows**: The proxy variables are read from the system environment and the `Environment` value of the `observiq-otel-collector` service (`HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\observiq-otel-collector`), which overrides the system environment, so the test uses the same proxy as the service. Proxy variables in the current console are ignored. If the service is not installed, the current environment is used.
 
-If Bindplane rejects the connection with `429 Too Many Requests`, the command retries up to three times. It waits for the duration in the server's `Retry-After` header, or backs off starting at one second when the header is not set, and prints each retry and how long it waits. Bindplane returns `429` when too many agents are connecting or when it detects another connection with the same agent ID, for example when the collector is running.
+If Bindplane rejects the connection with `429 Too Many Requests`, the command retries up to three times. It waits for the duration in the server's `Retry-After` header, or backs off starting at one second when the header is not set, and prints each retry and how long it waits. Bindplane returns `429` when too many agents are connecting.

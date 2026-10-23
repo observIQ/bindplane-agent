@@ -33,6 +33,7 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
+	"github.com/oklog/ulid/v2"
 	"github.com/stretchr/testify/require"
 )
 
@@ -301,11 +302,14 @@ func TestRunConnectionTest_Success(t *testing.T) {
 
 	header := gotHeader()
 	require.Equal(t, "Secret-Key my-secret", header.Get("Authorization"))
-	require.Equal(t, testAgentIDString, header.Get("Agent-ID"))
+	require.NotEqual(t, testAgentIDString, header.Get("Agent-ID"), "the configured agent_id must not be used")
+	_, err := ulid.Parse(header.Get("Agent-ID"))
+	require.NoError(t, err)
 	require.True(t, strings.HasPrefix(header.Get("User-Agent"), "observiq-otel-collector/"))
 
 	output := out.String()
-	require.Contains(t, output, "Agent ID: "+testAgentIDString)
+	require.Contains(t, output, "Using temporary agent ID "+header.Get("Agent-ID")+" (not saved)")
+	require.NotContains(t, output, testAgentIDString)
 	require.Contains(t, output, "Secret key: set")
 	require.Contains(t, output, "No proxy configured")
 	require.Contains(t, output, "Handshake succeeded: 101 Switching Protocols")
@@ -319,7 +323,7 @@ func TestRunConnectionTest_TemporaryAgentID(t *testing.T) {
 
 	out := &bytes.Buffer{}
 	require.NoError(t, RunConnectionTest([]string{"--manager", path}, out))
-	require.Contains(t, out.String(), "using temporary agent ID")
+	require.Contains(t, out.String(), "Using temporary agent ID")
 	require.Contains(t, out.String(), "Secret key: not set")
 	require.NotEmpty(t, gotHeader().Get("Agent-ID"))
 

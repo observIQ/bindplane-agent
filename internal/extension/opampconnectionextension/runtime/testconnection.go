@@ -35,10 +35,10 @@ import (
 	"time"
 
 	"github.com/dynatrace/dynatrace-bindplane-otel-contrib/pkg/osinfo"
-	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 	"github.com/observiq/bindplane-otel-collector/internal/extension/opampconnectionextension/internal/opamp"
 	"github.com/observiq/bindplane-otel-collector/internal/extension/opampconnectionextension/internal/opamp/observiq"
+	"github.com/oklog/ulid/v2"
 	"github.com/spf13/pflag"
 	"golang.org/x/net/http/httpproxy"
 )
@@ -130,17 +130,12 @@ func RunConnectionTest(args []string, out io.Writer) error {
 		return fmt.Errorf("unsupported endpoint scheme %q: must be ws or wss", endpoint.Scheme)
 	}
 
-	agentID := cfg.AgentID
-	if agentID == opamp.EmptyAgentID {
-		u, err := uuid.NewV7()
-		if err != nil {
-			return fmt.Errorf("new uuidv7: %w", err)
-		}
-		agentID = opamp.AgentIDFromUUID(u)
-		c.printf("Manager config has no agent_id, using temporary agent ID %s (not saved)", agentID)
-	} else {
-		c.printf("Agent ID: %s", agentID)
+	// Use a new agent ID so the test does not conflict with a running collector using the configured agent_id
+	agentID, err := opamp.ParseAgentID(ulid.Make().String())
+	if err != nil {
+		return fmt.Errorf("new agent ID: %w", err)
 	}
+	c.printf("Using temporary agent ID %s (not saved)", agentID)
 	if cfg.SecretKey == nil {
 		c.printf("Secret key: not set")
 	} else {
